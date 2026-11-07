@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: work/cports/main/nvme-cli/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "nvme-cli"
+version = "2.16"
+release = 1
+summary = "NVMe management command line interface"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/linux-nvme/nvme-cli"
+patches = ["basename.patch"]
+hostdeps = ["bash", "meson", "ninja", "pkgconf"]
+builddeps = ["libnvme-devel", "linux-headers", "util-linux-uuid-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/linux-nvme/nvme-cli/archive/refs/tags/v2.16.tar.gz", sha256 = "989682ed7b250a2c7a8127e362ffc5d29f5c370127abe405be09c73216da2b97" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+rm -rf "$pkgdir/usr/lib/systemd/system"
+'''

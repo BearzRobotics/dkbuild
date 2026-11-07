@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: work/cports/main/libgpg-error/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "libgpg-error"
+version = "1.61"
+release = 1
+summary = "Library for error values used by GnuPG components"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.gnupg.org"
+patches = ["regen.patch", "tests.patch"]
+hostdeps = ["automake", "gettext-devel", "pkgconf", "slibtool"]
+
+source = [
+    { url = "https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.61.tar.bz2", sha256 = "7a85413f2bc354f4f8aa832b718af122e48965e9e0eb9012ee659c13c6385c93" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+rm -rf "$pkgdir/usr/share/common-lisp"
+'''

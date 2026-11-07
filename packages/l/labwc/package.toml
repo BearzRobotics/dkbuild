@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: work/cports/main/labwc/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "labwc"
+version = "0.20.2"
+release = 1
+summary = "Stacking wayland compositor"
+license = "GPL-2.0-only"
+homepage = "https://github.com/labwc/labwc"
+hostdeps = ["gettext", "meson", "pkgconf", "scdoc", "wayland-progs"]
+builddeps = ["cairo-devel", "glib-devel", "libdrm-devel", "librsvg-devel", "libsfdo-devel", "libxcb-devel", "libxml2-devel", "pango-devel", "wayland-devel", "wayland-protocols", "wlroots0.20-devel", "xcb-util-wm-devel", "xwayland-devel"]
+rundeps = ["xwayland"]
+
+source = [
+    { url = "https://github.com/labwc/labwc/archive/refs/tags/0.20.2.tar.gz", sha256 = "fae023b6fe022f7057556707a17cdb2d98e0138c5dffaedaa1dade975699f9e8" },
+]
+
+setup = '''
+%meson \
+    -Dman-pages=enabled \
+    -Dxwayland=enabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

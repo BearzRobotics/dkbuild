@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: work/cports/main/libnl/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "libnl"
+version = "3.12.0"
+release = 1
+summary = "Netlink Protocol Library Suite"
+license = "LGPL-2.1-only"
+homepage = "https://github.com/thom311/libnl"
+hostdeps = ["automake", "libtool", "pkgconf", "flex", "bison"]
+builddeps = ["linux-headers"]
+checkdeps = ["bash"]
+
+source = [
+    { url = "https://github.com/thom311/libnl/releases/download/libnl3_12_0/libnl-3.12.0.tar.gz", sha256 = "fc51ca7196f1a3f5fdf6ffd3864b50f4f9c02333be28be4eeca057e103c0dd18" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-static
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

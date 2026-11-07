@@ -1,0 +1,36 @@
+# Imported from Chimera Linux cports: work/cports/main/freetype/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "freetype"
+version = "2.14.3"
+release = 1
+summary = "Font rendering engine"
+license = "FTL OR GPL-2.0-or-later"
+homepage = "https://freetype.org"
+patches = ["enable-subpixel-rendering.patch"]
+hostdeps = ["meson", "pkgconf"]
+builddeps = ["brotli-devel", "bzip2-devel", "freetype-bootstrap", "harfbuzz-devel", "libpng-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/freetype/freetype-2.14.3.tar.xz", sha256 = "36bc4f1cc413335368ee656c42afca65c5a3987e8768cc28cf11ba775e785a5f" },
+]
+
+setup = '''
+%meson \
+    -Dbrotli=enabled \
+    -Dbzip2=enabled \
+    -Dharfbuzz=enabled \
+    -Dmmap=enabled \
+    -Dpng=enabled \
+    -Dtests=enabled \
+    -Dzlib=enabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE.TXT "$pkgdir/usr/share/licenses/freetype/LICENSE.TXT"
+install -Dm644 docs/FTL.TXT "$pkgdir/usr/share/licenses/freetype/FTL.TXT"
+'''

@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: work/cports/main/fribidi/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "fribidi"
+version = "1.0.16"
+release = 2
+summary = "Free implementation of the Unicode Bidirectional Algorithm"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/fribidi/fribidi"
+hostdeps = ["meson", "pkgconf"]
+
+source = [
+    { url = "https://github.com/fribidi/fribidi/archive/v1.0.16.tar.gz", sha256 = "5a1d187a33daa58fcee2ad77f0eb9d136dd6fa4096239199ba31e850d397e8a8" },
+]
+
+setup = '''
+%meson \
+    -Ddocs=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

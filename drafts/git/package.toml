@@ -1,0 +1,91 @@
+# Imported from Chimera Linux cports: work/cports/main/git/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "git"
+version = "2.56.0"
+release = 1
+summary = "Fast, distributed version control system"
+license = "GPL-2.0-only"
+homepage = "https://git-scm.com"
+patches = ["t4201-tr-workaround.patch", "t4301-gsed.patch", "t5303-gsed.patch"]
+hostdeps = ["asciidoctor", "docbook-xsl", "gettext", "perl", "pkgconf", "tk", "xmlto"]
+builddeps = ["curl-devel", "libexpat-devel", "libsecret-devel", "linux-headers", "pcre2-devel", "tk-devel"]
+checkdeps = ["gnupg", "gsed"]
+rundeps = ["ca-certificates", "perl-authen-sasl", "perl-mime-tools", "perl-net-smtp-ssl"]
+
+source = [
+    { url = "https://www.kernel.org/pub/software/scm/git/git-2.56.0.tar.xz", sha256 = "26c56c296b38c0695b26fa95f475f1d01704d2d38e73465ca30b0b2f5dc789d3" },
+]
+
+setup = '''
+# TODO(cbuild): with open(self.cwd / "config.mak", "w") as cf:
+#         cf.write(f"""
+#     prefix = /usr
+#     gitexecdir = /usr/lib/git-core
+#     CC = {self.get_tool("CC")}
+#     AR = {self.get_tool("AR")}
+#     TAR = tar
+#     CFLAGS = {self.get_cflags(shell=True)}
+#     LDFLAGS = {self.get_ldflags(shell=True)}
+#     USE_LIBPCRE2 = Yes
+#     USE_ASCIIDOCTOR = Yes
+#     NO_INSTALL_HARDLINKS = Yes
+#     ICONV_OMITS_BOM = Yes
+#     NO_REGEX = Yes
+#     # this won't work forever but for now saves us some pain in the ass
+#     NO_RUST = Yes
+#     INSTALLDIRS = vendor
+#     INSTALL_SYMLINKS = 1
+#     perllibdir = /usr/share/perl5/vendor_perl
+#     PYTHON_PATH = /usr/bin/python
+#     DEFAULT_TEST_TARGET=prove
+#     GIT_PROVE_OPTS=--jobs={self.make_jobs}
+#     HOST_CPU = {self.profile.arch}
+#     """)
+'''
+build = '''
+# TODO(cbuild): cmd = ["make", f"-j{self.make_jobs}"]
+# TODO(cbuild): self.do(*cmd)
+# TODO(cbuild): self.do(*cmd, "-C", "Documentation", "man")
+# TODO(cbuild): self.do(*cmd, "-C", "contrib/contacts", "all")
+# TODO(cbuild): self.do(*cmd, "-C", "contrib/diff-highlight", "all")
+# TODO(cbuild): self.do(*cmd, "-C", "contrib/subtree", "all", "man")
+# TODO(cbuild): self.do(*cmd, "-C", "contrib/credential/libsecret", "all")
+'''
+check = '''
+# t5000.75 fails intermittently
+# t7527 hangs in test env
+# TODO(cbuild): self.do("make", "all", env={"GIT_SKIP_TESTS": "t5000.75 t7527"}, wrksrc="t")
+make -C contrib/diff-highlight test
+make -C contrib/subtree test
+'''
+install = '''
+# TODO(cbuild): ddir = f"DESTDIR={self.chroot_destdir}"
+# TODO(cbuild): self.do("make", "install", "install-doc", ddir)
+# contacts still requires python asciidoc so skip man
+# TODO(cbuild): self.do("make", "-C", "contrib/contacts", "install", ddir)
+# TODO(cbuild): self.do("make", "-C", "contrib/subtree", "install", "install-man", ddir)
+# no install target
+install -Dm755 contrib/credential/libsecret/git-credential-libsecret "$pkgdir/usr/lib/git-core/git-credential-libsecret"
+# remove cvs for now
+rm -rf "$pkgdir/usr/bin/git-cvsserver"
+rm -rf "$pkgdir/usr/lib/git-core/git-cvsexportcommit"
+rm -rf "$pkgdir/usr/lib/git-core/git-cvsimport"
+rm -rf "$pkgdir/usr/lib/git-core/git-cvsserver"
+rm -rf "$pkgdir/usr/share/man/man1/git-cvsexportcommit.1"
+rm -rf "$pkgdir/usr/share/man/man1/git-cvsimport.1"
+rm -rf "$pkgdir/usr/share/man/man1/git-cvsserver.1"
+rm -rf "$pkgdir/usr/share/man/man7/gitcvs-migration.7"
+install -Dm644 contrib/completion/git-prompt.sh "$pkgdir/usr/share/git/git-prompt.sh"
+install -Dm755 contrib/diff-highlight/diff-highlight "$pkgdir/usr/bin/diff-highlight"
+install -Dm644 contrib/diff-highlight/README "$pkgdir/usr/share/doc/git/diff-highlight"
+install -Dm755 contrib/git-jump/git-jump "$pkgdir/usr/lib/git-core/git-jump"
+install -Dm644 contrib/git-jump/README "$pkgdir/usr/share/doc/git/git-jump"
+# hardlink
+# TODO(cbuild): p = self.destdir / "usr/lib/git-core/git-citool"
+# TODO(cbuild): self.rm(p)
+# TODO(cbuild): p.symlink_to("git-gui")
+# register shells
+# TODO(cbuild): self.install_shell("/usr/bin/git-shell")
+'''

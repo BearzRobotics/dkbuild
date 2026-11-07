@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: work/cports/main/userspace-rcu/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "userspace-rcu"
+version = "0.15.6"
+release = 1
+summary = "Userspace RCU library"
+license = "LGPL-2.1-or-later"
+homepage = "https://liburcu.org"
+patches = ["skip_tests.patch"]
+hostdeps = ["automake", "pkgconf", "slibtool"]
+checkdeps = ["bash"]
+
+source = [
+    { url = "https://www.lttng.org/files/urcu/userspace-rcu-0.15.6.tar.bz2", sha256 = "850b192096eb11ebf2c70e8f97bc7da7479ee41da1bebeb44e3986908bac414f" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -DLITTLE_ENDIAN=4321 -DBIG_ENDIAN=1234"
+'''
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

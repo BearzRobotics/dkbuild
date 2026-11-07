@@ -1,0 +1,38 @@
+# Imported from Chimera Linux cports: work/cports/main/libxml2/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "libxml2"
+version = "2.15.4"
+release = 1
+summary = "XML parsing library"
+license = "MIT"
+homepage = "http://www.xmlsoft.org"
+patches = ["overflow.patch"]
+hostdeps = ["automake", "pkgconf", "slibtool"]
+builddeps = ["icu-devel", "libedit-readline-devel", "ncurses-devel", "xz-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.4.tar.xz", sha256 = "98087fd181d9070724f3fbc65c7377db03038eb92bd882374daff44940138821" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-shared \
+    --enable-static \
+    --with-history \
+    --with-icu \
+    --with-legacy \
+    --with-threads \
+    --without-docs
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 Copyright "$pkgdir/usr/share/licenses/libxml2/Copyright"
+'''

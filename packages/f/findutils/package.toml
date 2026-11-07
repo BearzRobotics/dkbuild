@@ -1,0 +1,38 @@
+# Imported from Chimera Linux cports: work/cports/main/findutils/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "findutils"
+version = "4.10.0"
+release = 1
+summary = "GNU find utilities"
+license = "GPL-3.0-or-later"
+homepage = "http://www.gnu.org/software/findutils"
+patches = ["tests.patch"]
+hostdeps = ["automake", "gettext-devel", "texinfo"]
+checkdeps = ["musl-bsd-headers"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/findutils/findutils-4.10.0.tar.xz", sha256 = "1387e0b67ff247d2abde998f90dfbf70c1491391a59ddfecb8ae698789f0a4f5" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --program-prefix=g
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+# we don't want this
+rm -rf "$pkgdir/usr/bin/glocate"
+rm -rf "$pkgdir/usr/bin/gupdatedb"
+rm -rf "$pkgdir/usr/libexec"
+rm -rf "$pkgdir/usr/share/man/man1/glocate.1"
+rm -rf "$pkgdir/usr/share/man/man1/gupdatedb.1"
+rm -rf "$pkgdir/usr/share/man/man5"
+'''

@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: work/cports/main/lzo/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "lzo"
+version = "2.10"
+release = 1
+summary = "Portable lossless data compression library"
+license = "GPL-2.0-or-later"
+homepage = "http://www.oberhumer.com/opensource/lzo"
+hostdeps = ["automake", "pkgconf", "slibtool"]
+
+source = [
+    { url = "http://www.oberhumer.com/opensource/lzo/download/lzo-2.10.tar.gz", sha256 = "c0f892943208266f9b6543b3ae308fab6284c5c90e627931446fb49b4221a072" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-shared
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+rm -rf "$pkgdir/usr/share/doc"
+'''

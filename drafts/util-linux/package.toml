@@ -1,0 +1,118 @@
+# Imported from Chimera Linux cports: work/cports/main/util-linux/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "util-linux"
+version = "2.40.4"
+release = 2
+summary = "Miscellaneous Linux utilities"
+license = "GPL-2.0-or-later"
+homepage = "https://www.kernel.org/pub/linux/utils/util-linux"
+patches = ["brokensym.patch", "cryptsetup-auto.patch", "hide-strv.patch", "meson-manpages.patch", "meson-symlink.patch", "runuser-bash.patch"]
+hostdeps = ["bash", "bison", "flex", "gettext-devel", "meson", "pkgconf"]
+builddeps = ["bash-completion", "file-devel", "libcap-ng-devel", "linux-headers", "linux-pam-devel", "ncurses-devel", "zlib-ng-compat-devel"]
+checkdeps = ["xz", "iproute2", "socat", "procps"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.kernel.org/pub/linux/utils/util-linux/v2.40/util-linux-2.40.4.tar.xz", sha256 = "5c1daf733b04e9859afdc3bd87cc481180ee0f88b5c0946b16fdec931975fb79" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -D_DIRENT_HAVE_D_TYPE"
+'''
+setup = '''
+# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 80); port it by hand
+%meson \
+    --auto-feature=enabled \
+    -Dtinfo=disabled \
+    -Dncurses=disabled \
+    -Deconf=disabled \
+    -Dselinux=disabled \
+    -Dslang=disabled \
+    -Dlibutil=disabled \
+    -Dlibuser=disabled \
+    -Dlibutempter=disabled \
+    -Dreadline=disabled \
+    -Dbuild-plymouth-support=disabled \
+    -Dfs-search-path-extra=/usr/sbin:/usr/bin \
+    -Dbuild-agetty=disabled \
+    -Dbuild-cal=disabled \
+    -Dbuild-fallocate=disabled \
+    -Dbuild-kill=disabled \
+    -Dbuild-liblastlog2=disabled \
+    -Dbuild-logger=disabled \
+    -Dbuild-login=disabled \
+    -Dbuild-mesg=disabled \
+    -Dbuild-more=disabled \
+    -Dbuild-chfn-chsh=disabled \
+    -Dbuild-nologin=disabled \
+    -Dbuild-newgrp=disabled \
+    -Dbuild-pam-lastlog2=disabled \
+    -Dbuild-pivot_root=disabled \
+    -Dbuild-setarch=disabled \
+    -Dbuild-switch_root=disabled \
+    -Dbuild-sulogin=disabled \
+    -Dbuild-su=disabled \
+    -Dbuild-ul=disabled \
+    -Dbuild-vipw=disabled \
+    -Dbuild-wall=disabled \
+    -Dbuild-write=disabled \
+    -Dbuild-python=disabled \
+    -Dsystemd=disabled \
+    -Dsysvinit=disabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+# TODO(cbuild): self.install_license(
+#         "Documentation/licenses/COPYING.BSD-3-Clause",
+#         pkgname="util-linux-uuid-libs",
+#     )
+# fix permissions
+# TODO(cbuild): for f in ["mount", "umount"]:
+#         (self.destdir / "usr/bin" / f).chmod(0o4755)
+# conflicts with chimerautils, less, ugetopt
+# TODO(cbuild): for f in [
+#         "addpart",
+#         "cal",
+#         "col",
+#         "colrm",
+#         "column",
+#         "ctrlaltdel",
+#         "delpart",
+#         "flock",
+#         "fsfreeze",
+#         "getopt",
+#         "ionice",
+#         "isosize",
+#         "hexdump",
+#         "kill",
+#         "login",
+#         "look",
+#         "mcookie",
+#         "resizepart",
+#         "renice",
+#         "rev",
+#         "script",
+#         "scriptlive",
+#         "scriptreplay",
+#         "setsid",
+#         "sulogin",
+#         "taskset",
+#         "whereis",
+#     ]:
+#         self.rm(self.destdir / f"usr/bin/{f}", force=True)
+#         self.rm(self.destdir / f"usr/share/man/man1/{f}.1", force=True)
+#         self.rm(self.destdir / f"usr/share/man/man8/{f}.8", force=True)
+#         self.rm(
+#             self.destdir / f"usr/share/bash-completion/completions/{f}",
+#             force=True,
+#         )
+# TODO(cbuild): self.install_sysusers(self.files_path / "sysusers.conf", name="uuidd")
+# TODO(cbuild): self.install_tmpfiles(self.files_path / "tmpfiles.conf", name="uuidd")
+# services
+# TODO(cbuild): self.install_service(self.files_path / "uuidd")
+'''

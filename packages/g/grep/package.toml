@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: work/cports/main/ggrep/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "grep"
+version = "3.12"
+release = 1
+summary = "GNU grep"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/grep"
+hostdeps = ["pkgconf"]
+builddeps = ["pcre2-devel"]
+checkdeps = ["perl"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/grep/grep-3.12.tar.xz", sha256 = "2649b27c0e90e632eadcd757be06c6e9a4f48d941de51e7c0f83ff76408a07b9" },
+]
+
+setup = '''
+%configure \
+    --program-prefix=g
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

@@ -1,0 +1,36 @@
+# Imported from Chimera Linux cports: work/cports/main/harfbuzz/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "harfbuzz"
+version = "14.5.0"
+release = 1
+summary = "Text shaping engine"
+license = "MIT"
+homepage = "https://harfbuzz.github.io"
+hostdeps = ["freetype-bootstrap", "glib-devel", "gobject-introspection", "gtk-doc-tools", "help2man", "meson", "pkgconf"]
+builddeps = ["cairo-devel", "freetype-bootstrap", "graphite2-devel", "icu-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://github.com/harfbuzz/harfbuzz/releases/download/14.5.0/harfbuzz-14.5.0.tar.xz", sha256 = "b7132e148358a45185c9feafd049dbaf243649d3c44414b3534d9c95d18592b9" },
+]
+
+setup = '''
+%meson \
+    -Db_ndebug=true \
+    -Dcairo=enabled \
+    -Dcpp_std=c++17 \
+    -Ddocs=enabled \
+    -Dfreetype=enabled \
+    -Dglib=enabled \
+    -Dgraphite2=enabled \
+    -Dicu=enabled \
+    -Dintrospection=enabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/harfbuzz/COPYING"
+'''

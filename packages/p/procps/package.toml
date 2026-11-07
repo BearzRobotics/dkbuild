@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: work/cports/main/procps/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "procps"
+version = "4.0.7"
+release = 1
+summary = "Utilities for monitoring your system and its processes"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://gitlab.com/procps-ng/procps"
+patches = ["musl.patch", "uid_t.patch"]
+hostdeps = ["automake", "gettext-devel", "libtool", "pkgconf"]
+builddeps = ["ncurses-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/procps-ng/Production/procps-ng-4.0.7.tar.xz", sha256 = "9d2021f47a4501c667862c9942a92d1953694b21d11bcd1702e83eb594e3d67d" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-kill \
+    --enable-watch8bit \
+    --disable-modern-top \
+    --without-systemd
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 $pkgfiles/sysctl.conf "$pkgdir/etc/sysctl.conf"
+'''

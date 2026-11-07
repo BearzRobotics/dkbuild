@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: work/cports/main/libinput/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "libinput"
+version = "1.31.3"
+release = 1
+summary = "Input abstraction library for Wayland and X"
+license = "MIT"
+homepage = "https://www.freedesktop.org/wiki/Software/libinput"
+patches = ["asus-expertbook.patch"]
+hostdeps = ["meson", "pkgconf"]
+builddeps = ["libevdev-devel", "libwacom-devel", "mtdev-devel", "udev-devel"]
+checkdeps = ["check-devel", "python-pytest", "bash"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/libinput/libinput/-/archive/1.31.3/libinput-1.31.3.tar.gz", sha256 = "b6749bf6f1890f6631c0a70a027c35fec9d2e096a39f720548896e41474a9854" },
+]
+
+setup = '''
+%meson \
+    -Ddocumentation=false \
+    -Dtests=true \
+    -Ddebug-gui=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libinput/COPYING"
+'''

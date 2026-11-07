@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: work/cports/main/wayland/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "wayland"
+version = "1.26.0"
+release = 1
+summary = "Wayland compositor infrastructure"
+license = "MIT"
+homepage = "https://wayland.freedesktop.org"
+hostdeps = ["meson", "pkgconf", "flex"]
+builddeps = ["flex-devel-static", "libexpat-devel", "libffi8-devel", "libxml2-devel"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/wayland/wayland/-/archive/1.26.0.tar.gz", sha256 = "5d92753c046c6dbd528a6f47edbab599a017d415aed8088875d8c36f39189b60" },
+]
+
+setup = '''
+%meson \
+    -Ddocumentation=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/wayland/COPYING"
+'''

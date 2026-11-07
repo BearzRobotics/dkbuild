@@ -1,0 +1,52 @@
+# Imported from Chimera Linux cports: work/cports/main/nodejs/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "nodejs"
+version = "26.12.1"
+release = 1
+summary = "JavaScript runtime based on V8"
+license = "MIT"
+homepage = "https://nodejs.org"
+patches = ["google-sucks.patch", "loongarch.patch", "no-libatomic.patch", "ppc64-no-gdbjit.patch", "shared-uv.patch"]
+hostdeps = ["ninja", "pkgconf", "python", "python-jinja2"]
+builddeps = ["brotli-devel", "c-ares-devel", "icu-devel", "libuv-devel", "linux-headers", "nghttp2-devel", "openssl3-devel", "zlib-ng-compat-devel"]
+checkdeps = ["procps"]
+options = ["!cross"]
+
+source = [
+    { url = "https://nodejs.org/dist/v26.12.1/node-v26.12.1.tar.gz", sha256 = "717244a8d757672ec86aae5077fca31e50f84b094441ec51bdf397aab12c304e" },
+]
+
+setup = '''
+./configure \
+    --ninja \
+    --openssl-use-def-ca-store \
+    --prefix=/usr \
+    --shared-brotli \
+    --shared-cares \
+    --shared-libuv \
+    --shared-nghttp2 \
+    --shared-openssl \
+    --shared-zlib \
+    --with-intl=system-icu
+'''
+build = '''
+%make
+'''
+check = '''
+# TODO(cbuild): npath = self.chroot_cwd / "out/Release"
+# TODO(cbuild): nexe = npath / "node"
+# TODO(cbuild): self.do(nexe, "-e", "console.log('test')", wrksrc="out/Release")
+# TODO(cbuild): self.do(
+#         nexe,
+#         "-e",
+#         f"require('assert').equal(process.versions.node, '{pkgver}')",
+#         wrksrc="out/Release",
+#     )
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/nodejs/LICENSE"
+# real test suite requires network acccess
+'''

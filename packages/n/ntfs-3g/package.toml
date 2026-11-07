@@ -1,0 +1,44 @@
+# Imported from Chimera Linux cports: work/cports/main/ntfs-3g/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "ntfs-3g"
+version = "2026.7.7"
+release = 1
+summary = "NTFS FUSE driver and tools"
+license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
+homepage = "https://github.com/tuxera/ntfs-3g"
+hostdeps = ["pkgconf", "automake", "libtool"]
+builddeps = ["gnutls-devel", "libgcrypt-devel", "linux-headers", "util-linux-uuid-devel"]
+rundeps = ["fuse"]
+
+source = [
+    { url = "https://tuxera.com/opensource/ntfs-3g_ntfsprogs-2026.7.7.tgz", sha256 = "d67b769025d32860549d35c2147e45024d172f81c540d750390ce3602c059dab" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --exec-prefix=/usr \
+    --sbin=/usr/bin \
+    --disable-static \
+    --disable-quarantined \
+    --enable-crypto \
+    --enable-extras \
+    --enable-posix-acls \
+    --enable-xattr-mappings \
+    --with-fuse=internal
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+ln -sf usr/bin "$pkgdir/sbin"
+%make_install
+mkdir -p "$pkgdir/usr/bin"
+ln -sf ntfs-3g "$pkgdir/usr/bin/mount.ntfs"
+rm -rf "$pkgdir/usr/share/man/man8/ntfsfallocate.8"
+rm -rf "$pkgdir/sbin"
+'''

@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: work/cports/main/graphene/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "graphene"
+version = "1.10.8"
+release = 2
+summary = "Thin layer of graphic data types"
+license = "MIT"
+homepage = "https://github.com/ebassi/graphene"
+patches = ["dont-install-tests.patch"]
+hostdeps = ["meson", "pkgconf", "gobject-introspection"]
+builddeps = ["glib-devel"]
+
+source = [
+    { url = "https://download.gnome.org/sources/graphene/1.10/graphene-1.10.8.tar.xz", sha256 = "a37bb0e78a419dcbeaa9c7027bcff52f5ec2367c25ec859da31dfde2928f279a" },
+]
+
+setup = '''
+%meson \
+    -Dinstalled_tests=false \
+    -Dgcc_vector=true \
+    -Dintrospection=enabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/graphene/LICENSE.txt"
+'''

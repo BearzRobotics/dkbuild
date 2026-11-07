@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: work/cports/main/hicolor-icon-theme/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "hicolor-icon-theme"
+version = "0.18"
+release = 1
+summary = "Default fallback theme for freedesktop.org icon themes"
+license = "GPL-2.0-or-later"
+homepage = "https://www.freedesktop.org/wiki/Software/icon-theme"
+hostdeps = ["meson", "pkgconf"]
+
+source = [
+    { url = "http://icon-theme.freedesktop.org/releases/hicolor-icon-theme-0.18.tar.xz", sha256 = "db0e50a80aa3bf64bb45cbca5cf9f75efd9348cf2ac690b907435238c3cf81d7" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

@@ -1,0 +1,50 @@
+# Imported from Chimera Linux cports: work/cports/main/e2fsprogs/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "e2fsprogs"
+version = "1.47.4"
+release = 1
+summary = "Ext2/3/4 file system utilities"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://e2fsprogs.sourceforge.net"
+patches = ["bsd-timeout.patch", "cross.patch"]
+hostdeps = ["pkgconf", "texinfo"]
+builddeps = ["fuse-devel", "linux-headers", "udev-devel", "util-linux-blkid-devel", "util-linux-uuid-devel"]
+checkdeps = ["bzip2", "perl"]
+
+source = [
+    { url = "https://www.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v1.47.4/e2fsprogs-1.47.4.tar.xz", sha256 = "fd5bf388cbdbe006a3d3b318d983b2948382440acc85a87f1e7d108653e8db0b" },
+]
+
+setup = '''
+# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 41); port it by hand
+%configure \
+    --enable-elf-shlibs \
+    --enable-e2initrd-helper \
+    --enable-fuse2fs \
+    --enable-symlink-build \
+    --enable-symlink-install \
+    --enable-relative-symlinks \
+    --disable-rpath \
+    --disable-fsck \
+    --disable-uuidd \
+    --disable-libuuid \
+    --disable-libblkid \
+    --with-root-prefix=/usr \
+    e2fsprogs_cv_struct_st_flags=no \
+    "MKDIR_P=mkdir -p"
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install \
+    -j1 \
+    install-libs
+# prevents udisks automount
+rm -rf "$pkgdir/usr/lib/udev/rules.d/64-ext4.rules"
+'''

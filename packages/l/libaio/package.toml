@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: work/cports/main/libaio/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "libaio"
+version = "0.3.113"
+release = 1
+summary = "Linux-native asynchronous I/O facility"
+license = "LGPL-2.1-or-later"
+homepage = "https://pagure.io/libaio"
+patches = ["0001-man-Fix-typos.patch", "0010-build-Do-not-use-Werror-by-default.patch", "0011-build-Honour-user-build-flags.patch", "out-of-tree-build.patch", "tests.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["linux-headers"]
+checkdeps = ["bash"]
+
+source = [
+    { url = "https://pagure.io/libaio/archive/libaio-0.3.113/libaio-libaio-0.3.113.tar.gz", sha256 = "716c7059703247344eb066b54ecbc3ca2134f0103307192e6c2b7dab5f9528ab" },
+]
+
+build = '''
+%make \
+    PREFIX=/usr
+'''
+check = '''
+%make partcheck
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr
+'''

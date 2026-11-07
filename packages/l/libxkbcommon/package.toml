@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: work/cports/main/libxkbcommon/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "libxkbcommon"
+version = "1.13.2"
+release = 1
+summary = "Library to handle keyboard descriptions"
+license = "MIT"
+homepage = "https://xkbcommon.org"
+hostdeps = ["bison", "meson", "pkgconf", "wayland-progs", "wayland-protocols"]
+builddeps = ["libxcb-devel", "libxml2-devel", "wayland-devel", "wayland-protocols", "xkeyboard-config", "xorgproto"]
+rundeps = ["xkeyboard-config"]
+
+source = [
+    { url = "https://github.com/xkbcommon/libxkbcommon/archive/xkbcommon-1.13.2.tar.gz", sha256 = "acc4d5f7c3cbba5f9f8d08d8bdbeede84ecede46792f47929aa9321873385528" },
+]
+
+setup = '''
+%meson \
+    -Denable-x11=true \
+    -Denable-wayland=true \
+    -Denable-xkbregistry=true \
+    -Denable-docs=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libxkbcommon/LICENSE"
+'''

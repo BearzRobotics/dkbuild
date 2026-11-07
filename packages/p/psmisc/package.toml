@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: work/cports/main/psmisc/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "psmisc"
+version = "23.7"
+release = 2
+summary = "Small utilities that use the proc file-system"
+license = "GPL-2.0-or-later"
+homepage = "https://gitlab.com/psmisc/psmisc"
+patches = ["tests.patch"]
+hostdeps = ["gettext-devel", "automake"]
+builddeps = ["ncurses-devel", "gnu-getopt", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/psmisc/psmisc-23.7.tar.xz", sha256 = "58c55d9c1402474065adae669511c191de374b0871eec781239ab400b907c327" },
+]
+
+environment = '''
+export LDFLAGS="${LDFLAGS} -lgnu_getopt"
+export CFLAGS="${CFLAGS} -Dgetopt_long_only=gnu_getopt_long_only"
+'''
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

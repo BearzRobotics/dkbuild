@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: work/cports/main/mtdev/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "mtdev"
+version = "1.1.7"
+release = 1
+summary = "Multitouch Protocol Translation Library"
+license = "MIT"
+homepage = "https://bitmath.org/code/mtdev"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["linux-headers"]
+
+source = [
+    { url = "https://bitmath.org/code/mtdev/mtdev-1.1.7.tar.bz2", sha256 = "a107adad2101fecac54ac7f9f0e0a0dd155d954193da55c2340c97f2ff1d814e" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/mtdev/COPYING"
+'''

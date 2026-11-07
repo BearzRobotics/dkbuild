@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: work/cports/main/hdparm/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "hdparm"
+version = "9.65"
+release = 1
+summary = "Command-line interface to hard disk drive parameters"
+license = "BSD-1-Clause AND GPL-2.0-only"
+homepage = "https://sourceforge.net/projects/hdparm"
+patches = ["00-fix-Makefile.patch"]
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/hdparm/hdparm-9.65.tar.gz", sha256 = "d14929f910d060932e717e9382425d47c2e7144235a53713d55a94f7de535a4b" },
+]
+
+build = '''
+%make \
+    PREFIX=/usr
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr \
+    -j1 \
+    binprefix=/usr \
+    sbindir=/usr/bin
+install -Dm644 LICENSE.TXT "$pkgdir/usr/share/licenses/hdparm/LICENSE.TXT"
+'''

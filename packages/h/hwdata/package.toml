@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: work/cports/main/hwdata/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "hwdata"
+version = "0.408"
+release = 1
+summary = "Hardware identification databases"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/vcrhonek/hwdata"
+hostdeps = ["pkgconf"]
+checkdeps = ["pciutils", "python", "bash"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/vcrhonek/hwdata/archive/refs/tags/v0.408.tar.gz", sha256 = "ac7c34efc5941d5cbf739a8f7f6c84b1c2edea493fd3fca10906ef64d7afd690" },
+]
+
+setup = '''
+./configure \
+    --prefix=/usr \
+    --sysconfdir=/etc \
+    --datadir=/usr/share \
+    --disable-blacklist
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

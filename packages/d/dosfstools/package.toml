@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: work/cports/main/dosfstools/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "dosfstools"
+version = "4.2"
+release = 1
+summary = "DOS filesystem tools"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/dosfstools/dosfstools"
+hostdeps = ["automake", "gettext-devel", "pkgconf"]
+builddeps = ["udev-devel", "linux-headers"]
+
+source = [
+    { url = "https://github.com/dosfstools/dosfstools/releases/download/v4.2/dosfstools-4.2.tar.gz", sha256 = "64926eebf90092dca21b14259a5301b7b98e7b1943e8a201c7d726084809b527" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-compat-symlinks
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+rm -rf "$pkgdir/usr/share/doc"
+'''

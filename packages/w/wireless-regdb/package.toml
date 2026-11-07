@@ -1,0 +1,22 @@
+# Imported from Chimera Linux cports: work/cports/main/wireless-regdb/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "wireless-regdb"
+version = "2026.09.03"
+release = 1
+summary = "Wireless CRDA database"
+license = "ISC"
+homepage = "https://wireless.wiki.kernel.org/en/developers/regulatory/wireless-regdb"
+options = ["!check"]
+
+source = [
+    { url = "https://mirrors.edge.kernel.org/pub/software/network/wireless-regdb/wireless-regdb-2026.09.03.tar.xz", sha256 = "b22e0901227b820cd1c280abe681a15b773a5103a5e10dc442e94ebb34cbf58d" },
+]
+
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr \
+    FIRMWARE_PATH=/usr/lib/firmware
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/wireless-regdb/LICENSE"
+'''

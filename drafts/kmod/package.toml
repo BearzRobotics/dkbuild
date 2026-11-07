@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: work/cports/main/kmod/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "kmod"
+version = "34.2"
+release = 1
+summary = "Linux kernel module handling"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://git.kernel.org/pub/scm/utils/kernel/kmod/kmod.git"
+patches = ["no-gtkdoc.patch"]
+hostdeps = ["bash", "meson", "pkgconf", "scdoc"]
+builddeps = ["openssl3-devel", "zlib-ng-compat-devel", "zstd-devel"]
+
+source = [
+    { url = "https://www.kernel.org/pub/linux/utils/kernel/kmod/kmod-34.2.tar.gz", sha256 = "d60a79fb12a85feab75674ce5b86b2c8bae1714f775f481eae926bd2657b2ffe" },
+]
+
+setup = '''
+%meson \
+    -Dxz=disabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 $pkgfiles/depmod-search.conf "$pkgdir/usr/lib/depmod.d/search.conf"
+# TODO(cbuild): self.install_tmpfiles(self.files_path / "tmpfiles.conf")
+# initramfs-tools
+# TODO(cbuild): self.install_initramfs(self.files_path / "kmod.initramfs-tools")
+'''

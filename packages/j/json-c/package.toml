@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: work/cports/main/json-c/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "json-c"
+version = "0.19"
+release = 1
+summary = "JSON implementation in C"
+license = "MIT"
+homepage = "https://json-c.github.io/json-c"
+patches = ["json-parse-cli-no-apps.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf", "doxygen"]
+
+source = [
+    { url = "https://s3.amazonaws.com/json-c_releases/releases/json-c-0.19.tar.gz", sha256 = "37ad0249902e301bd9052bf712e511fcc6acff4ecaad4b5900aad9ce564e26de" },
+]
+
+setup = '''
+%cmake \
+    -DENABLE_THREADING=ON \
+    -DBUILD_APPS=OFF \
+    -DBUILD_STATIC_LIBS=ON \
+    -DDISABLE_WERROR=ON \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/json-c/COPYING"
+'''

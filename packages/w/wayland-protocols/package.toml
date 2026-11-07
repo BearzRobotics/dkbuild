@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: work/cports/main/wayland-protocols/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "wayland-protocols"
+version = "1.49"
+release = 1
+summary = "Wayland compositor protocols"
+license = "MIT"
+homepage = "https://wayland.freedesktop.org"
+hostdeps = ["meson", "pkgconf", "wayland-progs"]
+builddeps = ["wayland-devel"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/wayland/wayland-protocols/-/archive/1.49/wayland-protocols-1.49.tar.gz", sha256 = "8d94eee148db4d8111ccc0d4331de2f82d4b28c38e30eace9f052886480f7d86" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/wayland-protocols/COPYING"
+'''

@@ -1,0 +1,87 @@
+# Imported from Chimera Linux cports: work/cports/main/shadow/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "shadow"
+version = "4.17.2"
+release = 1
+summary = "Shadow password file utilities"
+license = "BSD-3-Clause"
+homepage = "https://github.com/shadow-maint/shadow"
+patches = ["defaults.patch", "login_defs.patch", "man.patch", "usermod-move-home-errmsg.patch", "xstrdup.patch"]
+builddeps = ["acl-devel", "linux-pam-devel", "linux-headers"]
+rundeps = ["linux-pam", "base-shells"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/shadow-maint/shadow/releases/download/4.17.2/shadow-4.17.2.tar.xz", sha256 = "a21cf0d34bffc4314cede01cff258689174fab30ca494ae8f45784d3d56c9849" },
+]
+
+setup = '''
+%configure \
+    --enable-shared \
+    --enable-lastlog \
+    --disable-static \
+    --with-libpam \
+    --with-acl \
+    --with-attr \
+    --without-libbsd \
+    --without-selinux \
+    --without-nscd \
+    --disable-nls \
+    --enable-subordinate-ids \
+    --disable-account-tools-setuid
+'''
+build = '''
+%make
+'''
+install = '''
+# shadow force-installs into sbin regardless of configure
+install -dm755 "$pkgdir/usr/bin"
+mkdir -p "$pkgdir/usr"
+ln -sf bin "$pkgdir/usr/sbin"
+%make_install
+rm -rf "$pkgdir/usr/sbin"
+# install sulogin which is noinst
+install -Dm755 src/sulogin "$pkgdir/usr/bin/sulogin"
+install -Dm644 man/man8/sulogin.8 "$pkgdir/usr/share/man/man8/sulogin.8"
+# do not install pam files supplied with shadow
+rm -rf "$pkgdir/etc/pam.d"
+# install our own pam files
+# TODO(cbuild): for f in ["chage", "chfn", "chsh", "login", "su", "passwd"]:
+#         self.install_file(self.files_path / f"{f}.pam", "usr/lib/pam.d", name=f)
+# TODO(cbuild): for f in [
+#         "chpasswd",
+#         "chgpasswd",
+#         "groupadd",
+#         "groupdel",
+#         "groupmems",
+#         "groupmod",
+#         "newusers",
+#         "useradd",
+#         "userdel",
+#         "usermod",
+#     ]:
+#         self.install_file(
+#             self.destdir / "usr/lib/pam.d/chage", "usr/lib/pam.d", name=f
+#         )
+# defaults for useradd
+install -Dm644 $pkgfiles/default.useradd "$pkgdir/etc/default/useradd"
+# links
+# TODO(cbuild): for mp in [
+#         "endspent",
+#         "fgetspent",
+#         "fgetspent_r",
+#         "getspent",
+#         "getspent_r",
+#         "getspnam_r",
+#         "lckpwdf",
+#         "putspent",
+#         "setspent",
+#         "sgetspent",
+#         "sgetspent_r",
+#         "ulckpwdf",
+#     ]:
+#         self.install_link(f"usr/share/man/man3/{mp}.3", "getspnam.3")
+install -Dm644 $pkgfiles/LICENSE "$pkgdir/usr/share/licenses/shadow/LICENSE"
+'''

@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: work/cports/main/xorriso/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "xorriso"
+version = "1.5.6.2"
+release = 3
+summary = "ISO 9660 Rock Ridge Filesystem Manipulator"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/xorriso"
+patches = ["build.patch", "cfi.patch"]
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["acl-devel", "bzip2-devel", "libedit-devel", "linux-headers", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://ftpmirror.gnu.org/gnu/xorriso/xorriso-1.5.6.pl02.tar.gz", sha256 = "786f9f5df9865cc5b0c1fecee3d2c0f5e04cab8c9a859bd1c9c7ccd4964fdae1" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-libedit \
+    --disable-libreadline \
+    "MKDIR_P=mkdir -p"
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

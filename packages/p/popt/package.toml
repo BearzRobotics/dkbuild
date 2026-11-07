@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: work/cports/main/popt/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "popt"
+version = "1.19"
+release = 1
+summary = "Command line option parsing library"
+license = "MIT"
+homepage = "https://rpm.org"
+hostdeps = ["pkgconf", "automake", "libtool", "gettext-devel"]
+builddeps = ["gettext-devel"]
+
+source = [
+    { url = "http://ftp.rpm.org/popt/releases/popt-1.x/popt-1.19.tar.gz", sha256 = "c25a4838fc8e4c1c8aacb8bd620edb3084a3d63bf8987fdad3ca2758c63240f9" },
+]
+
+setup = '''
+./autogen.sh
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/popt/COPYING"
+'''

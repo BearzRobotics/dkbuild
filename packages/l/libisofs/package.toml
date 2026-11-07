@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: work/cports/main/libisofs/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "libisofs"
+version = "1.5.6.1"
+release = 1
+summary = "Library to create ISO 9660 images"
+license = "GPL-2.0-or-later"
+homepage = "https://dev.lovelyhq.com/libburnia/libisofs"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["acl-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "http://files.libburnia-project.org/releases/libisofs-1.5.6.pl01.tar.gz", sha256 = "ac1fd338d641744ca1fb1567917188b79bc8c2506832dd56885fec98656b9f25" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

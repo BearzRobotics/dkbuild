@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: work/cports/main/libdisplay-info/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "libdisplay-info"
+version = "0.3.0"
+release = 1
+summary = "EDID and DisplayID library"
+license = "MIT"
+homepage = "https://gitlab.freedesktop.org/emersion/libdisplay-info"
+hostdeps = ["meson", "pkgconf"]
+builddeps = ["hwdata-devel"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/emersion/libdisplay-info/-/archive/0.3.0/libdisplay-info-0.3.0.tar.gz", sha256 = "2b467e3336aec63819d6aca28d7310d3dc7415b2b3a3c3a5aec9d3727053c078" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libdisplay-info/LICENSE"
+'''

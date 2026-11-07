@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: work/cports/main/exfatprogs/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "exfatprogs"
+version = "1.4.3"
+release = 1
+summary = "ExFAT filesystem utilities"
+license = "GPL-2.0-only"
+homepage = "https://github.com/exfatprogs/exfatprogs"
+hostdeps = ["automake", "pkgconf", "slibtool"]
+builddeps = ["linux-headers", "util-linux-blkid-devel"]
+
+source = [
+    { url = "https://github.com/exfatprogs/exfatprogs/archive/refs/tags/1.4.3.tar.gz", sha256 = "d745a0e7f97e1c36fad97148062ba4c496724e212d6075ff3129355d9054e218" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

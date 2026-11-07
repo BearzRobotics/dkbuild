@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: work/cports/main/libburn/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "libburn"
+version = "1.5.6"
+release = 1
+summary = "Library for reading, mastering and writing optical discs"
+license = "GPL-2.0-or-later"
+homepage = "https://dev.lovelyhq.com/libburnia/libburn"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["linux-headers"]
+
+source = [
+    { url = "http://files.libburnia-project.org/releases/libburn-1.5.6.tar.gz", sha256 = "7295491b4be5eeac5e7a3fb2067e236e2955ffdc6bbd45f546466edee321644b" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

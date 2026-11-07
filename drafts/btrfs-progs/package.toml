@@ -1,0 +1,34 @@
+# Imported from Chimera Linux cports: work/cports/main/btrfs-progs/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "btrfs-progs"
+version = "7.1"
+release = 1
+summary = "Btrfs file system utilities"
+license = "GPL-2.0-only AND LGPL-2.1-or-later"
+homepage = "https://btrfs.readthedocs.io/en/latest"
+patches = ["basename.patch", "cp.patch"]
+hostdeps = ["asciidoc", "automake", "libxml2-progs", "pkgconf", "python-devel", "python-setuptools", "python-sphinx", "python-sphinx_rtd_theme", "xmlto"]
+builddeps = ["acl-devel", "e2fsprogs-devel", "linux-headers", "lzo-devel", "python-devel", "udev-devel", "util-linux-blkid-devel", "util-linux-uuid-devel", "zlib-ng-compat-devel", "zstd-devel"]
+checkdeps = ["xz"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.kernel.org/pub/linux/kernel/people/kdave/btrfs-progs/btrfs-progs-v7.1.tar.xz", sha256 = "d1f55cc2971398c9142eaa79d203e63d586a3b4b867f956664a1d68322cd4e34" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-backtrace \
+    --enable-python
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install \
+    install_python
+# TODO(cbuild): self.install_completion("btrfs-completion", "bash", "btrfs")
+'''

@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: work/cports/main/libgcrypt/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "libgcrypt"
+version = "1.12.4"
+release = 1
+summary = "GNU cryptographic library"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.gnupg.org"
+patches = ["config.patch", "ppc64-pubkey-test.patch", "regen.patch"]
+hostdeps = ["automake", "libgpg-error-devel", "libtool", "pkgconf"]
+builddeps = ["libgpg-error-devel"]
+
+source = [
+    { url = "https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-1.12.4.tar.bz2", sha256 = "d77f68f48879510e79a2f65977ccc68981781ea0923e5bdffac2a193ea3d660e" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-static \
+    --without-capabilities \
+    ac_cv_sys_symbol_underscore=no
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

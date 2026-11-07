@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: work/cports/main/nasm/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "nasm"
+version = "2.16.03"
+release = 1
+summary = "80x86 assembler designed for portability and modularity"
+license = "BSD-2-Clause"
+homepage = "https://www.nasm.us"
+hostdeps = ["asciidoc"]
+checkdeps = ["perl"]
+
+source = [
+    { url = "https://www.nasm.us/pub/nasm/releasebuilds/2.16.03/nasm-2.16.03.tar.xz", sha256 = "1412a1c760bbd05db026b6c0d1657affd6631cd0a63cddb6f73cc6d4aa616148" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make test
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/nasm/LICENSE"
+'''

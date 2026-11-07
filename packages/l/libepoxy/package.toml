@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: work/cports/main/libepoxy/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "libepoxy"
+version = "1.5.10"
+release = 2
+summary = "Library for handling OpenGL function pointers"
+license = "MIT"
+homepage = "https://github.com/anholt/libepoxy"
+hostdeps = ["meson", "pkgconf", "xorg-util-macros"]
+builddeps = ["libglvnd-devel", "libx11-devel"]
+
+source = [
+    { url = "https://github.com/anholt/libepoxy/archive/1.5.10.tar.gz", sha256 = "a7ced37f4102b745ac86d6a70a9da399cc139ff168ba6b8002b4d8d43c900c15" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libepoxy/COPYING"
+'''

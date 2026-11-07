@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: work/cports/main/gsed/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "sed"
+version = "4.9"
+release = 1
+summary = "GNU stream editor"
+license = "GPL-3.0-or-later"
+homepage = "http://www.gnu.org/software/sed"
+hostdeps = ["automake", "gettext-devel", "texinfo"]
+builddeps = ["acl-devel"]
+checkdeps = ["perl", "bash"]
+options = ["!check"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/sed/sed-4.9.tar.xz", sha256 = "6e226b732e1cd739464ad6862bd1a1aba42d7982922da7a53519631d24975181" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-acl \
+    --program-prefix=g \
+    gl_cv_func_working_acl_get_file=yes \
+    ac_cv_lib_error_at_line=no \
+    ac_cv_header_sys_cdefs_h=no
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

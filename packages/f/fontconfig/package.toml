@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: work/cports/main/fontconfig/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "fontconfig"
+version = "2.18.3"
+release = 2
+summary = "Library for configuring and customizing font access"
+license = "MIT"
+homepage = "https://www.fontconfig.org"
+hostdeps = ["automake", "gettext-devel", "gperf", "libtool", "pkgconf", "python"]
+builddeps = ["libexpat-devel", "freetype-bootstrap", "util-linux-uuid-devel"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/api/v4/projects/890/packages/generic/fontconfig/2.18.3/fontconfig-2.18.3.tar.xz", sha256 = "4f7b554a38cdf78c033f666c8871f3749e14a094f65a07f630c91ed0b43d35e3" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-static \
+    --enable-docs \
+    --with-cache-dir=/var/cache/fontconfig
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/fontconfig/COPYING"
+'''

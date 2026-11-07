@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: work/cports/main/pango/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "pango"
+version = "1.58.2"
+release = 1
+summary = "Text rendering and layout library"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.pango.org"
+patches = ["disable-some-tests.patch"]
+hostdeps = ["glib-devel", "gobject-introspection", "help2man", "meson", "pkgconf"]
+builddeps = ["cairo-devel", "fribidi-devel", "harfbuzz-devel", "libthai-devel", "libxft-devel", "sysprof-capture"]
+checkdeps = ["fonts-cantarell-otf", "fonts-dejavu-ttf", "fonts-liberation-ttf"]
+
+source = [
+    { url = "https://download.gnome.org/sources/pango/1.58/pango-1.58.2.tar.xz", sha256 = "342385b6ca3b7c73455d7c80a13b7dbe4489e00bc3bd4c5bd6ed4dce421e374a" },
+]
+
+setup = '''
+%meson \
+    -Dintrospection=enabled \
+    -Dsysprof=enabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

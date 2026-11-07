@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: work/cports/main/texinfo/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "texinfo"
+version = "7.2"
+release = 1
+summary = "GNU Documentation System"
+license = "GPL-3.0-or-later"
+homepage = "http://www.gnu.org/software/texinfo"
+hostdeps = ["perl", "ncurses-devel"]
+builddeps = ["ncurses-devel"]
+rundeps = ["perl"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/texinfo/texinfo-7.2.tar.xz", sha256 = "0329d7788fbef113fa82cb80889ca197a344ce0df7646fe000974c5d714363a6" },
+]
+
+setup = '''
+%configure \
+    --disable-static \
+    --disable-perl-xs
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

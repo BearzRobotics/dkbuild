@@ -1,0 +1,20 @@
+# Imported from Chimera Linux cports: work/cports/main/alsa-ucm-conf/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "alsa-ucm-conf"
+version = "1.2.16.1"
+release = 1
+summary = "ALSA Use Case Manager topology files"
+license = "BSD-3-Clause"
+homepage = "https://github.com/alsa-project/alsa-ucm-conf"
+patches = ["0001-Add-xiaomi-surya-config.patch", "0002-Add-xiaomi-davinci-config.patch", "0003-Add-xiaomi-tucana-config.patch", "0004-Add-symlinks-for-U-Boot-compatibility.patch"]
+
+source = [
+    { url = "https://github.com/alsa-project/alsa-ucm-conf/archive/refs/tags/v1.2.16.1.tar.gz", sha256 = "cbfa3c34add2b22375536362a42a36b1488c1ee82503117730d62524ff653aa0" },
+]
+
+install = '''
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/alsa-ucm-conf/LICENSE"
+# TODO(cbuild): self.install_files("ucm2", "usr/share/alsa")
+'''

@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: work/cports/main/libnvme/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "libnvme"
+version = "1.16.2"
+release = 1
+summary = "C library for NVMe on Linux"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/linux-nvme/libnvme"
+patches = ["doc-test.patch", "sysfs-test.patch"]
+hostdeps = ["meson", "pkgconf", "bash", "swig"]
+builddeps = ["dbus-devel", "json-c-devel", "keyutils-devel", "linux-headers", "openssl3-devel", "python-devel"]
+
+source = [
+    { url = "https://github.com/linux-nvme/libnvme/archive/v1.16.2/libnvme-v1.16.2.tar.gz", sha256 = "1d850d5a871559abf641d6e6b63bb86047e4cb26f3ad144597c2c64b3cff7231" },
+]
+
+setup = '''
+%meson \
+    -Ddocs=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

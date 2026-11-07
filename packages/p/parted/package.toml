@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: work/cports/main/parted/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "parted"
+version = "3.8"
+release = 1
+summary = "GNU parted"
+license = "GPL-3.0-or-later"
+homepage = "http://www.gnu.org/software/parted"
+hostdeps = ["pkgconf"]
+builddeps = ["linux-headers", "lvm2-devel", "ncurses-devel", "readline-devel", "util-linux-blkid-devel", "util-linux-uuid-devel"]
+checkdeps = ["e2fsprogs", "perl", "python"]
+options = ["!check"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/parted/parted-3.8.tar.xz", sha256 = "a2b7811f47b0ddb1f7b1d0aa456f7c1270da70708ce231c2fe054c7199eafa63" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

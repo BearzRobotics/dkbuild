@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: work/cports/main/wlroots0.20/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "wlroots"
+version = "0.20.2"
+release = 2
+summary = "Modular Wayland compositor library 0.20.x"
+license = "MIT"
+homepage = "https://gitlab.freedesktop.org/wlroots/wlroots"
+patches = ["sover.patch"]
+hostdeps = ["glslang-progs", "meson", "pkgconf", "xwayland-devel"]
+builddeps = ["hwdata-devel", "lcms2-devel", "libdisplay-info-devel", "libdrm-devel", "libglvnd-devel", "libinput-devel", "libliftoff-devel", "libseat-devel", "libxcb-devel", "libxkbcommon-devel", "linux-headers", "mesa-gbm-devel", "pixman-devel", "udev-devel", "vulkan-headers", "vulkan-loader-devel", "wayland-devel", "wayland-protocols", "xcb-util-errors-devel", "xcb-util-renderutil-devel", "xcb-util-wm-devel"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/wlroots/wlroots/-/releases/0.20.2/downloads/wlroots-0.20.2.tar.gz", sha256 = "80c567d2ed4efb2cfa6b077f22c7a710d9c78ba4e185a75e8694001114af0733" },
+]
+
+setup = '''
+%meson \
+    --auto-features=enabled \
+    -Dexamples=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/wlroots0.20/LICENSE"
+'''
