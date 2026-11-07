@@ -19,7 +19,7 @@ recipes in `packages/` inside a sandbox on top of the DKRescue image.
 ## 2. Host packages
 
 ```sh
-sudo apt install ca-certificates curl git tar xz-utils xorriso squashfs-tools util-linux openssl
+sudo apt install ca-certificates curl git tar xz-utils lzip xorriso squashfs-tools util-linux openssl
 ```
 
 | Package | Why |

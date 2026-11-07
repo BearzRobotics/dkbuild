@@ -19,7 +19,7 @@ source = [
 
 setup = '''
 autoreconf -if -W none
-%configure \
+%configure --without-libpsl \
     --enable-ares \
     --enable-httpsrr \
     --enable-ipv6 \

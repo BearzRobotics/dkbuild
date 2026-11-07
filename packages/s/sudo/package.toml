@@ -22,4 +22,5 @@ build = '''
 install = '''
 make DESTDIR=$pkgdir install
 chmod 4755 "$pkgdir/usr/bin/sudo"
+rm -rf "$pkgdir/run"
 '''

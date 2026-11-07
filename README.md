@@ -11,7 +11,7 @@ FenrirOS does not exist yet, so the first host is Ubuntu (24.04 is the reference
 host tools:
 
 ```sh
-sudo apt install ca-certificates curl git tar xz-utils xorriso squashfs-tools util-linux openssl
+sudo apt install ca-certificates curl git tar xz-utils lzip xorriso squashfs-tools util-linux openssl
 ```
 
 Ubuntu 23.10 and later block unprivileged user namespaces, which the sandbox needs:
