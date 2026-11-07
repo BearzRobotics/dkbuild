@@ -7,6 +7,7 @@ const inputs = @import("inputs.zig");
 const bootstrap = @import("bootstrap.zig");
 const sandbox = @import("sandbox.zig");
 const doctor = @import("doctor.zig");
+const cbuild = @import("cbuild.zig");
 
 const usage =
     \\usage: dkbuild [--tree DIR] <command> [args]
@@ -16,6 +17,9 @@ const usage =
     \\  pkg [-j N] [--key FILE] [--keep-root] [--force] <name>...
     \\                             build packages and the dependencies in the tree
     \\  graph <name>...            print the build order for packages
+    \\  import-cbuild [--out DIR] <template.py|dir>...
+    \\                             convert Chimera cbuild templates into draft recipes
+    \\                             (default DIR: imported/); see docs/decisions/0002
     \\  doctor                     check this machine can run dkbuild; print the fixes
     \\  bootstrap-root [--force] [--dest DIR] <image>
     \\                             unpack the build machine (the DKRescue ISO, its
@@ -181,6 +185,27 @@ pub fn main(init: std.process.Init) !void {
             const r = t.recipes[idx];
             std.debug.print("{s}-{s}-r{d}\n", .{ r.name, r.version, r.release });
         }
+    } else if (std.mem.eql(u8, cmd, "import-cbuild")) {
+        var out_dir: []const u8 = try std.fs.path.join(arena, &.{ root, "imported" });
+        var inputs_list: std.ArrayList([]const u8) = .empty;
+        var k: usize = 0;
+        while (k < rest.len) : (k += 1) {
+            if (std.mem.eql(u8, rest[k], "--out") and k + 1 < rest.len) {
+                k += 1;
+                out_dir = rest[k];
+            } else try inputs_list.append(arena, rest[k]);
+        }
+        if (inputs_list.items.len == 0) return die(usage);
+        var failed = false;
+        for (inputs_list.items) |path| {
+            const res = cbuild.importPath(arena, init.io, path, out_dir) catch |err| {
+                std.debug.print("{s}: {s}\n", .{ path, @errorName(err) });
+                failed = true;
+                continue;
+            };
+            cbuild.printResult(res);
+        }
+        if (failed) std.process.exit(1);
     } else if (std.mem.eql(u8, cmd, "doctor")) {
         const ok = try doctor.run(arena, init.io, root, init.environ_map.get("PATH") orelse "/usr/bin:/bin", init.environ_map.get("HOME"));
         if (!ok) std.process.exit(1);
@@ -238,6 +263,7 @@ test {
     _ = @import("sandbox.zig");
     _ = @import("basepkg.zig");
     _ = @import("doctor.zig");
+    _ = @import("cbuild.zig");
     _ = @import("fetch.zig");
     _ = @import("build.zig");
     _ = @import("split.zig");

@@ -69,9 +69,11 @@ dependency chains; rebuilds; installing from the repository. They run once for e
 | `dkbuild graph <name>...` | prints the build order |
 | `dkbuild fetch [name]...` | downloads sources and checks their checksums |
 | `dkbuild pkg [--force] <name>...` | builds packages and their in-tree dependencies |
+| `dkbuild import-cbuild [--out DIR] <template.py\|dir>...` | converts Chimera cbuild templates into draft recipes (`imported/`) |
 
 ## Status
 
 Stage 1 (building on the DKRescue image) works for the five recipes in `packages/`. Not yet built: the LLVM
 toolchain and the rest of the base system (SPEC 9), stage 2 (roots filled from `repo/` only, which also catches
-forgotten dependencies), images, cross-compiling, and the importer for Chimera `cbuild` templates (SPEC 5.9).
+forgotten dependencies), images and cross-compiling. The cbuild importer (SPEC 5.9) writes draft recipes with
+`TODO(cbuild)` markers; Solus `package.yml` import is planned.

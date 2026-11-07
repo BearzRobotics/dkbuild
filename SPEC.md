@@ -367,21 +367,51 @@ install = '''
 ### 5.9 Importing recipes from other distributions
 
 dkbuild builds only TOML recipes. Recipes from elsewhere are converted by a
-separate import step (**planned, after B1**; nothing here is built yet):
+separate step. Design record: `docs/decisions/0002-cbuild-importer.md`.
 
-- **Chimera `cbuild` templates (`template.py`) are the main source.** Chimera
-  is also musl, LLVM and apk, so most packages apply directly. The
-  declarative top of a template (`pkgname`, `pkgver`, `pkgrel`, `pkgdesc`,
-  `license`, `url`, `source` + `sha256`, `hostmakedepends`, `makedepends`,
-  `checkdepends`, `depends`, `options`, `build_style`) maps onto the fields
-  of 5.2; `build_style` maps onto the macros of 5.5. A template is Python,
-  so its functions (`def build(self)`, `@subpackage`, loops) are not
-  translated automatically: the importer writes a draft recipe, turns
-  simple `self.do(...)` calls into shell, and marks everything else with a
-  `# TODO(cbuild): ...` comment and a report, for a person to finish.
-  cports is BSD-2-Clause; converted recipes keep its attribution.
-- **Solus `package.yml`** files are read with `yaml-zig` and converted the
-  same way. This is the secondary path.
+**Chimera `cbuild` templates (`template.py`) are the main source**
+(**implemented**). Chimera is also musl, LLVM and apk, so most packages apply
+directly:
+
+```
+dkbuild import-cbuild [--out DIR] <template.py | package dir>...
+```
+
+writes a **draft** `DIR/<name>/package.toml` (default `imported/`), copies the
+template's `patches/` and `files/`, prints a report, and says whether the draft
+passes the recipe check. It reads the template as *text* and never runs it.
+
+- **Declarative variables map onto fields** (5.2): `pkgname`, `pkgver`,
+  `pkgrel` (+1: cbuild counts from 0), `pkgdesc`, `license`, `url`, `source`
+  with `sha256` (paired by position; an f-string over earlier variables such as
+  `pkgver` is resolved), `hostmakedepends`, `makedepends`, `checkdepends`,
+  `depends`, and the `options` and `archs` we know. `tool_flags` become
+  `export` lines in `environment`.
+- **`build_style` maps onto the macros of 5.5:** `gnu_configure`, `configure`,
+  `meson`, `cmake` and `makefile`, with `configure_args`, `make_build_args`,
+  `make_install_args` and `make_check_args`. A `do_build`-style function
+  replaces the style's step; `pre_*` and `post_*` hooks go around it.
+- **Functions are translated only when trivial:** `self.do(...)` with plain
+  string arguments (`make_jobs` -> `$jobs`, `destdir` -> `$pkgdir`), and
+  `install_license`, `install_file`, `install_bin`, `install_man`,
+  `install_dir` and `uninstall`. **Every other statement stays in the step as
+  a `# TODO(cbuild): <the Python line>` comment**, and in the report.
+- **Dropped, and reported:** variables with no equivalent (`hardening`,
+  `compression`, `renames`, `provides`, ...), options and archs we do not
+  know, and cbuild's subpackage classes beyond our defaults.
+- **Dependency names are Chimera's** (`zlib-ng-compat-devel`, `openssl3-devel`)
+  and are listed for review.
+- cports is BSD-2-Clause; every draft names its source template and keeps the
+  attribution.
+
+Tried on real cports templates: `zstd` and `dinit` come out almost complete
+(one `for` loop and one `with pushd` block left as TODOs); `lvm2` and `curl`
+list their service files, a module-level `if`, and a file-rewriting block.
+It is a typing aid, not a compiler: a draft with TODOs is not expected to
+build.
+
+**Solus `package.yml`** files, read with `yaml-zig`, are the secondary path
+(**planned**).
 
 ## 6. Architectures
 
@@ -895,6 +925,6 @@ keys/             public signing keys (private keys never in the repository)
 9. ~~Triple vendor (6.1, 9.2).~~ **Decided:** `fenriros`; DKRescue's LLVM
    builds and runs programs with any vendor (tested, 9.2). The profiles switch
    when builds move to the DKRescue root.
-10. **The importer (5.9).** Where the Python-subset reader for `template.py`
-    lives (inside dkbuild or its own library), and how much of a template's
-    code it translates against marking it for a person.
+10. ~~The importer (5.9).~~ **Decided:** inside dkbuild (`src/cbuild.zig`); it
+    translates only trivial calls and marks everything else for a person. Split
+    it out only if something else needs the Python reader.
