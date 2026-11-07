@@ -21,7 +21,8 @@ setup = '''
 %meson \
     -Dintrospection=disabled \
     -Dinstalled_tests=false \
-    -Dglycin=disabled
+    -Dglycin=disabled \
+    -Dman=false
 '''
 build = '''
 %meson_build
