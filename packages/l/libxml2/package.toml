@@ -21,7 +21,7 @@ autoreconf -if -W none
     --enable-shared \
     --enable-static \
     --with-history \
-    --with-icu \
+    --without-icu \
     --with-legacy \
     --with-threads \
     --without-docs

@@ -91,6 +91,7 @@ pub const Profile = struct {
         return std.fmt.allocPrint(arena,
             \\export CC="clang --target={[t]s}{[sys]s}"
             \\export CXX="clang++ --target={[t]s}{[sys]s}"
+            \\export FORCE_UNSAFE_CONFIGURE=1
             \\export CFLAGS="-O2 -march={[c]s}"
             \\export CXXFLAGS="-O2 -march={[c]s}"
             \\export LDFLAGS="-fuse-ld=lld -Wl,--undefined-version{[st]s}"

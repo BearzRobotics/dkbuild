@@ -7,7 +7,6 @@ release = 1
 summary = "Utilities for monitoring your system and its processes"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://gitlab.com/procps-ng/procps"
-patches = ["musl.patch", "uid_t.patch"]
 hostdeps = ["automake", "gettext-devel", "libtool", "pkgconf"]
 builddeps = ["ncurses-devel"]
 options = ["!check"]
@@ -17,12 +16,7 @@ source = [
 ]
 
 setup = '''
-autoreconf -if -W none
-%configure \
-    --disable-kill \
-    --enable-watch8bit \
-    --disable-modern-top \
-    --without-systemd
+%configure --disable-static --disable-kill --enable-watch8bit
 '''
 build = '''
 %make

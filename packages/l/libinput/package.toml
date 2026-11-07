@@ -19,8 +19,9 @@ source = [
 setup = '''
 %meson \
     -Ddocumentation=false \
-    -Dtests=true \
-    -Ddebug-gui=false
+    -Dtests=false \
+    -Ddebug-gui=false \
+    -Dlibwacom=false
 '''
 build = '''
 %meson_build

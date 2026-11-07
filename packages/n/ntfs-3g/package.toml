@@ -22,7 +22,7 @@ autoreconf -if -W none
     --sbin=/usr/bin \
     --disable-static \
     --disable-quarantined \
-    --enable-crypto \
+    --disable-crypto \
     --enable-extras \
     --enable-posix-acls \
     --enable-xattr-mappings \

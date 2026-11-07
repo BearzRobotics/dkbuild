@@ -7,7 +7,6 @@ release = 1
 summary = "Command-line interface to hard disk drive parameters"
 license = "BSD-1-Clause AND GPL-2.0-only"
 homepage = "https://sourceforge.net/projects/hdparm"
-patches = ["00-fix-Makefile.patch"]
 builddeps = ["linux-headers"]
 options = ["!check"]
 
@@ -16,15 +15,9 @@ source = [
 ]
 
 build = '''
-%make \
-    PREFIX=/usr
+make -j$jobs CC="$CC"
 '''
 install = '''
-%make_install \
-    STRIP=true \
-    PREFIX=/usr \
-    -j1 \
-    binprefix=/usr \
-    sbindir=/usr/bin
+make DESTDIR=$pkgdir binprefix=/usr install
 install -Dm644 LICENSE.TXT "$pkgdir/usr/share/licenses/hdparm/LICENSE.TXT"
 '''

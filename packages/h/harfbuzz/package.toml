@@ -18,14 +18,14 @@ source = [
 setup = '''
 %meson \
     -Db_ndebug=true \
-    -Dcairo=enabled \
+    -Dcairo=disabled \
     -Dcpp_std=c++17 \
-    -Ddocs=enabled \
+    -Ddocs=disabled \
     -Dfreetype=enabled \
     -Dglib=enabled \
-    -Dgraphite2=enabled \
-    -Dicu=enabled \
-    -Dintrospection=enabled
+    -Dgraphite2=disabled \
+    -Dicu=disabled \
+    -Dintrospection=disabled
 '''
 build = '''
 %meson_build

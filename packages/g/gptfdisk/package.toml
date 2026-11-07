@@ -7,23 +7,25 @@ release = 2
 summary = "Fdisk-like partitioning tool for GPT disks"
 license = "GPL-2.0-or-later"
 homepage = "https://sourceforge.net/projects/gptfdisk"
-patches = ["fix_test.patch", "ncurses.patch"]
 builddeps = ["linux-headers", "ncurses-devel", "popt-devel", "util-linux-uuid-devel"]
 
 source = [
     { url = "https://downloads.sourceforge.net/sourceforge/gptfdisk/1.0.10/gptfdisk-1.0.10.tar.gz", sha256 = "2abed61bc6d2b9ec498973c0440b8b804b7a72d7144069b5a9209b2ad693a282" },
 ]
 
+setup = '''
+sed -i 's|ncursesw/||' gptcurses.cc
+'''
 build = '''
-%make \
-    PREFIX=/usr
+make -j$jobs CXX="$CXX" CC="$CC"
 '''
 check = '''
 sh gdisk_test.sh
 '''
 install = '''
-install -Dm755 cgdisk "$pkgdir/usr/bin/cgdisk"
-install -Dm755 fixparts "$pkgdir/usr/bin/fixparts"
-install -Dm755 gdisk "$pkgdir/usr/bin/gdisk"
-install -Dm755 sgdisk "$pkgdir/usr/bin/sgdisk"
+for m in gdisk sgdisk cgdisk fixparts; do install -Dm644 $m.8 "$pkgdir/usr/share/man/man8/$m.8"; done
+install -Dm755 cgdisk "$pkgdir/usr/sbin/cgdisk"
+install -Dm755 fixparts "$pkgdir/usr/sbin/fixparts"
+install -Dm755 gdisk "$pkgdir/usr/sbin/gdisk"
+install -Dm755 sgdisk "$pkgdir/usr/sbin/sgdisk"
 '''

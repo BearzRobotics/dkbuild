@@ -15,7 +15,7 @@ source = [
 ]
 
 setup = '''
-%meson
+%meson -Dx11=false -Dglx=no -Degl=yes
 '''
 build = '''
 %meson_build

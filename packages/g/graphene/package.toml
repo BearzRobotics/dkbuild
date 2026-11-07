@@ -19,7 +19,7 @@ setup = '''
 %meson \
     -Dinstalled_tests=false \
     -Dgcc_vector=true \
-    -Dintrospection=enabled
+    -Dintrospection=disabled
 '''
 build = '''
 %meson_build
