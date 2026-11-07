@@ -19,7 +19,9 @@ source = [
 setup = '''
 %meson \
     -Dintrospection=disabled \
-    -Dsysprof=disabled
+    -Dsysprof=disabled \
+    -Dbuild-testsuite=false \
+    -Dbuild-examples=false
 '''
 build = '''
 %meson_build

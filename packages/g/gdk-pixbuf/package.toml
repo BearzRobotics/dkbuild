@@ -19,9 +19,9 @@ source = [
 
 setup = '''
 %meson \
-    -Dintrospection=enabled \
+    -Dintrospection=disabled \
     -Dinstalled_tests=false \
-    -Dglycin=enabled
+    -Dglycin=disabled
 '''
 build = '''
 %meson_build

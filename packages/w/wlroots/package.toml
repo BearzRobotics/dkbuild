@@ -17,7 +17,12 @@ source = [
 
 setup = '''
 %meson \
-    --auto-features=enabled \
+    -Dxwayland=disabled \
+    -Dbackends=drm,libinput \
+    -Drenderers=gles2 \
+    -Dallocators=gbm \
+    -Dsession=enabled \
+    -Dcolor-management=disabled \
     -Dexamples=false
 '''
 build = '''
