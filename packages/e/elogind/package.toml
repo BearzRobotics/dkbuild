@@ -1,5 +1,7 @@
 # Imported from Chimera Linux cports: work/cports/main/elogind/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# NOT ENABLED: the system uses seatd. This package exists because polkit links
+# libelogind; nothing in base starts the elogind service.
 # Reviewed by hand. Changed from Chimera: no PAM and no man pages; polkit is on
 # because dkde requires it. The service and /run/systemd are written for our
 # dinit layout. NOT BUILT YET: needs dbus, eudev, libcap, libseccomp,

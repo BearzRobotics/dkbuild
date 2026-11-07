@@ -3,7 +3,12 @@
 #
 # Written from Chimera's recipe (polkit 128), changed for this system:
 #  - authfw=shadow: no PAM here (polkit 128 can authenticate against shadow).
-#  - session tracking by elogind (polkit offers only logind, elogind, ConsoleKit).
+#  - polkit offers only logind, elogind or ConsoleKit for session tracking, so it
+#    is BUILT against elogind's library, but the elogind daemon is not started
+#    (seatd is the only seat manager for now). polkitd's service does not depend
+#    on it. UNVERIFIED: without a running logind polkitd cannot look up sessions,
+#    so rules that need an active local session will not match; password
+#    authentication for admin users should still work.
 #  - Chimera's turnstile.patch is dropped: it tracks sessions through turnstile.
 #  - the polkitd user comes from scripts/pre-install, not sysusers.
 # NOT BUILT YET: needs elogind, dbus, glib and duktape in the tree.
@@ -16,7 +21,7 @@ homepage = "https://www.freedesktop.org/wiki/Software/polkit"
 patches = ["dbus-activation.patch", "disable-sd-pidfd.patch", "readiness.patch"]
 hostdeps = ["gettext", "meson", "perl", "pkgconf"]
 builddeps = ["duktape-devel", "elogind-devel", "glib-devel", "expat-devel"]
-rundeps = ["dbus", "elogind"]
+rundeps = ["dbus"]
 options = ["!check", "!cross"]
 
 source = [
