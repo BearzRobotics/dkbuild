@@ -5,7 +5,9 @@
 set -u
 cd "$(dirname "$0")/.."
 CH=$PWD/rootfs/chimera
-W=$(mktemp -d); trap 'rm -rf "$W"' EXIT
+mkdir -p work
+# Under work/ (ignored by git), not /tmp: the toolchain root is over 500 MB and /tmp is often a small tmpfs.
+W=$(mktemp -d "$PWD/work/musl.XXXXXX"); trap 'rm -rf "$W"' EXIT
 SR=$W/sr; TC=$W/tc
 mkdir -p "$SR/etc/apk/keys" "$TC/etc/apk/keys"
 cp keys/*.pub "$SR/etc/apk/keys/"
