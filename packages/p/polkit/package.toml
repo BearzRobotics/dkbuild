@@ -3,15 +3,16 @@
 #
 # Written from Chimera's recipe (polkit 128), changed for this system:
 #  - authfw=shadow: no PAM here (polkit 128 can authenticate against shadow).
-#  - polkit offers only logind, elogind or ConsoleKit for session tracking, so it
-#    is BUILT against elogind's library, but the elogind daemon is not started
-#    (seatd is the only seat manager for now). polkitd's service does not depend
-#    on it. UNVERIFIED: without a running logind polkitd cannot look up sessions,
-#    so rules that need an active local session will not match; password
-#    authentication for admin users should still work.
+#  - a REDUCED polkit: session_tracking=ConsoleKit builds polkit's generic session
+#    monitor, which needs no logind or elogind at all. It asks ConsoleKit over
+#    D-Bus for the caller's session; with no ConsoleKit running that fails, so
+#    polkit treats nobody as being in an active local session. Rules that need
+#    one ("allow_active") do not match, and administrator password
+#    authentication, which is what the graphical prompt uses, is unaffected.
+#    UNVERIFIED until polkitd runs on the image.
 #  - Chimera's turnstile.patch is dropped: it tracks sessions through turnstile.
 #  - the polkitd user comes from scripts/pre-install, not sysusers.
-# NOT BUILT YET: needs elogind, dbus, glib and duktape in the tree.
+# NOT BUILT YET: needs dbus, glib and duktape in the tree.
 name = "polkit"
 version = "128"
 release = 1
@@ -20,7 +21,7 @@ license = "GPL-2.0-or-later"
 homepage = "https://www.freedesktop.org/wiki/Software/polkit"
 patches = ["dbus-activation.patch", "disable-sd-pidfd.patch", "readiness.patch"]
 hostdeps = ["gettext", "meson", "perl", "pkgconf"]
-builddeps = ["duktape-devel", "elogind-devel", "glib-devel", "expat-devel"]
+builddeps = ["duktape-devel", "glib-devel", "expat-devel"]
 rundeps = ["dbus"]
 options = ["!check", "!cross"]
 
@@ -30,7 +31,7 @@ source = [
 
 setup = '''
 %meson \
-    -Dsession_tracking=elogind \
+    -Dsession_tracking=ConsoleKit \
     -Dsystemdsystemunitdir= \
     -Dpolkitd_user=polkitd \
     -Dauthfw=shadow \
