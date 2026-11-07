@@ -129,7 +129,8 @@ ls repo/x86_64/                      # the packages and Packages.adb
 ```
 
 What to expect: the first run downloads the sources (kept in `cache/`) and builds in dependency order; the 12
-packages currently in the tree took about 2 minutes on a laptop after the sources were cached. Each package prints
+packages currently in the tree (35 `.apk` files with their `-devel`, `-doc` and `-static` parts) took about
+3 minutes from a clean clone, downloads included, and about 2 once the sources were cached. Each package prints
 `built <name>` and where its log is (`logs/x86_64/`). Run it again and it says `up to date` for everything,
 because a package is rebuilt only when its recipe, patches, files, the architecture profile or something it
 builds against changes. `dkbuild pkg <name>...` builds just those and what they need.
