@@ -32,10 +32,4 @@ install = '''
 # TODO(cbuild): self.make.install()
 install -Dm644 mdadm.conf-example "$pkgdir/etc/mdadm.conf"
 install -Dm644 $pkgfiles/modprobe.conf "$pkgdir/usr/lib/modprobe.d/mdadm.conf"
-# TODO(cbuild): self.install_service(self.files_path / "mdadm")
-# TODO(cbuild): self.install_initramfs(self.files_path / "mdadm.hook")
-# TODO(cbuild): self.install_initramfs(self.files_path / "mdadm.local-block", "local-block")
-# TODO(cbuild): self.install_initramfs(
-#         self.files_path / "mdadm.local-bottom", "local-bottom"
-#     )
 '''

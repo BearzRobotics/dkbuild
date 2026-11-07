@@ -1,0 +1,50 @@
+# Imported from Chimera Linux cports: work/cports/main/bash/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
+# installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+name = "bash"
+version = "5.3"
+release = 2
+summary = "GNU Bourne Again Shell"
+license = "GPL-3.0-or-later"
+homepage = "http://www.gnu.org/software/bash"
+patches = ["fc-wraparound-sigill.patch"]
+hostdeps = ["bison", "texinfo"]
+builddeps = ["ncurses-devel", "readline-devel"]
+checkdeps = ["perl"]
+rundeps = ["debianutils"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/bash/bash-5.3.tar.gz", sha256 = "0d5cd86965f869a26cf64f4b71be7b96f90a3ba8b3d74e27e8e9d9d5550f31ba" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -DSYS_BASHRC="/usr/share/bash/bashrc" -DNON_INTERACTIVE_LOGIN_SHELLS"
+'''
+setup = '''
+%configure \
+    --without-bash-malloc \
+    --with-curses \
+    --with-installed-readline \
+    gl_cv_func_working_acl_get_file=yes \
+    ac_cv_lib_error_at_line=no \
+    ac_cv_header_sys_cdefs_h=no
+'''
+build = '''
+%make
+'''
+check = '''
+%make tests
+'''
+install = '''
+%make_install
+# remove devel files
+rm -rf "$pkgdir/usr/lib"
+rm -rf "$pkgdir/usr/include"
+# register with shells
+rm -rf "$pkgdir/usr/share/doc"
+mkdir -p "$pkgdir/usr/bin"
+ln -sf bash "$pkgdir/usr/bin/rbash"
+install -Dm644 $pkgfiles/bashrc "$pkgdir/usr/share/bash/bashrc"
+install -Dm644 $pkgfiles/bash.sh "$pkgdir/usr/lib/profile.d/bash.sh"
+'''

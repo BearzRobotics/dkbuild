@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: work/cports/main/wireplumber/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
+# installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+name = "wireplumber"
+version = "0.5.18"
+release = 1
+summary = "Session and policy manager implementation for PipeWire"
+license = "MIT"
+homepage = "https://pipewire.pages.freedesktop.org/wireplumber"
+hostdeps = ["doxygen", "glib-devel", "gobject-introspection", "meson", "pkgconf", "python-lxml"]
+builddeps = ["dinit-chimera", "dinit-dbus", "glib-devel", "lua5.4-devel", "pipewire-devel"]
+checkdeps = ["pipewire", "dbus"]
+rundeps = ["pipewire"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/pipewire/wireplumber/-/archive/0.5.18/wireplumber-0.5.18.tar.gz", sha256 = "8c8a326a5b2a570681c1503c83f1fce0cc54ba862019815604b2bc92a7d483a1" },
+]
+
+setup = '''
+%meson \
+    -Dsystem-lua=true \
+    -Ddoc=disabled \
+    -Dintrospection=enabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/wireplumber/LICENSE"
+'''

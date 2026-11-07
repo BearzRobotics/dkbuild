@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: work/cports/main/ddrescue/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
+# installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+name = "ddrescue"
+version = "1.30"
+release = 1
+summary = "Data recovery tool for failing block devices"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/ddrescue/ddrescue.html"
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/ddrescue/ddrescue-1.30.tar.lz", sha256 = "2264622d309d6c87a1cfc19148292b8859a688e9bc02d4702f5cd4f288745542" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

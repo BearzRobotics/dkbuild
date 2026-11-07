@@ -1,0 +1,23 @@
+# Follows the DKRescue post's build of alsa-utils 1.2.15.2.
+name = "alsa-utils"
+version = "1.2.15.2"
+release = 1
+summary = "ALSA utilities"
+license = "GPL-2.0-or-later"
+homepage = "https://www.alsa-project.org"
+builddeps = ["alsa-lib-devel", "ncurses-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.alsa-project.org/files/pub/utils/alsa-utils-1.2.15.2.tar.bz2", sha256 = "7aaaafbfb01942113ec0c31e51f705910e81079205088ca2f8f137a3869e1a3a" },
+]
+
+setup = '''
+%configure --disable-alsaconf --disable-bat --disable-xmlto
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

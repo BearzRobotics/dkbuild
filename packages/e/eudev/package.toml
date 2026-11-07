@@ -1,0 +1,23 @@
+# Follows the DKRescue post's build of eudev 3.2.14.
+name = "eudev"
+version = "3.2.14"
+release = 1
+summary = "Device manager (udev)"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/eudev-project/eudev"
+builddeps = ["hwdata"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/eudev-project/eudev/releases/download/v3.2.14/eudev-3.2.14.tar.gz", sha256 = "8da4319102f24abbf7fff5ce9c416af848df163b29590e666d334cc1927f006f" },
+]
+
+setup = '''
+%configure --bindir=/usr/bin --sbindir=/usr/sbin --libdir=/usr/lib --libexecdir=/usr/lib --with-rootprefix=/usr --disable-static --disable-manpages
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

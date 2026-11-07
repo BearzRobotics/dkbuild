@@ -47,9 +47,6 @@ build = '''
 install = '''
 %meson_install
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/pipewire/LICENSE"
-# TODO(cbuild): self.install_sysusers(self.files_path / "pipewire.conf")
-# TODO(cbuild): self.install_service(self.files_path / "pipewire.user", enable=True)
-# TODO(cbuild): self.install_service(self.files_path / "pipewire-pulse.user", enable=True)
 # move to vendordir
 install -dm755 "$pkgdir/usr/share/pam"
 # TODO(cbuild): self.rename("etc/security", "usr/share/pam/security", relative=False)

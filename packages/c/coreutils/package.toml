@@ -1,0 +1,26 @@
+# Follows the DKRescue post's build of coreutils 9.6.
+name = "coreutils"
+version = "9.6"
+release = 1
+summary = "GNU core utilities"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/coreutils"
+options = ["!check"]
+
+source = [
+    { url = "https://ftpmirror.gnu.org/gnu/coreutils/coreutils-9.6.tar.xz", sha256 = "7a0124327b398fd9eb1a6abde583389821422c744ffa10734b24f557610d3283" },
+]
+
+setup = '''
+%configure --enable-install-program=hostname --enable-no-install-program=kill,uptime
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+mkdir -p "$pkgdir/usr/sbin" "$pkgdir/usr/share/man/man8"
+mv "$pkgdir/usr/bin/chroot" "$pkgdir/usr/sbin/chroot"
+mv "$pkgdir/usr/share/man/man1/chroot.1" "$pkgdir/usr/share/man/man8/chroot.8"
+sed -i 's/"1"/"8"/' "$pkgdir/usr/share/man/man8/chroot.8"
+'''

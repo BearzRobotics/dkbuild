@@ -1,0 +1,71 @@
+# Imported from Chimera Linux cports: work/cports/main/util-linux/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reviewed by hand; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+name = "util-linux"
+version = "2.40.4"
+release = 2
+summary = "Miscellaneous Linux utilities"
+license = "GPL-2.0-or-later"
+homepage = "https://www.kernel.org/pub/linux/utils/util-linux"
+patches = ["brokensym.patch", "cryptsetup-auto.patch", "hide-strv.patch", "meson-manpages.patch", "meson-symlink.patch", "runuser-bash.patch"]
+hostdeps = ["bash", "bison", "flex", "gettext-devel", "meson", "pkgconf"]
+builddeps = ["bash-completion", "file-devel", "libcap-ng-devel", "linux-headers", "linux-pam-devel", "ncurses-devel", "zlib-ng-compat-devel"]
+checkdeps = ["xz", "iproute2", "socat", "procps"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.kernel.org/pub/linux/utils/util-linux/v2.40/util-linux-2.40.4.tar.xz", sha256 = "5c1daf733b04e9859afdc3bd87cc481180ee0f88b5c0946b16fdec931975fb79" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -D_DIRENT_HAVE_D_TYPE"
+'''
+setup = '''
+%meson \
+    --auto-feature=enabled \
+    -Dtinfo=disabled \
+    -Dncurses=disabled \
+    -Deconf=disabled \
+    -Dselinux=disabled \
+    -Dslang=disabled \
+    -Dlibutil=disabled \
+    -Dlibuser=disabled \
+    -Dlibutempter=disabled \
+    -Dreadline=disabled \
+    -Dbuild-plymouth-support=disabled \
+    -Dfs-search-path-extra=/usr/sbin:/usr/bin \
+    -Dbuild-agetty=disabled \
+    -Dbuild-cal=disabled \
+    -Dbuild-fallocate=disabled \
+    -Dbuild-kill=disabled \
+    -Dbuild-liblastlog2=disabled \
+    -Dbuild-logger=disabled \
+    -Dbuild-login=disabled \
+    -Dbuild-mesg=disabled \
+    -Dbuild-more=disabled \
+    -Dbuild-chfn-chsh=disabled \
+    -Dbuild-nologin=disabled \
+    -Dbuild-newgrp=disabled \
+    -Dbuild-pam-lastlog2=disabled \
+    -Dbuild-pivot_root=disabled \
+    -Dbuild-setarch=disabled \
+    -Dbuild-switch_root=disabled \
+    -Dbuild-sulogin=disabled \
+    -Dbuild-su=disabled \
+    -Dbuild-ul=disabled \
+    -Dbuild-vipw=disabled \
+    -Dbuild-wall=disabled \
+    -Dbuild-write=disabled \
+    -Dbuild-python=disabled \
+    -Dsystemd=disabled \
+    -Dsysvinit=disabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+# fix permissions
+chmod 4755 "$pkgdir/usr/bin/mount" "$pkgdir/usr/bin/umount"
+# (Chimera removes programs that clash with its own coreutils; this system keeps them all.)
+'''

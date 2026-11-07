@@ -87,5 +87,4 @@ install -Dm644 contrib/git-jump/README "$pkgdir/usr/share/doc/git/git-jump"
 # TODO(cbuild): self.rm(p)
 # TODO(cbuild): p.symlink_to("git-gui")
 # register shells
-# TODO(cbuild): self.install_shell("/usr/bin/git-shell")
 '''

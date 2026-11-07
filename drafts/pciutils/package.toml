@@ -18,7 +18,6 @@ source = [
 ]
 
 build = '''
-# TODO(cbuild): init_build() sets variables for this phase (cbuild line 35); port it by hand
 # TODO(cbuild): self.make.build(["SHARED=no"])
 # TODO(cbuild): self.mv("lib/libpci.a", "libpci_a")
 # TODO(cbuild): self.make.invoke("clean")

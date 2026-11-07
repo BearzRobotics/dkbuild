@@ -1,0 +1,34 @@
+# Imported from Chimera Linux cports: work/cports/main/glib/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
+# installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+name = "glib"
+version = "2.90.1"
+release = 1
+summary = "GLib library of C routines"
+license = "LGPL-2.1-or-later"
+homepage = "https://wiki.gnome.org/Projects/GLib"
+patches = ["29fb84735c9c1ce0c3b72d3fc21bdf9744e37f64.patch", "alwaysbash.patch", "deprecated-no-warn.patch", "girepository-no-pytests.patch", "no-desktop-file-utils.patch"]
+hostdeps = ["gettext", "gobject-introspection", "meson", "pkgconf", "python-docutils", "python-packaging"]
+builddeps = ["dbus-devel", "elfutils-devel", "freetype-bootstrap", "glib-bootstrap", "libffi8-devel", "pcre2-devel", "sysprof-capture", "util-linux-mount-devel", "zlib-ng-compat-devel"]
+checkdeps = ["dbus", "python-pytest"]
+
+source = [
+    { url = "https://download.gnome.org/sources/glib/2.90/glib-2.90.1.tar.xz", sha256 = "93c941aa17d5eb1d53fe838365f29a8b4e539c222a256d974ec8f30fc413e396" },
+]
+
+setup = '''
+%meson \
+    -Ddocumentation=false \
+    -Dintrospection=enabled \
+    -Dman-pages=enabled \
+    -Dselinux=disabled \
+    -Dsysprof=enabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/glib/COPYING"
+'''

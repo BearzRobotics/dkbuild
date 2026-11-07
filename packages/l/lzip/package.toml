@@ -1,0 +1,22 @@
+# Follows the DKRescue post's build of lzip 1.25.
+name = "lzip"
+version = "1.25"
+release = 1
+summary = "LZMA compressor"
+license = "GPL-2.0-or-later"
+homepage = "https://www.nongnu.org/lzip"
+options = ["!check"]
+
+source = [
+    { url = "https://download.savannah.gnu.org/releases/lzip/lzip-1.25.tar.gz", sha256 = "09418a6d8fb83f5113f5bd856e09703df5d37bae0308c668d0f346e3d3f0a56f" },
+]
+
+setup = '''
+./configure --prefix=/usr CXX="$CXX" CXXFLAGS="$CXXFLAGS" LDFLAGS="$LDFLAGS"
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make DESTDIR=$pkgdir install
+'''

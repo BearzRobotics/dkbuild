@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: work/cports/main/smartmontools/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
+# installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+name = "smartmontools"
+version = "7.5"
+release = 1
+summary = "Utilities for SMART-enabled drives"
+license = "GPL-2.0-or-later"
+homepage = "https://www.smartmontools.org"
+hostdeps = ["automake"]
+builddeps = ["dinit-chimera", "libcap-ng-devel", "linux-headers"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/smartmontools/smartmontools-7.5.tar.gz", sha256 = "690b83ca331378da9ea0d9d61008c4b22dde391387b9bbad7f29387f2595f76e" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-scriptpath=/usr/local/bin:/usr/bin
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+# TODO: patch in readiness
+'''

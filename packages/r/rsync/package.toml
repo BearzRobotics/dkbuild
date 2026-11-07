@@ -1,0 +1,45 @@
+# Imported from Chimera Linux cports: work/cports/main/rsync/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# No ACL/xattr support: acl needs linux-headers, which needs rsync (a cycle).
+# Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
+# installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+name = "rsync"
+version = "3.5.1"
+release = 1
+summary = "Fast incremental file transfer tool"
+license = "GPL-3.0-only"
+homepage = "https://rsync.samba.org"
+builddeps = ["lz4-devel", "openssl-devel", "popt-devel", "zlib-ng-compat-devel", "zstd-devel"]
+checkdeps = ["bash", "python"]
+
+source = [
+    { url = "https://www.samba.org/ftp/rsync/src/rsync-3.5.1.tar.gz", sha256 = "c55f9c9dc10fb8bec397b399a0fdded53cc9a2d8e30891bb0d63724d25c37bef" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -DINET6"
+'''
+setup = '''
+%configure \
+    --with-rrsync \
+    --with-included-popt=no \
+    --with-included-zlib=no \
+    --disable-md2man \
+    --disable-acl-support \
+    --disable-xattr-support \
+    --disable-xxhash
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 $pkgfiles/rsyncd.conf "$pkgdir/etc/rsyncd.conf"
+install -Dm755 $pkgfiles/rsyncd.sh "$pkgdir/usr/lib/rsyncd"
+install -Dm755 support/nameconvert "$pkgdir/usr/bin/nameconvert"
+install -Dm755 support/json-rsync-version "$pkgdir/usr/bin/json-rsync-version"
+install -Dm755 support/rsyncstats "$pkgdir/usr/bin/rsyncstats"
+'''

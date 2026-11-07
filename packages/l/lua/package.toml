@@ -1,0 +1,32 @@
+# Follows the DKRescue post's build of lua 5.4.8.
+name = "lua"
+version = "5.4.8"
+release = 1
+summary = "Lua scripting language"
+license = "MIT"
+homepage = "https://www.lua.org"
+builddeps = ["ncurses-devel", "readline-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.lua.org/ftp/lua-5.4.8.tar.gz", sha256 = "4f18ddae154e793e46eeab727c59ef1c0c0c2b744e7b94219710d76f530629ae" },
+]
+
+build = '''
+make linux CC="$CC" AR="llvm-ar rcu" RANLIB=llvm-ranlib MYCFLAGS=-fPIC -j$jobs
+'''
+install = '''
+make INSTALL_TOP=$pkgdir/usr install
+install -d "$pkgdir/usr/lib/pkgconfig"
+cat > "$pkgdir/usr/lib/pkgconfig/lua.pc" <<'PC'
+prefix=/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: Lua
+Description: An extensible extension language
+Version: 5.4.8
+Libs: -L${libdir} -llua -lm
+Cflags: -I${includedir}
+PC
+'''

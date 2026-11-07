@@ -1,0 +1,22 @@
+# Follows the DKRescue post's build of which 2.23.
+name = "which"
+version = "2.23"
+release = 1
+summary = "Show the full path of commands"
+license = "GPL-3.0-or-later"
+homepage = "https://savannah.gnu.org/projects/which"
+options = ["static", "!check"]
+
+source = [
+    { url = "https://ftpmirror.gnu.org/which/which-2.23.tar.gz", sha256 = "a2c558226fc4d9e4ce331bd2fd3c3f17f955115d2c00e447618a4ef9978a2a73" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

@@ -1,0 +1,24 @@
+# Follows the DKRescue post's build of nwipe 0.43.1.
+name = "nwipe"
+version = "0.43.1"
+release = 1
+summary = "Secure disk eraser"
+license = "GPL-2.0-only"
+homepage = "https://github.com/martijnvanbrummelen/nwipe"
+builddeps = ["ncurses-devel", "parted-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/martijnvanbrummelen/nwipe/archive/refs/tags/v0.43.1.tar.gz", sha256 = "134169dc2b0e11c1d3d6ea9c3d03b2dd0a69151cfb612e39ab17a81fd64eb02f" },
+]
+
+setup = '''
+./autogen.sh
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

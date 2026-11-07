@@ -1,0 +1,22 @@
+# Follows the DKRescue post's build of squashfs-tools 4.7.5.
+name = "squashfs-tools"
+version = "4.7.5"
+release = 1
+summary = "Squashfs filesystem tools"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/plougher/squashfs-tools"
+builddeps = ["zlib-ng-compat-devel", "xz-devel", "lzo-devel", "zstd-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/plougher/squashfs-tools/archive/refs/tags/4.7.5.tar.gz", sha256 = "547b7b7f4d2e44bf91b6fc554664850c69563701deab9fd9cd7e21f694c88ea6" },
+]
+
+build = '''
+cd squashfs-tools
+make -j$jobs CC="$CC" GZIP_SUPPORT=1 XZ_SUPPORT=1 LZO_SUPPORT=1 ZSTD_SUPPORT=1 LZ4_SUPPORT=0
+'''
+install = '''
+cd squashfs-tools
+make INSTALL_DIR=$pkgdir/usr/bin INSTALL_PREFIX=$pkgdir/usr INSTALL_MANPAGES_DIR=$pkgdir/usr/share/man/man1 install
+'''

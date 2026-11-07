@@ -1,0 +1,38 @@
+# Imported from Chimera Linux cports: work/cports/main/xfsprogs/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
+# installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+name = "xfsprogs"
+version = "7.2.1"
+release = 1
+summary = "XFS file system utilities"
+license = "LGPL-2.1-or-later"
+homepage = "http://xfs.org/index.php/Main_Page"
+patches = ["no-bash-and-chown.patch"]
+hostdeps = ["gettext", "util-linux-uuid-devel", "pkgconf"]
+builddeps = ["attr-devel", "gettext-devel", "inih-devel", "libedit-devel", "linux-headers", "lvm2-devel", "userspace-rcu-devel", "util-linux-blkid-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.kernel.org/pub/linux/utils/fs/xfs/xfsprogs/xfsprogs-7.2.1.tar.xz", sha256 = "c45f5fd81fdebcdae61938fcfdff86c9960b39fc89a06df633730d93876cd27d" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -DOVERRIDE_SYSTEM_STATX"
+'''
+setup = '''
+%configure \
+    --enable-editline=yes \
+    --enable-lib64=no
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install \
+    -j1 \
+    install-dev
+rm -rf "$pkgdir/usr/share/doc"
+# prevents udisks automount
+rm -rf "$pkgdir/usr/lib/udev/rules.d/64-xfs.rules"
+'''

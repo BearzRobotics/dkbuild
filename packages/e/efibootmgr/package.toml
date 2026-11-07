@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: work/cports/main/efibootmgr/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
+# installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+name = "efibootmgr"
+version = "18"
+release = 5
+summary = "Tool to modify the UEFI Boot Manager"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/rhboot/efibootmgr"
+patches = ["efibootmgr_default_to_grub2.patch", "ub.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["efivar-devel", "popt-devel", "linux-headers"]
+rundeps = ["base-kernel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/rhboot/efibootmgr/releases/download/18/efibootmgr-18.tar.bz2", sha256 = "2b195f912aa353f0d11f21f207684c91460fbc37f9a4f2673e63e5e32d108b10" },
+]
+
+setup = '''
+'''
+build = '''
+%make \
+    PREFIX=/usr
+'''
+install = '''
+install -Dm755 src/efibootdump "$pkgdir/usr/bin/efibootdump"
+install -Dm644 src/efibootdump.8 "$pkgdir/usr/share/man/man8/efibootdump.8"
+install -Dm755 src/efibootmgr "$pkgdir/usr/bin/efibootmgr"
+install -Dm644 src/efibootmgr.8 "$pkgdir/usr/share/man/man8/efibootmgr.8"
+'''

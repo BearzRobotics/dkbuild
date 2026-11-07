@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: work/cports/main/apk-tools/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reviewed by hand; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+name = "apk-tools"
+version = "3.0.8"
+release = 1
+summary = "Alpine package manager"
+license = "GPL-2.0-only"
+homepage = "http://git.alpinelinux.org/cgit/apk-tools"
+hostdeps = ["lua5.4", "lua5.4-zlib", "meson", "pkgconf", "scdoc"]
+builddeps = ["openssl3-devel", "zlib-ng-compat-devel"]
+options = ["bootstrap"]
+
+source = [
+    { url = "https://gitlab.alpinelinux.org/alpine/apk-tools/-/archive/v3.0.8/apk-tools-v3.0.8.tar.gz", sha256 = "e81c64a6e7c3806d45d4622c253e757aee970be84048554fa0eed79310e9453e" },
+]
+
+setup = '''
+%meson \
+    -Dlua=disabled \
+    -Dlua_version=5.4 \
+    -Dpython=disabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 $pkgfiles/config "$pkgdir/usr/lib/apk/config"
+'''

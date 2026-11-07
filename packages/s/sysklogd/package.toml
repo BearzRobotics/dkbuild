@@ -1,0 +1,22 @@
+# Follows the DKRescue post's build of sysklogd 2.7.2.
+name = "sysklogd"
+version = "2.7.2"
+release = 1
+summary = "System logging daemon"
+license = "BSD-3-Clause"
+homepage = "https://github.com/troglobit/sysklogd"
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/troglobit/sysklogd/releases/download/v2.7.2/sysklogd-2.7.2.tar.gz", sha256 = "bc410ca64551a11fac6518b418fb6b8afbd888a70af2c5eb353334a706727bca" },
+]
+
+setup = '''
+%configure --sysconfdir=/etc --runstatedir=/run --without-logger --docdir=/usr/share/doc/sysklogd
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

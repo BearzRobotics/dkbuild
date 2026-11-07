@@ -1,0 +1,19 @@
+# Follows the DKRescue post's build of dmidecode 3.7.
+name = "dmidecode"
+version = "3.7"
+release = 1
+summary = "DMI table decoder"
+license = "GPL-2.0-or-later"
+homepage = "https://www.nongnu.org/dmidecode"
+options = ["!check"]
+
+source = [
+    { url = "https://download.savannah.gnu.org/releases/dmidecode/dmidecode-3.7.tar.xz", sha256 = "2c3aed12c85a1e6a9410d406d5e417c455466dc1bc7c89278bb32cf7cad91e8a" },
+]
+
+build = '''
+make -j$jobs CC="$CC" prefix=/usr
+'''
+install = '''
+make DESTDIR=$pkgdir prefix=/usr install
+'''

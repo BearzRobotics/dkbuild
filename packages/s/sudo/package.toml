@@ -1,0 +1,25 @@
+# Follows the DKRescue post's build of sudo 1.9.17p2.
+# Built without PAM: authentication goes through shadow, not PAM.
+name = "sudo"
+version = "1.9.17p2"
+release = 1
+summary = "Run commands as another user"
+license = "ISC"
+homepage = "https://www.sudo.ws"
+builddeps = ["zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.sudo.ws/dist/sudo-1.9.17p2.tar.gz", sha256 = "4a38a1ab3adb1199257edc2a7c4a2bd714665eb605b04368843b06dada2cfcfb" },
+]
+
+setup = '''
+%configure --libexecdir=/usr/lib --with-secure-path --with-all-insults --with-env-editor --without-pam
+'''
+build = '''
+%make
+'''
+install = '''
+make DESTDIR=$pkgdir install
+chmod 4755 "$pkgdir/usr/bin/sudo"
+'''
