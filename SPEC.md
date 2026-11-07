@@ -767,6 +767,7 @@ inside a namespace the installed root runs `apk --version`, `sh`, `ls` and
 | `dkbuild fetch [<name>...]` | Only downloads and checks sources |
 | `dkbuild check <name>...` | Checks recipes: fields, checksums present, patches exist, no unknown keys |
 | `dkbuild graph <name>` | Prints the dependency order |
+| `dkbuild doctor` | Checks the host (programs, namespaces, overlayfs, disk, key) and prints the fixes (3.1) |
 | `dkbuild image <file>` | Builds an image (8) |
 | `dkbuild bootstrap-root [--force] [--dest DIR] <image>` | Unpacks the stage 0 build machine and checks it (9.2) |
 | `dkbuild shell <name>` | Opens a shell in a prepared build root for that recipe |
