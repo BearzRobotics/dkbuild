@@ -87,7 +87,7 @@ Builds run on the DKRescue system: its root filesystem is the read-only base tha
 to the machine and unpack it (about a minute, 4.2 GB, no root needed):
 
 ```sh
-./zig-out/bin/dkbuild bootstrap-root /path/to/dkrescue-fixed.iso
+./zig-out/bin/dkbuild bootstrap-root /path/to/dkrescue.iso
 ```
 
 The image these instructions were tested with is 1,187,035,136 bytes with SHA-256

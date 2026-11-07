@@ -1,0 +1,23 @@
+# needed by: base (boot loader), the live image
+name = "dklilo"
+version = "0.0.3"
+release = 1
+summary = "A modern LILO: BIOS and UEFI boot loader that reads filesystems itself"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dklilo"
+archs = ["x86_64"]
+hostdeps = ["zig"]
+options = ["static", "!check"]
+
+source = [
+    { url = "https://github.com/BearzRobotics/dklilo/releases/download/v0.0.3/dklilo-v0.0.3.tar.gz", sha256 = "266de21b0fd2142fd7af58f4cb8b143259bc497b2c71168448cdeddf519dc7a0" },
+]
+
+install = '''
+%zig_build
+# The upstream build installs bin/dklilo; the boot installer belongs in sbin.
+install -d "$pkgdir/usr/sbin"
+mv "$pkgdir/usr/bin/dklilo" "$pkgdir/usr/sbin/dklilo"
+rmdir "$pkgdir/usr/bin" 2>/dev/null || true
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/dklilo/LICENSE"
+'''

@@ -166,7 +166,7 @@ pub fn run(arena: Allocator, io: std.Io, root: []const u8, path_var: []const u8,
         const p = try std.fmt.allocPrint(arena, "{s}/rootfs/dkrescue/usr/bin/apk", .{root});
         const have = if (Dir.cwd().statFile(io, p, .{ .follow_symlinks = false })) |_| true else |_| false;
         say("  rootfs/dkrescue   {s}\n", .{if (have) "ok" else "absent"});
-        if (!have) say("      Unpack the DKRescue image: dkbuild bootstrap-root /path/to/dkrescue-fixed.iso\n", .{});
+        if (!have) say("      Unpack the DKRescue image: dkbuild bootstrap-root /path/to/dkrescue.iso\n", .{});
     }
 
     if (missing.items.len > 0) {

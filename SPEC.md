@@ -659,10 +659,19 @@ documentation. Three meta-packages describe the sets:
   to the live image (8), not to `base`.
 
 `base-devel` contains: LLVM (clang, lld, the LLVM binutils, compiler-rt,
-libunwind, libc++abi, libc++), `zig` (the official binary tarball, repackaged),
+libunwind, libc++abi, libc++), `zig` (a build-time system Zig, see below),
 CMake, Ninja, Meson, Python, Perl, GNU make, m4, gawk, patch, file, pkgconf,
 gettext, Bison, Flex, bc, gperf, Autoconf, Automake, Libtool, scdoc and
 setuptools. Python and Perl are build tools, not part of `base`.
+
+**The `zig` package** is there to build the repository's Zig programs, as
+Debian ships a Rust only to build its own packages. It is not a recommendation
+for writing Zig: the language still changes between releases, so users are
+pointed to zvm, anyzig and similar tools, and the package's README says so.
+Its version follows what the Zig packages need (dklilo 0.0.3 requires 0.17.1,
+so the image's 0.17.0 is too old). Today the recipe repackages the official
+x86_64 binary (`/usr/lib/zig`, `/usr/bin/zig` symlink). **OPEN:** build it
+from source once `llvm` exists in the tree (wave 1); the name stays `zig`.
 
 Every package has a reason to exist, stated in its recipe (a `# needed by:`
 comment): nothing joins the tree because DKRescue had it.
@@ -671,7 +680,7 @@ comment): nothing joins the tree because DKRescue had it.
 
 dkbuild needs a build machine with a toolchain and apk. That machine is
 **stage 0: the DKRescue image**, the hand-built system documented in the
-DKRescue posts (`dkrescue-fixed.iso`). Its `/live/rootfs.sfs` already has
+DKRescue posts (`dkrescue.iso`, sha256 `b3929359…ea72`, the build that boots to a desktop on real hardware). Its `/live/rootfs.sfs` already has
 LLVM 23 and compiler-rt, musl, Zig, Python, Perl, GNU make, CMake, Ninja,
 Meson, bash, dinit, git, scdoc, `unshare`, `pivot_root` and apk-tools, which
 is the list in the "build host" post. No hand-built stage 0 is left to do, and

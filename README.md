@@ -38,7 +38,7 @@ Then:
 
 ```sh
 # 1. The build machine: unpack the DKRescue image (1 minute, 4.2 GB). Needs no root.
-./zig-out/bin/dkbuild bootstrap-root /path/to/dkrescue-fixed.iso
+./zig-out/bin/dkbuild bootstrap-root /path/to/dkrescue.iso
 
 # 2. A signing key for the repository (keep it private and backed up).
 mkdir -p ~/.config/dkbuild && openssl genrsa -out ~/.config/dkbuild/signing.rsa 4096
