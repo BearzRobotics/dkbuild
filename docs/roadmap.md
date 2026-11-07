@@ -38,10 +38,8 @@ desktop on the same hardware as `dkrescue.iso`.
      already does for base.
   3. Like `zig`, the system `rust` is for building repository packages;
      users get rustup.
-  **Decision for you:** the full source chain (mrustc, then every rustc from
-  1.54 on) trusts no binary at all, but takes days of compiling. It's a
-  later project, not a blocker. The seed approach above is what Debian,
-  Alpine and Chimera do.
+  **Decided:** the seed compiler is enough. The full source chain (mrustc,
+  then every rustc from 1.54) is out of scope.
 - **Firefox 159** (built on the ISO already; patches in `firefox-patches/`).
   Needs rust, cbindgen, nodejs (the ISO builds node 26), nasm, GTK 3. Only
   after `rust`.
@@ -58,12 +56,16 @@ Roughly in this order, because each tests something new:
 4. **Session management** (logind): `elogind` (patched for musl) next to
    `seatd`. Both are packages; the image picks one.
 5. **qt6**: big, uses our LLVM; unlocks KDE and many apps.
-6. **Hyprland** with a good default config. Needs hyprutils, hyprlang,
-   aquamarine and friends, and a `hyprland-config` package so the default
-   isn't the bare upstream one. Details to settle with you: the look
-   (the two examples linked in the request are the reference), the bar,
-   launcher, notifications, wallpaper, and font and icon choices.
-   It ships next to labwc and dkde, not instead.
+6. **Hyprland** and its configurations, as separate packages. Hyprland has
+   no config manager of its own; the dotfile projects bring theirs.
+   Candidates: ML4W (`mylinuxforwork/dotfiles`, GPL-3.0, has its own
+   installer) and PewDiePie's `dionysus` (no license in the repository, so
+   it cannot be packaged without the author's permission; a look-alike would
+   be written from scratch). Several configs will fight over `~/.config/hypr`,
+   so each ships its files under `/usr/share/<package>/` and a small
+   selector (like `dkde-setup --once`) copies one into the user's home.
+   Installing two never conflicts on disk. Hyprland ships next to labwc and
+   dkde, not instead.
 
 Anything not listed is added the same way: a recipe, `dkbuild check`, `dkbuild
 pkg`, and it can go in an image.
