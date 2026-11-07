@@ -12,9 +12,9 @@ dkbuild check [NAME | FILE.toml]...
 
 dkbuild fetch [NAME]...
 
-dkbuild pkg [-j N] [--key FILE] [--keep-root] [--force] NAME...
+dkbuild pkg [-j N] [--key FILE] [--keep-root] [--no-check] [--force] NAME...
 
-dkbuild world [-j N] [--key FILE] [--keep-root] [--force]
+dkbuild world [-j N] [--key FILE] [--keep-root] [--no-check] [--force]
 
 dkbuild graph NAME...
 
@@ -72,6 +72,9 @@ pkg and world
 --keep-root
 : Keep the build root under **work/NAME/** after the build, for inspection.
 
+--no-check
+: Skip every recipe's check step. For first bring-up builds, when test suites would take longer than the build.
+
 --force
 : Rebuild even when the package is up to date.
 
@@ -82,6 +85,9 @@ import-cbuild
 bootstrap-root
 --dest DIR
 : Unpack into DIR instead of **rootfs/dkrescue/**.
+
+--no-check
+: Skip every recipe's check step. For first bring-up builds, when test suites would take longer than the build.
 
 --force
 : Replace an existing root.

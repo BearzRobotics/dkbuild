@@ -22,6 +22,8 @@ pub const Options = struct {
     arch: []const u8 = "x86_64",
     jobs: usize = 1,
     keep_root: bool = false,
+    /// Skip every recipe's check step (first bring-up builds).
+    no_check: bool = false,
     /// Dependencies this tree provides are not installed from the bootstrap
     /// repositories; they will come from repo/ once packaging exists.
     tree: ?tree.Tree = null,
@@ -100,7 +102,7 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
     const steps = [_]struct { name: []const u8, body: ?[]const u8 }{
         .{ .name = "setup", .body = r.setup },
         .{ .name = "build", .body = r.build },
-        .{ .name = "check", .body = if (contains(r.options, "!check")) null else r.check },
+        .{ .name = "check", .body = if (contains(r.options, "!check") or opts.no_check) null else r.check },
         .{ .name = "install", .body = r.install },
     };
     for (steps) |st| {

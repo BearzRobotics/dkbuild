@@ -14,9 +14,9 @@ const usage =
     \\
     \\  check [name|file.toml]...   validate recipes (all of them if none given)
     \\  fetch [name]...            download sources into cache/sources and check them
-    \\  pkg [-j N] [--key FILE] [--keep-root] [--force] <name>...
+    \\  pkg [-j N] [--key FILE] [--keep-root] [--no-check] [--force] <name>...
     \\                             build packages and the dependencies in the tree
-    \\  world [-j N] [--key FILE] [--keep-root] [--force]
+    \\  world [-j N] [--key FILE] [--keep-root] [--no-check] [--force]
     \\                             build every recipe in the tree that is out of date
     \\  graph <name>...            print the build order for packages
     \\  import-cbuild [--out DIR] <template.py|dir>...
@@ -130,6 +130,8 @@ pub fn main(init: std.process.Init) !void {
                 opts.key = rest[k];
             } else if (std.mem.eql(u8, rest[k], "--keep-root")) {
                 opts.keep_root = true;
+            } else if (std.mem.eql(u8, rest[k], "--no-check")) {
+                opts.no_check = true;
             } else if (std.mem.eql(u8, rest[k], "--force")) {
                 force = true;
             } else try names.append(arena, rest[k]);
