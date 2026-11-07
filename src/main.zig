@@ -5,13 +5,14 @@ const fetch = @import("fetch.zig");
 const build = @import("build.zig");
 const inputs = @import("inputs.zig");
 const bootstrap = @import("bootstrap.zig");
+const sandbox = @import("sandbox.zig");
 
 const usage =
     \\usage: dkbuild [--tree DIR] <command> [args]
     \\
     \\  check [name|file.toml]...   validate recipes (all of them if none given)
     \\  fetch [name]...            download sources into cache/sources and check them
-    \\  pkg [-j N] [--key FILE] [--keep-root] [--force] <name>...
+    \\  pkg [-j N] [--base chimera|dkrescue] [--key FILE] [--keep-root] [--force] <name>...
     \\                             build packages and the dependencies in the tree
     \\  graph <name>...            print the build order for packages
     \\  bootstrap-root [--force] [--dest DIR] <image>
@@ -24,6 +25,9 @@ const usage =
 pub fn main(init: std.process.Init) !void {
     const arena = init.arena.allocator();
     const args = try init.minimal.args.toSlice(arena);
+
+    // The sandbox runs in a copy of this program (sandbox.zig).
+    if (args.len > 1 and std.mem.eql(u8, args[1], sandbox.subcommand)) sandbox.childMain(args[2..]);
 
     var root: []const u8 = ".";
     var i: usize = 1;
@@ -105,11 +109,17 @@ pub fn main(init: std.process.Init) !void {
         };
         if (init.environ_map.get("HOME")) |home|
             opts.key = try std.fs.path.join(arena, &.{ home, ".config", "dkbuild", "signing.rsa" });
+        // DKBUILD_BASE=dkrescue selects the DKRescue root for every build (the
+        // test scripts use it); --base overrides.
+        if (init.environ_map.get("DKBUILD_BASE")) |b| opts.base = std.meta.stringToEnum(build.Base, b) orelse return die(usage);
         var names: std.ArrayList([]const u8) = .empty;
         var force = false;
         var k: usize = 0;
         while (k < rest.len) : (k += 1) {
-            if (std.mem.eql(u8, rest[k], "-j") and k + 1 < rest.len) {
+            if (std.mem.eql(u8, rest[k], "--base") and k + 1 < rest.len) {
+                k += 1;
+                opts.base = std.meta.stringToEnum(build.Base, rest[k]) orelse return die(usage);
+            } else if (std.mem.eql(u8, rest[k], "-j") and k + 1 < rest.len) {
                 k += 1;
                 opts.jobs = std.fmt.parseInt(usize, rest[k], 10) catch return die(usage);
             } else if (std.mem.eql(u8, rest[k], "--key") and k + 1 < rest.len) {
@@ -193,7 +203,7 @@ pub fn main(init: std.process.Init) !void {
         const img = image orelse return die(usage);
         const where = dest orelse try std.fs.path.join(arena, &.{ root, "rootfs", "dkrescue" });
         const work = try std.fs.path.join(arena, &.{ root, "work" });
-        bootstrap.bootstrapRoot(arena, init.io, img, where, .{ .work_dir = work, .force = force }) catch |err| switch (err) {
+        bootstrap.bootstrapRoot(arena, init.io, img, where, .{ .work_dir = work, .root = root, .force = force }) catch |err| switch (err) {
             error.OutOfMemory => return err,
             else => std.process.exit(1),
         };
@@ -226,6 +236,8 @@ test {
     _ = @import("macro.zig");
     _ = @import("tree.zig");
     _ = @import("bootstrap.zig");
+    _ = @import("sandbox.zig");
+    _ = @import("basepkg.zig");
     _ = @import("fetch.zig");
     _ = @import("build.zig");
     _ = @import("split.zig");

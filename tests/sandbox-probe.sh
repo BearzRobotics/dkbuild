@@ -23,8 +23,12 @@ int main(void) {
 C
     clang /tmp/conn.c -o /tmp/conn 2>/dev/null && { /tmp/conn || bad "connected to 1.1.1.1:53"; }
 fi
-# The build machine's home directories are not visible.
-[ -z "$(ls -A /home 2>/dev/null)" ] || bad "/home is not empty"
+# The host user's home directory is not visible. (The image may have /home of
+# its own; the test substitutes the host's real path for the placeholder. Run
+# directly on the host, the placeholder stays and $HOME is used, which exists.)
+HOST_HOME="@HOSTHOME@"
+case "$HOST_HOME" in @*) HOST_HOME=$HOME ;; esac
+[ ! -e "$HOST_HOME" ] || bad "the host home directory $HOST_HOME is visible"
 # Its processes are not visible: only the few in this PID namespace.
 n=$(ls /proc | grep -c '^[0-9][0-9]*$')
 [ "$n" -le 12 ] || bad "$n processes visible in /proc"

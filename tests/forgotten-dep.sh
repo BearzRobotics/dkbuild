@@ -4,6 +4,12 @@
 set -u
 cd "$(dirname "$0")/.."
 . tests/lib.sh
+if [ "${DKBUILD_BASE:-chimera}" = dkrescue ]; then
+    # Stage 1 builds on the DKRescue image, which has zlib.h whether or not a
+    # recipe declares it. Only stage 2 builds roots from declared packages (SPEC.md 7.3).
+    echo "skipped: stage 1 (the DKRescue base) cannot catch a forgotten dependency; stage 2 does"
+    exit 0
+fi
 T=tests/trees/forgotten-dep
 newtree "$T"
 mkdemo "$T/src"

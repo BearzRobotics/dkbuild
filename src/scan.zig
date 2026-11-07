@@ -174,6 +174,11 @@ pub fn scanTree(arena: Allocator, io: std.Io, root: []const u8) !Result {
         defer f.close(io);
         const info = (try parseElf(arena, FileSource{ .file = f, .io = io })) orelse continue;
         if (info.soname) |so| try addUnique(arena, &provides, try std.fmt.allocPrint(arena, "so:{s}", .{so}));
+        // musl's libc.so is the C library, the dynamic loader and the thing every
+        // program links as `libc.so`, but it has no SONAME. Provide the name the
+        // programs ask for.
+        if (info.soname == null and (std.mem.eql(u8, e.path, "usr/lib/libc.so") or std.mem.eql(u8, e.path, "lib/libc.so")))
+            try addUnique(arena, &provides, "so:libc.so");
         for (info.needed) |nd| try addUnique(arena, &needs, try std.fmt.allocPrint(arena, "so:{s}", .{nd}));
     }
 
