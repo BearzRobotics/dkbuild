@@ -1,0 +1,36 @@
+# Imported from Chimera Linux cports: work/cports/main/xz/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reviewed by hand: the file-removal loop was written as a shell loop.
+name = "xz"
+version = "5.8.4"
+release = 1
+summary = "XZ compression utilities"
+license = "0BSD"
+homepage = "https://tukaani.org/xz"
+patches = ["no-gettext.patch", "sanitize.patch"]
+hostdeps = ["automake", "libtool", "pkgconf"]
+options = ["bootstrap"]
+
+source = [
+    { url = "https://github.com/tukaani-project/xz/releases/download/v5.8.4/xz-5.8.4.tar.gz", sha256 = "0014c7886930454fe8bd4228665b51af55eeae560ea135c9c4cd33f55b2591d9" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xz/COPYING"
+rm -rf "$pkgdir/usr/share/doc"
+# Chimera ships its own grep/diff/less wrappers instead of xz's scripts.
+for tool in xzgrep xzfgrep xzegrep lzgrep lzfgrep lzegrep xzdiff lzdiff xzcmp lzcmp xzless xzmore lzless lzmore; do
+    rm -f "$pkgdir/usr/bin/$tool" "$pkgdir/usr/share/man/man1/$tool.1"
+done
+'''

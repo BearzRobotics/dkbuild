@@ -877,7 +877,8 @@ fn translateCall(arena: Allocator, code: []const u8, env: *const Env, pkgname: [
     }
     if (std.mem.eql(u8, method, "uninstall")) {
         if (w.len != 1 or call.kwargs.len != 0) return false;
-        try out.print(arena, "rm -f \"$pkgdir/{s}\"\n", .{std.mem.trim(u8, w[0], "/")});
+        // cbuild's uninstall removes a file or a whole directory.
+        try out.print(arena, "rm -rf \"$pkgdir/{s}\"\n", .{std.mem.trim(u8, w[0], "/")});
         return true;
     }
     return false;
@@ -1162,6 +1163,14 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
     const make_install_args = try listOf(&env, &consumed, arena, &notes, &lines_of, "make_install_args");
     const make_check_args = try listOf(&env, &consumed, arena, &notes, &lines_of, "make_check_args");
     const no_check = contains(options.items, "!check");
+    // cports: build_style_defaults of gnu_configure has configure_gen = autoreconf.
+    const configure_gen: []const []const u8 = if (env.contains("configure_gen"))
+        try listOf(&env, &consumed, arena, &notes, &lines_of, "configure_gen")
+    else
+        &.{ "autoreconf", "-if", "-W", "none" };
+    const use_env = if (env.get("make_use_env")) |v| (v == .boolean and v.boolean) else false;
+    try consumed.put(arena, "make_use_env", {});
+    const check_target = (try strOf(&env, &consumed, arena, "make_check_target")) orelse "check";
 
     var steps: [4]std.ArrayList(u8) = .{ .empty, .empty, .empty, .empty };
     const phase_names = [_][]const u8{ "configure", "build", "check", "install" };
@@ -1185,7 +1194,7 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
         if (replaces) |f| {
             try translateBody(arena, f, &env, name, &notes, out);
         } else if (style) |st| {
-            try styleStep(arena, out, st, @as(Phase, @enumFromInt(k)), cfg_args, make_build_args, make_install_args, make_check_args, no_check);
+            try styleStep(arena, out, st, @as(Phase, @enumFromInt(k)), cfg_args, make_build_args, make_install_args, make_check_args, check_target, use_env, configure_gen, no_check);
         }
         var post_buf: [32]u8 = undefined;
         const post = std.fmt.bufPrint(&post_buf, "post_{s}", .{ph}) catch unreachable;
@@ -1251,36 +1260,60 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
     return .{ .name = name, .toml = o.items, .notes = notes.items };
 }
 
-fn styleStep(arena: Allocator, out: *std.ArrayList(u8), style: []const u8, phase: Phase, cfg: []const []const u8, mk: []const []const u8, mi: []const []const u8, mc: []const []const u8, no_check: bool) Allocator.Error!void {
+fn styleStep(arena: Allocator, out: *std.ArrayList(u8), style: []const u8, phase: Phase, cfg: []const []const u8, mk: []const []const u8, mi: []const []const u8, mc: []const []const u8, check_target: []const u8, use_env: bool, gen: []const []const u8, no_check: bool) Allocator.Error!void {
     const eq = std.mem.eql;
     if (eq(u8, style, "gnu_configure")) switch (phase) {
-        .configure => try macroLine(arena, out, "%configure", cfg),
+        .configure => {
+            // cbuild runs `configure_gen` (default: autoreconf) before configure.
+            if (gen.len > 0) {
+                for (gen, 0..) |w, i| {
+                    if (i > 0) try out.append(arena, ' ');
+                    try out.appendSlice(arena, try shellWord(arena, w));
+                }
+                try out.append(arena, '\n');
+            }
+            try macroLine(arena, out, "%configure", cfg);
+        },
         .build => try macroLine(arena, out, "%make", mk),
         .check => if (!no_check) {
-            try out.appendSlice(arena, "%make check");
+            try out.print(arena, "%make {s}", .{check_target});
             for (mc) |a| try out.print(arena, " {s}", .{try shellWord(arena, a)});
             try out.append(arena, '\n');
         },
         .install => try macroLine(arena, out, "%make_install", mi),
     } else if (eq(u8, style, "configure")) switch (phase) {
         .configure => {
-            var args: std.ArrayList([]const u8) = .empty;
-            try args.append(arena, "--prefix=/usr");
-            try args.appendSlice(arena, cfg);
-            try macroLine(arena, out, "./configure", args.items);
+            // cbuild's `configure` style runs the script with exactly configure_args.
+            try macroLine(arena, out, "./configure", cfg);
         },
         .build => try macroLine(arena, out, "%make", mk),
         .check => if (!no_check) {
-            try out.appendSlice(arena, "%make check");
+            try out.print(arena, "%make {s}", .{check_target});
             for (mc) |a| try out.print(arena, " {s}", .{try shellWord(arena, a)});
             try out.append(arena, '\n');
         },
         .install => try macroLine(arena, out, "%make_install", mi),
     } else if (eq(u8, style, "makefile")) switch (phase) {
         .configure => {},
-        .build => try macroLine(arena, out, "%make", mk),
-        .check => if (!no_check and mc.len > 0) try macroLine(arena, out, "%make", mc),
-        .install => try macroLine(arena, out, "%make_install", mi),
+        // cbuild's makefile style (build_style/makefile.py): PREFIX=/usr, unless
+        // make_use_env, and STRIP=true PREFIX=/usr for the install.
+        .build => {
+            var args: std.ArrayList([]const u8) = .empty;
+            if (!use_env) try args.append(arena, "PREFIX=/usr");
+            try args.appendSlice(arena, mk);
+            try macroLine(arena, out, "%make", args.items);
+        },
+        .check => if (!no_check) {
+            try out.print(arena, "%make {s}", .{check_target});
+            for (mc) |a| try out.print(arena, " {s}", .{try shellWord(arena, a)});
+            try out.append(arena, '\n');
+        },
+        .install => {
+            var args: std.ArrayList([]const u8) = .empty;
+            try args.appendSlice(arena, &.{ "STRIP=true", "PREFIX=/usr" });
+            try args.appendSlice(arena, mi);
+            try macroLine(arena, out, "%make_install", args.items);
+        },
     } else if (eq(u8, style, "meson")) switch (phase) {
         .configure => try macroLine(arena, out, "%meson", cfg),
         .build => try out.appendSlice(arena, "%meson_build\n"),
@@ -1675,4 +1708,89 @@ test "cbuild mirror variables in source URLs are expanded, unknown ones are flag
     try std.testing.expectEqualStrings("https://download.kde.org/unstable/x", (try expandSites(a, "$(KDE_UNSTABLE_SITE)/x")).?);
     try std.testing.expect((try expandSites(a, "$(NOPE_SITE)/x")) == null);
     try std.testing.expect((try expandSites(a, "$(GNU_SITE")) == null);
+}
+
+test "uninstall removes directories, configure does not repeat --prefix, makefile check runs the target" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const c = try convert(a,
+        \\pkgname = "q"
+        \\pkgver = "1"
+        \\pkgrel = 0
+        \\build_style = "configure"
+        \\configure_args = ["--prefix=/usr", "--shared"]
+        \\pkgdesc = "q"
+        \\license = "MIT"
+        \\source = "https://x.org/q.tgz"
+        \\sha256 = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+        \\
+        \\def post_install(self):
+        \\    self.uninstall("usr/share/doc")
+        \\
+    , .{ .origin = "q" });
+    try std.testing.expect(std.mem.indexOf(u8, c.toml, "rm -rf \"$pkgdir/usr/share/doc\"") != null);
+    // cbuild's configure style adds nothing of its own to configure_args.
+    try std.testing.expect(std.mem.indexOf(u8, c.toml, "./configure \\\n    --prefix=/usr \\\n    --shared\n") != null);
+
+    const m = try convert(a,
+        \\pkgname = "mk"
+        \\pkgver = "1"
+        \\pkgrel = 0
+        \\build_style = "makefile"
+        \\make_check_args = ["-j1"]
+        \\make_check_target = "test"
+        \\pkgdesc = "mk"
+        \\license = "MIT"
+        \\source = "https://x.org/mk.tgz"
+        \\sha256 = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+        \\
+    , .{ .origin = "mk" });
+    try std.testing.expect(std.mem.indexOf(u8, m.toml, "%make test -j1") != null);
+}
+
+test "makefile style passes PREFIX like cbuild does, and not with make_use_env" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const head =
+        \\pkgname = "mk"
+        \\pkgver = "1"
+        \\pkgrel = 0
+        \\build_style = "makefile"
+        \\pkgdesc = "mk"
+        \\license = "MIT"
+        \\source = "https://x.org/mk.tgz"
+        \\sha256 = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+        \\
+    ;
+    const plain = try convert(a, head, .{ .origin = "mk" });
+    try std.testing.expect(std.mem.indexOf(u8, plain.toml, "%make \\\n    PREFIX=/usr\n") != null);
+    try std.testing.expect(std.mem.indexOf(u8, plain.toml, "%make_install \\\n    STRIP=true \\\n    PREFIX=/usr\n") != null);
+    const env = try convert(a, head ++ "make_use_env = True\n", .{ .origin = "mk" });
+    try std.testing.expect(std.mem.indexOf(u8, env.toml, "PREFIX=/usr\n") != null); // install still has it
+    try std.testing.expect(std.mem.indexOf(u8, env.toml, "build = '''\n%make\n'''") != null);
+}
+
+test "gnu_configure runs autoreconf unless configure_gen is empty or replaced" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const head =
+        \\pkgname = "g"
+        \\pkgver = "1"
+        \\pkgrel = 0
+        \\build_style = "gnu_configure"
+        \\pkgdesc = "g"
+        \\license = "MIT"
+        \\source = "https://x.org/g.tgz"
+        \\sha256 = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+        \\
+    ;
+    const dflt = try convert(a, head, .{ .origin = "g" });
+    try std.testing.expect(std.mem.indexOf(u8, dflt.toml, "setup = '''\nautoreconf -if -W none\n%configure\n") != null);
+    const none = try convert(a, head ++ "configure_gen = []\n", .{ .origin = "g" });
+    try std.testing.expect(std.mem.indexOf(u8, none.toml, "setup = '''\n%configure\n") != null);
+    const custom = try convert(a, head ++ "configure_gen = [\"./bootstrap\"]\n", .{ .origin = "g" });
+    try std.testing.expect(std.mem.indexOf(u8, custom.toml, "setup = '''\n./bootstrap\n%configure\n") != null);
 }

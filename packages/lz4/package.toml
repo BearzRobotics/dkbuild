@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: work/cports/main/lz4/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reviewed by hand: cbuild's init_configure only passed CFLAGS and LDFLAGS to make,
+# which the build environment already provides.
+name = "lz4"
+version = "1.10.0"
+release = 2
+summary = "LZ4 compression utilities"
+license = "BSD-2-Clause AND GPL-2.0-or-later"
+homepage = "https://lz4.github.io/lz4"
+hostdeps = ["pkgconf"]
+options = ["bootstrap"]
+
+source = [
+    { url = "https://github.com/lz4/lz4/archive/v1.10.0.tar.gz", sha256 = "537512904744b35e232912055ccf8ec66d768639ff3abe5788d90d792ec5f48b" },
+]
+
+build = '''
+%make
+'''
+check = '''
+%make check -j1
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr
+install -Dm644 lib/LICENSE "$pkgdir/usr/share/licenses/lz4/LICENSE"
+'''

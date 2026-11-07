@@ -16,6 +16,8 @@ const usage =
     \\  fetch [name]...            download sources into cache/sources and check them
     \\  pkg [-j N] [--key FILE] [--keep-root] [--force] <name>...
     \\                             build packages and the dependencies in the tree
+    \\  world [-j N] [--key FILE] [--keep-root] [--force]
+    \\                             build every recipe in the tree that is out of date
     \\  graph <name>...            print the build order for packages
     \\  import-cbuild [--out DIR] <template.py|dir>...
     \\                             convert Chimera cbuild templates into draft recipes
@@ -108,7 +110,8 @@ pub fn main(init: std.process.Init) !void {
         };
         report(problems.items);
         if (failed or problems.items.len > 0) std.process.exit(1);
-    } else if (std.mem.eql(u8, cmd, "pkg")) {
+    } else if (std.mem.eql(u8, cmd, "pkg") or std.mem.eql(u8, cmd, "world")) {
+        const is_world = std.mem.eql(u8, cmd, "world");
         var opts: build.Options = .{
             .root = root,
             .jobs = std.Thread.getCpuCount() catch 1,
@@ -131,10 +134,13 @@ pub fn main(init: std.process.Init) !void {
                 force = true;
             } else try names.append(arena, rest[k]);
         }
-        if (names.items.len == 0) return die(usage);
+        if (names.items.len == 0 and !is_world) return die(usage);
+        if (names.items.len > 0 and is_world) return die(usage);
         var t = try tree.load(arena, init.io, root, &problems);
         t.allow_external = true;
         opts.tree = t;
+        // `world` is every recipe in the tree; what is up to date is skipped below.
+        if (is_world) for (t.recipes) |wr| try names.append(arena, wr.name);
         const order = try t.order(arena, names.items, &problems);
         if (problems.items.len > 0) {
             report(problems.items);

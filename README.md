@@ -3,6 +3,8 @@
 The package builder for **FenrirOS**: TOML recipes in, signed **apk** packages and a repository out, built in an
 unprivileged namespace sandbox on musl and LLVM. Written in Zig. See `SPEC.md` for the design.
 
+**Full step-by-step guide, with troubleshooting: [`docs/setup-ubuntu.md`](docs/setup-ubuntu.md).**
+
 ## Quick start on Ubuntu
 
 FenrirOS does not exist yet, so the first host is Ubuntu (24.04 is the reference). One command installs the
@@ -43,7 +45,7 @@ mkdir -p ~/.config/dkbuild && openssl genrsa -out ~/.config/dkbuild/signing.rsa 
 openssl rsa -in ~/.config/dkbuild/signing.rsa -pubout -out keys/dkbuild-signing.rsa.pub
 
 # 3. Build a repository.
-./zig-out/bin/dkbuild pkg linux-headers musl zstd seatd lvm2
+./zig-out/bin/dkbuild world        # every recipe in packages/; or: dkbuild pkg zstd xz ...
 ls repo/x86_64/                # the .apk files and the signed Packages.adb
 ```
 
@@ -68,12 +70,13 @@ dependency chains; rebuilds; installing from the repository. They run once for e
 | `dkbuild check [name]...` | validates recipes |
 | `dkbuild graph <name>...` | prints the build order |
 | `dkbuild fetch [name]...` | downloads sources and checks their checksums |
+| `dkbuild world [--force]` | builds every recipe in the tree that is out of date |
 | `dkbuild pkg [--force] <name>...` | builds packages and their in-tree dependencies |
 | `dkbuild import-cbuild [--out DIR] <template.py\|dir>...` | converts Chimera cbuild templates into draft recipes (`imported/`) |
 
 ## Status
 
-Stage 1 (building on the DKRescue image) works for the nine recipes in `packages/`, four of them imported from Chimera's cports by `import-cbuild` (`pkgconf`, `attr`, `acl`, `libexpat`). Not yet built: the LLVM
+Stage 1 (building on the DKRescue image) works for the twelve recipes in `packages/`; seven of them were imported from Chimera's cports by `import-cbuild` (`pkgconf`, `attr`, `acl`, `libexpat`, `xz`, `lz4`, `zlib-ng-compat`). Not yet built: the LLVM
 toolchain and the rest of the base system (SPEC 9), stage 2 (roots filled from `repo/` only, which also catches
 forgotten dependencies), images and cross-compiling. The cbuild importer (SPEC 5.9) writes draft recipes with
 `TODO(cbuild)` markers; Solus `package.yml` import is planned.
