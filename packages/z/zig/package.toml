@@ -25,7 +25,8 @@ source = [
 
 setup = '''
 # --maxrss: the stage 3 step declares an 8 GB upper bound and zig refuses to start on
-# a machine with less (this one has 6 GB); its real use is lower. Needs about 5 GB free.
+# a machine that does not think it has that much (this one has 6 GB). --maxrss only
+# tells zig the budget; the real use is lower, but the step needs several GB free.
 # ZIG_TARGET_MCPU=baseline: a package built for the machine that builds it
 # would fail on older CPUs. The static LLVM keeps zig independent of llvm22 at
 # run time.
@@ -38,7 +39,7 @@ cmake -B build -G Ninja                                              \
     -DZIG_STATIC_LLVM=ON                                             \
     -DZIG_TARGET_MCPU=baseline                                       \
     -DZIG_VERSION=0.17.1 \
-    -DZIG_EXTRA_BUILD_ARGS='--maxrss;6000000000'
+    -DZIG_EXTRA_BUILD_ARGS='--maxrss;8000000000'
 '''
 build = '''
 nice -n 10 cmake --build build -j$jobs

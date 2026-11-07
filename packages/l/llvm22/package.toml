@@ -1,10 +1,11 @@
-# needed by: zig (its CMake accepts only LLVM 22.x; the system LLVM is 23)
+# needed by: zig (its CMake accepts only LLVM 22.x; the system LLVM is 23) and, planned,
+# rust 1.99 (built against LLVM 22 as Chimera does; LLVM 23 is untested for rustc)
 #
 # Libraries only, installed under /usr/lib/llvm22 so nothing on the system
 # finds them by accident. No tools but llvm-config, no runtimes, no shared
 # library: zig links these statically. All targets are built because zig's
 # bindings reference every target's initialiser (src/codegen/llvm/bindings.zig).
-# Retire this package when Zig supports the LLVM version in the tree.
+# Retire this package when both Zig and Rust support the LLVM version in the tree.
 name = "llvm22"
 version = "22.1.8"
 release = 1
