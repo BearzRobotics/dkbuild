@@ -211,7 +211,7 @@ source = [
 | `!cross` | Can't be cross-compiled; built only natively (6.3) |
 | `!strip` | Don't strip binaries |
 | `!lto` | Turn off link-time optimization (when it's on by default) |
-| `static` | Link programs statically (rescue-critical tools) |
+| `static` | Link programs statically (rescue-critical tools): adds `-static` to `LDFLAGS`. Never on a recipe that ships a shared library: `-shared -static` links without a warning and gives a library that crashes its users (zstd 1.5.7-r1 crashed lld that way) |
 | `bootstrap` | Part of the bootstrap set (9); built in stage 0 |
 | `jobs:N` | At most N parallel jobs for this recipe (LLVM: `jobs:2`) |
 

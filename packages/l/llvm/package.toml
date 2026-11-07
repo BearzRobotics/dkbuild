@@ -1,0 +1,111 @@
+# needed by: every package (the C/C++ toolchain: clang, lld, compiler-rt,
+# libc++, libunwind) and zig (once it is built from source), mesa (libLLVM).
+#
+# One build, as the DKRescue toolchain post does it: clang and lld first, then
+# the runtimes built by the clang just made, installed together so compiler-rt
+# lands in clang's resource directory. Everything links one shared libLLVM.
+name = "llvm"
+version = "23.1.5"
+release = 1
+summary = "LLVM libraries and tools"
+description = "LLVM with Clang, LLD, compiler-rt, libunwind, libc++abi and libc++ (X86 and AMDGPU targets)."
+license = "Apache-2.0 WITH LLVM-exception"
+homepage = "https://llvm.org"
+archs = ["x86_64"]
+# cmake, ninja and python3 come from the stage 0 image until they are recipes (SPEC 9.3, wave 3).
+builddeps = ["zlib-ng-compat-devel", "zstd-devel", "linux-headers"]
+# LLVM must not take over the machine that builds it: at most 4 compile jobs
+# (never more, whatever -j says), one link job (LLVM_PARALLEL_LINK_JOBS in
+# setup; a link of libLLVM or clang needs several GB) and a lowered CPU
+# priority. This also keeps an 8 GB machine from running out of memory.
+options = ["bootstrap", "jobs:4", "!check"]
+
+source = [
+    { url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-23.1.5/llvm-project-23.1.5.src.tar.xz", sha256 = "fb50b1eac93ddeb3aa8dab4cfe324dff74f4a9c2bdee6160c9e36188f8d06a6e" },
+]
+
+setup = '''
+# AMDGPU is for Mesa's radeonsi, which compiles shaders with LLVM at run time;
+# X86 is for llvmpipe and for compiling programs. FORCE_ON makes a missing
+# zlib or zstd an error instead of a quietly different build. The triple is the
+# target's, so `clang -print-target-triple` names this system.
+cmake -G Ninja -S llvm -B build                                     \
+    -DCMAKE_BUILD_TYPE=Release                                      \
+    -DCMAKE_INSTALL_PREFIX=/usr                                     \
+    -DCMAKE_C_COMPILER=clang                                        \
+    -DCMAKE_CXX_COMPILER=clang++                                    \
+    -DLLVM_HOST_TRIPLE="$target"                                    \
+    -DLLVM_DEFAULT_TARGET_TRIPLE="$target"                          \
+    -DLLVM_TARGETS_TO_BUILD="X86;AMDGPU"                            \
+    -DLLVM_ENABLE_PROJECTS="clang;lld"                              \
+    -DLLVM_ENABLE_RUNTIMES="compiler-rt;libunwind;libcxxabi;libcxx" \
+    -DLLVM_BUILD_LLVM_DYLIB=ON                                      \
+    -DLLVM_LINK_LLVM_DYLIB=ON                                       \
+    -DCLANG_LINK_CLANG_DYLIB=ON                                     \
+    -DLLVM_ENABLE_LIBCXX=ON                                         \
+    -DLLVM_INSTALL_BINUTILS_SYMLINKS=ON                             \
+    -DLLVM_ENABLE_ZLIB=FORCE_ON                                     \
+    -DLLVM_ENABLE_ZSTD=FORCE_ON                                     \
+    -DLLVM_ENABLE_LIBXML2=OFF                                       \
+    -DLLVM_ENABLE_LIBEDIT=OFF                                       \
+    -DLLVM_INCLUDE_TESTS=OFF                                        \
+    -DLLVM_INCLUDE_BENCHMARKS=OFF                                   \
+    -DLLVM_INCLUDE_EXAMPLES=OFF                                     \
+    -DLLVM_INCLUDE_DOCS=OFF                                         \
+    -DLLVM_PARALLEL_LINK_JOBS=1                                     \
+    -DCLANG_DEFAULT_LINKER=lld                                      \
+    -DCLANG_DEFAULT_RTLIB=compiler-rt                               \
+    -DCLANG_DEFAULT_UNWINDLIB=libunwind                             \
+    -DCLANG_DEFAULT_CXX_STDLIB=libc++                               \
+    -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=OFF                        \
+    -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON                            \
+    -DCOMPILER_RT_BUILD_BUILTINS=ON                                 \
+    -DCOMPILER_RT_BUILD_CRT=ON                                      \
+    -DCOMPILER_RT_BUILD_SANITIZERS=OFF                              \
+    -DCOMPILER_RT_BUILD_XRAY=OFF                                    \
+    -DCOMPILER_RT_BUILD_LIBFUZZER=OFF                               \
+    -DCOMPILER_RT_BUILD_PROFILE=OFF                                 \
+    -DCOMPILER_RT_BUILD_MEMPROF=OFF                                 \
+    -DCOMPILER_RT_BUILD_ORC=OFF                                     \
+    -DCOMPILER_RT_BUILD_GWP_ASAN=OFF                                \
+    -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF                             \
+    -DLIBUNWIND_USE_COMPILER_RT=ON                                  \
+    -DLIBCXXABI_USE_COMPILER_RT=ON                                  \
+    -DLIBCXXABI_USE_LLVM_UNWINDER=ON                                \
+    -DLIBCXXABI_HAS_CXA_THREAD_ATEXIT_IMPL=OFF                      \
+    -DLIBCXX_USE_COMPILER_RT=ON                                     \
+    -DLIBCXX_HAS_MUSL_LIBC=ON                                       \
+    -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=ON                           \
+    -DLIBCXX_STATICALLY_LINK_ABI_IN_SHARED_LIBRARY=OFF
+'''
+build = '''
+nice -n 10 ninja -C build -j$jobs
+'''
+install = '''
+DESTDIR=$pkgdir cmake --install build --strip
+install -Dm644 llvm/LICENSE.TXT "$pkgdir/usr/share/licenses/llvm/LICENSE.TXT"
+'''
+
+# What is left in `llvm` after these: libLLVM, libLTO, libRemarks and the
+# llvm-* tools. The runtimes need no tools, so libc++ and libunwind install
+# without clang. compiler-rt sits in clang's resource directory and travels
+# with clang, which cannot link without it.
+[subpackages.clang]
+summary = "C and C++ compiler"
+paths   = ["/usr/bin/clang*", "/usr/lib/libclang*", "/usr/lib/clang", "/usr/libexec", "/usr/share/clang", "/usr/share/man/man1/clang.1"]
+
+[subpackages.lld]
+summary = "LLVM linker"
+paths   = ["/usr/bin/lld*", "/usr/bin/ld.lld", "/usr/bin/ld64.lld", "/usr/bin/wasm-ld", "/usr/lib/liblld*"]
+
+[subpackages.libcxx]
+summary = "LLVM C++ standard library and ABI library"
+paths   = ["/usr/lib/libc++.so.*", "/usr/lib/libc++abi.so.*"]
+
+[subpackages.libunwind]
+summary = "LLVM stack unwinder"
+paths   = ["/usr/lib/libunwind.so.*"]
+
+[subpackages.libcxx-devel]
+summary = "libc++ and libunwind headers and unversioned libraries"
+paths   = ["/usr/include/c++", "/usr/include/unwind.h", "/usr/include/__unwind_*.h", "/usr/include/libunwind.h", "/usr/include/mach-o", "/usr/lib/libc++.so", "/usr/lib/libc++abi.so", "/usr/lib/libunwind.so", "/usr/share/libc++"]

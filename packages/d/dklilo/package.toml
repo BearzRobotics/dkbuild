@@ -7,7 +7,7 @@ license = "MIT"
 homepage = "https://github.com/BearzRobotics/dklilo"
 archs = ["x86_64"]
 hostdeps = ["zig"]
-options = ["static", "!check"]
+options = ["!check"]  # zig builds static executables itself
 
 source = [
     { url = "https://github.com/BearzRobotics/dklilo/releases/download/v0.0.3/dklilo-v0.0.3.tar.gz", sha256 = "266de21b0fd2142fd7af58f4cb8b143259bc497b2c71168448cdeddf519dc7a0" },
