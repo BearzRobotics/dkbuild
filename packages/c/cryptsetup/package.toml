@@ -2,25 +2,26 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 name = "cryptsetup"
-version = "2.8.6"
+version = "2.8.8"
 release = 1
 summary = "Open source Linux disk encryption setup"
 license = "GPL-2.0-or-later"
 homepage = "https://gitlab.com/cryptsetup/cryptsetup"
-patches = ["tests.patch"]
 hostdeps = ["automake", "bash", "gettext-devel", "libtool", "pkgconf"]
 builddeps = ["json-c-devel", "json-c-devel-static", "libatomic-chimera-devel", "libatomic-chimera-devel-static", "libunwind-devel", "libunwind-devel-static", "linux-headers", "lvm2-devel", "lvm2-devel-static", "musl-devel", "musl-devel-static", "openssl3-devel", "openssl3-devel-static", "popt-devel", "popt-devel-static", "udev-devel", "udev-devel-static", "util-linux-blkid-devel", "util-linux-blkid-devel-static", "util-linux-uuid-devel", "util-linux-uuid-devel-static"]
 checkdeps = ["procps", "xz"]
 
 source = [
-    { url = "https://www.kernel.org/pub/linux/utils/cryptsetup/v2.8/cryptsetup-2.8.6.tar.xz", sha256 = "8004265fd993885d08f7b633dbe056851de1a210307613a4ebddc743fccefe5a" },
+    { url = "https://www.kernel.org/pub/linux/utils/cryptsetup/v2.8/cryptsetup-2.8.8.tar.gz", sha256 = "4cdc4f46a6d41b856a36392a38fa302bab2a1b530e32d9fc010eb3a704f3e984" },
 ]
 
 setup = '''
 autoreconf -if -W none
 %configure \
     --with-crypto_backend=openssl \
-    --enable-static-cryptsetup \
+    --sbindir=/usr/sbin \
+    --disable-static \
+    --disable-external-tokens \
     --disable-ssh-token \
     --disable-asciidoc
 '''

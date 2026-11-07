@@ -2,8 +2,8 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Reviewed: no TODOs; dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 name = "readline"
-version = "8.3.001"
-release = 2
+version = "8.3"
+release = 1
 summary = "GNU Readline library"
 license = "GPL-3.0-or-later"
 homepage = "https://tiswww.cwru.edu/php/chet/readline/rltop.html"
@@ -12,7 +12,7 @@ hostdeps = ["pkgconf"]
 builddeps = ["ncurses-devel"]
 
 source = [
-    { url = "https://git.savannah.gnu.org/cgit/readline.git/snapshot/readline-15970c431517a046099d8294c91d778b1da9b29d.tar.gz", sha256 = "cbf75f73fd1bbdfd75b3988c401d6769aad6057ac79241127a7b44a79d89ae0c" },
+    { url = "https://ftpmirror.gnu.org/gnu/readline/readline-8.3.tar.gz", sha256 = "fe5383204467828cd495ee8d1d3c037a7eba1389c22bc6a041f627976f9061cc" },
 ]
 
 setup = '''

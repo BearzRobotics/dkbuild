@@ -16,7 +16,7 @@ const usage =
     \\  fetch [name]...            download sources into cache/sources and check them
     \\  pkg [-j N] [--key FILE] [--keep-root] [--no-check] [--force] <name>...
     \\                             build packages and the dependencies in the tree
-    \\  world [-j N] [--key FILE] [--keep-root] [--no-check] [--force]
+    \\  world [-j N] [--key FILE] [--keep-root] [--no-check] [--keep-going] [--force]
     \\                             build every recipe in the tree that is out of date
     \\  graph <name>...            print the build order for packages
     \\  import-cbuild [--out DIR] <template.py|dir>...
@@ -120,6 +120,7 @@ pub fn main(init: std.process.Init) !void {
             opts.key = try std.fs.path.join(arena, &.{ home, ".config", "dkbuild", "signing.rsa" });
         var names: std.ArrayList([]const u8) = .empty;
         var force = false;
+        var keep_going = false;
         var k: usize = 0;
         while (k < rest.len) : (k += 1) {
             if (std.mem.eql(u8, rest[k], "-j") and k + 1 < rest.len) {
@@ -130,6 +131,8 @@ pub fn main(init: std.process.Init) !void {
                 opts.key = rest[k];
             } else if (std.mem.eql(u8, rest[k], "--keep-root")) {
                 opts.keep_root = true;
+            } else if (std.mem.eql(u8, rest[k], "--keep-going")) {
+                keep_going = true;
             } else if (std.mem.eql(u8, rest[k], "--no-check")) {
                 opts.no_check = true;
             } else if (std.mem.eql(u8, rest[k], "--force")) {
@@ -151,8 +154,25 @@ pub fn main(init: std.process.Init) !void {
         // Rebuild decisions (SPEC.md 7.2).
         const own = try arena.alloc(inputs.Hex, t.recipes.len);
         for (t.recipes, own) |r, *h| h.* = try inputs.ownHash(arena, init.io, root, r.name, opts.arch);
+        // --keep-going: recipes that failed, and (transitively) the ones skipped for them.
+        const bad = try arena.alloc(bool, t.recipes.len);
+        @memset(bad, false);
+        var failed_names: std.ArrayList([]const u8) = .empty;
+        var skipped_names: std.ArrayList([]const u8) = .empty;
         for (order) |idx| {
             const r = t.recipes[idx];
+            var blocked = false;
+            for ([_][]const []const u8{ r.hostdeps, r.builddeps }) |dl| {
+                for (dl) |d| if (t.provider(d)) |pi| {
+                    if (bad[pi]) blocked = true;
+                };
+            }
+            if (blocked) {
+                bad[idx] = true;
+                try skipped_names.append(arena, r.name);
+                std.debug.print("==> {s}: skipped, a package it needs failed\n", .{r.name});
+                continue;
+            }
             const ver = try std.fmt.allocPrint(arena, "{s}-r{d}", .{ r.version, r.release });
             const deps = try inputs.depsHash(arena, t, own, idx);
             const rec_path = try std.fmt.allocPrint(arena, "{s}/repo/{s}/{s}.dkhash", .{ root, opts.arch, r.name });
@@ -174,12 +194,23 @@ pub fn main(init: std.process.Init) !void {
             }
             build.buildOne(arena, init.io, r, opts) catch |err| {
                 std.debug.print("{s}: {s}\n", .{ r.name, @errorName(err) });
-                std.process.exit(1);
+                if (!keep_going) std.process.exit(1);
+                bad[idx] = true;
+                try failed_names.append(arena, r.name);
+                continue;
             };
             const text = try inputs.format(arena, .{ .version = ver, .inputs = own[idx], .deps = deps });
             std.Io.Dir.cwd().writeFile(init.io, .{ .sub_path = rec_path, .data = text }) catch |err| {
                 std.debug.print("warning: cannot write {s}: {s}\n", .{ rec_path, @errorName(err) });
             };
+        }
+        if (failed_names.items.len > 0 or skipped_names.items.len > 0) {
+            std.debug.print("\n{d} failed:", .{failed_names.items.len});
+            for (failed_names.items) |n| std.debug.print(" {s}", .{n});
+            std.debug.print("\n{d} skipped:", .{skipped_names.items.len});
+            for (skipped_names.items) |n| std.debug.print(" {s}", .{n});
+            std.debug.print("\n", .{});
+            std.process.exit(1);
         }
     } else if (std.mem.eql(u8, cmd, "graph")) {
         if (rest.len == 0) return die(usage);

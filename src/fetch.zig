@@ -69,7 +69,7 @@ pub fn fetchOne(arena: Allocator, io: std.Io, cache: []const u8, src: recipe.Sou
             };
             const tmp = try std.fmt.allocPrint(arena, "{s}.part", .{final});
             const res = std.process.run(arena, io, .{
-                .argv = &.{ "curl", "--fail", "--location", "--silent", "--show-error", "--output", tmp, t.url },
+                .argv = &.{ "curl", "--fail", "--location", "--silent", "--show-error", "--retry", "4", "--retry-delay", "3", "--retry-all-errors", "--output", tmp, t.url },
             }) catch |err| {
                 message.* = try std.fmt.allocPrint(arena, "cannot run curl: {s}", .{@errorName(err)});
                 return error.DownloadFailed;

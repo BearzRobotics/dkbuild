@@ -16,10 +16,10 @@ source = [
 ]
 
 setup = '''
-python configure.py --bootstrap
+python3 configure.py --bootstrap
 '''
 build = '''
-python configure.py
+python3 configure.py
 '''
 install = '''
 install -Dm755 ninja "$pkgdir/usr/bin/ninja"
