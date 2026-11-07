@@ -18,8 +18,8 @@ source = [
 
 setup = '''
 %meson \
-    -Dintrospection=enabled \
-    -Dsysprof=enabled
+    -Dintrospection=disabled \
+    -Dsysprof=disabled
 '''
 build = '''
 %meson_build

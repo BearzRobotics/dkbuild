@@ -18,10 +18,11 @@ source = [
 setup = '''
 %configure --disable-static --disable-kill --enable-watch8bit
 '''
+# dash's echo prints "-e"; procps's generated sources need bash's.
 build = '''
-%make
+make -j$jobs SHELL=/usr/bin/bash CC="$CC"
 '''
 install = '''
-%make_install
+make SHELL=/usr/bin/bash DESTDIR=$pkgdir install
 install -Dm644 $pkgfiles/sysctl.conf "$pkgdir/etc/sysctl.conf"
 '''

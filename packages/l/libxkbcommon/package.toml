@@ -17,7 +17,7 @@ source = [
 
 setup = '''
 %meson \
-    -Denable-x11=true \
+    -Denable-x11=false \
     -Denable-wayland=true \
     -Denable-xkbregistry=true \
     -Denable-docs=false

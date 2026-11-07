@@ -86,6 +86,12 @@ pub fn covers(pattern: []const u8, path: []const u8) bool {
     }
 }
 
+/// True when the subpackage claims `path` only through a pattern ending in ".so".
+fn endsWithSoPattern(sp: recipe.Subpackage, path: []const u8) bool {
+    for (sp.paths) |pat| if (covers(pat, path)) return std.mem.endsWith(u8, pat, ".so");
+    return false;
+}
+
 /// Index of the first subpackage that claims `path`.
 fn owner(subs: []const recipe.Subpackage, path: []const u8) ?usize {
     for (subs, 0..) |sp, i| {
@@ -103,20 +109,29 @@ pub fn run(arena: Allocator, io: std.Io, destdir: []const u8, out: []const u8, s
     defer d.close(io);
 
     var files: std.ArrayList([]const u8) = .empty;
+    // Regular files (not symlinks), same order as `files`: see the "*.so" rule below.
+    var regular: std.ArrayList(bool) = .empty;
     var dirs: std.ArrayList([]const u8) = .empty;
     {
         var w = try d.walk(arena);
         defer w.deinit();
         while (try w.next(io)) |e| {
             const copy = try arena.dupe(u8, e.path);
-            if (e.kind == .directory) try dirs.append(arena, copy) else try files.append(arena, copy);
+            if (e.kind == .directory) try dirs.append(arena, copy) else {
+                try files.append(arena, copy);
+                try regular.append(arena, e.kind == .file);
+            }
         }
     }
 
     const counts = try arena.alloc(usize, subs.len);
     @memset(counts, 0);
-    for (files.items) |f| {
+    for (files.items, regular.items) |f, is_regular| {
         const idx = owner(subs, f) orelse continue;
+        // A "*.so" pattern means the development symlink (libfoo.so -> libfoo.so.1).
+        // A real file with that name is a library packages load at run time
+        // (gettext's libgettextlib-0.24.so), so it stays in the main package.
+        if (is_regular and std.mem.endsWith(u8, f, ".so") and endsWithSoPattern(subs[idx], f)) continue;
         const dest = try std.fs.path.join(arena, &.{ out, subs[idx].name, f });
         if (std.fs.path.dirname(dest)) |parent| try Dir.cwd().createDirPath(io, parent);
         try d.rename(f, Dir.cwd(), dest, io);
