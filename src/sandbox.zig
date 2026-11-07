@@ -85,6 +85,16 @@ pub fn run(arena: Allocator, io: std.Io, spec: Spec, log: *std.ArrayList(u8)) Er
     };
 }
 
+/// Makes a finished sandbox's directories removable. The kernel creates the
+/// overlay's `work/work` with mode 000 and a recursive delete cannot enter it,
+/// which would leave the whole writable layer behind after every build. Call
+/// this with the `work` directory that was in the `Spec`, then delete the tree.
+pub fn makeRemovable(io: std.Io, work: []const u8) void {
+    var buf: [std.fs.max_path_bytes]u8 = undefined;
+    const inner = std.fmt.bufPrint(&buf, "{s}/work", .{work}) catch return;
+    std.Io.Dir.cwd().setFilePermissions(io, inner, .fromMode(0o700), .{}) catch {};
+}
+
 // ---- the child --------------------------------------------------------------
 //
 // Everything below runs in the re-executed process, between the first system

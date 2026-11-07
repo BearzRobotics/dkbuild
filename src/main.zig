@@ -13,7 +13,7 @@ const usage =
     \\
     \\  check [name|file.toml]...   validate recipes (all of them if none given)
     \\  fetch [name]...            download sources into cache/sources and check them
-    \\  pkg [-j N] [--base chimera|dkrescue] [--key FILE] [--keep-root] [--force] <name>...
+    \\  pkg [-j N] [--key FILE] [--keep-root] [--force] <name>...
     \\                             build packages and the dependencies in the tree
     \\  graph <name>...            print the build order for packages
     \\  doctor                     check this machine can run dkbuild; print the fixes
@@ -64,7 +64,7 @@ pub fn main(init: std.process.Init) !void {
         if (rest.len == 0 or names.items.len > 0) {
             var t = try tree.load(arena, init.io, root, &problems);
             // Until the tree builds its own toolchain (SPEC.md 9), dependencies
-            // it doesn't provide come from the Chimera bootstrap repositories.
+            // it doesn't provide are assumed to be in the base image (SPEC.md 7.3).
             t.allow_external = true;
             checked += if (rest.len == 0) t.recipes.len else names.items.len;
             for (names.items) |n| {
@@ -111,17 +111,11 @@ pub fn main(init: std.process.Init) !void {
         };
         if (init.environ_map.get("HOME")) |home|
             opts.key = try std.fs.path.join(arena, &.{ home, ".config", "dkbuild", "signing.rsa" });
-        // DKBUILD_BASE=dkrescue selects the DKRescue root for every build (the
-        // test scripts use it); --base overrides.
-        if (init.environ_map.get("DKBUILD_BASE")) |b| opts.base = std.meta.stringToEnum(build.Base, b) orelse return die(usage);
         var names: std.ArrayList([]const u8) = .empty;
         var force = false;
         var k: usize = 0;
         while (k < rest.len) : (k += 1) {
-            if (std.mem.eql(u8, rest[k], "--base") and k + 1 < rest.len) {
-                k += 1;
-                opts.base = std.meta.stringToEnum(build.Base, rest[k]) orelse return die(usage);
-            } else if (std.mem.eql(u8, rest[k], "-j") and k + 1 < rest.len) {
+            if (std.mem.eql(u8, rest[k], "-j") and k + 1 < rest.len) {
                 k += 1;
                 opts.jobs = std.fmt.parseInt(usize, rest[k], 10) catch return die(usage);
             } else if (std.mem.eql(u8, rest[k], "--key") and k + 1 < rest.len) {

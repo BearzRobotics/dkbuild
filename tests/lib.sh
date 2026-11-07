@@ -11,6 +11,7 @@ sbrun() {
     ./zig-out/bin/dkbuild sandbox-child --lower "$PWD/rootfs/dkrescue" --upper "$_sb/u" --work "$_sb/w" \
         --merged "$_sb/m" --env PATH=/usr/bin:/bin --env HOME=/root "$@"
     _rc=$?
+    chmod 700 "$_sb/w/work" 2>/dev/null   # the overlay makes it mode 000
     rm -rf "$_sb"
     return $_rc
 }

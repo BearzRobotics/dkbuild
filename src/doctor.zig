@@ -26,7 +26,6 @@ pub const tools = [_]Tool{
     .{ .name = "unshare", .apt = "util-linux", .why = "bootstrap-root checks the root runs in a user namespace" },
     .{ .name = "openssl", .apt = "openssl", .why = "makes the signing key for the repository", .required = false },
     .{ .name = "git", .apt = "git", .why = "recipes whose source is a git repository", .required = false },
-    .{ .name = "bwrap", .apt = "bubblewrap", .why = "only the old Chimera prototype base (--base chimera)", .required = false },
 };
 
 /// The one command that installs every tool above that is missing, for a person to run.

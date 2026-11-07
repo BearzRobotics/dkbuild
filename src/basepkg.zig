@@ -66,7 +66,10 @@ pub fn ensure(arena: Allocator, io: std.Io, root: []const u8, dkr: []const u8, f
         Dir.cwd().createDirPath(io, rel) catch return error.BasePackageFailed;
         sb[k] = Dir.cwd().realPathFileAlloc(io, rel, arena) catch return error.BasePackageFailed;
     }
-    defer Dir.cwd().deleteTree(io, sb_rel) catch {};
+    defer {
+        sandbox.makeRemovable(io, sb[1]);
+        Dir.cwd().deleteTree(io, sb_rel) catch {};
+    }
 
     const argv = [_][]const u8{
         "/usr/bin/apk",     "mkpkg",

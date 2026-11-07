@@ -100,8 +100,8 @@ test "macros expand per target" {
     var st = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer st.deinit();
     const a = st.allocator();
-    const x86 = try testProfile(a, "x86_64", "x86_64-chimera-linux-musl", "x86-64", "x86_64-linux-musl", "baseline", "x86");
-    const arm = try testProfile(a, "aarch64", "aarch64-chimera-linux-musl", "armv8-a", "aarch64-linux-musl", "baseline", "arm64");
+    const x86 = try testProfile(a, "x86_64", "x86_64-fenriros-linux-musl", "x86-64", "x86_64-linux-musl", "baseline", "x86");
+    const arm = try testProfile(a, "aarch64", "aarch64-fenriros-linux-musl", "armv8-a", "aarch64-linux-musl", "baseline", "arm64");
     var bad: []const u8 = "";
 
     const native = try expand(a, .{ .target = x86, .host = x86 }, "%configure\n%make\n%make_install\n%kernel_make", &bad);
@@ -114,7 +114,7 @@ test "macros expand per target" {
 
     const cross = try expand(a, .{ .target = arm, .host = x86, .static = true }, "%configure", &bad);
     try std.testing.expectEqualStrings(
-        "./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --build=x86_64-chimera-linux-musl --host=aarch64-chimera-linux-musl",
+        "./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --build=x86_64-fenriros-linux-musl --host=aarch64-fenriros-linux-musl",
         cross,
     );
 
@@ -129,7 +129,7 @@ test "longest macro name wins, %% and stray % are kept, unknown fails" {
     var st = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer st.deinit();
     const a = st.allocator();
-    const x86 = try testProfile(a, "x86_64", "x86_64-chimera-linux-musl", "x86-64", "x86_64-linux-musl", "baseline", "x86");
+    const x86 = try testProfile(a, "x86_64", "x86_64-fenriros-linux-musl", "x86-64", "x86_64-linux-musl", "baseline", "x86");
     var bad: []const u8 = "";
     const ctx: Context = .{ .target = x86, .host = x86 };
     try std.testing.expectEqualStrings("make DESTDIR=$pkgdir install", try expand(a, ctx, "%make_install", &bad));

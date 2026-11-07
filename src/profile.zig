@@ -124,7 +124,7 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
 
 const aarch64_src =
     \\arch = "aarch64"
-    \\triple = "aarch64-chimera-linux-musl"
+    \\triple = "aarch64-fenriros-linux-musl"
     \\cpu = "armv8-a"
     \\zig_target = "aarch64-linux-musl"
     \\zig_cpu = "baseline"
@@ -141,7 +141,7 @@ test "profile parses and generates cross files" {
     try std.testing.expectEqualStrings("arm64", p.kernel_arch);
 
     const meson = try p.mesonCross(a);
-    try std.testing.expect(std.mem.indexOf(u8, meson, "--target=aarch64-chimera-linux-musl") != null);
+    try std.testing.expect(std.mem.indexOf(u8, meson, "--target=aarch64-fenriros-linux-musl") != null);
     try std.testing.expect(std.mem.indexOf(u8, meson, "cpu_family = 'aarch64'") != null);
     try std.testing.expect(std.mem.indexOf(u8, meson, "-march=armv8-a") != null);
 
@@ -162,7 +162,7 @@ test "profile rejects unknown keys and mismatched triples" {
     var d: Diagnostic = .{};
     try std.testing.expectError(error.InvalidProfile, parse(a, aarch64_src ++ "boot = \"x\"\n", &d));
     try std.testing.expectEqualStrings("unknown key 'boot'", d.message);
-    var bad_src = try std.mem.replaceOwned(u8, a, aarch64_src, "aarch64-chimera-linux-musl", "x86_64-chimera-linux-musl");
+    var bad_src = try std.mem.replaceOwned(u8, a, aarch64_src, "aarch64-fenriros-linux-musl", "x86_64-fenriros-linux-musl");
     bad_src = bad_src;
     try std.testing.expectError(error.InvalidProfile, parse(a, bad_src, &d));
 }
@@ -173,9 +173,9 @@ test "shipped profiles generate correct files for all three targets" {
     const a = st.allocator();
     const Case = struct { src: []const u8, arch: []const u8, triple: []const u8, cpu: []const u8, kernel: []const u8 };
     const cases = [_]Case{
-        .{ .src = @embedFile("profile_x86_64"), .arch = "x86_64", .triple = "x86_64-chimera-linux-musl", .cpu = "x86-64", .kernel = "x86" },
-        .{ .src = @embedFile("profile_aarch64"), .arch = "aarch64", .triple = "aarch64-chimera-linux-musl", .cpu = "armv8-a", .kernel = "arm64" },
-        .{ .src = @embedFile("profile_riscv64"), .arch = "riscv64", .triple = "riscv64-chimera-linux-musl", .cpu = "rv64gc", .kernel = "riscv" },
+        .{ .src = @embedFile("profile_x86_64"), .arch = "x86_64", .triple = "x86_64-fenriros-linux-musl", .cpu = "x86-64", .kernel = "x86" },
+        .{ .src = @embedFile("profile_aarch64"), .arch = "aarch64", .triple = "aarch64-fenriros-linux-musl", .cpu = "armv8-a", .kernel = "arm64" },
+        .{ .src = @embedFile("profile_riscv64"), .arch = "riscv64", .triple = "riscv64-fenriros-linux-musl", .cpu = "rv64gc", .kernel = "riscv" },
     };
     for (cases) |c| {
         var d: Diagnostic = .{};

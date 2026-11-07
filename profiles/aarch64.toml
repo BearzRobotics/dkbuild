@@ -1,5 +1,5 @@
 arch = "aarch64"
-triple = "aarch64-chimera-linux-musl"
+triple = "aarch64-fenriros-linux-musl"
 cpu = "armv8-a"
 zig_target = "aarch64-linux-musl"
 zig_cpu = "baseline"

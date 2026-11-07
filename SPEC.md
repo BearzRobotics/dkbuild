@@ -104,9 +104,6 @@ sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 echo 'kernel.apparmor_restrict_unprivileged_userns = 0' | sudo tee /etc/sysctl.d/60-dkbuild.conf
 ```
 
-`bubblewrap` is needed only for the old Chimera prototype base
-(`--base chimera`), which goes away once the DKRescue base builds the tree.
-
 ## 4. Stack
 
 | Layer | Choice | Notes |
@@ -395,18 +392,17 @@ architecture-specific so recipes don't have to:
 
 | Field | x86_64 | aarch64 | riscv64 |
 |---|---|---|---|
-| LLVM triple | `x86_64-chimera-linux-musl` | `aarch64-chimera-linux-musl` | `riscv64-chimera-linux-musl` |
+| LLVM triple | `x86_64-fenriros-linux-musl` | `aarch64-fenriros-linux-musl` | `riscv64-fenriros-linux-musl` |
 | Baseline CPU | `x86-64` | `armv8-a` | `rv64gc` |
 | Zig target and CPU | `x86_64-linux-musl`, `baseline` | `aarch64-linux-musl`, `baseline` | `riscv64-linux-musl`, `baseline_rv64` |
 | Kernel `ARCH` | `x86` | `arm64` | `riscv` |
 | Boot | **OPEN** (dklilo, when it exists) | **OPEN** (UEFI) | **OPEN** (UEFI or OpenSBI) |
 
-The vendor field is `chimera` in the profiles today, left over from the
-prototype that built in Chimera's bootstrap root, whose compiler looks for its
-runtime under `x86_64-chimera-linux-musl`. With the DKRescue image as stage 0
-(9.2) that constraint probably no longer applies and the vendor can be
-`fenriros` from the start (**OPEN**, 9.2). The vendor never changes the CPU or
-ABI.
+The vendor field is `fenriros`. Nothing depends on it: DKRescue's clang builds
+and runs programs with any vendor (tested, 9.2), and the target's runtime is
+found in LLVM's plain layout. (The Chimera prototype this replaces needed its
+own `chimera` vendor, because Chimera's compiler looks for its runtime under
+`<arch>-chimera-linux-musl`.)
 
 From a profile, dkbuild generates the Meson cross file, the CMake
 toolchain file and the `configure` `--host` value for a cross build.
@@ -543,10 +539,8 @@ Two kinds of build root exist, matching the stages of 9.2:
   dependencies and nothing else. This is where "a forgotten dependency fails
   the build" (section 1) is enforced.
 
-There is no Chimera repository in either. (The first prototype built in
-Chimera's bootstrap root; its `/etc/apk/repositories` tagged `repo/` as `@dk`
-so a Chimera package could not stand in for an in-tree one. With `repo/` the
-only source that tag is unnecessary.)
+There is no other distribution's repository in either; `repo/` is the only
+source of packages.
 
 ## 8. Images
 
@@ -674,18 +668,14 @@ ISO is built without `home/builder` and `srv/dkbuild`.
 
 After stage 2, nothing in the tree depends on DKRescue.
 
-**The vendor field.** The earlier plan kept the `chimera` vendor in the
-profiles' triples through stage 1 because Chimera's toolchain looks for its
-compiler runtime under `<arch>-chimera-linux-musl`. DKRescue's LLVM installs
-its runtime in the plain layout (`usr/lib/clang/23/lib/linux/`,
-`libclang_rt.builtins-x86_64.a`), so the constraint does not apply. **Tested**
-(clang 23.1.4 from the image, unprivileged user namespace): a C program built
-with `--target=x86_64-fenriros-linux-musl`, with `x86_64-chimera-linux-musl`
-and with `x86_64-dkrescue-linux-musl` (the image's own default) links with
-lld and runs, dynamically and with `-static`. The profiles can therefore say
-`fenriros` once builds move to the DKRescue root; the `chimera` triples stay
-only while the Chimera prototype path still exists, and `profiles/bootstrap/`
-is not needed.
+**The vendor field.** The profiles' triples say `fenriros` from the start.
+DKRescue's LLVM installs its runtime in the plain layout
+(`usr/lib/clang/23/lib/linux/`, `libclang_rt.builtins-x86_64.a`), not under a
+per-triple directory, so the vendor does not matter. **Tested** (clang 23.1.4
+from the image, unprivileged user namespace): a C program built with
+`--target=x86_64-fenriros-linux-musl`, with `x86_64-chimera-linux-musl` and
+with `x86_64-dkrescue-linux-musl` (the image's own default) links with lld and
+runs, dynamically and with `-static`. `profiles/bootstrap/` is not needed.
 
 ### 9.3 Build order
 
@@ -708,22 +698,16 @@ The order inside a wave is dkbuild's dependency order, not this table's.
 
 Found by reading the DKRescue posts against what exists:
 
-1. **Stage 0 and stage 2 build roots:** `build.zig` hard-codes Chimera's
-   package names (`base-bootstrap`, `clang`, `gmake`, `chimerautils-extra`)
-   and Chimera's repositories. For stage 1 it must instead mount the DKRescue
-   root read-only under a writable layer (7.3), and for stage 2 populate the
-   root from `base-devel` and `repo/` only, with `/etc/apk/repositories`
-   listing `repo/` alone. **Stage 1's lower layer is an OPEN design point:**
-   an overlay mount inside the user namespace (needs `overlayfs` in the
-   DKRescue kernel; unprivileged overlay mounts since Linux 5.11), or a
-   read-only bind mount plus a writable `$pkgdir`/`$srcdir`/`/tmp`. The second
-   is simpler and enough if a build never writes outside those.
-2. **Names across stages:** the existing recipes say `gsed` because Chimera's
-   `sed` is BSD; DKRescue's `sed` is GNU, as FenrirOS's will be. With the
-   DKRescue base this item shrinks: recipes should say `sed`, and the
-   `gsed` workarounds in `linux-headers` and `lvm2` go away. If a name
-   still differs between stages, it needs a `provides` key in recipes or a
-   per-stage name map. **OPEN.**
+1. **Stage 2 build roots.** Stage 1 is implemented: the DKRescue root is the
+   lower layer of an overlay mounted inside the user namespace (7.1, 7.3; it
+   works unprivileged on Linux 5.11 and newer, and `dkbuild doctor` checks
+   it). Stage 2 must populate the root from `base-devel` and `repo/` only, with
+   `/etc/apk/repositories` listing `repo/` alone.
+2. **Names across stages:** the recipes now say `sed`, the name in both
+   DKRescue and FenrirOS (Chimera's was `gsed`, because its `sed` is BSD), and
+   the `gsed` workarounds in `linux-headers` and `lvm2` are gone. If a build
+   tool ever has different names in stage 1 and stage 2, a recipe needs a
+   `provides` key or a per-stage name map. **OPEN**, but no recipe needs it.
 3. **Zig dependency fetch** for `dkde-console`: `dkbuild fetch` runs
    `zig fetch` while the network is allowed, and the build uses `--system`
    offline (the `zig_build` macro already passes it). Scoped to libghostty-vt
@@ -817,10 +801,8 @@ keys/             public signing keys (private keys never in the repository)
   bad checksums), macro expansion for each target,
   the generated cross and toolchain files, subpackage splitting, and the
   ELF and pkg-config scans against fixture files.
-- **Both bases:** `tests/run-all.sh` runs the end-to-end scripts once for each
-  build base present (`rootfs/dkrescue`, `rootfs/chimera`). `forgotten-dep` is
-  skipped on the DKRescue base: stage 1 cannot catch a forgotten dependency
-  (7.3), so that test belongs to stage 2.
+- **End-to-end:** `tests/run-all.sh` runs the end-to-end scripts. `forgotten-dep` is skipped: stage 1 cannot catch a forgotten
+  dependency (7.3), so that test comes back with stage 2.
 - **Sandbox tests:** a build can't reach the network, can't see the build
   machine's processes or `/home`, and leaves no mount or process behind.
   (`tests/sandbox.sh`: a probe runs as a build step and checks the sandbox
@@ -908,9 +890,8 @@ keys/             public signing keys (private keys never in the repository)
    `base-devel`, which build roots and a later "everything included" image
    install. Still open: how a recipe names a build tool that has different
    names in stage 1 and stage 2 (9.4, item 2).
-8. **Stage 1 lower layer (7.3, 9.4 item 1).** Overlay mount or read-only bind
-   mount plus writable work directories, and what that means for catching a
-   forgotten dependency before stage 2.
+8. ~~Stage 1 lower layer (7.3, 9.4 item 1).~~ **Decided:** an overlay in the
+   user namespace. Stage 1 cannot catch a forgotten dependency; stage 2 does.
 9. ~~Triple vendor (6.1, 9.2).~~ **Decided:** `fenriros`; DKRescue's LLVM
    builds and runs programs with any vendor (tested, 9.2). The profiles switch
    when builds move to the DKRescue root.

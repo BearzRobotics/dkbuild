@@ -1,5 +1,5 @@
 arch = "riscv64"
-triple = "riscv64-chimera-linux-musl"
+triple = "riscv64-fenriros-linux-musl"
 cpu = "rv64gc"
 zig_target = "riscv64-linux-musl"
 zig_cpu = "baseline_rv64"

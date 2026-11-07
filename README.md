@@ -43,12 +43,11 @@ mkdir -p ~/.config/dkbuild && openssl genrsa -out ~/.config/dkbuild/signing.rsa 
 openssl rsa -in ~/.config/dkbuild/signing.rsa -pubout -out keys/dkbuild-signing.rsa.pub
 
 # 3. Build a repository.
-DKBUILD_BASE=dkrescue ./zig-out/bin/dkbuild pkg linux-headers musl zstd seatd lvm2
+./zig-out/bin/dkbuild pkg linux-headers musl zstd seatd lvm2
 ls repo/x86_64/                # the .apk files and the signed Packages.adb
 ```
 
-`DKBUILD_BASE=dkrescue` (or `--base dkrescue`) selects the DKRescue image as the build machine. Sources are
-downloaded the first time (`cache/`), the logs are in `logs/`, and a package is only rebuilt when its recipe, patches,
+Builds run on the unpacked DKRescue image (`rootfs/dkrescue`). Sources are downloaded the first time (`cache/`), the logs are in `logs/`, and a package is only rebuilt when its recipe, patches,
 profile or a dependency changes. Edit a recipe without bumping its `release` and dkbuild stops and says so.
 
 ## Tests
@@ -69,7 +68,7 @@ dependency chains; rebuilds; installing from the repository. They run once for e
 | `dkbuild check [name]...` | validates recipes |
 | `dkbuild graph <name>...` | prints the build order |
 | `dkbuild fetch [name]...` | downloads sources and checks their checksums |
-| `dkbuild pkg [--base dkrescue] [--force] <name>...` | builds packages and their in-tree dependencies |
+| `dkbuild pkg [--force] <name>...` | builds packages and their in-tree dependencies |
 
 ## Status
 

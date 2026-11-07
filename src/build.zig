@@ -1,8 +1,8 @@
 //! Building one recipe (SPEC.md 7): prepare a root, unpack, run the steps in
 //! the sandbox, check what was installed. Packaging comes after this.
 //!
-//! The root is prepared with the Chimera bootstrap rootfs's apk (rootfs/chimera)
-//! until FenrirOS can bootstrap itself (SPEC.md 9).
+//! Stage 1 (SPEC.md 7.3, 9.2): builds run on the DKRescue image (rootfs/dkrescue,
+//! from `dkbuild bootstrap-root`) under a writable layer, in our own sandbox.
 
 const std = @import("std");
 const recipe = @import("recipe.zig");
@@ -17,18 +17,7 @@ const basepkg = @import("basepkg.zig");
 const Allocator = std.mem.Allocator;
 const Dir = std.Io.Dir;
 
-/// Which machine builds run on (SPEC.md 9.2).
-pub const Base = enum {
-    /// The prototype: Chimera's bootstrap root and `bwrap`, build roots filled by apk.
-    chimera,
-    /// Stage 1: the DKRescue root (`dkbuild bootstrap-root`) under a writable
-    /// layer, in our own sandbox. In-tree packages are installed on top from
-    /// repo/; everything else is whatever the image provides.
-    dkrescue,
-};
-
 pub const Options = struct {
-    base: Base = .chimera,
     /// Project root (holds packages/, profiles/, rootfs/, cache/, work/, logs/).
     root: []const u8,
     arch: []const u8 = "x86_64",
@@ -39,17 +28,6 @@ pub const Options = struct {
     tree: ?tree.Tree = null,
     /// Private key that signs the repository index (never in the project).
     key: []const u8 = "",
-};
-
-/// Packages every build root gets, before the recipe's own dependencies.
-const base_set = [_][]const u8{ "base-bootstrap", "clang", "gmake", "chimerautils-extra" };
-
-/// Extra packages for recipes with the `static` option: static libc and runtime.
-const static_set = [_][]const u8{ "musl-devel-static", "libunwind-devel-static", "libatomic-chimera-devel-static" };
-
-const repos = [_][]const u8{
-    "https://repo.chimera-linux.org/current/main",
-    "https://repo.chimera-linux.org/current/user",
 };
 
 /// Top-level directories a package may install into (SPEC.md 7 step 4).
@@ -149,6 +127,13 @@ pub fn checkPolicy(arena: Allocator, io: std.Io, destdir: []const u8, problems: 
     try problems.append(arena, "installs into /usr/local");
 }
 
+/// Deletes a build's work directory, including a sandbox's overlay layers
+/// (see `sandbox.makeRemovable`). Works on leftovers of an earlier build too.
+fn removeBuildDir(arena: Allocator, io: std.Io, work: []const u8) void {
+    if (std.fs.path.join(arena, &.{ work, "sb", "work" })) |ow| sandbox.makeRemovable(io, ow) else |_| {}
+    Dir.cwd().deleteTree(io, work) catch {};
+}
+
 const SbDirs = struct { upper: []const u8, work: []const u8, merged: []const u8 };
 
 /// Fresh upper, work and mount-point directories for one sandbox, under `parent`.
@@ -162,33 +147,18 @@ fn sbDirs(arena: Allocator, io: std.Io, parent: []const u8, name: []const u8) Bu
     return .{ .upper = out_dirs[0], .work = out_dirs[1], .merged = out_dirs[2] };
 }
 
-/// Runs `argv` (absolute path) in the build machine's root with `binds`, in
-/// either mode. Chimera: `bwrap` on the Chimera root. DKRescue: our sandbox on
-/// the DKRescue root, with `sb` as the writable layer.
-fn runTool(arena: Allocator, io: std.Io, base: Base, base_root: []const u8, sb: SbDirs, binds: []const sandbox.Bind, argv: []const []const u8, log: *std.ArrayList(u8)) !bool {
-    switch (base) {
-        .chimera => {
-            var a: std.ArrayList([]const u8) = .empty;
-            try a.appendSlice(arena, &.{
-                "bwrap",         "--bind", base_root, "/",
-                "--proc",        "/proc",  "--dev",   "/dev",
-                "--unshare-all", "--die-with-parent", "--uid", "0",
-                "--gid",         "0",      "--tmpfs", "/tmp",
-            });
-            for (binds) |b| try a.appendSlice(arena, &.{ if (b.read_only) "--ro-bind" else "--bind", b.src, b.dst });
-            try a.appendSlice(arena, argv);
-            return runLogged(arena, io, a.items, log);
-        },
-        .dkrescue => return sandbox.run(arena, io, .{
-            .lower = base_root,
-            .upper = sb.upper,
-            .work = sb.work,
-            .merged = sb.merged,
-            .binds = binds,
-            .env = &.{ "PATH=/usr/bin:/bin", "HOME=/root" },
-            .argv = argv,
-        }, log),
-    }
+/// Runs `argv` (absolute path) in the build machine's root, in our sandbox, with
+/// `binds`; `sb` is the writable layer.
+fn runTool(arena: Allocator, io: std.Io, base_root: []const u8, sb: SbDirs, binds: []const sandbox.Bind, argv: []const []const u8, log: *std.ArrayList(u8)) !bool {
+    return sandbox.run(arena, io, .{
+        .lower = base_root,
+        .upper = sb.upper,
+        .work = sb.work,
+        .merged = sb.merged,
+        .binds = binds,
+        .env = &.{ "PATH=/usr/bin:/bin", "HOME=/root" },
+        .argv = argv,
+    }, log);
 }
 
 pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) BuildError!void {
@@ -225,22 +195,18 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
 
     // 2. Build root
     const work = try std.fs.path.join(arena, &.{ opts.root, "work", r.name });
-    Dir.cwd().deleteTree(io, work) catch {};
+    removeBuildDir(arena, io, work);
     const root_rel = try std.fs.path.join(arena, &.{ work, "root" });
     Dir.cwd().createDirPath(io, root_rel) catch return error.PrepareFailed;
     const root_abs = absPath(arena, io, root_rel) catch return error.PrepareFailed;
-    const base_name = if (opts.base == .chimera) "chimera" else "dkrescue";
-    const chimera = absPath(arena, io, try std.fs.path.join(arena, &.{ opts.root, "rootfs", base_name })) catch {
-        if (opts.base == .chimera)
-            out("error: rootfs/chimera is missing (the Chimera bootstrap rootfs, see SPEC.md 9)\n", .{})
-        else
-            out("error: rootfs/dkrescue is missing; unpack the build machine with `dkbuild bootstrap-root <dkrescue.iso>` (SPEC.md 9.2)\n", .{});
+    const base_root = absPath(arena, io, try std.fs.path.join(arena, &.{ opts.root, "rootfs", "dkrescue" })) catch {
+        out("error: rootfs/dkrescue is missing; unpack the build machine with `dkbuild bootstrap-root <dkrescue.iso>` (SPEC.md 9.2)\n", .{});
         return error.PrepareFailed;
     };
-    // The writable layer of the build root (DKRescue mode); the prepare and
+    // The writable layer of the build root; the prepare and
     // build steps share it, so what the first installs the second sees.
     const sb = try sbDirs(arena, io, work, "sb");
-    defer if (!opts.keep_root) Dir.cwd().deleteTree(io, work) catch {};
+    defer if (!opts.keep_root) removeBuildDir(arena, io, work);
 
     var log: std.ArrayList(u8) = .empty;
     const logdir = try std.fs.path.join(arena, &.{ opts.root, "logs", opts.arch });
@@ -248,32 +214,10 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
     const logpath = try std.fmt.allocPrint(arena, "{s}/{s}.log", .{ logdir, id });
     defer Dir.cwd().writeFile(io, .{ .sub_path = logpath, .data = log.items }) catch {};
 
-    var pkgs: std.ArrayList([]const u8) = .empty;
-    for (base_set) |p| try pkgs.append(arena, p);
-    if (!contains(r.options, "!check") and r.check != null) for (r.checkdeps) |d| try pkgs.append(arena, d);
-    if (ctx.static) for (static_set) |p| try pkgs.append(arena, p);
-    for ([_][]const []const u8{ r.hostdeps, r.builddeps }) |deps| {
-        for (deps) |d| {
-            // A dependency this tree provides comes from repo/ (the @dk tag), at
-            // exactly the version the tree builds, together with its recipe's
-            // main package. Without the tag a same-named package in the
-            // bootstrap repositories could be chosen instead.
-            if (opts.tree) |t| if (t.provider(d)) |pi| {
-                const pr = t.recipes[pi];
-                for ([_][]const u8{ d, pr.name }) |want| {
-                    const spec = try std.fmt.allocPrint(arena, "{s}@dk={s}-r{d}", .{ want, pr.version, pr.release });
-                    if (!contains(pkgs.items, spec)) try pkgs.append(arena, spec);
-                }
-                continue;
-            };
-            try pkgs.append(arena, d);
-        }
-    }
-
     const local_repo = try std.fmt.allocPrint(arena, "{s}/repo/{s}", .{ opts.root, opts.arch });
     const local_abs: ?[]const u8 = absPath(arena, io, local_repo) catch null;
     const keys_dir: ?[]const u8 = absPath(arena, io, try std.fs.path.join(arena, &.{ opts.root, "keys" })) catch null;
-    if (opts.base == .dkrescue) {
+    {
         // Stage 1: the toolchain and libraries are the image's. Only packages
         // this tree built are added, on top, from repo/ (SPEC.md 7.3).
         var specs: std.ArrayList([]const u8) = .empty;
@@ -297,7 +241,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
                 return error.PrepareFailed;
             };
             // apk must know what the image already provides (basepkg.zig).
-            basepkg.ensure(arena, io, opts.root, chimera, false) catch {
+            basepkg.ensure(arena, io, opts.root, base_root, false) catch {
                 out("error: cannot describe the base image to apk\n", .{});
                 return error.PrepareFailed;
             };
@@ -315,54 +259,12 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
                 "apk",
             });
             try argv.appendSlice(arena, specs.items);
-            const ok = runTool(arena, io, .dkrescue, chimera, sb, binds.items, argv.items, &log) catch false;
+            const ok = runTool(arena, io, base_root, sb, binds.items, argv.items, &log) catch false;
             if (!ok) {
                 out("error: installing packages from repo/ failed; see {s}\n", .{logpath});
                 return error.PrepareFailed;
             }
         }
-    } else {
-    out("    preparing build root ({d} requested packages)\n", .{pkgs.items.len});
-    // Repositories: ours first, tagged @dk, then the bootstrap ones.
-    {
-        var repo_text: std.ArrayList(u8) = .empty;
-        const have_local = if (absPath(arena, io, try std.fmt.allocPrint(arena, "{s}/repo/{s}/Packages.adb", .{ opts.root, opts.arch }))) |_| true else |_| false;
-        if (have_local) try repo_text.appendSlice(arena, "@dk /tmp/dkrepo/Packages.adb\n");
-        for (repos) |rp| {
-            try repo_text.appendSlice(arena, rp);
-            try repo_text.append(arena, '\n');
-        }
-        const etc = try std.fs.path.join(arena, &.{ root_rel, "etc", "apk" });
-        Dir.cwd().createDirPath(io, etc) catch return error.PrepareFailed;
-        Dir.cwd().writeFile(io, .{ .sub_path = try std.fs.path.join(arena, &.{ etc, "repositories" }), .data = repo_text.items }) catch return error.PrepareFailed;
-    }
-    {
-        var argv: std.ArrayList([]const u8) = .empty;
-        try argv.appendSlice(arena, &.{
-            "bwrap",                  "--bind",      chimera, "/",
-            "--bind",                 root_abs,      "/mnt",  "--proc",
-            "/proc",                  "--dev",       "/dev",  "--unshare-user",
-            "--unshare-pid",          "--die-with-parent",
-            "--ro-bind",              "/etc/resolv.conf", "/etc/resolv.conf",
-            "--tmpfs",                "/tmp",
-        });
-        // Our own packages and the key that signs them.
-        if (local_abs) |la| try argv.appendSlice(arena, &.{ "--ro-bind", la, "/tmp/dkrepo" });
-        if (keys_dir) |kd| try argv.appendSlice(arena, &.{ "--ro-bind", kd, "/tmp/dkkeys" });
-        try argv.appendSlice(arena, &.{
-            "sh", "-c",
-            "mkdir -p /mnt/etc/apk && cp -r /etc/apk/keys /mnt/etc/apk/ && { cp /tmp/dkkeys/* /mnt/etc/apk/keys/ 2>/dev/null || true; } && exec apk --usermode --root /mnt --initdb \"$@\"",
-            "apk",
-        });
-        try argv.append(arena, "add");
-        try argv.appendSlice(arena, pkgs.items);
-        const ok = runLogged(arena, io, argv.items, &log) catch false;
-        if (!ok) {
-            out("error: preparing the build root failed; see {s}\n", .{logpath});
-            return error.PrepareFailed;
-        }
-    }
-
     }
 
     // 3. Unpack
@@ -415,28 +317,14 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
 
     out("    building\n", .{});
     {
-        const ok = if (opts.base == .chimera) blk: {
-            const argv = [_][]const u8{
-                "bwrap",     "--bind",   root_abs,  "/",
-                "--proc",    "/proc",    "--dev",   "/dev",
-                "--tmpfs",   "/tmp",     "--tmpfs", "/run",
-                "--unshare-all", "--die-with-parent",
-                "--uid",     "0",        "--gid",   "0",
-                "--clearenv", "--setenv", "PATH",   "/usr/bin:/bin",
-                "--setenv",  "HOME",     "/root",   "sh",
-                "/dkbuild/script.sh",
-            };
-            break :blk runLogged(arena, io, &argv, &log) catch false;
-        } else blk: {
-            // The three directories the build writes to are bound in from the
-            // host side, so `destdir` can be read after the sandbox is gone.
-            const binds = [_]sandbox.Bind{
-                .{ .src = try std.fs.path.join(arena, &.{ root_abs, "build" }), .dst = "/build" },
-                .{ .src = try std.fs.path.join(arena, &.{ root_abs, "destdir" }), .dst = "/destdir" },
-                .{ .src = try std.fs.path.join(arena, &.{ root_abs, "dkbuild" }), .dst = "/dkbuild" },
-            };
-            break :blk runTool(arena, io, .dkrescue, chimera, sb, &binds, &.{ "/usr/bin/sh", "/dkbuild/script.sh" }, &log) catch false;
+        // The three directories the build writes to are bound in from the host
+        // side, so `destdir` can be read after the sandbox is gone.
+        const binds = [_]sandbox.Bind{
+            .{ .src = try std.fs.path.join(arena, &.{ root_abs, "build" }), .dst = "/build" },
+            .{ .src = try std.fs.path.join(arena, &.{ root_abs, "destdir" }), .dst = "/destdir" },
+            .{ .src = try std.fs.path.join(arena, &.{ root_abs, "dkbuild" }), .dst = "/dkbuild" },
         };
+        const ok = runTool(arena, io, base_root, sb, &binds, &.{ "/usr/bin/sh", "/dkbuild/script.sh" }, &log) catch false;
         if (!ok) {
             out("error: {s} failed; log: {s}\n", .{ id, logpath });
             const tail_start = if (log.items.len > 1500) log.items.len - 1500 else 0;
@@ -486,7 +374,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
         try pkg_list.append(arena, sub);
         out("    {s}-{s}: {d} files\n", .{ r.name, m.name, m.files });
     }
-    try publish(arena, io, r, opts, id, chimera, sb, pkg_list.items, &log);
+    try publish(arena, io, r, opts, id, base_root, sb, pkg_list.items, &log);
     out("    built {s}; log: {s}\n", .{ id, logpath });
 }
 
@@ -513,7 +401,7 @@ fn withScan(arena: Allocator, io: std.Io, files: []const u8, declared: []const [
     return .{ .name = "", .summary = "", .files = files, .depends = deps.items, .provides = res.provides };
 }
 
-fn publish(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options, id: []const u8, chimera: []const u8, sb: SbDirs, pkgs: []const Pkg, log: *std.ArrayList(u8)) BuildError!void {
+fn publish(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options, id: []const u8, base_root: []const u8, sb: SbDirs, pkgs: []const Pkg, log: *std.ArrayList(u8)) BuildError!void {
     _ = id;
     if (opts.key.len == 0) {
         out("error: no signing key; create one with:\n  openssl genrsa -out ~/.config/dkbuild/signing.rsa 4096\n", .{});
@@ -560,7 +448,7 @@ fn publish(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options, id: []
             try argv.appendSlice(arena, &.{ "--info", try std.fmt.allocPrint(arena, "provides:{s}", .{try std.mem.join(arena, " ", versioned.items)}) });
         }
         try argv.appendSlice(arena, &.{ "--files", "/tmp/files", "--output", try std.fmt.allocPrint(arena, "/tmp/out/{s}-{s}.apk", .{ pk.name, ver }) });
-        const ok = runTool(arena, io, opts.base, chimera, sb, &binds, argv.items, log) catch false;
+        const ok = runTool(arena, io, base_root, sb, &binds, argv.items, log) catch false;
         if (!ok) {
             out("error: apk mkpkg failed for {s}\n", .{pk.name});
             return error.BuildFailed;
@@ -585,7 +473,7 @@ fn publish(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options, id: []
             }
         }.lt);
         try argv.appendSlice(arena, names.items);
-        const ok = runTool(arena, io, opts.base, chimera, sb, &binds, argv.items, log) catch false;
+        const ok = runTool(arena, io, base_root, sb, &binds, argv.items, log) catch false;
         if (!ok) {
             out("error: apk mkndx failed\n", .{});
             return error.BuildFailed;
@@ -597,7 +485,7 @@ test "script runs setup, build, check, install in order with macros expanded" {
     var st = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer st.deinit();
     const a = st.allocator();
-    const p: profile.Profile = .{ .arch = "x86_64", .triple = "x86_64-chimera-linux-musl", .cpu = "x86-64", .zig_target = "x86_64-linux-musl", .zig_cpu = "baseline", .kernel_arch = "x86" };
+    const p: profile.Profile = .{ .arch = "x86_64", .triple = "x86_64-fenriros-linux-musl", .cpu = "x86-64", .zig_target = "x86_64-linux-musl", .zig_cpu = "baseline", .kernel_arch = "x86" };
     const r: recipe.Recipe = .{
         .name = "t", .version = "1", .release = 1, .summary = "s", .license = "MIT",
         .source = &.{}, .build = "%make", .install = "%make_install",
@@ -605,7 +493,7 @@ test "script runs setup, build, check, install in order with macros expanded" {
     var bad: []const u8 = "";
     const s = try script(a, r, .{ .target = p, .host = p }, "/build/t-1", .{ .root = ".", .jobs = 4 }, &bad);
     try std.testing.expect(std.mem.indexOf(u8, s, "export jobs=4") != null);
-    try std.testing.expect(std.mem.indexOf(u8, s, "--target=x86_64-chimera-linux-musl") != null);
+    try std.testing.expect(std.mem.indexOf(u8, s, "--target=x86_64-fenriros-linux-musl") != null);
     const b = std.mem.indexOf(u8, s, "==> build").?;
     const i = std.mem.indexOf(u8, s, "==> install").?;
     try std.testing.expect(b < i);
@@ -618,7 +506,7 @@ test "patches are applied in order before setup" {
     var st = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer st.deinit();
     const a = st.allocator();
-    const p: profile.Profile = .{ .arch = "x86_64", .triple = "x86_64-chimera-linux-musl", .cpu = "x86-64", .zig_target = "x86_64-linux-musl", .zig_cpu = "baseline", .kernel_arch = "x86" };
+    const p: profile.Profile = .{ .arch = "x86_64", .triple = "x86_64-fenriros-linux-musl", .cpu = "x86-64", .zig_target = "x86_64-linux-musl", .zig_cpu = "baseline", .kernel_arch = "x86" };
     const r: recipe.Recipe = .{
         .name = "t", .version = "1", .release = 1, .summary = "s", .license = "MIT",
         .source = &.{}, .patches = &.{ "a.patch", "b.patch" }, .setup = "echo setup", .install = "x",
