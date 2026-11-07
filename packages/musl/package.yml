@@ -1,0 +1,29 @@
+name       : musl
+version    : 1.2.6
+release    : 1
+summary    : The C standard library
+license    : MIT
+homepage   : https://musl.libc.org/
+# Verified against musl's release key 8364 8929 0BB6 B70F 99FF DA05 56BC DB59 3020 450F
+# (musl-1.2.6.tar.gz.asc from musl.libc.org).
+source     :
+    - https://musl.libc.org/releases/musl-1.2.6.tar.gz : d585fd3b613c66151fc3249e8ed44f77020cb5e6c1e635a616d3f9f82460512a
+builddeps  : [linux-headers]
+options    : ['!check']
+# needed by: every program on the system.
+# libc.so is the library itself, not a development symlink, so the default
+# devel split (which takes /usr/lib/*.so) would move it out of the main package.
+subpackages:
+    devel:
+        summary : Headers and startup files
+        paths   : [/usr/include, /usr/lib/*.o]
+setup      : |
+    # LIBCC names the runtime library libc.so links against; musl would find it
+    # by itself, but this makes the dependency visible.
+    ./configure --prefix=/usr --syslibdir=/usr/lib LIBCC="$($CC -print-libgcc-file-name)"
+build      : |
+    make -j$jobs
+install    : |
+    make DESTDIR=$pkgdir install
+    # musl-gcc is a GCC wrapper; this system has no GCC.
+    rm -f $pkgdir/usr/bin/musl-gcc $pkgdir/usr/lib/musl-gcc.specs

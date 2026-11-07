@@ -1,0 +1,38 @@
+#!/bin/sh
+# SPEC.md 7.2: unchanged packages are skipped; a recipe change under the same
+# release is an error; a new release rebuilds the package and what builds on it.
+set -u
+cd "$(dirname "$0")/.."
+. tests/lib.sh
+T=tests/trees/rebuild
+newtree "$T"
+mkdemo "$T/src"
+demo_recipe "$T" 1
+user_recipe "$T" usedemo dkdemo-devel
+run() { ./zig-out/bin/dkbuild --tree "$T" pkg usedemo 2>&1; }
+fail() { echo "$OUT" | tail -8; echo "FAIL: $1"; exit 1; }
+
+OUT=$(run) || fail "first build"
+echo "$OUT" | grep -q '^==> usedemo-1-r1$' || fail "usedemo not built the first time"
+
+OUT=$(run) || fail "second run"
+echo "$OUT" | grep -q 'dkdemo-1-r1: up to date' || fail "dkdemo was not skipped"
+echo "$OUT" | grep -q 'usedemo-1-r1: up to date' || fail "usedemo was not skipped"
+echo "$OUT" | grep -q 'preparing build root' && fail "something was rebuilt although nothing changed"
+
+# A recipe change without a new release is an error, and builds nothing.
+echo "# edited" >> "$T/packages/dkdemo/package.yml"
+OUT=$(run) && fail "an edited recipe with the same release was accepted"
+echo "$OUT" | grep -q 'release is still r1' || fail "no message about the unchanged release"
+echo "$OUT" | grep -q 'preparing build root' && fail "built despite the error"
+
+# A new release rebuilds it, and the package that builds against it.
+sed -i 's/^release    : 1$/release    : 2/' "$T/packages/dkdemo/package.yml"
+OUT=$(run) || fail "build after the release bump"
+echo "$OUT" | grep -q '^==> dkdemo-1-r2$' || fail "dkdemo r2 was not built"
+echo "$OUT" | grep -q 'usedemo-1-r1: packages it builds against changed' || fail "usedemo was not rebuilt after its dependency changed"
+
+# --force rebuilds an up-to-date package.
+OUT=$(./zig-out/bin/dkbuild --tree "$T" pkg --force usedemo 2>&1) || fail "--force build"
+echo "$OUT" | grep -q 'preparing build root' || fail "--force did not rebuild"
+echo "ok: skipped when unchanged; error for a changed recipe at the same release; rebuilt when its release or a dependency changes; --force rebuilds"

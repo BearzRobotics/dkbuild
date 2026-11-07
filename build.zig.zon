@@ -1,0 +1,8 @@
+.{
+    .name = .dkbuild,
+    .fingerprint = 0xfb244dd7a60c44b3,
+    .version = "0.0.1",
+    .minimum_zig_version = "0.17.0",
+    .dependencies = .{},
+    .paths = .{ "build.zig", "build.zig.zon", "src", "SPEC.md", "packages" },
+}

@@ -1,0 +1,29 @@
+name       : linux-headers
+version    : 6.19
+release    : 1
+summary    : Linux kernel API headers for userspace
+license    : GPL-2.0-only WITH Linux-syscall-note
+homepage   : https://www.kernel.org/
+source     :
+    - https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.19.tar.xz : 303079a8250b8f381f82b03f90463d12ac98d4f6b149b761ea75af1323521357
+hostdeps   : [gsed, rsync]
+options    : ['!check', '!strip']
+# The kernel's scripts need GNU sed. Where `sed` is BSD (the Chimera bootstrap
+# root) and `gsed` exists, put a GNU `sed` first on PATH; elsewhere nothing happens.
+environment: |
+    if command -v gsed >/dev/null 2>&1; then
+        mkdir -p /tmp/gnubin && ln -sf "$(command -v gsed)" /tmp/gnubin/sed
+        export PATH=/tmp/gnubin:$PATH
+    fi
+# needed by: musl, and every program that includes <linux/...>.
+# The headers are the package, so they stay in the main package instead of a
+# -devel split.
+subpackages:
+    devel:
+        summary : Unused
+        paths   : []
+build      : |
+    %kernel_make headers
+install    : |
+    %kernel_make headers_install INSTALL_HDR_PATH=$pkgdir/usr
+    find $pkgdir/usr/include \( -name '.install' -o -name '..install.cmd' \) -delete

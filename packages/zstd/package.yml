@@ -1,0 +1,17 @@
+name       : zstd
+version    : 1.5.7
+release    : 1
+summary    : Fast lossless compression
+license    : BSD-3-Clause OR GPL-2.0-only
+homepage   : https://facebook.github.io/zstd/
+source     :
+    - https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz : eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3
+# TODO: drop !check (and add checkdeps: file) once the tree has GNU coreutils:
+# zstd's tests use `stat -c`, which the Chimera bootstrap root doesn't have.
+options    : [static, '!check']
+build      : |
+    %make
+check      : |
+    %make check
+install    : |
+    %make_install PREFIX=/usr
