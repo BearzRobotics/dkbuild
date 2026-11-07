@@ -145,6 +145,9 @@ pub fn bootstrapRoot(arena: Allocator, io: std.Io, image: []const u8, dest: []co
         Dir.cwd().deleteTree(io, dest) catch {};
     } else |_| {}
     Dir.cwd().createDirPath(io, opts.work_dir) catch return error.BadImage;
+    // unsquashfs creates the destination itself but not its parents (rootfs/
+    // does not exist in a fresh checkout).
+    if (std.fs.path.dirname(dest)) |parent| Dir.cwd().createDirPath(io, parent) catch return error.BadImage;
 
     var staged: ?[]const u8 = null;
     defer if (staged) |s| Dir.cwd().deleteFile(io, s) catch {};
