@@ -601,12 +601,20 @@ Meson, bash, dinit, git, scdoc, `unshare`, `pivot_root` and apk-tools, which
 is the list in the "build host" post. No hand-built stage 0 is left to do, and
 no other distribution's packages are needed.
 
-`dkbuild bootstrap-root <image>` (**planned**) unpacks the image's root
-filesystem into `rootfs/dkrescue/`. It accepts the ISO (reading
-`/live/rootfs.sfs`), the squashfs itself, or a root tarball
-(`dkrescue-bootstrap.tar.xz`, `dkrescue-toolchain.tar.xz`). It checks that the
-tools above are present and that user namespaces work (`unshare --user
---map-root-user`). The private signing key never comes from the image: the
+`dkbuild bootstrap-root <image>` (**implemented**) unpacks the image's root
+filesystem into `rootfs/dkrescue/`, without privileges. It accepts the ISO
+(reading `/live/rootfs.sfs` with `xorriso`), the squashfs itself (with
+`unsquashfs`), or a root tarball (`dkrescue-bootstrap.tar.xz`), and tells them
+apart by their magic bytes, not their names. The host needs `xorriso` (ISO
+only), `unsquashfs` or `tar`, and `unshare`. Unpacking the 1.2 GB ISO took
+about a minute and 4.2 GB of disk. Files end up owned by the current user,
+which a user namespace that maps that user to root shows as root; device
+nodes, setuid bits and file capabilities are not kept, and builds don't need
+them. It then checks that `apk`, `clang`, `ld.lld`, `llvm-ar`, `make`, `sh`,
+`sed`, `tar` and `xz` are present (a tool may be a symlink with an absolute
+target, such as `zig -> /opt/zig-0.17.0/zig`, so links are not followed),
+and that the root runs its own `apk` and `clang` from inside a user namespace
+(`unshare --user --map-root-user chroot`). The private signing key never comes from the image: the
 ISO is built without `home/builder` and `srv/dkbuild`.
 
 1. **Stage 1:** build `base` and `base-devel` inside stage 0, as 7.3
@@ -627,10 +635,14 @@ After stage 2, nothing in the tree depends on DKRescue.
 profiles' triples through stage 1 because Chimera's toolchain looks for its
 compiler runtime under `<arch>-chimera-linux-musl`. DKRescue's LLVM installs
 its runtime in the plain layout (`usr/lib/clang/23/lib/linux/`,
-`libclang_rt.builtins-x86_64.a`), not under a per-triple directory, so that
-constraint probably does not apply and the profiles can say `fenriros` from
-the start. **OPEN:** confirm by building a program with the `fenriros` triple
-in stage 0, then drop `profiles/bootstrap/` if nothing needs it.
+`libclang_rt.builtins-x86_64.a`), so the constraint does not apply. **Tested**
+(clang 23.1.4 from the image, unprivileged user namespace): a C program built
+with `--target=x86_64-fenriros-linux-musl`, with `x86_64-chimera-linux-musl`
+and with `x86_64-dkrescue-linux-musl` (the image's own default) links with
+lld and runs, dynamically and with `-static`. The profiles can therefore say
+`fenriros` once builds move to the DKRescue root; the `chimera` triples stay
+only while the Chimera prototype path still exists, and `profiles/bootstrap/`
+is not needed.
 
 ### 9.3 Build order
 
@@ -713,6 +725,7 @@ inside a namespace the installed root runs `apk --version`, `sh`, `ls` and
 | `dkbuild check <name>...` | Checks recipes: fields, checksums present, patches exist, no unknown keys |
 | `dkbuild graph <name>` | Prints the dependency order |
 | `dkbuild image <file>` | Builds an image (8) |
+| `dkbuild bootstrap-root [--force] [--dest DIR] <image>` | Unpacks the stage 0 build machine and checks it (9.2) |
 | `dkbuild shell <name>` | Opens a shell in a prepared build root for that recipe |
 | `-j N` | Parallel jobs per build (default: the number of CPUs) |
 | `--keep-root` | Keeps the build root after the build |
@@ -850,8 +863,9 @@ keys/             public signing keys (private keys never in the repository)
 8. **Stage 1 lower layer (7.3, 9.4 item 1).** Overlay mount or read-only bind
    mount plus writable work directories, and what that means for catching a
    forgotten dependency before stage 2.
-9. **Triple vendor (6.1, 9.2).** Confirm `fenriros` works with DKRescue's LLVM
-   and drop `profiles/bootstrap/`.
+9. ~~Triple vendor (6.1, 9.2).~~ **Decided:** `fenriros`; DKRescue's LLVM
+   builds and runs programs with any vendor (tested, 9.2). The profiles switch
+   when builds move to the DKRescue root.
 10. **The importer (5.9).** Where the Python-subset reader for `template.py`
     lives (inside dkbuild or its own library), and how much of a template's
     code it translates against marking it for a person.

@@ -4,6 +4,7 @@ const tree = @import("tree.zig");
 const fetch = @import("fetch.zig");
 const build = @import("build.zig");
 const inputs = @import("inputs.zig");
+const bootstrap = @import("bootstrap.zig");
 
 const usage =
     \\usage: dkbuild [--tree DIR] <command> [args]
@@ -13,6 +14,10 @@ const usage =
     \\  pkg [-j N] [--key FILE] [--keep-root] [--force] <name>...
     \\                             build packages and the dependencies in the tree
     \\  graph <name>...            print the build order for packages
+    \\  bootstrap-root [--force] [--dest DIR] <image>
+    \\                             unpack the build machine (the DKRescue ISO, its
+    \\                             rootfs.sfs, or a root tarball) into rootfs/dkrescue
+    \\                             and check it (SPEC.md 9.2)
     \\
 ;
 
@@ -170,6 +175,28 @@ pub fn main(init: std.process.Init) !void {
             const r = t.recipes[idx];
             std.debug.print("{s}-{s}-r{d}\n", .{ r.name, r.version, r.release });
         }
+    } else if (std.mem.eql(u8, cmd, "bootstrap-root")) {
+        var force = false;
+        var dest: ?[]const u8 = null;
+        var image: ?[]const u8 = null;
+        var k: usize = 0;
+        while (k < rest.len) : (k += 1) {
+            if (std.mem.eql(u8, rest[k], "--force")) {
+                force = true;
+            } else if (std.mem.eql(u8, rest[k], "--dest") and k + 1 < rest.len) {
+                k += 1;
+                dest = rest[k];
+            } else if (image == null) {
+                image = rest[k];
+            } else return die(usage);
+        }
+        const img = image orelse return die(usage);
+        const where = dest orelse try std.fs.path.join(arena, &.{ root, "rootfs", "dkrescue" });
+        const work = try std.fs.path.join(arena, &.{ root, "work" });
+        bootstrap.bootstrapRoot(arena, init.io, img, where, .{ .work_dir = work, .force = force }) catch |err| switch (err) {
+            error.OutOfMemory => return err,
+            else => std.process.exit(1),
+        };
     } else return die(usage);
 }
 
@@ -198,6 +225,7 @@ test {
     _ = @import("profile.zig");
     _ = @import("macro.zig");
     _ = @import("tree.zig");
+    _ = @import("bootstrap.zig");
     _ = @import("fetch.zig");
     _ = @import("build.zig");
     _ = @import("split.zig");
