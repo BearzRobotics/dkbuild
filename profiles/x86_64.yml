@@ -1,6 +1,0 @@
-arch        : x86_64
-triple      : x86_64-chimera-linux-musl
-cpu         : x86-64
-zig_target  : x86_64-linux-musl
-zig_cpu     : baseline
-kernel_arch : x86

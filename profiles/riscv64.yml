@@ -1,6 +1,0 @@
-arch        : riscv64
-triple      : riscv64-chimera-linux-musl
-cpu         : rv64gc
-zig_target  : riscv64-linux-musl
-zig_cpu     : baseline_rv64
-kernel_arch : riscv

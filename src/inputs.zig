@@ -74,13 +74,13 @@ fn hashFileInto(h: *Sha256, arena: Allocator, io: std.Io, path: []const u8, labe
     h.update(data);
 }
 
-/// Hash of a recipe's own inputs: package.yml, everything under patches/ and
+/// Hash of a recipe's own inputs: package.toml, everything under patches/ and
 /// files/ (names and contents, sorted), and the architecture profile.
 pub fn ownHash(arena: Allocator, io: std.Io, root: []const u8, name: []const u8, arch: []const u8) !Hex {
     var h = Sha256.init(.{});
     const base = try std.fs.path.join(arena, &.{ root, "packages", name });
-    try hashFileInto(&h, arena, io, try std.fs.path.join(arena, &.{ base, "package.yml" }), "package.yml");
-    try hashFileInto(&h, arena, io, try std.fmt.allocPrint(arena, "{s}/profiles/{s}.yml", .{ root, arch }), "profile");
+    try hashFileInto(&h, arena, io, try std.fs.path.join(arena, &.{ base, "package.toml" }), "package.toml");
+    try hashFileInto(&h, arena, io, try std.fmt.allocPrint(arena, "{s}/profiles/{s}.toml", .{ root, arch }), "profile");
 
     for ([_][]const u8{ "patches", "files" }) |sub| {
         const dir_path = try std.fs.path.join(arena, &.{ base, sub });

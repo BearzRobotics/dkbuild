@@ -1,10 +1,10 @@
 //! Target profiles and the files generated from them (SPEC.md 6.1).
 
 const std = @import("std");
-const yaml = @import("yaml.zig");
+const cfg = @import("cfg.zig");
 const Allocator = std.mem.Allocator;
 
-pub const Diagnostic = yaml.Diagnostic;
+pub const Diagnostic = cfg.Diagnostic;
 
 pub const Profile = struct {
     arch: []const u8,
@@ -100,43 +100,35 @@ pub const Profile = struct {
 };
 
 pub fn parse(arena: Allocator, text: []const u8, diag: *Diagnostic) (error{InvalidProfile} || Allocator.Error)!Profile {
-    const doc = yaml.parse(arena, text, diag) catch |err| switch (err) {
-        error.Syntax => return error.InvalidProfile,
-        error.OutOfMemory => |e| return e,
+    return parseChecked(arena, text, diag) catch |err| switch (err) {
+        error.Invalid => error.InvalidProfile,
+        error.OutOfMemory => |e| e,
     };
-    const m = doc.asMap() orelse return bad(arena, diag, "top level must be a mapping", .{});
+}
+
+fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error!Profile {
+    const root = try cfg.parse(arena, text, diag);
     const fields = [_][]const u8{ "arch", "triple", "cpu", "zig_target", "zig_cpu", "kernel_arch" };
-    for (m.keys) |k| {
-        for (fields) |f| {
-            if (std.mem.eql(u8, k, f)) break;
-        } else return bad(arena, diag, "unknown key '{s}'", .{k});
-    }
+    try cfg.onlyKeys(arena, diag, root, &fields, "");
     var p: Profile = undefined;
     inline for (fields) |f| {
-        const v = (m.get(f) orelse return bad(arena, diag, "missing required key '{s}'", .{f})).asScalar() orelse
-            return bad(arena, diag, "'{s}' must be a single value", .{f});
-        @field(p, f) = try arena.dupe(u8, v);
+        @field(p, f) = try cfg.reqString(arena, diag, root, f);
     }
     // the triple must name the same architecture and use musl
     if (!std.mem.startsWith(u8, p.triple, p.arch) or !std.mem.endsWith(u8, p.triple, "-musl"))
-        return bad(arena, diag, "triple '{s}' does not match arch '{s}' with musl", .{ p.triple, p.arch });
+        return cfg.fail(arena, diag, "triple '{s}' does not match arch '{s}' with musl", .{ p.triple, p.arch });
     return p;
-}
-
-fn bad(arena: Allocator, diag: *Diagnostic, comptime fmt: []const u8, args: anytype) error{ InvalidProfile, OutOfMemory } {
-    diag.message = try std.fmt.allocPrint(arena, fmt, args);
-    return error.InvalidProfile;
 }
 
 // ---- tests ----
 
 const aarch64_src =
-    \\arch: aarch64
-    \\triple: aarch64-chimera-linux-musl
-    \\cpu: armv8-a
-    \\zig_target: aarch64-linux-musl
-    \\zig_cpu: baseline
-    \\kernel_arch: arm64
+    \\arch = "aarch64"
+    \\triple = "aarch64-chimera-linux-musl"
+    \\cpu = "armv8-a"
+    \\zig_target = "aarch64-linux-musl"
+    \\zig_cpu = "baseline"
+    \\kernel_arch = "arm64"
     \\
 ;
 
@@ -168,7 +160,7 @@ test "profile rejects unknown keys and mismatched triples" {
     defer st.deinit();
     const a = st.allocator();
     var d: Diagnostic = .{};
-    try std.testing.expectError(error.InvalidProfile, parse(a, aarch64_src ++ "boot: x\n", &d));
+    try std.testing.expectError(error.InvalidProfile, parse(a, aarch64_src ++ "boot = \"x\"\n", &d));
     try std.testing.expectEqualStrings("unknown key 'boot'", d.message);
     var bad_src = try std.mem.replaceOwned(u8, a, aarch64_src, "aarch64-chimera-linux-musl", "x86_64-chimera-linux-musl");
     bad_src = bad_src;

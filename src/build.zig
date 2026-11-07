@@ -140,7 +140,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
     const id = try std.fmt.allocPrint(arena, "{s}-{s}-r{d}", .{ r.name, r.version, r.release });
     out("==> {s}\n", .{id});
 
-    const prof_path = try std.fmt.allocPrint(arena, "{s}/profiles/{s}.yml", .{ opts.root, opts.arch });
+    const prof_path = try std.fmt.allocPrint(arena, "{s}/profiles/{s}.toml", .{ opts.root, opts.arch });
     const prof_text = Dir.cwd().readFileAlloc(io, prof_path, arena, .limited(1 << 16)) catch {
         out("error: cannot read {s}\n", .{prof_path});
         return error.BadRecipe;

@@ -19,3 +19,5 @@ zig-out/
 !/tests/trees/sandbox/.gitkeep
 /tests/trees/rebuild/*
 !/tests/trees/rebuild/.gitkeep
+/tests/trees/forgotten-dep/*
+!/tests/trees/forgotten-dep/.gitkeep

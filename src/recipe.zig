@@ -1,18 +1,18 @@
 //! Recipe model, reader and validation (SPEC.md section 5).
 //!
-//! The YAML is parsed by zig-yaml; everything outside the subset of 5.1 is
-//! rejected here, after parsing. Unknown keys are errors (5.1).
+//! The TOML is parsed by toml-zig (`cfg.parse`); this file checks the types
+//! and rejects everything section 5 does not define. Unknown keys are errors
+//! (5.1).
 
 const std = @import("std");
-const yaml = @import("yaml.zig");
-const Value = yaml.Value;
-const Map = yaml.Map;
+const toml = @import("toml");
+const cfg = @import("cfg.zig");
 const Allocator = std.mem.Allocator;
 
 pub const Source = union(enum) {
-    /// `URL : sha256`
+    /// `{ url, sha256 }`
     tarball: struct { url: []const u8, sha256: []const u8 },
-    /// `git|URL : tag-or-commit`
+    /// `{ git, tag }` or `{ git, commit }`; `ref` is whichever was given.
     git: struct { url: []const u8, ref: []const u8 },
 };
 
@@ -47,15 +47,15 @@ pub const Recipe = struct {
 };
 
 /// What went wrong, in words a recipe author can act on.
-pub const Diagnostic = yaml.Diagnostic;
+pub const Diagnostic = cfg.Diagnostic;
 
 pub const Error = error{InvalidRecipe} || Allocator.Error;
 
 const known_keys = [_][]const u8{
-    "name",     "version",   "release",   "summary",     "description", "license",
-    "homepage", "source",    "patches",   "archs",       "hostdeps",    "builddeps",
-    "checkdeps", "rundeps",  "options",   "environment", "setup",       "build",
-    "check",    "install",   "subpackages",
+    "name",      "version",   "release",     "summary",     "description", "license",
+    "homepage",  "source",    "patches",     "archs",       "hostdeps",    "builddeps",
+    "checkdeps", "rundeps",   "options",     "environment", "setup",       "build",
+    "check",     "install",   "subpackages",
 };
 
 const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap" };
@@ -63,53 +63,50 @@ const known_archs = [_][]const u8{ "x86_64", "aarch64", "riscv64" };
 
 /// Parse and validate `text`. All returned memory lives in `arena`.
 pub fn parse(arena: Allocator, text: []const u8, diag: *Diagnostic) Error!Recipe {
-    const doc = yaml.parse(arena, text, diag) catch |err| switch (err) {
-        error.Syntax => return error.InvalidRecipe,
-        error.OutOfMemory => |e| return e,
+    return parseChecked(arena, text, diag) catch |err| switch (err) {
+        error.Invalid => error.InvalidRecipe,
+        error.OutOfMemory => |e| e,
     };
-    const root = doc.asMap() orelse return fail(arena, diag, "top level must be a mapping", .{});
+}
 
-    for (root.keys) |k| {
-        if (!contains(&known_keys, k)) return fail(arena, diag, "unknown key '{s}'", .{k});
-    }
+fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error!Recipe {
+    const root = try cfg.parse(arena, text, diag);
+    try cfg.onlyKeys(arena, diag, root, &known_keys, "");
 
     var r: Recipe = undefined;
-    r.name = try reqScalar(arena, diag, root, "name");
-    if (!validName(r.name)) return fail(arena, diag, "name '{s}': only lowercase letters, digits, '-', '+', '.'", .{r.name});
-    r.version = try reqScalar(arena, diag, root, "version");
-    const rel = try reqScalar(arena, diag, root, "release");
-    r.release = std.fmt.parseInt(u32, rel, 10) catch
-        return fail(arena, diag, "release '{s}' is not a number", .{rel});
-    if (r.release < 1) return fail(arena, diag, "release starts at 1", .{});
-    r.summary = try reqScalar(arena, diag, root, "summary");
-    r.license = try reqScalar(arena, diag, root, "license");
-    r.description = try optScalar(arena, diag, root, "description");
-    r.homepage = try optScalar(arena, diag, root, "homepage");
-    r.environment = try optScalar(arena, diag, root, "environment");
-    r.setup = try optScalar(arena, diag, root, "setup");
-    r.build = try optScalar(arena, diag, root, "build");
-    r.check = try optScalar(arena, diag, root, "check");
-    r.install = try reqScalar(arena, diag, root, "install");
-    r.patches = try optList(arena, diag, root, "patches");
-    r.archs = try optList(arena, diag, root, "archs");
-    r.hostdeps = try optList(arena, diag, root, "hostdeps");
-    r.builddeps = try optList(arena, diag, root, "builddeps");
-    r.checkdeps = try optList(arena, diag, root, "checkdeps");
-    r.rundeps = try optList(arena, diag, root, "rundeps");
-    r.options = try optList(arena, diag, root, "options");
+    r.name = try cfg.reqString(arena, diag, root, "name");
+    if (!validName(r.name)) return cfg.fail(arena, diag, "name '{s}': only lowercase letters, digits, '-', '+', '.'", .{r.name});
+    r.version = try cfg.reqString(arena, diag, root, "version");
+    r.release = try cfg.reqPositive(arena, diag, root, "release", u32);
+    r.summary = try cfg.reqString(arena, diag, root, "summary");
+    r.license = try cfg.reqString(arena, diag, root, "license");
+    r.description = try cfg.optString(arena, diag, root, "description");
+    r.homepage = try cfg.optString(arena, diag, root, "homepage");
+    r.environment = try cfg.optString(arena, diag, root, "environment");
+    r.setup = try cfg.optString(arena, diag, root, "setup");
+    r.build = try cfg.optString(arena, diag, root, "build");
+    r.check = try cfg.optString(arena, diag, root, "check");
+    r.install = try cfg.reqString(arena, diag, root, "install");
+    r.patches = try cfg.optStrings(arena, diag, root, "patches");
+    r.archs = try cfg.optStrings(arena, diag, root, "archs");
+    r.hostdeps = try cfg.optStrings(arena, diag, root, "hostdeps");
+    r.builddeps = try cfg.optStrings(arena, diag, root, "builddeps");
+    r.checkdeps = try cfg.optStrings(arena, diag, root, "checkdeps");
+    r.rundeps = try cfg.optStrings(arena, diag, root, "rundeps");
+    r.options = try cfg.optStrings(arena, diag, root, "options");
 
     for (r.archs) |a| {
         const bare = if (a.len > 0 and a[0] == '!') a[1..] else a;
-        if (!contains(&known_archs, bare)) return fail(arena, diag, "unknown arch '{s}'", .{a});
+        if (!contains(&known_archs, bare)) return cfg.fail(arena, diag, "unknown arch '{s}'", .{a});
     }
     for (r.options) |o| {
         const bare = if (o.len > 0 and o[0] == '!') o[1..] else o;
         const key = if (std.mem.startsWith(u8, bare, "jobs:")) "jobs" else bare;
         if (!std.mem.eql(u8, key, "jobs") and !contains(&known_options, key))
-            return fail(arena, diag, "unknown option '{s}'", .{o});
+            return cfg.fail(arena, diag, "unknown option '{s}'", .{o});
         if (std.mem.eql(u8, key, "jobs") and
             (std.fmt.parseInt(u32, bare["jobs:".len..], 10) catch 0) == 0)
-            return fail(arena, diag, "option '{s}': jobs:N needs a positive number", .{o});
+            return cfg.fail(arena, diag, "option '{s}': jobs:N needs a positive number", .{o});
     }
 
     r.source = try parseSources(arena, diag, root);
@@ -117,72 +114,66 @@ pub fn parse(arena: Allocator, text: []const u8, diag: *Diagnostic) Error!Recipe
     return r;
 }
 
-fn parseSources(arena: Allocator, diag: *Diagnostic, root: Map) Error![]const Source {
-    const v = root.get("source") orelse return fail(arena, diag, "missing required key 'source'", .{});
-    const list = v.asList() orelse return fail(arena, diag, "'source' must be a list", .{});
-    if (list.len == 0) return fail(arena, diag, "'source' is empty", .{});
+const source_shape = "'source' entries must look like { url = \"...\", sha256 = \"...\" } or { git = \"...\", tag = \"...\" }";
+
+fn parseSources(arena: Allocator, diag: *Diagnostic, root: *const toml.Table) cfg.Error![]const Source {
+    const v = root.get("source") orelse return cfg.fail(arena, diag, "missing required key 'source'", .{});
+    const list = switch (v) {
+        .array => |a| a.items.items,
+        else => return cfg.fail(arena, diag, "'source' must be a list", .{}),
+    };
+    if (list.len == 0) return cfg.fail(arena, diag, "'source' is empty", .{});
     const out = try arena.alloc(Source, list.len);
     for (list, out) |item, *dst| {
-        const m = item.asMap() orelse
-            return fail(arena, diag, "'source' entries must look like 'URL : sha256'", .{});
-        if (m.count() != 1) return fail(arena, diag, "'source' entries must look like 'URL : sha256'", .{});
-        const key = m.keys[0];
-        const val = m.values[0].asScalar() orelse
-            return fail(arena, diag, "source '{s}' has no checksum", .{key});
-        if (std.mem.startsWith(u8, key, "git|")) {
-            dst.* = .{ .git = .{ .url = try arena.dupe(u8, key["git|".len..]), .ref = try arena.dupe(u8, val) } };
+        const t = switch (item) {
+            .table => |t| t,
+            else => return cfg.fail(arena, diag, "{s}", .{source_shape}),
+        };
+        try cfg.onlyKeys(arena, diag, t, &.{ "url", "sha256", "git", "tag", "commit" }, "source");
+        if (t.get("url") != null) {
+            // A tarball: url + sha256, nothing for git.
+            if (t.get("git") != null or t.get("tag") != null or t.get("commit") != null)
+                return cfg.fail(arena, diag, "{s}", .{source_shape});
+            const url = try cfg.reqString(arena, diag, t, "url");
+            const checksum = (try cfg.optString(arena, diag, t, "sha256")) orelse
+                return cfg.fail(arena, diag, "source '{s}' has no checksum", .{url});
+            if (!validSha256(checksum)) return cfg.fail(arena, diag, "source '{s}': checksum is not 64 hex digits", .{url});
+            dst.* = .{ .tarball = .{ .url = url, .sha256 = checksum } };
+        } else if (t.get("git") != null) {
+            if (t.get("sha256") != null) return cfg.fail(arena, diag, "{s}", .{source_shape});
+            const url = try cfg.reqString(arena, diag, t, "git");
+            const tag = try cfg.optString(arena, diag, t, "tag");
+            const commit = try cfg.optString(arena, diag, t, "commit");
+            if ((tag == null) == (commit == null))
+                return cfg.fail(arena, diag, "git source '{s}': give exactly one of 'tag' and 'commit'", .{url});
+            dst.* = .{ .git = .{ .url = url, .ref = tag orelse commit.? } };
         } else {
-            if (!validSha256(val)) return fail(arena, diag, "source '{s}': checksum is not 64 hex digits", .{key});
-            dst.* = .{ .tarball = .{ .url = try arena.dupe(u8, key), .sha256 = try arena.dupe(u8, val) } };
+            return cfg.fail(arena, diag, "{s}", .{source_shape});
         }
     }
     return out;
 }
 
-fn parseSubpackages(arena: Allocator, diag: *Diagnostic, root: Map) Error![]const Subpackage {
+fn parseSubpackages(arena: Allocator, diag: *Diagnostic, root: *const toml.Table) cfg.Error![]const Subpackage {
     const v = root.get("subpackages") orelse return &.{};
-    const m = v.asMap() orelse return fail(arena, diag, "'subpackages' must be a mapping", .{});
+    const m = switch (v) {
+        .table => |t| t,
+        else => return cfg.fail(arena, diag, "'subpackages' must be a table", .{}),
+    };
     const out = try arena.alloc(Subpackage, m.count());
-    for (m.keys, m.values, out) |k, val, *dst| {
-        const sm = val.asMap() orelse return fail(arena, diag, "subpackage '{s}' must be a mapping", .{k});
-        for (sm.keys) |sk| {
-            if (!std.mem.eql(u8, sk, "summary") and !std.mem.eql(u8, sk, "paths"))
-                return fail(arena, diag, "subpackage '{s}': unknown key '{s}'", .{ k, sk });
-        }
+    for (m.entries.keys(), m.entries.values(), out) |k, val, *dst| {
+        const sm = switch (val) {
+            .table => |t| t,
+            else => return cfg.fail(arena, diag, "subpackage '{s}' must be a table", .{k}),
+        };
+        try cfg.onlyKeys(arena, diag, sm, &.{ "summary", "paths" }, try std.fmt.allocPrint(arena, "subpackage '{s}'", .{k}));
         dst.* = .{
             .name = try arena.dupe(u8, k),
-            .summary = try reqScalar(arena, diag, sm, "summary"),
-            .paths = try optList(arena, diag, sm, "paths"),
+            .summary = try cfg.reqString(arena, diag, sm, "summary"),
+            .paths = try cfg.optStrings(arena, diag, sm, "paths"),
         };
     }
     return out;
-}
-
-fn reqScalar(arena: Allocator, diag: *Diagnostic, m: Map, key: []const u8) Error![]const u8 {
-    return (try optScalar(arena, diag, m, key)) orelse
-        fail(arena, diag, "missing required key '{s}'", .{key});
-}
-
-fn optScalar(arena: Allocator, diag: *Diagnostic, m: Map, key: []const u8) Error!?[]const u8 {
-    const v = m.get(key) orelse return null;
-    const s = v.asScalar() orelse return fail(arena, diag, "'{s}' must be a single value", .{key});
-    return try arena.dupe(u8, s);
-}
-
-fn optList(arena: Allocator, diag: *Diagnostic, m: Map, key: []const u8) Error![]const []const u8 {
-    const v = m.get(key) orelse return &.{};
-    const list = v.asList() orelse return fail(arena, diag, "'{s}' must be a list", .{key});
-    const out = try arena.alloc([]const u8, list.len);
-    for (list, out) |item, *dst| {
-        const s = item.asScalar() orelse return fail(arena, diag, "'{s}' entries must be plain values", .{key});
-        dst.* = try arena.dupe(u8, s);
-    }
-    return out;
-}
-
-fn fail(arena: Allocator, diag: *Diagnostic, comptime fmt: []const u8, args: anytype) Error {
-    diag.message = try std.fmt.allocPrint(arena, fmt, args);
-    return error.InvalidRecipe;
 }
 
 fn contains(haystack: []const []const u8, needle: []const u8) bool {
@@ -209,33 +200,91 @@ fn validSha256(s: []const u8) bool {
 
 const sha = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 
+const minimal = "name = \"zstd\"\nversion = \"1.5.7\"\nrelease = 1\nsummary = \"Compressor\"\nlicense = \"BSD-3-Clause\"\n" ++
+    "install = \'\'\'\n%make_install\n\'\'\'\n" ++
+    "source = [{ url = \"https://example.org/zstd-1.5.7.tar.gz\", sha256 = \"" ++ sha ++ "\" }]\n";
+
+fn expectInvalid(text: []const u8, message: []const u8) !void {
+    var arena_state = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena_state.deinit();
+    var diag: Diagnostic = .{};
+    try std.testing.expectError(error.InvalidRecipe, parse(arena_state.allocator(), text, &diag));
+    try std.testing.expectEqualStrings(message, diag.message);
+}
+
 test "minimal recipe" {
     var arena_state = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer arena_state.deinit();
     var diag: Diagnostic = .{};
-    const r = try parse(arena_state.allocator(),
-        "name: zstd\nversion: 1.5.7\nrelease: 1\nsummary: Compressor\nlicense: BSD-3-Clause\n" ++
-            "source:\n  - https://example.org/zstd-1.5.7.tar.gz : " ++ sha ++ "\n" ++
-            "install: |\n  %make_install\n", &diag);
+    const r = try parse(arena_state.allocator(), minimal, &diag);
     try std.testing.expectEqualStrings("zstd", r.name);
     try std.testing.expectEqual(@as(u32, 1), r.release);
     try std.testing.expectEqualStrings(sha, r.source[0].tarball.sha256);
+    try std.testing.expectEqualStrings("%make_install\n", r.install);
+}
+
+test "shell steps are literal: backslashes and dollars survive" {
+    var arena_state = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena_state.deinit();
+    var diag: Diagnostic = .{};
+    const r = try parse(arena_state.allocator(), minimal ++
+        "build = \'\'\'\n%configure --a \\\n    --b=$pkgdir\n\'\'\'\n", &diag);
+    try std.testing.expectEqualStrings("%configure --a \\\n    --b=$pkgdir\n", r.build.?);
+}
+
+test "git sources, lists, subpackages and [[source]] tables" {
+    var arena_state = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena_state.deinit();
+    var diag: Diagnostic = .{};
+    const r = try parse(arena_state.allocator(),
+        "name = \"a\"\nversion = \"1\"\nrelease = 2\nsummary = \"s\"\nlicense = \"MIT\"\n" ++
+            "install = \"x\"\noptions = [\"static\", \"!check\", \"jobs:2\"]\nbuilddeps = [\"zlib\", \"xz\"]\n" ++
+            "[[source]]\ngit = \"https://example.org/a.git\"\ntag = \"v1\"\n" ++
+            "[[source]]\nurl = \"https://example.org/b.tgz\"\nsha256 = \"" ++ sha ++ "\"\n" ++
+            "[subpackages.tools]\nsummary = \"Tools\"\npaths = [\"/usr/bin\"]\n", &diag);
+    try std.testing.expectEqual(@as(u32, 2), r.release);
+    try std.testing.expectEqualStrings("v1", r.source[0].git.ref);
+    try std.testing.expectEqualStrings("https://example.org/b.tgz", r.source[1].tarball.url);
+    try std.testing.expectEqual(@as(usize, 3), r.options.len);
+    try std.testing.expectEqualStrings("xz", r.builddeps[1]);
+    try std.testing.expectEqualStrings("tools", r.subpackages[0].name);
+    try std.testing.expectEqualStrings("/usr/bin", r.subpackages[0].paths[0]);
 }
 
 test "unknown key is an error" {
-    var arena_state = std.heap.ArenaAllocator.init(std.testing.allocator);
-    defer arena_state.deinit();
-    var diag: Diagnostic = .{};
-    try std.testing.expectError(error.InvalidRecipe, parse(arena_state.allocator(),
-        "name: a\nversoin: 1\n", &diag));
-    try std.testing.expectEqualStrings("unknown key 'versoin'", diag.message);
+    try expectInvalid("name = \"a\"\nversoin = 1\n", "unknown key 'versoin'");
 }
 
-test "bad checksum is an error" {
-    var arena_state = std.heap.ArenaAllocator.init(std.testing.allocator);
-    defer arena_state.deinit();
-    var diag: Diagnostic = .{};
-    try std.testing.expectError(error.InvalidRecipe, parse(arena_state.allocator(),
-        "name: a\nversion: 1\nrelease: 1\nsummary: s\nlicense: MIT\n" ++
-            "source:\n  - https://example.org/a.tar.gz : abc\ninstall: x\n", &diag));
+test "types are checked" {
+    try expectInvalid(minimal ++ "check = 5\n", "'check' must be a string, not integer");
+    try expectInvalid(minimal ++ "builddeps = \"zlib\"\n", "'builddeps' must be a list, not string");
+    try expectInvalid(minimal ++ "patches = [1]\n", "'patches' entries must be strings, not integer");
+}
+
+test "release is an integer starting at 1" {
+    const head = "name = \"a\"\nversion = \"1\"\nsummary = \"s\"\nlicense = \"MIT\"\ninstall = \"x\"\n" ++
+        "source = [{ url = \"u\", sha256 = \"" ++ sha ++ "\" }]\n";
+    try expectInvalid(head ++ "release = \"1\"\n", "'release' must be an integer, not string");
+    try expectInvalid(head ++ "release = 0\n", "'release' starts at 1");
+    try expectInvalid(head, "missing required key 'release'");
+}
+
+test "version must be a string" {
+    try expectInvalid("name = \"a\"\nversion = 1.5\n", "'version' must be a string, not float");
+}
+
+test "bad checksum and bad source shapes are errors" {
+    const head = "name = \"a\"\nversion = \"1\"\nrelease = 1\nsummary = \"s\"\nlicense = \"MIT\"\ninstall = \"x\"\n";
+    try expectInvalid(head ++ "source = [{ url = \"https://example.org/a.tar.gz\", sha256 = \"abc\" }]\n", "source 'https://example.org/a.tar.gz': checksum is not 64 hex digits");
+    try expectInvalid(head ++ "source = [{ url = \"u\" }]\n", "source 'u' has no checksum");
+    try expectInvalid(head ++ "source = [{ git = \"g\" }]\n", "git source 'g': give exactly one of 'tag' and 'commit'");
+    try expectInvalid(head ++ "source = [{ git = \"g\", tag = \"t\", commit = \"c\" }]\n", "git source 'g': give exactly one of 'tag' and 'commit'");
+    try expectInvalid(head ++ "source = [{ url = \"u\", sha256 = \"" ++ sha ++ "\", tag = \"t\" }]\n", source_shape);
+    try expectInvalid(head ++ "source = [{ urll = \"u\" }]\n", "source: unknown key 'urll'");
+    try expectInvalid(head ++ "source = []\n", "'source' is empty");
+    try expectInvalid(head ++ "source = [\"u\"]\n", source_shape);
+}
+
+test "a TOML syntax error reports line and column" {
+    try expectInvalid("name = \"a\"\nversion = \n", "line 2, column 11: expected value");
 }

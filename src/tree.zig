@@ -97,7 +97,7 @@ pub const Tree = struct {
     }
 };
 
-/// Loads `<root>/packages/*/package.yml`. Recipes that fail validation are
+/// Loads `<root>/packages/*/package.toml`. Recipes that fail validation are
 /// reported in `problems` and left out of the tree.
 pub fn load(arena: Allocator, io: std.Io, root: []const u8, problems: *std.ArrayList(Problem)) !Tree {
     var list: std.ArrayList(Recipe) = .empty;
@@ -117,9 +117,9 @@ pub fn load(arena: Allocator, io: std.Io, root: []const u8, problems: *std.Array
     }.lt);
 
     for (names.items) |dirname| {
-        const file = try std.fs.path.join(arena, &.{ pkg_path, dirname, "package.yml" });
+        const file = try std.fs.path.join(arena, &.{ pkg_path, dirname, "package.toml" });
         const text = std.Io.Dir.cwd().readFileAlloc(io, file, arena, .limited(1 << 20)) catch |err| {
-            try problems.append(arena, .{ .where = dirname, .message = try std.fmt.allocPrint(arena, "cannot read package.yml: {s}", .{@errorName(err)}) });
+            try problems.append(arena, .{ .where = dirname, .message = try std.fmt.allocPrint(arena, "cannot read package.toml: {s}", .{@errorName(err)}) });
             continue;
         };
         var diag: recipe.Diagnostic = .{};

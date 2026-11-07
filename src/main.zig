@@ -8,7 +8,7 @@ const inputs = @import("inputs.zig");
 const usage =
     \\usage: dkbuild [--tree DIR] <command> [args]
     \\
-    \\  check [name|file.yml]...   validate recipes (all of them if none given)
+    \\  check [name|file.toml]...   validate recipes (all of them if none given)
     \\  fetch [name]...            download sources into cache/sources and check them
     \\  pkg [-j N] [--key FILE] [--keep-root] [--force] <name>...
     \\                             build packages and the dependencies in the tree
@@ -37,7 +37,7 @@ pub fn main(init: std.process.Init) !void {
         // Files named directly are checked on their own.
         var names: std.ArrayList([]const u8) = .empty;
         for (rest) |a| {
-            if (std.mem.endsWith(u8, a, ".yml")) {
+            if (std.mem.endsWith(u8, a, ".toml")) {
                 checked += 1;
                 const text = std.Io.Dir.cwd().readFileAlloc(init.io, a, arena, .limited(1 << 20)) catch |err| {
                     try problems.append(arena, .{ .where = a, .message = @errorName(err) });
@@ -193,7 +193,7 @@ fn contains(hay: []const []const u8, needle: []const u8) bool {
 }
 
 test {
-    _ = @import("yaml.zig");
+    _ = @import("cfg.zig");
     _ = @import("recipe.zig");
     _ = @import("profile.zig");
     _ = @import("macro.zig");

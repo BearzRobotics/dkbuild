@@ -15,21 +15,26 @@ newtree "$T"
 mkdemo "$T/src"
 mkdir -p "$T/packages/probe/files"
 cp tests/sandbox-probe.sh "$T/packages/probe/files/probe.sh"
-cat > "$T/packages/probe/package.yml" <<EOF
-name       : probe
-version    : 1
-release    : 1
-summary    : Test recipe: checks the sandbox from the inside
-license    : MIT
-source     :
-    - $DEMO_URL : $DEMO_SHA
-options    : ['!check']
-build      : |
-    sleep 7777 &
-    sh \$pkgfiles/probe.sh
-install    : |
-    mkdir -p \$pkgdir/usr/share/probe
-    echo ok > \$pkgdir/usr/share/probe/ok
+cat > "$T/packages/probe/package.toml" <<EOF
+name    = "probe"
+version = "1"
+release = 1
+summary = "Test recipe: checks the sandbox from the inside"
+license = "MIT"
+options = ["!check"]
+
+source = [
+    { url = "$DEMO_URL", sha256 = "$DEMO_SHA" },
+]
+
+build = '''
+sleep 7777 &
+sh \$pkgfiles/probe.sh
+'''
+install = '''
+mkdir -p \$pkgdir/usr/share/probe
+echo ok > \$pkgdir/usr/share/probe/ok
+'''
 EOF
 
 OUT=$(./zig-out/bin/dkbuild --tree "$T" pkg probe 2>&1) || { echo "$OUT" | tail -20; echo "FAIL: the build sandbox is not isolated"; exit 1; }

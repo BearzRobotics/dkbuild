@@ -3,6 +3,9 @@
     .fingerprint = 0xfb244dd7a60c44b3,
     .version = "0.0.1",
     .minimum_zig_version = "0.17.0",
-    .dependencies = .{},
+    .dependencies = .{
+        // The TOML library (a sibling project). Pin it by hash once it is published.
+        .toml = .{ .path = "../toml-zig" },
+    },
     .paths = .{ "build.zig", "build.zig.zon", "src", "SPEC.md", "packages" },
 }
