@@ -1,5 +1,6 @@
 # Imported from Chimera Linux cports: work/cports/main/gtk4/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# GTK flags follow the DKRescue desktop post (Wayland only, GLES via epoxy/Mesa).
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 name = "gtk4"
 version = "4.24.1"
@@ -20,21 +21,19 @@ source = [
 
 setup = '''
 %meson \
-    -Dman-pages=true \
-    -Ddocumentation=false \
-    -Dbroadway-backend=true \
-    -Dx11-backend=true \
+    -Dx11-backend=false \
     -Dwayland-backend=true \
-    -Dintrospection=enabled \
-    -Dcolord=enabled \
-    -Dvulkan=enabled \
-    -Dcloudproviders=enabled \
-    -Dtracker=enabled \
-    -Dsysprof=enabled \
-    -Dprint-cups=enabled \
+    -Dbroadway-backend=false \
+    -Dmedia-gstreamer=disabled \
+    -Dprint-cups=disabled \
+    -Dvulkan=disabled \
+    -Dintrospection=disabled \
+    -Ddocumentation=false \
+    -Dman-pages=false \
+    -Dbuild-demos=false \
     -Dbuild-examples=false \
-    -Dbuild-testsuite=false \
-    -Dbuild-tests=false
+    -Dbuild-tests=false \
+    -Dbuild-testsuite=false
 '''
 build = '''
 %meson_build
