@@ -30,5 +30,5 @@ build = '''
 '''
 install = '''
 %make_install \
-    install_python
+   
 '''
