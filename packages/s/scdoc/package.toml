@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: work/cports/main/scdoc/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reviewed: no TODOs; dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "scdoc"
+version = "1.11.3"
+release = 1
+summary = "Tool for generating roff manual pages"
+license = "MIT"
+homepage = "https://git.sr.ht/~sircmpwn/scdoc"
+patches = ["fuck-werror.patch"]
+hostdeps = ["pkgconf"]
+
+source = [
+    { url = "https://git.sr.ht/~sircmpwn/scdoc/archive/1.11.3.tar.gz", sha256 = "4c5c6136540384e5455b250f768e7ca11b03fdba1a8efc2341ee0f1111e57612" },
+]
+
+build = '''
+%make \
+    PREFIX=/usr
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/scdoc/COPYING"
+'''

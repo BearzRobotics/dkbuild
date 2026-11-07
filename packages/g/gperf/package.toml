@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: work/cports/main/gperf/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reviewed: no TODOs; dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "gperf"
+version = "3.3"
+release = 1
+summary = "Perfect hash function generator"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/gperf"
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/gperf/gperf-3.3.tar.gz", sha256 = "fd87e0aba7e43ae054837afd6cd4db03a3f2693deb3619085e6ed9d8d9604ad8" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

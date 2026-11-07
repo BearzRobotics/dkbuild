@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: work/cports/main/argp-standalone/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reviewed: no TODOs; dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "argp-standalone"
+version = "1.4.1"
+release = 1
+summary = "Standalone argp implementation"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/ericonr/argp-standalone"
+hostdeps = ["automake"]
+options = ["!lto"]
+
+source = [
+    { url = "https://github.com/ericonr/argp-standalone/archive/1.4.1.tar.gz", sha256 = "879d76374424dce051b812f16f43c6d16de8dbaddd76002f83fd1b6e57d39e0b" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -fPIC"
+'''
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+install -Dm644 build/libargp.a "$pkgdir/usr/lib/libargp.a"
+install -Dm644 argp.h "$pkgdir/usr/include/argp.h"
+'''

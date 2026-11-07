@@ -3,28 +3,45 @@
 # A build-time system Zig, the way Debian ships a Rust only to build its own
 # packages. It is not the Zig for writing software: Zig changes between
 # releases, so users are pointed to zvm, anyzig and the like (see the
-# package's README). The recipe repackages the official x86_64 binary; the
-# source build waits for the `llvm` package (SPEC 9.3, wave 1), and replaces
-# this recipe without a change of name.
+# package's README).
+#
+# Built from source with CMake, through zig's own stage1 (zig1.wasm compiled by
+# a C compiler), against llvm22 because Zig 0.17.1 accepts only LLVM 22.x.
+# Revision 1 repackaged the upstream x86_64 binary; this replaces it.
 name = "zig"
 version = "0.17.1"
-release = 1
+release = 2
 summary = "Zig compiler, for building packages in this repository"
 description = "The Zig version the repository's Zig packages are built with. Install zvm or anyzig for general development."
 license = "MIT"
 homepage = "https://ziglang.org"
 archs = ["x86_64"]
-options = ["bootstrap", "!strip", "!check"]
+builddeps = ["llvm22", "llvm-libcxx-devel", "zlib-ng-compat-devel", "zstd-devel"]
+options = ["bootstrap", "jobs:4", "!check"]
 
 source = [
-    { url = "https://ziglang.org/download/0.17.1/zig-x86_64-linux-0.17.1.tar.xz", sha256 = "3581863e3cbcfd0fce0efc682ce7e9e93da96668a977791d356a26d2a7e9b17a" },
+    { url = "https://ziglang.org/download/0.17.1/zig-0.17.1.tar.xz", sha256 = "1e89bf06610b769a8c77676c6c8d54b093a0db60f4891f2f91014829012f0e24" },
 ]
 
+setup = '''
+# ZIG_TARGET_MCPU=baseline: a package built for the machine that builds it
+# would fail on older CPUs. The static LLVM keeps zig independent of llvm22 at
+# run time.
+cmake -B build -G Ninja                                              \
+    -DCMAKE_BUILD_TYPE=Release                                       \
+    -DCMAKE_INSTALL_PREFIX=/usr                                      \
+    -DCMAKE_C_COMPILER=clang                                         \
+    -DCMAKE_CXX_COMPILER=clang++                                     \
+    -DCMAKE_PREFIX_PATH=/usr/lib/llvm22                              \
+    -DZIG_STATIC_LLVM=ON                                             \
+    -DZIG_TARGET_MCPU=baseline                                       \
+    -DZIG_VERSION=0.17.1
+'''
+build = '''
+nice -n 10 cmake --build build -j$jobs
+'''
 install = '''
-# zig finds lib/ next to its real path, so the whole tree stays together.
-install -d "$pkgdir/usr/lib/zig" "$pkgdir/usr/bin"
-cp -a zig lib "$pkgdir/usr/lib/zig/"
-ln -s ../lib/zig/zig "$pkgdir/usr/bin/zig"
+DESTDIR=$pkgdir cmake --install build
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/zig/LICENSE"
 install -Dm644 /dev/stdin "$pkgdir/usr/share/doc/zig/README" <<'DOC'
 This Zig exists to build the packages in this repository. It is

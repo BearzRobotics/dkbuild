@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: work/cports/main/musl-obstack/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reviewed: no TODOs; dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "musl-obstack"
+version = "1.2.3"
+release = 1
+summary = "Implementation of obstack for musl"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/void-linux/musl-obstack"
+hostdeps = ["automake", "libtool", "pkgconf"]
+
+source = [
+    { url = "https://github.com/void-linux/musl-obstack/archive/v1.2.3.tar.gz", sha256 = "9ffb3479b15df0170eba4480e51723c3961dbe0b461ec289744622db03a69395" },
+]
+
+setup = '''
+./bootstrap.sh
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

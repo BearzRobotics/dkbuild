@@ -1,0 +1,34 @@
+# Imported from Chimera Linux cports: work/cports/main/file/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reviewed: no TODOs; dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "file"
+version = "5.48"
+release = 1
+summary = "File type identification utility"
+license = "BSD-2-Clause"
+homepage = "http://www.darwinsys.com/file"
+hostdeps = ["automake", "pkgconf", "slibtool"]
+builddeps = ["zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://astron.com/pub/file/file-5.48.tar.gz", sha256 = "ed14656883b23a364b4057c05595d93252da9bc473d30106519519d0da141283" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-static \
+    --disable-libseccomp \
+    --disable-bzlib \
+    --disable-xzlib
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/file/COPYING"
+'''

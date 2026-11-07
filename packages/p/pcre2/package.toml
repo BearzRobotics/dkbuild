@@ -1,0 +1,41 @@
+# Imported from Chimera Linux cports: work/cports/main/pcre2/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reviewed: no TODOs; dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "pcre2"
+version = "10.49"
+release = 1
+summary = "Perl Compatible Regular Expressions v2"
+license = "BSD-3-Clause"
+homepage = "https://www.pcre.org"
+patches = ["tests.patch"]
+hostdeps = ["pkgconf", "automake", "libtool"]
+builddeps = ["zlib-ng-compat-devel", "bzip2-devel", "libedit-devel"]
+
+source = [
+    { url = "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.49/pcre2-10.49.tar.gz", sha256 = "929f0b20e62879252a15886b06c89f1edef61a363cbd5826fb041080a5e557ae" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-pic \
+    --enable-pcre2-16 \
+    --enable-pcre2-32 \
+    --enable-pcre2test-libedit \
+    --enable-pcre2grep-libz \
+    --enable-pcre2grep-libbz2 \
+    --enable-newline-is-anycrlf \
+    --enable-jit \
+    --enable-static \
+    --disable-symvers
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 LICENCE.md "$pkgdir/usr/share/licenses/pcre2/LICENCE.md"
+'''

@@ -1,0 +1,38 @@
+# Imported from Chimera Linux cports: work/cports/main/flex/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reviewed: no TODOs; dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "flex"
+version = "2.6.4"
+release = 3
+summary = "Fast Lexical Analyzer"
+license = "custom:flex"
+homepage = "https://github.com/westes/flex"
+patches = ["bmake.patch", "disable-tests.patch", "no-help2man.patch", "rpl-malloc.patch"]
+hostdeps = ["byacc"]
+builddeps = ["byacc"]
+rundeps = ["byacc"]
+
+source = [
+    { url = "https://github.com/westes/flex/releases/download/v2.6.4/flex-2.6.4.tar.gz", sha256 = "e87aae032bf07c26f85ac0ed3250998c37621d95f8bd748b31f15b33c45ee995" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -D_GNU_SOURCE"
+'''
+setup = '''
+%configure \
+    --disable-bootstrap \
+    --disable-shared
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+mkdir -p "$pkgdir/usr/bin"
+ln -sf flex "$pkgdir/usr/bin/lex"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/flex/COPYING"
+'''

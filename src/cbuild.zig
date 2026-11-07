@@ -1381,7 +1381,11 @@ pub fn importPath(arena: Allocator, io: std.Io, path: []const u8, out_root: []co
         .{ .from = files_dir, .name = "files", .copy = has_files },
     }) |c| {
         if (!c.copy) continue;
-        const res = try std.process.run(arena, io, .{ .argv = &.{ "cp", "-r", c.from, try std.fs.path.join(arena, &.{ out_dir, c.name }) } });
+        // "from/." copies the contents, so converting the same template twice (a
+        // cports subpackage symlink points back at it) can't nest files/files.
+        const dest = try std.fs.path.join(arena, &.{ out_dir, c.name });
+        try Dir.cwd().createDirPath(io, dest);
+        const res = try std.process.run(arena, io, .{ .argv = &.{ "cp", "-r", try std.fmt.allocPrint(arena, "{s}/.", .{c.from}), dest } });
         switch (res.term) {
             .exited => |code| if (code != 0) return error.CopyFailed,
             else => return error.CopyFailed,

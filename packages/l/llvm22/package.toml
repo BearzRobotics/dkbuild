@@ -1,0 +1,55 @@
+# needed by: zig (its CMake accepts only LLVM 22.x; the system LLVM is 23)
+#
+# Libraries only, installed under /usr/lib/llvm22 so nothing on the system
+# finds them by accident. No tools but llvm-config, no runtimes, no shared
+# library: zig links these statically. All targets are built because zig's
+# bindings reference every target's initialiser (src/codegen/llvm/bindings.zig).
+# Retire this package when Zig supports the LLVM version in the tree.
+name = "llvm22"
+version = "22.1.8"
+release = 1
+summary = "LLVM 22 libraries, for building Zig"
+license = "Apache-2.0 WITH LLVM-exception"
+homepage = "https://llvm.org"
+archs = ["x86_64"]
+builddeps = ["zlib-ng-compat-devel", "zstd-devel", "linux-headers", "llvm-libcxx-devel"]
+# Same core limits as llvm: 4 compile jobs, one link job, low priority.
+options = ["jobs:4", "!check", "!strip"]
+
+source = [
+    { url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.8/llvm-project-22.1.8.src.tar.xz", sha256 = "922f1817a0df7b1489272d18134ee0087a8b068828f87ac63b9861b1a9965888" },
+]
+
+setup = '''
+cmake -G Ninja -S llvm -B build                                     \
+    -DCMAKE_BUILD_TYPE=Release                                      \
+    -DCMAKE_INSTALL_PREFIX=/usr/lib/llvm22                          \
+    -DCMAKE_C_COMPILER=clang                                        \
+    -DCMAKE_CXX_COMPILER=clang++                                    \
+    -DLLVM_HOST_TRIPLE="$target"                                    \
+    -DLLVM_TARGETS_TO_BUILD="AArch64;AMDGPU;ARM;AVR;BPF;Hexagon;Lanai;Mips;MSP430;NVPTX;PowerPC;RISCV;Sparc;SPIRV;SystemZ;VE;WebAssembly;X86;XCore;LoongArch"  \
+    -DLLVM_ENABLE_PROJECTS="clang;lld"                              \
+    -DLLVM_ENABLE_LIBCXX=ON                                         \
+    -DLLVM_ENABLE_ZLIB=FORCE_ON                                     \
+    -DLLVM_ENABLE_ZSTD=FORCE_ON                                     \
+    -DLLVM_ENABLE_LIBXML2=OFF                                       \
+    -DLLVM_ENABLE_LIBEDIT=OFF                                       \
+    -DLLVM_ENABLE_TERMINFO=OFF                                      \
+    -DLLVM_INCLUDE_TESTS=OFF                                        \
+    -DLLVM_INCLUDE_BENCHMARKS=OFF                                   \
+    -DLLVM_INCLUDE_EXAMPLES=OFF                                     \
+    -DLLVM_INCLUDE_DOCS=OFF                                         \
+    -DLLVM_INCLUDE_UTILS=OFF                                        \
+    -DLLVM_PARALLEL_LINK_JOBS=1                                     \
+    -DCLANG_BUILD_TOOLS=OFF                                         \
+    -DCLANG_INCLUDE_TESTS=OFF                                       \
+    -DCLANG_INCLUDE_DOCS=OFF                                        \
+    -DLLVM_DISTRIBUTION_COMPONENTS="llvm-libraries;llvm-headers;cmake-exports;llvm-config;clang-libraries;clang-headers;clang-cmake-exports;lld-libraries;lld-headers;lld-cmake-exports"
+'''
+build = '''
+nice -n 10 ninja -C build -j$jobs distribution
+'''
+install = '''
+DESTDIR=$pkgdir nice -n 10 ninja -C build -j$jobs install-distribution
+install -Dm644 llvm/LICENSE.TXT "$pkgdir/usr/share/licenses/llvm22/LICENSE.TXT"
+'''

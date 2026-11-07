@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: work/cports/main/gmake/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reviewed: no TODOs; dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "make"
+version = "4.4.1"
+release = 3
+summary = "GNU Make build tool"
+license = "GPL-3.0-or-later"
+homepage = "http://www.gnu.org/software/make"
+checkdeps = ["perl"]
+options = ["!check", "bootstrap"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz", sha256 = "dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3" },
+]
+
+setup = '''
+%configure \
+    --without-guile
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+mkdir -p "$pkgdir/usr/bin"
+ln -sf make "$pkgdir/usr/bin/gmake"
+'''

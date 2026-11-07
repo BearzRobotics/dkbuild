@@ -1,0 +1,34 @@
+# Imported from Chimera Linux cports: work/cports/main/readline/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reviewed: no TODOs; dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+name = "readline"
+version = "8.3.001"
+release = 2
+summary = "GNU Readline library"
+license = "GPL-3.0-or-later"
+homepage = "https://tiswww.cwru.edu/php/chet/readline/rltop.html"
+patches = ["no-rpath-and-link.patch", "nullptr.patch", "shlib.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["ncurses-devel"]
+
+source = [
+    { url = "https://git.savannah.gnu.org/cgit/readline.git/snapshot/readline-15970c431517a046099d8294c91d778b1da9b29d.tar.gz", sha256 = "cbf75f73fd1bbdfd75b3988c401d6769aad6057ac79241127a7b44a79d89ae0c" },
+]
+
+setup = '''
+%configure \
+    --disable-static \
+    --enable-multibyte \
+    --with-curses \
+    bash_cv_termcap_lib=libncursesw
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+rm -rf "$pkgdir/usr/share/doc"
+'''
