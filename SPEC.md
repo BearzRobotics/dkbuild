@@ -10,8 +10,8 @@ Resolve it here before writing code that depends on it.
 ## 1. Vision
 
 The package builder for **FenrirOS**, a general-purpose operating system, in the spirit of Chimera
-Linux's `cbuild`, written in Zig, with recipes in a YAML format modelled on
-Solus's `package.yml`. It turns a tree of recipes into signed **apk**
+Linux's `cbuild`, written in Zig, with recipes in TOML whose fields follow
+Solus's `package.yml` and Chimera's templates. It turns a tree of recipes into signed **apk**
 packages and repositories, and turns a list of packages into a bootable
 system image.
 
@@ -38,7 +38,7 @@ Three things make it trustworthy, and this spec exists to enforce them:
 
 ### Goals (v1)
 
-- Build packages from YAML recipes, in dependency order, each in a clean
+- Build packages from TOML recipes, in dependency order, each in a clean
   sandbox.
 - Produce apk v3 packages and signed repository indexes with apk-tools.
 - **Several architectures:** `x86_64` first, then `aarch64` and `riscv64`,
@@ -53,7 +53,8 @@ Three things make it trustworthy, and this spec exists to enforce them:
 
 - A package manager of our own. apk-tools is the package manager.
 - Building with GCC. The toolchain is LLVM/Clang, as everywhere in FenrirOS.
-- Building recipes from other distributions' formats.
+- Building directly from other distributions' recipe formats. They are
+  **converted** to our TOML first (5.9); the build only ever sees TOML.
 - A binary cache server. Repositories are plain directories, served by any
   web server if wanted.
 
@@ -78,7 +79,7 @@ particular:
 | Layer | Choice | Notes |
 |---|---|---|
 | Language | **Zig 0.17.0** | Pinned in `build.zig.zon`, as in dkde and dklilo. |
-| Recipe format | **YAML**, a strict subset (5.1) | Our own reader, `src/yaml.zig`. zig-yaml was tried and dropped (14). |
+| Recipe format | **TOML** (5.1) | `toml-zig` (TOML 1.1, `std.Io`), a path dependency until it is pinned by hash. YAML survives only as an import format (5.9). |
 | Packages | **apk-tools v3** (`apk mkpkg`, `apk mkndx`, `apk add`) | The same tool and package format as Chimera. Pinned to an exact version. |
 | Sandbox | **Linux namespaces** (user, mount, PID, network, UTS, IPC) | Through `unshare(2)` directly. No bubblewrap. |
 | Fetching | Zig's `std.http` | Only in the fetch step. |
@@ -98,38 +99,45 @@ One directory per package, in the recipe tree:
 ```
 packages/
   zstd/
-    package.yml
+    package.toml
   lvm2/
-    package.yml
+    package.toml
     patches/
       lvm2-2.03.35-musl_stdio-1.patch
   dinit/
-    package.yml
+    package.toml
     files/
       boot
       rcboot.sh
 ```
 
-`package.yml` is YAML, limited to: block mappings, block sequences, plain and
-quoted scalars, literal block scalars (`|`), and one-line flow sequences of
-scalars (`[a, b]`, used for short lists like `builddeps`). No anchors,
-aliases, tags, flow mappings, nested flow collections, folded (`>`) or
-chomped (`|-`) scalars, tabs in indentation, duplicate keys or multiple
-documents. Keys not in 5.2 are an error, not
-ignored, so a typo can't silently do nothing.
+`package.toml` is TOML, read with `toml-zig`. Keys not in 5.2 are an error,
+not ignored, so a typo can't silently do nothing, and every value must have
+the type 5.2 gives it. Two TOML rules matter when writing one:
+
+- **Tables go last.** In TOML every key after a `[table]` header belongs to
+  that table, so all top-level keys come first and `[subpackages.*]` tables
+  last.
+- **Shell steps are multi-line *literal* strings** (`'''`...`'''`). Nothing in them is
+  an escape, so `\` line continuations, `$pkgdir` and `%macros` are written
+  exactly as the shell sees them. A step can't contain `'''`; one that must
+  uses a `"""` string with escapes.
+
+The comment character is `#`. `docs/writing-toml.md` in `toml-zig` is a short
+guide to the rest of the syntax.
 
 ### 5.2 Fields
 
 | Key | Required | Meaning |
 |---|---|---|
 | `name` | yes | Package name: lowercase letters, digits, `-`, `+`, `.` |
-| `version` | yes | Upstream version |
-| `release` | yes | Recipe revision, starting at 1; reset when `version` changes |
+| `version` | yes | Upstream version (always a string: `"2.03.35"` is not a number) |
+| `release` | yes | Recipe revision, an integer starting at 1; reset when `version` changes |
 | `summary` | yes | One line |
 | `description` | no | Longer text |
 | `license` | yes | SPDX expression |
 | `homepage` | no | URL |
-| `source` | yes | List of `URL : sha256` entries (5.3) |
+| `source` | yes | Array of inline tables, `{ url, sha256 }` or `{ git, tag \| commit }` (5.3) |
 | `patches` | no | Files in `patches/`, applied in order with `patch -p1` |
 | `archs` | no | Architectures this builds for; default all. `!riscv64` excludes one |
 | `hostdeps` | no | Packages run during the build (compilers, meson, perl): installed for the **build machine's** architecture |
@@ -143,16 +151,17 @@ ignored, so a typo can't silently do nothing.
 
 ### 5.3 Sources
 
-```yaml
-source     :
-    - https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz : 0123…cdef
-    - git|https://github.com/BearzRobotics/dkde.git : v0.0.3
+```toml
+source = [
+    { url = "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz", sha256 = "0123…cdef" },
+    { git = "https://github.com/BearzRobotics/dkde.git", tag = "v0.0.3" },
+]
 ```
 
-- A tarball entry is `URL : sha256`. The file is downloaded once into the
+- A tarball entry is `{ url, sha256 }`. The file is downloaded once into the
   source cache, named by its checksum, and the build fails if the checksum
   doesn't match.
-- A `git|` entry clones at a tag or commit. A tag is resolved to its commit
+- A `{ git, tag }` or `{ git, commit }` entry clones at that tag or commit. A tag is resolved to its commit
   on first fetch and recorded in `package.lock` next to the recipe, so later
   builds use exactly that commit.
 - The first tarball is unpacked into the build directory, and the build
@@ -220,17 +229,18 @@ programs, data packages, plugins loaded with `dlopen`.
 
 ### 5.7 Subpackages
 
-```yaml
-subpackages:
-    devel:
-        summary : Headers and development files
-        paths   : [/usr/include, /usr/lib/*.so, /usr/lib/pkgconfig, /usr/share/pkgconfig, /usr/lib/cmake, /usr/share/aclocal]
-    static:
-        summary : Static libraries
-        paths   : [/usr/lib/*.a]
-    doc:
-        summary : Manual pages and documentation
-        paths   : [/usr/share/man, /usr/share/doc, /usr/share/info]
+```toml
+[subpackages.devel]
+summary = "Headers and development files"
+paths   = ["/usr/include", "/usr/lib/*.so", "/usr/lib/pkgconfig", "/usr/share/pkgconfig", "/usr/lib/cmake", "/usr/share/aclocal"]
+
+[subpackages.static]
+summary = "Static libraries"
+paths   = ["/usr/lib/*.a"]
+
+[subpackages.doc]
+summary = "Manual pages and documentation"
+paths   = ["/usr/share/man", "/usr/share/doc", "/usr/share/info"]
 ```
 
 `<name>-devel`, `<name>-static` and `<name>-doc` are created **by default**
@@ -257,65 +267,97 @@ information (`--strip-debug`).
 
 **Autotools, with a musl patch:**
 
-```yaml
-name       : lvm2
-version    : 2.03.35
-release    : 1
-summary    : Logical Volume Manager
-license    : GPL-2.0-only AND LGPL-2.1-only
-homepage   : https://sourceware.org/lvm2/
-source     :
-    - https://sourceware.org/pub/lvm2/LVM2.2.03.35.tgz : <sha256>
-patches    :
-    - lvm2-2.03.35-musl_stdio-1.patch
-builddeps  : [libaio, util-linux]
-build      : |
-    %configure --disable-udev_rules --disable-udev_sync \
-               --with-default-locking-dir=/run/lock/lvm
-    %make
-install    : |
-    %make_install
+```toml
+name      = "lvm2"
+version   = "2.03.35"
+release   = 1
+summary   = "Logical Volume Manager"
+license   = "GPL-2.0-only AND LGPL-2.1-only"
+homepage  = "https://sourceware.org/lvm2/"
+patches   = ["lvm2-2.03.35-musl_stdio-1.patch"]
+builddeps = ["libaio", "util-linux"]
+
+source = [
+    { url = "https://sourceware.org/pub/lvm2/LVM2.2.03.35.tgz", sha256 = "<sha256>" },
+]
+
+build = '''
+%configure --disable-udev_rules --disable-udev_sync \
+           --with-default-locking-dir=/run/lock/lvm
+%make
+'''
+install = '''
+%make_install
+'''
 ```
 
 **Meson:**
 
-```yaml
-name       : seatd
-version    : 0.9.1
-release    : 1
-summary    : Seat management daemon and library
-license    : MIT
-source     :
-    - https://git.sr.ht/~kennylevinsen/seatd/archive/0.9.1.tar.gz : <sha256>
-build      : |
-    %meson -Dlibseat-builtin=enabled -Dserver=enabled -Dexamples=disabled
-    %meson_build
-install    : |
-    %meson_install
+```toml
+name    = "seatd"
+version = "0.9.1"
+release = 1
+summary = "Seat management daemon and library"
+license = "MIT"
+
+source = [
+    { url = "https://git.sr.ht/~kennylevinsen/seatd/archive/0.9.1.tar.gz", sha256 = "<sha256>" },
+]
+
+build = '''
+%meson -Dlibseat-builtin=enabled -Dserver=enabled -Dexamples=disabled
+%meson_build
+'''
+install = '''
+%meson_install
+'''
 ```
 
 **Zig:**
 
-```yaml
-name       : dkde
-version    : 0.0.3
-release    : 1
-summary    : A small Wayland desktop shell
-license    : MIT
-source     :
-    - https://github.com/BearzRobotics/dkde/releases/download/v0.0.3/dkde-v0.0.3.tar.gz : <sha256>
-hostdeps   : [zig]
-builddeps  : [gtk4-devel, gtk4-layer-shell-devel, wayland-devel, harfbuzz-devel]
-rundeps    : [labwc, seatd, dbus]
-install    : |
-    %zig_build
+```toml
+name      = "dkde"
+version   = "0.0.3"
+release   = 1
+summary   = "A small Wayland desktop shell"
+license   = "MIT"
+hostdeps  = ["zig"]
+builddeps = ["gtk4-devel", "gtk4-layer-shell-devel", "wayland-devel", "harfbuzz-devel"]
+rundeps   = ["labwc", "seatd", "dbus"]
+
+source = [
+    { url = "https://github.com/BearzRobotics/dkde/releases/download/v0.0.3/dkde-v0.0.3.tar.gz", sha256 = "<sha256>" },
+]
+
+install = '''
+%zig_build
+'''
 ```
+
+### 5.9 Importing recipes from other distributions
+
+dkbuild builds only TOML recipes. Recipes from elsewhere are converted by a
+separate import step (**planned, after B1**; nothing here is built yet):
+
+- **Chimera `cbuild` templates (`template.py`) are the main source.** Chimera
+  is also musl, LLVM and apk, so most packages apply directly. The
+  declarative top of a template (`pkgname`, `pkgver`, `pkgrel`, `pkgdesc`,
+  `license`, `url`, `source` + `sha256`, `hostmakedepends`, `makedepends`,
+  `checkdepends`, `depends`, `options`, `build_style`) maps onto the fields
+  of 5.2; `build_style` maps onto the macros of 5.5. A template is Python,
+  so its functions (`def build(self)`, `@subpackage`, loops) are not
+  translated automatically: the importer writes a draft recipe, turns
+  simple `self.do(...)` calls into shell, and marks everything else with a
+  `# TODO(cbuild): ...` comment and a report, for a person to finish.
+  cports is BSD-2-Clause; converted recipes keep its attribution.
+- **Solus `package.yml`** files are read with `yaml-zig` and converted the
+  same way. This is the secondary path.
 
 ## 6. Architectures
 
 ### 6.1 Target profiles
 
-Each architecture is a file in `profiles/`, holding everything
+Each architecture is a TOML file in `profiles/` (`<arch>.toml`), holding everything
 architecture-specific so recipes don't have to:
 
 | Field | x86_64 | aarch64 | riscv64 |
@@ -326,11 +368,12 @@ architecture-specific so recipes don't have to:
 | Kernel `ARCH` | `x86` | `arm64` | `riscv` |
 | Boot | **OPEN** (dklilo, when it exists) | **OPEN** (UEFI) | **OPEN** (UEFI or OpenSBI) |
 
-The vendor field is `chimera` for now, because the Chimera toolchain used to
-bootstrap builds looks for its compiler runtime under
-`x86_64-chimera-linux-musl`; with any other vendor, clang can't find
-`crtbeginS.o` and `libclang_rt.builtins`. Once FenrirOS builds its own LLVM
-(section 9), the vendor becomes `fenriros`.
+The vendor field is `chimera` in the profiles today, left over from the
+prototype that built in Chimera's bootstrap root, whose compiler looks for its
+runtime under `x86_64-chimera-linux-musl`. With the DKRescue image as stage 0
+(9.2) that constraint probably no longer applies and the vendor can be
+`fenriros` from the start (**OPEN**, 9.2). The vendor never changes the CPU or
+ABI.
 
 From a profile, dkbuild generates the Meson cross file, the CMake
 toolchain file and the `configure` `--host` value for a cross build.
@@ -424,7 +467,7 @@ namespaces**:
 
 Next to each built package dkbuild writes `repo/<arch>/<name>.dkhash`: the
 `version-release` it was built as, a hash of the recipe's **own inputs**
-(`package.yml`, everything under `patches/` and `files/`, and the
+(`package.toml`, everything under `patches/` and `files/`, and the
 architecture profile), and a hash of the **in-tree packages it was built
 against** (its `hostdeps` and `builddeps`, transitively: their names,
 versions and own-input hashes). Before building, `dkbuild pkg` compares:
@@ -441,40 +484,51 @@ package's output changes. A rebuild only because something it builds against
 changed is not an error: the recipe didn't change, and the new package keeps
 its version, as in a rebuild against a new library.
 
-### 7.3 Build roots and the bootstrap repositories
+### 7.3 Build roots, stage 0 and `repo/`
 
-Until FenrirOS builds its own toolchain (9), the build root is populated from
-the Chimera repositories plus `repo/`. The root's `/etc/apk/repositories`
-lists `repo/` first, tagged `@dk`, then Chimera's. Every in-tree dependency is
-requested as `name@dk=<version>-r<release>`, together with its recipe's main
-package, so a same-named package in the Chimera repositories can't be chosen
-instead. Anything else a package pulls in (its own runtime dependencies) is
-resolved by apk from all repositories.
+Two kinds of build root exist, matching the stages of 9.2:
+
+- **Stage 1 (bootstrap):** the build machine is the **DKRescue image** (9.2),
+  not a root assembled by apk. Its root filesystem is the read-only lower
+  layer of the build root; the build writes to a throwaway layer on top. It
+  has a complete toolchain but no apk database, so the recipe's `hostdeps` and
+  `builddeps` are **not installed** into it: they are whatever DKRescue already
+  provides, and a forgotten dependency is *not* caught in stage 1. In-tree
+  packages built earlier are installed on top from `repo/`.
+- **Stage 2 and everything after:** the root is populated by apk from
+  `repo/` only: the base build set (`base-devel`) plus the recipe's declared
+  dependencies and nothing else. This is where "a forgotten dependency fails
+  the build" (section 1) is enforced.
+
+There is no Chimera repository in either. (The first prototype built in
+Chimera's bootstrap root; its `/etc/apk/repositories` tagged `repo/` as `@dk`
+so a Chimera package could not stand in for an in-tree one. With `repo/` the
+only source that tag is unnecessary.)
 
 ## 8. Images
 
-```yaml
-# images/fenriros.yml
-name     : fenriros
-arch     : x86_64
-packages :
-    - base
-    - linux
-    - bootloader   # OPEN: dklilo when it exists
-    - core-utils
-    - dkde
-exclude  :
-    - "*-devel"
-    - "*-doc"
-users    :
-    - name: fenrir
-      groups: [wheel, video, render]
-      password: locked
-services : [udevd, dhcpcd, syslogd, seatd]
-output   : [rootfs, squashfs, iso]
+```toml
+# images/fenriros.toml
+name     = "fenriros"
+arch     = "x86_64"
+packages = [
+    "base",
+    "linux",
+    "bootloader",   # OPEN: dklilo when it exists
+    "core-utils",
+    "dkde",
+]
+exclude  = ["*-devel", "*-doc"]
+services = ["udevd", "dhcpcd", "syslogd", "seatd"]
+output   = ["rootfs", "squashfs", "iso"]
+
+[[users]]
+name     = "fenrir"
+groups   = ["wheel", "video", "render"]
+password = "locked"
 ```
 
-`dkbuild image images/fenriros.yml`:
+`dkbuild image images/fenriros.toml`:
 
 1. `apk add --root <rootfs> --arch <arch> --initdb` with the package list
    (and nothing matching `exclude`), from the local repository.
@@ -539,29 +593,44 @@ comment): nothing joins the tree because DKRescue had it.
 
 ### 9.2 Stages
 
-dkbuild needs a build machine with a toolchain and apk. The machine we have is
-the **Chimera bootstrap root** (`rootfs/chimera`), and building in it needs no
-hand-built stage 0, so the by-hand DKRescue chroot is no longer on the path.
+dkbuild needs a build machine with a toolchain and apk. That machine is
+**stage 0: the DKRescue image**, the hand-built system documented in the
+DKRescue posts (`dkrescue-fixed.iso`). Its `/live/rootfs.sfs` already has
+LLVM 23 and compiler-rt, musl, Zig, Python, Perl, GNU make, CMake, Ninja,
+Meson, bash, dinit, git, scdoc, `unshare`, `pivot_root` and apk-tools, which
+is the list in the "build host" post. No hand-built stage 0 is left to do, and
+no other distribution's packages are needed.
 
-1. **Stage 1:** build `base` and `base-devel` with build roots populated from
-   the Chimera repositories plus `repo/` (7.3). Names the recipes use for
-   build tools are Chimera's.
+`dkbuild bootstrap-root <image>` (**planned**) unpacks the image's root
+filesystem into `rootfs/dkrescue/`. It accepts the ISO (reading
+`/live/rootfs.sfs`), the squashfs itself, or a root tarball
+(`dkrescue-bootstrap.tar.xz`, `dkrescue-toolchain.tar.xz`). It checks that the
+tools above are present and that user namespaces work (`unshare --user
+--map-root-user`). The private signing key never comes from the image: the
+ISO is built without `home/builder` and `srv/dkbuild`.
+
+1. **Stage 1:** build `base` and `base-devel` inside stage 0, as 7.3
+   describes: DKRescue's root is the lower layer, `repo/` supplies the
+   in-tree packages built so far.
 2. **Stage 2:** build both again with build roots populated from **`repo/`
-   only**: no Chimera repository, and the base build set is `base-devel`. The
-   Chimera root still supplies the `apk` binary that populates the roots; it
-   never supplies a package.
+   only**, and the base build set is `base-devel`. The stage 0 root still
+   supplies the `apk` binary that populates the roots; it never supplies a
+   package.
 3. **Compare** the stage 1 and stage 2 packages: file lists, sizes, and the
    scans' `depends` and `provides`. Differences point to a package that
    depends on its build machine in a way it shouldn't. Byte-identical output
    is not required in v1.
 
-After stage 2, nothing in the tree depends on Chimera.
+After stage 2, nothing in the tree depends on DKRescue.
 
-**The vendor field changes at the cut-over.** Stage 1 uses the `chimera` triples
-(6.1) because the toolchain that builds it looks for its runtime there. The
-LLVM built in stage 1 is configured with `LLVM_HOST_TRIPLE=<arch>-fenriros-linux-musl`,
-so stage 2 runs with the profiles' triples switched to `fenriros`. The stage 1
-profiles live in `profiles/bootstrap/` and are used with `--bootstrap`.
+**The vendor field.** The earlier plan kept the `chimera` vendor in the
+profiles' triples through stage 1 because Chimera's toolchain looks for its
+compiler runtime under `<arch>-chimera-linux-musl`. DKRescue's LLVM installs
+its runtime in the plain layout (`usr/lib/clang/23/lib/linux/`,
+`libclang_rt.builtins-x86_64.a`), not under a per-triple directory, so that
+constraint probably does not apply and the profiles can say `fenriros` from
+the start. **OPEN:** confirm by building a program with the `fenriros` triple
+in stage 0, then drop `profiles/bootstrap/` if nothing needs it.
 
 ### 9.3 Build order
 
@@ -584,14 +653,22 @@ The order inside a wave is dkbuild's dependency order, not this table's.
 
 Found by reading the DKRescue posts against what exists:
 
-1. **Stage 2 build roots:** the base build set comes from `base-devel`, and
-   `/etc/apk/repositories` lists `repo/` only. Today `build.zig` hard-codes
-   Chimera's package names (`base-bootstrap`, `clang`, `gmake`,
-   `chimerautils-extra`).
-2. **Names across stages:** Chimera calls GNU sed `gsed` because `sed` is BSD
-   there; in FenrirOS `sed` is GNU. A recipe that says `gsed` works in stage 1
-   and not in stage 2. Needs a `provides` key in recipes, or a per-stage name
-   map. **OPEN.**
+1. **Stage 0 and stage 2 build roots:** `build.zig` hard-codes Chimera's
+   package names (`base-bootstrap`, `clang`, `gmake`, `chimerautils-extra`)
+   and Chimera's repositories. For stage 1 it must instead mount the DKRescue
+   root read-only under a writable layer (7.3), and for stage 2 populate the
+   root from `base-devel` and `repo/` only, with `/etc/apk/repositories`
+   listing `repo/` alone. **Stage 1's lower layer is an OPEN design point:**
+   an overlay mount inside the user namespace (needs `overlayfs` in the
+   DKRescue kernel; unprivileged overlay mounts since Linux 5.11), or a
+   read-only bind mount plus a writable `$pkgdir`/`$srcdir`/`/tmp`. The second
+   is simpler and enough if a build never writes outside those.
+2. **Names across stages:** the existing recipes say `gsed` because Chimera's
+   `sed` is BSD; DKRescue's `sed` is GNU, as FenrirOS's will be. With the
+   DKRescue base this item shrinks: recipes should say `sed`, and the
+   `gsed` workarounds in `linux-headers` and `lvm2` go away. If a name
+   still differs between stages, it needs a `provides` key in recipes or a
+   per-stage name map. **OPEN.**
 3. **Zig dependency fetch** for `dkde-console`: `dkbuild fetch` runs
    `zig fetch` while the network is allowed, and the build uses `--system`
    offline (the `zig_build` macro already passes it). Scoped to libghostty-vt
@@ -604,9 +681,10 @@ Found by reading the DKRescue posts against what exists:
    but nothing has checked it. Test with shadow.
 6. **Directory modes:** the subpackage split recreates moved directories with
    default permissions (5.7); a package whose directory is `0700` loses that.
-7. **Tests that need GNU tools:** many `check` steps need GNU coreutils, which
-   Chimera's root doesn't have. They can be switched on once wave 4 has built
-   them, i.e. in stage 2.
+7. **Tests that need GNU tools:** many `check` steps need GNU coreutils.
+   DKRescue's root has them (static), so stage 1 can already run those
+   checks and the `!check` workarounds added for Chimera's BSD tools (zstd's
+   `stat -c`) can go. Verify against DKRescue before removing them.
 8. **Large builds on 8 GB:** LLVM needs `LLVM_PARALLEL_LINK_JOBS` and the
    `jobs:N` option; the build tool should print a memory warning rather than
    die silently.
@@ -656,8 +734,7 @@ build.zig.zon
 SPEC.md
 src/
   main.zig
-  yaml.zig     YAML subset reader (5.1)
-  recipe.zig   recipe model, validation
+  recipe.zig   recipe model, validation (reads TOML with toml-zig)
   macro/       macro expansion, per-target variables
   profile/     target profiles, cross files, toolchain files
   fetch/
@@ -671,16 +748,16 @@ src/
 **The recipe tree** (FenrirOS's):
 
 ```
-packages/<name>/package.yml, patches/, files/
-profiles/x86_64.yml, aarch64.yml, riscv64.yml
-images/fenriros.yml
+packages/<name>/package.toml, patches/, files/
+profiles/x86_64.toml, aarch64.toml, riscv64.toml
+images/fenriros.toml
 keys/             public signing keys (private keys never in the repository)
 ```
 
 ## 12. Testing
 
-- **Unit tests:** the YAML subset reader (and its errors for everything
-  outside the subset), recipe validation, macro expansion for each target,
+- **Unit tests:** recipe and profile validation (wrong types, unknown keys,
+  bad checksums), macro expansion for each target,
   the generated cross and toolchain files, subpackage splitting, and the
   ELF and pkg-config scans against fixture files.
 - **Sandbox tests:** a build can't reach the network, can't see the build
@@ -689,11 +766,11 @@ keys/             public signing keys (private keys never in the repository)
   from the inside; the same probe must flag the host, or it proves nothing.)
 - **End-to-end tests** (`tests/run-all.sh`) use `dkdemo`, a tiny library built
   from a generated tarball through a `file://` source, so they need no
-  download and no package in the Chimera repositories can stand in for it.
+  download and no package from any repository can stand in for it.
 - **A forgotten dependency fails:** a test recipe that uses zlib without
   declaring it must fail to build.
 - **The FenrirOS tree:** `dkbuild world` for `x86_64`, then
-  `dkbuild image images/fenriros.yml`, then the ISO boots in QEMU with
+  `dkbuild image images/fenriros.toml`, then the ISO boots in QEMU with
   SeaBIOS and OVMF, as in the DKRescue ISO build.
 - **Cross:** the base set for `aarch64` builds, and its image boots in
   `qemu-system-aarch64` with UEFI firmware.
@@ -731,7 +808,7 @@ keys/             public signing keys (private keys never in the repository)
 ### B3 — Images
 
 - Section 8.
-- **Done when:** `dkbuild image images/fenriros.yml` produces an ISO that
+- **Done when:** `dkbuild image images/fenriros.toml` produces an ISO that
   boots in QEMU on BIOS and UEFI, and passes CONSTRAINTS.md's checks.
 
 ### B4 — Cross
@@ -747,11 +824,13 @@ keys/             public signing keys (private keys never in the repository)
 ## 14. Open questions
 
 1. ~~The real name.~~ **Decided:** `dkbuild`.
-2. ~~YAML.~~ **Decided:** our own reader for the 5.1 subset. zig-yaml was
-   vendored first, but it needed patches to build on Zig 0.17.0 and has no
-   support for `|` block scalars, which every recipe's build steps use. The
-   subset reader is about 300 lines with tests, and rejects everything
-   outside the subset by construction.
+2. ~~Recipe format.~~ **Decided:** TOML, read with `toml-zig` (decision
+   record `docs/decisions/0001-toml-recipes.md`). Earlier it was a YAML subset
+   read by our own `src/yaml.zig` (zig-yaml had been tried and dropped: it
+   needed patches for Zig 0.17.0 and had no `|` block scalars). YAML remains
+   only as an import format (5.9). Semantic errors (unknown key, wrong type)
+   name the key but not the line, because `toml-zig` does not record key
+   positions; syntax errors keep line and column.
 3. The apk-tools v3 version to pin, and how signing keys are kept and used
    (undecided).
 4. Bootloader for all architectures, pending dklilo (6.1). Until then B3 needs a
@@ -759,7 +838,8 @@ keys/             public signing keys (private keys never in the repository)
 5. qemu-user and `binfmt_misc` for native builds of other architectures
    (6.3).
 6. ~~DKRescue's posts.~~ **Decided:** DKRescue was a one-off. FenrirOS has its
-   own documentation; the DKRescue posts stay as history.
+   own documentation; the DKRescue posts stay as history. The DKRescue
+   *image* is not history: it is stage 0 (9.2).
 7. ~~The base system's contents and stages (9).~~ **Decided:** `/bin/sh` is
    **dash**; bash is the interactive shell; **dksh** is an experimental shell,
    packaged and installable but not the default. GNU userland, as in DKRescue
@@ -767,3 +847,11 @@ keys/             public signing keys (private keys never in the repository)
    `base-devel`, which build roots and a later "everything included" image
    install. Still open: how a recipe names a build tool that has different
    names in stage 1 and stage 2 (9.4, item 2).
+8. **Stage 1 lower layer (7.3, 9.4 item 1).** Overlay mount or read-only bind
+   mount plus writable work directories, and what that means for catching a
+   forgotten dependency before stage 2.
+9. **Triple vendor (6.1, 9.2).** Confirm `fenriros` works with DKRescue's LLVM
+   and drop `profiles/bootstrap/`.
+10. **The importer (5.9).** Where the Python-subset reader for `template.py`
+    lives (inside dkbuild or its own library), and how much of a template's
+    code it translates against marking it for a person.
