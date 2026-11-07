@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: work/cports/main/bc-gh/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reviewed by hand: renamed bc-gh to bc (the name on the ISO); configure.sh call written out.
+name = "bc"
+version = "7.1.0"
+release = 1
+summary = "Implementation of POSIX bc with GNU extensions"
+license = "BSD-2-Clause"
+homepage = "https://git.yzena.com/gavin/bc"
+
+source = [
+    { url = "https://github.com/gavinhoward/bc/releases/download/7.1.0/bc-7.1.0.tar.xz", sha256 = "1f13663ba0f2435b684321714a4d0b9fff32bb951fc78dc7424cd69bba5c0d3a" },
+]
+
+setup = '''
+PREFIX=/usr HOSTCC=clang HOSTCFLAGS="$CFLAGS" ./configure.sh -GM -sbc.banner -sdc.tty_mode
+'''
+build = '''
+%make
+'''
+check = '''
+%make test
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/bc/LICENSE.md"
+install -Dm644 manuals/bc.1 "$pkgdir/usr/share/man/man1/bc.1"
+install -Dm644 manuals/dc.1 "$pkgdir/usr/share/man/man1/dc.1"
+'''

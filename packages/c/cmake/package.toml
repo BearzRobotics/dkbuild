@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: work/cports/main/cmake/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reviewed by hand: the importer lost the source URL (an f-string); build follows the DKRescue post.
+name = "cmake"
+version = "4.4.5"
+release = 1
+summary = "Cross-platform, open source build system"
+license = "BSD-3-Clause"
+homepage = "https://cmake.org"
+patches = ["default-install-lib.patch"]
+options = ["bootstrap", "!check"]
+
+source = [
+    { url = "https://github.com/Kitware/CMake/releases/download/v4.4.5/cmake-4.4.5.tar.gz", sha256 = "a0c54c88abb8078dd8eccadb717fc6bb194bf18e7d44c86309910288886e04e2" },
+]
+
+# The bundled copies of libarchive, curl, expat, libuv and rhash are used (the
+# DKRescue build did the same): cmake is built before those libraries exist.
+environment = '''
+export CXXFLAGS="${CXXFLAGS} -Wno-unused-command-line-argument"
+'''
+setup = '''
+./bootstrap --prefix=/usr --mandir=/share/man --docdir=/share/doc/cmake \
+    --parallel=$jobs --generator=Ninja
+'''
+build = '''
+ninja -j$jobs
+'''
+install = '''
+DESTDIR=$pkgdir ninja install
+install -Dm644 LICENSE.rst "$pkgdir/usr/share/licenses/cmake/LICENSE.rst"
+install -Dm644 Utilities/KWIML/Copyright.txt "$pkgdir/usr/share/licenses/cmake/KWIML-Copyright.txt"
+'''

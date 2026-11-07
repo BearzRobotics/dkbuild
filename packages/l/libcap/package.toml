@@ -1,0 +1,37 @@
+# Imported from Chimera Linux cports: work/cports/main/libcap/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reviewed by hand: CC and BUILD_CC added to the make calls, as cports' init_configure did.
+name = "libcap"
+version = "2.78"
+release = 1
+summary = "POSIX.1e capabilities suite"
+license = "GPL-2.0-only"
+homepage = "http://sites.google.com/site/fullycapable"
+patches = ["no-bash.patch", "remove-so-main.patch"]
+hostdeps = ["pkgconf", "perl"]
+builddeps = ["attr-devel", "linux-headers"]
+
+source = [
+    { url = "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.78.tar.xz", sha256 = "0d621e562fd932ccf67b9660fb018e468a683d7b827541df27813228c996bb11" },
+]
+
+setup = '''
+'''
+build = '''
+%make \
+    CC=clang BUILD_CC=clang \
+    GOLANG=no
+'''
+check = '''
+%make CC=clang BUILD_CC=clang test
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr \
+    PKGCONFIGDIR=/usr/lib/pkgconfig \
+    SBINDIR=/usr/bin \
+    LIBDIR=/usr/lib \
+    exec_prefix=/usr \
+    RAISE_SETFCAP=no
+'''

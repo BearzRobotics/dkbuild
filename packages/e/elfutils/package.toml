@@ -1,0 +1,43 @@
+# Imported from Chimera Linux cports: work/cports/main/elfutils/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reviewed by hand: eustack symlink and rename written as shell.
+name = "elfutils"
+version = "0.193"
+release = 1
+summary = "Utilities and libraries to handle ELF files and DWARF data"
+license = "GPL-3.0-or-later AND (GPL-2.0-or-later OR LGPL-3.0-or-later)"
+homepage = "https://sourceware.org/elfutils"
+patches = ["fix-aarch64_fregs.patch", "fix-uninitialized.patch", "musl-asm-ptrace-h.patch", "musl-macros.patch", "no-libdw-srclang-test.patch", "no-stack-conflict.patch", "sed.patch", "stacktrace.patch", "tests.patch"]
+hostdeps = ["bison", "flex", "pkgconf"]
+builddeps = ["argp-standalone", "bzip2-devel", "chimerautils-devel", "curl-devel", "json-c-devel", "libarchive-devel", "libmicrohttpd-devel", "linux-headers", "musl-bsd-headers", "musl-obstack-devel", "sqlite-devel", "xz-devel", "zlib-ng-compat-devel", "zstd-devel"]
+checkdeps = ["bash"]
+
+source = [
+    { url = "https://sourceware.org/elfutils/ftp/0.193/elfutils-0.193.tar.bz2", sha256 = "7857f44b624f4d8d421df851aaae7b1402cfe6bcdd2d8049f15fc07d3dde7635" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -D_GNU_SOURCE -Wno-unaligned-access"
+export LDFLAGS="${LDFLAGS} -Wl,-z,stack-size=2097152"
+'''
+setup = '''
+%configure \
+    --disable-nls \
+    --disable-werror \
+    --enable-debuginfod \
+    --enable-deterministic-archives \
+    --enable-libdebuginfod \
+    --with-zstd \
+    --program-prefix=eu-
+'''
+build = '''
+%make
+ln -sf eustack src/stack
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+mv "$pkgdir/usr/bin/eu-eustack" "$pkgdir/usr/bin/eu-stack"
+'''

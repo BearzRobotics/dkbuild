@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: work/cports/main/ninja/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reviewed by hand: completions installed by hand.
+name = "ninja"
+version = "1.13.2"
+release = 1
+summary = "Small build system with a focus on speed"
+license = "Apache-2.0"
+homepage = "https://ninja-build.org"
+patches = ["bootstrap.patch"]
+hostdeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/ninja-build/ninja/archive/v1.13.2.tar.gz", sha256 = "974d6b2f4eeefa25625d34da3cb36bdcebe7fbce40f4c16ac0835fd1c0cbae17" },
+]
+
+setup = '''
+python configure.py --bootstrap
+'''
+build = '''
+python configure.py
+'''
+install = '''
+install -Dm755 ninja "$pkgdir/usr/bin/ninja"
+install -Dm644 misc/bash-completion "$pkgdir/usr/share/bash-completion/completions/ninja"
+install -Dm644 misc/zsh-completion "$pkgdir/usr/share/zsh/site-functions/_ninja"
+'''
