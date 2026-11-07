@@ -1,5 +1,20 @@
 # Helpers for the test scripts (source this; it expects to run from the project root).
 
+# sbrun [--bind SRC DST | --robind SRC DST]... -- CMD...: runs CMD (an absolute path) in
+# the DKRescue root, in dkbuild's own sandbox (no bwrap, no Chimera). The root is
+# read-only underneath; what CMD writes is thrown away.
+sbrun() {
+    [ -d rootfs/dkrescue ] || { echo "rootfs/dkrescue is missing: run 'dkbuild bootstrap-root <dkrescue.iso>'"; return 99; }
+    mkdir -p work
+    _sb=$(mktemp -d "$PWD/work/sb.XXXXXX")
+    mkdir "$_sb/u" "$_sb/w" "$_sb/m"
+    ./zig-out/bin/dkbuild sandbox-child --lower "$PWD/rootfs/dkrescue" --upper "$_sb/u" --work "$_sb/w" \
+        --merged "$_sb/m" --env PATH=/usr/bin:/bin --env HOME=/root "$@"
+    _rc=$?
+    rm -rf "$_sb"
+    return $_rc
+}
+
 # mkdemo DIR: builds DIR/dkdemo-1.tar.gz, a tiny C library Chimera doesn't ship,
 # and sets DEMO_URL (a file:// URL) and DEMO_SHA. Reproducible: same bytes every run.
 mkdemo() {

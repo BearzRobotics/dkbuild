@@ -1,15 +1,18 @@
 #!/bin/sh
 # A package built into repo/ installs with our key trusted, and is refused without it.
+# Needs zstd in repo/ (built here if it is not), and the DKRescue root for apk.
 set -u
 cd "$(dirname "$0")/.."
-CH=$PWD/rootfs/chimera
-T=$(mktemp -d)
+. tests/lib.sh
+ls repo/x86_64/zstd-static-*.apk >/dev/null 2>&1 || {
+    ./zig-out/bin/dkbuild pkg zstd >/dev/null 2>&1 || { echo "FAIL: building zstd into repo/"; exit 1; }
+}
+mkdir -p work
+T=$(mktemp -d "$PWD/work/ri.XXXXXX")
 trap 'rm -rf "$T"' EXIT
 try() { # $1 = root dir, PKG = package to add
-    bwrap --bind "$CH" / --bind "$1" /mnt --proc /proc --dev /dev \
-        --unshare-user --unshare-pid --tmpfs /tmp --ro-bind "$PWD/repo/x86_64" /tmp/repo \
-        apk --usermode --root /mnt --initdb --keys-dir /mnt/etc/apk/keys \
-        --repository /tmp/repo/Packages.adb --no-network --no-interactive add "$PKG" >/dev/null 2>&1
+    sbrun --bind "$1" /mnt --robind "$PWD/repo/x86_64" /tmp/repo -- /usr/bin/apk --root /mnt --initdb \
+        --keys-dir /mnt/etc/apk/keys --repository /tmp/repo/Packages.adb --no-network --no-interactive add "$PKG" >/dev/null 2>&1
 }
 mkdir -p "$T/trusted/etc/apk/keys" "$T/untrusted/etc/apk/keys"
 cp keys/*.pub "$T/trusted/etc/apk/keys/"
