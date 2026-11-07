@@ -21,7 +21,6 @@ setup = '''
 %configure --disable-fuse2fs \
     --enable-elf-shlibs \
     --enable-e2initrd-helper \
-    --enable-fuse2fs \
     --enable-symlink-build \
     --enable-symlink-install \
     --enable-relative-symlinks \

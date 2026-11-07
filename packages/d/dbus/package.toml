@@ -36,6 +36,7 @@ build = '''
 '''
 install = '''
 %meson_install
+rm -rf "$pkgdir/run"
 # service file
 install -Dm755 $pkgfiles/dbus-session.wrapper "$pkgdir/usr/lib/dbus-session.wrapper"
 # x11 support
