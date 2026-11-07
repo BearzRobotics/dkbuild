@@ -29,7 +29,7 @@ setup = '''
     -Dsystemd=disabled \
     -Duser_session=false \
     -Dtraditional_activation=true \
-    -Dxml_docs=enabled
+    -Dxml_docs=disabled
 '''
 build = '''
 %meson_build

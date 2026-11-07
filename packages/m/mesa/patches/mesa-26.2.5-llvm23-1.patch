@@ -1,0 +1,33 @@
+Submitted By: Dakota Keeler (HolyFenrir)
+Date: 2026-10-31
+Origin: Alpine Linux aports, main/mesa/llvm23.patch (postmarketOS)
+Description: llvmpipe: LLVM 23 changed the ObjectLinkingLayer creator
+             callback to receive the memory manager.
+
+diff --git a/src/gallium/auxiliary/gallivm/lp_bld_init_orc.cpp b/src/gallium/auxiliary/gallivm/lp_bld_init_orc.cpp
+index 9a02de3b945..7a1c305d4fb 100644
+--- a/src/gallium/auxiliary/gallivm/lp_bld_init_orc.cpp
++++ b/src/gallium/auxiliary/gallivm/lp_bld_init_orc.cpp
+@@ -341,6 +341,11 @@ LPJit::LPJit() :jit_dylib_count(0) {
+          .setJITTargetMachineBuilder(std::move(JTMB))
+ #ifdef USE_JITLINK
+          .setObjectLinkingLayerCreator(
++#if LLVM_VERSION_MAJOR >= 23
++            [&](ExecutionSession &ES, llvm::jitlink::JITLinkMemoryManager &MemMgr) {
++               return std::make_unique<ObjectLinkingLayer>(ES, MemMgr);
++            })
++#else
+ #if LLVM_VERSION_MAJOR >= 21
+             /* LLVM 21 removed the Triple argument */
+             [&](ExecutionSession &ES) {
+@@ -350,6 +355,7 @@ LPJit::LPJit() :jit_dylib_count(0) {
+                return std::make_unique<ObjectLinkingLayer>(
+                   ES, ExitOnErr(llvm::jitlink::InProcessMemoryManager::Create()));
+             })
++#endif
+ #else
+ #if LLVM_USE_INTEL_JITEVENTS
+          .RegisterJITEventListener(
+-- 
+2.55.0
+

@@ -22,7 +22,7 @@ export CFLAGS="${CFLAGS} -DOVERRIDE_SYSTEM_STATX"
 '''
 setup = '''
 %configure \
-    --enable-editline=yes \
+    --enable-editline=no \
     --enable-lib64=no
 '''
 build = '''

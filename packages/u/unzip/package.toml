@@ -18,7 +18,7 @@ environment = '''
 export CFLAGS="${CFLAGS} -DWILD_STOP_AT_DIR -DLARGE_FILE_SUPPORT -DUNICODE_SUPPORT -DUNICODE_WCHAR -DUTF8_MAYBE_NATIVE -DNO_LCHMOD -DDATE_FORMAT=DF_YMD -DUSE_BZIP2 -DNATIVE"
 '''
 build = '''
-make -f unix/Makefile generic CC="$CC" LF2= D_USE_BZ2=-DUSE_BZIP2 L_BZ2=-lbz2
+make -f unix/Makefile generic CC="$CC -std=gnu89" LF2= D_USE_BZ2=-DUSE_BZIP2 L_BZ2=-lbz2
 '''
 check = '''
 %make test -f unix/Makefile

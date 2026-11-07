@@ -21,8 +21,7 @@ source = [
 setup = '''
 '''
 build = '''
-%make \
-    PREFIX=/usr
+%make PREFIX=/usr EFIDIR=dkrescue
 '''
 install = '''
 install -Dm755 src/efibootdump "$pkgdir/usr/bin/efibootdump"

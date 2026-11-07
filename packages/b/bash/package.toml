@@ -18,10 +18,8 @@ source = [
     { url = "https://ftp.gnu.org/gnu/bash/bash-5.3.tar.gz", sha256 = "0d5cd86965f869a26cf64f4b71be7b96f90a3ba8b3d74e27e8e9d9d5550f31ba" },
 ]
 
-environment = '''
-export CFLAGS="${CFLAGS} -DSYS_BASHRC=\"/usr/share/bash/bashrc\" -DNON_INTERACTIVE_LOGIN_SHELLS"
-'''
 setup = '''
+sed -i 's|^/\* #define SYS_BASHRC.*|#define SYS_BASHRC "/usr/share/bash/bashrc"|; s|^/\* #define NON_INTERACTIVE_LOGIN_SHELLS.*|#define NON_INTERACTIVE_LOGIN_SHELLS 1|' config-top.h
 %configure \
     --without-bash-malloc \
     --with-curses \

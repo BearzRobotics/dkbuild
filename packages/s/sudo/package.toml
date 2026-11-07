@@ -1,7 +1,7 @@
 # Follows the DKRescue post's build of sudo 1.9.17p2.
 # Built without PAM: authentication goes through shadow, not PAM.
 name = "sudo"
-version = "1.9.17p2"
+version = "1.9.17_p2"
 release = 1
 summary = "Run commands as another user"
 license = "ISC"

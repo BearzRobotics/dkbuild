@@ -1,5 +1,6 @@
 # Imported from Chimera Linux cports: work/cports/main/mesa/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Driver set, flags and the LLVM 23 patch are the DKRescue desktop post's (no Intel iris yet).
 # Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
 name = "mesa"
@@ -8,7 +9,7 @@ release = 2
 summary = "Mesa 3D Graphics Library"
 license = "MIT"
 homepage = "https://www.mesa3d.org"
-patches = ["0001-radeonsi-On-Aarch64-force-persistent-buffers-to-GTT.patch", "musl-stacksize.patch", "vec-clang.patch"]
+patches = ["mesa-26.2.5-llvm23-1.patch"]
 hostdeps = ["bison", "cbindgen", "flex", "glslang-progs", "meson", "pkgconf", "python-mako", "python-ply", "python-pycparser", "python-pyyaml", "wayland-progs", "wayland-protocols"]
 builddeps = ["clang-devel", "elfutils-devel", "libarchive-devel", "libdrm-devel", "libexpat-devel", "libffi8-devel", "libglvnd-devel", "libva-bootstrap", "libx11-devel", "libxcb-devel", "libxdamage-devel", "libxext-devel", "libxfixes-devel", "libxml2-devel", "libxrandr-devel", "libxshmfence-devel", "libxv-devel", "libxxf86vm-devel", "llvm-devel", "lm-sensors-devel", "lua5.4-devel", "ncurses-devel", "wayland-devel", "wayland-protocols", "zlib-ng-compat-devel", "zstd-devel"]
 rundeps = ["libglvnd"]
@@ -20,18 +21,26 @@ source = [
 
 setup = '''
 %meson \
-    -Db_ndebug=true \
-    -Ddefault_library=shared \
+    -Dplatforms=wayland \
+    -Dgallium-drivers=llvmpipe,radeonsi,r600,nouveau,virgl,svga \
+    -Dvulkan-drivers= \
+    -Dglx=disabled \
+    -Dglvnd=disabled \
     -Degl=enabled \
     -Dgbm=enabled \
-    -Dgles1=enabled \
+    -Dgles1=disabled \
     -Dgles2=enabled \
-    -Dglvnd=enabled \
-    -Dglx=dri \
     -Dllvm=enabled \
-    -Dlmsensors=enabled \
-    -Dplatforms=x11,wayland \
-    -Dvideo-codecs=all
+    -Dshared-llvm=enabled \
+    -Dcpp_rtti=false \
+    -Dgallium-va=disabled \
+    -Dgallium-rusticl=false \
+    -Dvideo-codecs= \
+    -Dvalgrind=disabled \
+    -Dlibunwind=disabled \
+    -Dlmsensors=disabled \
+    -Dzstd=enabled \
+    -Dbuild-tests=false
 '''
 build = '''
 %meson_build
