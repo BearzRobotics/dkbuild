@@ -81,7 +81,13 @@ fn lookup(arena: Allocator, ctx: Context, name: []const u8) Allocator.Error!?[]c
     if (eql(u8, name, "cmake_build")) return "cmake --build build";
     if (eql(u8, name, "cmake_install")) return "DESTDIR=$pkgdir cmake --install build --strip";
     if (eql(u8, name, "zig_build")) {
-        return try std.fmt.allocPrint(arena, "DESTDIR=$pkgdir zig build --release=safe --prefix /usr -Dtarget={s} -Dcpu={s} --system zig-pkg -j$jobs", .{ t.zig_target, t.zig_cpu });
+        // A native build leaves out -Dtarget: with an explicit target zig treats the
+        // build as a cross build and does not ask pkg-config for system libraries.
+        return try std.fmt.allocPrint(arena, "DESTDIR=$pkgdir zig build --release=safe --prefix /usr{s}{s} -Dcpu={s} --system zig-pkg -j$jobs", .{
+            if (cross) " -Dtarget=" else "",
+            if (cross) t.zig_target else "",
+            t.zig_cpu,
+        });
     }
     if (eql(u8, name, "kernel_make")) return try std.fmt.allocPrint(arena, "make LLVM=1 ARCH={s}", .{t.kernel_arch});
     return null;
