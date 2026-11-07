@@ -22,7 +22,8 @@ setup = '''
 autoreconf -if -W none
 %configure \
     --disable-backtrace \
-    --enable-python
+    --disable-python \
+    --disable-documentation
 '''
 build = '''
 %make

@@ -29,6 +29,8 @@ setup = '''
     --disable-pylibmount \
     --disable-liblastlog2 \
     --disable-static \
+    --disable-makeinstall-chown \
+    --disable-makeinstall-setuid \
     --without-python \
     --without-systemd \
     --without-systemdsystemunitdir \

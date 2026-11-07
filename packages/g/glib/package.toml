@@ -20,10 +20,10 @@ source = [
 setup = '''
 %meson \
     -Ddocumentation=false \
-    -Dintrospection=enabled \
-    -Dman-pages=enabled \
+    -Dintrospection=disabled \
+    -Dman-pages=disabled \
     -Dselinux=disabled \
-    -Dsysprof=enabled
+    -Dsysprof=disabled
 '''
 build = '''
 %meson_build
