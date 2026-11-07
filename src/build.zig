@@ -395,6 +395,9 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
     out("    built {s}; log: {s}\n", .{ id, logpath });
 }
 
+/// The install script names apk knows (apk-package(5)).
+const script_types = [_][]const u8{ "pre-install", "post-install", "pre-upgrade", "post-upgrade", "pre-deinstall", "post-deinstall", "trigger" };
+
 /// `apk mkpkg` for the package, then `apk mkndx` to rebuild and sign the
 /// architecture's index in repo/<arch>/.
 const Pkg = struct {
@@ -464,8 +467,22 @@ fn publish(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options, id: []
             for (pk.provides) |pv| try versioned.append(arena, try std.fmt.allocPrint(arena, "{s}={s}", .{ pv, if (std.mem.startsWith(u8, pv, "so:")) "0" else ver }));
             try argv.appendSlice(arena, &.{ "--info", try std.fmt.allocPrint(arena, "provides:{s}", .{try std.mem.join(arena, " ", versioned.items)}) });
         }
+        // Install scripts (SPEC 9.4): scripts/<type> next to package.toml, on the
+        // main package only. The types are apk-package(5)'s.
+        var all_binds: std.ArrayList(sandbox.Bind) = .empty;
+        try all_binds.appendSlice(arena, &binds);
+        if (std.mem.eql(u8, pk.name, r.name)) {
+            const sdir = try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, opts.root, r.name), "scripts" });
+            if (absPath(arena, io, sdir)) |sabs| {
+                try all_binds.append(arena, .{ .src = sabs, .dst = "/tmp/scripts", .read_only = true });
+                for (script_types) |t| {
+                    Dir.cwd().access(io, try std.fs.path.join(arena, &.{ sdir, t }), .{}) catch continue;
+                    try argv.appendSlice(arena, &.{ "--script", try std.fmt.allocPrint(arena, "{s}:/tmp/scripts/{s}", .{ t, t }) });
+                }
+            } else |_| {}
+        }
         try argv.appendSlice(arena, &.{ "--files", "/tmp/files", "--output", try std.fmt.allocPrint(arena, "/tmp/out/{s}-{s}.apk", .{ pk.name, ver }) });
-        const ok = runTool(arena, io, base_root, sb, &binds, argv.items, log) catch false;
+        const ok = runTool(arena, io, base_root, sb, all_binds.items, argv.items, log) catch false;
         if (!ok) {
             out("error: apk mkpkg failed for {s}\n", .{pk.name});
             return error.BuildFailed;

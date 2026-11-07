@@ -21,3 +21,5 @@ zig-out/
 !/tests/trees/rebuild/.gitkeep
 /tests/trees/forgotten-dep/*
 !/tests/trees/forgotten-dep/.gitkeep
+/tests/trees/scripts/*
+!/tests/trees/scripts/.gitkeep

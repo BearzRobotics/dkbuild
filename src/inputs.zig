@@ -83,7 +83,7 @@ pub fn ownHash(arena: Allocator, io: std.Io, root: []const u8, name: []const u8,
     try hashFileInto(&h, arena, io, try std.fs.path.join(arena, &.{ base, "package.toml" }), "package.toml");
     try hashFileInto(&h, arena, io, try std.fmt.allocPrint(arena, "{s}/profiles/{s}.toml", .{ root, arch }), "profile");
 
-    for ([_][]const u8{ "patches", "files" }) |sub| {
+    for ([_][]const u8{ "patches", "files", "scripts" }) |sub| {
         const dir_path = try std.fs.path.join(arena, &.{ base, sub });
         var d = Dir.cwd().openDir(io, dir_path, .{ .iterate = true }) catch continue;
         defer d.close(io);

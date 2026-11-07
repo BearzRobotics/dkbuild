@@ -766,9 +766,12 @@ Found by reading the DKRescue posts against what exists:
    `zig fetch` while the network is allowed, and the build uses `--system`
    offline (the `zig_build` macro already passes it). Scoped to libghostty-vt
    and what it needs, not the full dkde tree.
-4. **Install scripts:** `apk mkpkg --script`, for what `base` needs at
-   install time (creating system users and groups, updating `/etc/shells`).
-   Recipes need a way to attach them.
+4. ~~**Install scripts.**~~ **Implemented:** a file named after an apk script
+   type (`pre-install`, `post-install`, `pre-upgrade`, `post-upgrade`,
+   `pre-deinstall`, `post-deinstall`, `trigger`) in the recipe's `scripts/`
+   directory is attached to the main package with `apk mkpkg --script`. They
+   run inside the target root, so they use only what `base` provides. Tested
+   with `tests/scripts.sh`.
 5. **Setuid and file modes:** `su`, `passwd` and `sudo` need mode 4755 in the
    package. Packaging runs under the root mapping, so they should carry over,
    but nothing has checked it. Test with shadow.

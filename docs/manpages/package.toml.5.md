@@ -47,6 +47,9 @@ Macros
 Subpackages
 **[subpackages.KEY]** with **summary** and **paths** creates **NAME-KEY**. **devel**, **static** and **doc** exist by default. Each file goes to the first subpackage whose path matches. A subpackage with no files is not made.
 
+Install scripts
+Executable files in **scripts/** next to **package.toml**, named **pre-install**, **post-install**, **pre-upgrade**, **post-upgrade**, **pre-deinstall**, **post-deinstall** or **trigger**, are attached to the main package. They run in the target root when apk installs it, so they can use only what is installed there. Subpackages get none.
+
 EXAMPLES
     name = "dksh"
     version = "0.0.1"
