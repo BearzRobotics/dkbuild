@@ -1,0 +1,37 @@
+# needed by: every bootable image. The configuration is the live DKRescue ISO's
+# own (boot/config-6.19-dkrescue, built from `defconfig` + kvm_guest.config plus the
+# options of the DKRescue posts), used as is: `make olddefconfig` only fills in
+# anything the config does not mention.
+#
+# Modules go to /usr/lib/modules; /lib is a link to /usr/lib on this system.
+name = "linux"
+version = "6.19"
+release = 1
+summary = "The Linux kernel and its modules"
+license = "GPL-2.0-only WITH Linux-syscall-note"
+homepage = "https://kernel.org"
+archs = ["x86_64"]
+hostdeps = ["bc", "flex", "bison", "perl", "kmod"]
+builddeps = ["openssl-devel", "elfutils", "zlib-ng-compat-devel"]
+# The kernel is a long build; keep to 4 jobs and a lower priority like llvm.
+options = ["jobs:4", "!check", "!strip"]
+
+source = [
+    { url = "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.19.tar.xz", sha256 = "303079a8250b8f381f82b03f90463d12ac98d4f6b149b761ea75af1323521357" },
+]
+
+setup = '''
+cp $pkgfiles/config .config
+make LLVM=1 olddefconfig
+'''
+build = '''
+nice -n 10 make LLVM=1 -j$jobs
+'''
+install = '''
+make LLVM=1 INSTALL_MOD_PATH=$pkgdir/usr INSTALL_MOD_STRIP=1 modules_install
+install -Dm644 arch/x86/boot/bzImage "$pkgdir/boot/vmlinuz-6.19-dkrescue"
+install -Dm644 System.map "$pkgdir/boot/System.map-6.19-dkrescue"
+install -Dm644 .config "$pkgdir/boot/config-6.19-dkrescue"
+# build and source links point into the build tree
+rm -f "$pkgdir"/usr/lib/modules/*/build "$pkgdir"/usr/lib/modules/*/source
+'''
