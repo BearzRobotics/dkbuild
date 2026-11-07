@@ -381,8 +381,12 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
             summary = sp.summary;
         };
         // -devel needs its main package; -static needs -devel (headers to build against).
+        // When the package has a -libs, -devel needs that and not the programs.
+        const has_libs = for (moved) |mm| {
+            if (std.mem.eql(u8, mm.name, "libs")) break true;
+        } else false;
         const need = if (std.mem.eql(u8, m.name, "devel"))
-            try std.fmt.allocPrint(arena, "{s}={s}", .{ r.name, ver })
+            try std.fmt.allocPrint(arena, "{s}{s}={s}", .{ r.name, if (has_libs) "-libs" else "", ver })
         else if (std.mem.eql(u8, m.name, "static"))
             try std.fmt.allocPrint(arena, "{s}-devel={s}", .{ r.name, ver })
         else

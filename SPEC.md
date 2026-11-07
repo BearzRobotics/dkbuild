@@ -279,13 +279,13 @@ summary = "Manual pages and documentation"
 paths   = ["/usr/share/man", "/usr/share/doc", "/usr/share/info"]
 ```
 
-`<name>-devel`, `<name>-static` and `<name>-doc` are created **by default**
+`<name>-devel`, `<name>-static`, `<name>-doc` and, for a package that also ships programs, `<name>-libs` (its shared libraries: `/usr/lib/*.so.*` and any real `*.so` file) are created **by default**
 with the paths above. A recipe lists `subpackages` only to add more or to
 change those; one with the same name replaces the default, and declared
 subpackages are matched before the defaults. Files are moved, not copied:
 each file belongs to exactly one package, the first subpackage whose path
 matches it (a path matches a file, or a directory above it; `*` matches
-within one path component). A subpackage that gets no files isn't made.
+within one path component). A subpackage that gets no files isn't made. A `*.so` pattern matches only symlinks (the development link), so a real `libfoo-1.2.so` is never taken into `-devel`. A package that is only a library has no `-libs`: its libraries stay in the main package. When `-libs` exists, `-devel` depends on it.
 Empty directories are dropped.
 
 Static libraries are a first-class product, not an afterthought: musl makes

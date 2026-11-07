@@ -24,6 +24,13 @@ pub const defaults = [_]recipe.Subpackage{
         .summary = "Manual pages and documentation",
         .paths = &.{ "/usr/share/man", "/usr/share/doc", "/usr/share/info" },
     },
+    // Only made when the package also ships programs (see `run`); a package that is
+    // just a library keeps its libraries in the main package.
+    .{
+        .name = "libs",
+        .summary = "Shared libraries",
+        .paths = &.{ "/usr/lib/*.so.*", "/usr/lib/*.so" },
+    },
 };
 
 /// Declared subpackages first, in order, then the defaults they didn't replace.
@@ -86,18 +93,29 @@ pub fn covers(pattern: []const u8, path: []const u8) bool {
     }
 }
 
-/// True when the subpackage claims `path` only through a pattern ending in ".so".
-fn endsWithSoPattern(sp: recipe.Subpackage, path: []const u8) bool {
-    for (sp.paths) |pat| if (covers(pat, path)) return std.mem.endsWith(u8, pat, ".so");
-    return false;
-}
-
-/// Index of the first subpackage that claims `path`.
-fn owner(subs: []const recipe.Subpackage, path: []const u8) ?usize {
+/// Index of the first subpackage that claims `path`. A "*.so" pattern means the
+/// development symlink (libfoo.so -> libfoo.so.1), so it does not claim a regular
+/// file (gettext's libgettextlib-0.24.so, which programs load at run time) unless
+/// the subpackage is "libs", the one that holds libraries.
+fn owner(subs: []const recipe.Subpackage, path: []const u8, is_regular: bool) ?usize {
     for (subs, 0..) |sp, i| {
-        for (sp.paths) |pat| if (covers(pat, path)) return i;
+        for (sp.paths) |pat| {
+            if (!covers(pat, path)) continue;
+            if (is_regular and std.mem.endsWith(u8, pat, ".so") and !std.mem.eql(u8, sp.name, "libs")) continue;
+            return i;
+        }
     }
     return null;
+}
+
+/// Does the tree hold programs (as opposed to being only a library)?
+fn hasPrograms(files: []const []const u8) bool {
+    for (files) |f| {
+        for ([_][]const u8{ "usr/bin/", "usr/sbin/", "bin/", "sbin/" }) |pre| {
+            if (std.mem.startsWith(u8, f, pre)) return true;
+        }
+    }
+    return false;
 }
 
 pub const Moved = struct { name: []const u8, files: usize };
@@ -126,12 +144,10 @@ pub fn run(arena: Allocator, io: std.Io, destdir: []const u8, out: []const u8, s
 
     const counts = try arena.alloc(usize, subs.len);
     @memset(counts, 0);
+    const split_libs = hasPrograms(files.items);
     for (files.items, regular.items) |f, is_regular| {
-        const idx = owner(subs, f) orelse continue;
-        // A "*.so" pattern means the development symlink (libfoo.so -> libfoo.so.1).
-        // A real file with that name is a library packages load at run time
-        // (gettext's libgettextlib-0.24.so), so it stays in the main package.
-        if (is_regular and std.mem.endsWith(u8, f, ".so") and endsWithSoPattern(subs[idx], f)) continue;
+        const idx = owner(subs, f, is_regular) orelse continue;
+        if (!split_libs and std.mem.eql(u8, subs[idx].name, "libs")) continue;
         const dest = try std.fs.path.join(arena, &.{ out, subs[idx].name, f });
         if (std.fs.path.dirname(dest)) |parent| try Dir.cwd().createDirPath(io, parent);
         try d.rename(f, Dir.cwd(), dest, io);
@@ -177,10 +193,23 @@ test "declared subpackages replace defaults of the same name and come first" {
         .{ .name = "tools", .summary = "t", .paths = &.{"/usr/bin/x"} },
     };
     const m = try merge(a, &declared);
-    try std.testing.expectEqual(@as(usize, 4), m.len);
+    try std.testing.expectEqual(@as(usize, 5), m.len);
     try std.testing.expectEqualStrings("devel", m[0].name);
     try std.testing.expectEqualStrings("mine", m[0].summary);
     try std.testing.expectEqualStrings("tools", m[1].name);
     try std.testing.expectEqualStrings("static", m[2].name);
     try std.testing.expectEqualStrings("doc", m[3].name);
+    try std.testing.expectEqualStrings("libs", m[4].name);
+}
+
+test "owner: .so patterns claim symlinks, and real .so files go to libs" {
+    const subs = [_]recipe.Subpackage{
+        .{ .name = "devel", .summary = "", .paths = &.{"/usr/lib/*.so"} },
+        .{ .name = "libs", .summary = "", .paths = &.{ "/usr/lib/*.so.*", "/usr/lib/*.so" } },
+    };
+    try std.testing.expectEqual(@as(?usize, 0), owner(&subs, "usr/lib/libz.so", false));
+    try std.testing.expectEqual(@as(?usize, 1), owner(&subs, "usr/lib/libgettextlib-0.24.so", true));
+    try std.testing.expectEqual(@as(?usize, 1), owner(&subs, "usr/lib/libz.so.1", false));
+    try std.testing.expect(hasPrograms(&.{ "usr/bin/msgfmt", "usr/lib/x.so.1" }));
+    try std.testing.expect(!hasPrograms(&.{ "usr/lib/x.so.1", "usr/include/x.h" }));
 }
