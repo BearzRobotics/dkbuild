@@ -67,6 +67,23 @@ Roughly in this order, because each tests something new:
    Installing two never conflicts on disk. Hyprland ships next to labwc and
    dkde, not instead.
 
+## Tier 4: applications
+
+Where a recipe comes from decides the work. Checked against the Chimera
+cports tree (`origin/master`, 2026-11-07):
+
+| Package | In cports? | Plan |
+|---|---|---|
+| ruby, qemu (system, user, tools), flatpak (+builder), libreoffice, qt6, openjdk 17/21/25, go, rust, zsh, elogind, nodejs, firefox | yes | `import-cbuild`, then review. Their `rust-bootstrap` and `go-bootstrap` are the seeds. |
+| **Xorg** | partly: protocols, xinit, xkbcomp, xrandr, xwayland, but **no Xorg server** and no `xf86-*` drivers | Write `xorg-server` (meson) by hand; libinput and the modesetting driver cover the hardware the ISO supports. The X libraries come from cports. |
+| hyprland, fish, edit | no | Hand-written recipes (Hyprland also needs its own libraries: hyprutils, hyprlang, aquamarine, ...). |
+| **Fritzing** | no | Hand-written: Qt6 and Boost; the parts library is a separate download. |
+| **ImHex** | no | Hand-written: C++ with many bundled third-party libraries (imgui, capstone, nlohmann-json, glfw, ...); cports already has capstone, glfw and nlohmann-json. |
+
+Order inside the tier: ruby and qemu first (plain builds that prove the
+toolchain), then Xorg, flatpak, Qt-based Fritzing and ImHex, and LibreOffice
+last (it is the largest build in the tree, hours on this machine).
+
 Anything not listed is added the same way: a recipe, `dkbuild check`, `dkbuild
 pkg`, and it can go in an image.
 
