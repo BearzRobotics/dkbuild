@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: work/cports/main/pkgconf/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "pkgconf"
+version = "2.4.3"
+release = 1
+summary = "Provides compiler and linker configuration"
+license = "MIT"
+homepage = "http://pkgconf.org"
+checkdeps = ["kyua"]
+options = ["bootstrap", "!check"]
+
+source = [
+    { url = "https://distfiles.dereferenced.org/pkgconf/pkgconf-2.4.3.tar.xz", sha256 = "51203d99ed573fa7344bf07ca626f10c7cc094e0846ac4aa0023bd0c83c25a41" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/pkgconf/COPYING"
+mkdir -p "$pkgdir/usr/bin"
+ln -sf pkgconf "$pkgdir/usr/bin/pkg-config"
+mkdir -p "$pkgdir/usr/share/man/man1"
+ln -sf pkgconf.1 "$pkgdir/usr/share/man/man1/pkg-config.1"
+'''

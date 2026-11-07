@@ -28,17 +28,12 @@ echo "$INFO" | grep -q 'so:libc.so' || { echo "FAIL: usedemo does not depend on 
 echo "$INFO" | grep -q 'cmd:usedemo' || { echo "FAIL: usedemo does not provide cmd:usedemo"; exit 1; }
 dump usedemo-static-1-r1.apk | grep -q 'so:' && { echo "FAIL: the static program depends on a shared library"; exit 1; }
 
-# Installing usedemo must pull in dkdemo (only our repo has it), and it must run.
-# This happens in a root made of the DKRescue image (described to apk as
-# dkrescue-base, so the dependency on libc.so can be met) plus our repository.
-OUT=$(sbrun --robind "$PWD/$T/repo/x86_64" /dkrepo --robind "$PWD/keys" /dkkeys \
-    --robind "$PWD/rootfs/dkrescue-base" /dkbase -- /usr/bin/sh -c '
-mkdir -p /etc/apk/keys && cp /dkkeys/*.pub /etc/apk/keys/
-apk --root / --initdb --allow-untrusted --no-network --no-interactive add /dkbase/dkrescue-base-1-r0.apk >/dev/null 2>&1 \
-    || { echo "FAIL: the base image could not be described to apk"; exit 1; }
-apk --root / --no-network --no-interactive --repository /dkrepo/Packages.adb add usedemo 2>&1 \
-    || { echo "FAIL: install of usedemo"; exit 1; }
-[ -e /usr/lib/libdkdemo.so.1 ] || { echo "FAIL: libdkdemo was not pulled in"; exit 1; }
-/usr/bin/usedemo || { echo "FAIL: usedemo does not run against the installed libdkdemo"; exit 1; }
+# What a stage 1 build does with these packages: unpack them over the DKRescue
+# image (checking each signature), then run the result against libdkdemo.
+OUT=$(sbrun --robind "$PWD/$T/repo/x86_64" /dkrepo --robind "$PWD/keys" /dkkeys -- /usr/bin/sh -c '
+apk --force-overwrite --keys-dir /dkkeys extract --destination / /dkrepo/dkdemo-1-r1.apk /dkrepo/usedemo-1-r1.apk >/dev/null 2>&1 \
+    || { echo "FAIL: unpacking dkdemo and usedemo from repo/"; exit 1; }
+[ -e /usr/lib/libdkdemo.so.1 ] || { echo "FAIL: libdkdemo was not unpacked"; exit 1; }
+/usr/bin/usedemo || { echo "FAIL: usedemo does not run against the unpacked libdkdemo"; exit 1; }
 ' 2>&1) || { echo "$OUT"; exit 1; }
-echo "ok: dkdemo built first; dynamic and static users built against it; scan results right; installs and runs"
+echo "ok: dkdemo built first; dynamic and static users built against it; scan results right; unpacks and runs"

@@ -14,7 +14,6 @@
 const std = @import("std");
 const Allocator = std.mem.Allocator;
 const Dir = std.Io.Dir;
-const basepkg = @import("basepkg.zig");
 
 pub const Kind = enum { iso, squashfs, tarball };
 
@@ -124,8 +123,6 @@ pub const Options = struct {
     /// Where scratch files go (a 1 GB squashfs is read out of the ISO).
     /// Not /tmp: that is often a small tmpfs.
     work_dir: []const u8,
-    /// The project root, where the base-image package is written.
-    root: []const u8,
     force: bool = false,
 };
 
@@ -173,9 +170,6 @@ pub fn bootstrapRoot(arena: Allocator, io: std.Io, image: []const u8, dest: []co
         },
     }
     try check(arena, io, dest);
-    // Describe the image to apk, so packages built on it can be installed (7.3).
-    const abs = Dir.cwd().realPathFileAlloc(io, dest, arena) catch return error.Incomplete;
-    basepkg.ensure(arena, io, opts.root, abs, true) catch return error.Incomplete;
 }
 
 /// Checks an unpacked root; prints one line per tool and the functional check.

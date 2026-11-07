@@ -73,7 +73,7 @@ dependency chains; rebuilds; installing from the repository. They run once for e
 
 ## Status
 
-Stage 1 (building on the DKRescue image) works for the five recipes in `packages/`. Not yet built: the LLVM
+Stage 1 (building on the DKRescue image) works for the nine recipes in `packages/`, four of them imported from Chimera's cports by `import-cbuild` (`pkgconf`, `attr`, `acl`, `libexpat`). Not yet built: the LLVM
 toolchain and the rest of the base system (SPEC 9), stage 2 (roots filled from `repo/` only, which also catches
 forgotten dependencies), images and cross-compiling. The cbuild importer (SPEC 5.9) writes draft recipes with
 `TODO(cbuild)` markers; Solus `package.yml` import is planned.

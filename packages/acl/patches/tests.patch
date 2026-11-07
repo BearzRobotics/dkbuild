@@ -1,0 +1,21 @@
+From a66d8b175270c3fa7c0629c8608c453d8645d682 Mon Sep 17 00:00:00 2001
+From: q66 <q66@chimera-linux.org>
+Date: Sun, 10 Oct 2021 23:54:54 +0200
+Subject: [PATCH] acl: do not use bash for runwrapper
+
+---
+ test/runwrapper | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+-- 
+2.33.0
+
+diff -ruN a/test/runwrapper b/test/runwrapper
+--- a/test/runwrapper	2026-06-28 22:44:30.000000000 +0200
++++ b/test/runwrapper	2026-10-03 09:24:38.994346958 +0200
+@@ -1,4 +1,4 @@
+-#!/bin/bash
++#!/bin/sh
+ 
+ cleanup() {
+ 	# remove the temporary location

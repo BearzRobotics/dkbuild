@@ -13,7 +13,6 @@ const tree = @import("tree.zig");
 const split = @import("split.zig");
 const scan = @import("scan.zig");
 const sandbox = @import("sandbox.zig");
-const basepkg = @import("basepkg.zig");
 const Allocator = std.mem.Allocator;
 const Dir = std.Io.Dir;
 
@@ -134,6 +133,50 @@ fn removeBuildDir(arena: Allocator, io: std.Io, work: []const u8) void {
     Dir.cwd().deleteTree(io, work) catch {};
 }
 
+/// The `.apk` files (names inside repo/<arch>) a build needs on top of the base
+/// image: the packages providing its host and build dependencies, and what
+/// those need to build and run (their own build and run dependencies, and the
+/// main package next to a `-devel`). Dependencies the tree does not provide are
+/// the image's (stage 1 assumes it has them).
+fn inTreeFiles(arena: Allocator, io: std.Io, opts: Options, r: recipe.Recipe, repo_abs: ?[]const u8) BuildError![]const []const u8 {
+    const t = opts.tree orelse return &.{};
+    var work: std.ArrayList([]const u8) = .empty;
+    var seen: std.ArrayList([]const u8) = .empty;
+    var files: std.ArrayList([]const u8) = .empty;
+    for ([_][]const []const u8{ r.hostdeps, r.builddeps }) |deps| try work.appendSlice(arena, deps);
+    const direct = work.items.len;
+    var k: usize = 0;
+    while (k < work.items.len) : (k += 1) {
+        const d = work.items[k];
+        if (contains(seen.items, d)) continue;
+        try seen.append(arena, d);
+        const pi = t.provider(d) orelse {
+            if (k < direct) out("    note: '{s}' is assumed to be in the base image (stage 1 does not check, SPEC.md 7.3)\n", .{d});
+            continue;
+        };
+        const pr = t.recipes[pi];
+        for ([_][]const u8{ d, pr.name }) |want| {
+            const file = try std.fmt.allocPrint(arena, "{s}-{s}-r{d}.apk", .{ want, pr.version, pr.release });
+            if (contains(files.items, file)) continue;
+            const present = if (repo_abs) |ra| blk: {
+                const path = try std.fs.path.join(arena, &.{ ra, file });
+                break :blk if (Dir.cwd().access(io, path, .{})) |_| true else |_| false;
+            } else false;
+            if (!present) {
+                if (k < direct) {
+                    out("error: {s} is not in repo/{s}; it should have been built before {s}\n", .{ file, opts.arch, r.name });
+                    return error.PrepareFailed;
+                }
+                continue;
+            }
+            try files.append(arena, file);
+        }
+        // What the provider needs once installed (not its build tools).
+        for ([_][]const []const u8{ pr.builddeps, pr.rundeps }) |deps| try work.appendSlice(arena, deps);
+    }
+    return files.items;
+}
+
 const SbDirs = struct { upper: []const u8, work: []const u8, merged: []const u8 };
 
 /// Fresh upper, work and mount-point directories for one sandbox, under `parent`.
@@ -218,50 +261,22 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
     const local_abs: ?[]const u8 = absPath(arena, io, local_repo) catch null;
     const keys_dir: ?[]const u8 = absPath(arena, io, try std.fs.path.join(arena, &.{ opts.root, "keys" })) catch null;
     {
-        // Stage 1: the toolchain and libraries are the image's. Only packages
-        // this tree built are added, on top, from repo/ (SPEC.md 7.3).
-        var specs: std.ArrayList([]const u8) = .empty;
-        for ([_][]const []const u8{ r.hostdeps, r.builddeps }) |deps| {
-            for (deps) |d| {
-                if (opts.tree) |t| if (t.provider(d)) |pi| {
-                    const pr = t.recipes[pi];
-                    for ([_][]const u8{ d, pr.name }) |want| {
-                        const spec = try std.fmt.allocPrint(arena, "{s}={s}-r{d}", .{ want, pr.version, pr.release });
-                        if (!contains(specs.items, spec)) try specs.append(arena, spec);
-                    }
-                    continue;
-                };
-                out("    note: '{s}' is assumed to be in the base image (stage 1 does not check, SPEC.md 7.3)\n", .{d});
-            }
-        }
-        out("    preparing build root ({d} package(s) from repo/ on top of the base image)\n", .{specs.items.len});
-        if (specs.items.len > 0) {
-            const la = local_abs orelse {
-                out("error: the tree has packages to install but no repo/{s}\n", .{opts.arch});
-                return error.PrepareFailed;
-            };
-            // apk must know what the image already provides (basepkg.zig).
-            basepkg.ensure(arena, io, opts.root, base_root, false) catch {
-                out("error: cannot describe the base image to apk\n", .{});
-                return error.PrepareFailed;
-            };
-            const base_dir = absPath(arena, io, try std.fs.path.join(arena, &.{ opts.root, basepkg.dir })) catch return error.PrepareFailed;
+        // Stage 1: the toolchain and libraries are the image's. The packages
+        // this tree built are laid over it from repo/ with `apk extract`, which
+        // checks each signature but not dependencies: the image has no package
+        // database, so there is nothing for a solver to work with (SPEC.md 7.3).
+        const files = try inTreeFiles(arena, io, opts, r, local_abs);
+        out("    preparing build root ({d} package(s) from repo/ on top of the base image)\n", .{files.len});
+        if (files.len > 0) {
             var binds: std.ArrayList(sandbox.Bind) = .empty;
-            try binds.append(arena, .{ .src = la, .dst = "/dkrepo", .read_only = true });
-            try binds.append(arena, .{ .src = base_dir, .dst = "/dkbase", .read_only = true });
+            try binds.append(arena, .{ .src = local_abs.?, .dst = "/dkrepo", .read_only = true });
             if (keys_dir) |kd| try binds.append(arena, .{ .src = kd, .dst = "/dkkeys", .read_only = true });
             var argv: std.ArrayList([]const u8) = .empty;
-            try argv.appendSlice(arena, &.{
-                "/usr/bin/sh", "-c",
-                "mkdir -p /etc/apk/keys && { cp /dkkeys/* /etc/apk/keys/ 2>/dev/null || true; } && " ++
-                    "apk --root / --initdb --no-network --no-interactive --allow-untrusted add /dkbase/" ++ basepkg.file_name ++ " && " ++
-                    "exec apk --root / --no-network --no-interactive --repository /dkrepo/Packages.adb add \"$@\"",
-                "apk",
-            });
-            try argv.appendSlice(arena, specs.items);
+            try argv.appendSlice(arena, &.{ "/usr/bin/apk", "--force-overwrite", "--keys-dir", "/dkkeys", "extract", "--destination", "/" });
+            for (files) |f| try argv.append(arena, try std.fmt.allocPrint(arena, "/dkrepo/{s}", .{f}));
             const ok = runTool(arena, io, base_root, sb, binds.items, argv.items, &log) catch false;
             if (!ok) {
-                out("error: installing packages from repo/ failed; see {s}\n", .{logpath});
+                out("error: unpacking packages from repo/ failed; see {s}\n", .{logpath});
                 return error.PrepareFailed;
             }
         }

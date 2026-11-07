@@ -559,11 +559,20 @@ Two kinds of build root exist, matching the stages of 9.2:
 
 - **Stage 1 (bootstrap):** the build machine is the **DKRescue image** (9.2),
   not a root assembled by apk. Its root filesystem is the read-only lower
-  layer of the build root; the build writes to a throwaway layer on top. It
-  has a complete toolchain but no apk database, so the recipe's `hostdeps` and
-  `builddeps` are **not installed** into it: they are whatever DKRescue already
-  provides, and a forgotten dependency is *not* caught in stage 1. In-tree
-  packages built earlier are installed on top from `repo/`.
+  layer of the build root (7.1); the build writes to a throwaway layer on top.
+  It has a complete toolchain but **no apk database**, so there is nothing for
+  apk's solver to work with, and the recipe's `hostdeps` and `builddeps` are
+  **not installed**: they are whatever DKRescue already provides, and a
+  forgotten dependency is *not* caught in stage 1. Packages this tree built
+  earlier are laid over the image with `apk extract --force-overwrite`
+  (`--keys-dir keys/`: every signature is checked, dependencies are not, and
+  files of the image are replaced, which is the point). Those are the packages
+  providing the recipe's dependencies and what they need to build and run (their
+  own `builddeps` and `rundeps`). *Tried first and dropped:* describing the image
+  to apk as one package that provides its `so:`/`cmd:` names, then `apk add`.
+  A versioned provide makes a package the only owner of that name, and an
+  unversioned one still conflicts with a package that provides it versioned
+  (apk-package(5)), so installing our own `pkgconf` over the image's failed.
 - **Stage 2 and everything after:** the root is populated by apk from
   `repo/` only: the base build set (`base-devel`) plus the recipe's declared
   dependencies and nothing else. This is where "a forgotten dependency fails

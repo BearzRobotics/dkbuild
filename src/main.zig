@@ -227,7 +227,7 @@ pub fn main(init: std.process.Init) !void {
         const img = image orelse return die(usage);
         const where = dest orelse try std.fs.path.join(arena, &.{ root, "rootfs", "dkrescue" });
         const work = try std.fs.path.join(arena, &.{ root, "work" });
-        bootstrap.bootstrapRoot(arena, init.io, img, where, .{ .work_dir = work, .root = root, .force = force }) catch |err| switch (err) {
+        bootstrap.bootstrapRoot(arena, init.io, img, where, .{ .work_dir = work, .force = force }) catch |err| switch (err) {
             error.OutOfMemory => return err,
             else => std.process.exit(1),
         };
@@ -261,7 +261,6 @@ test {
     _ = @import("tree.zig");
     _ = @import("bootstrap.zig");
     _ = @import("sandbox.zig");
-    _ = @import("basepkg.zig");
     _ = @import("doctor.zig");
     _ = @import("cbuild.zig");
     _ = @import("fetch.zig");

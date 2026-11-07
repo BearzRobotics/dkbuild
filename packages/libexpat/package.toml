@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: work/cports/main/libexpat/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libexpat"
+version = "2.10.0"
+release = 1
+summary = "Stream-oriented XML parser library"
+license = "MIT"
+homepage = "https://libexpat.github.io"
+patches = ["remove-bash.patch"]
+hostdeps = ["pkgconf"]
+
+source = [
+    { url = "https://github.com/libexpat/libexpat/releases/download/R_2_10_0/expat-2.10.0.tar.xz", sha256 = "c624ba2998fc65df1163a49641ff3f9ab73138b11641d92c86bee0fb01b1bc7f" },
+]
+
+setup = '''
+%configure \
+    --without-examples
+'''
+build = '''
+%make
+'''
+check = '''
+%make check -j1
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libexpat/COPYING"
+'''

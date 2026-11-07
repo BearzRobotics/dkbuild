@@ -51,6 +51,7 @@ fn isStringStart(s: []const u8, i: usize) bool {
 /// plain equivalent.
 fn selfAttr(env: *const Env, attr: []const u8) ?[]const u8 {
     if (std.mem.eql(u8, attr, "make_jobs")) return "$jobs";
+    if (std.mem.eql(u8, attr, "files_path")) return "$pkgfiles";
     if (std.mem.eql(u8, attr, "destdir") or std.mem.eql(u8, attr, "chroot_destdir")) return "$pkgdir";
     if (std.mem.eql(u8, attr, "pkgname") or std.mem.eql(u8, attr, "pkgver")) {
         const key = attr;
@@ -157,9 +158,16 @@ pub const Parser = struct {
         var v = try p.parseAtom();
         while (true) {
             p.skipWs();
-            if (p.peek() != '+') break;
+            const op = p.peek() orelse break;
+            if (op != '+' and op != '/') break;
             p.i += 1;
             const rhs = try p.parseAtom();
+            if (op == '/') {
+                // `self.files_path / "x"`, `self.destdir / "usr/bin"`: a path join.
+                if (v != .str or rhs != .str) return p.finishUnknown(start);
+                v = .{ .str = try std.fmt.allocPrint(p.arena, "{s}/{s}", .{ std.mem.trimEnd(u8, v.str, "/"), std.mem.trimStart(u8, rhs.str, "/") }) };
+                continue;
+            }
             v = (try concat(p.arena, v, rhs)) orelse return p.finishUnknown(start);
         }
         p.skipWs();
@@ -262,6 +270,18 @@ pub const Parser = struct {
         if (std.mem.eql(u8, name, "True")) return .{ .boolean = true };
         if (std.mem.eql(u8, name, "False")) return .{ .boolean = false };
         if (std.mem.eql(u8, name, "None")) return .none;
+
+        // `name.replace("a", "b")` on a string we know.
+        if (p.env.get(name)) |known| if (known == .str and std.mem.startsWith(u8, p.s[p.i..], ".replace(")) {
+            const save = p.i;
+            p.i += ".replace".len;
+            if (try parseCall(p)) |call| {
+                if (call.args.len == 2 and call.kwargs.len == 0 and call.args[0] == .str and call.args[1] == .str and call.args[0].str.len > 0) {
+                    return .{ .str = try std.mem.replaceOwned(u8, p.arena, known.str, call.args[0].str, call.args[1].str) };
+                }
+            }
+            p.i = save;
+        };
 
         // Trailers: `.attr`, `(...)`, `[...]`.
         var first_attr: ?[]const u8 = null;
@@ -542,6 +562,54 @@ pub const Converted = struct {
     notes: []const Note,
 };
 
+/// cbuild's mirror variables: `$(GNU_SITE)` is `sites["gnu"]` (the name is
+/// lower-cased and loses its `_SITE`). Copied from `sites` in
+/// src/cbuild/core/template.py of chimera-linux/cports, which `_interp_url`
+/// there applies to every source URL.
+const sites = [_]struct { name: []const u8, url: []const u8 }{
+    .{ .name = "sourceforge", .url = "https://downloads.sourceforge.net/sourceforge" },
+    .{ .name = "freedesktop", .url = "https://distributions.freedesktop.org/software" },
+    .{ .name = "mozilla", .url = "https://ftp.mozilla.org/pub" },
+    .{ .name = "debian", .url = "https://ftp.debian.org/debian/pool" },
+    .{ .name = "ubuntu", .url = "https://archive.ubuntu.com/ubuntu/pool" },
+    .{ .name = "nongnu", .url = "https://download.savannah.nongnu.org/releases" },
+    .{ .name = "kernel", .url = "https://www.kernel.org/pub/linux" },
+    .{ .name = "gnome", .url = "https://download.gnome.org/sources" },
+    .{ .name = "xorg", .url = "https://www.x.org/releases/individual" },
+    .{ .name = "cpan", .url = "https://www.cpan.org/modules/by-module" },
+    .{ .name = "pypi", .url = "https://files.pythonhosted.org/packages/source" },
+    .{ .name = "gnu", .url = "https://ftp.gnu.org/gnu" },
+    .{ .name = "kde", .url = "https://download.kde.org/stable" },
+    .{ .name = "kde_unstable", .url = "https://download.kde.org/unstable" },
+    .{ .name = "xfce", .url = "https://archive.xfce.org/src" },
+};
+
+/// Replaces every `$(NAME_SITE)` in `url`. Null if one is not a known mirror.
+fn expandSites(arena: Allocator, url: []const u8) Allocator.Error!?[]const u8 {
+    var out: std.ArrayList(u8) = .empty;
+    var i: usize = 0;
+    while (i < url.len) {
+        if (std.mem.startsWith(u8, url[i..], "$(")) {
+            const close = std.mem.indexOfScalarPos(u8, url, i, ')') orelse return null;
+            const raw = url[i + 2 .. close];
+            const stripped = if (std.mem.endsWith(u8, raw, "_SITE")) raw[0 .. raw.len - "_SITE".len] else raw;
+            var lower_buf: [32]u8 = undefined;
+            if (stripped.len > lower_buf.len) return null;
+            const lower = std.ascii.lowerString(&lower_buf, stripped);
+            var found: ?[]const u8 = null;
+            for (sites) |site| if (std.mem.eql(u8, site.name, lower)) {
+                found = site.url;
+            };
+            try out.appendSlice(arena, found orelse return null);
+            i = close + 1;
+        } else {
+            try out.append(arena, url[i]);
+            i += 1;
+        }
+    }
+    return out.items;
+}
+
 const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap" };
 const known_archs = [_][]const u8{ "x86_64", "aarch64", "riscv64" };
 
@@ -787,6 +855,19 @@ fn translateCall(arena: Allocator, code: []const u8, env: *const Env, pkgname: [
         const ext = std.fs.path.extension(base);
         if (ext.len != 2 or !std.ascii.isDigit(ext[1])) return false;
         try out.print(arena, "install -Dm644 {s} \"$pkgdir/usr/share/man/man{c}/{s}\"\n", .{ try shellWord(arena, w[0]), ext[1], base });
+        return true;
+    }
+    if (std.mem.eql(u8, method, "install_link")) {
+        // install_link(path, target): a symlink at `path` (inside the destdir) to `target`.
+        if (w.len != 2 or call.kwargs.len != 0) return false;
+        const dest = std.mem.trim(u8, w[0], "/");
+        if (std.fs.path.dirname(dest)) |parent| try out.print(arena, "mkdir -p \"$pkgdir/{s}\"\n", .{parent});
+        try out.print(arena, "ln -sf {s} \"$pkgdir/{s}\"\n", .{ try shellWord(arena, w[1]), dest });
+        return true;
+    }
+    if (std.mem.eql(u8, method, "install_lib")) {
+        if (w.len != 1 or call.kwargs.len != 0) return false;
+        try out.print(arena, "install -Dm755 {s} \"$pkgdir/usr/lib/{s}\"\n", .{ try shellWord(arena, w[0]), std.fs.path.basename(w[0]) });
         return true;
     }
     if (std.mem.eql(u8, method, "install_dir")) {
@@ -1044,6 +1125,12 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
     }
     if (src_urls.items.len != src_shas.items.len)
         try notes.append(arena, .{ .line = lines_of.get("sha256") orelse 0, .kind = .todo, .text = try std.fmt.allocPrint(arena, "{d} source(s) but {d} sha256 value(s)", .{ src_urls.items.len, src_shas.items.len }) });
+    for (src_urls.items) |*u| {
+        if (std.mem.indexOf(u8, u.*, "$(") == null) continue;
+        if (try expandSites(arena, u.*)) |full| {
+            u.* = full;
+        } else try notes.append(arena, .{ .line = lines_of.get("source") orelse 0, .kind = .todo, .text = try std.fmt.allocPrint(arena, "source URL uses a mirror variable this importer does not know: {s}", .{u.*}) });
+    }
     for (src_urls.items) |u| if (std.mem.indexOf(u8, u, "{?") != null)
         try notes.append(arena, .{ .line = lines_of.get("source") orelse 0, .kind = .todo, .text = try std.fmt.allocPrint(arena, "source URL has a part that could not be evaluated: {s}", .{u}) });
 
@@ -1547,4 +1634,45 @@ test "an unknown build style leaves a placeholder install and says so" {
         styled = true;
     };
     try std.testing.expect(styled);
+}
+
+test "path joins, str.replace and install_link" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    var env: Env = .empty;
+    try env.put(a, "pkgver", .{ .str = "2.7.1" });
+    try std.testing.expectEqualStrings("$pkgfiles/x.pc", (try evalExpr(a, &env, "self.files_path / \"x.pc\"")).str);
+    try std.testing.expectEqualStrings("$pkgdir/usr/bin/tool", (try evalExpr(a, &env, "self.destdir / \"usr/bin\" / \"tool\"")).str);
+    try std.testing.expectEqualStrings("R_2_7_1", (try evalExpr(a, &env, "f\"R_{pkgver.replace('.', '_')}\"")).str);
+    // Other string methods are still unknown.
+    try std.testing.expect((try evalExpr(a, &env, "pkgver.upper()")) == .unknown);
+
+    const c = try convert(a,
+        \\pkgname = "l"
+        \\pkgver = "1"
+        \\pkgrel = 0
+        \\pkgdesc = "l"
+        \\license = "MIT"
+        \\source = "https://x.org/l.tgz"
+        \\sha256 = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+        \\
+        \\def install(self):
+        \\    self.install_link("usr/bin/cc", "clang")
+        \\    self.install_file(self.files_path / "l.pc", "usr/lib/pkgconfig")
+        \\
+    , .{ .origin = "l" });
+    try std.testing.expect(std.mem.indexOf(u8, c.toml, "mkdir -p \"$pkgdir/usr/bin\"\nln -sf clang \"$pkgdir/usr/bin/cc\"") != null);
+    try std.testing.expect(std.mem.indexOf(u8, c.toml, "install -Dm644 $pkgfiles/l.pc \"$pkgdir/usr/lib/pkgconfig/l.pc\"") != null);
+}
+
+test "cbuild mirror variables in source URLs are expanded, unknown ones are flagged" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    try std.testing.expectEqualStrings("https://download.savannah.nongnu.org/releases/acl/acl-2.4.0.tar.gz", (try expandSites(a, "$(NONGNU_SITE)/acl/acl-2.4.0.tar.gz")).?);
+    try std.testing.expectEqualStrings("https://ftp.gnu.org/gnu/make/make-4.4.tar.gz", (try expandSites(a, "$(GNU_SITE)/make/make-4.4.tar.gz")).?);
+    try std.testing.expectEqualStrings("https://download.kde.org/unstable/x", (try expandSites(a, "$(KDE_UNSTABLE_SITE)/x")).?);
+    try std.testing.expect((try expandSites(a, "$(NOPE_SITE)/x")) == null);
+    try std.testing.expect((try expandSites(a, "$(GNU_SITE")) == null);
 }

@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: work/cports/main/attr/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "attr"
+version = "2.5.2"
+release = 1
+summary = "Extended attribute support library for ACL support"
+license = "LGPL-2.1-or-later"
+homepage = "http://savannah.nongnu.org/projects/attr"
+patches = ["basename.patch", "bmake.patch", "tests.patch"]
+hostdeps = ["pkgconf"]
+checkdeps = ["perl"]
+options = ["bootstrap"]
+
+source = [
+    { url = "https://download.savannah.nongnu.org/releases/attr/attr-2.5.2.tar.gz", sha256 = "39bf67452fa41d0948c2197601053f48b3d78a029389734332a6309a680c6c87" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check -j1
+'''
+install = '''
+%make_install
+'''
