@@ -1,0 +1,19 @@
+# Man page tool: finds, searches and renders man pages and Markdown docs.
+# Zig dependencies (md-zig, gtroff-zig) are fetched on the host (option `zigdeps`).
+name = "dkman"
+version = "0.3.0"
+release = 1
+summary = "Man page tool: finds, searches and renders man pages and Markdown docs"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkman"
+hostdeps = ["zig"]
+options = ["zigdeps", "!check"]
+
+source = [
+    { url = "https://github.com/BearzRobotics/dkman/releases/download/v0.3.0/dkman-0.3.0.tar.gz", sha256 = "e4f4d2a1dd2c1492eb5d3009d9b43244e75a464622c4f3cebd42e1aed6cbe3ef" },
+]
+
+install = '''
+%zig_build
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/dkman/LICENSE"
+'''

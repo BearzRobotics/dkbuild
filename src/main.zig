@@ -98,6 +98,14 @@ pub fn main(init: std.process.Init) !void {
                 var msg: []const u8 = "";
                 if (fetch.fetchOne(arena, init.io, cache, src, &msg)) |st| {
                     std.debug.print("{s}: {s}\n", .{ r.name, @tagName(st) });
+                    if (src == .tarball and contains(r.options, "zigdeps")) {
+                        if (fetch.fetchZigDeps(arena, init.io, cache, src.tarball.sha256, &msg)) |zst| {
+                            std.debug.print("{s}: zig dependencies {s}\n", .{ r.name, @tagName(zst) });
+                        } else |zerr| {
+                            failed = true;
+                            std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(zerr) });
+                        }
+                    }
                 } else |err| {
                     failed = true;
                     std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });

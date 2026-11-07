@@ -159,15 +159,19 @@ fn inTreeFiles(arena: Allocator, io: std.Io, opts: Options, r: recipe.Recipe, re
             continue;
         };
         const pr = t.recipes[pi];
-        for ([_][]const u8{ d, pr.name }) |want| {
+        // Also the provider's -libs, when it has one: its programs and -devel need the
+        // libraries, and `apk extract` does not follow dependencies.
+        const libs_name = try std.fmt.allocPrint(arena, "{s}-libs", .{pr.name});
+        for ([_][]const u8{ d, pr.name, libs_name }) |want| {
             const file = try std.fmt.allocPrint(arena, "{s}-{s}-r{d}.apk", .{ want, pr.version, pr.release });
+            const optional = std.mem.eql(u8, want, libs_name);
             if (contains(files.items, file)) continue;
             const present = if (repo_abs) |ra| blk: {
                 const path = try std.fs.path.join(arena, &.{ ra, file });
                 break :blk if (Dir.cwd().access(io, path, .{})) |_| true else |_| false;
             } else false;
             if (!present) {
-                if (k < direct) {
+                if (k < direct and !optional) {
                     out("error: {s} is not in repo/{s}; it should have been built before {s}\n", .{ file, opts.arch, r.name });
                     return error.PrepareFailed;
                 }
@@ -230,14 +234,23 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
     // 1. Sources
     const cache = try std.fs.path.join(arena, &.{ opts.root, "cache" });
     var first_tarball: ?[]const u8 = null;
+    var zigdeps_tar: ?[]const u8 = null;
     for (r.source) |src| {
         var msg: []const u8 = "";
         _ = fetch.fetchOne(arena, io, cache, src, &msg) catch |err| {
             out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
             return error.PrepareFailed;
         };
-        if (first_tarball == null and src == .tarball)
+        if (first_tarball == null and src == .tarball) {
             first_tarball = try fetch.cachePath(arena, cache, src.tarball.sha256);
+            if (contains(r.options, "zigdeps")) {
+                _ = fetch.fetchZigDeps(arena, io, cache, src.tarball.sha256, &msg) catch |err| {
+                    out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
+                    return error.PrepareFailed;
+                };
+                zigdeps_tar = try fetch.zigDepsPath(arena, cache, src.tarball.sha256);
+            }
+        }
     }
 
     // 2. Build root
@@ -320,6 +333,15 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
                 only = try arena.dupe(u8, e.name);
             }
             if (count == 1) srcdir = try std.fmt.allocPrint(arena, "/build/{s}", .{only});
+        }
+        // Zig dependencies fetched on the host: lay zig-pkg/ in the source tree.
+        if (zigdeps_tar) |zt| {
+            const dest = try std.fmt.allocPrint(arena, "{s}{s}", .{ build_rel, srcdir["/build".len..] });
+            const ok = runLogged(arena, io, &.{ "tar", "-xf", zt, "-C", dest }, &log) catch false;
+            if (!ok) {
+                out("error: cannot unpack the Zig dependencies {s}\n", .{zt});
+                return error.UnpackFailed;
+            }
         }
     }
 

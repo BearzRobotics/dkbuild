@@ -1,0 +1,20 @@
+# Quotes from the Douay-Rheims, the Roman Catechism and the CCC, one per login.
+# The release has no LICENSE file; MIT is assumed, like the author's other
+# projects: confirm and fix. Its build prints a note and tries to edit
+# $HOME/.bashrc; that runs in the build root and is not packaged.
+name = "dkscripture"
+version = "0.1.0"
+release = 1
+summary = "Random quotes from scripture and the catechisms"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkscripture"
+hostdeps = ["zig"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/BearzRobotics/dkscripture/releases/download/v0.1.0/dkscripture-0.1.0.tar.gz", sha256 = "cbfca14ebb89227350c05b125ea74a57cd5f770f9dbcd624bd47aafb763a2b03" },
+]
+
+install = '''
+%zig_build
+'''

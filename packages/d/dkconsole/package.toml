@@ -1,0 +1,23 @@
+# needed by: base (the text login console that replaces agetty).
+# Zig dependencies (dkterm -> libghostty-vt, toml-zig) are fetched on the host by
+# `dkbuild fetch` (option `zigdeps`) and built offline with --system zig-pkg.
+name = "dkconsole"
+version = "0.1.0"
+release = 1
+summary = "Text console for Linux virtual terminals; replaces agetty"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkconsole"
+archs = ["x86_64"]
+hostdeps = ["zig"]
+options = ["zigdeps", "!check"]
+
+source = [
+    { url = "https://github.com/BearzRobotics/dkconsole/releases/download/v0.1.0/dkconsole-0.1.0.tar.gz", sha256 = "8a4ead8d616fafd280fca314fe110883438d065a6449db85333ea4f8fb076111" },
+]
+
+install = '''
+%zig_build
+# The dinit template service: one instance per VT (dinitctl enable dkconsole@1).
+install -Dm644 data/dinit.d/dkconsole@ "$pkgdir/etc/dinit.d/dkconsole@"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/dkconsole/LICENSE"
+'''

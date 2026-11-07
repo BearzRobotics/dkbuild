@@ -107,3 +107,50 @@ test "validSha256" {
     try std.testing.expect(!validSha256(&upper));
     try std.testing.expect(!validSha256(&nonhex));
 }
+
+/// Where the vendored Zig dependencies of a source tarball are cached.
+pub fn zigDepsPath(arena: Allocator, cache: []const u8, tarball_sha256: []const u8) ![]const u8 {
+    return std.fmt.allocPrint(arena, "{s}/zigdeps/{s}.tar", .{ cache, tarball_sha256 });
+}
+
+/// For recipes with the `zigdeps` option: fetch the Zig dependencies of the
+/// source tarball (needs the network, so it runs on the host, never in the
+/// sandbox) and keep them as `cache/zigdeps/<sha256>.tar`, holding the
+/// `zig-pkg/` directory that `zig build --system zig-pkg` reads offline
+/// (SPEC 9.4 item 3). Uses the `zig` on the host's PATH, which must be a
+/// version the project accepts.
+pub fn fetchZigDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, message: *[]const u8) Error!Status {
+    const out_path = try zigDepsPath(arena, cache, tarball_sha256);
+    if (std.Io.Dir.cwd().access(io, out_path, .{})) |_| return .cached else |_| {}
+    const tarball = try cachePath(arena, cache, tarball_sha256);
+    const dir = try std.fmt.allocPrint(arena, "{s}/zigdeps", .{cache});
+    std.Io.Dir.cwd().createDirPath(io, dir) catch |err| {
+        message.* = try std.fmt.allocPrint(arena, "cannot create {s}: {s}", .{ dir, @errorName(err) });
+        return error.DownloadFailed;
+    };
+    const tmp = try std.fmt.allocPrint(arena, "{s}/tmp-{s}", .{ dir, tarball_sha256 });
+    // The tarball has one top-level directory; the fetch runs inside it.
+    const script = try std.fmt.allocPrint(arena,
+        \\set -e
+        \\rm -rf '{0s}'; mkdir -p '{0s}/gc'
+        \\tar -xf '{1s}' -C '{0s}'
+        \\top=$(ls -d '{0s}'/*/ | grep -v '/gc/$' | head -n1)
+        \\( cd "$top" && ZIG_GLOBAL_CACHE_DIR="$(pwd)/../gc" timeout 1800 zig build --fetch=all )
+        \\tar -cf '{2s}.part' -C "$top" zig-pkg
+        \\mv '{2s}.part' '{2s}'
+        \\rm -rf '{0s}'
+    , .{ tmp, tarball, out_path });
+    const res = std.process.run(arena, io, .{ .argv = &.{ "sh", "-c", script } }) catch |err| {
+        message.* = try std.fmt.allocPrint(arena, "cannot run the Zig dependency fetch: {s}", .{@errorName(err)});
+        return error.DownloadFailed;
+    };
+    const ok = switch (res.term) {
+        .exited => |c| c == 0,
+        else => false,
+    };
+    if (!ok) {
+        message.* = try std.fmt.allocPrint(arena, "Zig dependency fetch failed (needs `zig` on PATH): {s}", .{std.mem.trim(u8, res.stderr, "\n ")});
+        return error.DownloadFailed;
+    }
+    return .downloaded;
+}

@@ -610,7 +610,7 @@ fn expandSites(arena: Allocator, url: []const u8) Allocator.Error!?[]const u8 {
     return out.items;
 }
 
-const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap" };
+const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap", "zigdeps" };
 const known_archs = [_][]const u8{ "x86_64", "aarch64", "riscv64" };
 
 const Func = struct {

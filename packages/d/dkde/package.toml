@@ -1,0 +1,31 @@
+# The DKDE desktop: panel, session, setup, and the apps (term, files, settings,
+# edit, calc, calendar, clock, color, charmap, parted, snip, tasks, view, pdf).
+# Zig dependencies (zig-gobject bindings, zig-wayland, dkterm, pdf-zig, dkman,
+# util-unix, toml-zig) are fetched on the host (option `zigdeps`).
+#
+# Only the programs and data (`zig build install`) are packaged. dkde's
+# packaging/build.sh also writes a greetd login screen and PAM files; this
+# system logs in on dkconsole and has no PAM, so those are not part of this package.
+#
+# NOT BUILT YET: needs gtk4, gtk4-layer-shell, wayland, cairo, pango, glib and the
+# Zig dependency fetch to have been run (`dkbuild fetch dkde`).
+name = "dkde"
+version = "0.1.0"
+release = 1
+summary = "A Wayland desktop shell in Zig on GTK4 and labwc"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkde"
+archs = ["x86_64"]
+hostdeps = ["zig", "pkgconf"]
+builddeps = ["gtk4-devel", "gtk4-layer-shell-devel", "wayland-devel", "wayland-protocols", "glib-devel", "cairo-devel", "pango-devel", "harfbuzz-devel", "gdk-pixbuf-devel", "graphene-devel"]
+rundeps = ["labwc", "seatd", "dbus", "polkit"]
+options = ["zigdeps", "!check"]
+
+source = [
+    { url = "https://github.com/BearzRobotics/dkde/releases/download/v0.1.0/dkde-0.1.0.tar.gz", sha256 = "a0a579eb50a20f2feb7bf571a0aa465947b3807366bb846a80579b8098122f54" },
+]
+
+install = '''
+%zig_build
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/dkde/LICENSE"
+'''

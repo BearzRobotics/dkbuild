@@ -17,8 +17,11 @@ source = [
 
 setup = '''
 %meson \
-    -Dman-pages=enabled \
-    -Dxwayland=enabled
+    -Dxwayland=disabled \
+    -Dsvg=disabled \
+    -Dicon=disabled \
+    -Dman-pages=disabled \
+    -Dsystemd-session=disabled
 '''
 build = '''
 %meson_build
