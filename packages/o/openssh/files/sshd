@@ -1,0 +1,9 @@
+# Started on demand, not at boot.
+type = process
+smooth-recovery = true
+command = /usr/sbin/sshd -D
+
+depends-on: loginready
+depends-on: sshd-keys
+depends-on: rcboot
+waits-for: syslogd

@@ -1,0 +1,4 @@
+#!/bin/sh
+mkdir -p /var/empty
+chmod 755 /var/empty
+exit 0

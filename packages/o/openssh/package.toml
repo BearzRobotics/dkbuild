@@ -1,0 +1,43 @@
+# needed by: base-net (remote login). Not on the DKRescue ISO's disk: its dinit
+# services (files/sshd, files/sshd-keys) are, so they are used as they are.
+#
+# Built without PAM, Kerberos, FIDO and LDNS, none of which the system has.
+name = "openssh"
+version = "10.6_p2"
+release = 1
+summary = "OpenSSH client and server"
+license = "SSH-OpenSSH"
+homepage = "https://www.openssh.com"
+builddeps = ["openssl-devel", "zlib-ng-compat-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-10.6p2.tar.gz", sha256 = "9ae44872090cf2f06b3cf9ff147e7f16f309671340763ed2f99248398ae29d5b" },
+]
+
+setup = '''
+%configure \
+    --sbindir=/usr/sbin \
+    --libexecdir=/usr/lib/ssh \
+    --sysconfdir=/etc/ssh \
+    --with-privsep-user=sshd \
+    --with-privsep-path=/var/empty \
+    --with-pid-dir=/run \
+    --with-mantype=doc \
+    --without-pam \
+    --without-selinux \
+    --disable-wtmp \
+    --disable-utmp \
+    --disable-strip
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENCE "$pkgdir/usr/share/licenses/openssh/LICENCE"
+install -Dm755 contrib/ssh-copy-id "$pkgdir/usr/bin/ssh-copy-id"
+install -Dm644 contrib/ssh-copy-id.1 "$pkgdir/usr/share/man/man1/ssh-copy-id.1"
+install -Dm644 $pkgfiles/sshd "$pkgdir/etc/dinit.d/sshd"
+install -Dm644 $pkgfiles/sshd-keys "$pkgdir/etc/dinit.d/sshd-keys"
+'''

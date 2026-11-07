@@ -1,0 +1,4 @@
+# Host keys are generated at first start; baking them in would share them across every copy of the ISO.
+
+type = scripted
+command = /usr/bin/ssh-keygen -A

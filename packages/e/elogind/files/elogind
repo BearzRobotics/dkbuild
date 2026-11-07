@@ -1,0 +1,8 @@
+# elogind: logind without systemd. Runs as root, needs the system bus.
+type = process
+command = /usr/lib/elogind/elogind
+smooth-recovery = true
+ready-notification = pipevar:LOGIND_READY_FD
+
+depends-on: rcboot
+depends-on: dbus
