@@ -2,7 +2,7 @@
 # (that is dash). An optional login shell, registered in /etc/shells.
 name = "dksh"
 version = "0.0.1"
-release = 1
+release = 2
 summary = "A small shell written in Zig"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dksh"

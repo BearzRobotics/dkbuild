@@ -1,7 +1,7 @@
 # needed by: base (boot loader), the live image
 name = "dklilo"
 version = "0.0.3"
-release = 1
+release = 2
 summary = "A modern LILO: BIOS and UEFI boot loader that reads filesystems itself"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dklilo"

@@ -28,6 +28,13 @@ SPEC 9.3 gives the wave order. The versions to match are in
 Done when `dkbuild image images/dkrescue.toml` makes an ISO that boots to the
 desktop on the same hardware as `dkrescue.iso`.
 
+Status 2026-11-07: `zig` 0.17.1 builds from source against `llvm22` and passes
+`zig run`, `ReleaseSafe` builds, `zig cc` and an aarch64 cross-build. `dksh` and
+`dklilo` were rebuilt with it (r2). Note: dkbuild hashes a recipe's whole file,
+comments included, so even a comment edit to a built recipe needs a `release`
+bump (for `llvm22` that would mean another 3-hour build): edit comments before
+the first build.
+
 ## Tier 2: extras on the same base
 
 - **Rust, properly bootstrapped.** Needed by Firefox and many others. Plan:
