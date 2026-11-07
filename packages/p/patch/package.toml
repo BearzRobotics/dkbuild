@@ -1,0 +1,23 @@
+# Follows the DKRescue post's build of patch 2.7.6; the importer's draft of
+# Chimera's recipe was not used.
+name = "patch"
+version = "2.7.6"
+release = 1
+summary = "Apply a diff to files"
+license = "GPL-3.0-or-later"
+homepage = "https://savannah.gnu.org/projects/patch"
+options = ["bootstrap", "!check"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/patch/patch-2.7.6.tar.xz", sha256 = "ac610bda97abe0d9f6b7c963255a11dcb196c25e337c61f94e4778d632f1d8fd" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

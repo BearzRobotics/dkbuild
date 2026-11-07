@@ -1,0 +1,24 @@
+# Follows the DKRescue post's build of gettext 0.24; the importer's draft of
+# Chimera's recipe was not used.
+name = "gettext"
+version = "0.24"
+release = 1
+summary = "GNU internationalisation tools"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/gettext"
+builddeps = ["ncurses-devel"]
+options = ["bootstrap", "!check"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/gettext/gettext-0.24.tar.xz", sha256 = "e1620d518b26d7d3b16ac570e5018206e8b0d725fb65c02d048397718b5cf318" },
+]
+
+setup = '''
+%configure --docdir=/usr/share/doc/gettext
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

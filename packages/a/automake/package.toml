@@ -1,0 +1,23 @@
+# Follows the DKRescue post's build of automake 1.17; the importer's draft of
+# Chimera's recipe was not used.
+name = "automake"
+version = "1.17"
+release = 1
+summary = "Makefile generator"
+license = "GPL-2.0-or-later"
+homepage = "https://www.gnu.org/software/automake"
+options = ["bootstrap", "!check"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/automake/automake-1.17.tar.xz", sha256 = "8920c1fc411e13b90bf704ef9db6f29d540e76d232cb3b2c9f4dc4cc599bd990" },
+]
+
+setup = '''
+%configure --docdir=/usr/share/doc/automake
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

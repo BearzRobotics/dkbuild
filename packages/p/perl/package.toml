@@ -1,0 +1,27 @@
+# Follows the DKRescue post's build of perl 5.40.1; the importer's draft of
+# Chimera's recipe was not used.
+name = "perl"
+version = "5.40.1"
+release = 1
+summary = "Practical Extraction and Report Language"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://www.perl.org"
+options = ["bootstrap", "!check"]
+
+source = [
+    { url = "https://www.cpan.org/src/5.0/perl-5.40.1.tar.xz", sha256 = "dfa20c2eef2b4af133525610bbb65dd13777ecf998c9c5b1ccf0d308e732ee3f" },
+]
+
+setup = '''
+sh Configure -des -D prefix=/usr -D vendorprefix=/usr -D useshrplib \
+    -D privlib=/usr/lib/perl5/5.40/core_perl -D archlib=/usr/lib/perl5/5.40/core_perl \
+    -D sitelib=/usr/lib/perl5/5.40/site_perl -D sitearch=/usr/lib/perl5/5.40/site_perl \
+    -D vendorlib=/usr/lib/perl5/5.40/vendor_perl -D vendorarch=/usr/lib/perl5/5.40/vendor_perl \
+    -U d_eaccess -D cc=clang
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make DESTDIR=$pkgdir install
+'''

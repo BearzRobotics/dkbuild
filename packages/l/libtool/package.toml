@@ -1,0 +1,24 @@
+# Follows the DKRescue post's build of libtool 2.5.4; the importer's draft of
+# Chimera's recipe was not used.
+name = "libtool"
+version = "2.5.4"
+release = 1
+summary = "Generic library support script"
+license = "GPL-2.0-or-later"
+homepage = "https://www.gnu.org/software/libtool"
+options = ["bootstrap", "!check"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/libtool/libtool-2.5.4.tar.xz", sha256 = "f81f5860666b0bc7d84baddefa60d1cb9fa6fceb2398cc3baca6afaa60266675" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+rm -f "$pkgdir/usr/lib/libltdl.a"
+'''
