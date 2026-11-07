@@ -2,7 +2,8 @@
 # Unit tests, recipe check, then the end-to-end tests once for each build base
 # that is present: rootfs/dkrescue (the DKRescue image from `dkbuild
 # bootstrap-root`) and rootfs/chimera (the old prototype base). Needs the signing
-# key in ~/.config/dkbuild. See `dkbuild doctor` for the host tools.
+# key in ~/.config/dkbuild. Host tools (Ubuntu): sudo apt install ca-certificates curl
+# git tar xz-utils xorriso squashfs-tools util-linux openssl; `dkbuild doctor` checks them.
 set -u
 cd "$(dirname "$0")/.."
 zig build test --summary all 2>&1 | grep -E "Build Summary|error:" || exit 1

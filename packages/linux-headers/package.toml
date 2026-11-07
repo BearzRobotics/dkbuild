@@ -1,24 +1,16 @@
 name     = "linux-headers"
 version  = "6.19"
-release  = 1
+release  = 2
 summary  = "Linux kernel API headers for userspace"
 license  = "GPL-2.0-only WITH Linux-syscall-note"
 homepage = "https://www.kernel.org/"
-hostdeps = ["gsed", "rsync"]
+hostdeps = ["rsync"]
 options  = ["!check", "!strip"]
 
 source = [
     { url = "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.19.tar.xz", sha256 = "303079a8250b8f381f82b03f90463d12ac98d4f6b149b761ea75af1323521357" },
 ]
 
-# The kernel's scripts need GNU sed. Where `sed` is BSD (the Chimera bootstrap
-# root) and `gsed` exists, put a GNU `sed` first on PATH; elsewhere nothing happens.
-environment = '''
-if command -v gsed >/dev/null 2>&1; then
-    mkdir -p /tmp/gnubin && ln -sf "$(command -v gsed)" /tmp/gnubin/sed
-    export PATH=/tmp/gnubin:$PATH
-fi
-'''
 build = '''
 %kernel_make headers
 '''

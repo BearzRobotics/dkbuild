@@ -1,11 +1,11 @@
 name      = "lvm2"
 version   = "2.03.35"
-release   = 1
+release   = 2
 summary   = "Logical Volume Manager"
 license   = "GPL-2.0-only AND LGPL-2.1-only"
 homepage  = "https://sourceware.org/lvm2/"
 patches   = ["lvm2-2.03.35-musl_stdio-1.patch"]
-hostdeps  = ["pkgconf", "gsed"]
+hostdeps  = ["pkgconf"]
 builddeps = ["linux-headers", "libaio-devel", "util-linux-blkid-devel"]
 options   = ["!check"]
 
@@ -13,10 +13,6 @@ source = [
     { url = "https://sourceware.org/pub/lvm2/LVM2.2.03.35.tgz", sha256 = "ebf28b3427535e2b5abd9991cd839b61622a0dbfb8c86df0f7af1f69dcaa8371" },
 ]
 
-# LVM's man page rules need GNU sed; /usr/bin/sed is the BSD one here.
-environment = '''
-export SED=gsed
-'''
 # Command-line tools and the library only: no udev rules or sync, no lvmlockd,
 # no dmeventd. use_mlockall is set in the default lvm.conf (musl's /proc/self/maps
 # filter in LVM is glibc-shaped).
@@ -28,6 +24,6 @@ build = '''
 '''
 install = '''
 %make_install
-gsed -i 's/^\(\s*\)# use_mlockall = 0/\1use_mlockall = 1/' $pkgdir/etc/lvm/lvm.conf
+sed -i 's/^\(\s*\)# use_mlockall = 0/\1use_mlockall = 1/' $pkgdir/etc/lvm/lvm.conf
 grep -q 'use_mlockall = 1' $pkgdir/etc/lvm/lvm.conf
 '''

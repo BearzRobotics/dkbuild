@@ -74,6 +74,39 @@ particular:
 - **Static where it matters:** recipes can ask for static linking (5.4), and
   FenrirOS's critical early-boot and recovery packages do.
 
+### 3.1 Host requirements
+
+Until FenrirOS exists, dkbuild runs on **Ubuntu** (24.04 is the reference).
+Everything below is checked by `dkbuild doctor`, which prints the missing
+pieces and the fix. Nothing in a build needs root.
+
+```sh
+sudo apt install ca-certificates curl git tar xz-utils xorriso squashfs-tools util-linux openssl
+```
+
+| Need | Why |
+|---|---|
+| `curl`, `ca-certificates` | downloading sources (the only step with network) |
+| `tar`, `xz-utils` | source tarballs and root tarballs |
+| `xorriso`, `squashfs-tools` | `bootstrap-root` reads the DKRescue ISO's `rootfs.sfs` |
+| `util-linux` (`unshare`) | `bootstrap-root` and `doctor` test user namespaces |
+| `openssl` | creating the repository signing key |
+| `git` | recipes whose source is a git repository |
+| Zig 0.17.1 | building dkbuild itself (`zig build`); not on apt, see the README |
+| a Linux kernel 5.11 or newer with user namespaces and overlayfs | the sandbox (7.1) |
+| about 20 GB free, 8 GB of RAM | the unpacked image is 4.2 GB; LLVM needs the RAM |
+
+**Ubuntu 23.10 and later restrict unprivileged user namespaces** with
+AppArmor, and the sandbox cannot start until that is relaxed:
+
+```sh
+sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+echo 'kernel.apparmor_restrict_unprivileged_userns = 0' | sudo tee /etc/sysctl.d/60-dkbuild.conf
+```
+
+`bubblewrap` is needed only for the old Chimera prototype base
+(`--base chimera`), which goes away once the DKRescue base builds the tree.
+
 ## 4. Stack
 
 | Layer | Choice | Notes |
@@ -81,7 +114,7 @@ particular:
 | Language | **Zig 0.17.0** | Pinned in `build.zig.zon`, as in dkde and dklilo. |
 | Recipe format | **TOML** (5.1) | `toml-zig` (TOML 1.1, `std.Io`), a path dependency until it is pinned by hash. YAML survives only as an import format (5.9). |
 | Packages | **apk-tools v3** (`apk mkpkg`, `apk mkndx`, `apk add`) | The same tool and package format as Chimera. Pinned to an exact version. |
-| Sandbox | **Linux namespaces** (user, mount, PID, network, UTS, IPC) | Through `unshare(2)` directly. No bubblewrap. |
+| Sandbox | **Linux namespaces** (user, mount, PID, network, UTS, IPC) and an overlay root | `src/sandbox.zig`, through the system calls directly. No bubblewrap, no util-linux. |
 | Fetching | Zig's `std.http` | Only in the fetch step. |
 | Stripping and ELF scans | **llvm-strip**, **llvm-readelf** or an ELF reader in Zig | From the LLVM toolchain already in every build root. |
 | Build | `zig build` | |
@@ -448,20 +481,30 @@ The log of every step goes to `logs/<arch>/<name>-<version>-r<release>.log`.
 ### 7.1 Sandbox
 
 Every build runs in new **user, mount, PID, network, UTS and IPC
-namespaces**:
+namespaces** (`src/sandbox.zig`, **implemented**), written against the
+system calls directly:
 
-- **Unprivileged:** a user namespace maps the building user to root inside,
-  so dkbuild needs no root on the build machine. Preparing a root is the
-  exception: apk-tools runs with `--usermode`, which it refuses as uid 0, so
-  that step runs as the building user (in a user namespace, with network),
-  and only the build steps run with the root mapping.
+- **Unprivileged:** a user namespace maps the building user to root inside
+  (`setgroups` denied, one uid and one gid mapped), so dkbuild needs no root
+  on the build machine.
+- **The root is an overlay.** The base image (stage 0, 9.2) is the read-only
+  lower layer; the build writes to a throwaway upper layer. The unpacked image
+  is never modified and is shared by every build. The directories the build
+  needs from the host (`/build`, `/destdir`, `/dkbuild`, the repository, the
+  keys) are bind mounts, read-only where they can be. `pivot_root` then makes
+  the overlay the root and detaches the host's tree.
 - **No network:** the network namespace has only `lo`.
-- **Its own `/proc`, `/dev` (a minimal set: `null`, `zero`, `full`,
-  `random`, `urandom`, `tty`, `ptmx` with a new `devpts`), `/tmp` and
-  `/run`.**
+- **Its own `/proc`, `/dev`** (a tmpfs with `null`, `zero`, `full`, `random`,
+  `urandom` and `tty` bound from the host, and `/dev/shm`), **`/tmp` and
+  `/run`.** No `devpts` or `ptmx` yet: mounting `devpts` in a user namespace
+  needs the host's `tty` group mapped, and no build has needed a pty.
+- **The environment is exactly `PATH` and `HOME`**; nothing leaks from the
+  host.
 - **When the build ends, the kernel ends every process in it and removes
-  every mount.** That's the same reason the DKRescue build's chroot moved to
-  namespaces: nothing is left running or mounted.
+  every mount.** The sandbox runs in a re-executed copy of dkbuild
+  (`sandbox-child`), is killed if dkbuild dies (`PR_SET_PDEATHSIG`), and the
+  PID namespace takes every process with its first. Nothing is left running or
+  mounted (`tests/sandbox.sh` checks both from outside).
 
 ### 7.2 Rebuilds
 
@@ -773,6 +816,10 @@ keys/             public signing keys (private keys never in the repository)
   bad checksums), macro expansion for each target,
   the generated cross and toolchain files, subpackage splitting, and the
   ELF and pkg-config scans against fixture files.
+- **Both bases:** `tests/run-all.sh` runs the end-to-end scripts once for each
+  build base present (`rootfs/dkrescue`, `rootfs/chimera`). `forgotten-dep` is
+  skipped on the DKRescue base: stage 1 cannot catch a forgotten dependency
+  (7.3), so that test belongs to stage 2.
 - **Sandbox tests:** a build can't reach the network, can't see the build
   machine's processes or `/home`, and leaves no mount or process behind.
   (`tests/sandbox.sh`: a probe runs as a build step and checks the sandbox

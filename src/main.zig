@@ -6,6 +6,7 @@ const build = @import("build.zig");
 const inputs = @import("inputs.zig");
 const bootstrap = @import("bootstrap.zig");
 const sandbox = @import("sandbox.zig");
+const doctor = @import("doctor.zig");
 
 const usage =
     \\usage: dkbuild [--tree DIR] <command> [args]
@@ -15,6 +16,7 @@ const usage =
     \\  pkg [-j N] [--base chimera|dkrescue] [--key FILE] [--keep-root] [--force] <name>...
     \\                             build packages and the dependencies in the tree
     \\  graph <name>...            print the build order for packages
+    \\  doctor                     check this machine can run dkbuild; print the fixes
     \\  bootstrap-root [--force] [--dest DIR] <image>
     \\                             unpack the build machine (the DKRescue ISO, its
     \\                             rootfs.sfs, or a root tarball) into rootfs/dkrescue
@@ -185,6 +187,9 @@ pub fn main(init: std.process.Init) !void {
             const r = t.recipes[idx];
             std.debug.print("{s}-{s}-r{d}\n", .{ r.name, r.version, r.release });
         }
+    } else if (std.mem.eql(u8, cmd, "doctor")) {
+        const ok = try doctor.run(arena, init.io, root, init.environ_map.get("PATH") orelse "/usr/bin:/bin", init.environ_map.get("HOME"));
+        if (!ok) std.process.exit(1);
     } else if (std.mem.eql(u8, cmd, "bootstrap-root")) {
         var force = false;
         var dest: ?[]const u8 = null;
@@ -238,6 +243,7 @@ test {
     _ = @import("bootstrap.zig");
     _ = @import("sandbox.zig");
     _ = @import("basepkg.zig");
+    _ = @import("doctor.zig");
     _ = @import("fetch.zig");
     _ = @import("build.zig");
     _ = @import("split.zig");
