@@ -35,6 +35,11 @@ comments included, so even a comment edit to a built recipe needs a `release`
 bump (for `llvm22` that would mean another 3-hour build): edit comments before
 the first build.
 
+Open follow-ups from bring-up:
+- **ncurses C++ binding** (`libncurses++w`) is off because it failed to link
+  (no libc++ on its link line). Turn it back on, with `-lc++` in its link
+  flags, when a package needs it (user, 2026-11-07).
+
 ## Tier 2: extras on the same base
 
 - **Rust, properly bootstrapped.** Needed by Firefox and many others. Plan:

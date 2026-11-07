@@ -1,6 +1,7 @@
 # Follows the DKRescue post's build of ncurses 6.5; the importer's draft of
 # Chimera's recipe was not used.
-# DKRescue builds a non-wide library; this adds --enable-widec because every consumer that matters
+# No C++ binding (libncurses++): it linked without libc++ and failed here, and nothing
+# on the ISO uses it. DKRescue builds a non-wide library; this adds --enable-widec because every consumer that matters
 # (readline, vim, python curses) links ncursesw.
 name = "ncurses"
 version = "6.5"
@@ -17,7 +18,7 @@ source = [
 setup = '''
 sed -i s/mawk// configure
 ./configure --prefix=/usr --mandir=/usr/share/man --with-shared --with-normal \
-    --without-debug --with-cxx-shared --enable-pc-files \
+    --without-debug --without-cxx-binding --without-ada --enable-pc-files \
     --enable-widec --with-pkg-config-libdir=/usr/lib/pkgconfig AWK=gawk
 '''
 build = '''
@@ -27,7 +28,7 @@ install = '''
 %make_install
 # Programs that look for -lncurses, -lcurses or -ltinfo get the wide library.
 for lib in ncurses form panel menu; do
-    printf 'INPUT(-l%sw)\n' "$lib" > "$pkgdir/usr/lib/lib$lib.so"
+    echo "INPUT(-l${lib}w)" > "$pkgdir/usr/lib/lib$lib.so"
 done
 printf 'INPUT(-lncursesw)\n' > "$pkgdir/usr/lib/libcurses.so"
 printf 'INPUT(-lncursesw)\n' > "$pkgdir/usr/lib/libtinfo.so"
