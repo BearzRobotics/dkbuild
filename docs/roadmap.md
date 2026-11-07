@@ -75,13 +75,14 @@ cports tree (`origin/master`, 2026-11-07):
 | Package | In cports? | Plan |
 |---|---|---|
 | ruby, qemu (system, user, tools), flatpak (+builder), libreoffice, qt6, openjdk 17/21/25, go, rust, zsh, elogind, nodejs, firefox | yes | `import-cbuild`, then review. Their `rust-bootstrap` and `go-bootstrap` are the seeds. |
-| **Xorg** | partly: protocols, xinit, xkbcomp, xrandr, xwayland, but **no Xorg server** and no `xf86-*` drivers | Write `xorg-server` (meson) by hand; libinput and the modesetting driver cover the hardware the ISO supports. The X libraries come from cports. |
+| **X server** | no Xorg server in cports | **XLibre** (`X11Libre/xserver`, 25.1.11, an Xorg fork, meson build) is the X server. Written by hand: `xlibre-xserver` plus its libinput driver; the modesetting driver is built in. The X libraries come from cports. |
+| **Phoenix** (`external-mirrors/phoenix`) | no | An X server written in Zig from scratch, GPL-3.0, 0.1.0. Upstream says it is not for end users: it only runs nested inside another X server. Packaged as `phoenix` for experiments, built with our `zig`; it needs one Zig dependency (`translate-c`), so it waits for the Zig dependency fetch (SPEC 9.4). Not a replacement for XLibre yet. |
 | hyprland, fish, edit | no | Hand-written recipes (Hyprland also needs its own libraries: hyprutils, hyprlang, aquamarine, ...). |
 | **Fritzing** | no | Hand-written: Qt6 and Boost; the parts library is a separate download. |
 | **ImHex** | no | Hand-written: C++ with many bundled third-party libraries (imgui, capstone, nlohmann-json, glfw, ...); cports already has capstone, glfw and nlohmann-json. |
 
 Order inside the tier: ruby and qemu first (plain builds that prove the
-toolchain), then Xorg, flatpak, Qt-based Fritzing and ImHex, and LibreOffice
+toolchain), then XLibre, flatpak, Qt-based Fritzing and ImHex, and LibreOffice
 last (it is the largest build in the tree, hours on this machine).
 
 Anything not listed is added the same way: a recipe, `dkbuild check`, `dkbuild
