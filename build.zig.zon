@@ -2,10 +2,13 @@
     .name = .dkbuild,
     .fingerprint = 0xfb244dd7a60c44b3,
     .version = "0.0.1",
-    .minimum_zig_version = "0.17.0",
+    .minimum_zig_version = "0.17.1",
     .dependencies = .{
-        // The TOML library (a sibling project). Pin it by hash once it is published.
-        .toml = .{ .path = "../toml-zig" },
+        // The TOML library, pinned to its published release.
+        .toml = .{
+            .url = "https://github.com/BearzRobotics/toml-zig/releases/download/v0.1.0/toml-0.1.0.tar.gz",
+            .hash = "toml-0.1.0-dDatLI4xAgB1P1SWnx8mnn9oHfDkYSZbqBMOKvKR-X3N",
+        },
     },
     .paths = .{ "build.zig", "build.zig.zon", "src", "SPEC.md", "packages" },
 }

@@ -230,3 +230,29 @@ A failed build prints the end of its log; the whole log is in `logs/x86_64/<name
 - Recipes can be imported from Chimera (step 12); Solus `package.yml` import is planned.
 
 The design, with the reasoning, is in `SPEC.md` and `docs/decisions/`.
+
+## Moving a build to another machine
+
+Everything the build needs that is not in git:
+
+| What | Where it goes | Notes |
+|---|---|---|
+| The signing key | `~/.config/dkbuild/signing.rsa` | Private; copy it over a safe channel. Its public half is `keys/dkbuild-signing.rsa.pub` (in git). |
+| The DKRescue ISO | anywhere, e.g. `~/dkrescue.iso` | `dkbuild bootstrap-root ~/dkrescue.iso` unpacks it into `rootfs/dkrescue/`. The current build is the one that boots to a desktop on real hardware. |
+| `zig` 0.17.1 | on the PATH | Builds dkbuild, and fetches Zig dependencies for recipes with the `zigdeps` option. |
+| `lzip` and the other host tools | `apt install` | `dkbuild doctor` lists what is missing. |
+
+Then:
+
+```
+git clone https://github.com/BearzRobotics/dkbuild.git && cd dkbuild
+zig build
+./zig-out/bin/dkbuild doctor
+./zig-out/bin/dkbuild bootstrap-root ~/dkrescue.iso
+./zig-out/bin/dkbuild world --no-check --keep-going
+```
+
+`--keep-going` builds everything that can build and prints which recipes failed and
+which were skipped because something they need failed. The first pass takes hours
+(LLVM, Zig and the kernel are the long ones); use at least 16 GB of RAM and keep `/tmp`
+off a small RAM disk. Recipes that need a manual fix are listed in the failed set.
