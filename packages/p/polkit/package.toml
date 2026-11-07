@@ -1,0 +1,45 @@
+# needed by: dkde (hard requirement: its polkit agent talks to polkitd), and
+# anything that asks for privileged actions through D-Bus.
+#
+# Written from Chimera's recipe (polkit 128), changed for this system:
+#  - authfw=shadow: no PAM here (polkit 128 can authenticate against shadow).
+#  - session tracking by elogind (polkit offers only logind, elogind, ConsoleKit).
+#  - Chimera's turnstile.patch is dropped: it tracks sessions through turnstile.
+#  - the polkitd user comes from scripts/pre-install, not sysusers.
+# NOT BUILT YET: needs elogind, dbus, glib and duktape in the tree.
+name = "polkit"
+version = "128"
+release = 1
+summary = "Toolkit for defining and handling authorizations"
+license = "GPL-2.0-or-later"
+homepage = "https://www.freedesktop.org/wiki/Software/polkit"
+patches = ["dbus-activation.patch", "disable-sd-pidfd.patch", "readiness.patch"]
+hostdeps = ["gettext", "meson", "perl", "pkgconf"]
+builddeps = ["duktape-devel", "elogind-devel", "glib-devel", "expat-devel"]
+rundeps = ["dbus", "elogind"]
+options = ["!check", "!cross"]
+
+source = [
+    { url = "https://github.com/polkit-org/polkit/archive/refs/tags/128.tar.gz", sha256 = "6edb06bf1448e49e428f9597a97af6a05d62146dd0b58f86eeaebcee3f5ecfaa" },
+]
+
+setup = '''
+%meson \
+    -Dsession_tracking=elogind \
+    -Dsystemdsystemunitdir= \
+    -Dpolkitd_user=polkitd \
+    -Dauthfw=shadow \
+    -Dos_type=lfs \
+    -Dman=false \
+    -Dintrospection=false \
+    -Dtests=false \
+    -Dgtk_doc=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+rm -rf "$pkgdir/usr/lib/sysusers.d" "$pkgdir/usr/lib/tmpfiles.d" "$pkgdir/usr/lib/systemd"
+install -Dm644 $pkgfiles/polkitd "$pkgdir/etc/dinit.d/polkitd"
+'''

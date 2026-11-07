@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: work/cports/main/duktape/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reviewed by hand. needed by: polkit (its JavaScript rules engine).
+name = "duktape"
+version = "2.7.0"
+release = 1
+summary = "Embeddeable JavaScript engine"
+license = "MIT"
+homepage = "https://duktape.org"
+patches = ["fix-up-makefile.patch"]
+hostdeps = ["pkgconf"]
+
+source = [
+    { url = "https://github.com/svaarala/duktape/releases/download/v2.7.0/duktape-2.7.0.tar.xz", sha256 = "90f8d2fa8b5567c6899830ddef2c03f3c27960b11aca222fa17aa7ac613c2890" },
+]
+
+build = '''
+make -j$jobs CC="$CC" PREFIX=/usr -f Makefile.sharedlibrary
+'''
+check = '''
+%make  -f Makefile.cmdline
+./duk -e "print('hello world', 5 + 10)"
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr \
+    -f \
+    Makefile.sharedlibrary \
+    INSTALL_PREFIX=/usr
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/duktape/LICENSE.txt"
+'''

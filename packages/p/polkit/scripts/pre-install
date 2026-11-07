@@ -1,0 +1,4 @@
+#!/bin/sh
+grep -q "^polkitd:" /etc/group || groupadd -r polkitd
+grep -q "^polkitd:" /etc/passwd || useradd -r -g polkitd -d /var/empty -s /usr/bin/nologin -c "polkit daemon" polkitd
+exit 0

@@ -22,7 +22,7 @@ SPEC 9.3 gives the wave order. The versions to match are in
 | Kernel | linux 6.19 | Config: `/boot/config-6.19-dkrescue` from the ISO |
 | Rescue tools | fsarchiver, ntfs-3g, nwipe, ddrescue, testdisk, btrfs-progs, ... | list is in the iso post |
 | Network | dhcpcd, iwd, wpa_supplicant, openssh | `base-net` |
-| Desktop | wayland, mesa, labwc, pipewire, gtk3/4, dkde, fonts | The longest tail: ~100 recipes |
+| Desktop | wayland, mesa, labwc, pipewire, gtk3/4, dkde, fonts | The longest tail: ~100 recipes. dkde requires **polkit**, which needs elogind, dbus, glib and duktape; recipes for polkit, elogind and duktape exist, and none builds yet. |
 | Image | squashfs, initramfs, dklilo ISO | `dkbuild image` |
 
 Done when `dkbuild image images/dkrescue.toml` makes an ISO that boots to the

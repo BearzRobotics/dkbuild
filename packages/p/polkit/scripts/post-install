@@ -1,0 +1,5 @@
+#!/bin/sh
+mkdir -p /etc/polkit-1/rules.d
+chown root:polkitd /etc/polkit-1/rules.d
+chmod 750 /etc/polkit-1/rules.d
+exit 0

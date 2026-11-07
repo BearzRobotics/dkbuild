@@ -1,4 +1,5 @@
-# needed by: base (an alternative login shell; registered in /etc/shells)
+# Experimental and not yet tested widely; not POSIX-compatible, so it is never /bin/sh
+# (that is dash). An optional login shell, registered in /etc/shells.
 name = "dksh"
 version = "0.0.1"
 release = 1
