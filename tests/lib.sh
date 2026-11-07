@@ -32,8 +32,8 @@ mkdemo() {
 
 # demo_recipe TREE RELEASE: writes the dkdemo library recipe into TREE.
 demo_recipe() {
-    mkdir -p "$1/packages/dkdemo"
-    cat > "$1/packages/dkdemo/package.toml" <<EOF
+    mkdir -p "$1/packages/d/dkdemo"
+    cat > "$1/packages/d/dkdemo/package.toml" <<EOF
 name    = "dkdemo"
 version = "1"
 release = $2
@@ -62,9 +62,9 @@ EOF
 
 # user_recipe TREE NAME DEP [static]: a program that links dkdemo (statically with "static").
 user_recipe() {
-    mkdir -p "$1/packages/$2"
+    mkdir -p "$1/packages/$(printf %.1s "$2")/$2"
     if [ "${4:-}" = static ]; then opts='["static", "!check"]'; link="-static"; else opts='["!check"]'; link=""; fi
-    cat > "$1/packages/$2/package.toml" <<EOF
+    cat > "$1/packages/$(printf %.1s "$2")/$2/package.toml" <<EOF
 name      = "$2"
 version   = "1"
 release   = 1

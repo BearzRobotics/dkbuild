@@ -291,7 +291,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
         Dir.cwd().createDirPath(io, try std.fs.path.join(arena, &.{ root_rel, "dkbuild" })) catch return error.UnpackFailed;
         // The recipe's patches/ and files/ appear read-only-by-convention at /dkbuild.
         for ([_][]const u8{ "patches", "files" }) |sub| {
-            const from = try std.fs.path.join(arena, &.{ opts.root, "packages", r.name, sub });
+            const from = try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, opts.root, r.name), sub });
             Dir.cwd().access(io, from, .{}) catch continue;
             const to = try std.fs.path.join(arena, &.{ root_rel, "dkbuild", sub });
             const ok = runLogged(arena, io, &.{ "cp", "-r", from, to }, &log) catch false;

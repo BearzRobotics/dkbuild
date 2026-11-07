@@ -21,13 +21,13 @@ echo "$OUT" | grep -q 'usedemo-1-r1: up to date' || fail "usedemo was not skippe
 echo "$OUT" | grep -q 'preparing build root' && fail "something was rebuilt although nothing changed"
 
 # A recipe change without a new release is an error, and builds nothing.
-echo "# edited" >> "$T/packages/dkdemo/package.toml"
+echo "# edited" >> "$T/packages/d/dkdemo/package.toml"
 OUT=$(run) && fail "an edited recipe with the same release was accepted"
 echo "$OUT" | grep -q 'release is still r1' || fail "no message about the unchanged release"
 echo "$OUT" | grep -q 'preparing build root' && fail "built despite the error"
 
 # A new release rebuilds it, and the package that builds against it.
-sed -i 's/^release = 1$/release = 2/' "$T/packages/dkdemo/package.toml"
+sed -i 's/^release = 1$/release = 2/' "$T/packages/d/dkdemo/package.toml"
 OUT=$(run) || fail "build after the release bump"
 echo "$OUT" | grep -q '^==> dkdemo-1-r2$' || fail "dkdemo r2 was not built"
 echo "$OUT" | grep -q 'usedemo-1-r1: packages it builds against changed' || fail "usedemo was not rebuilt after its dependency changed"

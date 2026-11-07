@@ -13,9 +13,9 @@ fi
 
 newtree "$T"
 mkdemo "$T/src"
-mkdir -p "$T/packages/probe/files"
-sed "s|@HOSTHOME@|$HOME|" tests/sandbox-probe.sh > "$T/packages/probe/files/probe.sh"
-cat > "$T/packages/probe/package.toml" <<EOF
+mkdir -p "$T/packages/p/probe/files"
+sed "s|@HOSTHOME@|$HOME|" tests/sandbox-probe.sh > "$T/packages/p/probe/files/probe.sh"
+cat > "$T/packages/p/probe/package.toml" <<EOF
 name    = "probe"
 version = "1"
 release = 1

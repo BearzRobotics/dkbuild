@@ -7,6 +7,7 @@
 //! the packages it builds against changing only means a rebuild.
 
 const std = @import("std");
+const recipe = @import("recipe.zig");
 const tree = @import("tree.zig");
 const Allocator = std.mem.Allocator;
 const Dir = std.Io.Dir;
@@ -78,7 +79,7 @@ fn hashFileInto(h: *Sha256, arena: Allocator, io: std.Io, path: []const u8, labe
 /// files/ (names and contents, sorted), and the architecture profile.
 pub fn ownHash(arena: Allocator, io: std.Io, root: []const u8, name: []const u8, arch: []const u8) !Hex {
     var h = Sha256.init(.{});
-    const base = try std.fs.path.join(arena, &.{ root, "packages", name });
+    const base = try recipe.dirPath(arena, root, name);
     try hashFileInto(&h, arena, io, try std.fs.path.join(arena, &.{ base, "package.toml" }), "package.toml");
     try hashFileInto(&h, arena, io, try std.fmt.allocPrint(arena, "{s}/profiles/{s}.toml", .{ root, arch }), "profile");
 

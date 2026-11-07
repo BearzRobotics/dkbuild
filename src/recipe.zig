@@ -62,6 +62,13 @@ const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static",
 const known_archs = [_][]const u8{ "x86_64", "aarch64", "riscv64" };
 
 /// Parse and validate `text`. All returned memory lives in `arena`.
+/// The directory that holds a package's recipe, relative to the project root:
+/// `packages/<first letter>/<name>`. The letter keeps `packages/` small enough
+/// to browse once the tree has hundreds of recipes.
+pub fn dirPath(arena: Allocator, root: []const u8, name: []const u8) ![]const u8 {
+    return std.fs.path.join(arena, &.{ root, "packages", name[0..1], name });
+}
+
 pub fn parse(arena: Allocator, text: []const u8, diag: *Diagnostic) Error!Recipe {
     return parseChecked(arena, text, diag) catch |err| switch (err) {
         error.Invalid => error.InvalidRecipe,

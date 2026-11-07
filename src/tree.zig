@@ -97,18 +97,26 @@ pub const Tree = struct {
     }
 };
 
-/// Loads `<root>/packages/*/package.toml`. Recipes that fail validation are
-/// reported in `problems` and left out of the tree.
+/// Loads `<root>/packages/<letter>/<name>/package.toml`. A recipe sits in the
+/// directory named by its first letter (`recipe.dirPath`). Recipes that fail
+/// validation are reported in `problems` and left out of the tree.
 pub fn load(arena: Allocator, io: std.Io, root: []const u8, problems: *std.ArrayList(Problem)) !Tree {
     var list: std.ArrayList(Recipe) = .empty;
     const pkg_path = try std.fs.path.join(arena, &.{ root, "packages" });
     var dir = try std.Io.Dir.cwd().openDir(io, pkg_path, .{ .iterate = true });
     defer dir.close(io);
 
+    // Every package directory as "<letter>/<name>", sorted so the order is stable.
     var names: std.ArrayList([]const u8) = .empty;
     var it = dir.iterate();
     while (try it.next(io)) |e| {
-        if (e.kind == .directory) try names.append(arena, try arena.dupe(u8, e.name));
+        if (e.kind != .directory) continue;
+        var bucket = try dir.openDir(io, e.name, .{ .iterate = true });
+        defer bucket.close(io);
+        var bit = bucket.iterate();
+        while (try bit.next(io)) |p| {
+            if (p.kind == .directory) try names.append(arena, try std.fs.path.join(arena, &.{ e.name, p.name }));
+        }
     }
     std.mem.sort([]const u8, names.items, {}, struct {
         fn lt(_: void, a: []const u8, b: []const u8) bool {
@@ -130,8 +138,9 @@ pub fn load(arena: Allocator, io: std.Io, root: []const u8, problems: *std.Array
             },
             error.OutOfMemory => return error.OutOfMemory,
         };
-        if (!std.mem.eql(u8, r.name, dirname)) {
-            try problems.append(arena, .{ .where = dirname, .message = try std.fmt.allocPrint(arena, "name '{s}' does not match its directory", .{r.name}) });
+        const expected = try std.fs.path.join(arena, &.{ r.name[0..1], r.name });
+        if (!std.mem.eql(u8, expected, dirname)) {
+            try problems.append(arena, .{ .where = dirname, .message = try std.fmt.allocPrint(arena, "name '{s}' belongs in packages/{s}", .{ r.name, expected }) });
             continue;
         }
         var ok = true;

@@ -13,9 +13,9 @@ exit 0
 T=tests/trees/forgotten-dep
 newtree "$T"
 mkdemo "$T/src"
-mkdir -p "$T/packages/usezlib"
+mkdir -p "$T/packages/u/usezlib"
 recipe() { # $1 = extra lines (builddeps)
-    cat > "$T/packages/usezlib/package.toml" <<EOF
+    cat > "$T/packages/u/usezlib/package.toml" <<EOF
 name    = "usezlib"
 version = "1"
 release = 1

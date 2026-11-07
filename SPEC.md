@@ -124,21 +124,27 @@ installed systems use.
 
 ### 5.1 Format
 
-One directory per package, in the recipe tree:
+One directory per package, in the recipe tree, under a directory named by the
+package's first letter (`packages/z/zstd/`). `dkbuild check` rejects a recipe
+in the wrong place. `patches/` holds every patch the recipe applies and sits
+next to `package.toml`:
 
 ```
 packages/
-  zstd/
-    package.toml
-  lvm2/
-    package.toml
-    patches/
-      lvm2-2.03.35-musl_stdio-1.patch
-  dinit/
-    package.toml
-    files/
-      boot
-      rcboot.sh
+  z/
+    zstd/
+      package.toml
+  l/
+    lvm2/
+      package.toml
+      patches/
+        lvm2-2.03.35-musl_stdio-1.patch
+  d/
+    dinit/
+      package.toml
+      files/
+        boot
+        rcboot.sh
 ```
 
 `package.toml` is TOML, read with `toml-zig`. Keys not in 5.2 are an error,
@@ -837,7 +843,7 @@ src/
 **The recipe tree** (FenrirOS's):
 
 ```
-packages/<name>/package.toml, patches/, files/
+packages/<letter>/<name>/package.toml, patches/, files/
 profiles/x86_64.toml, aarch64.toml, riscv64.toml
 images/fenriros.toml
 keys/             public signing keys (private keys never in the repository)

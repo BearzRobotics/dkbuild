@@ -185,7 +185,7 @@ git -C ~/cports sparse-checkout set main/xz
 It writes `imported/xz/package.toml` (and copies `patches/` and `files/`) and prints a report:
 `TODO` lines are things a person must finish (each is also left in the recipe as a `# TODO(cbuild): ...` comment),
 `dropped` lines are template settings with no equivalent, `check` lines are things to look at. Copy the directory
-to `packages/`, fix the TODOs, run `dkbuild check`, then `dkbuild pkg <name>`. Dependency names are Chimera's
+to `packages/<letter>/`, fix the TODOs, run `dkbuild check`, then `dkbuild pkg <name>`. Dependency names are Chimera's
 (`zlib-ng-compat-devel`, `openssl3-devel`) and may need changing. cports is BSD-2-Clause; the draft's header
 keeps the attribution.
 
@@ -193,7 +193,7 @@ keeps the attribution.
 
 | Path | What | In git? |
 |---|---|---|
-| `packages/<name>/` | recipes: `package.toml`, `patches/`, `files/` | yes |
+| `packages/<letter>/<name>/` | recipes: `package.toml`, `patches/`, `files/` | yes |
 | `profiles/` | per-architecture settings | yes |
 | `keys/` | public signing key(s) | yes |
 | `docs/`, `SPEC.md` | design | yes |
