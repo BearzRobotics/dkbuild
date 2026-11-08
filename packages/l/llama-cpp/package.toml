@@ -4,14 +4,15 @@
 # CPU backend is built for every x86_64 feature level, picked at run time, so
 # one package runs well on any machine (GGML_NATIVE would tie it to the builder).
 # No web UI download at build time (no network in the sandbox).
+# r2: ggml's CPU backend threads with OpenMP (openmp is in the tree now).
 name = "llama-cpp"
 version = "0.9.0"
-release = 1
+release = 2
 summary = "LLM inference in C/C++, with Vulkan GPU support"
 license = "MIT"
 homepage = "https://github.com/ggml-org/llama.cpp"
 hostdeps = ["cmake", "ninja", "pkgconf", "shaderc"]
-builddeps = ["curl-devel", "openssl-devel", "vulkan-headers-devel", "vulkan-loader-devel"]
+builddeps = ["curl-devel", "openssl-devel", "vulkan-headers-devel", "vulkan-loader-devel", "openmp-devel"]
 rundeps = ["vulkan-loader"]
 options = ["!check"]
 
@@ -26,6 +27,7 @@ setup = '''
     -DGGML_BACKEND_DL=ON \
     -DGGML_CPU_ALL_VARIANTS=ON \
     -DGGML_VULKAN=ON \
+    -DGGML_OPENMP=ON \
     -DLLAMA_OPENSSL=ON \
     -DLLAMA_BUILD_TESTS=OFF \
     -DLLAMA_BUILD_EXAMPLES=OFF \

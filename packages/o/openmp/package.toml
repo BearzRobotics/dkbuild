@@ -1,0 +1,32 @@
+# The LLVM OpenMP runtime (libomp, omp.h): clang -fopenmp links it. Used by
+# llama.cpp/ggml's CPU threading, muparser, GIMP's GEGL, OpenColorIO and more.
+# Standalone from the llvm-project source, against the installed LLVM, as Arch
+# packages it; version locked to `llvm`. No libgomp/libiomp5 alias names, so it
+# never collides with GCC's libgomp (GCC is opt-in, docs/roadmap.md). No
+# offloading (libomptarget).
+name = "openmp"
+version = "23.1.5"
+release = 1
+summary = "LLVM OpenMP runtime library"
+license = "Apache-2.0 WITH LLVM-exception"
+homepage = "https://openmp.llvm.org"
+hostdeps = ["cmake", "ninja", "python", "llvm", "llvm-clang"]
+builddeps = ["llvm-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-23.1.5/llvm-project-23.1.5.src.tar.xz", sha256 = "fb50b1eac93ddeb3aa8dab4cfe324dff74f4a9c2bdee6160c9e36188f8d06a6e" },
+]
+
+setup = '''
+cmake -S openmp -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DLLVM_DIR=/usr/lib/cmake/llvm \
+    -DLIBOMP_INSTALL_ALIASES=OFF -DOPENMP_ENABLE_LIBOMPTARGET=OFF \
+    -DOPENMP_ENABLE_OMPT_TOOLS=OFF -DLIBOMP_OMPD_SUPPORT=OFF
+'''
+build = '''
+ninja -C build -j$jobs
+'''
+install = '''
+DESTDIR=$pkgdir ninja -C build install
+install -Dm644 LICENSE.TXT "$pkgdir/usr/share/licenses/openmp/LICENSE.TXT"
+'''

@@ -1,0 +1,28 @@
+# The OpenCL C library for clang (bitcode for AMD, NVIDIA and SPIR-V targets):
+# Mesa needs it for Intel's Vulkan and GL drivers and for rusticl, its OpenCL.
+# Standalone from the llvm-project source, against the installed LLVM and
+# clang, with llvm-spirv for the SPIR-V targets. Version locked to `llvm`.
+name = "libclc"
+version = "23.1.5"
+release = 1
+summary = "Open source implementation of the OpenCL C library"
+license = "Apache-2.0 WITH LLVM-exception"
+homepage = "https://libclc.llvm.org"
+hostdeps = ["cmake", "ninja", "python", "llvm", "llvm-clang", "spirv-llvm-translator"]
+builddeps = ["llvm-devel"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-23.1.5/llvm-project-23.1.5.src.tar.xz", sha256 = "fb50b1eac93ddeb3aa8dab4cfe324dff74f4a9c2bdee6160c9e36188f8d06a6e" },
+]
+
+setup = '''
+cmake -S libclc -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DLLVM_DIR=/usr/lib/cmake/llvm
+'''
+build = '''
+ninja -C build -j$jobs
+'''
+install = '''
+DESTDIR=$pkgdir ninja -C build install
+install -Dm644 LICENSE.TXT "$pkgdir/usr/share/licenses/libclc/LICENSE.TXT"
+'''

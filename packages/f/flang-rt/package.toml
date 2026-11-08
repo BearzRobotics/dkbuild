@@ -1,0 +1,29 @@
+# The Fortran runtime library that programs compiled by flang link against.
+# Built from the llvm-project source's runtimes/ directory with the flang just
+# built; version locked to `llvm`.
+name = "flang-rt"
+version = "23.1.5"
+release = 1
+summary = "LLVM Fortran runtime library"
+license = "Apache-2.0 WITH LLVM-exception"
+homepage = "https://flang.llvm.org"
+hostdeps = ["cmake", "ninja", "python", "llvm", "llvm-clang", "flang"]
+builddeps = ["llvm-devel", "llvm-libcxx-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-23.1.5/llvm-project-23.1.5.src.tar.xz", sha256 = "fb50b1eac93ddeb3aa8dab4cfe324dff74f4a9c2bdee6160c9e36188f8d06a6e" },
+]
+
+setup = '''
+cmake -S runtimes -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DLLVM_DIR=/usr/lib/cmake/llvm \
+    -DLLVM_ENABLE_RUNTIMES=flang-rt -DCMAKE_Fortran_COMPILER=/usr/bin/flang \
+    -DCMAKE_Fortran_COMPILER_WORKS=ON -DFLANG_RT_INCLUDE_TESTS=OFF
+'''
+build = '''
+ninja -C build -j$jobs
+'''
+install = '''
+DESTDIR=$pkgdir ninja -C build install
+install -Dm644 LICENSE.TXT "$pkgdir/usr/share/licenses/flang-rt/LICENSE.TXT"
+'''

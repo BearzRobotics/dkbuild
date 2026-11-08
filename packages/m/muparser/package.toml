@@ -1,14 +1,16 @@
 # Imported from Chimera Linux cports: main/muparser/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# needed by: hyprland (expressions in its config). No OpenMP (libomp is not built).
+# needed by: hyprland (expressions in its config).
 # r2: rebuilt with libraries in /usr/lib (the %cmake macro set no libdir; they went to /usr/lib64).
+# r3: with OpenMP (openmp is in the tree now).
 name = "muparser"
 version = "2.3.5"
-release = 2
+release = 3
 summary = "Qt implementation of freedesktop.org xdg specs"
 license = "BSD-2-Clause"
 homepage = "https://beltoforion.de/en/muparser"
 hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["openmp-devel"]
 
 source = [
     { url = "https://github.com/beltoforion/muparser/archive/refs/tags/v2.3.5.tar.gz", sha256 = "20b43cc68c655665db83711906f01b20c51909368973116dfc8d7b3c4ddb5dd4" },
@@ -16,7 +18,7 @@ source = [
 
 setup = '''
 %cmake \
-    -DENABLE_OPENMP=OFF
+    -DENABLE_OPENMP=ON
 '''
 build = '''
 %cmake_build

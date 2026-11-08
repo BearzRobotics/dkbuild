@@ -1,0 +1,30 @@
+# MLIR, LLVM's multi-level IR framework: needed by flang (LLVM's Fortran
+# compiler). Standalone from the llvm-project source against the installed
+# LLVM; version locked to `llvm`. No Python bindings.
+name = "mlir"
+version = "23.1.5"
+release = 1
+summary = "Multi-Level Intermediate Representation (LLVM)"
+license = "Apache-2.0 WITH LLVM-exception"
+homepage = "https://mlir.llvm.org"
+hostdeps = ["cmake", "ninja", "python", "llvm", "llvm-clang"]
+builddeps = ["llvm-devel", "llvm-libcxx-devel", "zlib-ng-compat-devel", "zstd-devel"]
+options = ["!check", "jobs:10"]
+
+source = [
+    { url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-23.1.5/llvm-project-23.1.5.src.tar.xz", sha256 = "fb50b1eac93ddeb3aa8dab4cfe324dff74f4a9c2bdee6160c9e36188f8d06a6e" },
+]
+
+setup = '''
+cmake -S mlir -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DLLVM_DIR=/usr/lib/cmake/llvm \
+    -DLLVM_TABLEGEN_EXE=/usr/bin/llvm-tblgen \
+    -DMLIR_INCLUDE_TESTS=OFF -DMLIR_INCLUDE_INTEGRATION_TESTS=OFF \
+    -DMLIR_ENABLE_BINDINGS_PYTHON=OFF -DLLVM_BUILD_TOOLS=ON -DLLVM_INSTALL_UTILS=ON
+'''
+build = '''
+nice -n 10 ninja -C build -j$jobs
+'''
+install = '''
+DESTDIR=$pkgdir ninja -C build install
+install -Dm644 LICENSE.TXT "$pkgdir/usr/share/licenses/mlir/LICENSE.TXT"
+'''
