@@ -1,0 +1,24 @@
+# aimgr: local AI model manager for Ollama and llama.cpp, a terminal UI and
+# CLI (models, chat and agent sessions, abliteration, GGUF conversion). Built
+# from the release's source tarball, which vendors every Zig dependency, so
+# the build is offline. The backends are this system's ollama and llama-cpp
+# packages; `aimgr abliterate setup` makes its own Python environment (it
+# downloads PyTorch and friends then, not at build time).
+name = "aimgr"
+version = "0.2.0"
+release = 1
+summary = "Local AI model manager for Ollama and llama.cpp"
+license = "GPL-2.0-only"
+homepage = "https://github.com/BearzRobotics/aimgr"
+hostdeps = ["zig"]
+rundeps = ["ollama", "llama-cpp", "python"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/BearzRobotics/aimgr/releases/download/v0.2.0/aimgr-0.2.0-src.tar.gz", sha256 = "c5263290ba050f348d4433034cc4fd1bd91ca6649c3bc08e24f3cfe85fb2b2c2" },
+]
+
+install = '''
+%zig_build
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/aimgr/LICENSE"
+'''
