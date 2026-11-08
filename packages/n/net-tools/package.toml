@@ -1,0 +1,42 @@
+# The classic networking tools: ifconfig, route, netstat, arp, rarp, nameif,
+# mii-tool, plipconfig, slattach, ipmaddr, iptunnel. `ip` and `ss` (iproute2)
+# are the system's tools; these are here for people who know the old ones.
+# No conflicts: busybox installs no applet links, iproute2's commands have
+# other names, and hostname (with dnsdomainname, domainname, ...) is left to
+# coreutils. The protocol families musl has no headers for (IPX, AppleTalk,
+# AX.25, NET/ROM, ROSE, X.25) are not built; TCP/IP, IPv6 and UNIX are.
+name = "net-tools"
+version = "2.10"
+release = 1
+summary = "Classic networking tools (ifconfig, route, netstat, arp)"
+license = "GPL-2.0-or-later"
+homepage = "https://net-tools.sourceforge.io"
+hostdeps = ["gettext"]
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/net-tools/net-tools-2.10.tar.xz", sha256 = "b262435a5241e89bfa51c3cabd5133753952f7a7b7b93f32e08cb9d96f580d69" },
+]
+
+setup = '''
+# `make config` asks every question of config.in; set the answers there and
+# take them all.
+for k in HAVE_AFIPX HAVE_AFATALK HAVE_AFAX25 HAVE_AFNETROM HAVE_AFROSE HAVE_AFX25 \
+         HAVE_HWAX25 HAVE_HWROSE HAVE_HWNETROM HAVE_HWX25 \
+         HAVE_HOSTNAME_TOOLS HAVE_HOSTNAME_SYMLINKS; do
+    sed -i "s/ $k y$/ $k n/" config.in
+done
+sed -i 's/ I18N n$/ I18N y/' config.in
+yes '' | make config
+'''
+build = '''
+make CC="$CC" CFLAGS="$CFLAGS -fno-strict-aliasing" LDFLAGS="$LDFLAGS" -j$jobs
+'''
+install = '''
+make DESTDIR="$pkgdir" BASEDIR="$pkgdir" BINDIR=/usr/bin SBINDIR=/usr/sbin install
+# hostname is coreutils'; its manual pages too.
+find "$pkgdir/usr/share/man" \( -name 'hostname.*' -o -name 'dnsdomainname.*' -o -name 'domainname.*' \
+    -o -name 'nisdomainname.*' -o -name 'ypdomainname.*' -o -name 'nodename.*' \) -delete
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/net-tools/COPYING"
+'''
