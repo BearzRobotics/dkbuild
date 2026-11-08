@@ -26,5 +26,4 @@ build = '''
 '''
 install = '''
 %meson_install
-install -Dm644 $pkgfiles/10_chimera_theme.gschema.override "$pkgdir/usr/share/glib-2.0/schemas/10_chimera_theme.gschema.override"
 '''

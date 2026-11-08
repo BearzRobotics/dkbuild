@@ -17,7 +17,8 @@ source = [
 
 build = '''
 make -C src
-# TODO(cbuild): self.rm("doc/ladspa.h.txt", force=True)
+make -C src CC="$CC" CXX="$CXX"
+rm -f doc/ladspa.h.txt
 '''
 check = '''
 make -C src test
@@ -26,13 +27,15 @@ install = '''
 # header
 install -Dm644 src/ladspa.h "$pkgdir/usr/include/ladspa.h"
 # plugins
-# TODO(cbuild): for f in (self.cwd / "plugins").glob("*.so*"):
-#         self.install_file(f, "usr/lib/ladspa", mode=0o755)
 # programs
-# TODO(cbuild): self.install_files("bin", "usr/bin")
 # docs
 install -dm755 "$pkgdir/usr/share/doc"
-# TODO(cbuild): self.cp("doc", self.destdir / "usr/share/doc/ladspa-sdk", recursive=True)
 mkdir -p "$pkgdir/usr/share/doc/ladspa-sdk"
 ln -sf ../../../include/ladspa.h "$pkgdir/usr/share/doc/ladspa-sdk/ladspa.h.txt"
+install -Dm644 src/ladspa.h "$pkgdir/usr/include/ladspa.h"
+install -d "$pkgdir/usr/lib/ladspa" "$pkgdir/usr/bin" "$pkgdir/usr/share/doc"
+install -m755 plugins/*.so* "$pkgdir/usr/lib/ladspa/"
+install -m755 bin/* "$pkgdir/usr/bin/"
+cp -r doc "$pkgdir/usr/share/doc/ladspa-sdk"
+ln -s ../../../include/ladspa.h "$pkgdir/usr/share/doc/ladspa-sdk/ladspa.h.txt"
 '''

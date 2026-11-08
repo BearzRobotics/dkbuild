@@ -1,0 +1,16 @@
+#!/bin/sh
+# directories and files (tmpfiles.conf)
+mkdir -p /run/nginx
+chmod 0750 /run/nginx
+chown root:root /run/nginx 2>/dev/null || true
+mkdir -p /var/log/nginx
+chmod 0755 /var/log/nginx
+chown _nginx:_nginx /var/log/nginx 2>/dev/null || true
+mkdir -p /var/lib/nginx
+chmod 0750 /var/lib/nginx
+chown _nginx:_nginx /var/lib/nginx 2>/dev/null || true
+mkdir -p /var/lib/nginx/tmp
+chmod 0700 /var/lib/nginx/tmp
+chown _nginx:_nginx /var/lib/nginx/tmp 2>/dev/null || true
+[ -e /var/lib/nginx/modules ] || ln -s ../../../usr/lib/nginx/modules /var/lib/nginx/modules
+exit 0

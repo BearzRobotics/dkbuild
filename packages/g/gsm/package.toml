@@ -17,10 +17,10 @@ source = [
 ]
 
 setup = '''
-# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 17); port it by hand
+:
 '''
 build = '''
-%make
+make CC="$CC" LD="$CC" AR="${AR:-llvm-ar}" CCFLAGS="$CFLAGS -c -DNeedFunctionPrototypes=1"
 '''
 check = '''
 %make tst
@@ -31,9 +31,7 @@ install -dm755 "$pkgdir/usr/lib"
 install -dm755 "$pkgdir/usr/include/gsm"
 install -dm755 "$pkgdir/usr/share/man/man3"
 install -dm755 "$pkgdir/usr/share/man/man1"
-%make_install \
-    STRIP=true \
-    PREFIX=/usr
+make INSTALL_ROOT="$pkgdir/usr" GSM_INSTALL_INC="$pkgdir/usr/include/gsm" GSM_INSTALL_MAN="$pkgdir/usr/share/man/man3" TOAST_INSTALL_MAN="$pkgdir/usr/share/man/man1" install
 install -Dm755 lib/libgsm.so "$pkgdir/usr/lib/libgsm.so.1.0.24"
 mkdir -p "$pkgdir/usr/lib"
 ln -sf libgsm.so.1.0.24 "$pkgdir/usr/lib/libgsm.so.1"

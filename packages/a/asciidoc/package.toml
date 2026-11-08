@@ -8,7 +8,7 @@ release = 4
 summary = "Text-based document generation"
 license = "GPL-2.0-or-later"
 homepage = "https://asciidoc.org"
-hostdeps = ["docbook-xsl-nons", "libxslt", "python-setuptools"]
+hostdeps = ["docbook-xsl-nons", "libxslt", "python-setuptools", "python"]
 rundeps = ["python", "docbook-xsl-nons", "libxslt", "libxml2"]
 options = ["!check"]
 
@@ -19,9 +19,9 @@ source = [
 install = '''
 install -dm755 "$pkgdir/etc"
 # compat link
-# TODO(cbuild): for f in (self.destdir / "usr/lib").glob("python*"):
-#         adpath = f / "site-packages/asciidoc/resources"
-#         self.install_link(
-#             "etc/asciidoc", f"../{adpath.relative_to(self.destdir)}"
-#         )
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+p=$(ls -d "$pkgdir"/usr/lib/python3*/site-packages/asciidoc/resources | head -n1)
+mkdir -p "$pkgdir/etc"
+ln -s "../${p#"$pkgdir"/}" "$pkgdir/etc/asciidoc"
 '''

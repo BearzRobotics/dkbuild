@@ -10,7 +10,7 @@
 # Revision 1 repackaged the upstream x86_64 binary; this replaces it.
 name = "zig"
 version = "0.17.1"
-release = 2
+release = 3
 summary = "Zig compiler, for building packages in this repository"
 description = "The Zig version the repository's Zig packages are built with. Install zvm or anyzig for general development."
 license = "MIT"

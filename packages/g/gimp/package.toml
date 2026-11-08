@@ -1,3 +1,4 @@
+# FenrirOS: no JavaScript plug-ins (gjs) or WebKit help browser yet: GIMP opens its help in the web browser.
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gimp/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
@@ -22,7 +23,8 @@ source = [
 setup = '''
 %meson \
     -Dcheck-update=no \
-    -Dbug-report-url=https://github.com/chimera-linux/cports/issues \
+    -Dbug-report-url=https://github.com/BearzRobotics/dkbuild/issues \
+    -Djavascript=disabled \
     -Dlibbacktrace=false \
     -Ddefault_library=shared \
     -Dlua=false

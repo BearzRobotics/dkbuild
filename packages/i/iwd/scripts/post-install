@@ -1,0 +1,12 @@
+#!/bin/sh
+# directories and files (iwd.conf)
+mkdir -p /etc/iwd
+chmod 0755 /etc/iwd
+chown root:root /etc/iwd 2>/dev/null || true
+mkdir -p /var/lib/iwd
+chmod 0700 /var/lib/iwd
+chown root:root /var/lib/iwd 2>/dev/null || true
+mkdir -p /var/lib/ead
+chmod 0700 /var/lib/ead
+chown root:root /var/lib/ead 2>/dev/null || true
+exit 0

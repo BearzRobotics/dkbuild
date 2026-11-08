@@ -1,3 +1,4 @@
+# FenrirOS: no OpenCV module (OpenCV is not in the tree yet).
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/mlt/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
@@ -26,7 +27,7 @@ setup = '''
     -DCLANG_FORMAT=OFF \
     -DMOD_GLAXNIMATE_QT6=ON \
     -DMOD_MOVIT=OFF \
-    -DMOD_OPENCV=ON \
+    -DMOD_OPENCV=OFF \
     -DMOD_SOX=OFF \
     -DMOD_QT6=ON \
     -DMOD_QT=OFF \

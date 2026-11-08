@@ -18,22 +18,14 @@ source = [
 ]
 
 build = '''
-# TODO(cbuild): self.make.invoke("versionupdate")
+make versionupdate
 %make \
     PREFIX=/usr
 '''
 install = '''
-# TODO(cbuild): self.install_file(
-#         f"liberation-fonts-otf-{pkgver}/*.otf",
-#         "usr/share/fonts/liberation",
-#         glob=True,
-#     )
-# TODO(cbuild): self.install_file(
-#         f"liberation-fonts-ttf-{pkgver}/*.ttf",
-#         "usr/share/fonts/liberation",
-#         glob=True,
-#     )
-# TODO(cbuild): for f in self.files_path.glob("*.conf"):
-#         self.install_file(f, "usr/share/fontconfig/conf.avail")
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/fonts-liberation/LICENSE"
+install -d "$pkgdir/usr/share/fonts/liberation" "$pkgdir/usr/share/fontconfig/conf.avail"
+install -m644 liberation-fonts-otf-*/*.otf liberation-fonts-ttf-*/*.ttf "$pkgdir/usr/share/fonts/liberation/" 2>/dev/null || install -m644 */*.ttf "$pkgdir/usr/share/fonts/liberation/"
+for f in $pkgfiles/*.conf; do install -m644 "$f" "$pkgdir/usr/share/fontconfig/conf.avail/"; done
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/fonts-liberation/LICENSE"
 '''

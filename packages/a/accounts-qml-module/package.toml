@@ -17,16 +17,6 @@ source = [
     { url = "https://gitlab.com/accounts-sso/accounts-qml-module/-/archive/05e79ebbbf3784a87f72b7be571070125c10dfe3.tar.gz", sha256 = "1a53a6d8a3a56694244bc24bdab844d91420483744822d08ae8517ff7df84763" },
 ]
 
-setup = '''
-# TODO(cbuild): self.do(
-#         "qmake6",
-#         "PREFIX=/usr",
-#         "CONFIG+=no_docs",
-#         f"QMAKE_CFLAGS={self.get_cflags(shell=True)}",
-#         f"QMAKE_CXXFLAGS={self.get_cxxflags(shell=True)}",
-#         f"QMAKE_LFLAGS={self.get_ldflags(shell=True)}",
-#     )
-'''
 build = '''
 %make
 '''
@@ -34,10 +24,10 @@ check = '''
 %make check
 '''
 install = '''
-# TODO(cbuild): init_install() sets variables for this phase (cbuild line 36); port it by hand
-%make_install \
+make INSTALL_ROOT="$pkgdir" install \
     STRIP=true \
     PREFIX=/usr
 # mistakenly installed
 rm -rf "$pkgdir/usr/bin/tst_plugin"
+rm -f "$pkgdir/usr/bin/tst_plugin"
 '''

@@ -36,7 +36,6 @@ build = '''
 '''
 install = '''
 %make_install
-# TODO(cbuild): self.install_service(self.files_path / "iwd")
-# TODO(cbuild): self.install_service(self.files_path / "ead")
-# TODO(cbuild): self.install_tmpfiles(self.files_path / "iwd.conf")
+install -Dm644 $pkgfiles/iwd "$pkgdir/etc/dinit.d/iwd"
+install -Dm644 $pkgfiles/ead "$pkgdir/etc/dinit.d/ead"
 '''

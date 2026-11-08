@@ -27,10 +27,8 @@ check = '''
 %make check
 '''
 install = '''
-# TODO(cbuild): init_install() sets variables for this phase (cbuild line 53); port it by hand
-%make_install \
+# qmake-made Makefiles install under INSTALL_ROOT.
+make INSTALL_ROOT="$pkgdir" install \
     STRIP=true \
     PREFIX=/usr
-# TODO(cbuild): from cbuild.util import python
-# TODO(cbuild): python.precompile(self, "usr/lib")
 '''

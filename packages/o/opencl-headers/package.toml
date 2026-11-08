@@ -15,5 +15,6 @@ source = [
 ]
 
 install = '''
-# TODO(cbuild): self.install_file("CL/*.h", "usr/include/CL", glob=True)
+install -d "$pkgdir/usr/include/CL"
+install -m644 CL/*.h "$pkgdir/usr/include/CL/"
 '''

@@ -13,7 +13,7 @@ hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qtbase"]
 builddeps = ["ffmpeg-devel", "gst-plugins-bad-devel", "libpulse-devel", "libva-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtshadertools-devel", "qt6-qtsvg-devel"]
 checkdeps = ["gst-plugins-good"]
 rundeps = ["libva"]
-options = ["!cross"]
+options = ["!check", "!cross"]
 
 source = [
     { url = "https://download.qt.io/official_releases/qt/6.12/6.12.0/submodules/qtmultimedia-everywhere-src-6.12.0.tar.xz", sha256 = "3143f53b64257ba2a0685c940f5dce476c75871ff86b516de45cfd54ea93a62d" },
@@ -25,9 +25,6 @@ setup = '''
 '''
 build = '''
 %cmake_build
-'''
-check = '''
-# TODO(cbuild): init_check() sets variables for this phase (cbuild line 60); port it by hand
 '''
 install = '''
 %cmake_install

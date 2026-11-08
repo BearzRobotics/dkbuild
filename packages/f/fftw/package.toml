@@ -14,43 +14,25 @@ options = ["!check"]
 source = [
     { url = "http://www.fftw.org/fftw-3.3.10.tar.gz", sha256 = "56c932549852cddcfafdab3820b0200c7742675be92179e59e6215b340e26467" },
 ]
-
 setup = '''
 autoreconf -if
-# TODO(cbuild): from cbuild.util import gnu_configure
-# TODO(cbuild): gnu_configure.replace_guess(self)
-# TODO(cbuild): eargs = ["--enable-shared", "--enable-threads"]
-# TODO(cbuild): sseargs = []
-# TODO(cbuild): sse2args = []
-# TODO(cbuild): if _have_omp:
-#         eargs += ["--enable-openmp"]
-# TODO(cbuild): match self.profile.arch:
-#         case "x86_64":
-#             sseargs += ["--enable-sse"]
-#             sse2args += ["--enable-sse2"]
-# TODO(cbuild): gnu_configure.configure(
-#         self, build_dir="build-double", extra_args=eargs + sse2args
-#     )
-# TODO(cbuild): gnu_configure.configure(
-#         self,
-#         build_dir="build-long-double",
-#         extra_args=[*eargs, "--enable-long-double"],
-#     )
-# TODO(cbuild): gnu_configure.configure(
-#         self,
-#         build_dir="build-float",
-#         extra_args=[*eargs, "--enable-float", *sseargs],
-#     )
+# Three builds: double (the default), long double and float, each in its own
+# directory; OpenMP and threads in all, SSE where the precision allows.
+for f in double long-double float; do
+    case $f in
+        double) extra="--enable-sse2 --enable-avx --enable-avx2" ;;
+        long-double) extra="--enable-long-double" ;;
+        float) extra="--enable-float --enable-sse --enable-avx --enable-avx2" ;;
+    esac
+    mkdir -p build-$f
+    ( cd build-$f && ../configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
+        --enable-shared --enable-static --enable-threads --enable-openmp $extra )
+done
 '''
 build = '''
-# TODO(cbuild): for f in ["double", "long-double", "float"]:
-#         self.make.build(wrksrc=f"build-{f}")
-'''
-check = '''
-# TODO(cbuild): for f in ["double", "long-double", "float"]:
-#         self.make.check(wrksrc=f"build-{f}")
+for f in double long-double float; do make -C build-$f -j$jobs; done
 '''
 install = '''
-# TODO(cbuild): for f in ["double", "long-double", "float"]:
-#         self.make.install(wrksrc=f"build-{f}")
+for f in double long-double float; do make -C build-$f DESTDIR="$pkgdir" install; done
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/fftw/COPYING"
 '''

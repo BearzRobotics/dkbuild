@@ -34,20 +34,18 @@ install = '''
     STRIP=true \
     PREFIX=/usr
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/openh264/LICENSE"
-# TODO(cbuild): _nspath = "usr/lib/nsbrowser/plugins/gmp-gmpopenh264/system-installed"
 # grab the main pkgver lib
-# TODO(cbuild): self.install_file(
-#         f"libgmpopenh264.so.{pkgver}",
-#         _nspath,
-#     )
 # symlinks; ensure the soname is right
-# TODO(cbuild): self.install_link(
-#         f"{_nspath}/libgmpopenh264.so.8", f"libgmpopenh264.so.{pkgver}"
-#     )
-# TODO(cbuild): self.install_link(f"{_nspath}/libgmpopenh264.so", "libgmpopenh264.so.8")
 # manifest file
-# TODO(cbuild): self.install_file(self.files_path / "gmpopenh264.info", _nspath)
 # profile and other stuff
+install -Dm644 $pkgfiles/profile.conf "$pkgdir/etc/profile.d/firefox-openh264.sh"
+install -Dm644 $pkgfiles/prefs.js "$pkgdir/usr/lib/firefox/defaults/pref/gmpopenh264.js"
+p=usr/lib/nsbrowser/plugins/gmp-gmpopenh264/system-installed
+v=$(ls "$pkgdir"/usr/lib/libopenh264.so.*.*.* | head -n1); v=${v##*libopenh264.so.}
+install -Dm755 libgmpopenh264.so.$v "$pkgdir/$p/libgmpopenh264.so.$v"
+ln -s libgmpopenh264.so.$v "$pkgdir/$p/libgmpopenh264.so.8"
+ln -s libgmpopenh264.so.8 "$pkgdir/$p/libgmpopenh264.so"
+install -Dm644 $pkgfiles/gmpopenh264.info "$pkgdir/$p/gmpopenh264.info"
 install -Dm644 $pkgfiles/profile.conf "$pkgdir/etc/profile.d/firefox-openh264.sh"
 install -Dm644 $pkgfiles/prefs.js "$pkgdir/usr/lib/firefox/defaults/pref/gmpopenh264.js"
 '''

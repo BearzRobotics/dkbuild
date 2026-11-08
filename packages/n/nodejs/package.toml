@@ -1,0 +1,44 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/nodejs/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "nodejs"
+version = "26.12.1"
+release = 1
+summary = "JavaScript runtime based on V8"
+license = "MIT"
+homepage = "https://nodejs.org"
+patches = ["google-sucks.patch", "loongarch.patch", "no-libatomic.patch", "ppc64-no-gdbjit.patch", "shared-uv.patch"]
+hostdeps = ["ninja", "pkgconf", "python", "python-jinja2"]
+builddeps = ["brotli-devel", "c-ares-devel", "icu-devel", "libuv-devel", "linux-headers", "nghttp2-devel", "openssl-devel", "zlib-ng-compat-devel"]
+checkdeps = ["procps"]
+options = ["!check", "!cross"]
+
+source = [
+    { url = "https://nodejs.org/dist/v26.12.1/node-v26.12.1.tar.gz", sha256 = "717244a8d757672ec86aae5077fca31e50f84b094441ec51bdf397aab12c304e" },
+]
+setup = '''
+# The system's brotli, c-ares, OpenSSL, zlib and jinja2 instead of the bundled copies.
+mv deps/openssl/nodejs-openssl.cnf .
+rm -rf deps/brotli deps/cares deps/openssl deps/zlib deps/v8/third_party/jinja2 tools/inspector_protocol/jinja2
+mkdir -p deps/openssl
+mv nodejs-openssl.cnf deps/openssl/
+./configure \
+    --ninja \
+    --openssl-use-def-ca-store \
+    --prefix=/usr \
+    --shared-brotli \
+    --shared-cares \
+    --shared-libuv \
+    --shared-nghttp2 \
+    --shared-openssl \
+    --shared-zlib \
+    --with-intl=system-icu
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/nodejs/LICENSE"
+'''

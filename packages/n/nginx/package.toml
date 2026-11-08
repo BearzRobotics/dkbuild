@@ -72,33 +72,29 @@ setup = '''
 build = '''
 %make
 '''
-check = '''
-# TODO(cbuild): with self.pushd("nginx-tests"):
-#         self.do(
-#             "prove",
-#             f"--jobs={max(self.make_jobs, 16)}",
-#             ".",
-#             env={"TEST_NGINX_BINARY": "../objs/nginx"},
-#         )
-'''
 install = '''
 %make_install
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/nginx/LICENSE"
 install -Dm644 README.md "$pkgdir/usr/share/doc/nginx/README.md"
 install -Dm644 man/nginx.8 "$pkgdir/usr/share/man/man8/nginx.8"
-# TODO(cbuild): self.install_sysusers(self.files_path / "sysusers.conf")
-# TODO(cbuild): self.install_tmpfiles(self.files_path / "tmpfiles.conf")
-# TODO(cbuild): self.install_service(self.files_path / "nginx")
+install -Dm644 $pkgfiles/nginx "$pkgdir/etc/dinit.d/nginx"
 # better default configs, mostly adapted from alpine
 rm -rf "$pkgdir/etc/nginx/nginx.conf"
 install -Dm644 $pkgfiles/nginx.conf "$pkgdir/etc/nginx/nginx.conf"
 install -Dm644 $pkgfiles/default.conf "$pkgdir/etc/nginx/http.d/default.conf"
 install -Dm644 $pkgfiles/stream.conf "$pkgdir/etc/nginx/conf.d/stream.conf"
 # remove old charset maps
-# TODO(cbuild): self.uninstall("etc/nginx/koi-*", glob=True)
+rm -rf "$pkgdir"/etc/nginx/koi-*
 rm -rf "$pkgdir/etc/nginx/win-utf"
 # these interfere with tmpfiles ownership and are not used anyway
 rm -rf "$pkgdir/var/lib/nginx/html"
 # these are unnecessary with apk backups
-# TODO(cbuild): self.uninstall("etc/nginx/*.default", glob=True)
+rm -rf "$pkgdir"/etc/nginx/*.default
+# Each dynamic module gets its loader in /etc/nginx/modules (Chimera does this per module package).
+mkdir -p "$pkgdir/etc/nginx/modules"
+for so in "$pkgdir"/usr/lib/nginx/modules/*.so; do
+    [ -e "$so" ] || continue
+    m=$(basename "$so" .so); m=${m#ngx_}; m=${m%_module}
+    printf 'load_module "modules/%s";\n' "$(basename "$so")" > "$pkgdir/etc/nginx/modules/000_$m.conf"
+done
 '''

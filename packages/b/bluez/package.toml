@@ -43,6 +43,6 @@ check = '''
 '''
 install = '''
 %make_install
-# TODO(cbuild): self.install_service(self.files_path / "bluetoothd")
-# TODO(cbuild): self.install_service(self.files_path / "mpris-proxy.user")
+install -Dm644 $pkgfiles/bluetoothd "$pkgdir/etc/dinit.d/bluetoothd"
+install -Dm644 $pkgfiles/mpris-proxy.user "$pkgdir/usr/lib/dinit.d/user/mpris-proxy"
 '''

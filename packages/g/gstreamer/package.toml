@@ -23,7 +23,7 @@ export LDFLAGS="${LDFLAGS} -Wl,-z,stack-size=0x200000"
 setup = '''
 %meson \
     -Dptp-helper-permissions=none \
-    -Dpackage-origin=https://chimera-linux.org \
+    -Dpackage-origin=https://github.com/BearzRobotics/dkbuild \
     -Ddbghelp=disabled \
     -Dintrospection=enabled \
     -Ddefault_library=shared

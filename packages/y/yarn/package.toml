@@ -18,6 +18,9 @@ source = [
 install = '''
 install -Dm644 lib/v8-compile-cache.js "$pkgdir/usr/lib/yarn/v8-compile-cache.js"
 install -Dm644 lib/cli.js "$pkgdir/usr/lib/yarn/cli.js"
-# TODO(cbuild): self.install_bin("bin/yarn.js", name="yarn")
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/yarn/LICENSE"
+install -Dm644 lib/v8-compile-cache.js "$pkgdir/usr/lib/yarn/v8-compile-cache.js"
+install -Dm644 lib/cli.js "$pkgdir/usr/lib/yarn/cli.js"
+install -Dm755 bin/yarn.js "$pkgdir/usr/bin/yarn"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/yarn/LICENSE"
 '''

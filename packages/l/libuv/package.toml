@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libuv/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libuv"
+version = "1.52.1"
+release = 1
+summary = "Multi-platform support library with focus on asynchronous I/O"
+license = "MIT"
+homepage = "https://libuv.org"
+patches = ["disable-fs-chown.patch", "disable-metrics_pool_events-test.patch", "disable-setuid-test.patch", "disable-tcp-connect6-link-local.patch", "disable-thread_priority.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["linux-headers"]
+
+source = [
+    { url = "https://dist.libuv.org/dist/v1.52.1/libuv-v1.52.1-dist.tar.gz", sha256 = "c5f14915e2fa7b83b6111c3bc477920559499e10d95f852707420c8725b82d6a" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libuv/LICENSE"
+'''

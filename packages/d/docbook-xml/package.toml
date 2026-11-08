@@ -10,6 +10,8 @@ license = "MIT"
 homepage = "http://www.oasis-open.org/docbook"
 rundeps = ["xmlcatmgr"]
 
+hostdeps = ["unzip"]
+
 source = [
     { url = "http://www.oasis-open.org/docbook/xml/4.5/docbook-xml-4.5.zip", sha256 = "4e4e037a2b83c98c6c94818390d4bdd3f6e10f6ec62dd79188594e26190dc7b4" },
     { url = "http://www.oasis-open.org/docbook/xml/4.4/docbook-xml-4.4.zip", sha256 = "02f159eb88c4254d95e831c51c144b1863b216d909b5ff45743a1ce6f5273090" },
@@ -18,29 +20,13 @@ source = [
 ]
 
 install = '''
-# TODO(cbuild): vers = ["4.2", "4.3", "4.4", "4.5"]
 install -Dm644 $pkgfiles/docbook-xml.conf "$pkgdir/usr/share/xml/catalogs/docbook-xml.conf"
-# TODO(cbuild): for v in vers:
-#         tdir = f"usr/share/xml/docbook/{v}"
-#         fname = f"{pkgname}-{v}.zip"
-#         self.install_dir(tdir)
-#         self.cp(self.sources_path / fname, self.destdir / tdir)
-#         self.do(
-#             "tar",
-#             "xf",
-#             self.chroot_destdir / tdir / fname,
-#             "-C",
-#             self.chroot_destdir / tdir,
-#             "--uid",
-#             "0",
-#             "--gid",
-#             "0",
-#         )
-#         self.uninstall(f"{tdir}/{fname}")
-#         self.rename(f"{tdir}/catalog.xml", "catalog")
-# TODO(cbuild): with self.pushd(self.destdir / "usr/share/xml/docbook/4.2"):
-#         with open(self.cwd / "catalog-4.1.2", "w") as ocat:
-#             with open(self.cwd / "catalog") as icat:
-#                 for ln in icat:
-#                     ocat.write(ln.replace("V4.2", "V4.1.2"))
+install -Dm644 $pkgfiles/docbook-xml.conf "$pkgdir/usr/share/xml/catalogs/docbook-xml.conf"
+for v in 4.2 4.3 4.4 4.5; do
+    d="$pkgdir/usr/share/xml/docbook/$v"
+    mkdir -p "$d"
+    unzip -q -o /build/sources/docbook-xml-$v.zip -d "$d"
+    mv "$d/catalog.xml" "$d/catalog"
+done
+sed 's/V4.2/V4.1.2/g' "$pkgdir/usr/share/xml/docbook/4.2/catalog" > "$pkgdir/usr/share/xml/docbook/4.2/catalog-4.1.2"
 '''

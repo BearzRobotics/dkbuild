@@ -34,5 +34,5 @@ build = '''
 install = '''
 %meson_install
 install -Dm644 COPYING "$pkgdir/usr/share/licenses/p11-kit/COPYING"
-# TODO(cbuild): self.rename("etc/pkcs11/pkcs11.conf.example", "pkcs11.conf")
+mv "$pkgdir/etc/pkcs11/pkcs11.conf.example" "$pkgdir/etc/pkcs11/pkcs11.conf"
 '''

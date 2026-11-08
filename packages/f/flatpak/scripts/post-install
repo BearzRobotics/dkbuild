@@ -1,0 +1,6 @@
+#!/bin/sh
+# directories and files (tmpfiles.conf)
+mkdir -p /var/lib/flatpak
+chmod 0755 /var/lib/flatpak
+chown _flatpak:_flatpak /var/lib/flatpak 2>/dev/null || true
+exit 0

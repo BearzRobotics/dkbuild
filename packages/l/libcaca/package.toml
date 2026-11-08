@@ -28,14 +28,8 @@ check = '''
 '''
 install = '''
 %make_install
-# TODO(cbuild): from cbuild.util import python
 install -Dm644 COPYING "$pkgdir/usr/share/licenses/libcaca/COPYING"
-# TODO(cbuild): d = self.destdir / "usr/lib"
 # remove broken autotools-compiled junk
-# TODO(cbuild): for f in d.rglob("*.pyo"):
-#         f.unlink()
-# TODO(cbuild): for f in d.rglob("*.pyc"):
-#         f.unlink()
 # actually compile properly
-# TODO(cbuild): python.precompile(self, "usr/lib")
+find "$pkgdir/usr/lib" \( -name "*.pyc" -o -name "*.pyo" \) -delete
 '''

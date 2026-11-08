@@ -19,12 +19,12 @@ source = [
 ]
 
 setup = '''
-# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 46); port it by hand
 ./autogen.sh
 %configure \
     --disable-lefty
 '''
 build = '''
+export HOSTCC="$CC"
 %make
 '''
 install = '''
@@ -32,5 +32,5 @@ install = '''
     -j1
 install -Dm644 epl-v10.txt "$pkgdir/usr/share/licenses/graphviz/epl-v10.txt"
 # useless
-# TODO(cbuild): self.rm(self.destdir / "usr/bin/dot_builtins")
+rm -f "$pkgdir/usr/bin/dot_builtins"
 '''

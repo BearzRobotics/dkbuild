@@ -18,9 +18,9 @@ source = [
 ]
 
 setup = '''
-# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 29); port it by hand
+mdds=$(ls -d /usr/include/mdds-* 2>/dev/null | head -n1); mdds=${mdds##*/mdds-}
 autoreconf -if -W none
-%configure
+%configure ${mdds:+--with-mdds=$mdds}
 '''
 build = '''
 %make

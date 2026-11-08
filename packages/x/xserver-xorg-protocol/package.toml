@@ -10,13 +10,9 @@ license = "MIT"
 homepage = "https://xorg.freedesktop.org"
 
 source = [
-    { url = "!https://gitlab.freedesktop.org/xorg/xserver/-/raw/53a0442b8700ddcb33caa5d1d17ca9a290000283/dix/protocol.txt", sha256 = "88b141646fc68627338443a820eeb949149ba73d4ddc925d4717d56a92e7e138" },
+    { url = "https://gitlab.freedesktop.org/xorg/xserver/-/raw/53a0442b8700ddcb33caa5d1d17ca9a290000283/dix/protocol.txt", sha256 = "88b141646fc68627338443a820eeb949149ba73d4ddc925d4717d56a92e7e138", unpack = false },
 ]
 
 install = '''
-# TODO(cbuild): self.install_file(
-#         self.sources_path / f"protocol-{pkgver}.txt",
-#         "usr/lib/xorg",
-#         name="protocol.txt",
-#     )
+install -Dm644 /build/sources/protocol.txt "$pkgdir/usr/lib/xorg/protocol.txt"
 '''

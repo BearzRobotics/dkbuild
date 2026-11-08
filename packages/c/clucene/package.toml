@@ -30,11 +30,8 @@ setup = '''
 build = '''
 %cmake_build
 '''
-check = '''
-# TODO(cbuild): self.mkdir("build/tmp", parents=True)
-# TODO(cbuild): self.do("./cl_test", wrksrc="build/bin", env={"TMP": "../tmp"})
-'''
 install = '''
 %cmake_install
 rm -rf "$pkgdir/usr/lib/CLuceneConfig.cmake"
+rm -f "$pkgdir/usr/lib/CLuceneConfig.cmake"
 '''

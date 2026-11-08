@@ -10,7 +10,7 @@ license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only WITH Qt-GPL-exceptio
 homepage = "https://www.qt.io"
 hostdeps = ["cmake", "ninja", "pkgconf"]
 builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel"]
-options = ["!cross"]
+options = ["!check", "!cross"]
 
 source = [
     { url = "https://download.qt.io/official_releases/qt/6.12/6.12.0/submodules/qtpositioning-everywhere-src-6.12.0.tar.xz", sha256 = "b060d410fac7413b05a0e7938bbf3325f7ad08d7df14af3956270f0696e76763" },
@@ -21,9 +21,6 @@ setup = '''
 '''
 build = '''
 %cmake_build
-'''
-check = '''
-# TODO(cbuild): init_check() sets variables for this phase (cbuild line 26); port it by hand
 '''
 install = '''
 %cmake_install

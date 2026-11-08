@@ -33,18 +33,9 @@ install = '''
 rm -rf "$pkgdir/usr/lib/udev"
 install -dm755 "$pkgdir/usr/lib/udev/hwdb.d"
 install -dm755 "$pkgdir/usr/lib/udev/rules.d"
-# TODO(cbuild): if not self.profile.cross:
-#         cexe = self.chroot_destdir / "usr/lib/libgphoto2/print-camera-list"
-#         cenv = {
-#             "LD_LIBRARY_PATH": str(self.chroot_destdir / "usr/lib"),
-#             "CAMLIBS": str(self.chroot_destdir / "usr/lib/libgphoto2" / pkgver),
-#         }
-# TODO(cbuild): else:
-#         cexe = "/usr/lib/libgphoto2/print-camera-list"
-#         cenv = None
-# TODO(cbuild): upath = self.destdir / "usr/lib/udev"
-# TODO(cbuild): with open(upath / "rules.d/40-gphoto.rules", "w") as uf:
-#         self.do(cexe, "udev-rules", "version", "201", env=cenv, stdout=uf)
-# TODO(cbuild): with open(upath / "hwdb.d/20-gphoto.hwdb", "w") as uf:
-#         self.do(cexe, "hwdb", env=cenv, stdout=uf)
+rm -rf "$pkgdir/usr/lib/udev"
+mkdir -p "$pkgdir/usr/lib/udev/hwdb.d" "$pkgdir/usr/lib/udev/rules.d"
+v=$(ls -d "$pkgdir"/usr/lib/libgphoto2/[0-9]* | head -n1)
+LD_LIBRARY_PATH="$pkgdir/usr/lib" CAMLIBS="$v" "$pkgdir/usr/lib/libgphoto2/print-camera-list" udev-rules version 201 > "$pkgdir/usr/lib/udev/rules.d/40-gphoto.rules"
+LD_LIBRARY_PATH="$pkgdir/usr/lib" CAMLIBS="$v" "$pkgdir/usr/lib/libgphoto2/print-camera-list" hwdb > "$pkgdir/usr/lib/udev/hwdb.d/20-gphoto.hwdb"
 '''

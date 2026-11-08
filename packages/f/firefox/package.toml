@@ -9,170 +9,53 @@ summary = "Mozilla Firefox web browser"
 license = "GPL-3.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND MPL-2.0"
 homepage = "https://www.mozilla.org/firefox"
 patches = ["atoi.patch", "clang-ias.patch", "clang-memory-throw-gcc.patch", "depflags.patch", "enable-elfhack-relr.patch", "fix-fortify-system-wrappers.patch", "fix-rust-target.patch", "fix-webrtc-pid_t.patch", "google-sucks.patch", "lfs64.patch", "libcxx18.patch", "loong0001-Enable-WebRTC-for-loongarch64.patch", "loong0003-Define-HWCAP_LOONGARCH_LSX_and_LASX.patch", "loong0004-Fix-ycbcr-chromium_types-warning.patch", "musl-prctl.patch", "no-ccache-stats.patch", "ppc64-webrtc.patch", "riscv64-no-llama-simd.patch", "riscv64-reduce-debug.patch", "sandbox-sched_setscheduler.patch", "sqlite-ppc.patch", "use-gtar.patch", "wasip1.patch", "wasm2c-various-archs.patch", "x11lol.patch", "x86_64-Fix-stack-alignment-in-breakpad_getcontext.S.patch", "xptcall-integrated-as.patch"]
-hostdeps = ["automake", "rust", "cbindgen", "llvm-devel", "dbus", "gettext", "tar", "libtool", "nasm", "nodejs", "pkgconf", "python", "wasi-sdk", "wlr-randr", "zip"]
-builddeps = ["alsa-lib-devel", "dbus-devel", "ffmpeg-devel", "freetype-devel", "glib-devel", "gtk+3-devel", "icu-devel", "libevent-devel", "libffi-devel", "libjpeg-turbo-devel", "libnotify-devel", "libogg-devel", "libpng-devel", "libpulse-devel", "libtheora-devel", "libvorbis-devel", "libvpx-devel", "libwebp-devel", "libxcomposite-devel", "libxscrnsaver-devel", "libxt-devel", "mesa-devel", "nspr-devel", "nss-devel", "pipewire-devel", "pixman-devel", "rust", "zlib-ng-compat-devel"]
+hostdeps = ["automake", "rust", "cbindgen", "llvm-devel", "llvm-clang", "llvm-lld", "dbus", "gettext", "tar", "libtool", "nasm", "nodejs", "pkgconf", "python", "zip", "unzip"]
+builddeps = ["alsa-lib-devel", "dbus-devel", "ffmpeg-devel", "freetype-devel", "glib-devel", "gtk+3-devel", "icu-devel", "libevent-devel", "libffi-devel", "libjpeg-turbo-devel", "libnotify-devel", "libogg-devel", "libpng-devel", "libpulse-devel", "libtheora-devel", "libvorbis-devel", "libvpx-devel", "libwebp-devel", "libxcomposite-devel", "libxscrnsaver-devel", "libxt-devel", "mesa-devel", "nspr-devel", "nss-devel", "pipewire-devel", "pixman-devel", "zlib-ng-compat-devel"]
 rundeps = ["ffmpeg", "openh264", "speechd"]
 options = ["!cross", "!check"]
 
 source = [
     { url = "https://ftp.mozilla.org/pub/firefox/releases/159.0/source/firefox-159.0.source.tar.xz", sha256 = "3d98df785894057fce60603e845828e758a5411ad79aaaaff2b8230597f500d9" },
 ]
-
 environment = '''
-export LDFLAGS="${LDFLAGS} -Wl,-rpath=/usr/lib/firefox -Wl,-z,stack-size=2097152"
-export SHELL=/usr/bin/sh
-export BUILD_OFFICIAL=1
-export MOZILLA_OFFICIAL=1
-export USE_SHORT_LIBNAME=1
-export MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE=system
-export MOZ_APP_REMOTINGNAME=firefox
-export MOZ_NOSPAM=1
-export CBUILD_BYPASS_STRIP_WRAPPER=1
+export MOZBUILD_STATE_PATH="$PWD/.mozbuild" MOZ_MAKE_FLAGS="-j$jobs" AS="$CC"
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export RUST_TARGET=x86_64-unknown-linux-musl RUSTFLAGS="-C target-feature=-crt-static"
+export MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE=system MOZ_NOSPAM=1
 '''
 setup = '''
-# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 110); port it by hand
-# TODO(cbuild): conf_opts = [
-#         "--prefix=/usr",
-#         "--libdir=/usr/lib",
-#         "--host=" + self.profile.triplet,
-#         "--target=" + self.profile.triplet,
-#         "--disable-install-strip",
-#         "--disable-strip",
-#         "--enable-linker=lld",
-#         "--enable-optimize",
-#         "--enable-release",
-#         "--with-wasi-sysroot=/usr/wasm32-unknown-wasi",
-#         # we have our own flags and better
-#         "--disable-hardening",
-#         # system libs
-#         "--with-system-ffi",
-#         "--with-system-icu",
-#         "--with-system-jpeg",
-#         "--with-system-libevent",
-#         "--with-system-libvpx",
-#         "--with-system-nspr",
-#         "--with-system-nss",
-#         "--with-system-pixman",
-#         "--with-system-webp",
-#         "--with-system-zlib",
-#         # no apng support
-#         "--without-system-png",
-#         # features
-#         "--enable-audio-backends=pulseaudio",
-#         "--enable-dbus",
-#         "--enable-default-toolkit=cairo-gtk3-wayland",
-#         "--enable-jack",
-#         "--enable-necko-wifi",
-#         "--enable-pulseaudio",
-#         # disabled features
-#         "--disable-alsa",
-#         "--disable-jemalloc",
-#         "--disable-profiling",
-#         "--disable-tests",
-#         "--disable-updater",
-#         # browser options
-#         "--allow-addon-sideload",
-#         "--enable-application=browser",
-#         "--enable-official-branding",
-#         "--with-distribution-id=org.chimera-linux",
-#     ]
-# TODO(cbuild): match self.profile.arch:
-#         case "x86_64" | "aarch64":
-#             # broken with rust 1.78 as it enables packed_simd feature that uses removed platform_intrinsics
-#             # conf_opts += ["--enable-rust-simd"]
-#             pass
-#         case "loongarch64":
-#             conf_opts += ["--disable-crashreporter"]
-# TODO(cbuild): if self.has_lto():
-#         conf_opts += ["--enable-lto=cross"]
-# crashes during profiling on x86_64 starting with 158.x
-# TODO(cbuild): _use_pgo = False
-# _use_pgo = self.has_lto()
-
-# aarch64: gets stuck busy-looping in profiling pass in ff140
-# ppc64le: takes long to link and generates a broken binary
-# TODO(cbuild): if self.profile.arch in ["aarch64", "ppc64le"]:
-#         _use_pgo = False
-# TODO(cbuild): if _use_pgo:
-#         # configure for profiling
-#         self.log("bootstrapping profile...")
-#         with self.stamp("profile_configure") as s:
-#             s.check()
-#             self.log("configuring profile build...")
-#             self.do(
-#                 "./mach",
-#                 "configure",
-#                 *conf_opts,
-#                 "--enable-profile-generate=cross",
-#             )
-#         # do the profiling build
-#         with self.stamp("profile_build") as s:
-#             s.check()
-#             self.log("building profile build...")
-#             self.do("./mach", "build", "--priority", "normal")
-#         # package it
-#         with self.stamp("profile_package") as s:
-#             s.check()
-#             self.log("packaging profile build...")
-#             self.do("./mach", "package")
-#         # generate the profile data
-#         with self.stamp("profile_generate") as s:
-#             s.check()
-#             self.log("generating profile...")
-#             for d in self.cwd.glob("obj-*"):
-#                 ldp = self.chroot_cwd / d.name / "dist/firefox"
-#             self.do(
-#                 "dbus-run-session",
-#                 "--",
-#                 "cage",
-#                 "sh",
-#                 "-c",
-#                 "wlr-randr --output HEADLESS-1 --custom-mode 1920x1080@60; ./mach python ./build/pgo/profileserver.py",
-#                 env={
-#                     "HOME": str(self.chroot_cwd),
-#                     "JARLOG_FILE": str(self.chroot_cwd / "jarlog"),
-#                     "LD_LIBRARY_PATH": ldp,
-#                     "LIBGL_ALWAYS_SOFTWARE": "1",
-#                     "LLVM_PROFDATA": "llvm-profdata",
-#                     "XDG_RUNTIME_DIR": "/tmp",
-#                     "WLR_BACKENDS": "headless",
-#                 },
-#             )
-#         # clean up build dir
-#         with self.stamp("profile_clobber") as s:
-#             s.check()
-#             self.log("cleaning up profile build...")
-#             self.do("./mach", "clobber", "objdir")
-#         # and finally make use of this for real configure
-#         conf_opts += [
-#             "--enable-profile-use=cross",
-#             f"--with-pgo-profile-path={self.chroot_cwd / 'merged.profdata'}",
-#             f"--with-pgo-jarlog={self.chroot_cwd / 'jarlog'}",
-#         ]
-# TODO(cbuild): self.log("configuring final firefox...")
-# TODO(cbuild): self.do("./mach", "configure", *conf_opts)
+# Chimera's breakpad header (musl has no stab.h).
+cp $pkgfiles/stab.h toolkit/crashreporter/google-breakpad/src/
+# No WASI toolchain yet: the RLBox-sandboxed libraries (graphite, ogg, expat,
+# woff2, ...) are built in, not sandboxed in WebAssembly. No JACK (PipeWire's
+# JACK library is not built yet).
+./mach configure --enable-application=browser --prefix=/usr --libdir=/usr/lib \
+    --host=$target --target=$target \
+    --disable-bootstrap \
+    --disable-install-strip --disable-strip \
+    --enable-linker=lld --enable-optimize --enable-release \
+    --disable-hardening \
+    --with-system-ffi --with-system-icu --with-system-jpeg --with-system-libevent \
+    --with-system-libvpx --with-system-nspr --with-system-nss --with-system-pixman \
+    --with-system-webp --with-system-zlib --without-system-png \
+    --enable-audio-backends=pulseaudio --enable-pulseaudio --disable-alsa --disable-jack \
+    --enable-dbus --enable-default-toolkit=cairo-gtk3-wayland --enable-necko-wifi \
+    --disable-jemalloc --disable-profiling --disable-tests --disable-updater \
+    --without-wasm-sandboxed-libraries \
+    --allow-addon-sideload --enable-official-branding \
+    --with-distribution-id=org.fenriros
 '''
 build = '''
 ./mach build --priority normal
 '''
 install = '''
-# TODO(cbuild): self.do(
-#         "./mach",
-#         "install",
-#         env={"DESTDIR": str(self.chroot_destdir)},
-#     )
+DESTDIR="$pkgdir" ./mach install
 install -Dm644 $pkgfiles/vendor.js "$pkgdir/usr/lib/firefox/browser/defaults/preferences/vendor.js"
 install -Dm644 $pkgfiles/distribution.ini "$pkgdir/usr/lib/firefox/distribution/distribution.ini"
 install -Dm644 $pkgfiles/firefox.desktop "$pkgdir/usr/share/applications/firefox.desktop"
-# icons
-# TODO(cbuild): for sz in [16, 22, 24, 32, 48, 128, 256]:
-#         self.install_file(
-#             f"browser/branding/official/default{sz}.png",
-#             f"usr/share/icons/hicolor/{sz}x{sz}/apps",
-#             name="firefox.png",
-#         )
-# https://bugzilla.mozilla.org/show_bug.cgi?id=658850
-rm -rf "$pkgdir/usr/lib/firefox/firefox-bin"
-mkdir -p "$pkgdir/usr/lib/firefox"
-ln -sf firefox "$pkgdir/usr/lib/firefox/firefox-bin"
+for sz in 16 22 24 32 48 128 256; do
+    install -Dm644 browser/branding/official/default$sz.png "$pkgdir/usr/share/icons/hicolor/${sz}x$sz/apps/firefox.png"
+done
+rm -f "$pkgdir/usr/lib/firefox/firefox-bin"
+ln -s firefox "$pkgdir/usr/lib/firefox/firefox-bin"
 '''

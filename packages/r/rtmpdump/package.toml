@@ -20,12 +20,8 @@ source = [
 environment = '''
 export CFLAGS="${CFLAGS} -D__LINUX_NETFILTER_H -DOPENSSL_API_COMPAT=0x10100000L -Wno-unused-const-variable -Wno-deprecated-declarations"
 '''
-setup = '''
-# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 29); port it by hand
-'''
 build = '''
-%make \
-    CRYPTO=OPENSSL
+make CC="$CC" OPT="$CFLAGS" XLDFLAGS="$LDFLAGS $CFLAGS" CRYPTO=OPENSSL -j$jobs
 '''
 install = '''
 %make_install \

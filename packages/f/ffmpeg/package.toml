@@ -22,8 +22,8 @@ export CFLAGS="${CFLAGS} -D_GNU_SOURCE"
 export LDFLAGS="${LDFLAGS} -Wl,-z,stack-size=0x200000"
 '''
 setup = '''
-# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 181); port it by hand
-./configure \
+# The toolchain is the environment's ($CC and friends).
+./configure --cc="$CC" --cxx="$CXX" --ld="$CC" --ar="${AR:-llvm-ar}" --nm="${NM:-llvm-nm}" --host-cc="$CC" --host-ld="$CC" \
     --prefix=/usr \
     --enable-shared \
     --enable-static \

@@ -16,15 +16,6 @@ source = [
     { url = "https://gitlab.com/accounts-sso/libaccounts-qt/-/archive/VERSION_1.17/libaccounts-qt-VERSION_1.17.tar.gz", sha256 = "6ed3e976133962c1c88f6c66928ba0d0a17a570843577d31e783dc891659e5d8" },
 ]
 
-setup = '''
-# TODO(cbuild): self.do(
-#         "qmake6",
-#         "PREFIX=/usr",
-#         f"QMAKE_CFLAGS={self.get_cflags(shell=True)}",
-#         f"QMAKE_CXXFLAGS={self.get_cxxflags(shell=True)}",
-#         f"QMAKE_LFLAGS={self.get_ldflags(shell=True)}",
-#     )
-'''
 build = '''
 %make
 '''
@@ -32,9 +23,9 @@ check = '''
 %make check
 '''
 install = '''
-# TODO(cbuild): init_install() sets variables for this phase (cbuild line 37); port it by hand
-%make_install \
+make INSTALL_ROOT="$pkgdir" install \
     STRIP=true \
     PREFIX=/usr
 rm -rf "$pkgdir/usr/bin/accountstest"
+rm -f "$pkgdir/usr/bin/accountstest"
 '''

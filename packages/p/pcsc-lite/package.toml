@@ -28,5 +28,5 @@ build = '''
 install = '''
 %meson_install
 install -Dm644 COPYING "$pkgdir/usr/share/licenses/pcsc-lite/COPYING"
-# TODO(cbuild): self.install_service(self.files_path / "pcscd")
+install -Dm644 $pkgfiles/pcscd "$pkgdir/etc/dinit.d/pcscd"
 '''

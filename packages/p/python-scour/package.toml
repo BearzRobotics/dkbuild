@@ -8,7 +8,7 @@ release = 5
 summary = "Python SVG scrubber"
 license = "Apache-2.0"
 homepage = "https://github.com/scour-project/scour"
-hostdeps = ["python-setuptools"]
+hostdeps = ["python-setuptools", "python"]
 checkdeps = []
 rundeps = ["python-six"]
 
@@ -17,6 +17,7 @@ source = [
 ]
 
 install = '''
-# TODO(cbuild): no install step could be derived
 true
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
 '''

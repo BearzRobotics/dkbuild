@@ -20,9 +20,6 @@ source = [
 environment = '''
 export CFLAGS="${CFLAGS} -fPIC"
 '''
-setup = '''
-# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 25); port it by hand
-'''
 build = '''
 %make \
     SYSTEM=linux-clang

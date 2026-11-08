@@ -18,7 +18,7 @@ source = [
 ]
 
 setup = '''
-# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 23); port it by hand
+export VERSION_MAJOR=${version%%.*} VERSION_MINOR=${version#*.}
 ./configure \
     --mandir=/usr/share/man \
     --use-libc
@@ -27,6 +27,6 @@ build = '''
 %make
 '''
 install = '''
-%make_install
+make DESTDIR="$pkgdir" install
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/liburing/LICENSE"
 '''

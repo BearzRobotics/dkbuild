@@ -17,10 +17,12 @@ source = [
 ]
 
 build = '''
+cd src
 %make \
     PREFIX=/usr
 '''
 install = '''
+cd src
 %make_install \
     STRIP=true \
     PREFIX=/usr \
@@ -32,8 +34,5 @@ install -Dm644 ../LICENSE.BSD-2-Clause "$pkgdir/usr/share/licenses/libbpf/LICENS
 # libbpf bpf-next tree) instead of the released (linux-headers stable) ones,
 # so place them in a separate private dir to use with -I later
 # https://gitlab.alpinelinux.org/alpine/aports/-/issues/13338
-# TODO(cbuild): with self.pushd("../include/uapi/linux"):
-#         self.install_file("bpf.h", "usr/include/bpf/uapi/linux")
-#         self.install_file("bpf_common.h", "usr/include/bpf/uapi/linux")
-#         self.install_file("btf.h", "usr/include/bpf/uapi/linux")
+for h in bpf.h bpf_common.h btf.h; do install -Dm644 ../include/uapi/linux/$h "$pkgdir/usr/include/bpf/uapi/linux/$h"; done
 '''

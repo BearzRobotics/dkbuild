@@ -9,66 +9,31 @@ summary = "Open source H.265/HEVC encoder"
 license = "GPL-2.0-or-later"
 homepage = "https://x265.org"
 patches = ["aarch64-func.patch", "x265-pic.patch"]
-hostdeps = ["pkgconf", "cmake", "ninja"]
+hostdeps = ["cmake", "ninja", "nasm", "pkgconf"]
 builddeps = ["numactl-devel", "linux-headers"]
 options = ["!check"]
 
 source = [
     { url = "https://bitbucket.org/multicoreware/x265_git/get/4.2.tar.gz", sha256 = "0a3d41f6b4e2fe5a49d783d6631bd1a49c44cdf999074a3ff09e2cb71ac8ed33" },
 ]
-
 setup = '''
-# TODO(cbuild): from cbuild.util import cmake
-# TODO(cbuild): cmake.configure(
-#         self,
-#         build_dir="build-12",
-#         extra_args=[
-#             *self.configure_args,
-#             # doesn't work with non-byte pixel value
-#             "-DENABLE_ALTIVEC=OFF",
-#             "-DENABLE_CLI=OFF",
-#             "-DENABLE_SHARED=OFF",
-#             "-DEXPORT_C_API=OFF",
-#             "-DHIGH_BIT_DEPTH=ON",
-#             "-DMAIN12=ON",
-#         ],
-#     )
-# TODO(cbuild): cmake.configure(
-#         self,
-#         build_dir="build-10",
-#         extra_args=[
-#             *self.configure_args,
-#             # doesn't work with non-byte pixel value
-#             "-DENABLE_ALTIVEC=OFF",
-#             "-DENABLE_SHARED=OFF",
-#             "-DENABLE_CLI=OFF",
-#             "-DEXPORT_C_API=OFF",
-#             "-DHIGH_BIT_DEPTH=ON",
-#             "-DMAIN12=OFF",
-#         ],
-#     )
-# TODO(cbuild): cmake.configure(
-#         self,
-#         build_dir="build",
-#         extra_args=[
-#             *self.configure_args,
-#             "-DEXTRA_LIB=x265_main10.a;x265_main12.a",
-#             "-DEXTRA_LINK_FLAGS=-L.",
-#             "-DLINKED_10BIT=TRUE",
-#             "-DLINKED_12BIT=TRUE",
-#         ],
-#     )
+cd source
+# One library with 8-, 10- and 12-bit encoders: the 10- and 12-bit ones are
+# built static and linked into the main (8-bit) one, as Chimera does.
+cmake -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -B build-12 -DENABLE_CLI=OFF -DENABLE_SHARED=OFF -DEXPORT_C_API=OFF -DHIGH_BIT_DEPTH=ON -DMAIN12=ON
+cmake -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -B build-10 -DENABLE_CLI=OFF -DENABLE_SHARED=OFF -DEXPORT_C_API=OFF -DHIGH_BIT_DEPTH=ON -DMAIN12=OFF
+cmake -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -B build "-DEXTRA_LIB=x265_main10.a;x265_main12.a" -DEXTRA_LINK_FLAGS=-L. -DLINKED_10BIT=TRUE -DLINKED_12BIT=TRUE
 '''
 build = '''
-# TODO(cbuild): from cbuild.util import cmake
-# TODO(cbuild): cmake.build(self, "build-12")
-# TODO(cbuild): cmake.build(self, "build-10")
-# TODO(cbuild): with self.stamp("build-symlinks") as s:
-#         s.check()
-#         self.ln_s("../build-12/libx265.a", "build/libx265_main12.a")
-#         self.ln_s("../build-10/libx265.a", "build/libx265_main10.a")
-# TODO(cbuild): cmake.build(self, "build")
+cd source
+cmake --build build-12
+cmake --build build-10
+ln -sf ../build-12/libx265.a build/libx265_main12.a
+ln -sf ../build-10/libx265.a build/libx265_main10.a
+cmake --build build
 '''
 install = '''
-%cmake_install
+cd source
+DESTDIR="$pkgdir" cmake --install build --strip
+install -Dm644 ../COPYING "$pkgdir/usr/share/licenses/x265/COPYING"
 '''

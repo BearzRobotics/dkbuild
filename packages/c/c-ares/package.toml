@@ -1,0 +1,34 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/c-ares/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "c-ares"
+version = "1.34.8"
+release = 1
+summary = "C library for asynchronous DNS requests"
+license = "MIT"
+homepage = "https://c-ares.haxx.se"
+hostdeps = ["pkgconf", "automake", "libtool"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/c-ares/c-ares/releases/download/v1.34.8/c-ares-1.34.8.tar.gz", sha256 = "c222b6d681096f9444d2c4863d2c1174019e27cacca0a4a5c114d36dd7d7bf78" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-tests
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/c-ares/LICENSE.md"
+# only cmake has a toggle to install these..
+install -Dm755 src/tools/.libs/adig "$pkgdir/usr/bin/adig" 2>/dev/null || install -Dm755 src/tools/adig "$pkgdir/usr/bin/adig"
+install -Dm755 src/tools/.libs/ahost "$pkgdir/usr/bin/ahost" 2>/dev/null || install -Dm755 src/tools/ahost "$pkgdir/usr/bin/ahost"
+install -Dm644 docs/adig.1 "$pkgdir/usr/share/man/man1/adig.1"
+install -Dm644 docs/ahost.1 "$pkgdir/usr/share/man/man1/ahost.1"
+'''

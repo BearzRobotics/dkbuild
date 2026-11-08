@@ -15,19 +15,19 @@ source = [
 ]
 
 install = '''
-# TODO(cbuild): self.install_file("*.h", "usr/include", glob=True)
-# TODO(cbuild): self.install_file("deprecated/*.h", "usr/include", glob=True)
-# TODO(cbuild): self.install_file("docs/*", "usr/share/doc/stb", glob=True)
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/stb/LICENSE"
 # .pc file
 install -dm755 "$pkgdir/usr/lib/pkgconfig"
-# TODO(cbuild): with open(self.destdir / "usr/lib/pkgconfig/stb.pc", "w") as outf:
-#         outf.write(f"""prefix=/usr
-#     includedir=${{prefix}}/include
-#     
-#     Name: stb
-#     Description: {pkgdesc}
-#     Cflags: -I${{includedir}}
-#     Version: {pkgver}
-#     """)
+install -d "$pkgdir/usr/include" "$pkgdir/usr/share/doc/stb" "$pkgdir/usr/lib/pkgconfig"
+install -m644 *.h deprecated/*.h "$pkgdir/usr/include/"
+cp -r docs/. "$pkgdir/usr/share/doc/stb/"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/stb/LICENSE"
+cat > "$pkgdir/usr/lib/pkgconfig/stb.pc" <<EOF
+prefix=/usr
+includedir=\${prefix}/include
+Name: stb
+Description: Single-file public domain libraries for C/C++
+Cflags: -I\${includedir}
+Version: $version
+EOF
 '''

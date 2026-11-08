@@ -12,10 +12,12 @@ hostdeps = ["ruby"]
 rundeps = ["ruby"]
 
 source = [
-    { url = "!https://rubygems.org/downloads/asciidoctor-2.0.26.gem", sha256 = "16e3accf1fc206bbd6335848649d7fd65f31d2daa60d85af13d47a8ee4b071c1" },
+    { url = "https://rubygems.org/downloads/asciidoctor-2.0.26.gem", sha256 = "16e3accf1fc206bbd6335848649d7fd65f31d2daa60d85af13d47a8ee4b071c1", unpack = false },
 ]
 
 install = '''
-# TODO(cbuild): no install step could be derived
 true
+gd=$(gem env gemdir)
+gem install --local --ignore-dependencies --no-document --install-dir "$pkgdir$gd" --bindir "$pkgdir/usr/bin" /build/sources/asciidoctor-*.gem
+rm -rf "$pkgdir$gd/cache"
 '''

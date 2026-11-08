@@ -1,0 +1,7 @@
+#!/bin/sh
+# users and groups (sysusers.conf)
+grep -q "^_nginx:" /etc/group || groupadd -r _nginx
+grep -q "^_nginx:" /etc/passwd || useradd -r -g _nginx -d /var/lib/nginx -s /usr/bin/nologin -c 'nginx www user' _nginx
+grep -q "^www-data:" /etc/group || groupadd -r www-data
+usermod -a -G www-data _nginx 2>/dev/null || true
+exit 0

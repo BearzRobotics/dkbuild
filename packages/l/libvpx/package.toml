@@ -36,11 +36,7 @@ setup = '''
 build = '''
 %make
 '''
-check = '''
-# TODO(cbuild): init_check() sets variables for this phase (cbuild line 79); port it by hand
-'''
 install = '''
-# TODO(cbuild): init_install() sets variables for this phase (cbuild line 71); port it by hand
-%make_install
+make DESTDIR="$pkgdir" DIST_DIR="$pkgdir/usr" install
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libvpx/LICENSE"
 '''

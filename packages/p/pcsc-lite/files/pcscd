@@ -1,4 +1,4 @@
 type = process
 command = /usr/bin/pcscd --foreground --auto-exit
-depends-on = local.target
+depends-on = rcboot
 smooth-recovery = true

@@ -1,5 +1,5 @@
 type = process
 command = /usr/lib/kadmind
 smooth-recovery = true
-depends-on: network.target
-depends-on: local.target
+depends-on: rcboot
+depends-on: rcboot

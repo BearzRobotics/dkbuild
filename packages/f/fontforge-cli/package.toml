@@ -26,6 +26,5 @@ build = '''
 '''
 install = '''
 %cmake_install
-# TODO(cbuild): for f in (self.cwd / "contrib/cidmap").glob("Adobe-*.cidmap"):
-#         self.install_file(f, "usr/share/fontforge")
+for f in contrib/cidmap/Adobe-*.cidmap; do install -Dm644 "$f" "$pkgdir/usr/share/fontforge/$(basename "$f")"; done
 '''

@@ -12,62 +12,46 @@ patches = ["0001-revert-cease-dependence-on-range.patch", "708353cdeb6006757e7c6
 hostdeps = ["pkgconf", "python"]
 builddeps = ["bzip2-devel", "icu-devel", "linux-headers", "python-devel", "xz-devel", "zlib-ng-compat-devel", "zstd-devel"]
 
+options = ["!check"]
+
 source = [
     { url = "https://archives.boost.io/release/1.91.0/source/boost_1_91_0.tar.gz", sha256 = "5734305f40a76c30f951c9abd409a45a2a19fb546efe4162119250bbe4d3a463" },
 ]
-
 build = '''
-# TODO(cbuild): self.do(
-#         self.chroot_cwd / "bootstrap.sh",
-#         f"--prefix={self.chroot_destdir}/usr",
-#         "--with-python=/usr/bin/python",
-#         "--with-python-root=/usr",
-#         # runs windres on res.rc and tries to link in a COFF object otherwise
-#         # which clang rejects
-#         env={"B2_DONT_EMBED_MANIFEST": "1"},
-#     )
-# TODO(cbuild): with open(self.cwd / "user-config.jam", "w") as cf:
-#         cf.write(f"""
-#     using clang : : {self.get_tool("CXX")} : <cxxflags>"{self.get_cxxflags(shell=True)}" <linkflags>"{self.get_ldflags(shell=True)}" <warnings-as-errors>"off" ;
-#     using python : {self.python_version} : /usr/bin/python3 : {self.profile.sysroot}/usr/include/python{self.python_version} : {self.profile.sysroot}/usr/lib/python{self.python_version} ;
-#     """)
-# TODO(cbuild): _call_b2(self)
-# TODO(cbuild): if self.profile.cross:
-#         # build b2 again, this time for the target system
-#         self.do(
-#             self.chroot_cwd / "tools/build/src/engine/build.sh",
-#             "--cxx=" + self.get_tool("CXX"),
-#             "--cxxflags=" + self.get_cxxflags(shell=True),
-#             "clang",
-#             env={"B2_DONT_EMBED_MANIFEST": "1"},
-#         )
-'''
-check = '''
-# TODO(cbuild): self.do(
-#         "python",
-#         "test_all.py",
-#         "--default-bjam",
-#         wrksrc="tools/build/test",
-#         env={"PATH": f"{self.chroot_cwd}/tools/build/src/engine:/usr/bin"},
-#     )
+b2() {
+    ./b2 -j$jobs --user-config="$PWD/user-config.jam" --prefix="$pkgdir/usr" release \
+        python="$pyver" architecture=x86 address-model=64 abi=sysv toolset=clang \
+        cxxflags="$CXXFLAGS" linkflags="$LDFLAGS" threading=multi debug-symbols=off \
+        runtime-link=shared link=shared,static --layout=system "$@"
+}
+pyver=$(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])')
+B2_DONT_EMBED_MANIFEST=1 ./bootstrap.sh --prefix="$pkgdir/usr" --with-python=/usr/bin/python3 --with-python-root=/usr
+cat > user-config.jam <<JAM
+using clang : : $CXX : <cxxflags>"$CXXFLAGS" <linkflags>"$LDFLAGS" <warnings-as-errors>"off" ;
+using python : $pyver : /usr/bin/python3 : /usr/include/python$pyver : /usr/lib/python$pyver ;
+JAM
+b2
 '''
 install = '''
-# install b2 globally
+b2() {
+    ./b2 -j$jobs --user-config="$PWD/user-config.jam" --prefix="$pkgdir/usr" release \
+        python="$pyver" architecture=x86 address-model=64 abi=sysv toolset=clang \
+        cxxflags="$CXXFLAGS" linkflags="$LDFLAGS" threading=multi debug-symbols=off \
+        runtime-link=shared link=shared,static --layout=system "$@"
+}
+pyver=$(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])')
 install -Dm755 tools/build/src/engine/b2 "$pkgdir/usr/bin/b2"
-# install boost itself
-# TODO(cbuild): _call_b2(self, "install")
-# install Boost.Build files
-install -dm755 "$pkgdir/usr/share/b2"
-# TODO(cbuild): for f in (self.cwd / "tools/build").glob("*"):
-#         self.cp(f, self.destdir / "usr/share/b2", recursive=True)
-# TODO(cbuild): for f in (self.destdir / "usr/share/b2").rglob("*.orig"):
-#         f.unlink()
-rm -rf "$pkgdir/usr/share/b2/src/engine/b2"
-install -dm755 "$pkgdir/etc"
-# TODO(cbuild): with open(self.destdir / "etc/site-config.jam", "w") as sc:
-#         sc.write("""# System-wide configuration file for Boost.Build.
-#     
-#     using clang ;
-#     """)
+b2 install
+mkdir -p "$pkgdir/usr/share/b2"
+cp -r tools/build/. "$pkgdir/usr/share/b2/"
+find "$pkgdir/usr/share/b2" -name '*.orig' -delete
+rm -f "$pkgdir/usr/share/b2/src/engine/b2"
+mkdir -p "$pkgdir/etc"
+printf '# System-wide configuration file for Boost.Build.\nusing clang ;\n' > "$pkgdir/etc/site-config.jam"
 install -Dm644 LICENSE_1_0.txt "$pkgdir/usr/share/licenses/boost/LICENSE_1_0.txt"
 '''
+
+[subpackages.build]
+summary = "Boost.Build framework"
+paths   = ["/usr/bin/b2", "/etc/site-config.jam", "/usr/share/b2"]
+depends = ["boost"]

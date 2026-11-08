@@ -18,6 +18,11 @@ source = [
 ]
 
 install = '''
-# TODO(cbuild): no install step could be derived
 true
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
 '''

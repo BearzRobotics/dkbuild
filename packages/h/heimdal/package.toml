@@ -36,15 +36,15 @@ install = '''
 %make_install \
     -j1
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/heimdal/LICENSE"
-# TODO(cbuild): self.uninstall("usr/share/man/cat*", glob=True)
-# TODO(cbuild): self.uninstall("usr/lib/windc*", glob=True)
+rm -rf "$pkgdir"/usr/share/man/cat*
+rm -rf "$pkgdir"/usr/lib/windc*
 rm -rf "$pkgdir/usr/bin/bsearch"
 rm -rf "$pkgdir/usr/bin/idn-lookup"
 rm -rf "$pkgdir/usr/share/man/man1/bsearch.1"
-# TODO(cbuild): self.rename("usr/bin/su", "ksu")
-# TODO(cbuild): self.rename("usr/bin/pagsh", "kpagsh")
-# TODO(cbuild): self.rename("usr/share/man/man1/su.1", "ksu.1")
-# TODO(cbuild): self.rename("usr/share/man/man1/pagsh.1", "kpagsh.1")
+mv "$pkgdir/usr/bin/su" "$pkgdir/usr/bin/ksu"
+mv "$pkgdir/usr/bin/pagsh" "$pkgdir/usr/bin/kpagsh"
+mv "$pkgdir/usr/share/man/man1/su.1" "$pkgdir/usr/share/man/man1/ksu.1"
+mv "$pkgdir/usr/share/man/man1/pagsh.1" "$pkgdir/usr/share/man/man1/kpagsh.1"
 # hardlink resolution
 rm -rf "$pkgdir/usr/share/man/man8/ipropd-master.8"
 rm -rf "$pkgdir/usr/share/man/man8/ipropd-slave.8"
@@ -55,7 +55,7 @@ mkdir -p "$pkgdir/usr/share/man/man8"
 ln -sf iprop.8 "$pkgdir/usr/share/man/man8/ipropd-slave.8"
 mkdir -p "$pkgdir/usr/share/man/man5"
 ln -sf mech.5 "$pkgdir/usr/share/man/man5/qop.5"
-# TODO(cbuild): self.install_service(self.files_path / "heimdal-kdc")
-# TODO(cbuild): self.install_service(self.files_path / "heimdal-kadmind")
-# TODO(cbuild): self.install_service(self.files_path / "heimdal-kpasswdd")
+install -Dm644 $pkgfiles/heimdal-kdc "$pkgdir/etc/dinit.d/heimdal-kdc"
+install -Dm644 $pkgfiles/heimdal-kadmind "$pkgdir/etc/dinit.d/heimdal-kadmind"
+install -Dm644 $pkgfiles/heimdal-kpasswdd "$pkgdir/etc/dinit.d/heimdal-kpasswdd"
 '''

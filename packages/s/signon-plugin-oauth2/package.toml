@@ -16,16 +16,6 @@ source = [
     { url = "https://gitlab.com/accounts-sso/signon-plugin-oauth2/-/archive/d759439066f0a34e5ad352ebab0b3bb2790d429e.tar.gz", sha256 = "e27678964563cbb64d9bd4088c4c7876bb2202c8e7af8ea77d8f27c578a8d6e4" },
 ]
 
-setup = '''
-# TODO(cbuild): self.do(
-#         "qmake6",
-#         "LIBDIR=/usr/lib",
-#         "PREFIX=/usr",
-#         f"QMAKE_CFLAGS={self.get_cflags(shell=True)}",
-#         f"QMAKE_CXXFLAGS={self.get_cxxflags(shell=True)}",
-#         f"QMAKE_LFLAGS={self.get_ldflags(shell=True)}",
-#     )
-'''
 build = '''
 %make
 '''
@@ -33,11 +23,11 @@ check = '''
 %make check
 '''
 install = '''
-# TODO(cbuild): init_install() sets variables for this phase (cbuild line 34); port it by hand
-%make_install \
+make INSTALL_ROOT="$pkgdir" install \
     STRIP=true \
     PREFIX=/usr
 # mistakenly installed
 rm -rf "$pkgdir/usr/bin/signon-oauth2plugin-tests"
 rm -rf "$pkgdir/usr/share/signon-oauth2plugin-tests"
+rm -rf "$pkgdir/usr/bin/signon-oauth2plugin-tests" "$pkgdir/usr/share/signon-oauth2plugin-tests"
 '''

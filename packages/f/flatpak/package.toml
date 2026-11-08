@@ -40,6 +40,5 @@ install = '''
 %meson_install
 rm -rf "$pkgdir/usr/lib/systemd"
 rm -rf "$pkgdir/usr/lib/tmpfiles.d/flatpak.conf"
-# TODO(cbuild): self.install_tmpfiles(self.files_path / "tmpfiles.conf")
 install -Dm644 $pkgfiles/modules-load.conf "$pkgdir/usr/lib/modules-load.d/flatpak.conf"
 '''

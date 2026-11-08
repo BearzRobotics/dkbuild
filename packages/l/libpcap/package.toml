@@ -17,7 +17,7 @@ source = [
 ]
 
 setup = '''
-# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 23); port it by hand
+export CFLAGS="$CFLAGS -I/usr/include/libnl3"
 autoreconf -if -W none
 %configure \
     --enable-ipv6 \
@@ -31,12 +31,10 @@ build = '''
 install = '''
 %make_install
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libpcap/LICENSE"
-# TODO(cbuild): for f in (self.destdir / "usr/share/man/man3").glob("*.3pcap"):
-#         ff = f.with_name(f.name.removesuffix("pcap"))
-#         if f.is_symlink():
-#             tp = f.readlink()
-#             f.unlink()
-#             self.ln_s(tp.with_name(tp.name.removesuffix("pcap")), ff)
-#         else:
-#             self.mv(f, ff)
+# Manual pages in section 3, not 3pcap.
+for f in "$pkgdir"/usr/share/man/man3/*.3pcap; do
+    [ -e "$f" ] || [ -L "$f" ] || continue
+    nf="${f%pcap}"
+    if [ -L "$f" ]; then t=$(readlink "$f"); rm -f "$f"; ln -s "${t%pcap}" "$nf"; else mv "$f" "$nf"; fi
+done
 '''

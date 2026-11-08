@@ -17,12 +17,15 @@ source = [
 ]
 
 setup = '''
+cd build/generic
 autoreconf -if -W none
 %configure
 '''
 build = '''
+cd build/generic
 %make
 '''
 install = '''
+cd build/generic
 %make_install
 '''

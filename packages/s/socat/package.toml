@@ -26,9 +26,6 @@ build = '''
 install = '''
 %make_install
 install -dm755 "$pkgdir/usr/share/examples/socat"
-# TODO(cbuild): self.mv(
-#         self.destdir / "usr/bin/socat-*.sh",
-#         self.destdir / "usr/share/examples/socat",
-#         glob=True,
-#     )
+mkdir -p "$pkgdir/usr/share/examples/socat"
+mv "$pkgdir"/usr/bin/socat-*.sh "$pkgdir/usr/share/examples/socat/" 2>/dev/null || true
 '''

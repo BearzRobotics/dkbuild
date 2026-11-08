@@ -24,9 +24,5 @@ build = '''
 install = '''
 %meson_install
 install -Dm644 COPYING "$pkgdir/usr/share/licenses/lilv/COPYING"
-# TODO(cbuild): self.rename(
-#         "etc/bash_completion.d/lilv",
-#         "usr/share/bash-completion/completions/lv2info",
-#         relative=False,
-#     )
+if [ -f "$pkgdir/etc/bash_completion.d/lilv" ]; then install -Dm644 "$pkgdir/etc/bash_completion.d/lilv" "$pkgdir/usr/share/bash-completion/completions/lv2info"; rm -rf "$pkgdir/etc/bash_completion.d"; fi
 '''

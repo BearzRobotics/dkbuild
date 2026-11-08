@@ -16,16 +16,20 @@ source = [
 ]
 
 setup = '''
+cd contrib/minizip
 autoreconf -if -W none
 %configure
 '''
 build = '''
+cd contrib/minizip
 %make
 '''
 check = '''
+cd contrib/minizip
 %make check
 '''
 install = '''
+cd contrib/minizip
 %make_install
 rm -rf "$pkgdir/usr/include/minizip/crypt.h"
 '''

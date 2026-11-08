@@ -21,33 +21,9 @@ install -Dm644 $pkgfiles/docbook-xsl.conf "$pkgdir/usr/share/xml/catalogs/docboo
 install -Dm644 catalog.xml "$pkgdir/usr/share/xsl/docbook/catalog.xml"
 install -Dm644 VERSION "$pkgdir/usr/share/xsl/docbook/VERSION"
 install -Dm644 VERSION.xsl "$pkgdir/usr/share/xsl/docbook/VERSION.xsl"
-# TODO(cbuild): for d in [
-#         "assembly",
-#         "common",
-#         "eclipse",
-#         "epub",
-#         "epub3",
-#         "fo",
-#         "highlighting",
-#         "html",
-#         "htmlhelp",
-#         "images",
-#         "javahelp",
-#         "lib",
-#         "manpages",
-#         "params",
-#         "profiling",
-#         "roundtrip",
-#         "template",
-#         "slides",
-#         "website",
-#         "xhtml",
-#         "xhtml-1_1",
-#         "xhtml5",
-#     ]:
-#         self.install_dir(f"usr/share/xsl/docbook/{d}")
-#         for f in (self.cwd / d).glob("*"):
-#             self.cp(
-#                 f, self.destdir / f"usr/share/xsl/docbook/{d}", recursive=True
-#             )
+for d in assembly common eclipse epub epub3 fo highlighting html htmlhelp images javahelp lib manpages params profiling roundtrip template slides website xhtml xhtml-1_1 xhtml5; do
+    [ -d "$d" ] || continue
+    mkdir -p "$pkgdir/usr/share/xsl/docbook/$d"
+    cp -r "$d"/. "$pkgdir/usr/share/xsl/docbook/$d/"
+done
 '''

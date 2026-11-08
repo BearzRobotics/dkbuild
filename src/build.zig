@@ -204,6 +204,23 @@ fn removeBuildDir(arena: Allocator, io: std.Io, work: []const u8) void {
 /// those need to build and run (their own build and run dependencies, and the
 /// main package next to a `-devel`). Dependencies the tree does not provide are
 /// the image's (stage 1 assumes it has them).
+/// Whether a source URL names a tar archive (anything else is copied, not unpacked).
+fn isTarArchive(url: []const u8) bool {
+    const exts = [_][]const u8{ ".tar", ".tar.gz", ".tgz", ".tar.xz", ".txz", ".tar.bz2", ".tbz2", ".tbz", ".tar.zst", ".tar.lz", ".tar.lzma", ".tar.Z" };
+    var u = url;
+    if (std.mem.indexOfAny(u8, u, "?#")) |i| u = u[0..i];
+    for (exts) |e| if (std.mem.endsWith(u8, u, e)) return true;
+    // GitHub and GitLab archive links without an extension in the path.
+    return std.mem.indexOf(u8, u, "/archive/") != null and !std.mem.endsWith(u8, u, ".zip");
+}
+
+test "isTarArchive" {
+    try std.testing.expect(isTarArchive("https://x.org/a-1.0.tar.xz"));
+    try std.testing.expect(isTarArchive("https://github.com/o/r/archive/v1.tar.gz"));
+    try std.testing.expect(!isTarArchive("https://docbook.org/xml/4.5/docbook-xml-4.5.zip"));
+    try std.testing.expect(!isTarArchive("https://x.org/protocol-21.1.txt"));
+}
+
 fn inTreeFiles(arena: Allocator, io: std.Io, opts: Options, r: recipe.Recipe, repo_abs: ?[]const u8) BuildError![]const []const u8 {
     const t = opts.tree orelse return &.{};
     var work: std.ArrayList([]const u8) = .empty;
@@ -434,36 +451,40 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 return error.PrepareFailed;
             }
         }
-        if (first_tarball) |tb| {
-            const ok = runLogged(arena, io, &.{ "tar", "-xf", tb, "-C", build_rel, "--no-same-owner" }, &log) catch false;
-            if (!ok) {
-                out("error: cannot unpack {s}\n", .{tb});
-                return error.UnpackFailed;
-            }
-            var d = Dir.cwd().openDir(io, build_rel, .{ .iterate = true }) catch return error.UnpackFailed;
-            defer d.close(io);
-            var it = d.iterate();
-            var count: usize = 0;
-            var only: []const u8 = "";
-            while (it.next(io) catch null) |e| {
-                count += 1;
-                only = try arena.dupe(u8, e.name);
-            }
-            if (count == 1) srcdir = try std.fmt.allocPrint(arena, "/build/{s}", .{only});
-            // Further tarballs (a vendored dependency's source, say) are unpacked
-            // next to the first; $srcdir stays the first one's directory.
-            var seen_first = false;
+        // Sources in order: a tar archive is unpacked into /build (the first
+        // one's top directory is $srcdir; the others land next to it); any
+        // other file (a .zip, a .txt) is copied to /build/sources/<name>.
+        if (first_tarball != null) {
+            var first = true;
             for (r.source) |src| {
                 if (src != .tarball) continue;
-                if (!seen_first) {
-                    seen_first = true;
+                const file = try fetch.cachePath(arena, cache, src.tarball.sha256);
+                if (!src.tarball.unpack or !isTarArchive(src.tarball.url)) {
+                    const sdir = try std.fs.path.join(arena, &.{ build_rel, "sources" });
+                    Dir.cwd().createDirPath(io, sdir) catch return error.UnpackFailed;
+                    const base = std.fs.path.basename(src.tarball.url);
+                    const ok = runLogged(arena, io, &.{ "cp", file, try std.fs.path.join(arena, &.{ sdir, base }) }, &log) catch false;
+                    if (!ok) return error.UnpackFailed;
+                    first = false;
                     continue;
                 }
-                const more = try fetch.cachePath(arena, cache, src.tarball.sha256);
-                const ok2 = runLogged(arena, io, &.{ "tar", "-xf", more, "-C", build_rel, "--no-same-owner" }, &log) catch false;
-                if (!ok2) {
-                    out("error: cannot unpack {s}\n", .{more});
+                const ok = runLogged(arena, io, &.{ "tar", "-xf", file, "-C", build_rel, "--no-same-owner" }, &log) catch false;
+                if (!ok) {
+                    out("error: cannot unpack {s}\n", .{file});
                     return error.UnpackFailed;
+                }
+                if (first) {
+                    first = false;
+                    var d = Dir.cwd().openDir(io, build_rel, .{ .iterate = true }) catch return error.UnpackFailed;
+                    defer d.close(io);
+                    var it = d.iterate();
+                    var count: usize = 0;
+                    var only: []const u8 = "";
+                    while (it.next(io) catch null) |e| {
+                        count += 1;
+                        only = try arena.dupe(u8, e.name);
+                    }
+                    if (count == 1) srcdir = try std.fmt.allocPrint(arena, "/build/{s}", .{only});
                 }
             }
         }
