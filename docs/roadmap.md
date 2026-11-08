@@ -117,7 +117,26 @@ GCC-built C++ brings libstdc++, kept apart from the tree's libc++ (one C++
 runtime per program). First user: GRUB 2, which also gives BIOS installs a
 bootloader beside dklilo.
 
+GCC comes as a **complete cross suite per target**: binutils, gcc and the C
+library, for every architecture FenrirOS supports (musl) and for the common
+embedded targets (newlib or the target's own libc): `avr` (avr-gcc,
+avr-binutils, avr-libc), `arm-none-eabi`, `aarch64-none-elf`,
+`riscv64-unknown-elf` / `riscv32`, and others as they are needed, packaged
+the way Arch packages `arm-none-eabi-gcc`.
+
+LLVM is built with **every backend**, stable and experimental (`all`), so
+clang cross-compiles for the same targets (AVR, ARM, RISC-V, Xtensa for the
+ESP32, ...). Code for AVR is built **without LTO**.
+
 Targets beyond x86_64, aarch64 and riscv64, as many as LLVM (or GCC, where
 LLVM can't) builds well: ppc64le, loongarch64, armv7, i686, s390x and others.
 Each is a profile (SPEC.md 6.1) plus whatever recipes need per-architecture
 care.
+
+## ISO package repositories
+
+`dkbuild image` can put packages on the ISO (`apks/<arch>/` with a signed
+`Packages.adb`), as Alpine's install media do: the live system lists the disc
+as a repository (`/run/live/medium/apks/<arch>/Packages.adb`), so `apk add`
+and an installer work offline, and an installed system can use a mounted disc
+the same way (optionally tagged, `@cdrom ...`).
