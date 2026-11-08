@@ -23,3 +23,7 @@ zig-out/
 !/tests/trees/forgotten-dep/.gitkeep
 /tests/trees/scripts/*
 !/tests/trees/scripts/.gitkeep
+/tests/trees/parallel/*
+!/tests/trees/parallel/.gitkeep
+*.iso
+/world-run.log

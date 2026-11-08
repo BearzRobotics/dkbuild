@@ -90,8 +90,8 @@ to the machine and unpack it (about a minute, 4.2 GB, no root needed):
 ./zig-out/bin/dkbuild bootstrap-root /path/to/dkrescue.iso
 ```
 
-The image these instructions were tested with is 1,187,035,136 bytes with SHA-256
-`7991de96eebf20eca6d5d2eaeb3f1283b12ee2f78ac292183700938dbb0b8c3c`; check yours with `sha256sum`. The command also
+The image these instructions were tested with is 1,166,366,720 bytes with SHA-256
+`b3929359a8c9d9c9dd29f928dd756564a763dbada5dc3a1128a8b5c0c504ea72`; check yours with `sha256sum`. The command also
 accepts the ISO's `rootfs.sfs` or a root tarball. It unpacks into `rootfs/dkrescue/` and ends with
 `ok: ./rootfs/dkrescue is a usable build machine`, after confirming the toolchain is there and that the root runs
 its own `apk` and `clang` from inside a user namespace. `--force` replaces an existing unpack.
