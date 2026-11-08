@@ -12,7 +12,7 @@ hostdeps = ["automake", "libtool", "pkgconf"]
 builddeps = ["linux-headers"]
 
 source = [
-    { url = "http://people.redhat.com/sgrubb/libcap-ng/libcap-ng-0.8.5.tar.gz", sha256 = "3ba5294d1cbdfa98afaacfbc00b6af9ed2b83e8a21817185dfd844cc8c7ac6ff" },
+    { url = "https://github.com/stevegrubb/libcap-ng/archive/refs/tags/v0.8.5.tar.gz", sha256 = "e4be07fdd234f10b866433f224d183626003c65634ed0552b02e654a380244c2" },
 ]
 
 setup = '''
