@@ -1,0 +1,34 @@
+# Imported from Chimera Linux cports: main/at-spi2-core/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: gtk+3 (atk and atk-bridge are part of this package since 2.46).
+# Changed from Chimera: no X11 (the system is Wayland-only, and the image has no
+# libX11), no introspection (gobject-introspection is not built yet), no docs.
+name = "at-spi2-core"
+version = "2.62.1"
+release = 1
+summary = "Assistive Technology Service Provider Interface"
+license = "GPL-2.0-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/at-spi2-core"
+hostdeps = ["gettext", "glib-devel", "meson", "pkgconf"]
+builddeps = ["dbus-devel", "glib-devel", "libxml2-devel"]
+rundeps = ["dbus"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/at-spi2-core/2.62/at-spi2-core-2.62.1.tar.xz", sha256 = "cca6b6a86e4389d89b370288761ce2385ddeceb10c4412da78689bc30c88af2d" },
+]
+
+setup = '''
+%meson \
+    -Duse_systemd=false \
+    -Dgtk2_atk_adaptor=false \
+    -Dx11=disabled \
+    -Dintrospection=disabled \
+    -Ddocs=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''
