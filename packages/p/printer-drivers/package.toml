@@ -1,0 +1,15 @@
+# The printer drivers for printers that are not driverless: HP (hplip),
+# Gutenprint (Epson, Canon and many more), the Foomatic database and PPDs,
+# Epson ESC/P-R, Brother lasers, Samsung SPL, ZjStream (foo2zjs).
+# Driverless printers (IPP Everywhere, AirPrint, IPP over USB) need only
+# `printing`.
+name = "printer-drivers"
+version = "1"
+release = 1
+summary = "Drivers for older (not driverless) printers"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+hostdeps = []
+rundeps = ["printing", "hplip", "gutenprint", "foomatic-db", "foomatic-db-engine", "epson-inkjet-printer-escpr", "brlaser", "splix", "foo2zjs"]
+options = ["meta"]
+

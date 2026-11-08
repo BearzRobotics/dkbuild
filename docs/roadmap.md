@@ -112,7 +112,8 @@ Everything asked for, in the order it can be built. All of it native: Flatpak
 | ocrmypdf + ghostscript, qpdf, jbig2dec, libxslt, libraqm and 24 Python packages (pikepdf, pillow, lxml, cryptography, uharfbuzz, fpdf2, rich, ...) | recipes written; building after the static wave. Renders pages with Ghostscript |
 | PDFium (for pypdfium2, OCRmyPDF's faster renderer), unpaper, pngquant, jbig2enc | OCRmyPDF extras: PDFium is a Chromium-style build (gn); unpaper needs FFmpeg |
 | printing: cups, cups-filters, libcupsfilters, libppd, ghostscript (with its cups device), avahi, ipp-usb, cups-pk-helper, poppler (+ data), ijs, libpaper, libexif, libdaemon; `printing` installs them all | recipes written; building after the static wave |
-| printer drivers: hplip (HP; needs SANE, python-dbus, python-gobject), gutenprint (Epson, Canon, ...), foomatic-db; SANE for scanners | after the printing stack; driverless printers (IPP Everywhere, AirPrint, ipp-usb) need none of them |
+| printer drivers: hplip (with net-snmp, sane-backends, python-dbus, python-gobject on gobject-introspection; glib r5 with introspection), gutenprint, foomatic-db + engine, epson-inkjet-printer-escpr, brlaser, splix, foo2zjs; `printer-drivers` installs them all | recipes written; building after the static wave. Driverless printers need none of them |
+| epson-inkjet-printer-escpr2 (newer Epsons; Epson ships it as a source RPM), libgphoto2 and v4l-utils (sane-backends r2: camera and webcam backends), groff (foo2zjs's manual) | later |
 | iwd, nginx, caddy, wget2 | small; next |
 | **npm/yarn dependency store** | infrastructure, before anything below that uses Node: one shared store for node modules, a list per package, like the Go/Rust/Zig stores (SPEC.md 7.4) |
 | nodejs, cbindgen | then Firefox |

@@ -1,0 +1,6 @@
+# SNMP agent. Started at boot when enabled (dinitctl enable snmpd).
+type = process
+command = /usr/sbin/snmpd -LOw -I -smux,mteTrigger,mteTriggerConf -f
+logfile = /var/log/net-snmp.log
+
+depends-on: rcboot

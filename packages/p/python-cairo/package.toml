@@ -1,0 +1,26 @@
+# After Chimera Linux cports: main/python-cairo. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# pycairo, Cairo for Python. needed by: python-gobject.
+name = "python-cairo"
+version = "1.29.0"
+release = 1
+summary = "Python bindings for Cairo"
+license = "LGPL-2.1-only OR MPL-1.1"
+homepage = "https://pycairo.readthedocs.io"
+hostdeps = ["meson", "ninja", "pkgconf", "python"]
+builddeps = ["cairo-devel", "python-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/pygobject/pycairo/releases/download/v1.29.0/pycairo-1.29.0.tar.gz", sha256 = "f3f7fde97325cae80224c09f12564ef58d0d0f655da0e3b040f5807bd5bd3142" },
+]
+
+setup = '''
+%meson -Dtests=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

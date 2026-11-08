@@ -1,0 +1,53 @@
+# After Chimera Linux cports: user/net-snmp. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# SNMP tools and library. needed by: hplip (finds and talks to HP network
+# printers). The agent and trap daemon are net-snmp-snmpd and -snmptrapd.
+# No Perl modules or embedded Perl: nothing here uses them.
+name = "net-snmp"
+version = "5.9.5.2"
+release = 1
+summary = "Simple Network Management Protocol tools"
+license = "BSD-3-Clause AND MIT"
+homepage = "http://www.net-snmp.org"
+patches = ["fix-fd_mask.patch", "netsnmp-swinst-crash.patch"]
+hostdeps = ["automake", "file", "libtool", "pkgconf"]
+builddeps = ["linux-headers", "openssl-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://sourceforge.net/projects/net-snmp/files/net-snmp/5.9.5.2/net-snmp-5.9.5.2.tar.gz", sha256 = "16707719f833184a4b72835dac359ae188123b06b5e42817c00790d7dc1384bf" },
+]
+
+setup = '''
+%configure \
+    --sbindir=/usr/sbin \
+    --disable-embedded-perl \
+    --without-perl-modules \
+    --enable-blumenthal-aes \
+    --enable-ipv6 \
+    --enable-ucd-snmp-compatibility \
+    --with-defaults \
+    --with-logfile=/var/log/net-snmpd.log \
+    --with-openssl \
+    --with-persistent-directory=/var/lib/net-snmp
+'''
+build = '''
+make -j1
+'''
+install = '''
+make DESTDIR="$pkgdir" install -j1
+install -Dm644 build/EXAMPLE.conf "$pkgdir/usr/share/examples/net-snmp/snmpd.conf" 2>/dev/null || install -Dm644 EXAMPLE.conf "$pkgdir/usr/share/examples/net-snmp/snmpd.conf"
+install -Dm644 $pkgfiles/snmptrapd.conf "$pkgdir/etc/snmp/snmptrapd.conf"
+install -Dm644 $pkgfiles/snmpd "$pkgdir/etc/dinit.d/snmpd"
+install -Dm644 $pkgfiles/snmptrapd "$pkgdir/etc/dinit.d/snmptrapd"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/net-snmp/COPYING"
+'''
+
+[subpackages.snmpd]
+summary = "SNMP agent"
+paths   = ["/usr/sbin/snmpd", "/usr/bin/net-snmp-create-v3-user", "/etc/dinit.d/snmpd", "/usr/share/examples/net-snmp/snmpd.conf"]
+depends = ["net-snmp"]
+
+[subpackages.snmptrapd]
+summary = "SNMP notification receiver"
+paths   = ["/usr/sbin/snmptrapd", "/etc/snmp/snmptrapd.conf", "/etc/dinit.d/snmptrapd"]
+depends = ["net-snmp"]

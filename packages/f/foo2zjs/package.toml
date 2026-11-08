@@ -1,0 +1,34 @@
+# foo2zjs: drivers for printers that speak ZjStream, ZjStream-LAVA, OAK,
+# QPDL, SLX, HIPERC, HBPL and DDST (many HP LaserJet 1000-series, Minolta,
+# Samsung, Oki, Xerox, Dell, Lexmark models). OpenPrinting's master at
+# 2026-08-19. Not packaged: the firmware some USB models load at power-on
+# (its getweb script downloads it from the vendors).
+name = "foo2zjs"
+version = "20200505_git20260819"
+release = 1
+summary = "Drivers for ZjStream and similar printers"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/OpenPrinting/foo2zjs"
+hostdeps = ["bc", "ghostscript"]
+builddeps = ["cups-devel"]
+rundeps = ["bc", "ghostscript", "cups-filters"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/OpenPrinting/foo2zjs/archive/80499ed5bf6caa2963ad337e37cfda78a80aab1e.tar.gz", sha256 = "88ab244deb082c2513fbee36a58c7d407be30a5bdcdf4fd0781807fd18a0c9b4" },
+]
+
+setup = '''
+# The PDF manual needs groff, which is not in the tree.
+sed -i 's/^\tall-osx-hotplug man doc \\$/\tall-osx-hotplug man \\/' Makefile
+'''
+build = '''
+make CC="$CC" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" PREFIX=/usr all
+'''
+install = '''
+# The wrappers have /usr built in; install with the package directory as prefix.
+mkdir -p "$pkgdir/usr/share/ppd" "$pkgdir/usr/share/foomatic/db/source"
+make PREFIX="$pkgdir/usr" DESTDIR="$pkgdir" FOODB="$pkgdir/usr/share/foomatic/db/source" LPuid= LPgid= \
+    install-prog install-extra install-crd install-foo install-ppd install-filter install-man
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/foo2zjs/COPYING"
+'''

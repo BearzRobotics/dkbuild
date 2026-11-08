@@ -1,0 +1,112 @@
+--- a/Makefile.am	2026-09-11 07:22:00.000000000 -0400
++++ b/Makefile.am	2026-11-08 14:51:14.997663721 -0500
+@@ -179,7 +179,7 @@
+ dist_hplip_SCRIPTS = hpssd.py __init__.py hpdio.py
+ endif #HPLIP_CLASS_DRIVER
+ 
+-dist_noinst_DATA += prnt/drv/hpijs.drv.in.template prnt/drv/hpcups.drv.in.template prnt/hpcups/libImageProcessor-x86_64.so prnt/hpcups/libImageProcessor-x86_32.so
++dist_noinst_DATA += prnt/drv/hpijs.drv.in.template prnt/drv/hpcups.drv.in.template
+ 
+ dist_noinst_DATA += prnt/ipp-usb/HPLIP.conf
+ dist_noinst_SCRIPTS += dat2drv.py install.py  hplip-install init-suse-firewall init-iptables-firewall class_rpm_build.sh hplipclassdriver.spec createPPD.sh Makefile_dat2drv hpijs-drv
+@@ -605,7 +605,7 @@
+ hpcups_CPPFLAGS = -I$(srcdir)/prnt/hpcups -I$(srcdir)/prnt -I$(srcdir)/common -D_GNU_SOURCE
+ hpcups_CXXFLAGS = $(APDK_ENDIAN_FLAG) $(DBUS_CFLAGS) $(AM_CXXFLAGS)
+ hpcups_LDFLAGS = $(AM_LDFLAGS)
+-hpcups_LDADD = -L./prnt/hpcups/ -ljpeg -ldl -lImageProcessor -lcups -lcupsimage -lz $(DBUS_LIBS)
++hpcups_LDADD = -L./prnt/hpcups/ -ljpeg -ldl -lcups -lcupsimage -lz $(DBUS_LIBS)
+ #else
+ #hpcupsdir = $(cupsfilterdir)
+ #hpcups_PROGRAMS = hpcups
+@@ -707,16 +707,6 @@
+ 
+ install-data-hook:
+ if HPLIP_BUILD
+-	if [ \( "$(UNAME)" = "x86_64" -a  -d "$(libdir)/" \) ]; then \
+-		cp prnt/hpcups/libImageProcessor-x86_64.so $(libdir)/ ; \
+-		chmod 775 $(libdir)/libImageProcessor-x86_64.so ; \
+-		ln -sf $(libdir)/libImageProcessor-x86_64.so $(libdir)/libImageProcessor.so ; \
+-	fi; \
+-	if [ \( \( "$(UNAME)" = "i686" -o "$(UNAME)" = "i386" \) -a -d "$(libdir)/" \) ]; then \
+-		cp prnt/hpcups/libImageProcessor-x86_32.so $(libdir)/ ; \
+-		chmod 775 $(libdir)/libImageProcessor-x86_32.so ; \
+-		ln -sf $(libdir)/libImageProcessor-x86_32.so $(libdir)/libImageProcessor.so ; \
+-	fi
+ 	if [ -d "/usr/share/ipp-usb/quirks/" ]; then \
+ 		echo "ipp-usb directory exists"; \
+ 		cp prnt/ipp-usb/HPLIP.conf /usr/share/ipp-usb/quirks/ ; \
+--- a/hplipclassdriver.spec	2026-09-11 07:22:00.000000000 -0400
++++ b/hplipclassdriver.spec	2026-11-08 14:51:14.994479066 -0500
+@@ -10,7 +10,6 @@
+ ldconfig
+ semodule -i /usr/share/hplip/selinux/mypol.pp
+ #ln -sf /usr/lib/libImageProcessor-x86_64.so /usr/lib/libImageProcessor.so
+-ln -sf /usr/lib/libImageProcessor-x86_32.so /usr/lib/libImageProcessor.so
+ %description 
+ The HP Linux Imaging and Printing (HPLIP) system
+ provides a unified single and multi-function connectivity
+--- a/prnt/cupsext/cupsext.c	2026-09-11 07:22:00.000000000 -0400
++++ b/prnt/cupsext/cupsext.c	2026-11-08 14:51:14.995580931 -0500
+@@ -99,6 +99,12 @@
+ #define _STRINGIZE(x) #x
+ #define STRINGIZE(x) _STRINGIZE(x)
+ 
++int controlCupsPrinter(char *pr_name, int op);
++int setDefaultCupsPrinter(char *pr_name);
++int delCupsPrinter(char *pr_name);
++int addCupsPrinter(char *name, char *device_uri, char *location, char *ppd_file, char *model, char *info);
++void _releaseCupsInstance();
++
+ // static http_t * http = NULL;     /* HTTP object */
+ 
+ PyObject *releaseCupsInstance(PyObject *self, PyObject *args)
+--- a/common/utils.c	2026-09-11 07:22:00.000000000 -0400
++++ b/common/utils.c	2026-11-08 14:51:14.995694740 -0500
+@@ -1,5 +1,5 @@
+ #include "utils.h"
+-#include "string.h"
++#include <string.h>
+ #include <dlfcn.h>
+ #include <sys/stat.h>
+ #include <errno.h>
+--- a/scan/sane/hpaio.c	2026-09-11 07:22:00.000000000 -0400
++++ b/scan/sane/hpaio.c	2026-11-08 14:51:14.995752260 -0500
+@@ -50,6 +50,7 @@
+ #include "sclpml.h"
+ #include "escl.h"
+ #include "io.h"
++#include "orblite.h"
+ #include "orblitei.h"
+ 
+ 
+--- a/scan/sane/orblite.c	2026-09-11 07:22:00.000000000 -0400
++++ b/scan/sane/orblite.c	2026-11-08 14:51:14.996172378 -0500
+@@ -19,6 +19,8 @@
+ #undef NDEBUG
+ #include "orblitei.h"
+ #include "orblite.h"//Added New
++#include "escli.h"
++#include <dlfcn.h>
+ #include <math.h>
+ #include "utils.h"
+ #include "io.h"
+--- a/scan/sane/bb_ledm.c	2026-09-11 07:22:00.000000000 -0400
++++ b/scan/sane/bb_ledm.c	2026-11-08 14:51:14.996255248 -0500
+@@ -26,6 +26,7 @@
+ # include "http.h"
+ # include "xml.h"
+ # include <stdlib.h>
++#include <unistd.h>
+ 
+ # include <stdint.h>
+ 
+--- a/scan/sane/http.c	2026-09-11 07:22:00.000000000 -0400
++++ b/scan/sane/http.c	2026-11-08 14:51:14.996345467 -0500
+@@ -36,6 +36,7 @@
+ #include <string.h>
+ #include <syslog.h>
+ #include <ctype.h>
++#include <unistd.h>
+ #include "hpmud.h"
+ #include "http.h"
+ 

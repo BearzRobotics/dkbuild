@@ -1,0 +1,27 @@
+# After Chimera Linux cports: main/python-gobject. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# PyGObject: GObject libraries from Python through introspection (`from gi.repository
+# import GLib`). needed by: hplip's tools (and GTK programs in Python later).
+name = "python-gobject"
+version = "3.58.0"
+release = 1
+summary = "Python bindings for GObject (PyGObject)"
+license = "LGPL-2.1-or-later"
+homepage = "https://pygobject.gnome.org"
+hostdeps = ["gobject-introspection", "meson", "ninja", "pkgconf", "python", "python-markupsafe"]
+builddeps = ["glib-devel", "gobject-introspection-devel", "libffi-devel", "python-cairo-devel", "python-devel"]
+rundeps = ["python", "python-cairo", "gobject-introspection"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/pygobject/3.58/pygobject-3.58.0.tar.gz", sha256 = "45068697de3ffe46840ca369705f23118b34db4f7deb63f6eff079a6734ddcca" },
+]
+
+setup = '''
+%meson -Dtests=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

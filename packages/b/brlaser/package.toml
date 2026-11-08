@@ -1,0 +1,26 @@
+# After Chimera Linux cports: main/brlaser. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Brother laser printers (HL, DCP, MFC series) that speak Brother's own language.
+name = "brlaser"
+version = "6.2.8"
+release = 1
+summary = "Brother laser printer driver"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/Owl-Maintain/brlaser"
+hostdeps = ["cmake", "ninja"]
+builddeps = ["cups-devel"]
+rundeps = ["cups"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/Owl-Maintain/brlaser/archive/refs/tags/v6.2.8.tar.gz", sha256 = "16dae855aa7fff0eef0c05398fab37678243d7d610fa5f9af0d3a2cc9bf08cb0" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

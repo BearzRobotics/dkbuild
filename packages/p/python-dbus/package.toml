@@ -1,0 +1,27 @@
+# After Chimera Linux cports: main/python-dbus. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# dbus-python, D-Bus for Python. needed by: hplip's tools.
+name = "python-dbus"
+version = "1.4.0"
+release = 1
+summary = "Python bindings for D-Bus"
+license = "MIT"
+homepage = "https://dbus.freedesktop.org/doc/dbus-python"
+hostdeps = ["pkgconf", "python"]
+builddeps = ["dbus-devel", "glib-devel", "python-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://dbus.freedesktop.org/releases/dbus-python/dbus-python-1.4.0.tar.xz", sha256 = "c36b28f10ffcc8f1f798aca973bcc132f91f33eb9b6b8904381b4077766043d5" },
+]
+
+setup = '''
+PYTHON=python3 %configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/python-dbus/COPYING"
+'''

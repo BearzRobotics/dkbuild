@@ -1,0 +1,29 @@
+# Foomatic's tools: they make PPD files from the Foomatic database
+# (foomatic-ppdfile), and CUPS lists those printers through them.
+# OpenPrinting's master at 2026-04-03 (no releases since 4.0.13).
+name = "foomatic-db-engine"
+version = "4.0.13_git20260403"
+release = 1
+summary = "Foomatic PPD generator and tools"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/OpenPrinting/foomatic-db-engine"
+hostdeps = ["autoconf", "automake", "file", "perl", "pkgconf"]
+builddeps = ["cups-devel", "libxml2-devel"]
+rundeps = ["perl", "foomatic-db", "cups-filters"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/OpenPrinting/foomatic-db-engine/archive/e4e7b9cd28ba160428f82bc5234559d1f50e5c42.tar.gz", sha256 = "c555d44b10fd64aca464570f27b61761d3d28e6ee54e728264e66effc0ac9f30" },
+]
+
+setup = '''
+./make_configure
+PERL_INSTALLDIRS=vendor %configure --sbindir=/usr/sbin
+'''
+build = '''
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/foomatic-db-engine/COPYING"
+'''

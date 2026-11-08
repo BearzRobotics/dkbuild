@@ -1,0 +1,46 @@
+# After Chimera Linux cports: main/sane-backends. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# SANE: scanner drivers (scanimage, saned and the backends, eSCL/AirScan for
+# driverless scanners among them). needed by: hplip (its hpaio backend).
+# Scanners belong to the scanner group (udev rule). Not built yet: the
+# gphoto2 (cameras) and v4l (webcams) backends, whose libraries
+# (libgphoto2, v4l-utils) come with the photo and video applications.
+name = "sane-backends"
+version = "1.3.1"
+release = 1
+summary = "Scanner Access Now Easy: scanner drivers"
+license = "GPL-2.0-or-later WITH SANE-exception"
+homepage = "http://www.sane-project.org"
+patches = ["fix-test-data.patch", "fix-tests-build.patch", "newref.patch", "sane-desc-cross.patch"]
+hostdeps = ["automake", "gettext-devel", "libtool", "pkgconf", "python"]
+builddeps = ["avahi-devel", "curl-devel", "libjpeg-turbo-devel", "libpng-devel", "libtiff-devel", "libusb-devel", "libxml2-devel", "linux-headers", "net-snmp-devel", "openssl-devel", "poppler-devel"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://gitlab.com/sane-project/backends/uploads/83bdbb6c9a115184c2d48f1fdc6847db/sane-backends-1.3.1.tar.gz", sha256 = "aa82f76f409b88f8ea9793d4771fce01254d9b6549ec84d6295b8f59a3879a0c" },
+]
+
+setup = '''
+%configure \
+    --sbindir=/usr/sbin \
+    --disable-locking \
+    --enable-ipv6 \
+    --enable-pthread \
+    --with-usb \
+    --with-avahi \
+    --with-snmp \
+    --with-poppler-glib \
+    --without-gphoto2 \
+    --without-v4l \
+    --docdir=/usr/share/doc/sane \
+    ac_cv_func_mmap_fixed_mapped=yes
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 tools/udev/libsane.rules "$pkgdir/usr/lib/udev/rules.d/49-sane.rules"
+install -Dm644 $pkgfiles/saned "$pkgdir/etc/dinit.d/saned"
+install -d "$pkgdir/etc/sane.d/dll.d"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/sane-backends/LICENSE"
+'''

@@ -1,0 +1,50 @@
+# After Chimera Linux cports: main/gobject-introspection. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# GObject introspection: g-ir-scanner, g-ir-compiler and libgirepository, so
+# languages (Python through pygobject, and others) can use GObject libraries.
+# needed by: glib's own introspection data, python-gobject (hplip's tools),
+# GIMP 3 later.
+# GLib and introspection need each other: glib's GIR files are made with this
+# package's tools. Chimera builds a glib-bootstrap package for that; here the
+# GLib source of the same version (the second source) is built privately in
+# the build tree, only to compile against. At run time this links the
+# system's GLib, and the tree has no cycle.
+name = "gobject-introspection"
+version = "1.86.0"
+release = 1
+summary = "Introspection system for GObject-based libraries"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/gobject-introspection"
+hostdeps = ["bison", "flex", "meson", "ninja", "pkgconf", "python", "python-mako", "python-markdown"]
+builddeps = ["libffi-devel", "pcre2-devel", "python-devel", "zlib-ng-compat-devel"]
+rundeps = ["python", "python-mako", "python-markdown", "python-setuptools"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/gobject-introspection/1.86/gobject-introspection-1.86.0.tar.xz", sha256 = "920d1a3fcedeadc32acff95c2e203b319039dd4b4a08dd1a2dfd283d19c0b9ae" },
+    { url = "https://download.gnome.org/sources/glib/2.90/glib-2.90.1.tar.xz", sha256 = "93c941aa17d5eb1d53fe838365f29a8b4e539c222a256d974ec8f30fc413e396" },
+]
+
+setup = '''
+# The private GLib, installed under /tmp/glib-for-gi.
+( cd ../glib-2.90.1 && meson setup build-gi --prefix=/usr --libdir=lib --buildtype=release \
+    -Dintrospection=disabled -Dtests=false -Ddocumentation=false -Dman-pages=disabled \
+    -Dselinux=disabled -Dsysprof=disabled -Dlibmount=disabled -Dlibelf=disabled -Dxattr=false \
+    && ninja -C build-gi -j$jobs && DESTDIR=/tmp/glib-for-gi ninja -C build-gi install )
+export PKG_CONFIG_SYSROOT_DIR= PKG_CONFIG_PATH=/tmp/glib-for-gi/usr/lib/pkgconfig
+export PATH="/tmp/glib-for-gi/usr/bin:$PATH" LD_LIBRARY_PATH=/tmp/glib-for-gi/usr/lib
+sed -i "s|^prefix=/usr|prefix=/tmp/glib-for-gi/usr|" /tmp/glib-for-gi/usr/lib/pkgconfig/*.pc
+%meson -Ddoctool=disabled -Dgtk_doc=false
+'''
+build = '''
+export LD_LIBRARY_PATH=/tmp/glib-for-gi/usr/lib PATH="/tmp/glib-for-gi/usr/bin:$PATH"
+%meson_build
+'''
+install = '''
+export LD_LIBRARY_PATH=/tmp/glib-for-gi/usr/lib
+%meson_install
+# The scanner's extension module under a plain name, as Chimera does.
+for f in "$pkgdir"/usr/lib/gobject-introspection/giscanner/_giscanner*.so; do
+    [ -e "$f" ] && mv "$f" "$pkgdir/usr/lib/gobject-introspection/giscanner/_giscanner.so"
+done
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/gobject-introspection/COPYING"
+'''

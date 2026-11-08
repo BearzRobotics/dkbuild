@@ -1,0 +1,40 @@
+# Gutenprint: high-quality drivers for some 3000 printers (Epson, Canon,
+# HP, Lexmark, dye-sublimation photo printers ...). CUPS gets its PPDs from
+# Gutenprint's driver program on demand (cups-genppd), so none are stored.
+# escputil cleans and aligns Epson heads. Not built: the GIMP plug-in (no GIMP
+# yet) and the GTK 2 UI library.
+name = "gutenprint"
+version = "5.3.5"
+release = 1
+summary = "Printer drivers for CUPS and Ghostscript"
+license = "GPL-2.0-or-later"
+homepage = "https://gimp-print.sourceforge.io"
+hostdeps = ["gettext", "perl", "pkgconf"]
+builddeps = ["cups-devel", "ijs-devel", "libusb-devel", "readline-devel", "zlib-ng-compat-devel"]
+rundeps = ["cups"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/gimp-print/gutenprint-5.3/5.3.5/gutenprint-5.3.5.tar.xz", sha256 = "f5a9f47de28530b1ae2069cfbc647a9a641baeeabe809bb0ef2b3ec5b9668d70" },
+]
+
+setup = '''
+%configure \
+    --sbindir=/usr/sbin \
+    --disable-libgutenprintui2 \
+    --without-gimp2 \
+    --disable-static-genppd \
+    --disable-cups-ppds \
+    --enable-escputil \
+    --with-readline \
+    --disable-test \
+    --disable-testpattern \
+    --without-doc
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/gutenprint/COPYING"
+'''

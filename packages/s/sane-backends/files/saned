@@ -1,0 +1,7 @@
+# The SANE network scanning daemon (share this machine's scanners). Started
+# at boot when enabled (dinitctl enable saned); allowed hosts in /etc/sane.d/saned.conf.
+type = process
+command = /usr/sbin/saned -l -u saned
+smooth-recovery = true
+
+depends-on: rcboot

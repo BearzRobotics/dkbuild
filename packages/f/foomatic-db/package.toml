@@ -1,0 +1,26 @@
+# The Foomatic printer database: XML descriptions of printers and drivers, and
+# the manufacturers' own PPD files (Brother, Canon, Epson, HP, Kyocera,
+# Ricoh, Xerox ...). OpenPrinting's master at 2026-09-04 (its last tag is
+# from 2024; the database is updated without releases).
+name = "foomatic-db"
+version = "20260904"
+release = 1
+summary = "Foomatic printer database and PPD files"
+license = "GPL-2.0-or-later AND MIT"
+homepage = "https://github.com/OpenPrinting/foomatic-db"
+hostdeps = ["autoconf", "automake"]
+builddeps = ["cups-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/OpenPrinting/foomatic-db/archive/76dd1e31354c189b2edd9ae8201285d622c89395.tar.gz", sha256 = "a5c2f5289ab4637d110b29a85bfc20582fe518c2e8ba58d79a0e323bd1cc3b6f" },
+]
+
+setup = '''
+./make_configure
+%configure
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/foomatic-db/COPYING"
+'''

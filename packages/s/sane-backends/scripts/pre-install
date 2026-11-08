@@ -1,0 +1,5 @@
+#!/bin/sh
+grep -q "^scanner:" /etc/group || groupadd -r scanner
+grep -q "^saned:" /etc/group || groupadd -r saned
+grep -q "^saned:" /etc/passwd || useradd -r -g saned -G lp,scanner -d /var/empty -s /usr/bin/nologin -c "SANE daemon" saned
+exit 0

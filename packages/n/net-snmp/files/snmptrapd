@@ -1,0 +1,6 @@
+# SNMP trap receiver. Started at boot when enabled (dinitctl enable snmptrapd).
+type = process
+command = /usr/sbin/snmptrapd -LOw -f udp:162 udp6:162
+logfile = /var/log/net-snmp.log
+
+depends-on: rcboot

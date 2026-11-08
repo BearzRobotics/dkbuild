@@ -4,9 +4,10 @@
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
 # r3: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 # r4: static libraries too (in glib-static), for fully static programs on musl.
+# r5: introspection data (GLib, GObject, Gio typelibs), with the tree's gobject-introspection.
 name = "glib"
 version = "2.90.1"
-release = 4
+release = 5
 summary = "GLib library of C routines"
 license = "LGPL-2.1-or-later"
 homepage = "https://wiki.gnome.org/Projects/GLib"
@@ -22,7 +23,7 @@ source = [
 setup = '''
 %meson \
     -Ddocumentation=false \
-    -Dintrospection=disabled \
+    -Dintrospection=enabled \
     -Dman-pages=disabled \
     -Dselinux=disabled \
     -Dsysprof=disabled

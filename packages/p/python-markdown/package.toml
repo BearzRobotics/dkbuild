@@ -1,0 +1,20 @@
+# Markdown in Python. needed by: gobject-introspection (its doc tool).
+name = "python-markdown"
+version = "3.11.3"
+release = 1
+summary = "Python implementation of Markdown"
+license = "BSD-3-Clause"
+homepage = "https://python-markdown.github.io"
+hostdeps = ["python", "python-setuptools"]
+builddeps = ["python-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/ca/eb/dc0fd6eff604bfb870b7fb68b90985a32caaf3c76f67736bbf7f438acd59/markdown-3.11.3.tar.gz", sha256 = "81eb91631dc97ad1efbc76019ef0f80fe90ca49ddf81546752d79989c3bfff3e" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

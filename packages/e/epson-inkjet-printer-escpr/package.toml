@@ -1,0 +1,28 @@
+# After Chimera Linux cports: main/epson-inkjet-printer-escpr. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Epson's ESC/P-R driver: most Epson inkjets (Stylus, WorkForce, Expression, EcoTank).
+name = "epson-inkjet-printer-escpr"
+version = "1.8.6"
+release = 1
+summary = "Epson inkjet printer driver (ESC/P-R)"
+license = "GPL-2.0-or-later"
+homepage = "https://support.epson.net/linux/Printer/LSB_distribution_pages/en/escpr.php"
+patches = ["fix-implicit-function-declaration-errors.patch"]
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["cups-devel"]
+rundeps = ["cups-filters"]
+options = ["!check"]
+
+source = [
+    { url = "https://download3.ebz.epson.net/dsc/f/03/00/16/21/81/74d098a47c3a616713079c9cd5904b468bb33dea/epson-inkjet-printer-escpr-1.8.6-1.tar.gz", sha256 = "8556d7e0e5cf7b8cb7ed2ce3bb7b957579557635f80c548dfc0d849b3dde09c4" },
+]
+
+setup = '''
+autoreconf -if
+%configure --with-cupsppddir=/usr/share/ppd --with-cupsfilterdir=/usr/lib/cups/filter
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

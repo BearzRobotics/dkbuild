@@ -1,0 +1,70 @@
+# After Chimera Linux cports: main/hplip. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# HPLIP: HP's printer and scanner drivers (hpcups, hpijs through IJS, the
+# hpaio SANE backend, PPDs) and its tools (hp-setup, hp-info, hp-check ...),
+# USB and network printers (SNMP discovery). Not built: the Qt GUI
+# (hp-toolbox; Qt 5 only), fax, and HP's prebuilt closed ImageProcessor
+# library (Chimera's patches take it out; refreshed for 3.26). Some models
+# need HP's binary plugin (hp-plugin), which is downloaded from HP and is not
+# part of any package.
+name = "hplip"
+version = "3.26.6"
+release = 1
+summary = "Drivers for HP printers and scanners"
+license = "GPL-2.0-only AND BSD-3-Clause AND MIT"
+homepage = "https://developers.hp.com/hp-linux-imaging-and-printing"
+patches = ["0017-Workaround-patch-for-missing-Python3-transition-of-t.patch", "0073-Fix-upstream-CFLAGS-override.patch", "broken-c.patch", "c++17.patch", "disable_upgrade.patch", "fix-memmove.patch", "no-imageprocessor-no-implicit-3.26.patch", "no-empty-glob.patch", "types-musl.patch"]
+hostdeps = ["automake", "libtool", "pkgconf", "python"]
+builddeps = ["cups-devel", "dbus-devel", "libjpeg-turbo-devel", "libusb-devel", "net-snmp-devel", "openssl-devel", "python-devel", "sane-backends-devel"]
+rundeps = ["python", "python-dbus", "python-gobject", "cups", "ghostscript", "sane-backends"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/hplip/hplip/3.26.6/hplip-3.26.6.tar.gz", sha256 = "5fb2235a9cb6ec07cb4786c4066b151359c301324d54aaabf69ae7eef35606b3" },
+]
+
+environment = '''
+export CFLAGS="$CFLAGS -D_GNU_SOURCE -Wno-incompatible-pointer-types"
+export CXXFLAGS="$CXXFLAGS -D_GNU_SOURCE"
+export PYTHON=python3
+'''
+setup = '''
+# autoreconf wants these to exist.
+touch NEWS README AUTHORS ChangeLog INSTALL
+autoreconf -if
+%configure \
+    --disable-doc-build \
+    --disable-fax-build \
+    --disable-gui-build \
+    --disable-qt4 --disable-qt5 \
+    --disable-imageProcessor-build \
+    --enable-network-build \
+    --enable-hpcups-install \
+    --enable-hpijs-install \
+    --enable-cups-drv-install \
+    --enable-cups-ppd-install \
+    --with-cupsbackenddir=/usr/lib/cups/backend \
+    --with-cupsfilterdir=/usr/lib/cups/filter
+'''
+build = '''
+%make
+'''
+install = '''
+make DESTDIR="$pkgdir" install -j1
+rm -rf "$pkgdir/usr/lib/systemd" "$pkgdir/etc/xdg"
+# Loaded through dll.d: the system's dll.conf is sane-backends'.
+if [ -f "$pkgdir/etc/sane.d/dll.conf" ]; then
+    install -Dm644 "$pkgdir/etc/sane.d/dll.conf" "$pkgdir/etc/sane.d/dll.d/hpaio"
+    rm -f "$pkgdir/etc/sane.d/dll.conf"
+fi
+if [ -d "$pkgdir/etc/udev" ]; then
+    mkdir -p "$pkgdir/usr/lib/udev"; cp -a "$pkgdir/etc/udev/." "$pkgdir/usr/lib/udev/"; rm -rf "$pkgdir/etc/udev"
+fi
+# Programs, not data: out of /usr/share.
+for f in locatedriver dat2drv; do
+    if [ -f "$pkgdir/usr/share/hplip/$f" ]; then
+        install -Dm755 "$pkgdir/usr/share/hplip/$f" "$pkgdir/usr/lib/hplip/$f"
+        ln -sf ../../lib/hplip/$f "$pkgdir/usr/share/hplip/$f"
+    fi
+done
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/hplip/COPYING"
+'''
