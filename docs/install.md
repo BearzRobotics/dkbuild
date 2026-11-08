@@ -74,7 +74,7 @@ reboot
 ```
 
 systemd-boot shows FenrirOS and a recovery entry. Log in on the console, then
-start the desktop with `Hyprland`.
+start the desktop with `dkde-session` (the default desktop), or `Hyprland`.
 
 ## Packages after installing
 
@@ -83,7 +83,8 @@ packages, signed; planned, SPEC.md 8). Mount it, or the USB stick it is on, and
 add it:
 
 ```sh
-mount -o ro /path/to/fenriros-repo.iso /mnt/repo      # or the stick's partition
+mkdir -p /mnt/repo
+mount -o ro,loop /path/to/fenriros-repo.iso /mnt/repo   # a file; for a disc or stick: mount -o ro /dev/sr0 /mnt/repo
 echo /mnt/repo/apks/x86_64/Packages.adb >> /etc/apk/repositories
 apk update && apk add <package>
 ```
