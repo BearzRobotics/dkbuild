@@ -2,7 +2,8 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # NOT USED YET: the system uses seatd, and polkit is built without logind. Kept
 # for when elogind is wanted (tier 3); nothing depends on it.
-# Reviewed by hand. Changed from Chimera: no PAM and no man pages; polkit support is on. The service and /run/systemd are written for our
+# Reviewed by hand. Changed from Chimera: no PAM and no man pages; polkit support is on;
+# Chimera's no-bash.patch is dropped (our sh is dash, which has no `set -o pipefail`). The service and /run/systemd are written for our
 # dinit layout. NOT BUILT YET: needs dbus, eudev, libcap, libseccomp,
 # util-linux and meson in the tree (SPEC 9.3 waves 2-5). The systemd compat
 # patches are Chimera's and are untested here.
@@ -12,8 +13,8 @@ release = 4
 summary = "Standalone version of logind"
 license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
 homepage = "https://github.com/elogind/elogind"
-patches = ["add-skip-inhibitors-flag.patch", "dbus-activation.patch", "getdents.patch", "gshadow.patch", "libxml215.patch", "linger-path.patch", "no-bash.patch", "no-getent.patch", "no-runtime-dir.patch", "ppc64-bad-tuple.patch", "rlim-max.patch", "sleep.patch", "strerror_r.patch", "strerror_r_1.patch", "tests.patch", "turnstile-dbus-session.patch", "xxx-musl-fixes.patch"]
-hostdeps = ["gettext", "gperf", "meson", "pkgconf"]
+patches = ["add-skip-inhibitors-flag.patch", "dbus-activation.patch", "getdents.patch", "gshadow.patch", "libxml215.patch", "linger-path.patch", "no-getent.patch", "no-runtime-dir.patch", "ppc64-bad-tuple.patch", "rlim-max.patch", "sleep.patch", "strerror_r.patch", "strerror_r_1.patch", "tests.patch", "turnstile-dbus-session.patch", "xxx-musl-fixes.patch"]
+hostdeps = ["bash", "gettext", "gperf", "meson", "pkgconf", "python-jinja2"]
 builddeps = ["libcap-devel", "libseccomp-devel", "eudev-devel", "util-linux-devel", "linux-headers"]
 rundeps = ["dbus"]
 

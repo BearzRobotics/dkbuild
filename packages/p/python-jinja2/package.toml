@@ -1,0 +1,21 @@
+# needed by: elogind (its meson build renders templates with jinja2).
+# Pure Python. Built offline with the image's pip and flit_core (jinja2's build
+# backend); markupsafe, its one dependency, is the image's until it is a recipe.
+name = "python-jinja2"
+version = "3.1.6"
+release = 1
+summary = "Template engine for Python"
+license = "BSD-3-Clause"
+homepage = "https://palletsprojects.com/p/jinja"
+hostdeps = ["python"]
+rundeps = ["python-markupsafe"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/df/bf/f7da0350254c0ed7c72f3e33cef02e048281fec7ecec5f032d4aac52226b/jinja2-3.1.6.tar.gz", sha256 = "0137fb05990d35f1275a587e9aee6d56da821fc83491a0fb838183be43f66d6d" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''
