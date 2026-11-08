@@ -1,7 +1,10 @@
 # needed by: base (boot loader), the live image
+# At commit 380a5b3 (two fixes after 0.0.3 the installer needs: install-bios with a
+# BIOS boot partition at 1 MiB, and check/config finding the device from
+# /proc/self/mountinfo). Back to a release tarball when 0.0.4 is tagged.
 name = "dklilo"
-version = "0.0.3"
-release = 2
+version = "0.0.3_git20261108"
+release = 1
 summary = "A modern LILO: BIOS and UEFI boot loader that reads filesystems itself"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dklilo"
@@ -10,7 +13,7 @@ hostdeps = ["zig"]
 options = ["!check"]  # zig builds static executables itself
 
 source = [
-    { url = "https://github.com/BearzRobotics/dklilo/releases/download/v0.0.3/dklilo-v0.0.3.tar.gz", sha256 = "266de21b0fd2142fd7af58f4cb8b143259bc497b2c71168448cdeddf519dc7a0" },
+    { url = "https://github.com/BearzRobotics/dklilo/archive/380a5b39f933b532dcbd04063cc2667885335576.tar.gz", sha256 = "84c6d433dac85326adeebd64f1e70e8c188808e219638f5245a0e20d381b25c2" },
 ]
 
 install = '''

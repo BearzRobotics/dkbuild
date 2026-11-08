@@ -197,6 +197,8 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
                 \\[ -n "$k" ] || {{ echo "error: no kernel in /boot (add 'linux' to packages)" >&2; exit 1; }}
                 \\cp "$k" "$t/boot/vmlinuz"
                 \\cp /target/usr/lib/live/initrd.img "$t/boot/initrd.img"
+                \\# The installer's minimum disk size: what the root takes, unpacked.
+                \\du -sb /target | cut -f1 > "$t/live/rootfs.size"
                 \\mksquashfs /target "$t/live/rootfs.sfs" -comp zstd -noappend -quiet
                 \\dklilo mkiso-images "$img"
                 \\cp "$img/eltorito.bin" "$img/efiboot.img" "$t/boot/dklilo/"

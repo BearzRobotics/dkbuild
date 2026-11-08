@@ -4,7 +4,7 @@
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
 name = "glib"
 version = "2.90.1"
-release = 1
+release = 2
 summary = "GLib library of C routines"
 license = "LGPL-2.1-or-later"
 homepage = "https://wiki.gnome.org/Projects/GLib"

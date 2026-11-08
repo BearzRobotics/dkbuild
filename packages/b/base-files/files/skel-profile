@@ -1,0 +1,3 @@
+# ~/.profile: read by login shells.
+[ -f /etc/profile ] && . /etc/profile
+export PATH="$HOME/.local/bin:$PATH"

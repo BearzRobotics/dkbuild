@@ -3,7 +3,7 @@
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 name = "nvme-cli"
 version = "2.16"
-release = 1
+release = 2
 summary = "NVMe management command line interface"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/linux-nvme/nvme-cli"

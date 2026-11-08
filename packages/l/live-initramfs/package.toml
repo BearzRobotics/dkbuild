@@ -5,9 +5,10 @@
 # under a RAM overlay and switches to dinit. `fenriros.shell` on the kernel
 # command line stops in a shell first. Runs on a static BusyBox; only the
 # kernel's built-in drivers are used (it carries no modules).
+# r2: no /run in the live fstab: the /run the initramfs moved into the root holds /run/live (the disc), and a second tmpfs would hide it.
 name = "live-initramfs"
 version = "1"
-release = 1
+release = 2
 summary = "Initramfs for FenrirOS live ISOs"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"

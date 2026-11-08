@@ -21,7 +21,9 @@ if [ "$1" = start ]; then
     mount -n -t devpts -o gid=5 devpts /dev/pts
 
     # /run, and various directories within it
-    mount -n -t tmpfs -o mode=775 tmpfs /run
+    # A live system already has /run, moved in by the initramfs with /run/live
+    # (the disc) in it: mounting another would hide that.
+    mountpoint -q /run || mount -n -t tmpfs -o mode=775 tmpfs /run
     mkdir /run/lock /run/udev
     
     # "hidepid=1" doesn't appear to take effect on first mount of /proc,

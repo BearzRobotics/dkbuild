@@ -1,0 +1,28 @@
+# The FenrirOS installer (dkrescue-install): installs the live system onto a
+# disk, BIOS or UEFI, with dklilo. A static Zig program with no dependencies,
+# built for the baseline CPU (%zig_build passes -Dcpu=baseline: a native build
+# dies with "Illegal instruction" on other CPUs). It needs, on the live ISO:
+# dklilo at 380a5b3 or later, /run/live/medium visible, live/rootfs.size, and
+# tzdb (see its docs/ISO-REQUIREMENTS.md; all provided by `dkbuild image`).
+# At commit dba890c, until a release is tagged. The repository has no LICENSE
+# yet: "unknown" until it does.
+name = "dkinstaller"
+version = "0_git20261108"
+release = 1
+summary = "FenrirOS installer: installs the live system onto a disk"
+license = "unknown"
+homepage = "https://github.com/BearzRobotics/dkinstaller"
+hostdeps = ["zig"]
+rundeps = ["dklilo", "util-linux", "e2fsprogs", "dosfstools", "squashfs-tools", "shadow", "sudo", "bash", "coreutils", "tzdb"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/BearzRobotics/dkinstaller/archive/dba890c945b183080495cb2a6e2e7903bf8bfef6.tar.gz", sha256 = "b4d09bb7fe68a83aa6109c2c546b0fd5d1499eda449f86e96c695c3ff869a50f" },
+]
+
+install = '''
+%zig_build
+# The ISO requirements name /usr/bin/dkrescue-install; /usr/sbin gets a link too.
+install -d "$pkgdir/usr/sbin"
+ln -s ../bin/dkrescue-install "$pkgdir/usr/sbin/dkrescue-install"
+'''
