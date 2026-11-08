@@ -1,0 +1,31 @@
+# After Chimera Linux cports: main/ijs. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# The IJS raster protocol between Ghostscript and printer drivers (hplip,
+# gutenprint). Built from the Ghostscript 9.55 tarball, its last separate home.
+name = "ijs"
+version = "0.35"
+release = 1
+summary = "IJS raster image transport protocol"
+license = "MIT"
+homepage = "https://www.ghostscript.com"
+hostdeps = ["pkgconf", "automake", "libtool"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs9550/ghostscript-9.55.0.tar.xz", sha256 = "6ee3057773646d6a2c6d117eb53a17d6752feadc513828e4322f68b7b7789ff6" },
+]
+
+setup = '''
+cd ijs
+autoreconf -if
+%configure --enable-shared --enable-static
+'''
+build = '''
+cd ijs
+%make
+'''
+install = '''
+cd ijs
+%make_install
+rm -rf "$pkgdir/usr/bin"
+install -Dm644 README "$pkgdir/usr/share/licenses/ijs/README"
+'''

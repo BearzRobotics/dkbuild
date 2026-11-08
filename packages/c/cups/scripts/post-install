@@ -1,0 +1,10 @@
+#!/bin/sh
+# What systemd-tmpfiles would set up on other systems.
+for d in /var/spool/cups /var/cache/cups /var/cache/cups/rss; do mkdir -p "$d"; chown cups:lp "$d"; done
+chmod 710 /var/spool/cups; chmod 770 /var/cache/cups; chmod 750 /var/cache/cups/rss
+mkdir -p /var/log/cups /etc/cups/ssl
+chmod 700 /etc/cups/ssl; chown cups:lp /etc/cups/ssl
+for f in classes.conf printers.conf subscriptions.conf; do
+    [ -e "/etc/cups/$f" ] || { : > "/etc/cups/$f"; chown root:lp "/etc/cups/$f"; chmod 600 "/etc/cups/$f"; }
+done
+exit 0

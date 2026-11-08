@@ -1,0 +1,10 @@
+# The CUPS print server. Its web interface is http://localhost:631; printers
+# are added there, with lpadmin, or by the desktop. Started at boot when
+# enabled (dinitctl enable cupsd).
+type = process
+command = /usr/sbin/cupsd -f
+smooth-recovery = true
+
+depends-on: rcboot
+waits-for: avahi-daemon
+waits-for: syslogd

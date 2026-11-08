@@ -1,0 +1,11 @@
+# Makes IPP-over-USB printers and scanners (most printers since about 2015:
+# "driverless", IPP Everywhere / AirPrint) appear as network printers that
+# CUPS finds through Avahi. Started at boot when enabled (dinitctl enable
+# ipp-usb); it waits for such a device to be plugged in.
+type = process
+command = /usr/sbin/ipp-usb standalone
+smooth-recovery = true
+
+depends-on: rcboot
+waits-for: avahi-daemon
+waits-for: udevd

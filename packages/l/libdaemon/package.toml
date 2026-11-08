@@ -1,0 +1,26 @@
+# After Chimera Linux cports: main/libdaemon. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Helpers for writing daemons. needed by: avahi.
+name = "libdaemon"
+version = "0.14"
+release = 1
+summary = "Lightweight C library for writing daemons"
+license = "LGPL-2.1-or-later"
+homepage = "http://0pointer.de/lennart/projects/libdaemon"
+patches = ["unistd.patch"]
+hostdeps = ["automake", "libtool", "pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "http://0pointer.de/lennart/projects/libdaemon/libdaemon-0.14.tar.gz", sha256 = "fd23eb5f6f986dcc7e708307355ba3289abe03cc381fc47a80bca4a50aa6b834" },
+]
+
+setup = '''
+autoreconf -if
+%configure --disable-lynx
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

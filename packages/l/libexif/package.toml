@@ -1,0 +1,25 @@
+# After Chimera Linux cports: main/libexif. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# EXIF data in JPEG files. needed by: libcupsfilters (image orientation when printing photos).
+name = "libexif"
+version = "0.6.26"
+release = 1
+summary = "Library to parse EXIF data"
+license = "LGPL-2.1-or-later"
+homepage = "https://libexif.github.io"
+hostdeps = ["pkgconf", "automake", "libtool", "gettext-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/libexif/libexif/archive/libexif-0_6_26-release.tar.gz", sha256 = "974329442c4b0515814aa700073abbac592a29d1c2c14e4ec2bf0209764dabe9" },
+]
+
+setup = '''
+autoreconf -if
+%configure ac_cv_path_DOXYGEN=false
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

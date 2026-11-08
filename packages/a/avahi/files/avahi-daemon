@@ -1,0 +1,9 @@
+# mDNS/DNS-SD: finds network printers (and other services) on the local
+# network. Started at boot when enabled (dinitctl enable avahi-daemon).
+type = process
+command = /usr/sbin/avahi-daemon -s
+smooth-recovery = true
+
+depends-on: rcboot
+depends-on: dbus
+waits-for: syslogd

@@ -1,0 +1,29 @@
+# After Chimera Linux cports: main/cups-filters. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# The CUPS filters and backends from OpenPrinting (PDF printing workflow,
+# foomatic-rip, beh, parallel/serial backends).
+name = "cups-filters"
+version = "2.0.1"
+release = 1
+summary = "OpenPrinting CUPS filters"
+license = "Apache-2.0 WITH LLVM-exception"
+homepage = "https://github.com/OpenPrinting/cups-filters"
+hostdeps = ["automake", "gettext-devel", "libtool", "pkgconf"]
+builddeps = ["avahi-devel", "cups-devel", "libcupsfilters-devel", "libppd-devel", "linux-headers"]
+rundeps = ["cups", "ghostscript", "poppler"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/OpenPrinting/cups-filters/releases/download/2.0.1/cups-filters-2.0.1.tar.xz", sha256 = "39e71de3ce06762b342749f1dc7cba6817738f7bf4d322c1bb9ab10b8569ab80" },
+]
+
+setup = '''
+autoreconf -if
+%configure --disable-mutool --with-shell=/bin/sh
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/cups-filters/COPYING"
+'''

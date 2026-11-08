@@ -1,0 +1,27 @@
+# After Chimera Linux cports: main/cups-pk-helper. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Lets desktop printer settings add and change printers through polkit,
+# without the root password for each change.
+name = "cups-pk-helper"
+version = "0.2.7"
+release = 1
+summary = "PolicyKit helper to configure CUPS"
+license = "GPL-2.0-or-later"
+homepage = "https://gitlab.freedesktop.org/cups-pk-helper/cups-pk-helper"
+hostdeps = ["meson", "pkgconf", "glib-devel", "gettext"]
+builddeps = ["cups-devel", "glib-devel", "polkit-devel"]
+rundeps = ["cups", "polkit"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/cups-pk-helper/cups-pk-helper/-/archive/0.2.7/cups-pk-helper-0.2.7.tar.gz", sha256 = "8571a7d2fe459f340fc4031a374aced254305d09d96092c7951b90b1c493ab8d" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

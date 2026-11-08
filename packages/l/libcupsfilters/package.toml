@@ -1,0 +1,28 @@
+# After Chimera Linux cports: main/libcupsfilters. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# The filter functions of cups-filters 2.x (PDF, raster, images, text).
+name = "libcupsfilters"
+version = "2.1.1"
+release = 1
+summary = "OpenPrinting filter library"
+license = "Apache-2.0 WITH LLVM-exception"
+homepage = "https://github.com/OpenPrinting/libcupsfilters"
+hostdeps = ["automake", "gettext-devel", "ghostscript", "libtool", "pkgconf"]
+builddeps = ["cups-devel", "fontconfig-devel", "lcms2-devel", "libexif-devel", "libjpeg-turbo-devel", "libpng-devel", "libtiff-devel", "linux-headers", "poppler-devel", "qpdf-devel"]
+rundeps = ["ghostscript"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/OpenPrinting/libcupsfilters/releases/download/2.1.1/libcupsfilters-2.1.1.tar.xz", sha256 = "6c303e36cfde05a6c88fb940c62b6a18e7cdbfb91f077733ebc98f104925ce36" },
+]
+
+setup = '''
+autoreconf -if
+%configure --disable-mutool
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libcupsfilters/COPYING"
+'''

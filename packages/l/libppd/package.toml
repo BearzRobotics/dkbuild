@@ -1,0 +1,27 @@
+# After Chimera Linux cports: main/libppd. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# PPD (printer description) support for classic drivers, split out of CUPS.
+name = "libppd"
+version = "2.1.1"
+release = 1
+summary = "OpenPrinting PPD library"
+license = "Apache-2.0 WITH LLVM-exception"
+homepage = "https://github.com/OpenPrinting/libppd"
+hostdeps = ["automake", "gettext-devel", "libtool", "pkgconf", "poppler", "ghostscript"]
+builddeps = ["cups-devel", "libcupsfilters-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/OpenPrinting/libppd/releases/download/2.1.1/libppd-2.1.1.tar.xz", sha256 = "3fa341cc03964046d2bf6b161d80c1b4b2e20609f38d860bcaa11cb70c1285e4" },
+]
+
+setup = '''
+autoreconf -if
+%configure --disable-mutool
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libppd/COPYING"
+'''

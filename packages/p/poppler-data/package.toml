@@ -1,0 +1,23 @@
+# After Chimera Linux cports: main/poppler-data. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Encoding data for Poppler (CJK and Cyrillic PDFs).
+name = "poppler-data"
+version = "0.4.12"
+release = 1
+summary = "Encoding files for Poppler"
+license = "BSD-3-Clause AND (GPL-2.0-only OR GPL-3.0-only)"
+homepage = "https://poppler.freedesktop.org"
+hostdeps = ["pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://poppler.freedesktop.org/poppler-data-0.4.12.tar.gz", sha256 = "c835b640a40ce357e1b83666aabd95edffa24ddddd49b8daff63adb851cdab74" },
+]
+
+build = '''
+make prefix=/usr
+'''
+install = '''
+make DESTDIR="$pkgdir" prefix=/usr install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/poppler-data/COPYING"
+install -Dm644 COPYING.adobe "$pkgdir/usr/share/licenses/poppler-data/COPYING.adobe"
+'''

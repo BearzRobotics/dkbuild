@@ -111,7 +111,8 @@ Everything asked for, in the order it can be built. All of it native: Flatpak
 | tesseract (OCR) + tesseract-data (one package per language), leptonica, icu, libarchive, libtiff, giflib, openjpeg, jbigkit | recipes written; building after the static wave |
 | ocrmypdf + ghostscript, qpdf, jbig2dec, libxslt, libraqm and 24 Python packages (pikepdf, pillow, lxml, cryptography, uharfbuzz, fpdf2, rich, ...) | recipes written; building after the static wave. Renders pages with Ghostscript |
 | PDFium (for pypdfium2, OCRmyPDF's faster renderer), unpaper, pngquant, jbig2enc | OCRmyPDF extras: PDFium is a Chromium-style build (gn); unpaper needs FFmpeg |
-| CUPS (+ ijs, libpaper), then ghostscript r2 with printing | the printing stack |
+| printing: cups, cups-filters, libcupsfilters, libppd, ghostscript (with its cups device), avahi, ipp-usb, cups-pk-helper, poppler (+ data), ijs, libpaper, libexif, libdaemon; `printing` installs them all | recipes written; building after the static wave |
+| printer drivers: hplip (HP; needs SANE, python-dbus, python-gobject), gutenprint (Epson, Canon, ...), foomatic-db; SANE for scanners | after the printing stack; driverless printers (IPP Everywhere, AirPrint, ipp-usb) need none of them |
 | iwd, nginx, caddy, wget2 | small; next |
 | **npm/yarn dependency store** | infrastructure, before anything below that uses Node: one shared store for node modules, a list per package, like the Go/Rust/Zig stores (SPEC.md 7.4) |
 | nodejs, cbindgen | then Firefox |

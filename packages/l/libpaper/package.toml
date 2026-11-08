@@ -1,0 +1,26 @@
+# After Chimera Linux cports: main/libpaper. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Paper sizes (the system default in /etc/papersize). needed by: cups, ghostscript.
+name = "libpaper"
+version = "2.2.6"
+release = 1
+summary = "Library for handling paper sizes"
+license = "MIT AND GPL-2.0-only AND GPL-3.0-or-later"
+homepage = "https://github.com/rrthomas/libpaper"
+hostdeps = ["pkgconf", "automake", "libtool", "gettext"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/rrthomas/libpaper/releases/download/v2.2.6/libpaper-2.2.6.tar.gz", sha256 = "500d39dc58768ee09688738c8b5bfe07640ba2fd6c25a6dc78810eb69c719e93" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -d "$pkgdir/etc/libpaper.d"
+install -Dm644 COPYING-MIT "$pkgdir/usr/share/licenses/libpaper/COPYING-MIT"
+'''

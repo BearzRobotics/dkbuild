@@ -1,0 +1,56 @@
+# After Chimera Linux cports: main/avahi. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Avahi: zero-configuration networking (mDNS/DNS-SD). CUPS uses it to find
+# network printers and to share its own. The daemon, avahi-utils (browse,
+# resolve) and the client libraries with the libdns_sd compatibility layer.
+# Not built yet: the GTK 3 browser, the Python tools and GObject
+# introspection (no GTK 3, python-dbus or gobject-introspection in the tree
+# yet); manual pages need xmltoman.
+name = "avahi"
+version = "0.8"
+release = 1
+summary = "Multicast DNS service discovery"
+license = "LGPL-2.1-or-later"
+homepage = "https://avahi.org"
+patches = ["libevent.patch"]
+hostdeps = ["automake", "gettext-devel", "glib-devel", "libtool", "pkgconf"]
+builddeps = ["dbus-devel", "expat-devel", "glib-devel", "libcap-devel", "libdaemon-devel", "libevent-devel"]
+rundeps = ["dbus"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/lathiat/avahi/releases/download/v0.8/avahi-0.8.tar.gz", sha256 = "060309d7a333d38d951bc27598c677af1796934dbd98e1024e7ad8de798fedda" },
+]
+
+setup = '''
+autoreconf -if
+%configure \
+    --disable-qt3 --disable-qt4 --disable-qt5 \
+    --disable-gtk --disable-gtk3 \
+    --disable-dbm --disable-gdbm \
+    --disable-mono --disable-monodoc \
+    --disable-doxygen-doc \
+    --disable-python --disable-pygobject \
+    --disable-introspection \
+    --disable-xmltoman --disable-manpages \
+    --enable-glib --enable-gobject \
+    --enable-libevent \
+    --enable-compat-libdns_sd \
+    --with-xml=expat \
+    --with-avahi-user=avahi --with-avahi-group=avahi \
+    --with-autoipd-user=avahi --with-autoipd-group=avahi \
+    --with-avahi-priv-access-group=wheel \
+    --with-dbus-sys=/usr/share/dbus-1/system.d \
+    --with-distro=none \
+    --with-dbus-system-socket=unix:path=/run/dbus/system_bus_socket \
+    --without-systemdsystemunitdir \
+    ssp_cv_lib=no
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+# avahi-daemon goes in /usr/sbin (it installs there); the service runs it.
+install -Dm644 $pkgfiles/avahi-daemon "$pkgdir/etc/dinit.d/avahi-daemon"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/avahi/LICENSE"
+'''

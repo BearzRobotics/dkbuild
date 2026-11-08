@@ -1,0 +1,15 @@
+# Everything to print: CUPS with OpenPrinting's filters and Ghostscript,
+# Avahi to find network printers, ipp-usb for driverless USB printers, and
+# the polkit helper for desktop printer settings. Then enable the services:
+#   dinitctl enable avahi-daemon; dinitctl enable cupsd; dinitctl enable ipp-usb
+# (or list them in an image's services).
+name = "printing"
+version = "1"
+release = 1
+summary = "Printing support (CUPS, filters, network and USB printers)"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+hostdeps = []
+rundeps = ["cups", "cups-filters", "libcupsfilters", "libppd", "ghostscript", "poppler", "avahi", "ipp-usb", "cups-pk-helper"]
+options = ["meta"]
+

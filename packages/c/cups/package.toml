@@ -1,0 +1,60 @@
+# After Chimera Linux cports: main/cups. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# CUPS, the print server: cupsd, lp/lpr/lpstat/cancel, lpadmin, the IPP
+# backends (ipp, ipps, usb, socket, lpd, dnssd) and libcups. TLS through
+# OpenSSL; network printers found through Avahi. Administrators are root and
+# the lpadmin and wheel groups. No PAM on this system: the web interface
+# authenticates with /etc/shadow.
+name = "cups"
+version = "2.4.20"
+release = 1
+summary = "Common Unix Printing System"
+license = "Apache-2.0"
+homepage = "https://openprinting.github.io/cups"
+patches = ["broken-tests.patch", "cups-tlslibs-no-export.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["acl-devel", "avahi-devel", "dbus-devel", "libpaper-devel", "libpng-devel", "libtiff-devel", "libusb-devel", "linux-headers", "openssl-devel", "zlib-ng-compat-devel"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://github.com/OpenPrinting/cups/releases/download/v2.4.20/cups-2.4.20-source.tar.gz", sha256 = "ab4d9cd7f3e58060091d2b24972223d6401675f11c49b65abf4f6ef31dea22ff" },
+]
+
+environment = '''
+export CFLAGS="$CFLAGS -Wno-unused-command-line-argument"
+export CXXFLAGS="$CXXFLAGS -Wno-unused-command-line-argument"
+'''
+setup = '''
+%configure \
+    --sbindir=/usr/sbin \
+    --with-optim="$CFLAGS $LDFLAGS" \
+    --enable-relro \
+    --enable-acl \
+    --enable-dbus \
+    --enable-libpaper \
+    --disable-pam \
+    --enable-raw-printing \
+    --disable-gssapi \
+    --without-rcdir \
+    --without-systemd \
+    --with-tls=openssl \
+    --with-dnssd=avahi \
+    --with-dbusdir=/usr/share/dbus-1 \
+    --with-rundir=/run/cups \
+    --with-logdir=/var/log/cups \
+    --with-docdir=/usr/share/cups/doc \
+    --with-menudir=/usr/share/applications \
+    --without-xinetd \
+    --with-cups-user=cups \
+    --with-cups-group=lp \
+    "--with-system-groups=lpadmin wheel root"
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 $pkgfiles/cupsd "$pkgdir/etc/dinit.d/cupsd"
+# Made at install time (scripts/post-install), with their owners.
+rm -rf "$pkgdir/var/spool" "$pkgdir/var/cache" "$pkgdir/var/log" "$pkgdir/run"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/cups/LICENSE"
+'''

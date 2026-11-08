@@ -1,0 +1,37 @@
+# ipp-usb: IPP over USB for driverless USB printers and scanners. Its Go
+# dependencies are in the release tarball (vendor/). Upstream starts it from a
+# udev rule through systemd; here it is a dinit service, and the udev rule
+# only gives the lp group the device.
+name = "ipp-usb"
+version = "0.9.34"
+release = 1
+summary = "Daemon for IPP over USB printers and scanners"
+license = "BSD-2-Clause"
+homepage = "https://github.com/OpenPrinting/ipp-usb"
+hostdeps = ["go", "pkgconf"]
+builddeps = ["avahi-devel", "libusb-devel"]
+rundeps = ["avahi"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/OpenPrinting/ipp-usb/archive/refs/tags/0.9.34.tar.gz", sha256 = "4f0ada8593fda3f4239a50fcf24a625842143039de97708281e7b8c0cdff201a" },
+]
+
+environment = '''
+export GOFLAGS="-mod=vendor -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off CGO_ENABLED=1
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go
+'''
+build = '''
+go build -ldflags "-s -w" -tags nethttpomithttp2 -o ipp-usb .
+'''
+install = '''
+install -Dm755 ipp-usb "$pkgdir/usr/sbin/ipp-usb"
+install -Dm644 ipp-usb.conf "$pkgdir/etc/ipp-usb/ipp-usb.conf"
+install -d "$pkgdir/usr/share/ipp-usb/quirks"
+install -m644 ipp-usb-quirks/* "$pkgdir/usr/share/ipp-usb/quirks/"
+install -Dm644 ipp-usb.8 "$pkgdir/usr/share/man/man8/ipp-usb.8"
+sed 's/, TAG+="systemd", ENV{SYSTEMD_WANTS}+="ipp-usb.service"//' systemd-udev/71-ipp-usb.rules > 71-ipp-usb.rules
+install -Dm644 71-ipp-usb.rules "$pkgdir/usr/lib/udev/rules.d/71-ipp-usb.rules"
+install -Dm644 $pkgfiles/ipp-usb "$pkgdir/etc/dinit.d/ipp-usb"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ipp-usb/LICENSE"
+'''
