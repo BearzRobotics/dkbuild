@@ -12,7 +12,7 @@ patches = ["atoi.patch", "clang-ias.patch", "clang-memory-throw-gcc.patch", "dep
 hostdeps = ["automake", "rust", "cbindgen", "llvm-devel", "llvm-clang", "llvm-lld", "dbus", "gettext", "tar", "libtool", "nasm", "nodejs", "pkgconf", "python", "zip", "unzip"]
 builddeps = ["alsa-lib-devel", "dbus-devel", "ffmpeg-devel", "freetype-devel", "glib-devel", "gtk+3-devel", "icu-devel", "libevent-devel", "libffi-devel", "libjpeg-turbo-devel", "libnotify-devel", "libogg-devel", "libpng-devel", "libpulse-devel", "libtheora-devel", "libvorbis-devel", "libvpx-devel", "libwebp-devel", "libxcomposite-devel", "libxscrnsaver-devel", "libxt-devel", "mesa-devel", "nspr-devel", "nss-devel", "pipewire-devel", "pixman-devel", "zlib-ng-compat-devel"]
 rundeps = ["ffmpeg", "openh264", "speechd"]
-options = ["!cross", "!check"]
+options = ["jobs:12", "!cross", "!check"]
 
 source = [
     { url = "https://ftp.mozilla.org/pub/firefox/releases/159.0/source/firefox-159.0.source.tar.xz", sha256 = "3d98df785894057fce60603e845828e758a5411ad79aaaaff2b8230597f500d9" },

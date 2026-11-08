@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/speex/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "speex"
+version = "1.2.1"
+release = 1
+summary = "Free audio codec for speech"
+license = "BSD-3-Clause"
+homepage = "https://www.speex.org"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["fftw-devel", "libogg-devel", "speexdsp-devel"]
+
+source = [
+    { url = "https://downloads.xiph.org/releases/speex/speex-1.2.1.tar.gz", sha256 = "4b44d4f2b38a370a2d98a78329fefc56a0cf93d1c1be70029217baae6628feea" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/speex/COPYING"
+'''

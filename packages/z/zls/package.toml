@@ -1,0 +1,19 @@
+# zls: the Zig language server, for Zig 0.17 (zls 0.17.0). Its Zig dependencies
+# are fetched on the host (zigdeps).
+name = "zls"
+version = "0.17.0"
+release = 1
+summary = "Zig language server"
+license = "MIT"
+homepage = "https://github.com/zigtools/zls"
+hostdeps = ["zig"]
+options = ["!check", "zigdeps"]
+
+source = [
+    { url = "https://github.com/zigtools/zls/archive/refs/tags/0.17.0.tar.gz", sha256 = "f77940720768daf67c01802ea3cf3029dfd8a74afd7b68b39676c4f814dd992e" },
+]
+
+install = '''
+%zig_build
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/zls/LICENSE"
+'''

@@ -1,0 +1,48 @@
+# HandBrake: video transcoder, the GTK 4 app (ghb) and the command line
+# (HandBrakeCLI). HandBrake builds its own patched FFmpeg and a few encoders
+# and decoders from fixed versions ("contribs": x265, dav1d, SVT-AV1, zimg,
+# libdvdread/nav, libbluray, libdovi, with libdovi's crates vendored); they are
+# sources here, put where HandBrake's build looks for them (download/), so the
+# build is offline. Everything else is the system's. Not built: Intel QSV, AMD
+# VCE (AMF needs AMD's proprietary runtime on Linux), NVIDIA NVENC, and
+# fdk-aac (its licence is not GPL-compatible).
+name = "handbrake"
+version = "1.11.2"
+release = 1
+summary = "Video transcoder"
+license = "GPL-2.0-only"
+homepage = "https://handbrake.fr"
+hostdeps = ["autoconf", "automake", "cmake", "libtool", "meson", "nasm", "ninja", "pkgconf", "python", "rust", "cargo-c", "gettext"]
+builddeps = ["bzip2-devel", "fontconfig-devel", "freetype-devel", "fribidi-devel", "gst-plugins-base-devel", "gstreamer-devel", "gtk4-devel", "harfbuzz-devel", "jansson-devel", "lame-devel", "libass-devel", "libdrm-devel", "libjpeg-turbo-devel", "libogg-devel", "libtheora-devel", "libva-devel", "libvorbis-devel", "libvpx-devel", "libxml2-devel", "numactl-devel", "opus-devel", "speex-devel", "x264-devel", "xz-devel", "zlib-ng-compat-devel"]
+options = ["!check", "!cross"]
+
+source = [
+    { url = "https://github.com/HandBrake/HandBrake/releases/download/1.11.2/HandBrake-1.11.2-source.tar.bz2", sha256 = "12b046350f2422dc28783ff94229aff4ba5fe5e683431e057355d36163b2593a" },
+    { url = "https://github.com/HandBrake/HandBrake-contribs/releases/download/contribs2/x265-snapshot-20260216-13309.tar.gz", sha256 = "a0882bb90826da62a96676c1a7cb7a7beb7f1db901f2775299cbeed03c3eb2a2", unpack = false },
+    { url = "https://github.com/HandBrake/HandBrake-contribs/releases/download/contribs2/dav1d-1.5.3.tar.bz2", sha256 = "e099f53253f6c247580c554d53a13f1040638f2066edc3c740e4c2f15174ce22", unpack = false },
+    { url = "https://github.com/HandBrake/HandBrake-contribs/releases/download/contribs2/SVT-AV1-v4.1.0.tar.gz", sha256 = "6c4c0c44ff0ba3d136d6f57f3a707f9de8e9c866f50f809c1d22a43f0d8c9583", unpack = false },
+    { url = "https://github.com/HandBrake/HandBrake-contribs/releases/download/contribs2/zimg-snapshot-20250624.tar.gz", sha256 = "19a96cdc266466be58be86a9271bedb1f080bf4cc14f5ed58ac39dc5b970fd17", unpack = false },
+    { url = "https://github.com/HandBrake/HandBrake-contribs/releases/download/contribs2/ffmpeg-8.0.2.tar.bz2", sha256 = "2a8b8840c0bc78f5ed1576f98eba7df00c05f87fd6d07fad16efcd9333016edf", unpack = false },
+    { url = "https://github.com/HandBrake/HandBrake-contribs/releases/download/contribs2/libdvdread-7.0.1.tar.bz2", sha256 = "b69f74d9ceea1ed173b579deba99f669c2cb42f3fd06d7d23b33ff222aa63763", unpack = false },
+    { url = "https://github.com/HandBrake/HandBrake-contribs/releases/download/contribs2/libdvdnav-7.0.0.tar.bz2", sha256 = "1363cdfaf6e92c0b574579299b5480f5867fb32989451468a28f3f402ec48787", unpack = false },
+    { url = "https://github.com/HandBrake/HandBrake-contribs/releases/download/contribs2/libbluray-1.4.0.tar.xz", sha256 = "77937baf07eadda4b2b311cf3af4c50269d2ea3165041f5843d96476c4c92777", unpack = false },
+    { url = "https://github.com/HandBrake/HandBrake-contribs/releases/download/contribs2/dovi_tool-libdovi-3.3.2_vendor.tar.gz", sha256 = "7a6eac8975ba576cad48eae7e569eebb988bce8f47a0e259647b206e938429cb", unpack = false },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export RUSTFLAGS="-C target-feature=-crt-static"
+'''
+setup = '''
+mkdir -p download
+cp /build/sources/* download/
+./configure --prefix=/usr --disable-gtk-update-checks --enable-x265 --enable-numa \
+    --disable-qsv --disable-vce --disable-nvenc --disable-fdk-aac --launch-jobs=$jobs
+'''
+build = '''
+make -C build -j$jobs
+'''
+install = '''
+make -C build DESTDIR="$pkgdir" install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/handbrake/COPYING"
+'''

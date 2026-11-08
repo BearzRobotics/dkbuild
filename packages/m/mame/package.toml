@@ -1,0 +1,38 @@
+# MAME: multi-system arcade and computer emulator, with its tools (chdman,
+# romcmp, ...). SDL OSD with Wayland; the system's expat, zlib, zstd, jpeg,
+# FLAC, Lua and SQLite, MAME's bundled copies of the rest (asio, portaudio,
+# portmidi, rapidjson, utf8proc, ...). A very large C++ build: it runs alone
+# and with fewer jobs (linking needs a lot of memory). ROMs are not part of
+# any package.
+name = "mame"
+version = "0.289"
+release = 1
+summary = "Multi-system arcade and computer emulator"
+license = "GPL-2.0-or-later"
+homepage = "https://www.mamedev.org"
+hostdeps = ["python", "pkgconf"]
+builddeps = ["alsa-lib-devel", "flac-devel", "fontconfig-devel", "libexpat-devel", "libjpeg-turbo-devel", "libpulse-devel", "lua-devel", "lua-static", "mesa-devel", "pipewire-devel", "qt6-qtbase-devel", "sdl2-compat-devel", "sqlite-devel", "wayland-devel", "zlib-ng-compat-devel", "zstd-devel"]
+options = ["!check", "!cross", "jobs:6"]
+
+source = [
+    { url = "https://github.com/mamedev/mame/archive/refs/tags/mame0289.tar.gz", sha256 = "0929cc749afabcef892900e10dd90bd8b05f94a7dde8f367ac6a5d2082589f84" },
+]
+
+build = '''
+make -j$jobs TARGET=mame TOOLS=1 NOWERROR=1 USE_WAYLAND=1 USE_QTDEBUG=0 \
+    OVERRIDE_CC="$CC" OVERRIDE_CXX="$CXX" OPTIMIZE=2 SYMBOLS=0 STRIP_SYMBOLS=1 \
+    ARCHOPTS="$CFLAGS" LDOPTS="$LDFLAGS" \
+    USE_SYSTEM_LIB_EXPAT=1 USE_SYSTEM_LIB_ZLIB=1 USE_SYSTEM_LIB_ZSTD=1 USE_SYSTEM_LIB_JPEG=1 \
+    USE_SYSTEM_LIB_FLAC=1 USE_SYSTEM_LIB_LUA=1 USE_SYSTEM_LIB_SQLITE3=1
+'''
+install = '''
+install -Dm755 mame "$pkgdir/usr/lib/mame/mame"
+mkdir -p "$pkgdir/usr/bin"
+printf '#!/bin/sh\nexec /usr/lib/mame/mame -inipath "$HOME/.mame/ini;/usr/lib/mame/ini" -rompath "$HOME/.mame/roms" "$@"\n' > "$pkgdir/usr/bin/mame"
+chmod 755 "$pkgdir/usr/bin/mame"
+for t in castool chdman floptool imgtool jedutil ldresample ldverify nltool nlwav pngcmp regrep romcmp split srcclean unidasm; do
+    [ -f "$t" ] && install -Dm755 "$t" "$pkgdir/usr/bin/mame-$t"
+done
+cp -r artwork bgfx ctrlr hash hlsl ini keymaps language plugins samples "$pkgdir/usr/lib/mame/" 2>/dev/null || true
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/mame/COPYING"
+'''

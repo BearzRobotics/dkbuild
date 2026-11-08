@@ -1,0 +1,22 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-requests/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "python-requests"
+version = "2.34.2"
+release = 1
+summary = "Python HTTP library for human beings"
+license = "Apache-2.0"
+homepage = "https://requests.readthedocs.io"
+patches = ["remove-certifi.patch"]
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["ca-certificates", "python", "python-charset-normalizer", "python-idna", "python-urllib3"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/r/requests/requests-2.34.2.tar.gz", sha256 = "f288924cae4e29463698d6d60bc6a4da69c89185ad1e0bcc4104f584e960b9ed" },
+]
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

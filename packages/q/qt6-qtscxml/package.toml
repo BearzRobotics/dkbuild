@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/qt6-qtscxml/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "qt6-qtscxml"
+version = "6.12.0"
+release = 1
+summary = "Qt6 SCXML component"
+license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only WITH Qt-GPL-exception-1.0"
+homepage = "https://www.qt.io"
+hostdeps = ["cmake", "ninja", "perl", "pkgconf", "qt6-qtbase", "qt6-qtdeclarative-devel"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.qt.io/official_releases/qt/6.12/6.12.0/submodules/qtscxml-everywhere-src-6.12.0.tar.xz", sha256 = "adc04875b383256bcd5a412f6f249d363495ea037913ca8c96d723442be38383" },
+]
+
+setup = '''
+%cmake \
+    -DQT_BUILD_TESTS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/tests"
+'''

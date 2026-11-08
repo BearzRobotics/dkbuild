@@ -1,0 +1,27 @@
+# OpenShot's video editing library (C++ with Python bindings): FFmpeg, Qt 6,
+# ImageMagick, babl, OpenMP; the system's jsoncpp. OpenCV effects are not
+# built (OpenCV is not in the tree yet).
+name = "libopenshot"
+version = "1.1.1"
+release = 1
+summary = "Video editing library for OpenShot"
+license = "LGPL-3.0-or-later"
+homepage = "https://github.com/OpenShot/libopenshot"
+hostdeps = ["cmake", "ninja", "pkgconf", "python", "swig"]
+builddeps = ["babl-devel", "ffmpeg-devel", "imagemagick-devel", "jsoncpp-devel", "libopenshot-audio-devel", "openmp-devel", "pipewire-devel", "python-devel", "qt6-qtbase-devel", "qt6-qtmultimedia-devel", "qt6-qtsvg-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/OpenShot/libopenshot/archive/refs/tags/v1.1.1.tar.gz", sha256 = "c5d650629b4104ec4368a2e3c183482e07de3e342d78d1e26f1cb297f9973439" },
+]
+
+setup = '''
+%cmake -DUSE_QT6=ON -DUSE_SYSTEM_JSONCPP=ON -DENABLE_OPENCV=OFF -DBUILD_TESTING=OFF -DENABLE_RUBY=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

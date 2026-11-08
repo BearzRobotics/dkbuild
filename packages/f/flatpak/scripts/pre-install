@@ -1,0 +1,5 @@
+#!/bin/sh
+# The system helper user (Chimera gets it from flatpak's sysusers.d file).
+grep -q "^_flatpak:" /etc/group || groupadd -r _flatpak
+grep -q "^_flatpak:" /etc/passwd || useradd -r -g _flatpak -d /var/lib/flatpak -s /usr/bin/nologin -c "Flatpak system helper" _flatpak
+exit 0

@@ -1,0 +1,24 @@
+# unpaper: cleans scanned pages (deskew, borders, noise). needed by: OCRmyPDF's --clean.
+name = "unpaper"
+version = "7.0.0"
+release = 1
+summary = "Post-processing tool for scanned pages"
+license = "GPL-2.0-only"
+homepage = "https://github.com/unpaper/unpaper"
+hostdeps = ["meson", "ninja", "pkgconf"]
+builddeps = ["ffmpeg-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/unpaper/unpaper/releases/download/unpaper-7.0.0/unpaper-7.0.0.tar.xz", sha256 = "2575fbbf26c22719d1cb882b59602c9900c7f747118ac130883f63419be46a80" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

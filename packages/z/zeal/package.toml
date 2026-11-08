@@ -1,0 +1,26 @@
+# Zeal: offline documentation browser (Dash docsets). Qt 6 with Qt WebEngine;
+# its bundled toml++ and cpp-httplib are used. No update check.
+name = "zeal"
+version = "0.9.2"
+release = 1
+summary = "Offline documentation browser"
+license = "GPL-3.0-or-later"
+homepage = "https://zealdocs.org"
+hostdeps = ["cmake", "ninja", "pkgconf", "extra-cmake-modules"]
+builddeps = ["libarchive-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel", "qt6-qtwebchannel-devel", "qt6-qtwebengine-devel", "sqlite-devel", "xcb-util-keysyms-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/zealdocs/zeal/archive/refs/tags/v0.9.2.tar.gz", sha256 = "4469c36ffed995863d67c16f062631c9eb9443369004b73d49faf4cbc9228fc0" },
+]
+
+setup = '''
+%cmake -DZEAL_FEATURE_UPDATE_CHECK=OFF -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/zeal/COPYING"
+'''

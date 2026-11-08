@@ -1,5 +1,6 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/flatpak/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# FenrirOS: Flathub is configured as the default remote (/etc/flatpak/remotes.d).
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "flatpak"
@@ -16,6 +17,7 @@ options = ["!check", "!cross"]
 
 source = [
     { url = "https://github.com/flatpak/flatpak/releases/download/1.18.4/flatpak-1.18.4.tar.xz", sha256 = "b899a7a00c48d2c626cb8ec33fe556720b376c25805d7222430c0fdca4c6ac8d" },
+    { url = "https://dl.flathub.org/repo/flathub.flatpakrepo", sha256 = "3371dd250e61d9e1633630073fefda153cd4426f72f4afa0c3373ae2e8fea03a", unpack = false },
 ]
 
 setup = '''
@@ -41,4 +43,6 @@ install = '''
 rm -rf "$pkgdir/usr/lib/systemd"
 rm -rf "$pkgdir/usr/lib/tmpfiles.d/flatpak.conf"
 install -Dm644 $pkgfiles/modules-load.conf "$pkgdir/usr/lib/modules-load.d/flatpak.conf"
+# Flathub is the default remote (for Steam and other apps not packaged here).
+install -Dm644 /build/sources/flathub.flatpakrepo "$pkgdir/etc/flatpak/remotes.d/flathub.flatpakrepo"
 '''

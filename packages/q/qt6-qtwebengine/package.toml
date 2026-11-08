@@ -13,7 +13,7 @@ archs = ["aarch64", "x86_64"]
 hostdeps = ["bison", "cmake", "flex", "gperf", "hwdata", "ninja", "nodejs", "perl", "pkgconf", "python-html5lib", "qt6-qtbase"]
 builddeps = ["alsa-lib-devel", "brotli-devel", "bzip2-devel", "cairo-devel", "ffmpeg-devel", "freetype-devel", "heimdal-devel", "icu-devel", "lcms2-devel", "libevent-devel", "libpulse-devel", "libva-devel", "libwebp-devel", "libxkbfile-devel", "libxshmfence-devel", "libxslt-devel", "minizip-devel", "nss-devel", "opus-devel", "pciutils-devel", "pipewire-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel", "qt6-qtwebchannel-devel", "qt6-qtwebsockets-devel", "snappy-devel"]
 rundeps = ["hwdata"]
-options = ["!check", "!cross"]
+options = ["jobs:8", "!check", "!cross"]
 
 source = [
     { url = "https://download.qt.io/development_releases/qtwebengine/6.140.0-rc/qtwebengine-everywhere-src-6.140.0-rc.tar.xz", sha256 = "61257967afd9803a1db6403e86ea25c4efff8fad479bda365a9d81bfd709f621" },

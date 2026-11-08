@@ -1,0 +1,27 @@
+# jbig2enc: JBIG2 encoder for bi-level images. needed by: OCRmyPDF's
+# --optimize 2 and 3 (much smaller black-and-white PDFs).
+name = "jbig2enc"
+version = "0.32"
+release = 1
+summary = "JBIG2 encoder"
+license = "Apache-2.0"
+homepage = "https://github.com/agl/jbig2enc"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["leptonica-devel", "libjpeg-turbo-devel", "libpng-devel", "libtiff-devel", "libwebp-devel", "giflib-devel", "openjpeg-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/agl/jbig2enc/archive/refs/tags/0.32.tar.gz", sha256 = "5b3b1c48617e5b1608f916a78038ea867a2c9eb20c2ff34a78a48a243f655c2a" },
+]
+
+setup = '''
+./autogen.sh
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/jbig2enc/COPYING"
+'''

@@ -3,7 +3,7 @@
 # needed by: libxcb.
 name = "xcbproto"
 version = "1.17.0"
-release = 4
+release = 5
 summary = "XML-XCB (X C Bindings) protocol descriptions"
 license = "MIT"
 homepage = "https://xcb.freedesktop.org"

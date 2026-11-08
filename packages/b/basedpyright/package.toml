@@ -1,0 +1,33 @@
+# basedpyright: Python type checker and language server (a pyright fork). The
+# release archive carries the compiled JavaScript; it is installed as a Python
+# package with two launchers that run it on the system's Node.js (upstream's
+# launcher downloads a Node binary through the nodejs-wheel package). Built
+# from TypeScript once the npm dependency store exists (docs/roadmap.md).
+name = "basedpyright"
+version = "1.40.2"
+release = 1
+summary = "Python type checker and language server"
+license = "MIT"
+homepage = "https://docs.basedpyright.com"
+hostdeps = ["python"]
+rundeps = ["nodejs", "python"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/DetachHead/basedpyright/releases/download/v1.40.2/basedpyright-1.40.2.tar.gz", sha256 = "78f4433bd7d0114ebfd0562e2bfb35d056753f580c325eb090b9a86b158c69ce" },
+]
+
+install = '''
+pyver=$(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])')
+d="$pkgdir/usr/lib/python$pyver/site-packages/basedpyright"
+mkdir -p "$d"
+cp -r basedpyright/. "$d/"
+rm -f "$d"/dist/*.map
+for b in basedpyright:pyright basedpyright-langserver:pyright-langserver; do
+    name=${b%%:*}; js=${b#*:}
+    mkdir -p "$pkgdir/usr/bin"
+    printf '#!/bin/sh\nexec node /usr/lib/python%s/site-packages/basedpyright/dist/%s.js "$@"\n' "$pyver" "$js" > "$pkgdir/usr/bin/$name"
+    chmod 755 "$pkgdir/usr/bin/$name"
+done
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/basedpyright/LICENSE.txt"
+'''

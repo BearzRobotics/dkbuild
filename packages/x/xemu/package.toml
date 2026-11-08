@@ -1,0 +1,36 @@
+# xemu: original Xbox emulator (a QEMU fork). The source release carries its
+# bundled subprojects (imgui, glslang, softfloat, nv2a, ...); nothing is
+# downloaded (--disable-download), the rest is the system's. Installed as
+# /usr/bin/xemu. It needs the Xbox BIOS, MCPX boot ROM and hard disk image,
+# which are not part of any package.
+name = "xemu"
+version = "0.8.139"
+release = 1
+summary = "Original Xbox emulator"
+license = "GPL-2.0-or-later"
+homepage = "https://xemu.app"
+hostdeps = ["meson", "ninja", "pkgconf", "python", "bison", "flex", "perl"]
+builddeps = ["alsa-lib-devel", "glib-devel", "gtk+3-devel", "libepoxy-devel", "libpcap-devel", "libpulse-devel", "libsamplerate-devel", "libslirp-devel", "libusb-devel", "mesa-devel", "openssl-devel", "pipewire-devel", "pixman-devel", "sdl3-devel", "tomlplusplus", "xxhash-devel", "zlib-ng-compat-devel", "zstd-devel", "curl-devel", "libjpeg-turbo-devel", "libpng-devel", "vulkan-loader-devel"]
+options = ["!check", "!cross"]
+
+source = [
+    { url = "https://github.com/xemu-project/xemu/releases/download/v0.8.139/xemu-0.8.139.tar.zst", sha256 = "97a986bb6f58134fb96b23c96b52615a0325c16e8d02cce6b1329f4d50dff342" },
+]
+
+setup = '''
+mkdir -p build && cd build
+../configure --prefix=/usr --target-list=i386-softmmu --disable-download --disable-werror \
+    --extra-cflags="-DXBOX=1 $CFLAGS" --extra-ldflags="$LDFLAGS"
+'''
+build = '''
+make -C build -j$jobs qemu-system-i386
+'''
+install = '''
+install -Dm755 build/qemu-system-i386 "$pkgdir/usr/bin/xemu"
+install -Dm644 ui/xemu.desktop "$pkgdir/usr/share/applications/xemu.desktop"
+for s in 16 24 32 48 64 128 256 512; do
+    install -Dm644 ui/icons/xemu_${s}x$s.png "$pkgdir/usr/share/icons/hicolor/${s}x$s/apps/xemu.png"
+done
+install -Dm644 ui/icons/xemu.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/xemu.svg"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/xemu/LICENSE"
+'''
