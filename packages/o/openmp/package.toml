@@ -19,7 +19,9 @@ source = [
 ]
 
 setup = '''
-cmake -S openmp -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DLLVM_DIR=/usr/lib/cmake/llvm \
+# LLVM 23 removed OpenMP's standalone build: it builds through runtimes/.
+cmake -S runtimes -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DLLVM_DIR=/usr/lib/cmake/llvm \
+    -DLLVM_ENABLE_RUNTIMES=openmp -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DLLVM_INCLUDE_TESTS=OFF \
     -DLIBOMP_INSTALL_ALIASES=OFF -DOPENMP_ENABLE_LIBOMPTARGET=OFF \
     -DOPENMP_ENABLE_OMPT_TOOLS=OFF -DLIBOMP_OMPD_SUPPORT=OFF
 '''
