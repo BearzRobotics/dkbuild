@@ -8,7 +8,8 @@
 # Changed from Chimera: no TPM2, no ukify, no man pages; no-getent.patch skips two
 # meson checks that only print warnings and need getent, which musl does not ship.
 # The other patches are Chimera's systemd-on-musl series (their udev/patches,
-# shared with their systemd-boot; much of it from OpenEmbedded).
+# shared with their systemd-boot; much of it from OpenEmbedded). time-epoch is a
+# fixed date (2025-01-01): with 0, meson asks BSD-style `stat -f` for one.
 name = "systemd-boot"
 version = "256.11"
 release = 1
@@ -28,7 +29,7 @@ source = [
 
 setup = '''
 %meson \
-    -Dmode=release -Dtime-epoch=0 \
+    -Dmode=release -Dtime-epoch=1735689600 \
     -Dacl=disabled -Dadm-group=false -Danalyze=false -Dapparmor=disabled -Daudit=disabled \
     -Dbacklight=false -Dbinfmt=false -Dbootloader=enabled -Dbpf-framework=disabled -Dbzip2=disabled \
     -Dcoredump=false -Ddbus=disabled -Defi=true -Delfutils=disabled -Denvironment-d=false \

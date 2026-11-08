@@ -4,9 +4,10 @@
 # gh, ollama, Firefox. Chimera keeps /etc/ssl/certs up to date with apk
 # triggers; dkbuild has none yet, so the bundle and the hash links are made
 # here, at build time, and update-ca-certificates is there for local additions.
+# r2: no c_rehash of its own: openssl's is the system one.
 name = "ca-certificates"
 version = "20261020"
-release = 1
+release = 2
 summary = "Common CA certificates for SSL/TLS"
 license = "GPL-2.0-or-later AND MPL-2.0"
 homepage = "https://gitlab.alpinelinux.org/alpine/ca-certificates"
@@ -34,4 +35,6 @@ cat "$c"/mozilla/*.crt > "$pkgdir/etc/ssl/certs/ca-certificates.crt"
 ln -s certs/ca-certificates.crt "$pkgdir/etc/ssl/cert.pem"
 for f in "$c"/mozilla/*.crt; do ln -s "/usr/share/ca-certificates/mozilla/${f##*/}" "$pkgdir/etc/ssl/certs/${f##*/}"; done
 ./c_rehash "$pkgdir/etc/ssl/certs" >/dev/null
+# openssl ships the system c_rehash; this one only made the links above.
+rm -f "$pkgdir/usr/bin/c_rehash"
 '''

@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: main/openresolv/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: dhcpcd (it hands DNS servers to resolvconf, which writes
+# /etc/resolv.conf). Installed as plain /usr/bin/resolvconf: Chimera renames it
+# for its alternatives system, which FenrirOS does not have.
+name = "openresolv"
+version = "3.17.4"
+release = 1
+summary = "Management framework for resolv.conf"
+license = "BSD-2-Clause"
+homepage = "https://roy.marples.name/projects/openresolv"
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/NetworkConfiguration/openresolv/releases/download/v3.17.4/openresolv-3.17.4.tar.xz", sha256 = "901d83a15520b80e117aeca8cb6f5b70ceb205ba050a638d45cebcf304df729b" },
+]
+
+setup = '''
+./configure --prefix=/usr --sysconfdir=/etc --libexecdir=/usr/lib/resolvconf
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/openresolv/LICENSE"
+'''

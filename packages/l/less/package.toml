@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: work/cports/main/less/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+# r2: no more, zless or zstdless: util-linux, gzip and zstd ship them (two packages may not own one file).
 name = "less"
 version = "710"
-release = 1
+release = 2
 summary = "Pager program similar to more(1)"
 license = "custom:less OR GPL-3.0-or-later"
 homepage = "https://www.greenwoodsoftware.com/less"
@@ -30,17 +31,8 @@ install = '''
 %make_install
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/less/LICENSE"
 install -Dm755 $pkgfiles/lesspipe.sh "$pkgdir/usr/bin/lesspipe.sh"
-install -Dm755 $pkgfiles/zless.sh "$pkgdir/usr/bin/zless"
-mkdir -p "$pkgdir/usr/bin"
-ln -sf less "$pkgdir/usr/bin/more"
-mkdir -p "$pkgdir/usr/share/man/man1"
-ln -sf less.1 "$pkgdir/usr/share/man/man1/more.1"
-mkdir -p "$pkgdir/usr/bin"
-ln -sf zless "$pkgdir/usr/bin/bzless"
-mkdir -p "$pkgdir/usr/bin"
-ln -sf zless "$pkgdir/usr/bin/xzless"
-mkdir -p "$pkgdir/usr/bin"
-ln -sf zless "$pkgdir/usr/bin/lzless"
-mkdir -p "$pkgdir/usr/bin"
-ln -sf zless "$pkgdir/usr/bin/zstdless"
+# more, zless and zstdless come from util-linux, gzip and zstd; less's viewer for
+# every compressed format serves the ones nothing else ships.
+install -Dm755 $pkgfiles/zless.sh "$pkgdir/usr/libexec/less/zless"
+for z in bzless xzless lzless; do ln -s ../libexec/less/zless "$pkgdir/usr/bin/$z"; done
 '''

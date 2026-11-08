@@ -2,16 +2,17 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+# r2: depends on openresolv (Chimera's "resolvconf" is a virtual name, which dkbuild has no provider for).
 name = "dhcpcd"
 version = "10.5.2"
-release = 1
+release = 2
 summary = "RFC2131 compliant DHCP client"
 license = "BSD-2-Clause"
 homepage = "https://roy.marples.name/projects/dhcpcd"
 patches = ["enable-controlgroup.patch"]
 hostdeps = ["pkgconf"]
 builddeps = ["dinit-chimera", "udev-devel", "linux-headers"]
-rundeps = ["resolvconf"]
+rundeps = ["openresolv"]
 
 source = [
     { url = "https://github.com/NetworkConfiguration/dhcpcd/releases/download/v10.5.2/dhcpcd-10.5.2.tar.xz", sha256 = "3e476657fdb6eeb38b277da3a48d0ac0113ecce5858ebdcddff2b629faed52b4" },
