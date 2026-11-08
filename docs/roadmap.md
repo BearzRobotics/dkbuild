@@ -105,3 +105,19 @@ pkg`, and it can go in an image.
 An image file lists packages, excluded patterns, services, users and outputs
 (SPEC 8). Different sets (rescue disk, minimal server, Hyprland desktop,
 developer workstation) are separate files over the same repo.
+
+## Long term: optional GCC, more targets
+
+LLVM stays the toolchain; **nothing builds with GCC unless its recipe opts
+in** (`options = ["gcc"]`, a per-recipe switch of `CC`, `CXX`, `AR` and the
+cross files). GCC itself is ordinary recipes, built only when something asks
+for it: binutils, gmp, mpfr, libmpc, isl, and gcc configured for musl targets
+(musl-cross-make style). GCC-built C links against musl and the tree as usual;
+GCC-built C++ brings libstdc++, kept apart from the tree's libc++ (one C++
+runtime per program). First user: GRUB 2, which also gives BIOS installs a
+bootloader beside dklilo.
+
+Targets beyond x86_64, aarch64 and riscv64, as many as LLVM (or GCC, where
+LLVM can't) builds well: ppc64le, loongarch64, armv7, i686, s390x and others.
+Each is a profile (SPEC.md 6.1) plus whatever recipes need per-architecture
+care.
