@@ -13,6 +13,7 @@ const tree = @import("tree.zig");
 const split = @import("split.zig");
 const scan = @import("scan.zig");
 const sandbox = @import("sandbox.zig");
+const inputs = @import("inputs.zig");
 const Allocator = std.mem.Allocator;
 const Dir = std.Io.Dir;
 
@@ -147,6 +148,13 @@ pub fn checkPolicy(arena: Allocator, io: std.Io, destdir: []const u8, problems: 
         if (!contains(&allowed_top, e.name))
             try problems.append(arena, try std.fmt.allocPrint(arena, "installs /{s}, outside /usr /etc /var /opt /boot", .{e.name}));
     }
+    // musl's loader only searches /usr/lib; CMake's GNUInstallDirs picks lib64
+    // on x86_64 unless told otherwise (%cmake does).
+    if (d.openDir(io, "usr/lib64", .{})) |lib64| {
+        var l = lib64;
+        l.close(io);
+        try problems.append(arena, "installs into /usr/lib64 (libraries go in /usr/lib: -DCMAKE_INSTALL_LIBDIR=lib, --libdir=/usr/lib)");
+    } else |_| {}
     var local = d.openDir(io, "usr/local", .{}) catch return;
     local.close(io);
     try problems.append(arena, "installs into /usr/local");
@@ -234,7 +242,8 @@ fn runTool(arena: Allocator, io: std.Io, base_root: []const u8, sb: SbDirs, bind
     }, log);
 }
 
-pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) BuildError!void {
+/// Builds and publishes `r`; returns the hash of what it produced (inputs.outputHash).
+pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) BuildError!inputs.Produced {
     const id = try std.fmt.allocPrint(arena, "{s}-{s}-r{d}", .{ r.name, r.version, r.release });
     out("==> {s}\n", .{id});
 
@@ -257,6 +266,8 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
     const cache = try std.fs.path.join(arena, &.{ opts.root, "cache" });
     var first_tarball: ?[]const u8 = null;
     var zigdeps_tar: ?[]const u8 = null;
+    // Go modules and Rust crates vendored on the host, laid into the source tree.
+    var vendor_tars: std.ArrayList([]const u8) = .empty;
     {
         fetch_mutex.lockUncancelable(io);
         defer fetch_mutex.unlock(io);
@@ -274,6 +285,20 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
                         return error.PrepareFailed;
                     };
                     zigdeps_tar = try fetch.zigDepsPath(arena, cache, src.tarball.sha256);
+                }
+                if (contains(r.options, "cargodeps")) {
+                    _ = fetch.fetchCargoDeps(arena, io, cache, src.tarball.sha256, &msg) catch |err| {
+                        out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
+                        return error.PrepareFailed;
+                    };
+                    try vendor_tars.append(arena, try fetch.cargoDepsPath(arena, cache, src.tarball.sha256));
+                }
+                if (contains(r.options, "godeps")) {
+                    _ = fetch.fetchGoDeps(arena, io, cache, src.tarball.sha256, &msg) catch |err| {
+                        out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
+                        return error.PrepareFailed;
+                    };
+                    try vendor_tars.append(arena, try fetch.goDepsPath(arena, cache, src.tarball.sha256));
                 }
             }
         }
@@ -359,6 +384,31 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
                 only = try arena.dupe(u8, e.name);
             }
             if (count == 1) srcdir = try std.fmt.allocPrint(arena, "/build/{s}", .{only});
+            // Further tarballs (a vendored dependency's source, say) are unpacked
+            // next to the first; $srcdir stays the first one's directory.
+            var seen_first = false;
+            for (r.source) |src| {
+                if (src != .tarball) continue;
+                if (!seen_first) {
+                    seen_first = true;
+                    continue;
+                }
+                const more = try fetch.cachePath(arena, cache, src.tarball.sha256);
+                const ok2 = runLogged(arena, io, &.{ "tar", "-xf", more, "-C", build_rel, "--no-same-owner" }, &log) catch false;
+                if (!ok2) {
+                    out("error: cannot unpack {s}\n", .{more});
+                    return error.UnpackFailed;
+                }
+            }
+        }
+        // Go modules and Rust crates vendored on the host: lay them in the source tree.
+        for (vendor_tars.items) |gt| {
+            const dest = try std.fmt.allocPrint(arena, "{s}{s}", .{ build_rel, srcdir["/build".len..] });
+            const ok = runLogged(arena, io, &.{ "tar", "-xf", gt, "-C", dest }, &log) catch false;
+            if (!ok) {
+                out("error: cannot unpack the vendored dependencies {s}\n", .{gt});
+                return error.UnpackFailed;
+            }
         }
         // Zig dependencies fetched on the host: lay zig-pkg/ in the source tree.
         if (zigdeps_tar) |zt| {
@@ -402,7 +452,9 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
 
     // 5. Policy
     var problems: std.ArrayList([]const u8) = .empty;
-    checkPolicy(arena, io, try std.fs.path.join(arena, &.{ root_rel, "destdir" }), &problems) catch return error.PolicyViolation;
+    // `rootlayout` (base-files) ships the root's own directories (/dev, /proc, ...).
+    if (!contains(r.options, "rootlayout"))
+        checkPolicy(arena, io, try std.fs.path.join(arena, &.{ root_rel, "destdir" }), &problems) catch return error.PolicyViolation;
     if (problems.items.len > 0) {
         for (problems.items) |p| out("error: {s}: {s}\n", .{ r.name, p });
         return error.PolicyViolation;
@@ -425,8 +477,12 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
     }
     for (moved) |m| {
         var summary: []const u8 = m.name;
+        var sp_depends: []const []const u8 = &.{};
+        var sp_install_if: []const []const u8 = &.{};
         for (try split.merge(arena, r.subpackages)) |sp| if (std.mem.eql(u8, sp.name, m.name)) {
             summary = sp.summary;
+            sp_depends = sp.depends;
+            sp_install_if = sp.install_if;
         };
         // -devel needs its main package; -static needs -devel (headers to build against).
         // When the package has a -libs, -devel needs that and not the programs.
@@ -439,14 +495,25 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
             try std.fmt.allocPrint(arena, "{s}-devel={s}", .{ r.name, ver })
         else
             "";
-        var sub = try withScan(arena, io, try std.fs.path.join(arena, &.{ subs_abs, m.name }), if (need.len > 0) try arena.dupe([]const u8, &.{need}) else &.{});
+        var declared: std.ArrayList([]const u8) = .empty;
+        if (need.len > 0) try declared.append(arena, need);
+        try declared.appendSlice(arena, sp_depends);
+        var sub = try withScan(arena, io, try std.fs.path.join(arena, &.{ subs_abs, m.name }), declared.items);
         sub.name = try std.fmt.allocPrint(arena, "{s}-{s}", .{ r.name, m.name });
         sub.summary = summary;
+        sub.install_if = sp_install_if;
         try pkg_list.append(arena, sub);
         out("    {s}-{s}: {d} files\n", .{ r.name, m.name, m.files });
     }
+    var parts: std.ArrayList(inputs.Part) = .empty;
+    for (pkg_list.items) |pk| try parts.append(arena, .{ .name = pk.name, .dir = pk.files });
+    const produced = inputs.outputHash(arena, io, parts.items) catch |err| {
+        out("error: {s}: hashing what it produced failed: {s}\n", .{ r.name, @errorName(err) });
+        return error.BuildFailed;
+    };
     try publish(arena, io, r, opts, id, base_root, sb, pkg_list.items, &log);
     out("    built {s}; log: {s}\n", .{ id, logpath });
+    return produced;
 }
 
 /// The install script names apk knows (apk-package(5)).
@@ -461,6 +528,7 @@ const Pkg = struct {
     files: []const u8,
     depends: []const []const u8,
     provides: []const []const u8 = &.{},
+    install_if: []const []const u8 = &.{},
 };
 
 /// Declared dependencies plus what the scan found, without duplicates.
@@ -485,7 +553,8 @@ fn publish(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options, id: []
         out("error: signing key {s} not found\n", .{opts.key});
         return error.PrepareFailed;
     };
-    const keys_abs = absPath(arena, io, try std.fs.path.join(arena, &.{ opts.root, "keys" })) catch {
+    // Checked here, before any package is made; reindex uses them.
+    _ = absPath(arena, io, try std.fs.path.join(arena, &.{ opts.root, "keys" })) catch {
         out("error: {s}/keys (public signing keys) not found\n", .{opts.root});
         return error.PrepareFailed;
     };
@@ -514,6 +583,7 @@ fn publish(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options, id: []
         // A repeated --info key replaces the earlier value, so lists are one
         // space-separated value.
         if (pk.depends.len > 0) try argv.appendSlice(arena, &.{ "--info", try std.fmt.allocPrint(arena, "depends:{s}", .{try std.mem.join(arena, " ", pk.depends)}) });
+        if (pk.install_if.len > 0) try argv.appendSlice(arena, &.{ "--info", try std.fmt.allocPrint(arena, "install-if:{s}", .{try std.mem.join(arena, " ", pk.install_if)}) });
         if (pk.provides.len > 0) {
             // apk only picks a provider automatically when the provide has a
             // version: sonames get 0, commands and pkg-config names the package's.
@@ -553,33 +623,144 @@ fn publish(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options, id: []
         };
     }
 
-    // mkndx over every package in the repository directory, one build at a time
-    // (it lists the directory, then writes Packages.adb in place).
+    try reindex(arena, io, opts, base_root, sb, log);
+}
+
+/// `apk mkndx` over every package in repo/<arch>/, signed: one build at a time
+/// (it lists the directory, then writes Packages.adb in place).
+fn reindex(arena: Allocator, io: std.Io, opts: Options, base_root: []const u8, sb: SbDirs, log: *std.ArrayList(u8)) BuildError!void {
+    const key_abs = absPath(arena, io, opts.key) catch {
+        out("error: signing key {s} not found\n", .{opts.key});
+        return error.PrepareFailed;
+    };
+    const keys_abs = absPath(arena, io, try std.fs.path.join(arena, &.{ opts.root, "keys" })) catch return error.PrepareFailed;
+    const repo_rel = try std.fmt.allocPrint(arena, "{s}/repo/{s}", .{ opts.root, opts.arch });
+    const repo_abs = absPath(arena, io, repo_rel) catch return error.PrepareFailed;
     index_mutex.lockUncancelable(io);
     defer index_mutex.unlock(io);
-    {
-        var argv: std.ArrayList([]const u8) = .empty;
-        const binds = [_]sandbox.Bind{ out_bind, .{ .src = key_abs, .dst = "/tmp/key", .read_only = true }, .{ .src = keys_abs, .dst = "/tmp/keys", .read_only = true } };
-        try argv.appendSlice(arena, &.{ "/usr/bin/apk", "--keys-dir", "/tmp/keys", "mkndx", "--sign-key", "/tmp/key", "--output", "/tmp/out/Packages.adb" });
-        var d = Dir.cwd().openDir(io, repo_rel, .{ .iterate = true }) catch return error.PrepareFailed;
-        defer d.close(io);
-        var it = d.iterate();
-        var names: std.ArrayList([]const u8) = .empty;
-        while (it.next(io) catch null) |e| {
-            if (std.mem.endsWith(u8, e.name, ".apk")) try names.append(arena, try std.fmt.allocPrint(arena, "/tmp/out/{s}", .{e.name}));
+    var argv: std.ArrayList([]const u8) = .empty;
+    const binds = [_]sandbox.Bind{ .{ .src = repo_abs, .dst = "/tmp/out" }, .{ .src = key_abs, .dst = "/tmp/key", .read_only = true }, .{ .src = keys_abs, .dst = "/tmp/keys", .read_only = true } };
+    try argv.appendSlice(arena, &.{ "/usr/bin/apk", "--keys-dir", "/tmp/keys", "mkndx", "--sign-key", "/tmp/key", "--output", "/tmp/out/Packages.adb" });
+    var d = Dir.cwd().openDir(io, repo_rel, .{ .iterate = true }) catch return error.PrepareFailed;
+    defer d.close(io);
+    var it = d.iterate();
+    var names: std.ArrayList([]const u8) = .empty;
+    while (it.next(io) catch null) |e| {
+        if (std.mem.endsWith(u8, e.name, ".apk")) try names.append(arena, try std.fmt.allocPrint(arena, "/tmp/out/{s}", .{e.name}));
+    }
+    std.mem.sort([]const u8, names.items, {}, struct {
+        fn lt(_: void, x: []const u8, y: []const u8) bool {
+            return std.mem.lessThan(u8, x, y);
         }
-        std.mem.sort([]const u8, names.items, {}, struct {
-            fn lt(_: void, a: []const u8, b: []const u8) bool {
-                return std.mem.lessThan(u8, a, b);
-            }
-        }.lt);
-        try argv.appendSlice(arena, names.items);
-        const ok = runTool(arena, io, base_root, sb, &binds, argv.items, log) catch false;
-        if (!ok) {
-            out("error: apk mkndx failed\n", .{});
-            return error.BuildFailed;
+    }.lt);
+    try argv.appendSlice(arena, names.items);
+    const ok = runTool(arena, io, base_root, sb, &binds, argv.items, log) catch false;
+    if (!ok) {
+        out("error: apk mkndx failed\n", .{});
+        return error.BuildFailed;
+    }
+}
+
+/// What a file in repo/<arch>/ is, for `prune`.
+pub const RepoFile = enum { current, stale, orphan, other };
+
+/// `<pkgname>-<version>-r<N>.apk` against the tree: current (a package of a
+/// recipe at its present version-release), stale (a recipe's package at
+/// another version), or orphan (no recipe provides that package name).
+pub fn classify(t: tree.Tree, file: []const u8) RepoFile {
+    if (!std.mem.endsWith(u8, file, ".apk")) return .other;
+    const stem = file[0 .. file.len - ".apk".len];
+    const rdash = std.mem.lastIndexOf(u8, stem, "-r") orelse return .other;
+    const rel = stem[rdash + 2 ..];
+    if (rel.len == 0) return .other;
+    for (rel) |c| if (!std.ascii.isDigit(c)) return .other;
+    const vdash = std.mem.lastIndexOfScalar(u8, stem[0..rdash], '-') orelse return .other;
+    const pkg = stem[0..vdash];
+    const ver = stem[vdash + 1 .. rdash];
+    const idx = t.provider(pkg) orelse return .orphan;
+    const r = t.recipes[idx];
+    const want_rel = std.fmt.parseInt(u32, rel, 10) catch return .other;
+    return if (std.mem.eql(u8, ver, r.version) and want_rel == r.release) .current else .stale;
+}
+
+/// The main package of the recipe a stale file belongs to, at the recipe's
+/// present version-release: once that is built, the recipe's older files go
+/// (including subpackages the recipe no longer makes).
+fn currentFile(arena: Allocator, t: tree.Tree, file: []const u8) Allocator.Error!?[]const u8 {
+    const stem = file[0 .. file.len - ".apk".len];
+    const rdash = std.mem.lastIndexOf(u8, stem, "-r") orelse return null;
+    const vdash = std.mem.lastIndexOfScalar(u8, stem[0..rdash], '-') orelse return null;
+    const r = t.recipes[t.provider(stem[0..vdash]) orelse return null];
+    return try std.fmt.allocPrint(arena, "{s}-{s}-r{d}.apk", .{ r.name, r.version, r.release });
+}
+
+/// Deletes stale packages from repo/<arch>/, once their recipe's present
+/// version is built (an older package is never removed before that), and
+/// rebuilds the index. Orphans (a recipe was removed or renamed) are only
+/// reported.
+pub fn prune(arena: Allocator, io: std.Io, opts: Options, dry_run: bool) BuildError!void {
+    const t = opts.tree orelse return error.BadRecipe;
+    const repo_rel = try std.fmt.allocPrint(arena, "{s}/repo/{s}", .{ opts.root, opts.arch });
+    var d = Dir.cwd().openDir(io, repo_rel, .{ .iterate = true }) catch {
+        out("nothing to prune: {s} does not exist\n", .{repo_rel});
+        return;
+    };
+    defer d.close(io);
+    var stale: std.ArrayList([]const u8) = .empty;
+    var it = d.iterate();
+    while (it.next(io) catch null) |e| {
+        switch (classify(t, e.name)) {
+            .stale => {
+                const cur = (try currentFile(arena, t, e.name)) orelse continue;
+                if (d.access(io, cur, .{})) |_| {
+                    try stale.append(arena, try arena.dupe(u8, e.name));
+                } else |_| out("kept (its {s} is not built yet): {s}\n", .{ cur, e.name });
+            },
+            .orphan => out("orphan (no recipe provides it; left alone): {s}\n", .{e.name}),
+            else => {},
         }
     }
+    std.mem.sort([]const u8, stale.items, {}, struct {
+        fn lt(_: void, x: []const u8, y: []const u8) bool {
+            return std.mem.lessThan(u8, x, y);
+        }
+    }.lt);
+    for (stale.items) |f| {
+        out("{s} {s}\n", .{ if (dry_run) "would remove" else "removing", f });
+        if (!dry_run) d.deleteFile(io, f) catch |err| out("warning: cannot remove {s}: {s}\n", .{ f, @errorName(err) });
+    }
+    if (dry_run or stale.items.len == 0) {
+        out("{d} stale package(s){s}\n", .{ stale.items.len, if (dry_run) " (dry run: nothing removed)" else "" });
+        return;
+    }
+    const base_root = absPath(arena, io, try std.fs.path.join(arena, &.{ opts.root, "rootfs", "dkrescue" })) catch return error.PrepareFailed;
+    const work = try std.fs.path.join(arena, &.{ opts.root, "work", "prune" });
+    removeBuildDir(arena, io, work);
+    defer removeBuildDir(arena, io, work);
+    const sb = try sbDirs(arena, io, work, "sb");
+    var log: std.ArrayList(u8) = .empty;
+    reindex(arena, io, opts, base_root, sb, &log) catch |err| {
+        out("{s}\n", .{log.items});
+        return err;
+    };
+    out("removed {d} stale package(s); index rebuilt\n", .{stale.items.len});
+}
+
+test "classify: current, stale and orphan packages in repo/" {
+    const rc = struct {
+        fn f(name: []const u8, version: []const u8, release: u32) recipe.Recipe {
+            return .{ .name = name, .version = version, .release = release, .summary = "s", .license = "MIT", .source = &.{}, .install = "x" };
+        }
+    }.f;
+    const t: tree.Tree = .{ .recipes = &.{ rc("spirv-tools", "1.4.363.0", 3), rc("zlib", "1.3", 1) } };
+    try std.testing.expectEqual(RepoFile.current, classify(t, "spirv-tools-1.4.363.0-r3.apk"));
+    try std.testing.expectEqual(RepoFile.current, classify(t, "spirv-tools-devel-1.4.363.0-r3.apk"));
+    try std.testing.expectEqual(RepoFile.stale, classify(t, "spirv-tools-1.4.363.0-r2.apk"));
+    try std.testing.expectEqual(RepoFile.stale, classify(t, "spirv-tools-libs-1.4.363.0-r1.apk"));
+    try std.testing.expectEqual(RepoFile.stale, classify(t, "zlib-1.2-r1.apk"));
+    try std.testing.expectEqual(RepoFile.orphan, classify(t, "gone-1-r1.apk"));
+    try std.testing.expectEqual(RepoFile.other, classify(t, "Packages.adb"));
+    try std.testing.expectEqual(RepoFile.other, classify(t, "zlib.dkhash"));
 }
 
 test "script runs setup, build, check, install in order with macros expanded" {

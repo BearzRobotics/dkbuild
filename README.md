@@ -68,6 +68,8 @@ dependency chains; rebuilds; installing from the repository. They run once for e
 | `dkbuild doctor` | checks the host and prints the fixes |
 | `dkbuild bootstrap-root <iso\|sfs\|tar>` | unpacks the build machine into `rootfs/dkrescue` and checks it |
 | `dkbuild check [name]...` | validates recipes |
+| `dkbuild image <file.toml>` | makes a root filesystem (tarball, squashfs or directory) from repo/; see docs/install.md |
+| `dkbuild prune [--dry-run]` | removes older versions of packages from repo/ and rebuilds the index |
 | `dkbuild graph <name>...` | prints the build order |
 | `dkbuild fetch [name]...` | downloads sources and checks their checksums |
 | `dkbuild world [--force] [-P N]` | builds every recipe in the tree that is out of date (`-P N`: up to N builds at once) |

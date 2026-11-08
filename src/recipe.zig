@@ -20,6 +20,12 @@ pub const Subpackage = struct {
     name: []const u8,
     summary: []const u8,
     paths: []const []const u8,
+    /// Packages this one needs, besides what the scan finds.
+    depends: []const []const u8 = &.{},
+    /// apk's install_if: installed automatically once all of these are.
+    install_if: []const []const u8 = &.{},
+    /// Made even when no file matches `paths` (a group that only depends).
+    empty: bool = false,
 };
 
 pub const Recipe = struct {
@@ -58,7 +64,7 @@ const known_keys = [_][]const u8{
     "check",     "install",   "subpackages",
 };
 
-const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap", "zigdeps" };
+const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap", "zigdeps", "godeps", "cargodeps", "meta", "rootlayout" };
 const known_archs = [_][]const u8{ "x86_64", "aarch64", "riscv64" };
 
 /// Parse and validate `text`. All returned memory lives in `arena`.
@@ -93,7 +99,7 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
     r.setup = try cfg.optString(arena, diag, root, "setup");
     r.build = try cfg.optString(arena, diag, root, "build");
     r.check = try cfg.optString(arena, diag, root, "check");
-    r.install = try cfg.reqString(arena, diag, root, "install");
+    r.install = (try cfg.optString(arena, diag, root, "install")) orelse "";
     r.patches = try cfg.optStrings(arena, diag, root, "patches");
     r.archs = try cfg.optStrings(arena, diag, root, "archs");
     r.hostdeps = try cfg.optStrings(arena, diag, root, "hostdeps");
@@ -116,7 +122,16 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
             return cfg.fail(arena, diag, "option '{s}': jobs:N needs a positive number", .{o});
     }
 
-    r.source = try parseSources(arena, diag, root);
+    // A meta-package (`meta`) only depends on others: no source, no steps.
+    const meta = contains(r.options, "meta");
+    if (meta) {
+        if (root.get("source") != null or r.setup != null or r.build != null or r.install.len > 0)
+            return cfg.fail(arena, diag, "a 'meta' package has no source, setup, build or install", .{});
+        r.source = &.{};
+    } else {
+        if (root.get("install") == null) return cfg.fail(arena, diag, "missing required key 'install'", .{});
+        r.source = try parseSources(arena, diag, root);
+    }
     r.subpackages = try parseSubpackages(arena, diag, root);
     return r;
 }
@@ -124,7 +139,8 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
 const source_shape = "'source' entries must look like { url = \"...\", sha256 = \"...\" } or { git = \"...\", tag = \"...\" }";
 
 fn parseSources(arena: Allocator, diag: *Diagnostic, root: *const toml.Table) cfg.Error![]const Source {
-    const v = root.get("source") orelse return cfg.fail(arena, diag, "missing required key 'source'", .{});
+    // No `source` at all: the recipe's own files/ are everything (base-files).
+    const v = root.get("source") orelse return &.{};
     const list = switch (v) {
         .array => |a| a.items.items,
         else => return cfg.fail(arena, diag, "'source' must be a list", .{}),
@@ -173,11 +189,18 @@ fn parseSubpackages(arena: Allocator, diag: *Diagnostic, root: *const toml.Table
             .table => |t| t,
             else => return cfg.fail(arena, diag, "subpackage '{s}' must be a table", .{k}),
         };
-        try cfg.onlyKeys(arena, diag, sm, &.{ "summary", "paths" }, try std.fmt.allocPrint(arena, "subpackage '{s}'", .{k}));
+        try cfg.onlyKeys(arena, diag, sm, &.{ "summary", "paths", "depends", "install_if", "empty" }, try std.fmt.allocPrint(arena, "subpackage '{s}'", .{k}));
+        const empty = if (sm.get("empty")) |e| switch (e) {
+            .boolean => |b| b,
+            else => return cfg.fail(arena, diag, "subpackage '{s}': 'empty' must be true or false", .{k}),
+        } else false;
         dst.* = .{
             .name = try arena.dupe(u8, k),
             .summary = try cfg.reqString(arena, diag, sm, "summary"),
             .paths = try cfg.optStrings(arena, diag, sm, "paths"),
+            .depends = try cfg.optStrings(arena, diag, sm, "depends"),
+            .install_if = try cfg.optStrings(arena, diag, sm, "install_if"),
+            .empty = empty,
         };
     }
     return out;
@@ -294,4 +317,23 @@ test "bad checksum and bad source shapes are errors" {
 
 test "a TOML syntax error reports line and column" {
     try expectInvalid("name = \"a\"\nversion = \n", "line 2, column 11: expected value");
+}
+
+test "meta packages have no source or steps; subpackages take depends, install_if, empty" {
+    var arena_state = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena_state.deinit();
+    var diag: Diagnostic = .{};
+    const head = "name = \"a\"\nversion = \"1\"\nrelease = 1\nsummary = \"s\"\nlicense = \"MIT\"\n";
+    const m = try parse(arena_state.allocator(), head ++ "options = [\"meta\"]\nrundeps = [\"b\", \"c\"]\n", &diag);
+    try std.testing.expectEqual(@as(usize, 0), m.source.len);
+    try std.testing.expectEqualStrings("", m.install);
+    try expectInvalid(head ++ "options = [\"meta\"]\ninstall = \"x\"\n", "a 'meta' package has no source, setup, build or install");
+    try expectInvalid(head ++ "source = []\n", "missing required key 'install'");
+    const f = try parse(arena_state.allocator(), head ++ "options = [\"meta\"]\n" ++
+        "[subpackages.gpu]\nsummary = \"GPU\"\nempty = true\ndepends = [\"a-amdgpu\"]\n" ++
+        "[subpackages.amdgpu]\nsummary = \"AMD\"\npaths = [\"/usr/lib/firmware/amdgpu\"]\ninstall_if = [\"a-gpu\"]\n", &diag);
+    try std.testing.expect(f.subpackages[0].empty);
+    try std.testing.expectEqualStrings("a-amdgpu", f.subpackages[0].depends[0]);
+    try std.testing.expectEqualStrings("a-gpu", f.subpackages[1].install_if[0]);
+    try std.testing.expect(!f.subpackages[1].empty);
 }

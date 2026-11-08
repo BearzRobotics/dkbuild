@@ -1,6 +1,7 @@
 #!/bin/sh
 # SPEC.md 7.2: unchanged packages are skipped; a recipe change under the same
-# release is an error; a new release rebuilds the package and what builds on it.
+# release is an error; a new release rebuilds the package, and what builds on it
+# only when the package came out different (early cutoff).
 set -u
 cd "$(dirname "$0")/.."
 . tests/lib.sh
@@ -26,13 +27,22 @@ OUT=$(run) && fail "an edited recipe with the same release was accepted"
 echo "$OUT" | grep -q 'release is still r1' || fail "no message about the unchanged release"
 echo "$OUT" | grep -q 'preparing build root' && fail "built despite the error"
 
-# A new release rebuilds it, and the package that builds against it.
+# A new release rebuilds it. It comes out identical (only a comment changed),
+# so the package that builds against it is not rebuilt (early cutoff).
 sed -i 's/^release = 1$/release = 2/' "$T/packages/d/dkdemo/package.toml"
 OUT=$(run) || fail "build after the release bump"
 echo "$OUT" | grep -q '^==> dkdemo-1-r2$' || fail "dkdemo r2 was not built"
-echo "$OUT" | grep -q 'usedemo-1-r1: packages it builds against changed' || fail "usedemo was not rebuilt after its dependency changed"
+echo "$OUT" | grep -q 'usedemo-1-r1: up to date' || fail "usedemo was rebuilt although dkdemo came out identical"
+
+# A release that changes what dkdemo produces rebuilds what builds against it.
+sed -i -e 's/^release = 2$/release = 3/' -e 's/llvm-ar rcs libdkdemo.a dkdemo_s.o/llvm-ar rcs libdkdemo.a dkdemo_s.o; echo extra > README.dkdemo/' \
+    -e 's|^cp dkdemo.h \$pkgdir/usr/include/$|cp dkdemo.h \$pkgdir/usr/include/; mkdir -p \$pkgdir/usr/share/dkdemo; cp README.dkdemo \$pkgdir/usr/share/dkdemo/|' \
+    "$T/packages/d/dkdemo/package.toml"
+OUT=$(run) || fail "build after a change to what dkdemo produces"
+echo "$OUT" | grep -q '^==> dkdemo-1-r3$' || fail "dkdemo r3 was not built"
+echo "$OUT" | grep -q 'usedemo-1-r1: packages it builds against changed' || fail "usedemo was not rebuilt after its dependency's output changed"
 
 # --force rebuilds an up-to-date package.
 OUT=$(./zig-out/bin/dkbuild --tree "$T" pkg --force usedemo 2>&1) || fail "--force build"
 echo "$OUT" | grep -q 'preparing build root' || fail "--force did not rebuild"
-echo "ok: skipped when unchanged; error for a changed recipe at the same release; rebuilt when its release or a dependency changes; --force rebuilds"
+echo "ok: skipped when unchanged; error for a changed recipe at the same release; an identical rebuild stops the cascade, a different one rebuilds dependents; --force rebuilds"

@@ -1,10 +1,13 @@
 //! Running the builds of `pkg` and `world` (SPEC.md 10): up to `parallel`
 //! at once, each starting as soon as everything its build root needs is built.
 //!
-//! What to build is decided before anything starts (main.zig); this runs that
-//! list. The list is in dependency order, and a build only waits for builds
-//! earlier in it, so it never waits in a circle, and with `parallel` = 1 it
-//! runs exactly as the list says.
+//! main.zig makes the list, in dependency order, and settles what it can
+//! upfront: a package never built, built as another version, or edited
+//! (`certain`). The rest are decided here, once everything their build root
+//! needs is done: rebuilt only if the outputs of those packages differ from
+//! what the package was last built with (inputs.buildRootHash; early cutoff).
+//! A build only waits for builds earlier in the list, so it never waits in a
+//! circle, and with `parallel` = 1 it runs exactly as the list says.
 //!
 //! - A build waits for the in-tree packages it unpacks from repo/
 //!   (`tree.needs`). When one of them fails, it is skipped.
@@ -19,6 +22,7 @@ const std = @import("std");
 const recipe = @import("recipe.zig");
 const tree = @import("tree.zig");
 const build = @import("build.zig");
+const inputs = @import("inputs.zig");
 const Allocator = std.mem.Allocator;
 const Io = std.Io;
 
@@ -27,9 +31,15 @@ pub const Job = struct {
     idx: usize,
     /// `name-version-rN`.
     id: []const u8,
-    /// Where the rebuild record goes, and what it says, once the build succeeds.
+    /// Where the rebuild record goes once the build succeeds.
     rec_path: []const u8,
-    record: []const u8,
+    /// `<version>-r<release>` and the recipe's own inputs, for that record.
+    version: []const u8,
+    own: inputs.Hex,
+    /// Build it whatever its build root holds (new, new version, --force).
+    certain: bool,
+    /// The build-root hash it was last built with (from its record).
+    old_root: ?inputs.Hex = null,
 };
 
 pub const Result = struct {
@@ -55,6 +65,7 @@ const Worker = struct {
     buffered: bool,
     console: std.ArrayList(u8) = .empty,
     err: ?anyerror = null,
+    output: inputs.Produced = undefined,
     thread: std.Thread = undefined,
 };
 
@@ -63,9 +74,11 @@ fn workerMain(w: *Worker) void {
     defer arena_state.deinit();
     if (w.buffered) build.console = &w.console;
     defer build.console = null;
-    build.buildOne(arena_state.allocator(), w.io, w.r, w.opts) catch |err| {
+    if (build.buildOne(arena_state.allocator(), w.io, w.r, w.opts)) |o| {
+        w.output = o;
+    } else |err| {
         w.err = err;
-    };
+    }
     w.shared.mutex.lockUncancelable(w.io);
     defer w.shared.mutex.unlock(w.io);
     w.shared.done.appendAssumeCapacity(w.job);
@@ -89,12 +102,18 @@ fn waitLists(arena: Allocator, t: tree.Tree, jobs: []const Job) Allocator.Error!
     return waits;
 }
 
-pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []const Job, opts: build.Options, parallel: usize, keep_going: bool) !Result {
+/// `outputs` holds, per recipe, the hash of what it last produced (from the
+/// records); builds that succeed here update it.
+pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []const Job, outputs: []?inputs.Produced, opts: build.Options, parallel: usize, keep_going: bool) !Result {
     const n = jobs.len;
     const waits = try waitLists(arena, t, jobs);
     const state = try arena.alloc(State, n);
     @memset(state, .pending);
     const workers = try arena.alloc(Worker, n);
+    // The build-root hash each job starts with, for its record.
+    const roots = try arena.alloc(inputs.Hex, n);
+    const announced = try arena.alloc(bool, n);
+    @memset(announced, false);
     var shared: Shared = .{};
     try shared.done.ensureTotalCapacity(arena, n);
     const buffered = parallel > 1;
@@ -125,7 +144,21 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []const Job, opts: buil
                     std.debug.print("==> {s}: skipped, a package it needs failed\n", .{r.name});
                     continue;
                 }
-                if (!ready or hold or running >= parallel) continue;
+                if (!ready) continue;
+                // Everything in its build root is settled: compare.
+                roots[j] = try inputs.buildRootHash(arena, t, outputs, jobs[j].idx);
+                if (!jobs[j].certain) {
+                    if (jobs[j].old_root) |old| if (std.mem.eql(u8, &old, &roots[j])) {
+                        state[j] = .ok;
+                        std.debug.print("==> {s}: up to date\n", .{jobs[j].id});
+                        continue;
+                    };
+                    if (!announced[j]) {
+                        announced[j] = true;
+                        std.debug.print("==> {s}: packages it builds against changed; rebuilding\n", .{jobs[j].id});
+                    }
+                }
+                if (hold or running >= parallel) continue;
                 const heavy = build.isHeavy(r);
                 if (heavy and running > 0) {
                     hold = true;
@@ -171,7 +204,9 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []const Job, opts: buil
                 continue;
             }
             state[j] = .ok;
-            std.Io.Dir.cwd().writeFile(io, .{ .sub_path = jobs[j].rec_path, .data = jobs[j].record }) catch |err| {
+            outputs[jobs[j].idx] = w.output;
+            const record = try inputs.format(arena, .{ .version = jobs[j].version, .inputs = jobs[j].own, .deps = roots[j], .output = w.output.output, .interface = w.output.interface });
+            std.Io.Dir.cwd().writeFile(io, .{ .sub_path = jobs[j].rec_path, .data = record }) catch |err| {
                 std.debug.print("warning: cannot write {s}: {s}\n", .{ jobs[j].rec_path, @errorName(err) });
             };
         }
@@ -198,9 +233,9 @@ test "a job waits only for earlier jobs it needs; up-to-date packages are not wa
     } };
     // zlib is up to date (not in the list); lib, other, app are built in that order.
     const jobs = [_]Job{
-        .{ .idx = 1, .id = "lib", .rec_path = "", .record = "" },
-        .{ .idx = 2, .id = "other", .rec_path = "", .record = "" },
-        .{ .idx = 0, .id = "app", .rec_path = "", .record = "" },
+        .{ .idx = 1, .id = "lib", .rec_path = "", .version = "1-r1", .own = undefined, .certain = true },
+        .{ .idx = 2, .id = "other", .rec_path = "", .version = "1-r1", .own = undefined, .certain = true },
+        .{ .idx = 0, .id = "app", .rec_path = "", .version = "1-r1", .own = undefined, .certain = true },
     };
     const w = try waitLists(a, t, &jobs);
     try std.testing.expectEqual(@as(usize, 0), w[0].len);

@@ -163,7 +163,12 @@ pub fn run(arena: Allocator, io: std.Io, destdir: []const u8, out: []const u8, s
     for (dirs.items) |dn| d.deleteDir(io, dn) catch {};
 
     var result: std.ArrayList(Moved) = .empty;
-    for (subs, counts) |sp, c| if (c > 0) try result.append(arena, .{ .name = sp.name, .files = c });
+    for (subs, counts) |sp, c| {
+        if (c > 0 or sp.empty) {
+            if (c == 0) try Dir.cwd().createDirPath(io, try std.fs.path.join(arena, &.{ out, sp.name }));
+            try result.append(arena, .{ .name = sp.name, .files = c });
+        }
+    }
     return result.items;
 }
 

@@ -173,7 +173,7 @@ guide to the rest of the syntax.
 | `description` | no | Longer text |
 | `license` | yes | SPDX expression |
 | `homepage` | no | URL |
-| `source` | yes | Array of inline tables, `{ url, sha256 }` or `{ git, tag \| commit }` (5.3) |
+| `source` | no | Array of inline tables, `{ url, sha256 }` or `{ git, tag \| commit }` (5.3). Left out, the recipe's own `files/` are everything (base-files); a `meta` package has none |
 | `patches` | no | Files in `patches/`, applied in order with `patch -p1` |
 | `archs` | no | Architectures this builds for; default all. `!riscv64` excludes one |
 | `hostdeps` | no | Packages run during the build (compilers, meson, perl): installed for the **build machine's** architecture |
@@ -182,7 +182,7 @@ guide to the rest of the syntax.
 | `rundeps` | no | Runtime dependencies that can't be detected (5.6) |
 | `options` | no | List from 5.4 |
 | `environment` | no | Shell lines run before every step |
-| `setup`, `build`, `check`, `install` | `install` yes | Shell steps, with macros (5.5) |
+| `setup`, `build`, `check`, `install` | `install` yes (not for `meta`) | Shell steps, with macros (5.5) |
 | `subpackages` | no | 5.7 |
 
 ### 5.3 Sources
@@ -201,7 +201,9 @@ source = [
   on first fetch and recorded in `package.lock` next to the recipe, so later
   builds use exactly that commit.
 - The first tarball is unpacked into the build directory, and the build
-  steps start inside its top directory.
+  steps start inside its top directory. Further tarballs are unpacked next to
+  it (`/build/<their top directory>`): a vendored dependency's source, such as
+  the llama.cpp that ollama builds.
 
 ### 5.4 Options
 
@@ -213,7 +215,12 @@ source = [
 | `!lto` | Turn off link-time optimization (when it's on by default) |
 | `static` | Link programs statically (rescue-critical tools): adds `-static` to `LDFLAGS`. Never on a recipe that ships a shared library: `-shared -static` links without a warning and gives a library that crashes its users (zstd 1.5.7-r1 crashed lld that way) |
 | `bootstrap` | Part of the bootstrap set (9); built in stage 0 |
-| `jobs:N` | At most N parallel jobs for this recipe (LLVM: `jobs:2`) |
+| `jobs:N` | At most N parallel jobs for this recipe (LLVM: `jobs:10`). Also marks it heavy: with `-P`, it builds alone (10) |
+| `zigdeps` | Zig dependencies fetched on the host into `cache/zigdeps/` and laid in the source tree as `zig-pkg/` (9.4) |
+| `godeps` | Go modules vendored on the host (`go mod vendor`, needs `go`) into `cache/godeps/`, laid in as `vendor/`; build with `-mod=vendor` |
+| `cargodeps` | Rust crates vendored on the host (`cargo vendor`, needs `cargo`) into `cache/cargodeps/`, laid in as `vendor/` with a `.cargo/config.toml` pointing at it; build with `--offline` |
+| `meta` | A meta-package: no source and no steps, only `rundeps` (`base`, `desktop-hyprland`) |
+| `rootlayout` | May install outside `/usr /etc /var /opt /boot` (base-files: `/dev`, `/proc`, the usr-merge links) |
 
 ### 5.5 Macros
 
@@ -227,7 +234,7 @@ hold the toolchain decisions in one place, per target (6.1).
 | `%make_install` | `make DESTDIR=$pkgdir install` |
 | `%meson` | `meson setup build --prefix=/usr --buildtype=release --wrap-mode=nodownload -Dwerror=false`, plus the target's cross file when cross-compiling |
 | `%meson_build`, `%meson_install` | `ninja -C build`, `DESTDIR=$pkgdir ninja -C build install` |
-| `%cmake` | `cmake -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release`, plus the target's toolchain file |
+| `%cmake` | `cmake -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release`, plus the target's toolchain file. Without the libdir, GNUInstallDirs picks `/usr/lib64` on x86_64, which musl's loader never searches; a package that installs there fails the policy check |
 | `%cmake_build`, `%cmake_install` | `cmake --build build`, `DESTDIR=$pkgdir cmake --install build --strip` |
 | `%zig_build` | `zig build --release=safe --prefix /usr -Dtarget=$zig_target -Dcpu=$zig_cpu` with `--system` for vendored dependencies, `-j$jobs`, and `DESTDIR=$pkgdir` |
 | `%kernel_make` | `make LLVM=1 ARCH=$kernel_arch` |
@@ -285,7 +292,13 @@ change those; one with the same name replaces the default, and declared
 subpackages are matched before the defaults. Files are moved, not copied:
 each file belongs to exactly one package, the first subpackage whose path
 matches it (a path matches a file, or a directory above it; `*` matches
-within one path component). A subpackage that gets no files isn't made. A `*.so` pattern matches only symlinks (the development link), so a real `libfoo-1.2.so` is never taken into `-devel`. A package that is only a library has no `-libs`: its libraries stay in the main package. When `-libs` exists, `-devel` depends on it.
+within one path component). A subpackage that gets no files isn't made,
+unless it says `empty = true` (a group that only depends on others). A
+subpackage can also list `depends` (packages it needs besides what the scan
+finds) and `install_if` (apk installs it automatically once all of those are
+installed). firmware-linux uses both: `firmware-linux-amdgpu` has
+`install_if = ["firmware-linux-gpu"]`, so a system gets either just the
+firmware it names, or a whole group. A `*.so` pattern matches only symlinks (the development link), so a real `libfoo-1.2.so` is never taken into `-devel`. A package that is only a library has no `-libs`: its libraries stay in the main package. When `-libs` exists, `-devel` depends on it.
 Empty directories are dropped.
 
 Static libraries are a first-class product, not an afterthought: musl makes
@@ -443,10 +456,14 @@ own `chimera` vendor, because Chimera's compiler looks for its runtime under
 From a profile, dkbuild generates the Meson cross file, the CMake
 toolchain file and the `configure` `--host` value for a cross build.
 
-**OPEN:** the bootloader for FenrirOS on every architecture. dklilo isn't
-implemented yet and is x86-only in its own spec, so nothing is decided; the
-x86_64 image can't depend on it until it exists. The kernel's EFI stub can boot directly from UEFI firmware on
-both, which may be enough for v1.
+**Decided for installed UEFI systems: systemd-boot.** It is built from
+systemd's source with only the boot manager and `bootctl` (as Chimera does),
+so it needs no systemd as init. The EFI system partition is mounted at `/boot`
+and holds the kernels; `gen-systemd-boot` writes Boot Loader Specification
+entries (normal and recovery) for every `/boot/vmlinuz-*`, and the `linux`
+package runs it after each install or upgrade (docs/install.md).
+**Still OPEN:** the live ISO (dklilo, x86-only in its own spec) and BIOS
+machines.
 
 ### 6.2 Cross-compiling
 
@@ -540,24 +557,54 @@ system calls directly:
 
 ### 7.2 Rebuilds
 
-Next to each built package dkbuild writes `repo/<arch>/<name>.dkhash`: the
-`version-release` it was built as, a hash of the recipe's **own inputs**
-(`package.toml`, everything under `patches/` and `files/`, and the
-architecture profile), and a hash of the **in-tree packages it was built
-against** (its `hostdeps` and `builddeps`, transitively: their names,
-versions and own-input hashes). Before building, `dkbuild pkg` compares:
+Next to each built package dkbuild writes `repo/<arch>/<name>.dkhash`:
 
-| Same version-release? | Own inputs | Built-against | Result |
+- `version`: the `version-release` it was built as;
+- `inputs`: a hash of the recipe's **own inputs** (`package.toml`, everything
+  under `patches/`, `files/` and `scripts/`, and the architecture profile);
+- `deps`: a hash of its **build root**: the in-tree packages laid into it from
+  `repo/` (`tree.needs`: its `hostdeps` and `builddeps`, and what those need to
+  build and run), each by name and by what it produced (`output` for the tools
+  it runs, `interface` for what it links against);
+- `output`: a hash of what this build **produced**: every path of every
+  package it made, with type, permission bits and contents (file data, link
+  target). No timestamps or owners, so an identical rebuild hashes the same;
+- `interface`: the part of that a package building against it can see (below).
+
+| Same version-release? | Own inputs | Build root | Result |
 |---|---|---|---|
 | no, or no package yet | | | build |
-| yes | same | same | skip: "up to date" |
-| yes | same | changed | rebuild |
 | yes | **changed** | | **error:** bump `release` (`--force` overrides) |
+| yes | same | same outputs | skip: "up to date" |
+| yes | same | changed outputs | rebuild |
 
-The error is the rule that `version` or `release` must change whenever the
-package's output changes. A rebuild only because something it builds against
-changed is not an error: the recipe didn't change, and the new package keeps
-its version, as in a rebuild against a new library.
+The error is decided before anything builds. The build-root comparison is
+made when the package's turn comes, after everything in its build root has
+been built in this run (src/sched.zig), because it depends on what those
+builds produced.
+
+**Early cutoff.** Because the build root is hashed by outputs, a dependency
+that is rebuilt and comes out identical (a new build tool, a comment, a
+release bump that changes nothing) stops the cascade: nothing above it is
+rebuilt. The build tools of a dependency are not in a package's build root, so
+they never count (adding rsync, which linux-headers uses, rebuilds
+linux-headers and nothing else). A build that is not reproducible (it embeds a
+date or a path) never cuts off; its dependents rebuild, which is what would
+have happened anyway. A new linux-headers *version* rebuilds what uses the
+headers; above that, only what came out different.
+
+**Interfaces.** The record also holds `interface`: the same hash as
+`output`, except that each shared library in `/usr/lib` counts as its soname
+and its exported symbols (with sizes for data), not its code. In a build root,
+the packages a build *links against* count by interface, and the *tools* it
+runs (its `hostdeps`, and what they need) by their whole output, since a
+changed compiler changes what it makes. So a fix inside a library's code
+rebuilds the library and nothing that links against it; a new export, a
+changed header or a new compiler rebuilds the dependents.
+
+**Later:** a build number in the published version, so a package rebuilt only
+because its build root changed reaches installed systems (apk upgrades only
+when the version goes up).
 
 ### 7.3 Build roots, stage 0 and `repo/`
 
@@ -596,13 +643,13 @@ arch     = "x86_64"
 packages = [
     "base",
     "linux",
-    "bootloader",   # OPEN: dklilo when it exists
+    "systemd-boot", # UEFI installs (6.1)
     "core-utils",
     "dkde",
 ]
 exclude  = ["*-devel", "*-doc"]
 services = ["udevd", "dhcpcd", "syslogd", "seatd"]
-output   = ["rootfs", "squashfs", "iso"]
+output   = ["rootfs", "squashfs", "tar"]
 
 [[users]]
 name     = "fenrir"
@@ -610,17 +657,29 @@ groups   = ["wheel", "video", "render"]
 password = "locked"
 ```
 
-`dkbuild image images/fenriros.toml`:
+`dkbuild image images/fenriros.toml` (src/image.zig), in the sandbox on the
+build machine, as uid 0 of a user namespace, writing only `out/<name>/`:
 
 1. `apk add --root <rootfs> --arch <arch> --initdb` with the package list
-   (and nothing matching `exclude`), from the local repository.
-2. Creates the users and enables the services listed.
-3. Produces what `output` asks for: the root filesystem as a directory, its
-   squashfs, and the live ISO, using the same steps as the DKRescue ISO
-   build (initramfs, `mksquashfs`, the bootloader's ISO tooling, `xorriso`).
+   from the local repository (`repo/<arch>/Packages.adb`, trusting `keys/`).
+   No package in the list may match an `exclude` pattern; what they depend on
+   is installed whatever its name.
+2. Writes `/etc/hostname`, enables the services listed (links in
+   `/etc/dinit.d/boot.d`) and creates the users (`useradd -R`). A user's
+   `password` is `"locked"` (the default: set it when installing), `"empty"`,
+   or a crypt(3) hash.
+3. Produces what `output` asks for: `rootfs` (the directory), `tar`
+   (`<name>.tar.zst`, root-owned: the way onto a disk, docs/install.md) and
+   `squashfs` (`<name>.sfs`). The archives are made inside the sandbox so they
+   record root ownership; on the host the files belong to the calling user.
 
-The ISO output is x86_64-only in v1, and waits on the bootloader decision
-(6.1, **OPEN**). The same image list can later feed an installer.
+**Not yet:** the `iso` output (initramfs, the live-boot bootloader, `xorriso`),
+which waits on the live-ISO bootloader (6.1). The same image list can later
+feed an installer.
+
+Meta-packages (`options = ["meta"]`) keep image lists short: `base` (boots to
+a login prompt with apk working), `base-net` (dhcpcd, OpenSSH, curl) and
+`desktop-hyprland`.
 
 ## 9. Bootstrap and the base system
 
@@ -811,6 +870,7 @@ inside a namespace the installed root runs `apk --version`, `sh`, `ls` and
 | `dkbuild doctor` | Checks the host (programs, namespaces, overlayfs, disk, key) and prints the fixes (3.1) |
 | `dkbuild image <file>` | Builds an image (8) |
 | `dkbuild bootstrap-root [--force] [--dest DIR] <image>` | Unpacks the stage 0 build machine and checks it (9.2) |
+| `dkbuild prune [--dry-run]` | Removes packages from `repo/` that their recipe no longer builds (older versions, dropped subpackages), once the recipe's present version is built, and rebuilds the index. Packages no recipe provides are reported, not removed |
 | `dkbuild shell <name>` | Opens a shell in a prepared build root for that recipe |
 | `-j N` | Parallel jobs per build (default: the number of CPUs) |
 | `-P N` | Builds at once (default 1) |

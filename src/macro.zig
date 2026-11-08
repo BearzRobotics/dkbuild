@@ -74,7 +74,7 @@ fn lookup(arena: Allocator, ctx: Context, name: []const u8) Allocator.Error!?[]c
     if (eql(u8, name, "meson_build")) return "ninja -C build";
     if (eql(u8, name, "meson_install")) return "DESTDIR=$pkgdir ninja -C build install";
     if (eql(u8, name, "cmake")) {
-        return try std.fmt.allocPrint(arena, "cmake -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release{s}", .{
+        return try std.fmt.allocPrint(arena, "cmake -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release{s}", .{
             if (cross) " -DCMAKE_TOOLCHAIN_FILE=" ++ cross_dir ++ "/toolchain.cmake" else "",
         });
     }

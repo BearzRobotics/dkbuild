@@ -9,6 +9,7 @@ const sandbox = @import("sandbox.zig");
 const doctor = @import("doctor.zig");
 const cbuild = @import("cbuild.zig");
 const sched = @import("sched.zig");
+const imagefile = @import("image.zig");
 
 const usage =
     \\usage: dkbuild [--tree DIR] <command> [args]
@@ -20,6 +21,11 @@ const usage =
     \\  world [-j N] [-P N] [--key FILE] [--keep-root] [--no-check] [--keep-going] [--force]
     \\                             build every recipe in the tree that is out of date
     \\                             (-j: jobs per build; -P: builds at once, default 1)
+    \\  image <file.toml>          make a root filesystem from repo/ (tarball, squashfs or
+    \\                             directory in out/<name>/); see SPEC.md 8
+    \\  prune [--dry-run] [--key FILE]
+    \\                             remove packages from repo/ that their recipe no longer
+    \\                             builds (older versions), and rebuild the index
     \\  graph <name>...            print the build order for packages
     \\  import-cbuild [--out DIR] <template.py|dir>...
     \\                             convert Chimera cbuild templates into draft recipes
@@ -108,6 +114,22 @@ pub fn main(init: std.process.Init) !void {
                             std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(zerr) });
                         }
                     }
+                    if (src == .tarball and contains(r.options, "cargodeps")) {
+                        if (fetch.fetchCargoDeps(arena, init.io, cache, src.tarball.sha256, &msg)) |cst| {
+                            std.debug.print("{s}: Rust crates {s}\n", .{ r.name, @tagName(cst) });
+                        } else |cerr| {
+                            failed = true;
+                            std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(cerr) });
+                        }
+                    }
+                    if (src == .tarball and contains(r.options, "godeps")) {
+                        if (fetch.fetchGoDeps(arena, init.io, cache, src.tarball.sha256, &msg)) |gst| {
+                            std.debug.print("{s}: Go modules {s}\n", .{ r.name, @tagName(gst) });
+                        } else |gerr| {
+                            failed = true;
+                            std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(gerr) });
+                        }
+                    }
                 } else |err| {
                     failed = true;
                     std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
@@ -169,41 +191,52 @@ pub fn main(init: std.process.Init) !void {
         // Rebuild decisions (SPEC.md 7.2).
         const own = try arena.alloc(inputs.Hex, t.recipes.len);
         for (t.recipes, own) |r, *h| h.* = try inputs.ownHash(arena, init.io, root, r.name, opts.arch);
-        // Every decision is made before anything builds: they depend only on
-        // the recipes, so a recipe edited without a new release stops the run
-        // before any work is lost.
+        // What can be settled before anything builds is settled here: a recipe
+        // edited without a new release stops the run before any work is lost.
+        // Whether a package whose recipe is unchanged needs rebuilding depends
+        // on what its dependencies produce in this run; sched.zig decides that.
+        const outputs = try arena.alloc(?inputs.Produced, t.recipes.len);
+        @memset(outputs, null);
         var jobs: std.ArrayList(sched.Job) = .empty;
+        var certain: usize = 0;
+        for (t.recipes, 0..) |r, idx| {
+            const rec_path = try std.fmt.allocPrint(arena, "{s}/repo/{s}/{s}.dkhash", .{ root, opts.arch, r.name });
+            const rec_text = std.Io.Dir.cwd().readFileAlloc(init.io, rec_path, arena, .limited(1 << 16)) catch continue;
+            if (try inputs.parse(arena, rec_text)) |rec| if (rec.output) |o| {
+                outputs[idx] = .{ .output = o, .interface = rec.interface orelse o };
+            };
+        }
         for (order) |idx| {
             const r = t.recipes[idx];
             const ver = try std.fmt.allocPrint(arena, "{s}-r{d}", .{ r.version, r.release });
-            const deps = try inputs.depsHash(arena, t, own, idx);
             const rec_path = try std.fmt.allocPrint(arena, "{s}/repo/{s}/{s}.dkhash", .{ root, opts.arch, r.name });
             const pkg_path = try std.fmt.allocPrint(arena, "{s}/repo/{s}/{s}-{s}.apk", .{ root, opts.arch, r.name, ver });
             const rec_text = std.Io.Dir.cwd().readFileAlloc(init.io, rec_path, arena, .limited(1 << 16)) catch null;
             const rec = if (rec_text) |txt| try inputs.parse(arena, txt) else null;
             const exists = if (std.Io.Dir.cwd().access(init.io, pkg_path, .{})) |_| true else |_| false;
-            switch (inputs.decide(rec, ver, own[idx], deps, exists)) {
-                .up_to_date => if (!force) {
-                    std.debug.print("==> {s}-{s}: up to date\n", .{ r.name, ver });
-                    continue;
-                },
-                .rebuild_deps => std.debug.print("==> {s}-{s}: packages it builds against changed; rebuilding\n", .{ r.name, ver }),
-                .unchanged_release => if (!force) {
-                    std.debug.print("error: {s}: its recipe, patches or files changed but the release is still r{d}; bump `release` (or use --force)\n", .{ r.name, r.release });
-                    std.process.exit(1);
-                },
-                .build => {},
-            }
-            try jobs.append(arena, .{
+            var job: sched.Job = .{
                 .idx = idx,
                 .id = try std.fmt.allocPrint(arena, "{s}-{s}", .{ r.name, ver }),
                 .rec_path = rec_path,
-                .record = try inputs.format(arena, .{ .version = ver, .inputs = own[idx], .deps = deps }),
-            });
+                .version = ver,
+                .own = own[idx],
+                .certain = true,
+            };
+            if (force or rec == null or !exists or !std.mem.eql(u8, rec.?.version, ver)) {
+                // never built, a new version or release, or --force
+            } else if (!std.mem.eql(u8, &rec.?.inputs, &own[idx])) {
+                std.debug.print("error: {s}: its recipe, patches or files changed but the release is still r{d}; bump `release` (or use --force)\n", .{ r.name, r.release });
+                std.process.exit(1);
+            } else {
+                job.certain = false;
+                job.old_root = rec.?.deps;
+            }
+            if (job.certain) certain += 1;
+            try jobs.append(arena, job);
         }
-        if (parallel > 1 and jobs.items.len > 0)
-            std.debug.print("{d} package(s) to build, up to {d} at a time\n", .{ jobs.items.len, parallel });
-        const res = try sched.run(arena, init.io, t, jobs.items, opts, parallel, keep_going);
+        if (parallel > 1 and certain > 0)
+            std.debug.print("{d} package(s) to build, others when what they build against changed; up to {d} at a time\n", .{ certain, parallel });
+        const res = try sched.run(arena, init.io, t, jobs.items, outputs, opts, parallel, keep_going);
         const failed_names = res.failed;
         const skipped_names = res.skipped;
         if (failed_names.len > 0 and !keep_going) std.process.exit(1);
@@ -215,6 +248,45 @@ pub fn main(init: std.process.Init) !void {
             std.debug.print("\n", .{});
             std.process.exit(1);
         }
+    } else if (std.mem.eql(u8, cmd, "image")) {
+        if (rest.len != 1) return die(usage);
+        const text = std.Io.Dir.cwd().readFileAlloc(init.io, rest[0], arena, .limited(1 << 20)) catch |err| {
+            std.debug.print("{s}: {s}\n", .{ rest[0], @errorName(err) });
+            std.process.exit(1);
+        };
+        var diag: imagefile.Diagnostic = .{};
+        const img = imagefile.parse(arena, text, &diag) catch |err| switch (err) {
+            error.InvalidImage => {
+                std.debug.print("{s}: {s}\n", .{ rest[0], diag.message });
+                std.process.exit(1);
+            },
+            else => return err,
+        };
+        imagefile.build(arena, init.io, img, .{ .root = root }) catch |err| switch (err) {
+            error.OutOfMemory => return err,
+            else => std.process.exit(1),
+        };
+    } else if (std.mem.eql(u8, cmd, "prune")) {
+        var opts: build.Options = .{ .root = root };
+        if (init.environ_map.get("HOME")) |home|
+            opts.key = try std.fs.path.join(arena, &.{ home, ".config", "dkbuild", "signing.rsa" });
+        var dry_run = false;
+        var k: usize = 0;
+        while (k < rest.len) : (k += 1) {
+            if (std.mem.eql(u8, rest[k], "--dry-run")) {
+                dry_run = true;
+            } else if (std.mem.eql(u8, rest[k], "--key") and k + 1 < rest.len) {
+                k += 1;
+                opts.key = rest[k];
+            } else return die(usage);
+        }
+        var t = try tree.load(arena, init.io, root, &problems);
+        t.allow_external = true;
+        opts.tree = t;
+        build.prune(arena, init.io, opts, dry_run) catch |err| switch (err) {
+            error.OutOfMemory => return err,
+            else => std.process.exit(1),
+        };
     } else if (std.mem.eql(u8, cmd, "graph")) {
         if (rest.len == 0) return die(usage);
         const t = try tree.load(arena, init.io, root, &problems);
@@ -311,4 +383,5 @@ test {
     _ = @import("scan.zig");
     _ = @import("inputs.zig");
     _ = @import("sched.zig");
+    _ = @import("image.zig");
 }

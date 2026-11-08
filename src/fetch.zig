@@ -108,6 +108,106 @@ test "validSha256" {
     try std.testing.expect(!validSha256(&nonhex));
 }
 
+/// Where the vendored Go modules of a source tarball are cached.
+pub fn goDepsPath(arena: Allocator, cache: []const u8, tarball_sha256: []const u8) ![]const u8 {
+    return std.fmt.allocPrint(arena, "{s}/godeps/{s}.tar", .{ cache, tarball_sha256 });
+}
+
+/// For recipes with the `godeps` option: `go mod vendor` in the source tarball
+/// (needs the network, so it runs on the host, never in the sandbox) and keep
+/// the result as `cache/godeps/<sha256>.tar`, holding the `vendor/` directory
+/// that `go build -mod=vendor` reads offline. Uses the `go` on the host's PATH;
+/// GOTOOLCHAIN=auto lets it fetch the Go version the module asks for.
+pub fn fetchGoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, message: *[]const u8) Error!Status {
+    const out_path = try goDepsPath(arena, cache, tarball_sha256);
+    if (std.Io.Dir.cwd().access(io, out_path, .{})) |_| return .cached else |_| {}
+    const tarball = try cachePath(arena, cache, tarball_sha256);
+    const dir = try std.fmt.allocPrint(arena, "{s}/godeps", .{cache});
+    std.Io.Dir.cwd().createDirPath(io, dir) catch |err| {
+        message.* = try std.fmt.allocPrint(arena, "cannot create {s}: {s}", .{ dir, @errorName(err) });
+        return error.DownloadFailed;
+    };
+    const tmp = try std.fmt.allocPrint(arena, "{s}/tmp-{s}", .{ dir, tarball_sha256 });
+    // The tarball has one top-level directory; the vendoring runs inside it.
+    // The module cache is thrown away afterwards (Go makes it read-only).
+    const script = try std.fmt.allocPrint(arena,
+        \\set -e
+        \\rm -rf '{0s}'; mkdir -p '{0s}/src'
+        \\tar -xf '{1s}' -C '{0s}/src'
+        \\top=$(ls -d '{0s}'/src/*/ | head -n1)
+        \\t=$(cd '{0s}' && pwd)
+        \\export GOPATH="$t/gopath" GOMODCACHE="$t/gopath/mod" GOCACHE="$t/gocache" GOTOOLCHAIN=auto GOFLAGS=-mod=mod
+        \\( cd "$top" && timeout 1800 go mod vendor )
+        \\tar -cf '{2s}.part' -C "$top" vendor
+        \\mv '{2s}.part' '{2s}'
+        \\chmod -R u+w '{0s}'; rm -rf '{0s}'
+    , .{ tmp, tarball, out_path });
+    const res = std.process.run(arena, io, .{ .argv = &.{ "sh", "-c", script } }) catch |err| {
+        message.* = try std.fmt.allocPrint(arena, "cannot run the Go module fetch: {s}", .{@errorName(err)});
+        return error.DownloadFailed;
+    };
+    const ok = switch (res.term) {
+        .exited => |c| c == 0,
+        else => false,
+    };
+    if (!ok) {
+        message.* = try std.fmt.allocPrint(arena, "Go module fetch failed (needs `go` on PATH): {s}", .{std.mem.trim(u8, res.stderr, "\n ")});
+        return error.DownloadFailed;
+    }
+    return .downloaded;
+}
+
+/// Where the vendored Rust crates of a source tarball are cached.
+pub fn cargoDepsPath(arena: Allocator, cache: []const u8, tarball_sha256: []const u8) ![]const u8 {
+    return std.fmt.allocPrint(arena, "{s}/cargodeps/{s}.tar", .{ cache, tarball_sha256 });
+}
+
+/// For recipes with the `cargodeps` option: `cargo vendor` in the source
+/// tarball (needs the network, so it runs on the host, never in the sandbox)
+/// and keep the result as `cache/cargodeps/<sha256>.tar`: the `vendor/`
+/// directory and a `.cargo/config.toml` that points cargo at it (the source's
+/// own config, if it has one, with the vendoring lines added), so an offline
+/// `cargo build` finds every crate. Uses the `cargo` on the host's PATH.
+pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, message: *[]const u8) Error!Status {
+    const out_path = try cargoDepsPath(arena, cache, tarball_sha256);
+    if (std.Io.Dir.cwd().access(io, out_path, .{})) |_| return .cached else |_| {}
+    const tarball = try cachePath(arena, cache, tarball_sha256);
+    const dir = try std.fmt.allocPrint(arena, "{s}/cargodeps", .{cache});
+    std.Io.Dir.cwd().createDirPath(io, dir) catch |err| {
+        message.* = try std.fmt.allocPrint(arena, "cannot create {s}: {s}", .{ dir, @errorName(err) });
+        return error.DownloadFailed;
+    };
+    const tmp = try std.fmt.allocPrint(arena, "{s}/tmp-{s}", .{ dir, tarball_sha256 });
+    const script = try std.fmt.allocPrint(arena,
+        \\set -e
+        \\rm -rf '{0s}'; mkdir -p '{0s}/src'
+        \\tar -xf '{1s}' -C '{0s}/src'
+        \\top=$(ls -d '{0s}'/src/*/ | head -n1)
+        \\t=$(cd '{0s}' && pwd)
+        \\export CARGO_HOME="$t/cargo-home"
+        \\( cd "$top" && timeout 1800 cargo vendor --locked vendor > "$t/vendor.toml" )
+        \\mkdir -p "$top/.cargo"
+        \\[ -f "$top/.cargo/config.toml" ] && printf '\\n' >> "$top/.cargo/config.toml"
+        \\cat "$t/vendor.toml" >> "$top/.cargo/config.toml"
+        \\tar -cf '{2s}.part' -C "$top" vendor .cargo/config.toml
+        \\mv '{2s}.part' '{2s}'
+        \\rm -rf '{0s}'
+    , .{ tmp, tarball, out_path });
+    const res = std.process.run(arena, io, .{ .argv = &.{ "sh", "-c", script } }) catch |err| {
+        message.* = try std.fmt.allocPrint(arena, "cannot run the crate fetch: {s}", .{@errorName(err)});
+        return error.DownloadFailed;
+    };
+    const ok = switch (res.term) {
+        .exited => |c| c == 0,
+        else => false,
+    };
+    if (!ok) {
+        message.* = try std.fmt.allocPrint(arena, "crate fetch failed (needs `cargo` on PATH): {s}", .{std.mem.trim(u8, res.stderr, "\n ")});
+        return error.DownloadFailed;
+    }
+    return .downloaded;
+}
+
 /// Where the vendored Zig dependencies of a source tarball are cached.
 pub fn zigDepsPath(arena: Allocator, cache: []const u8, tarball_sha256: []const u8) ![]const u8 {
     return std.fmt.allocPrint(arena, "{s}/zigdeps/{s}.tar", .{ cache, tarball_sha256 });

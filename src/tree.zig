@@ -42,12 +42,18 @@ pub const Tree = struct {
     /// dependencies, and what those need to build and run, transitively.
     /// Never `i` itself.
     pub fn needs(t: Tree, arena: Allocator, i: usize) Allocator.Error![]const usize {
+        return t.needsOf(arena, i, &.{ t.recipes[i].hostdeps, t.recipes[i].builddeps });
+    }
+
+    /// `needs`, starting from the given dependency lists of recipe `i` only:
+    /// with just its `hostdeps`, the tools a build runs and what they need.
+    pub fn needsOf(t: Tree, arena: Allocator, i: usize, start: []const []const []const u8) Allocator.Error![]const usize {
         const seen = try arena.alloc(bool, t.recipes.len);
         @memset(seen, false);
         seen[i] = true;
         var names: std.ArrayList([]const u8) = .empty;
         var out: std.ArrayList(usize) = .empty;
-        for ([_][]const []const u8{ t.recipes[i].hostdeps, t.recipes[i].builddeps }) |deps| try names.appendSlice(arena, deps);
+        for (start) |deps| try names.appendSlice(arena, deps);
         var k: usize = 0;
         while (k < names.items.len) : (k += 1) {
             const p = t.provider(names.items[k]) orelse continue;

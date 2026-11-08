@@ -20,12 +20,12 @@ SPEC 9.3 gives the wave order. The versions to match are in
 | Libraries and build tools | zlib, bzip2, xz, lz4, zstd, ncurses, readline, libffi, expat, openssl, cmake, ninja, meson, python, perl, m4, make, ... | Chimera templates via `import-cbuild` |
 | Base | coreutils ... util-linux, e2fsprogs, kmod, eudev, shadow, dinit, apk-tools, dklilo, dksh, dkde-console | `base`, `base-devel` metapackages |
 | Kernel | linux 6.19 | Config: `/boot/config-6.19-dkrescue` from the ISO |
-| Rescue tools | fsarchiver, ntfs-3g, nwipe, ddrescue, testdisk, btrfs-progs, ... | list is in the iso post |
+| Rescue tools | `rescue-tools` meta-package: fsarchiver, ntfs-3g, nwipe, ddrescue, testdisk, chntpw, mdadm, ... (rsync waits on linux-headers) | `images/rescue.toml` |
 | Network | dhcpcd, iwd, wpa_supplicant, openssh | `base-net` |
 | Desktop | wayland, mesa, labwc, pipewire, gtk3/4, dkde, fonts | The longest tail: ~100 recipes. dkde requires **polkit**, built in its reduced form (no logind, authentication against shadow), which needs dbus, glib and duktape; recipes for polkit and duktape exist, and neither builds yet. |
 | Image | squashfs, initramfs, dklilo ISO | `dkbuild image` |
 
-Done when `dkbuild image images/dkrescue.toml` makes an ISO that boots to the
+Done when `dkbuild image images/rescue.toml` makes an ISO that boots to the
 desktop on the same hardware as `dkrescue.iso`.
 
 Status 2026-11-07: `zig` 0.17.1 builds from source against `llvm22` and passes
