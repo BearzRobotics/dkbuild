@@ -1,15 +1,16 @@
 # Imported from Chimera Linux cports: work/cports/main/libdrm/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+# r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 name = "libdrm"
 version = "2.4.134"
-release = 1
+release = 2
 summary = "Userspace interface to kernel DRM services"
 license = "MIT"
 homepage = "https://dri.freedesktop.org"
 patches = ["tests.patch"]
 hostdeps = ["meson", "pkgconf"]
-builddeps = ["udev-devel", "libpciaccess-devel", "linux-headers"]
+builddeps = ["eudev-devel", "libpciaccess-devel", "linux-headers"]
 
 source = [
     { url = "https://gitlab.freedesktop.org/mesa/drm/-/archive/libdrm-2.4.134/drm-libdrm-2.4.134.tar.gz", sha256 = "6b18e4834b0c061232cb5c11e98a6ecdc72ebc6bc282d124406b7a9d4e089ce2" },

@@ -529,6 +529,12 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         var main = try withScan(arena, io, destdir_abs, r.rundeps);
         main.name = r.name;
         main.summary = r.summary;
+        if (r.provides.len > 0) {
+            var all: std.ArrayList([]const u8) = .empty;
+            try all.appendSlice(arena, main.provides);
+            for (r.provides) |pv| if (!contains(all.items, pv)) try all.append(arena, pv);
+            main.provides = all.items;
+        }
         try pkg_list.append(arena, main);
     }
     for (moved) |m| {

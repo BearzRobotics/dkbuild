@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: main/libconfig/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: nwipe (its configuration file).
+name = "libconfig"
+version = "1.8.1"
+release = 1
+summary = "Configuration file library"
+license = "LGPL-2.1-or-later"
+homepage = "https://hyperrealm.com/libconfig/libconfig.html"
+hostdeps = ["automake", "bison", "flex", "libtool", "pkgconf", "texinfo"]
+
+source = [
+    { url = "https://github.com/hyperrealm/libconfig/archive/v1.8.1.tar.gz", sha256 = "e95798d2992a66ecd547ce3651d7e10642ff2211427c43a7238186ff4c372627" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-examples
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

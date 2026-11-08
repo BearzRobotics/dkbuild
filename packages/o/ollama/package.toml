@@ -5,9 +5,10 @@
 # second source instead, given to CMake as FETCHCONTENT_SOURCE_DIR_LLAMA_CPP,
 # and Ollama's compat patch is applied to it as usual. Go modules are vendored
 # on the host (`godeps`). No MLX engine (CUDA/Metal only).
+# r2: rebuilt so its private ggml libraries (/usr/lib/ollama) are not provided system-wide.
 name = "ollama"
 version = "0.40.15"
-release = 1
+release = 2
 summary = "Run large language models locally, with Vulkan GPU support"
 license = "MIT"
 homepage = "https://ollama.com"

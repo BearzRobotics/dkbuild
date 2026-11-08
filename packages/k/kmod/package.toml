@@ -2,15 +2,16 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+# r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 name = "kmod"
 version = "34.2"
-release = 1
+release = 2
 summary = "Linux kernel module handling"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://git.kernel.org/pub/scm/utils/kernel/kmod/kmod.git"
 patches = ["no-gtkdoc.patch"]
 hostdeps = ["bash", "meson", "pkgconf", "scdoc"]
-builddeps = ["openssl3-devel", "zlib-ng-compat-devel", "zstd-devel"]
+builddeps = ["openssl-devel", "zlib-ng-compat-devel", "zstd-devel"]
 
 source = [
     { url = "https://www.kernel.org/pub/linux/utils/kernel/kmod/kmod-34.2.tar.gz", sha256 = "d60a79fb12a85feab75674ce5b86b2c8bae1714f775f481eae926bd2657b2ffe" },

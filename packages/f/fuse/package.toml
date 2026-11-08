@@ -1,0 +1,40 @@
+# Imported from Chimera Linux cports: main/fuse/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: ntfs-3g, e2fsprogs (fuse2fs), and later flatpak and sshfs. fusermount3
+# is setuid root, as upstream installs it.
+name = "fuse"
+version = "3.18.3"
+release = 1
+summary = "Filesystem in USErspace"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://github.com/libfuse/libfuse"
+hostdeps = ["meson", "pkgconf"]
+builddeps = ["linux-headers", "eudev-devel"]
+checkdeps = ["python-pytest"]
+options = ["!lto", "!check"]
+
+source = [
+    { url = "https://github.com/libfuse/libfuse/releases/download/fuse-3.18.3/fuse-3.18.3.tar.gz", sha256 = "bcd19582c5e30f7fe45dd86a5540e998590aa01903afc7ebcbeea6c8ac5421ee" },
+]
+
+setup = '''
+%meson \
+    -Dexamples=false \
+    -Duseroot=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+rm -rf "$pkgdir/etc/init.d/fuse3"
+# compat links
+mkdir -p "$pkgdir/usr/bin"
+ln -sf fusermount3 "$pkgdir/usr/bin/fusermount"
+mkdir -p "$pkgdir/usr/bin"
+ln -sf mount.fuse3 "$pkgdir/usr/bin/mount.fuse"
+mkdir -p "$pkgdir/usr/share/man/man1"
+ln -sf fusermount3.1 "$pkgdir/usr/share/man/man1/fusermount.1"
+mkdir -p "$pkgdir/usr/share/man/man8"
+ln -sf mount.fuse3.8 "$pkgdir/usr/share/man/man8/mount.fuse.8"
+'''

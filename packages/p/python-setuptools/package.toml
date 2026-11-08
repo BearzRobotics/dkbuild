@@ -1,0 +1,26 @@
+# needed by: every Python package built with setuptools, and setuptools-scm at run time.
+# Built from the sdist offline with pip (--no-build-isolation); it builds
+# itself or with its backend from hostdeps (one of the Python basics that
+# were the build image's until they had recipes).
+name = "python-setuptools"
+version = "84.2.1"
+release = 1
+summary = "Most extensible Python build backend with support for C/C++ extension modules"
+license = "MIT"
+homepage = "https://github.com/pypa/setuptools"
+hostdeps = ["python"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/70/b3/c19426f783614d625699a4b247faf628ea9ab1db228674491767b417f9e1/setuptools-84.2.1.tar.gz", sha256 = "3ff8b3b5492a0aa66960f4419365a86b84e013070d4313e4d4a6894f5d64d6bc" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+for f in LICENSE LICENSE.txt LICENSE.md LICENSE.rst COPYING LICENSES/*; do
+    [ -f "$f" ] && install -Dm644 "$f" "$pkgdir/usr/share/licenses/python-setuptools/${f##*/}"
+done
+true
+'''

@@ -2,15 +2,16 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+# r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 name = "xfsprogs"
 version = "7.2.1"
-release = 1
+release = 2
 summary = "XFS file system utilities"
 license = "LGPL-2.1-or-later"
 homepage = "http://xfs.org/index.php/Main_Page"
 patches = ["no-bash-and-chown.patch"]
-hostdeps = ["gettext", "util-linux-uuid-devel", "pkgconf"]
-builddeps = ["attr-devel", "gettext-devel", "inih-devel", "libedit-devel", "linux-headers", "lvm2-devel", "userspace-rcu-devel", "util-linux-blkid-devel"]
+hostdeps = ["gettext", "util-linux-devel", "pkgconf"]
+builddeps = ["attr-devel", "gettext-devel", "inih-devel", "libedit-devel", "linux-headers", "lvm2-devel", "userspace-rcu-devel", "util-linux-devel"]
 options = ["!check"]
 
 source = [

@@ -2,15 +2,16 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+# r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 name = "e2fsprogs"
 version = "1.47.4"
-release = 1
+release = 2
 summary = "Ext2/3/4 file system utilities"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://e2fsprogs.sourceforge.net"
 patches = ["bsd-timeout.patch", "cross.patch"]
 hostdeps = ["pkgconf", "texinfo"]
-builddeps = ["fuse-devel", "linux-headers", "udev-devel", "util-linux-blkid-devel", "util-linux-uuid-devel"]
+builddeps = ["fuse-devel", "linux-headers", "eudev-devel", "util-linux-devel"]
 checkdeps = ["bzip2", "perl"]
 
 source = [

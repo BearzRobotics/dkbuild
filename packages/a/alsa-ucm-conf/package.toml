@@ -1,7 +1,7 @@
-# Imported from Chimera Linux cports: work/cports/main/alsa-ucm-conf/template.py
+# Imported from Chimera Linux cports: main/alsa-ucm-conf/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
+# needed by: alsa-lib (use-case configurations: which mixer controls a sound card
+# needs set, on laptops with modern codecs above all).
 name = "alsa-ucm-conf"
 version = "1.2.16.1"
 release = 1
@@ -16,5 +16,6 @@ source = [
 
 install = '''
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/alsa-ucm-conf/LICENSE"
-# TODO(cbuild): self.install_files("ucm2", "usr/share/alsa")
+mkdir -p "$pkgdir/usr/share/alsa"
+cp -r ucm2 "$pkgdir/usr/share/alsa/"
 '''

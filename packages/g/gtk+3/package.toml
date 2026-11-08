@@ -4,14 +4,15 @@
 # Like gtk4 (the DKRescue desktop post): Wayland only. No X11, broadway, CUPS,
 # colord, Tracker, cloudproviders, introspection or man pages: none of them is
 # in the image or the tree.
+# r8: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 name = "gtk+3"
 version = "3.24.43"
-release = 7
+release = 8
 summary = "Gimp Toolkit version 3"
 license = "LGPL-2.1-or-later"
 homepage = "https://gtk.org"
 patches = ["geometry.patch"]
-hostdeps = ["gettext-devel", "glib-devel", "meson", "perl", "pkgconf", "wayland-progs"]
+hostdeps = ["gettext-devel", "glib-devel", "meson", "perl", "pkgconf", "wayland"]
 builddeps = ["at-spi2-core-devel", "gdk-pixbuf-devel", "libepoxy-devel", "libxkbcommon-devel", "mesa-devel", "pango-devel", "wayland-devel", "wayland-protocols"]
 checkdeps = ["adwaita-icon-theme", "dbus", "fonts-dejavu-otf", "librsvg", "xwayland-run"]
 rundeps = ["adwaita-icon-theme", "shared-mime-info"]

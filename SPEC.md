@@ -190,6 +190,7 @@ guide to the rest of the syntax.
 | `builddeps` | no | Libraries and headers linked against: installed for the **target** architecture |
 | `checkdeps` | no | Extra packages needed only by `check` |
 | `rundeps` | no | Runtime dependencies that can't be detected (5.6) |
+| `provides` | no | Names the main package provides besides what the scan finds (5.6), e.g. `so:libgcc_s.so.1` for a link the scanner cannot see through |
 | `options` | no | List from 5.4 |
 | `environment` | no | Shell lines run before every step |
 | `setup`, `build`, `check`, `install` | `install` yes (not for `meta`) | Shell steps, with macros (5.5) |
@@ -263,8 +264,12 @@ LVM2 in the DKRescue build).
 After `install`, dkbuild scans `$pkgdir`:
 
 - **ELF files:** each shared library a program needs (`DT_NEEDED`) becomes a
-  dependency on `so:<soname>`, and each library the package ships becomes a
-  `so:<soname>` provide. Matching across packages is then apk's job.
+  dependency on `so:<soname>`, and each library the package ships in
+  `/usr/lib` becomes a `so:<soname>` provide. Matching across packages is then
+  apk's job. A library in a subdirectory (`/usr/lib/ollama`, perl's `CORE/`)
+  is private, found through an rpath: it is not provided to other packages, and
+  a need it meets is not a dependency (two packages each carrying a private
+  ggml must not conflict).
 - **pkg-config files:** each `.pc` provides `pc:<name>`, and each
   `Requires:` becomes a dependency.
 - **Commands:** each executable in `/usr/bin` provides `cmd:<name>`.

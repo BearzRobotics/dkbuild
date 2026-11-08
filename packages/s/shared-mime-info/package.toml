@@ -1,13 +1,14 @@
 # Imported from Chimera Linux cports: work/cports/main/shared-mime-info/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+# r5: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 name = "shared-mime-info"
 version = "2.4"
-release = 4
+release = 5
 summary = "Core database of common types"
 license = "GPL-2.0-or-later"
 homepage = "https://freedesktop.org/wiki/Software/shared-mime-info"
-hostdeps = ["meson", "pkgconf", "gettext", "xmlto", "libxml2-progs"]
+hostdeps = ["meson", "pkgconf", "gettext", "xmlto", "libxml2"]
 builddeps = ["glib-devel", "libxml2-devel"]
 
 source = [

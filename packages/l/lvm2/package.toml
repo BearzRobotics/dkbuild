@@ -1,12 +1,13 @@
+# r3: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 name      = "lvm2"
 version   = "2.03.35"
-release   = 2
+release   = 3
 summary   = "Logical Volume Manager"
 license   = "GPL-2.0-only AND LGPL-2.1-only"
 homepage  = "https://sourceware.org/lvm2/"
 patches   = ["lvm2-2.03.35-musl_stdio-1.patch"]
 hostdeps  = ["pkgconf"]
-builddeps = ["linux-headers", "libaio-devel", "util-linux-blkid-devel"]
+builddeps = ["linux-headers", "libaio-devel", "util-linux-devel"]
 options   = ["!check"]
 
 source = [

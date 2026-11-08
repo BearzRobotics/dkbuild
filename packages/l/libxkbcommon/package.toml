@@ -1,13 +1,14 @@
 # Imported from Chimera Linux cports: work/cports/main/libxkbcommon/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+# r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 name = "libxkbcommon"
 version = "1.13.2"
-release = 1
+release = 2
 summary = "Library to handle keyboard descriptions"
 license = "MIT"
 homepage = "https://xkbcommon.org"
-hostdeps = ["bison", "meson", "pkgconf", "wayland-progs", "wayland-protocols"]
+hostdeps = ["bison", "meson", "pkgconf", "wayland", "wayland-protocols"]
 builddeps = ["libxcb-devel", "libxml2-devel", "wayland-devel", "wayland-protocols", "xkeyboard-config", "xorgproto"]
 rundeps = ["xkeyboard-config"]
 

@@ -43,6 +43,9 @@ pub const Recipe = struct {
     builddeps: []const []const u8 = &.{},
     checkdeps: []const []const u8 = &.{},
     rundeps: []const []const u8 = &.{},
+    /// Names the main package provides besides what the scan finds
+    /// (`so:libgcc_s.so.1` for a link the scanner cannot see through).
+    provides: []const []const u8 = &.{},
     options: []const []const u8 = &.{},
     environment: ?[]const u8 = null,
     setup: ?[]const u8 = null,
@@ -61,7 +64,7 @@ const known_keys = [_][]const u8{
     "name",      "version",   "release",     "summary",     "description", "license",
     "homepage",  "source",    "patches",     "archs",       "hostdeps",    "builddeps",
     "checkdeps", "rundeps",   "options",     "environment", "setup",       "build",
-    "check",     "install",   "subpackages",
+    "check",     "install",   "subpackages", "provides",
 };
 
 const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap", "zigdeps", "godeps", "cargodeps", "meta", "rootlayout" };
@@ -106,6 +109,7 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
     r.builddeps = try cfg.optStrings(arena, diag, root, "builddeps");
     r.checkdeps = try cfg.optStrings(arena, diag, root, "checkdeps");
     r.rundeps = try cfg.optStrings(arena, diag, root, "rundeps");
+    r.provides = try cfg.optStrings(arena, diag, root, "provides");
     r.options = try cfg.optStrings(arena, diag, root, "options");
 
     for (r.archs) |a| {

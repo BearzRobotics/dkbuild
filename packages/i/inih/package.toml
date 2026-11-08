@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/inih/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: xfsprogs (xfs_scrub's configuration).
+name = "inih"
+version = "62"
+release = 1
+summary = "Simple ini parser library"
+license = "BSD-3-Clause"
+homepage = "https://github.com/benhoyt/inih"
+hostdeps = ["meson", "pkgconf"]
+
+source = [
+    { url = "https://github.com/benhoyt/inih/archive/r62.tar.gz", sha256 = "9c15fa751bb8093d042dae1b9f125eb45198c32c6704cd5481ccde460d4f8151" },
+]
+
+setup = '''
+%meson \
+    -Ddistro_install=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/inih/LICENSE.txt"
+'''

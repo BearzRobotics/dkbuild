@@ -149,6 +149,12 @@ fn addUnique(arena: Allocator, list: *std.ArrayList([]const u8), item: []const u
 pub fn scanTree(arena: Allocator, io: std.Io, root: []const u8) !Result {
     var provides: std.ArrayList([]const u8) = .empty;
     var needs: std.ArrayList([]const u8) = .empty;
+    // Libraries outside /usr/lib itself (ollama's /usr/lib/ollama, perl's CORE)
+    // are private: found through an rpath, not by the loader's search path. They
+    // are not provided to other packages, and a need they meet is not a
+    // dependency. Without this, two packages that each carry a private ggml
+    // would conflict over so:libggml-base.so.0.
+    var private: std.ArrayList([]const u8) = .empty;
 
     var d = try Dir.cwd().openDir(io, root, .{ .iterate = true });
     defer d.close(io);
@@ -173,7 +179,10 @@ pub fn scanTree(arena: Allocator, io: std.Io, root: []const u8) !Result {
         const f = d.openFile(io, e.path, .{}) catch continue;
         defer f.close(io);
         const info = (try parseElf(arena, FileSource{ .file = f, .io = io })) orelse continue;
-        if (info.soname) |so| try addUnique(arena, &provides, try std.fmt.allocPrint(arena, "so:{s}", .{so}));
+        if (info.soname) |so| {
+            const public = std.mem.eql(u8, dirname, "usr/lib") or std.mem.eql(u8, dirname, "lib");
+            try addUnique(arena, if (public) &provides else &private, try std.fmt.allocPrint(arena, "so:{s}", .{so}));
+        }
         // musl's libc.so is the C library, the dynamic loader and the thing every
         // program links as `libc.so`, but it has no SONAME. Provide the name the
         // programs ask for.
@@ -185,6 +194,7 @@ pub fn scanTree(arena: Allocator, io: std.Io, root: []const u8) !Result {
     var deps: std.ArrayList([]const u8) = .empty;
     outer: for (needs.items) |n| {
         for (provides.items) |p| if (std.mem.eql(u8, n, p)) continue :outer;
+        for (private.items) |p| if (std.mem.eql(u8, n, p)) continue :outer;
         try deps.append(arena, n);
     }
     std.mem.sort([]const u8, deps.items, {}, lessThan);

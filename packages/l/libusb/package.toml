@@ -1,15 +1,16 @@
 # Imported from Chimera Linux cports: work/cports/main/libusb/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+# r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 name = "libusb"
 version = "1.0.30"
-release = 1
+release = 2
 summary = "Library for userspace USB device access"
 license = "LGPL-2.1-or-later"
 homepage = "https://libusb.info"
 patches = ["portability-fixes.patch"]
 hostdeps = ["automake", "libtool", "pkgconf"]
-builddeps = ["udev-devel", "linux-headers"]
+builddeps = ["eudev-devel", "linux-headers"]
 
 source = [
     { url = "https://github.com/libusb/libusb/releases/download/v1.0.30/libusb-1.0.30.tar.bz2", sha256 = "fea36f34f9156400209595e300840767ab1a385ede1dc7ee893015aea9c6dbaf" },

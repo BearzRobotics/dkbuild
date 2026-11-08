@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: main/xkeyboard-config/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: libxkbcommon (every keyboard layout; without it Wayland compositors
+# and consoles fall back to US only). Only the data: no X server tools (xkbcomp).
+name = "xkeyboard-config"
+version = "2.44"
+release = 2
+summary = "X Keyboard Configuration Database"
+license = "MIT"
+homepage = "https://www.freedesktop.org/wiki/Software/XKeyboardConfig"
+hostdeps = ["meson", "pkgconf", "python", "perl"]
+checkdeps = ["gawk"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/data/xkeyboard-config/xkeyboard-config-2.44.tar.xz", sha256 = "54d2c33eeebb031d48fa590c543e54c9bcbd0f00386ebc6489b2f47a0da4342a" },
+]
+
+setup = '''
+%meson \
+    -Dxorg-rules-symlinks=true \
+    -Dcompat-rules=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xkeyboard-config/COPYING"
+'''

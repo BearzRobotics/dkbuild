@@ -1,0 +1,26 @@
+# needed by: hatchling, setuptools-scm, vcs-versioning, glib's build.
+# Built from the sdist offline with pip (--no-build-isolation); it builds
+# itself or with its backend from hostdeps (one of the Python basics that
+# were the build image's until they had recipes).
+name = "python-packaging"
+version = "26.3"
+release = 1
+summary = "Core utilities for Python packages"
+license = "Apache-2.0 OR BSD-2-Clause"
+homepage = "https://github.com/pypa/packaging"
+hostdeps = ["python", "python-flit-core"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/7d/fa/3944b40b07da9ce895c0e6303a5ab7d53da063554f534556b134a54d6093/packaging-26.3.tar.gz", sha256 = "94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd6004aed79" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+for f in LICENSE LICENSE.txt LICENSE.md LICENSE.rst COPYING LICENSES/*; do
+    [ -f "$f" ] && install -Dm644 "$f" "$pkgdir/usr/share/licenses/python-packaging/${f##*/}"
+done
+true
+'''

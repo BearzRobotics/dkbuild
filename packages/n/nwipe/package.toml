@@ -1,11 +1,12 @@
 # Follows the DKRescue post's build of nwipe 0.43.1.
+# r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 name = "nwipe"
 version = "0.43.1"
-release = 1
+release = 2
 summary = "Secure disk eraser"
 license = "GPL-2.0-only"
 homepage = "https://github.com/martijnvanbrummelen/nwipe"
-builddeps = ["ncurses-devel", "parted-devel"]
+builddeps = ["ncurses-devel", "parted-devel", "libconfig-devel"]
 options = ["!check"]
 
 source = [

@@ -14,15 +14,16 @@
 #  - the polkitd user comes from scripts/pre-install, not sysusers.
 # NOT BUILT YET: needs dbus, glib and duktape in the tree.
 # r2: rebuilt with the empty directories it installs (dkbuild's splitter dropped them).
+# r3: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 name = "polkit"
 version = "128"
-release = 2
+release = 3
 summary = "Toolkit for defining and handling authorizations"
 license = "GPL-2.0-or-later"
 homepage = "https://www.freedesktop.org/wiki/Software/polkit"
 patches = ["dbus-activation.patch", "disable-sd-pidfd.patch", "readiness.patch"]
 hostdeps = ["gettext", "meson", "perl", "pkgconf"]
-builddeps = ["duktape-devel", "glib-devel", "expat-devel"]
+builddeps = ["duktape-devel", "glib-devel", "libexpat-devel"]
 rundeps = ["dbus"]
 options = ["!check", "!cross"]
 

@@ -1,14 +1,15 @@
 # Imported from Chimera Linux cports: work/cports/main/cryptsetup/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+# r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 name = "cryptsetup"
 version = "2.8.8"
-release = 1
+release = 2
 summary = "Open source Linux disk encryption setup"
 license = "GPL-2.0-or-later"
 homepage = "https://gitlab.com/cryptsetup/cryptsetup"
 hostdeps = ["automake", "bash", "gettext-devel", "libtool", "pkgconf"]
-builddeps = ["json-c-devel", "json-c-devel-static", "libatomic-chimera-devel", "libatomic-chimera-devel-static", "libunwind-devel", "libunwind-devel-static", "linux-headers", "lvm2-devel", "lvm2-devel-static", "musl-devel", "musl-devel-static", "openssl3-devel", "openssl3-devel-static", "popt-devel", "popt-devel-static", "udev-devel", "udev-devel-static", "util-linux-blkid-devel", "util-linux-blkid-devel-static", "util-linux-uuid-devel", "util-linux-uuid-devel-static"]
+builddeps = ["json-c-devel", "json-c-static", "libatomic-chimera-devel", "libatomic-chimera-devel-static", "libunwind-devel", "libunwind-devel-static", "linux-headers", "lvm2-devel", "lvm2-static", "musl-devel", "musl-static", "openssl-devel", "openssl-static", "popt-devel", "popt-static", "eudev-devel", "eudev-static", "util-linux-devel", "util-linux-static"]
 checkdeps = ["procps", "xz"]
 
 source = [

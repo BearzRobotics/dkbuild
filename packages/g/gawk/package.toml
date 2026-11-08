@@ -1,15 +1,16 @@
 # Imported from Chimera Linux cports: work/cports/main/gawk/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Reviewed: no TODOs; dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+# r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 name = "gawk"
 version = "5.3.2"
-release = 1
+release = 2
 summary = "GNU awk utility"
 license = "GPL-3.0-or-later"
 homepage = "http://www.gnu.org/software/gawk"
 patches = ["musl.patch"]
 hostdeps = ["automake", "gettext-devel", "libtool"]
-builddeps = ["libedit-readline-devel"]
+builddeps = ["readline-devel"]
 
 source = [
     { url = "https://ftp.gnu.org/gnu/gawk/gawk-5.3.2.tar.xz", sha256 = "f8c3486509de705192138b00ef2c00bbbdd0e84c30d5c07d23fc73a9dc4cc9cc" },

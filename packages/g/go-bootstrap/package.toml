@@ -2,9 +2,10 @@
 # Upstream's linux-amd64 release, repackaged: the Go toolchain is statically
 # linked, so it runs on musl as is. Chimera ships its own bootstrap tarball; this
 # uses the official one instead. Only for building `go`; not for use.
+# r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 name = "go-bootstrap"
 version = "1.25.4"
-release = 1
+release = 2
 summary = "Go toolchain for bootstrapping the go package"
 license = "BSD-3-Clause"
 homepage = "https://go.dev"
@@ -17,5 +18,8 @@ source = [
 install = '''
 mkdir -p "$pkgdir/usr/lib/go-bootstrap"
 cp -a bin pkg src lib go.env VERSION "$pkgdir/usr/lib/go-bootstrap/"
+# Go's test data holds ELF files built elsewhere (glibc programs, a libtiffxx);
+# they would show up as needs and provides of this package.
+find "$pkgdir/usr/lib/go-bootstrap/src" -type d -name testdata -prune -exec rm -rf {} +
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/go-bootstrap/LICENSE"
 '''

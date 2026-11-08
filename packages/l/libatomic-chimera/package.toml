@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: main/libatomic-chimera/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: llvm-libcxx (libc++ uses libatomic for wide atomics), and anything
+# built by clang that needs __atomic_* calls. Chimera's ABI-compatible GNU libatomic.
+name = "libatomic-chimera"
+version = "0.90.0"
+release = 2
+summary = "ABI-compatible GNU libatomic alternative"
+license = "Apache-2.0"
+homepage = "https://github.com/chimera-linux/libatomic-chimera"
+options = ["bootstrap", "!lto"]
+
+source = [
+    { url = "https://github.com/chimera-linux/libatomic-chimera/archive/refs/tags/v0.90.0.tar.gz", sha256 = "fccbd8c0ef7fd473275f835b3fca9275fb27a0c196cdcdff1f6d14ab12ed3a53" },
+]
+
+build = '''
+%make \
+    PREFIX=/usr
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr
+'''

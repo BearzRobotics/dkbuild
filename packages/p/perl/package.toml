@@ -1,8 +1,9 @@
 # Follows the DKRescue post's build of perl 5.40.1; the importer's draft of
 # Chimera's recipe was not used.
+# r2: rebuilt so its private libperl.so (perl's CORE/) is no longer an external dependency.
 name = "perl"
 version = "5.40.1"
-release = 1
+release = 2
 summary = "Practical Extraction and Report Language"
 license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
 homepage = "https://www.perl.org"

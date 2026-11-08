@@ -2,16 +2,17 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+# r6: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 name = "efibootmgr"
 version = "18"
-release = 5
+release = 6
 summary = "Tool to modify the UEFI Boot Manager"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/rhboot/efibootmgr"
 patches = ["efibootmgr_default_to_grub2.patch", "ub.patch"]
 hostdeps = ["pkgconf"]
 builddeps = ["efivar-devel", "popt-devel", "linux-headers"]
-rundeps = ["base-kernel"]
+rundeps = []
 options = ["!check"]
 
 source = [

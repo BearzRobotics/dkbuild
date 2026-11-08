@@ -1,12 +1,13 @@
 # Follows the DKRescue post's build of gettext 0.24; the importer's draft of
 # Chimera's recipe was not used.
+# r4: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 name = "gettext"
 version = "0.24"
-release = 3
+release = 4
 summary = "GNU internationalisation tools"
 license = "GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/gettext"
-builddeps = ["ncurses-devel"]
+builddeps = ["ncurses-devel", "libxml2-devel"]
 options = ["bootstrap", "!check"]
 
 source = [

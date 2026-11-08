@@ -6,16 +6,17 @@
 # Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
 # No X11 build dependencies (-Dplatforms=wayland, -Dglx=disabled).
+# r4: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 name = "mesa"
 version = "26.2.5"
-release = 3
+release = 4
 summary = "Mesa 3D Graphics Library"
 license = "MIT"
 homepage = "https://www.mesa3d.org"
 patches = ["mesa-26.2.5-llvm23-1.patch"]
-hostdeps = ["bison", "cbindgen", "flex", "glslang", "meson", "pkgconf", "python-mako", "python-ply", "python-pycparser", "python-pyyaml", "wayland-progs", "wayland-protocols"]
-builddeps = ["clang-devel", "elfutils-devel", "libarchive-devel", "libdrm-devel", "libexpat-devel", "libffi8-devel", "libglvnd-devel", "libva-bootstrap", "libxml2-devel", "llvm-devel", "lm-sensors-devel", "lua-devel", "ncurses-devel", "wayland-devel", "wayland-protocols", "zlib-ng-compat-devel", "zstd-devel", "vulkan-headers-devel"]
-rundeps = ["libglvnd"]
+hostdeps = ["bison", "cbindgen", "flex", "glslang", "meson", "pkgconf", "python-mako", "python-ply", "python-pycparser", "python-pyyaml", "wayland", "wayland-protocols"]
+builddeps = ["clang-devel", "elfutils-devel", "libarchive-devel", "libdrm-devel", "libexpat-devel", "libffi-devel", "libxml2-devel", "llvm-devel", "lua-devel", "ncurses-devel", "wayland-devel", "wayland-protocols", "zlib-ng-compat-devel", "zstd-devel", "vulkan-headers-devel"]
+rundeps = []
 options = ["!cross", "!lto"]
 
 source = [

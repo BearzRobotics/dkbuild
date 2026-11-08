@@ -1,0 +1,26 @@
+# needed by: every Python package built with flit (packaging, idna, pathspec, typing-extensions).
+# Built from the sdist offline with pip (--no-build-isolation); it builds
+# itself or with its backend from hostdeps (one of the Python basics that
+# were the build image's until they had recipes).
+name = "python-flit-core"
+version = "4.2.0"
+release = 1
+summary = "Distribution-building parts of Flit. See flit package for more information"
+license = "BSD-3-Clause"
+homepage = "https://github.com/pypa/flit"
+hostdeps = ["python"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/d3/8b/0370578a456986d6995344967a479dd5c9d4e064681550c2a9594bb58b4a/flit_core-4.2.0.tar.gz", sha256 = "84e4e4d8fdd45ba2613800a3ebc6834de26d47ec9746efc3719f94181137b460" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+for f in LICENSE LICENSE.txt LICENSE.md LICENSE.rst COPYING LICENSES/*; do
+    [ -f "$f" ] && install -Dm644 "$f" "$pkgdir/usr/share/licenses/python-flit-core/${f##*/}"
+done
+true
+'''

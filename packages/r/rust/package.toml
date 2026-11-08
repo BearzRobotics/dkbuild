@@ -10,13 +10,16 @@
 # It stays in the main package (no -devel), since rust's users only install rust.
 # r2: upstream's binaries load libgcc_s.so.1 for unwinding; here that is a link to
 # LLVM's libunwind, which has the same _Unwind_* functions.
+# r4: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 name = "rust"
 version = "1.99.1"
-release = 3
+release = 4
 summary = "Rust programming language: rustc, cargo and the standard library"
 license = "MIT OR Apache-2.0"
 homepage = "https://www.rust-lang.org"
 rundeps = ["llvm-libunwind"]
+# The scanner sees libgcc_s.so.1 only as a link to libunwind.
+provides = ["so:libgcc_s.so.1"]
 options = ["!check", "!strip"]
 
 source = [

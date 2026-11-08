@@ -2,17 +2,18 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # GTK flags follow the DKRescue desktop post (Wayland only, GLES via epoxy/Mesa).
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+# r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 name = "gtk4"
 version = "4.24.1"
-release = 1
+release = 2
 summary = "Gimp Toolkit version 4"
 license = "LGPL-2.1-or-later"
 homepage = "https://gtk.org"
 patches = ["int.patch", "no-gsk-test.patch", "test-timeouts.patch", "tests-nodeparser-ref.patch"]
-hostdeps = ["docbook-xsl-nons", "gettext-devel", "glib-devel", "gobject-introspection", "gtk+3-update-icon-cache", "libxslt-progs", "meson", "perl", "pkgconf", "python-docutils", "sassc", "shaderc-progs", "wayland-progs", "wayland-protocols"]
-builddeps = ["at-spi2-core-devel", "colord-devel", "cups-devel", "ffmpeg-devel", "gdk-pixbuf-devel", "graphene-devel", "gst-plugins-bad-devel", "iso-codes", "libcloudproviders-devel", "libepoxy-devel", "libtiff-devel", "libxcomposite-devel", "libxcursor-devel", "libxdamage-devel", "libxext-devel", "libxi-devel", "libxinerama-devel", "libxkbcommon-devel", "libxrandr-devel", "mesa-devel", "pango-devel", "sysprof-capture", "tinysparql-devel", "vulkan-headers", "vulkan-loader-devel", "wayland-devel", "wayland-protocols"]
+hostdeps = ["gettext-devel", "glib-devel", "meson", "perl", "pkgconf", "python-docutils", "shaderc", "wayland", "wayland-protocols"]
+builddeps = ["at-spi2-core-devel", "gdk-pixbuf-devel", "graphene-devel", "libepoxy-devel", "libxcursor-devel", "libxkbcommon-devel", "mesa-devel", "pango-devel", "sysprof-capture", "vulkan-headers", "vulkan-loader-devel", "wayland-devel", "wayland-protocols"]
 checkdeps = ["adwaita-icon-theme", "bash", "dbus", "fonts-cantarell-otf", "fonts-dejavu", "fonts-noto", "python-gobject", "xwayland-run"]
-rundeps = ["adwaita-icon-theme", "gobject-introspection-freedesktop", "gtk+3-update-icon-cache", "shared-mime-info"]
+rundeps = ["adwaita-icon-theme", "shared-mime-info"]
 options = ["!cross", "!check", "!lto"]
 
 source = [
