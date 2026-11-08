@@ -65,8 +65,24 @@ const Worker = struct {
     buffered: bool,
     console: std.ArrayList(u8) = .empty,
     err: ?anyerror = null,
-    output: inputs.Produced = undefined,
+    result: build.Built = undefined,
+    /// Set for a rebuild only because the build root changed.
+    rebuild: ?build.Rebuild = null,
+    bump: Bump = undefined,
     thread: std.Thread = undefined,
+};
+
+/// What `build.Rebuild.bump` needs: the recipe to bump, in the tree and on disk.
+const Bump = struct {
+    t: tree.Tree,
+    idx: usize,
+    root: []const u8,
+    io: Io,
+
+    fn call(ctx: *anyopaque) anyerror!u32 {
+        const b: *Bump = @ptrCast(@alignCast(ctx));
+        return bumpRelease(b.io, b.t, b.idx, b.root);
+    }
 };
 
 fn workerMain(w: *Worker) void {
@@ -74,8 +90,8 @@ fn workerMain(w: *Worker) void {
     defer arena_state.deinit();
     if (w.buffered) build.console = &w.console;
     defer build.console = null;
-    if (build.buildOne(arena_state.allocator(), w.io, w.r, w.opts)) |o| {
-        w.output = o;
+    if (build.buildOne(arena_state.allocator(), w.io, w.r, w.opts, w.rebuild)) |res| {
+        w.result = res;
     } else |err| {
         w.err = err;
     }
@@ -104,11 +120,12 @@ fn waitLists(arena: Allocator, t: tree.Tree, jobs: []const Job) Allocator.Error!
 
 /// `outputs` holds, per recipe, the hash of what it last produced (from the
 /// records); builds that succeed here update it.
-/// A package rebuilt because what it builds against changed gets the next
-/// release, written into its recipe (SPEC.md 7.2): its files change, and apk
-/// upgrades only when the version goes up. The tree's copy of the recipe is
-/// updated too, so what builds against it looks for the new files; nothing
-/// that needs it is running yet (it waits for this build).
+/// A package rebuilt because what it builds against changed is published as
+/// the next release, written into its recipe, if it comes out different (apk
+/// upgrades only when the version goes up); if it comes out identical, its
+/// package stays as it is (SPEC.md 7.2). The tree's copy of the recipe is
+/// updated with any bump, so what builds against it looks for the new files;
+/// nothing that needs it is running yet (it waits for this build).
 pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inputs.Produced, opts: build.Options, parallel: usize, keep_going: bool) !Result {
     const n = jobs.len;
     const waits = try waitLists(arena, t, jobs);
@@ -160,15 +177,7 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
                     };
                     if (!announced[j]) {
                         announced[j] = true;
-                        const old_id = jobs[j].id;
-                        bumpRelease(arena, io, t, &jobs[j], opts) catch |err| {
-                            std.debug.print("error: {s}: cannot bump its release in its recipe: {s}\n", .{ old_id, @errorName(err) });
-                            state[j] = .failed;
-                            try failed.append(arena, t.recipes[jobs[j].idx].name);
-                            if (!keep_going) stop = true;
-                            continue;
-                        };
-                        std.debug.print("==> {s}: packages it builds against changed; rebuilding as {s} (release bumped in its recipe)\n", .{ old_id, jobs[j].id });
+                        std.debug.print("==> {s}: packages it builds against changed; rebuilding\n", .{jobs[j].id});
                     }
                 }
                 if (hold or running >= parallel) continue;
@@ -178,6 +187,10 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
                     continue;
                 }
                 workers[j] = .{ .shared = &shared, .io = io, .job = j, .r = t.recipes[jobs[j].idx], .opts = opts, .buffered = buffered };
+                if (!jobs[j].certain) if (outputs[jobs[j].idx]) |prev| {
+                    workers[j].bump = .{ .t = t, .idx = jobs[j].idx, .root = opts.root, .io = io };
+                    workers[j].rebuild = .{ .previous = prev, .bump = Bump.call, .ctx = &workers[j].bump };
+                };
                 workers[j].thread = std.Thread.spawn(.{}, workerMain, .{&workers[j]}) catch |err| {
                     std.debug.print("error: cannot start a thread for {s}: {s}\n", .{ r.name, @errorName(err) });
                     std.process.exit(1);
@@ -217,8 +230,15 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
                 continue;
             }
             state[j] = .ok;
-            outputs[jobs[j].idx] = w.output;
-            const record = try inputs.format(arena, .{ .version = jobs[j].version, .inputs = jobs[j].own, .deps = roots[j], .output = w.output.output, .interface = w.output.interface });
+            outputs[jobs[j].idx] = w.result.produced;
+            const r_now = t.recipes[jobs[j].idx];
+            if (w.result.release != w.r.release) {
+                // Bumped: the record is for the new release and the edited recipe.
+                jobs[j].version = try std.fmt.allocPrint(arena, "{s}-r{d}", .{ r_now.version, w.result.release });
+                jobs[j].id = try std.fmt.allocPrint(arena, "{s}-{s}", .{ r_now.name, jobs[j].version });
+                jobs[j].own = try inputs.ownHash(arena, io, opts.root, r_now.name, opts.arch);
+            }
+            const record = try inputs.format(arena, .{ .version = jobs[j].version, .inputs = jobs[j].own, .deps = roots[j], .output = w.result.produced.output, .interface = w.result.produced.interface });
             std.Io.Dir.cwd().writeFile(io, .{ .sub_path = jobs[j].rec_path, .data = record }) catch |err| {
                 std.debug.print("warning: cannot write {s}: {s}\n", .{ jobs[j].rec_path, @errorName(err) });
             };
@@ -227,21 +247,22 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
     return .{ .failed = failed.items, .skipped = skipped.items };
 }
 
-/// `release = N` becomes `N + 1` in the recipe's package.toml, in the tree's
-/// copy of the recipe, and in the job (its id, version and own hash).
-fn bumpRelease(arena: Allocator, io: Io, t: tree.Tree, job: *Job, opts: build.Options) !void {
+/// `release = N` becomes `N + 1` in the recipe's package.toml and in the
+/// tree's copy of the recipe. Runs in the worker that built it.
+fn bumpRelease(io: Io, t: tree.Tree, idx: usize, root: []const u8) !u32 {
+    var st = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer st.deinit();
+    const arena = st.allocator();
     const recipes = @constCast(t.recipes);
-    const r = &recipes[job.idx];
-    const path = try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, opts.root, r.name), "package.toml" });
+    const r = &recipes[idx];
+    const path = try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, root, r.name), "package.toml" });
     const text = try std.Io.Dir.cwd().readFileAlloc(io, path, arena, .limited(1 << 20));
     const span = releaseValue(text) orelse return error.NoReleaseLine;
     const next = r.release + 1;
     const new_text = try std.fmt.allocPrint(arena, "{s}{d}{s}", .{ text[0..span[0]], next, text[span[1]..] });
     try std.Io.Dir.cwd().writeFile(io, .{ .sub_path = path, .data = new_text });
     r.release = next;
-    job.version = try std.fmt.allocPrint(arena, "{s}-r{d}", .{ r.version, next });
-    job.id = try std.fmt.allocPrint(arena, "{s}-{s}", .{ r.name, job.version });
-    job.own = try inputs.ownHash(arena, io, opts.root, r.name, opts.arch);
+    return next;
 }
 
 /// Where the number of the top-level `release = N` line is: [start, end).

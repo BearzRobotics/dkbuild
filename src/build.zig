@@ -242,8 +242,30 @@ fn runTool(arena: Allocator, io: std.Io, base_root: []const u8, sb: SbDirs, bind
     }, log);
 }
 
-/// Builds and publishes `r`; returns the hash of what it produced (inputs.outputHash).
-pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) BuildError!inputs.Produced {
+/// For a rebuild only because the build root changed (sched.zig): what the
+/// last build of this release produced, and how to move to the next release.
+pub const Rebuild = struct {
+    previous: inputs.Produced,
+    /// Writes the next release into the recipe and returns it; called only
+    /// when the rebuild came out different.
+    bump: *const fn (ctx: *anyopaque) anyerror!u32,
+    ctx: *anyopaque,
+};
+
+pub const Built = struct {
+    produced: inputs.Produced,
+    /// The release it was published as (`r.release`, or the bumped one).
+    release: u32,
+    /// False when a rebuild came out identical: the package already in repo/
+    /// is kept, and nothing is published.
+    published: bool,
+};
+
+/// Builds `r` and publishes it. A `rebuild` that comes out identical to the
+/// last build is not published (its package stays, at its release); one that
+/// differs gets the next release first (SPEC.md 7.2).
+pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options, rebuild: ?Rebuild) BuildError!Built {
+    var r = r_in;
     const id = try std.fmt.allocPrint(arena, "{s}-{s}-r{d}", .{ r.name, r.version, r.release });
     out("==> {s}\n", .{id});
 
@@ -467,6 +489,29 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
         out("error: {s}: splitting subpackages failed: {s}\n", .{ r.name, @errorName(err) });
         return error.BuildFailed;
     };
+    // What this build produced, before anything names a release: an identical
+    // rebuild is not published, and a different one is published as the next
+    // release, which the packages' metadata below must carry.
+    var parts: std.ArrayList(inputs.Part) = .empty;
+    try parts.append(arena, .{ .name = r.name, .dir = destdir_abs });
+    for (moved) |m| try parts.append(arena, .{ .name = try std.fmt.allocPrint(arena, "{s}-{s}", .{ r.name, m.name }), .dir = try std.fs.path.join(arena, &.{ subs_abs, m.name }) });
+    const produced = inputs.outputHash(arena, io, parts.items) catch |err| {
+        out("error: {s}: hashing what it produced failed: {s}\n", .{ r.name, @errorName(err) });
+        return error.BuildFailed;
+    };
+    if (rebuild) |rb| {
+        if (std.mem.eql(u8, &rb.previous.output, &produced.output)) {
+            out("    rebuilt {s}: identical to the package in repo/, kept as is; log: {s}\n", .{ id, logpath });
+            return .{ .produced = produced, .release = r.release, .published = false };
+        }
+        r.release = rb.bump(rb.ctx) catch |err| {
+            out("error: {s}: cannot bump its release in its recipe: {s}\n", .{ r.name, @errorName(err) });
+            return error.BuildFailed;
+        };
+        out("    {s} came out different: published as release {d} (bumped in its recipe)\n", .{ id, r.release });
+    }
+    const pub_id = try std.fmt.allocPrint(arena, "{s}-{s}-r{d}", .{ r.name, r.version, r.release });
+
     var pkg_list: std.ArrayList(Pkg) = .empty;
     const ver = try std.fmt.allocPrint(arena, "{s}-r{d}", .{ r.version, r.release });
     {
@@ -505,15 +550,9 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
         try pkg_list.append(arena, sub);
         out("    {s}-{s}: {d} files\n", .{ r.name, m.name, m.files });
     }
-    var parts: std.ArrayList(inputs.Part) = .empty;
-    for (pkg_list.items) |pk| try parts.append(arena, .{ .name = pk.name, .dir = pk.files });
-    const produced = inputs.outputHash(arena, io, parts.items) catch |err| {
-        out("error: {s}: hashing what it produced failed: {s}\n", .{ r.name, @errorName(err) });
-        return error.BuildFailed;
-    };
-    try publish(arena, io, r, opts, id, base_root, sb, pkg_list.items, &log);
-    out("    built {s}; log: {s}\n", .{ id, logpath });
-    return produced;
+    try publish(arena, io, r, opts, pub_id, base_root, sb, pkg_list.items, &log);
+    out("    built {s}; log: {s}\n", .{ pub_id, logpath });
+    return .{ .produced = produced, .release = r.release, .published = true };
 }
 
 /// The install script names apk knows (apk-package(5)).

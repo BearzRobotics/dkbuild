@@ -34,14 +34,25 @@ OUT=$(run) || fail "build after the release bump"
 echo "$OUT" | grep -q '^==> dkdemo-1-r2$' || fail "dkdemo r2 was not built"
 echo "$OUT" | grep -q 'usedemo-1-r1: up to date' || fail "usedemo was rebuilt although dkdemo came out identical"
 
-# A release that changes what dkdemo produces rebuilds what builds against it.
+# dkdemo gains a file a package building against it can see (its interface
+# changes), so usedemo is rebuilt; usedemo's own program comes out the same,
+# so its package is kept, at r1, and nothing is bumped.
 sed -i -e 's/^release = 2$/release = 3/' -e 's/llvm-ar rcs libdkdemo.a dkdemo_s.o/llvm-ar rcs libdkdemo.a dkdemo_s.o; echo extra > README.dkdemo/' \
     -e 's|^cp dkdemo.h \$pkgdir/usr/include/$|cp dkdemo.h \$pkgdir/usr/include/; mkdir -p \$pkgdir/usr/share/dkdemo; cp README.dkdemo \$pkgdir/usr/share/dkdemo/|' \
     "$T/packages/d/dkdemo/package.toml"
 OUT=$(run) || fail "build after a change to what dkdemo produces"
 echo "$OUT" | grep -q '^==> dkdemo-1-r3$' || fail "dkdemo r3 was not built"
-echo "$OUT" | grep -q 'usedemo-1-r1: packages it builds against changed; rebuilding as usedemo-1-r2' || fail "usedemo was not rebuilt (as r2) after its dependency's output changed"
-echo "$OUT" | grep -q '^==> usedemo-1-r2$' || fail "usedemo r2 was not built"
+echo "$OUT" | grep -q 'usedemo-1-r1: packages it builds against changed; rebuilding' || fail "usedemo was not rebuilt after its dependency's interface changed"
+echo "$OUT" | grep -q 'rebuilt usedemo-1-r1: identical' || fail "usedemo's identical rebuild was not kept"
+grep -Eq '^release +=  *1$' "$T/packages/u/usedemo/package.toml" || fail "usedemo's recipe was bumped although it came out the same"
+OUT=$(run) || fail "run after the identical rebuild"
+echo "$OUT" | grep -q 'usedemo-1-r1: up to date' || fail "usedemo was not up to date after its identical rebuild"
+
+# dkdemo's soname changes: usedemo's program now names another library, so it
+# comes out different and is published as the next release, bumped in its recipe.
+sed -i -e 's/^release = 3$/release = 4/' -e 's/libdkdemo\.so\.1/libdkdemo.so.2/g' "$T/packages/d/dkdemo/package.toml"
+OUT=$(run) || fail "build after dkdemo's soname changed"
+echo "$OUT" | grep -q 'usedemo-1-r1 came out different: published as release 2' || fail "usedemo's different rebuild was not published as release 2"
 grep -Eq '^release +=  *2$' "$T/packages/u/usedemo/package.toml" || fail "usedemo's recipe was not bumped to release 2"
 OUT=$(run) || fail "run after the bump"
 echo "$OUT" | grep -q 'usedemo-1-r2: up to date' || fail "usedemo r2 was not up to date on the next run"
@@ -49,4 +60,4 @@ echo "$OUT" | grep -q 'usedemo-1-r2: up to date' || fail "usedemo r2 was not up 
 # --force rebuilds an up-to-date package.
 OUT=$(./zig-out/bin/dkbuild --tree "$T" pkg --force usedemo 2>&1) || fail "--force build"
 echo "$OUT" | grep -q 'preparing build root' || fail "--force did not rebuild"
-echo "ok: skipped when unchanged; error for a changed recipe at the same release; an identical rebuild stops the cascade, a different one rebuilds dependents with their release bumped; --force rebuilds"
+echo "ok: skipped when unchanged; error for a changed recipe at the same release; an identical rebuild stops the cascade; a dependent that comes out the same is kept, one that comes out different is published with its release bumped; --force rebuilds"

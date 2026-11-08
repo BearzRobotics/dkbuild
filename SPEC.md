@@ -588,7 +588,7 @@ Next to each built package dkbuild writes `repo/<arch>/<name>.dkhash`:
 | no, or no package yet | | | build |
 | yes | **changed** | | **error:** bump `release` (`--force` overrides) |
 | yes | same | same outputs | skip: "up to date" |
-| yes | same | changed outputs | rebuild, as the next release: dkbuild bumps `release` in the recipe |
+| yes | same | changed outputs | rebuild; then, if it came out **identical**, keep the package in `repo/` as it is; if **different**, publish it as the next release (dkbuild bumps `release` in the recipe) |
 
 The error is decided before anything builds. The build-root comparison is
 made when the package's turn comes, after everything in its build root has
@@ -614,13 +614,17 @@ changed compiler changes what it makes. So a fix inside a library's code
 rebuilds the library and nothing that links against it; a new export, a
 changed header or a new compiler rebuilds the dependents.
 
-**Release bumps.** A package rebuilt because its build root changed has new
-files, but apk upgrades installed systems only when the version goes up. So
+**Release bumps.** A package rebuilt because its build root changed is
+compared with what its last build produced, before it is published. If it
+came out identical (a new build tool, a dependency's change that does not
+reach this package's files), nothing is published: the package in `repo/` and
+its version stay, and only the record learns the new build root. If it came out
+different, apk upgrades installed systems only when the version goes up, so
 dkbuild writes the next `release` into the recipe (`release = 3` becomes
-`release = 4`) before building it, as Alpine and Chimera bump `pkgrel` for a
-rebuild, and says so; the bump is committed like any other change, so the
-history shows why each package changed. The old package files stay in `repo/`
-until `dkbuild prune`.
+`release = 4`), as Alpine and Chimera bump `pkgrel` for a rebuild, publishes
+the package as that release, and says so; the bump is committed like any
+other change, so the history shows which packages changed and why. The old
+package files stay in `repo/` until `dkbuild prune`.
 
 ### 7.3 Build roots, stage 0 and `repo/`
 
