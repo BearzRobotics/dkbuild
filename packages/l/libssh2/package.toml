@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: main/libssh2/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: curl (sftp:// and scp://).
+# r3: static libraries too (in libssh2-static), for fully static programs on musl.
 name = "libssh2"
 version = "1.11.1"
-release = 2
+release = 3
 summary = "Library implementing the SSH2 protocol"
 license = "BSD-3-Clause"
 homepage = "https://www.libssh2.org"

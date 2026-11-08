@@ -15,9 +15,10 @@
 # NOT BUILT YET: needs dbus, glib and duktape in the tree.
 # r2: rebuilt with the empty directories it installs (dkbuild's splitter dropped them).
 # r3: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
+# r4: static libraries too (in polkit-static), for fully static programs on musl.
 name = "polkit"
 version = "128"
-release = 3
+release = 4
 summary = "Toolkit for defining and handling authorizations"
 license = "GPL-2.0-or-later"
 homepage = "https://www.freedesktop.org/wiki/Software/polkit"

@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+# r2: static libraries too (in wireplumber-static), for fully static programs on musl.
 name = "wireplumber"
 version = "0.5.18"
-release = 1
+release = 2
 summary = "Session and policy manager implementation for PipeWire"
 license = "MIT"
 homepage = "https://pipewire.pages.freedesktop.org/wireplumber"

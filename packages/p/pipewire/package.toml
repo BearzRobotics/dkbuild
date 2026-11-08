@@ -8,9 +8,10 @@
 # is in the image or the tree. No logind (the system uses seatd), no rtkit:
 # realtime limits come from PAM/rlimits. Patches and dinit services are Chimera's
 # (readiness.patch makes pipewire tell dinit when it is ready).
+# r2: static libraries too (in pipewire-static), for fully static programs on musl.
 name = "pipewire"
 version = "1.6.10"
-release = 1
+release = 2
 summary = "Server and user space API to deal with multimedia pipelines"
 license = "MIT"
 homepage = "https://pipewire.org"

@@ -58,16 +58,17 @@ fn lookup(arena: Allocator, ctx: Context, name: []const u8) Allocator.Error!?[]c
     const cross_dir = Profile.cross_dir;
 
     if (eql(u8, name, "configure")) {
-        return try std.fmt.allocPrint(arena, "./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var{s}{s}", .{
+        // Shared and static libraries both: the static ones go to <name>-static
+        // (5.7), for fully static programs on musl.
+        return try std.fmt.allocPrint(arena, "./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var{s}", .{
             if (cross) try std.fmt.allocPrint(arena, " --build={s} --host={s}", .{ ctx.host.triple, t.triple }) else "",
-            if (ctx.static) "" else " --disable-static",
         });
     }
     if (eql(u8, name, "make"))
         return "make -j$jobs CC=\"$CC\" CXX=\"$CXX\" AR=llvm-ar NM=llvm-nm RANLIB=llvm-ranlib";
     if (eql(u8, name, "make_install")) return "make DESTDIR=$pkgdir install";
     if (eql(u8, name, "meson")) {
-        return try std.fmt.allocPrint(arena, "meson setup build --prefix=/usr --buildtype=release --wrap-mode=nodownload -Dwerror=false{s}", .{
+        return try std.fmt.allocPrint(arena, "meson setup build --prefix=/usr --buildtype=release --wrap-mode=nodownload -Dwerror=false -Ddefault_library=both{s}", .{
             if (cross) " --cross-file " ++ cross_dir ++ "/meson.ini" else "",
         });
     }
@@ -112,7 +113,7 @@ test "macros expand per target" {
 
     const native = try expand(a, .{ .target = x86, .host = x86 }, "%configure\n%make\n%make_install\n%kernel_make", &bad);
     try std.testing.expectEqualStrings(
-        "./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static\n" ++
+        "./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var\n" ++
             "make -j$jobs CC=\"$CC\" CXX=\"$CXX\" AR=llvm-ar NM=llvm-nm RANLIB=llvm-ranlib\n" ++
             "make DESTDIR=$pkgdir install\nmake LLVM=1 ARCH=x86",
         native,

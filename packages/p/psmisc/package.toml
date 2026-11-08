@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: work/cports/main/psmisc/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+# r3: static libraries too (in psmisc-static), for fully static programs on musl.
 name = "psmisc"
 version = "23.7"
-release = 2
+release = 3
 summary = "Small utilities that use the proc file-system"
 license = "GPL-2.0-or-later"
 homepage = "https://gitlab.com/psmisc/psmisc"

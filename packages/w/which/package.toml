@@ -1,7 +1,8 @@
 # Follows the DKRescue post's build of which 2.23.
+# r2: static libraries too (in which-static), for fully static programs on musl.
 name = "which"
 version = "2.23"
-release = 1
+release = 2
 summary = "Show the full path of commands"
 license = "GPL-3.0-or-later"
 homepage = "https://savannah.gnu.org/projects/which"

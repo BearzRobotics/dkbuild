@@ -7,7 +7,7 @@
 # r2: no c_rehash of its own: openssl's is the system one.
 name = "ca-certificates"
 version = "20261020"
-release = 2
+release = 3
 summary = "Common CA certificates for SSL/TLS"
 license = "GPL-2.0-or-later AND MPL-2.0"
 homepage = "https://gitlab.alpinelinux.org/alpine/ca-certificates"

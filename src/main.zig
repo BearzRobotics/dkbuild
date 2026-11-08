@@ -221,6 +221,7 @@ pub fn main(init: std.process.Init) !void {
                 .version = ver,
                 .own = own[idx],
                 .certain = true,
+                .script = try build.scriptHash(arena, init.io, r, opts),
             };
             if (force or rec == null or !exists or !std.mem.eql(u8, rec.?.version, ver) or rec.?.output == null) {
                 // never built, a new version or release, --force, or a record
@@ -232,6 +233,8 @@ pub fn main(init: std.process.Init) !void {
             } else {
                 job.certain = false;
                 job.old_root = rec.?.deps;
+                // A record from before scripts were recorded is taken as current.
+                if (rec.?.script) |old| job.script_changed = !std.mem.eql(u8, &old, &job.script);
             }
             if (job.certain) certain += 1;
             try jobs.append(arena, job);

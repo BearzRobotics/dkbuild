@@ -3,7 +3,7 @@
 # undeclared `err` in the branch taken for alsa-lib newer than 1.2.15).
 name = "alsa-utils"
 version = "1.2.16"
-release = 1
+release = 2
 summary = "ALSA utilities"
 license = "GPL-2.0-or-later"
 homepage = "https://www.alsa-project.org"

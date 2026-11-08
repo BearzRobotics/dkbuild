@@ -1,9 +1,10 @@
 # needed by: rescue-tools. Saves and restores whole filesystems to archives
 # (with their attributes, compressed, optionally encrypted), as on DKRescue.
 # All compressors on: gzip, bzip2, xz, lzo, lz4, zstd.
+# r2: static libraries too (in fsarchiver-static), for fully static programs on musl.
 name = "fsarchiver"
 version = "0.8.9"
-release = 1
+release = 2
 summary = "Filesystem archiver: saves and restores filesystems"
 license = "GPL-2.0-only"
 homepage = "https://www.fsarchiver.org"

@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: main/libunistring/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: libidn2 (Unicode normalisation for internationalized domain names).
+# r2: static libraries too (in libunistring-static), for fully static programs on musl.
 name = "libunistring"
 version = "1.4.2"
-release = 1
+release = 2
 summary = "Library for manipulating Unicode strings"
 license = "LGPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/libunistring"
@@ -17,7 +18,7 @@ source = [
 
 setup = '''
 %configure \
-    --disable-static
+   
 '''
 build = '''
 %make

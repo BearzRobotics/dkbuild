@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: curl (the Public Suffix List: no cookies for a whole domain such as
 # co.uk). International names through libidn2, not ICU.
+# r2: static libraries too (in libpsl-static), for fully static programs on musl.
 name = "libpsl"
 version = "0.23.3"
-release = 1
+release = 2
 summary = "Public Suffix List library"
 license = "MIT"
 homepage = "https://rockdaboot.github.io/libpsl"

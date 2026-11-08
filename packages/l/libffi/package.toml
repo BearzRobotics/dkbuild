@@ -1,7 +1,8 @@
 # Follows the DKRescue post's build of libffi 3.4.7.
+# r2: static libraries too (in libffi-static), for fully static programs on musl.
 name = "libffi"
 version = "3.4.7"
-release = 1
+release = 2
 summary = "Foreign function interface library"
 license = "MIT"
 homepage = "https://sourceware.org/libffi"

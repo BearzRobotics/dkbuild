@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
+# r3: static libraries too (in cryptsetup-static), for fully static programs on musl.
 name = "cryptsetup"
 version = "2.8.8"
-release = 2
+release = 3
 summary = "Open source Linux disk encryption setup"
 license = "GPL-2.0-or-later"
 homepage = "https://gitlab.com/cryptsetup/cryptsetup"
@@ -21,7 +22,6 @@ autoreconf -if -W none
 %configure \
     --with-crypto_backend=openssl \
     --sbindir=/usr/sbin \
-    --disable-static \
     --disable-external-tokens \
     --disable-ssh-token \
     --disable-asciidoc

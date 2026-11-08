@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: hyprland (libeis: emulated input for remote desktop). liboeffis (the portal
 # client, needs sd-bus) is off.
+# r2: static libraries too (in libei-static), for fully static programs on musl.
 name = "libei"
 version = "1.6.0"
-release = 1
+release = 2
 summary = "Emulated Input Library"
 license = "MIT"
 homepage = "https://gitlab.freedesktop.org/libinput/libei"

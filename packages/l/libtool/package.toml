@@ -1,8 +1,9 @@
 # Follows the DKRescue post's build of libtool 2.5.4; the importer's draft of
 # Chimera's recipe was not used.
+# r2: static libraries too (in libtool-static), for fully static programs on musl.
 name = "libtool"
 version = "2.5.4"
-release = 1
+release = 2
 summary = "Generic library support script"
 license = "GPL-2.0-or-later"
 homepage = "https://www.gnu.org/software/libtool"

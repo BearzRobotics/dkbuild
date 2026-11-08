@@ -7,9 +7,10 @@
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
 # No X11 build dependencies (-Dplatforms=wayland, -Dglx=disabled).
 # r4: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
+# r5: static libraries too (in mesa-static), for fully static programs on musl.
 name = "mesa"
 version = "26.2.5"
-release = 4
+release = 5
 summary = "Mesa 3D Graphics Library"
 license = "MIT"
 homepage = "https://www.mesa3d.org"

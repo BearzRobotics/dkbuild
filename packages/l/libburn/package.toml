@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: work/cports/main/libburn/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+# r2: static libraries too (in libburn-static), for fully static programs on musl.
 name = "libburn"
 version = "1.5.6"
-release = 1
+release = 2
 summary = "Library for reading, mastering and writing optical discs"
 license = "GPL-2.0-or-later"
 homepage = "https://dev.lovelyhq.com/libburnia/libburn"

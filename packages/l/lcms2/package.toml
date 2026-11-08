@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: main/lcms2/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: hyprland (colour management). Without tiff support (libtiff is the image's).
+# r2: static libraries too (in lcms2-static), for fully static programs on musl.
 name = "lcms2"
 version = "2.19.1"
-release = 1
+release = 2
 summary = "Small-footprint color management engine"
 license = "MIT"
 homepage = "https://littlecms.com"

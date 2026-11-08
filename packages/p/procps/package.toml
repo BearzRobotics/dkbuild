@@ -3,7 +3,7 @@
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 name = "procps"
 version = "4.0.7"
-release = 1
+release = 2
 summary = "Utilities for monitoring your system and its processes"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://gitlab.com/procps-ng/procps"
@@ -16,7 +16,7 @@ source = [
 ]
 
 setup = '''
-%configure --disable-static --disable-kill --enable-watch8bit
+%configure --disable-kill --enable-watch8bit
 '''
 # dash's echo prints "-e"; procps's generated sources need bash's.
 build = '''

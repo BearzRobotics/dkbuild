@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: main/xorgproto/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: the X libraries. Hyprland needs libXcursor (cursor themes), and that pulls in this small X stack.
+# r2: static libraries too (in xorgproto-static), for fully static programs on musl.
 name = "xorgproto"
 version = "2024.1"
-release = 1
+release = 2
 summary = "Combined X.Org X11 protocol headers"
 license = "MIT"
 homepage = "https://xorg.freedesktop.org"

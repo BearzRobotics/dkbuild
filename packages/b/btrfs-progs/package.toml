@@ -3,9 +3,10 @@
 # Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
 # r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
+# r3: static libraries too (in btrfs-progs-static), for fully static programs on musl.
 name = "btrfs-progs"
 version = "7.1"
-release = 2
+release = 3
 summary = "Btrfs file system utilities"
 license = "GPL-2.0-only AND LGPL-2.1-or-later"
 homepage = "https://btrfs.readthedocs.io/en/latest"

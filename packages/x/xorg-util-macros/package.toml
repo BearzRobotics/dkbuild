@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: main/xorg-util-macros/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: the X libraries (their autotools builds use its m4 macros).
+# r2: static libraries too (in xorg-util-macros-static), for fully static programs on musl.
 name = "xorg-util-macros"
 version = "1.20.2"
-release = 1
+release = 2
 summary = "X.org autotools macros"
 license = "MIT"
 homepage = "https://gitlab.freedesktop.org/xorg/util/macros"

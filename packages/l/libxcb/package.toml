@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: main/libxcb/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: libx11.
+# r2: static libraries too (in libxcb-static), for fully static programs on musl.
 name = "libxcb"
 version = "1.17.0"
-release = 1
+release = 2
 summary = "X protocol C language binding"
 license = "MIT"
 homepage = "https://xcb.freedesktop.org"

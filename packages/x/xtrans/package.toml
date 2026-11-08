@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: main/xtrans/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: libx11.
+# r2: static libraries too (in xtrans-static), for fully static programs on musl.
 name = "xtrans"
 version = "1.6.0"
-release = 1
+release = 2
 summary = "Network API translation layer to insulate X"
 license = "MIT"
 homepage = "https://xorg.freedesktop.org"

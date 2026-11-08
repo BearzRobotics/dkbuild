@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+# r2: static libraries too (in ddrescue-static), for fully static programs on musl.
 name = "ddrescue"
 version = "1.30"
-release = 1
+release = 2
 summary = "Data recovery tool for failing block devices"
 license = "GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/ddrescue/ddrescue.html"

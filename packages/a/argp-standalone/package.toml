@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # 1.5.0 as built for the DKRescue ISO (Chimera had 1.4.1, whose output path differs).
 # Reviewed: no TODOs; dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+# r2: static libraries too (in argp-standalone-static), for fully static programs on musl.
 name = "argp-standalone"
 version = "1.5.0"
-release = 1
+release = 2
 summary = "Standalone argp implementation"
 license = "LGPL-2.1-or-later"
 homepage = "https://github.com/argp-standalone/argp-standalone"

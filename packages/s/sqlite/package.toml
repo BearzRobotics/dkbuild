@@ -1,9 +1,10 @@
 # Follows the DKRescue post's build of sqlite 3.54.1; the importer's draft of
 # Chimera's recipe was not used.
 # r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
+# r3: static libraries too (in sqlite-static), for fully static programs on musl.
 name = "sqlite"
 version = "3.54.1"
-release = 2
+release = 3
 summary = "SQL database engine"
 license = "blessing"
 homepage = "https://sqlite.org"
@@ -15,7 +16,7 @@ source = [
 ]
 
 setup = '''
-%configure --disable-static --soname=legacy
+%configure --soname=legacy
 '''
 build = '''
 %make

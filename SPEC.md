@@ -240,10 +240,10 @@ hold the toolchain decisions in one place, per target (6.1).
 
 | Macro | Expands to |
 |---|---|
-| `%configure` | `./configure` with `--prefix=/usr`, `--sysconfdir=/etc`, `--localstatedir=/var`, `--build`/`--host` for cross, `--disable-static` unless `static` |
+| `%configure` | `./configure` with `--prefix=/usr`, `--sysconfdir=/etc`, `--localstatedir=/var`, `--build`/`--host` for cross. Shared and static libraries both; the static ones go to `<name>-static` (5.7) |
 | `%make` | `make -j$jobs` with `CC`, `CXX`, `AR`, `NM`, `RANLIB` set to the LLVM tools |
 | `%make_install` | `make DESTDIR=$pkgdir install` |
-| `%meson` | `meson setup build --prefix=/usr --buildtype=release --wrap-mode=nodownload -Dwerror=false`, plus the target's cross file when cross-compiling |
+| `%meson` | `meson setup build --prefix=/usr --buildtype=release --wrap-mode=nodownload -Dwerror=false -Ddefault_library=both`, plus the target's cross file when cross-compiling. Shared and static libraries both, as `%configure` |
 | `%meson_build`, `%meson_install` | `ninja -C build`, `DESTDIR=$pkgdir ninja -C build install` |
 | `%cmake` | `cmake -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release`, plus the target's toolchain file. Without the libdir, GNUInstallDirs picks `/usr/lib64` on x86_64, which musl's loader never searches; a package that installs there fails the policy check |
 | `%cmake_build`, `%cmake_install` | `cmake --build build`, `DESTDIR=$pkgdir cmake --install build --strip` |
@@ -318,6 +318,11 @@ Empty directories are dropped.
 
 Static libraries are a first-class product, not an afterthought: musl makes
 fully static programs practical, which is why `-static` is its own package.
+The `%configure` and `%meson` macros build shared and static libraries both,
+and a recipe turns static ones off only for a stated reason (spirv-tools: its
+CMake config would point every user at a `.a` in a package they don't
+install). CMake projects mostly build one kind or the other; their recipes
+choose.
 `<name>-devel` depends on `<name>` at the same version, and `<name>-static`
 depends on `<name>-devel`, so installing the static library brings the
 headers it is used with. Keeping headers, static libraries and manuals in
@@ -586,7 +591,13 @@ Next to each built package dkbuild writes `repo/<arch>/<name>.dkhash`:
 - `output`: a hash of what this build **produced**: every path of every
   package it made, with type, permission bits and contents (file data, link
   target). No timestamps or owners, so an identical rebuild hashes the same;
-- `interface`: the part of that a package building against it can see (below).
+- `interface`: the part of that a package building against it can see (below);
+- `script`: the recipe's build script with dkbuild's macros expanded (one job,
+  a fixed source directory, so it is the same on every machine). When a macro
+  changes (`%configure` started building static libraries), every recipe that
+  uses it is rebuilt, and published as the next release only if its package
+  came out different, as for a changed build root. A record without it (from
+  before it was recorded) is taken as current.
 
 | Same version-release? | Own inputs | Build root | Result |
 |---|---|---|---|

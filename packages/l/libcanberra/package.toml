@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: hyprland (event sounds). Lean: ALSA output and the null driver only;
 # no PulseAudio, GStreamer or GTK modules.
+# r4: static libraries too (in libcanberra-static), for fully static programs on musl.
 name = "libcanberra"
 version = "0.30"
-release = 3
+release = 4
 summary = "Portable sound event API"
 license = "LGPL-2.1-or-later"
 homepage = "https://0pointer.de/lennart/projects/libcanberra"

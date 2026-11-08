@@ -148,6 +148,24 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
     return s.items;
 }
 
+/// Hash of `r`'s build script with dkbuild's macros expanded, for the record
+/// (inputs.Record.script): the same for every machine (one job, a fixed
+/// source directory), so it changes only when a recipe or a macro does.
+pub fn scriptHash(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) !inputs.Hex {
+    const prof_path = try std.fmt.allocPrint(arena, "{s}/profiles/{s}.toml", .{ opts.root, opts.arch });
+    const prof_text = try Dir.cwd().readFileAlloc(io, prof_path, arena, .limited(1 << 16));
+    var pdiag: profile.Diagnostic = .{};
+    const prof = try profile.parse(arena, prof_text, &pdiag);
+    const ctx: macro.Context = .{ .target = prof, .host = prof, .static = contains(r.options, "static") };
+    var fixed = opts;
+    fixed.jobs = 1;
+    var bad: []const u8 = "";
+    const text = try script(arena, r, ctx, "/build/src", fixed, &bad);
+    var h = std.crypto.hash.sha2.Sha256.init(.{});
+    h.update(text);
+    return std.fmt.bytesToHex(h.finalResult(), .lower);
+}
+
 /// Everything under `destdir` must sit in an allowed top-level directory,
 /// and nothing may be in /usr/local.
 pub fn checkPolicy(arena: Allocator, io: std.Io, destdir: []const u8, problems: *std.ArrayList([]const u8)) !void {

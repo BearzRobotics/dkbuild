@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: libxkbcommon (every keyboard layout; without it Wayland compositors
 # and consoles fall back to US only). Only the data: no X server tools (xkbcomp).
+# r3: static libraries too (in xkeyboard-config-static), for fully static programs on musl.
 name = "xkeyboard-config"
 version = "2.44"
-release = 2
+release = 3
 summary = "X Keyboard Configuration Database"
 license = "MIT"
 homepage = "https://www.freedesktop.org/wiki/Software/XKeyboardConfig"

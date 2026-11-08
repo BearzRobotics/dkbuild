@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: ntfs-3g, e2fsprogs (fuse2fs), and later flatpak and sshfs. fusermount3
 # is setuid root, as upstream installs it.
+# r2: static libraries too (in fuse-static), for fully static programs on musl.
 name = "fuse"
 version = "3.18.3"
-release = 1
+release = 2
 summary = "Filesystem in USErspace"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://github.com/libfuse/libfuse"

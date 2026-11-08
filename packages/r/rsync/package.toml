@@ -6,9 +6,10 @@
 # Adding it no longer rebuilds everything: linux-headers comes out identical,
 # so early cutoff stops there (SPEC.md 7.2). Dropped from Chimera's recipe:
 # shell completions.
+# r3: static libraries too (in rsync-static), for fully static programs on musl.
 name = "rsync"
 version = "3.5.1"
-release = 2
+release = 3
 summary = "Fast incremental file transfer tool"
 license = "GPL-3.0-only"
 homepage = "https://rsync.samba.org"

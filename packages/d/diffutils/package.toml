@@ -1,7 +1,8 @@
 # Follows the DKRescue post's build of diffutils 3.11.
+# r2: static libraries too (in diffutils-static), for fully static programs on musl.
 name = "diffutils"
 version = "3.11"
-release = 1
+release = 2
 summary = "GNU file comparison utilities"
 license = "GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/diffutils"

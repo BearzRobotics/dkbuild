@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # Wayland-only: no X11 dependencies, and the xlib/xcb backends off.
+# r3: static libraries too (in cairo-static), for fully static programs on musl.
 name = "cairo"
 version = "1.18.6"
-release = 2
+release = 3
 summary = "Vector graphics library with cross-device output support"
 license = "LGPL-2.1-or-later OR MPL-1.1"
 homepage = "https://cairographics.org"
@@ -24,8 +25,7 @@ setup = '''
     -Dxlib=disabled \
     -Dxcb=disabled \
     -Dspectre=disabled \
-    -Dtests=disabled \
-    -Ddefault_library=shared
+    -Dtests=disabled
 '''
 build = '''
 %meson_build

@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: main/libxrender/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: libxcursor.
+# r2: static libraries too (in libxrender-static), for fully static programs on musl.
 name = "libxrender"
 version = "0.9.12"
-release = 1
+release = 2
 summary = "X Render library"
 license = "MIT"
 homepage = "https://xorg.freedesktop.org"

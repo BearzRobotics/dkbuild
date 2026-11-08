@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: work/cports/main/gtar/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+# r3: static libraries too (in tar-static), for fully static programs on musl.
 name = "tar"
 version = "1.35"
-release = 2
+release = 3
 summary = "GNU tape archiver"
 license = "GPL-3.0-or-later"
 homepage = "http://www.gnu.org/software/tar"

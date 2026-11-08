@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: main/adwaita-icon-theme/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: gtk+3, gtk4 (the default icons). Without the legacy icon set.
+# r2: static libraries too (in adwaita-icon-theme-static), for fully static programs on musl.
 name = "adwaita-icon-theme"
 version = "51.0"
-release = 1
+release = 2
 summary = "Icon theme for GTK+"
 license = "LGPL-3.0-or-later OR CC-BY-SA-3.0"
 homepage = "https://gitlab.gnome.org/GNOME/adwaita-icon-theme"

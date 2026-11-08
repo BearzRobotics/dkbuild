@@ -7,7 +7,7 @@
 # reverted. Installed under /usr/lib/go with links in /usr/bin, like Chimera.
 name = "go"
 version = "1.27.3"
-release = 1
+release = 2
 summary = "Go programming language"
 license = "BSD-3-Clause"
 homepage = "https://go.dev"

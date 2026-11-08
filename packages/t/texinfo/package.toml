@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: work/cports/main/texinfo/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+# r2: static libraries too (in texinfo-static), for fully static programs on musl.
 name = "texinfo"
 version = "7.2"
-release = 1
+release = 2
 summary = "GNU Documentation System"
 license = "GPL-3.0-or-later"
 homepage = "http://www.gnu.org/software/texinfo"
@@ -17,7 +18,6 @@ source = [
 
 setup = '''
 %configure \
-    --disable-static \
     --disable-perl-xs
 '''
 build = '''

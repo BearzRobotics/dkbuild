@@ -3,9 +3,10 @@
 # Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
 # r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
+# r3: static libraries too (in kmod-static), for fully static programs on musl.
 name = "kmod"
 version = "34.2"
-release = 2
+release = 3
 summary = "Linux kernel module handling"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://git.kernel.org/pub/scm/utils/kernel/kmod/kmod.git"

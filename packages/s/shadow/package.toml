@@ -7,9 +7,10 @@
 # fixes); its login.defs patch and pam.d files are PAM-only and left out.
 # r2: no sulogin: util-linux's is the system one.
 # r3: rebuilt with the empty directories it installs (dkbuild's splitter dropped them).
+# r4: static libraries too (in shadow-static), for fully static programs on musl.
 name = "shadow"
 version = "4.17.2"
-release = 3
+release = 4
 summary = "Shadow password file utilities"
 license = "BSD-3-Clause"
 homepage = "https://github.com/shadow-maint/shadow"
@@ -25,7 +26,6 @@ source = [
 setup = '''
 %configure \
     --enable-shared \
-    --disable-static \
     --enable-lastlog \
     --without-libpam \
     --with-acl \

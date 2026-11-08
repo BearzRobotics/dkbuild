@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: main/libxau/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: libxcb.
+# r2: static libraries too (in libxau-static), for fully static programs on musl.
 name = "libxau"
 version = "1.0.12"
-release = 1
+release = 2
 summary = "Authorization Protocol for X"
 license = "MIT"
 homepage = "https://xorg.freedesktop.org"

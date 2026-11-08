@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: main/libvorbis/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: libcanberra.
+# r2: static libraries too (in libvorbis-static), for fully static programs on musl.
 name = "libvorbis"
 version = "1.3.7"
-release = 1
+release = 2
 summary = "Vorbis general audio compression codec"
 license = "BSD-3-Clause"
 homepage = "https://www.xiph.org/vorbis"

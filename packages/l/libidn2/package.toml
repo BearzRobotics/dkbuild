@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: rsync, curl (hostnames with non-ASCII characters, converted to the
 # ASCII form DNS carries: bücher.example -> xn--bcher-kva.example).
+# r2: static libraries too (in libidn2-static), for fully static programs on musl.
 name = "libidn2"
 version = "2.3.8"
-release = 1
+release = 2
 summary = "Internationalized domain name handling library"
 license = "LGPL-3.0-or-later AND GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/libidn#libidn2"
@@ -18,7 +19,6 @@ source = [
 
 setup = '''
 %configure \
-    --disable-static \
     --disable-gtk-doc
 '''
 build = '''

@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: main/libx11/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: libxcursor (Hyprland's cursor themes).
+# r2: static libraries too (in libx11-static), for fully static programs on musl.
 name = "libx11"
 version = "1.8.13"
-release = 1
+release = 2
 summary = "Base X libraries from Xorg"
 license = "MIT"
 homepage = "https://xorg.freedesktop.org"

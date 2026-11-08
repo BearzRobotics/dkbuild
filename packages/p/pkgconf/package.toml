@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
+# r2: static libraries too (in pkgconf-static), for fully static programs on musl.
 name = "pkgconf"
 version = "2.4.3"
-release = 1
+release = 2
 summary = "Provides compiler and linker configuration"
 license = "MIT"
 homepage = "http://pkgconf.org"

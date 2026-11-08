@@ -1,6 +1,7 @@
+# r2: static libraries too (in seatd-static), for fully static programs on musl.
 name      = "seatd"
 version   = "0.9.1"
-release   = 1
+release   = 2
 summary   = "Seat management daemon and library"
 license   = "MIT"
 homepage  = "https://sr.ht/~kennylevinsen/seatd/"

@@ -10,9 +10,10 @@
 # The other patches are Chimera's systemd-on-musl series (their udev/patches,
 # shared with their systemd-boot; much of it from OpenEmbedded). time-epoch is a
 # fixed date (2025-01-01): with 0, meson asks BSD-style `stat -f` for one.
+# r2: static libraries too (in systemd-boot-static), for fully static programs on musl.
 name = "systemd-boot"
 version = "256.11"
-release = 1
+release = 2
 summary = "UEFI boot manager"
 license = "LGPL-2.1-or-later"
 homepage = "https://github.com/systemd/systemd"

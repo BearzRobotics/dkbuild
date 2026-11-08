@@ -5,9 +5,10 @@
 # colord, Tracker, cloudproviders, introspection or man pages: none of them is
 # in the image or the tree.
 # r8: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
+# r9: static libraries too (in gtk+3-static), for fully static programs on musl.
 name = "gtk+3"
 version = "3.24.43"
-release = 8
+release = 9
 summary = "Gimp Toolkit version 3"
 license = "LGPL-2.1-or-later"
 homepage = "https://gtk.org"

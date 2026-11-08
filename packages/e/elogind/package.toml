@@ -9,7 +9,7 @@
 # patches are Chimera's and are untested here.
 name = "elogind"
 version = "255.17"
-release = 4
+release = 5
 summary = "Standalone version of logind"
 license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
 homepage = "https://github.com/elogind/elogind"

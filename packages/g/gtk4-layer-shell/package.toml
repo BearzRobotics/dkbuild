@@ -3,9 +3,10 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 # r3: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
+# r4: static libraries too (in gtk4-layer-shell-static), for fully static programs on musl.
 name = "gtk4-layer-shell"
 version = "1.3.0"
-release = 3
+release = 4
 summary = "Library to create panels and other desktop components for Wayland"
 license = "MIT"
 homepage = "https://github.com/wmww/gtk4-layer-shell"

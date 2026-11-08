@@ -1,7 +1,8 @@
 # Follows the DKRescue post's build of coreutils 9.6.
+# r2: static libraries too (in coreutils-static), for fully static programs on musl.
 name = "coreutils"
 version = "9.6"
-release = 1
+release = 2
 summary = "GNU core utilities"
 license = "GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/coreutils"

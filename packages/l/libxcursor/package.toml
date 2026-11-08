@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: main/libxcursor/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: hyprland (it loads XCursor themes).
+# r2: static libraries too (in libxcursor-static), for fully static programs on musl.
 name = "libxcursor"
 version = "1.2.3"
-release = 1
+release = 2
 summary = "Client-side cursor loading library for X"
 license = "MIT"
 homepage = "https://xorg.freedesktop.org"

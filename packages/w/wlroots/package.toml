@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r3: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
+# r4: static libraries too (in wlroots-static), for fully static programs on musl.
 name = "wlroots"
 version = "0.20.2"
-release = 3
+release = 4
 summary = "Modular Wayland compositor library 0.20.x"
 license = "MIT"
 homepage = "https://gitlab.freedesktop.org/wlroots/wlroots"

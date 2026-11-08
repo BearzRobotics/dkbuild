@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: main/libxfixes/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: libxcursor.
+# r2: static libraries too (in libxfixes-static), for fully static programs on musl.
 name = "libxfixes"
 version = "6.0.2"
-release = 1
+release = 2
 summary = "Xfixes library and extension of X RandR"
 license = "MIT"
 homepage = "https://xorg.freedesktop.org"

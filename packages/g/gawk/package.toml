@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Reviewed: no TODOs; dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
+# r3: static libraries too (in gawk-static), for fully static programs on musl.
 name = "gawk"
 version = "5.3.2"
-release = 2
+release = 3
 summary = "GNU awk utility"
 license = "GPL-3.0-or-later"
 homepage = "http://www.gnu.org/software/gawk"

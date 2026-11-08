@@ -3,7 +3,7 @@
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 name = "findutils"
 version = "4.10.0"
-release = 1
+release = 2
 summary = "GNU find utilities"
 license = "GPL-3.0-or-later"
 homepage = "http://www.gnu.org/software/findutils"

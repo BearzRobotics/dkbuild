@@ -3,9 +3,10 @@
 # Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
 # r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
+# r3: static libraries too (in e2fsprogs-static), for fully static programs on musl.
 name = "e2fsprogs"
 version = "1.47.4"
-release = 2
+release = 3
 summary = "Ext2/3/4 file system utilities"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://e2fsprogs.sourceforge.net"

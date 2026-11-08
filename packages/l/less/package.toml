@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r2: no more, zless or zstdless: util-linux, gzip and zstd ship them (two packages may not own one file).
+# r3: static libraries too (in less-static), for fully static programs on musl.
 name = "less"
 version = "710"
-release = 2
+release = 3
 summary = "Pager program similar to more(1)"
 license = "custom:less OR GPL-3.0-or-later"
 homepage = "https://www.greenwoodsoftware.com/less"

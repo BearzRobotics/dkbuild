@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
+# r3: static libraries too (in ntfs-3g-static), for fully static programs on musl.
 name = "ntfs-3g"
 version = "2026.7.7"
-release = 2
+release = 3
 summary = "NTFS FUSE driver and tools"
 license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
 homepage = "https://github.com/tuxera/ntfs-3g"
@@ -21,7 +22,6 @@ autoreconf -if -W none
 %configure \
     --exec-prefix=/usr \
     --sbin=/usr/bin \
-    --disable-static \
     --disable-quarantined \
     --disable-crypto \
     --enable-extras \

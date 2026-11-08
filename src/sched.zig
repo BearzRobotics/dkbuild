@@ -40,6 +40,10 @@ pub const Job = struct {
     certain: bool,
     /// The build-root hash it was last built with (from its record).
     old_root: ?inputs.Hex = null,
+    /// Its build script now (build.scriptHash), and whether that differs from
+    /// the record's: a changed macro rebuilds it like a changed build root.
+    script: inputs.Hex,
+    script_changed: bool = false,
 };
 
 pub const Result = struct {
@@ -170,14 +174,14 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
                 // Everything in its build root is settled: compare.
                 roots[j] = try inputs.buildRootHash(arena, t, outputs, jobs[j].idx);
                 if (!jobs[j].certain) {
-                    if (jobs[j].old_root) |old| if (std.mem.eql(u8, &old, &roots[j])) {
+                    if (jobs[j].old_root) |old| if (!jobs[j].script_changed and std.mem.eql(u8, &old, &roots[j])) {
                         state[j] = .ok;
                         std.debug.print("==> {s}: up to date\n", .{jobs[j].id});
                         continue;
                     };
                     if (!announced[j]) {
                         announced[j] = true;
-                        std.debug.print("==> {s}: packages it builds against changed; rebuilding\n", .{jobs[j].id});
+                        std.debug.print("==> {s}: {s}; rebuilding\n", .{ jobs[j].id, if (jobs[j].script_changed) "dkbuild's macros changed its build script" else "packages it builds against changed" });
                     }
                 }
                 if (hold or running >= parallel) continue;
@@ -238,7 +242,7 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
                 jobs[j].id = try std.fmt.allocPrint(arena, "{s}-{s}", .{ r_now.name, jobs[j].version });
                 jobs[j].own = try inputs.ownHash(arena, io, opts.root, r_now.name, opts.arch);
             }
-            const record = try inputs.format(arena, .{ .version = jobs[j].version, .inputs = jobs[j].own, .deps = roots[j], .output = w.result.produced.output, .interface = w.result.produced.interface });
+            const record = try inputs.format(arena, .{ .version = jobs[j].version, .inputs = jobs[j].own, .deps = roots[j], .output = w.result.produced.output, .interface = w.result.produced.interface, .script = jobs[j].script });
             std.Io.Dir.cwd().writeFile(io, .{ .sub_path = jobs[j].rec_path, .data = record }) catch |err| {
                 std.debug.print("warning: cannot write {s}: {s}\n", .{ jobs[j].rec_path, @errorName(err) });
             };
@@ -319,9 +323,9 @@ test "a job waits only for earlier jobs it needs; up-to-date packages are not wa
     } };
     // zlib is up to date (not in the list); lib, other, app are built in that order.
     const jobs = [_]Job{
-        .{ .idx = 1, .id = "lib", .rec_path = "", .version = "1-r1", .own = undefined, .certain = true },
-        .{ .idx = 2, .id = "other", .rec_path = "", .version = "1-r1", .own = undefined, .certain = true },
-        .{ .idx = 0, .id = "app", .rec_path = "", .version = "1-r1", .own = undefined, .certain = true },
+        .{ .idx = 1, .id = "lib", .rec_path = "", .version = "1-r1", .own = undefined, .certain = true, .script = undefined },
+        .{ .idx = 2, .id = "other", .rec_path = "", .version = "1-r1", .own = undefined, .certain = true, .script = undefined },
+        .{ .idx = 0, .id = "app", .rec_path = "", .version = "1-r1", .own = undefined, .certain = true, .script = undefined },
     };
     const w = try waitLists(a, t, &jobs);
     try std.testing.expectEqual(@as(usize, 0), w[0].len);

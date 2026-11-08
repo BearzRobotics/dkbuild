@@ -1,8 +1,9 @@
 # Follows the DKRescue post's build of nwipe 0.43.1.
 # r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
+# r3: static libraries too (in nwipe-static), for fully static programs on musl.
 name = "nwipe"
 version = "0.43.1"
-release = 2
+release = 3
 summary = "Secure disk eraser"
 license = "GPL-2.0-only"
 homepage = "https://github.com/martijnvanbrummelen/nwipe"

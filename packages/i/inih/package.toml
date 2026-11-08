@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: main/inih/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: xfsprogs (xfs_scrub's configuration).
+# r2: static libraries too (in inih-static), for fully static programs on musl.
 name = "inih"
 version = "62"
-release = 1
+release = 2
 summary = "Simple ini parser library"
 license = "BSD-3-Clause"
 homepage = "https://github.com/benhoyt/inih"

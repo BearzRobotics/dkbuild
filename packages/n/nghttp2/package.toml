@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: curl (HTTP/2). Only the library (--enable-lib-only): curl needs no more,
 # and the nghttpx proxy and h2load tools would bring c-ares, libev, jansson and HTTP/3.
+# r2: static libraries too (in nghttp2-static), for fully static programs on musl.
 name = "nghttp2"
 version = "1.70.0"
-release = 1
+release = 2
 summary = "HTTP/2 C Library"
 license = "MIT"
 homepage = "https://nghttp2.org"

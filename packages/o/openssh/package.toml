@@ -3,9 +3,10 @@
 #
 # Built without PAM, Kerberos, FIDO and LDNS, none of which the system has.
 # r2: rebuilt with the empty directories it installs (dkbuild's splitter dropped them).
+# r3: static libraries too (in openssh-static), for fully static programs on musl.
 name = "openssh"
 version = "10.6_p2"
-release = 2
+release = 3
 summary = "OpenSSH client and server"
 license = "SSH-OpenSSH"
 homepage = "https://www.openssh.com"

@@ -4,9 +4,10 @@
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
 # No X11 build dependencies (Wayland-only system; they were Chimera leftovers).
 # r3: rebuilt with the empty directories it installs (dkbuild's splitter dropped them).
+# r4: static libraries too (in dbus-static), for fully static programs on musl.
 name = "dbus"
 version = "1.16.2"
-release = 3
+release = 4
 summary = "Message bus system"
 license = "GPL-2.0-or-later"
 homepage = "https://dbus.freedesktop.org"

@@ -1,7 +1,8 @@
 # Follows the DKRescue post's build of eudev 3.2.14.
+# r2: static libraries too (in eudev-static), for fully static programs on musl.
 name = "eudev"
 version = "3.2.14"
-release = 1
+release = 2
 summary = "Device manager (udev)"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/eudev-project/eudev"
@@ -13,7 +14,7 @@ source = [
 ]
 
 setup = '''
-%configure --bindir=/usr/bin --sbindir=/usr/sbin --libdir=/usr/lib --libexecdir=/usr/lib --with-rootprefix=/usr --disable-static --disable-manpages
+%configure --bindir=/usr/bin --sbindir=/usr/sbin --libdir=/usr/lib --libexecdir=/usr/lib --with-rootprefix=/usr --disable-manpages
 '''
 build = '''
 %make

@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
+# r3: static libraries too (in wayland-static), for fully static programs on musl.
 name = "wayland"
 version = "1.26.0"
-release = 2
+release = 3
 summary = "Wayland compositor infrastructure"
 license = "MIT"
 homepage = "https://wayland.freedesktop.org"

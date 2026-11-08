@@ -1,8 +1,9 @@
 # Follows the DKRescue post's build of m4 1.4.19; the importer's draft of
 # Chimera's recipe was not used.
+# r2: static libraries too (in m4-static), for fully static programs on musl.
 name = "m4"
 version = "1.4.19"
-release = 1
+release = 2
 summary = "GNU macro processor"
 license = "GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/m4"

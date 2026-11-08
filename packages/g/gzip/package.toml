@@ -1,7 +1,8 @@
 # Follows the DKRescue post's build of gzip 1.13.
+# r2: static libraries too (in gzip-static), for fully static programs on musl.
 name = "gzip"
 version = "1.13"
-release = 1
+release = 2
 summary = "GNU compression utility"
 license = "GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/gzip"

@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r3: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
+# r4: static libraries too (in nvme-cli-static), for fully static programs on musl.
 name = "nvme-cli"
 version = "2.16"
-release = 3
+release = 4
 summary = "NVMe management command line interface"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/linux-nvme/nvme-cli"

@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: user/tomlplusplus/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: hyprcursor.
+# r2: static libraries too (in tomlplusplus-static), for fully static programs on musl.
 name = "tomlplusplus"
 version = "3.4.0"
-release = 1
+release = 2
 summary = "Header-only TOML config file parser and serializer for C++17"
 license = "MIT"
 homepage = "https://github.com/marzer/tomlplusplus"

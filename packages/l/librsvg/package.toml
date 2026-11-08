@@ -4,9 +4,10 @@
 # Written in Rust; crates vendored on the host (`cargodeps`), built offline.
 # Changed from Chimera: no AVIF, introspection, Vala or docs; the gdk-pixbuf
 # loader is off as in Chimera.
+# r3: static libraries too (in librsvg-static), for fully static programs on musl.
 name = "librsvg"
 version = "2.63.2"
-release = 2
+release = 3
 summary = "SVG library for GNOME"
 license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
 homepage = "https://wiki.gnome.org/Projects/LibRsvg"

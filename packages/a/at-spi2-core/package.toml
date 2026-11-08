@@ -3,9 +3,10 @@
 # needed by: gtk+3 (atk and atk-bridge are part of this package since 2.46).
 # Changed from Chimera: no X11 (the system is Wayland-only, and the image has no
 # libX11), no introspection (gobject-introspection is not built yet), no docs.
+# r2: static libraries too (in at-spi2-core-static), for fully static programs on musl.
 name = "at-spi2-core"
 version = "2.62.1"
-release = 1
+release = 2
 summary = "Assistive Technology Service Provider Interface"
 license = "GPL-2.0-or-later"
 homepage = "https://gitlab.gnome.org/GNOME/at-spi2-core"

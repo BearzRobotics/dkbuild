@@ -31,6 +31,9 @@ pub const Record = struct {
     output: ?Hex = null,
     /// The part of it a package building against it can see (`outputHash`).
     interface: ?Hex = null,
+    /// The build script with dkbuild's macros expanded (build.scriptHash): a
+    /// change to a macro (`%configure`) rebuilds what uses it.
+    script: ?Hex = null,
 };
 
 /// What a build produced, two ways (outputHash).
@@ -60,7 +63,9 @@ pub fn format(arena: Allocator, r: Record) Allocator.Error![]const u8 {
     const o = r.output orelse return base;
     const with_output = try std.fmt.allocPrint(arena, "{s}output: {s}\n", .{ base, &o });
     const i = r.interface orelse return with_output;
-    return std.fmt.allocPrint(arena, "{s}interface: {s}\n", .{ with_output, &i });
+    const with_interface = try std.fmt.allocPrint(arena, "{s}interface: {s}\n", .{ with_output, &i });
+    const sc = r.script orelse return with_interface;
+    return std.fmt.allocPrint(arena, "{s}script: {s}\n", .{ with_interface, &sc });
 }
 
 pub fn parse(arena: Allocator, text: []const u8) Allocator.Error!?Record {
@@ -69,6 +74,7 @@ pub fn parse(arena: Allocator, text: []const u8) Allocator.Error!?Record {
     var deps: ?Hex = null;
     var output: ?Hex = null;
     var interface: ?Hex = null;
+    var script: ?Hex = null;
     var lines = std.mem.splitScalar(u8, text, '\n');
     while (lines.next()) |line| {
         const colon = std.mem.indexOf(u8, line, ": ") orelse continue;
@@ -79,8 +85,9 @@ pub fn parse(arena: Allocator, text: []const u8) Allocator.Error!?Record {
         if (std.mem.eql(u8, key, "deps") and val.len == 64) deps = val[0..64].*;
         if (std.mem.eql(u8, key, "output") and val.len == 64) output = val[0..64].*;
         if (std.mem.eql(u8, key, "interface") and val.len == 64) interface = val[0..64].*;
+        if (std.mem.eql(u8, key, "script") and val.len == 64) script = val[0..64].*;
     }
-    return .{ .version = version orelse return null, .inputs = inputs orelse return null, .deps = deps orelse return null, .output = output, .interface = interface };
+    return .{ .version = version orelse return null, .inputs = inputs orelse return null, .deps = deps orelse return null, .output = output, .interface = interface, .script = script };
 }
 
 fn hashFileInto(h: *Sha256, arena: Allocator, io: std.Io, path: []const u8, label: []const u8) !void {

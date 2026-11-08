@@ -3,9 +3,10 @@
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # No X11 build dependencies (it is built with -Dx11=false).
 # r4: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
+# r5: static libraries too (in libepoxy-static), for fully static programs on musl.
 name = "libepoxy"
 version = "1.5.10"
-release = 4
+release = 5
 summary = "Library for handling OpenGL function pointers"
 license = "MIT"
 homepage = "https://github.com/anholt/libepoxy"

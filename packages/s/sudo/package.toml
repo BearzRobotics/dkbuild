@@ -1,9 +1,10 @@
 # Follows the DKRescue post's build of sudo 1.9.17p2.
 # Built without PAM: authentication goes through shadow, not PAM.
 # r2: rebuilt with the empty directories it installs (dkbuild's splitter dropped them).
+# r3: static libraries too (in sudo-static), for fully static programs on musl.
 name = "sudo"
 version = "1.9.17_p2"
-release = 2
+release = 3
 summary = "Run commands as another user"
 license = "ISC"
 homepage = "https://www.sudo.ws"

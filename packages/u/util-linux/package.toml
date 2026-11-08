@@ -1,9 +1,10 @@
 # Written from the DKRescue base-system post (util-linux 2.41.3, autotools), not from
 # Chimera's meson recipe, which disables much of what the ISO ships. No login/su/
 # chfn: shadow provides those. The mount programs are installed setuid.
+# r2: static libraries too (in util-linux-static), for fully static programs on musl.
 name = "util-linux"
 version = "2.41.3"
-release = 1
+release = 2
 summary = "Miscellaneous system utilities"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/util-linux/util-linux"
@@ -28,7 +29,6 @@ setup = '''
     --disable-runuser \
     --disable-pylibmount \
     --disable-liblastlog2 \
-    --disable-static \
     --disable-makeinstall-chown \
     --disable-makeinstall-setuid \
     --without-python \

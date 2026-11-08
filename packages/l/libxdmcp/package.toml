@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: main/libxdmcp/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: libxcb.
+# r2: static libraries too (in libxdmcp-static), for fully static programs on musl.
 name = "libxdmcp"
 version = "1.1.5"
-release = 1
+release = 2
 summary = "X Display Manager Control Protocol library"
 license = "MIT"
 homepage = "https://xorg.freedesktop.org"

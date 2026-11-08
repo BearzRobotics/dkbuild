@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: main/libconfig/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: nwipe (its configuration file).
+# r2: static libraries too (in libconfig-static), for fully static programs on musl.
 name = "libconfig"
 version = "1.8.1"
-release = 1
+release = 2
 summary = "Configuration file library"
 license = "LGPL-2.1-or-later"
 homepage = "https://hyperrealm.com/libconfig/libconfig.html"

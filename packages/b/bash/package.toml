@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+# r3: static libraries too (in bash-static), for fully static programs on musl.
 name = "bash"
 version = "5.3"
-release = 2
+release = 3
 summary = "GNU Bourne Again Shell"
 license = "GPL-3.0-or-later"
 homepage = "http://www.gnu.org/software/bash"

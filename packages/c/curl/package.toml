@@ -4,9 +4,10 @@
 # r2: HTTP/2 (nghttp2), international hostnames (libidn2), the Public Suffix
 # List (libpsl) and sftp/scp (libssh2). Not HTTP/3: ngtcp2/nghttp3 need a QUIC
 # TLS stack, a separate decision.
+# r3: static libraries too (in curl-static), for fully static programs on musl.
 name = "curl"
 version = "8.23.0"
-release = 2
+release = 3
 summary = "Command line tool for transferring data with URL syntax"
 license = "curl"
 homepage = "https://curl.se"

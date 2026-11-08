@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: rescue-tools. testdisk (finds lost partitions, repairs boot
 # sectors) and photorec (recovers files by content), as on DKRescue.
+# r2: static libraries too (in testdisk-static), for fully static programs on musl.
 name = "testdisk"
 version = "7.2"
-release = 1
+release = 2
 summary = "Data recovery suite: testdisk and photorec"
 license = "GPL-2.0-or-later"
 homepage = "https://www.cgsecurity.org"
