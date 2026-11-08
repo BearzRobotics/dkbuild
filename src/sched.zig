@@ -104,7 +104,12 @@ fn waitLists(arena: Allocator, t: tree.Tree, jobs: []const Job) Allocator.Error!
 
 /// `outputs` holds, per recipe, the hash of what it last produced (from the
 /// records); builds that succeed here update it.
-pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []const Job, outputs: []?inputs.Produced, opts: build.Options, parallel: usize, keep_going: bool) !Result {
+/// A package rebuilt because what it builds against changed gets the next
+/// release, written into its recipe (SPEC.md 7.2): its files change, and apk
+/// upgrades only when the version goes up. The tree's copy of the recipe is
+/// updated too, so what builds against it looks for the new files; nothing
+/// that needs it is running yet (it waits for this build).
+pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inputs.Produced, opts: build.Options, parallel: usize, keep_going: bool) !Result {
     const n = jobs.len;
     const waits = try waitLists(arena, t, jobs);
     const state = try arena.alloc(State, n);
@@ -155,7 +160,15 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []const Job, outputs: [
                     };
                     if (!announced[j]) {
                         announced[j] = true;
-                        std.debug.print("==> {s}: packages it builds against changed; rebuilding\n", .{jobs[j].id});
+                        const old_id = jobs[j].id;
+                        bumpRelease(arena, io, t, &jobs[j], opts) catch |err| {
+                            std.debug.print("error: {s}: cannot bump its release in its recipe: {s}\n", .{ old_id, @errorName(err) });
+                            state[j] = .failed;
+                            try failed.append(arena, t.recipes[jobs[j].idx].name);
+                            if (!keep_going) stop = true;
+                            continue;
+                        };
+                        std.debug.print("==> {s}: packages it builds against changed; rebuilding as {s} (release bumped in its recipe)\n", .{ old_id, jobs[j].id });
                     }
                 }
                 if (hold or running >= parallel) continue;
@@ -164,7 +177,7 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []const Job, outputs: [
                     hold = true;
                     continue;
                 }
-                workers[j] = .{ .shared = &shared, .io = io, .job = j, .r = r, .opts = opts, .buffered = buffered };
+                workers[j] = .{ .shared = &shared, .io = io, .job = j, .r = t.recipes[jobs[j].idx], .opts = opts, .buffered = buffered };
                 workers[j].thread = std.Thread.spawn(.{}, workerMain, .{&workers[j]}) catch |err| {
                     std.debug.print("error: cannot start a thread for {s}: {s}\n", .{ r.name, @errorName(err) });
                     std.process.exit(1);
@@ -212,6 +225,58 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []const Job, outputs: [
         }
     }
     return .{ .failed = failed.items, .skipped = skipped.items };
+}
+
+/// `release = N` becomes `N + 1` in the recipe's package.toml, in the tree's
+/// copy of the recipe, and in the job (its id, version and own hash).
+fn bumpRelease(arena: Allocator, io: Io, t: tree.Tree, job: *Job, opts: build.Options) !void {
+    const recipes = @constCast(t.recipes);
+    const r = &recipes[job.idx];
+    const path = try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, opts.root, r.name), "package.toml" });
+    const text = try std.Io.Dir.cwd().readFileAlloc(io, path, arena, .limited(1 << 20));
+    const span = releaseValue(text) orelse return error.NoReleaseLine;
+    const next = r.release + 1;
+    const new_text = try std.fmt.allocPrint(arena, "{s}{d}{s}", .{ text[0..span[0]], next, text[span[1]..] });
+    try std.Io.Dir.cwd().writeFile(io, .{ .sub_path = path, .data = new_text });
+    r.release = next;
+    job.version = try std.fmt.allocPrint(arena, "{s}-r{d}", .{ r.version, next });
+    job.id = try std.fmt.allocPrint(arena, "{s}-{s}", .{ r.name, job.version });
+    job.own = try inputs.ownHash(arena, io, opts.root, r.name, opts.arch);
+}
+
+/// Where the number of the top-level `release = N` line is: [start, end).
+fn releaseValue(text: []const u8) ?[2]usize {
+    var start: usize = 0;
+    while (start < text.len) {
+        const end = std.mem.indexOfScalarPos(u8, text, start, '\n') orelse text.len;
+        const line = text[start..end];
+        // Subpackage tables come after every top-level key (SPEC.md 5.1).
+        if (line.len > 0 and line[0] == '[') return null;
+        if (std.mem.startsWith(u8, line, "release")) {
+            var i: usize = "release".len;
+            while (i < line.len and line[i] == ' ') i += 1;
+            if (i < line.len and line[i] == '=') {
+                i += 1;
+                while (i < line.len and line[i] == ' ') i += 1;
+                const d0 = i;
+                while (i < line.len and std.ascii.isDigit(line[i])) i += 1;
+                if (i > d0) return .{ start + d0, start + i };
+            }
+        }
+        start = end + 1;
+    }
+    return null;
+}
+
+test "releaseValue finds the top-level release, however it is spaced" {
+    const t1 = "name = \"a\"\nrelease = 12\nsummary = \"s\"\n";
+    const s1 = releaseValue(t1).?;
+    try std.testing.expectEqualStrings("12", t1[s1[0]..s1[1]]);
+    const t2 = "name      = \"a\"\nrelease   = 3\n";
+    const s2 = releaseValue(t2).?;
+    try std.testing.expectEqualStrings("3", t2[s2[0]..s2[1]]);
+    try std.testing.expect(releaseValue("name = \"a\"\n[subpackages.x]\nrelease = 1\n") == null);
+    try std.testing.expect(releaseValue("# release = 4\nreleases = 2\n") == null);
 }
 
 fn rc(name: []const u8, build_deps: []const []const u8) recipe.Recipe {

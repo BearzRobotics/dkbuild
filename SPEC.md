@@ -576,7 +576,7 @@ Next to each built package dkbuild writes `repo/<arch>/<name>.dkhash`:
 | no, or no package yet | | | build |
 | yes | **changed** | | **error:** bump `release` (`--force` overrides) |
 | yes | same | same outputs | skip: "up to date" |
-| yes | same | changed outputs | rebuild |
+| yes | same | changed outputs | rebuild, as the next release: dkbuild bumps `release` in the recipe |
 
 The error is decided before anything builds. The build-root comparison is
 made when the package's turn comes, after everything in its build root has
@@ -602,9 +602,13 @@ changed compiler changes what it makes. So a fix inside a library's code
 rebuilds the library and nothing that links against it; a new export, a
 changed header or a new compiler rebuilds the dependents.
 
-**Later:** a build number in the published version, so a package rebuilt only
-because its build root changed reaches installed systems (apk upgrades only
-when the version goes up).
+**Release bumps.** A package rebuilt because its build root changed has new
+files, but apk upgrades installed systems only when the version goes up. So
+dkbuild writes the next `release` into the recipe (`release = 3` becomes
+`release = 4`) before building it, as Alpine and Chimera bump `pkgrel` for a
+rebuild, and says so; the bump is committed like any other change, so the
+history shows why each package changed. The old package files stay in `repo/`
+until `dkbuild prune`.
 
 ### 7.3 Build roots, stage 0 and `repo/`
 

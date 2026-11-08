@@ -40,9 +40,13 @@ sed -i -e 's/^release = 2$/release = 3/' -e 's/llvm-ar rcs libdkdemo.a dkdemo_s.
     "$T/packages/d/dkdemo/package.toml"
 OUT=$(run) || fail "build after a change to what dkdemo produces"
 echo "$OUT" | grep -q '^==> dkdemo-1-r3$' || fail "dkdemo r3 was not built"
-echo "$OUT" | grep -q 'usedemo-1-r1: packages it builds against changed' || fail "usedemo was not rebuilt after its dependency's output changed"
+echo "$OUT" | grep -q 'usedemo-1-r1: packages it builds against changed; rebuilding as usedemo-1-r2' || fail "usedemo was not rebuilt (as r2) after its dependency's output changed"
+echo "$OUT" | grep -q '^==> usedemo-1-r2$' || fail "usedemo r2 was not built"
+grep -Eq '^release +=  *2$' "$T/packages/u/usedemo/package.toml" || fail "usedemo's recipe was not bumped to release 2"
+OUT=$(run) || fail "run after the bump"
+echo "$OUT" | grep -q 'usedemo-1-r2: up to date' || fail "usedemo r2 was not up to date on the next run"
 
 # --force rebuilds an up-to-date package.
 OUT=$(./zig-out/bin/dkbuild --tree "$T" pkg --force usedemo 2>&1) || fail "--force build"
 echo "$OUT" | grep -q 'preparing build root' || fail "--force did not rebuild"
-echo "ok: skipped when unchanged; error for a changed recipe at the same release; an identical rebuild stops the cascade, a different one rebuilds dependents; --force rebuilds"
+echo "ok: skipped when unchanged; error for a changed recipe at the same release; an identical rebuild stops the cascade, a different one rebuilds dependents with their release bumped; --force rebuilds"
