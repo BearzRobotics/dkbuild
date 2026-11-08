@@ -13,8 +13,9 @@ homepage = "https://kernel.org"
 archs = ["x86_64"]
 hostdeps = ["bc", "flex", "bison", "perl", "kmod"]
 builddeps = ["openssl-devel", "elfutils", "zlib-ng-compat-devel"]
-# The kernel is a long build; keep to 4 jobs and a lower priority like llvm.
-options = ["jobs:4", "!check", "!strip"]
+# The kernel compiles one small file per job, so it uses every core (-j limits
+# it); lower priority like llvm.
+options = ["!check", "!strip"]
 
 source = [
     { url = "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.19.tar.xz", sha256 = "303079a8250b8f381f82b03f90463d12ac98d4f6b149b761ea75af1323521357" },

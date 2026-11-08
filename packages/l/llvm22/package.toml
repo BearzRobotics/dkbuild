@@ -13,8 +13,10 @@ license = "Apache-2.0 WITH LLVM-exception"
 homepage = "https://llvm.org"
 archs = ["x86_64"]
 builddeps = ["zlib-ng-compat-devel", "zstd-devel", "linux-headers", "llvm-libcxx-devel"]
-# Same core limits as llvm: 4 compile jobs, one link job, low priority.
-options = ["jobs:4", "!check", "!strip"]
+# At most 10 compile jobs (two cores left for the desktop), two link jobs and
+# low priority. Links here are only llvm-config and static libraries, so they
+# are small. On an 8 GB machine pass -j 4.
+options = ["jobs:10", "!check", "!strip"]
 
 source = [
     { url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.8/llvm-project-22.1.8.src.tar.xz", sha256 = "922f1817a0df7b1489272d18134ee0087a8b068828f87ac63b9861b1a9965888" },
@@ -40,7 +42,7 @@ cmake -G Ninja -S llvm -B build                                     \
     -DLLVM_INCLUDE_EXAMPLES=OFF                                     \
     -DLLVM_INCLUDE_DOCS=OFF                                         \
     -DLLVM_INCLUDE_UTILS=OFF                                        \
-    -DLLVM_PARALLEL_LINK_JOBS=1                                     \
+    -DLLVM_PARALLEL_LINK_JOBS=2                                     \
     -DCLANG_BUILD_TOOLS=OFF                                         \
     -DCLANG_INCLUDE_TESTS=OFF                                       \
     -DCLANG_INCLUDE_DOCS=OFF                                        \
