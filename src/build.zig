@@ -459,10 +459,10 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
             for (r.source) |src| {
                 if (src != .tarball) continue;
                 const file = try fetch.cachePath(arena, cache, src.tarball.sha256);
-                if (!src.tarball.unpack or !isTarArchive(src.tarball.url)) {
+                if (!src.tarball.unpack or src.tarball.name != null or !isTarArchive(src.tarball.url)) {
                     const sdir = try std.fs.path.join(arena, &.{ build_rel, "sources" });
                     Dir.cwd().createDirPath(io, sdir) catch return error.UnpackFailed;
-                    const base = std.fs.path.basename(src.tarball.url);
+                    const base = src.tarball.name orelse std.fs.path.basename(src.tarball.url);
                     const ok = runLogged(arena, io, &.{ "cp", file, try std.fs.path.join(arena, &.{ sdir, base }) }, &log) catch false;
                     if (!ok) return error.UnpackFailed;
                     first = false;

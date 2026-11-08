@@ -24,7 +24,8 @@ autoreconf -if -W none
 %configure \
     --disable-tests \
     --enable-tools \
-    --enable-win64
+    --enable-win64 \
+    --enable-archs=x86_64,i386
 '''
 build = '''
 %make

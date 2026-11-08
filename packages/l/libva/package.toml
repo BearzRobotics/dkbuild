@@ -1,3 +1,4 @@
+# FenrirOS: no GLX backend (libva-glx is deprecated), so libva does not need Mesa and Mesa can use libva.
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libva/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
@@ -9,7 +10,7 @@ summary = "Video Acceleration API"
 license = "MIT"
 homepage = "https://01.org/linuxmedia/vaapi"
 hostdeps = ["pkgconf", "wayland"]
-builddeps = ["libdrm-devel", "libffi-devel", "libxext-devel", "libxfixes-devel", "mesa-devel", "wayland-devel"]
+builddeps = ["libdrm-devel", "libffi-devel", "libxext-devel", "libxfixes-devel", "wayland-devel"]
 
 source = [
     { url = "https://github.com/intel/libva/archive/2.24.1.tar.gz", sha256 = "0b4a3649ee8d683b9cce2ef094df4fb039d276c0cef7e49337c43d3b297b9f42" },
@@ -17,7 +18,7 @@ source = [
 
 setup = '''
 %meson \
-    -Dwith_glx=yes \
+    -Dwith_glx=no \
     -Dwith_wayland=yes
 '''
 build = '''

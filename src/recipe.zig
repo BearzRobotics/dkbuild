@@ -12,7 +12,7 @@ const Allocator = std.mem.Allocator;
 pub const Source = union(enum) {
     /// `{ url, sha256 }`, and `unpack = false` for an archive the build wants
     /// as a file (copied to /build/sources/<name>, like any non-tar source).
-    tarball: struct { url: []const u8, sha256: []const u8, unpack: bool = true },
+    tarball: struct { url: []const u8, sha256: []const u8, unpack: bool = true, name: ?[]const u8 = null },
     /// `{ git, tag }` or `{ git, commit }`; `ref` is whichever was given.
     git: struct { url: []const u8, ref: []const u8 },
 };
@@ -161,7 +161,7 @@ fn parseSources(arena: Allocator, diag: *Diagnostic, root: *const toml.Table) cf
             .table => |t| t,
             else => return cfg.fail(arena, diag, "{s}", .{source_shape}),
         };
-        try cfg.onlyKeys(arena, diag, t, &.{ "url", "sha256", "unpack", "git", "tag", "commit" }, "source");
+        try cfg.onlyKeys(arena, diag, t, &.{ "url", "sha256", "unpack", "name", "git", "tag", "commit" }, "source");
         if (t.get("url") != null) {
             // A tarball: url + sha256, nothing for git.
             if (t.get("git") != null or t.get("tag") != null or t.get("commit") != null)
@@ -174,7 +174,11 @@ fn parseSources(arena: Allocator, diag: *Diagnostic, root: *const toml.Table) cf
                 .boolean => |b| b,
                 else => return cfg.fail(arena, diag, "source '{s}': unpack must be true or false", .{url}),
             } else true;
-            dst.* = .{ .tarball = .{ .url = url, .sha256 = checksum, .unpack = unpack } };
+            // `name`: the file name the source is copied as (crates.io URLs all end in /download).
+            const fname = try cfg.optString(arena, diag, t, "name");
+            if (fname) |f| if (f.len == 0 or std.mem.indexOfScalar(u8, f, '/') != null)
+                return cfg.fail(arena, diag, "source '{s}': name must be a plain file name", .{url});
+            dst.* = .{ .tarball = .{ .url = url, .sha256 = checksum, .unpack = unpack, .name = fname } };
         } else if (t.get("git") != null) {
             if (t.get("sha256") != null) return cfg.fail(arena, diag, "{s}", .{source_shape});
             const url = try cfg.reqString(arena, diag, t, "git");

@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/lm-sensors/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "lm-sensors"
+version = "3.6.2"
+release = 1
+summary = "Sensor reading utilities"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://github.com/lm-sensors/lm-sensors"
+patches = ["clang.patch"]
+hostdeps = ["flex", "bison", "perl"]
+rundeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/lm-sensors/lm-sensors/archive/V3-6-2.tar.gz", sha256 = "c6a0587e565778a40d88891928bf8943f27d353f382d5b745a997d635978a8f0" },
+]
+
+build = '''
+%make MACHINE=x86_64 \
+    PREFIX=/usr
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr \
+    SBINDIR=/usr/bin \
+    MANDIR=/usr/share/man
+'''
