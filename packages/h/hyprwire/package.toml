@@ -1,0 +1,26 @@
+# needed by: hyprland (its IPC wire protocol, since 0.5x).
+name = "hyprwire"
+version = "0.3.1"
+release = 1
+summary = "Fast and consistent IPC wire protocol for the Hypr* ecosystem"
+license = "BSD-3-Clause"
+homepage = "https://github.com/hyprwm/hyprwire"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["hyprutils-devel", "libffi-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/hyprwm/hyprwire/archive/refs/tags/v0.3.1.tar.gz", sha256 = "92a673d40ae6a7d66fbcd0a34ec071e026e17eaeeb0040c3375e4b2a80dba737" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/hyprwire/LICENSE"
+'''

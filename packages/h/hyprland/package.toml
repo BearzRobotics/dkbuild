@@ -12,7 +12,7 @@ summary = "Dynamic tiling Wayland compositor"
 license = "BSD-3-Clause"
 homepage = "https://hyprland.org"
 hostdeps = ["cmake", "ninja", "pkgconf", "hyprwayland-scanner-devel", "glslang", "python"]
-builddeps = ["aquamarine-devel", "hyprlang-devel", "hyprcursor-devel", "hyprutils-devel", "hyprgraphics-devel", "hyprland-protocols-devel", "glaze-devel", "libxkbcommon-devel", "util-linux-devel", "wayland-devel", "wayland-protocols", "cairo-devel", "pango-devel", "pixman-devel", "libxcursor-devel", "libdrm-devel", "libinput-devel", "libei-devel", "mesa-devel", "glib-devel", "re2-devel", "muparser-devel", "lcms2-devel", "libcanberra-devel", "lua5.5-devel", "glslang-devel", "spirv-tools-devel"]
+builddeps = ["aquamarine-devel", "hyprwire-devel", "hyprlang-devel", "hyprcursor-devel", "hyprutils-devel", "hyprgraphics-devel", "hyprland-protocols-devel", "glaze-devel", "libxkbcommon-devel", "util-linux-devel", "wayland-devel", "wayland-protocols", "cairo-devel", "pango-devel", "pixman-devel", "libxcursor-devel", "libdrm-devel", "libinput-devel", "libei-devel", "mesa-devel", "glib-devel", "re2-devel", "muparser-devel", "lcms2-devel", "libcanberra-devel", "lua5.5-devel", "glslang-devel", "spirv-tools-devel"]
 rundeps = ["aquamarine", "hyprcursor", "hyprgraphics", "hyprlang", "hyprutils"]
 options = ["!check"]
 
