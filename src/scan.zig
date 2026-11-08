@@ -179,9 +179,13 @@ pub fn scanTree(arena: Allocator, io: std.Io, root: []const u8) !Result {
         const f = d.openFile(io, e.path, .{}) catch continue;
         defer f.close(io);
         const info = (try parseElf(arena, FileSource{ .file = f, .io = io })) orelse continue;
+        const public = std.mem.eql(u8, dirname, "usr/lib") or std.mem.eql(u8, dirname, "lib");
         if (info.soname) |so| {
-            const public = std.mem.eql(u8, dirname, "usr/lib") or std.mem.eql(u8, dirname, "lib");
             try addUnique(arena, if (public) &provides else &private, try std.fmt.allocPrint(arena, "so:{s}", .{so}));
+        } else if (!public and std.mem.indexOf(u8, e.basename, ".so") != null) {
+            // A private library without a soname (perl's CORE/libperl.so) is
+            // linked, and so needed, by its file name.
+            try addUnique(arena, &private, try std.fmt.allocPrint(arena, "so:{s}", .{e.basename}));
         }
         // musl's libc.so is the C library, the dynamic loader and the thing every
         // program links as `libc.so`, but it has no SONAME. Provide the name the
