@@ -133,10 +133,18 @@ LLVM can't) builds well: ppc64le, loongarch64, armv7, i686, s390x and others.
 Each is a profile (SPEC.md 6.1) plus whatever recipes need per-architecture
 care.
 
-## ISO package repositories
+## ISO package repositories, and a source ISO
 
 `dkbuild image` can put packages on the ISO (`apks/<arch>/` with a signed
 `Packages.adb`), as Alpine's install media do: the live system lists the disc
 as a repository (`/run/live/medium/apks/<arch>/Packages.adb`), so `apk add`
 and an installer work offline, and an installed system can use a mounted disc
 the same way (optionally tagged, `@cdrom ...`).
+
+Two discs, made by `dkbuild image`: the **repository ISO** above (with
+`"all"`: every package, the offline package source for machines without a
+repository server, and a restore of any installed system), and a **source
+ISO**: `cache/` (every source tarball and the vendored Go, Rust and Zig
+dependencies), the git tree at that point and the stage 0 build image, enough
+to rebuild the whole distribution with no network. The private signing key is
+on neither.
