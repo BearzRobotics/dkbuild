@@ -8,9 +8,12 @@
 # sshd and sshd-keys come with openssh.
 # r2: rebuilt with the empty directories it installs (dkbuild's splitter dropped them).
 # r3: a /run already mounted (by a live initramfs) is kept, not hidden under a new tmpfs.
+# r4: rcboot works without D-Bus (machine-id from the kernel), keeps the random
+# seed in /var/lib, and a missing /etc/hostname no longer fails it.
+# r5: dhcpcd is /usr/bin/dhcpcd.
 name = "dinit-services"
 version = "1"
-release = 3
+release = 5
 summary = "dinit service definitions and boot scripts for FenrirOS"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"

@@ -22,5 +22,6 @@ dhcpcd:x:52:
 kvm:x:61:
 wheel:x:97:
 render:x:98:
+sgx:x:99:
 users:x:999:
 nogroup:x:65534:

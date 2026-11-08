@@ -1,7 +1,7 @@
 # Example dhcpcd script.
 
 type = process
-command = /usr/sbin/dhcpcd -B -M --logfile /var/log/dhcpcd-service.log
+command = /usr/bin/dhcpcd -B -M --logfile /var/log/dhcpcd-service.log
 logfile = /var/log/dhcpcd.log
 restart = false
 

@@ -14,12 +14,17 @@ if [ "$1" != "stop" ]; then
   : > /var/run/utmp
   #mkdir -m og-w /var/run/dbus
   
-  dbus-uuidgen --ensure=/etc/machine-id
+  # A machine id without D-Bus (the CLI system has none): the kernel's random
+  # UUID without dashes is the same format dbus-uuidgen writes.
+  if [ ! -s /etc/machine-id ]; then
+    tr -d '-' < /proc/sys/kernel/random/uuid > /etc/machine-id
+    chmod 0444 /etc/machine-id
+  fi
 
 
   # Configure random number generator
-  if [ -e /var/state/random-seed ]; then
-    cat /var/state/random-seed > /dev/urandom;
+  if [ -e /var/lib/random-seed ]; then
+    cat /var/lib/random-seed > /dev/urandom
   fi
   
   # Configure network
@@ -28,7 +33,7 @@ if [ "$1" != "stop" ]; then
   # You can put other static configuration here:
   #/sbin/ifconfig eth0 192.168.1.38 netmask 255.255.255.0 broadcast 192.168.1.255
 
-  [ -s /etc/hostname ] && cat /etc/hostname > /proc/sys/kernel/hostname
+  if [ -s /etc/hostname ]; then cat /etc/hostname > /proc/sys/kernel/hostname; fi
 
   # /usr/sbin/alsactl restore
 
@@ -38,6 +43,7 @@ else
   
   # echo "Saving random number seed..."
   POOLSIZE="$(cat /proc/sys/kernel/random/poolsize)"
-  dd if=/dev/urandom of=/var/state/random-seed bs="$POOLSIZE" count=1 2> /dev/null
+  mkdir -p /var/lib
+  dd if=/dev/urandom of=/var/lib/random-seed bs="$POOLSIZE" count=1 2> /dev/null
 
 fi;
