@@ -1,6 +1,8 @@
-# Follows the DKRescue post's build of alsa-utils 1.2.15.2.
+# Follows the DKRescue post's build of alsa-utils 1.2.15.2, moved to 1.2.16 to match
+# alsa-lib 1.2.16.1: 1.2.15.2 does not build against it (aconnect.c uses an
+# undeclared `err` in the branch taken for alsa-lib newer than 1.2.15).
 name = "alsa-utils"
-version = "1.2.15.2"
+version = "1.2.16"
 release = 1
 summary = "ALSA utilities"
 license = "GPL-2.0-or-later"
@@ -9,7 +11,7 @@ builddeps = ["alsa-lib-devel", "ncurses-devel"]
 options = ["!check"]
 
 source = [
-    { url = "https://www.alsa-project.org/files/pub/utils/alsa-utils-1.2.15.2.tar.bz2", sha256 = "7aaaafbfb01942113ec0c31e51f705910e81079205088ca2f8f137a3869e1a3a" },
+    { url = "https://www.alsa-project.org/files/pub/utils/alsa-utils-1.2.16.tar.bz2", sha256 = "092399d5e8749a1d5e188e393157521cec4b75693b60ebb79bbce728cff2232c" },
 ]
 
 setup = '''

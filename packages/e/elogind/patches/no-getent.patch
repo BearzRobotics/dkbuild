@@ -1,0 +1,13 @@
+--- a/meson.build
++++ b/meson.build
+@@ -1047,7 +1047,9 @@
+ nobody_user = get_option('nobody-user')
+ nobody_group = get_option('nobody-group')
+ 
+-if not meson.is_cross_build()
++# The checks below call getent, which musl does not ship; they only print
++# warnings, so skip them.
++if false and not meson.is_cross_build()
+         getent_result = run_command('getent', 'passwd', '65534', check : false)
+         if getent_result.returncode() == 0
+                 name = getent_result.stdout().split(':')[0]
