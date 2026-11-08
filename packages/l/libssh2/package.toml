@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: main/libssh2/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: curl (sftp:// and scp://).
+name = "libssh2"
+version = "1.11.1"
+release = 2
+summary = "Library implementing the SSH2 protocol"
+license = "BSD-3-Clause"
+homepage = "https://www.libssh2.org"
+patches = ["CVE-2026-7598.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["zlib-ng-compat-devel", "openssl-devel"]
+checkdeps = ["bash"]
+
+source = [
+    { url = "https://www.libssh2.org/download/libssh2-1.11.1.tar.gz", sha256 = "d9ec76cbe34db98eec3539fe2c899d26b0c837cb3eb466a56b0f109cabf658f7" },
+]
+
+setup = '''
+%configure \
+    --with-libssl-prefix=/usr \
+    --disable-docker-tests
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libssh2/COPYING"
+'''

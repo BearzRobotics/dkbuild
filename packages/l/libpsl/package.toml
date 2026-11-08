@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: main/libpsl/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: curl (the Public Suffix List: no cookies for a whole domain such as
+# co.uk). International names through libidn2, not ICU.
+name = "libpsl"
+version = "0.23.3"
+release = 1
+summary = "Public Suffix List library"
+license = "MIT"
+homepage = "https://rockdaboot.github.io/libpsl"
+hostdeps = ["meson", "pkgconf"]
+builddeps = ["libidn2-devel", "libunistring-devel"]
+
+source = [
+    { url = "https://github.com/rockdaboot/libpsl/releases/download/0.23.3/libpsl-0.23.3.tar.gz", sha256 = "93941f85a1e7bd593fa94f299233cb5dfc91cd144fd9a78a6ceb75001c5b03be" },
+]
+
+setup = '''
+%meson \
+    -Druntime=libidn2 \
+    -Dbuiltin=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libpsl/COPYING"
+'''

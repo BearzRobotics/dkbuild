@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: main/libunistring/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: libidn2 (Unicode normalisation for internationalized domain names).
+name = "libunistring"
+version = "1.4.2"
+release = 1
+summary = "Library for manipulating Unicode strings"
+license = "LGPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/libunistring"
+patches = ["disable-pthread-rwlock.patch"]
+hostdeps = ["automake", "libtool"]
+options = ["!check"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/libunistring/libunistring-1.4.2.tar.gz", sha256 = "e82664b170064e62331962126b259d452d53b227bb4a93ab20040d846fec01d8" },
+]
+
+setup = '''
+%configure \
+    --disable-static
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

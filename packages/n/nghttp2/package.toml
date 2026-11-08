@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: main/nghttp2/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: curl (HTTP/2). Only the library (--enable-lib-only): curl needs no more,
+# and the nghttpx proxy and h2load tools would bring c-ares, libev, jansson and HTTP/3.
+name = "nghttp2"
+version = "1.70.0"
+release = 1
+summary = "HTTP/2 C Library"
+license = "MIT"
+homepage = "https://nghttp2.org"
+patches = ["no-spanstream-test.patch"]
+hostdeps = ["pkgconf"]
+checkdeps = ["cppunit-devel"]
+
+source = [
+    { url = "https://github.com/tatsuhiro-t/nghttp2/releases/download/v1.70.0/nghttp2-1.70.0.tar.xz", sha256 = "e05cb1388eaca3830aded4ccf20044b6e1ac1a61411dcca11b0437c4285c8bc2" },
+]
+
+setup = '''
+%configure \
+    --enable-lib-only
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/nghttp2/COPYING"
+'''

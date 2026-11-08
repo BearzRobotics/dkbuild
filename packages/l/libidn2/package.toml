@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: main/libidn2/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: rsync, curl (hostnames with non-ASCII characters, converted to the
+# ASCII form DNS carries: bücher.example -> xn--bcher-kva.example).
+name = "libidn2"
+version = "2.3.8"
+release = 1
+summary = "Internationalized domain name handling library"
+license = "LGPL-3.0-or-later AND GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/libidn#libidn2"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["libunistring-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz", sha256 = "f557911bf6171621e1f72ff35f5b1825bb35b52ed45325dcdee931e5d3c0787a" },
+]
+
+setup = '''
+%configure \
+    --disable-static \
+    --disable-gtk-doc
+'''
+build = '''
+# gnulib defines this to nothing, which breaks an #if
+%make GNULIBHEADERS_OVERRIDE_WINT_T=0
+'''
+install = '''
+%make_install
+'''

@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: main/xxhash/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: rsync (its fastest checksums, and its default when present).
+name = "xxhash"
+version = "0.8.4"
+release = 1
+summary = "Fast non-cryptographic hashing algorithm"
+license = "BSD-2-Clause"
+homepage = "https://cyan4973.github.io/xxHash"
+patches = ["tests.patch"]
+hostdeps = ["pkgconf"]
+
+source = [
+    { url = "https://github.com/Cyan4973/xxhash/archive/v0.8.4.tar.gz", sha256 = "5738270935e7c3d38a79b3adf7c9692566ce7895a25f67de43ad52ab504acd32" },
+]
+
+build = '''
+%make
+'''
+check = '''
+%make test -j1
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/xxhash/LICENSE"
+'''
