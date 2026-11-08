@@ -1,0 +1,52 @@
+# After Chimera Linux cports: main/zsh. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# The Z shell. /etc/zsh/zprofile reads /etc/profile (in sh emulation), so a
+# zsh login gets the same PATH and settings as sh and bash.
+name = "zsh"
+version = "5.9.2"
+release = 1
+summary = "Z shell"
+license = "MIT AND GPL-3.0-or-later"
+homepage = "https://www.zsh.org"
+hostdeps = ["pkgconf", "texinfo", "automake"]
+builddeps = ["ncurses-devel", "pcre2-devel", "libcap-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.zsh.org/pub/zsh-5.9.2.tar.xz", sha256 = "36fa734374b44783582cec09bcd67822e2f992c779ec1624ab5596df078d2f81" },
+]
+
+setup = '''
+# Completions for other systems' tools.
+rm -rf Completion/AIX Completion/BSD Completion/Cygwin Completion/Darwin Completion/Debian \
+    Completion/Mandriva Completion/openSUSE Completion/Redhat Completion/Solaris Completion/Linux/Command/_pkgtool
+%configure \
+    --disable-gdbm \
+    --enable-etcdir=/etc/zsh \
+    --enable-zshenv=/etc/zsh/zshenv \
+    --enable-zlogin=/etc/zsh/zlogin \
+    --enable-zlogout=/etc/zsh/zlogout \
+    --enable-zprofile=/etc/zsh/zprofile \
+    --enable-zshrc=/etc/zsh/zshrc \
+    --enable-maildir-support \
+    --enable-function-subdirs \
+    --enable-fndir=/usr/share/zsh/functions \
+    --enable-scriptdir=/usr/share/zsh/scripts \
+    --enable-multibyte \
+    --enable-pcre \
+    --enable-cap \
+    --with-term-lib=ncursesw \
+    --with-tcsetpgrp \
+    zsh_cv_shared_environ=yes \
+    zsh_cv_sys_dynamic_execsyms=yes \
+    zsh_cv_func_dlsym_needs_underscore=no
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 $pkgfiles/zprofile "$pkgdir/etc/zsh/zprofile"
+# zsh is installed as zsh-<version> with zsh hard-linked to it; one file.
+rm -f "$pkgdir/usr/bin/zsh-5.9.2"
+install -Dm644 LICENCE "$pkgdir/usr/share/licenses/zsh/LICENCE"
+'''

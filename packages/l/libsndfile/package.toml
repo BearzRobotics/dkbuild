@@ -1,0 +1,27 @@
+# After Chimera Linux cports: main/libsndfile. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reading and writing sampled audio files. needed by: sox_ng, twolame, libpulse.
+name = "libsndfile"
+version = "1.2.2"
+release = 1
+summary = "Library for reading and writing sampled audio files"
+license = "LGPL-2.1-or-later"
+homepage = "https://libsndfile.github.io/libsndfile"
+hostdeps = ["pkgconf", "python"]
+builddeps = ["alsa-lib-devel", "flac-devel", "lame-devel", "libmad-devel", "libogg-devel", "libvorbis-devel", "opus-devel", "sqlite-devel"]
+
+source = [
+    { url = "https://github.com/libsndfile/libsndfile/releases/download/1.2.2/libsndfile-1.2.2.tar.xz", sha256 = "3799ca9924d3125038880367bf1468e53a1b7e3686a934f098b7e1d286cdb80e" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+make check
+'''
+install = '''
+%make_install
+'''

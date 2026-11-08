@@ -1,0 +1,36 @@
+# After Chimera Linux cports: user/fish-shell. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# The friendly interactive shell (fish 4, written in Rust; crates vendored on
+# the host). No manual: building it needs Sphinx, which is not in the tree yet.
+name = "fish"
+version = "4.9.3"
+release = 1
+summary = "Friendly interactive command line shell"
+license = "GPL-2.0-only"
+homepage = "https://fishshell.com"
+hostdeps = ["cmake", "ninja", "pkgconf", "gettext", "rust"]
+builddeps = ["pcre2-devel"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/fish-shell/fish-shell/releases/download/4.9.3/fish-4.9.3.tar.xz", sha256 = "20998a25f73217ddcc19f499055fd587e9912d1ad6e7109120fbcf2871f0b98c" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export RUSTFLAGS="-C target-feature=-crt-static"
+'''
+setup = '''
+%cmake \
+    -DWITH_DOCS=OFF \
+    -DFISH_USE_SYSTEM_PCRE2=ON \
+    -DRust_CARGO_TARGET=x86_64-unknown-linux-musl
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# The packages' own /etc/fish is empty (config goes in /etc/fish/config.fish).
+rm -rf "$pkgdir/etc/fish"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/fish/COPYING"
+'''

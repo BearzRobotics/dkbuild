@@ -1,0 +1,38 @@
+# After Chimera Linux cports: main/libgit2. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Git as a library. needed by: nushell (its gstat plugin).
+# SSH goes through the ssh program (OpenSSH), not libssh2; the HTTP parser
+# (llhttp) is libgit2's own copy.
+name = "libgit2"
+version = "1.9.7"
+release = 1
+summary = "Linkable library for using git"
+license = "GPL-2.0-only WITH GCC-exception-2.0"
+homepage = "https://libgit2.org"
+hostdeps = ["cmake", "ninja", "pkgconf", "python"]
+builddeps = ["openssl-devel", "pcre2-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/libgit2/libgit2/archive/v1.9.7.tar.gz", sha256 = "1a4fbe7589e814777ae76b64734ad80f4ecad22cd33a22682a2aaea4ae5375e7" },
+]
+
+setup = '''
+%cmake \
+    -DUSE_SSH=exec \
+    -DREGEX_BACKEND=pcre2 \
+    -DUSE_BUNDLED_ZLIB=OFF \
+    -DUSE_HTTP_PARSER=builtin \
+    -DUSE_HTTPS=OpenSSL \
+    -DBUILD_TESTS=OFF
+# CMake builds one kind of library per configure: a second build makes the static one.
+cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DUSE_SSH=exec -DREGEX_BACKEND=pcre2 -DUSE_BUNDLED_ZLIB=OFF -DUSE_HTTP_PARSER=builtin -DUSE_HTTPS=OpenSSL -DBUILD_TESTS=OFF -DBUILD_CLI=OFF
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+install = '''
+DESTDIR=$pkgdir cmake --install build-static
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libgit2/COPYING"
+'''

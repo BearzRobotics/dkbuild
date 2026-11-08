@@ -1,0 +1,27 @@
+# MPEG audio (MP3) decoder: the Tenacity team's maintained libmad (the
+# original's last release was 2004). needed by: sox_ng, libsndfile.
+name = "libmad"
+version = "0.16.5"
+release = 1
+summary = "MPEG audio decoder library"
+license = "GPL-2.0-or-later"
+homepage = "https://codeberg.org/tenacityteam/libmad"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+
+source = [
+    { url = "https://codeberg.org/tenacityteam/libmad/archive/0.16.5.tar.gz", sha256 = "e32320a010e3cc00bfa66e0cde523a969313cddfd81e07ec4e3ef06d10ad3fe0" },
+]
+
+setup = '''
+%cmake -DEXAMPLE=OFF
+# CMake builds one kind of library per configure: a second build makes the static one.
+cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DEXAMPLE=OFF
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+install = '''
+DESTDIR=$pkgdir cmake --install build-static
+%cmake_install
+'''

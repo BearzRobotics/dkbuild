@@ -1,0 +1,32 @@
+# After Chimera Linux cports: main/libdeflate. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: transmission.
+name = "libdeflate"
+version = "1.25"
+release = 1
+summary = "Fast DEFLATE, zlib and gzip compression and decompression"
+license = "MIT"
+homepage = "https://github.com/ebiggers/libdeflate"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://github.com/ebiggers/libdeflate/archive/refs/tags/v1.25.tar.gz", sha256 = "d11473c1ad4c57d874695e8026865e38b47116bbcb872bfc622ec8f37a86017d" },
+]
+
+setup = '''
+%cmake \
+    -DLIBDEFLATE_BUILD_SHARED_LIB=ON \
+    -DLIBDEFLATE_BUILD_STATIC_LIB=ON \
+    -DLIBDEFLATE_BUILD_TESTS=ON \
+    -DLIBDEFLATE_USE_SHARED_LIB=ON
+'''
+build = '''
+%cmake_build
+'''
+check = '''
+ctest --test-dir build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libdeflate/COPYING"
+'''

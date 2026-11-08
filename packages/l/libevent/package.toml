@@ -1,0 +1,28 @@
+# After Chimera Linux cports: main/libevent. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: transmission.
+name = "libevent"
+version = "2.1.13"
+release = 1
+summary = "Asynchronous event notification library"
+license = "BSD-3-Clause"
+homepage = "https://libevent.org"
+hostdeps = ["pkgconf"]
+builddeps = ["openssl-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/libevent/libevent/releases/download/release-2.1.13-stable/libevent-2.1.13-stable.tar.gz", sha256 = "f7e9383b8c0baa81b687e5b5eecc01beefaf1b19b64151d95ed61647fe7a315c" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+# A Python script for generating RPC code; nothing here uses it.
+rm -f "$pkgdir/usr/bin/event_rpcgen.py"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libevent/LICENSE"
+'''

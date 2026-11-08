@@ -1,0 +1,28 @@
+# After Chimera Linux cports: main/pangomm. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: transmission-gtk (the gtkmm stack: libsigc++, glibmm, cairomm, pangomm, gtkmm).
+name = "pangomm"
+version = "2.56.1"
+release = 1
+summary = "C++ bindings for Pango"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.gtkmm.org"
+hostdeps = ["meson", "pkgconf", "glib-devel"]
+builddeps = ["pango-devel", "glibmm-devel", "cairomm-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/pangomm/2.56/pangomm-2.56.1.tar.xz", sha256 = "539f5aa60e9bdc6b955bb448e2a62cc14562744df690258040fbb74bf885755d" },
+]
+
+setup = '''
+%meson \
+    -Dmaintainer-mode=false \
+    -Dbuild-documentation=false \
+    -Dbuild-examples=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

@@ -1,0 +1,30 @@
+# After Chimera Linux cports: main/libsigc++. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: glibmm, cairomm and the rest of the gtkmm stack (transmission-gtk).
+name = "libsigc++"
+version = "3.6.0"
+release = 1
+summary = "Type-safe callback system for C++"
+license = "LGPL-3.0-only"
+homepage = "https://libsigcplusplus.github.io/libsigcplusplus"
+hostdeps = ["meson", "pkgconf"]
+
+source = [
+    { url = "https://download.gnome.org/sources/libsigc++/3.6/libsigc++-3.6.0.tar.xz", sha256 = "c3d23b37dfd6e39f2e09f091b77b1541fbfa17c4f0b6bf5c89baef7229080e17" },
+]
+
+setup = '''
+%meson \
+    -Dmaintainer-mode=false \
+    -Dbuild-documentation=false \
+    -Dbuild-examples=false \
+    -Dbenchmark=false
+'''
+build = '''
+%meson_build
+'''
+check = '''
+meson test -C build
+'''
+install = '''
+%meson_install
+'''

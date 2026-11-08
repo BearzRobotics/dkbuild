@@ -1,0 +1,5 @@
+# /etc/zsh/zprofile: read by zsh login shells. The system's login settings
+# (PATH, EDITOR, profile.d) are in /etc/profile, written for sh.
+if [ -r /etc/profile ]; then
+    emulate sh -c 'source /etc/profile'
+fi

@@ -1,0 +1,48 @@
+# After Chimera Linux cports: user/transmission. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# BitTorrent client: transmission has the daemon (with its web interface and
+# a dinit service, run as the transmission user) and the command-line tools;
+# transmission-gtk the GTK 4 app. The Qt app waits for Qt 6 (transmission r2).
+# gtest and the other third-party code it bundles (libnatpmp, libutp, dht, ...)
+# come in the release tarball.
+name = "transmission"
+version = "4.1.4"
+release = 1
+summary = "BitTorrent client"
+license = "GPL-2.0-or-later"
+homepage = "https://transmissionbt.com"
+hostdeps = ["cmake", "ninja", "pkgconf", "gettext", "libxml2", "python"]
+builddeps = ["curl-devel", "gtkmm-devel", "libdeflate-devel", "libevent-devel", "libpsl-devel", "linux-headers", "miniupnpc-devel", "openssl-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/transmission/transmission/releases/download/4.1.4/transmission-4.1.4.tar.xz", sha256 = "86e7aa020cdf64826447034bc85f4d3b7c848d8c0891d9dc9b9fddfb2c805d22" },
+]
+
+setup = '''
+%cmake \
+    -DENABLE_DAEMON=ON \
+    -DENABLE_GTK=ON \
+    -DENABLE_QT=OFF \
+    -DENABLE_CLI=ON \
+    -DENABLE_UTILS=ON \
+    -DENABLE_TESTS=OFF \
+    -DINSTALL_LIB=ON \
+    -DUSE_SYSTEM_DEFLATE=ON \
+    -DUSE_SYSTEM_EVENT2=ON \
+    -DUSE_SYSTEM_MINIUPNPC=ON \
+    -DUSE_SYSTEM_PSL=ON \
+    -DWITH_CRYPTO=openssl
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 $pkgfiles/transmission-daemon "$pkgdir/etc/dinit.d/transmission-daemon"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/transmission/COPYING"
+'''
+
+[subpackages.gtk]
+summary = "BitTorrent client (GTK app)"
+paths   = ["/usr/bin/transmission-gtk", "/usr/share/applications/transmission-gtk.desktop", "/usr/share/metainfo", "/usr/share/locale", "/usr/share/man/man1/transmission-gtk.1"]
+depends = ["transmission"]

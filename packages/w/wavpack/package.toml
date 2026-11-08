@@ -1,0 +1,27 @@
+# After Chimera Linux cports: main/wavpack. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: sox_ng.
+name = "wavpack"
+version = "5.8.1"
+release = 1
+summary = "Hybrid lossless audio compression"
+license = "BSD-3-Clause"
+homepage = "https://www.wavpack.com"
+hostdeps = ["pkgconf"]
+
+source = [
+    { url = "https://github.com/dbry/WavPack/releases/download/5.8.1/wavpack-5.8.1.tar.xz", sha256 = "7322775498602c8850afcfc1ae38f99df4cbcd51386e873d6b0f8047e55c0c26" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/wavpack/COPYING"
+'''

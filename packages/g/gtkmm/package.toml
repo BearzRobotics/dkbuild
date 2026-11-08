@@ -1,0 +1,28 @@
+# After Chimera Linux cports: main/gtkmm. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: transmission-gtk (the gtkmm stack: libsigc++, glibmm, cairomm, pangomm, gtkmm).
+name = "gtkmm"
+version = "4.24.0"
+release = 1
+summary = "C++ bindings for GTK 4"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.gtkmm.org"
+hostdeps = ["meson", "pkgconf", "glib-devel"]
+builddeps = ["cairomm-devel", "gdk-pixbuf-devel", "gtk4-devel", "libepoxy-devel", "pangomm-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/gtkmm/4.24/gtkmm-4.24.0.tar.xz", sha256 = "7fd9cea356e7d3b74bf7d2a51d7e0e6763f3f9f1cddc5e77c8b0b5b7fa9d5e5a" },
+]
+
+setup = '''
+%meson \
+    -Dmaintainer-mode=false \
+    -Dbuild-documentation=false \
+    -Dbuild-examples=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

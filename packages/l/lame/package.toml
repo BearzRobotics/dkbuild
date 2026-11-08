@@ -1,0 +1,29 @@
+# After Chimera Linux cports: main/lame. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# MP3 encoder. needed by: libsndfile, sox_ng.
+name = "lame"
+version = "3.100"
+release = 1
+summary = "MP3 encoder"
+license = "LGPL-2.0-or-later"
+homepage = "https://lame.sourceforge.io"
+hostdeps = ["nasm"]
+builddeps = ["ncurses-devel"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/lame/lame-3.100.tar.gz", sha256 = "ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e" },
+]
+
+setup = '''
+%configure \
+    --enable-nasm \
+    --enable-shared
+'''
+build = '''
+%make
+'''
+check = '''
+make check
+'''
+install = '''
+%make_install
+'''

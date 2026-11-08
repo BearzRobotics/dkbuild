@@ -1,0 +1,11 @@
+# Started on demand (dinitctl enable transmission-daemon), not at boot.
+# Downloads and settings are in /var/lib/transmission; the web interface is on
+# port 9091 (localhost only until settings.json allows more).
+type = process
+command = /usr/bin/transmission-daemon --foreground --config-dir /var/lib/transmission/config --download-dir /var/lib/transmission/downloads
+run-as = transmission
+smooth-recovery = true
+logfile = /var/log/transmission-daemon.log
+
+depends-on: rcboot
+waits-for: syslogd

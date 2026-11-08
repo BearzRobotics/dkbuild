@@ -1,0 +1,28 @@
+# After Chimera Linux cports: main/miniupnpc. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: transmission (opens its port on the router through UPnP).
+name = "miniupnpc"
+version = "2.3.3"
+release = 1
+summary = "UPnP client library"
+license = "BSD-3-Clause"
+homepage = "http://miniupnp.free.fr"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+
+source = [
+    { url = "http://miniupnp.free.fr/files/miniupnpc-2.3.3.tar.gz", sha256 = "d52a0afa614ad6c088cc9ddff1ae7d29c8c595ac5fdd321170a05f41e634bd1a" },
+]
+
+setup = '''
+%cmake \
+    -DUPNPC_BUILD_SHARED=ON \
+    -DUPNPC_BUILD_STATIC=ON \
+    -DUPNPC_BUILD_SAMPLE=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -f "$pkgdir/usr/bin/external-ip.sh"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/miniupnpc/LICENSE"
+'''

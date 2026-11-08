@@ -1,0 +1,28 @@
+# After Chimera Linux cports: main/libid3tag. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# ID3 tags (the Tenacity team's maintained libid3tag). needed by: sox_ng.
+name = "libid3tag"
+version = "0.16.3"
+release = 1
+summary = "ID3 tag manipulation library"
+license = "GPL-2.0-or-later"
+homepage = "https://codeberg.org/tenacityteam/libid3tag"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://codeberg.org/tenacityteam/libid3tag/archive/0.16.3.tar.gz", sha256 = "0561009778513a95d91dac33cee8418d6622f710450a7cb56a74636d53b588cb" },
+]
+
+setup = '''
+%cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+# CMake builds one kind of library per configure: a second build makes the static one.
+cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+install = '''
+DESTDIR=$pkgdir cmake --install build-static
+%cmake_install
+'''

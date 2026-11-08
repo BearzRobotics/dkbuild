@@ -1,0 +1,43 @@
+# The PulseAudio client library and tools (pactl, paplay, ...), without the
+# sound server: PipeWire is the server (pipewire-pulse speaks its protocol).
+# needed by: sox_ng, and programs that play sound through PulseAudio.
+name = "libpulse"
+version = "17.0"
+release = 1
+summary = "PulseAudio client library and tools"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.freedesktop.org/wiki/Software/PulseAudio"
+hostdeps = ["meson", "pkgconf", "gettext", "perl", "m4"]
+builddeps = ["dbus-devel", "glib-devel", "libsndfile-devel", "libcap-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.freedesktop.org/software/pulseaudio/releases/pulseaudio-17.0.tar.xz", sha256 = "053794d6671a3e397d849e478a80b82a63cb9d8ca296bd35b73317bb5ceb87b5" },
+]
+
+setup = '''
+%meson \
+    -Ddaemon=false \
+    -Dclient=true \
+    -Ddoxygen=false \
+    -Dman=false \
+    -Dtests=false \
+    -Dgcov=false \
+    -Ddatabase=simple \
+    -Dglib=enabled \
+    -Ddbus=enabled \
+    -Dgtk=disabled \
+    -Dx11=disabled \
+    -Dsystemd=disabled \
+    -Delogind=disabled \
+    -Dasyncns=disabled \
+    -Dtcpwrap=disabled \
+    -Dbashcompletiondir=/usr/share/bash-completion/completions \
+    -Dzshcompletiondir=/usr/share/zsh/site-functions
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

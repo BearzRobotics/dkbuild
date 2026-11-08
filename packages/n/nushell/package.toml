@@ -1,0 +1,63 @@
+# After Chimera Linux cports: user/nushell. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Nushell, a shell for structured data. Crates vendored on the host; OpenSSL,
+# libgit2, SQLite and zstd are the system's. Each plugin is its own package
+# and turns itself on when installed (vendor/autoload).
+name = "nushell"
+version = "0.116.1"
+release = 1
+summary = "Shell with a focus on structured data"
+license = "MIT"
+homepage = "https://www.nushell.sh"
+hostdeps = ["pkgconf", "rust"]
+builddeps = ["libgit2-devel", "openssl-devel", "sqlite-devel", "zstd-devel", "linux-headers"]
+options = ["!check", "cargodeps", "jobs:1"]
+
+source = [
+    { url = "https://github.com/nushell/nushell/archive/refs/tags/0.116.1.tar.gz", sha256 = "0cca0c5bc9d9eb608dee00c75b6b511917df6e66c784b034468bab2ff0fbb9b4" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export RUSTFLAGS="-C target-feature=-crt-static"
+export OPENSSL_NO_VENDOR=1 LIBGIT2_NO_VENDOR=1 LIBSQLITE3_SYS_USE_PKG_CONFIG=1 ZSTD_SYS_USE_PKG_CONFIG=1
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs --workspace \
+    --no-default-features \
+    --features=plugin,trash-support,lsp,local-socket,system-clipboard,sqlite,native-tls,network
+'''
+install = '''
+install -Dm755 target/release/nu "$pkgdir/usr/bin/nu"
+d="$pkgdir/usr/share/nushell/vendor/autoload"
+mkdir -p "$d"
+for p in formats gstat inc polars query; do
+    install -Dm755 "target/release/nu_plugin_$p" "$pkgdir/usr/bin/nu_plugin_$p"
+    echo "plugin add /usr/bin/nu_plugin_$p" > "$d/enable_plugin_$p.nu"
+done
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/nushell/LICENSE"
+'''
+
+[subpackages.plugin-formats]
+summary = "Nushell formats plugin"
+paths   = ["/usr/bin/nu_plugin_formats", "/usr/share/nushell/vendor/autoload/enable_plugin_formats.nu"]
+depends = ["nushell"]
+
+[subpackages.plugin-gstat]
+summary = "Nushell gstat plugin"
+paths   = ["/usr/bin/nu_plugin_gstat", "/usr/share/nushell/vendor/autoload/enable_plugin_gstat.nu"]
+depends = ["nushell"]
+
+[subpackages.plugin-inc]
+summary = "Nushell inc plugin"
+paths   = ["/usr/bin/nu_plugin_inc", "/usr/share/nushell/vendor/autoload/enable_plugin_inc.nu"]
+depends = ["nushell"]
+
+[subpackages.plugin-polars]
+summary = "Nushell polars plugin"
+paths   = ["/usr/bin/nu_plugin_polars", "/usr/share/nushell/vendor/autoload/enable_plugin_polars.nu"]
+depends = ["nushell"]
+
+[subpackages.plugin-query]
+summary = "Nushell query plugin"
+paths   = ["/usr/bin/nu_plugin_query", "/usr/share/nushell/vendor/autoload/enable_plugin_query.nu"]
+depends = ["nushell"]
