@@ -148,3 +148,14 @@ ISO**: `cache/` (every source tarball and the vendored Go, Rust and Zig
 dependencies), the git tree at that point and the stage 0 build image, enough
 to rebuild the whole distribution with no network. The private signing key is
 on neither.
+
+## Rust in the kernel (ready, off)
+
+Linux's Rust support needs rustc (1.78 or newer), the standard library's
+source and bindgen (0.65.1 or newer), with LLVM, which the kernel already
+builds with (`LLVM=1`). The tree has them: `rust` (with its `rust-src`
+subpackage) and `bindgen`. Nothing FenrirOS runs needs a Rust driver yet, so
+`CONFIG_RUST` is off. Turning it on: `hostdeps = ["rust", "rust-src", "bindgen"]`
+in the linux recipe (rust is then always built before the kernel), `CONFIG_RUST=y`
+in its config, `make LLVM=1 rustavailable` as the first build step, and a
+release bump.

@@ -1,0 +1,28 @@
+# needed by: linux, once its Rust support is turned on (CONFIG_RUST); bindgen
+# makes Rust bindings from C headers, through libclang. From the crates.io
+# release (it carries Cargo.lock); crates vendored on the host (`cargodeps`).
+# The kernel needs bindgen 0.65.1 or newer.
+name = "bindgen"
+version = "0.73.2"
+release = 1
+summary = "Generates Rust bindings to C and C++ libraries"
+license = "BSD-3-Clause"
+homepage = "https://rust-lang.github.io/rust-bindgen"
+hostdeps = ["rust"]
+rundeps = ["llvm-clang"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://static.crates.io/crates/bindgen-cli/bindgen-cli-0.73.2.crate", sha256 = "5622e043625b6d1f32c84f53699690a44d1419e657879de26eb252699f5ebb7c" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs
+'''
+install = '''
+install -Dm755 target/release/bindgen "$pkgdir/usr/bin/bindgen"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/bindgen/LICENSE"
+'''
