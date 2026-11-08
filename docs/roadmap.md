@@ -100,6 +100,30 @@ last (it is the largest build in the tree, hours on this machine).
 Anything not listed is added the same way: a recipe, `dkbuild check`, `dkbuild
 pkg`, and it can go in an image.
 
+## Requested applications (2026-11-08)
+
+Everything asked for, in the order it can be built. All of it native: Flatpak
+(with Flathub enabled) is there for Steam, not instead of these.
+
+| Package | Status / what it waits for |
+|---|---|
+| zsh, fish, nushell, vim (+ `/etc/vimrc`), bash-completion, sox (sox-ng), transmission (daemon, CLI, GTK) | recipes written; building after the static wave. transmission-qt waits for Qt 6. fish's manual waits for Sphinx. |
+| iwd, nginx, caddy, wget2 | small; next |
+| **npm/yarn dependency store** | infrastructure, before anything below that uses Node: one shared store for node modules, a list per package, like the Go/Rust/Zig stores (SPEC.md 7.4) |
+| nodejs, cbindgen | then Firefox |
+| Firefox, **Thunderbird** | the same toolchain (Rust, cbindgen, nodejs); Thunderbird builds from the Firefox ESR tree with comm-central |
+| Qt 6 (base, svg, tools, wayland, declarative, multimedia, ...), KF6 core | foundation for most apps below |
+| **Zeal** | Qt 6 and Qt WebEngine (Chromium inside: the largest Qt module) |
+| FFmpeg with codecs (x264, x265, dav1d, svt-av1, libvpx, libass, ...) | foundation for video apps |
+| **HandBrake** | FFmpeg stack, GTK 4; its build downloads its own copies of codecs: vendor them (sources in the recipe) |
+| GIMP, Inkscape, Krita, Kdenlive (+ MLT), OpenShot (+ libopenshot, PyQt6), LibreOffice | apps on the foundations above |
+| xemu, Dolphin (emulator), MAME | SDL2/3, Qt 6 |
+| wine | needs a MinGW cross compiler (LLVM's works) |
+| Code - OSS (Electron from source, Open VSX) + zls, taplo, basedpyright | Electron is a Chromium build; after the npm store |
+| flatpak, Flathub enabled by default | for Steam |
+| aimgr | waits for a release tarball with its Zig dependencies vendored |
+| GRUB2 and GCC cross suites | the GCC opt-in (below) |
+
 ## Image definitions
 
 An image file lists packages, excluded patterns, services, users and outputs
