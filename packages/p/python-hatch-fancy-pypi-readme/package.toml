@@ -1,0 +1,26 @@
+# needed by: httpx, httpcore, pydantic.
+# Built from the sdist offline with pip (--no-build-isolation): the build
+# backend comes from hostdeps. setuptools, packaging and flit-core are the
+# image's until they are recipes.
+name = "python-hatch-fancy-pypi-readme"
+version = "25.1.0"
+release = 1
+summary = "Fancy PyPI READMEs with Hatch"
+license = "MIT"
+homepage = "https://pypi.org/project/hatch-fancy-pypi-readme"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python", "python-hatchling"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/f3/0f/aed57c301f339936eb91cb4d8c1e5088a101081854bd3ec18a889df32365/hatch_fancy_pypi_readme-25.1.0.tar.gz", sha256 = "9c58ed3dff90d51f43414ce37009ad1d5b0f08ffc9fc216998a06380f01c0045" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+for f in LICENSE LICENSE.txt LICENSE.md LICENSE.rst COPYING LICENSES/*; do
+    [ -f "$f" ] && install -Dm644 "$f" "$pkgdir/usr/share/licenses/python-hatch-fancy-pypi-readme/${f##*/}"
+done
+true
+'''

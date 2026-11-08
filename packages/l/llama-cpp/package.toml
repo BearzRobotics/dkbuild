@@ -1,0 +1,44 @@
+# LLM inference in C/C++ (llama-cli, llama-server and the ggml libraries).
+# GPU through Vulkan (Mesa's radv on AMD, lavapipe on any CPU); NVIDIA's driver
+# is glibc-only. ggml's backends are loadable modules (GGML_BACKEND_DL) and the
+# CPU backend is built for every x86_64 feature level, picked at run time, so
+# one package runs well on any machine (GGML_NATIVE would tie it to the builder).
+# No web UI download at build time (no network in the sandbox).
+name = "llama-cpp"
+version = "0.9.0"
+release = 1
+summary = "LLM inference in C/C++, with Vulkan GPU support"
+license = "MIT"
+homepage = "https://github.com/ggml-org/llama.cpp"
+hostdeps = ["cmake", "ninja", "pkgconf", "shaderc"]
+builddeps = ["curl-devel", "openssl-devel", "vulkan-headers-devel", "vulkan-loader-devel"]
+rundeps = ["vulkan-loader"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/ggml-org/llama.cpp/archive/refs/tags/v0.9.0.tar.gz", sha256 = "5d0f1aaf55fd8629c29a55e81b7cb63b80239f83c33a580963071204896836a8" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DGGML_NATIVE=OFF \
+    -DGGML_BACKEND_DL=ON \
+    -DGGML_CPU_ALL_VARIANTS=ON \
+    -DGGML_VULKAN=ON \
+    -DLLAMA_OPENSSL=ON \
+    -DLLAMA_BUILD_TESTS=OFF \
+    -DLLAMA_BUILD_EXAMPLES=OFF \
+    -DLLAMA_BUILD_SERVER=ON \
+    -DLLAMA_BUILD_UI=OFF \
+    -DLLAMA_USE_PREBUILT_UI=OFF \
+    -DLLAMA_CONNECT=OFF \
+    -DLLAMA_TESTS_INSTALL=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/llama-cpp/LICENSE"
+'''

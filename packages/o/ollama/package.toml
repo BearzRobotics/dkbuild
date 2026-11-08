@@ -1,0 +1,42 @@
+# Run large language models locally: the `ollama` server and CLI.
+# GPU through Vulkan (Mesa's radv on AMD, lavapipe on any CPU); NVIDIA's driver
+# is glibc-only. Ollama builds its own pinned llama.cpp (LLAMA_CPP_VERSION in
+# its tree, here b12111), normally fetched with git at build time: it is the
+# second source instead, given to CMake as FETCHCONTENT_SOURCE_DIR_LLAMA_CPP,
+# and Ollama's compat patch is applied to it as usual. Go modules are vendored
+# on the host (`godeps`). No MLX engine (CUDA/Metal only).
+name = "ollama"
+version = "0.40.15"
+release = 1
+summary = "Run large language models locally, with Vulkan GPU support"
+license = "MIT"
+homepage = "https://ollama.com"
+hostdeps = ["cmake", "go", "git", "ninja", "pkgconf", "shaderc"]
+builddeps = ["vulkan-headers-devel", "vulkan-loader-devel"]
+rundeps = ["vulkan-loader"]
+options = ["!check", "!strip", "godeps"]
+
+source = [
+    { url = "https://github.com/ollama/ollama/archive/refs/tags/v0.40.15.tar.gz", sha256 = "b3cd037b5beebbdb6fcea8cba62276507316e42fdee6b0f31773bae0e6247c82" },
+    { url = "https://github.com/ggml-org/llama.cpp/archive/refs/tags/b12111.tar.gz", sha256 = "b58c05970c877747cb92a1343234c873bc25fd57d26e24f9a6f21b86f56f8450" },
+]
+
+environment = '''
+export GOFLAGS="-mod=vendor -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=1
+'''
+setup = '''
+%cmake \
+    -DOLLAMA_LLAMA_BACKENDS=vulkan \
+    -DOLLAMA_MLX_BACKENDS= \
+    -DFETCHCONTENT_FULLY_DISCONNECTED=ON \
+    -DFETCHCONTENT_SOURCE_DIR_LLAMA_CPP=/build/llama.cpp-b12111 \
+    -DGGML_NATIVE=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ollama/LICENSE"
+'''

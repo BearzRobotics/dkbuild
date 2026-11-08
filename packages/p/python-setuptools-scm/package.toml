@@ -1,0 +1,26 @@
+# needed by: pluggy, anyio, hatch-vcs (version from tags).
+# Built from the sdist offline with pip (--no-build-isolation): the build
+# backend comes from hostdeps. setuptools, packaging and flit-core are the
+# image's until they are recipes.
+name = "python-setuptools-scm"
+version = "10.3.4"
+release = 1
+summary = "the blessed package to manage your versions by scm tags"
+license = "MIT"
+homepage = "https://pypi.org/project/setuptools-scm"
+hostdeps = ["python", "python-setuptools", "python-vcs-versioning"]
+rundeps = ["python", "python-vcs-versioning", "python-packaging", "python-setuptools"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/85/d8/fc143f88819ccf10ba2388ba86732ee2de193e578234e25a783f6cc14bf7/setuptools_scm-10.3.4.tar.gz", sha256 = "a69f28bfc245608781205e912faae437c2b2165773afa4e7b979d77447a69dd2" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+for f in LICENSE LICENSE.txt LICENSE.md LICENSE.rst COPYING LICENSES/*; do
+    [ -f "$f" ] && install -Dm644 "$f" "$pkgdir/usr/share/licenses/python-setuptools-scm/${f##*/}"
+done
+true
+'''

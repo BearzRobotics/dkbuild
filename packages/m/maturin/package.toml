@@ -1,0 +1,28 @@
+# needed by: python-pydantic-core (maturin builds Rust extensions into Python wheels).
+# Only the maturin program, built with cargo from the PyPI sdist (crates vendored
+# on the host, `cargodeps`); pydantic-core runs `maturin build` itself, so the
+# Python wrapper module is not needed.
+name = "maturin"
+version = "1.16.0"
+release = 1
+summary = "Build and publish crates with pyo3, cffi and uniffi bindings as Python packages"
+license = "MIT OR Apache-2.0"
+homepage = "https://www.maturin.rs"
+hostdeps = ["rust"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/m/maturin/maturin-1.16.0.tar.gz", sha256 = "13e69ca12542999d8c5467131de72a49bb76e4c284b9a45c5783df7c0fcb3a8a" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs
+'''
+install = '''
+install -Dm755 target/release/maturin "$pkgdir/usr/bin/maturin"
+install -Dm644 license-mit "$pkgdir/usr/share/licenses/maturin/license-mit"
+install -Dm644 license-apache "$pkgdir/usr/share/licenses/maturin/license-apache"
+'''

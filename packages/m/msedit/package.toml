@@ -1,0 +1,32 @@
+# Microsoft Edit: a simple modal-less terminal text editor.
+# Crates vendored on the host (`cargodeps`). Plain stable build: upstream's
+# smaller release profile (.cargo/release.toml) rebuilds std (build-std), which
+# needs the std sources and their crates offline. Installed as upstream's
+# installer does: /usr/bin/msedit, with `edit` linked to it.
+name = "msedit"
+version = "2.0.0"
+release = 1
+summary = "Microsoft Edit, a simple terminal text editor"
+license = "MIT"
+homepage = "https://github.com/microsoft/edit"
+hostdeps = ["rust"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/microsoft/edit/archive/refs/tags/v2.0.0.tar.gz", sha256 = "f35da309c5f3d92b10e5c4b2267e4d5e29d809b2aa460e80326b11f7feba72a5" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline -p edit -j $jobs
+'''
+install = '''
+install -Dm755 target/release/edit "$pkgdir/usr/bin/msedit"
+ln -s msedit "$pkgdir/usr/bin/edit"
+install -Dm644 assets/manpage/edit.1 "$pkgdir/usr/share/man/man1/edit.1"
+install -Dm644 assets/com.microsoft.edit.desktop "$pkgdir/usr/share/applications/com.microsoft.edit.desktop"
+install -Dm644 assets/edit.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/edit.svg"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/msedit/LICENSE"
+'''

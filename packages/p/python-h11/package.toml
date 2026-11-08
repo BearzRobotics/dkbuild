@@ -1,0 +1,26 @@
+# needed by: httpcore.
+# Built from the sdist offline with pip (--no-build-isolation): the build
+# backend comes from hostdeps. setuptools, packaging and flit-core are the
+# image's until they are recipes.
+name = "python-h11"
+version = "0.16.0"
+release = 1
+summary = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
+license = "MIT"
+homepage = "https://github.com/python-hyper/h11"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/01/ee/02a2c011bdab74c6fb3c75474d40b3052059d95df7e73351460c8588d963/h11-0.16.0.tar.gz", sha256 = "4e35b956cf45792e4caa5885e69fba00bdbc6ffafbfa020300e549b208ee5ff1" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+for f in LICENSE LICENSE.txt LICENSE.md LICENSE.rst COPYING LICENSES/*; do
+    [ -f "$f" ] && install -Dm644 "$f" "$pkgdir/usr/share/licenses/python-h11/${f##*/}"
+done
+true
+'''

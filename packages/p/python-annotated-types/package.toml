@@ -1,0 +1,26 @@
+# needed by: pydantic.
+# Built from the sdist offline with pip (--no-build-isolation): the build
+# backend comes from hostdeps. setuptools, packaging and flit-core are the
+# image's until they are recipes.
+name = "python-annotated-types"
+version = "0.8.0"
+release = 1
+summary = "Reusable constraint types to use with typing.Annotated"
+license = "MIT"
+homepage = "https://github.com/annotated-types/annotated-types"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/5f/56/a8120250d128bed162cd73c76d45f6ef9991f3e068f62a8ee060afa3104a/annotated_types-0.8.0.tar.gz", sha256 = "13b2beaad985e05e2d6407ee4c4f35590b11f8d693a258a561055cac8f64cab7" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+for f in LICENSE LICENSE.txt LICENSE.md LICENSE.rst COPYING LICENSES/*; do
+    [ -f "$f" ] && install -Dm644 "$f" "$pkgdir/usr/share/licenses/python-annotated-types/${f##*/}"
+done
+true
+'''

@@ -1,0 +1,25 @@
+# needed by: maturin, python-pydantic-core (and every Rust program in the tree).
+# Upstream's x86_64-unknown-linux-musl host toolchain (rustc, cargo, std),
+# repackaged, as zig and go started out: it runs on musl as is. Chimera builds
+# Rust from source against the system LLVM; that is for later. HTML docs are
+# left out. Rust's musl target links statically by default: libraries loaded
+# by other programs (Python extensions) need RUSTFLAGS=-Ctarget-feature=-crt-static.
+name = "rust"
+version = "1.99.1"
+release = 1
+summary = "Rust programming language: rustc, cargo and the standard library"
+license = "MIT OR Apache-2.0"
+homepage = "https://www.rust-lang.org"
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://static.rust-lang.org/dist/rust-1.99.1-x86_64-unknown-linux-musl.tar.xz", sha256 = "da398394254c8ffd29d1e397dfc00941dfb6a631bc7254cf797481fec8df6f5a" },
+]
+
+install = '''
+cat components
+sh install.sh --prefix=/usr --destdir="$pkgdir" --disable-ldconfig
+rm -rf "$pkgdir/usr/share/doc/rust/html" "$pkgdir/usr/lib/rustlib/uninstall.sh" "$pkgdir/usr/lib/rustlib/install.log"
+install -Dm644 LICENSE-MIT "$pkgdir/usr/share/licenses/rust/LICENSE-MIT"
+install -Dm644 LICENSE-APACHE "$pkgdir/usr/share/licenses/rust/LICENSE-APACHE"
+'''

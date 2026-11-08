@@ -1,0 +1,26 @@
+# needed by: tomlkit (its build backend).
+# Built from the sdist offline with pip (--no-build-isolation): the build
+# backend comes from hostdeps. setuptools, packaging and flit-core are the
+# image's until they are recipes.
+name = "python-poetry-core"
+version = "2.5.0"
+release = 1
+summary = "Poetry PEP 517 Build Backend"
+license = "MIT"
+homepage = "https://github.com/python-poetry/poetry-core"
+hostdeps = ["python"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/42/b5/50f1fda26c4fe5b1d6ce5cdf0391bdfa1ca12fdcb8ad68344d5cf678fc90/poetry_core-2.5.0.tar.gz", sha256 = "81d04c9253b19d0604718268d781867c8f7b2128e5b25bbf1e84141eec6b89c4" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+for f in LICENSE LICENSE.txt LICENSE.md LICENSE.rst COPYING LICENSES/*; do
+    [ -f "$f" ] && install -Dm644 "$f" "$pkgdir/usr/share/licenses/python-poetry-core/${f##*/}"
+done
+true
+'''

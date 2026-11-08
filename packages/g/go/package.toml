@@ -1,0 +1,40 @@
+# Imported from Chimera Linux cports: main/go/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: gh, ollama (and every Go program in the tree).
+# Built from source with go-bootstrap (upstream's static binary). Patches are
+# Chimera's: the linker prefers musl's dynamic loader, `go` never downloads a
+# different toolchain by itself (GOTOOLCHAIN), and an ERMS memmove change is
+# reverted. Installed under /usr/lib/go with links in /usr/bin, like Chimera.
+name = "go"
+version = "1.27.3"
+release = 1
+summary = "Go programming language"
+license = "BSD-3-Clause"
+homepage = "https://go.dev"
+patches = ["0001-cmd-link-prefer-musl-s-over-glibc-s-ld.so-during-dyn.patch", "disable-auto-go-download.patch", "revert-erms-memmove.patch"]
+hostdeps = ["bash", "go-bootstrap"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://go.dev/dl/go1.27.3.src.tar.gz", sha256 = "6e7749035cf360f06b2575d162ea79df9fda8ef671889e5c375f8e50777f26bb" },
+]
+
+build = '''
+cd src
+GOROOT_BOOTSTRAP=/usr/lib/go-bootstrap GOROOT="$srcdir" CC=clang GOARCH=amd64 \
+    GOCACHE=/tmp/go-cache bash make.bash -v
+'''
+install = '''
+g="$pkgdir/usr/lib/go"
+mkdir -p "$g" "$pkgdir/usr/bin"
+cp -a bin lib pkg src doc misc go.env VERSION "$g/"
+for f in "$g"/bin/*; do ln -s "../lib/go/bin/${f##*/}" "$pkgdir/usr/bin/${f##*/}"; done
+mkdir -p "$pkgdir/usr/share/go"
+ln -s ../../lib/go/doc "$pkgdir/usr/share/go/doc"
+ln -s ../../lib/go/misc "$pkgdir/usr/share/go/misc"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/go/LICENSE"
+# what is only for Go's own tests
+rm -rf "$g"/pkg/tool/*/api
+find "$g/src" -type d -name testdata -prune -exec rm -rf {} +
+find "$g/src" -name '*_test.go' -delete
+'''

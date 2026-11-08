@@ -1,0 +1,30 @@
+# needed by: python-pydantic (its validation core, written in Rust).
+# Crates vendored on the host (`cargodeps`); `maturin build` makes the wheel
+# offline and pip installs it. Linked dynamically against musl (-crt-static off)
+# so Python can load it.
+name = "python-pydantic-core"
+version = "2.50.4"
+release = 1
+summary = "Core functionality for Pydantic validation and serialization"
+license = "MIT"
+homepage = "https://github.com/pydantic/pydantic-core"
+hostdeps = ["python", "rust", "maturin"]
+builddeps = ["python-devel"]
+rundeps = ["python", "python-typing-extensions"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/9c/0f/34f9ce4ba701dd0b815033ef94d99b56f66200e578ee6052aa3ac26f064e/pydantic_core-2.50.4.tar.gz", sha256 = "aead3b74b68396bf0feab5d57e050b730ded7df55853c1e048a87e00aaf033c6" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export RUSTFLAGS="-C target-feature=-crt-static"
+'''
+build = '''
+maturin build --release --frozen --offline -i python3 --compatibility linux --out dist -j $jobs
+'''
+install = '''
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr dist/*.whl
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pydantic-core/LICENSE"
+'''

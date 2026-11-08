@@ -1,0 +1,42 @@
+# Imported from Chimera Linux cports: main/gcompat/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Runs programs built for glibc: provides glibc's loader name and library names,
+# backed by musl. x86_64 only so far (the loader names are per architecture).
+name = "gcompat"
+version = "1.1.0"
+release = 1
+summary = "Glibc compatibility shim for musl"
+license = "ISC"
+homepage = "https://git.adelielinux.org/adelie/gcompat"
+hostdeps = ["pkgconf"]
+builddeps = ["libucontext-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://git.adelielinux.org/adelie/gcompat/-/archive/06600632096b14e03e32b234ec0b02a9d4d045e9.tar.gz", sha256 = "d6135408a5806742d66a76c9fa40b8a1f7a5fc74d0d2fe35b1301b0b2f119699" },
+]
+
+build = '''
+%make \
+    LOADER_NAME=ld-linux-x86-64.so.2 \
+    LOADER_PATH=/usr/lib/ld-linux-x86-64.so.2 \
+    LINKER_PATH=/usr/lib/ld-musl-x86_64.so.1 \
+    LIBGCOMPAT_PATH=/usr/lib/libgcompat.so.0 \
+    WITH_LIBUCONTEXT=1
+'''
+install = '''
+# make install doesn't create the dirs and dies
+install -dm755 "$pkgdir/usr/lib"
+%make_install \
+    STRIP=true \
+    LOADER_NAME=ld-linux-x86-64.so.2 \
+    LOADER_PATH=/usr/lib/ld-linux-x86-64.so.2 \
+    LINKER_PATH=/usr/lib/ld-musl-x86_64.so.1 \
+    LIBGCOMPAT_PATH=/usr/lib/libgcompat.so.0 \
+    WITH_LIBUCONTEXT=1
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/gcompat/LICENSE"
+# glibc's library names, all served by libgcompat
+for f in libc.so.6 libcrypt.so.1 libm.so.6 libpthread.so.0 libresolv.so.2 librt.so.1 libutil.so.1; do
+    ln -s libgcompat.so.0 "$pkgdir/usr/lib/$f"
+done
+'''

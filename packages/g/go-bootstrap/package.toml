@@ -1,0 +1,21 @@
+# needed by: go (Go is written in Go: building it needs an existing Go).
+# Upstream's linux-amd64 release, repackaged: the Go toolchain is statically
+# linked, so it runs on musl as is. Chimera ships its own bootstrap tarball; this
+# uses the official one instead. Only for building `go`; not for use.
+name = "go-bootstrap"
+version = "1.25.4"
+release = 1
+summary = "Go toolchain for bootstrapping the go package"
+license = "BSD-3-Clause"
+homepage = "https://go.dev"
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://go.dev/dl/go1.25.4.linux-amd64.tar.gz", sha256 = "9fa5ffeda4170de60f67f3aa0f824e426421ba724c21e133c1e35d6159ca1bec" },
+]
+
+install = '''
+mkdir -p "$pkgdir/usr/lib/go-bootstrap"
+cp -a bin pkg src lib go.env VERSION "$pkgdir/usr/lib/go-bootstrap/"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/go-bootstrap/LICENSE"
+'''

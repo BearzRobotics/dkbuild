@@ -1,0 +1,23 @@
+# needed by: python-jinja2 (its one dependency).
+# Built offline with the image's pip and setuptools; the C speedups module is
+# built too.
+name = "python-markupsafe"
+version = "3.0.3"
+release = 1
+summary = "Safely add untrusted strings to HTML/XML markup"
+license = "BSD-3-Clause"
+homepage = "https://markupsafe.palletsprojects.com"
+hostdeps = ["python"]
+builddeps = ["python-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/M/MarkupSafe/markupsafe-3.0.3.tar.gz", sha256 = "722695808f4b6457b320fdc131280796bdceb04ab50fe1795cd540799ebe1698" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-markupsafe/LICENSE.txt"
+'''

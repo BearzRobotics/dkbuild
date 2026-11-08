@@ -1,0 +1,26 @@
+# needed by: trove-classifiers.
+# Built from the sdist offline with pip (--no-build-isolation): the build
+# backend comes from hostdeps. setuptools, packaging and flit-core are the
+# image's until they are recipes.
+name = "python-calver"
+version = "2025.10.20"
+release = 1
+summary = "Setuptools extension for CalVer package versions"
+license = "Apache-2.0"
+homepage = "https://github.com/di/calver"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/4a/96/0c57e3e228ffc54074867406b659b197678674f1f0bf600d114965289834/calver-2025.10.20.tar.gz", sha256 = "c98b376c2424642224d456b2f70c51402343e008c63d204634665e1a2a2835f5" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+for f in LICENSE LICENSE.txt LICENSE.md LICENSE.rst COPYING LICENSES/*; do
+    [ -f "$f" ] && install -Dm644 "$f" "$pkgdir/usr/share/licenses/python-calver/${f##*/}"
+done
+true
+'''
