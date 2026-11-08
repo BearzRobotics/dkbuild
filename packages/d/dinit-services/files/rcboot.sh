@@ -12,6 +12,11 @@ if [ "$1" != "stop" ]; then
   
   # empty utmp, create needed directories
   : > /var/run/utmp
+
+  # Users, groups, directories and files packages declare (sysusers.d,
+  # tmpfiles.d): /run is new at every boot. sd-tools is in base.
+  if [ -x /usr/bin/sd-sysusers ]; then /usr/bin/sd-sysusers || :; fi
+  if [ -x /usr/bin/sd-tmpfiles ]; then /usr/bin/sd-tmpfiles --create --remove --boot || :; fi
   #mkdir -m og-w /var/run/dbus
   
   # A machine id without D-Bus (the CLI system has none): the kernel's random

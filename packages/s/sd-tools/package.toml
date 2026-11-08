@@ -1,0 +1,34 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/sd-tools/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "sd-tools"
+version = "0.99.0"
+release = 5
+summary = "Small set of tools forked from systemd"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/chimera-linux/sd-tools"
+patches = ["no-bash.patch", "uid-range-fix-32-bit.patch"]
+hostdeps = ["meson", "ninja", "pkgconf"]
+builddeps = ["acl-devel", "libcap-devel", "linux-headers"]
+rundeps = ["base-files"]
+triggers = ["/usr/lib/sysusers.d", "/usr/lib/tmpfiles.d"]
+
+source = [
+    { url = "https://github.com/chimera-linux/sd-tools/archive/refs/tags/v0.99.0.tar.gz", sha256 = "09ffbc8bfe1f660d4918fd50dff51db1686ac9b3bd45c7ddcbf27b0470394da3" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+# deprecated names, to be phased out
+mkdir -p "$pkgdir/usr/bin"
+ln -sf sd-tmpfiles "$pkgdir/usr/bin/systemd-tmpfiles"
+mkdir -p "$pkgdir/usr/bin"
+ln -sf sd-sysusers "$pkgdir/usr/bin/systemd-sysusers"
+'''

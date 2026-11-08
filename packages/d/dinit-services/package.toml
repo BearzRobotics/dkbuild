@@ -11,9 +11,10 @@
 # r4: rcboot works without D-Bus (machine-id from the kernel), keeps the random
 # seed in /var/lib, and a missing /etc/hostname no longer fails it.
 # r5: dhcpcd is /usr/bin/dhcpcd.
+# r6: rcboot applies sysusers.d and tmpfiles.d at boot (sd-tools), so /run directories exist.
 name = "dinit-services"
 version = "1"
-release = 5
+release = 6
 summary = "dinit service definitions and boot scripts for FenrirOS"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"

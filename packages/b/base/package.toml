@@ -2,7 +2,8 @@
 # console, and apk works (SPEC.md 9.1). No compiler, no desktop, no network
 # daemons (base-net). The kernel, bootloader and firmware are chosen by the
 # image, since they depend on the machine.
-# r2: bash-completion, and both editors: msedit (the default EDITOR) and vim.
+# r2: bash-completion, both editors (msedit, the default EDITOR, and vim), and sd-tools
+#     (sysusers.d and tmpfiles.d, applied on install and at boot).
 name = "base"
 version = "1"
 release = 2
@@ -16,5 +17,5 @@ rundeps = [
     "coreutils", "dash", "bash", "sed", "grep", "gawk", "findutils", "diffutils",
     "which", "less", "file", "procps", "psmisc", "iproute2", "kbd", "sysklogd",
     "tar", "gzip", "xz", "zstd", "e2fsprogs", "dosfstools",
-    "bash-completion", "msedit", "vim",
+    "bash-completion", "msedit", "vim", "sd-tools",
 ]

@@ -718,6 +718,8 @@ fn publish(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options, id: []
         // space-separated value.
         if (pk.depends.len > 0) try argv.appendSlice(arena, &.{ "--info", try std.fmt.allocPrint(arena, "depends:{s}", .{try std.mem.join(arena, " ", pk.depends)}) });
         if (pk.install_if.len > 0) try argv.appendSlice(arena, &.{ "--info", try std.fmt.allocPrint(arena, "install-if:{s}", .{try std.mem.join(arena, " ", pk.install_if)}) });
+        if (std.mem.eql(u8, pk.name, r.name) and r.triggers.len > 0)
+            try argv.appendSlice(arena, &.{ "--info", try std.fmt.allocPrint(arena, "triggers:{s}", .{try std.mem.join(arena, " ", r.triggers)}) });
         if (pk.provides.len > 0) {
             // apk only picks a provider automatically when the provide has a
             // version: sonames get 0, commands and pkg-config names the package's.
