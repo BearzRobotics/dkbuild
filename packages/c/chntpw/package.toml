@@ -23,7 +23,8 @@ for p in $(grep -v '^#' /build/debian/patches/series); do
 done
 '''
 build = '''
-make CC="$CC" CFLAGS="$CFLAGS -DUSELIBGCRYPT -I. $(pkg-config --cflags libgcrypt)" LIBS="$LDFLAGS $(pkg-config --libs libgcrypt)"
+# ntreg.h uses int32_t without <stdint.h>; glibc happens to pull it in, musl does not.
+make CC="$CC" CFLAGS="$CFLAGS -include stdint.h -DUSELIBGCRYPT -I. $(pkg-config --cflags libgcrypt)" LIBS="$LDFLAGS $(pkg-config --libs libgcrypt)"
 '''
 install = '''
 for b in chntpw cpnt reged samusrgrp sampasswd samunlock; do

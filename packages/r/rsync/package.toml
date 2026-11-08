@@ -29,7 +29,8 @@ setup = '''
     --disable-md2man \
     --disable-acl-support \
     --disable-xattr-support \
-    --disable-xxhash
+    --disable-xxhash \
+    --disable-idn
 '''
 build = '''
 %make

@@ -222,8 +222,10 @@ pub fn main(init: std.process.Init) !void {
                 .own = own[idx],
                 .certain = true,
             };
-            if (force or rec == null or !exists or !std.mem.eql(u8, rec.?.version, ver)) {
-                // never built, a new version or release, or --force
+            if (force or rec == null or !exists or !std.mem.eql(u8, rec.?.version, ver) or rec.?.output == null) {
+                // never built, a new version or release, --force, or a record
+                // from before outputs were recorded: built at this release,
+                // with nothing to compare against and no reason to bump it
             } else if (!std.mem.eql(u8, &rec.?.inputs, &own[idx])) {
                 std.debug.print("error: {s}: its recipe, patches or files changed but the release is still r{d}; bump `release` (or use --force)\n", .{ r.name, r.release });
                 std.process.exit(1);

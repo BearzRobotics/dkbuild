@@ -4,12 +4,15 @@
 # Rust from source against the system LLVM; that is for later. HTML docs are
 # left out. Rust's musl target links statically by default: libraries loaded
 # by other programs (Python extensions) need RUSTFLAGS=-Ctarget-feature=-crt-static.
+# r2: upstream's binaries load libgcc_s.so.1 for unwinding; here that is a link to
+# LLVM's libunwind, which has the same _Unwind_* functions.
 name = "rust"
 version = "1.99.1"
-release = 1
+release = 2
 summary = "Rust programming language: rustc, cargo and the standard library"
 license = "MIT OR Apache-2.0"
 homepage = "https://www.rust-lang.org"
+rundeps = ["llvm-libunwind"]
 options = ["!check", "!strip"]
 
 source = [
@@ -19,6 +22,7 @@ source = [
 install = '''
 cat components
 sh install.sh --prefix=/usr --destdir="$pkgdir" --disable-ldconfig
+ln -s libunwind.so.1 "$pkgdir/usr/lib/libgcc_s.so.1"
 rm -rf "$pkgdir/usr/share/doc/rust/html" "$pkgdir/usr/lib/rustlib/uninstall.sh" "$pkgdir/usr/lib/rustlib/install.log"
 install -Dm644 LICENSE-MIT "$pkgdir/usr/share/licenses/rust/LICENSE-MIT"
 install -Dm644 LICENSE-APACHE "$pkgdir/usr/share/licenses/rust/LICENSE-APACHE"
