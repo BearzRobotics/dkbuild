@@ -63,11 +63,21 @@ Three things make it trustworthy, and this spec exists to enforce them:
 The FenrirOS constraints (carried over from DKRescue's CONSTRAINTS.md) apply to everything built with this tool. In
 particular:
 
-- **No GCC or GNU binutils** in any build root.
+- **No GCC or GNU binutils** in any build root, unless a recipe explicitly
+  opts in (planned: `options = ["gcc"]`, for the few that need it, such as
+  GRUB 2; see docs/roadmap.md). LLVM is the toolchain.
 - **Verified sources:** a recipe without a checksum for every source does
   not build.
 - **Offline builds:** the network is available only in the fetch step,
-  never during a build.
+  never during a build: the sandbox has no network at all. Fetching downloads
+  every source, and vendors what a language's package manager would download
+  (Zig, Go and Rust dependencies, on the host: 5.4 `zigdeps`, `godeps`,
+  `cargodeps`), into `cache/`, named by checksum. Anything an upstream build
+  would download for itself (CMake FetchContent, git submodules, prebuilt web
+  bundles, toolchains) becomes a pinned, checksummed source of the recipe
+  instead (ollama's llama.cpp, Hyprland's glaze). With `cache/` and the stage 0
+  build image, the whole distribution rebuilds with no network (8: the source
+  ISO).
 - **Baseline CPUs:** each architecture has a baseline (`x86-64`,
   `armv8-a`, `rv64gc`), set by the target profile (6.1), never
   `-march=native`.
@@ -509,8 +519,10 @@ the target architecture, run through `qemu-user` registered with
 
 For each recipe, in dependency order:
 
-1. **Fetch** (network allowed): download missing sources into the cache and
-   check their checksums.
+1. **Fetch** (network allowed, the only step that is): download missing
+   sources into the cache and check their checksums, and vendor the Zig, Go
+   or Rust dependencies of recipes that ask for it (`zigdeps`, `godeps`,
+   `cargodeps`), on the host, into the cache as well.
 2. **Prepare the build root:** a new directory, with apk-tools installing
    `hostdeps`, the toolchain and the base build set into it, plus the
    sysroot for cross builds (6.2). Nothing from previous builds is reused
@@ -680,6 +692,20 @@ build machine, as uid 0 of a user namespace, writing only `out/<name>/`:
 **Not yet:** the `iso` output (initramfs, the live-boot bootloader, `xorriso`),
 which waits on the live-ISO bootloader (6.1). The same image list can later
 feed an installer.
+
+**Planned: package and source ISOs.** With no repository server, packages
+travel on discs. `iso_repo` will put packages on an ISO, as `apks/<arch>/`
+with the signed `Packages.adb` and the public key, the way Alpine's install
+media carry theirs: a list of packages, so the install ISO works offline, or
+`"all"` for a **repository ISO** of every package. A machine mounts it and
+adds `<mount>/apks/<arch>/Packages.adb` to `/etc/apk/repositories` (tagged,
+`@cdrom ...`, to use it only on request); a newer disc and `apk upgrade`
+update it, and rebuilt packages are seen because rebuilds bump the release
+(7.2). It also restores any installed system. A **source ISO** carries
+`cache/` (every source tarball and vendored dependency), the git tree at that
+point and the stage 0 build image: enough to rebuild the whole distribution
+offline, even after upstream downloads disappear. **The private signing key is
+on neither**; it is backed up separately, encrypted and offline.
 
 Meta-packages (`options = ["meta"]`) keep image lists short: `base` (boots to
 a login prompt with apk working), `base-net` (dhcpcd, OpenSSH, curl) and

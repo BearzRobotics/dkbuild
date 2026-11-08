@@ -52,6 +52,21 @@ ls repo/x86_64/                # the .apk files and the signed Packages.adb
 Builds run on the unpacked DKRescue image (`rootfs/dkrescue`). Sources are downloaded the first time (`cache/`), the logs are in `logs/`, and a package is only rebuilt when its recipe, patches,
 profile or a dependency changes. Edit a recipe without bumping its `release` and dkbuild stops and says so.
 
+## Offline, and packages without a server
+
+Builds never use the network: the sandbox has none. `dkbuild fetch` (or the
+first build) downloads every source and vendors Go, Rust and Zig dependencies
+into `cache/`, named by checksum, and from then on everything rebuilds offline.
+Upstream builds that would download things themselves get those as pinned
+sources in their recipes instead.
+
+There is no repository server: packages travel on discs. Planned (SPEC.md 8):
+a **repository ISO** of every package, signed, that any FenrirOS machine mounts
+as an apk repository to install and upgrade from, and that restores a system;
+and a **source ISO** of `cache/`, the git tree and the build image, enough to
+rebuild the whole distribution offline. The private signing key goes on
+neither: keep it encrypted on a drive of its own (docs/setup-ubuntu.md, 8).
+
 ## Tests
 
 ```sh

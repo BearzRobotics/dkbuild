@@ -19,12 +19,14 @@ recipes in `packages/` inside a sandbox on top of the DKRescue image.
 ## 2. Host packages
 
 ```sh
-sudo apt install ca-certificates curl git tar xz-utils lzip xorriso squashfs-tools util-linux openssl
+sudo apt install ca-certificates curl git tar xz-utils lzip xorriso squashfs-tools util-linux openssl golang-go
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh     # cargo, for recipes with Rust dependencies
 ```
 
 | Package | Why |
 |---|---|
 | `curl`, `ca-certificates` | downloading sources: the only step that uses the network |
+| `golang-go` (any version), `cargo` (rustup's is fine) | vendoring the Go modules and Rust crates of recipes with `godeps` or `cargodeps`, at fetch time; `GOTOOLCHAIN=auto` fetches whatever newer Go a module asks for |
 | `tar`, `xz-utils` | source tarballs |
 | `xorriso`, `squashfs-tools` | reading the DKRescue ISO and unpacking its root |
 | `util-linux` | `unshare`, used by `doctor` and `bootstrap-root` to test namespaces |
@@ -116,8 +118,11 @@ chmod 600 ~/.config/dkbuild/signing.rsa
 openssl rsa -in ~/.config/dkbuild/signing.rsa -pubout -out keys/dkbuild-signing.rsa.pub
 ```
 
-Keep a copy of the private key somewhere safe, off the machine. Without it you cannot sign more packages for
-systems that already trust the old one, and every one of them would have to be told to trust a new key. If the
+Keep a copy of the private key somewhere safe, off the machine: **encrypted, on a drive kept offline** (for
+example `gpg -c signing.rsa` on its own USB stick, not the one you boot or carry ISOs on). Never put it on a
+package or source ISO, in git, or on a shared drive: anyone holding it can sign packages every FenrirOS system
+trusts. Without it you cannot sign more packages for systems that already trust the old one, and every one of
+them would have to be told to trust a new key. If the
 private key and `keys/*.pub` do not match, the index step fails; that is the thing to check first.
 
 ## 9. Build the repository
@@ -240,6 +245,8 @@ Everything the build needs that is not in git:
 | The signing key | `~/.config/dkbuild/signing.rsa` | Private; copy it over a safe channel. Its public half is `keys/dkbuild-signing.rsa.pub` (in git). |
 | The DKRescue ISO | anywhere, e.g. `~/dkrescue.iso` | `dkbuild bootstrap-root ~/dkrescue.iso` unpacks it into `rootfs/dkrescue/`. The current build is the one that boots to a desktop on real hardware. |
 | `zig` 0.17.1 | on the PATH | Builds dkbuild, and fetches Zig dependencies for recipes with the `zigdeps` option. |
+| `go`, `cargo` | on the PATH | Vendor Go modules and Rust crates for recipes with `godeps` and `cargodeps` (fetch time only). |
+| `cache/` (optional) | the project's `cache/` | Copy it over (or from a source ISO, when there is one) and nothing is downloaded again: every source tarball and vendored dependency is in it, named by checksum. |
 | `lzip` and the other host tools | `apt install` | `dkbuild doctor` lists what is missing. |
 
 Then:

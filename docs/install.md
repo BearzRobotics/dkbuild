@@ -76,6 +76,21 @@ reboot
 systemd-boot shows FenrirOS and a recovery entry. Log in on the console, then
 start the desktop with `Hyprland`.
 
+## Packages after installing
+
+Until there is a repository server, packages come on a **repository ISO** (all
+packages, signed; planned, SPEC.md 8). Mount it, or the USB stick it is on, and
+add it:
+
+```sh
+mount -o ro /path/to/fenriros-repo.iso /mnt/repo      # or the stick's partition
+echo /mnt/repo/apks/x86_64/Packages.adb >> /etc/apk/repositories
+apk update && apk add <package>
+```
+
+A newer disc and `apk upgrade` bring updates. The packages are signed with the
+key in `/etc/apk/keys`, whatever they come from.
+
 ## Later kernels
 
 Installing or upgrading the `linux` package runs `gen-systemd-boot`, which
