@@ -2,9 +2,10 @@
 # makes Rust bindings from C headers, through libclang. From the crates.io
 # release (it carries Cargo.lock); crates vendored on the host (`cargodeps`).
 # The kernel needs bindgen 0.65.1 or newer.
+# r2: linked against the shared musl, so it can load libclang (dlopen).
 name = "bindgen"
 version = "0.73.2"
-release = 1
+release = 2
 summary = "Generates Rust bindings to C and C++ libraries"
 license = "BSD-3-Clause"
 homepage = "https://rust-lang.github.io/rust-bindgen"
