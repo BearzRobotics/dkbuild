@@ -23,7 +23,7 @@ source = [
 ]
 
 environment = '''
-export GOFLAGS="-mod=vendor -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
 export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=1
 '''
 setup = '''

@@ -123,6 +123,10 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
     // The variables SPEC 5.5 lists besides jobs/srcdir/pkgdir/CC/CFLAGS.
     try w.add(arena, &s, "export target='{s}'\nexport arch='{s}'\nexport zig_target='{s}'\nexport zig_cpu='{s}'\n", .{ ctx.target.triple, ctx.target.arch, ctx.target.zig_target, ctx.target.zig_cpu });
     try s.appendSlice(arena, try ctx.target.buildEnv(arena, ctx.target.isCross(ctx.host), ctx.static));
+    // Go builds offline from the shared module cache (fetch.zig), checked
+    // against go.sum when it was filled.
+    if (contains(r.options, "godeps"))
+        try s.appendSlice(arena, "export GOMODCACHE=/dkdeps/go GOPROXY=off GOSUMDB=off GOTOOLCHAIN=local GOFLAGS=-mod=mod\n");
     if (r.environment) |e| {
         try s.appendSlice(arena, try macro.expand(arena, ctx, e, bad_macro));
         try s.append(arena, '\n');
@@ -315,9 +319,12 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     // 1. Sources
     const cache = try std.fs.path.join(arena, &.{ opts.root, "cache" });
     var first_tarball: ?[]const u8 = null;
-    var zigdeps_tar: ?[]const u8 = null;
-    // Go modules and Rust crates vendored on the host, laid into the source tree.
-    var vendor_tars: std.ArrayList([]const u8) = .empty;
+    // Dependencies fetched on the host into the shared stores (fetch.zig): the
+    // lists of what this package uses.
+    var zig_list: ?[]const u8 = null;
+    var cargo_list: ?[]const u8 = null;
+    var cargo_config: ?[]const u8 = null;
+    var uses_go = false;
     {
         for (r.source) |src| {
             const lock = fetchLock(src);
@@ -335,21 +342,22 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                         out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
                         return error.PrepareFailed;
                     };
-                    zigdeps_tar = try fetch.zigDepsPath(arena, cache, src.tarball.sha256);
+                    zig_list = try fetch.zigDepsPath(arena, cache, src.tarball.sha256);
                 }
                 if (contains(r.options, "cargodeps")) {
                     _ = fetch.fetchCargoDeps(arena, io, cache, src.tarball.sha256, &msg) catch |err| {
                         out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
                         return error.PrepareFailed;
                     };
-                    try vendor_tars.append(arena, try fetch.cargoDepsPath(arena, cache, src.tarball.sha256));
+                    cargo_list = try fetch.cargoDepsPath(arena, cache, src.tarball.sha256);
+                    cargo_config = try std.fmt.allocPrint(arena, "{s}/cargodeps/{s}.config.toml", .{ cache, src.tarball.sha256 });
                 }
                 if (contains(r.options, "godeps")) {
                     _ = fetch.fetchGoDeps(arena, io, cache, src.tarball.sha256, &msg) catch |err| {
                         out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
                         return error.PrepareFailed;
                     };
-                    try vendor_tars.append(arena, try fetch.goDepsPath(arena, cache, src.tarball.sha256));
+                    uses_go = true;
                 }
             }
         }
@@ -452,21 +460,33 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 }
             }
         }
-        // Go modules and Rust crates vendored on the host: lay them in the source tree.
-        for (vendor_tars.items) |gt| {
-            const dest = try std.fmt.allocPrint(arena, "{s}{s}", .{ build_rel, srcdir["/build".len..] });
-            const ok = runLogged(arena, io, &.{ "tar", "-xf", gt, "-C", dest }, &log) catch false;
-            if (!ok) {
-                out("error: cannot unpack the vendored dependencies {s}\n", .{gt});
-                return error.UnpackFailed;
+        // Crates and Zig packages from the shared stores: symbolic links to
+        // where the build sees the stores (read-only, bound at /dkdeps), so a
+        // build cannot change them. Go reads its module cache directly.
+        const dest = try std.fmt.allocPrint(arena, "{s}{s}", .{ build_rel, srcdir["/build".len..] });
+        var lay: std.ArrayList(u8) = .empty;
+        if (cargo_list) |cl| {
+            const text = Dir.cwd().readFileAlloc(io, cl, arena, .limited(1 << 22)) catch return error.UnpackFailed;
+            try lay.appendSlice(arena, "mkdir -p vendor .cargo\n");
+            try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "cp '{s}' .cargo/config.toml\n", .{cargo_config.?}));
+            var lines = std.mem.tokenizeScalar(u8, text, '\n');
+            while (lines.next()) |l| {
+                var f = std.mem.tokenizeScalar(u8, l, ' ');
+                const n = f.next() orelse continue;
+                const k = f.next() orelse continue;
+                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "ln -sfn '/dkdeps/crates/{s}' 'vendor/{s}'\n", .{ k, n }));
             }
         }
-        // Zig dependencies fetched on the host: lay zig-pkg/ in the source tree.
-        if (zigdeps_tar) |zt| {
-            const dest = try std.fmt.allocPrint(arena, "{s}{s}", .{ build_rel, srcdir["/build".len..] });
-            const ok = runLogged(arena, io, &.{ "tar", "-xf", zt, "-C", dest }, &log) catch false;
+        if (zig_list) |zl| {
+            const text = Dir.cwd().readFileAlloc(io, zl, arena, .limited(1 << 22)) catch return error.UnpackFailed;
+            try lay.appendSlice(arena, "mkdir -p zig-pkg\n");
+            var lines = std.mem.tokenizeScalar(u8, text, '\n');
+            while (lines.next()) |n| try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "ln -sfn '/dkdeps/zig/{s}' 'zig-pkg/{s}'\n", .{ n, n }));
+        }
+        if (lay.items.len > 0) {
+            const ok = runLogged(arena, io, &.{ "sh", "-ec", try std.fmt.allocPrint(arena, "cd '{s}'\n{s}", .{ dest, lay.items }) }, &log) catch false;
             if (!ok) {
-                out("error: cannot unpack the Zig dependencies {s}\n", .{zt});
+                out("error: cannot lay out the vendored dependencies of {s}\n", .{r.name});
                 return error.UnpackFailed;
             }
         }
@@ -487,12 +507,24 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     {
         // The three directories the build writes to are bound in from the host
         // side, so `destdir` can be read after the sandbox is gone.
-        const binds = [_]sandbox.Bind{
+        var binds: std.ArrayList(sandbox.Bind) = .empty;
+        try binds.appendSlice(arena, &.{
             .{ .src = try std.fs.path.join(arena, &.{ root_abs, "build" }), .dst = "/build" },
             .{ .src = try std.fs.path.join(arena, &.{ root_abs, "destdir" }), .dst = "/destdir" },
             .{ .src = try std.fs.path.join(arena, &.{ root_abs, "dkbuild" }), .dst = "/dkbuild" },
-        };
-        const ok = runTool(arena, io, base_root, sb, &binds, &.{ "/usr/bin/sh", "/dkbuild/script.sh" }, &log) catch false;
+        });
+        // The shared dependency stores, read-only.
+        for ([_]struct { use: bool, sub: []const u8, dst: []const u8 }{
+            .{ .use = cargo_list != null, .sub = "crates", .dst = "/dkdeps/crates" },
+            .{ .use = zig_list != null, .sub = "zigpkg", .dst = "/dkdeps/zig" },
+            .{ .use = uses_go, .sub = "gomod", .dst = "/dkdeps/go" },
+        }) |st| {
+            if (!st.use) continue;
+            const rel = try std.fs.path.join(arena, &.{ cache, st.sub });
+            Dir.cwd().createDirPath(io, rel) catch return error.PrepareFailed;
+            try binds.append(arena, .{ .src = absPath(arena, io, rel) catch return error.PrepareFailed, .dst = st.dst, .read_only = true });
+        }
+        const ok = runTool(arena, io, base_root, sb, binds.items, &.{ "/usr/bin/sh", "/dkbuild/script.sh" }, &log) catch false;
         if (!ok) {
             out("error: {s} failed; log: {s}\n", .{ id, logpath });
             const tail_start = if (log.items.len > 1500) log.items.len - 1500 else 0;
@@ -772,8 +804,72 @@ fn currentFile(arena: Allocator, t: tree.Tree, file: []const u8) Allocator.Error
 /// version is built (an older package is never removed before that), and
 /// rebuilds the index. Orphans (a recipe was removed or renamed) are only
 /// reported.
+/// The shared dependency stores (fetch.zig): lists whose source tarball no
+/// recipe uses any more go, and then every crate or Zig package no remaining
+/// list names. Go's module cache is left to `go clean -modcache`. Do not run
+/// it while a fetch is running: a fetch moves into the store before it lists.
+fn pruneDeps(arena: Allocator, io: std.Io, opts: Options, t: tree.Tree, dry_run: bool) !void {
+    const cache = try std.fs.path.join(arena, &.{ opts.root, "cache" });
+    const kinds = [_]struct { option: []const u8, dir: []const u8, store: ?[]const u8, field: usize }{
+        .{ .option = "cargodeps", .dir = "cargodeps", .store = "crates", .field = 1 },
+        .{ .option = "zigdeps", .dir = "zigdeps", .store = "zigpkg", .field = 0 },
+        .{ .option = "godeps", .dir = "godeps", .store = null, .field = 0 },
+    };
+    var removed: usize = 0;
+    for (kinds) |k| {
+        // The source tarballs of the recipes that use this kind.
+        var wanted: std.StringHashMapUnmanaged(void) = .empty;
+        for (t.recipes) |r| {
+            if (!contains(r.options, k.option)) continue;
+            for (r.source) |src| if (src == .tarball) {
+                try wanted.put(arena, src.tarball.sha256, {});
+                break;
+            };
+        }
+        const dir_rel = try std.fs.path.join(arena, &.{ cache, k.dir });
+        var keep: std.StringHashMapUnmanaged(void) = .empty;
+        var d = Dir.cwd().openDir(io, dir_rel, .{ .iterate = true }) catch continue;
+        defer d.close(io);
+        var it = d.iterate();
+        while (it.next(io) catch null) |e| {
+            if (std.mem.startsWith(u8, e.name, "tmp-") or e.name.len < 64) continue;
+            const sha = e.name[0..64];
+            if (wanted.contains(sha)) {
+                if (!std.mem.endsWith(u8, e.name, ".list")) continue;
+                const text = d.readFileAlloc(io, e.name, arena, .limited(1 << 22)) catch continue;
+                var lines = std.mem.tokenizeScalar(u8, text, '\n');
+                while (lines.next()) |l| {
+                    var f = std.mem.tokenizeScalar(u8, l, ' ');
+                    var i: usize = 0;
+                    while (f.next()) |v| : (i += 1) if (i == k.field) try keep.put(arena, try arena.dupe(u8, v), {});
+                }
+                continue;
+            }
+            out("{s} {s}/{s}\n", .{ if (dry_run) "would remove" else "removing", k.dir, e.name });
+            removed += 1;
+            if (!dry_run) d.deleteFile(io, e.name) catch {};
+        }
+        const store = k.store orelse continue;
+        const store_rel = try std.fs.path.join(arena, &.{ cache, store });
+        var sd = Dir.cwd().openDir(io, store_rel, .{ .iterate = true }) catch continue;
+        defer sd.close(io);
+        var stale: std.ArrayList([]const u8) = .empty;
+        var sit = sd.iterate();
+        while (sit.next(io) catch null) |e| {
+            if (!keep.contains(e.name)) try stale.append(arena, try arena.dupe(u8, e.name));
+        }
+        for (stale.items) |n| {
+            out("{s} {s}/{s}\n", .{ if (dry_run) "would remove" else "removing", store, n });
+            removed += 1;
+            if (!dry_run) sd.deleteTree(io, n) catch {};
+        }
+    }
+    out("{d} stale dependency file(s) or store entr(ies){s}\n", .{ removed, if (dry_run) " (dry run: nothing removed)" else "" });
+}
+
 pub fn prune(arena: Allocator, io: std.Io, opts: Options, dry_run: bool) BuildError!void {
     const t = opts.tree orelse return error.BadRecipe;
+    try pruneDeps(arena, io, opts, t, dry_run);
     const repo_rel = try std.fmt.allocPrint(arena, "{s}/repo/{s}", .{ opts.root, opts.arch });
     var d = Dir.cwd().openDir(io, repo_rel, .{ .iterate = true }) catch {
         out("nothing to prune: {s} does not exist\n", .{repo_rel});

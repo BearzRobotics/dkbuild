@@ -389,7 +389,7 @@ test "image files parse; bad outputs, excluded packages and odd names are refuse
     const s = try script(a, img);
     try std.testing.expect(std.mem.indexOf(u8, s, "--initdb --arch x86_64") != null);
     try std.testing.expect(std.mem.indexOf(u8, s, " base hyprland\n") != null);
-    try std.testing.expect(std.mem.indexOf(u8, s, "useradd -R /target -m -s '/bin/sh' -G 'wheel,video' 'fenrir'") != null);
+    try std.testing.expect(std.mem.indexOf(u8, s, "useradd -R /target -m -s '/bin/bash' -G 'wheel,video' 'fenrir'") != null);
     try std.testing.expect(std.mem.indexOf(u8, s, "fenriros.tar.zst") != null);
     try std.testing.expect(std.mem.indexOf(u8, s, "mksquashfs") == null);
 }

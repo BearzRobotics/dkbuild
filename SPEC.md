@@ -227,9 +227,9 @@ source = [
 | `static` | Link programs statically (rescue-critical tools): adds `-static` to `LDFLAGS`. Never on a recipe that ships a shared library: `-shared -static` links without a warning and gives a library that crashes its users (zstd 1.5.7-r1 crashed lld that way) |
 | `bootstrap` | Part of the bootstrap set (9); built in stage 0 |
 | `jobs:N` | At most N parallel jobs for this recipe (LLVM: `jobs:10`). Also marks it heavy: with `-P`, it builds alone (10) |
-| `zigdeps` | Zig dependencies fetched on the host into `cache/zigdeps/` and laid in the source tree as `zig-pkg/` (9.4) |
-| `godeps` | Go modules vendored on the host (`go mod vendor`, needs `go`) into `cache/godeps/`, laid in as `vendor/`; build with `-mod=vendor` |
-| `cargodeps` | Rust crates vendored on the host (`cargo vendor`, needs `cargo`) into `cache/cargodeps/`, laid in as `vendor/` with a `.cargo/config.toml` pointing at it; build with `--offline` |
+| `zigdeps` | Zig dependencies fetched on the host into the shared `cache/zigpkg/` and laid in the source tree as `zig-pkg/` (7.4) |
+| `godeps` | Go modules downloaded on the host (`go mod download`, needs `go`) into the shared module cache `cache/gomod/`; the build gets `GOMODCACHE`, `GOPROXY=off`, `GOFLAGS=-mod=mod` (7.4) |
+| `cargodeps` | Rust crates vendored on the host (`cargo vendor`, needs `cargo`) into the shared `cache/crates/`, laid in as `vendor/` with a `.cargo/config.toml` pointing at it; build with `--offline` (7.4) |
 | `meta` | A meta-package: no source and no steps, only `rundeps` (`base`, `desktop-hyprland`) |
 | `rootlayout` | May install outside `/usr /etc /var /opt /boot` (base-files: `/dev`, `/proc`, the usr-merge links) |
 
@@ -532,7 +532,7 @@ For each recipe, in dependency order:
 1. **Fetch** (network allowed, the only step that is): download missing
    sources into the cache and check their checksums, and vendor the Zig, Go
    or Rust dependencies of recipes that ask for it (`zigdeps`, `godeps`,
-   `cargodeps`), on the host, into the cache as well.
+   `cargodeps`), on the host, into the shared stores of 7.4.
 2. **Prepare the build root:** a new directory, with apk-tools installing
    `hostdeps`, the toolchain and the base build set into it, plus the
    sysroot for cross builds (6.2). Nothing from previous builds is reused
@@ -669,6 +669,33 @@ Two kinds of build root exist, matching the stages of 9.2:
 
 There is no other distribution's repository in either; `repo/` is the only
 source of packages.
+
+### 7.4 Dependency stores
+
+Go modules, Rust crates and Zig packages are shared between packages: each is
+downloaded once and kept once, however many packages use it.
+
+| Where | What |
+|---|---|
+| `cache/cargo-home/`, `cache/zig-global/` | cargo's and zig's download caches, so nothing is downloaded twice |
+| `cache/crates/<dir>-<hash>/` | one vendored crate: `cargo vendor`'s directory, named by the first 16 hex digits of the sha256 of its `.cargo-checksum.json` (which lists every file's checksum) |
+| `cache/zigpkg/<name>/` | one Zig package, under the hash name Zig gives it |
+| `cache/gomod/` | Go's module cache (`GOMODCACHE`): the module zips, checked against `go.sum` when downloaded, and their unpacked trees |
+| `cache/{cargodeps,zigdeps,godeps}/<sha256>.list` | what one source tarball uses; written last, so its presence means the fetch is complete. `cargodeps/<sha256>.config.toml` is the `.cargo/config.toml` for it |
+
+The build binds the stores read-only into the sandbox (`/dkdeps/crates`,
+`/dkdeps/zig`, `/dkdeps/go`) and lays `vendor/` and `zig-pkg/` into the source
+tree as symbolic links to the entries its list names, so nothing is copied and
+no build can change a store. Go reads its module cache directly. Cargo checks
+every crate against its `.cargo-checksum.json` as it builds. Which entries a
+package uses doesn't feed the rebuild hashes: they follow from the source
+tarball (its lock files), whose checksum does.
+
+`dkbuild prune` removes the lists of source tarballs no recipe uses any more
+and then every crate and Zig package no remaining list names (Go's module
+cache is not pruned yet; `go clean -modcache` empties it). It must not run
+while a fetch does. A dependency tarball made by an older dkbuild
+(`<sha256>.tar`) is moved into the stores at the next fetch, offline.
 
 ## 8. Images
 

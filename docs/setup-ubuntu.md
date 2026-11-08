@@ -203,7 +203,7 @@ keeps the attribution.
 | `keys/` | public signing key(s) | yes |
 | `docs/`, `SPEC.md` | design | yes |
 | `rootfs/dkrescue/` | the unpacked build machine (4.2 GB) | no |
-| `cache/` | downloaded sources, named by checksum | no |
+| `cache/` | downloaded sources, named by checksum, and the shared Go, Rust and Zig dependency stores (SPEC.md 7.4) | no |
 | `work/` | build trees; removed when each build ends | no |
 | `logs/x86_64/` | one log per build | no |
 | `repo/x86_64/` | **the repository you built** | no |
