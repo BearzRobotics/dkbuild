@@ -133,6 +133,9 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
     };
     try s.appendSlice(arena,
         \\set -eu
+        \\# A root left by an earlier run holds files of other users, which only
+        \\# this namespace may remove.
+        \\find /target -mindepth 1 -delete
         \\echo '==> packages'
         \\mkdir -p /target/etc/apk/keys
         \\cp /dkkeys/*.pub /target/etc/apk/keys/
@@ -155,7 +158,9 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
         \\mkdir -p /target/etc/skel
         \\cat >> /target/etc/skel/.profile <<'EOF'
         \\# The desktop starts on the first console (dkbuild image: session).
-        \\if [ "$(tty)" = /dev/tty1 ] && [ -z "$WAYLAND_DISPLAY" ]; then
+        \\# Once only: a session may read this file again (dkde-session does).
+        \\if [ "$(tty)" = /dev/tty1 ] && [ -z "${{WAYLAND_DISPLAY:-}}" ] && [ -z "${{SESSION_STARTED:-}}" ]; then
+        \\    export SESSION_STARTED=1
         \\    exec {s}
         \\fi
         \\EOF
@@ -234,6 +239,8 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
             , .{ img.name, img.label });
         }
     }
+    // Only a rootfs output keeps the root on disk.
+    if (!contains(img.output, "rootfs")) try s.appendSlice(arena, "find /target -mindepth 1 -delete\n");
     return s.items;
 }
 
@@ -276,6 +283,13 @@ pub fn build(arena: Allocator, io: std.Io, img: Image, opts: Options) !void {
     const script_path = try std.fs.path.join(arena, &.{ abs[5], "image.sh" });
     Dir.cwd().writeFile(io, .{ .sub_path = script_path, .data = text }) catch return error.PrepareFailed;
 
+    // Files owned by users other than root (a user's home, a package's
+    // service account) need the caller's sub-ids mapped too.
+    const ids = sandbox.subIds(arena, io);
+    if (ids == null and img.users.len > 0) {
+        std.debug.print("error: image {s} makes users, whose files need sub-ids: give your user a range in /etc/subuid and /etc/subgid and install newuidmap/newgidmap (Ubuntu: uidmap)\n", .{img.name});
+        return error.PrepareFailed;
+    }
     std.debug.print("==> image {s} ({d} package(s) asked for)\n", .{ img.name, img.packages.len });
     var log: std.ArrayList(u8) = .empty;
     const ok = sandbox.run(arena, io, .{
@@ -292,6 +306,7 @@ pub fn build(arena: Allocator, io: std.Io, img: Image, opts: Options) !void {
         },
         .env = &.{ "PATH=/usr/bin:/usr/sbin:/bin:/sbin", "HOME=/root" },
         .argv = &.{ "/usr/bin/sh", "/image.sh" },
+        .ids = ids,
     }, &log) catch false;
     const logpath = try std.fmt.allocPrint(arena, "{s}/image.log", .{out_rel});
     Dir.cwd().writeFile(io, .{ .sub_path = logpath, .data = log.items }) catch {};

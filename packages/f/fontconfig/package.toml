@@ -3,9 +3,10 @@
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r3: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 # r4: static libraries too (in fontconfig-static), for fully static programs on musl.
+# r5: fontconfig-libs depends on fontconfig: the library reads /etc/fonts/fonts.conf from the main package; without it no fonts are configured.
 name = "fontconfig"
 version = "2.18.3"
-release = 4
+release = 5
 summary = "Library for configuring and customizing font access"
 license = "MIT"
 homepage = "https://www.fontconfig.org"
@@ -33,3 +34,10 @@ install = '''
 %make_install
 install -Dm644 COPYING "$pkgdir/usr/share/licenses/fontconfig/COPYING"
 '''
+
+# The libraries need data the scan cannot see (SPEC.md 5.6). Only the versioned
+# libraries: the development links stay in -devel.
+[subpackages.libs]
+summary = "Shared libraries"
+paths   = ["/usr/lib/*.so.*"]
+depends = ["fontconfig"]

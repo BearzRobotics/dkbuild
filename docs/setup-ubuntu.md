@@ -19,7 +19,7 @@ recipes in `packages/` inside a sandbox on top of the DKRescue image.
 ## 2. Host packages
 
 ```sh
-sudo apt install ca-certificates curl git tar xz-utils lzip xorriso squashfs-tools util-linux openssl golang-go
+sudo apt install ca-certificates curl git tar xz-utils lzip xorriso squashfs-tools util-linux uidmap openssl golang-go
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh     # cargo, for recipes with Rust dependencies
 ```
 

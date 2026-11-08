@@ -3,9 +3,10 @@
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 # r3: static libraries too (in libxkbcommon-static), for fully static programs on musl.
+# r4: libxkbcommon-libs depends on xkeyboard-config: the library reads the keyboard layouts from xkeyboard-config's data; without it labwc found no keymap and crashed.
 name = "libxkbcommon"
 version = "1.13.2"
-release = 3
+release = 4
 summary = "Library to handle keyboard descriptions"
 license = "MIT"
 homepage = "https://xkbcommon.org"
@@ -31,3 +32,10 @@ install = '''
 %meson_install
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libxkbcommon/LICENSE"
 '''
+
+# The libraries need data the scan cannot see (SPEC.md 5.6). Only the versioned
+# libraries: the development links stay in -devel.
+[subpackages.libs]
+summary = "Shared libraries"
+paths   = ["/usr/lib/*.so.*"]
+depends = ["xkeyboard-config"]

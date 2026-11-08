@@ -8,9 +8,10 @@
 # r2: rebuilt with the empty directories it installs (dkbuild's splitter dropped them).
 # r3: /etc/skel/.profile, so a new user (useradd -m, the installer) gets a working login shell.
 # r4: the sgx group, which udev rules name (Intel SGX devices).
+# r5: /etc/profile gives dash (the login shell) a working prompt; it showed bash escapes raw.
 name = "base-files"
 version = "1"
-release = 4
+release = 5
 summary = "FenrirOS base directory layout and configuration files"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"

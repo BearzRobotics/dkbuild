@@ -24,6 +24,7 @@ pub const tools = [_]Tool{
     .{ .name = "xorriso", .apt = "xorriso", .why = "reads the DKRescue ISO (bootstrap-root)" },
     .{ .name = "unsquashfs", .apt = "squashfs-tools", .why = "unpacks the DKRescue root (bootstrap-root)" },
     .{ .name = "unshare", .apt = "util-linux", .why = "bootstrap-root checks the root runs in a user namespace" },
+    .{ .name = "newuidmap", .apt = "uidmap", .why = "images with users map your sub-ids (/etc/subuid), so their files keep their owners", .required = false },
     .{ .name = "openssl", .apt = "openssl", .why = "makes the signing key for the repository", .required = false },
     .{ .name = "git", .apt = "git", .why = "recipes whose source is a git repository", .required = false },
 };

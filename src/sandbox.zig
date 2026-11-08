@@ -44,7 +44,70 @@ pub const Spec = struct {
     env: []const []const u8 = &.{},
     /// argv[0] is an absolute path inside the sandbox.
     argv: []const []const u8,
+    /// Map a whole range of ids, not just root: uid/gid 1.. inside become the
+    /// caller's sub-ids (/etc/subuid, /etc/subgid) outside, so files can be
+    /// owned by other users (an image's /home/<user>). See `subIds`.
+    ids: ?Ids = null,
 };
+
+/// The caller's sub-id ranges and the setuid helpers that map them.
+pub const Ids = struct {
+    newuidmap: []const u8,
+    newgidmap: []const u8,
+    uid_start: u32,
+    uid_count: u32,
+    gid_start: u32,
+    gid_count: u32,
+};
+
+/// Finds the calling user's sub-id ranges and newuidmap/newgidmap, or null
+/// when either is missing (then only root can be mapped).
+pub fn subIds(arena: Allocator, io: std.Io) ?Ids {
+    const uid = linux.getuid();
+    const uid_s = std.fmt.allocPrint(arena, "{d}", .{uid}) catch return null;
+    // The user name, from /etc/passwd (sub-id files may use either).
+    var name: []const u8 = uid_s;
+    if (std.Io.Dir.cwd().readFileAlloc(io, "/etc/passwd", arena, .limited(1 << 22))) |pw| {
+        var lines = std.mem.splitScalar(u8, pw, '\n');
+        while (lines.next()) |l| {
+            var f = std.mem.splitScalar(u8, l, ':');
+            const n = f.next() orelse continue;
+            _ = f.next();
+            if (std.mem.eql(u8, f.next() orelse continue, uid_s)) {
+                name = n;
+                break;
+            }
+        }
+    } else |_| {}
+    var ids: Ids = undefined;
+    inline for (.{ .{ "/etc/subuid", "uid_start", "uid_count" }, .{ "/etc/subgid", "gid_start", "gid_count" } }) |t| {
+        const text = std.Io.Dir.cwd().readFileAlloc(io, t[0], arena, .limited(1 << 22)) catch return null;
+        var found = false;
+        var lines = std.mem.splitScalar(u8, text, '\n');
+        while (lines.next()) |l| {
+            var f = std.mem.splitScalar(u8, l, ':');
+            const who = f.next() orelse continue;
+            if (!std.mem.eql(u8, who, name) and !std.mem.eql(u8, who, uid_s)) continue;
+            @field(ids, t[1]) = std.fmt.parseInt(u32, f.next() orelse continue, 10) catch continue;
+            @field(ids, t[2]) = std.fmt.parseInt(u32, f.next() orelse continue, 10) catch continue;
+            if (@field(ids, t[2]) == 0) continue;
+            found = true;
+            break;
+        }
+        if (!found) return null;
+    }
+    inline for (.{ "newuidmap", "newgidmap" }) |tool| {
+        var path: ?[]const u8 = null;
+        for ([_][]const u8{ "/usr/bin/", "/bin/", "/usr/sbin/", "/sbin/" }) |d| {
+            const c = std.fmt.allocPrint(arena, "{s}{s}", .{ d, tool }) catch return null;
+            std.Io.Dir.cwd().access(io, c, .{}) catch continue;
+            path = c;
+            break;
+        }
+        @field(ids, tool) = path orelse return null;
+    }
+    return ids;
+}
 
 pub const subcommand = "sandbox-child";
 
@@ -71,6 +134,11 @@ pub fn run(arena: Allocator, io: std.Io, spec: Spec, log: *std.ArrayList(u8)) Er
         "--cwd",          spec.cwd,
     });
     if (spec.net) try argv.append(arena, "--net");
+    if (spec.ids) |m| try argv.appendSlice(arena, &.{
+        "--ids",                                                m.newuidmap, m.newgidmap,
+        try std.fmt.allocPrint(arena, "{d}", .{m.uid_start}), try std.fmt.allocPrint(arena, "{d}", .{m.uid_count}),
+        try std.fmt.allocPrint(arena, "{d}", .{m.gid_start}), try std.fmt.allocPrint(arena, "{d}", .{m.gid_count}),
+    });
     for (spec.binds) |b| try argv.appendSlice(arena, &.{ if (b.read_only) "--robind" else "--bind", b.src, b.dst });
     for (spec.env) |e| try argv.appendSlice(arena, &.{ "--env", e });
     try argv.append(arena, "--");
@@ -178,6 +246,32 @@ fn bindMount(src: []const u8, dst_inside: []const u8, merged: []const u8, read_o
     }
 }
 
+/// Runs a program (absolute path) with an empty environment and waits.
+fn runWait(argv: []const [:0]const u8) bool {
+    const pid = linux.fork();
+    sys(pid, "fork", "");
+    if (pid == 0) {
+        const argv_c = page.alloc(?[*:0]const u8, argv.len + 1) catch linux.exit_group(127);
+        for (argv, 0..) |c, k| argv_c[k] = c.ptr;
+        argv_c[argv.len] = null;
+        const envp = [_:null]?[*:0]const u8{};
+        _ = linux.execve(argv[0], @ptrCast(argv_c.ptr), &envp);
+        linux.exit_group(127);
+    }
+    return waitOk(@intCast(pid));
+}
+
+fn waitOk(pid: i32) bool {
+    var status: i32 = 0;
+    while (true) {
+        const rc = linux.waitpid(pid, &status, 0);
+        if (linux.errno(rc) == .INTR) continue;
+        if (linux.errno(rc) != .SUCCESS) return false;
+        break;
+    }
+    return @as(u32, @bitCast(status)) == 0;
+}
+
 const dev_nodes = [_][]const u8{ "null", "zero", "full", "random", "urandom", "tty" };
 
 pub fn childMain(args: []const [:0]const u8) noreturn {
@@ -187,6 +281,7 @@ pub fn childMain(args: []const [:0]const u8) noreturn {
     var merged: []const u8 = "";
     var cwd: []const u8 = "/";
     var net = false;
+    var ids: ?[]const [:0]const u8 = null;
     var binds: std.ArrayList(Bind) = .empty;
     var env: std.ArrayList([]const u8) = .empty;
     var cmd: []const [:0]const u8 = &.{};
@@ -199,6 +294,9 @@ pub fn childMain(args: []const [:0]const u8) noreturn {
             break;
         } else if (std.mem.eql(u8, a, "--net")) {
             net = true;
+        } else if (i + 6 < args.len and std.mem.eql(u8, a, "--ids")) {
+            ids = args[i + 1 .. i + 7];
+            i += 6;
         } else if (i + 1 < args.len and std.mem.eql(u8, a, "--lower")) {
             i += 1;
             lower = args[i];
@@ -232,13 +330,42 @@ pub fn childMain(args: []const [:0]const u8) noreturn {
 
     var flags: usize = linux.CLONE.NEWUSER | linux.CLONE.NEWNS | linux.CLONE.NEWPID | linux.CLONE.NEWUTS | linux.CLONE.NEWIPC;
     if (!net) flags |= linux.CLONE.NEWNET;
-    sys(linux.unshare(flags), "unshare", "namespaces (are unprivileged user namespaces enabled?)");
+    if (ids) |m| {
+        // A whole range: only the setuid newuidmap/newgidmap may write such
+        // maps, and from outside the new namespace. A helper forked before
+        // unshare waits for it, then maps this process: 0 is this user, 1..
+        // the sub-ids.
+        var fds: [2]i32 = undefined;
+        sys(linux.pipe2(&fds, .{ .CLOEXEC = true }), "pipe", "");
+        const me = linux.getpid();
+        const h = linux.fork();
+        sys(h, "fork", "");
+        if (h == 0) {
+            _ = linux.close(fds[1]);
+            var b: [1]u8 = undefined;
+            if (linux.read(fds[0], &b, 1) != 1) linux.exit_group(1);
+            const pid_s = z("{d}", .{me});
+            if (!runWait(&.{ m[0], pid_s, "0", z("{d}", .{uid}), "1", "1", m[2], m[3] })) linux.exit_group(1);
+            if (!runWait(&.{ m[1], pid_s, "0", z("{d}", .{gid}), "1", "1", m[4], m[5] })) linux.exit_group(1);
+            linux.exit_group(0);
+        }
+        _ = linux.close(fds[0]);
+        sys(linux.unshare(flags), "unshare", "namespaces (are unprivileged user namespaces enabled?)");
+        sys(linux.write(fds[1], "x", 1), "write", "pipe");
+        _ = linux.close(fds[1]);
+        if (!waitOk(@intCast(h))) die("newuidmap/newgidmap could not map the sub-ids", .{});
+        // Drop the host's supplementary groups (unmapped inside).
+        const none = [_]u32{};
+        sys(linux.setgroups(0, &none), "setgroups", "");
+    } else {
+        sys(linux.unshare(flags), "unshare", "namespaces (are unprivileged user namespaces enabled?)");
 
-    // Become root inside: map this user to uid/gid 0. setgroups must be denied
-    // first, or the kernel refuses an unprivileged gid_map.
-    writeFile("/proc/self/setgroups", "deny");
-    writeFile("/proc/self/uid_map", z("0 {d} 1\n", .{uid}));
-    writeFile("/proc/self/gid_map", z("0 {d} 1\n", .{gid}));
+        // Become root inside: map this user to uid/gid 0. setgroups must be
+        // denied first, or the kernel refuses an unprivileged gid_map.
+        writeFile("/proc/self/setgroups", "deny");
+        writeFile("/proc/self/uid_map", z("0 {d} 1\n", .{uid}));
+        writeFile("/proc/self/gid_map", z("0 {d} 1\n", .{gid}));
+    }
 
     // The first fork lands in the new PID namespace as its PID 1. This process
     // stays outside it and passes on the exit status.
