@@ -187,7 +187,7 @@ pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_s
         \\export CARGO_HOME="$t/cargo-home"
         \\( cd "$top" && timeout 1800 cargo vendor --locked vendor > "$t/vendor.toml" )
         \\mkdir -p "$top/.cargo"
-        \\[ -f "$top/.cargo/config.toml" ] && printf '\\n' >> "$top/.cargo/config.toml"
+        \\[ -f "$top/.cargo/config.toml" ] && printf '\n' >> "$top/.cargo/config.toml"
         \\cat "$t/vendor.toml" >> "$top/.cargo/config.toml"
         \\tar -cf '{2s}.part' -C "$top" vendor .cargo/config.toml
         \\mv '{2s}.part' '{2s}'

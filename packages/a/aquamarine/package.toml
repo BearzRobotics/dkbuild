@@ -5,7 +5,7 @@ release = 1
 summary = "Very light linux rendering backend library (DRM/KMS, libinput, Wayland)"
 license = "BSD-3-Clause"
 homepage = "https://github.com/hyprwm/aquamarine"
-hostdeps = ["cmake", "ninja", "pkgconf", "hyprwayland-scanner"]
+hostdeps = ["cmake", "ninja", "pkgconf", "hyprwayland-scanner-devel"]
 builddeps = ["hyprutils-devel", "seatd-devel", "libinput-devel", "wayland-devel", "wayland-protocols", "hwdata", "libdisplay-info-devel", "libdrm-devel", "mesa-devel", "eudev-devel", "pixman-devel"]
 options = ["!check"]
 

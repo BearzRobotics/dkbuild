@@ -1,18 +1,62 @@
-diff -ruN a/src/basic/meson.build b/src/basic/meson.build
+From 4a4005583e2debe491850229aa5ae2a97770532d Mon Sep 17 00:00:00 2001
+From: Alexander Kanavin <alex.kanavin@gmail.com>
+Date: Sat, 22 May 2021 20:26:24 +0200
+Subject: [PATCH 05/27] add fallback parse_printf_format implementation
+
+Upstream-Status: Inappropriate [musl specific]
+
+Signed-off-by: Emil Renner Berthing <systemd@esmil.dk>
+Signed-off-by: Khem Raj <raj.khem@gmail.com>
+Signed-off-by: Chen Qi <Qi.Chen@windriver.com>
+[rebased for systemd 243]
+Signed-off-by: Scott Murray <scott.murray@konsulko.com>
+---
+ meson.build                              |   1 +
+ src/basic/meson.build                    |   5 +
+ src/basic/parse-printf-format.c          | 273 +++++++++++++++++++++++
+ src/basic/parse-printf-format.h          |  57 +++++
+ src/basic/stdio-util.h                   |   2 +-
+ src/libsystemd/sd-journal/journal-send.c |   2 +-
+ 6 files changed, 338 insertions(+), 2 deletions(-)
+ create mode 100644 src/basic/parse-printf-format.c
+ create mode 100644 src/basic/parse-printf-format.h
+
+diff --git a/meson.build b/meson.build
+index 52723bef09..e20bf3af8a 100644
+--- a/meson.build
++++ b/meson.build
+@@ -753,6 +753,7 @@ foreach header : ['crypt.h',
+                   'linux/memfd.h',
+                   'linux/time_types.h',
+                   'linux/vm_sockets.h',
++                  'printf.h',
+                   'sys/auxv.h',
+                   'sys/sdt.h',
+                   'threads.h',
+diff --git a/src/basic/meson.build b/src/basic/meson.build
+index 9a214575a5..b49b6ade56 100644
 --- a/src/basic/meson.build
 +++ b/src/basic/meson.build
-@@ -68,6 +68,7 @@
-         'nulstr-util.c',
-         'ordered-set.c',
-         'os-util.c',
-+        'parse-printf-format.c',
-         'parse-util.c',
-         'path-lookup.c',
-         'path-util.c',
-diff -ruN a/src/basic/parse-printf-format.c b/src/basic/parse-printf-format.c
---- a/src/basic/parse-printf-format.c
+@@ -189,6 +189,11 @@ endforeach
+ 
+ basic_sources += generated_gperf_headers
+ 
++if conf.get('HAVE_PRINTF_H') != 1
++        basic_sources += [files('parse-printf-format.c')]
++endif
++
++
+ ############################################################
+ 
+ arch_list = [
+diff --git a/src/basic/parse-printf-format.c b/src/basic/parse-printf-format.c
+new file mode 100644
+index 0000000000..49437e5445
+--- /dev/null
 +++ b/src/basic/parse-printf-format.c
-@@ -0,0 +1,277 @@
+@@ -0,0 +1,273 @@
++/*-*- Mode: C; c-basic-offset: 8; indent-tabs-mode: nil -*-*/
++
 +/***
 +  This file is part of systemd.
 +
@@ -35,14 +79,10 @@ diff -ruN a/src/basic/parse-printf-format.c b/src/basic/parse-printf-format.c
 +  along with systemd; If not, see <http://www.gnu.org/licenses/>.
 +***/
 +
-+#if HAVE_PRINTF_H == 0
 +#include <stddef.h>
 +#include <string.h>
-+#endif // HAVE_PRINTF_H
 +
 +#include "parse-printf-format.h"
-+
-+#if HAVE_PRINTF_H == 0
 +
 +static const char *consume_nonarg(const char *fmt)
 +{
@@ -288,12 +328,14 @@ diff -ruN a/src/basic/parse-printf-format.c b/src/basic/parse-printf-format.c
 +
 +        return last;
 +}
-+
-+#endif // HAVE_PRINTF_H
-diff -ruN a/src/basic/parse-printf-format.h b/src/basic/parse-printf-format.h
---- a/src/basic/parse-printf-format.h
+diff --git a/src/basic/parse-printf-format.h b/src/basic/parse-printf-format.h
+new file mode 100644
+index 0000000000..47be7522d7
+--- /dev/null
 +++ b/src/basic/parse-printf-format.h
-@@ -0,0 +1,56 @@
+@@ -0,0 +1,57 @@
++/*-*- Mode: C; c-basic-offset: 8; indent-tabs-mode: nil -*-*/
++
 +/***
 +  This file is part of systemd.
 +
@@ -320,45 +362,73 @@ diff -ruN a/src/basic/parse-printf-format.h b/src/basic/parse-printf-format.h
 +
 +#include "config.h"
 +
-+#if HAVE_PRINTF_H == 1
++#if HAVE_PRINTF_H
 +#include <printf.h>
-+#else // 0
++#else
 +
 +#include <stddef.h>
 +
-+enum {        /* C type: */
-+  PA_INT,     /* int */
-+  PA_CHAR,    /* int, cast to char */
-+  PA_WCHAR,   /* wide char */
-+  PA_STRING,  /* const char *, a '\0'-terminated string */
-+  PA_WSTRING, /* const wchar_t *, wide character string */
-+  PA_POINTER, /* void * */
-+  PA_FLOAT,   /* float */
-+  PA_DOUBLE,  /* double */
++enum {				/* C type: */
++  PA_INT,			/* int */
++  PA_CHAR,			/* int, cast to char */
++  PA_WCHAR,			/* wide char */
++  PA_STRING,			/* const char *, a '\0'-terminated string */
++  PA_WSTRING,			/* const wchar_t *, wide character string */
++  PA_POINTER,			/* void * */
++  PA_FLOAT,			/* float */
++  PA_DOUBLE,			/* double */
 +  PA_LAST
 +};
 +
 +/* Flag bits that can be set in a type returned by `parse_printf_format'.  */
-+#define PA_FLAG_MASK        0xff00
-+#define PA_FLAG_LONG_LONG   (1 << 8)
-+#define PA_FLAG_LONG_DOUBLE PA_FLAG_LONG_LONG
-+#define PA_FLAG_LONG        (1 << 9)
-+#define PA_FLAG_SHORT       (1 << 10)
-+#define PA_FLAG_PTR         (1 << 11)
++#define	PA_FLAG_MASK		0xff00
++#define	PA_FLAG_LONG_LONG	(1 << 8)
++#define	PA_FLAG_LONG_DOUBLE	PA_FLAG_LONG_LONG
++#define	PA_FLAG_LONG		(1 << 9)
++#define	PA_FLAG_SHORT		(1 << 10)
++#define	PA_FLAG_PTR		(1 << 11)
 +
 +size_t parse_printf_format(const char *fmt, size_t n, int *types);
 +
 +#endif /* HAVE_PRINTF_H */
-+
-diff -ruN a/src/basic/stdio-util.h b/src/basic/stdio-util.h
+diff --git a/src/basic/stdio-util.h b/src/basic/stdio-util.h
+index 0a2239d022..43a765dacd 100644
 --- a/src/basic/stdio-util.h
 +++ b/src/basic/stdio-util.h
-@@ -1,7 +1,7 @@
+@@ -1,12 +1,12 @@
  /* SPDX-License-Identifier: LGPL-2.1-or-later */
  #pragma once
  
 -#include <printf.h>
-+#include "parse-printf-format.h" /* musl has no <printf.h>: the fallback, from elogind */
  #include <stdarg.h>
  #include <stdio.h>
  #include <sys/types.h>
+ 
+ #include "macro.h"
++#include "parse-printf-format.h"
+ 
+ _printf_(3, 4)
+ static inline char* snprintf_ok(char *buf, size_t len, const char *format, ...) {
+diff --git a/src/libsystemd/sd-journal/journal-send.c b/src/libsystemd/sd-journal/journal-send.c
+index 7d02b57d7b..75e8e08add 100644
+--- a/src/libsystemd/sd-journal/journal-send.c
++++ b/src/libsystemd/sd-journal/journal-send.c
+@@ -2,7 +2,6 @@
+ 
+ #include <errno.h>
+ #include <fcntl.h>
+-#include <printf.h>
+ #include <stddef.h>
+ #include <sys/un.h>
+ #include <unistd.h>
+@@ -28,6 +27,7 @@
+ #include "stdio-util.h"
+ #include "string-util.h"
+ #include "tmpfile-util.h"
++#include "parse-printf-format.h"
+ 
+ #define SNDBUF_SIZE (8*1024*1024)
+ 
+-- 
+2.45.1
+

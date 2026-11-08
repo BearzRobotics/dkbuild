@@ -6,7 +6,7 @@ summary = "Graphics and resource utilities for the Hypr* ecosystem"
 license = "BSD-3-Clause"
 homepage = "https://github.com/hyprwm/hyprgraphics"
 hostdeps = ["cmake", "ninja", "pkgconf"]
-builddeps = ["hyprutils-devel", "cairo-devel", "pango-devel", "pixman-devel", "libdrm-devel", "libjpeg-turbo-devel", "libwebp-devel", "file-devel", "libpng-devel", "mesa-devel"]
+builddeps = ["hyprutils-devel", "cairo-devel", "pango-devel", "pixman-devel", "libdrm-devel", "libjpeg-turbo-devel", "libwebp-devel", "file-devel", "librsvg-devel", "libpng-devel", "mesa-devel"]
 options = ["!check"]
 
 source = [
