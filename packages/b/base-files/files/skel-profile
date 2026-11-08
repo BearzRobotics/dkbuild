@@ -1,3 +1,6 @@
-# ~/.profile: read by login shells.
+# ~/.profile: read by login shells (the console, a desktop session).
 [ -f /etc/profile ] && . /etc/profile
+# Your own programs: ~/.local/bin comes first.
 export PATH="$HOME/.local/bin:$PATH"
+# Interactive shells (also in terminal windows) read ~/.shrc.
+export ENV="$HOME/.shrc"

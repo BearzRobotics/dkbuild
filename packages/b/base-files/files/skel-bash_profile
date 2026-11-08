@@ -1,0 +1,3 @@
+# ~/.bash_profile: bash reads this instead of ~/.profile in a login shell.
+[ -f "$HOME/.profile" ] && . "$HOME/.profile"
+case $- in *i*) [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc" ;; esac

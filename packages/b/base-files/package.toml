@@ -8,7 +8,8 @@
 # r2: rebuilt with the empty directories it installs (dkbuild's splitter dropped them).
 # r3: /etc/skel/.profile, so a new user (useradd -m, the installer) gets a working login shell.
 # r4: the sgx group, which udev rules name (Intel SGX devices).
-# r5: /etc/profile gives dash (the login shell) a working prompt; it showed bash escapes raw.
+# r5: a full /etc/skel (.profile, .shrc, .bashrc, .bash_profile, ~/.local/bin) and /etc/shrc,
+#     so aliases (ls --color=auto) and the prompt work in every interactive shell, dash or bash.
 name = "base-files"
 version = "1"
 release = 5
@@ -34,13 +35,17 @@ ln -s usr/lib "$d/lib64"
 ln -s lib "$d/usr/lib64"
 ln -s ../run "$d/var/run"
 ln -s ../proc/self/mounts "$d/etc/mtab"
-for f in passwd group fstab hosts profile shells protocols services os-release issue; do
+for f in passwd group fstab hosts profile shrc shells protocols services os-release issue; do
     install -m644 "$pkgfiles/$f" "$d/etc/$f"
 done
 install -m600 "$pkgfiles/shadow" "$d/etc/shadow"
 install -m600 "$pkgfiles/gshadow" "$d/etc/gshadow"
 install -m440 "$pkgfiles/sudoers-wheel" "$d/etc/sudoers.d/00-wheel"
-install -Dm644 "$pkgfiles/skel-profile" "$d/etc/skel/.profile"
+for f in profile shrc bashrc bash_profile; do
+    install -Dm644 "$pkgfiles/skel-$f" "$d/etc/skel/.$f"
+done
+# ~/.local/bin is on PATH (~/.profile); it is there from the start.
+mkdir -p "$d/etc/skel/.local/bin"
 mv "$d/etc/os-release" "$d/usr/lib/os-release"
 ln -s ../usr/lib/os-release "$d/etc/os-release"
 '''

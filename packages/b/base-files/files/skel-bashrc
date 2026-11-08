@@ -1,0 +1,6 @@
+# ~/.bashrc: read by interactive bash shells that are not login shells.
+[ -f "$HOME/.shrc" ] && . "$HOME/.shrc"
+HISTCONTROL=ignoredups:erasedups
+HISTSIZE=10000
+HISTFILESIZE=20000
+shopt -s histappend checkwinsize
