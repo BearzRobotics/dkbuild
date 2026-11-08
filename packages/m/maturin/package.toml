@@ -9,6 +9,7 @@ summary = "Build and publish crates with pyo3, cffi and uniffi bindings as Pytho
 license = "MIT OR Apache-2.0"
 homepage = "https://www.maturin.rs"
 hostdeps = ["rust"]
+builddeps = ["xz-devel", "bzip2-devel", "zlib-ng-compat-devel"]
 options = ["!check", "cargodeps"]
 
 source = [
@@ -17,6 +18,9 @@ source = [
 
 environment = '''
 export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+# Link against the system's shared libraries: upstream's musl target is static
+# by default, which needs every library's .a (and rules out dlopen).
+export RUSTFLAGS="-C target-feature=-crt-static"
 '''
 build = '''
 cargo build --release --frozen --offline -j $jobs

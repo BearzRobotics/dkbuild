@@ -40,6 +40,14 @@ build = '''
 '''
 install = '''
 %make_install
+# shadow installs some programs and libraries under /bin, /sbin and /lib
+# whatever configure says (Chimera's template notes it too): into /usr.
+for d in bin sbin lib; do
+    [ -d "$pkgdir/$d" ] || continue
+    mkdir -p "$pkgdir/usr/$d"
+    cp -a "$pkgdir/$d/." "$pkgdir/usr/$d/"
+    rm -rf "$pkgdir/$d"
+done
 install -Dm755 src/sulogin "$pkgdir/usr/sbin/sulogin"
 install -Dm644 $pkgfiles/default.useradd "$pkgdir/etc/default/useradd"
 for f in chage chfn chsh expiry gpasswd newgidmap newuidmap newgrp passwd sg su; do

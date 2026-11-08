@@ -17,6 +17,9 @@ source = [
 
 environment = '''
 export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+# Link against the system's shared libraries: upstream's musl target is static
+# by default, which needs every library's .a (and rules out dlopen).
+export RUSTFLAGS="-C target-feature=-crt-static"
 '''
 build = '''
 cargo build --release --frozen --offline -j $jobs

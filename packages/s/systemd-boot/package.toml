@@ -6,7 +6,9 @@
 # needs its base-kernel tools) writes the boot entries, with the ESP mounted at
 # /boot; the linux package runs it after each kernel install or upgrade.
 # Changed from Chimera: no TPM2, no ukify, no man pages; no-getent.patch skips two
-# meson checks that only print warnings and need getent, which musl does not ship.
+# meson checks that only print warnings and need getent, which musl does not ship;
+# musl-printf.patch adds elogind's parse_printf_format(), since musl has no
+# <printf.h> (both are LGPL-2.1-or-later).
 name = "systemd-boot"
 version = "256.11"
 release = 1
@@ -14,7 +16,7 @@ summary = "UEFI boot manager"
 license = "LGPL-2.1-or-later"
 homepage = "https://github.com/systemd/systemd"
 archs = ["x86_64"]
-patches = ["no-getent.patch"]
+patches = ["no-getent.patch", "musl-printf.patch"]
 hostdeps = ["bash", "gperf", "meson", "perl", "pkgconf", "python-jinja2", "python-pyelftools"]
 builddeps = ["acl-devel", "kmod-devel", "libcap-devel", "linux-headers", "openssl-devel", "util-linux-devel"]
 rundeps = ["util-linux"]
@@ -24,6 +26,9 @@ source = [
     { url = "https://github.com/systemd/systemd/archive/refs/tags/v256.11.tar.gz", sha256 = "5038424744b2ed8c1d7ecc75b00eeffe68528f9789411da60f199d65762d9ba5" },
 ]
 
+environment = '''
+export CFLAGS="${CFLAGS} -DHAVE_PRINTF_H=0"
+'''
 setup = '''
 %meson \
     -Dmode=release -Dtime-epoch=0 \
