@@ -19,5 +19,5 @@ output   = ["tar"]
 
 [[users]]
 name     = "dakota"
-groups   = ["wheel", "video", "render", "audio", "input"]
+groups   = ["wheel", "video", "render", "audio", "input", "dialout"]
 password = "locked"

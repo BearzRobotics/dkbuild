@@ -1,0 +1,37 @@
+# Arduino's command-line tool: compile and upload sketches, manage boards,
+# cores and libraries. Go; modules vendored on the host (`godeps`). Version
+# flags as upstream's Taskfile sets them (no commit or date: the build is
+# from the release tarball, and reproducible).
+# The board toolchains it downloads at run time (avr-gcc, avrdude, esptool...)
+# are glibc builds from Arduino's servers: gcompat lets them run on musl.
+# UNVERIFIED until a core is installed and a sketch uploaded on FenrirOS.
+# Uploading to a board needs access to its serial port (the dialout group).
+name = "arduino-cli"
+version = "1.5.1"
+release = 1
+summary = "Arduino command-line tool: build and upload sketches, manage boards and libraries"
+license = "GPL-3.0-only"
+homepage = "https://arduino.github.io/arduino-cli"
+hostdeps = ["go"]
+rundeps = ["gcompat"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/arduino/arduino-cli/archive/refs/tags/v1.5.1.tar.gz", sha256 = "262fbe874f62677d01eb15593144ca82bd6e7c2d0c00f82aa93949ab12924de6" },
+]
+
+environment = '''
+export GOFLAGS="-mod=vendor -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+go build -o arduino-cli -ldflags "-X github.com/arduino/arduino-cli/internal/version.versionString=1.5.1"
+for sh in bash fish zsh; do ./arduino-cli completion $sh > arduino-cli.$sh; done
+'''
+install = '''
+install -Dm755 arduino-cli "$pkgdir/usr/bin/arduino-cli"
+install -Dm644 arduino-cli.bash "$pkgdir/usr/share/bash-completion/completions/arduino-cli"
+install -Dm644 arduino-cli.fish "$pkgdir/usr/share/fish/vendor_completions.d/arduino-cli.fish"
+install -Dm644 arduino-cli.zsh "$pkgdir/usr/share/zsh/site-functions/_arduino-cli"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/arduino-cli/LICENSE.txt"
+'''
