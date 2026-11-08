@@ -1,0 +1,33 @@
+# FenrirOS: its Python debugging tools (libwacom-show-stylus) need python-libevdev and python-pyudev, not in the tree yet.
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libwacom/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libwacom"
+version = "2.20.0"
+release = 1
+summary = "Library to handle Wacom tablets"
+license = "MIT"
+homepage = "https://github.com/linuxwacom/libwacom"
+patches = ["update-no-sudo.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["glib-devel", "libevdev-devel", "libgudev-devel", "libxml2-devel"]
+checkdeps = ["bash"]
+rundeps = []
+
+source = [
+    { url = "https://github.com/linuxwacom/libwacom/releases/download/libwacom-2.20.0/libwacom-2.20.0.tar.xz", sha256 = "370b45b5e05a91960df0aeb9c9481ae05846aab92ab2d4ec66945a0da4216888" },
+]
+
+setup = '''
+%meson \
+    -Ddocumentation=disabled \
+    -Dtests=enabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libwacom/COPYING"
+'''

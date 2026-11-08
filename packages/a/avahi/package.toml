@@ -13,7 +13,7 @@ license = "LGPL-2.1-or-later"
 homepage = "https://avahi.org"
 patches = ["libevent.patch"]
 hostdeps = ["automake", "gettext-devel", "glib-devel", "libtool", "pkgconf"]
-builddeps = ["dbus-devel", "expat-devel", "glib-devel", "libcap-devel", "libdaemon-devel", "libevent-devel"]
+builddeps = ["dbus-devel", "libexpat-devel", "glib-devel", "libcap-devel", "libdaemon-devel", "libevent-devel"]
 rundeps = ["dbus"]
 options = ["!check"]
 
