@@ -9,7 +9,7 @@ summary = "Open source Linux disk encryption setup"
 license = "GPL-2.0-or-later"
 homepage = "https://gitlab.com/cryptsetup/cryptsetup"
 hostdeps = ["automake", "bash", "gettext-devel", "libtool", "pkgconf"]
-builddeps = ["json-c-devel", "json-c-static", "libatomic-chimera-devel", "libatomic-chimera-devel-static", "libunwind-devel", "libunwind-devel-static", "linux-headers", "lvm2-devel", "lvm2-static", "musl-devel", "musl-static", "openssl-devel", "openssl-static", "popt-devel", "popt-static", "eudev-devel", "eudev-static", "util-linux-devel", "util-linux-static"]
+builddeps = ["json-c-devel", "libatomic-chimera-devel", "linux-headers", "lvm2-devel", "musl-devel", "openssl-devel", "popt-devel", "eudev-devel", "util-linux-devel"]
 checkdeps = ["procps", "xz"]
 
 source = [
