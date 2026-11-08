@@ -1,0 +1,22 @@
+# After Chimera Linux cports: main/giflib. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: leptonica.
+name = "giflib"
+version = "5.2.2"
+release = 1
+summary = "Library to read and write GIF images"
+license = "MIT"
+homepage = "https://sourceforge.net/projects/giflib"
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/giflib/giflib-5.2.2.tar.gz", sha256 = "be7ffbd057cadebe2aa144542fd90c6838c6a083b5e8a9048b8ee3b66b29d5fb" },
+]
+
+build = '''
+# The manual pages need xmlto; the library and tools do not.
+make CC="$CC" CFLAGS="$CFLAGS -fPIC" LDFLAGS="$LDFLAGS" -j$jobs libgif.so libgif.a libutil.so libutil.a gif2rgb gifbuild gifclrmp giffix giftext giftool
+'''
+install = '''
+make PREFIX=/usr DESTDIR="$pkgdir" install-bin install-include install-lib
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/giflib/COPYING"
+'''

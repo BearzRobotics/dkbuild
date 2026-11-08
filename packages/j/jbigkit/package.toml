@@ -1,0 +1,28 @@
+# After Chimera Linux cports: main/jbigkit. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# JBIG1 bi-level image compression (Void's shared-library build of it).
+# needed by: libtiff.
+name = "jbigkit"
+version = "2.2"
+release = 1
+summary = "JBIG1 data compression standard implementation"
+license = "GPL-2.0-only"
+homepage = "https://www.cl.cam.ac.uk/~mgk25/jbigkit"
+hostdeps = ["pkgconf", "automake", "libtool"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/void-linux/jbigkit-shared/archive/v2.2.tar.gz", sha256 = "5cccbfb3bd7daf224a244ce0578dbcf706e4f39962426ceede873262b29b9931" },
+]
+
+setup = '''
+autoreconf -if
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 jbigkit.pc "$pkgdir/usr/lib/pkgconfig/jbigkit.pc"
+install -Dm644 jbigkit85.pc "$pkgdir/usr/lib/pkgconfig/jbigkit85.pc"
+'''

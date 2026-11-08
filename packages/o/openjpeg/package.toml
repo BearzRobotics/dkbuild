@@ -1,0 +1,29 @@
+# After Chimera Linux cports: main/openjpeg. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# JPEG 2000. needed by: leptonica (and later poppler, GIMP, FFmpeg).
+name = "openjpeg"
+version = "2.5.4"
+release = 1
+summary = "JPEG 2000 codec library and tools"
+license = "BSD-2-Clause"
+homepage = "https://www.openjpeg.org"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["lcms2-devel", "libpng-devel", "libtiff-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/uclouvain/openjpeg/archive/v2.5.4.tar.gz", sha256 = "a695fbe19c0165f295a8531b1e4e855cd94d0875d2f88ec4b61080677e27188a" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DBUILD_STATIC_LIBS=ON \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/openjpeg/LICENSE"
+'''

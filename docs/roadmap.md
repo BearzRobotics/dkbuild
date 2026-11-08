@@ -108,6 +108,8 @@ Everything asked for, in the order it can be built. All of it native: Flatpak
 | Package | Status / what it waits for |
 |---|---|
 | zsh, fish, nushell, vim (+ `/etc/vimrc`), bash-completion, sox (sox-ng), transmission (daemon, CLI, GTK) | recipes written; building after the static wave. transmission-qt waits for Qt 6. fish's manual waits for Sphinx. |
+| tesseract (OCR) + tesseract-data (one package per language), leptonica, icu, libarchive, libtiff, giflib, openjpeg, jbigkit | recipes written; building after the static wave |
+| OCRmyPDF | adds a searchable text layer to scanned PDFs with tesseract: Python (pikepdf on qpdf, pdfminer.six, img2pdf, pillow), Ghostscript; jbig2enc, pngquant and unpaper for smaller, cleaner output |
 | iwd, nginx, caddy, wget2 | small; next |
 | **npm/yarn dependency store** | infrastructure, before anything below that uses Node: one shared store for node modules, a list per package, like the Go/Rust/Zig stores (SPEC.md 7.4) |
 | nodejs, cbindgen | then Firefox |

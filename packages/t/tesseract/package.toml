@@ -1,0 +1,38 @@
+# After Chimera Linux cports: main/tesseract. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Tesseract, the OCR engine: `tesseract image.png out` writes out.txt (or
+# hOCR, PDF with a text layer, TSV). Installs English and orientation/script
+# detection data; other languages are tesseract-data-<code>, all of them
+# tesseract-data. The training tools are tesseract-training. No manual
+# pages: they need asciidoc, which is not in the tree yet.
+name = "tesseract"
+version = "5.5.2"
+release = 1
+summary = "OCR engine"
+license = "Apache-2.0"
+homepage = "https://tesseract-ocr.github.io"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["cairo-devel", "curl-devel", "icu-devel", "leptonica-devel", "libarchive-devel", "pango-devel"]
+rundeps = ["tesseract-data-eng", "tesseract-data-osd"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/tesseract-ocr/tesseract/archive/refs/tags/5.5.2.tar.gz", sha256 = "6235ea0dae45ea137f59c09320406f5888383741924d98855bd2ce0d16b54f21" },
+]
+
+setup = '''
+./autogen.sh
+%configure --disable-doc
+'''
+build = '''
+%make
+%make training
+'''
+install = '''
+%make_install
+make DESTDIR="$pkgdir" training-install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/tesseract/LICENSE"
+'''
+
+[subpackages.training]
+summary = "OCR engine (training tools)"
+paths   = ["/usr/bin/ambiguous_words", "/usr/bin/classifier_tester", "/usr/bin/cntraining", "/usr/bin/combine_lang_model", "/usr/bin/combine_tessdata", "/usr/bin/dawg2wordlist", "/usr/bin/lstmeval", "/usr/bin/lstmtraining", "/usr/bin/merge_unicharsets", "/usr/bin/mftraining", "/usr/bin/set_unicharset_properties", "/usr/bin/shapeclustering", "/usr/bin/text2image", "/usr/bin/unicharset_extractor", "/usr/bin/wordlist2dawg"]

@@ -1,0 +1,36 @@
+# After Chimera Linux cports: main/libarchive. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Reading and writing tar, cpio, zip, 7z, xar, ISO 9660 and more, with bsdtar
+# and bsdcpio. needed by: tesseract, mesa (and later many others).
+name = "libarchive"
+version = "3.8.10"
+release = 1
+summary = "Library to read and write many archive formats"
+license = "BSD-2-Clause"
+homepage = "https://www.libarchive.org"
+hostdeps = ["pkgconf"]
+builddeps = ["acl-devel", "bzip2-devel", "libxml2-devel", "lz4-devel", "openssl-devel", "xz-devel", "zlib-ng-compat-devel", "zstd-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/libarchive/libarchive/releases/download/v3.8.10/libarchive-3.8.10.tar.gz", sha256 = "a1bffbe5152cfe869751179e7b16648c87c461cb8c46eee75062efbe164cc57c" },
+]
+
+setup = '''
+%configure \
+    --enable-acl \
+    --enable-xattr \
+    --with-lz4 \
+    --with-zstd \
+    --with-openssl \
+    --with-xml2 \
+    --without-expat \
+    --without-nettle \
+    --disable-rpath
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libarchive/COPYING"
+'''

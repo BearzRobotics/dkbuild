@@ -1,0 +1,30 @@
+# After Chimera Linux cports: main/leptonica. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Image processing library. needed by: tesseract.
+name = "leptonica"
+version = "1.85.0"
+release = 1
+summary = "Image processing and analysis library"
+license = "BSD-2-Clause"
+homepage = "http://www.leptonica.org"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["giflib-devel", "libjpeg-turbo-devel", "libpng-devel", "libtiff-devel", "libwebp-devel", "openjpeg-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/DanBloomberg/leptonica/archive/refs/tags/1.85.0.tar.gz", sha256 = "c01376bce0379d4ea4bc2ec5d5cbddaa49e2f06f88242619ab8c059e21adf233" },
+]
+
+setup = '''
+%cmake -DBUILD_SHARED_LIBS=ON
+# CMake builds one kind of library per configure: a second build makes the static one.
+cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+install = '''
+DESTDIR=$pkgdir cmake --install build-static
+%cmake_install
+install -Dm644 leptonica-license.txt "$pkgdir/usr/share/licenses/leptonica/leptonica-license.txt"
+'''
