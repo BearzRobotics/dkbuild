@@ -1,0 +1,20 @@
+# Font tools (fontTools, ttx). needed by: python-fpdf2.
+name = "python-fonttools"
+version = "4.68.0"
+release = 1
+summary = "fonttools for Python"
+license = "MIT"
+homepage = "https://pypi.org/project/fonttools"
+hostdeps = ["python", "python-setuptools"]
+builddeps = ["python-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/0c/b5/672312ae80ce8b8eb9779c56052a24c8f36652aa7293a1a420553bcf03e5/fonttools-4.68.0.tar.gz", sha256 = "73294e233070f71e2b3653b6bd8564af676d57f26d075761fb06d1ab2e4a7a5d" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

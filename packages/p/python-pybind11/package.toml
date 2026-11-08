@@ -1,0 +1,20 @@
+# C++/Python bindings. needed by: python-pillow.
+name = "python-pybind11"
+version = "3.1.0"
+release = 1
+summary = "pybind11 for Python"
+license = "BSD-3-Clause"
+homepage = "https://pypi.org/project/pybind11"
+hostdeps = ["python", "python-scikit-build-core", "cmake", "ninja"]
+builddeps = ["python-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/76/f3/95b0f40b31df41dbfe6bb0857419c9442c15839cbac4796f1c26ae0b6081/pybind11-3.1.0.tar.gz", sha256 = "a1cc06b524ab3edca51f8ad3895f9c4fa20b8b19283173dff4ae781449dc9639" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

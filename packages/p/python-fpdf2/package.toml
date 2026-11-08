@@ -1,0 +1,20 @@
+# PDF generation. needed by: ocrmypdf (it draws the invisible text layer).
+name = "python-fpdf2"
+version = "2.9.0"
+release = 1
+summary = "fpdf2 for Python"
+license = "LGPL-3.0-only"
+homepage = "https://pypi.org/project/fpdf2"
+hostdeps = ["python", "python-setuptools", "python-fonttools"]
+builddeps = ["python-devel"]
+rundeps = ["python", "python-pillow", "python-fonttools", "python-defusedxml"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/ec/be/440da8ede1cf7aaff73be5c5a6d0dc6f2938df6604ffbc313f9c6dc63f55/fpdf2-2.9.0.tar.gz", sha256 = "af2e7e06a5a2f9e32e24b146b56f58166142dfff45f55370ab03bfac9c8e3e21" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

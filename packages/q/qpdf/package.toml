@@ -1,0 +1,32 @@
+# After Chimera Linux cports: main/qpdf. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# PDF transformation: the qpdf command and the C++ library. needed by:
+# python-pikepdf (OCRmyPDF).
+name = "qpdf"
+version = "12.4.2"
+release = 1
+summary = "Command-line tool and C++ library for PDF files"
+license = "Apache-2.0"
+homepage = "https://qpdf.sourceforge.io"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["libjpeg-turbo-devel", "openssl-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/qpdf/qpdf/releases/download/v12.4.2/qpdf-12.4.2.tar.gz", sha256 = "8a58af5b6141319287c1883bec8bd1bd545b7567b7fc5e6ce5d25a1c85f36397" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DBUILD_STATIC_LIBS=ON \
+    -DBUILD_DOC=OFF \
+    -DINSTALL_EXAMPLES=OFF \
+    -DREQUIRE_CRYPTO_OPENSSL=ON \
+    -DUSE_IMPLICIT_CRYPTO=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

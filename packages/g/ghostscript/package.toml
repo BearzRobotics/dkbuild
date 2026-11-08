@@ -1,0 +1,48 @@
+# After Chimera Linux cports: main/ghostscript. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Ghostscript: PostScript and PDF interpreter (gs), and libgs. With the
+# system's libraries in place of its bundled copies (removed before
+# configure). Its own Tesseract and Leptonica copies stay: they give it its
+# OCR output devices (pdfocr8 ...) and cannot be the system's.
+# Not built yet: CUPS printing (no CUPS in the tree yet; ghostscript r2 with
+# it, along with ijs and libpaper) and X11 output (the desktop is Wayland).
+name = "ghostscript"
+version = "10.08.0"
+release = 1
+summary = "PostScript and PDF language interpreter"
+license = "AGPL-3.0-or-later"
+homepage = "https://www.ghostscript.com"
+patches = ["allow-fopen.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["dbus-devel", "fontconfig-devel", "freetype-devel", "jbig2dec-devel", "lcms2-devel", "libidn2-devel", "libjpeg-turbo-devel", "libpng-devel", "libtiff-devel", "openjpeg-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10080/ghostscript-10.08.0.tar.xz", sha256 = "c20492bc8ebb96c87fa2e52a0926e1cda8cde95d66145e018ac713fed5da38cf" },
+]
+
+setup = '''
+rm -rf cups/libs freetype ijs jbig2dec jpeg lcms2mt libpng openjpeg tiff zlib
+CCAUX="$CC" CFLAGSAUX="$CFLAGS" LDFLAGS="$CFLAGS $LDFLAGS" \
+./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
+    --disable-dynamic \
+    --disable-cups \
+    --without-ijs \
+    --without-libpaper \
+    --without-x \
+    --enable-fontconfig \
+    --enable-freetype \
+    --enable-openjpeg \
+    --disable-compile-inits \
+    --with-system-libtiff \
+    --with-jbig2dec \
+    --with-libidn \
+    --with-drivers=ALL \
+    --with-fontpath=/usr/share/fonts/Type1:/usr/share/fonts
+'''
+build = '''
+make -j$jobs all so
+'''
+install = '''
+make DESTDIR="$pkgdir" install install-so
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ghostscript/LICENSE"
+'''

@@ -1,0 +1,20 @@
+# Rich text and progress bars in the terminal. needed by: ocrmypdf.
+name = "python-rich"
+version = "15.0.0"
+release = 1
+summary = "rich for Python"
+license = "MIT"
+homepage = "https://pypi.org/project/rich"
+hostdeps = ["python", "python-poetry-core"]
+builddeps = ["python-devel"]
+rundeps = ["python", "python-markdown-it-py", "python-pygments"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/c0/8f/0722ca900cc807c13a6a0c696dacf35430f72e0ec571c4275d2371fca3e9/rich-15.0.0.tar.gz", sha256 = "edd07a4824c6b40189fb7ac9bc4c52536e9780fbbfbddf6f1e2502c31b068c36" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

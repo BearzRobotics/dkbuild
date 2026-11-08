@@ -1,0 +1,27 @@
+# Cryptographic recipes and primitives (Rust and OpenSSL; crates vendored on the host). needed by: python-pdfminer-six.
+name = "python-cryptography"
+version = "50.0.2"
+release = 1
+summary = "cryptography for Python"
+license = "Apache-2.0 OR BSD-3-Clause"
+homepage = "https://pypi.org/project/cryptography"
+hostdeps = ["python", "rust", "maturin", "python-cffi", "python-setuptools", "pkgconf"]
+builddeps = ["python-devel", "openssl-devel"]
+rundeps = ["python", "python-cffi"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/9d/af/182eb91b0df3fe75c4d9f26fe70684569566745f6ba7e5c9c73a862c5252/cryptography-50.0.2.tar.gz", sha256 = "7b46165bb56eb4704e2eaaf86f3c940d19154535d9b0ca7d6d590b04060e00d5" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export RUSTFLAGS="-C target-feature=-crt-static"
+export OPENSSL_NO_VENDOR=1
+'''
+build = '''
+maturin build --release --frozen --offline -i python3 --compatibility linux --out dist -j $jobs
+'''
+install = '''
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr dist/*.whl
+'''

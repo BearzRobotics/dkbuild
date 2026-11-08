@@ -1,0 +1,20 @@
+# @deprecated decorator. needed by: python-pikepdf.
+name = "python-deprecated"
+version = "3.0.1"
+release = 1
+summary = "deprecated for Python"
+license = "MIT"
+homepage = "https://pypi.org/project/deprecated"
+hostdeps = ["python", "python-hatchling"]
+builddeps = ["python-devel"]
+rundeps = ["python", "python-wrapt"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/61/46/f6958cdfa8a801fc845e981a8a958dba2e74a386b026a8fd5cae58423f1f/deprecated-3.0.1.tar.gz", sha256 = "2f5a9fecc9961e26462846cf1e57f73a612b1d0b79c27dceeed8de647beadcee" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

@@ -1,0 +1,20 @@
+# C parser in Python. needed by: python-cffi.
+name = "python-pycparser"
+version = "3.12"
+release = 1
+summary = "pycparser for Python"
+license = "BSD-3-Clause"
+homepage = "https://pypi.org/project/pycparser"
+hostdeps = ["python", "python-setuptools"]
+builddeps = ["python-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/cb/27/eeb9f307bf07060f3d9f9aa0fb8c15b01bdfded0a941e4b2719c7f94cacd/pycparser-3.12.tar.gz", sha256 = "f03387877eab82ce01bbdfd0ba7252ee55a90b1c708d5129e2ce915475cf1db6" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

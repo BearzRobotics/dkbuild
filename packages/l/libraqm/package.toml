@@ -1,0 +1,26 @@
+# Complex text layout (bidirectional text, shaping) on FriBidi and HarfBuzz.
+# needed by: python-pillow (its text drawing for complex scripts).
+name = "libraqm"
+version = "0.11.0"
+release = 1
+summary = "Library for complex text layout"
+license = "MIT"
+homepage = "https://github.com/HOST-Oman/libraqm"
+hostdeps = ["meson", "pkgconf"]
+builddeps = ["freetype-devel", "fribidi-devel", "harfbuzz-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/HOST-Oman/libraqm/releases/download/v0.11.0/raqm-0.11.0.tar.xz", sha256 = "3d0add115f7d4a9410d3377462ed3c05e86342193ef984183e4380e3787b2d4c" },
+]
+
+setup = '''
+%meson -Ddocs=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libraqm/COPYING"
+'''

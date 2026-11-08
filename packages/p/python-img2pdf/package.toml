@@ -1,0 +1,20 @@
+# Lossless images to PDF. needed by: ocrmypdf.
+name = "python-img2pdf"
+version = "0.6.3"
+release = 1
+summary = "img2pdf for Python"
+license = "MIT"
+homepage = "https://pypi.org/project/img2pdf"
+hostdeps = ["python", "python-flit-core"]
+builddeps = ["python-devel"]
+rundeps = ["python", "python-pillow", "python-pikepdf"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/8e/97/ca44c467131b93fda82d2a2f21b738c8bcf63b5259e3b8250e928b8dd52a/img2pdf-0.6.3.tar.gz", sha256 = "219518020f5bd242bdc46493941ea3f756f664c2e86f2454721e74353f58cd95" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

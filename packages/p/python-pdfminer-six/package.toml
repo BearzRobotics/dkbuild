@@ -1,0 +1,20 @@
+# PDF text extraction. needed by: ocrmypdf.
+name = "python-pdfminer-six"
+version = "20260107"
+release = 1
+summary = "pdfminer.six for Python"
+license = "MIT"
+homepage = "https://pypi.org/project/pdfminer.six"
+hostdeps = ["python", "python-setuptools", "python-setuptools-scm"]
+builddeps = ["python-devel"]
+rundeps = ["python", "python-charset-normalizer", "python-cryptography"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/34/a4/5cec1112009f0439a5ca6afa8ace321f0ab2f48da3255b7a1c8953014670/pdfminer_six-20260107.tar.gz", sha256 = "96bfd431e3577a55a0efd25676968ca4ce8fd5b53f14565f85716ff363889602" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

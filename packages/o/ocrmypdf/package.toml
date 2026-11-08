@@ -1,0 +1,24 @@
+# OCRmyPDF: adds a searchable text layer to scanned PDFs with Tesseract
+# (`ocrmypdf scan.pdf out.pdf`; -l deu for German, with tesseract-data-deu).
+# Pages are rendered with Ghostscript: pypdfium2, OCRmyPDF's other renderer,
+# needs PDFium, which is not in the tree yet; OCRmyPDF falls back by itself.
+# unpaper, pngquant and jbig2enc (cleaning and smaller output) come later.
+name = "ocrmypdf"
+version = "17.13.0"
+release = 1
+summary = "Add an OCR text layer to scanned PDF files"
+license = "MPL-2.0"
+homepage = "https://ocrmypdf.readthedocs.io"
+hostdeps = ["python", "python-hatchling"]
+builddeps = ["python-devel"]
+rundeps = ["python", "python-fpdf2", "python-img2pdf", "python-packaging", "python-pdfminer-six", "python-pikepdf", "python-pillow", "python-pluggy", "python-pydantic", "python-rich", "python-uharfbuzz", "tesseract", "ghostscript"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/d9/1b/d35a3c9bb4e4959bd782808f0eb45cce16e66040a292b7f4eaa6a6e44ff1/ocrmypdf-17.13.0.tar.gz", sha256 = "151c35d810eb628fbc5cb9bbe80b834ecf094737efa0e7a2e9e1fac3c730ed49" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

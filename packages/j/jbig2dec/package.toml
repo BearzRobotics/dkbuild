@@ -1,0 +1,28 @@
+# After Chimera Linux cports: main/jbig2dec. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# JBIG2 decoder. needed by: ghostscript.
+name = "jbig2dec"
+version = "0.20"
+release = 1
+summary = "JBIG2 decoder library"
+license = "AGPL-3.0-or-later"
+homepage = "https://www.jbig2dec.com"
+patches = ["separate-configure.patch"]
+hostdeps = ["pkgconf", "automake", "libtool"]
+builddeps = ["libpng-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/ArtifexSoftware/jbig2dec/archive/0.20.tar.gz", sha256 = "a9705369a6633aba532693450ec802c562397e1b824662de809ede92f67aff21" },
+]
+
+setup = '''
+./autogen.sh
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/jbig2dec/COPYING"
+'''

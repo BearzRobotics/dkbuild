@@ -1,0 +1,20 @@
+# URL utilities for markdown-it. needed by: python-markdown-it-py.
+name = "python-mdurl"
+version = "0.1.2"
+release = 1
+summary = "mdurl for Python"
+license = "MIT"
+homepage = "https://pypi.org/project/mdurl"
+hostdeps = ["python", "python-flit-core"]
+builddeps = ["python-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/d6/54/cfe61301667036ec958cb99bd3efefba235e65cdeb9c84d24a8293ba1d90/mdurl-0.1.2.tar.gz", sha256 = "bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

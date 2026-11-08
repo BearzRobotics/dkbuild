@@ -109,7 +109,9 @@ Everything asked for, in the order it can be built. All of it native: Flatpak
 |---|---|
 | zsh, fish, nushell, vim (+ `/etc/vimrc`), bash-completion, sox (sox-ng), transmission (daemon, CLI, GTK) | recipes written; building after the static wave. transmission-qt waits for Qt 6. fish's manual waits for Sphinx. |
 | tesseract (OCR) + tesseract-data (one package per language), leptonica, icu, libarchive, libtiff, giflib, openjpeg, jbigkit | recipes written; building after the static wave |
-| OCRmyPDF | adds a searchable text layer to scanned PDFs with tesseract: Python (pikepdf on qpdf, pdfminer.six, img2pdf, pillow), Ghostscript; jbig2enc, pngquant and unpaper for smaller, cleaner output |
+| ocrmypdf + ghostscript, qpdf, jbig2dec, libxslt, libraqm and 24 Python packages (pikepdf, pillow, lxml, cryptography, uharfbuzz, fpdf2, rich, ...) | recipes written; building after the static wave. Renders pages with Ghostscript |
+| PDFium (for pypdfium2, OCRmyPDF's faster renderer), unpaper, pngquant, jbig2enc | OCRmyPDF extras: PDFium is a Chromium-style build (gn); unpaper needs FFmpeg |
+| CUPS (+ ijs, libpaper), then ghostscript r2 with printing | the printing stack |
 | iwd, nginx, caddy, wget2 | small; next |
 | **npm/yarn dependency store** | infrastructure, before anything below that uses Node: one shared store for node modules, a list per package, like the Go/Rust/Zig stores (SPEC.md 7.4) |
 | nodejs, cbindgen | then Firefox |

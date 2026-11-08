@@ -1,0 +1,20 @@
+# Syntax highlighter. needed by: python-rich.
+name = "python-pygments"
+version = "2.21.0"
+release = 1
+summary = "pygments for Python"
+license = "BSD-2-Clause"
+homepage = "https://pypi.org/project/pygments"
+hostdeps = ["python", "python-hatchling"]
+builddeps = ["python-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/49/2e/ced460408999b33da6b31b0021b0f37d329e202d4169aeb164493778f25b/pygments-2.21.0.tar.gz", sha256 = "610ca751c9bc2492b38eb9a38a7fbc93edbbb2d7182edaf34e66ae493dee5c8c" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

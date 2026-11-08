@@ -1,0 +1,27 @@
+# After Chimera Linux cports: main/libxslt. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# XSLT with EXSLT (its crypto functions through libgcrypt), and xsltproc.
+# needed by: python-lxml (and later documentation tools).
+name = "libxslt"
+version = "1.1.45"
+release = 1
+summary = "XSLT library and xsltproc"
+license = "MIT"
+homepage = "https://gitlab.gnome.org/GNOME/libxslt"
+hostdeps = ["pkgconf"]
+builddeps = ["libgcrypt-devel", "libxml2-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/libxslt/1.1/libxslt-1.1.45.tar.xz", sha256 = "9acfe68419c4d06a45c550321b3212762d92f41465062ca4ea19e632ee5d216e" },
+]
+
+setup = '''
+%configure --without-python --with-crypto
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 Copyright "$pkgdir/usr/share/licenses/libxslt/Copyright"
+'''

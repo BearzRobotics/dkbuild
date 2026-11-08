@@ -1,0 +1,22 @@
+# Pillow, the Python imaging library: JPEG, PNG, TIFF, WebP, JPEG 2000, FreeType text
+# with libraqm layout, LittleCMS colour. Not built yet: AVIF (no libavif in the
+# tree), libimagequant (Rust, not in the tree), XCB screen grabs (Wayland desktop).
+name = "python-pillow"
+version = "13.0.0"
+release = 1
+summary = "pillow for Python"
+license = "MIT-CMU"
+homepage = "https://pypi.org/project/pillow"
+hostdeps = ["python", "python-setuptools", "python-pybind11", "pkgconf"]
+builddeps = ["python-devel", "freetype-devel", "fribidi-devel", "harfbuzz-devel", "lcms2-devel", "libjpeg-turbo-devel", "libraqm-devel", "libtiff-devel", "libwebp-devel", "openjpeg-devel", "zlib-ng-compat-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/ce/a4/9cc30690a394a8305e8be4c9036aa16d0dfddadd09079860b582f562496d/pillow-13.0.0.tar.gz", sha256 = "cdcd1ba258178f7356d74170c9a81ba4eab6a5d55748bc402a5a2a6fe6be3510" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile -C raqm=enable -C fribidi=enable \
+    --root "$pkgdir" --prefix /usr .
+'''

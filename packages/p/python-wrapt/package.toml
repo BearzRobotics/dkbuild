@@ -1,0 +1,20 @@
+# Decorators and wrappers (C extension). needed by: python-deprecated.
+name = "python-wrapt"
+version = "2.5.2"
+release = 1
+summary = "wrapt for Python"
+license = "BSD-2-Clause"
+homepage = "https://pypi.org/project/wrapt"
+hostdeps = ["python", "python-setuptools"]
+builddeps = ["python-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/9c/b0/f752d19e1e83ab8bd64aeccfde32ff086aee3ef08520f7340b69a8d0a4d2/wrapt-2.5.2.tar.gz", sha256 = "551cb49e88b3722faad780303833bc4fa70685fb1773270fb98b40d39d9fddbf" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

@@ -1,0 +1,20 @@
+# Build backend for CMake projects. needed by: python-pikepdf, python-nanobind, python-pybind11.
+name = "python-scikit-build-core"
+version = "1.1.2"
+release = 1
+summary = "scikit-build-core for Python"
+license = "Apache-2.0"
+homepage = "https://pypi.org/project/scikit-build-core"
+hostdeps = ["python", "python-hatchling", "python-hatch-vcs"]
+builddeps = ["python-devel"]
+rundeps = ["python", "python-packaging", "python-pathspec"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/30/8a/a1777e7eef0e91cc182b8a1eea3b88be6520c7b5afaf08232a7d8899c0ae/scikit_build_core-1.1.2.tar.gz", sha256 = "7893709119c5ab1be75cd10442383132c9433b9f104dacef5185949efbea7974" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

@@ -1,0 +1,23 @@
+# HarfBuzz bindings, built against the system's HarfBuzz. needed by: ocrmypdf (text shaping for the text layer).
+name = "python-uharfbuzz"
+version = "0.57.0"
+release = 1
+summary = "uharfbuzz for Python"
+license = "Apache-2.0"
+homepage = "https://pypi.org/project/uharfbuzz"
+hostdeps = ["python", "python-setuptools", "python-setuptools-scm", "python-cython", "python-pkgconfig", "pkgconf"]
+builddeps = ["python-devel", "harfbuzz-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/e6/48/0b293baafb87b5ccfec082f427fb1e81ce4d27098a8b2ac8db6c76e07e65/uharfbuzz-0.57.0.tar.gz", sha256 = "55136df18a9dd09fec36d1ceb77965f3108de6d86c338b3825feedb0730d84b7" },
+]
+
+environment = '''
+export USE_SYSTEM_LIBS=1
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''
