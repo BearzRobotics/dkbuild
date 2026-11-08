@@ -1,15 +1,18 @@
 # Imported from Chimera Linux cports: work/cports/main/curl/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Reviewed by hand; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+# r2: HTTP/2 (nghttp2), international hostnames (libidn2), the Public Suffix
+# List (libpsl) and sftp/scp (libssh2). Not HTTP/3: ngtcp2/nghttp3 need a QUIC
+# TLS stack, a separate decision.
 name = "curl"
 version = "8.23.0"
-release = 1
+release = 2
 summary = "Command line tool for transferring data with URL syntax"
 license = "curl"
 homepage = "https://curl.se"
 patches = ["optimize.patch"]
 hostdeps = ["automake", "pkgconf", "perl", "mandoc", "slibtool"]
-builddeps = ["openssl-devel", "zlib-ng-compat-devel", "zstd-devel"]
+builddeps = ["openssl-devel", "zlib-ng-compat-devel", "zstd-devel", "libpsl-devel", "libidn2-devel", "nghttp2-devel", "libssh2-devel"]
 checkdeps = ["nghttp2-progs", "python"]
 rundeps = ["ca-certificates"]
 
@@ -22,13 +25,13 @@ setup = '''
     --with-ssl \
     --with-zlib \
     --with-zstd \
+    --with-libpsl \
+    --with-libidn2 \
+    --with-nghttp2 \
+    --with-libssh2 \
     --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt \
-    --without-libpsl \
-    --without-libidn2 \
-    --without-nghttp2 \
     --without-nghttp3 \
     --without-ngtcp2 \
-    --without-libssh2 \
     --disable-ldap \
     --disable-ares \
     --enable-ipv6 \

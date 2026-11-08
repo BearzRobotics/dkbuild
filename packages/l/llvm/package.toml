@@ -4,9 +4,13 @@
 # One build, as the DKRescue toolchain post does it: clang and lld first, then
 # the runtimes built by the clang just made, installed together so compiler-rt
 # lands in clang's resource directory. Everything links one shared libLLVM.
+# r2: every backend LLVM has, stable and experimental (ARC, CSKY, DirectX, M68k,
+# Xtensa for the ESP32), not just X86 and AMDGPU: clang cross-compiles for every
+# architecture FenrirOS supports and for microcontrollers (AVR, ARM, RISC-V).
+# Code for AVR must be built without LTO.
 name = "llvm"
 version = "23.1.5"
-release = 1
+release = 2
 summary = "LLVM libraries and tools"
 description = "LLVM with Clang, LLD, compiler-rt, libunwind, libc++abi and libc++ (X86 and AMDGPU targets)."
 license = "Apache-2.0 WITH LLVM-exception"
@@ -36,7 +40,8 @@ cmake -G Ninja -S llvm -B build                                     \
     -DCMAKE_CXX_COMPILER=clang++                                    \
     -DLLVM_HOST_TRIPLE="$target"                                    \
     -DLLVM_DEFAULT_TARGET_TRIPLE="$target"                          \
-    -DLLVM_TARGETS_TO_BUILD="X86;AMDGPU"                            \
+    -DLLVM_TARGETS_TO_BUILD=all \
+    -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD=all \
     -DLLVM_ENABLE_PROJECTS="clang;lld"                              \
     -DLLVM_ENABLE_RUNTIMES="compiler-rt;libunwind;libcxxabi;libcxx" \
     -DLLVM_BUILD_LLVM_DYLIB=ON                                      \
