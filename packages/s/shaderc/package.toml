@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: main/shaderc/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: llama.cpp and ollama: glslc compiles ggml's Vulkan shaders.
+# glslang 16 installs its SPIRV headers under /usr/include/glslang.
+name = "shaderc"
+version = "2026.4"
+release = 1
+summary = "Collection of tools and libraries for shader compilation"
+license = "Apache-2.0"
+homepage = "https://github.com/google/shaderc"
+patches = ["drop-build-versions.patch", "unbundle.patch"]
+hostdeps = ["cmake", "ninja", "python", "pkgconf"]
+builddeps = ["spirv-tools-devel", "spirv-headers-devel", "glslang-devel"]
+
+source = [
+    { url = "https://github.com/google/shaderc/archive/v2026.4.tar.gz", sha256 = "f06ce5bcca94e5df7f34e115743597d0ad2e13c5fe9213c67dc8c76031241947" },
+]
+
+environment = '''
+export CXXFLAGS="${CXXFLAGS} -I/usr/include/glslang"
+'''
+setup = '''
+%cmake \
+    -DSHADERC_SKIP_TESTS=ON \
+    -DSHADERC_SKIP_EXAMPLES=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

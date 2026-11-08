@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: main/spirv-tools/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: glslang, shaderc (glslc compiles llama.cpp's Vulkan shaders).
+# r2: rebuilt with libraries in /usr/lib (the %cmake macro set no libdir; they went to /usr/lib64).
+# r3: no static library: its CMake config then names a .a that sits in
+# spirv-tools-static, which builds against spirv-tools do not install. All its
+# libraries are shared (BUILD_SHARED_LIBS=ON), as Arch builds it.
+name = "spirv-tools"
+version = "1.4.363.0"
+release = 3
+summary = "API and commands for processing SPIR-V modules"
+license = "Apache-2.0"
+homepage = "https://github.com/KhronosGroup/SPIRV-Tools"
+hostdeps = ["cmake", "ninja", "pkgconf", "python"]
+builddeps = ["spirv-headers-devel"]
+
+source = [
+    { url = "https://github.com/KhronosGroup/SPIRV-Tools/archive/vulkan-sdk-1.4.363.0.tar.gz", sha256 = "e6c83a215538fbfd265ccf398d3877985055df1273dbed73912bd05307664688" },
+]
+
+setup = '''
+%cmake \
+    -DSPIRV_WERROR=OFF \
+    -DSPIRV-Headers_SOURCE_DIR=/usr \
+    -DSPIRV_TOOLS_BUILD_STATIC=OFF \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

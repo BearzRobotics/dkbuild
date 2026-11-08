@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: main/glslang/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: shaderc. No tests (gtest is not in the tree).
+# r2: rebuilt with libraries in /usr/lib (the %cmake macro set no libdir; they went to /usr/lib64).
+name = "glslang"
+version = "16.6.0"
+release = 2
+summary = "Khronos reference front-end for GLSL/ESSL + sample SPIR-V generator"
+license = "BSD-3-Clause"
+homepage = "https://github.com/KhronosGroup/glslang"
+hostdeps = ["cmake", "ninja", "python", "bison", "spirv-tools-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/KhronosGroup/glslang/archive/16.6.0.tar.gz", sha256 = "9c09b901149c729df745057dafa815278aaa101b84d2b6e14f16a42de52f97f2" },
+]
+
+environment = '''
+export LDFLAGS="${LDFLAGS} -Wl,-z,stack-size=0x200000"
+'''
+setup = '''
+%cmake \
+    -DALLOW_EXTERNAL_SPIRV_TOOLS=ON \
+    -DBUILD_SHARED_LIBS=ON \
+    -DGLSLANG_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/glslang/LICENSE.txt"
+'''

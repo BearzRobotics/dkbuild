@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: main/pugixml/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: hyprwayland-scanner. No tests.
+# r2: rebuilt with libraries in /usr/lib (the %cmake macro set no libdir; they went to /usr/lib64).
+name = "pugixml"
+version = "1.15"
+release = 2
+summary = "Light-weight, simple and fast XML parser for C++"
+license = "MIT"
+homepage = "https://pugixml.org"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+
+source = [
+    { url = "https://github.com/zeux/pugixml/archive/refs/tags/v1.15.tar.gz", sha256 = "b39647064d9e28297a34278bfb897092bf33b7c487906ddfc094c9e8868bddcb" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DPUGIXML_BUILD_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/pugixml/LICENSE.md"
+'''

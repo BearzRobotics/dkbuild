@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: main/re2/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: hyprland (window rules). No ICU, no tests.
+# r3: rebuilt with libraries in /usr/lib (the %cmake macro set no libdir; they went to /usr/lib64).
+name = "re2"
+version = "2025.11.05"
+release = 3
+summary = "C++ regular expression library"
+license = "BSD-3-Clause"
+homepage = "https://github.com/google/re2"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["abseil-cpp-devel"]
+
+source = [
+    { url = "https://github.com/google/re2/archive/refs/tags/2025-11-05.tar.gz", sha256 = "87f6029d2f6de8aa023654240a03ada90e876ce9a4676e258dd01ea4c26ffd67" },
+]
+
+environment = '''
+export CXXFLAGS="${CXXFLAGS} -DNDEBUG"
+'''
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DRE2_USE_ICU=OFF \
+    -DRE2_BUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/re2/LICENSE"
+'''

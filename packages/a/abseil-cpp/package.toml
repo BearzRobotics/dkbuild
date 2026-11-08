@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: main/abseil-cpp/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: re2. No tests.
+# r2: rebuilt with libraries in /usr/lib (the %cmake macro set no libdir; they went to /usr/lib64).
+name = "abseil-cpp"
+version = "20260526.0"
+release = 2
+summary = "Abseil C++ libraries"
+license = "Apache-2.0"
+homepage = "https://abseil.io"
+patches = ["any-invocable-test.patch", "drop-lib-gtest-dep.patch", "google-sucks.patch", "test-printf-precision.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["linux-headers"]
+
+source = [
+    { url = "https://github.com/abseil/abseil-cpp/archive/refs/tags/20260526.0.tar.gz", sha256 = "6e1aee535473414164bf83e4ebc40240dec71a4701f8a642d906e95bea1aea0c" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_CXX_STANDARD=17 \
+    -DBUILD_SHARED_LIBS=ON \
+    -DABSL_PROPAGATE_CXX_STD=ON \
+    -DABSL_USE_EXTERNAL_GOOGLETEST=OFF \
+    -DABSL_BUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

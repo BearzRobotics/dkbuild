@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/vulkan-headers/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: vulkan-loader, mesa (Vulkan drivers), llama.cpp and ollama (GPU).
+name = "vulkan-headers"
+version = "1.4.365"
+release = 1
+summary = "Vulkan header files"
+license = "Apache-2.0"
+homepage = "https://www.khronos.org/vulkan"
+hostdeps = ["cmake", "ninja"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/KhronosGroup/Vulkan-Headers/archive/v1.4.365.tar.gz", sha256 = "ed832b3292cce324ebba6522fd2d3004bf1b797fa49bfbcad0b302ff23d56abc" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

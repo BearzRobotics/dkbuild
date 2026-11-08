@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: main/vulkan-loader/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: llama.cpp and ollama (GPU), anything using Vulkan.
+# Wayland only: no XCB or Xlib surface support (the image has no X11).
+# r2: rebuilt with libraries in /usr/lib (the %cmake macro set no libdir; they went to /usr/lib64).
+name = "vulkan-loader"
+version = "1.4.365"
+release = 2
+summary = "Vulkan Installable Client Driver (ICD) loader"
+license = "Apache-2.0"
+homepage = "https://www.khronos.org/vulkan"
+hostdeps = ["cmake", "ninja", "pkgconf", "python"]
+builddeps = ["libxkbcommon-devel", "vulkan-headers-devel", "wayland-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/KhronosGroup/Vulkan-Loader/archive/v1.4.365.tar.gz", sha256 = "df0358f57c1936e4abd262a7327ba1f80ffb424dbbdcbcb01bb9288511f31eef" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_TESTS=OFF \
+    -DBUILD_WSI_XCB_SUPPORT=OFF \
+    -DBUILD_WSI_XLIB_SUPPORT=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''
