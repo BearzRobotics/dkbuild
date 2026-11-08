@@ -102,33 +102,30 @@ pkg`, and it can go in an image.
 
 ## Requested applications (2026-11-08)
 
-Everything asked for, in the order it can be built. All of it native: Flatpak
-(with Flathub enabled) is there for Steam, not instead of these.
+Everything asked for. All of it native: Flatpak (with Flathub as its default
+remote) is there for Steam, not instead of these. "Written" means the recipe
+exists and passes `dkbuild check`; the builds of 2026-11-08 onwards
+(work/pipeline.sh) show which ones still fail.
 
-| Package | Status / what it waits for |
+| Package | Status |
 |---|---|
-| zsh, fish, nushell, vim (+ `/etc/vimrc`), bash-completion, sox (sox-ng), transmission (daemon, CLI, GTK) | recipes written; building after the static wave. transmission-qt waits for Qt 6. fish's manual waits for Sphinx. |
-| tesseract (OCR) + tesseract-data (one package per language), leptonica, icu, libarchive, libtiff, giflib, openjpeg, jbigkit | recipes written; building after the static wave |
-| ocrmypdf + ghostscript, qpdf, jbig2dec, libxslt, libraqm and 24 Python packages (pikepdf, pillow, lxml, cryptography, uharfbuzz, fpdf2, rich, ...) | recipes written; building after the static wave. Renders pages with Ghostscript |
-| PDFium (for pypdfium2, OCRmyPDF's faster renderer), unpaper, pngquant, jbig2enc | OCRmyPDF extras: PDFium is a Chromium-style build (gn); unpaper needs FFmpeg |
-| printing: cups, cups-filters, libcupsfilters, libppd, ghostscript (with its cups device), avahi, ipp-usb, cups-pk-helper, poppler (+ data), ijs, libpaper, libexif, libdaemon; `printing` installs them all | recipes written; building after the static wave |
-| printer drivers: hplip (with net-snmp, sane-backends, python-dbus, python-gobject on gobject-introspection; glib r5 with introspection), gutenprint, foomatic-db + engine, epson-inkjet-printer-escpr, brlaser, splix, foo2zjs; `printer-drivers` installs them all | recipes written; building after the static wave. Driverless printers need none of them |
-| epson-inkjet-printer-escpr2 (newer Epsons; Epson ships it as a source RPM), libgphoto2 and v4l-utils (sane-backends r2: camera and webcam backends), groff (foo2zjs's manual) | later |
-| iwd, nginx, caddy, wget2 | small; next |
-| **npm/yarn dependency store** | infrastructure, before anything below that uses Node: one shared store for node modules, a list per package, like the Go/Rust/Zig stores (SPEC.md 7.4) |
-| nodejs, cbindgen | then Firefox |
-| Firefox, **Thunderbird** | the same toolchain (Rust, cbindgen, nodejs); Thunderbird builds from the Firefox ESR tree with comm-central |
-| Qt 6 (base, svg, tools, wayland, declarative, multimedia, ...), KF6 core | foundation for most apps below |
-| **Zeal** | Qt 6 and Qt WebEngine (Chromium inside: the largest Qt module) |
-| FFmpeg with codecs (x264, x265, dav1d, svt-av1, libvpx, libass, ...) | foundation for video apps |
-| **HandBrake** | FFmpeg stack, GTK 4; its build downloads its own copies of codecs: vendor them (sources in the recipe) |
-| GIMP, Inkscape, Krita, Kdenlive (+ MLT), OpenShot (+ libopenshot, PyQt6), LibreOffice | apps on the foundations above |
-| xemu, Dolphin (emulator), MAME | SDL2/3, Qt 6 |
-| wine | needs a MinGW cross compiler (LLVM's works) |
-| Code - OSS (Electron from source, Open VSX) + zls, taplo, basedpyright | Electron is a Chromium build; after the npm store |
-| flatpak, Flathub enabled by default | for Steam |
-| aimgr | waits for a release tarball with its Zig dependencies vendored |
-| GRUB2 and GCC cross suites | the GCC opt-in (below) |
+| zsh, fish, nushell, vim (+ `/etc/vimrc`), bash-completion, sox (sox-ng), transmission (daemon, CLI, GTK), net-tools | written. transmission-qt waits for a Qt 6 build of it; fish's manual for Sphinx |
+| tesseract + tesseract-data (one package per language), leptonica, icu, libarchive, ... | written |
+| ocrmypdf (+ Ghostscript, qpdf, 24 Python packages), unpaper, jbig2enc | written. Renders with Ghostscript |
+| printing (CUPS, cups-filters, Avahi, ipp-usb, Poppler, ...) and printer-drivers (hplip, gutenprint, foomatic, escpr, brlaser, splix, foo2zjs), SANE | written |
+| sd-tools (sysusers.d / tmpfiles.d on install and at boot) | written; in base |
+| iwd, nginx, caddy, wget2, nodejs, yarn, cbindgen | written (imported from Chimera; nodejs, c-ares, libuv by hand) |
+| Firefox, Thunderbird | written: no WASI toolchain yet, so the RLBox libraries are not wasm-sandboxed; no JACK |
+| Qt 6 (base, svg, tools, wayland, declarative, multimedia, WebEngine, scxml, ...), the KDE frameworks Krita/Kdenlive need, PyQt6 | written (imported) |
+| FFmpeg and its codecs, GStreamer, SDL 3 (+ sdl2-compat), Mesa r6 (GLX/glvnd, VA-API, Intel, NVK, Rusticl) | written |
+| GIMP (no JS plug-ins or WebKit help), Inkscape, Krita, Kdenlive + MLT (no OpenCV), LibreOffice (English first), Dolphin, Wine (64- and 32-bit), Xwayland | written (imported) |
+| Zeal, HandBrake (contribs as sources; no QSV/VCE/NVENC/fdk-aac), OpenShot (+ libopenshot, -audio), xemu, MAME, zls, taplo, basedpyright | written by hand |
+| flatpak (+ builder), Flathub as the default remote | written |
+| aimgr 0.2.0 | written (from the release's vendored source tarball) |
+| **Code - OSS** | **not started.** It needs Electron built from source: a full Chromium build (gclient, its own toolchain and sysroot, thousands of npm modules). Nobody builds Electron on musl from source today (Alpine, Chimera and Void ship no Electron). Options to decide: the npm store plus an Electron port (weeks of work), VSCodium from Flathub, or an editor without Electron (Zed, Lapce, Kate with clangd/zls) |
+| **npm/yarn dependency store** | not started: needed by basedpyright from TypeScript and anything Electron |
+| PDFium (OCRmyPDF's faster renderer), pngquant + libimagequant (no Cargo.lock to pin crates), epson-inkjet-printer-escpr2 (a source RPM), libgphoto2/v4l in SANE, groff | later |
+| **GCC (opt-in), GRUB, binutils, cross suites (arm-none-eabi, aarch64-none-elf, riscv64-unknown-elf, avr)** | not started; a design task. Chimera's gcc builds on libgcc-chimera (compiler-rt) and libc++ headers; here rust's package already provides `libgcc_s`, so GCC's own runtime would conflict. Chimera's bare-metal gcc has no C library: newlib (and avr-libc) are to be added. GRUB is the first user (`options = ["gcc"]`) |
 
 ## Image definitions
 
