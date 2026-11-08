@@ -220,11 +220,11 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
                 \\    append = "root=live:LABEL={1s} console=tty0 console=ttyS0,115200"
                 \\    initrd = /boot/initrd.img
                 \\EOF
-                \\xorriso -as mkisofs -R -V {1s} -o /out/{0s}.iso \\
-                \\    --grub2-mbr "$img/mbr.bin" \\
-                \\    -b boot/dklilo/eltorito.bin -no-emul-boot -boot-load-size 4 -boot-info-table \\
-                \\    -eltorito-alt-boot -e boot/dklilo/efiboot.img -no-emul-boot \\
-                \\    -append_partition 2 0xEF "$img/efiboot.img" -appended_part_as_gpt \\
+                \\xorriso -as mkisofs -R -V {1s} -o /out/{0s}.iso \
+                \\    --grub2-mbr "$img/mbr.bin" \
+                \\    -b boot/dklilo/eltorito.bin -no-emul-boot -boot-load-size 4 -boot-info-table \
+                \\    -eltorito-alt-boot -e boot/dklilo/efiboot.img -no-emul-boot \
+                \\    -append_partition 2 0xEF "$img/efiboot.img" -appended_part_as_gpt \
                 \\    "$t"
                 \\dklilo isohybrid /out/{0s}.iso
                 \\rm -rf "$t" "$img"

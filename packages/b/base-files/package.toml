@@ -5,9 +5,10 @@
 # System users for the tree's daemons are here, not in install scripts:
 # dbus (the bus daemon runs as dbus, -Ddbus_user=dbus), sshd (openssh), dhcpcd. polkit adds polkitd itself.
 # Every account starts locked; an image sets passwords.
+# r2: rebuilt with the empty directories it installs (dkbuild's splitter dropped them).
 name = "base-files"
 version = "1"
-release = 1
+release = 2
 summary = "FenrirOS base directory layout and configuration files"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"

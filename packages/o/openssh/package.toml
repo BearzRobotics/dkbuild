@@ -2,9 +2,10 @@
 # services (files/sshd, files/sshd-keys) are, so they are used as they are.
 #
 # Built without PAM, Kerberos, FIDO and LDNS, none of which the system has.
+# r2: rebuilt with the empty directories it installs (dkbuild's splitter dropped them).
 name = "openssh"
 version = "10.6_p2"
-release = 1
+release = 2
 summary = "OpenSSH client and server"
 license = "SSH-OpenSSH"
 homepage = "https://www.openssh.com"

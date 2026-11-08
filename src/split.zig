@@ -142,6 +142,10 @@ pub fn run(arena: Allocator, io: std.Io, destdir: []const u8, out: []const u8, s
         }
     }
 
+    // Directories that held a file moved out (and their parents): only these
+    // may be removed afterwards. A directory a package installs empty on
+    // purpose (/sys and /tmp in base-files, /var/empty for sshd) stays.
+    var emptied = std.StringHashMap(void).init(arena);
     const counts = try arena.alloc(usize, subs.len);
     @memset(counts, 0);
     const split_libs = hasPrograms(files.items);
@@ -152,15 +156,17 @@ pub fn run(arena: Allocator, io: std.Io, destdir: []const u8, out: []const u8, s
         if (std.fs.path.dirname(dest)) |parent| try Dir.cwd().createDirPath(io, parent);
         try d.rename(f, Dir.cwd(), dest, io);
         counts[idx] += 1;
+        var parent = std.fs.path.dirname(f);
+        while (parent) |p| : (parent = std.fs.path.dirname(p)) try emptied.put(p, {});
     }
 
-    // Remove directories the moves emptied, deepest first.
+    // Remove the directories the moves emptied, deepest first.
     std.mem.sort([]const u8, dirs.items, {}, struct {
         fn longer(_: void, a: []const u8, b: []const u8) bool {
             return a.len > b.len;
         }
     }.longer);
-    for (dirs.items) |dn| d.deleteDir(io, dn) catch {};
+    for (dirs.items) |dn| if (emptied.contains(dn)) d.deleteDir(io, dn) catch {};
 
     var result: std.ArrayList(Moved) = .empty;
     for (subs, counts) |sp, c| {
@@ -217,4 +223,28 @@ test "owner: .so patterns claim symlinks, and real .so files go to libs" {
     try std.testing.expectEqual(@as(?usize, 1), owner(&subs, "usr/lib/libz.so.1", false));
     try std.testing.expect(hasPrograms(&.{ "usr/bin/msgfmt", "usr/lib/x.so.1" }));
     try std.testing.expect(!hasPrograms(&.{ "usr/lib/x.so.1", "usr/include/x.h" }));
+}
+
+test "run removes only the directories moves emptied; empty ones a package made stay" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    try tmp.dir.createDirPath(io, "dest/usr/include");
+    try tmp.dir.writeFile(io, .{ .sub_path = "dest/usr/include/x.h", .data = "int x;" });
+    try tmp.dir.createDirPath(io, "dest/sys");
+    try tmp.dir.createDirPath(io, "dest/var/empty");
+    try tmp.dir.createDirPath(io, "out");
+    const dest = try tmp.dir.realPathFileAlloc(io, "dest", a);
+    const out = try tmp.dir.realPathFileAlloc(io, "out", a);
+    const moved = try run(a, io, dest, out, try merge(a, &.{}));
+    try std.testing.expectEqual(@as(usize, 1), moved.len);
+    try std.testing.expectEqualStrings("devel", moved[0].name);
+    // The header moved to -devel, and the directories it left are gone ...
+    try std.testing.expectError(error.FileNotFound, tmp.dir.access(io, "dest/usr/include", .{}));
+    // ... but the empty directories the package installed on purpose stay.
+    try tmp.dir.access(io, "dest/sys", .{});
+    try tmp.dir.access(io, "dest/var/empty", .{});
 }

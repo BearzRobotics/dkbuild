@@ -3,9 +3,10 @@
 # Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
 # r2: depends on openresolv (Chimera's "resolvconf" is a virtual name, which dkbuild has no provider for).
+# r3: rebuilt with the empty directories it installs (dkbuild's splitter dropped them).
 name = "dhcpcd"
 version = "10.5.2"
-release = 2
+release = 3
 summary = "RFC2131 compliant DHCP client"
 license = "BSD-2-Clause"
 homepage = "https://roy.marples.name/projects/dhcpcd"

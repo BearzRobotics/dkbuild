@@ -6,9 +6,10 @@
 # upstream's. Patches are Chimera's (default shell /bin/sh, no mail spool, two
 # fixes); its login.defs patch and pam.d files are PAM-only and left out.
 # r2: no sulogin: util-linux's is the system one.
+# r3: rebuilt with the empty directories it installs (dkbuild's splitter dropped them).
 name = "shadow"
 version = "4.17.2"
-release = 2
+release = 3
 summary = "Shadow password file utilities"
 license = "BSD-3-Clause"
 homepage = "https://github.com/shadow-maint/shadow"

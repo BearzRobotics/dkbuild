@@ -13,9 +13,10 @@
 #  - Chimera's turnstile.patch is dropped: it tracks sessions through turnstile.
 #  - the polkitd user comes from scripts/pre-install, not sysusers.
 # NOT BUILT YET: needs dbus, glib and duktape in the tree.
+# r2: rebuilt with the empty directories it installs (dkbuild's splitter dropped them).
 name = "polkit"
 version = "128"
-release = 1
+release = 2
 summary = "Toolkit for defining and handling authorizations"
 license = "GPL-2.0-or-later"
 homepage = "https://www.freedesktop.org/wiki/Software/polkit"

@@ -1,8 +1,9 @@
 # Follows the DKRescue post's build of sudo 1.9.17p2.
 # Built without PAM: authentication goes through shadow, not PAM.
+# r2: rebuilt with the empty directories it installs (dkbuild's splitter dropped them).
 name = "sudo"
 version = "1.9.17_p2"
-release = 1
+release = 2
 summary = "Run commands as another user"
 license = "ISC"
 homepage = "https://www.sudo.ws"
