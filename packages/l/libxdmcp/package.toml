@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: main/libxdmcp/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: libxcb.
+name = "libxdmcp"
+version = "1.1.5"
+release = 1
+summary = "X Display Manager Control Protocol library"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "libtool", "pkgconf", "xorg-util-macros-devel"]
+builddeps = ["xorgproto-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/lib/libXdmcp-1.1.5.tar.gz", sha256 = "31a7abc4f129dcf6f27ae912c3eedcb94d25ad2e8f317f69df6eda0bc4e4f2f3" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libxdmcp/COPYING"
+'''

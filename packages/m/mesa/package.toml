@@ -1,17 +1,20 @@
 # Imported from Chimera Linux cports: work/cports/main/mesa/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Driver set, flags and the LLVM 23 patch are the DKRescue desktop post's (no Intel iris yet).
+# r3: Vulkan drivers for llama.cpp and ollama: radv (AMD) and lavapipe (swrast,
+# any CPU). Intel anv needs libclc and SPIRV-LLVM-Translator, not built yet.
 # Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+# No X11 build dependencies (-Dplatforms=wayland, -Dglx=disabled).
 name = "mesa"
 version = "26.2.5"
-release = 2
+release = 3
 summary = "Mesa 3D Graphics Library"
 license = "MIT"
 homepage = "https://www.mesa3d.org"
 patches = ["mesa-26.2.5-llvm23-1.patch"]
-hostdeps = ["bison", "cbindgen", "flex", "glslang-progs", "meson", "pkgconf", "python-mako", "python-ply", "python-pycparser", "python-pyyaml", "wayland-progs", "wayland-protocols"]
-builddeps = ["clang-devel", "elfutils-devel", "libarchive-devel", "libdrm-devel", "libexpat-devel", "libffi8-devel", "libglvnd-devel", "libva-bootstrap", "libx11-devel", "libxcb-devel", "libxdamage-devel", "libxext-devel", "libxfixes-devel", "libxml2-devel", "libxrandr-devel", "libxshmfence-devel", "libxv-devel", "libxxf86vm-devel", "llvm-devel", "lm-sensors-devel", "lua5.4-devel", "ncurses-devel", "wayland-devel", "wayland-protocols", "zlib-ng-compat-devel", "zstd-devel"]
+hostdeps = ["bison", "cbindgen", "flex", "glslang", "meson", "pkgconf", "python-mako", "python-ply", "python-pycparser", "python-pyyaml", "wayland-progs", "wayland-protocols"]
+builddeps = ["clang-devel", "elfutils-devel", "libarchive-devel", "libdrm-devel", "libexpat-devel", "libffi8-devel", "libglvnd-devel", "libva-bootstrap", "libxml2-devel", "llvm-devel", "lm-sensors-devel", "lua-devel", "ncurses-devel", "wayland-devel", "wayland-protocols", "zlib-ng-compat-devel", "zstd-devel", "vulkan-headers-devel"]
 rundeps = ["libglvnd"]
 options = ["!cross", "!lto"]
 
@@ -23,7 +26,7 @@ setup = '''
 %meson \
     -Dplatforms=wayland \
     -Dgallium-drivers=llvmpipe,radeonsi,r600,nouveau,virgl,svga \
-    -Dvulkan-drivers= \
+    -Dvulkan-drivers=amd,swrast \
     -Dglx=disabled \
     -Dglvnd=disabled \
     -Degl=enabled \

@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: main/libei/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: hyprland (libeis: emulated input for remote desktop). liboeffis (the portal
+# client, needs sd-bus) is off.
+name = "libei"
+version = "1.6.0"
+release = 1
+summary = "Emulated Input Library"
+license = "MIT"
+homepage = "https://gitlab.freedesktop.org/libinput/libei"
+hostdeps = ["meson", "pkgconf", "python-jinja2"]
+builddeps = ["libevdev-devel", "libxkbcommon-devel"]
+checkdeps = ["dbus", "glib", "python-attrs", "python-dbusmock", "python-gobject", "python-pytest", "python-pyyaml", "python-structlog"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/libinput/libei/-/archive/1.6.0/libei-1.6.0.tar.bz2", sha256 = "5ed6078fa63afd554cc04b1001675615da0ed8fe23b80492ab63403140b5a830" },
+    { url = "https://github.com/nemequ/munit/archive/fbbdf1467eb0d04a6ee465def2e529e4c87f2118.tar.gz", sha256 = "d0c8bf80b9804d4df5301bd428702352fe7e14f84f22027c3a2c084a0d9f69a7" },
+]
+
+setup = '''
+%meson \
+    -Dsd-bus-provider=none \
+    -Dliboeffis=disabled \
+    -Dtests=disabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libei/COPYING"
+'''

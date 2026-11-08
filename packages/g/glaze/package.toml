@@ -1,0 +1,28 @@
+# needed by: hyprland (JSON for hyprctl and IPC). Header-only C++ library.
+# v7.2.0 is the version Hyprland would otherwise fetch at build time.
+name = "glaze"
+version = "7.2.0"
+release = 1
+summary = "Fast C++ JSON and binary serialization library"
+license = "MIT"
+homepage = "https://github.com/stephenberry/glaze"
+hostdeps = ["cmake", "ninja"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/stephenberry/glaze/archive/refs/tags/v7.2.0.tar.gz", sha256 = "17dba19ae63ae48f94994f00d49d5cb3c8f1306db1046c534c4828662490b7d4" },
+]
+
+setup = '''
+%cmake \
+    -Dglaze_DEVELOPER_MODE=OFF \
+    -Dglaze_BUILD_EXAMPLES=OFF \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/glaze/LICENSE"
+'''

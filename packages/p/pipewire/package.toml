@@ -1,0 +1,66 @@
+# Imported from Chimera Linux cports: main/pipewire/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: wireplumber (the session manager), the desktop's audio and screen sharing.
+# Lean where Chimera enables everything: only ALSA, D-Bus, the PulseAudio server
+# (pipewire-pulse), the ALSA plugin, V4L2 and the core SPA plugins. No pw-cat
+# (pw-play, pw-record: needs libsndfile), no Bluetooth,
+# JACK, GStreamer, libcamera, avahi, echo cancelling, LV2 or ffmpeg: none of them
+# is in the image or the tree. No logind (the system uses seatd), no rtkit:
+# realtime limits come from PAM/rlimits. Patches and dinit services are Chimera's
+# (readiness.patch makes pipewire tell dinit when it is ready).
+name = "pipewire"
+version = "1.6.10"
+release = 1
+summary = "Server and user space API to deal with multimedia pipelines"
+license = "MIT"
+homepage = "https://pipewire.org"
+patches = ["lol.patch", "readiness.patch"]
+hostdeps = ["glib-devel", "meson", "pkgconf"]
+builddeps = ["alsa-lib-devel", "dbus-devel", "eudev-devel", "ncurses-devel", "readline-devel"]
+rundeps = ["dbus"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/1.6.10/pipewire-1.6.10.tar.gz", sha256 = "93b7c4f1e62fd9ec3a921846c6bfc64442872bb2366c2bbc3ea69a427b79a4f9" },
+]
+
+setup = '''
+%meson \
+    --auto-features=disabled \
+    -Ddocs=disabled \
+    -Dman=disabled \
+    -Dexamples=disabled \
+    -Dtests=disabled \
+    -Dspa-plugins=enabled \
+    -Dalsa=enabled \
+    -Daudiomixer=enabled \
+    -Daudioconvert=enabled \
+    -Dcontrol=enabled \
+    -Daudiotestsrc=enabled \
+    -Dsupport=enabled \
+    -Dvideoconvert=enabled \
+    -Dvideotestsrc=enabled \
+    -Dvolume=enabled \
+    -Dv4l2=enabled \
+    -Dudev=enabled \
+    -Ddbus=enabled \
+    -Dpipewire-alsa=enabled \
+    -Dpipewire-v4l2=enabled \
+    -Dpw-cat=disabled \
+    -Dreadline=enabled \
+    -Dflatpak=enabled \
+    -Dpam-defaults-install=true \
+    -Dlibv4l2-path=/usr/lib \
+    -Dudevrulesdir=/usr/lib/udev/rules.d \
+    -Dsession-managers=[] \
+    -Drlimits-match=@pipewire
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/pipewire/LICENSE"
+install -Dm644 $pkgfiles/pipewire.user "$pkgdir/usr/lib/dinit.d/user/pipewire"
+install -Dm644 $pkgfiles/pipewire-pulse.user "$pkgdir/usr/lib/dinit.d/user/pipewire-pulse"
+'''

@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: main/xcbproto/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: libxcb.
+name = "xcbproto"
+version = "1.17.0"
+release = 3
+summary = "XML-XCB (X C Bindings) protocol descriptions"
+license = "MIT"
+homepage = "https://xcb.freedesktop.org"
+hostdeps = ["pkgconf", "python", "automake"]
+rundeps = ["python"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/xorg/proto/xcbproto/-/archive/xcb-proto-1.17.0/xcbproto-xcb-proto-1.17.0.tar.gz", sha256 = "479447448281cfb6585ad780f23bd75311af20daf344fb9209c8a87ea77e296a" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-legacy
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xcbproto/COPYING"
+'''

@@ -1,0 +1,45 @@
+# Imported from Chimera Linux cports: main/libcanberra/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: hyprland (event sounds). Lean: ALSA output and the null driver only;
+# no PulseAudio, GStreamer or GTK modules.
+name = "libcanberra"
+version = "0.30"
+release = 3
+summary = "Portable sound event API"
+license = "LGPL-2.1-or-later"
+homepage = "https://0pointer.de/lennart/projects/libcanberra"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["alsa-lib-devel", "eudev-devel", "libtool-devel", "libvorbis-devel"]
+
+source = [
+    { url = "https://0pointer.de/lennart/projects/libcanberra/libcanberra-0.30.tar.xz", sha256 = "c2b671e67e0c288a69fc33dc1b6f1b534d07882c2aceed37004bf48c601afa72" },
+]
+
+environment = '''
+export GTKDOCIZE=true
+'''
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-null \
+    --disable-pulse \
+    --disable-gstreamer \
+    --disable-gtk3 \
+    --disable-gtk \
+    --enable-alsa \
+    --disable-oss \
+    --disable-lynx \
+    --disable-tdb \
+    --disable-gtk-doc \
+    --with-builtin=dso
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install \
+    -j1
+'''

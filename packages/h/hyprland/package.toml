@@ -1,0 +1,38 @@
+# Dynamic tiling Wayland compositor.
+# The release's source tarball (with its udis86 and tracy subprojects; the
+# GitHub archive leaves them out). Wayland only (NO_XWAYLAND: no X server in
+# the image), no systemd or UWSM integration, no rtkit (NO_RTKIT: sdbus-c++ is
+# not built; seatd and rlimits handle priorities), no hyprpm (the plugin
+# manager compiles plugins with git and a toolchain on the user's machine).
+# glaze, which Hyprland would fetch at build time, is the glaze recipe.
+name = "hyprland"
+version = "0.57.1"
+release = 1
+summary = "Dynamic tiling Wayland compositor"
+license = "BSD-3-Clause"
+homepage = "https://hyprland.org"
+hostdeps = ["cmake", "ninja", "pkgconf", "hyprwayland-scanner", "glslang", "python"]
+builddeps = ["aquamarine-devel", "hyprlang-devel", "hyprcursor-devel", "hyprutils-devel", "hyprgraphics-devel", "hyprland-protocols", "glaze-devel", "libxkbcommon-devel", "util-linux-devel", "wayland-devel", "wayland-protocols", "cairo-devel", "pango-devel", "pixman-devel", "libxcursor-devel", "libdrm-devel", "libinput-devel", "libei-devel", "mesa-devel", "glib-devel", "re2-devel", "muparser-devel", "lcms2-devel", "libcanberra-devel", "lua5.5-devel", "glslang-devel", "spirv-tools-devel"]
+rundeps = ["aquamarine", "hyprcursor", "hyprgraphics", "hyprlang", "hyprutils"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/hyprwm/Hyprland/releases/download/v0.57.1/source-v0.57.1.tar.gz", sha256 = "24e7428f83115e58e5fc81f100f6b73691dcaaf7a503087391e44327a71c43ab" },
+]
+
+setup = '''
+%cmake \
+    -DNO_XWAYLAND=ON \
+    -DNO_SYSTEMD=ON \
+    -DNO_UWSM=ON \
+    -DNO_RTKIT=ON \
+    -DNO_HYPRPM=ON \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/hyprland/LICENSE"
+'''

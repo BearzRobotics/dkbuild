@@ -1,0 +1,40 @@
+# Imported from Chimera Linux cports: main/libx11/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: libxcursor (Hyprland's cursor themes).
+name = "libx11"
+version = "1.8.13"
+release = 1
+summary = "Base X libraries from Xorg"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+patches = ["handle_new_xorgproto_symbols.patch"]
+hostdeps = ["pkgconf", "xorg-util-macros-devel"]
+builddeps = ["xorgproto-devel", "xtrans-devel", "libxcb-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/lib/libX11-1.8.13.tar.gz", sha256 = "acf0e7cd7541110e6330ecb539441a2d53061f386ec7be6906dfde0de2598470" },
+]
+
+environment = '''
+# autoconf only takes a preset RAWCPP that is an absolute path; there is no
+# `cpp`, and `clang -E` will not read standard input, which the check needs.
+export RAWCPP=/usr/bin/clang-cpp
+'''
+setup = '''
+%configure \
+    --enable-ipv6 \
+    --enable-xlocaledir \
+    --enable-malloc0returnsnull \
+    --enable-static \
+    --without-xmlto
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libx11/COPYING"
+'''

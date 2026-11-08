@@ -8,8 +8,8 @@ release = 1
 summary = "Session and policy manager implementation for PipeWire"
 license = "MIT"
 homepage = "https://pipewire.pages.freedesktop.org/wireplumber"
-hostdeps = ["doxygen", "glib-devel", "gobject-introspection", "meson", "pkgconf", "python-lxml"]
-builddeps = ["dinit-chimera", "dinit-dbus", "glib-devel", "lua5.4-devel", "pipewire-devel"]
+hostdeps = ["glib-devel", "meson", "pkgconf"]
+builddeps = ["dinit-chimera", "dinit-dbus", "glib-devel", "lua-devel", "pipewire-devel"]
 checkdeps = ["pipewire", "dbus"]
 rundeps = ["pipewire"]
 
@@ -21,7 +21,7 @@ setup = '''
 %meson \
     -Dsystem-lua=true \
     -Ddoc=disabled \
-    -Dintrospection=enabled
+    -Dintrospection=disabled
 '''
 build = '''
 %meson_build

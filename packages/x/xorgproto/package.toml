@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: main/xorgproto/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: the X libraries. Hyprland needs libXcursor (cursor themes), and that pulls in this small X stack.
+name = "xorgproto"
+version = "2024.1"
+release = 1
+summary = "Combined X.Org X11 protocol headers"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "libtool", "pkgconf", "xorg-util-macros-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/proto/xorgproto-2024.1.tar.gz", sha256 = "4f6b9b4faf91e5df8265b71843a91fc73dc895be6210c84117a996545df296ce" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-legacy
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+for f in COPYING-*; do install -Dm644 "$f" "$pkgdir/usr/share/licenses/xorgproto/$f"; done
+for os in apple windows; do
+    rm -f "$pkgdir"/usr/include/X11/extensions/$os* "$pkgdir/usr/share/licenses/xorgproto/COPYING-${os}wmproto" "$pkgdir/usr/share/pkgconfig/${os}wmproto.pc"
+done
+# provided by libx11-devel
+rm -rf "$pkgdir/usr/include/X11/extensions/XKBgeom.h"
+'''

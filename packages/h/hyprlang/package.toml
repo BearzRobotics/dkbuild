@@ -1,0 +1,26 @@
+# needed by: hyprcursor, hyprland.
+name = "hyprlang"
+version = "0.6.8"
+release = 1
+summary = "The official implementation library for the hypr config language"
+license = "LGPL-3.0-only"
+homepage = "https://github.com/hyprwm/hyprlang"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["hyprutils-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/hyprwm/hyprlang/archive/refs/tags/v0.6.8.tar.gz", sha256 = "d10a0778b646e04d83e8b90cc0f764fb96958c01a15c3c0678d95a40fc647ed5" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/hyprlang/LICENSE"
+'''

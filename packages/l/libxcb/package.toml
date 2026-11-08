@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: main/libxcb/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: libx11.
+name = "libxcb"
+version = "1.17.0"
+release = 1
+summary = "X protocol C language binding"
+license = "MIT"
+homepage = "https://xcb.freedesktop.org"
+hostdeps = ["pkgconf", "libtool", "python", "xorg-util-macros-devel", "xcbproto-devel"]
+builddeps = ["xcbproto-devel", "libxdmcp-devel", "libxau-devel"]
+
+source = [
+    { url = "https://xorg.freedesktop.org/archive/individual/lib/libxcb-1.17.0.tar.xz", sha256 = "599ebf9996710fea71622e6e184f3a8ad5b43d0e5fa8c4e407123c88a59a6d55" },
+]
+
+setup = '''
+%configure \
+    --disable-build-docs \
+    --enable-xinput \
+    --enable-xkb
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libxcb/COPYING"
+'''

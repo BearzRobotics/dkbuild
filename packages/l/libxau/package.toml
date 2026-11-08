@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: main/libxau/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: libxcb.
+name = "libxau"
+version = "1.0.12"
+release = 1
+summary = "Authorization Protocol for X"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "pkgconf", "libtool", "xorg-util-macros-devel"]
+builddeps = ["xorgproto-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/lib/libXau-1.0.12.tar.gz", sha256 = "2402dd938da4d0a332349ab3d3586606175e19cb32cb9fe013c19f1dc922dcee" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libxau/COPYING"
+'''

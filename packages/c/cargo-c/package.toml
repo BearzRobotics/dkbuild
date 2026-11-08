@@ -1,0 +1,29 @@
+# needed by: librsvg (its meson build runs `cargo cbuild`/`cargo cinstall`).
+# From the crates.io release, which carries Cargo.lock (the GitHub tarball does
+# not); crates vendored on the host (`cargodeps`).
+name = "cargo-c"
+version = "0.10.26"
+release = 1
+summary = "Cargo subcommands to build and install C-ABI libraries from Rust"
+license = "MIT"
+homepage = "https://github.com/lu-zero/cargo-c"
+hostdeps = ["rust", "pkgconf"]
+builddeps = ["openssl-devel", "curl-devel", "zlib-ng-compat-devel"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://static.crates.io/crates/cargo-c/cargo-c-0.10.26+cargo-0.100.0.crate", sha256 = "5ff6e05531e58286d3c02ec0adb7f254e5d532a8d4b667f30b9942d802e1db25" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs
+'''
+install = '''
+for b in cargo-capi cargo-cbuild cargo-cinstall cargo-ctest; do
+    install -Dm755 target/release/$b "$pkgdir/usr/bin/$b"
+done
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/cargo-c/LICENSE"
+'''

@@ -1,0 +1,41 @@
+# Imported from Chimera Linux cports: main/librsvg/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: hyprcursor (SVG cursor themes), and SVG icons in GTK.
+# Written in Rust; crates vendored on the host (`cargodeps`), built offline.
+# Changed from Chimera: no AVIF, introspection, Vala or docs; the gdk-pixbuf
+# loader is off as in Chimera.
+name = "librsvg"
+version = "2.63.2"
+release = 1
+summary = "SVG library for GNOME"
+license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
+homepage = "https://wiki.gnome.org/Projects/LibRsvg"
+hostdeps = ["rust", "cargo-c", "glib-devel", "meson", "pkgconf", "python"]
+builddeps = ["cairo-devel", "freetype-devel", "gdk-pixbuf-devel", "glib-devel", "libxml2-devel", "pango-devel"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://download.gnome.org/sources/librsvg/2.63/librsvg-2.63.2.tar.xz", sha256 = "852b18e1a00b8605528825a27dc7748bff2a5dd254028f59dc22a34ea57e81b6" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export RUSTFLAGS="-C target-feature=-crt-static"
+'''
+setup = '''
+%meson \
+    -Dtriplet=x86_64-unknown-linux-musl \
+    -Davif=disabled \
+    -Ddocs=disabled \
+    -Dintrospection=disabled \
+    -Dpixbuf=enabled \
+    -Dpixbuf-loader=disabled \
+    -Dvala=disabled \
+    -Dtests=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

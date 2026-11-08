@@ -1,0 +1,26 @@
+# needed by: hyprland (images, wallpapers). No JPEG XL or AVIF (libjxl, libheif not built).
+name = "hyprgraphics"
+version = "0.6.0"
+release = 1
+summary = "Graphics and resource utilities for the Hypr* ecosystem"
+license = "BSD-3-Clause"
+homepage = "https://github.com/hyprwm/hyprgraphics"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["hyprutils-devel", "cairo-devel", "pango-devel", "pixman-devel", "libdrm-devel", "libjpeg-turbo-devel", "libwebp-devel", "file-devel", "libpng-devel", "mesa-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/hyprwm/hyprgraphics/archive/refs/tags/v0.6.0.tar.gz", sha256 = "27e9e19ff59ba75a2963d72c3dcb5c0840b266b90d7fca6d5df7cac105419b08" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/hyprgraphics/LICENSE"
+'''

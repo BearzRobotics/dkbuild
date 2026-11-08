@@ -1,0 +1,41 @@
+# Imported from Chimera Linux cports: main/lua5.5/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: hyprland (Lua 5.5 config). Installed beside the tree's lua (5.4)
+# under versioned names, as Chimera does: lua5.5, luac5.5, liblua5.5,
+# /usr/include/lua5.5 and lua5.5.pc. Readline from the tree's readline
+# (Chimera uses libedit).
+name = "lua5.5"
+version = "5.5.0"
+release = 1
+summary = "Lua scripting language 5.5.x"
+license = "MIT"
+homepage = "https://lua.org"
+patches = ["liblua.so.patch", "skip-ranlib.patch", "version.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["readline-devel"]
+
+source = [
+    { url = "https://www.lua.org/ftp/lua-5.5.0.tar.gz", sha256 = "57ccc32bbbd005cab75bcc52444052535af691789dba2b9016d5c50640d68b3d" },
+]
+
+build = '''
+make linux CC="$CC" AR="llvm-ar rc" \
+    MYCFLAGS="$CFLAGS -fPIC -DLUA_USE_READLINE" MYLDFLAGS="$LDFLAGS" MYLIBS="-lreadline"
+'''
+check = '''
+make test
+'''
+install = '''
+make install \
+    INSTALL_TOP="$pkgdir/usr" \
+    TO_BIN="lua5.5 luac5.5" \
+    TO_LIB="liblua5.5.a liblua5.5.so.5.5.0" \
+    INSTALL_INC="$pkgdir/usr/include/lua5.5" \
+    INSTALL_MAN="$pkgdir/usr/share/man/man1"
+install -Dm644 $pkgfiles/lua5.5.pc "$pkgdir/usr/lib/pkgconfig/lua5.5.pc"
+install -Dm644 doc/readme.html "$pkgdir/usr/share/licenses/lua5.5/readme.html"
+mv "$pkgdir/usr/share/man/man1/lua.1" "$pkgdir/usr/share/man/man1/lua5.5.1"
+mv "$pkgdir/usr/share/man/man1/luac.1" "$pkgdir/usr/share/man/man1/luac5.5.1"
+ln -s liblua5.5.so.5.5.0 "$pkgdir/usr/lib/liblua5.5.so"
+ln -s liblua5.5.so.5.5.0 "$pkgdir/usr/lib/liblua5.5.so.5.5"
+'''

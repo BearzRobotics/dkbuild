@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: user/tomlplusplus/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: hyprcursor.
+name = "tomlplusplus"
+version = "3.4.0"
+release = 1
+summary = "Header-only TOML config file parser and serializer for C++17"
+license = "MIT"
+homepage = "https://github.com/marzer/tomlplusplus"
+hostdeps = ["cmake", "meson", "pkgconf"]
+
+source = [
+    { url = "https://github.com/marzer/tomlplusplus/archive/refs/tags/v3.4.0.tar.gz", sha256 = "8517f65938a4faae9ccf8ebb36631a38c1cadfb5efa85d9a72e15b9e97d25155" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/tomlplusplus/LICENSE"
+'''

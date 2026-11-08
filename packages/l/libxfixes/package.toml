@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: main/libxfixes/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: libxcursor.
+name = "libxfixes"
+version = "6.0.2"
+release = 1
+summary = "Xfixes library and extension of X RandR"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "pkgconf", "libtool", "xorg-util-macros-devel"]
+builddeps = ["xorgproto-devel", "libx11-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/lib/libXfixes-6.0.2.tar.gz", sha256 = "041331b8e6e36038b3bf836785b6b175ec8515f964c9e4e3316b3bfed0f53ac7" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libxfixes/COPYING"
+'''

@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: main/xtrans/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: libx11.
+name = "xtrans"
+version = "1.6.0"
+release = 1
+summary = "Network API translation layer to insulate X"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["pkgconf", "automake", "xorg-util-macros-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/lib/xtrans-1.6.0.tar.xz", sha256 = "faafea166bf2451a173d9d593352940ec6404145c5d1da5c213423ce4d359e92" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xtrans/COPYING"
+'''

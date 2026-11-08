@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: main/libxcursor/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: hyprland (it loads XCursor themes).
+name = "libxcursor"
+version = "1.2.3"
+release = 1
+summary = "Client-side cursor loading library for X"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "libtool", "pkgconf", "xorg-util-macros-devel"]
+builddeps = ["xorgproto-devel", "libxfixes-devel", "libxrender-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/lib/libXcursor-1.2.3.tar.gz", sha256 = "74e72da27e61cc2cfd2e267c14f500ea47775850048ee0b00362a55c9b60ee9b" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libxcursor/COPYING"
+'''
