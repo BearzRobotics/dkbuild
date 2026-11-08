@@ -4,24 +4,25 @@
 # dies with "Illegal instruction" on other CPUs). It needs, on the live ISO:
 # dklilo at 380a5b3 or later, /run/live/medium visible, live/rootfs.size, and
 # tzdb (see its docs/ISO-REQUIREMENTS.md; all provided by `dkbuild image`).
-# At commit dba890c, until a release is tagged. The repository has no LICENSE
-# yet: "unknown" until it does.
+# The release tarball is attached to the GitHub release (made with
+# `git archive --prefix=dkinstaller-<version>/`), so its checksum is stable.
 name = "dkinstaller"
-version = "0_git20261108"
+version = "0.0.2"
 release = 1
 summary = "FenrirOS installer: installs the live system onto a disk"
-license = "unknown"
+license = "GPL-2.0-only"
 homepage = "https://github.com/BearzRobotics/dkinstaller"
 hostdeps = ["zig"]
 rundeps = ["dklilo", "util-linux", "e2fsprogs", "dosfstools", "squashfs-tools", "shadow", "sudo", "bash", "coreutils", "tzdb"]
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/dkinstaller/archive/dba890c945b183080495cb2a6e2e7903bf8bfef6.tar.gz", sha256 = "b4d09bb7fe68a83aa6109c2c546b0fd5d1499eda449f86e96c695c3ff869a50f" },
+    { url = "https://github.com/BearzRobotics/dkinstaller/releases/download/v0.0.2/dkinstaller-0.0.2.tar.gz", sha256 = "65d0443b1f101696f5da26978970db62a33021a7eb3582ef9439f1dcf3048098" },
 ]
 
 install = '''
 %zig_build
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/dkinstaller/LICENSE"
 # The ISO requirements name /usr/bin/dkrescue-install; /usr/sbin gets a link too.
 install -d "$pkgdir/usr/sbin"
 ln -s ../bin/dkrescue-install "$pkgdir/usr/sbin/dkrescue-install"
