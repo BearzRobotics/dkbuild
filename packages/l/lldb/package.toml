@@ -1,0 +1,36 @@
+# The LLVM debugger, with lldb-dap (the Debug Adapter Protocol server that VS
+# Code's LLDB extensions talk to). Built standalone from the same
+# llvm-project source against the installed LLVM and Clang (LLDB supports
+# this), as Arch packages it: no LLVM rebuild. Version locked to `llvm`.
+# No Python scripting yet (needs SWIG), no libedit line editing (not in the
+# tree yet).
+name = "lldb"
+version = "23.1.5"
+release = 1
+summary = "Next generation, high-performance debugger (LLVM)"
+license = "Apache-2.0 WITH LLVM-exception"
+homepage = "https://lldb.llvm.org"
+hostdeps = ["cmake", "ninja", "python", "llvm", "llvm-clang"]
+builddeps = ["llvm-devel", "llvm-libcxx-devel", "libxml2-devel", "ncurses-devel", "xz-devel", "zlib-ng-compat-devel"]
+options = ["!check", "jobs:10"]
+
+source = [
+    { url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-23.1.5/llvm-project-23.1.5.src.tar.xz", sha256 = "fb50b1eac93ddeb3aa8dab4cfe324dff74f4a9c2bdee6160c9e36188f8d06a6e" },
+]
+
+setup = '''
+cmake -S lldb -B build -G Ninja \
+    -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+    -DLLVM_DIR=/usr/lib/cmake/llvm -DClang_DIR=/usr/lib/cmake/clang \
+    -DLLVM_TABLEGEN_EXE=/usr/bin/llvm-tblgen \
+    -DLLDB_ENABLE_PYTHON=OFF -DLLDB_ENABLE_LUA=OFF -DLLDB_ENABLE_LIBEDIT=OFF \
+    -DLLDB_ENABLE_CURSES=ON -DLLDB_ENABLE_LZMA=ON -DLLDB_ENABLE_LIBXML2=ON \
+    -DLLDB_INCLUDE_TESTS=OFF
+'''
+build = '''
+nice -n 10 ninja -C build -j$jobs
+'''
+install = '''
+DESTDIR=$pkgdir ninja -C build install
+install -Dm644 LICENSE.TXT "$pkgdir/usr/share/licenses/lldb/LICENSE.TXT"
+'''

@@ -1,0 +1,43 @@
+# clangd (the C/C++ language server: VS Code's clangd extension, any editor),
+# clang-tidy, clang-include-cleaner and the other tools from LLVM's
+# clang-tools-extra. They can only be built as part of clang, so this recipe
+# configures a standalone clang (clang-tools-extra placed in clang/tools/extra,
+# as Arch does) against the installed LLVM, builds just these tools, and
+# installs just them; the `llvm` package and its clang are untouched. The tools
+# link clang's libraries statically. Version locked to `llvm` (same source; they
+# use its clang resource headers in /usr/lib/clang/23).
+name = "clang-tools-extra"
+version = "23.1.5"
+release = 1
+summary = "clangd, clang-tidy and other Clang tools"
+license = "Apache-2.0 WITH LLVM-exception"
+homepage = "https://clang.llvm.org/extra"
+hostdeps = ["cmake", "ninja", "python", "llvm", "llvm-clang"]
+builddeps = ["llvm-devel", "llvm-libcxx-devel", "zlib-ng-compat-devel", "zstd-devel"]
+rundeps = ["llvm-clang"]
+options = ["!check", "jobs:10"]
+
+source = [
+    { url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-23.1.5/llvm-project-23.1.5.src.tar.xz", sha256 = "fb50b1eac93ddeb3aa8dab4cfe324dff74f4a9c2bdee6160c9e36188f8d06a6e" },
+]
+
+setup = '''
+mv clang-tools-extra clang/tools/extra
+cmake -S clang -B build -G Ninja \
+    -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+    -DLLVM_DIR=/usr/lib/cmake/llvm -DLLVM_TABLEGEN_EXE=/usr/bin/llvm-tblgen \
+    -DCLANG_LINK_CLANG_DYLIB=OFF -DCLANG_INCLUDE_TESTS=OFF -DCLANG_INCLUDE_DOCS=OFF \
+    -DLLVM_INCLUDE_TESTS=OFF
+'''
+build = '''
+nice -n 10 ninja -C build -j$jobs clangd clang-tidy clang-include-cleaner clang-apply-replacements \
+    clang-query clang-doc clang-move clang-change-namespace clang-reorder-fields pp-trace modularize
+'''
+install = '''
+for t in clangd clang-tidy clang-include-cleaner clang-apply-replacements clang-query clang-doc \
+         clang-move clang-change-namespace clang-reorder-fields pp-trace modularize; do
+    install -Dm755 build/bin/$t "$pkgdir/usr/bin/$t"
+done
+install -Dm755 clang/tools/extra/clang-tidy/tool/run-clang-tidy.py "$pkgdir/usr/bin/run-clang-tidy"
+install -Dm644 LICENSE.TXT "$pkgdir/usr/share/licenses/clang-tools-extra/LICENSE.TXT"
+'''
