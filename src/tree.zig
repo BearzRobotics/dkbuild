@@ -37,6 +37,28 @@ pub const Tree = struct {
         return null;
     }
 
+    /// The recipes whose packages a build of recipe `i` lays over its root from
+    /// repo/ (build.inTreeFiles): the providers of its host and build
+    /// dependencies, and what those need to build and run, transitively.
+    /// Never `i` itself.
+    pub fn needs(t: Tree, arena: Allocator, i: usize) Allocator.Error![]const usize {
+        const seen = try arena.alloc(bool, t.recipes.len);
+        @memset(seen, false);
+        seen[i] = true;
+        var names: std.ArrayList([]const u8) = .empty;
+        var out: std.ArrayList(usize) = .empty;
+        for ([_][]const []const u8{ t.recipes[i].hostdeps, t.recipes[i].builddeps }) |deps| try names.appendSlice(arena, deps);
+        var k: usize = 0;
+        while (k < names.items.len) : (k += 1) {
+            const p = t.provider(names.items[k]) orelse continue;
+            if (seen[p]) continue;
+            seen[p] = true;
+            try out.append(arena, p);
+            for ([_][]const []const u8{ t.recipes[p].builddeps, t.recipes[p].rundeps }) |deps| try names.appendSlice(arena, deps);
+        }
+        return out.items;
+    }
+
     /// Build order for `roots` and everything they need: dependencies first.
     /// Needs are `hostdeps` and `builddeps`; `checkdeps` and `rundeps` don't
     /// have to exist before a package builds.
@@ -184,6 +206,37 @@ test "order puts dependencies first, resolves -devel to its recipe" {
     try std.testing.expectEqualStrings("zlib", names[1]);
     try std.testing.expectEqualStrings("lib", names[2]);
     try std.testing.expectEqualStrings("app", names[3]);
+}
+
+test "needs follows build deps, then the deps' build and run deps, not the recipe's own run deps" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    var lib = rc("lib", &.{}, &.{"zlib-devel"});
+    lib.rundeps = &.{"data"};
+    var app = rc("app", &.{"tool"}, &.{"lib-devel"});
+    app.rundeps = &.{"other"};
+    const t: Tree = .{ .recipes = &.{
+        app,
+        rc("data", &.{}, &.{}),
+        lib,
+        rc("other", &.{}, &.{}),
+        rc("tool", &.{}, &.{"app"}), // a cycle back to app: never listed
+        rc("zlib", &.{}, &.{}),
+    } };
+    const n = try t.needs(a, 0);
+    var names: std.ArrayList([]const u8) = .empty;
+    for (n) |i| try names.append(a, t.recipes[i].name);
+    std.mem.sort([]const u8, names.items, {}, struct {
+        fn lt(_: void, x: []const u8, y: []const u8) bool {
+            return std.mem.lessThan(u8, x, y);
+        }
+    }.lt);
+    try std.testing.expectEqual(@as(usize, 4), names.items.len);
+    try std.testing.expectEqualStrings("data", names.items[0]);
+    try std.testing.expectEqualStrings("lib", names.items[1]);
+    try std.testing.expectEqualStrings("tool", names.items[2]);
+    try std.testing.expectEqualStrings("zlib", names.items[3]);
 }
 
 test "provider knows the default subpackages, including -static" {

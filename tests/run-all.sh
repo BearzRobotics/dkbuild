@@ -11,7 +11,7 @@ zig build || exit 1
 ./zig-out/bin/dkbuild check || exit 1
 [ -d rootfs/dkrescue ] || { echo "no build machine: run 'dkbuild bootstrap-root <dkrescue.iso>' first"; exit 1; }
 status=0
-for t in forgotten-dep sandbox chain rebuild scripts repo-install musl import; do
+for t in forgotten-dep sandbox chain rebuild scripts repo-install musl import parallel; do
     ./tests/$t.sh || status=1
 done
 exit $status

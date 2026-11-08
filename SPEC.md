@@ -813,11 +813,18 @@ inside a namespace the installed root runs `apk --version`, `sh`, `ls` and
 | `dkbuild bootstrap-root [--force] [--dest DIR] <image>` | Unpacks the stage 0 build machine and checks it (9.2) |
 | `dkbuild shell <name>` | Opens a shell in a prepared build root for that recipe |
 | `-j N` | Parallel jobs per build (default: the number of CPUs) |
+| `-P N` | Builds at once (default 1) |
 | `--keep-root` | Keeps the build root after the build |
 
-Only one package builds at a time in v1. The jobs go to that one build,
-which suits an 8 GB machine better than several builds side by side.
-**Post-v1:** several builds at once, with a memory budget.
+One package builds at a time unless `-P N` asks for more; one at a time
+suits an 8 GB machine better than several builds side by side. With `-P N`
+(src/sched.zig), a build starts once every in-tree package its build root
+unpacks from repo/ is built, each build gets the full `-j`, and a recipe with
+`jobs:N` (the large ones: LLVM, Zig) runs alone. New packages are written
+under a temporary name and renamed into place, and one build at a time rebuilds
+the index, so no build sees half a package or half an index. Every rebuild
+decision (7.2) is made before the first build starts. **Later:** a real memory
+budget instead of "heavy builds run alone".
 
 ## 11. Repository layout
 

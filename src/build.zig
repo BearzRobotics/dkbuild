@@ -36,8 +36,30 @@ const allowed_top = [_][]const u8{ "usr", "etc", "var", "opt", "boot" };
 
 pub const BuildError = error{ BuildFailed, PrepareFailed, UnpackFailed, PolicyViolation, BadRecipe } || Allocator.Error;
 
+/// When several builds run at once (sched.zig), each worker thread collects
+/// its console output here and the scheduler prints it in one piece when the
+/// build ends. Null: print as it happens. Grown with `std.heap.smp_allocator`.
+pub threadlocal var console: ?*std.ArrayList(u8) = null;
+
 fn out(comptime fmt: []const u8, args: anytype) void {
+    if (console) |c| {
+        c.print(std.heap.smp_allocator, fmt, args) catch {};
+        return;
+    }
     std.debug.print(fmt, args);
+}
+
+/// One download at a time: two builds of recipes that share a source would
+/// write the same `.part` file in the cache.
+var fetch_mutex: std.Io.Mutex = .init;
+/// One index rebuild at a time (`apk mkndx` writes Packages.adb in place).
+var index_mutex: std.Io.Mutex = .init;
+
+/// A recipe that caps its jobs (`jobs:N`) is a large build (LLVM, Zig): the
+/// scheduler runs it alone, never beside another build.
+pub fn isHeavy(r: recipe.Recipe) bool {
+    for (r.options) |o| if (std.mem.startsWith(u8, o, "jobs:")) return true;
+    return false;
 }
 
 fn runLogged(arena: Allocator, io: std.Io, argv: []const []const u8, log: *std.ArrayList(u8)) !bool {
@@ -235,20 +257,24 @@ pub fn buildOne(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options) B
     const cache = try std.fs.path.join(arena, &.{ opts.root, "cache" });
     var first_tarball: ?[]const u8 = null;
     var zigdeps_tar: ?[]const u8 = null;
-    for (r.source) |src| {
-        var msg: []const u8 = "";
-        _ = fetch.fetchOne(arena, io, cache, src, &msg) catch |err| {
-            out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
-            return error.PrepareFailed;
-        };
-        if (first_tarball == null and src == .tarball) {
-            first_tarball = try fetch.cachePath(arena, cache, src.tarball.sha256);
-            if (contains(r.options, "zigdeps")) {
-                _ = fetch.fetchZigDeps(arena, io, cache, src.tarball.sha256, &msg) catch |err| {
-                    out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
-                    return error.PrepareFailed;
-                };
-                zigdeps_tar = try fetch.zigDepsPath(arena, cache, src.tarball.sha256);
+    {
+        fetch_mutex.lockUncancelable(io);
+        defer fetch_mutex.unlock(io);
+        for (r.source) |src| {
+            var msg: []const u8 = "";
+            _ = fetch.fetchOne(arena, io, cache, src, &msg) catch |err| {
+                out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
+                return error.PrepareFailed;
+            };
+            if (first_tarball == null and src == .tarball) {
+                first_tarball = try fetch.cachePath(arena, cache, src.tarball.sha256);
+                if (contains(r.options, "zigdeps")) {
+                    _ = fetch.fetchZigDeps(arena, io, cache, src.tarball.sha256, &msg) catch |err| {
+                        out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
+                        return error.PrepareFailed;
+                    };
+                    zigdeps_tar = try fetch.zigDepsPath(arena, cache, src.tarball.sha256);
+                }
             }
         }
     }
@@ -509,15 +535,28 @@ fn publish(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options, id: []
                 }
             } else |_| {}
         }
-        try argv.appendSlice(arena, &.{ "--files", "/tmp/files", "--output", try std.fmt.allocPrint(arena, "/tmp/out/{s}-{s}.apk", .{ pk.name, ver }) });
+        // Written as .part and renamed when complete: a build running beside
+        // this one may unpack from repo/ or index it at any moment, and must
+        // never see half a package (mkndx below only takes *.apk).
+        const file = try std.fmt.allocPrint(arena, "{s}-{s}.apk", .{ pk.name, ver });
+        try argv.appendSlice(arena, &.{ "--files", "/tmp/files", "--output", try std.fmt.allocPrint(arena, "/tmp/out/{s}.part", .{file}) });
+        const part = try std.fmt.allocPrint(arena, "{s}/{s}.part", .{ repo_rel, file });
         const ok = runTool(arena, io, base_root, sb, all_binds.items, argv.items, log) catch false;
         if (!ok) {
+            Dir.cwd().deleteFile(io, part) catch {};
             out("error: apk mkpkg failed for {s}\n", .{pk.name});
             return error.BuildFailed;
         }
+        Dir.cwd().rename(part, Dir.cwd(), try std.fmt.allocPrint(arena, "{s}/{s}", .{ repo_rel, file }), io) catch {
+            out("error: cannot move {s} into place\n", .{part});
+            return error.BuildFailed;
+        };
     }
 
-    // mkndx over every package in the repository directory
+    // mkndx over every package in the repository directory, one build at a time
+    // (it lists the directory, then writes Packages.adb in place).
+    index_mutex.lockUncancelable(io);
+    defer index_mutex.unlock(io);
     {
         var argv: std.ArrayList([]const u8) = .empty;
         const binds = [_]sandbox.Bind{ out_bind, .{ .src = key_abs, .dst = "/tmp/key", .read_only = true }, .{ .src = keys_abs, .dst = "/tmp/keys", .read_only = true } };

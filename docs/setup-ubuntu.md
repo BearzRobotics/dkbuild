@@ -249,10 +249,12 @@ git clone https://github.com/BearzRobotics/dkbuild.git && cd dkbuild
 zig build
 ./zig-out/bin/dkbuild doctor
 ./zig-out/bin/dkbuild bootstrap-root ~/dkrescue.iso
-./zig-out/bin/dkbuild world --no-check --keep-going
+./zig-out/bin/dkbuild world --no-check --keep-going -P 3
 ```
 
 `--keep-going` builds everything that can build and prints which recipes failed and
 which were skipped because something they need failed. The first pass takes hours
 (LLVM, Zig and the kernel are the long ones); use at least 16 GB of RAM and keep `/tmp`
 off a small RAM disk. Recipes that need a manual fix are listed in the failed set.
+`-P 3` runs up to three builds at once, which keeps a 12-core machine busy through
+the many small packages; LLVM and Zig still run alone. Leave it out on an 8 GB machine.

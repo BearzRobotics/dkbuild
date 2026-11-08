@@ -70,7 +70,7 @@ dependency chains; rebuilds; installing from the repository. They run once for e
 | `dkbuild check [name]...` | validates recipes |
 | `dkbuild graph <name>...` | prints the build order |
 | `dkbuild fetch [name]...` | downloads sources and checks their checksums |
-| `dkbuild world [--force]` | builds every recipe in the tree that is out of date |
+| `dkbuild world [--force] [-P N]` | builds every recipe in the tree that is out of date (`-P N`: up to N builds at once) |
 | `dkbuild pkg [--force] <name>...` | builds packages and their in-tree dependencies |
 | `dkbuild import-cbuild [--out DIR] <template.py\|dir>...` | converts Chimera cbuild templates into draft recipes (`imported/`) |
 

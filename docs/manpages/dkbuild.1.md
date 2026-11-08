@@ -12,9 +12,9 @@ dkbuild check [NAME | FILE.toml]...
 
 dkbuild fetch [NAME]...
 
-dkbuild pkg [-j N] [--key FILE] [--keep-root] [--no-check] [--force] NAME...
+dkbuild pkg [-j N] [-P N] [--key FILE] [--keep-root] [--no-check] [--keep-going] [--force] NAME...
 
-dkbuild world [-j N] [--key FILE] [--keep-root] [--no-check] [--force]
+dkbuild world [-j N] [-P N] [--key FILE] [--keep-root] [--no-check] [--keep-going] [--force]
 
 dkbuild graph NAME...
 
@@ -65,6 +65,12 @@ Global
 pkg and world
 -j N
 : Parallel jobs per build. A recipe's **jobs:N** option can lower this, never raise it.
+
+-P N
+: Run up to N builds at once (default 1). A build starts once every in-tree package its build root needs is built; when one of those fails, it is skipped. Each build gets the full **-j**. A recipe with a **jobs:N** option (LLVM, Zig) is heavy and runs alone: it waits for the running builds to end, and nothing starts beside it. With N above 1, each build's output is printed whole when it ends, after a **--> NAME: started** line when it begins.
+
+--keep-going
+: When a build fails, keep building what does not need it, and list the failed and skipped recipes at the end.
 
 --key FILE
 : RSA key used to sign packages. Default: **~/.config/dkbuild/signing.rsa**.
