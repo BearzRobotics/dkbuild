@@ -1,0 +1,27 @@
+# A modern, portable crypto library (NaCl). Needed by: vim (its xchacha20 file
+# encryption, :set cryptmethod=xchacha20v2).
+name = "libsodium"
+version = "1.0.22"
+release = 1
+summary = "Modern and easy-to-use crypto library"
+license = "ISC"
+homepage = "https://libsodium.org"
+hostdeps = ["pkgconf"]
+
+source = [
+    { url = "https://download.libsodium.org/libsodium/releases/libsodium-1.0.22.tar.gz", sha256 = "adbdd8f16149e81ac6078a03aca6fc03b592b89ef7b5ed83841c086191be3349" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+make check -j$jobs
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libsodium/LICENSE"
+'''

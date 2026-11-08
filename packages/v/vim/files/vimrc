@@ -1,0 +1,6 @@
+" FenrirOS's system vimrc. Your own settings go in ~/.vimrc (or ~/.vim/vimrc).
+"
+" Vim's own defaults (syntax highlighting, filetype plugins and indenting,
+" incremental search, the mouse), which it uses only when nobody has a vimrc.
+unlet! skip_defaults_vim
+source $VIMRUNTIME/defaults.vim

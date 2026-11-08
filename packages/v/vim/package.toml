@@ -1,0 +1,47 @@
+# Vim, the vi-style editor (after Chimera Linux cports: user/vim). Terminal only.
+# Lua is built in (the tree's lua is a static library, so vim needs nothing at
+# run time for it); Python 3 is loaded only when a script uses it. Ruby is left
+# out: there is no ruby in the tree yet.
+# xxd is its own package (vim-xxd), as other programs use it alone.
+name = "vim"
+version = "9.2.1302"
+release = 1
+summary = "Vi-style text editor"
+license = "Vim"
+homepage = "https://www.vim.org"
+hostdeps = ["pkgconf"]
+builddeps = ["acl-devel", "libsodium-devel", "lua-static", "ncurses-devel", "python-devel"]
+rundeps = ["vim-xxd"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/vim/vim/archive/refs/tags/v9.2.1302.tar.gz", sha256 = "a9d2a2f57d5d3149cff8342b8a0b063d410df5d5a4b46d898610059648b6a17e" },
+]
+
+setup = '''
+%configure \
+    --enable-acl \
+    --enable-gui=no \
+    --without-x \
+    --enable-luainterp=yes \
+    --with-lua-prefix=/usr \
+    --enable-python3interp=dynamic \
+    --with-features=huge \
+    --with-compiledby=FenrirOS \
+    --with-tlib=ncursesw
+'''
+build = '''
+%make
+'''
+install = '''
+# The install targets race each other for directories.
+make DESTDIR="$pkgdir" install -j1
+install -Dm644 $pkgfiles/vimrc "$pkgdir/usr/share/vim/vimrc"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/vim/LICENSE"
+# No GUI was built; its desktop file names nothing.
+rm -f "$pkgdir/usr/share/applications/gvim.desktop"
+'''
+
+[subpackages.xxd]
+summary = "Tool for viewing and editing hex dumps"
+paths   = ["/usr/bin/xxd", "/usr/share/man/man1/xxd.1", "/usr/share/man/*/man1/xxd.1"]

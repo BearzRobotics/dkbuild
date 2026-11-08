@@ -9,7 +9,8 @@
 # r3: /etc/skel/.profile, so a new user (useradd -m, the installer) gets a working login shell.
 # r4: the sgx group, which udev rules name (Intel SGX devices).
 # r5: a full /etc/skel (.profile, .shrc, .bashrc, .bash_profile, ~/.local/bin) and /etc/shrc,
-#     so aliases (ls --color=auto) and the prompt work in every interactive shell, dash or bash.
+#     so aliases (ls --color=auto) and the prompt work in every interactive shell, dash or bash;
+#     /etc/profile reads profile.d and sets EDITOR=msedit; root's shell is bash (dash stays /bin/sh).
 name = "base-files"
 version = "1"
 release = 5

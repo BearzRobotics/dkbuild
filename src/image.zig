@@ -20,7 +20,7 @@ pub const User = struct {
     groups: []const []const u8 = &.{},
     /// "locked" (no password login), "empty" (no password), or a crypt(3) hash.
     password: []const u8 = "locked",
-    shell: []const u8 = "/bin/sh",
+    shell: []const u8 = "/bin/bash",
 };
 
 pub const Image = struct {

@@ -4,6 +4,10 @@ umask 022
 export PAGER=less
 # less shows colors (git, grep --color) instead of escape codes.
 export LESS=-R
+# The editor programs open (git commit, sudoedit, crontab -e). Set your own in
+# ~/.profile, e.g. export EDITOR=vim.
+export EDITOR="${EDITOR:-msedit}"
+export VISUAL="${VISUAL:-$EDITOR}"
 
 # Interactive settings (aliases, prompt) live in /etc/shrc, so terminals that
 # start a non-login shell get them too: a POSIX sh reads the file named by
@@ -16,3 +20,9 @@ fi
 if [ -n "${BASH_VERSION:-}" ] && [ ! -f "$HOME/.bashrc" ]; then
     case $- in *i*) . /etc/shrc ;; esac
 fi
+
+# Packages' login settings: /usr/lib/profile.d (theirs), /etc/profile.d (local).
+for _f in /usr/lib/profile.d/*.sh /etc/profile.d/*.sh; do
+    [ -r "$_f" ] && . "$_f"
+done
+unset _f

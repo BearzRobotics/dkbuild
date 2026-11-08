@@ -4,3 +4,5 @@
 export PATH="$HOME/.local/bin:$PATH"
 # Interactive shells (also in terminal windows) read ~/.shrc.
 export ENV="$HOME/.shrc"
+# The editor programs open (default: msedit). For vim:
+# export EDITOR=vim VISUAL=vim

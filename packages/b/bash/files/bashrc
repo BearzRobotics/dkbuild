@@ -10,10 +10,8 @@ if [[ $- != *i* ]] ; then
     return
 fi
 
-while read -r bashrc_d; do
-    [ -e "$bashrc_d" ] && . "$bashrc_d"
-done <<EOS
-$(/usr/bin/run-parts --list --regex '^.*\.sh' /etc/bash/bashrc.d /usr/share/bash/bashrc.d)
-EOS
-
+# Every *.sh in the bashrc.d directories (bash-completion's hook is one).
+for bashrc_d in /etc/bash/bashrc.d/*.sh /usr/share/bash/bashrc.d/*.sh; do
+    [ -r "$bashrc_d" ] && . "$bashrc_d"
+done
 unset bashrc_d

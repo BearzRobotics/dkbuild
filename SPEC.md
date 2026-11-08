@@ -756,8 +756,18 @@ documentation. Three meta-packages describe the sets:
   readline, libcap, attr, acl, expat, OpenSSL, and libelf with the musl
   compatibility libraries (argp-standalone, musl-fts, musl-obstack) where
   something needs them.
-- **Shells:** dash is `/bin/sh`; bash is the login shell. dksh (experimental)
-  is a separate package, `dksh`, not installed by default.
+- **Shells:** dash is `/bin/sh` (scripts, and the fallback); bash is every
+  user's login shell, root's too (`/etc/default/useradd`, `dkbuild image`),
+  with bash-completion. dksh (experimental) is a separate package, `dksh`, not
+  installed by default.
+- **Editors:** msedit (the default `EDITOR`/`VISUAL`, set in `/etc/profile`)
+  and vim. A user picks their own in `~/.profile`.
+- **The user's environment:** `/etc/profile` (PATH, umask 022, `PAGER=less`,
+  `LESS=-R`, `EDITOR`, then `/usr/lib/profile.d` and `/etc/profile.d`) for
+  login shells; `/etc/shrc` (aliases with color, the prompt) for every
+  interactive shell, read by dash through `$ENV` and by bash through
+  `~/.bashrc`. `/etc/skel` has `.profile` (`~/.local/bin` first on PATH),
+  `.shrc`, `.bashrc`, `.bash_profile` and `~/.local/bin`.
 - **Programs to repair a broken system, built static** (`options: [static]`):
   coreutils, findutils, grep, sed, diffutils, tar, gzip, less, which, bash,
   dash, dinit. This is DKRescue's rule: on musl it is cheap and safe, and a damaged

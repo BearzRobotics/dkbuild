@@ -2,9 +2,10 @@
 # console, and apk works (SPEC.md 9.1). No compiler, no desktop, no network
 # daemons (base-net). The kernel, bootloader and firmware are chosen by the
 # image, since they depend on the machine.
+# r2: bash-completion, and both editors: msedit (the default EDITOR) and vim.
 name = "base"
 version = "1"
-release = 1
+release = 2
 summary = "FenrirOS base system"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"
@@ -15,4 +16,5 @@ rundeps = [
     "coreutils", "dash", "bash", "sed", "grep", "gawk", "findutils", "diffutils",
     "which", "less", "file", "procps", "psmisc", "iproute2", "kbd", "sysklogd",
     "tar", "gzip", "xz", "zstd", "e2fsprogs", "dosfstools",
+    "bash-completion", "msedit", "vim",
 ]

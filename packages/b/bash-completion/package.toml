@@ -1,0 +1,26 @@
+# Tab completion for bash (after Chimera Linux cports: main/bash-completion).
+# Its hook goes in /usr/share/bash/bashrc.d, which bash's system bashrc reads
+# for every interactive shell. The test suite needs pytest and pexpect.
+name = "bash-completion"
+version = "2.18.0"
+release = 1
+summary = "Programmable completion functions for bash"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/scop/bash-completion"
+hostdeps = ["pkgconf"]
+rundeps = ["bash"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/scop/bash-completion/releases/download/2.18.0/bash-completion-2.18.0.tar.xz", sha256 = "88bcf85124f77f74f2f2f8bcd16ac4382d807a827ede742a64940c7116aea33f" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+make DESTDIR="$pkgdir" profiledir=/usr/share/bash/bashrc.d install
+'''
