@@ -1,1 +1,0 @@
-(deferred: linux-headers lists rsync as a build tool; adding it to the tree would change linux-headers' dependency hash and rebuild the toolchain. Needs a decision.)

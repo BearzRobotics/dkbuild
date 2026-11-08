@@ -1,0 +1,27 @@
+# needed by: rescue-tools. Saves and restores whole filesystems to archives
+# (with their attributes, compressed, optionally encrypted), as on DKRescue.
+# All compressors on: gzip, bzip2, xz, lzo, lz4, zstd.
+name = "fsarchiver"
+version = "0.8.9"
+release = 1
+summary = "Filesystem archiver: saves and restores filesystems"
+license = "GPL-2.0-only"
+homepage = "https://www.fsarchiver.org"
+hostdeps = ["pkgconf"]
+builddeps = ["zlib-ng-compat-devel", "bzip2-devel", "xz-devel", "lzo-devel", "lz4-devel", "zstd-devel", "libgcrypt-devel", "libgpg-error-devel", "e2fsprogs-devel", "util-linux-devel", "attr-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/fdupoux/fsarchiver/releases/download/0.8.9/fsarchiver-0.8.9.tar.gz", sha256 = "ade1d9d3c7de815c0b40b54e24e39b53d4a3b0add69d47f23b36fc2fd8f21843" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/fsarchiver/COPYING"
+'''

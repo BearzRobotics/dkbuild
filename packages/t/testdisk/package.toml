@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: user/testdisk/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: rescue-tools. testdisk (finds lost partitions, repairs boot
+# sectors) and photorec (recovers files by content), as on DKRescue.
+name = "testdisk"
+version = "7.2"
+release = 1
+summary = "Data recovery suite: testdisk and photorec"
+license = "GPL-2.0-or-later"
+homepage = "https://www.cgsecurity.org"
+hostdeps = ["automake", "pkgconf"]
+builddeps = ["e2fsprogs-devel", "libjpeg-turbo-devel", "ncurses-devel", "ntfs-3g-devel", "util-linux-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.cgsecurity.org/testdisk-7.2.tar.bz2", sha256 = "f8343be20cb4001c5d91a2e3bcd918398f00ae6d8310894a5a9f2feb813c283f" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

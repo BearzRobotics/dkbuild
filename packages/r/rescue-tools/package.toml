@@ -1,0 +1,24 @@
+# The rescue toolset, as on DKRescue: disk imaging and recovery (ddrescue,
+# testdisk/photorec, fsarchiver), wiping (nwipe), disk health (smartmontools,
+# nvme-cli, hdparm), partitioning (parted, gptfdisk), every common filesystem
+# (ext, btrfs, XFS, FAT, exFAT, NTFS), encrypted and RAID volumes (cryptsetup,
+# lvm2, mdadm), boot repair (efibootmgr, dklilo), Windows passwords (chntpw),
+# hardware listing (dmidecode, lspci, lsusb), and image tools (squashfs,
+# xorriso), and rsync, ssh and curl for moving data off a machine.
+name = "rescue-tools"
+version = "1"
+release = 1
+summary = "FenrirOS rescue toolset (DKRescue's)"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+options = ["meta"]
+rundeps = [
+    "ddrescue", "testdisk", "fsarchiver", "nwipe",
+    "smartmontools", "nvme-cli", "hdparm",
+    "parted", "gptfdisk", "util-linux",
+    "e2fsprogs", "btrfs-progs", "xfsprogs", "dosfstools", "exfatprogs", "ntfs-3g",
+    "cryptsetup", "lvm2", "mdadm",
+    "efibootmgr", "dklilo", "chntpw",
+    "dmidecode", "pciutils", "usbutils",
+    "squashfs-tools", "xorriso", "openssh", "curl", "rsync",
+]

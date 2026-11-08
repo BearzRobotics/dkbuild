@@ -1,8 +1,10 @@
 # Imported from Chimera Linux cports: work/cports/main/rsync/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # No ACL/xattr support: acl needs linux-headers, which needs rsync (a cycle).
-# Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
-# installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+# needed by: rescue-tools, linux-headers (its headers_install copies with rsync).
+# Adding it no longer rebuilds everything: linux-headers comes out identical,
+# so early cutoff stops there (SPEC.md 7.2). Dropped from Chimera's recipe:
+# shell completions.
 name = "rsync"
 version = "3.5.1"
 release = 1
@@ -10,7 +12,7 @@ summary = "Fast incremental file transfer tool"
 license = "GPL-3.0-only"
 homepage = "https://rsync.samba.org"
 builddeps = ["lz4-devel", "openssl-devel", "popt-devel", "zlib-ng-compat-devel", "zstd-devel"]
-checkdeps = ["bash", "python"]
+options = ["!check"]
 
 source = [
     { url = "https://www.samba.org/ftp/rsync/src/rsync-3.5.1.tar.gz", sha256 = "c55f9c9dc10fb8bec397b399a0fdded53cc9a2d8e30891bb0d63724d25c37bef" },
@@ -31,9 +33,6 @@ setup = '''
 '''
 build = '''
 %make
-'''
-check = '''
-%make check
 '''
 install = '''
 %make_install

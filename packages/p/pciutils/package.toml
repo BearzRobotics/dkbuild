@@ -1,0 +1,37 @@
+# Imported from Chimera Linux cports: work/cports/main/pciutils/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: rescue-tools (lspci). Shared libpci only (Chimera also ships a
+# static one); the PCI ID list comes from hwdata.
+name = "pciutils"
+version = "3.15.0"
+release = 1
+summary = "PCI bus utilities"
+license = "GPL-2.0-or-later"
+homepage = "https://mj.ucw.cz/sw/pciutils"
+hostdeps = ["pkgconf"]
+builddeps = ["zlib-ng-compat-devel", "kmod-devel", "linux-headers"]
+rundeps = ["hwdata"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://github.com/pciutils/pciutils/archive/v3.15.0.tar.gz", sha256 = "06f467642057599acf396bc17340452fac3308f1e08be19e0c32587e42d7017b" },
+]
+
+build = '''
+%make \
+    CC="$CC" \
+    ZLIB=yes \
+    SHARED=yes \
+    SHAREDIR=/usr/share/hwdata \
+    MANDIR=/usr/share/man \
+    PREFIX=/usr
+'''
+install = '''
+make install install-lib DESTDIR="$pkgdir" STRIP= ZLIB=yes SHARED=yes \
+    SHAREDIR=/usr/share/hwdata MANDIR=/usr/share/man PREFIX=/usr SBINDIR=/usr/bin
+# provided by hwdata
+rm -rf "$pkgdir/usr/share/hwdata"
+# we don't want to touch pci.ids
+rm -rf "$pkgdir/usr/bin/update-pciids"
+rm -rf "$pkgdir/usr/share/man/man8/update-pciids.8"
+'''
