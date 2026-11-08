@@ -1,0 +1,9 @@
+# eudev installs udevadm in /usr/bin, not /usr/sbin.
+# Trigger udev events for already-present devices.
+
+type = scripted
+command = /usr/bin/udevadm trigger --action=add
+log-type = buffer
+restart = false
+
+depends-on: udevd

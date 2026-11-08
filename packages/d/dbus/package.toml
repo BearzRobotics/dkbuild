@@ -2,15 +2,16 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested. Dropped from Chimera's recipe: shell completions, service/tmpfiles/sysusers
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+# No X11 build dependencies (Wayland-only system; they were Chimera leftovers).
 name = "dbus"
 version = "1.16.2"
-release = 1
+release = 2
 summary = "Message bus system"
 license = "GPL-2.0-or-later"
 homepage = "https://dbus.freedesktop.org"
 patches = ["0001-add-flag-for-dinit-activated-launch.patch", "0002-add-dinit-environment-updating.patch", "launch-helper-grp.patch", "no-issetugid.patch"]
 hostdeps = ["gperf", "meson", "pkgconf", "xmlto"]
-builddeps = ["dinit-chimera", "libcap-devel", "libexpat-devel", "libx11-devel"]
+builddeps = ["dinit-chimera", "libcap-devel", "libexpat-devel"]
 
 source = [
     { url = "https://dbus.freedesktop.org/releases/dbus/dbus-1.16.2.tar.xz", sha256 = "0ba2a1a4b16afe7bceb2c07e9ce99a8c2c3508e5dec290dbb643384bd6beb7e2" },

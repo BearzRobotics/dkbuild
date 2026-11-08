@@ -1,0 +1,27 @@
+# The live ISO's initramfs: /usr/lib/live/initrd.img, which `dkbuild image`
+# puts on the ISO. Its init (from DKRescue) finds the disc by volume label
+# (root=live:LABEL=..., default FENRIROS), or an .iso file on an exFAT, NTFS,
+# FAT, UDF or ext partition (Ventoy and the like), mounts /live/rootfs.sfs
+# under a RAM overlay and switches to dinit. `fenriros.shell` on the kernel
+# command line stops in a shell first. Runs on a static BusyBox; only the
+# kernel's built-in drivers are used (it carries no modules).
+name = "live-initramfs"
+version = "1"
+release = 1
+summary = "Initramfs for FenrirOS live ISOs"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+hostdeps = ["busybox", "zstd"]
+options = ["!check", "!strip"]
+
+install = '''
+r=$(mktemp -d)
+mkdir -p "$r/bin" "$r/dev" "$r/proc" "$r/sys" "$r/run" "$r/newroot"
+install -m755 /usr/bin/busybox "$r/bin/busybox"
+ln -s busybox "$r/bin/sh"
+install -m755 "$pkgfiles/init" "$r/init"
+install -m644 "$pkgfiles/fstab.live" "$r/fstab.live"
+mkdir -p "$pkgdir/usr/lib/live"
+( cd "$r" && find . | sort | busybox cpio -o -H newc 2>/dev/null ) | zstd -19 -q > "$pkgdir/usr/lib/live/initrd.img"
+rm -rf "$r"
+'''

@@ -1,15 +1,16 @@
 # Imported from Chimera Linux cports: work/cports/main/cairo/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
+# Wayland-only: no X11 dependencies, and the xlib/xcb backends off.
 name = "cairo"
 version = "1.18.6"
-release = 1
+release = 2
 summary = "Vector graphics library with cross-device output support"
 license = "LGPL-2.1-or-later OR MPL-1.1"
 homepage = "https://cairographics.org"
 patches = ["musl-stacksize.patch"]
 hostdeps = ["meson", "pkgconf"]
-builddeps = ["fontconfig-devel", "freetype-bootstrap", "glib-bootstrap", "libpng-devel", "libx11-devel", "libxcb-devel", "libxext-devel", "libxrender-devel", "lzo-devel", "pixman-devel", "zlib-ng-compat-devel"]
+builddeps = ["fontconfig-devel", "freetype-bootstrap", "glib-bootstrap", "libpng-devel", "lzo-devel", "pixman-devel", "zlib-ng-compat-devel"]
 checkdeps = ["ghostscript", "poppler-devel", "librsvg-devel"]
 options = ["!check"]
 
@@ -20,6 +21,8 @@ source = [
 setup = '''
 %meson \
     -Dtee=enabled \
+    -Dxlib=disabled \
+    -Dxcb=disabled \
     -Dspectre=disabled \
     -Dtests=disabled \
     -Ddefault_library=shared

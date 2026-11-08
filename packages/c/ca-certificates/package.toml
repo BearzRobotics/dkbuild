@@ -1,0 +1,37 @@
+# Imported from Chimera Linux cports: main/ca-certificates/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Mozilla's CA certificates (Alpine's packaging), for every TLS client: curl,
+# gh, ollama, Firefox. Chimera keeps /etc/ssl/certs up to date with apk
+# triggers; dkbuild has none yet, so the bundle and the hash links are made
+# here, at build time, and update-ca-certificates is there for local additions.
+name = "ca-certificates"
+version = "20261020"
+release = 1
+summary = "Common CA certificates for SSL/TLS"
+license = "GPL-2.0-or-later AND MPL-2.0"
+homepage = "https://gitlab.alpinelinux.org/alpine/ca-certificates"
+hostdeps = ["perl", "openssl"]
+builddeps = ["openssl-devel"]
+rundeps = ["openssl"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.alpinelinux.org/alpine/ca-certificates/-/archive/20261020/ca-certificates-20261020.tar.gz", sha256 = "1b9fb5a2972d2ff452a7d9b46a11f40914e20181b702c61191d2f1171758058f" },
+]
+
+build = '''
+make CC="$CC"
+'''
+install = '''
+make install DESTDIR="$pkgdir"
+rm -rf "$pkgdir/usr/local"
+mv "$pkgdir"/usr/sbin/update-ca-certificates "$pkgdir/usr/bin/"
+rmdir "$pkgdir/usr/sbin"
+c="$pkgdir/usr/share/ca-certificates"
+( cd "$c" && find . -name '*.crt' | sed 's|^\./||' | sort ) > "$c/ca-certificates.conf"
+# the bundle and per-certificate links, as update-ca-certificates makes them
+cat "$c"/mozilla/*.crt > "$pkgdir/etc/ssl/certs/ca-certificates.crt"
+ln -s certs/ca-certificates.crt "$pkgdir/etc/ssl/cert.pem"
+for f in "$c"/mozilla/*.crt; do ln -s "/usr/share/ca-certificates/mozilla/${f##*/}" "$pkgdir/etc/ssl/certs/${f##*/}"; done
+./c_rehash "$pkgdir/etc/ssl/certs" >/dev/null
+'''

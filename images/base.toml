@@ -1,0 +1,18 @@
+# FenrirOS base: a command-line live system (boot, log in, apk, network), for
+# any x86_64 PC, BIOS or UEFI. Every firmware group is included so hardware
+# works out of the box. The live user logs in on tty1 by itself and has no
+# password; `sudo` works (wheel).
+name     = "base"
+arch     = "x86_64"
+hostname = "fenriros"
+label    = "FENRIROS"
+packages = ["base", "base-net", "linux", "live-initramfs", "firmware-linux-meta"]
+exclude  = ["*-devel", "*-doc", "*-static"]
+services = ["udevd", "udev-trigger", "udev-settle", "modules", "dhcpcd", "syslogd"]
+output   = ["iso", "tar"]
+autologin = "live"
+
+[[users]]
+name     = "live"
+groups   = ["wheel", "video", "render", "audio", "input"]
+password = "empty"

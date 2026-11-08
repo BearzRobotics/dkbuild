@@ -1,0 +1,8 @@
+# Load kernel modules from /etc/modules
+
+type = scripted
+command = /etc/dinit.d/modules.sh start
+log-type = buffer
+restart = false
+
+depends-on: early-filesystems

@@ -1,0 +1,18 @@
+# FenrirOS with the DKDE desktop: a live ISO that boots straight to the
+# graphical desktop (the live user logs in on tty1 and dkde-session starts).
+# Every firmware group is included.
+name     = "dkde"
+arch     = "x86_64"
+hostname = "fenriros"
+label    = "FENRIROS_DKDE"
+packages = ["base", "base-net", "linux", "live-initramfs", "firmware-linux-meta", "desktop-dkde"]
+exclude  = ["*-devel", "*-doc", "*-static"]
+services = ["udevd", "udev-trigger", "udev-settle", "modules", "dhcpcd", "syslogd", "seatd", "dbus"]
+output   = ["iso"]
+autologin = "live"
+session   = "dkde-session"
+
+[[users]]
+name     = "live"
+groups   = ["wheel", "video", "render", "audio", "input"]
+password = "empty"

@@ -1,0 +1,20 @@
+# FenrirOS Rescue, DKRescue's successor: a live ISO for repairing, imaging,
+# recovering and wiping disks on any x86_64 PC (BIOS or UEFI, DVD, USB stick or
+# an .iso on a Ventoy stick). Boots straight to the DKDE desktop as `rescue`
+# (no password, sudo works); tty2-6 and the serial boot entry give a text login.
+# Every firmware group is included.
+name     = "rescue"
+arch     = "x86_64"
+hostname = "fenriros-rescue"
+label    = "FENRIROS_RESCUE"
+packages = ["base", "base-net", "linux", "live-initramfs", "firmware-linux-meta", "rescue-tools", "desktop-dkde"]
+exclude  = ["*-devel", "*-doc", "*-static"]
+services = ["udevd", "udev-trigger", "udev-settle", "modules", "dhcpcd", "syslogd", "seatd", "dbus"]
+output   = ["iso"]
+autologin = "rescue"
+session   = "dkde-session"
+
+[[users]]
+name     = "rescue"
+groups   = ["wheel", "video", "render", "audio", "input", "disk"]
+password = "empty"

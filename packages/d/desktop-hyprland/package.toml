@@ -1,0 +1,14 @@
+# A Hyprland desktop: the compositor, seat management, audio (PipeWire with
+# WirePlumber), Mesa with Vulkan, D-Bus, fonts, and the DKDE apps (terminal,
+# files, editor...).
+name = "desktop-hyprland"
+version = "1"
+release = 1
+summary = "Hyprland desktop for FenrirOS"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+options = ["meta"]
+rundeps = [
+    "hyprland", "seatd", "dbus", "mesa", "vulkan-loader", "pipewire", "wireplumber",
+    "fonts-dejavu", "shared-mime-info", "hicolor-icon-theme", "dkde",
+]

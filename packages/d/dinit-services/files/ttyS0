@@ -1,0 +1,7 @@
+# Serial-console login for QEMU -nographic and headless machines; no autologin on a rescue disk used on foreign networks.
+
+type = process
+command = /usr/sbin/agetty -L 115200 ttyS0 vt100
+restart = true
+
+depends-on: loginready

@@ -1,0 +1,18 @@
+# What every FenrirOS system has: it boots with dinit, you log in on a text
+# console, and apk works (SPEC.md 9.1). No compiler, no desktop, no network
+# daemons (base-net). The kernel, bootloader and firmware are chosen by the
+# image, since they depend on the machine.
+name = "base"
+version = "1"
+release = 1
+summary = "FenrirOS base system"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+options = ["meta"]
+rundeps = [
+    "base-files", "musl", "dinit", "dinit-services", "eudev", "kmod",
+    "util-linux", "shadow", "sudo", "apk-tools", "ca-certificates", "tzdb",
+    "coreutils", "dash", "bash", "sed", "grep", "gawk", "findutils", "diffutils",
+    "which", "less", "file", "procps", "psmisc", "iproute2", "kbd", "sysklogd",
+    "tar", "gzip", "xz", "zstd", "e2fsprogs", "dosfstools",
+]

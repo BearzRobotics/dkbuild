@@ -1,0 +1,3 @@
+export PATH=/usr/bin:/usr/sbin
+export PS1='\[\e[1;36m\]\u\[\e[1;35m\]@\[\e[1;33m\]\h\[\e[1;34m\] \w \$\[\e[0m\] '
+alias ls='ls --color=auto'

@@ -1,0 +1,41 @@
+# The base layout of a FenrirOS root: directories, the usr-merged links
+# (/bin, /sbin, /lib, /lib64 -> /usr/..., as on DKRescue), and /etc: users and groups, fstab
+# (without the root line, which installing writes), hosts, profile, shells,
+# os-release. Taken from the DKRescue image, without its live `rescue` user.
+# System users for the tree's daemons are here, not in install scripts:
+# dbus (the bus daemon runs as dbus, -Ddbus_user=dbus), sshd (openssh), dhcpcd. polkit adds polkitd itself.
+# Every account starts locked; an image sets passwords.
+name = "base-files"
+version = "1"
+release = 1
+summary = "FenrirOS base directory layout and configuration files"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+options = ["!check", "!strip", "rootlayout"]
+
+install = '''
+d="$pkgdir"
+for x in boot dev etc etc/sudoers.d home mnt opt proc run srv sys \
+         usr/bin usr/lib usr/share usr/include usr/local/bin usr/local/lib usr/local/share \
+         var/cache var/empty var/lib var/log var/spool var/opt; do
+    mkdir -p "$d/$x"
+done
+install -dm0700 "$d/root"
+install -dm1777 "$d/tmp" "$d/var/tmp"
+ln -s usr/bin "$d/bin"
+mkdir -p "$d/usr/sbin"
+ln -s usr/sbin "$d/sbin"
+ln -s usr/lib "$d/lib"
+ln -s usr/lib "$d/lib64"
+ln -s lib "$d/usr/lib64"
+ln -s ../run "$d/var/run"
+ln -s ../proc/self/mounts "$d/etc/mtab"
+for f in passwd group fstab hosts profile shells protocols services os-release issue; do
+    install -m644 "$pkgfiles/$f" "$d/etc/$f"
+done
+install -m600 "$pkgfiles/shadow" "$d/etc/shadow"
+install -m600 "$pkgfiles/gshadow" "$d/etc/gshadow"
+install -m440 "$pkgfiles/sudoers-wheel" "$d/etc/sudoers.d/00-wheel"
+mv "$d/etc/os-release" "$d/usr/lib/os-release"
+ln -s ../usr/lib/os-release "$d/etc/os-release"
+'''

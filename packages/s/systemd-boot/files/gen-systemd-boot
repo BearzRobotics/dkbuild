@@ -1,0 +1,34 @@
+#!/bin/sh
+# Writes systemd-boot entries (Boot Loader Specification) for every kernel in
+# /boot, with the EFI system partition mounted at /boot. Run by the linux
+# package after it installs or upgrades a kernel; safe to run by hand.
+#   /etc/default/systemd-boot: SD_BOOT_CMDLINE="..." adds kernel options.
+set -e
+[ -f /etc/default/systemd-boot ] && . /etc/default/systemd-boot
+BOOT=${SD_BOOT_PATH:-/boot}
+if ! mountpoint -q "$BOOT" || [ ! -d "$BOOT/loader" ]; then
+    echo "gen-systemd-boot: $BOOT is not an EFI system partition with systemd-boot (run: bootctl install); skipping" >&2
+    exit 0
+fi
+ROOT=$(findmnt -no UUID /)
+[ -n "$ROOT" ] || { echo "gen-systemd-boot: cannot find the UUID of /" >&2; exit 1; }
+TITLE=$(. /usr/lib/os-release && echo "${PRETTY_NAME:-$NAME}")
+TOKEN=$(. /usr/lib/os-release && echo "${ID:-linux}")
+OPTS="root=UUID=$ROOT ro${SD_BOOT_CMDLINE:+ $SD_BOOT_CMDLINE}"
+mkdir -p "$BOOT/loader/entries"
+rm -f "$BOOT/loader/entries/$TOKEN"-*.conf
+for k in "$BOOT"/vmlinuz-*; do
+    [ -f "$k" ] || continue
+    v=${k##*/vmlinuz-}
+    for mode in normal recovery; do
+        f="$BOOT/loader/entries/$TOKEN-$v.conf"; o="$OPTS"; t="$TITLE ($v)"
+        if [ $mode = recovery ]; then f="$BOOT/loader/entries/$TOKEN-$v-recovery.conf"; o="$OPTS single"; t="$TITLE ($v, recovery)"; fi
+        {
+            echo "title $t"
+            echo "linux /vmlinuz-$v"
+            [ -f "$BOOT/initrd.img-$v" ] && echo "initrd /initrd.img-$v"
+            echo "options $o"
+        } > "$f"
+        echo "gen-systemd-boot: wrote $f"
+    done
+done

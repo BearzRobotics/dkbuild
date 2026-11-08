@@ -1,0 +1,5 @@
+# The D-Bus system bus (polkit, dkde's notifications and tray, BlueZ).
+type = process
+command = /usr/bin/dbus-daemon --system --nofork --nopidfile --nosyslog
+smooth-recovery = true
+depends-on: dbus-prepare

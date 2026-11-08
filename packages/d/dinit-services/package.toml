@@ -1,0 +1,26 @@
+# dinit's system services: the boot sequence (filesystems, rootfs check,
+# modules, udev, rcboot), the login gettys (tty1-6, ttyS0), single-user and
+# recovery modes, and services for daemons whose packages do not ship one yet
+# (dbus, dhcpcd, seatd, syslogd, udevd, hwclock). Taken from the DKRescue image (dbus
+# is new: the system bus for polkit and the desktop); the
+# hostname now comes from /etc/hostname. Services an image starts at boot are
+# links in /etc/dinit.d/boot.d, made by `dkbuild image` (`services = [...]`).
+# sshd and sshd-keys come with openssh.
+name = "dinit-services"
+version = "1"
+release = 1
+summary = "dinit service definitions and boot scripts for FenrirOS"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+rundeps = ["dinit", "util-linux", "eudev"]
+options = ["!check", "!strip"]
+
+install = '''
+mkdir -p "$pkgdir/etc/dinit.d/boot.d"
+for f in "$pkgfiles"/*; do
+    case "$f" in
+        *.sh) install -m755 "$f" "$pkgdir/etc/dinit.d/" ;;
+        *) install -m644 "$f" "$pkgdir/etc/dinit.d/" ;;
+    esac
+done
+'''

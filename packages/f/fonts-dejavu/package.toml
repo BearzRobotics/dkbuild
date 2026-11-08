@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: main/fonts-dejavu/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# The DejaVu fonts: the default text font for the desktop, Firefox and the
+# terminal. Upstream's released TTF files (building them from source needs
+# fontforge); fontconfig rules enabled as Chimera does.
+name = "fonts-dejavu"
+version = "2.37"
+release = 1
+summary = "DejaVu family of fonts"
+license = "custom:Bitstream-Vera AND custom:Arev-Fonts"
+homepage = "https://github.com/dejavu-fonts/dejavu-fonts"
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/dejavu-fonts/dejavu-fonts/releases/download/version_2_37/dejavu-fonts-ttf-2.37.tar.bz2", sha256 = "fa9ca4d13871dd122f61258a80d01751d603b4d3ee14095d65453b4e846e17d7" },
+]
+
+install = '''
+install -d "$pkgdir/usr/share/fonts/dejavu" "$pkgdir/usr/share/fontconfig/conf.avail" "$pkgdir/etc/fonts/conf.d"
+install -m644 ttf/*.ttf "$pkgdir/usr/share/fonts/dejavu/"
+for f in fontconfig/*.conf; do
+    case "$f" in *lgc*) continue ;; esac
+    install -m644 "$f" "$pkgdir/usr/share/fontconfig/conf.avail/"
+    ln -s "../../../usr/share/fontconfig/conf.avail/${f##*/}" "$pkgdir/etc/fonts/conf.d/${f##*/}"
+done
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/fonts-dejavu/LICENSE"
+'''

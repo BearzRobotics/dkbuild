@@ -1,0 +1,23 @@
+# FenrirOS for the build machine itself (Ryzen 7000 + Radeon RX 7700/7800 XT):
+# base system, networking, the DKDE desktop (default; Hyprland also installed),
+# systemd-boot, AMD firmware,
+# and the AI/dev tools. `dkbuild image images/fenriros.toml` makes
+# out/fenriros/fenriros.tar.zst, which is unpacked onto the disk (see
+# docs/install.md).
+name     = "fenriros"
+arch     = "x86_64"
+hostname = "fenriros"
+packages = [
+    "base", "base-net", "linux", "systemd-boot",
+    "firmware-linux-amdgpu", "firmware-linux-amd-ucode",
+    "desktop-dkde", "desktop-hyprland",
+    "llama-cpp", "ollama", "python-ollama", "gh", "go", "msedit", "ttt", "gcompat",
+]
+exclude  = ["*-devel", "*-doc", "*-static"]
+services = ["udevd", "udev-trigger", "udev-settle", "modules", "dhcpcd", "syslogd", "seatd", "dbus"]
+output   = ["tar"]
+
+[[users]]
+name     = "dakota"
+groups   = ["wheel", "video", "render", "audio", "input"]
+password = "locked"

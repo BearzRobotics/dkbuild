@@ -1,0 +1,699 @@
+# Imported from Chimera Linux cports: main/firmware-linux/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Firmware for the kernel, split as Chimera splits it: one package per vendor or
+# device family (firmware-linux-amdgpu, -iwlwifi, ...), so a system gets only
+# what it needs. Each is pulled in automatically (install_if) when its group is
+# installed: firmware-linux-gpu, -network, -audio, -storage, -misc, -soc; and
+# firmware-linux-meta brings in every group. The table of 127 packages
+# and their paths is generated from Chimera's. Files are zstd-compressed (the
+# kernel reads .zst firmware) and not deduplicated (that needs rdfind).
+name = "firmware-linux"
+version = "20261019"
+release = 1
+summary = "Binary firmware blobs for the Linux kernel"
+license = "custom:linux-firmware"
+homepage = "https://www.kernel.org"
+hostdeps = ["zstd", "python"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://gitlab.com/kernel-firmware/linux-firmware/-/archive/20261019.tar.gz", sha256 = "abf515553e6525c0314398e40d329c9b199ae614c17cb97b02536db3ca6be07a" },
+]
+
+install = '''
+fw="$pkgdir/usr/lib/firmware"
+mkdir -p "$fw"
+ZSTD_CLEVEL=9 ZSTD_NBTHREADS=4 ./copy-firmware.sh --zstd -v "$fw"
+install -Dm644 WHENCE "$pkgdir/usr/share/licenses/firmware-linux/WHENCE"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/firmware-linux/LICENSE"
+for lc in LICENSES/LICEN*; do [ -f "$lc" ] && install -Dm644 "$lc" "$pkgdir/usr/share/licenses/firmware-linux/${lc##*/}"; done
+# as Chimera: deprecated, never-mainline and other-architecture firmware
+for x in av7110 cis dabusb dsp56k imx mwlwifi ositech r128 sb16 sxg ti-keystone \
+         'r8a779x_usb3_v1.dlmem*' 'r8a779x_usb3_v2.dlmem*' 'r8a779x_usb3_v3.dlmem*' \
+         'ti/vpdma-1b8.bin*' 'usbdux_firmware.bin*' 'usbduxfast_firmware.bin*' 'usbduxsigma_firmware.bin*'; do
+    rm -rf "$fw"/$x
+done
+# NVIDIA GSP-only directories are links to an older one; make them directories
+# with a gsp link inside, so each belongs to one package (as Chimera does).
+for f in "$fw"/nvidia/ad* "$fw"/nvidia/gb*; do
+    [ -L "$f" ] || continue
+    bp=$(readlink "$f"); rm "$f"; mkdir -m755 "$f"; ln -s "../$bp/gsp" "$f/gsp"
+done
+'''
+
+[subpackages.audio]
+summary = "Firmware for audio (group: installs all of it)"
+empty = true
+install_if = ["firmware-linux-meta"]
+
+[subpackages.gpu]
+summary = "Firmware for graphics (group: installs all of it)"
+empty = true
+install_if = ["firmware-linux-meta"]
+
+[subpackages.misc]
+summary = "Firmware for miscellaneous (group: installs all of it)"
+empty = true
+install_if = ["firmware-linux-meta"]
+
+[subpackages.network]
+summary = "Firmware for network devices (group: installs all of it)"
+empty = true
+install_if = ["firmware-linux-meta"]
+
+[subpackages.soc]
+summary = "Firmware for systems on chip (group: installs all of it)"
+empty = true
+install_if = ["firmware-linux-meta"]
+
+[subpackages.storage]
+summary = "Firmware for storage devices (group: installs all of it)"
+empty = true
+install_if = ["firmware-linux-meta"]
+
+[subpackages.meta]
+summary = "All Linux firmware (installs every group)"
+empty = true
+
+[subpackages.advansys]
+summary = "Firmware for Advansys SCSI"
+paths = ["/usr/lib/firmware/advansys"]
+install_if = ["firmware-linux-storage"]
+
+[subpackages.aeonsemi]
+summary = "Firmware for Aeonsemi Ethernet PHY"
+paths = ["/usr/lib/firmware/aeonsemi"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.aic]
+summary = "Firmware for AIC Bluetooth and Wi-Fi"
+paths = ["/usr/lib/firmware/aic"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.airoha]
+summary = "Firmware for Airoha Ethernet PHY"
+paths = ["/usr/lib/firmware/airoha"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.amd-ucode]
+summary = "Firmware for AMD CPU microcode"
+paths = ["/usr/lib/firmware/amd-ucode"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.amd-sev]
+summary = "Firmware for AMD SEV firmware"
+paths = ["/usr/lib/firmware/amd"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.amdgpu]
+summary = "Firmware for Newer AMD GPUs"
+paths = ["/usr/lib/firmware/amdgpu"]
+install_if = ["firmware-linux-gpu"]
+
+[subpackages.amdnpu]
+summary = "Firmware for AMD AI junk"
+paths = ["/usr/lib/firmware/amdnpu"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.amphion]
+summary = "Firmware for i.MX8Q VPU"
+paths = ["/usr/lib/firmware/amphion"]
+
+[subpackages.amdtee]
+summary = "Firmware for AMD ASP TEE"
+paths = ["/usr/lib/firmware/amdtee"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.amlogic-bt]
+summary = "Firmware for Amlogic Bluetooth"
+paths = ["/usr/lib/firmware/amlogic/aml_w*_bt_uart.bin*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.ar3k]
+summary = "Firmware for Atheros AR3K Bluetooth"
+paths = ["/usr/lib/firmware/ar3k"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.ar3011]
+summary = "Firmware for AR3011 Bluetooth"
+paths = ["/usr/lib/firmware/ath3k*.fw*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.ar5523]
+summary = "Firmware for AR5523 WLAN"
+paths = ["/usr/lib/firmware/ar5523.bin*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.ar9170]
+summary = "Firmware for AR9170 WLAN"
+paths = ["/usr/lib/firmware/ar9170*.fw*", "/usr/lib/firmware/carl9170*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.ath6k]
+summary = "Firmware for AR6000x WLAN"
+paths = ["/usr/lib/firmware/ath6k"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.ath9k_htc]
+summary = "Firmware for AR7010/9271 WLAN"
+paths = ["/usr/lib/firmware/ar*.fw*", "/usr/lib/firmware/ath9k_htc", "/usr/lib/firmware/htc_*.fw*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.ath10k]
+summary = "Firmware for ath10k WLAN"
+paths = ["/usr/lib/firmware/ath10k"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.ath11k]
+summary = "Firmware for ath11k WLAN"
+paths = ["/usr/lib/firmware/ath11k"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.ath12k]
+summary = "Firmware for ath12k WLAN"
+paths = ["/usr/lib/firmware/ath12k"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.atwilc]
+summary = "Firmware for Atmel WILC WLAN"
+paths = ["/usr/lib/firmware/atmel"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.atusb]
+summary = "Firmware for ATUSB IEEE 802.15.4 transceiver"
+paths = ["/usr/lib/firmware/atusb"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.bmi260]
+summary = "Firmware for BMI260 Inertial Measurement Unit"
+paths = ["/usr/lib/firmware/bmi260*"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.bnx2]
+summary = "Firmware for BNX2 1Gb Ethernet"
+paths = ["/usr/lib/firmware/bnx2"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.bnx2x]
+summary = "Firmware for BNX2 10Gb Ethernet"
+paths = ["/usr/lib/firmware/bnx2x"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.brcm]
+summary = "Firmware for Broadcom WLAN/Bluetooth"
+paths = ["/usr/lib/firmware/brcm", "/usr/lib/firmware/cypress"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.ca0132]
+summary = "Firmware for Creative CA0132 HD Audio codec"
+paths = ["/usr/lib/firmware/ctefx.bin*", "/usr/lib/firmware/ctspeq.bin*"]
+install_if = ["firmware-linux-audio"]
+
+[subpackages.cnn55xx]
+summary = "Firmware for Cavium CNN55XX crypto accelerator"
+paths = ["/usr/lib/firmware/cavium/cnn55xx*"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.cpia2]
+summary = "Firmware for STM CPIA2 cameras"
+paths = ["/usr/lib/firmware/cpia2"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.cs35l41]
+summary = "Firmware for Cirrus CS35L41 amplifier"
+paths = ["/usr/lib/firmware/cirrus/cs35l41*"]
+install_if = ["firmware-linux-audio"]
+
+[subpackages.cs35l54]
+summary = "Firmware for Cirrus CS35L54 amplifier"
+paths = ["/usr/lib/firmware/cirrus/cs35l54*"]
+install_if = ["firmware-linux-audio"]
+
+[subpackages.cs35l56]
+summary = "Firmware for Cirrus CS35L56 amplifier"
+paths = ["/usr/lib/firmware/cirrus/cs35l56*"]
+install_if = ["firmware-linux-audio"]
+
+[subpackages.cs35l57]
+summary = "Firmware for Cirrus CS35L57 amplifier"
+paths = ["/usr/lib/firmware/cirrus/cs35l57*"]
+install_if = ["firmware-linux-audio"]
+
+[subpackages.cs35l63]
+summary = "Firmware for Cirrus CS35L63 amplifier"
+paths = ["/usr/lib/firmware/cirrus/cs35l63*"]
+install_if = ["firmware-linux-audio"]
+
+[subpackages.cs42l43]
+summary = "Firmware for Cirrus CS42L43 amplifier"
+paths = ["/usr/lib/firmware/cs42l43.bin*"]
+install_if = ["firmware-linux-audio"]
+
+[subpackages.cs42l45]
+summary = "Firmware for Cirrus CS42L45 codec"
+paths = ["/usr/lib/firmware/sdca/1fa"]
+install_if = ["firmware-linux-audio"]
+
+[subpackages.cxgb3]
+summary = "Firmware for Chelsio T3 10Gb Ethernet"
+paths = ["/usr/lib/firmware/cxgb3"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.cxgb4]
+summary = "Firmware for Chelsio T4/5/6 Ethernet"
+paths = ["/usr/lib/firmware/cxgb4"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.cw1200]
+summary = "Firmware for ST-E CW1200 WLAN"
+paths = ["/usr/lib/firmware/wsm_22.bin*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.dpaa2]
+summary = "Firmware for NXP DPAA2"
+paths = ["/usr/lib/firmware/dpaa2"]
+
+[subpackages.dvb]
+summary = "Firmware for Misc DVB devices"
+paths = ["/usr/lib/firmware/as102*.hex*", "/usr/lib/firmware/dvb-*.fw*", "/usr/lib/firmware/v4l-cx*.fw*", "/usr/lib/firmware/tlg2300*"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.e100]
+summary = "Firmware for Intel PRO/100 Ethernet"
+paths = ["/usr/lib/firmware/e100"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.edgeport]
+summary = "Firmware for Edgeport USB Serial Converter"
+paths = ["/usr/lib/firmware/edgeport"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.emi]
+summary = "Firmware for Emagic EMI audo interfaces"
+paths = ["/usr/lib/firmware/emi26"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.ene-ub6250]
+summary = "Firmware for ENE UB6250 SD card reader"
+paths = ["/usr/lib/firmware/ene-ub6250"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.go7007]
+summary = "Firmware for WIS GO7007 MPEG encoder"
+paths = ["/usr/lib/firmware/go7007"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.hermes]
+summary = "Firmware for Orinoco Hermes WLAN"
+paths = ["/usr/lib/firmware/agere*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.hfi1]
+summary = "Firmware for Intel OPA hfi1"
+paths = ["/usr/lib/firmware/hfi1_*.fw*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.xe]
+summary = "Firmware for Intel Xe GPUs"
+paths = ["/usr/lib/firmware/i915/bmg*", "/usr/lib/firmware/i915/dg*", "/usr/lib/firmware/xe"]
+install_if = ["firmware-linux-gpu"]
+
+[subpackages.i915]
+summary = "Firmware for Intel GPUs"
+paths = ["/usr/lib/firmware/i915"]
+install_if = ["firmware-linux-gpu"]
+
+[subpackages.intel-audio]
+summary = "Firmware for Intel audio"
+paths = ["/usr/lib/firmware/intel/IntcSST2.bin*", "/usr/lib/firmware/intel/dsp_fw_*.bin*", "/usr/lib/firmware/intel/fw_sst_*.bin*", "/usr/lib/firmware/intel/avs", "/usr/lib/firmware/intel/catpt"]
+install_if = ["firmware-linux-audio"]
+
+[subpackages.intel-bt]
+summary = "Firmware for Intel Bluetooth"
+paths = ["/usr/lib/firmware/intel/ibt*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.intel-ice]
+summary = "Firmware for Intel E800 series"
+paths = ["/usr/lib/firmware/intel/ice"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.intel-ipu2]
+summary = "Firmware for Intel IPU2"
+paths = ["/usr/lib/firmware/intel/ipu/shisp_*.bin*"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.intel-ipu3]
+summary = "Firmware for Intel IPU3"
+paths = ["/usr/lib/firmware/intel/ipu/irci_*.bin*", "/usr/lib/firmware/intel/ipu3-fw.bin*", "/usr/lib/firmware/intel/irci_*.bin*"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.intel-ipu6]
+summary = "Firmware for Intel IPU6"
+paths = ["/usr/lib/firmware/intel/ipu/ipu6*.bin*"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.intel-ipu7]
+summary = "Firmware for Intel IPU7"
+paths = ["/usr/lib/firmware/intel/ipu/ipu7*.bin*"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.intel-ish]
+summary = "Firmware for Intel Integrated Sensor Hub"
+paths = ["/usr/lib/firmware/HP/ish", "/usr/lib/firmware/LENOVO/ish", "/usr/lib/firmware/dell/ish", "/usr/lib/firmware/intel/ish"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.intel-ivsc]
+summary = "Firmware for Intel Visual Sensing Controller"
+paths = ["/usr/lib/firmware/intel/vsc"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.intel-vpu]
+summary = "Firmware for Intel VPU"
+paths = ["/usr/lib/firmware/intel/vpu"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.inside-secure]
+summary = "Firmware for Inside Secure SafeXcel"
+paths = ["/usr/lib/firmware/inside-secure"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.isci]
+summary = "Firmware for Intel C600 SAS controller"
+paths = ["/usr/lib/firmware/isci"]
+install_if = ["firmware-linux-storage"]
+
+[subpackages.iwlwifi]
+summary = "Firmware for Intel WLAN"
+paths = ["/usr/lib/firmware/intel/iwlwifi", "/usr/lib/firmware/iwlwifi*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.ixp4xx]
+summary = "Firmware for IXP4xx"
+paths = ["/usr/lib/firmware/ixp4xx"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.kaweth]
+summary = "Firmware for KL5KUSB101 Ethernet"
+paths = ["/usr/lib/firmware/kaweth"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.keyspan]
+summary = "Firmware for Keyspan serial converters"
+paths = ["/usr/lib/firmware/keyspan*"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.liquidio]
+summary = "Firmware for Cavium LiquidIO NICs"
+paths = ["/usr/lib/firmware/liquidio"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.lt9611uxc]
+summary = "Firmware for LT9611UXC DSI to HDMI"
+paths = ["/usr/lib/firmware/lt9611uxc_fw.bin*"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.lontium]
+summary = "Firmware for Lontium bridge"
+paths = ["/usr/lib/firmware/Lontium", "/usr/lib/firmware/lt87*"]
+install_if = ["firmware-linux-gpu"]
+
+[subpackages.mali]
+summary = "Firmware for ARM Mali GPUs"
+paths = ["/usr/lib/firmware/arm/mali"]
+
+[subpackages.matrox]
+summary = "Firmware for Matrox G200/400"
+paths = ["/usr/lib/firmware/matrox"]
+install_if = ["firmware-linux-gpu"]
+
+[subpackages.mediatek-soc]
+summary = "Firmware for Mediatek SoCs"
+paths = ["/usr/lib/firmware/mediatek/mt798*", "/usr/lib/firmware/mediatek/mt81*", "/usr/lib/firmware/mediatek/sof"]
+
+[subpackages.mediatek]
+summary = "Firmware for Mediatek WLAN/Bluetooth"
+paths = ["/usr/lib/firmware/mediatek", "/usr/lib/firmware/mt7*.bin*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.mellanox]
+summary = "Firmware for Mellanox Ethernet"
+paths = ["/usr/lib/firmware/mellanox"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.meson-vdec]
+summary = "Firmware for Amlogic Meson decoders"
+paths = ["/usr/lib/firmware/meson/vdec"]
+
+[subpackages.mhdp8546]
+summary = "Firmware for Cadence MHDP8546 DP bridge"
+paths = ["/usr/lib/firmware/cadence/mhdp8546*"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.morsemicro]
+summary = "Firmware for Morse Micro Wi-Fi"
+paths = ["/usr/lib/firmware/morsemicro"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.moxa]
+summary = "Firmware for Moxa USB-Serial hubs"
+paths = ["/usr/lib/firmware/moxa"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.mrvl-cpt]
+summary = "Firmware for Marvell Octeon crypto"
+paths = ["/usr/lib/firmware/mrvl/cpt*"]
+
+[subpackages.mrvl-prestera]
+summary = "Firmware for Marvell Prestera switches"
+paths = ["/usr/lib/firmware/mrvl/prestera"]
+
+[subpackages.mrvl]
+summary = "Firmware for Marvell WLAN/Bluetooth"
+paths = ["/usr/lib/firmware/mrvl", "/usr/lib/firmware/lbtf_usb.bin*", "/usr/lib/firmware/libertas", "/usr/lib/firmware/mwl8k"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.multitech]
+summary = "Firmware for Multi-Tech modems"
+paths = ["/usr/lib/firmware/mts_*.fw*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.myricom]
+summary = "Firmware for Myricom Ethernet NICs"
+paths = ["/usr/lib/firmware/myri10ge*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.nfp]
+summary = "Firmware for Netronome Flow Processor"
+paths = ["/usr/lib/firmware/netronome"]
+
+[subpackages.nxp-uwb]
+summary = "Firmware for NXP UWB firmware"
+paths = ["/usr/lib/firmware/nxp/sr150_fw.bin*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.nxp-bt]
+summary = "Firmware for NXP BT chipsets"
+paths = ["/usr/lib/firmware/nxp/helper_uart*.bin*", "/usr/lib/firmware/nxp/uartiw*.bin*", "/usr/lib/firmware/nxp/uartspi*.se*", "/usr/lib/firmware/nxp/uartuart*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.nxp-wifi]
+summary = "Firmware for NXP WiFi firmware"
+paths = ["/usr/lib/firmware/nxp/sd_w*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.nvidia-gsp]
+summary = "Firmware for Nvidia GSP"
+paths = ["/usr/lib/firmware/nvidia/*/gsp"]
+install_if = ["firmware-linux-gpu"]
+
+[subpackages.nvidia]
+summary = "Firmware for Nvidia GPUs"
+paths = ["/usr/lib/firmware/nvidia"]
+install_if = ["firmware-linux-gpu"]
+
+[subpackages.powervr]
+summary = "Firmware for PowerVR GPUs"
+paths = ["/usr/lib/firmware/powervr"]
+install_if = ["firmware-linux-gpu"]
+
+[subpackages.qat]
+summary = "Firmware for Intel QuickAssist Technology"
+paths = ["/usr/lib/firmware/intel/qat", "/usr/lib/firmware/qat*"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.qca]
+summary = "Firmware for Qualcomm Atheros WLAN/Bluetooth"
+paths = ["/usr/lib/firmware/qca"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.qcom]
+summary = "Firmware for Qualcomm SoCs"
+paths = ["/usr/lib/firmware/a300_*.fw*", "/usr/lib/firmware/qcom"]
+
+[subpackages.qlogic]
+summary = "Firmware for QLogic HBAs"
+paths = ["/usr/lib/firmware/cbfw*.bin*", "/usr/lib/firmware/ct2fw*.bin*", "/usr/lib/firmware/ctfw*.bin*", "/usr/lib/firmware/qed", "/usr/lib/firmware/ql2*.bin*", "/usr/lib/firmware/qlogic", "/usr/lib/firmware/phanfw.bin*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.radeon]
+summary = "Firmware for Older AMD GPUs"
+paths = ["/usr/lib/firmware/radeon"]
+install_if = ["firmware-linux-gpu"]
+
+[subpackages.ralink]
+summary = "Firmware for Ralink WLAN"
+paths = ["/usr/lib/firmware/rt*.bin*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.rcar]
+summary = "Firmware for R-Car SoC"
+paths = ["/usr/lib/firmware/rcar*"]
+
+[subpackages.rockchip]
+summary = "Firmware for Rockchip SoCs"
+paths = ["/usr/lib/firmware/rockchip"]
+
+[subpackages.rp2]
+summary = "Firmware for Comtrol RocketPort 2"
+paths = ["/usr/lib/firmware/rp2.fw*"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.rsi]
+summary = "Firmware for Redpine RSI91X WLAN/Bluetooth"
+paths = ["/usr/lib/firmware/rsi*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.rt1320]
+summary = "Firmware for Realtek sound MCU"
+paths = ["/usr/lib/firmware/realtek/rt1320"]
+install_if = ["firmware-linux-audio"]
+
+[subpackages.rtl_bt]
+summary = "Firmware for Realtek Bluetooth"
+paths = ["/usr/lib/firmware/rtl_bt"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.rtl_nic]
+summary = "Firmware for Realtek Ethernet"
+paths = ["/usr/lib/firmware/rtl_nic"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.rtlwifi]
+summary = "Firmware for Realtek WLAN"
+paths = ["/usr/lib/firmware/rtlwifi", "/usr/lib/firmware/rtw88", "/usr/lib/firmware/rtw89"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.sagrad]
+summary = "Firmware for Sagrad SG901-1091/1098 WLAN"
+paths = ["/usr/lib/firmware/sdd_sagrad_*.bin*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.sensoray]
+summary = "Firmware for Sensoray webcams"
+paths = ["/usr/lib/firmware/f2255usb.bin*", "/usr/lib/firmware/s2250*.fw*"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.s5p-mfc]
+summary = "Firmware for Samsung Multi Format Codec"
+paths = ["/usr/lib/firmware/s5p-mfc*.fw*"]
+
+[subpackages.siano]
+summary = "Firmware for Siano DTV"
+paths = ["/usr/lib/firmware/sms1xxx*.fw*", "/usr/lib/firmware/*.inp*"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.slicoss]
+summary = "Firmware for Alacritech Slicoss NICs"
+paths = ["/usr/lib/firmware/slicoss"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.starfire]
+summary = "Firmware for Adaptec Starfire Ethernet"
+paths = ["/usr/lib/firmware/adaptec/starfire*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.tehuti]
+summary = "Firmware for Tehuti 10GbE NICs"
+paths = ["/usr/lib/firmware/tehuti"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.ti-connectivity]
+summary = "Firmware for TI WLAN/Bluetooth"
+paths = ["/usr/lib/firmware/ti-connectivity"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.ti-serial]
+summary = "Firmware for TI USB 3410/5052"
+paths = ["/usr/lib/firmware/ti_*.fw*"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.ti-tas]
+summary = "Firmware for Texas Instruments amplifiers"
+paths = ["/usr/lib/firmware/INT88*", "/usr/lib/firmware/TAS2*", "/usr/lib/firmware/TIAS2*", "/usr/lib/firmware/TXNW*", "/usr/lib/firmware/tas25*", "/usr/lib/firmware/ti/audio/tas*", "/usr/lib/firmware/ti/pcm6240", "/usr/lib/firmware/*-*-0x*.bin*"]
+install_if = ["firmware-linux-audio"]
+
+[subpackages.tigon]
+summary = "Firmware for Tigon I/II/III Ethernet"
+paths = ["/usr/lib/firmware/tigon"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.tsse]
+summary = "Firmware for Mont-TSSE crypto algorithm accelerator"
+paths = ["/usr/lib/firmware/tsse_firmware.bin*"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.typhoon]
+summary = "Firmware for 3Com Typhoon Ethernet"
+paths = ["/usr/lib/firmware/3com"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.ueagle-atm]
+summary = "Firmware for Eagle USB modems"
+paths = ["/usr/lib/firmware/ueagle-atm"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.vntwusb]
+summary = "Firmware for Via VNT6656 USB WLAN"
+paths = ["/usr/lib/firmware/vntwusb.fw*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.vsc85xx]
+summary = "Firmware for Microchip VSX85xx Ethernet PHYs"
+paths = ["/usr/lib/firmware/microchip/mscc_vsc85*.bin*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.vxge]
+summary = "Firmware for Exar X3100 10Gb Ethernet"
+paths = ["/usr/lib/firmware/vxge"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.wave521c]
+summary = "Firmware for WAVE521C encoder IP"
+paths = ["/usr/lib/firmware/cnm/wave521c*"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.wave633c]
+summary = "Firmware for WAVE633C codec IP"
+paths = ["/usr/lib/firmware/cnm/wave633c*"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.whiteheat]
+summary = "Firmware for WhiteHEAT USB-Serial"
+paths = ["/usr/lib/firmware/whiteheat*"]
+install_if = ["firmware-linux-misc"]
+
+[subpackages.wil6210]
+summary = "Firmware for Qualcomm wil6210 60GHz WLAN"
+paths = ["/usr/lib/firmware/wil6210*"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.wfx]
+summary = "Firmware for Silicon Laboratories WFx WLAN"
+paths = ["/usr/lib/firmware/wfx"]
+install_if = ["firmware-linux-network"]
+
+[subpackages.yamaha]
+summary = "Firmware for Yamaha audio drivers"
+paths = ["/usr/lib/firmware/yamaha"]
+install_if = ["firmware-linux-audio"]

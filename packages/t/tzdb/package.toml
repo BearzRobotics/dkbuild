@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/tzdb/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# The IANA time zone database (/usr/share/zoneinfo) and zic/zdump. /etc/localtime
+# is a link to a zone, set when the system is installed.
+name = "tzdb"
+version = "2026e"
+release = 1
+summary = "Time zone database"
+license = "custom:none"
+homepage = "https://www.iana.org/time-zones"
+hostdeps = ["lzip"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.iana.org/time-zones/repository/releases/tzdb-2026e.tar.lz", sha256 = "4e9c4e9d4587443e716ed42a7070466c1e5975938fb530244a17cf6db883990b" },
+]
+
+build = '''
+make CC="$CC" KSHELL=/bin/sh
+'''
+install = '''
+make install DESTDIR="$pkgdir" KSHELL=/bin/sh ZICDIR=/usr/bin ZFLAGS="-b fat" REDO=posix_right
+rm -rf "$pkgdir/etc" "$pkgdir/usr/lib" "$pkgdir/usr/share/man/man3" "$pkgdir/usr/share/zoneinfo-posix"
+mv "$pkgdir/usr/share/zoneinfo-leaps" "$pkgdir/usr/share/zoneinfo/right"
+install -m644 leap-seconds.list "$pkgdir/usr/share/zoneinfo/"
+'''

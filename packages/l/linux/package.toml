@@ -4,9 +4,12 @@
 # anything the config does not mention.
 #
 # Modules go to /usr/lib/modules; /lib is a link to /usr/lib on this system.
+# r2: install and upgrade scripts write systemd-boot entries (gen-systemd-boot),
+# when systemd-boot is installed. UDF is built in (=y), like exFAT and NTFS3, so the
+# live ISO's init can find an image on any stick Ventoy or a DVD uses.
 name = "linux"
 version = "6.19"
-release = 1
+release = 2
 summary = "The Linux kernel and its modules"
 license = "GPL-2.0-only WITH Linux-syscall-note"
 homepage = "https://kernel.org"

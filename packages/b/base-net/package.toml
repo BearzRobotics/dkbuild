@@ -1,0 +1,10 @@
+# Networking for a FenrirOS system: DHCP, SSH and an HTTP client. A choice,
+# not a need (DKRescue's constraints: every service earns its place).
+name = "base-net"
+version = "1"
+release = 1
+summary = "FenrirOS networking: dhcpcd, OpenSSH, curl"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+options = ["meta"]
+rundeps = ["dhcpcd", "openssh", "curl", "ca-certificates"]

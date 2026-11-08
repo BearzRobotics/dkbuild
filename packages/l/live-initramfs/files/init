@@ -1,0 +1,120 @@
+#!/bin/sh
+# FenrirOS live init: find the disc, mount the squashfs on it, lay a RAM
+# layer over it, and hand over to dinit.
+PATH=/bin
+export PATH
+
+/bin/busybox mount -t proc proc /proc
+/bin/busybox --install -s /bin
+mount -t sysfs    sysfs    /sys
+mount -t devtmpfs devtmpfs /dev
+mount -t tmpfs -o mode=0755,nosuid,nodev tmpfs /run
+
+fail() {
+    echo "fenriros: $1"
+    echo "fenriros: starting a shell. Fix the problem, then do the rest of"
+    echo "fenriros: /init's steps by hand (less /init shows them), ending with:"
+    echo "    for fs in dev proc sys run; do mount -o move /\$fs /newroot/\$fs; done"
+    echo "    exec switch_root /newroot /sbin/init"
+    # setsid and cttyhack give the shell a controlling terminal, so job
+    # control and Ctrl+C work in it.
+    exec setsid cttyhack sh
+}
+
+# fenriros.shell on the kernel command line: stop here, before anything is
+# searched for or mounted, with every tool BusyBox has.
+case " $(cat /proc/cmdline) " in
+    *" fenriros.shell "*)
+        echo "fenriros: fenriros.shell given. Leave this shell (exit or Ctrl+D)"
+        echo "fenriros: to continue booting."
+        setsid cttyhack sh
+        ;;
+esac
+
+# The disc's volume label, from root=live:LABEL=... on the command line.
+label=FENRIROS
+for arg in $(cat /proc/cmdline); do
+    case $arg in
+        root=live:LABEL=*) label=${arg#root=live:LABEL=} ;;
+    esac
+done
+
+# Ventoy and similar tools leave the disc as a plain .iso file on a data
+# partition, so no volume carries the label. Look inside the partitions
+# for an ISO that holds /live/rootfs.sfs. iso-scan/filename=/path.iso on
+# the command line (dklilo's iso= entries pass it) is tried first. Only
+# exFAT, NTFS, FAT, UDF and ext are opened, read-only; ext without journal
+# replay, so a damaged disk is never touched.
+find_iso() {
+    want=
+    for arg in $(cat /proc/cmdline); do
+        case $arg in iso-scan/filename=*) want=${arg#iso-scan/filename=} ;; esac
+    done
+    mkdir -p /run/live/probe
+    while read -r major minor blocks name; do
+        [ -b "/dev/$name" ] || continue
+        case $name in loop*|ram*|sr*) continue ;; esac
+        fstype=$(blkid "/dev/$name" 2>/dev/null |
+                 sed -n 's/.*TYPE="\([^"]*\)".*/\1/p')
+        case $fstype in
+            exfat|vfat|udf) fsopts=ro ;;
+            ntfs)           fstype=ntfs3; fsopts=ro ;;
+            ext2|ext3|ext4) fstype=ext4;  fsopts=ro,noload ;;
+            *) continue ;;
+        esac
+        host=/run/live/host/$name
+        mkdir -p "$host"
+        mount -t "$fstype" -o "$fsopts" "/dev/$name" "$host" 2>/dev/null || continue
+        for f in ${want:+"$host$want"} "$host"/*.iso "$host"/*/*.iso; do
+            [ -f "$f" ] || continue
+            mount -t iso9660 -o ro,loop "$f" /run/live/probe 2>/dev/null || continue
+            if [ -f /run/live/probe/live/rootfs.sfs ]; then
+                umount /run/live/probe
+                dev=$f
+                mopts=ro,loop
+                return 0
+            fi
+            umount /run/live/probe
+        done
+        umount "$host"
+    done < /proc/partitions
+    return 1
+}
+
+# USB sticks and optical drives can take several seconds to appear.
+# findfs only reads each device's label; nothing is mounted or written.
+dev=
+mopts=ro
+tries=0
+while [ $tries -lt 30 ]; do
+    dev=$(findfs "LABEL=$label" 2>/dev/null)
+    [ -n "$dev" ] && break
+    [ $tries -ge 3 ] && find_iso && break
+    sleep 1
+    tries=$((tries + 1))
+done
+[ -n "$dev" ] || fail "no volume labelled $label found"
+
+mkdir -p /run/live/medium /run/live/rootfs /run/live/rw
+mount -t iso9660 -o "$mopts" "$dev" /run/live/medium ||
+    fail "cannot mount $dev"
+mount -t squashfs -o ro,loop /run/live/medium/live/rootfs.sfs /run/live/rootfs ||
+    fail "cannot mount /live/rootfs.sfs"
+
+# The writable layer: changes live in RAM and vanish at shutdown.
+mount -t tmpfs -o mode=0755 tmpfs /run/live/rw
+mkdir -p /run/live/rw/upper /run/live/rw/work
+mount -t overlay overlay \
+    -o lowerdir=/run/live/rootfs,upperdir=/run/live/rw/upper,workdir=/run/live/rw/work \
+    /newroot || fail "cannot mount the overlay"
+
+cp /fstab.live /newroot/etc/fstab
+
+# BusyBox's switch_root, unlike util-linux's, doesn't move the mounts into
+# the new root. Move them first: /run carries the disc and the RAM layer,
+# which stay visible at /run/live.
+for fs in dev proc sys run; do
+    mount -o move /$fs /newroot/$fs || fail "cannot move /$fs"
+done
+
+exec switch_root /newroot /sbin/init

@@ -1,0 +1,8 @@
+# eudev installs udevadm in /usr/bin, not /usr/sbin.
+type = scripted
+command = /usr/bin/udevadm settle
+restart = false
+log-type = buffer
+
+depends-on: udevd
+depends-on: udev-trigger

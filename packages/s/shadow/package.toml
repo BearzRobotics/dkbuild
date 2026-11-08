@@ -1,0 +1,50 @@
+# Imported from Chimera Linux cports: main/shadow/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# login, su, passwd, useradd and friends (util-linux is built without login
+# and su, which come from here). Without PAM (not built; DKRescue has none):
+# shadow checks passwords against /etc/shadow itself and login.defs is
+# upstream's. Patches are Chimera's (default shell /bin/sh, no mail spool, two
+# fixes); its login.defs patch and pam.d files are PAM-only and left out.
+name = "shadow"
+version = "4.17.2"
+release = 1
+summary = "Shadow password file utilities"
+license = "BSD-3-Clause"
+homepage = "https://github.com/shadow-maint/shadow"
+patches = ["defaults.patch", "xstrdup.patch", "usermod-move-home-errmsg.patch"]
+builddeps = ["acl-devel", "attr-devel", "linux-headers"]
+rundeps = ["base-files"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/shadow-maint/shadow/releases/download/4.17.2/shadow-4.17.2.tar.xz", sha256 = "a21cf0d34bffc4314cede01cff258689174fab30ca494ae8f45784d3d56c9849" },
+]
+
+setup = '''
+%configure \
+    --enable-shared \
+    --disable-static \
+    --enable-lastlog \
+    --without-libpam \
+    --with-acl \
+    --with-attr \
+    --without-libbsd \
+    --without-selinux \
+    --without-nscd \
+    --disable-nls \
+    --enable-subordinate-ids \
+    --disable-account-tools-setuid
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm755 src/sulogin "$pkgdir/usr/sbin/sulogin"
+install -Dm644 $pkgfiles/default.useradd "$pkgdir/etc/default/useradd"
+for f in chage chfn chsh expiry gpasswd newgidmap newuidmap newgrp passwd sg su; do
+    [ -e "$pkgdir/usr/bin/$f" ] && chmod 4755 "$pkgdir/usr/bin/$f"
+done
+rm -rf "$pkgdir/etc/pam.d"
+install -Dm644 $pkgfiles/LICENSE "$pkgdir/usr/share/licenses/shadow/LICENSE"
+'''

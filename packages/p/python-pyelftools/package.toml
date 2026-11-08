@@ -1,0 +1,22 @@
+# needed by: systemd-boot (its EFI build turns ELF into PE with pyelftools).
+# Built from the sdist offline with pip (--no-build-isolation); setuptools is
+# the image's until it is a recipe.
+name = "python-pyelftools"
+version = "0.33"
+release = 1
+summary = "Library for analyzing ELF files and DWARF debugging information"
+license = "Unlicense"
+homepage = "https://github.com/eliben/pyelftools"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/a3/11/767522582afab1b884d277de0e6e011640cb9d7292a38694b4b1a1df1ae8/pyelftools-0.33.tar.gz", sha256 = "660d82dcbeb8e83d1702bd97f223f761625da06111c0cc988eac6b8ab0c1b61f" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pyelftools/LICENSE"
+'''

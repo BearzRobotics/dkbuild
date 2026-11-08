@@ -1,0 +1,31 @@
+# needed by: live-initramfs (the live ISO's init runs on it).
+# Static, from defconfig, as on DKRescue (BusyBox 1.37.0). Only the busybox
+# binary is installed, not its applet links: the system's tools are coreutils,
+# util-linux and friends; `busybox <applet>` still works for rescue.
+# tc is off: it does not build against current kernel headers.
+name = "busybox"
+version = "1.37.0"
+release = 1
+summary = "Many common UNIX utilities in one small static executable"
+license = "GPL-2.0-only"
+homepage = "https://busybox.net"
+builddeps = ["linux-headers"]
+options = ["!check", "static"]
+
+source = [
+    { url = "https://busybox.net/downloads/busybox-1.37.0.tar.bz2", sha256 = "3311dff32e746499f4df0d5df04d7eb396382d7e108bb9250e7b519b837043a4" },
+]
+
+setup = '''
+make defconfig HOSTCC="$CC"
+sed -i -e 's/^CONFIG_TC=y/# CONFIG_TC is not set/' \
+       -e 's/^# CONFIG_STATIC is not set/CONFIG_STATIC=y/' .config
+'''
+build = '''
+make -j$jobs CC="$CC" HOSTCC="$CC" AR=llvm-ar STRIP=llvm-strip \
+    EXTRA_CFLAGS="$CFLAGS" EXTRA_LDFLAGS="$LDFLAGS" busybox
+'''
+install = '''
+install -Dm755 busybox "$pkgdir/usr/bin/busybox"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/busybox/LICENSE"
+'''
