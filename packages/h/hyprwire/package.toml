@@ -6,7 +6,7 @@ summary = "Fast and consistent IPC wire protocol for the Hypr* ecosystem"
 license = "BSD-3-Clause"
 homepage = "https://github.com/hyprwm/hyprwire"
 hostdeps = ["cmake", "ninja", "pkgconf"]
-builddeps = ["hyprutils-devel", "libffi-devel"]
+builddeps = ["hyprutils-devel", "libffi-devel", "pugixml-devel"]
 options = ["!check"]
 
 source = [

@@ -1,9 +1,10 @@
 # Imported from Chimera Linux cports: work/cports/main/dinit/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Reviewed by hand; dependency names are Chimera's and resolve from stage 0 until they are recipes.
+# r2: /usr/sbin/init points at ../bin/dinit (dinit is in /usr/bin; the link said ./dinit).
 name = "dinit"
 version = "0.22.0"
-release = 1
+release = 2
 summary = "Service manager and init system"
 license = "Apache-2.0"
 homepage = "https://davmac.org/projects/dinit"
@@ -34,5 +35,5 @@ check = '''
 '''
 install = '''
 %make_install
-mkdir -p "$pkgdir/usr/sbin"; ln -sf dinit "$pkgdir/usr/sbin/init"
+mkdir -p "$pkgdir/usr/sbin"; ln -sf ../bin/dinit "$pkgdir/usr/sbin/init"
 '''
