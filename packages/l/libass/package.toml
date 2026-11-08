@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libass/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libass"
+version = "0.17.5"
+release = 1
+summary = "Portable library for SSA/ASS subtitle rendering"
+license = "MIT"
+homepage = "https://github.com/libass/libass"
+patches = ["overflow.patch"]
+hostdeps = ["automake", "libtool", "nasm", "pkgconf"]
+builddeps = ["fontconfig-devel", "fribidi-devel", "harfbuzz-devel", "libunibreak-devel"]
+
+source = [
+    { url = "https://github.com/libass/libass/releases/download/0.17.5/libass-0.17.5.tar.gz", sha256 = "caab4b993dd7be6187c55623b789ed75dddefea6e65938af134637c732fe094a" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libass/COPYING"
+'''

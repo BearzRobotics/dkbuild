@@ -1,0 +1,12 @@
+# Caddy web server; configuration in /etc/caddy/Caddyfile. Started at boot
+# when enabled (dinitctl enable caddy).
+type = process
+command = /usr/bin/caddy run --config /etc/caddy/Caddyfile
+run-as = caddy
+working-dir = /var/lib/caddy
+logfile = /var/log/caddy.log
+capabilities = ^cap_net_bind_service
+smooth-recovery = true
+
+depends-on: rcboot
+waits-for: syslogd

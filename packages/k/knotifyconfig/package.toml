@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/knotifyconfig/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "knotifyconfig"
+version = "6.31.0"
+release = 1
+summary = "KDE Configuration dialog for desktop notifications"
+license = "LGPL-2.0-only"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja"]
+builddeps = ["kcompletion-devel", "kconfig-devel", "kconfigwidgets-devel", "ki18n-devel", "kio-devel", "knotifications-devel", "kxmlgui-devel", "libcanberra-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/knotifyconfig-6.31.0.tar.xz", sha256 = "185b326c746ee983c9dc19ff19cd40205f9be9dcd2b41e6619015f85abcc47e6" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

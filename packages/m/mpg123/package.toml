@@ -1,0 +1,35 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/mpg123/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "mpg123"
+version = "1.33.7"
+release = 1
+summary = "MPEG 1.0/2.0/2.5 audio player"
+license = "LGPL-2.1-only"
+homepage = "https://www.mpg123.org"
+hostdeps = ["automake", "libtool", "libtool-devel", "pkgconf"]
+builddeps = ["libpulse-devel", "linux-headers", "pipewire-devel", "sdl2-compat-devel"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/mpg123/mpg123-1.33.7.tar.bz2", sha256 = "31d0e35a4ca567ec9b5ebda6c3062bb4435d6d3eacd6ef0d95cadd7854dc03ee" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-optimization=0 \
+    --with-default-audio=pulse \
+    --enable-ipv6=yes \
+    --enable-network=yes \
+    --disable-lfs-alias
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

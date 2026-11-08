@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/v4l-utils/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "v4l-utils"
+version = "1.30.1"
+release = 1
+summary = "Userspace tools and libraries for V4L"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://linuxtv.org/wiki/index.php/V4l-utils"
+patches = ["dont-install-to-sbin.patch", "gsed.patch", "int-overflow.patch"]
+hostdeps = ["bash", "gettext-devel", "sed", "perl", "pkgconf"]
+builddeps = ["argp-standalone", "glu-devel", "json-c-devel", "libbpf-devel", "libjpeg-turbo-devel", "libx11-devel", "mesa-devel", "eudev-devel"]
+
+source = [
+    { url = "https://linuxtv.org/downloads/v4l-utils/v4l-utils-1.30.1.tar.xz", sha256 = "c1cf549c2ec3cf39eb5ec7bf15731349e61b26a21b5e963922db422333bae197" },
+]
+
+environment = '''
+export CXXFLAGS="${CXXFLAGS} -D_LARGEFILE64_SOURCE"
+export LDFLAGS="${LDFLAGS} -largp"
+'''
+setup = '''
+%meson \
+    -Dqv4l2=disabled \
+    -Dudevdir=/usr/lib/udev
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

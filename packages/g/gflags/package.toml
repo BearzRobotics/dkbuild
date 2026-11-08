@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gflags/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "gflags"
+version = "2.2.2"
+release = 2
+summary = "Google C++ argparse library"
+license = "BSD-3-Clause"
+homepage = "https://github.com/gflags/gflags"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+
+source = [
+    { url = "https://github.com/gflags/gflags/archive/refs/tags/v2.2.2.tar.gz", sha256 = "34af2f15cf7367513b352bdcd2493ab14ce43692d2dcd9dfc499492966c64dcf" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DBUILD_STATIC_LIBS=ON \
+    -DBUILD_TESTING=ON \
+    -DREGISTER_INSTALL_PREFIX=OFF \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING.txt "$pkgdir/usr/share/licenses/gflags/COPYING.txt"
+# useless completion script
+rm -rf "$pkgdir/usr/bin/gflags_completions.sh"
+'''

@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/kdoctools/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "kdoctools"
+version = "6.31.0"
+release = 1
+summary = "KDE Documentation generation from docbook"
+license = "LGPL-2.1-or-later"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "docbook-xsl", "extra-cmake-modules", "gettext", "libxml2", "ninja", "perl", "perl-uri"]
+builddeps = ["karchive-devel", "ki18n-devel", "libxslt-devel", "qt6-qttools-devel"]
+rundeps = ["docbook-xsl", "libxml2"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/kdoctools-6.31.0.tar.xz", sha256 = "6a54b0319d775b8d0d5ebaffd1149b7862621e997fec564da0fb2fcbd694a060" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

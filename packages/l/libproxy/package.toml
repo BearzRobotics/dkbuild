@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libproxy/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libproxy"
+version = "0.5.12"
+release = 1
+summary = "Automatic proxy configuration management library"
+license = "LGPL-2.1-or-later"
+homepage = "http://libproxy.github.io/libproxy"
+patches = ["tests.patch"]
+hostdeps = ["bash", "glib-devel", "gobject-introspection", "pkgconf", "vala"]
+builddeps = ["duktape-devel", "glib-devel", "gsettings-desktop-schemas-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://github.com/libproxy/libproxy/archive/refs/tags/0.5.12.tar.gz", sha256 = "a1fa55991998b80a567450a9e84382421a7176a84446c95caaa8b72cf09fa86f" },
+]
+
+setup = '''
+%meson \
+    -Ddocs=false \
+    -Dconfig-windows=false \
+    -Dconfig-osx=false \
+    -Dconfig-sysconfig=false \
+    -Dcurl=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

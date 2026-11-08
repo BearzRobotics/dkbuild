@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libb2/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libb2"
+version = "0.98.1"
+release = 1
+summary = "BLAKE2 hash library"
+license = "CC0-1.0"
+homepage = "https://www.blake2.net"
+hostdeps = ["pkgconf", "automake", "libtool"]
+
+source = [
+    { url = "https://github.com/BLAKE2/libb2/archive/v0.98.1.tar.gz", sha256 = "10053dbc2fa342516b780a6bbf6e7b2a2360b8d49c5ac426936bf3df82526732" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

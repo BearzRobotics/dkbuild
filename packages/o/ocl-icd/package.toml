@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/ocl-icd/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "ocl-icd"
+version = "2.3.5"
+release = 1
+summary = "Generic OpenCL ICD loader"
+license = "BSD-2-Clause"
+homepage = "https://forge.imag.fr/projects/ocl-icd"
+patches = ["headers.patch"]
+hostdeps = ["asciidoc", "automake", "libtool", "pkgconf", "ruby"]
+builddeps = ["opencl-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/OCL-dev/ocl-icd/archive/v2.3.5.tar.gz", sha256 = "cdd7984425fa92d37273eee4180b5f57b047eda6dd8fd623e58498f844b09b75" },
+]
+
+setup = '''
+./bootstrap
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/ocl-icd/COPYING"
+'''

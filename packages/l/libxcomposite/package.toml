@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libxcomposite/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libxcomposite"
+version = "0.4.7"
+release = 1
+summary = "X Composite library"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "pkgconf", "libtool", "xorg-util-macros"]
+builddeps = ["xorgproto", "libxfixes-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/lib/libXcomposite-0.4.7.tar.gz", sha256 = "5fc39a8fd6452ec225a95070dd5ac312899247a154fd041cc5f100a93c4ce192" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libxcomposite/COPYING"
+'''

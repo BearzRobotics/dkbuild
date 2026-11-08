@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/kxmlgui/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "kxmlgui"
+version = "6.31.0"
+release = 1
+summary = "KDE Framework for managing menu and toolbar actions"
+license = "LGPL-2.1-only AND LGPL-2.1-or-later"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja"]
+builddeps = ["kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kglobalaccel-devel", "kguiaddons-devel", "ki18n-devel", "kiconthemes-devel", "kitemviews-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel"]
+checkdeps = ["breeze-icons", "dbus"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/kxmlgui-6.31.0.tar.xz", sha256 = "048c2229a39ec717740a56b4e8b23dc2e68cefa36c4b6ab652104a0dc1a6fbd8" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_PYTHON_BINDINGS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

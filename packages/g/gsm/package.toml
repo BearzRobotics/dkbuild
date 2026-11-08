@@ -1,0 +1,45 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gsm/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "gsm"
+version = "1.0.24"
+release = 1
+summary = "GSM 06.10 lossy speech compression"
+license = "TU-Berlin-2.0"
+homepage = "http://www.quut.com/gsm"
+patches = ["gsm-1.0.12-64bit.patch", "gsm-1.0.13-shared.patch", "tests.patch"]
+hostdeps = ["pkgconf"]
+options = ["!lto"]
+
+source = [
+    { url = "http://www.quut.com/gsm/gsm-1.0.24.tar.gz", sha256 = "a3c40c6471928383f4abfcb2e8f24012a1f562be2f17b8d672145d5986681a92" },
+]
+
+setup = '''
+# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 17); port it by hand
+'''
+build = '''
+%make
+'''
+check = '''
+%make tst
+'''
+install = '''
+install -dm755 "$pkgdir/usr/bin"
+install -dm755 "$pkgdir/usr/lib"
+install -dm755 "$pkgdir/usr/include/gsm"
+install -dm755 "$pkgdir/usr/share/man/man3"
+install -dm755 "$pkgdir/usr/share/man/man1"
+%make_install \
+    STRIP=true \
+    PREFIX=/usr
+install -Dm755 lib/libgsm.so "$pkgdir/usr/lib/libgsm.so.1.0.24"
+mkdir -p "$pkgdir/usr/lib"
+ln -sf libgsm.so.1.0.24 "$pkgdir/usr/lib/libgsm.so.1"
+mkdir -p "$pkgdir/usr/lib"
+ln -sf libgsm.so.1.0.24 "$pkgdir/usr/lib/libgsm.so"
+mkdir -p "$pkgdir/usr/include"
+ln -sf gsm/gsm.h "$pkgdir/usr/include/gsm.h"
+install -Dm644 COPYRIGHT "$pkgdir/usr/share/licenses/gsm/COPYRIGHT"
+'''

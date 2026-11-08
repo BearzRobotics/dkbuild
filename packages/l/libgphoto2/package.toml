@@ -1,0 +1,50 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libgphoto2/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libgphoto2"
+version = "2.5.32"
+release = 1
+summary = "Digital camera access library"
+license = "LGPL-2.1-or-later"
+homepage = "http://www.gphoto.org"
+hostdeps = ["automake", "gettext-devel", "libtool", "pkgconf"]
+builddeps = ["libexif-devel", "libgd-devel", "libtool-devel", "libusb-devel", "libxml2-devel"]
+
+source = [
+    { url = "https://github.com/gphoto/libgphoto2/releases/download/v2.5.32/libgphoto2-2.5.32.tar.xz", sha256 = "495a347be21b8f970607a81e739aa91513a8479cbd73b79454a339c73e2b860e" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-static \
+    --disable-rpath \
+    udevscriptdir=/usr/lib/udev
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+rm -rf "$pkgdir/usr/lib/udev"
+install -dm755 "$pkgdir/usr/lib/udev/hwdb.d"
+install -dm755 "$pkgdir/usr/lib/udev/rules.d"
+# TODO(cbuild): if not self.profile.cross:
+#         cexe = self.chroot_destdir / "usr/lib/libgphoto2/print-camera-list"
+#         cenv = {
+#             "LD_LIBRARY_PATH": str(self.chroot_destdir / "usr/lib"),
+#             "CAMLIBS": str(self.chroot_destdir / "usr/lib/libgphoto2" / pkgver),
+#         }
+# TODO(cbuild): else:
+#         cexe = "/usr/lib/libgphoto2/print-camera-list"
+#         cenv = None
+# TODO(cbuild): upath = self.destdir / "usr/lib/udev"
+# TODO(cbuild): with open(upath / "rules.d/40-gphoto.rules", "w") as uf:
+#         self.do(cexe, "udev-rules", "version", "201", env=cenv, stdout=uf)
+# TODO(cbuild): with open(upath / "hwdb.d/20-gphoto.hwdb", "w") as uf:
+#         self.do(cexe, "hwdb", env=cenv, stdout=uf)
+'''

@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/pangomm1.4/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "pangomm1.4"
+version = "2.46.4"
+release = 1
+summary = "C++ bindings for Pango, version 2.46.x"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.gtkmm.org"
+hostdeps = ["pkgconf"]
+builddeps = ["pango-devel", "glibmm2.4-devel", "cairomm1.0-devel"]
+
+source = [
+    { url = "https://download.gnome.org/sources/pangomm/2.46/pangomm-2.46.4.tar.xz", sha256 = "b92016661526424de4b9377f1512f59781f41fb16c9c0267d6133ba1cd68db22" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

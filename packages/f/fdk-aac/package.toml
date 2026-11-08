@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/fdk-aac/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "fdk-aac"
+version = "2.0.3"
+release = 1
+summary = "Fraunhofer FDK AAC library"
+license = "custom:FDK-AAC"
+homepage = "http://www.iis.fraunhofer.de/en/ff/amm/impl/fdkaaccodec.html"
+hostdeps = ["automake", "libtool", "pkgconf"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/opencore-amr/fdk-aac-2.0.3.tar.gz", sha256 = "829b6b89eef382409cda6857fd82af84fabb63417b08ede9ea7a553f811cb79e" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 NOTICE "$pkgdir/usr/share/licenses/fdk-aac/NOTICE"
+'''

@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/fluidsynth/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "fluidsynth"
+version = "2.4.7"
+release = 1
+summary = "Software synthesizer based on the SoundFont 2 specifications"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.fluidsynth.org"
+patches = ["edit.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["alsa-lib-devel", "dbus-devel", "glib-devel", "libedit-devel", "libpulse-devel", "libsndfile-devel", "linux-headers", "pipewire-devel", "sdl2-compat-devel"]
+
+source = [
+    { url = "https://github.com/FluidSynth/fluidsynth/archive/v2.4.7.tar.gz", sha256 = "7fb0e328c66a24161049e2b9e27c3b6e51a6904b31b1a647f73cc1f322523e88" },
+]
+
+setup = '''
+%cmake \
+    -DLIB_SUFFIX= \
+    -DDEFAULT_SOUNDFONT=/usr/share/soundfonts/default.sf2
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/md4c/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "md4c"
+version = "0.5.3"
+release = 1
+summary = "Fast CommonMark compliant markdown parser"
+license = "MIT"
+homepage = "https://github.com/mity/md4c"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+
+source = [
+    { url = "https://github.com/mity/md4c/archive/release-0.5.3.tar.gz", sha256 = "353c346f376b87c954a13f3415ede2d51264cc61dc5abcd38ff1d2aa0d059b9e" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/md4c/LICENSE.md"
+'''

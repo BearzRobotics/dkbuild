@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xmlto/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "xmlto"
+version = "0.0.29"
+release = 2
+summary = "Tool to help transform XML documents into other formats"
+license = "GPL-2.0-or-later"
+homepage = "https://pagure.io/xmlto"
+hostdeps = ["automake", "bash", "docbook-xsl-nons", "flex", "libtool", "libxslt"]
+rundeps = ["bash", "libxslt", "docbook-xsl-nons"]
+
+source = [
+    { url = "https://pagure.io/xmlto/archive/0.0.29/xmlto-0.0.29.tar.gz", sha256 = "40504db68718385a4eaa9154a28f59e51e59d006d1aa14f5bc9d6fded1d6017a" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

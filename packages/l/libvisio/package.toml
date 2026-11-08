@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libvisio/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libvisio"
+version = "0.1.11"
+release = 1
+summary = "Library for reading and converting MS Visio diagrams"
+license = "MPL-2.0"
+homepage = "https://wiki.documentfoundation.org/DLP/Libraries/libvisio"
+hostdeps = ["automake", "gperf", "perl", "pkgconf", "libtool"]
+builddeps = ["boost-devel", "icu-devel", "librevenge-devel", "libxml2-devel"]
+
+source = [
+    { url = "http://dev-www.libreoffice.org/src/libvisio-0.1.11.tar.xz", sha256 = "2a6efd40b6d9dbcb70fba3be53112366882ba97b57151df3698dfa478c8d8dd3" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

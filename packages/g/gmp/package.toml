@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gmp/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "gmp"
+version = "6.3.0"
+release = 2
+summary = "Library for arbitrary precision arithmetic"
+license = "LGPL-3.0-or-later OR GPL-2.0-or-later"
+homepage = "https://gmplib.org"
+patches = ["loongarch.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz", sha256 = "a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898" },
+]
+
+setup = '''
+%configure \
+    --enable-cxx
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/cdparanoia/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "cdparanoia"
+version = "10.2"
+release = 3
+summary = "CDDA reading utility with extra data verification features"
+license = "GPL-2.0-or-later AND LGPL-2.1-only"
+homepage = "https://www.xiph.org/paranoia"
+patches = ["autoconf-init-ac_cv_objext.patch", "byteswap-null-check.patch", "fix-clang-17.patch", "gcc.patch", "makefile.in-install.patch", "musl.patch"]
+hostdeps = ["pkgconf", "automake", "libtool"]
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.xiph.org/releases/cdparanoia/cdparanoia-III-10.2.src.tgz", sha256 = "005db45ef4ee017f5c32ec124f913a0546e77014266c6a1c50df902a55fe64df" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -Du_int16_t=uint16_t -Du_int32_t=uint32_t"
+'''
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

@@ -1,0 +1,38 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/wine/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "wine"
+version = "11.20"
+release = 1
+summary = "Compatibility layer for running Windows programs on Linux"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.winehq.org"
+patches = ["0001-Revert-winmm-Always-load-mmdevapi-as-audio-driver.patch", "rpath.patch"]
+archs = ["aarch64", "x86_64"]
+hostdeps = ["automake", "pkgconf"]
+builddeps = ["bison", "cups-devel", "dbus-devel", "ffmpeg-devel", "flex", "fontconfig-devel", "freetype-devel", "gettext", "gnutls-devel", "gst-plugins-base-devel", "libgphoto2-devel", "libpcap-devel", "libpulse-devel", "libusb-devel", "libxcomposite-devel", "libxcursor-devel", "libxi-devel", "libxinerama-devel", "libxrandr-devel", "libxrender-devel", "linux-headers", "mesa-devel", "ncurses-devel", "ocl-icd-devel", "pcsc-lite-devel", "sane-backends-devel", "sdl2-compat-devel", "v4l-utils-devel", "vulkan-loader-devel", "wayland-devel"]
+rundeps = ["libxrandr"]
+options = ["!lto", "!check"]
+
+source = [
+    { url = "https://dl.winehq.org/wine/source/11.x/wine-11.20.tar.xz", sha256 = "eac8ca448f9c0087f963026b4dc276d1e2b7fbb64056edc093e59bbb7e56fe28" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-tests \
+    --enable-tools \
+    --enable-win64
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    STRIPPROG=true
+mkdir -p "$pkgdir/usr/bin"
+ln -sf wine "$pkgdir/usr/bin/wine64"
+'''

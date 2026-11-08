@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gspell/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "gspell"
+version = "1.14.1"
+release = 2
+summary = "Spell-checking library for Gtk+"
+license = "LGPL-2.1-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/gspell"
+hostdeps = ["gettext", "gobject-introspection", "pkgconf", "vala"]
+builddeps = ["enchant-devel", "glib-devel", "gtk+3-devel", "icu-devel", "vala"]
+options = ["!check", "!cross"]
+
+source = [
+    { url = "https://gitlab.gnome.org/GNOME/gspell/-/archive/1.14.1/gspell-1.14.1.tar.gz", sha256 = "1ecdc789e4f798e63cf49fc1718541e7974e5f67034ce152ae052a2b8f337e8e" },
+]
+
+setup = '''
+%meson \
+    -Dgtk_doc=false \
+    -Dinstall_tests=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

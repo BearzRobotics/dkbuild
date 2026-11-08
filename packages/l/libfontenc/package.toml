@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libfontenc/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libfontenc"
+version = "1.1.8"
+release = 1
+summary = "Fontenc Library from X.org"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["pkgconf"]
+builddeps = ["xorgproto", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/lib/libfontenc-1.1.8.tar.xz", sha256 = "7b02c3d405236e0d86806b1de9d6868fe60c313628b38350b032914aa4fd14c6" },
+]
+
+setup = '''
+%configure \
+    --with-encodingsdir=/usr/share/fonts/encodings
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libfontenc/COPYING"
+'''

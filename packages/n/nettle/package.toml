@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/nettle/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "nettle"
+version = "3.10.2"
+release = 1
+summary = "Low-level cryptographic library"
+license = "GPL-2.0-or-later OR LGPL-3.0-or-later"
+homepage = "https://www.lysator.liu.se/~nisse/nettle"
+patches = ["musl-ppc-use-auxval.patch"]
+hostdeps = ["pkgconf", "texinfo", "automake", "libtool"]
+builddeps = ["gmp-devel", "linux-headers"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/nettle/nettle-3.10.2.tar.gz", sha256 = "fe9ff51cb1f2abb5e65a6b8c10a92da0ab5ab6eaf26e7fc2b675c45f1fb519b5" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

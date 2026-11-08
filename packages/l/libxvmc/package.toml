@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libxvmc/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libxvmc"
+version = "1.0.14"
+release = 1
+summary = "XvMC extension library"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["pkgconf"]
+builddeps = ["xorgproto", "libx11-devel", "libxext-devel", "libxv-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/lib/libXvMC-1.0.14.tar.xz", sha256 = "e4be9eb6b6bafdbbf81f47f7163047215376e45e2dc786d0ea6181c930725ed9" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libxvmc/COPYING"
+# in xorgproto
+rm -rf "$pkgdir/usr/include/X11/extensions/vldXvMC.h"
+'''

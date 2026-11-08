@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/kaccounts-integration/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "kaccounts-integration"
+version = "26.08.2"
+release = 1
+summary = "KDE integration for Accounts-SSO and SignOn-SSO"
+license = "GPL-2.0-or-later"
+homepage = "https://invent.kde.org/network/kaccounts-integration"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcmutils-devel", "kcoreaddons-devel", "kdbusaddons-devel", "ki18n-devel", "kio-devel", "kwallet-devel", "libaccounts-qt-devel", "qcoro-devel", "qt6-qtdeclarative-devel", "signond-devel"]
+rundeps = ["signon-kwallet-extension", "signon-plugin-oauth2"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kaccounts-integration-26.08.2.tar.xz", sha256 = "1d8b11fb01151f4a44cae517bb21b10740c130856b99ab42cefd72d4945d62ca" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

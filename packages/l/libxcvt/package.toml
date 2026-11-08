@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libxcvt/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libxcvt"
+version = "0.1.3"
+release = 1
+summary = "Library to handle VESA CVT modeline generation"
+license = "MIT"
+homepage = "https://xkbcommon.org"
+hostdeps = ["pkgconf"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/lib/libxcvt-0.1.3.tar.xz", sha256 = "a929998a8767de7dfa36d6da4751cdbeef34ed630714f2f4a767b351f2442e01" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libxcvt/COPYING"
+'''

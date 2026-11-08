@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libxmlb/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libxmlb"
+version = "0.3.29"
+release = 1
+summary = "Library to help create and query binary XML blobs"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/hughsie/libxmlb"
+hostdeps = ["pkgconf", "gobject-introspection"]
+builddeps = ["xz-devel", "zstd-devel"]
+checkdeps = ["shared-mime-info"]
+rundeps = ["shared-mime-info"]
+options = ["!cross"]
+
+source = [
+    { url = "https://github.com/hughsie/libxmlb/releases/download/0.3.29/libxmlb-0.3.29.tar.xz", sha256 = "448294be33bfae62f00fa66e506f1cae80237ce71b7ab6530aefa75005eeb08a" },
+]
+
+setup = '''
+%meson \
+    -Dgtkdoc=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+rm -rf "$pkgdir/usr/lib/installed-tests"
+rm -rf "$pkgdir/usr/share/installed-tests"
+'''

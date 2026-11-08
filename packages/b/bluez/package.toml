@@ -1,0 +1,48 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/bluez/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "bluez"
+version = "5.87"
+release = 1
+summary = "Linux Bluetooth stack"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "http://www.bluez.org"
+patches = ["0001-enable-dbus-without-systemd.patch", "0001-src-org.bluez.service-start-dinit-service.patch", "0003-allow-mesh-on-non-systemd-system.patch", "0006-musl-fix.patch", "0008-grant-permission-to-bluetooth-group.patch", "001-bcm43xx-Add-bcm43xx-3wire-variant.patch", "002-bcm43xx-The-UART-speed-must-be-reset-after-the-firmw.patch", "003-Increase-firmware-load-timeout-to-30s.patch", "004-Move-the-43xx-firmware-into-lib-firmware.patch", "005-hostname-Use-phone-class-for-handhelds.patch", "fix-endianness.patch", "max-input.patch", "max_input.patch", "test-mesh-crypto.patch"]
+hostdeps = ["automake", "flex", "libtool", "pkgconf", "python-docutils"]
+builddeps = ["cups-devel", "dbus-devel", "dbus", "glib-devel", "libical-devel", "linux-headers", "readline-devel", "eudev-devel"]
+rundeps = ["dbus"]
+
+source = [
+    { url = "https://www.kernel.org/pub/linux/bluetooth/bluez-5.87.tar.xz", sha256 = "26bdcf2cebd7310c6f598850606b037ef0c515fe6608ebc54d22c50c4c32b35f" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -Wno-deprecated-declarations"
+export LDFLAGS="${LDFLAGS} -Wl,-z,nostart-stop-gc"
+'''
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-deprecated \
+    --disable-experimental \
+    --disable-mesh \
+    --disable-nfc \
+    --disable-systemd \
+    --enable-cups \
+    --enable-library \
+    --enable-sixaxis \
+    --enable-threads \
+    --with-udevdir=/usr/lib/udev
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+# TODO(cbuild): self.install_service(self.files_path / "bluetoothd")
+# TODO(cbuild): self.install_service(self.files_path / "mpris-proxy.user")
+'''

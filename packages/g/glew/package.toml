@@ -1,0 +1,36 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/glew/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "glew"
+version = "2.2.0"
+release = 1
+summary = "OpenGL Extension Wrangler Library"
+license = "BSD-3-Clause"
+homepage = "https://github.com/nigels-com/glew"
+patches = ["no-lib64.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["libxext-devel", "libxmu-devel", "libxi-devel", "glu-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/nigels-com/glew/releases/download/glew-2.2.0/glew-2.2.0.tgz", sha256 = "d4fc82893cfb00109578d0a1a2337fb8ca335b3ceccf97b97e5cc7f08e4353e1" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -fPIC"
+'''
+setup = '''
+# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 25); port it by hand
+'''
+build = '''
+%make \
+    SYSTEM=linux-clang
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr \
+    SYSTEM=linux-clang
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/glew/LICENSE.txt"
+'''

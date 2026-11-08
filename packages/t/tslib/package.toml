@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/tslib/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "tslib"
+version = "1.24"
+release = 1
+summary = "Touchscreen access library"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/libts/tslib"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["linux-headers"]
+
+source = [
+    { url = "https://github.com/libts/tslib/releases/download/1.24/tslib-1.24.tar.xz", sha256 = "58d9941ffaa269c399f00d0d308184c96087f7acf69aa8e3c6645e852f993ba2" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

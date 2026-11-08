@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/doctest/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "doctest"
+version = "2.4.12"
+release = 1
+summary = "Single-header testing framework"
+license = "MIT"
+homepage = "https://github.com/doctest/doctest"
+patches = ["no-werror.patch"]
+hostdeps = ["cmake", "ninja"]
+
+source = [
+    { url = "https://github.com/doctest/doctest/archive/refs/tags/v2.4.12.tar.gz", sha256 = "73381c7aa4dee704bd935609668cf41880ea7f19fa0504a200e13b74999c2d70" },
+]
+
+setup = '''
+%cmake \
+    -DDOCTEST_USE_STD_HEADERS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/doctest/LICENSE.txt"
+'''

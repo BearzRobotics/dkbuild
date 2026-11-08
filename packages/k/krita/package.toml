@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/krita/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "krita"
+version = "6.0.4"
+release = 1
+summary = "Digital painting program"
+license = "GPL-2.0-or-later"
+homepage = "https://krita.org"
+patches = ["0001-fftw-use-pkgconfig.patch", "qt612.patch", "simd-globals.patch", "sip-abi.patch"]
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf", "python", "python-sip", "wayland"]
+builddeps = ["boost-devel", "cups-devel", "eigen", "exiv2-devel", "fftw-devel", "fontconfig-devel", "freetype-devel", "fribidi-devel", "gsl-devel", "harfbuzz-devel", "immer", "kcolorscheme-devel", "kcompletion-devel", "kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "kguiaddons-devel", "ki18n-devel", "kitemviews-devel", "kseexpr-devel", "kwidgetsaddons-devel", "lager", "lcms2-devel", "libheif-devel", "libjxl-devel", "libkdcraw-devel", "libmypaint-devel", "libpng-devel", "libtiff-devel", "libunibreak-devel", "libwebp-devel", "libxkbcommon-devel", "mesa-devel", "mlt-devel", "opencolorio-devel", "openexr-devel", "openjpeg-devel", "poppler-devel", "python-pyqt6", "qt6-qt5compat-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel", "quazip-devel", "sdl2-compat-devel", "wayland-devel", "wayland-protocols", "xsimd", "zlib-ng-compat-devel", "zug"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/krita/6.0.4/krita-6.0.4.tar.xz", sha256 = "ef73e57fe20fa5bd896d53d4af6eb254e5ade83e6a39b47273dd320f9823ab4b" },
+]
+
+setup = '''
+%cmake \
+    -DALLOW_UNSTABLE=QT6 \
+    -DBUILD_WITH_QT6=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,42 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libedit/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libedit"
+version = "20250614"
+release = 1
+summary = "Port of the NetBSD command line editing library"
+license = "BSD-3-Clause"
+homepage = "https://github.com/chimera-linux/libedit-chimera"
+hostdeps = ["pkgconf"]
+builddeps = ["ncurses-devel"]
+options = ["bootstrap"]
+
+source = [
+    { url = "https://github.com/chimera-linux/libedit-chimera/archive/b280b361724a60fa8b740150950a59c4f4edcf15.tar.gz", sha256 = "aa0fcba24403e002b3f7f6e9cf41616d8f637ce5a5708a36450f1127887f412c" },
+]
+
+build = '''
+%make \
+    PREFIX=/usr
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libedit/COPYING"
+# readline compat
+install -Dm644 $pkgfiles/readline.h "$pkgdir/usr/include/readline/readline.h"
+install -Dm644 $pkgfiles/history.h "$pkgdir/usr/include/readline/history.h"
+install -Dm644 $pkgfiles/libhistory.so "$pkgdir/usr/lib/libhistory.so"
+install -Dm644 $pkgfiles/libreadline.so "$pkgdir/usr/lib/libreadline.so"
+mkdir -p "$pkgdir/usr/lib"
+ln -sf libedit.a "$pkgdir/usr/lib/libreadline.a"
+mkdir -p "$pkgdir/usr/lib"
+ln -sf libedit.a "$pkgdir/usr/lib/libhistory.a"
+mkdir -p "$pkgdir/usr/lib/pkgconfig"
+ln -sf libedit.pc "$pkgdir/usr/lib/pkgconfig/readline.pc"
+'''

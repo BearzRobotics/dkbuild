@@ -1,0 +1,23 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/perl-uri/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "perl-uri"
+version = "5.37"
+release = 1
+summary = "Perl Uniform Resource Identifiers module"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/pod/URI"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+rundeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.cpan.org/modules/by-module/URI/OALDERS/URI-5.37.tar.gz", sha256 = "5a8750ddd8ee743d7cc89bebdd542a9b78a34023164ebe19dea0c248e121c21e" },
+]
+
+install = '''
+# TODO(cbuild): no install step could be derived
+true
+'''

@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/bubblewrap/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "bubblewrap"
+version = "0.13.1"
+release = 1
+summary = "Unprivileged sandboxing tool"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/containers/bubblewrap"
+patches = ["fix-test_dev_bind_dir.patch", "tests-aarch64.patch", "tests-bash.patch", "tests-portability.patch"]
+hostdeps = ["bash-completion", "docbook-xsl-nons", "libxslt", "pkgconf"]
+builddeps = ["libcap-devel"]
+checkdeps = ["bash", "libcap", "util-linux"]
+
+source = [
+    { url = "https://github.com/containers/bubblewrap/releases/download/v0.13.1/bubblewrap-0.13.1.tar.xz", sha256 = "0e85c8702248b8dd64144f594147553650cdd0e4c951690345faace79c217c4d" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

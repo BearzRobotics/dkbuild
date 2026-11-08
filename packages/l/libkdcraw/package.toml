@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libkdcraw/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libkdcraw"
+version = "26.08.2"
+release = 1
+summary = "KDE wrapper around libraw"
+license = "GPL-2.0-or-later"
+homepage = "https://invent.kde.org/graphics/libkdcraw"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["libraw-devel", "qt6-qtbase-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/libkdcraw-26.08.2.tar.xz", sha256 = "1e4efcc416d8c2a3f5c1e3c1d458938ca243975fcda094b9101999175f505959" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_TESTING=OFF \
+    -DQT_MAJOR_VERSION=6
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

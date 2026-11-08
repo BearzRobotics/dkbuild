@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libheif/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libheif"
+version = "1.23.5"
+release = 2
+summary = "HEIF and AVIF file format decoder and encoder"
+license = "LGPL-3.0-or-later"
+homepage = "http://www.libheif.org"
+hostdeps = ["cmake", "libaom", "ninja", "pkgconf"]
+builddeps = ["dav1d-devel", "libaom-devel", "libde265-devel", "libjpeg-turbo-devel", "libpng-devel", "libwebp-devel", "openh264-devel", "x264-devel", "x265-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://github.com/strukturag/libheif/archive/v1.23.5.tar.gz", sha256 = "3be49950c75d3fd9318ba775e8253248dd9e08c61ea955fca81b6b89c02d6b2b" },
+]
+
+setup = '''
+%cmake \
+    -DWITH_DAV1D=ON \
+    -DWITH_GDK_PIXBUF=OFF \
+    -DWITH_JPEG_DECODER=ON \
+    -DWITH_JPEG_ENCODER=ON \
+    -DWITH_UNCOMPRESSED_CODEC=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

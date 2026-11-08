@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/kddockwidgets/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "kddockwidgets"
+version = "2.4.0"
+release = 6
+summary = "Dock Widget Framework for Qt"
+license = "GPL-2.0-only OR GPL-3.0-only"
+homepage = "https://www.kdab.com/development-resources/qt-tools/kddockwidgets"
+patches = ["qt610.patch"]
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf"]
+builddeps = ["fmt-devel", "nlohmann-json", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "spdlog-devel"]
+
+source = [
+    { url = "https://github.com/KDAB/KDDockWidgets/releases/download/v2.4.0/kddockwidgets-2.4.0.tar.gz", sha256 = "51dbf24fe72e43dd7cb9a289d3cab47112010f1a2ed69b6fc8ac0dff31991ed2" },
+]
+
+setup = '''
+%cmake \
+    -DKDDockWidgets_QT6=ON \
+    -DKDDockWidgets_EXAMPLES=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

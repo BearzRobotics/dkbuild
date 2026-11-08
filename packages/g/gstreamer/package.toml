@@ -1,0 +1,36 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gstreamer/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "gstreamer"
+version = "1.28.7"
+release = 1
+summary = "Core GStreamer libraries and elements"
+license = "LGPL-2.1-or-later"
+homepage = "https://gstreamer.freedesktop.org"
+patches = ["disable-gst-leaks-test.patch", "tests.patch"]
+hostdeps = ["bison", "docbook-xsl-nons", "flex", "gettext", "glib-devel", "gobject-introspection", "libcap", "pkgconf", "python", "rust"]
+builddeps = ["bash-completion", "glib-devel", "libcap-devel", "libxml2-devel", "rust"]
+options = ["!cross"]
+
+source = [
+    { url = "https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.28.7.tar.xz", sha256 = "787329b2c5758e228a71d926a6dcf960bceaacca3cadd63874ba665dfcda013e" },
+]
+
+environment = '''
+export LDFLAGS="${LDFLAGS} -Wl,-z,stack-size=0x200000"
+'''
+setup = '''
+%meson \
+    -Dptp-helper-permissions=none \
+    -Dpackage-origin=https://chimera-linux.org \
+    -Ddbghelp=disabled \
+    -Dintrospection=enabled \
+    -Ddefault_library=shared
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/asciidoc/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "asciidoc"
+version = "10.2.1"
+release = 4
+summary = "Text-based document generation"
+license = "GPL-2.0-or-later"
+homepage = "https://asciidoc.org"
+hostdeps = ["docbook-xsl-nons", "libxslt", "python-setuptools"]
+rundeps = ["python", "docbook-xsl-nons", "libxslt", "libxml2"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/a/asciidoc/asciidoc-10.2.1.tar.gz", sha256 = "d9f13c285981b3c7eb660d02ca0a2779981e88d48105de81bb40445e60dddb83" },
+]
+
+install = '''
+install -dm755 "$pkgdir/etc"
+# compat link
+# TODO(cbuild): for f in (self.destdir / "usr/lib").glob("python*"):
+#         adpath = f / "site-packages/asciidoc/resources"
+#         self.install_link(
+#             "etc/asciidoc", f"../{adpath.relative_to(self.destdir)}"
+#         )
+'''

@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/blake3/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "blake3"
+version = "1.8.7"
+release = 1
+summary = "BLAKE3 cryptographic hash implementation"
+license = "CC0-1.0 OR Apache-2.0"
+homepage = "https://github.com/BLAKE3-team/BLAKE3"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["onetbb-devel"]
+
+source = [
+    { url = "https://github.com/BLAKE3-team/BLAKE3/archive/refs/tags/1.8.7.tar.gz", sha256 = "c6782a28842b1c0478524ac06a4f2ede784038ee298d6e2162c0b089c4306a3c" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DBLAKE3_USE_TBB=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

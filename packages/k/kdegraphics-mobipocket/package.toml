@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/kdegraphics-mobipocket/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "kdegraphics-mobipocket"
+version = "26.08.2"
+release = 1
+summary = "KDE plugins for mobipocket files"
+license = "GPL-2.0-or-later"
+homepage = "https://invent.kde.org/graphics/kdegraphics-mobipocket"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kio-devel", "qt6-qt5compat-devel", "qt6-qtdeclarative-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kdegraphics-mobipocket-26.08.2.tar.xz", sha256 = "771fb6343177cc9b61ab83fda6d32ed3e87b57de0ce2744ce86b00f8488b6300" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_WITH_QT6=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

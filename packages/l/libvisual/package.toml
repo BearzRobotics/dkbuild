@@ -1,0 +1,34 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libvisual/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libvisual"
+version = "0.4.2"
+release = 1
+summary = "Abstraction library for audio visualization plugins"
+license = "LGPL-2.1-or-later"
+homepage = "http://libvisual.org"
+patches = ["accidental-condition-assignment.patch"]
+hostdeps = ["autoconf-archive", "automake", "gettext-devel", "libtool", "pkgconf"]
+builddeps = ["linux-headers"]
+
+source = [
+    { url = "https://github.com/Libvisual/libvisual/releases/download/libvisual-0.4.2/libvisual-0.4.2.tar.gz", sha256 = "63085fd9835c42c9399ea6bb13a7ebd4b1547ace75c4595ce8e9759512bd998a" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-examples \
+    --disable-lv-tool
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+rm -rf "$pkgdir/usr/share/man/man1/lv-tool-0.4.1"
+'''

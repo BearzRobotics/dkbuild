@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libuninameslist/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libuninameslist"
+version = "20240910"
+release = 2
+summary = "Library of Unicode names and annotation data"
+license = "BSD-3-Clause"
+homepage = "https://github.com/fontforge/libuninameslist"
+hostdeps = ["pkgconf", "automake", "libtool"]
+
+source = [
+    { url = "https://github.com/fontforge/libuninameslist/releases/download/20240910/libuninameslist-dist-20240910.tar.gz", sha256 = "e59aab324ca0a3a713fe85c09a56c40c680a8458438d90624597920b3ef0be26" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libuninameslist/LICENSE"
+'''

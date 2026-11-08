@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/breeze-icons/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "breeze-icons"
+version = "6.31.0"
+release = 1
+summary = "Breeze icon themes"
+license = "LGPL-3.0-or-later"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf", "python-lxml"]
+builddeps = ["qt6-qtbase-devel"]
+checkdeps = ["fdupes"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/breeze-icons-6.31.0.tar.xz", sha256 = "82ab1c13f782cb37176e7c13c5fb2c77536a65f24b85d09127f3575f917fb56d" },
+]
+
+setup = '''
+%cmake \
+    -DBINARY_ICONS_RESOURCE=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

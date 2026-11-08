@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libcdio-paranoia/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libcdio-paranoia"
+version = "10.2.2.0.2"
+release = 1
+summary = "CD paranoia utility/libraries from libcdio"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/libcdio"
+patches = ["sane-version.patch"]
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["libcdio-devel", "linux-headers"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/libcdio/libcdio-paranoia-10.2+2.0.2.tar.bz2", sha256 = "186892539dedd661276014d71318c8c8f97ecb1250a86625256abd4defbf0d0c" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-example-progs \
+    --enable-cpp-progs
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

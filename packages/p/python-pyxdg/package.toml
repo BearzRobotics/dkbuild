@@ -1,0 +1,23 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-pyxdg/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "python-pyxdg"
+version = "0.28"
+release = 4
+summary = "Freedesktop.org standards module for Python"
+license = "LGPL-2.0-only"
+homepage = "https://freedesktop.org/Software/pyxdg"
+hostdeps = ["python-setuptools"]
+checkdeps = ["shared-mime-info"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/p/pyxdg/pyxdg-0.28.tar.gz", sha256 = "3267bb3074e934df202af2ee0868575484108581e6f3cb006af1da35395e88b4" },
+]
+
+install = '''
+# TODO(cbuild): no install step could be derived
+true
+'''

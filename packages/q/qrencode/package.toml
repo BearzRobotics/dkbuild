@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/qrencode/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "qrencode"
+version = "4.1.1"
+release = 3
+summary = "Library for encoding QR codes"
+license = "LGPL-2.1-or-later"
+homepage = "https://fukuchi.org/works/qrencode/index.html.en"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["libpng-devel"]
+
+source = [
+    { url = "https://github.com/fukuchi/libqrencode/archive/refs/tags/v4.1.1.tar.gz", sha256 = "5385bc1b8c2f20f3b91d258bf8ccc8cf62023935df2d2676b5b67049f31a049c" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-tests
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

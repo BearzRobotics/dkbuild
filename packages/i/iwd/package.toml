@@ -1,0 +1,42 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/iwd/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "iwd"
+version = "3.12"
+release = 2
+summary = "Wireless daemon that replaces wpa_supplicant"
+license = "LGPL-2.1-or-later"
+homepage = "https://iwd.wiki.kernel.org"
+patches = ["fix-dbus-stuff.patch", "fix-groups.patch", "resolvconf-default.patch"]
+hostdeps = ["pkgconf", "python-docutils", "automake", "libtool"]
+builddeps = ["dbus-devel", "dbus", "linux-headers", "readline-devel"]
+checkdeps = ["python", "dbus"]
+rundeps = ["dbus", "openresolv"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.kernel.org/pub/linux/network/wireless/iwd-3.12.tar.xz", sha256 = "d89a5e45c7180170e19be828f9e944a768c593758094fc57a358d0e7c4cb1a49" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -Wno-unknown-warning-option -Wno-duplicate-decl-specifier"
+'''
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-optimization \
+    --disable-systemd-service \
+    --enable-dbus-policy \
+    --enable-wired \
+    --enable-pie
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+# TODO(cbuild): self.install_service(self.files_path / "iwd")
+# TODO(cbuild): self.install_service(self.files_path / "ead")
+# TODO(cbuild): self.install_tmpfiles(self.files_path / "iwd.conf")
+'''

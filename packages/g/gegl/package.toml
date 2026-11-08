@@ -1,0 +1,37 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gegl/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "gegl"
+version = "0.4.70"
+release = 2
+summary = "Graph-based image processing framework"
+license = "GPL-3.0-only AND LGPL-3.0-only"
+homepage = "https://gegl.org"
+patches = ["gexiv2.patch"]
+hostdeps = ["gettext", "glib-devel", "gobject-introspection", "pkgconf", "python", "vala-devel"]
+builddeps = ["babl-devel", "exiv2-devel", "ffmpeg-devel", "gexiv2-devel", "jasper-devel", "json-glib-devel", "lensfun-devel", "libraw-devel", "librsvg-devel", "libspiro-devel", "libwebp-devel", "openexr-devel", "pango-devel", "poppler-devel", "v4l-utils-devel", "vala-devel"]
+
+source = [
+    { url = "https://download.gimp.org/pub/gegl/0.4/gegl-0.4.70.tar.xz", sha256 = "47f50d9c3aecd375deb48c11ebfead52d162e4fc162a4b3d44618277f1faec02" },
+]
+
+setup = '''
+%meson \
+    -Ddocs=false \
+    -Dintrospection=true \
+    -Dvapigen=enabled \
+    -Dlibspiro=disabled \
+    -Dlua=disabled \
+    -Dmrg=disabled \
+    -Dopenexr=enabled \
+    -Dlibav=disabled \
+    -Dsdl2=disabled \
+    -Dumfpack=disabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/numactl/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "numactl"
+version = "2.0.19"
+release = 2
+summary = "Simple NUMA policy support"
+license = "LGPL-2.1-only"
+homepage = "https://github.com/numactl/numactl"
+patches = ["hardening.patch"]
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["linux-headers"]
+checkdeps = ["bash"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/numactl/numactl/archive/v2.0.19.tar.gz", sha256 = "8b84ffdebfa0d730fb2fc71bb7ec96bb2d38bf76fb67246fde416a68e04125e4" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+rm -rf "$pkgdir/usr/share/man/man2"
+'''

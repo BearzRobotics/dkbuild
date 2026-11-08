@@ -1,0 +1,36 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/kdenlive/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "kdenlive"
+version = "26.08.2"
+release = 1
+summary = "KDE video editor"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/kdenlive"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["ffmpeg-devel", "imath-devel", "karchive-devel", "kbookmarks-devel", "kcodecs-devel", "kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kddockwidgets-devel", "kdoctools-devel", "kfilemetadata-devel", "kguiaddons-devel", "kiconthemes-devel", "kio-devel", "knewstuff-devel", "knotifications-devel", "knotifyconfig-devel", "ktextwidgets-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "mlt-devel", "opentimelineio-devel", "purpose-devel", "qt6-qtmultimedia-devel", "qt6-qtnetworkauth-devel", "qt6-qtsvg-devel", "solid-devel", "v4l-utils-devel"]
+rundeps = ["ffmpeg", "frei0r"]
+options = ["!cross", "!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kdenlive-26.08.2.tar.xz", sha256 = "1019cda23429a526e3a2dbdd2ec93406fef0c89ca243af16dfa16ac9ae8a6bf8" },
+]
+
+environment = '''
+export LDFLAGS="${LDFLAGS} -Wl,-z,stack-size=0x200000"
+'''
+setup = '''
+%cmake \
+    -DBUILD_TESTING=OFF \
+    -DBUILD_RUN_QMLLINT=OFF \
+    -DFETCH_OTIO=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# unused post-build artifact of kdenliveLib's ecm_add_qml_module()
+rm -rf "$pkgdir/usr/lib/libkdenliveLibplugin.a"
+'''

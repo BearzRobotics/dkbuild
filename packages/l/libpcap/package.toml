@@ -1,0 +1,42 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libpcap/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libpcap"
+version = "1.10.6"
+release = 1
+summary = "System-independent interface for user-level packet capture"
+license = "BSD-3-Clause"
+homepage = "https://www.tcpdump.org"
+hostdeps = ["automake", "pkgconf", "flex", "libtool"]
+builddeps = ["libnl-devel", "libusb-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.tcpdump.org/release/libpcap-1.10.6.tar.gz", sha256 = "872dd11337fe1ab02ad9d4fee047c9da244d695c6ddf34e2ebb733efd4ed8aa9" },
+]
+
+setup = '''
+# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 23); port it by hand
+autoreconf -if -W none
+%configure \
+    --enable-ipv6 \
+    --with-libnl \
+    --with-pcap=linux \
+    --enable-usb
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libpcap/LICENSE"
+# TODO(cbuild): for f in (self.destdir / "usr/share/man/man3").glob("*.3pcap"):
+#         ff = f.with_name(f.name.removesuffix("pcap"))
+#         if f.is_symlink():
+#             tp = f.readlink()
+#             f.unlink()
+#             self.ln_s(tp.with_name(tp.name.removesuffix("pcap")), ff)
+#         else:
+#             self.mv(f, ff)
+'''

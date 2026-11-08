@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libqxp/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libqxp"
+version = "0.0.3"
+release = 1
+summary = "Library for QuarkXPress format"
+license = "MPL-2.0"
+homepage = "https://wiki.documentfoundation.org/DLP/Libraries/libqxp"
+hostdeps = ["pkgconf", "automake", "libtool"]
+builddeps = ["librevenge-devel", "boost-devel", "icu-devel"]
+
+source = [
+    { url = "https://dev-www.libreoffice.org/src/libqxp/libqxp-0.0.3.tar.xz", sha256 = "4687a9cc96c32d7406e5072c4da150fca696c563e5cde62b024f82fa53d32332" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

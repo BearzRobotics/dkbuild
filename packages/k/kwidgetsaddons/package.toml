@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/kwidgetsaddons/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "kwidgetsaddons"
+version = "6.31.0"
+release = 1
+summary = "KDE addons to QtWidgets"
+license = "GPL-2.0-only AND LGPL-2.1-only AND Unicode-DFS-2016"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "qt6-qtbase", "qt6-qttools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qttools-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/kwidgetsaddons-6.31.0.tar.xz", sha256 = "94d1a1ba334a383c38b7f4238d93895ddd2b40f3d6511b16937bc951b542b5a5" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_PYTHON_BINDINGS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

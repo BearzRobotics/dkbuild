@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libfreeaptx/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libfreeaptx"
+version = "0.2.2"
+release = 1
+summary = "Free implementation of aptX codec"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/iamthehorker/libfreeaptx"
+hostdeps = ["pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/iamthehorker/libfreeaptx/archive/refs/tags/0.2.2.tar.gz", sha256 = "5ab5ebddf3f2eb7ce47a505b87460b00fc1ede99c70010796d3575ab31ea80bf" },
+]
+
+build = '''
+%make \
+    PREFIX=/usr
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr
+'''

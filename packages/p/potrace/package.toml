@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/potrace/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "potrace"
+version = "1.16"
+release = 1
+summary = "Bitmap to vector tracer"
+license = "GPL-2.0-or-later"
+homepage = "https://potrace.sourceforge.net"
+patches = ["asm.patch"]
+hostdeps = ["automake", "pkgconf", "libtool"]
+builddeps = ["zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/potrace/potrace-1.16.tar.gz", sha256 = "be8248a17dedd6ccbaab2fcc45835bb0502d062e40fbded3bc56028ce5eb7acc" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-libpotrace
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

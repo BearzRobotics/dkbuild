@@ -1,0 +1,65 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/nss/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "nss"
+version = "3.132"
+release = 1
+summary = "Mozilla Network Security Services"
+license = "MPL-2.0"
+homepage = "https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS"
+patches = ["clang-ias.patch", "native-nsinstall-cflags.patch", "ppc64_disable_broken_stuff.patch", "respect-ldflags.patch", "tests-objdir.patch"]
+hostdeps = ["pkgconf", "perl"]
+builddeps = ["linux-headers", "nspr-devel", "sqlite-devel", "zlib-ng-compat-devel"]
+checkdeps = ["bash"]
+
+source = [
+    { url = "https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_132_RTM/src/nss-3.132.tar.gz", sha256 = "ee9cf4837ba801141a804321c4462ad8f452ff4314275c6d5108a6b05af227ff" },
+]
+
+environment = '''
+export LIBRUNPATH=''
+export BUILD_OPT=1
+export NSS_USE_SYSTEM_SQLITE=1
+export NSS_ENABLE_WERROR=0
+export NSS_ENABLE_ECC=1
+export NSS_DISABLE_GTESTS=1
+'''
+build = '''
+# TODO(cbuild): self.make.build(
+#         [
+#             "-C",
+#             "nss",
+#             f"-j{self.make_jobs}",
+#             f"OS_TEST={_nssarch}",
+#             "CCC=" + self.get_tool("CXX"),
+#             "NATIVE_CC=" + self.get_tool("CC", target="host"),
+#             "NATIVE_FLAGS=" + self.get_cflags(target="host", shell=True),
+#             "NATIVE_LDFLAGS=" + self.get_ldflags(target="host", shell=True),
+#         ],
+#         env={"XCFLAGS": self.get_cflags(shell=True)},
+#     )
+'''
+check = '''
+# TODO(cbuild): self.do(
+#         self.chroot_cwd / "nss/tests/all.sh",
+#         env={
+#             "HOST": "localhost",
+#             "DOMSUF": "localdomain",
+#             "XCFLAGS": self.get_cflags(shell=True),
+#             # full suite takes like >2 hours to complete
+#             "NSS_TESTS": "cipher libpkix",
+#             "NSS_CYCLES": "standard",
+#         },
+#         wrksrc="nss/tests",
+#     )
+'''
+install = '''
+# TODO(cbuild): self.do(
+#         self.chroot_cwd / "install.sh",
+#         env={
+#             "DESTDIR": str(self.chroot_destdir),
+#             "NSS_VERSION": pkgver,
+#         },
+#     )
+'''

@@ -1,0 +1,43 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/speechd/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "speechd"
+version = "0.12.1"
+release = 2
+summary = "High level interface to speech synthesis"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/brailcom/speechd"
+patches = ["const.patch"]
+hostdeps = ["automake", "gettext-devel", "libtool", "pkgconf", "python"]
+builddeps = ["dotconf-devel", "espeak-ng-devel", "glib-devel", "libpulse-devel", "libsndfile-devel"]
+checkdeps = ["texinfo"]
+rundeps = ["python-pyxdg"]
+
+source = [
+    { url = "https://github.com/brailcom/speechd/releases/download/0.12.1/speech-dispatcher-0.12.1.tar.gz", sha256 = "b14a5238d287d2dcce4dd42bbd66ca65fa228e7e683708267f7b34036f7ba4b4" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -D_GNU_SOURCE"
+'''
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-static \
+    --with-espeak-ng \
+    --without-baratinoo \
+    --without-flite \
+    --without-ibmtts \
+    --without-kali \
+    --without-voxin
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

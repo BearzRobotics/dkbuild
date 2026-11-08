@@ -1,0 +1,37 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/ostree/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "ostree"
+version = "2026.4"
+release = 1
+summary = "Operating system and container binary deployment and upgrades"
+license = "LGPL-2.0-or-later"
+homepage = "https://ostreedev.github.io/ostree"
+patches = ["remove-gcc-override.patch", "type-redef.patch"]
+hostdeps = ["automake", "bison", "docbook-xsl-nons", "gobject-introspection", "libtool", "libxslt", "pkgconf"]
+builddeps = ["curl-devel", "e2fsprogs-devel", "fuse-devel", "glib-devel", "gpgme-devel", "libarchive-devel", "libgpg-error-devel", "linux-headers", "openssl-devel", "xz-devel"]
+checkdeps = ["attr", "libarchive", "gnupg", "xz"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/ostreedev/ostree/releases/download/v2026.4/libostree-2026.4.tar.xz", sha256 = "b26c9016eb03bb4ee52cc00c642d56e00fc79ae7faac6bf4aa317d7451339ef7" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-builtin-grub2-mkconfig \
+    --with-crypto=openssl \
+    --with-modern-grub \
+    --with-openssl \
+    --with-curl \
+    --with-soup=no \
+    --disable-gtk-doc
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

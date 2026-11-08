@@ -1,0 +1,21 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/asciidoctor/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "asciidoctor"
+version = "2.0.26"
+release = 1
+summary = "Ruby-based AsciiDoc converter"
+license = "MIT"
+homepage = "https://asciidoctor.org"
+hostdeps = ["ruby"]
+rundeps = ["ruby"]
+
+source = [
+    { url = "!https://rubygems.org/downloads/asciidoctor-2.0.26.gem", sha256 = "16e3accf1fc206bbd6335848649d7fd65f31d2daa60d85af13d47a8ee4b071c1" },
+]
+
+install = '''
+# TODO(cbuild): no install step could be derived
+true
+'''

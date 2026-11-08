@@ -1,0 +1,23 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/yarn/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "yarn"
+version = "1.22.22"
+release = 1
+summary = "Package manager for Node"
+license = "BSD-2-Clause"
+homepage = "https://yarnpkg.com"
+patches = ["yarn.patch"]
+rundeps = ["nodejs"]
+
+source = [
+    { url = "https://github.com/yarnpkg/yarn/releases/download/v1.22.22/yarn-v1.22.22.tar.gz", sha256 = "88268464199d1611fcf73ce9c0a6c4d44c7d5363682720d8506f6508addf36a0" },
+]
+
+install = '''
+install -Dm644 lib/v8-compile-cache.js "$pkgdir/usr/lib/yarn/v8-compile-cache.js"
+install -Dm644 lib/cli.js "$pkgdir/usr/lib/yarn/cli.js"
+# TODO(cbuild): self.install_bin("bin/yarn.js", name="yarn")
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/yarn/LICENSE"
+'''

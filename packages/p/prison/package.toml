@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/prison/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "prison"
+version = "6.31.0"
+release = 1
+summary = "KDE library to produce QR codes and DataMatrix barcodes"
+license = "MIT"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja"]
+builddeps = ["libdmtx-devel", "qrencode-devel", "qt6-qtdeclarative-devel", "qt6-qtmultimedia-devel", "qt6-qttools-devel", "zxing-cpp-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/prison-6.31.0.tar.xz", sha256 = "30cdb5564ef76c4c2a6fe509234095c1329f30165243b81008312a1182d326bc" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSES/MIT.txt "$pkgdir/usr/share/licenses/prison/MIT.txt"
+'''

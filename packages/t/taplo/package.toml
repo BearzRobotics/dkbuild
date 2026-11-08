@@ -1,0 +1,35 @@
+# Ported to dkbuild: taplo, TOML toolkit and language server (taplo lsp stdio); crates vendored on the host.
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/taplo/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "taplo"
+version = "0.10.0"
+release = 1
+summary = "CLI for TOML"
+license = "MIT"
+homepage = "https://taplo.tamasfe.dev"
+hostdeps = ["rust", "pkgconf"]
+builddeps = ["openssl-devel"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/tamasfe/taplo/archive/refs/tags/0.10.0.tar.gz", sha256 = "c2f7b3234fc62000689a476b462784db4d1bb2be6edcc186654b211f691efaf8" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export RUSTFLAGS="-C target-feature=-crt-static"
+export OPENSSL_NO_VENDOR=1
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs -p taplo-cli --no-default-features --features completions,native-tls,lsp
+for sh in bash fish zsh; do target/release/taplo completions $sh > taplo.$sh; done
+'''
+install = '''
+install -Dm755 target/release/taplo "$pkgdir/usr/bin/taplo"
+install -Dm644 taplo.bash "$pkgdir/usr/share/bash-completion/completions/taplo"
+install -Dm644 taplo.fish "$pkgdir/usr/share/fish/vendor_completions.d/taplo.fish"
+install -Dm644 taplo.zsh "$pkgdir/usr/share/zsh/site-functions/_taplo"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/taplo/LICENSE"
+'''

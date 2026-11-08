@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/autoconf-archive/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "autoconf-archive"
+version = "2024.10.16"
+release = 2
+summary = "Collection of re-usable Autoconf macros"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/autoconf-archive"
+patches = ["fix-quotes.patch"]
+builddeps = ["automake", "texinfo"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/autoconf-archive/autoconf-archive-2024.10.16.tar.xz", sha256 = "7bcd5d001916f3a50ed7436f4f700e3d2b1bade3ed803219c592d62502a57363" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

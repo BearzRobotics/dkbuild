@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/vala/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "vala"
+version = "0.56.19"
+release = 1
+summary = "Programming language based on the GObject type system"
+license = "LGPL-2.1-or-later"
+homepage = "https://wiki.gnome.org/Projects/Vala"
+patches = ["array-len-dup-overflow.patch", "disable-unstable-tests.patch", "fix-integer-overflows.patch", "slibtool-testpath.patch"]
+hostdeps = ["automake", "bison", "docbook-xml", "flex", "libtool", "libxslt", "pkgconf"]
+builddeps = ["flex-devel", "glib-devel", "gobject-introspection-devel"]
+checkdeps = ["dbus", "gobject-introspection-devel", "bash"]
+
+source = [
+    { url = "https://download.gnome.org/sources/vala/0.56/vala-0.56.19.tar.xz", sha256 = "5ad7cbbfcc0de61b403d6797c9ef60455bfbebd8e162aec33b5b0b097adfb9d5" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-valadoc
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

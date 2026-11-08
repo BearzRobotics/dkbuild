@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/freeglut/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "freeglut"
+version = "3.6.0"
+release = 2
+summary = "Open source implementation of the OpenGL Utility Toolkit library"
+license = "MIT"
+homepage = "http://freeglut.sourceforge.net"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["glu-devel", "libglvnd-devel", "libxi-devel", "libxxf86vm-devel", "linux-headers"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/freeglut/freeglut-3.6.0.tar.gz", sha256 = "9c3d4d6516fbfa0280edc93c77698fb7303e443c1aaaf37d269e3288a6c3ea52" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/freeglut/COPYING"
+'''

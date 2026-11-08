@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gtkmm3.0/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "gtkmm3.0"
+version = "3.24.11"
+release = 1
+summary = "C++ bindings for Gtk+3"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.gtkmm.org"
+hostdeps = ["pkgconf", "glib-devel"]
+builddeps = ["atkmm1.6-devel", "cairomm1.0-devel", "gdk-pixbuf-devel", "gtk+3-devel", "pangomm1.4-devel"]
+checkdeps = []
+
+source = [
+    { url = "https://download.gnome.org/sources/gtkmm/3.24/gtkmm-3.24.11.tar.xz", sha256 = "19e383c82d5dd89db275e00b82864e90414d4c3fb3d100b2f996bcc2338a4cc7" },
+]
+
+setup = '''
+%meson \
+    -Dbuild-demos=false \
+    -Dbuild-tests=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

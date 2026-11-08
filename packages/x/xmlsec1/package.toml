@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xmlsec1/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "xmlsec1"
+version = "1.3.12"
+release = 1
+summary = "XML Security Library"
+license = "MIT"
+homepage = "https://www.aleksey.com/xmlsec"
+hostdeps = ["pkgconf", "automake", "libtool", "gnutls-devel"]
+builddeps = ["gnutls-devel", "libgcrypt-devel", "libtool-devel", "libxslt-devel", "nspr-devel", "nss-devel"]
+options = ["!cross", "!check"]
+
+source = [
+    { url = "https://www.aleksey.com/xmlsec/download/xmlsec1-1.3.12.tar.gz", sha256 = "24045199af12d93fe5fdbbbf7e386e823e4842071e9432e2b90ac108b889a923" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-docs \
+    --enable-http
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xmlsec1/COPYING"
+'''

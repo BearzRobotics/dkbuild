@@ -1,0 +1,35 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gnupg/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "gnupg"
+version = "2.4.9"
+release = 3
+summary = "GNU Privacy Guard 2.x"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnupg.org"
+patches = ["pcsc.patch"]
+hostdeps = ["pkgconf", "libgpg-error", "texinfo"]
+builddeps = ["bzip2-devel", "gnutls-devel", "libassuan-devel", "libgcrypt-devel", "libgpg-error-devel", "libksba-devel", "libusb-devel", "npth-devel", "openldap-devel", "readline-devel", "sqlite-devel"]
+rundeps = ["pinentry"]
+
+source = [
+    { url = "https://gnupg.org/ftp/gcrypt/gnupg/gnupg-2.4.9.tar.bz2", sha256 = "dd17ab2e9a04fd79d39d853f599cbc852062ddb9ab52a4ddeb4176fd8b302964" },
+    { url = "https://gitlab.com/freepg/gnupg/-/archive/source-2.4.9-freepg-1/gnupg-source-2.4.9-freepg-1.tar.gz", sha256 = "9d971136172c1370731586563b96596770d3ad5b9f40b22aaeeb61da8ba900ff" },
+]
+
+setup = '''
+%configure \
+    --enable-all-tests \
+    --enable-large-secmem \
+    --libexecdir=/usr/lib/gnupg
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

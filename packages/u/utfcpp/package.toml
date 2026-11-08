@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/utfcpp/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "utfcpp"
+version = "4.0.6"
+release = 1
+summary = "UTF-8 header-only library"
+license = "BSL-1.0"
+homepage = "https://github.com/nemtrif/utfcpp"
+hostdeps = ["cmake", "ninja"]
+
+source = [
+    { url = "https://github.com/nemtrif/utfcpp/archive/refs/tags/v4.0.6.tar.gz", sha256 = "6920a6a5d6a04b9a89b2a89af7132f8acefd46e0c2a7b190350539e9213816c0" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/utfcpp/LICENSE"
+'''

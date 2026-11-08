@@ -1,0 +1,40 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/tcl/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "tcl"
+version = "8.6.16"
+release = 1
+summary = "TCL scripting language"
+license = "TCL"
+homepage = "http://www.tcl.tk"
+patches = ["uintptr.patch"]
+hostdeps = ["automake", "pkgconf"]
+builddeps = ["zlib-ng-compat-devel", "sqlite-devel"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/tcl/tcl8.6.16-src.tar.gz", sha256 = "91cb8fa61771c63c262efb553059b7c7ad6757afa5857af6265e4b0bdc2a14a5" },
+]
+
+setup = '''
+# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 27); port it by hand
+autoreconf -if -W none
+%configure \
+    --enable-threads \
+    --enable-man-symlinks \
+    --disable-rpath \
+    --with-system-sqlite \
+    --without-tzdata \
+    tcl_cv_strstr_unbroken=ok \
+    tcl_cv_strtoul_unbroken=ok
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+mkdir -p "$pkgdir/usr/bin"
+ln -sf tclsh8.6 "$pkgdir/usr/bin/tclsh"
+install -Dm644 ../license.terms "$pkgdir/usr/share/licenses/tcl/license.terms"
+'''

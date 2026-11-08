@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/librevenge/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "librevenge"
+version = "0.0.6"
+release = 1
+summary = "Library for reverse engineered format filters"
+license = "MPL-2.0"
+homepage = "https://sourceforge.net/p/libwpd/librevenge"
+hostdeps = ["pkgconf", "automake", "libtool"]
+builddeps = ["boost-devel", "zlib-ng-compat-devel", "cppunit-devel"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/libwpd/librevenge-0.0.6.tar.xz", sha256 = "19eacf5ce55d7fe6a990a45142589cdf7da0c7b68701797f133482cb44f189fa" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-werror \
+    --disable-static
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

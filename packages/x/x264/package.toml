@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/x264/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "x264"
+version = "20250831"
+release = 2
+summary = "Free library for encoding H264/AVC video streams"
+license = "GPL-2.0-or-later"
+homepage = "https://www.videolan.org/developers/x264.html"
+patches = ["fix-version.patch"]
+hostdeps = ["bash", "nasm", "perl", "pkgconf"]
+builddeps = ["fontconfig-devel", "fribidi-devel", "harfbuzz-devel"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://code.videolan.org/videolan/x264/-/archive/0480cb05fa188d37ae87e8f4fd8f1aea3711f7ee.tar.gz", sha256 = "d0967a1348c85dfde363bb52610403be898171493100561efa0dd05d5fd1ae50" },
+]
+
+setup = '''
+%configure \
+    --enable-static \
+    --enable-shared
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

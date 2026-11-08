@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/aspell/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "aspell"
+version = "0.60.8.2"
+release = 1
+summary = "Spell checker with good multi-language support"
+license = "LGPL-2.1-only"
+homepage = "http://aspell.net"
+hostdeps = ["automake", "gettext-devel", "libtool"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/aspell/aspell-0.60.8.2.tar.gz", sha256 = "57fe4863eae6048f72245a8575b44b718fb85ca14b9f8c0afc41b254dfd76919" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

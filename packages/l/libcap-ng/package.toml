@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libcap-ng/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libcap-ng"
+version = "0.8.5"
+release = 1
+summary = "Alternate POSIX capabilities library"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "http://people.redhat.com/sgrubb/libcap-ng"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["linux-headers"]
+
+source = [
+    { url = "http://people.redhat.com/sgrubb/libcap-ng/libcap-ng-0.8.5.tar.gz", sha256 = "3ba5294d1cbdfa98afaacfbc00b6af9ed2b83e8a21817185dfd844cc8c7ac6ff" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --without-python3
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

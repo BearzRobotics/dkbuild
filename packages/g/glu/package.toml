@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/glu/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "glu"
+version = "9.0.3"
+release = 1
+summary = "Mesa OpenGL utility library"
+license = "SGI-B-2.0"
+homepage = "https://gitlab.freedesktop.org/mesa/glu"
+hostdeps = ["pkgconf"]
+builddeps = ["libglvnd-devel"]
+
+source = [
+    { url = "https://mesa.freedesktop.org/archive/glu/glu-9.0.3.tar.xz", sha256 = "bd43fe12f374b1192eb15fe20e45ff456b9bc26ab57f0eee919f96ca0f8a330f" },
+]
+
+setup = '''
+%meson \
+    -Dgl_provider=gl
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

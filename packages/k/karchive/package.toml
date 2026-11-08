@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/karchive/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "karchive"
+version = "6.31.0"
+release = 1
+summary = "Qt6 addon providing access to numerous types of archives"
+license = "LGPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://develop.kde.org/docs/features/karchive"
+patches = ["tests-overflow.patch"]
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf"]
+builddeps = ["bzip2-devel", "qt6-qtbase-devel", "qt6-qttools-devel", "xz-devel", "zlib-ng-compat-devel", "zstd-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/karchive-6.31.0.tar.xz", sha256 = "95acaf5a459593184104e1c157cef415ec59a33e71674186169e0df33cdacaac" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

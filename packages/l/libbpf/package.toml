@@ -1,0 +1,39 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libbpf/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libbpf"
+version = "1.7.0"
+release = 1
+summary = "Linux BPF userspace library"
+license = "LGPL-2.1-only OR BSD-2-Clause"
+homepage = "https://github.com/libbpf/libbpf"
+hostdeps = ["pkgconf"]
+builddeps = ["elfutils-devel", "linux-headers", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/libbpf/libbpf/archive/refs/tags/v1.7.0.tar.gz", sha256 = "7ab5feffbf78557f626f2e3e3204788528394494715a30fc2070fcddc2051b7b" },
+]
+
+build = '''
+%make \
+    PREFIX=/usr
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr \
+    LIBSUBDIR=lib
+install -Dm644 ../LICENSE.BSD-2-Clause "$pkgdir/usr/share/licenses/libbpf/LICENSE.BSD-2-Clause"
+# these headers are the 'latest' bpf headers, newer than what linux-headers
+# provides.
+# libbpf headers require using these latest bpf headers (that come from the
+# libbpf bpf-next tree) instead of the released (linux-headers stable) ones,
+# so place them in a separate private dir to use with -I later
+# https://gitlab.alpinelinux.org/alpine/aports/-/issues/13338
+# TODO(cbuild): with self.pushd("../include/uapi/linux"):
+#         self.install_file("bpf.h", "usr/include/bpf/uapi/linux")
+#         self.install_file("bpf_common.h", "usr/include/bpf/uapi/linux")
+#         self.install_file("btf.h", "usr/include/bpf/uapi/linux")
+'''

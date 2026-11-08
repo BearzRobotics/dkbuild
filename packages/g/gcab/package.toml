@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gcab/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "gcab"
+version = "1.6"
+release = 1
+summary = "GObject library to create cabinet files"
+license = "LGPL-2.1-or-later"
+homepage = "https://wiki.gnome.org/msitools"
+hostdeps = ["gettext", "glib-devel", "gobject-introspection", "pkgconf", "vala"]
+builddeps = ["glib-devel", "vala"]
+options = ["!cross"]
+
+source = [
+    { url = "https://download.gnome.org/sources/gcab/1.6/gcab-1.6.tar.xz", sha256 = "2f0c9615577c4126909e251f9de0626c3ee7a152376c15b5544df10fc87e560b" },
+]
+
+setup = '''
+%meson \
+    -Dintrospection=true \
+    -Ddocs=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

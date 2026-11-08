@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/argon2/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "argon2"
+version = "20190702"
+release = 2
+summary = "Argon2 password-hashing function"
+license = "Apache-2.0 OR CC0-1.0"
+homepage = "https://github.com/P-H-C/phc-winner-argon2"
+patches = ["explicit-bzero.patch", "libdir.patch"]
+hostdeps = ["pkgconf"]
+
+source = [
+    { url = "https://github.com/P-H-C/phc-winner-argon2/archive/20190702.tar.gz", sha256 = "daf972a89577f8772602bf2eb38b6a3dd3d922bf5724d45e7f9589b5e830442c" },
+]
+
+build = '''
+%make \
+    OPTTARGET=none \
+    ARGON2_VERSION=20190702
+'''
+check = '''
+%make test
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr \
+    OPTTARGET=none
+'''

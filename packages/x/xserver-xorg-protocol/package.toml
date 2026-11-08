@@ -1,0 +1,22 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xserver-xorg-protocol/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "xserver-xorg-protocol"
+version = "20240503"
+release = 1
+summary = "X server protocol name registry"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+
+source = [
+    { url = "!https://gitlab.freedesktop.org/xorg/xserver/-/raw/53a0442b8700ddcb33caa5d1d17ca9a290000283/dix/protocol.txt", sha256 = "88b141646fc68627338443a820eeb949149ba73d4ddc925d4717d56a92e7e138" },
+]
+
+install = '''
+# TODO(cbuild): self.install_file(
+#         self.sources_path / f"protocol-{pkgver}.txt",
+#         "usr/lib/xorg",
+#         name="protocol.txt",
+#     )
+'''

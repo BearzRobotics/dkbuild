@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libwps/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libwps"
+version = "0.4.14"
+release = 10
+summary = "Library for importing Microsoft Works documents"
+license = "MPL-2.0 OR LGPL-2.1-or-later"
+homepage = "https://sourceforge.net/p/libwps/wiki/Home"
+hostdeps = ["pkgconf", "automake", "libtool"]
+builddeps = ["librevenge-devel", "boost-devel"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/libwps/libwps-0.4.14.tar.xz", sha256 = "365b968e270e85a8469c6b160aa6af5619a4e6c995dbb04c1ecc1b4dd13e80de" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-werror
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

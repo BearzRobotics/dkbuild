@@ -1,0 +1,46 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libjxl/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libjxl"
+version = "0.12.0"
+release = 2
+summary = "Reference JpegXL implementation"
+license = "BSD-3-Clause"
+homepage = "https://github.com/libjxl/libjxl"
+hostdeps = ["asciidoc", "cmake", "libxml2", "ninja", "pkgconf"]
+builddeps = ["brotli-devel", "gflags-devel", "giflib-devel", "gtest-devel", "highway-devel", "lcms2-devel", "libjpeg-turbo-devel", "libpng-devel", "openexr-devel"]
+
+source = [
+    { url = "https://github.com/libjxl/libjxl/archive/refs/tags/v0.12.0.tar.gz", sha256 = "03e9be69a30be4011f559da75328b6d7cea8ad921fabfbd551ce10bf45cdc992" },
+    { url = "https://github.com/libjxl/testdata/archive/73695d303670c90e4d506ea89d9901b081385089.tar.gz", sha256 = "380a58890e11513d34f1ed1e686e3c2cee97931cc9faaa80b33fd6c8d2640301" },
+]
+
+environment = '''
+export CXXFLAGS="${CXXFLAGS} -DNDEBUG"
+'''
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DBUILD_TESTING=ON \
+    -DJPEGXL_ENABLE_HWY_AVX3=ON \
+    -DJPEGXL_ENABLE_HWY_AVX3_ZEN4=ON \
+    -DJPEGXL_ENABLE_BENCHMARK=OFF \
+    -DJPEGXL_ENABLE_EXAMPLES=OFF \
+    -DJPEGXL_ENABLE_PLUGINS=ON \
+    -DJPEGXL_ENABLE_PLUGIN_GDKPIXBUF=OFF \
+    -DJPEGXL_ENABLE_SJPEG=OFF \
+    -DJPEGXL_ENABLE_SKCMS=OFF \
+    -DJPEGXL_FORCE_SYSTEM_BROTLI=ON \
+    -DJPEGXL_FORCE_SYSTEM_GTEST=ON \
+    -DJPEGXL_FORCE_SYSTEM_HWY=ON \
+    -DJPEGXL_FORCE_SYSTEM_LCMS2=ON \
+    -DJPEGXL_VERSION=0.12.0
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libjxl/LICENSE"
+'''

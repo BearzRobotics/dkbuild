@@ -1,0 +1,99 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gst-plugins-bad/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "gst-plugins-bad"
+version = "1.28.7"
+release = 2
+summary = "GStreamer bad plugins"
+license = "LGPL-2.1-or-later"
+homepage = "https://gstreamer.freedesktop.org"
+hostdeps = ["gettext", "glib-devel", "gobject-introspection", "orc", "pkgconf", "shaderc", "wayland"]
+builddeps = ["bluez-devel", "bzip2-devel", "cairo-devel", "chromaprint-devel", "curl-devel", "fdk-aac-devel", "fluidsynth-devel", "gsm-devel", "gst-plugins-base-devel", "gstreamer-devel", "gtk+3-devel", "json-glib-devel", "ladspa-sdk", "lcms2-devel", "libaom-devel", "libass-devel", "libbs2b-devel", "libde265-devel", "libdrm-devel", "libfreeaptx-devel", "libgme-devel", "libgudev-devel", "liblc3-devel", "libmicrodns-devel", "libmodplug-devel", "libnice-devel", "librsvg-devel", "libsndfile-devel", "libsrtp-devel", "libssh2-devel", "libusb-devel", "libva-devel", "libwebp-devel", "libxkbcommon-devel", "libxml2-devel", "lilv-devel", "linux-headers", "lrdf-devel", "mesa-devel", "openal-soft-devel", "openexr-devel", "openjpeg-devel", "openssl-devel", "opus-devel", "pango-devel", "qrencode-devel", "rtmpdump-devel", "sbc-devel", "soundtouch-devel", "spandsp-devel", "svt-av1-devel", "usrsctp-devel", "v4l-utils-devel", "vulkan-headers", "vulkan-loader-devel", "wayland-devel", "wayland-protocols"]
+rundeps = ["gst-plugins-base"]
+options = ["!check", "!cross"]
+
+source = [
+    { url = "https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-1.28.7.tar.xz", sha256 = "dc525383c18b2c265bbe6a43d498656cd918aaa130aa4e3abeabcdaa741c3ffe" },
+]
+
+setup = '''
+%meson \
+    --auto-features=enabled \
+    -Ddefault_library=shared \
+    -Dglib_assert=false \
+    -Dglib_checks=false \
+    -Dglib_debug=disabled \
+    -Dtests=disabled \
+    -Dexamples=disabled \
+    -Ddoc=disabled \
+    -Dhls-crypto=openssl \
+    -Daja=disabled \
+    -Dopencv=disabled \
+    -Damfcodec=disabled \
+    -Dandroidmedia=disabled \
+    -Dapplemedia=disabled \
+    -Dd3dvideosink=disabled \
+    -Dd3d11=disabled \
+    -Ddirectfb=disabled \
+    -Ddirectshow=disabled \
+    -Ddirectsound=disabled \
+    -Dfaac=disabled \
+    -Dfbdev=disabled \
+    -Dlcevcdecoder=disabled \
+    -Dlcevcencoder=disabled \
+    -Dmediafoundation=disabled \
+    -Dmpeghdec=disabled \
+    -Dmsdk=disabled \
+    -Dmusepack=disabled \
+    -Dneon=disabled \
+    -Dnvcodec=disabled \
+    -Dnvcomp=disabled \
+    -Dnvdswrapper=disabled \
+    -Donnx=disabled \
+    -Dopenh264=disabled \
+    -Dopenmpt=disabled \
+    -Dopenni2=disabled \
+    -Dopensles=disabled \
+    -Dqsv=disabled \
+    -Dsmoothstreaming=disabled \
+    -Dsrt=disabled \
+    -Dsvthevcenc=disabled \
+    -Dsvtjpegxs=disabled \
+    -Dteletext=disabled \
+    -Dtflite=disabled \
+    -Dtinyalsa=disabled \
+    -Dvmaf=disabled \
+    -Dvoaacenc=disabled \
+    -Dvoamrwbenc=disabled \
+    -Dqt6d3d11=disabled \
+    -Dwasapi=disabled \
+    -Dwasapi2=disabled \
+    -Dwildmidi=disabled \
+    -Dwinks=disabled \
+    -Dwinscreencap=disabled \
+    -Dwpe=disabled \
+    -Dwpe2=disabled \
+    -Dmagicleap=disabled \
+    -Davtp=disabled \
+    -Dcuda-nvmm=disabled \
+    -Ddc1394=disabled \
+    -Ddts=disabled \
+    -Dfaad=disabled \
+    -Dgs=disabled \
+    -Diqa=disabled \
+    -Dmpeg2enc=disabled \
+    -Dmplex=disabled \
+    -Dresindvd=disabled \
+    -Dx265=disabled \
+    -Dzbar=disabled \
+    -Dzxing=disabled \
+    -Dflite=disabled \
+    -Disac=disabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

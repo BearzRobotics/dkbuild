@@ -1,0 +1,41 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/wget2/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "wget2"
+version = "2.2.1"
+release = 1
+summary = "GNU downloader"
+license = "GPL-3.0-or-later"
+homepage = "https://gitlab.com/gnuwget/wget2"
+hostdeps = ["automake", "gettext-devel", "libtool", "pkgconf", "texinfo"]
+builddeps = ["brotli-devel", "bzip2-devel", "gnutls-devel", "libidn2-devel", "libpsl-devel", "nghttp2-devel", "pcre2-devel", "xz-devel", "zlib-ng-compat-devel", "zstd-devel"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/wget/wget2-2.2.1.tar.gz", sha256 = "d7544b13e37f18e601244fce5f5f40688ac1d6ab9541e0fbb01a32ee1fb447b4" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-lzma \
+    --with-bzip2
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+# testing-only
+rm -rf "$pkgdir/usr/bin/wget2_noinstall"
+# we don't have wget1
+mkdir -p "$pkgdir/usr/bin"
+ln -sf wget2 "$pkgdir/usr/bin/wget"
+# this is only installed with pandoc detected
+install -Dm644 docs/man/man1/wget2.1 "$pkgdir/usr/share/man/man1/wget2.1"
+mkdir -p "$pkgdir/usr/share/man/man1"
+ln -sf wget2.1 "$pkgdir/usr/share/man/man1/wget.1"
+'''

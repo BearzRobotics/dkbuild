@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/zimg/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "zimg"
+version = "3.0.5"
+release = 1
+summary = "Image processing library"
+license = "WTFPL"
+homepage = "https://github.com/sekrit-twc/zimg"
+patches = ["fix-size_t.patch"]
+hostdeps = ["pkgconf", "automake", "libtool"]
+builddeps = ["linux-headers"]
+
+source = [
+    { url = "https://github.com/sekrit-twc/zimg/archive/release-3.0.5.tar.gz", sha256 = "a9a0226bf85e0d83c41a8ebe4e3e690e1348682f6a2a7838f1b8cbff1b799bcf" },
+]
+
+setup = '''
+./autogen.sh
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/zimg/COPYING"
+'''

@@ -1,0 +1,40 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/signond/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "signond"
+version = "8.61"
+release = 2
+summary = "D-Bus service for user authentication"
+license = "LGPL-2.1-only"
+homepage = "https://gitlab.com/accounts-sso/signond"
+patches = ["qt6.patch"]
+hostdeps = ["doxygen", "pkgconf", "qt6-qtbase"]
+builddeps = ["qt6-qtbase-devel"]
+checkdeps = ["dbus"]
+
+source = [
+    { url = "https://gitlab.com/accounts-sso/signond/-/archive/VERSION_8.61/signond-VERSION_8.61.tar.gz", sha256 = "3dd57c25e1bf1583b2cb857f96831e38e73d40264ff66ca43e63bb7233f76828" },
+]
+
+setup = '''
+# TODO(cbuild): self.do(
+#         "qmake6",
+#         "PREFIX=/usr",
+#         f"QMAKE_CFLAGS={self.get_cflags(shell=True)}",
+#         f"QMAKE_CXXFLAGS={self.get_cxxflags(shell=True)}",
+#         f"QMAKE_LFLAGS={self.get_ldflags(shell=True)}",
+#     )
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+# TODO(cbuild): init_install() sets variables for this phase (cbuild line 31); port it by hand
+%make_install \
+    STRIP=true \
+    PREFIX=/usr
+'''

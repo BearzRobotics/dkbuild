@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/pcsc-lite/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "pcsc-lite"
+version = "2.3.3"
+release = 1
+summary = "Middleware to access PC/SC smart cards using SCard API"
+license = "BSD-3-Clause"
+homepage = "https://pcsclite.apdu.fr"
+hostdeps = ["flex", "perl", "pkgconf"]
+builddeps = ["libusb-devel", "eudev-devel", "polkit-devel"]
+
+source = [
+    { url = "https://pcsclite.apdu.fr/files/pcsc-lite-2.3.3.tar.xz", sha256 = "cdff7d7153a0b37aa74e26dfec89ec7dc5c5286aa21b91b903e38739d227e8e7" },
+]
+
+setup = '''
+%meson \
+    -Dlibsystemd=false \
+    -Dlibudev=true \
+    -Dpolkit=true \
+    -Dusb=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/pcsc-lite/COPYING"
+# TODO(cbuild): self.install_service(self.files_path / "pcscd")
+'''

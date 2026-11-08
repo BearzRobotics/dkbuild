@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/rasqal/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "rasqal"
+version = "0.9.33"
+release = 1
+summary = "RDF Query Library"
+license = "GPL-2.0-or-later OR LGPL-2.1-or-later OR Apache-2.0"
+homepage = "https://librdf.org/rasqal"
+hostdeps = ["pkgconf", "automake", "libtool"]
+builddeps = ["mpfr-devel", "raptor-devel"]
+checkdeps = ["perl"]
+
+source = [
+    { url = "https://librdf.org/dist/source/rasqal-0.9.33.tar.gz", sha256 = "6924c9ac6570bd241a9669f83b467c728a322470bf34f4b2da4f69492ccfd97c" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libsigc++2/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libsigc++2"
+version = "2.12.1"
+release = 1
+summary = "Type-safe callback system for C++, version 2.x"
+license = "LGPL-2.1-or-later"
+homepage = "https://libsigcplusplus.github.io/libsigcplusplus"
+hostdeps = ["pkgconf"]
+
+source = [
+    { url = "https://download.gnome.org/sources/libsigc++/2.12/libsigc++-2.12.1.tar.xz", sha256 = "a9dbee323351d109b7aee074a9cb89ca3e7bcf8ad8edef1851f4cf359bd50843" },
+]
+
+setup = '''
+%meson \
+    -Dbuild-examples=false \
+    -Dwarnings=max
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

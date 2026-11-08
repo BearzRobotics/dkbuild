@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libsrtp/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libsrtp"
+version = "2.8.1"
+release = 1
+summary = "Library for Secure Real-Time Transport Protocol"
+license = "BSD-3-Clause"
+homepage = "https://github.com/cisco/libsrtp"
+patches = ["tests.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["openssl-devel"]
+
+source = [
+    { url = "https://github.com/cisco/libsrtp/archive/v2.8.1.tar.gz", sha256 = "ef5569220749529d778013aae1178391d972570a2b4f7288dda22effa875b07c" },
+]
+
+setup = '''
+%meson \
+    -Dcrypto-library=openssl
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libsrtp/LICENSE"
+'''

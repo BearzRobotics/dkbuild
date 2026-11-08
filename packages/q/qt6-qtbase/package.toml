@@ -1,0 +1,84 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/qt6-qtbase/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "qt6-qtbase"
+version = "6.12.0"
+release = 2
+summary = "Qt application framework 6.x"
+license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only WITH Qt-GPL-exception-1.0"
+homepage = "https://www.qt.io"
+patches = ["arm64-yield.patch", "foortify.patch", "lfs64.patch", "loongarch.patch", "musl-usr-path-hack.patch", "qrangemodel-bogus-test.patch"]
+hostdeps = ["cmake", "ninja", "perl", "pkgconf"]
+builddeps = ["brotli-devel", "cups-devel", "dbus-devel", "double-conversion-devel", "glib-devel", "gtk+3-devel", "harfbuzz-devel", "heimdal-devel", "icu-devel", "libb2-devel", "libdrm-devel", "libglvnd-devel", "libinput-devel", "libjpeg-turbo-devel", "libpng-devel", "libproxy-devel", "libxcb-devel", "libxkbcommon-devel", "linux-headers", "mesa-devel", "mtdev-devel", "pcre2-devel", "sqlite-devel", "tslib-devel", "vulkan-headers", "vulkan-loader-devel", "wayland-devel", "xcb-util-cursor-devel", "xcb-util-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel", "xcb-util-renderutil-devel", "xcb-util-wm-devel", "zlib-ng-compat-devel", "zstd-devel"]
+rundeps = ["shared-mime-info"]
+options = ["!cross"]
+
+source = [
+    { url = "https://download.qt.io/official_releases/qt/6.12/6.12.0/submodules/qtbase-everywhere-src-6.12.0.tar.xz", sha256 = "a951bd163c7b80fc6b8c88d7668fb56abf91c152373e13c10666763238131307" },
+]
+
+environment = '''
+export LDFLAGS="${LDFLAGS} -Wl,-z,stack-size=0x200000"
+'''
+setup = '''
+# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 98); port it by hand
+%cmake \
+    -DBUILD_WITH_PCH=OFF \
+    -DINSTALL_ARCHDATADIR=lib/qt6 \
+    -DINSTALL_BINDIR=lib/qt6/bin \
+    -DINSTALL_DATADIR=share/qt6 \
+    -DINSTALL_DOCDIR=share/doc/qt6 \
+    -DINSTALL_EXAMPLESDIR=lib/qt6/examples \
+    -DINSTALL_INCLUDEDIR=include/qt6 \
+    -DINSTALL_MKSPECSDIR=lib/qt6/mkspecs \
+    -DINSTALL_PUBLICBINDIR=bin \
+    -DINSTALL_SYSCONFDIR=/etc/xdg \
+    -DINSTALL_TESTSDIR=lib/qt6/tests \
+    -DQT_BUILD_TESTS=ON \
+    -DQT_FEATURE_journald=OFF \
+    -DQT_FEATURE_libproxy=ON \
+    -DQT_FEATURE_openssl_linked=ON \
+    -DQT_FEATURE_qmake=ON \
+    -DQT_FEATURE_reduce_relocations=OFF \
+    -DQT_FEATURE_syslog=ON \
+    -DQT_FEATURE_system_sqlite=ON \
+    -DQT_FEATURE_vulkan=ON \
+    -DQT_FEATURE_xcb=ON \
+    -DQT_FEATURE_xcb_glx_plugin=ON
+'''
+build = '''
+%cmake_build
+'''
+check = '''
+# TODO(cbuild): init_check() sets variables for this phase (cbuild line 103); port it by hand
+'''
+install = '''
+%cmake_install
+# remove installed checks files (because of "-DQT_BUILD_TESTS=ON")
+rm -rf "$pkgdir/usr/tests"
+rm -rf "$pkgdir/usr/lib/qt6/tests"
+rm -rf "$pkgdir/usr/lib/qt6/bin/syslocaleapp"
+rm -rf "$pkgdir/usr/lib/qt6/bin/socketprocess"
+rm -rf "$pkgdir/usr/lib/qt6/bin/qcommandlineparser_test_helper"
+rm -rf "$pkgdir/usr/lib/qt6/bin/paster"
+rm -rf "$pkgdir/usr/lib/qt6/bin/modal_helper"
+rm -rf "$pkgdir/usr/lib/qt6/bin/fileWriterProcess"
+rm -rf "$pkgdir/usr/lib/qt6/bin/echo"
+rm -rf "$pkgdir/usr/lib/qt6/bin/desktopsettingsaware_helper"
+rm -rf "$pkgdir/usr/lib/qt6/bin/crashingServer"
+rm -rf "$pkgdir/usr/lib/qt6/bin/copier"
+rm -rf "$pkgdir/usr/lib/qt6/bin/clientserver"
+rm -rf "$pkgdir/usr/lib/qt6/bin/nospace"
+rm -rf "$pkgdir/usr/lib/qt6/bin/one space"
+rm -rf "$pkgdir/usr/lib/qt6/bin/two space s"
+rm -rf "$pkgdir/usr/lib/qt6/bin/write-read-write"
+# TODO(cbuild): self.uninstall("usr/lib/qt6/bin/test*", glob=True)
+# TODO(cbuild): self.uninstall("usr/lib/qt6/bin/tst*", glob=True)
+install -Dm644 $pkgfiles/target_qt.conf "$pkgdir/usr/lib/qt6/bin/target_qt.conf"
+# eliminate hardlinks
+# TODO(cbuild): for f in (self.destdir / "usr/lib/qt6/bin").glob("*6"):
+#         nsname = f.name.removesuffix("6")
+#         f.with_name(nsname).unlink()
+#         self.install_link(f"usr/lib/qt6/bin/{nsname}", f.name)
+'''

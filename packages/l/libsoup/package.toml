@@ -1,0 +1,34 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libsoup/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libsoup"
+version = "3.6.6"
+release = 1
+summary = "HTTP library for glib"
+license = "LGPL-2.1-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/libsoup"
+hostdeps = ["gettext", "glib-devel", "gobject-introspection", "pkgconf", "vala"]
+builddeps = ["brotli-devel", "glib-devel", "glib-networking", "heimdal-devel", "libpsl-devel", "libxml2-devel", "nghttp2-devel", "sqlite-devel", "vala-devel"]
+rundeps = ["glib-networking"]
+options = ["!cross"]
+
+source = [
+    { url = "https://download.gnome.org/sources/libsoup/3.6/libsoup-3.6.6.tar.xz", sha256 = "51ed0ae06f9d5a40f401ff459e2e5f652f9a510b7730e1359ee66d14d4872740" },
+]
+
+setup = '''
+%meson \
+    -Dgssapi=enabled \
+    -Dbrotli=enabled \
+    -Dintrospection=enabled \
+    -Dvapi=enabled \
+    -Dntlm=disabled \
+    -Dsysprof=disabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

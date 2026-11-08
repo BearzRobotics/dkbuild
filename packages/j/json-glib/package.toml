@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/json-glib/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "json-glib"
+version = "1.10.8"
+release = 1
+summary = "JSON parser for glib-based projects"
+license = "LGPL-2.1-or-later"
+homepage = "https://wiki.gnome.org/action/show/Projects/JsonGlib"
+hostdeps = ["gettext", "glib-devel", "gobject-introspection", "pkgconf"]
+builddeps = ["glib-devel"]
+
+source = [
+    { url = "https://download.gnome.org/sources/json-glib/1.10/json-glib-1.10.8.tar.xz", sha256 = "55c5c141a564245b8f8fbe7698663c87a45a7333c2a2c56f06f811ab73b212dd" },
+]
+
+setup = '''
+%meson \
+    -Dintrospection=enabled \
+    -Dinstalled_tests=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

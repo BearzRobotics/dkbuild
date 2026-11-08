@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/yaml-cpp/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "yaml-cpp"
+version = "0.8.0"
+release = 1
+summary = "C++ YAML parser and emitter"
+license = "MIT"
+homepage = "https://github.com/jbeder/yaml-cpp"
+patches = ["unbundle-gtest.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["gtest-devel"]
+
+source = [
+    { url = "https://github.com/jbeder/yaml-cpp/archive/0.8.0.tar.gz", sha256 = "fbe74bbdcee21d656715688706da3c8becfd946d92cd44705cc6098bb23b3a16" },
+]
+
+setup = '''
+%cmake \
+    -DYAML_CPP_BUILD_TESTS=ON \
+    -DYAML_BUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/yaml-cpp/LICENSE"
+'''

@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/fontforge-cli/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "fontforge-cli"
+version = "20251009"
+release = 2
+summary = "Create and modify PostScript, TrueType and SVG fonts"
+license = "GPL-3.0-or-later"
+homepage = "http://fontforge.github.io/en-US"
+patches = ["libedit.patch"]
+hostdeps = ["cmake", "ninja", "gettext", "pkgconf"]
+builddeps = ["freetype-devel", "giflib-devel", "libedit-devel", "libjpeg-turbo-devel", "libpng-devel", "libspiro-devel", "libtiff-devel", "libuninameslist-devel", "libxml2-devel", "python-devel", "woff2-devel", "zlib-ng-compat-devel"]
+rundeps = ["!fontforge"]
+
+source = [
+    { url = "https://github.com/fontforge/fontforge/archive/20251009.tar.gz", sha256 = "613424039e0e1b6bb106f8f0df287e1d249ac285d854f4e1964d68e9b9ad7eb0" },
+]
+
+setup = '''
+%cmake \
+    -DENABLE_GUI=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# TODO(cbuild): for f in (self.cwd / "contrib/cidmap").glob("Adobe-*.cidmap"):
+#         self.install_file(f, "usr/share/fontforge")
+'''

@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libnotify/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libnotify"
+version = "0.8.8"
+release = 1
+summary = "Desktop notification library"
+license = "LGPL-2.1-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/libnotify"
+hostdeps = ["docbook-xsl", "glib-devel", "gobject-introspection", "libxslt", "pkgconf"]
+builddeps = ["gdk-pixbuf-devel", "glib-devel", "gtk+3-devel", "gtk4-devel", "libpng-devel"]
+checkdeps = ["dbus"]
+options = ["!cross", "!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/libnotify/0.8/libnotify-0.8.8.tar.xz", sha256 = "23420ef619dc2cb5aebad613f4823a2fa41c07e5a1d05628d40f6ec4b35bfddd" },
+]
+
+setup = '''
+%meson \
+    -Dintrospection=enabled \
+    -Ddocbook_docs=disabled \
+    -Dgtk_doc=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

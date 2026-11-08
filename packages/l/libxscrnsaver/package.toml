@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libxscrnsaver/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libxscrnsaver"
+version = "1.2.5"
+release = 1
+summary = "X Screensaver Library"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "pkgconf", "libtool", "xorg-util-macros"]
+builddeps = ["xorgproto", "libx11-devel", "libxext-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/lib/libXScrnSaver-1.2.5.tar.gz", sha256 = "356f45ae365403b5500702b6b7c6e708d02a5b0ada0e5a6c859db677e41fdb00" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-malloc0returnsnull
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libxscrnsaver/COPYING"
+'''

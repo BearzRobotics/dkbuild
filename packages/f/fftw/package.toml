@@ -1,0 +1,56 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/fftw/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "fftw"
+version = "3.3.10"
+release = 1
+summary = "Library for computing the discrete Fourier transform"
+license = "GPL-2.0-or-later"
+homepage = "http://www.fftw.org"
+hostdeps = ["pkgconf", "automake", "libtool"]
+options = ["!check"]
+
+source = [
+    { url = "http://www.fftw.org/fftw-3.3.10.tar.gz", sha256 = "56c932549852cddcfafdab3820b0200c7742675be92179e59e6215b340e26467" },
+]
+
+setup = '''
+autoreconf -if
+# TODO(cbuild): from cbuild.util import gnu_configure
+# TODO(cbuild): gnu_configure.replace_guess(self)
+# TODO(cbuild): eargs = ["--enable-shared", "--enable-threads"]
+# TODO(cbuild): sseargs = []
+# TODO(cbuild): sse2args = []
+# TODO(cbuild): if _have_omp:
+#         eargs += ["--enable-openmp"]
+# TODO(cbuild): match self.profile.arch:
+#         case "x86_64":
+#             sseargs += ["--enable-sse"]
+#             sse2args += ["--enable-sse2"]
+# TODO(cbuild): gnu_configure.configure(
+#         self, build_dir="build-double", extra_args=eargs + sse2args
+#     )
+# TODO(cbuild): gnu_configure.configure(
+#         self,
+#         build_dir="build-long-double",
+#         extra_args=[*eargs, "--enable-long-double"],
+#     )
+# TODO(cbuild): gnu_configure.configure(
+#         self,
+#         build_dir="build-float",
+#         extra_args=[*eargs, "--enable-float", *sseargs],
+#     )
+'''
+build = '''
+# TODO(cbuild): for f in ["double", "long-double", "float"]:
+#         self.make.build(wrksrc=f"build-{f}")
+'''
+check = '''
+# TODO(cbuild): for f in ["double", "long-double", "float"]:
+#         self.make.check(wrksrc=f"build-{f}")
+'''
+install = '''
+# TODO(cbuild): for f in ["double", "long-double", "float"]:
+#         self.make.install(wrksrc=f"build-{f}")
+'''

@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/qcoro/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "qcoro"
+version = "0.13.0"
+release = 1
+summary = "Qt C++ Coroutine Library"
+license = "MIT"
+homepage = "https://qcoro.dvratil.cz"
+hostdeps = ["cmake", "ninja"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtwebsockets-devel"]
+checkdeps = ["dbus"]
+
+source = [
+    { url = "https://github.com/danvratil/qcoro/archive/refs/tags/v0.13.0.tar.gz", sha256 = "4bff7513c5c8e301b66308df05795043b1792ed16381a484e5c990171b8ff19e" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DQCORO_BUILD_EXAMPLES=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/qcoro/LICENSE"
+'''

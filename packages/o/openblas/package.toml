@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/openblas/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "openblas"
+version = "0.3.30"
+release = 1
+summary = "Optimized BLAS library"
+license = "BSD-3-Clause"
+homepage = "https://www.openblas.net"
+patches = ["5365.patch", "riscv64-detect.patch"]
+archs = ["aarch64", "riscv64", "x86_64"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["linux-headers"]
+
+source = [
+    { url = "https://github.com/OpenMathLib/OpenBLAS/releases/download/v0.3.30/OpenBLAS-0.3.30.tar.gz", sha256 = "27342cff518646afb4c2b976d809102e368957974c250a25ccc965e53063c95d" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/openblas/LICENSE"
+'''

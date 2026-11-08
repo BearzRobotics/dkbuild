@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libcdio/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libcdio"
+version = "2.1.0"
+release = 3
+summary = "CD-ROM access library"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/libcdio"
+patches = ["disable-broken-test.patch", "format-security.patch", "largefile.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["ncurses-devel", "libcddb-devel", "linux-headers"]
+checkdeps = ["bash"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/libcdio/libcdio-2.1.0.tar.bz2", sha256 = "8550e9589dbd594bfac93b81ecf129b1dc9d0d51e90f9696f1b2f9b2af32712b" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

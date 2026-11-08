@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/qca/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "qca"
+version = "2.3.12"
+release = 1
+summary = "Qt6 cryptographic architecture"
+license = "LGPL-2.1-or-later"
+homepage = "https://invent.kde.org/libraries/qca"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["libgcrypt-devel", "libsasl-devel", "openssl-devel", "pkcs11-helper-devel", "qt6-qt5compat-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/qca/2.3.12/qca-2.3.12.tar.xz", sha256 = "d4a2b3aa0272d73ea0c4cd2140960177fa34ddc2030e59a48ecfb80c757572c3" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_WITH_QT6=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

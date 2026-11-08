@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xdg-dbus-proxy/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "xdg-dbus-proxy"
+version = "0.1.9"
+release = 1
+summary = "Filtering proxy for D-Bus connections"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/flatpak/xdg-dbus-proxy"
+hostdeps = ["docbook-xsl-nons", "libxslt", "ninja", "pkgconf"]
+builddeps = ["glib-devel"]
+checkdeps = ["dbus"]
+
+source = [
+    { url = "https://github.com/flatpak/xdg-dbus-proxy/releases/download/0.1.9/xdg-dbus-proxy-0.1.9.tar.xz", sha256 = "5450dda586ec3bb3ca709d311e845487883faa3b09cf562608d7e84f4311dced" },
+]
+
+setup = '''
+%meson \
+    -Dman=enabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libmwaw/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libmwaw"
+version = "0.3.23"
+release = 1
+summary = "Library for importing legacy Mac documents"
+license = "MPL-2.0 OR LGPL-2.1-or-later"
+homepage = "https://sourceforge.net/projects/libmwaw"
+hostdeps = ["pkgconf", "automake", "libtool"]
+builddeps = ["librevenge-devel", "boost-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/libmwaw/libmwaw-0.3.23.tar.xz", sha256 = "ac3590f691a2904eb8c7dc8b757b8a29f125f592449e421459ae8fa928b399eb" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

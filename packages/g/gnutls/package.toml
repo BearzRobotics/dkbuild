@@ -1,0 +1,44 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gnutls/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "gnutls"
+version = "3.8.13"
+release = 2
+summary = "GNU Transport Layer Security library"
+license = "LGPL-2.1-or-later"
+homepage = "https://gnutls.org"
+patches = ["disable-failing-test.patch", "no-mini-dtls-fragments.patch", "no-timespectest.patch", "skip-ktls.patch", "tests.patch"]
+hostdeps = ["automake", "gettext-devel", "libtool", "pkgconf"]
+builddeps = ["brotli-devel", "gmp-devel", "libidn2-devel", "libtasn1-devel", "libunistring-devel", "linux-headers", "nettle-devel", "p11-kit-devel", "zlib-ng-compat-devel", "zstd-devel"]
+checkdeps = ["texinfo"]
+rundeps = ["trousers-libs"]
+
+source = [
+    { url = "https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/gnutls-3.8.13.tar.xz", sha256 = "ffed8ec1bf09c2426d4f14aae377de4753b53e537d685e604e99a8b16ca9c97e" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-rpath \
+    --disable-static \
+    --disable-valgrind-tests \
+    --disable-afalg \
+    --enable-ktls \
+    --with-brotli=link \
+    --with-default-trust-store-file=/etc/ssl/certs/ca-certificates.crt \
+    --with-tpm2=link \
+    --with-zlib=link \
+    --with-zstd=link
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 $pkgfiles/config "$pkgdir/etc/gnutls/config"
+'''

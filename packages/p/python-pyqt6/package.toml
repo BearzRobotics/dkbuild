@@ -1,0 +1,36 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-pyqt6/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "python-pyqt6"
+version = "6.12.0"
+release = 1
+summary = "Python Qt6 bindings"
+license = "GPL-3.0-only"
+homepage = "https://www.riverbankcomputing.com/software/pyqt"
+hostdeps = ["pkgconf", "python-pyqt-builder", "python-setuptools", "python-sip"]
+builddeps = ["libx11-devel", "python-dbus-devel", "python-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtmultimedia-devel", "qt6-qtpositioning-devel", "qt6-qtsensors-devel", "qt6-qtsvg-devel", "qt6-qttools-devel", "qt6-qtwebchannel-devel", "qt6-qtwebsockets-devel"]
+rundeps = ["python-pyqt6-sip"]
+options = ["!cross"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/P/PyQt6/pyqt6-6.12.0.tar.gz", sha256 = "d3e021b716bae880224422f9d1b894d2d53de7e60e60dbc43f860723f9cc300b" },
+]
+
+setup = '''
+sip-build --confirm-license --no-make --qmake /usr/bin/qmake6 --api-dir /usr/share/qt6/qsci/api/python --pep484-pyi --verbose
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+# TODO(cbuild): init_install() sets variables for this phase (cbuild line 53); port it by hand
+%make_install \
+    STRIP=true \
+    PREFIX=/usr
+# TODO(cbuild): from cbuild.util import python
+# TODO(cbuild): python.precompile(self, "usr/lib")
+'''

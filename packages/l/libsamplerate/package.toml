@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libsamplerate/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libsamplerate"
+version = "0.2.2"
+release = 1
+summary = "Sample Rate Converter for audio"
+license = "BSD-2-Clause"
+homepage = "https://libsndfile.github.io/libsamplerate"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["linux-headers"]
+checkdeps = ["fftw-devel", "libsndfile-devel"]
+
+source = [
+    { url = "https://github.com/libsndfile/libsamplerate/releases/download/0.2.2/libsamplerate-0.2.2.tar.xz", sha256 = "3258da280511d24b49d6b08615bbe824d0cacc9842b0e4caf11c52cf2b043893" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libsamplerate/COPYING"
+'''

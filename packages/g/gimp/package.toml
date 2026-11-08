@@ -1,0 +1,35 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gimp/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "gimp"
+version = "3.2.6"
+release = 1
+summary = "GNU Image Manipulation Program"
+license = "GPL-3.0-only"
+homepage = "https://www.gimp.org"
+patches = ["atol.patch", "gexiv.patch", "handle-this.patch"]
+hostdeps = ["bison", "flex", "gettext-devel", "glib-devel", "gobject-introspection", "iso-codes", "libxslt", "perl", "pkgconf", "python-gobject", "shared-mime-info"]
+builddeps = ["alsa-lib-devel", "appstream-devel", "at-spi2-core-devel", "babl-devel", "cairo-devel", "fontconfig-devel", "freetype-devel", "gdk-pixbuf-devel", "gegl-devel", "gexiv2-devel", "ghostscript-devel", "glib-devel", "gtk+3-devel", "harfbuzz-devel", "json-glib-devel", "lcms2-devel", "libarchive-devel", "libgudev-devel", "libheif-devel", "libjpeg-turbo-devel", "libjxl-devel", "libmypaint-devel", "openmp-devel", "libpng-devel", "librsvg-devel", "libtiff-devel", "llvm-libcxx-devel", "libwebp-devel", "libxcursor-devel", "libxmu-devel", "libxpm-devel", "linux-headers", "mypaint-brushes", "openjpeg-devel", "pango-devel", "poppler-data", "poppler-devel", "xz-devel", "zlib-ng-compat-devel"]
+checkdeps = ["dbus"]
+rundeps = ["iso-codes", "mypaint-brushes", "python-gobject"]
+options = ["!cross", "!check"]
+
+source = [
+    { url = "https://download.gimp.org/pub/gimp/v3.2/gimp-3.2.6.tar.xz", sha256 = "40b15e90ad0c0c631b76da3c467ea9847fa5c24f37413ac5b492804860a28cd8" },
+]
+
+setup = '''
+%meson \
+    -Dcheck-update=no \
+    -Dbug-report-url=https://github.com/chimera-linux/cports/issues \
+    -Dlibbacktrace=false \
+    -Ddefault_library=shared \
+    -Dlua=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

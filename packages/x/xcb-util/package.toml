@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xcb-util/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "xcb-util"
+version = "0.4.1"
+release = 1
+summary = "XCB utilities library"
+license = "MIT"
+homepage = "https://xcb.freedesktop.org"
+hostdeps = ["automake", "gperf", "pkgconf", "libtool", "xorg-util-macros"]
+builddeps = ["libxcb-devel"]
+
+source = [
+    { url = "https://xcb.freedesktop.org/dist/xcb-util-0.4.1.tar.gz", sha256 = "21c6e720162858f15fe686cef833cf96a3e2a79875f84007d76f6d00417f593a" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xcb-util/COPYING"
+'''

@@ -1,0 +1,34 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/imlib2/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "imlib2"
+version = "1.12.5"
+release = 1
+summary = "Image manipulation library"
+license = "Imlib2"
+homepage = "https://www.enlightenment.org"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["freetype-devel", "giflib-devel", "libheif-devel", "libjpeg-turbo-devel", "libpng-devel", "librsvg-devel", "libtiff-devel", "libwebp-devel", "libxcb-devel"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/enlightenment/imlib2-src/imlib2-1.12.5.tar.gz", sha256 = "097d40aee4cf4a349187615b796b37db1652fcc84bb0e8d5c0b380ab651d9095" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-static \
+    --sysconfdir=/etc/imlib2 \
+    --enable-visibility-hiding
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/imlib2/COPYING"
+'''

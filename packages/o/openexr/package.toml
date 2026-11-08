@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/openexr/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "openexr"
+version = "3.4.15"
+release = 1
+summary = "Reference implementation of the EXR format"
+license = "BSD-3-Clause"
+homepage = "https://www.openexr.com"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["boost-devel", "imath-devel", "libdeflate-devel", "openjph-devel"]
+
+source = [
+    { url = "https://github.com/openexr/openexr/archive/v3.4.15.tar.gz", sha256 = "445ed5b0ea4d9cf98be3a4f219e419628b123b61dec65ccb743ab9b07fbebdaa" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/openexr/LICENSE.md"
+'''

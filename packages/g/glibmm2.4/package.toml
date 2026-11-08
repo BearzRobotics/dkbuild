@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/glibmm2.4/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "glibmm2.4"
+version = "2.66.10"
+release = 1
+summary = "C++ bindings for GLib, API version 2.4"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.gtkmm.org"
+patches = ["tests.patch"]
+hostdeps = ["glib-devel", "perl", "pkgconf"]
+builddeps = ["glib-devel", "libsigc++2-devel"]
+checkdeps = ["glib-networking"]
+
+source = [
+    { url = "https://download.gnome.org/sources/glibmm/2.66/glibmm-2.66.10.tar.xz", sha256 = "2b61780203aed98e701d3ea57c8f353e7c8ada9706a79be782f6c5153dd035c0" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

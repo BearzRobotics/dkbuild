@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/lv2/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "lv2"
+version = "1.18.10"
+release = 1
+summary = "Plugin standard for audio systems"
+license = "ISC"
+homepage = "https://lv2plug.in"
+hostdeps = ["pkgconf"]
+builddeps = ["libsndfile-devel"]
+
+source = [
+    { url = "https://lv2plug.in/spec/lv2-1.18.10.tar.xz", sha256 = "78c51bcf21b54e58bb6329accbb4dae03b2ed79b520f9a01e734bd9de530953f" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/lv2/COPYING"
+'''

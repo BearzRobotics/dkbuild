@@ -1,0 +1,53 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/openh264/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "openh264"
+version = "2.6.0"
+release = 2
+summary = "H.264 codec implementation"
+license = "BSD-2-Clause"
+homepage = "https://github.com/cisco/openh264"
+patches = ["no-install-rebuild.patch"]
+hostdeps = ["nasm", "pkgconf"]
+
+source = [
+    { url = "https://github.com/cisco/openh264/archive/v2.6.0.tar.gz", sha256 = "558544ad358283a7ab2930d69a9ceddf913f4a51ee9bf1bfb9e377322af81a69" },
+    { url = "https://github.com/mozilla/gmp-api/archive/refs/tags/Firefox135.tar.gz", sha256 = "939be3596292ff445bf3cd5454a03041f68258444f7fff023a0bac17b238b40f" },
+]
+
+build = '''
+%make \
+    BUILDTYPE=Release \
+    CFLAGS_OPT= \
+    ENABLEPIC=Yes \
+    HAVE_AVX2=No \
+    HAVE_GMP_API=Yes \
+    libraries \
+    plugin
+'''
+check = '''
+%make test
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/openh264/LICENSE"
+# TODO(cbuild): _nspath = "usr/lib/nsbrowser/plugins/gmp-gmpopenh264/system-installed"
+# grab the main pkgver lib
+# TODO(cbuild): self.install_file(
+#         f"libgmpopenh264.so.{pkgver}",
+#         _nspath,
+#     )
+# symlinks; ensure the soname is right
+# TODO(cbuild): self.install_link(
+#         f"{_nspath}/libgmpopenh264.so.8", f"libgmpopenh264.so.{pkgver}"
+#     )
+# TODO(cbuild): self.install_link(f"{_nspath}/libgmpopenh264.so", "libgmpopenh264.so.8")
+# manifest file
+# TODO(cbuild): self.install_file(self.files_path / "gmpopenh264.info", _nspath)
+# profile and other stuff
+install -Dm644 $pkgfiles/profile.conf "$pkgdir/etc/profile.d/firefox-openh264.sh"
+install -Dm644 $pkgfiles/prefs.js "$pkgdir/usr/lib/firefox/defaults/pref/gmpopenh264.js"
+'''

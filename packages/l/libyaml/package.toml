@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libyaml/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libyaml"
+version = "0.2.5"
+release = 1
+summary = "Fast YAML 1.1 parser and emitter library"
+license = "MIT"
+homepage = "https://pyyaml.org/wiki/LibYAML"
+hostdeps = ["pkgconf", "automake", "libtool"]
+
+source = [
+    { url = "https://github.com/yaml/libyaml/archive/0.2.5.tar.gz", sha256 = "fa240dbf262be053f3898006d502d514936c818e422afdcf33921c63bed9bf2e" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 License "$pkgdir/usr/share/licenses/libyaml/License"
+'''

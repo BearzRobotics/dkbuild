@@ -1,0 +1,36 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/graphviz/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "graphviz"
+version = "13.1.2"
+release = 1
+summary = "Graph visualization software"
+license = "EPL-1.0"
+homepage = "https://graphviz.org"
+hostdeps = ["automake", "bison", "flex", "libtool", "libtool-devel", "perl", "pkgconf", "python"]
+builddeps = ["cairo-devel", "fontconfig-devel", "freetype-devel", "gdk-pixbuf-devel", "libexpat-devel", "libgd-devel", "libjpeg-turbo-devel", "libpng-devel", "libwebp-devel", "pango-devel", "zlib-ng-compat-devel"]
+checkdeps = ["fonts-liberation"]
+rundeps = ["fonts-liberation"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/graphviz/graphviz/-/archive/13.1.2/graphviz-13.1.2.tar.gz", sha256 = "0e79b8402e8ea13f05c0fc0e30604f1d0731cd3f60f85850cedac7e0ee420ef8" },
+]
+
+setup = '''
+# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 46); port it by hand
+./autogen.sh
+%configure \
+    --disable-lefty
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install \
+    -j1
+install -Dm644 epl-v10.txt "$pkgdir/usr/share/licenses/graphviz/epl-v10.txt"
+# useless
+# TODO(cbuild): self.rm(self.destdir / "usr/bin/dot_builtins")
+'''

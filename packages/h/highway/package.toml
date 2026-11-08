@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/highway/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "highway"
+version = "1.4.0"
+release = 1
+summary = "Google's SIMD library with runtime dispatch"
+license = "Apache-2.0 OR BSD-3-Clause"
+homepage = "https://github.com/google/highway"
+patches = ["ppc64le-failing-tests.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["gtest-devel", "linux-headers"]
+
+source = [
+    { url = "https://github.com/google/highway/archive/refs/tags/1.4.0.tar.gz", sha256 = "e72241ac9524bb653ae52ced768b508045d4438726a303f10181a38f764a453c" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DHWY_CMAKE_RVV=OFF \
+    -DHWY_SYSTEM_GTEST=ON \
+    -DHWY_ENABLE_EXAMPLES=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/highway/LICENSE"
+'''

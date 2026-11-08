@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/help2man/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "help2man"
+version = "1.49.3"
+release = 2
+summary = "GNU conversion tool to create man pages"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/help2man"
+hostdeps = ["perl-locale-gettext", "texinfo"]
+rundeps = ["perl-locale-gettext"]
+options = ["!check"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/help2man/help2man-1.49.3.tar.xz", sha256 = "4d7e4fdef2eca6afe07a2682151cea78781e0a4e8f9622142d9f70c083a2fd4f" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

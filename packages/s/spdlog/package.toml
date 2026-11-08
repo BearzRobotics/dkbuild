@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/spdlog/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "spdlog"
+version = "1.17.0"
+release = 1
+summary = "C++ logging library"
+license = "MIT"
+homepage = "https://github.com/gabime/spdlog"
+patches = ["musl.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["catch2-devel", "fmt-devel"]
+checkdeps = ["tzdb"]
+
+source = [
+    { url = "https://github.com/gabime/spdlog/archive/refs/tags/v1.17.0.tar.gz", sha256 = "d8862955c6d74e5846b3f580b1605d2428b11d97a410d86e2fb13e857cd3a744" },
+]
+
+setup = '''
+%cmake \
+    -DSPDLOG_FMT_EXTERNAL=ON \
+    -DSPDLOG_BUILD_SHARED=ON \
+    -DSPDLOG_BUILD_EXAMPLE=OFF \
+    -DSPDLOG_BUILD_TESTS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/spdlog/LICENSE"
+'''

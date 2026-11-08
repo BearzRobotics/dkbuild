@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/openal-soft/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "openal-soft"
+version = "1.25.2"
+release = 2
+summary = "Cross-platform 3D audio API"
+license = "LGPL-2.1-or-later"
+homepage = "https://openal-soft.org"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["ffmpeg-devel", "libpulse-devel", "pipewire-devel", "sdl3-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/kcat/openal-soft/archive/1.25.2.tar.gz", sha256 = "fb27e5839aa11f0e5b9d33756965291fad5d6909ab928ea1f796f4a1a6877894" },
+]
+
+setup = '''
+%cmake \
+    -DALSOFT_EXAMPLES=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/share/openal/alsoftrc.sample"
+install -Dm644 alsoftrc.sample "$pkgdir/usr/share/examples/openal-soft/alsoftrc.sample"
+'''

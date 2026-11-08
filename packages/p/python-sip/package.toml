@@ -1,0 +1,21 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-sip/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "python-sip"
+version = "6.17.2"
+release = 1
+summary = "Tool for making python bindings for C/C++ libraries"
+license = "custom:sip"
+homepage = "https://github.com/Python-SIP/sip"
+hostdeps = ["python-setuptools-scm"]
+rundeps = ["python-packaging", "python-setuptools"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/s/sip/sip-6.17.2.tar.gz", sha256 = "f9e3e765b662b1a93a57440efd3f99a4001bf1bfe282fc0e24566d8d6122de3c" },
+]
+
+install = '''
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-sip/LICENSE"
+'''

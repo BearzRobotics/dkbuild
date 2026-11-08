@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libexttextcat/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libexttextcat"
+version = "3.4.8"
+release = 1
+summary = "N-Gram-Based Text Categorization library"
+license = "BSD-3-Clause"
+homepage = "https://wiki.documentfoundation.org/Libexttextcat"
+hostdeps = ["pkgconf", "automake", "libtool"]
+checkdeps = ["bash"]
+
+source = [
+    { url = "https://dev-www.libreoffice.org/src/libexttextcat/libexttextcat-3.4.8.tar.xz", sha256 = "93eb89fd4fc8f565806354e100e778b3ac9a24e5fc04c24e6a83fb1e9b6c9d59" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-werror
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libexttextcat/LICENSE"
+'''

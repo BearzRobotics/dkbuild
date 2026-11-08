@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libetonyek/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libetonyek"
+version = "0.1.13"
+release = 4
+summary = "Library for Apple Keynote presentations"
+license = "MPL-2.0"
+homepage = "https://wiki.documentfoundation.org/DLP/Libraries/libetonyek"
+patches = ["mdds3.patch"]
+hostdeps = ["automake", "pkgconf", "libtool"]
+builddeps = ["boost-devel", "glm", "liblangtag-devel", "librevenge-devel", "libxml2-devel", "mdds"]
+checkdeps = ["cppunit-devel"]
+
+source = [
+    { url = "https://dev-www.libreoffice.org/src/libetonyek/libetonyek-0.1.13.tar.xz", sha256 = "032b71cb597edd92a0b270b916188281bc35be55296b263f6817b29adbcb1709" },
+]
+
+setup = '''
+# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 29); port it by hand
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

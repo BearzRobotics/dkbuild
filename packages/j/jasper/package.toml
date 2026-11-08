@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/jasper/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "jasper"
+version = "4.2.8"
+release = 1
+summary = "Reference implementation of the JPEG-2000 codec"
+license = "JasPer-2.0"
+homepage = "https://ece.engr.uvic.ca/~frodo/jasper"
+patches = ["test.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["libjpeg-turbo-devel"]
+
+source = [
+    { url = "https://github.com/jasper-software/jasper/releases/download/version-4.2.8/jasper-4.2.8.tar.gz", sha256 = "98058a94fbff57ec6e31dcaec37290589de0ba6f47c966f92654681a56c71fae" },
+]
+
+setup = '''
+%cmake \
+    -DALLOW_IN_SOURCE_BUILD=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/jasper/LICENSE.txt"
+'''

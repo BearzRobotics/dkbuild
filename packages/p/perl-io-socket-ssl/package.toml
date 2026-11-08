@@ -1,0 +1,22 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/perl-io-socket-ssl/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "perl-io-socket-ssl"
+version = "2.095"
+release = 2
+summary = "SSL sockets with IO::Socket interface"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/release/IO-Socket-SSL"
+hostdeps = ["perl"]
+builddeps = ["perl", "perl-net-ssleay", "perl-uri"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.cpan.org/modules/by-module/IO/IO-Socket-SSL-2.095.tar.gz", sha256 = "7e764392b1b8bd44e654183c082b75be47800e98d7cd325f0e1b76c7d9a6b768" },
+]
+
+install = '''
+# TODO(cbuild): no install step could be derived
+true
+'''

@@ -1,0 +1,61 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/heimdal/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "heimdal"
+version = "7.8.0"
+release = 4
+summary = "Implementation of the Kerberos authentication protocol"
+license = "BSD-3-Clause"
+homepage = "https://heimdal.software"
+patches = ["001-nfs-des.patch", "002-openafs.patch", "003-installsh.patch", "004-link-gssapi.patch", "005-no-build-string.patch", "006-parallel-build.patch", "007-disable-iprop.patch", "008-disable-rpath.patch", "009-missing-headers.patch", "010-musl-warning.patch", "011-disable-zip-tests.patch", "012-disable-db-tests-sqlite.patch", "1085.patch", "upstream-001.patch", "upstream-002.patch", "upstream-003.patch", "upstream-004.patch", "upstream-005.patch", "upstream-006.patch", "upstream-007.patch"]
+hostdeps = ["automake", "byacc", "e2fsprogs-devel", "flex", "gettext", "libtool", "mandoc", "perl", "perl-json", "pkgconf", "python", "texinfo"]
+builddeps = ["e2fsprogs-devel", "gettext-devel", "libcap-ng-devel", "libedit-devel", "ncurses-devel", "openldap-devel", "sqlite-devel"]
+
+source = [
+    { url = "https://github.com/heimdal/heimdal/releases/download/heimdal-7.8.0/heimdal-7.8.0.tar.gz", sha256 = "fd87a207846fa650fd377219adc4b8a8193e55904d8a752c2c3715b4155d8d38" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-kcm \
+    --disable-otp \
+    --without-openssl \
+    --with-hcrypto-default-backend=hcrypto \
+    --without-berkeley-db \
+    --with-db-type-preference=sqlite
+'''
+build = '''
+%make
+'''
+check = '''
+%make check -j1
+'''
+install = '''
+%make_install \
+    -j1
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/heimdal/LICENSE"
+# TODO(cbuild): self.uninstall("usr/share/man/cat*", glob=True)
+# TODO(cbuild): self.uninstall("usr/lib/windc*", glob=True)
+rm -rf "$pkgdir/usr/bin/bsearch"
+rm -rf "$pkgdir/usr/bin/idn-lookup"
+rm -rf "$pkgdir/usr/share/man/man1/bsearch.1"
+# TODO(cbuild): self.rename("usr/bin/su", "ksu")
+# TODO(cbuild): self.rename("usr/bin/pagsh", "kpagsh")
+# TODO(cbuild): self.rename("usr/share/man/man1/su.1", "ksu.1")
+# TODO(cbuild): self.rename("usr/share/man/man1/pagsh.1", "kpagsh.1")
+# hardlink resolution
+rm -rf "$pkgdir/usr/share/man/man8/ipropd-master.8"
+rm -rf "$pkgdir/usr/share/man/man8/ipropd-slave.8"
+rm -rf "$pkgdir/usr/share/man/man5/qop.5"
+mkdir -p "$pkgdir/usr/share/man/man8"
+ln -sf iprop.8 "$pkgdir/usr/share/man/man8/ipropd-master.8"
+mkdir -p "$pkgdir/usr/share/man/man8"
+ln -sf iprop.8 "$pkgdir/usr/share/man/man8/ipropd-slave.8"
+mkdir -p "$pkgdir/usr/share/man/man5"
+ln -sf mech.5 "$pkgdir/usr/share/man/man5/qop.5"
+# TODO(cbuild): self.install_service(self.files_path / "heimdal-kdc")
+# TODO(cbuild): self.install_service(self.files_path / "heimdal-kadmind")
+# TODO(cbuild): self.install_service(self.files_path / "heimdal-kpasswdd")
+'''

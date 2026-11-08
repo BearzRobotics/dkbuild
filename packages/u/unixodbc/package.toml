@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/unixodbc/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "unixodbc"
+version = "2.3.12"
+release = 1
+summary = "Unix ODBC implementation"
+license = "GPL-2.0-only AND LGPL-2.1-or-later"
+homepage = "https://www.unixodbc.org"
+hostdeps = ["pkgconf", "automake", "libtool"]
+builddeps = ["libtool-devel", "libedit-devel"]
+
+source = [
+    { url = "https://www.unixodbc.org/unixODBC-2.3.12.tar.gz", sha256 = "f210501445ce21bf607ba51ef8c125e10e22dffdffec377646462df5f01915ec" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

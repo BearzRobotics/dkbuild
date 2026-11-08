@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libatomic_ops/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libatomic-ops"
+version = "7.8.4"
+release = 1
+summary = "Library for atomic operations"
+license = "MIT AND GPL-2.0-or-later"
+homepage = "https://github.com/ivmai/libatomic_ops"
+hostdeps = ["pkgconf", "automake", "libtool"]
+
+source = [
+    { url = "https://github.com/ivmai/libatomic_ops/releases/download/v7.8.4/libatomic_ops-7.8.4.tar.gz", sha256 = "2356e002e80ef695875e971d6a4fd8c61ca5c6fa4fd1bf31cce54a269c8bfcd5" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-static \
+    --enable-shared
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libatomic_ops/LICENSE"
+'''

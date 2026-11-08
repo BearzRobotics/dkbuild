@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gexiv2/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "gexiv2"
+version = "0.16.2"
+release = 1
+summary = "GObject wrapper for exiv2"
+license = "GPL-2.0-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/gexiv2"
+hostdeps = ["glib-devel", "gobject-introspection", "pkgconf", "python-gobject", "vala"]
+builddeps = ["glib-devel", "exiv2-devel"]
+
+source = [
+    { url = "https://download.gnome.org/sources/gexiv2/0.16/gexiv2-0.16.2.tar.xz", sha256 = "aad9e240fdffbe85e390f46ee0a567e251baea5c29c3d8690260388683dc8d0a" },
+]
+
+setup = '''
+%meson \
+    -Dintrospection=true \
+    -Dvapi=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

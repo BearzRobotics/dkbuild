@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/pystring/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "pystring"
+version = "1.1.4"
+release = 1
+summary = "C++ functions matching the interface of Python string methods"
+license = "BSD-3-Clause"
+homepage = "https://github.com/imageworks/pystring"
+patches = ["44.patch", "sover.patch"]
+hostdeps = ["cmake", "ninja"]
+
+source = [
+    { url = "https://github.com/imageworks/pystring/archive/refs/tags/v1.1.4.tar.gz", sha256 = "49da0fe2a049340d3c45cce530df63a2278af936003642330287b68cefd788fb" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/pystring/LICENSE"
+'''

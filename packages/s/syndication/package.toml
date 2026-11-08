@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/syndication/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "syndication"
+version = "6.31.0"
+release = 1
+summary = "KDE's RSS/Atom parser library"
+license = "LGPL-2.0-or-later AND BSD-2-Clause"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja"]
+builddeps = ["kcodecs-devel", "qt6-qttools-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/syndication-6.31.0.tar.xz", sha256 = "7cd3ac299ff01736b7a9a1a2eb3700561810267a2e3af50935c3f3cce9635077" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSES/BSD-2-Clause.txt "$pkgdir/usr/share/licenses/syndication/BSD-2-Clause.txt"
+'''

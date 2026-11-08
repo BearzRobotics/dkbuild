@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libxfont2/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libxfont2"
+version = "2.0.9"
+release = 1
+summary = "X font 2 library"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "libtool", "pkgconf", "xorg-util-macros"]
+builddeps = ["freetype-devel", "libfontenc-devel", "xorgproto", "xtrans"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/lib/libXfont2-2.0.9.tar.xz", sha256 = "f042a370666815e7b941e9b7019024755bd1c6c2954afbfa515af378251799e2" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libxfont2/COPYING"
+'''

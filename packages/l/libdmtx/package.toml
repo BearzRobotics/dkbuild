@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libdmtx/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libdmtx"
+version = "0.7.8"
+release = 1
+summary = "Data Matrix 2D library"
+license = "BSD-2-Clause"
+homepage = "https://github.com/dmtx/libdmtx"
+hostdeps = ["automake", "libtool", "pkgconf"]
+
+source = [
+    { url = "https://github.com/dmtx/libdmtx/archive/refs/tags/v0.7.8.tar.gz", sha256 = "2394bf1d1d693a5a4ca3cfcc1bb28a4d878bdb831ea9ca8f3d5c995d274bdc39" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libdmtx/LICENSE"
+'''

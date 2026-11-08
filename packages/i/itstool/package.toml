@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/itstool/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "itstool"
+version = "2.0.7"
+release = 4
+summary = "ITS Tool"
+license = "GPL-3.0-or-later"
+homepage = "http://itstool.org"
+patches = ["python312.patch", "switch-from-libxml2-python.patch"]
+hostdeps = ["automake", "python", "python-lxml"]
+rundeps = ["python-lxml"]
+
+source = [
+    { url = "http://files.itstool.org/itstool/itstool-2.0.7.tar.bz2", sha256 = "6b9a7cd29a12bb95598f5750e8763cee78836a1a207f85b74d8b3275b27e87ca" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

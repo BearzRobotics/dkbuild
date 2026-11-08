@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gtksourceview4/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "gtksourceview4"
+version = "4.8.4"
+release = 3
+summary = "Advanced Gtk+ text editor widget"
+license = "GPL-2.0-or-later"
+homepage = "https://wiki.gnome.org/Projects/GtkSourceView"
+hostdeps = ["gettext", "glib-devel", "gobject-introspection", "gtk+3-devel", "libxslt", "pkgconf", "vala"]
+builddeps = ["glib-devel", "gtk+3-devel", "libxml2-devel", "vala"]
+options = ["!check", "!cross"]
+
+source = [
+    { url = "https://download.gnome.org/sources/gtksourceview/4.8/gtksourceview-4.8.4.tar.xz", sha256 = "7ec9d18fb283d1f84a3a3eff3b7a72b09a10c9c006597b3fbabbb5958420a87d" },
+]
+
+setup = '''
+%meson \
+    -Dglade_catalog=false \
+    -Dgir=true \
+    -Dvapi=true \
+    -Dgtk_doc=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

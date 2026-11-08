@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/eigen/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "eigen"
+version = "3.4.0"
+release = 1
+summary = "C++ template library for linear algebra"
+license = "MPL-2.0 AND BSD-3-Clause AND Minpack AND Apache-2.0"
+homepage = "https://gitlab.com/libeigen/eigen"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.bz2", sha256 = "b4c198460eba6f28d34894e3a5710998818515104d6e74e5cc331ce31e46e626" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING.BSD "$pkgdir/usr/share/licenses/eigen/COPYING.BSD"
+'''

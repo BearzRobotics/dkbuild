@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/dotconf/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "dotconf"
+version = "1.4.1"
+release = 3
+summary = "Dot.conf configuration file parser library"
+license = "LGPL-2.1-only AND Apache-1.1"
+homepage = "https://github.com/williamh/dotconf"
+hostdeps = ["automake", "libtool", "pkgconf"]
+
+source = [
+    { url = "https://github.com/williamh/dotconf/archive/refs/tags/v1.4.1.tar.gz", sha256 = "5922c46cacf99b2ecc4853d28a2bda4a489292e73276e604bd9cba29dfca892d" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

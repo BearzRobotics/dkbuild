@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libglvnd/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libglvnd"
+version = "1.7.0"
+release = 2
+summary = "GL vendor-neutral dispatch library"
+license = "custom:glvnd"
+homepage = "https://gitlab.freedesktop.org/glvnd/libglvnd"
+patches = ["00-ce2d1ebf93c8d72f31ae401a525a51cf24bb0665.patch", "287.patch", "295.patch", "298.patch", "36c8b61af77f48524d55f95006e7c7a3a6d8ef45.patch", "cc263984adffd5fff0aa1191f2cc5d72ceb55795.patch", "symbols-check.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["libx11-devel", "libxext-devel", "xorgproto"]
+checkdeps = []
+rundeps = []
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/glvnd/libglvnd/-/archive/v1.7.0/libglvnd-v1.7.0.tar.gz", sha256 = "2b6e15b06aafb4c0b6e2348124808cbd9b291c647299eaaba2e3202f51ff2f3d" },
+]
+
+setup = '''
+%meson \
+    -Dtls=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 README.md "$pkgdir/usr/share/licenses/libglvnd/README.md"
+'''

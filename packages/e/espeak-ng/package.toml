@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/espeak-ng/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "espeak-ng"
+version = "1.52.0"
+release = 2
+summary = "Multilingual software speech synthesizer"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/espeak-ng/espeak-ng"
+patches = ["overflow.patch"]
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["pcaudiolib-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/espeak-ng/espeak-ng/archive/refs/tags/1.52.0.tar.gz", sha256 = "bb4338102ff3b49a81423da8a1a158b420124b055b60fa76cfb4b18677130a23" },
+]
+
+setup = '''
+./autogen.sh
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/cppunit/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "cppunit"
+version = "1.15.1"
+release = 1
+summary = "C++ unit testing framework"
+license = "LGPL-2.1-or-later"
+homepage = "http://cppunit.sourceforge.net"
+hostdeps = ["automake", "pkgconf", "libtool"]
+
+source = [
+    { url = "https://dev-www.libreoffice.org/src/cppunit-1.15.1.tar.gz", sha256 = "89c5c6665337f56fd2db36bc3805a5619709d51fb136e51937072f63fcc717a7" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-werror
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

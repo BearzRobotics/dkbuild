@@ -1,0 +1,39 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libaom/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libaom"
+version = "3.15.1"
+release = 1
+summary = "Reference implementation of the AV1 codec"
+license = "BSD-2-Clause"
+homepage = "https://aomedia.org"
+patches = ["split-static.patch"]
+hostdeps = ["cmake", "doxygen", "nasm", "ninja", "perl", "pkgconf", "python"]
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://storage.googleapis.com/aom-releases/libaom-3.15.1.tar.gz", sha256 = "8ca0c52746174603500f0adb6f2a215d69c9ca2aab2acb3caa06fb791d8d01bf" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -D_GNU_SOURCE -DNDEBUG"
+export CXXFLAGS="${CXXFLAGS} -D_GNU_SOURCE -DNDEBUG"
+export LDFLAGS="${LDFLAGS} -Wl,-z,stack-size=2097152"
+'''
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DENABLE_APPS=ON \
+    -DENABLE_EXAMPLES=OFF \
+    -DENABLE_NASM=ON \
+    -DENABLE_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libaom/LICENSE"
+'''

@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/serd/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "serd"
+version = "0.32.10"
+release = 1
+summary = "C library for RDF syntax"
+license = "ISC"
+homepage = "https://drobilla.net/software/serd.html"
+patches = ["tests.patch"]
+hostdeps = ["pkgconf"]
+
+source = [
+    { url = "https://download.drobilla.net/serd-0.32.10.tar.xz", sha256 = "b0e93b49e52f01a049475b7886ef140407115a32d3b1e5dc5f95141c88275d1c" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/serd/COPYING"
+'''

@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libusbmuxd/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libusbmuxd"
+version = "2.1.1"
+release = 2
+summary = "Client library to multiplex connections to/from iOS devices"
+license = "LGPL-2.1-only"
+homepage = "https://libimobiledevice.org"
+patches = ["musl.patch"]
+hostdeps = ["pkgconf", "automake", "libtool"]
+builddeps = ["libimobiledevice-glue-devel", "libplist-devel", "libusb-devel"]
+
+source = [
+    { url = "https://github.com/libimobiledevice/libusbmuxd/releases/download/2.1.1/libusbmuxd-2.1.1.tar.bz2", sha256 = "5546f1aba1c3d1812c2b47d976312d00547d1044b84b6a461323c621f396efce" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

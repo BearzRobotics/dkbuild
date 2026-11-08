@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/qt6-qtwayland/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "qt6-qtwayland"
+version = "6.12.0"
+release = 1
+summary = "Qt6 Wayland component"
+license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only WITH Qt-GPL-exception-1.0"
+homepage = "https://www.qt.io"
+hostdeps = ["cmake", "ninja", "perl", "pkgconf", "qt6-qtbase", "qt6-qtdeclarative-devel"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel"]
+checkdeps = ["mesa"]
+options = ["!cross"]
+
+source = [
+    { url = "https://download.qt.io/official_releases/qt/6.12/6.12.0/submodules/qtwayland-everywhere-src-6.12.0.tar.xz", sha256 = "ae14d9bcf1bb3c300a3ab2e6a53f50284e5c6c966a4ac4cc5aedcb1bc74e4d02" },
+]
+
+setup = '''
+%cmake \
+    -DQT_BUILD_TESTS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

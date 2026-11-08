@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/doxygen/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "doxygen"
+version = "1.17.0"
+release = 1
+summary = "Source code documentation generator tool"
+license = "GPL-2.0-only"
+homepage = "https://doxygen.nl"
+patches = ["test-is-not-git.patch", "xmllint-expected-xml.patch"]
+hostdeps = ["cmake", "ninja", "perl", "python", "flex", "bison"]
+builddeps = ["sqlite-devel"]
+checkdeps = ["libxml2"]
+
+source = [
+    { url = "https://doxygen.nl/files/doxygen-1.17.0.src.tar.gz", sha256 = "fa4c3dd78785abc11ccc992bc9c01e7a8c3120fe14b8a8dfd7cefa7014530814" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_BUILD_TYPE=Release \
+    -Duse_sys_sqlite3=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 doc/doxygen.1 "$pkgdir/usr/share/man/man1/doxygen.1"
+'''

@@ -1,0 +1,40 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/clucene/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "clucene"
+version = "2.3.3.4"
+release = 14
+summary = "Text searching and indexing library"
+license = "LGPL-2.0-or-later OR Apache-2.0"
+homepage = "https://clucene.sourceforge.net"
+patches = ["binary_function.patch", "c++20.patch", "clucene-asan.patch", "clucene-core-2.3.3.4-install_contribs_lib.patch", "clucene-core-2.3.3.4-pkgconfig.patch", "clucene-debug.patch", "clucene-gcc-atomics.patch", "clucene-libcpp.patch", "clucene-multimap-put.patch", "clucene-mutex.patch", "clucene-narrowing-conversions.patch", "clucene-nullptr.patch", "clucene-ub.patch", "clucene-warnings.patch", "heap-buffer-overflow.patch", "multithreading.patch", "nullstring.patch", "ostream-wchar_t.patch", "test-data.patch", "test-others-build.patch", "test-usleep.patch", "write-strings.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["boost-devel", "zlib-ng-compat-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/clucene/clucene-core-2.3.3.4.tar.gz", sha256 = "ddfdc433dd8ad31b5c5819cc4404a8d2127472a3b720d3e744e8c51d79732eab" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DENABLE_ASCII_MODE=OFF \
+    -DENABLE_PACKAGING=OFF \
+    -DBUILD_CONTRIBS_LIB=ON \
+    -DLIB_DESTINATION=/usr/lib \
+    -DLUCENE_SYS_INCLUDES=/usr/include \
+    -DDISABLE_MULTITHREADING=ON
+'''
+build = '''
+%cmake_build
+'''
+check = '''
+# TODO(cbuild): self.mkdir("build/tmp", parents=True)
+# TODO(cbuild): self.do("./cl_test", wrksrc="build/bin", env={"TMP": "../tmp"})
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/lib/CLuceneConfig.cmake"
+'''

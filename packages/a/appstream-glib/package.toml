@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/appstream-glib/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "appstream-glib"
+version = "0.8.4"
+release = 1
+summary = "AppStream metadata library"
+license = "LGPL-2.1-or-later"
+homepage = "https://people.freedesktop.org/~hughsient/appstream-glib"
+hostdeps = ["curl-devel", "glib-devel", "gobject-introspection", "gperf", "libyaml-devel", "pkgconf", "vala"]
+builddeps = ["curl-devel", "gcab-devel", "glib-devel", "gtk+3-devel", "json-glib-devel", "libarchive-devel", "libyaml-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://people.freedesktop.org/~hughsient/appstream-glib/releases/appstream-glib-0.8.4.tar.xz", sha256 = "132575f3ef2712cd0fc8a7f0c9287ff5c4264d75921953220dd2089911272946" },
+]
+
+setup = '''
+%meson \
+    -Dintrospection=true \
+    -Dgtk-doc=false \
+    -Drpm=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+rm -rf "$pkgdir/usr/share/installed-tests"
+'''

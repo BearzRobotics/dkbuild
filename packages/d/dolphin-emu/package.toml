@@ -1,0 +1,54 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/dolphin-emu/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "dolphin-emu"
+version = "2609a"
+release = 2
+summary = "GameCube and Wii emulator"
+license = "GPL-3.0-only"
+homepage = "https://dolphin-emu.org"
+patches = ["glslang-ver.patch", "includes.patch"]
+archs = ["aarch64", "x86_64"]
+hostdeps = ["cmake", "gettext", "glslang", "ninja", "pkgconf"]
+builddeps = ["bluez-devel", "bzip2-devel", "curl-devel", "enet-devel", "ffmpeg-devel", "fmt-devel", "glslang-devel", "hidapi-devel", "libedit-devel", "libevdev-devel", "libpulse-devel", "libspng-devel", "libxi-devel", "llvm-devel", "lz4-devel", "lzo-devel", "miniupnpc-devel", "minizip-ng-devel", "pugixml-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "sdl3-devel", "sfml-devel", "speexdsp-devel", "spirv-tools-devel", "eudev-devel", "xxhash-devel", "xz-devel", "zlib-ng-compat-devel", "zstd-devel"]
+
+source = [
+    { url = "https://github.com/dolphin-emu/dolphin/archive/refs/tags/2609a.tar.gz", sha256 = "6e813c7994e093d9c95c208cafe5a36baf2a85a0aa46c60f31a37528baba9a13" },
+    { url = "https://github.com/mozilla/cubeb/archive/54217bca3f3e0cd53c073690a23dd25d83557909.tar.gz", sha256 = "a795511bf56183ff7bad8fb2d2836ca5bb158e12ddd519caced62946ffa69c83" },
+    { url = "https://github.com/syoyo/tinygltf/archive/c5641f2c22d117da7971504591a8f6a41ece488b.tar.gz", sha256 = "6352803f1ed18d479ea93abf96ac75c0222a21403be22840bde1072ee5935dfa" },
+    { url = "https://github.com/ocornut/imgui/archive/45acd5e0e82f4c954432533ae9985ff0e1aad6d5.tar.gz", sha256 = "97484925aec2f4d3e913d6644d46b234f8d6d8d98c6aa9c50109e0f0df772090" },
+    { url = "https://github.com/epezent/implot/archive/3da8bd34299965d3b0ab124df743fe3e076fa222.tar.gz", sha256 = "4700b44ef00ca2feba0b35a31922c240045bbeb900da5b3eb3830b56871ada45" },
+    { url = "https://github.com/RetroAchievements/rcheevos/archive/926e4608f8dca7989267c787bbefb3ab1c835ac5.tar.gz", sha256 = "11e5fc43c4676289ff4637c04a9f43070235006d826c363628dcb194d5182ebd" },
+    { url = "https://github.com/KhronosGroup/SPIRV-Cross/archive/ebe2aa0cd80f5eb5cd8a605da604cacf72205f3b.tar.gz", sha256 = "ff848426a2eabfa0dfb5ee961440210f6cdec190883ed438ee7252ba595c9128" },
+    { url = "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/3bab6924988e5f19bf36586a496156cf72f70d9f.tar.gz", sha256 = "618dc35e4f571a508575fc1fc914eb15ab513e4443986509aff08dfb8844ba24" },
+    { url = "https://github.com/mgba-emu/mgba/archive/0b40863f64d0940f333fa1c638e75f86f8a26a33.tar.gz", sha256 = "9b59ed1422914f605ce912e9cafcd84d1c5b1bf9abcf0fef1b49e1d810f6f5e5" },
+    { url = "https://github.com/mutouyun/cpp-ipc/archive/b6cbbc940e25ff898f09a40b107781cef6027b13.tar.gz", sha256 = "33991ccd0620ab1bd244c6e94c519f4bf7e64247cec90a772e20f5eccd468a30" },
+    { url = "https://github.com/weisslj/cpp-optparse/archive/2265d647232249a53a03b411099863ceca35f0d3.tar.gz", sha256 = "6f38fff3c4d2788eead7a28626b3220cc4c101510fc984678ad55f77756b107e" },
+    { url = "https://github.com/e-dant/watcher/archive/b03bdcfc11549df595b77239cefe2643943a3e2f.tar.gz", sha256 = "61e97c12c3d23f2b6588d99ce61c8ad462b4382f979d14c7a338a11af507edd1" },
+]
+
+environment = '''
+export LDFLAGS="${LDFLAGS} -lz"
+'''
+setup = '''
+%cmake \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DDISTRIBUTOR=chimera-linux.org \
+    -DENABLE_ANALYTICS=ON \
+    -DENABLE_AUTOUPDATE=OFF \
+    -DENABLE_TESTS=OFF \
+    -DUSE_SANITIZERS=OFF \
+    -DUSE_SYSTEM_LIBS=ON \
+    -DUSE_SYSTEM_MBEDTLS=OFF \
+    -DUSE_SYSTEM_LIBMGBA=OFF \
+    -DUSE_SYSTEM_CUBEB=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 Data/51-usb-device.rules "$pkgdir/usr/lib/udev/rules.d/51-usb-device.rules"
+'''

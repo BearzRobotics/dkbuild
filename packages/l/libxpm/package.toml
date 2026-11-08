@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libxpm/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libxpm"
+version = "3.5.17"
+release = 1
+summary = "X PixMap library"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "gettext", "pkgconf", "libtool", "xorg-util-macros"]
+builddeps = ["xorgproto", "libsm-devel", "libxext-devel", "libxt-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/lib/libXpm-3.5.17.tar.gz", sha256 = "959466c7dfcfcaa8a65055bfc311f74d4c43d9257900f85ab042604d286df0c6" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-open-zfile
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libxpm/COPYING"
+'''

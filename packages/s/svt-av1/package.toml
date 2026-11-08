@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/svt-av1/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "svt-av1"
+version = "3.1.2"
+release = 1
+summary = "AOMedia Scalable Video Technology AV1 Encoder/Decoder"
+license = "BSD-3-Clause-Clear"
+homepage = "https://gitlab.com/AOMediaCodec/SVT-AV1"
+patches = ["redef.patch"]
+hostdeps = ["cmake", "nasm", "ninja", "pkgconf"]
+checkdeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/AOMediaCodec/SVT-AV1/-/archive/v3.1.2/SVT-AV1-v3.1.2.tar.gz", sha256 = "d0d73bfea42fdcc1222272bf2b0e2319e9df5574721298090c3d28315586ecb1" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_BUILD_STYLE=Release \
+    -DBUILD_SHARED_LIBS=ON \
+    -DBUILD_TESTING=OFF \
+    -DSVT_AV1_LTO=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/svt-av1/LICENSE.md"
+'''

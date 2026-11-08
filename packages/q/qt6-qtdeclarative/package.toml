@@ -1,0 +1,35 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/qt6-qtdeclarative/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "qt6-qtdeclarative"
+version = "6.12.0"
+release = 1
+summary = "Qt6 declarative component"
+license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only WITH Qt-GPL-exception-1.0"
+homepage = "https://www.qt.io"
+patches = ["revert-dad91592e609364231decaba771418d2d48d4910.patch"]
+hostdeps = ["cmake", "ninja", "perl", "pkgconf", "python", "qt6-qtbase", "qt6-qtshadertools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtshadertools-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://download.qt.io/official_releases/qt/6.12/6.12.0/submodules/qtdeclarative-everywhere-src-6.12.0.tar.xz", sha256 = "311f3a2603e1973bb59baef9dfa740a376de713157d4782ee043681e889c9260" },
+]
+
+setup = '''
+%cmake \
+    -DQT_BUILD_TESTS=ON
+'''
+build = '''
+%cmake_build
+'''
+check = '''
+# TODO(cbuild): init_check() sets variables for this phase (cbuild line 29); port it by hand
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/tests"
+rm -rf "$pkgdir/usr/lib/qt6/bin/testapp"
+# TODO(cbuild): self.uninstall("usr/lib/qt6/bin/qqmldebug*", glob=True)
+'''

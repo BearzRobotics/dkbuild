@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xcb-util-renderutil/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "xcb-util-renderutil"
+version = "0.3.10"
+release = 1
+summary = "XCB utilities library - Render extension convenience functions"
+license = "MIT"
+homepage = "https://xcb.freedesktop.org"
+hostdeps = ["automake", "pkgconf", "libtool", "xorg-util-macros"]
+builddeps = ["xcb-util-devel"]
+
+source = [
+    { url = "https://xcb.freedesktop.org/dist/xcb-util-renderutil-0.3.10.tar.gz", sha256 = "e04143c48e1644c5e074243fa293d88f99005b3c50d1d54358954404e635128a" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xcb-util-renderutil/COPYING"
+'''

@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/dconf/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "dconf"
+version = "51.0"
+release = 1
+summary = "Low-level configuration system for GNOME"
+license = "LGPL-2.1-or-later"
+homepage = "https://wiki.gnome.org/Projects/dconf"
+hostdeps = ["docbook-xsl-nons", "glib-devel", "libxslt", "pkgconf", "vala"]
+builddeps = ["bash-completion", "dbus-devel", "glib-devel", "gtk+3-devel", "libxml2-devel", "vala-devel"]
+checkdeps = ["dbus"]
+
+source = [
+    { url = "https://download.gnome.org/sources/dconf/51/dconf-51.0.tar.xz", sha256 = "e65c1b7867f836faad9f9ee04acf5c5a6cae2bbc784833fe093207e0cb590248" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+rm -rf "$pkgdir/usr/lib/systemd/user"
+'''

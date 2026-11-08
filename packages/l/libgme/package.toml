@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libgme/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libgme"
+version = "0.6.5"
+release = 1
+summary = "Video game music file emulation/playback library"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/libgme/game-music-emu"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["zlib-ng-compat-devel", "sdl2-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/libgme/game-music-emu/releases/download/0.6.5/libgme-0.6.5-src.tar.gz", sha256 = "a133f19278222136ba0d8c27b64a07987ba05fec9d2e6d293ccd8cabdd97ddbb" },
+]
+
+setup = '''
+%cmake \
+    -DENABLE_UBSAN=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

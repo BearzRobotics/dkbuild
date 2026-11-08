@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libimobiledevice/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libimobiledevice"
+version = "1.4.0"
+release = 1
+summary = "Library to communicate with Apple devices"
+license = "LGPL-2.1-only"
+homepage = "https://libimobiledevice.org"
+hostdeps = ["automake", "libtool", "pkgconf", "python", "python-cython", "python-setuptools"]
+builddeps = ["glib-devel", "libplist-devel", "libtatsu-devel", "libusb-devel", "libusbmuxd-devel", "openssl-devel", "python-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://github.com/libimobiledevice/libimobiledevice/releases/download/1.4.0/libimobiledevice-1.4.0.tar.bz2", sha256 = "23cc0077e221c7d991bd0eb02150a0d49199bcca1ddf059edccee9ffd914939d" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-static
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

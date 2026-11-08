@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/lager/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "lager"
+version = "0.1.3"
+release = 1
+summary = "C++ library for transducers"
+license = "BSL-1.0"
+homepage = "https://sinusoid.es/lager"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+checkdeps = ["catch2-devel"]
+rundeps = ["boost-devel", "immer", "zug"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/arximboldi/lager/archive/refs/tags/v0.1.3.tar.gz", sha256 = "55d3442d2d4306aad78fa2af5d3db01af65f4fdbfc58c4620fba13dbde82e599" },
+]
+
+setup = '''
+%cmake \
+    -Dlager_BUILD_EXAMPLES=OFF \
+    -Dlager_BUILD_DEBUGGER_EXAMPLES=OFF \
+    -Dlager_BUILD_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/lager/LICENSE"
+'''

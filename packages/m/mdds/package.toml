@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/mdds/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "mdds"
+version = "3.2.1"
+release = 1
+summary = "Collection of multi-dimensional data structures"
+license = "MIT"
+homepage = "https://gitlab.com/mdds/mdds"
+patches = ["no-examples.patch"]
+hostdeps = ["pkgconf", "automake", "libtool"]
+checkdeps = ["boost-devel"]
+
+source = [
+    { url = "https://gitlab.com/api/v4/projects/mdds%2Fmdds/packages/generic/source/3.2.1/mdds-3.2.1.tar.gz", sha256 = "3dcb6805c561a0bba3d463de516577a51afce5a69fcf378941fe193a228ecd1b" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/mdds/LICENSE"
+'''

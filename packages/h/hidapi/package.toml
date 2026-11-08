@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/hidapi/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "hidapi"
+version = "0.15.0"
+release = 1
+summary = "Cross-platform library for communicating with HID devices"
+license = "BSD-3-Clause OR custom:hidapi OR GPL-3.0-only"
+homepage = "https://github.com/libusb/hidapi"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["libusb-devel", "linux-headers", "eudev-devel"]
+
+source = [
+    { url = "https://github.com/libusb/hidapi/archive/refs/tags/hidapi-0.15.0.tar.gz", sha256 = "5d84dec684c27b97b921d2f3b73218cb773cf4ea915caee317ac8fc73cef8136" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE-bsd.txt "$pkgdir/usr/share/licenses/hidapi/LICENSE-bsd.txt"
+install -Dm644 LICENSE-orig.txt "$pkgdir/usr/share/licenses/hidapi/LICENSE-orig.txt"
+'''

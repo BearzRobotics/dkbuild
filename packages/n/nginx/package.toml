@@ -1,0 +1,104 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/nginx/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "nginx"
+version = "1.30.6"
+release = 1
+summary = "Advanced load balancer, web server, and reverse proxy"
+license = "BSD-2-Clause"
+homepage = "https://nginx.org"
+hostdeps = ["libgd-devel", "libxml2-devel", "libxslt-devel", "linux-headers", "openssl-devel", "pcre2-devel", "perl", "zlib-ng-compat-devel"]
+checkdeps = ["ca-certificates", "ffmpeg", "libgd", "perl-io-socket-ssl", "perl-net-ssleay"]
+options = ["!cross"]
+
+source = [
+    { url = "https://nginx.org/download/nginx-1.30.6.tar.gz", sha256 = "3cf46f5ed7504d460125866b7bea99fb357f31d887e2e63b35503310e9b8b6c8" },
+    { url = "https://github.com/nginx/nginx-tests/archive/4d1de3f357.tar.gz", sha256 = "e6008f0883a98eb30d84b2ab5d69c19aed2dea8a2eb368402a526e1d3fd16636" },
+]
+
+setup = '''
+./configure \
+    --prefix=/var/lib/nginx \
+    --user=_nginx \
+    --group=_nginx \
+    --with-file-aio \
+    --conf-path=/etc/nginx/nginx.conf \
+    --error-log-path=/var/log/nginx/error.log \
+    --http-log-path=/var/log/nginx/access.log \
+    --lock-path=/run/nginx/nginx.lock \
+    --modules-path=/usr/lib/nginx/modules \
+    --pid-path=/run/nginx/nginx.pid \
+    --sbin-path=/usr/bin/nginx \
+    --http-client-body-temp-path=/var/lib/nginx/tmp/client_body_temp \
+    --http-fastcgi-temp-path=/var/lib/nginx/tmp/fastcgi_temp \
+    --http-proxy-temp-path=/var/lib/nginx/tmp/proxy_temp \
+    --http-scgi-temp-path=/var/lib/nginx/tmp/scgi_temp \
+    --http-uwsgi-temp-path=/var/lib/nginx/tmp/uwsgi_temp \
+    --with-compat \
+    --with-http_addition_module \
+    --with-http_auth_request_module \
+    --with-http_dav_module \
+    --with-http_flv_module \
+    --with-http_gunzip_module \
+    --with-http_gzip_static_module \
+    --with-http_image_filter_module=dynamic \
+    --with-http_mp4_module \
+    --with-http_perl_module=dynamic \
+    --with-http_random_index_module \
+    --with-http_realip_module \
+    --with-http_secure_link_module \
+    --with-http_slice_module \
+    --with-http_ssl_module \
+    --with-http_stub_status_module \
+    --with-http_sub_module \
+    --with-http_v2_module \
+    --with-http_v3_module \
+    --with-http_xslt_module=dynamic \
+    --with-mail=dynamic \
+    --with-mail_ssl_module \
+    --with-pcre \
+    --with-pcre-jit \
+    --with-perl_modules_path=/usr/lib/perl5/vendor_perl \
+    --with-stream=dynamic \
+    --with-stream_realip_module \
+    --with-stream_ssl_module \
+    --with-stream_ssl_preread_module \
+    --with-threads \
+    --without-mail_imap_module \
+    --without-mail_pop3_module \
+    --without-mail_smtp_module
+'''
+build = '''
+%make
+'''
+check = '''
+# TODO(cbuild): with self.pushd("nginx-tests"):
+#         self.do(
+#             "prove",
+#             f"--jobs={max(self.make_jobs, 16)}",
+#             ".",
+#             env={"TEST_NGINX_BINARY": "../objs/nginx"},
+#         )
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/nginx/LICENSE"
+install -Dm644 README.md "$pkgdir/usr/share/doc/nginx/README.md"
+install -Dm644 man/nginx.8 "$pkgdir/usr/share/man/man8/nginx.8"
+# TODO(cbuild): self.install_sysusers(self.files_path / "sysusers.conf")
+# TODO(cbuild): self.install_tmpfiles(self.files_path / "tmpfiles.conf")
+# TODO(cbuild): self.install_service(self.files_path / "nginx")
+# better default configs, mostly adapted from alpine
+rm -rf "$pkgdir/etc/nginx/nginx.conf"
+install -Dm644 $pkgfiles/nginx.conf "$pkgdir/etc/nginx/nginx.conf"
+install -Dm644 $pkgfiles/default.conf "$pkgdir/etc/nginx/http.d/default.conf"
+install -Dm644 $pkgfiles/stream.conf "$pkgdir/etc/nginx/conf.d/stream.conf"
+# remove old charset maps
+# TODO(cbuild): self.uninstall("etc/nginx/koi-*", glob=True)
+rm -rf "$pkgdir/etc/nginx/win-utf"
+# these interfere with tmpfiles ownership and are not used anyway
+rm -rf "$pkgdir/var/lib/nginx/html"
+# these are unnecessary with apk backups
+# TODO(cbuild): self.uninstall("etc/nginx/*.default", glob=True)
+'''

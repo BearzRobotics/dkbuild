@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libodfgen/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libodfgen"
+version = "0.1.8"
+release = 11
+summary = "ODF generator for librevenge"
+license = "MPL-2.0 OR LGPL-2.1-or-later"
+homepage = "https://sourceforge.net/p/libwpd/libodfgen"
+hostdeps = ["pkgconf", "automake", "libtool"]
+builddeps = ["librevenge-devel", "boost-devel", "libxml2-devel"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/libwpd/libodfgen/libodfgen-0.1.8/libodfgen-0.1.8.tar.xz", sha256 = "55200027fd46623b9bdddd38d275e7452d1b0ff8aeddcad6f9ae6dc25f610625" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

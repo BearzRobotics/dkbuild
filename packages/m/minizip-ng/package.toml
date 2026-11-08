@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/minizip-ng/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "minizip-ng"
+version = "4.0.10"
+release = 1
+summary = "Fork of the popular zip manipulation library"
+license = "Zlib"
+homepage = "https://github.com/zlib-ng/minizip-ng"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["bzip2-devel", "openssl-devel", "xz-devel", "zlib-ng-compat-devel", "zstd-devel"]
+
+source = [
+    { url = "https://github.com/zlib-ng/minizip-ng/archive/refs/tags/4.0.10.tar.gz", sha256 = "c362e35ee973fa7be58cc5e38a4a6c23cc8f7e652555daf4f115a9eb2d3a6be7" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DMZ_LIB_SUFFIX=-ng
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

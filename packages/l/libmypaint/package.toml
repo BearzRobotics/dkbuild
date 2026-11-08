@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libmypaint/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libmypaint"
+version = "1.6.1"
+release = 1
+summary = "MyPaint brush engine library"
+license = "ISC"
+homepage = "https://github.com/mypaint/libmypaint"
+hostdeps = ["glib-devel", "gobject-introspection", "intltool", "pkgconf"]
+builddeps = ["glib-devel", "json-glib-devel", "json-c-devel", "gegl-devel"]
+
+source = [
+    { url = "https://github.com/mypaint/libmypaint/releases/download/v1.6.1/libmypaint-1.6.1.tar.xz", sha256 = "741754f293f6b7668f941506da07cd7725629a793108bb31633fb6c3eae5315f" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libmypaint/COPYING"
+'''

@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/rnnoise/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "rnnoise"
+version = "0.2"
+release = 2
+summary = "Neural network based noise reduction library"
+license = "BSD-3-Clause"
+homepage = "https://jmvalin.ca/demo/rnnoise"
+patches = ["fix.patch"]
+hostdeps = ["automake", "libtool", "pkgconf"]
+
+source = [
+    { url = "https://github.com/xiph/rnnoise/releases/download/v0.2/rnnoise-0.2.tar.gz", sha256 = "90fce4b00b9ff24c08dbfe31b82ffd43bae383d85c5535676d28b0a2b11c0d37" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/rnnoise/COPYING"
+'''

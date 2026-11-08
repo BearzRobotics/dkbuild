@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/kfilemetadata/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "kfilemetadata"
+version = "6.31.0"
+release = 1
+summary = "KDE framework for file metadata"
+license = "LGPL-2.1-only AND LGPL-2.1-or-later"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["attr-devel", "ebook-tools-devel", "exiv2-devel", "ffmpeg-devel", "karchive-devel", "kcodecs-devel", "kconfig-devel", "kcoreaddons-devel", "kdegraphics-mobipocket-devel", "ki18n-devel", "libepubgen-devel", "poppler-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel", "taglib-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/kfilemetadata-6.31.0.tar.xz", sha256 = "9c9dd8d4a3d0dfc97c8177a391b8276638402fe0f55e5ff8b4332e1ab214da58" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,38 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/qt6-qttools/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "qt6-qttools"
+version = "6.12.0"
+release = 1
+summary = "Qt6 tools"
+license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only WITH Qt-GPL-exception-1.0"
+homepage = "https://www.qt.io"
+patches = ["pie.patch"]
+hostdeps = ["cmake", "ninja", "perl", "pkgconf", "qt6-qtbase", "qt6-qtdeclarative-devel"]
+builddeps = ["llvm-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.qt.io/official_releases/qt/6.12/6.12.0/submodules/qttools-everywhere-src-6.12.0.tar.xz", sha256 = "8dab8f3611496486a470ad5f115ceea584f36bc22a2b8b6f6ebdbafbb8160693" },
+]
+
+setup = '''
+%cmake \
+    -DQT_BUILD_TESTS=OFF \
+    -DINSTALL_PUBLICBINDIR=usr/bin \
+    -DQT_BUILD_SHARED_LIBS=ON \
+    -DQT_FEATURE_assistant=ON \
+    -DQT_FEATURE_pixeltool=ON \
+    -DQT_FEATURE_distancefieldgenerator=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# hardlink
+rm -rf "$pkgdir/usr/lib/qt6/bin/qtdiag"
+mkdir -p "$pkgdir/usr/lib/qt6/bin"
+ln -sf qtdiag6 "$pkgdir/usr/lib/qt6/bin/qtdiag"
+'''

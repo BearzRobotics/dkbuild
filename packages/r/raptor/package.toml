@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/raptor/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "raptor"
+version = "2.0.16"
+release = 10
+summary = "Raptor RDF syntax library"
+license = "Apache-2.0 OR LGPL-2.1-or-later OR GPL-2.0-or-later"
+homepage = "https://librdf.org/raptor"
+patches = ["broken-test.patch", "libxml2.patch", "out-of-bounds.patch"]
+hostdeps = ["automake", "pkgconf"]
+builddeps = ["curl-devel", "icu-devel", "libxml2-devel", "libxslt-devel", "xz-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://librdf.org/dist/source/raptor2-2.0.16.tar.gz", sha256 = "089db78d7ac982354bdbf39d973baf09581e6904ac4c92a98c5caadb3de44680" },
+]
+
+setup = '''
+%configure \
+    --with-yajl=no
+'''
+build = '''
+%make
+'''
+check = '''
+%make check -j1
+'''
+install = '''
+%make_install
+'''

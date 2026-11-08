@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/zxing-cpp/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "zxing-cpp"
+version = "3.1.1"
+release = 1
+summary = "Multi-format 1D/2D barcode library"
+license = "Apache-2.0"
+homepage = "https://github.com/nu-book/zxing-cpp"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["gtest-devel", "stb"]
+
+source = [
+    { url = "https://github.com/nu-book/zxing-cpp/releases/download/v3.1.1/zxing-cpp-3.1.1.tar.gz", sha256 = "c3c02c29c0b519de7bd4e25b376e606e87f0761befd1282815642a2246613d14" },
+]
+
+setup = '''
+%cmake \
+    -DZXING_UNIT_TESTS=ON \
+    -DZXING_BLACKBOX_TESTS=OFF \
+    -DZXING_EXAMPLES=ON \
+    -DZXING_DEPENDENCIES=LOCAL \
+    -DZXING_WRITERS=BOTH
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

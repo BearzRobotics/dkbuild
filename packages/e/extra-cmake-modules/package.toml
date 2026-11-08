@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/extra-cmake-modules/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "extra-cmake-modules"
+version = "6.31.0"
+release = 1
+summary = "Extra modules and scripts for CMake"
+license = "BSD-3-Clause"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "ninja"]
+checkdeps = ["qt6-qtdeclarative-devel", "qt6-qttools-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/extra-cmake-modules-6.31.0.tar.xz", sha256 = "8f74af329e4c918358bfe54316f8cf4d530c28444595a3e2fb15075f72877f17" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_WITH_QT6=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING-CMAKE-SCRIPTS "$pkgdir/usr/share/licenses/extra-cmake-modules/COPYING-CMAKE-SCRIPTS"
+'''

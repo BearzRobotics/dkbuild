@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/orc/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "orc"
+version = "0.4.44"
+release = 1
+summary = "Optimized Inner Loop Runtime Compiler"
+license = "BSD-2-Clause"
+homepage = "https://gstreamer.freedesktop.org/modules/orc.html"
+hostdeps = ["pkgconf"]
+builddeps = ["linux-headers"]
+
+source = [
+    { url = "https://gstreamer.freedesktop.org/src/orc/orc-0.4.44.tar.xz", sha256 = "4aeb97aea2b58224029dc2b23d7d064cfa990cb4fb8c4da440bcbe9c95bc5d2d" },
+]
+
+setup = '''
+%meson \
+    -Dexamples=disabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/orc/COPYING"
+'''

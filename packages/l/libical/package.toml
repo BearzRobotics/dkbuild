@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libical/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libical"
+version = "3.0.20"
+release = 2
+summary = "Open source implementation of iCalendar protocols and formats"
+license = "MPL-2.0 OR LGPL-2.1-only"
+homepage = "https://libical.github.io/libical"
+patches = ["fix-cross.patch", "ub.patch"]
+hostdeps = ["cmake", "gettext", "glib-devel", "gobject-introspection", "libxml2-devel", "ninja", "perl", "pkgconf", "vala"]
+builddeps = ["glib-devel", "icu-devel", "libxml2-devel", "vala-devel"]
+checkdeps = ["python-gobject"]
+options = ["!cross"]
+
+source = [
+    { url = "https://github.com/libical/libical/archive/v3.0.20.tar.gz", sha256 = "e73de92f5a6ce84c1b00306446b290a2b08cdf0a80988eca0a2c9d5c3510b4c2" },
+]
+
+setup = '''
+%cmake \
+    -DICAL_BUILD_DOCS=OFF \
+    -DGOBJECT_INTROSPECTION=ON \
+    -DICAL_GLIB_VAPI=ON \
+    -DLIBICAL_BUILD_EXAMPLES=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

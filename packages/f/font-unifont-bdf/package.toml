@@ -1,0 +1,19 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/font-unifont-bdf/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "font-unifont-bdf"
+version = "16.0.04"
+release = 1
+summary = "GNU Unifont Glyphs"
+license = "GPL-2.0-or-later"
+homepage = "https://unifoundry.com/unifont/index.html"
+rundeps = ["font-util"]
+
+source = [
+    { url = "https://unifoundry.com/pub/unifont/unifont-16.0.04/font-builds/unifont-16.0.04.bdf.gz", sha256 = "4a1689c0065666ac70e1310420ce67d7fa3dcf83c1a2e1e6b2c115aa22deb3cf" },
+]
+
+install = '''
+install -Dm644 unifont-16.0.04.bdf "$pkgdir/usr/share/fonts/misc/unifont.bdf"
+'''

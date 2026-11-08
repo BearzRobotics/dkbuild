@@ -1,0 +1,38 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/ladspa-sdk/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "ladspa-sdk"
+version = "1.17"
+release = 2
+summary = "Linux Audio Developer's Simple Plugin API"
+license = "LGPL-2.1-or-later"
+homepage = "http://www.ladspa.org"
+patches = ["makefile.patch"]
+builddeps = ["libsndfile-devel"]
+
+source = [
+    { url = "http://www.ladspa.org/download/ladspa_sdk_1.17.tgz", sha256 = "27d24f279e4b81bd17ecbdcc38e4c42991bb388826c0b200067ce0eb59d3da5b" },
+]
+
+build = '''
+make -C src
+# TODO(cbuild): self.rm("doc/ladspa.h.txt", force=True)
+'''
+check = '''
+make -C src test
+'''
+install = '''
+# header
+install -Dm644 src/ladspa.h "$pkgdir/usr/include/ladspa.h"
+# plugins
+# TODO(cbuild): for f in (self.cwd / "plugins").glob("*.so*"):
+#         self.install_file(f, "usr/lib/ladspa", mode=0o755)
+# programs
+# TODO(cbuild): self.install_files("bin", "usr/bin")
+# docs
+install -dm755 "$pkgdir/usr/share/doc"
+# TODO(cbuild): self.cp("doc", self.destdir / "usr/share/doc/ladspa-sdk", recursive=True)
+mkdir -p "$pkgdir/usr/share/doc/ladspa-sdk"
+ln -sf ../../../include/ladspa.h "$pkgdir/usr/share/doc/ladspa-sdk/ladspa.h.txt"
+'''

@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/font-alias/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "font-alias"
+version = "1.0.5"
+release = 1
+summary = "Standard aliases for X11 PCF fonts"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+
+source = [
+    { url = "https://www.x.org/releases/individual/font/font-alias-1.0.5.tar.gz", sha256 = "f8e0ca6537003f11fcaf36c598f7de9c0428f8ed587388a8a37ff18ccc597730" },
+]
+
+setup = '''
+%configure \
+    --with-fontrootdir=/usr/share/fonts
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/font-alias/COPYING"
+'''

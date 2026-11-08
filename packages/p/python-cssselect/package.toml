@@ -1,0 +1,21 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-cssselect/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "python-cssselect"
+version = "1.3.0"
+release = 2
+summary = "Python module for CSS selectors"
+license = "BSD-3-Clause"
+homepage = "https://cssselect.readthedocs.io/en/latest"
+hostdeps = ["python-setuptools"]
+checkdeps = ["python-lxml"]
+rundeps = ["python"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/c/cssselect/cssselect-1.3.0.tar.gz", sha256 = "57f8a99424cfab289a1b6a816a43075a4b00948c86b4dcf3ef4ee7e15f7ab0c7" },
+]
+
+install = '''
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-cssselect/LICENSE"
+'''

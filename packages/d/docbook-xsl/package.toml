@@ -1,0 +1,53 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/docbook-xsl/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "docbook-xsl"
+version = "1.79.2"
+release = 4
+summary = "Docbook XSL modular stylesheet"
+license = "MIT"
+homepage = "https://docbook.org"
+patches = ["catalog-compat.patch"]
+rundeps = ["xmlcatmgr", "docbook-xml"]
+
+source = [
+    { url = "https://github.com/docbook/xslt10-stylesheets/releases/download/release/1.79.2/docbook-xsl-1.79.2.tar.bz2", sha256 = "316524ea444e53208a2fb90eeb676af755da96e1417835ba5f5eb719c81fa371" },
+]
+
+install = '''
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/docbook-xsl/COPYING"
+install -Dm644 $pkgfiles/docbook-xsl.conf "$pkgdir/usr/share/xml/catalogs/docbook-xsl.conf"
+install -Dm644 catalog.xml "$pkgdir/usr/share/xsl/docbook/catalog.xml"
+install -Dm644 VERSION "$pkgdir/usr/share/xsl/docbook/VERSION"
+install -Dm644 VERSION.xsl "$pkgdir/usr/share/xsl/docbook/VERSION.xsl"
+# TODO(cbuild): for d in [
+#         "assembly",
+#         "common",
+#         "eclipse",
+#         "epub",
+#         "epub3",
+#         "fo",
+#         "highlighting",
+#         "html",
+#         "htmlhelp",
+#         "images",
+#         "javahelp",
+#         "lib",
+#         "manpages",
+#         "params",
+#         "profiling",
+#         "roundtrip",
+#         "template",
+#         "slides",
+#         "website",
+#         "xhtml",
+#         "xhtml-1_1",
+#         "xhtml5",
+#     ]:
+#         self.install_dir(f"usr/share/xsl/docbook/{d}")
+#         for f in (self.cwd / d).glob("*"):
+#             self.cp(
+#                 f, self.destdir / f"usr/share/xsl/docbook/{d}", recursive=True
+#             )
+'''

@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/swig/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "swig"
+version = "4.3.1"
+release = 1
+summary = "Simplified Wrapper and Interface Generator"
+license = "GPL-3.0-or-later"
+homepage = "https://www.swig.org"
+hostdeps = ["byacc"]
+builddeps = ["zlib-ng-compat-devel", "pcre2-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/swig/swig-4.3.1.tar.gz", sha256 = "44fc829f70f1e17d635a2b4d69acab38896699ecc24aa023e516e0eabbec61b8" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

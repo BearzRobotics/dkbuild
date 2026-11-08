@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libgudev/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libgudev"
+version = "238"
+release = 1
+summary = "GObject bindings for libudev"
+license = "LGPL-2.1-or-later"
+homepage = "http://wiki.gnome.org/Projects/libgudev"
+patches = ["export-dynamic.patch"]
+hostdeps = ["glib-devel", "gobject-introspection", "pkgconf", "vala"]
+builddeps = ["glib-devel", "eudev-devel", "vala-devel"]
+
+source = [
+    { url = "https://download.gnome.org/sources/libgudev/238/libgudev-238.tar.xz", sha256 = "61266ab1afc9d73dbc60a8b2af73e99d2fdff47d99544d085760e4fa667b5dd1" },
+]
+
+setup = '''
+%meson \
+    -Dintrospection=enabled \
+    -Dvapi=enabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

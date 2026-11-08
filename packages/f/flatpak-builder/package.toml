@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/flatpak-builder/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "flatpak-builder"
+version = "1.4.11"
+release = 1
+summary = "Tool to build flatpaks from source"
+license = "LGPL-2.1-or-later"
+homepage = "https://docs.flatpak.org"
+patches = ["libglnx-memfd_create.patch", "libglnx-musl.patch"]
+hostdeps = ["appstream", "debugedit", "docbook-xsl", "pkgconf", "xmlto"]
+builddeps = ["curl-devel", "elfutils-devel", "flatpak-devel", "json-glib-devel", "libxml2-devel", "libyaml-devel", "linux-headers"]
+checkdeps = ["bash"]
+rundeps = ["debugedit", "elfutils", "flatpak", "git", "llvm"]
+
+source = [
+    { url = "https://github.com/flatpak/flatpak-builder/releases/download/1.4.11/flatpak-builder-1.4.11.tar.xz", sha256 = "2a5ef4f3eaea86f808aa477e57e65b6f68978eb1c034fafe05bffdebbf1dcd03" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

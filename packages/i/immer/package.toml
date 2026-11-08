@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/immer/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "immer"
+version = "0.9.1"
+release = 1
+summary = "C++ library for persistent and immutable data structures"
+license = "BSL-1.0"
+homepage = "https://sinusoid.es/immer"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+checkdeps = ["catch2-devel", "fmt-devel"]
+rundeps = ["boost-devel", "gc-devel"]
+
+source = [
+    { url = "https://github.com/arximboldi/immer/archive/refs/tags/v0.9.1.tar.gz", sha256 = "b18b92ba60ec3186dc36ef671d3c2ae542cbb63eb6dc0e258476c6111a67c971" },
+]
+
+environment = '''
+export CXXFLAGS="${CXXFLAGS} -Wno-c2y-extensions -U_FORTIFY_SOURCE"
+'''
+setup = '''
+%cmake \
+    -DDISABLE_WERROR=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/immer/LICENSE"
+'''

@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/babl/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "babl"
+version = "0.1.126"
+release = 1
+summary = "Dynamic pixel format translation library"
+license = "LGPL-3.0-only"
+homepage = "https://gegl.org/babl"
+patches = ["tests.patch"]
+hostdeps = ["glib-devel", "gobject-introspection", "pkgconf", "python", "vala-devel"]
+builddeps = ["glib-devel", "lcms2-devel", "vala-devel"]
+
+source = [
+    { url = "https://download.gimp.org/pub/babl/0.1/babl-0.1.126.tar.xz", sha256 = "3f090f4b2a61fecf7c8dc60a5804bbc77cefd8d778af2ded059f0e367a52930e" },
+]
+
+setup = '''
+%meson \
+    -Denable-gir=true \
+    -Dwith-docs=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

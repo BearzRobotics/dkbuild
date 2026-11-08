@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libunibreak/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libunibreak"
+version = "6.1"
+release = 1
+summary = "Library for the Unicode line breaking and word breaking algorithms"
+license = "Zlib"
+homepage = "https://github.com/adah1972/libunibreak"
+hostdeps = ["automake", "libtool", "pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/adah1972/libunibreak/releases/download/libunibreak_6_1/libunibreak-6.1.tar.gz", sha256 = "cc4de0099cf7ff05005ceabff4afed4c582a736abc38033e70fdac86335ce93f" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENCE "$pkgdir/usr/share/licenses/libunibreak/LICENCE"
+'''

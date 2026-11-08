@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/mythes/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "mythes"
+version = "1.2.6"
+release = 1
+summary = "Simple thesaurus that uses structured text data"
+license = "BSD-3-Clause"
+homepage = "https://hunspell.github.io"
+hostdeps = ["pkgconf", "automake", "libtool"]
+builddeps = ["hunspell-devel"]
+
+source = [
+    { url = "https://github.com/hunspell/mythes/releases/download/v1.2.6/mythes-1.2.6.tar.xz", sha256 = "97bd2ba5738aebdba1bc31f30f1be42f1404386c94105ad5990d839a1311c8a5" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/mythes/COPYING"
+'''

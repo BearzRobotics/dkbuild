@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/woff2/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "woff2"
+version = "1.0.2"
+release = 2
+summary = "Web Open Font Format 2 reference implementation"
+license = "MIT"
+homepage = "https://github.com/google/woff2"
+patches = ["always-install-executables.patch", "dont-set-rpath.patch", "overflow.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["brotli-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/google/woff2/archive/v1.0.2.tar.gz", sha256 = "add272bb09e6384a4833ffca4896350fdb16e0ca22df68c0384773c67a175594" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/woff2/LICENSE"
+'''

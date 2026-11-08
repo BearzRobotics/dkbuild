@@ -1,0 +1,45 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/flatpak/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "flatpak"
+version = "1.18.4"
+release = 1
+summary = "Linux application sandboxing and distribution framework"
+license = "LGPL-2.1-or-later"
+homepage = "https://flatpak.org"
+hostdeps = ["bison", "bubblewrap", "docbook-xml", "gettext-devel", "gobject-introspection", "libxml2", "pkgconf", "python-pyparsing", "xdg-dbus-proxy", "xmlto"]
+builddeps = ["appstream-devel", "appstream-glib-devel", "curl-devel", "dconf-devel", "fuse-devel", "gcab-devel", "gdk-pixbuf-devel", "glib-devel", "gpgme-devel", "json-glib-devel", "libarchive-devel", "libcap-devel", "libseccomp-devel", "libxau-devel", "libxml2-devel", "ostree-devel", "polkit-devel", "wayland-devel", "wayland-protocols", "zstd-devel"]
+checkdeps = ["bash", "dbus", "socat"]
+rundeps = ["bubblewrap", "gtk+3", "shared-mime-info", "xdg-dbus-proxy"]
+options = ["!check", "!cross"]
+
+source = [
+    { url = "https://github.com/flatpak/flatpak/releases/download/1.18.4/flatpak-1.18.4.tar.xz", sha256 = "b899a7a00c48d2c626cb8ec33fe556720b376c25805d7222430c0fdca4c6ac8d" },
+]
+
+setup = '''
+%meson \
+    -Ddconf=enabled \
+    -Ddbus_config_dir=/usr/share/dbus-1/system.d \
+    -Dgdm_env_file=true \
+    -Dlibzstd=enabled \
+    -Dselinux_module=disabled \
+    -Dsystem_bubblewrap=/usr/bin/bwrap \
+    -Dsystem_dbus_proxy=/usr/bin/xdg-dbus-proxy \
+    -Dsystem_fusermount=/usr/bin/fusermount3 \
+    -Dsystem_helper_user=_flatpak \
+    -Dsystemd=disabled \
+    -Dtests=false \
+    -Dwayland_security_context=enabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+rm -rf "$pkgdir/usr/lib/systemd"
+rm -rf "$pkgdir/usr/lib/tmpfiles.d/flatpak.conf"
+# TODO(cbuild): self.install_tmpfiles(self.files_path / "tmpfiles.conf")
+install -Dm644 $pkgfiles/modules-load.conf "$pkgdir/usr/lib/modules-load.d/flatpak.conf"
+'''

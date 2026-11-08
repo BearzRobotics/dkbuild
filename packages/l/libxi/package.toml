@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libxi/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libxi"
+version = "1.8.3"
+release = 1
+summary = "X Input extension library"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "libtool", "pkgconf", "xmlto", "xorg-util-macros"]
+builddeps = ["xorgproto", "libxfixes-devel", "libxext-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/lib/libXi-1.8.3.tar.xz", sha256 = "7ad60056f01af4f786cfe93b3a7707447711626fc8da2637bec71a90409babe5" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-malloc0returnsnull
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libxi/COPYING"
+'''

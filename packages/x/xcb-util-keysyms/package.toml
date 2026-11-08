@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xcb-util-keysyms/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "xcb-util-keysyms"
+version = "0.4.1"
+release = 1
+summary = "XCB utilities library - key constants and keycode conversion"
+license = "MIT"
+homepage = "https://xcb.freedesktop.org"
+hostdeps = ["automake", "libtool", "pkgconf", "xorg-util-macros"]
+builddeps = ["xcb-util-devel"]
+
+source = [
+    { url = "https://xcb.freedesktop.org/dist/xcb-util-keysyms-0.4.1.tar.gz", sha256 = "1fa21c0cea3060caee7612b6577c1730da470b88cbdf846fa4e3e0ff78948e54" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xcb-util-keysyms/COPYING"
+'''

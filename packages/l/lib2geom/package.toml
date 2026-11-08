@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/lib2geom/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "lib2geom"
+version = "1.4"
+release = 8
+summary = "2D geometry library for C++"
+license = "MPL-1.1 OR LGPL-2.1-only"
+homepage = "https://gitlab.com/inkscape/lib2geom"
+hostdeps = ["cmake", "ninja", "pkgconf", "python-cython", "ragel"]
+builddeps = ["boost-devel", "cairo-devel", "double-conversion-devel", "gsl-devel", "gtest-devel", "gtk+3-devel"]
+
+source = [
+    { url = "https://gitlab.com/inkscape/lib2geom/-/archive/1.4/lib2geom-1.4.tar.gz", sha256 = "edef330f557f188afc11ab505b6ffcfafb075da73e5dde95b9ecf96d20ab6374" },
+]
+
+setup = '''
+%cmake \
+    -D2GEOM_BUILD_SHARED=ON \
+    -D2GEOM_TESTING=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,47 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/openldap/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "openldap"
+version = "2.6.13"
+release = 1
+summary = "FOSS implementation of the Lightweight Directory Access Protocol"
+license = "OLDAP-2.8"
+homepage = "https://www.openldap.org"
+hostdeps = ["automake", "libtool", "mandoc", "pkgconf"]
+builddeps = ["libevent-devel", "libsasl-devel", "libsodium-devel", "libtool-devel", "openssl-devel"]
+
+source = [
+    { url = "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.6.13.tgz", sha256 = "d693b49517a42efb85a1a364a310aed16a53d428d1b46c0d31ef3fba78fcb656" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-debug \
+    --disable-slapd \
+    --disable-sql \
+    --disable-static \
+    --disable-versioning \
+    --disable-wt \
+    --enable-backends=mod \
+    --enable-crypt \
+    --enable-dynamic \
+    --enable-modules \
+    --enable-overlays=mod \
+    --enable-rlookups \
+    --enable-spasswd \
+    --enable-syslog \
+    --with-cyrus-sasl \
+    --with-tls=openssl
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/openldap/LICENSE"
+'''

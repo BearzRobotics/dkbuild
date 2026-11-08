@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/wlr-randr/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "wlr-randr"
+version = "0.4.1"
+release = 1
+summary = "Utility to manage outputs of wlroots compositors"
+license = "MIT"
+homepage = "https://sr.ht/~emersion/wlr-randr"
+hostdeps = ["pkgconf", "wayland"]
+builddeps = ["wayland-devel"]
+
+source = [
+    { url = "https://git.sr.ht/~emersion/wlr-randr/refs/download/v0.4.1/wlr-randr-0.4.1.tar.gz", sha256 = "fd5783002c13d37267898e571f03b618363d13952a264cf3d61a35383869d631" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/wlr-randr/LICENSE"
+'''

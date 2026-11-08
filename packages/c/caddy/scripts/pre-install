@@ -1,0 +1,6 @@
+#!/bin/sh
+grep -q "^caddy:" /etc/group || groupadd -r caddy
+grep -q "^caddy:" /etc/passwd || useradd -r -g caddy -d /var/lib/caddy -s /usr/bin/nologin -c "Caddy web server" caddy
+mkdir -p /var/lib/caddy /etc/caddy
+chown caddy:caddy /var/lib/caddy; chmod 750 /var/lib/caddy
+exit 0

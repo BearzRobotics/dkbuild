@@ -1,0 +1,21 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-appdirs/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "python-appdirs"
+version = "1.4.4"
+release = 4
+summary = "Platform-specific directory module for Python"
+license = "MIT"
+homepage = "https://github.com/ActiveState/appdirs"
+hostdeps = ["python-setuptools"]
+checkdeps = []
+rundeps = ["python"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/a/appdirs/appdirs-1.4.4.tar.gz", sha256 = "7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41" },
+]
+
+install = '''
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-appdirs/LICENSE.txt"
+'''

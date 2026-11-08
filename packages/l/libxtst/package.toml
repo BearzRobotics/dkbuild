@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libxtst/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libxtst"
+version = "1.2.5"
+release = 1
+summary = "X Tst library"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "libtool", "pkgconf", "xorg-util-macros"]
+builddeps = ["libxext-devel", "libxi-devel", "xorgproto"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/lib/libXtst-1.2.5.tar.xz", sha256 = "b50d4c25b97009a744706c1039c598f4d8e64910c9fde381994e1cae235d9242" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libxtst/COPYING"
+'''

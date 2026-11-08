@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/cairomm1.0/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "cairomm1.0"
+version = "1.14.5"
+release = 8
+summary = "C++ bindings to Cairo graphics library, API version 1.14"
+license = "LGPL-2.0-or-later"
+homepage = "https://www.cairographics.org/cairomm"
+hostdeps = ["pkgconf"]
+builddeps = ["cairo-devel", "libsigc++2-devel"]
+checkdeps = ["boost-devel", "fontconfig-devel", "fonts-dejavu"]
+
+source = [
+    { url = "https://cairographics.org/releases/cairomm-1.14.5.tar.xz", sha256 = "70136203540c884e89ce1c9edfb6369b9953937f6cd596d97c78c9758a5d48db" },
+]
+
+setup = '''
+%meson \
+    -Dboost-shared=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

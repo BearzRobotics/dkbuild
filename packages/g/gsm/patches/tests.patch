@@ -1,0 +1,81 @@
+diff --git a/tst/cod2lin.c b/tst/cod2lin.c
+index 76e8f8c..3de0f6b 100644
+--- a/tst/cod2lin.c
++++ b/tst/cod2lin.c
+@@ -17,6 +17,7 @@ extern void exit(int);
+ #include <stdio.h>
+ #include <string.h>
+ #include <assert.h>
++#include <unistd.h>
+ 
+ #include	"gsm.h"
+ #include	"proto.h"
+diff --git a/tst/cod2txt.c b/tst/cod2txt.c
+index 405b895..37946b1 100644
+--- a/tst/cod2txt.c
++++ b/tst/cod2txt.c
+@@ -19,7 +19,7 @@ int	debug      = 0;
+ int	verbosity  = 0;
+ int	error      = 0;
+ 
+-usage P0()
++void usage P0()
+ {
+ 	fprintf(stderr, "Usage: %s [files...]\n", pname);
+ 	exit(1);
+@@ -69,7 +69,7 @@ void process P2((f, filename), FILE * f, char * filename)
+ 	}
+ }
+ 
+-main P2((ac, av), int ac, char ** av)
++int main P2((ac, av), int ac, char ** av)
+ {
+ 	int 		opt;
+ 	extern char   * optarg;
+diff --git a/tst/gsm2cod.c b/tst/gsm2cod.c
+index c5dd8d9..ebb7bf8 100644
+--- a/tst/gsm2cod.c
++++ b/tst/gsm2cod.c
+@@ -68,7 +68,7 @@ void process P2((f, filename), FILE * f, char * filename)
+ 	}
+ }
+ 
+-main P2((ac, av), int ac, char ** av)
++int main P2((ac, av), int ac, char ** av)
+ {
+ 	int 		opt;
+ 	extern char   * optarg;
+diff --git a/tst/lin2cod.c b/tst/lin2cod.c
+index 62b878c..1a9b2ca 100644
+--- a/tst/lin2cod.c
++++ b/tst/lin2cod.c
+@@ -7,6 +7,7 @@
+ /*$Header: /tmp_amd/presto/export/kbs/jutta/src/gsm/RCS/lin2cod.c,v 1.2 1996/07/02 14:33:13 jutta Exp jutta $*/
+ 
+ #include <stdio.h>
++#include <stdlib.h>
+ #include <unistd.h>
+ 
+ #include "gsm.h"
+diff --git a/tst/lin2txt.c b/tst/lin2txt.c
+index fb39504..bb04f39 100644
+--- a/tst/lin2txt.c
++++ b/tst/lin2txt.c
+@@ -17,7 +17,7 @@ int	debug      = 0;
+ int	verbosity  = 0;
+ int	error      = 0;
+ 
+-usage P0()
++void usage P0()
+ {
+ 	fprintf(stderr, "Usage: %s [-v] [files...]\n", pname);
+ 	exit(1);
+@@ -63,7 +63,7 @@ void process P2((f, filename), FILE * f, char * filename)
+ 	}
+ }
+ 
+-main P2((ac, av), int ac, char ** av)
++int main P2((ac, av), int ac, char ** av)
+ {
+ 	int 		opt;
+ 	extern char   * optarg;

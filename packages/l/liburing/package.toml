@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/liburing/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "liburing"
+version = "2.12"
+release = 1
+summary = "Linux kernel io_uring access library"
+license = "LGPL-2.1-or-later OR MIT"
+homepage = "https://github.com/axboe/liburing"
+patches = ["godforsaken-version.patch"]
+hostdeps = ["bash", "pkgconf"]
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/axboe/liburing/archive/refs/tags/liburing-2.12.tar.gz", sha256 = "f1d10cb058c97c953b4c0c446b11e9177e8c8b32a5a88b309f23fdd389e26370" },
+]
+
+setup = '''
+# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 23); port it by hand
+./configure \
+    --mandir=/usr/share/man \
+    --use-libc
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/liburing/LICENSE"
+'''

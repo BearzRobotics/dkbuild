@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libpagemaker/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libpagemaker"
+version = "0.0.4"
+release = 10
+summary = "Library for Aldus/Adobe PageMaker format"
+license = "MPL-2.0"
+homepage = "https://wiki.documentfoundation.org/DLP/Libraries/libpagemaker"
+hostdeps = ["pkgconf", "automake", "libtool"]
+builddeps = ["librevenge-devel", "boost-devel"]
+
+source = [
+    { url = "https://dev-www.libreoffice.org/src/libpagemaker/libpagemaker-0.0.4.tar.xz", sha256 = "66adacd705a7d19895e08eac46d1e851332adf2e736c566bef1164e7a442519d" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/opencolorio/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "opencolorio"
+version = "2.5.1"
+release = 3
+summary = "Color management framework"
+license = "BSD-3-Clause"
+homepage = "https://opencolorio.org"
+patches = ["fromchars.patch", "skip-broken-test.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf", "python"]
+builddeps = ["freeglut-devel", "glew-devel", "imath-devel", "lcms2-devel", "libexpat-devel", "minizip-ng-devel", "openexr-devel", "pystring-devel", "python-devel", "python-pybind11-devel", "yaml-cpp-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/refs/tags/v2.5.1.tar.gz", sha256 = "08cb6213ea4edee550ab050509d38204004bee6742c658166b1cf825d0a9381b" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DOCIO_BUILD_TESTS=ON \
+    -DOCIO_BUILD_GPU_TESTS=OFF \
+    -DOPENGL_opengl_LIBRARY=/usr/lib/libGL.so
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/opencolorio/LICENSE"
+'''

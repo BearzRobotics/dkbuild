@@ -1,0 +1,34 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libnice/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libnice"
+version = "0.1.23"
+release = 1
+summary = "Implementation of the IETF's draft ICE"
+license = "LGPL-2.1-or-later"
+homepage = "https://libnice.freedesktop.org"
+patches = ["failing-tests.patch", "sendmmsg.patch"]
+hostdeps = ["glib-devel", "gobject-introspection", "pkgconf"]
+builddeps = ["glib-devel", "gst-plugins-base-devel", "gstreamer-devel", "openssl-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://libnice.freedesktop.org/releases/libnice-0.1.23.tar.gz", sha256 = "618fc4e8de393b719b1641c1d8eec01826d4d39d15ade92679d221c7f5e4e70d" },
+]
+
+setup = '''
+%meson \
+    -Ddefault_library=shared \
+    -Dcrypto-library=openssl \
+    -Dgtk_doc=disabled \
+    -Dexamples=disabled \
+    -Dintrospection=enabled \
+    -Dtests=enabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

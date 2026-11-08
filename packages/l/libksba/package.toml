@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libksba/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libksba"
+version = "1.8.1"
+release = 1
+summary = "CMS and X.509 access library"
+license = "GPL-2.0-or-later OR LGPL-3.0-or-later"
+homepage = "https://gnupg.org/software/libksba/index.html"
+hostdeps = ["pkgconf"]
+builddeps = ["libgpg-error-devel"]
+
+source = [
+    { url = "https://gnupg.org/ftp/gcrypt/libksba/libksba-1.8.1.tar.bz2", sha256 = "c2f84393011827219ae117131dba8e7684c2bed0961eed11b0642c2acba440b5" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

@@ -1,0 +1,39 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/fonts-liberation/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "fonts-liberation"
+version = "2.1.5"
+release = 4
+summary = "Liberation family of fonts"
+license = "OFL-1.1"
+homepage = "https://github.com/liberationfonts/liberation-fonts"
+patches = ["0001-add-otf-generation.patch"]
+hostdeps = ["fontforge-cli", "python-fonttools"]
+rundeps = ["mkfontscale"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/liberationfonts/liberation-fonts/archive/2.1.5.tar.gz", sha256 = "9a823ccb33c8a8a865e84b982bcdc44d03ba4914adb91e6000df035dc0e55936" },
+]
+
+build = '''
+# TODO(cbuild): self.make.invoke("versionupdate")
+%make \
+    PREFIX=/usr
+'''
+install = '''
+# TODO(cbuild): self.install_file(
+#         f"liberation-fonts-otf-{pkgver}/*.otf",
+#         "usr/share/fonts/liberation",
+#         glob=True,
+#     )
+# TODO(cbuild): self.install_file(
+#         f"liberation-fonts-ttf-{pkgver}/*.ttf",
+#         "usr/share/fonts/liberation",
+#         glob=True,
+#     )
+# TODO(cbuild): for f in self.files_path.glob("*.conf"):
+#         self.install_file(f, "usr/share/fontconfig/conf.avail")
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/fonts-liberation/LICENSE"
+'''

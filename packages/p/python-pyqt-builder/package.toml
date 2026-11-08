@@ -1,0 +1,22 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-pyqt-builder/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "python-pyqt-builder"
+version = "1.20.3"
+release = 1
+summary = "PEP517 backend for PyQt projects"
+license = "custom:sip"
+homepage = "https://github.com/Python-PyQt/PyQt-builder"
+patches = ["envflags.patch"]
+hostdeps = ["python-setuptools-scm"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/P/PyQt-builder/pyqt_builder-1.20.3.tar.gz", sha256 = "be65ff822a75d020fafc0edcaf9fd79b7e3f145a00995a177c98c3286a5f85d5" },
+]
+
+install = '''
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pyqt-builder/LICENSE"
+'''

@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/kiconthemes/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "kiconthemes"
+version = "6.31.0"
+release = 1
+summary = "KDE Icon GUI utilities"
+license = "LGPL-2.1-only"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja"]
+builddeps = ["breeze-icons-devel", "karchive-devel", "kcolorscheme-devel", "kconfigwidgets-devel", "ki18n-devel", "kwidgetsaddons-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "qt6-qttools-devel"]
+rundeps = ["qt6-qtsvg"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/kiconthemes-6.31.0.tar.xz", sha256 = "d6558d7dc6ed6de90ef3b5eef905c25fb624147a01d2703329144534a5df58ec" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

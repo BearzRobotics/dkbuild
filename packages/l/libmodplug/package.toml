@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libmodplug/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libmodplug"
+version = "0.8.9.0"
+release = 3
+summary = "MOD playing library"
+license = "custom:none"
+homepage = "http://modplug-xmms.sourceforge.net"
+patches = ["clang16.patch", "muloverflow.patch"]
+hostdeps = ["pkgconf", "automake", "libtool"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/modplug-xmms/libmodplug-0.8.9.0.tar.gz", sha256 = "457ca5a6c179656d66c01505c0d95fafaead4329b9dbaa0f997d00a3508ad9de" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-static
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

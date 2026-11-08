@@ -1,0 +1,37 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/rtmpdump/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "rtmpdump"
+version = "2.4.20210219"
+release = 4
+summary = "Toolkit for RTMP streams"
+license = "GPL-2.0-or-later"
+homepage = "https://rtmpdump.mplayerhq.hu"
+patches = ["fix-chunk-size.patch", "fix-version.patch", "librtmp-dh.h.patch", "librtmp-handshake.h.patch", "librtmp-hashswf.c.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["zlib-ng-compat-devel", "openssl-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://repo.chimera-linux.org/distfiles/rtmpdump-2.4.20210219.tar.xz", sha256 = "705b7a99af575e07613c436bc58829cb04d924776949cb243d03091335747139" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -D__LINUX_NETFILTER_H -DOPENSSL_API_COMPAT=0x10100000L -Wno-unused-const-variable -Wno-deprecated-declarations"
+'''
+setup = '''
+# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 29); port it by hand
+'''
+build = '''
+%make \
+    CRYPTO=OPENSSL
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr \
+    prefix=/usr \
+    sbindir=/usr/bin \
+    mandir=/usr/share/man
+'''

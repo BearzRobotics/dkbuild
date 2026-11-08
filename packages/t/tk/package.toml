@@ -1,0 +1,38 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/tk/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "tk"
+version = "8.6.17"
+release = 1
+summary = "TK graphical user interface toolkit for TCL"
+license = "TCL"
+homepage = "http://www.tcl.tk"
+hostdeps = ["automake", "pkgconf"]
+builddeps = ["libxext-devel", "libxft-devel", "libxscrnsaver-devel", "tcl-devel", "zlib-ng-compat-devel"]
+options = ["!check", "!cross", "!lto"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/tcl/tk8.6.17-src.tar.gz", sha256 = "e4982df6f969c08bf9dd858a6891059b4a3f50dc6c87c10abadbbe2fc4838946" },
+]
+
+setup = '''
+# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 32); port it by hand
+autoreconf -if -W none
+%configure \
+    --enable-threads \
+    --enable-man-symlinks \
+    --disable-rpath \
+    --without-tzdata \
+    tk_cv_strtod_unbroken=ok \
+    LIBS=-ltcl8.6
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+mkdir -p "$pkgdir/usr/bin"
+ln -sf wish8.6 "$pkgdir/usr/bin/wish"
+install -Dm644 ../license.terms "$pkgdir/usr/share/licenses/tk/license.terms"
+'''

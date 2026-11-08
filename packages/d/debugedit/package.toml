@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/debugedit/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "debugedit"
+version = "5.2"
+release = 1
+summary = "Utilities for creating debuginfo and source file distributions"
+license = "GPL-3.0-or-later AND LGPL-2.0-or-later"
+homepage = "https://sourceware.org/debugedit"
+hostdeps = ["automake", "bash", "help2man", "pkgconf"]
+builddeps = ["elfutils-devel", "xxhash-devel"]
+options = ["!check", "!cross"]
+
+source = [
+    { url = "https://sourceware.org/pub/debugedit/5.2/debugedit-5.2.tar.xz", sha256 = "705296803cc4403f38764e891b4ed38f8d8d4f8a9164bd4f86c9d4bedcac68dd" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

@@ -1,0 +1,74 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/x265/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "x265"
+version = "4.2"
+release = 1
+summary = "Open source H.265/HEVC encoder"
+license = "GPL-2.0-or-later"
+homepage = "https://x265.org"
+patches = ["aarch64-func.patch", "x265-pic.patch"]
+hostdeps = ["pkgconf", "cmake", "ninja"]
+builddeps = ["numactl-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://bitbucket.org/multicoreware/x265_git/get/4.2.tar.gz", sha256 = "0a3d41f6b4e2fe5a49d783d6631bd1a49c44cdf999074a3ff09e2cb71ac8ed33" },
+]
+
+setup = '''
+# TODO(cbuild): from cbuild.util import cmake
+# TODO(cbuild): cmake.configure(
+#         self,
+#         build_dir="build-12",
+#         extra_args=[
+#             *self.configure_args,
+#             # doesn't work with non-byte pixel value
+#             "-DENABLE_ALTIVEC=OFF",
+#             "-DENABLE_CLI=OFF",
+#             "-DENABLE_SHARED=OFF",
+#             "-DEXPORT_C_API=OFF",
+#             "-DHIGH_BIT_DEPTH=ON",
+#             "-DMAIN12=ON",
+#         ],
+#     )
+# TODO(cbuild): cmake.configure(
+#         self,
+#         build_dir="build-10",
+#         extra_args=[
+#             *self.configure_args,
+#             # doesn't work with non-byte pixel value
+#             "-DENABLE_ALTIVEC=OFF",
+#             "-DENABLE_SHARED=OFF",
+#             "-DENABLE_CLI=OFF",
+#             "-DEXPORT_C_API=OFF",
+#             "-DHIGH_BIT_DEPTH=ON",
+#             "-DMAIN12=OFF",
+#         ],
+#     )
+# TODO(cbuild): cmake.configure(
+#         self,
+#         build_dir="build",
+#         extra_args=[
+#             *self.configure_args,
+#             "-DEXTRA_LIB=x265_main10.a;x265_main12.a",
+#             "-DEXTRA_LINK_FLAGS=-L.",
+#             "-DLINKED_10BIT=TRUE",
+#             "-DLINKED_12BIT=TRUE",
+#         ],
+#     )
+'''
+build = '''
+# TODO(cbuild): from cbuild.util import cmake
+# TODO(cbuild): cmake.build(self, "build-12")
+# TODO(cbuild): cmake.build(self, "build-10")
+# TODO(cbuild): with self.stamp("build-symlinks") as s:
+#         s.check()
+#         self.ln_s("../build-12/libx265.a", "build/libx265_main12.a")
+#         self.ln_s("../build-10/libx265.a", "build/libx265_main10.a")
+# TODO(cbuild): cmake.build(self, "build")
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,35 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/redland/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "redland"
+version = "1.0.17"
+release = 1
+summary = "Redlang Resource Description Framework"
+license = "GPL-2.0-or-later OR LGPL-2.1-or-later OR Apache-2.0"
+homepage = "https://librdf.org"
+hostdeps = ["pkgconf", "automake", "libtool", "perl"]
+builddeps = ["libtool-devel", "rasqal-devel", "sqlite-devel", "unixodbc-devel"]
+
+source = [
+    { url = "https://librdf.org/dist/source/redland-1.0.17.tar.gz", sha256 = "de1847f7b59021c16bdc72abb4d8e2d9187cd6124d69156f3326dd34ee043681" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-static \
+    --enable-release \
+    --with-raptor=system \
+    --with-rasqal=system \
+    --with-sqlite=3
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

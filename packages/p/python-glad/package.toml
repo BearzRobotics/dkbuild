@@ -1,0 +1,21 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-glad/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "python-glad"
+version = "2.0.8"
+release = 3
+summary = "Multi-language graphics API loader generator"
+license = "MIT"
+homepage = "https://glad.dav1d.de"
+hostdeps = ["python-jinja2", "python-setuptools"]
+rundeps = ["python-jinja2"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/Dav1dde/glad/archive/refs/tags/v2.0.8.tar.gz", sha256 = "44f06f9195427c7017f5028d0894f57eb216b0a8f7c4eda7ce883732aeb2d0fc" },
+]
+
+install = '''
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-glad/LICENSE"
+'''

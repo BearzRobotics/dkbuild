@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libvips/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libvips"
+version = "8.18.7"
+release = 1
+summary = "Image processing library"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/libvips/libvips"
+hostdeps = ["gettext", "glib-devel", "gobject-introspection", "pkgconf"]
+builddeps = ["fftw-devel", "giflib-devel", "glib-devel", "gobject-introspection", "highway-devel", "imagemagick-devel", "libarchive-devel", "libexif-devel", "libexpat-devel", "libheif-devel", "libjpeg-turbo-devel", "libjxl-devel", "libpng-devel", "libraw-devel", "librsvg-devel", "libtiff-devel", "libwebp-devel", "openexr-devel", "pango-devel", "poppler-devel", "zlib-ng-compat-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://github.com/libvips/libvips/releases/download/v8.18.7/vips-8.18.7.tar.xz", sha256 = "5baaead3b0bb20ffdb9e9ff09aa9fda08620923df77b63b436654cb5e0b3bf94" },
+]
+
+setup = '''
+%meson \
+    -Db_ndebug=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

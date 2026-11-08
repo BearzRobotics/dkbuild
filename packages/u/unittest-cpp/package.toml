@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/unittest-cpp/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "unittest-cpp"
+version = "2.0.0"
+release = 1
+summary = "Unit testing framework for C++"
+license = "MIT"
+homepage = "https://github.com/unittest-cpp/unittest-cpp"
+patches = ["0001-CMakeLists-set-version.patch", "0001-CMakeLists.txt-fix-PACKAGE_VERSION-substitution-in-..patch"]
+builddeps = ["cmake", "ninja", "pkgconf"]
+options = ["!lto"]
+
+source = [
+    { url = "https://github.com/unittest-cpp/unittest-cpp/archive/refs/tags/v2.0.0.tar.gz", sha256 = "74852198877dc2fdebdc4e5e9bd074018bf8ee03a13de139bfe41f4585b2f5b9" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DUTPP_INCLUDE_TESTS_IN_BUILD=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/unittest-cpp/LICENSE"
+'''

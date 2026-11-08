@@ -1,0 +1,113 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/thunderbird/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "thunderbird"
+version = "159.0"
+release = 1
+summary = "Thunderbird mail client"
+license = "GPL-3.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND MPL-2.0"
+homepage = "https://www.thunderbird.net"
+patches = ["atoi.patch", "clang-ias.patch", "clang-memory-throw-gcc.patch", "depflags.patch", "enable-elfhack-relr.patch", "fix-fortify-system-wrappers.patch", "fix-rnp-getenv.patch", "fix-rust-target.patch", "fix-webrtc-pid_t.patch", "google-sucks.patch", "lfs64.patch", "libcxx18.patch", "loong0001-Enable-WebRTC-for-loongarch64.patch", "loong0003-Define-HWCAP_LOONGARCH_LSX_and_LASX.patch", "loong0004-Fix-ycbcr-chromium_types-warning.patch", "musl-libresolv.patch", "musl-prctl.patch", "no-ccache-stats.patch", "ppc64-webrtc.patch", "riscv64-no-llama-simd.patch", "riscv64-reduce-debug.patch", "sandbox-sched_setscheduler.patch", "sqlite-ppc.patch", "wasip1.patch", "wasm2c-various-archs.patch", "x11lol.patch", "xptcall-integrated-as.patch"]
+hostdeps = ["automake", "rust", "cbindgen", "llvm-devel", "dbus", "gettext", "libtool", "nasm", "nodejs", "pkgconf", "python", "wasi-sdk", "zip"]
+builddeps = ["alsa-lib-devel", "dbus-devel", "ffmpeg-devel", "freetype-devel", "glib-devel", "gtk+3-devel", "icu-devel", "libevent-devel", "libffi-devel", "libjpeg-turbo-devel", "libnotify-devel", "libogg-devel", "libpng-devel", "libpulse-devel", "libtheora-devel", "libvorbis-devel", "libvpx-devel", "libwebp-devel", "libxcomposite-devel", "libxscrnsaver-devel", "libxt-devel", "mesa-devel", "nspr-devel", "nss-devel", "pipewire-devel", "pixman-devel", "rust", "zlib-ng-compat-devel"]
+options = ["!cross", "!check"]
+
+source = [
+    { url = "https://ftp.mozilla.org/pub/thunderbird/releases/159.0/source/thunderbird-159.0.source.tar.xz", sha256 = "b4cbc4e010deaa66a51a5c647586c8dc41579c136155fe8baa8253f7c8b3927e" },
+]
+
+environment = '''
+export LDFLAGS="${LDFLAGS} -Wl,-rpath=/usr/lib/thunderbird -Wl,-z,stack-size=2097152"
+export SHELL=/usr/bin/sh
+export BUILD_OFFICIAL=1
+export MOZILLA_OFFICIAL=1
+export USE_SHORT_LIBNAME=1
+export MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE=system
+export MOZ_APP_REMOTINGNAME=thunderbird
+export MOZ_NOSPAM=1
+export CBUILD_BYPASS_STRIP_WRAPPER=1
+'''
+setup = '''
+# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 115); port it by hand
+# TODO(cbuild): conf_opts = [
+#         "--prefix=/usr",
+#         "--libdir=/usr/lib",
+#         "--host=" + self.profile.triplet,
+#         "--target=" + self.profile.triplet,
+#         "--disable-install-strip",
+#         "--disable-strip",
+#         "--enable-linker=lld",
+#         "--enable-optimize",
+#         "--enable-release",
+#         "--with-wasi-sysroot=/usr/wasm32-unknown-wasi",
+#         # we have our own flags and better
+#         "--disable-hardening",
+#         # system libs
+#         "--with-system-ffi",
+#         "--with-system-icu",
+#         "--with-system-jpeg",
+#         "--with-system-libevent",
+#         "--with-system-libvpx",
+#         "--with-system-nspr",
+#         "--with-system-nss",
+#         "--with-system-pixman",
+#         "--with-system-webp",
+#         "--with-system-zlib",
+#         # no apng support
+#         "--without-system-png",
+#         # features
+#         "--enable-audio-backends=pulseaudio",
+#         "--enable-dbus",
+#         "--enable-default-toolkit=cairo-gtk3-wayland",
+#         "--enable-jack",
+#         "--enable-necko-wifi",
+#         "--enable-pulseaudio",
+#         # disabled features
+#         "--disable-alsa",
+#         "--disable-jemalloc",
+#         "--disable-profiling",
+#         "--disable-tests",
+#         "--disable-updater",
+#         # mail options
+#         "--allow-addon-sideload",
+#         "--enable-application=comm/mail",
+#         "--enable-official-branding",
+#         "--with-distribution-id=org.chimera-linux",
+#     ]
+# TODO(cbuild): match self.profile.arch:
+#         case "x86_64" | "aarch64":
+#             # broken with rust 1.78 as it enables packed_simd feature that uses removed platform_intrinsics
+#             # conf_opts += ["--enable-rust-simd"]
+#             pass
+#         case "loongarch64":
+#             conf_opts += ["--disable-crashreporter"]
+# TODO(cbuild): if self.has_lto():
+#         conf_opts += ["--enable-lto=cross"]
+# TODO(cbuild): self.log("configuring final thunderbird...")
+# TODO(cbuild): self.do("./mach", "configure", *conf_opts)
+'''
+build = '''
+./mach build --priority normal
+'''
+install = '''
+# TODO(cbuild): self.do(
+#         "./mach",
+#         "install",
+#         env={"DESTDIR": str(self.chroot_destdir)},
+#     )
+install -Dm644 $pkgfiles/vendor.js "$pkgdir/usr/lib/thunderbird/defaults/preferences/vendor.js"
+install -Dm644 $pkgfiles/distribution.ini "$pkgdir/usr/lib/thunderbird/distribution/distribution.ini"
+install -Dm644 $pkgfiles/thunderbird.desktop "$pkgdir/usr/share/applications/thunderbird.desktop"
+# icons
+# TODO(cbuild): for sz in [16, 22, 24, 32, 48, 128, 256]:
+#         self.install_file(
+#             f"comm/mail/branding/thunderbird/default{sz}.png",
+#             f"usr/share/icons/hicolor/{sz}x{sz}/apps",
+#             name="thunderbird.png",
+#         )
+# https://bugzilla.mozilla.org/show_bug.cgi?id=658850
+rm -rf "$pkgdir/usr/lib/thunderbird/thunderbird-bin"
+mkdir -p "$pkgdir/usr/lib/thunderbird"
+ln -sf thunderbird "$pkgdir/usr/lib/thunderbird/thunderbird-bin"
+'''

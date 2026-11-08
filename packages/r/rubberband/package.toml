@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/rubberband/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "rubberband"
+version = "4.0.0"
+release = 2
+summary = "Time-stretching and pitch-shifting audio library"
+license = "GPL-2.0-or-later"
+homepage = "https://breakfastquay.com/rubberband"
+hostdeps = ["pkgconf"]
+builddeps = ["fftw-devel", "ladspa-sdk", "libsamplerate-devel", "libsndfile-devel", "lv2", "vamp-plugin-sdk-devel"]
+
+source = [
+    { url = "https://breakfastquay.com/files/releases/rubberband-4.0.0.tar.bz2", sha256 = "af050313ee63bc18b35b2e064e5dce05b276aaf6d1aa2b8a82ced1fe2f8028e9" },
+]
+
+setup = '''
+%meson \
+    -Dfft=fftw \
+    -Dresampler=libsamplerate
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

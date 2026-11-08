@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/liborcus/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "liborcus"
+version = "0.21.0"
+release = 5
+summary = "Library for processing spreadsheets"
+license = "MPL-2.0"
+homepage = "https://gitlab.com/orcus/orcus"
+hostdeps = ["pkgconf", "automake", "libtool", "python"]
+builddeps = ["boost-devel", "ixion-devel", "mdds", "python-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://gitlab.com/orcus/orcus/-/archive/0.21.0/liborcus-0.21.0.tar.gz", sha256 = "2dc9bc0e4e22acf9752ff62d388c68fc66bd68138cbed8594982b147b415e186" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

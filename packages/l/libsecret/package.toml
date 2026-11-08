@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libsecret/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libsecret"
+version = "0.21.8.2"
+release = 1
+summary = "GObject-based library for accessing the Secret Service API"
+license = "LGPL-2.1-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/libsecret"
+patches = ["fcntl.patch"]
+hostdeps = ["bash-completion", "docbook-xsl-nons", "glib-devel", "gobject-introspection", "libxslt", "pkgconf", "vala"]
+builddeps = ["glib-devel", "libgcrypt-devel", "vala"]
+options = ["!check", "!cross"]
+
+source = [
+    { url = "https://download.gnome.org/sources/libsecret/0.21/libsecret-0.21.8.2.tar.xz", sha256 = "142948339c5b971d8f6a8c7099521f6fd319b6fe73d2694b4e6d3310ed28b6e6" },
+]
+
+setup = '''
+%meson \
+    -Ddefault_library=shared \
+    -Dgtk_doc=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

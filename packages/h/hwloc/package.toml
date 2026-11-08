@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/hwloc/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "hwloc"
+version = "2.14.0"
+release = 1
+summary = "Hardware resource locality library"
+license = "BSD-3-Clause"
+homepage = "https://www.open-mpi.org/projects/hwloc"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["cairo-devel", "libxml2-devel", "ncurses-devel", "eudev-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.open-mpi.org/software/hwloc/v2.14/downloads/hwloc-2.14.0.tar.bz2", sha256 = "966b9bb3e9f29f8d65ce8d106779e457f40e246a645e584b100772a42f9ae94b" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/hwloc/COPYING"
+'''

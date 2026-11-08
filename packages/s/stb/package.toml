@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/stb/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "stb"
+version = "0_git20250512"
+release = 1
+summary = "Single-header libraries for C/C++"
+license = "MIT"
+homepage = "https://github.com/nothings/stb"
+hostdeps = ["pkgconf"]
+
+source = [
+    { url = "https://github.com/nothings/stb/archive/802cd454f25469d3123e678af41364153c132c2a.tar.gz", sha256 = "d7f870bbe53a4171d5d5526043926b2f26194e6b08de63fc3f1cf4b54e5d5249" },
+]
+
+install = '''
+# TODO(cbuild): self.install_file("*.h", "usr/include", glob=True)
+# TODO(cbuild): self.install_file("deprecated/*.h", "usr/include", glob=True)
+# TODO(cbuild): self.install_file("docs/*", "usr/share/doc/stb", glob=True)
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/stb/LICENSE"
+# .pc file
+install -dm755 "$pkgdir/usr/lib/pkgconfig"
+# TODO(cbuild): with open(self.destdir / "usr/lib/pkgconfig/stb.pc", "w") as outf:
+#         outf.write(f"""prefix=/usr
+#     includedir=${{prefix}}/include
+#     
+#     Name: stb
+#     Description: {pkgdesc}
+#     Cflags: -I${{includedir}}
+#     Version: {pkgver}
+#     """)
+'''

@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/qt6-qtsensors/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "qt6-qtsensors"
+version = "6.12.0"
+release = 1
+summary = "Qt6 Sensors component"
+license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only WITH Qt-GPL-exception-1.0"
+homepage = "https://www.qt.io"
+patches = ["no-cmake-tests.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://download.qt.io/official_releases/qt/6.12/6.12.0/submodules/qtsensors-everywhere-src-6.12.0.tar.xz", sha256 = "861df58be8808cef777a1b531d7bec804d25733ec34e8ebbdafbe27040319090" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/lib/cmake/Qt6BuildInternals"
+rm -rf "$pkgdir/usr/tests"
+'''

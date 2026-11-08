@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/spandsp/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "spandsp"
+version = "0.0.6"
+release = 1
+summary = "Low-level signal processing library for telephony"
+license = "LGPL-2.1-or-later AND GPL-2.0-or-later"
+homepage = "https://www.soft-switch.org"
+hostdeps = ["automake", "pkgconf", "libtool"]
+builddeps = ["libtiff-devel", "libjpeg-turbo-devel"]
+
+source = [
+    { url = "https://ftp.debian.org/debian/pool/main/s/spandsp/spandsp_0.0.6+dfsg.orig.tar.xz", sha256 = "3dcdc611b8a119f1f26540d05e6279c4c1e5cd576271f6d45df431359fc190f9" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install \
+    -j1
+'''

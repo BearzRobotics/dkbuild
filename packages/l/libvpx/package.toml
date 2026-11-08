@@ -1,0 +1,46 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libvpx/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libvpx"
+version = "1.15.2"
+release = 1
+summary = "VP8 and VP9 codec implementation"
+license = "BSD-3-Clause"
+homepage = "http://www.webmproject.org"
+patches = ["link-with-cflags.patch", "remove-dumb-checks.patch"]
+hostdeps = ["pkgconf", "perl", "nasm"]
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/webmproject/libvpx/archive/v1.15.2.tar.gz", sha256 = "26fcd3db88045dee380e581862a6ef106f49b74b6396ee95c2993a260b4636aa" },
+]
+
+setup = '''
+./configure \
+    --enable-shared \
+    --enable-pic \
+    --enable-vp8 \
+    --enable-vp9 \
+    --enable-multithread \
+    --enable-postproc \
+    --enable-vp9-postproc \
+    --enable-temporal-denoising \
+    --enable-vp9-temporal-denoising \
+    --enable-experimental \
+    --enable-runtime-cpu-detect \
+    --disable-static \
+    --disable-install-srcs
+'''
+build = '''
+%make
+'''
+check = '''
+# TODO(cbuild): init_check() sets variables for this phase (cbuild line 79); port it by hand
+'''
+install = '''
+# TODO(cbuild): init_install() sets variables for this phase (cbuild line 71); port it by hand
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libvpx/LICENSE"
+'''

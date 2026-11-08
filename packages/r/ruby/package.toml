@@ -1,0 +1,37 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/ruby/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "ruby"
+version = "3.4.7"
+release = 1
+summary = "Ruby scripting language"
+license = "Ruby OR BSD-2-Clause"
+homepage = "https://www.ruby-lang.org/en"
+patches = ["align-builtin-binaries-ibf_header.patch", "fix-riscv64-build.patch", "musl-fix-get_main_stack.patch", "ppc-no-setjmp.patch", "rubygems-avoid-platform-specific-gems.patch", "test_insns-lower-recursion-depth.patch"]
+hostdeps = ["automake", "bison", "flex", "mandoc", "pkgconf"]
+builddeps = ["libedit-devel", "libffi-devel", "libyaml-devel", "openssl-devel", "zlib-ng-compat-devel"]
+options = ["!cross", "!check"]
+
+source = [
+    { url = "https://cache.ruby-lang.org/pub/ruby/3.4/ruby-3.4.7.tar.xz", sha256 = "db425a86f6e07546957578f4946cc700a91e7fd51115a86c56e096f30e0530c7" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-shared \
+    --disable-rpath \
+    --disable-install-doc \
+    ac_cv_func_isnan=yes \
+    ac_cv_func_isinf=yes
+'''
+build = '''
+%make \
+    all \
+    capi
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/ruby/COPYING"
+'''

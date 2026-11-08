@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/opentimelineio/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "opentimelineio"
+version = "0.17.0"
+release = 2
+summary = "API and interchange format for editorial timeline information"
+license = "Apache-2.0"
+homepage = "https://opentimeline.io"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["imath-devel"]
+
+source = [
+    { url = "https://github.com/AcademySoftwareFoundation/OpenTimelineIO/archive/refs/tags/v0.17.0.tar.gz", sha256 = "cdf8281c6091a18a4147295b660e13b610a6d58919a79608bf03e5359c1c2d24" },
+    { url = "https://github.com/Tencent/rapidjson/archive/24b5e7a8b27f42fa16b96fc70aade9106cf7102f.tar.gz", sha256 = "2d2601a82d2d3b7e143a3c8d43ef616671391034bc46891a9816b79cf2d3e7a8" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DOTIO_FIND_IMATH=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

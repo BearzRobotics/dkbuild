@@ -7,7 +7,7 @@
 # Retire this package when Zig supports the LLVM version in the tree.
 name = "llvm22"
 version = "22.1.8"
-release = 1
+release = 2
 summary = "LLVM 22 libraries, for building Zig"
 license = "Apache-2.0 WITH LLVM-exception"
 homepage = "https://llvm.org"

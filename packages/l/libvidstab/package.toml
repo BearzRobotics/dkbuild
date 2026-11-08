@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libvidstab/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libvidstab"
+version = "1.1.2"
+release = 1
+summary = "Video stabilization library"
+license = "GPL-2.0-or-later"
+homepage = "http://public.hronopik.de/vid.stab"
+patches = ["no-runtime-sse2-lookup.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["orc-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/georgmartius/vid.stab/archive/v1.1.2.tar.gz", sha256 = "96db34d48a9e3aa13736a48744b56dfb76731ac9bb5193c716de8534c9fd709d" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

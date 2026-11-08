@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/mypaint-brushes/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "mypaint-brushes"
+version = "2.0.2"
+release = 1
+summary = "Brushes for libmypaint"
+license = "CC0-1.0"
+homepage = "https://github.com/mypaint/mypaint-brushes"
+hostdeps = ["automake", "pkgconf"]
+
+source = [
+    { url = "https://github.com/mypaint/mypaint-brushes/archive/v2.0.2.tar.gz", sha256 = "01032550dd817bb0f8e85d83a632ed2e50bc16e0735630839e6c508f02f800ac" },
+]
+
+setup = '''
+./autogen.sh
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/mypaint-brushes/COPYING"
+'''

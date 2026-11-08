@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gsettings-desktop-schemas/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "gsettings-desktop-schemas"
+version = "51.0"
+release = 1
+summary = "Collection of GSettings schemas"
+license = "LGPL-2.1-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/gsettings-desktop-schemas"
+hostdeps = ["gettext", "glib-devel", "gobject-introspection", "pkgconf"]
+builddeps = ["glib-devel"]
+rundeps = ["adwaita-icon-theme", "fonts-adwaita-ttf"]
+options = ["!cross"]
+
+source = [
+    { url = "https://download.gnome.org/sources/gsettings-desktop-schemas/51/gsettings-desktop-schemas-51.0.tar.xz", sha256 = "1e2419a5f21d26c324b28ae1c00e29e9175e8b596fff385a04c2172b36652226" },
+]
+
+setup = '''
+%meson \
+    -Dintrospection=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 $pkgfiles/10_chimera_theme.gschema.override "$pkgdir/usr/share/glib-2.0/schemas/10_chimera_theme.gschema.override"
+'''

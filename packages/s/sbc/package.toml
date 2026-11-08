@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/sbc/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "sbc"
+version = "2.2"
+release = 1
+summary = "Bluetooth Subband Codec (SBC) library"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "http://www.bluez.org"
+patches = ["disable-nonportable.patch"]
+hostdeps = ["automake", "pkgconf", "libtool"]
+builddeps = ["libsndfile-devel", "linux-headers"]
+
+source = [
+    { url = "https://www.kernel.org/pub/linux/bluetooth/sbc-2.2.tar.xz", sha256 = "a1ada76ef35e5af9c2fbd063754dc9e37a8d989417c6eb1ecebb089b1383ae9e" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-pie
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

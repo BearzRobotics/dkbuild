@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libmspub/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libmspub"
+version = "0.1.5"
+release = 1
+summary = "Library for mspub format"
+license = "MPL-2.0"
+homepage = "https://wiki.documentfoundation.org/DLP/Libraries/libmspub"
+hostdeps = ["automake", "pkgconf", "libtool"]
+builddeps = ["boost-devel", "icu-devel", "librevenge-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://dev-www.libreoffice.org/src/libmspub/libmspub-0.1.5.tar.xz", sha256 = "3671095f5a10bee8a755052a30576952c5b16d8b0f2ba9f2fb998338c18cb119" },
+]
+
+environment = '''
+export CXXFLAGS="${CXXFLAGS} -D_HAS_AUTO_PTR_ETC=0"
+'''
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

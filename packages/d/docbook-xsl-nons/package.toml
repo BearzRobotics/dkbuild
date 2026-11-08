@@ -1,0 +1,55 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/docbook-xsl-nons/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "docbook-xsl-nons"
+version = "1.79.2"
+release = 2
+summary = "Docbook XSL modular stylesheet"
+license = "MIT"
+homepage = "https://docbook.org"
+patches = ["0001_non-recursive_string_subst.patch", "0002_docbook-xsl-mandir.patch", "0003_catalog.xml-Compatibility-with-1.79.1-or-earlier.patch"]
+rundeps = ["xmlcatmgr", "docbook-xml"]
+
+source = [
+    { url = "https://github.com/docbook/xslt10-stylesheets/releases/download/release/1.79.2/docbook-xsl-nons-1.79.2.tar.bz2", sha256 = "ee8b9eca0b7a8f89075832a2da7534bce8c5478fc8fc2676f512d5d87d832102" },
+]
+
+install = '''
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/docbook-xsl-nons/COPYING"
+install -Dm644 $pkgfiles/docbook-xsl-nons.conf "$pkgdir/usr/share/xml/catalogs/docbook-xsl-nons.conf"
+install -Dm644 catalog.xml "$pkgdir/usr/share/xsl-nons/docbook/catalog.xml"
+install -Dm644 VERSION "$pkgdir/usr/share/xsl-nons/docbook/VERSION"
+install -Dm644 VERSION.xsl "$pkgdir/usr/share/xsl-nons/docbook/VERSION.xsl"
+# TODO(cbuild): for d in [
+#         "assembly",
+#         "common",
+#         "eclipse",
+#         "epub",
+#         "epub3",
+#         "fo",
+#         "highlighting",
+#         "html",
+#         "htmlhelp",
+#         "images",
+#         "javahelp",
+#         "lib",
+#         "manpages",
+#         "params",
+#         "profiling",
+#         "roundtrip",
+#         "template",
+#         "slides",
+#         "website",
+#         "xhtml",
+#         "xhtml-1_1",
+#         "xhtml5",
+#     ]:
+#         self.install_dir(f"usr/share/xsl-nons/docbook/{d}")
+#         for f in (self.cwd / d).glob("*"):
+#             self.cp(
+#                 f,
+#                 self.destdir / f"usr/share/xsl-nons/docbook/{d}",
+#                 recursive=True,
+#             )
+'''

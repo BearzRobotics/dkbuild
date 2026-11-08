@@ -1,0 +1,40 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/neon/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "neon"
+version = "0.34.2"
+release = 1
+summary = "HTTP and WebDAV client library"
+license = "LGPL-2.0-or-later"
+homepage = "https://notroj.github.io/neon"
+patches = ["bsd-date.patch", "socket-ssl.patch"]
+hostdeps = ["automake", "libtool", "perl", "pkgconf", "xmlto"]
+builddeps = ["libexpat-devel", "libproxy-devel", "openssl-devel", "zlib-ng-compat-devel"]
+rundeps = ["ca-certificates"]
+
+source = [
+    { url = "https://notroj.github.io/neon/neon-0.34.2.tar.gz", sha256 = "f98ce3c74300be05eddf05dccbdca498b14d40c289f773195dd1a559cffa5856" },
+]
+
+setup = '''
+./autogen.sh
+%configure \
+    --with-expat \
+    --with-ssl \
+    --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt \
+    --without-gssapi \
+    --enable-shared \
+    --enable-threadsafe-ssl=posix \
+    --disable-static \
+    --disable-nls
+'''
+build = '''
+%make
+'''
+check = '''
+%make check -j1
+'''
+install = '''
+%make_install
+'''

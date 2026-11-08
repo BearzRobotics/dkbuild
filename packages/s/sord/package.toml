@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/sord/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "sord"
+version = "0.16.22"
+release = 1
+summary = "C library for storing RDF data in memory"
+license = "ISC"
+homepage = "https://drobilla.net/software/sord.html"
+hostdeps = ["pkgconf"]
+builddeps = ["serd-devel", "pcre2-devel", "zix-devel"]
+
+source = [
+    { url = "https://download.drobilla.net/sord-0.16.22.tar.xz", sha256 = "bb23b34b216579136795d518cffa73d91cf205594ce9accebfd408afb839173f" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/sord/COPYING"
+'''

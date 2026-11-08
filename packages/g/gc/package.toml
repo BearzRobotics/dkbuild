@@ -1,0 +1,35 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gc/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "gc"
+version = "8.2.12"
+release = 1
+summary = "Boehm garbage collector for C/C++"
+license = "MIT"
+homepage = "https://www.hboehm.info/gc"
+patches = ["0001-Fix-gctest-with-musl-libc-on-s390x.patch"]
+hostdeps = ["pkgconf", "automake", "libtool"]
+builddeps = ["linux-headers"]
+
+source = [
+    { url = "https://github.com/ivmai/bdwgc/releases/download/v8.2.12/gc-8.2.12.tar.gz", sha256 = "42e5194ad06ab6ffb806c83eb99c03462b495d979cda782f3c72c08af833cd4e" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-static \
+    --enable-cplusplus \
+    --with-libatomic-ops=none
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 README.QUICK "$pkgdir/usr/share/licenses/gc/README.QUICK"
+'''

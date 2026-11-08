@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-pyparsing/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "python-pyparsing"
+version = "3.2.3"
+release = 2
+summary = "Python parsing module"
+license = "MIT"
+homepage = "https://github.com/pyparsing/pyparsing"
+hostdeps = ["python-flit-core"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/pyparsing/pyparsing/archive/3.2.3.tar.gz", sha256 = "3ad3397385c3f68c89d313529af4cafc9a9117845bc0cb6b38f02e621d151d38" },
+]
+
+build = '''
+python -m flit_core.wheel
+'''
+install = '''
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pyparsing/LICENSE"
+'''

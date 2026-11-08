@@ -1,0 +1,23 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/perl-net-ssleay/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "perl-net-ssleay"
+version = "1.94"
+release = 4
+summary = "Perl extension for using OpenSSL"
+license = "Artistic-2.0"
+homepage = "https://metacpan.org/release/Net-SSLeay"
+hostdeps = ["perl", "openssl"]
+builddeps = ["perl", "zlib-ng-compat-devel", "openssl-devel"]
+rundeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.cpan.org/modules/by-module/Net/Net-SSLeay-1.94.tar.gz", sha256 = "9d7be8a56d1bedda05c425306cc504ba134307e0c09bda4a788c98744ebcd95d" },
+]
+
+install = '''
+# TODO(cbuild): no install step could be derived
+true
+'''

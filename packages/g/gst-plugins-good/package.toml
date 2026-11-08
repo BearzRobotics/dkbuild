@@ -1,0 +1,50 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gst-plugins-good/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "gst-plugins-good"
+version = "1.28.7"
+release = 2
+summary = "GStreamer good plugins"
+license = "LGPL-2.1-or-later"
+homepage = "https://gstreamer.freedesktop.org"
+patches = ["testskip.patch"]
+hostdeps = ["gettext", "glib-devel", "nasm", "orc", "pkgconf", "qt6-qtbase", "qt6-qttools"]
+builddeps = ["bzip2-devel", "flac-devel", "gdk-pixbuf-devel", "gst-plugins-base-devel", "gstreamer-devel", "gtk+3-devel", "lame-devel", "libcaca-devel", "libgudev-devel", "libpng-devel", "libpulse-devel", "libsoup-devel", "libvpx-devel", "libxml2-devel", "mpg123-devel", "orc-devel", "pipewire-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel", "qt6-qtwayland-devel", "taglib-devel", "twolame-devel", "wavpack-devel"]
+checkdeps = []
+rundeps = ["gst-plugins-base"]
+
+source = [
+    { url = "https://gstreamer.freedesktop.org/src/gst-plugins-good/gst-plugins-good-1.28.7.tar.xz", sha256 = "87256969c82cf3bc8574301f3e7044a90de0ac500a5a27d8ba38c4dde894dd8b" },
+]
+
+setup = '''
+%meson \
+    --auto-features=enabled \
+    -Ddefault_library=shared \
+    -Ddoc=disabled \
+    -Dexamples=disabled \
+    -Daalib=disabled \
+    -Damrnb=disabled \
+    -Damrwbdec=disabled \
+    -Ddirectsound=disabled \
+    -Ddv1394=disabled \
+    -Ddv=disabled \
+    -Doss4=disabled \
+    -Doss=disabled \
+    -Dosxaudio=disabled \
+    -Dosxvideo=disabled \
+    -Dqt5=disabled \
+    -Drpicamsrc=disabled \
+    -Dshout2=disabled \
+    -Dspeex=disabled \
+    -Dv4l2-libv4l2=disabled \
+    -Dwaveform=disabled \
+    -Dximagesrc=disabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/speexdsp/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "speexdsp"
+version = "1.2.1"
+release = 2
+summary = "Speex DSP library"
+license = "BSD-3-Clause"
+homepage = "https://www.speex.org"
+patches = ["slibtool.patch"]
+hostdeps = ["automake", "libtool", "pkgconf"]
+
+source = [
+    { url = "https://gitlab.xiph.org/xiph/speexdsp/-/archive/SpeexDSP-1.2.1/speexdsp-SpeexDSP-1.2.1.tar.bz2", sha256 = "b36d4f16e42b7103b7fc3e4a8f98b6bf889dd1f70f65c2365af07be82844db29" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/speexdsp/COPYING"
+'''

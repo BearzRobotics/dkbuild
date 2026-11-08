@@ -1,0 +1,30 @@
+# Ported to dkbuild: crates vendored on the host (cargodeps). needed by: firefox, thunderbird.
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/cbindgen/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "cbindgen"
+version = "0.29.4"
+release = 1
+summary = "Tool to generate C bindings for Rust code"
+license = "MPL-2.0"
+homepage = "https://github.com/eqrion/cbindgen"
+hostdeps = ["rust"]
+builddeps = []
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/eqrion/cbindgen/archive/v0.29.4.tar.gz", sha256 = "9b5757e915cf8be523d3aca282b9b5651bafa112e14bf1ba488562ba282807d6" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export RUSTFLAGS="-C target-feature=-crt-static"
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs
+'''
+install = '''
+install -Dm755 target/release/cbindgen "$pkgdir/usr/bin/cbindgen"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/cbindgen/LICENSE"
+'''

@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/ebook-tools/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "ebook-tools"
+version = "0.2.2"
+release = 2
+summary = "Tools for accessing and converting ebook formats"
+license = "MIT"
+homepage = "https://sourceforge.net/projects/ebook-tools"
+patches = ["10-cmake_libzip_zipconf_path.patch"]
+hostdeps = ["cmake", "ninja"]
+builddeps = ["libxml2-devel", "libzip-devel"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/ebook-tools/ebook-tools-0.2.2.tar.gz", sha256 = "cbc35996e911144fa62925366ad6a6212d6af2588f1e39075954973bbee627ae" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ebook-tools/LICENSE"
+'''

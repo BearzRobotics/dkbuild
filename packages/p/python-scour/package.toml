@@ -1,0 +1,22 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-scour/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "python-scour"
+version = "0.38.2"
+release = 5
+summary = "Python SVG scrubber"
+license = "Apache-2.0"
+homepage = "https://github.com/scour-project/scour"
+hostdeps = ["python-setuptools"]
+checkdeps = []
+rundeps = ["python-six"]
+
+source = [
+    { url = "https://github.com/scour-project/scour/archive/refs/tags/v0.38.2.tar.gz", sha256 = "26166de53d9da3eccc52570bf8c2853e60efefd9e90e26fdfc7124fe0bd873af" },
+]
+
+install = '''
+# TODO(cbuild): no install step could be derived
+true
+'''
