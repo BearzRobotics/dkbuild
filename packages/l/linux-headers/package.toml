@@ -1,6 +1,6 @@
 name     = "linux-headers"
 version  = "6.19"
-release  = 2
+release  = 3
 summary  = "Linux kernel API headers for userspace"
 license  = "GPL-2.0-only WITH Linux-syscall-note"
 homepage = "https://www.kernel.org/"

@@ -19,7 +19,7 @@ source = [
 ]
 
 build = '''
-make linux CC="$CC" AR="llvm-ar rc" \
+make linux CC="$CC" AR=llvm-ar \
     MYCFLAGS="$CFLAGS -fPIC -DLUA_USE_READLINE" MYLDFLAGS="$LDFLAGS" MYLIBS="-lreadline"
 '''
 check = '''

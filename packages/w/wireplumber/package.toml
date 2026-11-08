@@ -9,7 +9,7 @@ summary = "Session and policy manager implementation for PipeWire"
 license = "MIT"
 homepage = "https://pipewire.pages.freedesktop.org/wireplumber"
 hostdeps = ["glib-devel", "meson", "pkgconf"]
-builddeps = ["dinit-chimera", "dinit-dbus", "glib-devel", "lua-devel", "pipewire-devel"]
+builddeps = ["dinit-chimera", "dinit-dbus", "glib-devel", "lua-devel", "lua-static", "pipewire-devel"]
 checkdeps = ["pipewire", "dbus"]
 rundeps = ["pipewire"]
 

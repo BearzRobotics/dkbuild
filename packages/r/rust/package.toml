@@ -6,6 +6,8 @@
 # by other programs (Python extensions) need RUSTFLAGS=-Ctarget-feature=-crt-static.
 # r3: rust-src, the standard library's source, in its own subpackage: the
 # Linux kernel's Rust support builds core and alloc from it (with bindgen).
+# libgcc_s.so too, for linking: proc macros and build scripts link -lgcc_s.
+# It stays in the main package (no -devel), since rust's users only install rust.
 # r2: upstream's binaries load libgcc_s.so.1 for unwinding; here that is a link to
 # LLVM's libunwind, which has the same _Unwind_* functions.
 name = "rust"
@@ -27,6 +29,7 @@ cat components
 sh install.sh --prefix=/usr --destdir="$pkgdir" --disable-ldconfig
 sh /build/rust-src-1.99.1/install.sh --prefix=/usr --destdir="$pkgdir" --disable-ldconfig
 ln -s libunwind.so.1 "$pkgdir/usr/lib/libgcc_s.so.1"
+ln -s libunwind.so.1 "$pkgdir/usr/lib/libgcc_s.so"
 rm -rf "$pkgdir/usr/share/doc/rust/html" "$pkgdir/usr/lib/rustlib/uninstall.sh" "$pkgdir/usr/lib/rustlib/install.log"
 install -Dm644 LICENSE-MIT "$pkgdir/usr/share/licenses/rust/LICENSE-MIT"
 install -Dm644 LICENSE-APACHE "$pkgdir/usr/share/licenses/rust/LICENSE-APACHE"
@@ -35,3 +38,7 @@ install -Dm644 LICENSE-APACHE "$pkgdir/usr/share/licenses/rust/LICENSE-APACHE"
 [subpackages.src]
 summary = "Rust standard library source (for the kernel's Rust support, rust-analyzer, build-std)"
 paths   = ["/usr/lib/rustlib/src"]
+
+[subpackages.devel]
+summary = "Headers and development files"
+paths   = ["/usr/include", "/usr/lib/pkgconfig"]

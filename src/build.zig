@@ -50,9 +50,19 @@ fn out(comptime fmt: []const u8, args: anytype) void {
     std.debug.print(fmt, args);
 }
 
-/// One download at a time: two builds of recipes that share a source would
-/// write the same `.part` file in the cache.
-var fetch_mutex: std.Io.Mutex = .init;
+/// Downloads and vendoring of one source happen one at a time (two builds that
+/// share a source would write the same `.part` file in the cache), but
+/// different sources do not wait for each other: a source takes the lock its
+/// checksum picks out of these. A cached source only checks its file.
+var fetch_locks: [64]std.Io.Mutex = @splat(.init);
+
+fn fetchLock(src: recipe.Source) *std.Io.Mutex {
+    const key: []const u8 = switch (src) {
+        .tarball => |t| t.sha256,
+        .git => |g| g.url,
+    };
+    return &fetch_locks[@as(usize, @truncate(std.hash.Wyhash.hash(0, key))) % fetch_locks.len];
+}
 /// One index rebuild at a time (`apk mkndx` writes Packages.adb in place).
 var index_mutex: std.Io.Mutex = .init;
 
@@ -291,9 +301,10 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     // Go modules and Rust crates vendored on the host, laid into the source tree.
     var vendor_tars: std.ArrayList([]const u8) = .empty;
     {
-        fetch_mutex.lockUncancelable(io);
-        defer fetch_mutex.unlock(io);
         for (r.source) |src| {
+            const lock = fetchLock(src);
+            lock.lockUncancelable(io);
+            defer lock.unlock(io);
             var msg: []const u8 = "";
             _ = fetch.fetchOne(arena, io, cache, src, &msg) catch |err| {
                 out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });

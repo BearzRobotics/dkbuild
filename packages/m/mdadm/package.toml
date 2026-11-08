@@ -19,7 +19,8 @@ source = [
 ]
 
 environment = '''
-export CFLAGS="${CFLAGS} -DNO_COROSYNC -DNO_DLM -DSendmail="sendmail -t" -DCONFFILE="/etc/mdadm.conf" -DCONFFILE2="/etc/mdadm/mdadm.conf" -DMAP_DIR="/run/mdadm" -DMAP_FILE="map" -DMDMON_DIR="/run/mdadm" -DFAILED_SLOTS_DIR="/run/mdadm/failed-slots" -DUSE_PTHREADS"
+# The string macros need their quotes kept: escaped inside the shell string.
+export CFLAGS="${CFLAGS} -DNO_COROSYNC -DNO_DLM -DSendmail=\"/usr/sbin/sendmail -t\" -DCONFFILE=\"/etc/mdadm.conf\" -DCONFFILE2=\"/etc/mdadm/mdadm.conf\" -DMAP_DIR=\"/run/mdadm\" -DMAP_FILE=\"map\" -DMDMON_DIR=\"/run/mdadm\" -DFAILED_SLOTS_DIR=\"/run/mdadm/failed-slots\" -DUSE_PTHREADS"
 '''
 build = '''
 %make \

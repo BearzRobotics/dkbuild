@@ -16,6 +16,10 @@ source = [
     { url = "https://www.cgsecurity.org/testdisk-7.2.tar.bz2", sha256 = "f8343be20cb4001c5d91a2e3bcd918398f00ae6d8310894a5a9f2feb813c283f" },
 ]
 
+environment = '''
+# musl 1.2.5 dropped the GNU basename() from <string.h>; the POSIX one is in <libgen.h>.
+export CFLAGS="${CFLAGS} -include libgen.h"
+'''
 setup = '''
 %configure
 '''
