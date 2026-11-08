@@ -1,6 +1,13 @@
-" FenrirOS's system vimrc. Your own settings go in ~/.vimrc (or ~/.vim/vimrc).
-"
-" Vim's own defaults (syntax highlighting, filetype plugins and indenting,
-" incremental search, the mouse), which it uses only when nobody has a vimrc.
-unlet! skip_defaults_vim
+" /etc/vimrc: FenrirOS's settings for every vim user (after LFS's).
+" Your own go in ~/.vimrc (or ~/.vim/vimrc), read after this file.
+
+" Vim's defaults first (syntax highlighting, filetype plugins and indenting,
+" incremental search, the mouse), so the settings below and your own vimrc
+" change them rather than being undone by them. Vim normally uses
+" defaults.vim only for people without a vimrc; here everybody gets it, once.
 source $VIMRUNTIME/defaults.vim
+let skip_defaults_vim = 1
+
+set nocompatible
+set backspace=indent,eol,start
+syntax on

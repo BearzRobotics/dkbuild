@@ -2,6 +2,7 @@
 # Lua is built in (the tree's lua is a static library, so vim needs nothing at
 # run time for it); Python 3 is loaded only when a script uses it. Ruby is left
 # out: there is no ruby in the tree yet.
+# The system-wide settings are /etc/vimrc (LFS's SYS_VIMRC_FILE).
 # xxd is its own package (vim-xxd), as other programs use it alone.
 name = "vim"
 version = "9.2.1302"
@@ -19,6 +20,9 @@ source = [
 ]
 
 setup = '''
+# As LFS does: the system vimrc is /etc/vimrc (vim's default is
+# /usr/share/vim/vimrc), so it is configuration: apk keeps local edits on upgrade.
+echo '#define SYS_VIMRC_FILE "/etc/vimrc"' >> src/feature.h
 %configure \
     --enable-acl \
     --enable-gui=no \
@@ -36,7 +40,7 @@ build = '''
 install = '''
 # The install targets race each other for directories.
 make DESTDIR="$pkgdir" install -j1
-install -Dm644 $pkgfiles/vimrc "$pkgdir/usr/share/vim/vimrc"
+install -Dm644 $pkgfiles/vimrc "$pkgdir/etc/vimrc"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/vim/LICENSE"
 # No GUI was built; its desktop file names nothing.
 rm -f "$pkgdir/usr/share/applications/gvim.desktop"
