@@ -243,6 +243,13 @@ fn inTreeFiles(arena: Allocator, io: std.Io, opts: Options, r: recipe.Recipe, re
         }
         // What the provider needs once installed (not its build tools).
         for ([_][]const []const u8{ pr.builddeps, pr.rundeps }) |deps| try work.appendSlice(arena, deps);
+        // A subpackage's own `depends` (llvm-devel needs llvm-static: LLVM's
+        // CMake files name every static library).
+        for (pr.subpackages) |sp| {
+            if (d.len == pr.name.len + 1 + sp.name.len and std.mem.startsWith(u8, d, pr.name) and
+                d[pr.name.len] == '-' and std.mem.eql(u8, d[pr.name.len + 1 ..], sp.name))
+                try work.appendSlice(arena, sp.depends);
+        }
     }
     return files.items;
 }

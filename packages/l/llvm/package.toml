@@ -8,9 +8,12 @@
 # Xtensa for the ESP32), not just X86 and AMDGPU: clang cross-compiles for every
 # architecture FenrirOS supports and for microcontrollers (AVR, ARM, RISC-V).
 # Code for AVR must be built without LTO.
+# r3: static libraries too (in llvm-static), for fully static programs on musl.
+# r4: llvm-devel depends on llvm-static: LLVM's CMake files name every static
+#     component library, so find_package(LLVM) failed without them (clang-tools-extra).
 name = "llvm"
 version = "23.1.5"
-release = 2
+release = 4
 summary = "LLVM libraries and tools"
 description = "LLVM with Clang, LLD, compiler-rt, libunwind, libc++abi and libc++ (X86 and AMDGPU targets)."
 license = "Apache-2.0 WITH LLVM-exception"
@@ -114,3 +117,10 @@ paths   = ["/usr/lib/libunwind.so.*"]
 [subpackages.libcxx-devel]
 summary = "libc++ and libunwind headers and unversioned libraries"
 paths   = ["/usr/include/c++", "/usr/include/unwind.h", "/usr/include/__unwind_*.h", "/usr/include/libunwind.h", "/usr/include/mach-o", "/usr/lib/libc++.so", "/usr/lib/libc++abi.so", "/usr/lib/libunwind.so", "/usr/share/libc++"]
+
+# The default development package, plus llvm-static: LLVMExports.cmake
+# names every libLLVM*.a, and CMake refuses an export with missing files.
+[subpackages.devel]
+summary = "Headers and development files"
+paths   = ["/usr/include", "/usr/lib/*.so", "/usr/lib/pkgconfig", "/usr/share/pkgconfig", "/usr/lib/cmake", "/usr/share/aclocal"]
+depends = ["llvm-static"]
