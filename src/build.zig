@@ -7,6 +7,9 @@
 const std = @import("std");
 const recipe = @import("recipe.zig");
 const fetch = @import("fetch.zig");
+const npmdeps = @import("npmdeps.zig");
+/// Sets up npm's cache from the npm store in a build (npmdeps).
+const npm_offline_js = @embedFile("npm-offline.js");
 const macro = @import("macro.zig");
 const profile = @import("profile.zig");
 const tree = @import("tree.zig");
@@ -125,6 +128,15 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
     try s.appendSlice(arena, try ctx.target.buildEnv(arena, ctx.target.isCross(ctx.host), ctx.static));
     // Go builds offline from the shared module cache (fetch.zig), checked
     // against go.sum when it was filled.
+    // npm installs offline from the shared store (npmdeps.zig): npm-offline.js
+    // makes a private npm cache whose content is the store, indexed by the
+    // lockfiles' tarball URLs.
+    if (contains(r.options, "npmdeps"))
+        try s.appendSlice(arena,
+            \\node /dkbuild/npm-offline.js /tmp/npm-cache $(find "$srcdir" -name package-lock.json -not -path '*/node_modules/*')
+            \\export npm_config_cache=/tmp/npm-cache npm_config_offline=true npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+            \\
+        );
     if (contains(r.options, "godeps"))
         try s.appendSlice(arena, "export GOMODCACHE=/dkdeps/go GOPROXY=off GOSUMDB=off GOTOOLCHAIN=local GOFLAGS=-mod=mod\n");
     if (r.environment) |e| {
@@ -349,6 +361,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     var cargo_list: ?[]const u8 = null;
     var cargo_config: ?[]const u8 = null;
     var uses_go = false;
+    var uses_npm = false;
     {
         for (r.source) |src| {
             const lock = fetchLock(src);
@@ -375,6 +388,13 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                     };
                     cargo_list = try fetch.cargoDepsPath(arena, cache, src.tarball.sha256);
                     cargo_config = try std.fmt.allocPrint(arena, "{s}/cargodeps/{s}.config.toml", .{ cache, src.tarball.sha256 });
+                }
+                if (contains(r.options, "npmdeps")) {
+                    _ = npmdeps.fetchNpmDeps(arena, io, cache, src.tarball.sha256, &msg) catch |err| {
+                        out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
+                        return error.PrepareFailed;
+                    };
+                    uses_npm = true;
                 }
                 if (contains(r.options, "godeps")) {
                     _ = fetch.fetchGoDeps(arena, io, cache, src.tarball.sha256, &msg) catch |err| {
@@ -530,6 +550,8 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         else => return error.OutOfMemory,
     };
     Dir.cwd().writeFile(io, .{ .sub_path = try std.fs.path.join(arena, &.{ root_rel, "dkbuild", "script.sh" }), .data = text }) catch return error.PrepareFailed;
+    if (contains(r.options, "npmdeps"))
+        Dir.cwd().writeFile(io, .{ .sub_path = try std.fs.path.join(arena, &.{ root_rel, "dkbuild", "npm-offline.js" }), .data = npm_offline_js }) catch return error.PrepareFailed;
 
     out("    building\n", .{});
     {
@@ -546,6 +568,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
             .{ .use = cargo_list != null, .sub = "crates", .dst = "/dkdeps/crates" },
             .{ .use = zig_list != null, .sub = "zigpkg", .dst = "/dkdeps/zig" },
             .{ .use = uses_go, .sub = "gomod", .dst = "/dkdeps/go" },
+            .{ .use = uses_npm, .sub = "npm", .dst = "/dkdeps/npm" },
         }) |st| {
             if (!st.use) continue;
             const rel = try std.fs.path.join(arena, &.{ cache, st.sub });

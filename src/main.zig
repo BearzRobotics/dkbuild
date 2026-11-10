@@ -2,6 +2,7 @@ const std = @import("std");
 const recipe = @import("recipe.zig");
 const tree = @import("tree.zig");
 const fetch = @import("fetch.zig");
+const npmdeps = @import("npmdeps.zig");
 const build = @import("build.zig");
 const inputs = @import("inputs.zig");
 const bootstrap = @import("bootstrap.zig");
@@ -125,6 +126,14 @@ pub fn main(init: std.process.Init) !void {
                         } else |cerr| {
                             failed = true;
                             std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(cerr) });
+                        }
+                    }
+                    if (is_first and contains(r.options, "npmdeps")) {
+                        if (npmdeps.fetchNpmDeps(arena, init.io, cache, src.tarball.sha256, &msg)) |nst| {
+                            std.debug.print("{s}: npm packages {s}\n", .{ r.name, @tagName(nst) });
+                        } else |nerr| {
+                            failed = true;
+                            std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(nerr) });
                         }
                     }
                     if (is_first and contains(r.options, "godeps")) {
@@ -405,6 +414,7 @@ test {
     _ = @import("doctor.zig");
     _ = @import("cbuild.zig");
     _ = @import("fetch.zig");
+    _ = @import("npmdeps.zig");
     _ = @import("build.zig");
     _ = @import("split.zig");
     _ = @import("scan.zig");

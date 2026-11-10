@@ -229,6 +229,7 @@ source = [
 | `jobs:N` | At most N parallel jobs for this recipe (LLVM: `jobs:10`). Also marks it heavy: with `-P`, it builds alone (10) |
 | `zigdeps` | Zig dependencies fetched on the host into the shared `cache/zigpkg/` and laid in the source tree as `zig-pkg/` (7.4) |
 | `godeps` | Go modules downloaded on the host (`go mod download`, needs `go`) into the shared module cache `cache/gomod/`; the build gets `GOMODCACHE`, `GOPROXY=off`, `GOFLAGS=-mod=mod` (7.4) |
+| `npmdeps` | npm packages of every `package-lock.json` in the source, fetched into the shared `cache/npm/` (each checked against its lockfile integrity hash); the build installs offline with `npm ci` (7.4) |
 | `cargodeps` | Rust crates vendored on the host (`cargo vendor`, needs `cargo`) into the shared `cache/crates/`, laid in as `vendor/` with a `.cargo/config.toml` pointing at it; build with `--offline` (7.4) |
 | `meta` | A meta-package: no source and no steps, only `rundeps` (`base`, `desktop-hyprland`) |
 | `rootlayout` | May install outside `/usr /etc /var /opt /boot` (base-files: `/dev`, `/proc`, the usr-merge links) |
@@ -683,8 +684,19 @@ downloaded once and kept once, however many packages use it.
 | `cache/gomod/` | Go's module cache (`GOMODCACHE`): the module zips, checked against `go.sum` when downloaded, and their unpacked trees |
 | `cache/{cargodeps,zigdeps,godeps}/<sha256>.list` | what one source tarball uses; written last, so its presence means the fetch is complete. `cargodeps/<sha256>.config.toml` is the `.cargo/config.toml` for it |
 
+npm packages (`npmdeps`) are kept in npm's own cache layout,
+`cache/npm/content-v2/<algorithm>/<hex>`, named by the integrity hash of
+the lockfiles that use them, and `cache/npmdeps/<sha256>.list` lists them.
+The fetch reads every `package-lock.json` outside `node_modules` as JSON
+(nothing from a package runs), downloads what the store lacks and checks
+each tarball against its hash. In the build, `npm-offline.js` (embedded in
+dkbuild) gives a private npm cache the store as its content and an index
+entry for each tarball URL, as npm's fetcher looks them up; `npm ci` then
+installs with `npm_config_offline`, checking every tarball again. Lockfiles
+without integrity hashes, yarn and pnpm are not handled yet.
+
 The build binds the stores read-only into the sandbox (`/dkdeps/crates`,
-`/dkdeps/zig`, `/dkdeps/go`) and lays `vendor/` and `zig-pkg/` into the source
+`/dkdeps/zig`, `/dkdeps/go`, `/dkdeps/npm`) and lays `vendor/` and `zig-pkg/` into the source
 tree as symbolic links to the entries its list names, so nothing is copied and
 no build can change a store. Go reads its module cache directly. Cargo checks
 every crate against its `.cargo-checksum.json` as it builds. Which entries a
