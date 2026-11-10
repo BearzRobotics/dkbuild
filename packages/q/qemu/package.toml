@@ -1,7 +1,5 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/qemu/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "qemu"
 version = "11.0.1"
 release = 1
@@ -22,8 +20,9 @@ export CFLAGS="${CFLAGS} -I/usr/include/bpf/uapi"
 export CXXFLAGS="${CXXFLAGS} -I/usr/include/bpf/uapi"
 '''
 setup = '''
-# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 137); port it by hand
+# qemu links many big programs at once: at most four links at a time
 %configure \
+    -Dbackend_max_links=4 \
     --enable-bpf \
     --enable-cap-ng \
     --enable-capstone \
@@ -71,17 +70,13 @@ install = '''
 %make_install
 install -Dm644 $pkgfiles/qemu-ga "$pkgdir/etc/dinit.d/qemu-ga"
 # no elf files in /usr/share
-# TODO(cbuild): self.rename("usr/share/qemu", "usr/lib/qemu", relative=False)
+mv "$pkgdir/usr/share/qemu" "$pkgdir/usr/lib/qemu"
 mkdir -p "$pkgdir/usr/share"
 ln -sf ../lib/qemu "$pkgdir/usr/share/qemu"
 install -Dm644 $pkgfiles/80-kvm.rules "$pkgdir/usr/lib/udev/rules.d/80-kvm.rules"
 install -Dm644 $pkgfiles/bridge.conf "$pkgdir/usr/lib/qemu/bridge.conf"
 rm -rf "$pkgdir/usr/share/doc"
-# TODO(cbuild): if self.profile.wordsize == 32:
-#         self.uninstall("usr/lib/qemu/palcode-clipper")
-#         self.uninstall("usr/lib/qemu/hppa-firmware.img")
-#         self.uninstall("usr/lib/qemu/hppa-firmware64.img")
-#         self.uninstall("usr/lib/qemu/opensbi-riscv64-generic-fw_dynamic.bin")
+# (Chimera drops some firmware on 32-bit targets; FenrirOS targets are 64-bit)
 #         self.uninstall("usr/lib/qemu/s390-ccw.img")
 #         self.uninstall("usr/lib/qemu/openbios-sparc64")
 '''
