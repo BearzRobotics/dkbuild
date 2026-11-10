@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/ptex/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "ptex"
+version = "2.4.3"
+release = 2
+summary = "Texture mapping library"
+license = "BSD-3-Clause"
+homepage = "https://ptex.us"
+patches = ["ver.patch"]
+hostdeps = ["cmake", "ninja", "doxygen", "pkgconf"]
+builddeps = ["zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://github.com/wdas/ptex/archive/refs/tags/v2.4.3.tar.gz", sha256 = "435aa2ee1781ff24859bd282b7616bfaeb86ca10604b13d085ada8aa7602ad27" },
+]
+
+setup = '''
+%cmake \
+    -DPTEX_BUILD_STATIC_LIBS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ptex/LICENSE"
+'''

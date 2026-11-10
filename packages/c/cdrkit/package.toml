@@ -1,0 +1,50 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/cdrkit/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "cdrkit"
+version = "1.1.11.5"
+release = 1
+summary = "Collection of CD/DVD authoring programs"
+license = "GPL-2.0-or-later"
+homepage = "https://salsa.debian.org/debian/cdrkit"
+patches = ["001-update-geteltorito.patch", "002-fix-typo.patch", "003-fix-libcap-detect.patch", "004-add-efi-boot.patch", "005-gcc10.patch", "006-format-security.patch", "007-implicit-func-decl.patch", "008-allow-set-creation-date.patch", "009-cmake-4.patch", "010-isoinfo-add-efi.patch", "999-libusal-no-remote.patch", "no-sbin.patch"]
+hostdeps = ["cmake", "libcap", "ninja"]
+builddeps = ["bzip2-devel", "libcap-devel", "zlib-ng-compat-devel"]
+rundeps = ["!schilytools-cdrtools"]
+options = ["!lto"]
+
+source = [
+    { url = "https://salsa.debian.org/debian/cdrkit/-/archive/debian/9%251.1.11-5/cdrkit-debian-9%251.1.11-5.tar.gz", sha256 = "cd1781f29f8a98a3364727a242d9f243c695c563bc1cc072c548bb31349ca12f" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -fno-strict-aliasing -Wno-deprecated-non-prototype -D__THROW="
+'''
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 $pkgfiles/modules-load.conf "$pkgdir/usr/lib/modules-load.d/wodim.conf"
+# compat symlinks
+mkdir -p "$pkgdir/usr/bin"
+ln -sf genisoimage "$pkgdir/usr/bin/mkisofs"
+mkdir -p "$pkgdir/usr/share/man/man1"
+ln -sf genisoimage.1 "$pkgdir/usr/share/man/man1/mkisofs.1"
+mkdir -p "$pkgdir/usr/share/man/man1"
+ln -sf cdda2ogg.1 "$pkgdir/usr/share/man/man1/cdda2mp3.1"
+mkdir -p "$pkgdir/usr/bin"
+ln -sf icedax "$pkgdir/usr/bin/list_audio_tracks"
+mkdir -p "$pkgdir/usr/bin"
+ln -sf icedax "$pkgdir/usr/bin/cdda2wav"
+mkdir -p "$pkgdir/usr/share/man/man1"
+ln -sf icedax.1 "$pkgdir/usr/share/man/man1/cdda2wav.1"
+mkdir -p "$pkgdir/usr/bin"
+ln -sf wodim "$pkgdir/usr/bin/cdrecord"
+mkdir -p "$pkgdir/usr/share/man/man1"
+ln -sf wodim.1 "$pkgdir/usr/share/man/man1/cdrecord.1"
+mkdir -p "$pkgdir/usr/share/man/man1"
+ln -sf wodim.1 "$pkgdir/usr/share/man/man1/netscsid.1"
+'''

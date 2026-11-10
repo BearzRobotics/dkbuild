@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/lxqt-runner/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "lxqt-runner"
+version = "2.4.0"
+release = 1
+summary = "Tool used to launch programs quickly by typing their names"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/lxqt/lxqt-runner"
+hostdeps = ["cmake", "lxqt-build-tools", "ninja", "perl", "pkgconf"]
+builddeps = ["kwindowsystem-devel", "layer-shell-qt-devel", "liblxqt-devel", "lxqt-globalkeys-devel", "muparser-devel", "qt6-qtbase-devel", "qt6-qttools-devel"]
+
+source = [
+    { url = "https://github.com/lxqt/lxqt-runner/releases/download/2.4.0/lxqt-runner-2.4.0.tar.xz", sha256 = "d0441f18922162db5ef6a5a9617aa20b0b437d2ddc76d0542fb32c7fd68f9029" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

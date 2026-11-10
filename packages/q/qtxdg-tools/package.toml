@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/qtxdg-tools/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "qtxdg-tools"
+version = "4.4.0"
+release = 1
+summary = "User tools for libqtxdg"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/lxqt/qtxdg-tools"
+hostdeps = ["cmake", "lxqt-build-tools", "ninja", "pkgconf"]
+builddeps = ["libqtxdg-devel"]
+
+source = [
+    { url = "https://github.com/lxqt/qtxdg-tools/releases/download/4.4.0/qtxdg-tools-4.4.0.tar.xz", sha256 = "f21ba4308eac0effd417d910cc4916df7b6202aaeee777b51bb120f7abc6c5ac" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

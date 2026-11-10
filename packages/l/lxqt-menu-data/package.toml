@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/lxqt-menu-data/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "lxqt-menu-data"
+version = "2.4.0"
+release = 1
+summary = "Menu files for LXQt components"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/lxqt/lxqt-menu-data"
+hostdeps = ["cmake", "lxqt-build-tools", "ninja", "perl", "pkgconf"]
+builddeps = ["qt6-qttools-devel"]
+
+source = [
+    { url = "https://github.com/lxqt/lxqt-menu-data/releases/download/2.4.0/lxqt-menu-data-2.4.0.tar.xz", sha256 = "3487e47562dc19e63358a50c81e51cd0cf1a020397943cadd8db35daeb4866cc" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

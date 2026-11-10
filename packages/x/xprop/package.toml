@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xprop/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xprop"
+version = "1.2.8"
+release = 1
+summary = "X property displayer"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "pkgconf", "xorg-util-macros"]
+builddeps = ["libx11-devel", "libxmu-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/app/xprop-1.2.8.tar.gz", sha256 = "a8394338c99775160d733d54d73cdcdc5c9c80a0dc8cffd5be1b7c977254b745" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xprop/COPYING"
+'''

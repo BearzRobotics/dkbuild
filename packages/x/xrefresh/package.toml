@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xrefresh/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xrefresh"
+version = "1.1.0"
+release = 1
+summary = "Refresh all or a part of an X screen"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "pkgconf", "xorg-util-macros"]
+builddeps = ["libx11-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/app/xrefresh-1.1.0.tar.gz", sha256 = "cbf0d3ed80f03188841a96ceb20e615b40a006e3928be2e179d9d5a0ded639b2" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xrefresh/COPYING"
+'''

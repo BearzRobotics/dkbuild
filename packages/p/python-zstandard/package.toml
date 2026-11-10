@@ -1,0 +1,21 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-zstandard/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "python-zstandard"
+version = "0.25.0"
+release = 2
+summary = "Python bindings to the Zstandard compression library"
+license = "BSD-3-Clause"
+homepage = "https://github.com/indygreg/python-zstandard"
+hostdeps = ["python-cffi", "python-setuptools"]
+builddeps = ["python-devel"]
+checkdeps = []
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/indygreg/python-zstandard/archive/refs/tags/0.25.0.tar.gz", sha256 = "851846ffe25681f7936ab2fd89130acf62b214a77b8c54e4319824f3510ab395" },
+]
+
+install = '''
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-zstandard/LICENSE"
+'''

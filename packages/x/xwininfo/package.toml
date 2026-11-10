@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xwininfo/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xwininfo"
+version = "1.1.7"
+release = 1
+summary = "Query information about X windows"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "gettext-devel", "pkgconf", "xorg-util-macros"]
+builddeps = ["libx11-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/app/xwininfo-1.1.7.tar.gz", sha256 = "5484f0059a8ffab6f9493cc9f508735ebb4f0ae801fe759dd270ccb4b7f11d29" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xwininfo/COPYING"
+'''

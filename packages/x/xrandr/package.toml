@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xrandr/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xrandr"
+version = "1.5.4"
+release = 1
+summary = "Command line interface to X RandR extension"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "pkgconf", "xorg-util-macros"]
+builddeps = ["libxrandr-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/app/xrandr-1.5.4.tar.xz", sha256 = "2cafccb2aaf2491a4068676117a0d4f90ab307724b96fffc54cd1da953779400" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xrandr/COPYING"
+'''

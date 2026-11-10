@@ -1,0 +1,57 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/blender/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "blender"
+version = "5.1.2"
+release = 4
+summary = "3D creation suite"
+license = "GPL-2.0-or-later"
+homepage = "https://www.blender.org"
+patches = ["0001-musl-fixes.patch", "aarch64-meme.patch", "format-security.patch", "jacobisvd.patch", "llvm.patch", "no-sse2neon.patch"]
+hostdeps = ["cmake", "ninja", "openimageio", "openshadinglanguage", "pkgconf"]
+builddeps = ["alembic-devel", "boost-devel", "ceres-devel", "llvm-devel", "eigen", "ffmpeg-devel", "fftw-devel", "fmt-devel", "freetype-devel", "gmp-devel", "libepoxy-devel", "libharu-devel", "libjpeg-turbo-devel", "openmp-devel", "libpng-devel", "libpulse-devel", "libsndfile-devel", "libtiff-devel", "libwebp-devel", "libxkbcommon-devel", "onetbb-devel", "openal-soft-devel", "opencolorio-devel", "openexr-devel", "openimageio-devel", "openjpeg-devel", "openshadinglanguage-devel", "opensubdiv-devel", "openvdb-devel", "pipewire-devel", "potrace-devel", "pugixml-devel", "python-devel", "python-numpy-devel", "shaderc-devel", "vulkan-loader-devel", "wayland-devel", "wayland-protocols", "zstd-devel"]
+rundeps = ["python-numpy", "python-requests", "python-zstandard"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.blender.org/source/blender-5.1.2.tar.xz", sha256 = "aedfd030231979b629b18049d93b92fd2794952ca0cf39ebde54e84438bed05a" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -D_GNU_SOURCE"
+export LDFLAGS="${LDFLAGS} -Wl,-z,stack-size=0x200000"
+'''
+setup = '''
+%cmake \
+    -DPYTHON_VERSION=$(python3 -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")') \
+    -DCMAKE_BUILD_TYPE=Release \
+    -C \
+    ../build_files/cmake/config/blender_full.cmake \
+    -DWITH_CLANG=ON \
+    -DWITH_CYCLES_OSL=ON \
+    -DWITH_INSTALL_PORTABLE=OFF \
+    -DWITH_INSTALL_PORTABLE=OFF \
+    -DWITH_LIBS_PRECOMPILED=OFF \
+    -DWITH_LLVM=ON \
+    -DWITH_PYTHON_INSTALL=OFF \
+    -DWITH_PYTHON_INSTALL_NUMPY=OFF \
+    -DWITH_PYTHON_INSTALL_REQUESTS=OFF \
+    -DWITH_PYTHON_INSTALL_ZSTANDARD=OFF \
+    -DWITH_SYSTEM_EIGEN3=ON \
+    -DWITH_SYSTEM_GFLAGS=ON \
+    -DWITH_SYSTEM_GLOG=ON \
+    -DWITH_SYSTEM_FREETYPE=ON \
+    -DWITH_SYSTEM_LZO=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# we don't allow elfs in usr/share, but this solib is loaded from
+# this location as it's relative to the io_scene_gltf2 module path
+# the glTF add-on's Draco library: a real library in /usr/lib/blender, linked back
+draco="usr/share/blender/${version%.*}/scripts/addons_core/io_scene_gltf2/libextern_draco.so"
+install -dm755 "$pkgdir/usr/lib/blender"
+mv "$pkgdir/$draco" "$pkgdir/usr/lib/blender/libextern_draco.so"
+ln -s ../../../../../../lib/blender/libextern_draco.so "$pkgdir/$draco"
+'''

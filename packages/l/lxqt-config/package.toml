@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/lxqt-config/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "lxqt-config"
+version = "2.4.0"
+release = 1
+summary = "Tools to configure LXQt and the underlying operating system"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/lxqt/lxqt-config"
+hostdeps = ["cmake", "lxqt-build-tools", "ninja", "perl", "pkgconf"]
+builddeps = ["kwindowsystem-devel", "libkscreen-devel", "liblxqt-devel", "lxqt-menu-data", "qt6-qtbase-devel", "qt6-qttools-devel", "xserver-xorg-input-libinput-devel"]
+rundeps = ["lxqt-menu-data"]
+
+source = [
+    { url = "https://github.com/lxqt/lxqt-config/releases/download/2.4.0/lxqt-config-2.4.0.tar.xz", sha256 = "8943a0d61993e068fa71aac85eb1eb93ac32064928ee1c8c1ff9666b45e1610e" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

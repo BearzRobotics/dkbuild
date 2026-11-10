@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xinput/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xinput"
+version = "1.6.4"
+release = 2
+summary = "X input device configuration utility"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["pkgconf"]
+builddeps = ["libxext-devel", "libxi-devel", "libxinerama-devel", "libxrandr-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/app/xinput-1.6.4.tar.gz", sha256 = "64e25434af1309ed0abca1ebebd035f7631bb0bc1bfac5decefe9aa98ccaf611" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xinput/COPYING"
+'''

@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/lxqt-panel/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "lxqt-panel"
+version = "2.4.1"
+release = 3
+summary = "LXQt desktop panel"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/lxqt/lxqt-panel"
+hostdeps = ["cmake", "lxqt-build-tools", "ninja", "perl", "pkgconf"]
+builddeps = ["kwindowsystem-devel", "layer-shell-qt-devel", "libdbusmenu-lxqt-devel", "liblxqt-devel", "libpulse-devel", "libstatgrab-devel", "lm-sensors-devel", "lxqt-globalkeys-devel", "lxqt-menu-data", "qt6-qtbase-devel", "qt6-qttools-devel", "qt6-qtwayland-devel", "solid-devel", "xcb-util-devel"]
+rundeps = ["lxqt-menu-data"]
+
+source = [
+    { url = "https://github.com/lxqt/lxqt-panel/releases/download/2.4.1/lxqt-panel-2.4.1.tar.xz", sha256 = "7828d7e8fabf66ef1491e50b609b8eb041d74c433554f7d073ac07af26843d02" },
+]
+
+setup = '''
+%cmake \
+    -DSYSSTAT_PLUGIN=OFF \
+    -DVOLUME_USE_ALSA=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/openvdb/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "openvdb"
+version = "13.0.0"
+release = 4
+summary = "Sparse volume data tools"
+license = "MPL-2.0"
+homepage = "https://www.openvdb.org"
+patches = ["onetbb-version.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["boost-devel", "c-blosc-devel", "gtest-devel", "onetbb-devel", "python-devel", "python-nanobind-devel"]
+checkdeps = ["python-numpy"]
+
+source = [
+    { url = "https://github.com/AcademySoftwareFoundation/openvdb/archive/refs/tags/v13.0.0.tar.gz", sha256 = "4d6a91df5f347017496fe8d22c3dbb7c4b5d7289499d4eb4d53dd2c75bb454e1" },
+]
+
+setup = '''
+%cmake \
+    -DOPENVDB_CORE_STATIC=OFF \
+    -DOPENVDB_BUILD_NANOVDB=ON \
+    -DOPENVDB_BUILD_PYTHON_MODULE=ON \
+    -DOPENVDB_BUILD_UNITTESTS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

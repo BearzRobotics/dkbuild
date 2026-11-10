@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/robin-map/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "robin-map"
+version = "1.4.0"
+release = 1
+summary = "Hash map and hash set implementation"
+license = "MIT"
+homepage = "https://github.com/Tessil/robin-map"
+hostdeps = ["cmake", "ninja"]
+
+source = [
+    { url = "https://github.com/Tessil/robin-map/archive/refs/tags/v1.4.0.tar.gz", sha256 = "7930dbf9634acfc02686d87f615c0f4f33135948130b8922331c16d90a03250c" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/robin-map/LICENSE"
+'''

@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xdpyinfo/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xdpyinfo"
+version = "1.4.0"
+release = 1
+summary = "X display information utility"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["pkgconf", "automake", "libtool", "xorg-util-macros"]
+builddeps = ["libxcomposite-devel", "libxext-devel", "libxinerama-devel", "libxrender-devel", "libxtst-devel", "libxxf86misc-devel", "libxxf86vm-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/app/xdpyinfo-1.4.0.tar.gz", sha256 = "bbbe0b75935285fbb4c795b4f1d3d4f9c91cd4c18f4b6fd7107c648094172f7b" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --without-dmx
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xdpyinfo/COPYING"
+'''

@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xrdb/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xrdb"
+version = "1.2.2"
+release = 1
+summary = "X server resource database utility"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["pkgconf", "automake", "libtool", "xorg-util-macros"]
+builddeps = ["libx11-devel", "libxmu-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/app/xrdb-1.2.2.tar.gz", sha256 = "db2d774a35ae2f7e7ac61cc2de0dcae27fc2aa14399c35721f8300e63ea73549" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-cpp=/usr/bin/clang-cpp,/usr/bin/cpp
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xrdb/COPYING"
+'''

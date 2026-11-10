@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/xserver-xorg-input-libinput/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xserver-xorg-input-libinput"
+version = "1.5.0"
+release = 3
+summary = "Generic input driver for X.org server based on libinput"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "pkgconf", "libtool", "xorg-util-macros"]
+builddeps = ["xserver-xorg-devel", "libinput-devel"]
+rundeps = []
+
+source = [
+    { url = "https://www.x.org/releases/individual/driver/xf86-input-libinput-1.5.0.tar.gz", sha256 = "936ce0ad647b49eb332c7d72945e346ffc61d48a45a009e3f0403a90dbf5908e" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xserver-xorg-input-libinput/COPYING"
+'''

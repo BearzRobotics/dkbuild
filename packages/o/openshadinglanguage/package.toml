@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/openshadinglanguage/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "openshadinglanguage"
+version = "1.15.6.0"
+release = 1
+summary = "Shading language library for renderers"
+license = "BSD-3-Clause"
+homepage = "https://github.com/AcademySoftwareFoundation/OpenShadingLanguage"
+patches = ["fix_install.patch"]
+hostdeps = ["bison", "cmake", "flex", "ninja", "pkgconf"]
+builddeps = ["boost-devel", "llvm-devel", "fmt-devel", "openexr-devel", "openimageio-devel", "openimageio", "pugixml-devel", "python-pybind11-devel", "qt6-qtbase-devel", "robin-map", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://github.com/AcademySoftwareFoundation/OpenShadingLanguage/archive/refs/tags/v1.15.6.0.tar.gz", sha256 = "85b71407ad28c464a7ec5c9dcb33ac67f9e98b92495568549d4b9c138c91a579" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -DNDEBUG -D_LARGEFILE64_SOURCE"
+export CXXFLAGS="${CXXFLAGS} -DNDEBUG -D_LARGEFILE64_SOURCE"
+'''
+setup = '''
+%cmake \
+    -DCMAKE_CXX_STANDARD=17
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/openshadinglanguage/LICENSE.md"
+'''

@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xhost/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xhost"
+version = "1.0.10"
+release = 1
+summary = "X server access control program"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "pkgconf", "gettext-devel", "xorg-util-macros"]
+builddeps = ["libx11-devel", "libxmu-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/app/xhost-1.0.10.tar.gz", sha256 = "10a157a9c818e6ec17764ba22117e006089107a22aacf58be6de089a76a112f4" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -DNEEDSOCKETS"
+'''
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xhost/COPYING"
+'''

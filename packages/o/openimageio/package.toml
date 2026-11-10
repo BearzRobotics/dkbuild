@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/openimageio/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "openimageio"
+version = "3.1.16.0"
+release = 2
+summary = "Toolset for manipulating VFX-related image file formats"
+license = "Apache-2.0"
+homepage = "https://github.com/AcademySoftwareFoundation/OpenImageIO"
+patches = ["BaseTypeFromC.patch", "default-font.patch", "wat.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["boost-devel", "ffmpeg-devel", "fmt-devel", "freetype-devel", "giflib-devel", "libheif-devel", "libjxl-devel", "libpng-devel", "libraw-devel", "libtiff-devel", "libwebp-devel", "mesa-devel", "onetbb-devel", "opencolorio-devel", "openexr-devel", "openjpeg-devel", "openjph-devel", "openvdb-devel", "ptex-devel", "pugixml-devel", "python-pybind11-devel", "robin-map"]
+checkdeps = ["bash", "fonts-dejavu"]
+
+source = [
+    { url = "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v3.1.16.0.tar.gz", sha256 = "5af7221be05bbe69d7ec4eb74b5656c6d15b8d1a332410d6af937b1df48647c0" },
+]
+
+environment = '''
+export CXXFLAGS="${CXXFLAGS} -DNDEBUG"
+'''
+setup = '''
+%cmake \
+    -DINSTALL_FONTS=OFF \
+    -DSTOP_ON_WARNING=OFF \
+    -DUSE_EXTERNAL_PUGIXML=ON \
+    -DUSE_QT=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

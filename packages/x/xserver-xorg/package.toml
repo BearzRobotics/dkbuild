@@ -1,0 +1,61 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/xserver-xorg/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# The X.org bitmap core fonts (Chimera's fonts-xorg) are left out: modern
+# programs draw with fontconfig, and Xorg has its built-in fixed font.
+name = "xserver-xorg"
+version = "21.1.24"
+release = 2
+summary = "X.org X server"
+license = "MIT AND BSD-3-Clause"
+homepage = "https://xorg.freedesktop.org"
+patches = ["0001-Support-libseat.patch", "06_use-intel-only-on-pre-gen4.patch", "07_use-modesetting-driver-by-default-on-GeForce.patch", "fix-libshadow-2.patch", "libseat-dep.patch"]
+hostdeps = ["pkgconf", "xkbcomp", "flex"]
+builddeps = ["dbus-devel", "font-util-devel", "libepoxy-devel", "seatd-devel", "libtirpc-devel", "libxcb-devel", "libxcvt-devel", "libxfont2-devel", "libxkbfile-devel", "libxkbui-devel", "libxrender-devel", "libxres-devel", "libxshmfence-devel", "libxtst-devel", "libxv-devel", "libxxf86dga-devel", "mesa-devel", "nettle-devel", "openssl-devel", "pixman-devel", "xcb-util-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel", "xcb-util-renderutil-devel", "xcb-util-wm-devel", "xkbcomp-devel", "xorgproto", "xtrans"]
+checkdeps = ["xkeyboard-config"]
+rundeps = ["iceauth", "setxkbmap", "transset", "xbacklight", "xcmsdb", "xcursorgen", "xdpyinfo", "xev", "xeyes", "xgamma", "xhost", "xinput", "xkbcomp", "xkill", "xlsatoms", "xlsclients", "xlsfonts", "xmodmap", "xpr", "xprop", "xrandr", "xrdb", "xrefresh", "xset", "xsetroot", "xvinfo", "xwd", "xwininfo", "xwud"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/xorg/xserver/-/archive/xorg-server-21.1.24/xserver-xorg-server-21.1.24.tar.gz", sha256 = "5051b8a339b9497cb573b57871fa7311a2d55c39c3d1cecd051804bbfe9c18e2" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -D_GNU_SOURCE -D__uid_t=uid_t -D__gid_t=gid_t"
+export LDFLAGS="${LDFLAGS} -Wl,-z,lazy"
+'''
+setup = '''
+%meson \
+    -Dxorg=true \
+    -Dxephyr=true \
+    -Dxnest=true \
+    -Dxvfb=true \
+    -Dipv6=true \
+    -Dxcsecurity=true \
+    -Ddri3=true \
+    -Dglamor=true \
+    -Dglx=true \
+    -Dseatd_libseat=true \
+    -Dsuid_wrapper=true \
+    -Dlinux_acpi=true \
+    -Dudev=true \
+    -Dlinux_apm=false \
+    -Dhal=false \
+    -Dsystemd_logind=false \
+    -Dxkb_dir=/usr/share/X11/xkb \
+    -Dxkb_output_dir=/var/lib/xkb
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xserver-xorg/COPYING"
+chmod 4755 "$pkgdir/usr/lib/Xorg.wrap"
+# provided by xserver-xorg-protocol
+rm -rf "$pkgdir/usr/lib/xorg/protocol.txt"
+# from debian: https://salsa.debian.org/xorg-team/xserver/xorg-server
+# check debian/local/xvfb-run for updates as needed
+# note ours is slightly patched (non-GNU fmt(1))
+install -Dm755 $pkgfiles/xvfb-run "$pkgdir/usr/bin/xvfb-run"
+install -Dm644 $pkgfiles/xvfb-run.1 "$pkgdir/usr/share/man/man1/xvfb-run.1"
+'''

@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/libdbusmenu-lxqt/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libdbusmenu-lxqt"
+version = "0.4.0"
+release = 1
+summary = "Qt implementation of the DBusMenu spec"
+license = "LGPL-2.0-or-later"
+homepage = "https://github.com/lxqt/libdbusmenu-lxqt"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["qt6-qtbase-devel"]
+
+source = [
+    { url = "https://github.com/lxqt/libdbusmenu-lxqt/releases/download/0.4.0/libdbusmenu-lxqt-0.4.0.tar.xz", sha256 = "b7f94d653559f021932aada76291e933535431a337c39c1a146d0461dd27a103" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

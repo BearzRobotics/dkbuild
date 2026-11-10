@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libkscreen/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libkscreen"
+version = "6.8.2"
+release = 1
+summary = "KDE screen management library"
+license = "LGPL-2.1-or-later AND GPL-2.0-or-later AND (GPL-2.0-only OR GPL-3.0-only)"
+homepage = "https://invent.kde.org/plasma/libkscreen"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf"]
+builddeps = ["plasma-wayland-protocols", "qt6-qtbase-devel", "qt6-qttools-devel", "qt6-qtwayland-devel"]
+checkdeps = ["dbus", "hwdata"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/libkscreen-6.8.2.tar.xz", sha256 = "6229bbcde7664a14f9cbf1e4e241e3dd88186a96295004c2749bdd0bebd627e3" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

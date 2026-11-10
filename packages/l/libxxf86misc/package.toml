@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libxxf86misc/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libxxf86misc"
+version = "1.0.4"
+release = 1
+summary = "XFree86-Misc X extension library"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "pkgconf", "libtool", "xorg-util-macros"]
+builddeps = ["xorgproto", "libxext-devel", "libx11-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/lib/libXxf86misc-1.0.4.tar.bz2", sha256 = "a89c03e2b0f16239d67a2031b9003f31b5a686106bbdb3c797fb88ae472af380" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-malloc0returnsnull
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libxxf86misc/COPYING"
+'''

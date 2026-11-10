@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/lxqt-globalkeys/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "lxqt-globalkeys"
+version = "2.4.0"
+release = 1
+summary = "Daemon used to register global keyboard shortcuts"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/lxqt/lxqt-globalkeys"
+hostdeps = ["cmake", "lxqt-build-tools", "ninja", "perl", "pkgconf"]
+builddeps = ["kwindowsystem-devel", "liblxqt-devel", "qt6-qtbase-devel", "qt6-qttools-devel"]
+
+source = [
+    { url = "https://github.com/lxqt/lxqt-globalkeys/releases/download/2.4.0/lxqt-globalkeys-2.4.0.tar.xz", sha256 = "6f7fb82337bd06823f698df5a1e631059e99e544bfa9a1d7c5b67fd01ff9319a" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

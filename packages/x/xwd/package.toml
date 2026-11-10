@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xwd/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xwd"
+version = "1.0.9"
+release = 3
+summary = "Dump an image of an X window"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["pkgconf", "automake", "libtool", "xorg-util-macros"]
+builddeps = ["libx11-devel", "libxkbfile-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/app/xwd-1.0.9.tar.gz", sha256 = "5fa984e1f7799a7e23ea4e795b3b61483e28df6d0284bae11062f6256c30a9c1" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xwd/COPYING"
+'''

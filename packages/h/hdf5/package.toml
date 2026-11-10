@@ -1,0 +1,39 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/hdf5/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "hdf5"
+version = "1.14.6"
+release = 1
+summary = "HDF5 data model library"
+license = "BSD-3-Clause AND BSD-3-Clause-LBNL"
+homepage = "https://www.hdfgroup.org/solutions/hdf5"
+hostdeps = ["cmake", "ninja", "perl", "pkgconf"]
+builddeps = ["libaec-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.6/hdf5-1.14.6.tar.gz", sha256 = "e4defbac30f50d64e1556374aa49e574417c9e72c6b1de7a4ff88c4b1bea6e9b" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DHDF5_BUILD_CPP_LIB=ON \
+    -DHDF5_BUILD_EXAMPLES=OFF \
+    -DHDF5_BUILD_FORTRAN=OFF \
+    -DHDF5_BUILD_HL_LIB=OFF \
+    -DHDF5_BUILD_STATIC_TOOLS=OFF \
+    -DHDF5_INSTALL_DOC_DIR=share/doc/hdf5 \
+    -DHDF5_INSTALL_CMAKE_DIR=lib/cmake \
+    -DHDF5_BUILD_TOOLS=ON \
+    -DHDF5_ENABLE_SZIP_ENCODING=ON \
+    -DHDF5_ENABLE_SZIP_SUPPORT=ON \
+    -DHDF5_ENABLE_Z_LIB_SUPPORT=ON \
+    -Dlibaec_DIR=/usr/lib/cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/hdf5/COPYING"
+install -Dm644 COPYING_LBNL_HDF5 "$pkgdir/usr/share/licenses/hdf5/COPYING_LBNL_HDF5"
+'''

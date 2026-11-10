@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/liblxqt/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "liblxqt"
+version = "2.4.0"
+release = 1
+summary = "Core utility library for all LXQt components"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/lxqt/liblxqt"
+hostdeps = ["cmake", "lxqt-build-tools", "ninja", "pkgconf"]
+builddeps = ["kwindowsystem-devel", "libqtxdg-devel", "libxscrnsaver-devel", "polkit-qt-1-devel", "qt6-qtbase-devel", "qt6-qttools-devel"]
+
+source = [
+    { url = "https://github.com/lxqt/liblxqt/releases/download/2.4.0/liblxqt-2.4.0.tar.xz", sha256 = "6627215644eb370723536274555743db52baed919db6ffc32ebc2bdf3cf8ee4a" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

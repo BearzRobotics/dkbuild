@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xcursorgen/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xcursorgen"
+version = "1.0.9"
+release = 1
+summary = "X cursor generator"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "pkgconf", "xorg-util-macros"]
+builddeps = ["libpng-devel", "libx11-devel", "libxcursor-devel", "libxfixes-devel", "libxrender-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/app/xcursorgen-1.0.9.tar.gz", sha256 = "21082be975472e469dd79d46166cee3720fda80a54382dc8d03fa7a4cd39837a" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xcursorgen/COPYING"
+'''

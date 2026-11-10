@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/ceres/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "ceres"
+version = "2.2.0"
+release = 2
+summary = "Non-linear optimization library"
+license = "BSD-3-Clause AND Apache-2.0 AND MIT"
+homepage = "http://ceres-solver.org"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["abseil-cpp-devel", "eigen", "gflags-devel", "glog-devel", "openblas-devel"]
+
+source = [
+    { url = "https://github.com/ceres-solver/ceres-solver/archive/refs/tags/2.2.0.tar.gz", sha256 = "12efacfadbfdc1bbfa203c236e96f4d3c210bed96994288b3ff0c8e7c6f350d4" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ceres/LICENSE"
+'''

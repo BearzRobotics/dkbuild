@@ -21,7 +21,7 @@ setup = '''
 %meson \
     -Ddefault_library=shared \
     -Dpackager_version=0.9.1-r1 \
-    "-Dpackager=Chimera Linux" \
+    -Dpackager=FenrirOS \
     -Duse_sys_blake3=enabled \
     -Duse_sys_capstone=enabled \
     -Duse_sys_magic=enabled \

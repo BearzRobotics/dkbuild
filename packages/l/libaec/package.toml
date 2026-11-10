@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libaec/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libaec"
+version = "1.1.4"
+release = 1
+summary = "Adaptive entropy coding library"
+license = "BSD-2-Clause"
+homepage = "https://gitlab.dkrz.de/k202009/libaec"
+patches = ["suboverflow.patch"]
+hostdeps = ["cmake", "ninja"]
+
+source = [
+    { url = "https://gitlab.dkrz.de/k202009/libaec/-/archive/v1.1.4.tar.gz", sha256 = "95439e861968cb0638a10b0bbdb37c9a10df1b22c5ee0293902acdbc68140f53" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/libaec/LICENSE.txt"
+'''

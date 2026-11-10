@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/alembic/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "alembic"
+version = "1.8.12"
+release = 1
+summary = "Computer graphics interchange framework"
+license = "BSD-3-Clause"
+homepage = "https://www.alembic.io"
+hostdeps = ["cmake", "ninja"]
+builddeps = ["boost-devel", "hdf5-devel", "openexr-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://github.com/alembic/alembic/archive/refs/tags/1.8.12.tar.gz", sha256 = "b6d916c40446e8c502c84273092ab3d98f3f7f6094f8a2b8203d23e2f1d2a4a0" },
+]
+
+setup = '''
+%cmake \
+    -DUSE_HDF5=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/alembic/LICENSE.txt"
+'''

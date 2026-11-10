@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xev/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xev"
+version = "1.2.6"
+release = 1
+summary = "Display X events"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "pkgconf", "xorg-util-macros"]
+builddeps = ["libxrandr-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/app/xev-1.2.6.tar.gz", sha256 = "e2e3527023017af3a9bfbef0a90f8e46ac354c506b51f0ee3834b30823e43b25" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xev/COPYING"
+'''

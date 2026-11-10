@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/dos2unix/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "dos2unix"
+version = "7.5.7"
+release = 1
+summary = "Line ending converter"
+license = "BSD-2-Clause"
+homepage = "https://waterlander.net/dos2unix"
+hostdeps = ["pkgconf", "gettext"]
+checkdeps = ["perl"]
+
+source = [
+    { url = "https://waterlander.net/dos2unix/files/dos2unix-7.5.7.tar.gz", sha256 = "669ee27120ae71589f638fe3a167d6ea54f8633f5ab1b282551bd7a7c9510dfa" },
+]
+
+build = '''
+%make \
+    PREFIX=/usr
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr
+install -Dm644 COPYING.txt "$pkgdir/usr/share/licenses/dos2unix/COPYING.txt"
+'''

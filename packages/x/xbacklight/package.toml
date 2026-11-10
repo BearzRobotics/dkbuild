@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xbacklight/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xbacklight"
+version = "1.2.4"
+release = 1
+summary = "Adjusts X backlight brightness"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "pkgconf", "xorg-util-macros"]
+builddeps = ["libx11-devel", "libxrandr-devel", "xcb-util-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/app/xbacklight-1.2.4.tar.xz", sha256 = "d4c30b0e6f18c82f387585a737ee3b72d468c927892b08a898c41bc12248e8ee" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xbacklight/COPYING"
+'''

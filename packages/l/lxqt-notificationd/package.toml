@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/lxqt-notificationd/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "lxqt-notificationd"
+version = "2.4.0"
+release = 1
+summary = "LXQt notification daemon"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/lxqt/lxqt-notificationd"
+hostdeps = ["cmake", "lxqt-build-tools", "ninja", "perl"]
+builddeps = ["kwindowsystem-devel", "layer-shell-qt-devel", "liblxqt-devel", "qt6-qtbase-devel", "qt6-qttools-devel"]
+
+source = [
+    { url = "https://github.com/lxqt/lxqt-notificationd/releases/download/2.4.0/lxqt-notificationd-2.4.0.tar.xz", sha256 = "525a21feb622cb255f10b7ebd28b4af5afba9da4833560337f167ffe5f1d19d2" },
+]
+
+setup = '''
+%cmake \
+    -DLXQT_NOTIFICATION_BUILD_TESTS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

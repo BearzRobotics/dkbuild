@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xkill/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xkill"
+version = "1.0.7"
+release = 1
+summary = "Kill an X client by its X resource"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "pkgconf", "xorg-util-macros"]
+builddeps = ["libx11-devel", "libxmu-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/app/xkill-1.0.7.tar.gz", sha256 = "aec5674d48d1749742e87dfbff30f1abacabe5e2a10c0679c3996882444c9f6d" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xkill/COPYING"
+'''

@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/setxkbmap/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "setxkbmap"
+version = "1.3.5"
+release = 1
+summary = "Sets the X keyboard layout"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["pkgconf"]
+builddeps = ["libx11-devel", "libxkbfile-devel", "libxrandr-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/app/setxkbmap-1.3.5.tar.gz", sha256 = "fe5948c40209b2ae35651968566cd09723865bf86a10a27b1e2ce3c6c543dd31" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/setxkbmap/COPYING"
+'''

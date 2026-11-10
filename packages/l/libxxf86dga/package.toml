@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libxxf86dga/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libxxf86dga"
+version = "1.1.6"
+release = 1
+summary = "XFree86-DGA X extension library"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "pkgconf", "libtool", "xorg-util-macros"]
+builddeps = ["xorgproto", "libxext-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/lib/libXxf86dga-1.1.6.tar.gz", sha256 = "87c7482b1e29b4eeb415815641c4f69c00545a8138e1b73ff1f361f7d9c22ac4" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-malloc0returnsnull
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libxxf86dga/COPYING"
+'''

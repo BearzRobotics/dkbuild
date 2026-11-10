@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/lxqt-build-tools/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "lxqt-build-tools"
+version = "2.4.0"
+release = 1
+summary = "LXQt build and packaging tooling"
+license = "BSD-3-Clause"
+homepage = "https://github.com/lxqt/lxqt-build-tools"
+hostdeps = ["cmake", "ninja"]
+builddeps = ["qt6-qtbase-devel"]
+
+source = [
+    { url = "https://github.com/lxqt/lxqt-build-tools/releases/download/2.4.0/lxqt-build-tools-2.4.0.tar.xz", sha256 = "14999ff954e820a23af44389b9f7c65f9e58b2f1c0a559f0badd38f9b459aee6" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 BSD-3-Clause "$pkgdir/usr/share/licenses/lxqt-build-tools/BSD-3-Clause"
+'''

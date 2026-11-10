@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xvinfo/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xvinfo"
+version = "1.1.6"
+release = 1
+summary = "X video capabilities query utility"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "pkgconf", "xorg-util-macros"]
+builddeps = ["libxv-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/app/xvinfo-1.1.6.tar.gz", sha256 = "1462820e914432e08afd64379bf9d4e8a3c7a71ecebbbd70756f9a2fbc263478" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xvinfo/COPYING"
+'''

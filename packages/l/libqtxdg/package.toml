@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/libqtxdg/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libqtxdg"
+version = "4.4.0"
+release = 3
+summary = "Qt implementation of freedesktop.org xdg specs"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/lxqt/libqtxdg"
+patches = ["qt610.patch"]
+hostdeps = ["cmake", "lxqt-build-tools", "ninja", "pkgconf"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtsvg-devel", "qt6-qttools-devel"]
+
+source = [
+    { url = "https://github.com/lxqt/libqtxdg/releases/download/4.4.0/libqtxdg-4.4.0.tar.xz", sha256 = "34d25949ae7b6275fb54da46187dd8ba41771600353405b15e53bdc90b9e287a" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''
