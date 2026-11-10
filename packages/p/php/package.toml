@@ -1,7 +1,8 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/php8.3/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
+# FenrirOS packages one PHP, as `php`: unsuffixed names and directories
+# (/etc/php, /usr/lib/php, php-fpm), every extension built shared and enabled
+# in /etc/php/conf.d (remove an .ini to turn one off).
 name = "php"
 version = "8.3.36"
 release = 1
@@ -21,6 +22,13 @@ source = [
 
 setup = '''
 %configure \
+    --datadir=/usr/share/php \
+    --datarootdir=/usr/share/php \
+    --includedir=/usr/include/php \
+    --libdir=/usr/lib/php \
+    --sysconfdir=/etc/php \
+    --with-config-file-path=/etc/php \
+    --with-config-file-scan-dir=/etc/php/conf.d \
     --program-prefix= \
     --with-layout=GNU \
     --enable-fpm \
@@ -87,44 +95,39 @@ check = '''
 %make test LIBTOOL=/usr/bin/libtool
 '''
 install = '''
-# TODO(cbuild): init_install() sets variables for this phase (cbuild line 214); port it by hand
-%make_install \
-    LIBTOOL=/usr/bin/libtool
-install -Dm644 LICENSE "$pkgdir/usr/share/licenses/php8.3/LICENSE"
-# TODO(cbuild): self.install_file("README.md", f"usr/share/doc/php{_majver}")
-# TODO(cbuild): self.install_service(self.files_path / f"php-fpm{_majver}")
-# default php-fpm config files
-# TODO(cbuild): self.rename(f"etc/php{_majver}/php-fpm.conf.default", "php-fpm.conf")
-# TODO(cbuild): for f in ["pear", "peardev", "pecl"]:
-#         self.rename(f"usr/bin/{f}", f"{f}{_majver}")
-# TODO(cbuild): self.install_file(
-#         self.files_path / "www.conf", f"etc/php{_majver}/php-fpm.d"
-#     )
-# these are unnecessary with apk backups
-# TODO(cbuild): self.uninstall(f"etc/php{_majver}/php-fpm.d/*.default", glob=True)
-# extensions
-# TODO(cbuild): extcp = self.destdir / f"etc/php{_majver}/conf.d"
-# TODO(cbuild): self.mkdir(extcp, parents=True)
-# TODO(cbuild): for f in (self.destdir / f"usr/lib/php{_majver}" / _apiver).glob("*.so"):
-#         extso = f.name.split("/")[-1]
-#         extn = extso.removesuffix(".so")
-#         with open(extcp / f"{extn}.ini", "w") as outf:
-#             if extn == "opcache":
-#                 outf.write(f"zend_extension={extso}\n")
-#             else:
-#                 outf.write(f"extension={extso}\n")
-# remove temporary files/dirs that shouldn't be part of package
-# TODO(cbuild): for f in [
-#         ".channels",
-#         ".depdb",
-#         ".depdblock",
-#         ".filemap",
-#         ".lock",
-#         f"usr/share/php{_majver}/pear/.channels",
-#         f"usr/share/php{_majver}/pear/.filemap",
-#         f"usr/share/php{_majver}/pear/.lock",
-#         f"usr/share/php{_majver}/pear/.registry",
-#         f"usr/share/php{_majver}/pear/test",
-#     ]:
-#         self.uninstall(f)
+%make_install INSTALL_ROOT="$pkgdir" LIBTOOL=/usr/bin/libtool
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/php/LICENSE"
+install -Dm644 README.md "$pkgdir/usr/share/doc/php/README.md"
+install -Dm644 $pkgfiles/php-fpm "$pkgdir/etc/dinit.d/php-fpm"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/php.conf"
+mv "$pkgdir/etc/php/php-fpm.conf.default" "$pkgdir/etc/php/php-fpm.conf"
+install -Dm644 $pkgfiles/www.conf "$pkgdir/etc/php/php-fpm.d/www.conf"
+rm -f "$pkgdir"/etc/php/php-fpm.d/*.default
+install -Dm644 php.ini-production "$pkgdir/etc/php/php.ini"
+# every shared extension enabled through its own .ini
+mkdir -p "$pkgdir/etc/php/conf.d"
+for f in "$pkgdir"/usr/lib/php/20230831/*.so; do
+    e=$(basename "$f" .so)
+    if [ "$e" = opcache ]; then echo "zend_extension=$e.so"; else echo "extension=$e.so"; fi > "$pkgdir/etc/php/conf.d/$e.ini"
+done
+ls "$pkgdir"/etc/php/conf.d/*.ini >/dev/null
+# PEAR's install leaves its own state behind
+rm -rf "$pkgdir"/.channels "$pkgdir"/.depdb "$pkgdir"/.depdblock "$pkgdir"/.filemap "$pkgdir"/.lock \
+    "$pkgdir"/usr/share/php/pear/.channels "$pkgdir"/usr/share/php/pear/.filemap \
+    "$pkgdir"/usr/share/php/pear/.lock "$pkgdir"/usr/share/php/pear/.registry "$pkgdir"/usr/share/php/pear/test
 '''
+
+[subpackages.fpm]
+summary = "FastCGI process manager"
+depends = ["php"]
+paths   = ["/usr/bin/php-fpm", "/usr/share/man/man8/php-fpm.8", "/etc/php/php-fpm.conf", "/etc/php/php-fpm.d", "/etc/dinit.d/php-fpm", "/usr/lib/sysusers.d/php.conf", "/usr/share/php/fpm"]
+
+[subpackages.cgi]
+summary = "CGI binary"
+depends = ["php"]
+paths   = ["/usr/bin/php-cgi", "/usr/share/man/man1/php-cgi.1"]
+
+[subpackages.pear]
+summary = "PHP Extension and Application Repository"
+depends = ["php"]
+paths   = ["/usr/bin/pear", "/usr/bin/peardev", "/usr/bin/pecl", "/usr/share/php/pear", "/etc/php/pear.conf"]
