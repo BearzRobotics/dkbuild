@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/esbuild/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "esbuild"
+version = "0.28.0"
+release = 8
+summary = "JavaScript and CSS bundler and minifier"
+license = "MIT"
+homepage = "https://esbuild.github.io"
+hostdeps = ["go", "nodejs"]
+
+source = [
+    { url = "https://github.com/evanw/esbuild/archive/v0.28.0.tar.gz", sha256 = "7aae83b197db3fd695e6f378d30fd6cbddeb93e4b1057b2c41d36ecb1dfebbc2" },
+]
+
+build = '''
+node scripts/esbuild.js npm/esbuild/package.json --version
+node scripts/esbuild.js ./build/esbuild --neutral
+'''
+install = '''
+install -dm755 "$pkgdir/usr/lib/node_modules/esbuild/bin"
+install -Dm644 npm/esbuild/package.json "$pkgdir/usr/lib/node_modules/esbuild/package.json"
+# TODO(cbuild): self.install_files("npm/esbuild/lib", "usr/lib/node_modules/esbuild")
+mkdir -p "$pkgdir/usr/lib/node_modules/esbuild/bin"
+ln -sf ../../../../bin/esbuild "$pkgdir/usr/lib/node_modules/esbuild/bin/esbuild"
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/esbuild/LICENSE.md"
+'''

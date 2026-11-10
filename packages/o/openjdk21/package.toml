@@ -1,0 +1,59 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/openjdk21/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "openjdk21"
+version = "21.0.13.0.3_p1"
+release = 1
+summary = "TODO"
+license = "GPL-2.0-only WITH Classpath-exception-2.0"
+homepage = "https://openjdk.org"
+patches = ["JDK-8218814_Wformat-security.patch", "ppc64le.patch", "riscv64.patch"]
+archs = ["aarch64", "x86_64"]
+hostdeps = ["automake", "bash", "file", "libtool", "linux-headers", "openssl", "pkgconf", "zip", "zlib-ng-compat-devel"]
+builddeps = ["alsa-lib-devel", "cups-devel", "fontconfig-devel", "freetype-devel", "giflib-devel", "lcms2-devel", "libjpeg-turbo-devel", "libxrandr-devel", "libxrender-devel", "libxt-devel", "libxtst-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/openjdk/jdk21u/archive/jdk-21.0.13.0.3+1.tar.gz", sha256 = "860df2bacc8fb971712b67493a78c9440ac4a37bb4b52f28107fd761e1a7bf08" },
+]
+
+environment = '''
+export CBUILD_BYPASS_STRIP_WRAPPER=1
+'''
+setup = '''
+# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 93); port it by hand
+# TODO(cbuild): from cbuild.util import gnu_configure
+# TODO(cbuild): gnu_configure.replace_guess(self)
+# TODO(cbuild): gnu_configure.configure(self, sysroot=False)
+'''
+build = '''
+%make \
+    jdk-image
+'''
+install = '''
+# install the stuff
+# TODO(cbuild): for f in (self.cwd / "build/images/jdk").iterdir():
+#         self.install_files(f, _java_home)
+# extras
+# TODO(cbuild): self.install_file("ASSEMBLY_EXCEPTION", _java_home)
+# TODO(cbuild): self.install_file("LICENSE", _java_home)
+# TODO(cbuild): self.install_file("README.md", _java_home)
+# shared cacerts store
+# TODO(cbuild): _cacerts = f"{_java_home}/lib/security/cacerts"
+# TODO(cbuild): self.uninstall(_cacerts)
+# TODO(cbuild): self.install_link(_cacerts, "../../../../../../etc/ssl/certs/java/cacerts")
+# system links
+install -dm755 "$pkgdir/usr/bin"
+install -dm755 "$pkgdir/usr/share/man/man1"
+# TODO(cbuild): self.install_link(f"{_java_base}/default", _java_name)
+# TODO(cbuild): for f in (self.destdir / _java_home / "bin").iterdir():
+#         self.install_link(
+#             f"usr/bin/{f.name}", f"../lib/jvm/{_java_name}/bin/{f.name}"
+#         )
+# TODO(cbuild): for f in (self.destdir / _java_home / "man/man1").iterdir():
+#         self.install_link(
+#             f"usr/share/man/man1/{f.name}",
+#             f"../../../lib/jvm/{_java_name}/man/man1/{f.name}",
+#         )
+'''

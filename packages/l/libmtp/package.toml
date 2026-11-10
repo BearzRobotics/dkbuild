@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libmtp/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libmtp"
+version = "1.1.22"
+release = 1
+summary = "Media Transfer Protocol (MTP) library"
+license = "LGPL-2.1-or-later"
+homepage = "http://libmtp.sourceforge.net"
+hostdeps = ["pkgconf"]
+builddeps = ["libgcrypt-devel", "libusb-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/libmtp/libmtp-1.1.22.tar.gz", sha256 = "c3fcf411aea9cb9643590cbc9df99fa5fe30adcac695024442973d76fa5f87bc" },
+]
+
+setup = '''
+%configure \
+    --with-udev=/usr/lib/udev \
+    --with-udev-group=plugdev
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

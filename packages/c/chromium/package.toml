@@ -1,0 +1,162 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/chromium/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "chromium"
+version = "157.0.8103.38"
+release = 1
+summary = "Web browser"
+license = "BSD-3-Clause"
+homepage = "https://www.chromium.org"
+patches = ["004-compiler.patch", "008-fstatat64.patch", "009-gdbinit.patch", "016-musl-sandbox.patch", "017-musl-tid-caching.patch", "019-musl-no-execinfo.patch", "020-musl-no-mallinfo.patch", "021-musl-no-res-ninit.patch", "022-no-sandbox-settls.patch", "023-aarch64-no-memtag.patch", "024-pvalloc.patch", "027-temp-failure-retry.patch", "028-yes-musl.patch", "032-dawn-platform-ppc64.patch", "033-perfetto-get-thread-name.patch", "035-breakpad-no-getcontext.patch", "038-misc-fixes.patch", "041-ffmpeg-opus.patch", "042-disable-mei-preload.patch", "999-ppc64le-support.patch", "chromium-141-cssstylesheet-iwyu.patch", "cr133-ffmpeg-no-noh264parse.patch", "cr140-musl-prctl.patch", "cr143-clang-string_view.patch", "cr143-libpng-testonly.patch", "cr143-libsync-__BEGIN_DECLS.patch", "cr145-iwyu-dev_t.patch", "cr145-musl-unfortify-SkDescriptor.patch", "cr146-sanitize-ignore-for-ubsan-feature.patch", "cr146-swiftshader-unfortify-memset-memcpy.patch", "cr146-unfortify-blink-display_item_list.patch", "cr147-simdutf-8.0-base-char.patch", "cr148-rust-1.95-bytemuck.patch", "cr149-rust-toolchain-var.patch", "cr152-unbundle-minizip-undo-unicode.patch", "cr152-unbundle-opus-devtools.patch", "cr153-typescript-break-definitions.patch", "cr153-unbundle-opus-iamf.patch", "cr155-no-python-vendoring.patch", "cr156-unbundle-icu-remoting.patch", "cr157-crubit-fix-rs_bindings_from_cc-breakages.patch", "cr157-ffmpeg-no-agtm.patch", "cr157-unbundle-brotli-pdfium.patch", "dawn-cipd-fuckoff.patch", "disable-dns_config_service.patch", "entry-forward-decl-incomplete-type.patch", "fort3.patch", "ignore-unknown-flags.patch", "libcxx-abi1.patch", "llvm21-client-cert-fix.patch", "llvm22-permission-request.patch", "musl-conditional-tkill.patch", "no-lifetime-dse.patch", "noclanglibs.patch", "node-version-check-fuckoff.patch", "qt6-6.7.patch", "rust-crubit-no-stdcpp.patch", "rust-tgt.patch", "sanitizer-no-death-callback.patch", "silence-noapikeys.patch", "skcolor-fromstring.patch", "system-ffmpeg-include.patch", "terminal-fdset.patch", "thirdparty-tests-fuckoff.patch", "v8-safe-libcxx.patch"]
+archs = ["aarch64", "x86_64"]
+hostdeps = ["bash", "bison", "rust", "esbuild", "findutils", "git", "gn", "go", "gperf", "hwdata", "ninja", "nodejs", "perl", "pkgconf", "python", "bindgen", "rust-src"]
+builddeps = ["alsa-lib-devel", "brotli-devel", "bzip2-devel", "cairo-devel", "llvm-devel", "cups-devel", "curl-devel", "dav1d-devel", "double-conversion-devel", "elfutils-devel", "ffmpeg-devel", "flac-devel", "fontconfig-devel", "freetype-devel", "glib-devel", "gtk4-devel", "heimdal-devel", "highway-devel", "lcms2-devel", "libaom-devel", "libavif-devel", "libcap-devel", "libdrm-devel", "libevdev-devel", "libevent-devel", "libexif-devel", "libffi-devel", "libgcrypt-devel", "libjpeg-turbo-devel", "libmtp-devel", "libpng-devel", "libpulse-devel", "libsecret-devel", "libucontext-devel", "libusb-devel", "libva-devel", "libwebp-devel", "libxcomposite-devel", "libxcursor-devel", "libxdamage-devel", "libxi-devel", "libxml2-devel", "libxrandr-devel", "libxscrnsaver-devel", "libxshmfence-devel", "libxslt-devel", "linux-headers", "mesa-devel", "minizip-devel", "nss-devel", "opus-devel", "pciutils-devel", "pipewire-devel", "qt6-qtbase-devel", "rust", "snappy-devel", "speex-devel", "sqlite-devel", "eudev-devel", "xcbproto", "zlib-ng-compat-devel"]
+rundeps = ["hwdata"]
+options = ["!cross", "!check"]
+
+source = [
+    { url = "https://github.com/chromium-linux-tarballs/chromium-tarballs/releases/download/157.0.8103.38/chromium-157.0.8103.38-linux.tar.xz", sha256 = "29904f34e47900e96b595e744a91ed23afc5f3060bf0e9f65817a043957ce7ad" },
+    { url = "https://github.com/google/crubit/archive/40fbac34597084a0863256d633889eac2c23b91b/crubit-40fbac34597084a0863256d633889eac2c23b91b.tar.gz", sha256 = "07b57fedcffc8c1e8df4875fc314c2290c8cd50ab8d04340b12c945e9c331f5a" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -Wno-unknown-warning-option -Wno-builtin-macro-redefined -Wno-deprecated-declarations -Wno-sign-compare -Wno-shorten-64-to-32"
+export CXXFLAGS="${CXXFLAGS} -Wno-unknown-warning-option -Wno-builtin-macro-redefined -Wno-deprecated-declarations -Wno-sign-compare -Wno-shorten-64-to-32"
+'''
+setup = '''
+# where we mess with libvpx configuration, regen the files
+# TODO(cbuild): if self.profile.arch == "ppc64le":
+#         self.do(
+#             self.chroot_cwd / "third_party/libvpx/generate_gni.sh",
+#             wrksrc="third_party/libvpx",
+#             env={"PATH": f"{self.chroot_cwd / 'out/Release'}:/usr/bin"},
+#         )
+# TODO(cbuild): _unbundle = [
+#         "brotli",
+#         "dav1d",
+#         "double-conversion",
+#         "ffmpeg",
+#         "flac",
+#         "fontconfig",
+#         "freetype",
+#         "harfbuzz",
+#         "highway",
+#         "libjpeg",
+#         "libpng",
+#         "libsecret",
+#         "libusb",
+#         "libwebp",
+#         "libxml",
+#         "libxslt",
+#         "opus",
+#         "zlib",
+#         "zstd",
+#     ]
+# TODO(cbuild): for lib in _unbundle:
+#         self.do("./unbundle.sh", lib)
+./unbundle.sh libjpeg_turbo
+# TODO(cbuild): self.do(
+#         "./build/linux/unbundle/replace_gn_files.py",
+#         "--system-libraries",
+#         *_unbundle,
+#     )
+./third_party/libaddressinput/chromium/tools/update-strings.py
+# TODO(cbuild): _confargs = [*self.configure_args]
+# TODO(cbuild): _vaapi = "true"
+# sqlite3BtreeOpen crash
+# TODO(cbuild): _cfi = "false"
+# TODO(cbuild): _lto = "true" if self.has_lto() else "false"
+# TODO(cbuild): match self.profile.arch:
+#         case "aarch64":
+#             _confargs.append('target_cpu="arm64"')
+#             # _cfi = "true"
+#         case "x86_64":
+#             _confargs.append('target_cpu="x64"')
+#             # _cfi = "true"
+#         case "ppc64le":
+#             _confargs.append('target_cpu="ppc64"')
+#             _vaapi = "false"
+#         case "riscv64":
+#             _confargs.append('target_cpu="riscv64"')
+#             _vaapi = "false"
+# TODO(cbuild): _confargs += [
+#         f"use_vaapi={_vaapi}",
+#         f"is_cfi={_cfi}",
+#         f"use_thin_lto={_lto}",
+#     ]
+# TODO(cbuild): self.do(
+#         "gn",
+#         "gen",
+#         "out/Release",
+#         "--args=" + " ".join(_confargs),
+#     )
+'''
+build = '''
+# TODO(cbuild): self.do(
+#         "ninja",
+#         "-C",
+#         "out/Release",
+#         f"-j{self.make_jobs}",
+#         "chrome",
+#         "chrome_sandbox",
+#         "chromedriver.unstripped",
+#         "chrome_crashpad_handler",
+#         env={
+#             "CCACHE_SLOPPINESS": "include_file_mtime",
+#             # rather than disable working rustc -Z flags, permit them
+#             "RUSTC_BOOTSTRAP": "1",
+#         },
+#     )
+'''
+install = '''
+# TODO(cbuild): srcp = "out/Release"
+# TODO(cbuild): dstp = "usr/lib/chromium"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/chromium/LICENSE"
+# TODO(cbuild): self.install_file(f"{srcp}/chrome", dstp, mode=0o755, name="chromium")
+# TODO(cbuild): self.install_file(f"{srcp}/chrome_crashpad_handler", dstp, mode=0o755)
+# TODO(cbuild): self.install_file(
+#         f"{srcp}/chromedriver.unstripped", dstp, mode=0o755, name="chromedriver"
+#     )
+# TODO(cbuild): self.install_file(
+#         f"{srcp}/chrome_sandbox", dstp, mode=0o4755, name="chrome-sandbox"
+#     )
+# TODO(cbuild): self.install_file(f"{srcp}/libEGL.so", dstp, mode=0o755)
+# TODO(cbuild): self.install_file(f"{srcp}/libGLESv2.so", dstp, mode=0o755)
+# TODO(cbuild): self.install_file(f"{srcp}/libqt6_shim.so", dstp, mode=0o755)
+# TODO(cbuild): self.install_file(f"{srcp}/libvulkan.so.1", dstp, mode=0o755)
+# TODO(cbuild): self.install_file(f"{srcp}/libvk_swiftshader.so", dstp, mode=0o755)
+# TODO(cbuild): self.install_file(f"{srcp}/vk_swiftshader_icd.json", dstp, mode=0o755)
+# TODO(cbuild): self.install_file(f"{srcp}/*.bin", dstp, glob=True)
+# TODO(cbuild): self.install_file(f"{srcp}/*.pak", dstp, glob=True)
+# TODO(cbuild): self.install_file(f"{srcp}/locales/*.pak", f"{dstp}/locales", glob=True)
+# TODO(cbuild): for s in [24, 48, 64, 128, 256]:
+#         self.install_file(
+#             f"chrome/app/theme/chromium/product_logo_{s}.png",
+#             f"usr/share/icons/hicolor/{s}x{s}/apps",
+#             name="chromium.png",
+#         )
+# TODO(cbuild): for s in [16, 32]:
+#         self.install_file(
+#             f"chrome/app/theme/default_100_percent/chromium/product_logo_{s}.png",
+#             f"usr/share/icons/hicolor/{s}x{s}/apps",
+#             name="chromium.png",
+#         )
+# launcher
+# TODO(cbuild): self.install_file(
+#         self.files_path / "chromium-launcher.sh", dstp, mode=0o755
+#     )
+install -Dm644 $pkgfiles/chromium.conf "$pkgdir/etc/chromium/chromium.conf"
+install -dm755 "$pkgdir/usr/bin"
+mkdir -p "$pkgdir/usr/bin"
+ln -sf ../lib/chromium/chromium-launcher.sh "$pkgdir/usr/bin/chromium-browser"
+mkdir -p "$pkgdir/usr/bin"
+ln -sf ../lib/chromium/chromedriver "$pkgdir/usr/bin/chromedriver"
+mkdir -p "$pkgdir/usr/bin"
+ln -sf chromium-browser "$pkgdir/usr/bin/chromium"
+# desktop file, manpage etc
+./pp-data.sh
+install -Dm644 chromium.desktop "$pkgdir/usr/share/applications/chromium.desktop"
+install -Dm644 chromium.appdata.xml "$pkgdir/usr/share/metainfo/chromium.appdata.xml"
+install -Dm644 chromium.1 "$pkgdir/usr/share/man/man1/chromium.1"
+'''

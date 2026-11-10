@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gn/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "gn"
+version = "0_git20261020"
+release = 1
+summary = "Build system that generates ninja"
+license = "BSD-3-Clause"
+homepage = "https://gn.googlesource.com/gn"
+patches = ["no-formatter.patch"]
+hostdeps = ["ninja", "python"]
+rundeps = ["ninja"]
+
+source = [
+    { url = "https://ftp.octaforge.org/q66/random/gn-938087829fcbcc8fd87835ee301dd522c7637685.tar.gz", sha256 = "0b96819efc688acfd1e61665fe8f56e60d08fb3db144140d8f6124e034edd552" },
+]
+
+setup = '''
+python ./build/gen.py --no-last-commit-position --no-static-libstdc++ --no-strip --allow-warnings
+'''
+build = '''
+ninja -j$jobs -C out
+'''
+check = '''
+./out/gn_unittests
+'''
+install = '''
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/gn/LICENSE"
+install -Dm755 out/gn "$pkgdir/usr/bin/gn"
+'''
