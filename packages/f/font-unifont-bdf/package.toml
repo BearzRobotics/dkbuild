@@ -9,11 +9,14 @@ summary = "GNU Unifont Glyphs"
 license = "GPL-2.0-or-later"
 homepage = "https://unifoundry.com/unifont/index.html"
 rundeps = ["font-util"]
+hostdeps = ["gzip"]
 
 source = [
     { url = "https://unifoundry.com/pub/unifont/unifont-16.0.04/font-builds/unifont-16.0.04.bdf.gz", sha256 = "4a1689c0065666ac70e1310420ce67d7fa3dcf83c1a2e1e6b2c115aa22deb3cf" },
 ]
 
 install = '''
-install -Dm644 unifont-16.0.04.bdf "$pkgdir/usr/share/fonts/misc/unifont.bdf"
+# The source is a gzipped .bdf, not a tarball: it stays in /build/sources.
+install -dm755 "$pkgdir/usr/share/fonts/misc"
+gzip -dc /build/sources/unifont-16.0.04.bdf.gz > "$pkgdir/usr/share/fonts/misc/unifont.bdf"
 '''

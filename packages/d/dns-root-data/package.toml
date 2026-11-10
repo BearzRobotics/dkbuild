@@ -1,18 +1,24 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/dns-root-data/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
+# Debian's package is the source: bsdtar reads the .deb (an ar archive), then
+# its data tarball; the files are IANA's root hints and trust anchors.
 name = "dns-root-data"
 version = "2025080400"
 release = 1
 summary = "DNS root hints and DNSSEC trust anchor"
 license = "custom:none"
 homepage = "https://data.iana.org/root-anchors"
+hostdeps = ["libarchive"]
+options = ["!check"]
 
 source = [
     { url = "https://ftp.debian.org/debian/pool/main/d/dns-root-data/dns-root-data_2025080400_all.deb", sha256 = "e18670a21334e5f9aa4931ebeafea23b32479ee61b796329ce55ec74c530a3ce" },
 ]
 
 install = '''
-# TODO(cbuild): self.install_files("usr/share/dns", "usr/share")
+mkdir deb && cd deb
+bsdtar -xf /build/sources/dns-root-data_2025080400_all.deb
+bsdtar -xf data.tar.*
+install -dm755 "$pkgdir/usr/share"
+cp -a usr/share/dns "$pkgdir/usr/share/"
 '''

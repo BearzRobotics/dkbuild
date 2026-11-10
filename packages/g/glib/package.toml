@@ -12,7 +12,7 @@ summary = "GLib library of C routines"
 license = "LGPL-2.1-or-later"
 homepage = "https://wiki.gnome.org/Projects/GLib"
 patches = ["29fb84735c9c1ce0c3b72d3fc21bdf9744e37f64.patch", "alwaysbash.patch", "deprecated-no-warn.patch", "girepository-no-pytests.patch", "no-desktop-file-utils.patch"]
-hostdeps = ["gettext", "gobject-introspection", "meson", "pkgconf", "python-docutils", "python-packaging"]
+hostdeps = ["gettext", "gobject-introspection", "gobject-introspection-devel", "meson", "pkgconf", "python-docutils", "python-packaging"]
 builddeps = ["dbus-devel", "elfutils-devel", "freetype-bootstrap", "glib-bootstrap", "libffi-devel", "pcre2-devel", "sysprof-capture", "util-linux-devel", "zlib-ng-compat-devel"]
 checkdeps = ["dbus", "python-pytest"]
 

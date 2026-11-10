@@ -233,7 +233,7 @@ fn removeBuildDir(arena: Allocator, io: std.Io, work: []const u8) void {
 /// the image's (stage 1 assumes it has them).
 /// Whether a source URL names a tar archive (anything else is copied, not unpacked).
 fn isTarArchive(url: []const u8) bool {
-    const exts = [_][]const u8{ ".tar", ".tar.gz", ".tgz", ".tar.xz", ".txz", ".tar.bz2", ".tbz2", ".tbz", ".tar.zst", ".tar.lz", ".tar.lzma", ".tar.Z" };
+    const exts = [_][]const u8{ ".tar", ".tar.gz", ".tgz", ".tar.xz", ".txz", ".tar.bz2", ".tbz2", ".tbz", ".tar.zst", ".tar.lz", ".tar.lzma", ".tar.Z", ".crate" };
     var u = url;
     if (std.mem.indexOfAny(u8, u, "?#")) |i| u = u[0..i];
     for (exts) |e| if (std.mem.endsWith(u8, u, e)) return true;
@@ -245,6 +245,8 @@ test "isTarArchive" {
     try std.testing.expect(isTarArchive("https://x.org/a-1.0.tar.xz"));
     try std.testing.expect(isTarArchive("https://github.com/o/r/archive/v1.tar.gz"));
     try std.testing.expect(!isTarArchive("https://docbook.org/xml/4.5/docbook-xml-4.5.zip"));
+    // crates.io packages are gzipped tarballs.
+    try std.testing.expect(isTarArchive("https://static.crates.io/crates/bindgen-cli/bindgen-cli-0.73.2.crate"));
     try std.testing.expect(!isTarArchive("https://x.org/protocol-21.1.txt"));
 }
 
