@@ -56,8 +56,8 @@ rm -f src/string/x86_64/memcpy.s src/string/x86_64/memmove.s
 '''
 build = '''
 make -j$jobs MALLOC_DIR=external EXTRA_OBJ='$(srcdir)/src/malloc/external/mimalloc.o'
-# mimalloc must not have pulled in anything libc does not export
-nm -D lib/libc.so | grep -q ' T malloc$'
+# the allocator is in (malloc is weak, so a program may still bring its own)
+nm -D lib/libc.so | grep -qE ' [TW] malloc$'
 '''
 install = '''
 make DESTDIR=$pkgdir install

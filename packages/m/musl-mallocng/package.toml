@@ -3,7 +3,8 @@
 # replace the system libc: it is a second copy in /usr/lib/musl-mallocng, and
 #   mallocng-run <program> [args...]
 # runs one program with it (musl's libc.so is also its dynamic loader).
-# Same source and patches as musl (patches/ is a link to musl's).
+# Same source and patches as musl (a copy of its patches/: the build sandbox
+# sees only this recipe's own directory).
 name = "musl-mallocng"
 version = "1.2.6"
 release = 1
