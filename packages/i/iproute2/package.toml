@@ -3,7 +3,7 @@
 # Reviewed by hand; dependency names are Chimera's and resolve from stage 0 until they are recipes.
 name = "iproute2"
 version = "7.1.0"
-release = 1
+release = 2
 summary = "IP routing utilities"
 license = "GPL-2.0-only"
 homepage = "https://wiki.linuxfoundation.org/networking/iproute2"

@@ -7,7 +7,7 @@
 # r3: static libraries too (in curl-static), for fully static programs on musl.
 name = "curl"
 version = "8.23.0"
-release = 3
+release = 4
 summary = "Command line tool for transferring data with URL syntax"
 license = "curl"
 homepage = "https://curl.se"

@@ -5,7 +5,7 @@
 # r3: static libraries too (in libdrm-static), for fully static programs on musl.
 name = "libdrm"
 version = "2.4.134"
-release = 3
+release = 4
 summary = "Userspace interface to kernel DRM services"
 license = "MIT"
 homepage = "https://dri.freedesktop.org"
