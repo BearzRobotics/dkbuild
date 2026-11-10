@@ -220,7 +220,9 @@ source = [
   installs its yarn and npm packages, so the build itself stays offline. Its
   work directory and log are in `cache/snapshots/`. A new snapshot's checksum
   is unknown until it is made: fetch keeps it under the checksum it has and
-  prints it for the recipe.
+  prints it for the recipe. `git` (repository URL, tag or commit) is a shallow
+  clone with all its submodules, for projects whose release archives leave
+  the submodules out.
 - The first tarball is unpacked into the build directory, and the build
   steps start inside its top directory. Further tarballs are unpacked next to
   it (`/build/<their top directory>`): a vendored dependency's source, such as

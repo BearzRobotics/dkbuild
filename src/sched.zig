@@ -225,6 +225,12 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
             if (w.console.items.len > 0) term.emit(w.console.items);
             w.console.deinit(std.heap.smp_allocator);
             if (w.err) |err| {
+                if (err == error.MissingDependency) {
+                    // already explained ("skipped, it needs ..."); its dependents skip too
+                    state[j] = .skipped;
+                    try skipped.append(arena, w.r.name);
+                    continue;
+                }
                 term.print("{s}: {s}\n", .{ w.r.name, @errorName(err) });
                 state[j] = .failed;
                 try failed.append(arena, w.r.name);

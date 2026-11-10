@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/acpica/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "acpica"
+version = "20260930"
+release = 1
+summary = "Intel ACPI Component Architecture utilities"
+license = "BSD-3-Clause OR GPL-2.0-only"
+homepage = "https://www.acpica.org"
+hostdeps = ["bison", "flex"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/open-acpica/acpica/releases/download/20260930/acpica-unix-20260930.tar.gz", sha256 = "aa18901b92e30749be0edc3081c8d550c61fce4fa37546fc6a65d367a4ae71a5" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -Wno-unknown-warning-option"
+'''
+build = '''
+%make \
+    NOFORTIFY=TRUE
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr
+install -Dm644 LICENSE.BSD-3-Clause "$pkgdir/usr/share/licenses/acpica/LICENSE.BSD-3-Clause"
+'''

@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/suil/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "suil"
+version = "0.10.22"
+release = 1
+summary = "C library for loading and wrapping LV2 plugin UIs"
+license = "ISC"
+homepage = "https://drobilla.net/software/suil.html"
+hostdeps = ["ninja", "pkgconf"]
+builddeps = ["gtk+3-devel", "lv2"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.drobilla.net/suil-0.10.22.tar.xz", sha256 = "d720969e0f44a99d5fba35c733a43ed63a16b0dab867970777efca4b25387eb7" },
+]
+
+setup = '''
+%meson \
+    -Dgtk2=disabled \
+    -Dgtk3=enabled \
+    -Dqt5=disabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/suil/COPYING"
+'''

@@ -48,7 +48,7 @@ pub const Options = struct {
 /// Top-level directories a package may install into (SPEC.md 7 step 4).
 const allowed_top = [_][]const u8{ "usr", "etc", "var", "opt", "boot" };
 
-pub const BuildError = error{ BuildFailed, PrepareFailed, UnpackFailed, PolicyViolation, BadRecipe } || Allocator.Error;
+pub const BuildError = error{ BuildFailed, PrepareFailed, UnpackFailed, PolicyViolation, BadRecipe, MissingDependency } || Allocator.Error;
 
 /// When several builds run at once (sched.zig), each worker thread collects
 /// its console output here and the scheduler prints it in one piece when the
@@ -327,8 +327,10 @@ fn inTreeFiles(arena: Allocator, io: std.Io, opts: Options, r: recipe.Recipe, re
             } else false;
             if (!present) {
                 if (k < direct and !optional) {
-                    out("error: {s} is not in repo/{s}; it should have been built before {s}\n", .{ file, opts.arch, r.name });
-                    return error.PrepareFailed;
+                    // Not this recipe's fault: something it needs was never built
+                    // (or failed in an earlier run). Reported as a skip.
+                    out("==> {s}: skipped, it needs {s}, which is not built ({s} is not in repo/{s})\n", .{ r.name, d, file, opts.arch });
+                    return error.MissingDependency;
                 }
                 continue;
             }

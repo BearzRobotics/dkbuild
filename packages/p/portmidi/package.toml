@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/portmidi/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "portmidi"
+version = "2.0.6"
+release = 1
+summary = "Cross-platform MIDI input/output library"
+license = "MIT"
+homepage = "https://github.com/PortMidi/portmidi"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["alsa-lib-devel"]
+
+source = [
+    { url = "https://github.com/PortMidi/portmidi/archive/refs/tags/v2.0.6.tar.gz", sha256 = "81d22b34051621cd56c8d5ef12908ef2a59764c9cdfba6dae47aabddb71ac914" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 license.txt "$pkgdir/usr/share/licenses/portmidi/license.txt"
+'''
