@@ -15,10 +15,13 @@ pub const Context = struct {
 
 pub const Error = error{UnknownMacro} || Allocator.Error;
 
-/// Expands every `%name` in `text`. `%%` is a literal `%`. A `%` followed by
-/// anything else is left alone (printf formats, shell `%` suffix removal).
+/// Expands every known `%name` in `text` that starts a word (at the start of
+/// the text or after whitespace). `%%` is a literal `%`. Any other `%` is left
+/// alone: printf formats ('%s %d'), shell suffix removal (${f%pcap}), and
+/// unknown names.
 /// `bad_macro` receives the offending name on `error.UnknownMacro`.
 pub fn expand(arena: Allocator, ctx: Context, text: []const u8, bad_macro: *[]const u8) Error![]const u8 {
+    _ = bad_macro; // kept for callers; nothing is unknown any more
     var out: std.ArrayList(u8) = .empty;
     var i: usize = 0;
     while (i < text.len) {
@@ -35,15 +38,19 @@ pub fn expand(arena: Allocator, ctx: Context, text: []const u8, bad_macro: *[]co
         }
         var j = i + 1;
         while (j < text.len and (std.ascii.isLower(text[j]) or text[j] == '_')) j += 1;
-        if (j == i + 1) {
+        const word_start = i == 0 or std.ascii.isWhitespace(text[i - 1]);
+        if (j == i + 1 or !word_start) {
             try out.append(arena, '%');
             i += 1;
             continue;
         }
         const name = text[i + 1 .. j];
+        // An unknown name is shell, not a macro ('%s %d' in a printf after a
+        // space); a misspelled macro fails in the build as "command not found".
         const body = try lookup(arena, ctx, name) orelse {
-            bad_macro.* = name;
-            return error.UnknownMacro;
+            try out.append(arena, '%');
+            i += 1;
+            continue;
         };
         try out.appendSlice(arena, body);
         i = j;
@@ -132,7 +139,7 @@ test "macros expand per target" {
     try std.testing.expect(std.mem.indexOf(u8, meson, "--cross-file /dkbuild/cross/meson.ini -Dfoo=1\nninja -C build") != null);
 }
 
-test "longest macro name wins, %% and stray % are kept, unknown fails" {
+test "longest macro name wins, %% and stray % are kept, unknown names too" {
     var st = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer st.deinit();
     const a = st.allocator();
@@ -141,6 +148,18 @@ test "longest macro name wins, %% and stray % are kept, unknown fails" {
     const ctx: Context = .{ .target = x86, .host = x86 };
     try std.testing.expectEqualStrings("make DESTDIR=$pkgdir install", try expand(a, ctx, "%make_install", &bad));
     try std.testing.expectEqualStrings("100% done, ${v%.*} %%", try expand(a, ctx, "100% done, ${v%.*} %%%%", &bad));
-    try std.testing.expectError(error.UnknownMacro, expand(a, ctx, "%nonsense", &bad));
-    try std.testing.expectEqualStrings("nonsense", bad);
+    try std.testing.expectEqualStrings("%nonsense", try expand(a, ctx, "%nonsense", &bad));
+}
+
+test "only a % that starts a word is a macro" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const p: Profile = .{ .arch = "x86_64", .triple = "x86_64-fenriros-linux-musl", .cpu = "x86-64", .zig_target = "x86_64-linux-musl", .zig_cpu = "baseline", .kernel_arch = "x86" };
+    var bad: []const u8 = "";
+    const shell = "n=${f%pcap}; m=${m%_module}; printf '%s %d\\n' x 1; echo 100%done";
+    try std.testing.expectEqualStrings(shell, try expand(a, .{ .target = p, .host = p }, shell, &bad));
+    const out = try expand(a, .{ .target = p, .host = p }, "PYTHON=python3 %make", &bad);
+    try std.testing.expect(std.mem.indexOf(u8, out, "%make") == null);
+    try std.testing.expectEqualStrings("  %nosuchmacro", try expand(a, .{ .target = p, .host = p }, "  %nosuchmacro", &bad));
 }

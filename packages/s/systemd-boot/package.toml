@@ -13,7 +13,7 @@
 # r2: static libraries too (in systemd-boot-static), for fully static programs on musl.
 name = "systemd-boot"
 version = "256.11"
-release = 2
+release = 3
 summary = "UEFI boot manager"
 license = "LGPL-2.1-or-later"
 homepage = "https://github.com/systemd/systemd"

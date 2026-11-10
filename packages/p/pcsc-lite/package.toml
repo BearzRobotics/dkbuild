@@ -12,7 +12,7 @@ hostdeps = ["flex", "perl", "pkgconf"]
 builddeps = ["libusb-devel", "eudev-devel", "polkit-devel"]
 
 source = [
-    { url = "https://pcsclite.apdu.fr/files/pcsc-lite-2.3.3.tar.xz", sha256 = "cdff7d7153a0b37aa74e26dfec89ec7dc5c5286aa21b91b903e38739d227e8e7" },
+    { url = "https://github.com/LudovicRousseau/PCSC/archive/refs/tags/2.3.3.tar.gz", sha256 = "00b667aa71504ed1d39a48ad377de048c70dbe47229e8c48a3239ab62979c70f" },
 ]
 
 setup = '''

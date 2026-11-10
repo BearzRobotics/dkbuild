@@ -102,11 +102,16 @@ pub fn main(init: std.process.Init) !void {
         var failed = false;
         for (t.recipes) |r| {
             if (rest.len > 0 and !contains(rest, r.name)) continue;
+            // Dependencies are vendored for the first tarball only, as the build
+            // lays them in (ollama's second tarball is llama.cpp, no Go modules).
+            var first_tb = true;
             for (r.source) |src| {
                 var msg: []const u8 = "";
                 if (fetch.fetchOne(arena, init.io, cache, src, &msg)) |st| {
                     std.debug.print("{s}: {s}\n", .{ r.name, @tagName(st) });
-                    if (src == .tarball and contains(r.options, "zigdeps")) {
+                    const is_first = src == .tarball and first_tb;
+                    if (src == .tarball) first_tb = false;
+                    if (is_first and contains(r.options, "zigdeps")) {
                         if (fetch.fetchZigDeps(arena, init.io, cache, src.tarball.sha256, &msg)) |zst| {
                             std.debug.print("{s}: zig dependencies {s}\n", .{ r.name, @tagName(zst) });
                         } else |zerr| {
@@ -114,7 +119,7 @@ pub fn main(init: std.process.Init) !void {
                             std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(zerr) });
                         }
                     }
-                    if (src == .tarball and contains(r.options, "cargodeps")) {
+                    if (is_first and contains(r.options, "cargodeps")) {
                         if (fetch.fetchCargoDeps(arena, init.io, cache, src.tarball.sha256, &msg)) |cst| {
                             std.debug.print("{s}: Rust crates {s}\n", .{ r.name, @tagName(cst) });
                         } else |cerr| {
@@ -122,7 +127,7 @@ pub fn main(init: std.process.Init) !void {
                             std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(cerr) });
                         }
                     }
-                    if (src == .tarball and contains(r.options, "godeps")) {
+                    if (is_first and contains(r.options, "godeps")) {
                         if (fetch.fetchGoDeps(arena, init.io, cache, src.tarball.sha256, &msg)) |gst| {
                             std.debug.print("{s}: Go modules {s}\n", .{ r.name, @tagName(gst) });
                         } else |gerr| {
