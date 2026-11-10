@@ -1,7 +1,5 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/yt-dlp/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "yt-dlp"
 version = "2026.10.26"
 release = 1
@@ -9,15 +7,16 @@ summary = "CLI program to download videos from YouTube and other sites"
 license = "Unlicense"
 homepage = "https://github.com/yt-dlp/yt-dlp"
 patches = ["enable-nodejs.patch", "yt-dlp-man-page-nodejs.patch"]
-hostdeps = ["python-hatchling"]
+hostdeps = ["python", "python-hatchling"]
 checkdeps = ["python-requests"]
-rundeps = ["python-certifi"]
+rundeps = ["python", "python-certifi", "ffmpeg"]
 
 source = [
     { url = "https://github.com/yt-dlp/yt-dlp/releases/download/2026.10.26/yt-dlp.tar.gz", sha256 = "21f942d258d25cc4e60b4982a25c423460f0bebb835f38e6dfd1fcb140087f95" },
 ]
 
 install = '''
-# TODO(cbuild): no install step could be derived
-true
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/yt-dlp/LICENSE"
 '''

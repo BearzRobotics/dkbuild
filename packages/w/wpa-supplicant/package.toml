@@ -1,7 +1,5 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/wpa_supplicant/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "wpa-supplicant"
 version = "2.12"
 release = 1
@@ -17,31 +15,24 @@ source = [
     { url = "http://w1.fi/releases/wpa_supplicant-2.12.tar.gz", sha256 = "08e23937e16d0155e55cab2b51f51fbe10d80a1aa91c4e15442645059b737ef6" },
 ]
 
+setup = '''
+cp $pkgfiles/config wpa_supplicant/.config
+'''
 build = '''
-%make \
-    V=1
+cd wpa_supplicant
+%make V=1
 '''
 install = '''
+cd wpa_supplicant
 install -dm755 "$pkgdir/usr/bin"
-%make_install \
-    STRIP=true \
-    PREFIX=/usr
-# dbus services
-# TODO(cbuild): for f in (self.cwd / "dbus").glob("*.service"):
-#         self.install_file(f, "usr/share/dbus-1/system-services")
-# dbus config
+%make_install STRIP=true PREFIX=/usr
+install -dm755 "$pkgdir/usr/share/dbus-1/system-services"
+install -m644 dbus/*.service "$pkgdir/usr/share/dbus-1/system-services/"
 install -Dm644 dbus/dbus-wpa_supplicant.conf "$pkgdir/usr/share/dbus-1/system.d/wpa_supplicant.conf"
-# default config
 install -Dm640 $pkgfiles/wpa_supplicant.conf "$pkgdir/etc/wpa_supplicant/wpa_supplicant.conf"
-# manpages
-# TODO(cbuild): for m in (self.cwd / "doc/docbook").glob("*.[58]"):
-#         if (
-#             m.stem == "wpa_gui"
-#             or m.stem == "wpa_priv"
-#             or m.stem == "eapol_test"
-#         ):
-#             continue
-#         self.install_man(m)
-# license
-install -Dm644 README "$pkgdir/usr/share/licenses/wpa_supplicant/README"
+for m in doc/docbook/*.5 doc/docbook/*.8; do
+    case "${m##*/}" in wpa_gui.*|wpa_priv.*|eapol_test.*) continue ;; esac
+    install -Dm644 "$m" "$pkgdir/usr/share/man/man${m##*.}/${m##*/}"
+done
+install -Dm644 README "$pkgdir/usr/share/licenses/wpa-supplicant/README"
 '''
