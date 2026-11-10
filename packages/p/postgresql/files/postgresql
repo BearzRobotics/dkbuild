@@ -1,0 +1,10 @@
+type = process
+command = /usr/bin/postgres -D /var/lib/postgresql
+smooth-recovery = true
+logfile = /var/log/postgresql.log
+run-as = _postgres
+stop-timeout = 60.0
+# fast shutdown (INT): the default smart shutdown waits for every client to go
+term-signal = INT
+depends-on: local.target
+depends-on: network.target

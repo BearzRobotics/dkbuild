@@ -1,11 +1,14 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/postgresql16/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
+# FenrirOS packages one PostgreSQL, as `postgresql`, in the usual places
+# (/usr/bin, /usr/share/postgresql, /etc/postgresql), with every contrib module.
+# The cluster lives in /var/lib/postgresql (owned by _postgres): create it with
+#   su -s /bin/sh _postgres -c 'initdb -D /var/lib/postgresql'
+# then enable the postgresql service.
 name = "postgresql"
 version = "16.15"
 release = 2
-summary = "Sophisticated object-relational DBMS, version 16.x"
+summary = "Sophisticated object-relational database system"
 license = "PostgreSQL"
 homepage = "https://www.postgresql.org"
 patches = ["disable-html-docs.patch", "dont-use-locale-a-on-musl.patch", "initdb-no-pg_ctl.patch", "per-version-dirs.patch", "perl-rpath.patch", "remove-libecpg_compat.patch"]
@@ -20,10 +23,9 @@ source = [
 
 setup = '''
 %configure \
-    --bindir=/usr/lib/postgresql16 \
-    --datadir=/usr/share/postgresql16 \
+    --datadir=/usr/share/postgresql \
     --includedir=/usr/include/postgresql \
-    --sysconfdir=/etc/postgresql16 \
+    --sysconfdir=/etc/postgresql \
     --disable-rpath \
     --with-libxml \
     --with-lz4 \
@@ -35,56 +37,43 @@ setup = '''
     --with-zstd \
     --with-system-tzdata=/usr/share/zoneinfo
 '''
+
 build = '''
-%make
+# the programs, libraries and contrib modules (the man pages come prebuilt)
+%make world-bin
 '''
 install = '''
-%make_install
-install -Dm644 $pkgfiles/pltcl_create_tables.sql "$pkgdir/usr/share/postgresql16/pltcl_create_tables.sql"
-# manpages; TODO man3 devel alternatives provider later
-# TODO(cbuild): for cat in [1, 3, 7]:
-#         for f in (self.cwd / f"doc/src/sgml/man{cat}").glob(f"*.{cat}"):
-#             self.install_file(f, f"usr/share/{pkgname}/man/man{cat}")
-# collect contrib list
-# TODO(cbuild): clist = set()
-# TODO(cbuild): for f in (self.cwd / "build/contrib").iterdir():
-#         if f.name == "Makefile":
-#             continue
-#         clist.add(f.name)
-# TODO(cbuild): for cont in _contrib_list:
-#         if cont.startswith("!"):
-#             clist.remove(cont.removeprefix("!"))
-#             continue
-#         clist.remove(cont)
-#         # install to a separate location to make up the file list
-#         self.do(
-#             "make",
-#             "-C",
-#             f"build/contrib/{cont}",
-#             f"DESTDIR={self.chroot_cwd}/tmp-contrib-{cont}",
-#             "install",
-#         )
-#         # capture file list and then install to where it should be
-#         with open(self.cwd / f"subpkg-list-{cont}.txt", "w") as flist:
-#             relp = self.cwd / f"tmp-contrib-{cont}"
-#             for f in relp.rglob("*"):
-#                 if f.is_dir():
-#                     continue
-#                 flist.write(f"{f.relative_to(relp)}\n")
-#         # and remove the temps
-#         self.rm(self.cwd / f"tmp-contrib-{cont}", recursive=True)
-# install all contrib in the destdir
-make -C build/contrib DESTDIR=$pkgdir install
-# check if there is anything left in the set
-# TODO(cbuild): if len(clist) > 0:
-#         self.error(f"leftover contribs: {clist}")
-# move some stuff not meant to be multiversioned
-# TODO(cbuild): if _default_ver:
-#         self.rename(
-#             f"usr/lib/{pkgname}/pg_config",
-#             "usr/bin/pg_config",
-#             relative=False,
-#         )
-# service
-# TODO(cbuild): self.install_service(self.files_path / pkgname)
+%make install-world-bin DESTDIR="$pkgdir"
+install -Dm644 $pkgfiles/pltcl_create_tables.sql "$pkgdir/usr/share/postgresql/pltcl_create_tables.sql"
+for c in 1 3 7; do
+    install -dm755 "$pkgdir/usr/share/man/man$c"
+    install -m644 doc/src/sgml/man$c/*.$c "$pkgdir/usr/share/man/man$c/"
+done
+install -Dm644 $pkgfiles/postgresql "$pkgdir/etc/dinit.d/postgresql"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/postgresql.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/postgresql.conf"
+install -Dm644 COPYRIGHT "$pkgdir/usr/share/licenses/postgresql/COPYRIGHT"
 '''
+
+[subpackages.client-libs]
+summary = "Client library (libpq)"
+paths   = ["/usr/lib/libpq.so.*"]
+
+[subpackages.ecpg-libs]
+summary = "Embedded SQL C libraries"
+paths   = ["/usr/lib/libecpg.so.*", "/usr/lib/libecpg_compat.so.*", "/usr/lib/libpgtypes.so.*"]
+
+[subpackages.pltcl]
+summary = "PL/Tcl"
+depends = ["postgresql"]
+paths   = ["/usr/lib/postgresql/pltcl.so", "/usr/share/postgresql/extension/pltcl*", "/usr/share/postgresql/pltcl_create_tables.sql"]
+
+[subpackages.plperl]
+summary = "PL/Perl"
+depends = ["postgresql"]
+paths   = ["/usr/lib/postgresql/plperl.so", "/usr/share/postgresql/extension/plperl*"]
+
+[subpackages.plpython]
+summary = "PL/Python"
+depends = ["postgresql"]
+paths   = ["/usr/lib/postgresql/plpython3.so", "/usr/share/postgresql/extension/plpython3*"]
