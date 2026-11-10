@@ -1,7 +1,5 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/nfs-utils/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "nfs-utils"
 version = "2.8.2"
 release = 4
@@ -36,26 +34,53 @@ build = '''
 '''
 install = '''
 %make_install
-# helpers
-# TODO(cbuild): for n in ["nfs-server", "proc-fs-nfsd", "rpc_pipefs"]:
-#         self.install_file(self.files_path / f"dinit-{n}", "usr/lib", mode=0o755)
+# helpers the services run
+for n in nfs-server proc-fs-nfsd rpc_pipefs; do install -Dm755 $pkgfiles/dinit-$n "$pkgdir/usr/lib/dinit-$n"; done
 # services
-# TODO(cbuild): for srv in [
-#         "blkmapd",
-#         "fsidd",
-#         "nfs-proc-nfsd",
-#         "nfs-rpc_pipefs",
-#         "nfs-server",
-#         "nfsdcld",
-#         "rpc.gssd",
-#         "rpc.idmapd",
-#         "rpc.mountd",
-#         "rpc.svcgssd",
-#         "rpc.statd",
-#     ]:
-#         self.install_service(self.files_path / srv)
+for s in blkmapd fsidd nfs-proc-nfsd nfs-rpc_pipefs nfs-server nfsdcld rpc.gssd rpc.idmapd rpc.mountd rpc.svcgssd rpc.statd; do
+    install -Dm644 $pkgfiles/$s "$pkgdir/etc/dinit.d/$s"
+done
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/nfs-utils.conf"
 # managed by tmpfiles
 rm -rf "$pkgdir/var/lib/nfs"
 install -Dm644 $pkgfiles/idmapd.conf "$pkgdir/etc/idmapd.conf"
 install -Dm644 nfs.conf "$pkgdir/etc/nfs.conf"
 '''
+
+[subpackages.server]
+summary = "NFS server components"
+depends = ["nfs-utils"]
+paths   = [
+    "/usr/bin/nfsdcld",
+    "/usr/bin/rpc.mountd",
+    "/usr/bin/fsidd",
+    "/usr/bin/rpc.nfsd",
+    "/usr/bin/blkmapd",
+    "/usr/bin/nfsdclddb",
+    "/usr/bin/nfsdctl",
+    "/usr/bin/rpc.svcgssd",
+    "/usr/bin/nfsdclnts",
+    "/usr/bin/nfsref",
+    "/usr/bin/nfsdcltrack",
+    "/usr/bin/exportfs",
+    "/etc/dinit.d/fsidd",
+    "/etc/dinit.d/blkmapd",
+    "/etc/dinit.d/nfs-server",
+    "/etc/dinit.d/nfsdcld",
+    "/etc/dinit.d/rpc.mountd",
+    "/etc/dinit.d/rpc.svcgssd",
+    "/usr/lib/dinit-nfs-server",
+    "/usr/lib/dinit-proc-fs-nfsd",
+    "/usr/share/man/man5/exports.5",
+    "/usr/share/man/man8/nfsdcld.8",
+    "/usr/share/man/man8/*mountd.8",
+    "/usr/share/man/man8/*nfsd.8",
+    "/usr/share/man/man8/blkmapd.8",
+    "/usr/share/man/man8/nfsdclddb.8",
+    "/usr/share/man/man8/nfsdctl.8",
+    "/usr/share/man/man8/*svcgssd.8",
+    "/usr/share/man/man8/nfsdclnts.8",
+    "/usr/share/man/man8/nfsref.8",
+    "/usr/share/man/man8/nfsdcltrack.8",
+    "/usr/share/man/man8/exportfs.8",
+]

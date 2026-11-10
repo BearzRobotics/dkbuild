@@ -1,7 +1,5 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libvirt/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "libvirt"
 version = "12.8.0"
 release = 1
@@ -34,7 +32,7 @@ setup = '''
     -Dlibssh2=enabled \
     -Dno_git=true \
     -Dnumactl=enabled \
-    "-Dpackager=Chimera Linux" \
+    -Dpackager=FenrirOS \
     -Dpciaccess=enabled \
     -Dstorage_dir=enabled \
     -Dstorage_disk=enabled \
@@ -55,20 +53,13 @@ build = '''
 install = '''
 %meson_install
 rm -rf "$pkgdir/usr/lib/sysusers.d"
-# TODO(cbuild): for service in [
-#         "ch",
-#         "interface",
-#         "lock",
-#         "log",
-#         "lxc",
-#         "network",
-#         "nodedev",
-#         "nwfilter",
-#         "proxy",
-#         "qemu",
-#         "secret",
-#         "storage",
-#         "vbox",
-#     ]:
-#         self.install_service(self.files_path / f"virt{service}d")
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/libvirt.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/libvirt.conf"
+for s in ch interface lock log lxc network nodedev nwfilter proxy qemu secret storage vbox; do
+    install -Dm644 $pkgfiles/virt${s}d "$pkgdir/etc/dinit.d/virt${s}d"
+done
 '''
+
+[subpackages.firewalld]
+summary = "firewalld zones and policies"
+paths   = ["/usr/lib/firewalld"]

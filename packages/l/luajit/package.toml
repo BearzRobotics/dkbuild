@@ -1,7 +1,5 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/luajit/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "luajit"
 version = "2.1_p20250117"
 release = 1
@@ -20,23 +18,19 @@ source = [
 ]
 
 build = '''
-# TODO(cbuild): init_build() sets variables for this phase (cbuild line 41); port it by hand
+# its makefile does not pass the link flags on by itself
 %make \
     PREFIX=/usr \
+    CC="$CC" HOST_CC="$CC" \
+    TARGET_CFLAGS="$CFLAGS" TARGET_LDFLAGS="$CFLAGS $LDFLAGS" TARGET_SHLDFLAGS="$CFLAGS $LDFLAGS" \
+    HOST_CFLAGS="$CFLAGS" HOST_LDFLAGS="$CFLAGS $LDFLAGS" \
     Q= \
     E=@:
 '''
 check = '''
-# TODO(cbuild): pfx = str(self.chroot_cwd / "test-suite/target")
-# TODO(cbuild): self.do("make", "install", "PREFIX=" + pfx)
-# TODO(cbuild): self.do(
-#         "./run-tests",
-#         pfx,
-#         f"{pfx}/bin/luajit",
-#         "clang",
-#         "clang++",
-#         wrksrc="test-suite",
-#     )
+cd test-suite
+make -C .. install PREFIX="$PWD/target"
+./run-tests "$PWD/target" "$PWD/target/bin/luajit" clang clang++
 '''
 install = '''
 %make_install \
