@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libspiel/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libspiel"
+version = "1.0.4"
+release = 3
+summary = "Speech synthesis client library"
+license = "LGPL-2.1-or-later"
+homepage = "https://project-spiel.org"
+patches = ["71.patch", "8214e2dae461c67801cbf8a6a27038c0d7bc7061.patch"]
+hostdeps = ["gobject-introspection", "pkgconf"]
+builddeps = ["glib-devel", "gst-plugins-base-devel", "gstreamer-devel", "libspeechprovider-devel"]
+checkdeps = ["dbus", "dbus-devel", "gst-plugins-good", "python-dbus"]
+
+source = [
+    { url = "https://github.com/project-spiel/libspiel/archive/refs/tags/SPIEL_1_0_4.tar.gz", sha256 = "6060024bd640c1d94d3860731e15a7171aa440b3a52d3bebf83d23088096eb75" },
+]
+
+setup = '''
+%meson \
+    -Ddocs=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

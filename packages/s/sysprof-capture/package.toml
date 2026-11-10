@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/sysprof-capture/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "sysprof-capture"
+version = "51.0"
+release = 1
+summary = "System-wide profiler for Linux"
+license = "BSD-2-Clause-Patent"
+homepage = "https://www.sysprof.com"
+hostdeps = ["pkgconf"]
+builddeps = ["linux-headers"]
+options = ["!lto"]
+
+source = [
+    { url = "https://download.gnome.org/sources/sysprof/51/sysprof-51.0.tar.xz", sha256 = "f2c8d9c5c8294ce3fdc8be7d9f4be56a72ed71522cb54987f1723a8cfd91637d" },
+]
+
+setup = '''
+%meson \
+    -Dexamples=false \
+    -Dgtk=false \
+    -Dhelp=false \
+    -Dtools=false \
+    -Dtests=false \
+    -Dsysprofd=none \
+    -Dlibsysprof=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 src/libsysprof-capture/COPYING "$pkgdir/usr/share/licenses/sysprof-capture/COPYING"
+'''

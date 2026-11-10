@@ -1,0 +1,53 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/webkitgtk/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "webkitgtk"
+version = "2.54.2"
+release = 1
+summary = "GTK port of the WebKit browser engine"
+license = "LGPL-2.1-or-later AND BSD-2-Clause"
+homepage = "https://webkitgtk.org"
+patches = ["fortify.patch", "le-check.patch", "loong-hwcap.patch", "loongarch-simdutf.patch", "ppc64-simdutf.patch", "reproducible.patch", "riscv64-no-wasm.patch", "silence.patch", "skia-foritfy.patch", "spiel-allow-sandbox.patch"]
+hostdeps = ["bubblewrap", "cmake", "flex", "geoclue", "gettext", "glib-devel", "gobject-introspection", "gperf", "libxml2", "ninja", "perl", "pkgconf", "python", "ruby", "unifdef", "wayland", "xdg-dbus-proxy"]
+builddeps = ["at-spi2-core-devel", "enchant-devel", "freetype-devel", "geoclue-devel", "gst-plugins-bad-devel", "gst-plugins-base-devel", "gstreamer-devel", "gtk+3-devel", "harfbuzz-devel", "hyphen-devel", "icu-devel", "lcms2-devel", "libavif-devel", "libdrm-devel", "libgcrypt-devel", "libjpeg-turbo-devel", "libjxl-devel", "libmanette-devel", "libnotify-devel", "libpng-devel", "libpsl-devel", "libseccomp-devel", "libsecret-devel", "libsoup-devel", "libspiel-devel", "libtasn1-devel", "libwebp-devel", "libwpe-devel", "libxkbcommon-devel", "libxml2-devel", "libxslt-devel", "libxt-devel", "linux-headers", "mesa-devel", "openjpeg-devel", "sqlite-devel", "sysprof-capture", "wayland-devel", "wayland-protocols", "woff2-devel", "wpebackend-fdo-devel"]
+rundeps = ["bubblewrap", "gst-plugins-bad", "gst-plugins-good", "xdg-dbus-proxy"]
+options = ["!check", "jobs:12"]
+
+source = [
+    { url = "https://webkitgtk.org/releases/webkitgtk-2.54.2.tar.xz", sha256 = "a76345b391bef6211fb5ab6cfab2e86b285d18cda17cbb9ade595f1252b86065" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -DNDEBUG"
+export CXXFLAGS="${CXXFLAGS} -DNDEBUG -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_NONE -Wno-deprecated-declarations -Wno-deprecated-copy"
+export CCACHE_SLOPPINESS=time_macros,include_file_mtime
+'''
+setup = '''
+%cmake \
+    -DPORT=GTK \
+    -DCMAKE_SKIP_RPATH=ON \
+    -DUSE_GTK4=OFF \
+    -DUSE_LD_LLD=ON \
+    -DUSE_LIBBACKTRACE=OFF \
+    -DUSE_SOUP2=OFF \
+    -DUSE_WOFF2=ON \
+    -DUSE_FLITE=OFF \
+    -DUSE_SPIEL=ON \
+    -DUSE_MIMALLOC=OFF \
+    -DENABLE_BUBBLEWRAP_SANDBOX=ON \
+    -DENABLE_DOCUMENTATION=OFF \
+    -DENABLE_INTROSPECTION=ON \
+    -DENABLE_JOURNALD_LOG=OFF \
+    -DENABLE_MINIBROWSER=ON \
+    -DENABLE_SAMPLING_PROFILER=OFF \
+    -DENABLE_WAYLAND_TARGET=ON \
+    -DENABLE_X11_TARGET=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 Source/WebCore/LICENSE-APPLE "$pkgdir/usr/share/licenses/webkitgtk/LICENSE-APPLE"
+install -Dm644 Source/WebCore/LICENSE-LGPL-2.1 "$pkgdir/usr/share/licenses/webkitgtk/LICENSE-LGPL-2.1"
+install -Dm644 Source/WebCore/LICENSE-LGPL-2 "$pkgdir/usr/share/licenses/webkitgtk/LICENSE-LGPL-2"
+'''

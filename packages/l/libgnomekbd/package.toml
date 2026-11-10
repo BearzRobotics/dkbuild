@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/libgnomekbd/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libgnomekbd"
+version = "3.28.1"
+release = 1
+summary = "Gnome keyboard configuration library"
+license = "GPL-2.0-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/libgnomekbd"
+hostdeps = ["gettext", "glib-devel", "gobject-introspection", "pkgconf"]
+builddeps = ["gtk+3-devel", "libxklavier-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://download.gnome.org/sources/libgnomekbd/3.28/libgnomekbd-3.28.1.tar.xz", sha256 = "22dc59566d73c0065350f5a97340e62ecc7b08c4df19183804bb8be24c8fe870" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

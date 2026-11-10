@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/jemalloc/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "jemalloc"
+version = "5.3.0"
+release = 2
+summary = "General purpose allocator library"
+license = "BSD-2-Clause"
+homepage = "https://jemalloc.net"
+patches = ["exceptionspec.patch", "pkgconf-ver.patch", "skiptest.patch"]
+hostdeps = ["automake", "libtool", "pkgconf"]
+
+source = [
+    { url = "https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2", sha256 = "2db82d1e7119df3e71b7640219b6dfe84789bc0537983c3b7ac4f7189aecfeaa" },
+]
+
+setup = '''
+./autogen.sh
+%configure \
+    --with-lg-hugepage=21
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/jemalloc/COPYING"
+'''

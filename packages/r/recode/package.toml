@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/recode/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "recode"
+version = "3.7.15"
+release = 1
+summary = "Charset converter tool and library"
+license = "GPL-3.0-or-later AND LGPL-3.0-only"
+homepage = "https://github.com/rrthomas/recode"
+hostdeps = ["automake", "bison", "flex", "gettext-devel", "libtool", "libtool-devel", "python", "texinfo"]
+checkdeps = ["python-cython", "python-devel", "python-setuptools"]
+
+source = [
+    { url = "https://github.com/rrthomas/recode/releases/download/v3.7.15/recode-3.7.15.tar.gz", sha256 = "f590407fc51badb351973fc1333ee33111f05ec83a8f954fd8cf0c5e30439806" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

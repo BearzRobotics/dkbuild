@@ -1,0 +1,5 @@
+#!/bin/sh
+# users and groups (geoclue.conf)
+grep -q "^_geoclue:" /etc/group || groupadd -r _geoclue
+grep -q "^_geoclue:" /etc/passwd || useradd -r -g _geoclue -d /var/empty -s /usr/bin/nologin -c 'geoclue user' _geoclue
+exit 0

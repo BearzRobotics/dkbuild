@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/geoclue/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "geoclue"
+version = "2.8.2"
+release = 1
+summary = "D-Bus geoinformation service"
+license = "LGPL-2.1-or-later"
+homepage = "https://gitlab.freedesktop.org/geoclue/geoclue/wikis/home"
+hostdeps = ["gettext", "glib-devel", "gobject-introspection", "pkgconf", "vala"]
+builddeps = ["avahi-devel", "json-glib-devel", "libnotify-devel", "libsoup-devel", "modemmanager-devel", "eudev-devel"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/geoclue/geoclue/-/archive/2.8.2/geoclue-2.8.2.tar.bz2", sha256 = "d4d65933b704d4c8d4ca9747dc511b883e35099abe534c8560f2aab3017e4cd4" },
+]
+
+setup = '''
+%meson \
+    -Ddbus-srv-user=_geoclue \
+    -Dgtk-doc=false \
+    -Dintrospection=true \
+    -Dvapi=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+rm -rf "$pkgdir/usr/lib/sysusers.d/geoclue-sysusers.conf"
+'''

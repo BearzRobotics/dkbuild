@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libwpe/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libwpe"
+version = "1.16.3"
+release = 1
+summary = "General-purpose library for WPE WebKit"
+license = "BSD-2-Clause"
+homepage = "https://wpewebkit.org"
+patches = ["poison.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["libglvnd-devel", "libxkbcommon-devel"]
+
+source = [
+    { url = "https://wpewebkit.org/releases/libwpe-1.16.3.tar.xz", sha256 = "c880fa8d607b2aa6eadde7d6d6302b1396ebc38368fe2332fa20e193c7ee1420" },
+]
+
+setup = '''
+%meson \
+    -Ddefault_library=shared
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libwpe/COPYING"
+'''

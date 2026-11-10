@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/wpebackend-fdo/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "wpebackend-fdo"
+version = "1.16.1"
+release = 1
+summary = "Wayland backend for WPE WebKit"
+license = "BSD-2-Clause"
+homepage = "https://wpewebkit.org"
+patches = ["narrowing.patch", "unistd.patch"]
+hostdeps = ["pkgconf", "wayland"]
+builddeps = ["glib-devel", "libepoxy-devel", "libwpe-devel", "wayland-devel"]
+
+source = [
+    { url = "https://wpewebkit.org/releases/wpebackend-fdo-1.16.1.tar.xz", sha256 = "544ae14012f8e7e426b8cb522eb0aaaac831ad7c35601d1cf31d37670e0ebb3b" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/wpebackend-fdo/COPYING"
+'''

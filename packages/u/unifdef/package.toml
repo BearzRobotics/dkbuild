@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/unifdef/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "unifdef"
+version = "2.12"
+release = 1
+summary = "Selectively remove C preprocessor conditionals"
+license = "BSD-2-Clause AND BSD-3-Clause"
+homepage = "https://github.com/fanf2/unifdef"
+patches = ["tests.patch"]
+
+source = [
+    { url = "https://dotat.at/prog/unifdef/unifdef-2.12.tar.xz", sha256 = "43ce0f02ecdcdc723b2475575563ddb192e988c886d368260bc0a63aee3ac400" },
+]
+
+build = '''
+%make \
+    PREFIX=/usr
+'''
+check = '''
+%make test -j1
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr \
+    prefix=/usr
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/unifdef/COPYING"
+'''

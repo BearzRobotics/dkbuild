@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libspeechprovider/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libspeechprovider"
+version = "1.0.3"
+release = 1
+summary = "Speech provider resources"
+license = "Apache-2.0"
+homepage = "https://project-spiel.org"
+hostdeps = ["gobject-introspection", "pkgconf"]
+builddeps = ["glib-devel"]
+checkdeps = ["python-gobject"]
+
+source = [
+    { url = "https://github.com/project-spiel/libspeechprovider/archive/refs/tags/SPEECHPROVIDER_1_0_3.tar.gz", sha256 = "e83e32428cd8b684dff3c931601151d1202e0b6370990a605a36322804959cae" },
+]
+
+setup = '''
+%meson \
+    -Ddocs=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

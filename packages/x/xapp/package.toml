@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/xapp/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xapp"
+version = "3.0.1"
+release = 2
+summary = "Cross-desktop libraries and common resources"
+license = "GPL-3.0-or-later AND LGPL-3.0-or-later"
+homepage = "https://projects.linuxmint.com/xapps"
+patches = ["bash.patch"]
+hostdeps = ["gettext", "gobject-introspection", "pkgconf", "vala"]
+builddeps = ["dbus-devel", "glib-devel", "gtk+3-devel", "libdbusmenu-devel", "libgnomekbd-devel", "libxkbfile-devel", "python-gobject-devel"]
+rundeps = ["gtk+3", "python-gobject", "python-setproctitle"]
+options = ["!check", "!cross"]
+
+source = [
+    { url = "https://github.com/linuxmint/xapp/archive/refs/tags/3.0.1.tar.gz", sha256 = "0bd907bb7def8a891386fc711b16057670c2a0212e50f7db2b9445550d282f1f" },
+]
+
+setup = '''
+%meson \
+    -Ddocs=true \
+    -Ddebian_derivative=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+# worthless
+rm -rf "$pkgdir/usr/bin/xapp-gpu-offload"
+'''

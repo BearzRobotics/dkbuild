@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/cracklib/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "cracklib"
+version = "2.10.3"
+release = 1
+summary = "Password checking library"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/cracklib/cracklib"
+hostdeps = ["automake", "bash", "gettext-devel", "libtool", "pkgconf"]
+rundeps = []
+
+source = [
+    { url = "https://github.com/cracklib/cracklib/releases/download/v2.10.3/cracklib-2.10.3.tar.gz", sha256 = "877b823198eb29aa1778b16a70cad05f7b54b164b3bf7ab656fc326c393f4c85" },
+    { url = "https://github.com/cracklib/cracklib/releases/download/v2.10.3/cracklib-words-2.10.3.gz", sha256 = "1d9dd4d8eed30520d83c0f331ac8ddad5b0c78b9fe8a4f456edbba7b6f871250" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-static
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 ./words/cracklib-words-2.10.3 "$pkgdir/usr/share/cracklib/cracklib-words"
+# compress
+for f in "$pkgdir"/usr/share/cracklib/*; do gzip -9n "$f"; done
+'''
