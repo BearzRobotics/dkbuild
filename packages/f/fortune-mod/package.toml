@@ -1,0 +1,28 @@
+# fortune and its cookies (the offensive set left out), unstr, strfile.
+name = "fortune-mod"
+version = "3.26.0"
+release = 1
+summary = "The fortune cookie program, with its cookie files"
+license = "BSD-4-Clause-UC"
+homepage = "https://github.com/shlomif/fortune-mod"
+hostdeps = ["cmake", "ninja", "pkgconf", "rinutils", "perl"]
+builddeps = ["recode-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/shlomif/fortune-mod/releases/download/fortune-mod-3.26.0/fortune-mod-3.26.0.tar.xz", sha256 = "ac4d1486cac9b999049107136b94106fe98a4aeac00ec635b144c43764bffe4c" },
+]
+
+setup = '''
+%cmake \
+    -DCOOKIEDIR=/usr/share/fortunes \
+    -DLOCALDIR=/usr/local/share/fortunes \
+    -DNO_OFFENSIVE=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING.txt "$pkgdir/usr/share/licenses/fortune-mod/COPYING.txt"
+'''

@@ -1,0 +1,26 @@
+# RetroArch with its online updaters for cores and assets off: cores come as
+# packages.
+name = "retroarch"
+version = "1.22.2"
+release = 1
+summary = "Frontend for emulators and game engines (libretro)"
+license = "GPL-3.0-or-later"
+homepage = "https://www.retroarch.com"
+hostdeps = ["pkgconf"]
+builddeps = ["sdl2-compat-devel", "mesa-devel", "wayland-devel", "wayland-protocols", "libxkbcommon-devel", "vulkan-loader-devel", "vulkan-headers", "ffmpeg-devel", "eudev-devel", "libpulse-devel", "alsa-lib-devel", "pipewire-devel", "freetype-devel", "zlib-ng-compat-devel", "libxml2-devel", "mbedtls-devel", "libusb-devel", "libx11-devel", "libxrandr-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/libretro/RetroArch/archive/refs/tags/v1.22.2.tar.gz", sha256 = "245ef18c8fa8fbd9fbb5eb25cf43e17c6aace2f95c1ed99873cbd794012bb232" },
+]
+
+setup = '''
+./configure --prefix=/usr --sysconfdir=/etc --disable-builtinmbedtls --disable-builtinzlib --enable-dbus --disable-update_cores --disable-update_assets --disable-update_core_info
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/retroarch/COPYING"
+'''

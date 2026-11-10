@@ -1,0 +1,27 @@
+# groff for documents and pages other tools format with it (man itself is dkman).
+name = "groff"
+version = "1.25.0"
+release = 1
+summary = "GNU troff document formatting system"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/groff"
+hostdeps = ["pkgconf", "perl", "bison", "texinfo"]
+builddeps = ["uchardet-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/groff/groff-1.25.0.tar.gz", sha256 = "24d103a07eb79e418963bce206c8771b649871f83bda2fd4c2e65529c1c56921" },
+]
+
+setup = '''
+%configure \
+    --without-x \
+    --with-doc=no
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/groff/COPYING"
+'''

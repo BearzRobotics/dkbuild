@@ -1,0 +1,5 @@
+type = process
+command = /usr/bin/mariadbd --user=_mysql
+smooth-recovery = true
+stop-timeout = 60.0
+depends-on: rcboot

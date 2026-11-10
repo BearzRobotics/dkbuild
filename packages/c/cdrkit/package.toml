@@ -9,7 +9,7 @@ homepage = "https://salsa.debian.org/debian/cdrkit"
 patches = ["001-update-geteltorito.patch", "002-fix-typo.patch", "003-fix-libcap-detect.patch", "004-add-efi-boot.patch", "005-gcc10.patch", "006-format-security.patch", "007-implicit-func-decl.patch", "008-allow-set-creation-date.patch", "009-cmake-4.patch", "010-isoinfo-add-efi.patch", "999-libusal-no-remote.patch", "no-sbin.patch"]
 hostdeps = ["cmake", "libcap", "ninja"]
 builddeps = ["bzip2-devel", "libcap-devel", "zlib-ng-compat-devel"]
-rundeps = ["!schilytools-cdrtools"]
+rundeps = ["!cdrtools"]
 options = ["!lto"]
 
 source = [

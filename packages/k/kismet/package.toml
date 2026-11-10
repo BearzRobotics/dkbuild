@@ -1,0 +1,32 @@
+# Kismet with its capture tools (Wi-Fi, Bluetooth, ...); the Python tools,
+# SDR and MQTT parts are off (libraries not in the tree yet).
+name = "kismet"
+version = "2026.10.R1"
+release = 1
+summary = "Wireless network detector, sniffer and IDS"
+license = "GPL-2.0-or-later"
+homepage = "https://www.kismetwireless.net"
+hostdeps = ["pkgconf", "protobuf"]
+builddeps = ["libpcap-devel", "libnl-devel", "protobuf-c-devel", "protobuf-devel", "sqlite-devel", "pcre2-devel", "libusb-devel", "openssl-devel", "zlib-ng-compat-devel", "libcap-devel", "lm-sensors-devel", "networkmanager-devel"]
+options = ["!check", "jobs:6"]
+
+source = [
+    { url = "https://www.kismetwireless.net/code/kismet-2026-10-R1.tar.xz", sha256 = "57bc17ed5fbc74a3dcfaece4baefc1c7b3fa6bdb768ada9193fcb48988b9de2e" },
+]
+
+setup = '''
+%configure \
+    --sysconfdir=/etc/kismet \
+    --disable-python-tools \
+    --disable-librtlsdr \
+    --disable-mosquitto \
+    --disable-libwebsockets \
+    --enable-require-pcre2
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install INSTUSR=root INSTGRP=root SUIDGROUP=root
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/kismet/LICENSE"
+'''

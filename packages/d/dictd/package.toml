@@ -1,0 +1,27 @@
+# dict, dictd and dictzip. Dictionaries are separate packages.
+name = "dictd"
+version = "1.13.3"
+release = 1
+summary = "Dictionary server and client (dict protocol, RFC 2229)"
+license = "GPL-2.0-or-later"
+homepage = "https://sourceforge.net/projects/dict"
+hostdeps = ["pkgconf", "bison", "flex", "libtool"]
+builddeps = ["libmaa-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/dict/dictd-1.13.3.tar.gz", sha256 = "192129dfb38fa723f48a9586c79c5198fc4904fec1757176917314dd073f1171" },
+]
+
+setup = '''
+%configure \
+    --sysconfdir=/etc/dict
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 $pkgfiles/dictd "$pkgdir/etc/dinit.d/dictd"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/dictd/COPYING"
+'''

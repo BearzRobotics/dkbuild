@@ -1,0 +1,21 @@
+# Lutris; runners it downloads itself land in ~/.local/share/lutris.
+name = "lutris"
+version = "0.5.22"
+release = 1
+summary = "Game launcher and manager (native, Wine, emulators)"
+license = "GPL-3.0-or-later"
+homepage = "https://lutris.net"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-gobject", "gtk+3", "python-pyyaml", "python-requests", "python-pillow", "python-dbus", "python-distro", "python-lxml", "python-magic", "webkitgtk", "python-cairo", "xrandr", "mesa", "vulkan-loader", "wine"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/lutris/lutris/archive/refs/tags/v0.5.22.tar.gz", sha256 = "1001b215d68c7e450b74bcf11510adb3ac60074ed46d5a160eb851bafcc14c3c" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 share/applications/net.lutris.Lutris.desktop "$pkgdir/usr/share/applications/net.lutris.Lutris.desktop" 2>/dev/null || true
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/lutris/LICENSE"
+'''

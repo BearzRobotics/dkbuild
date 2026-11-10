@@ -1,0 +1,4 @@
+type = process
+command = /usr/bin/dictd --nodetach
+smooth-recovery = true
+depends-on: rcboot

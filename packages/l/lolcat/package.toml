@@ -1,0 +1,20 @@
+name = "lolcat"
+version = "1.5"
+release = 1
+summary = "Rainbow-colored cat (the fast C version)"
+license = "WTFPL"
+homepage = "https://github.com/jaseg/lolcat"
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/jaseg/lolcat/archive/refs/tags/v1.5.tar.gz", sha256 = "2af79bed90e0bda52ae500d16e7e7022037fad10c487c317e7f0ff17ec4b14f5" },
+]
+
+build = '''
+%make CC="$CC" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" lolcat censor
+'''
+install = '''
+install -Dm755 lolcat "$pkgdir/usr/bin/lolcat"
+install -Dm755 censor "$pkgdir/usr/bin/censor"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/lolcat/LICENSE"
+'''

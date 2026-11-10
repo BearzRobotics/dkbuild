@@ -1,0 +1,28 @@
+# The original cdrtools from schilytools (the maintained continuation), only the
+# CD/DVD tools. cdrkit (the Debian fork) provides mkisofs and cdrecord as links to
+# its own programs, so the two exclude each other (`!` dependencies).
+name = "cdrtools"
+version = "2024.03.21"
+release = 1
+summary = "cdrecord, mkisofs, readcd, cdda2wav (Schily's original cdrtools)"
+license = "CDDL-1.0 AND GPL-2.0-only"
+homepage = "https://codeberg.org/schilytools/schilytools"
+hostdeps = ["make"]
+builddeps = ["linux-headers", "libcap-devel"]
+rundeps = ["!cdrkit"]
+options = ["!check"]
+
+source = [
+    { url = "https://codeberg.org/schilytools/schilytools/releases/download/2024-03-21/schily-2024-03-21.tar.bz2", sha256 = "76db022e450c1791a00e69780b55d18a2e3fc39b5ff870996433f87312032024" },
+]
+
+build = '''
+make -j1 CCOM=clang INS_BASE=/usr INS_RBASE=/ DEFINSUSR=root DEFINSGRP=root
+'''
+install = '''
+for d in cdrecord cdda2wav readcd mkisofs scgcheck; do
+    make -C $d -j1 CCOM=clang INS_BASE=/usr INS_RBASE=/ DEFINSUSR=root DEFINSGRP=root DESTDIR="$pkgdir" install
+done
+rm -rf "$pkgdir/usr/include" "$pkgdir/usr/lib/"*.a "$pkgdir/usr/lib/profiled"
+install -Dm644 CDDL.Schily.txt "$pkgdir/usr/share/licenses/cdrtools/CDDL.Schily.txt"
+'''

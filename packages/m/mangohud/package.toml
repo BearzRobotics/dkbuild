@@ -1,0 +1,31 @@
+# The release's -Source tarball carries its meson subprojects (imgui, implot,
+# vulkan-headers), so nothing is downloaded.
+name = "mangohud"
+version = "0.8.4"
+release = 1
+summary = "Vulkan/OpenGL overlay: FPS, temperatures, load"
+license = "MIT"
+homepage = "https://github.com/flightlessmango/MangoHud"
+hostdeps = ["meson", "ninja", "pkgconf", "glslang", "python-mako"]
+builddeps = ["dbus-devel", "libx11-devel", "mesa-devel", "vulkan-headers", "wayland-devel", "libxkbcommon-devel", "spdlog-devel", "nlohmann-json", "glfw-devel", "libdrm-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/flightlessmango/MangoHud/releases/download/v0.8.4/MangoHud-v0.8.4-Source.tar.xz", sha256 = "bbe5a2b976313c53f21dc24b98bbed03226589460a0cce20d923cb2c36c9d8b0" },
+]
+
+setup = '''
+%meson \
+    -Dwith_xnvctrl=disabled \
+    -Duse_system_spdlog=enabled \
+    -Dmangoapp=true \
+    -Dmangohudctl=true \
+    --wrap-mode=nodownload
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/mangohud/LICENSE"
+'''

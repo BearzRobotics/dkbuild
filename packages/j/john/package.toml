@@ -1,0 +1,28 @@
+# John the Ripper, the community jumbo version (bleeding-jumbo of 2026-11-04;
+# no releases since 1.9.0), with OpenMP and OpenCL.
+name = "john"
+version = "1.9.0+jumbo20261104"
+release = 1
+summary = "John the Ripper password cracker (jumbo)"
+license = "GPL-2.0-or-later"
+homepage = "https://www.openwall.com/john/"
+hostdeps = ["pkgconf"]
+builddeps = ["openssl-devel", "gmp-devel", "libpcap-devel", "zlib-ng-compat-devel", "bzip2-devel", "opencl-headers", "ocl-icd-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/openwall/john/archive/37bebbe4b6442c8dd3888e5848ef062c0783e9f3.tar.gz", sha256 = "9e595c25610de6dd3fa37124c57a1be76548399bb299f285d6797e60d3efb969" },
+]
+
+setup = '''
+cd src && ./configure --prefix=/usr --with-systemwide --enable-openmp --enable-opencl
+'''
+build = '''
+cd src && %make
+'''
+install = '''
+install -dm755 "$pkgdir/usr/lib/john" "$pkgdir/usr/bin" "$pkgdir/usr/share/john"
+cp -a run/. "$pkgdir/usr/lib/john/"
+for b in john zip2john rar2john; do [ -e "$pkgdir/usr/lib/john/$b" ] && ln -sf ../lib/john/$b "$pkgdir/usr/bin/$b"; done
+install -Dm644 doc/LICENSE "$pkgdir/usr/share/licenses/john/LICENSE"
+'''

@@ -1,0 +1,25 @@
+# needed by: fortune-mod.
+name = "rinutils"
+version = "0.10.3"
+release = 1
+summary = "Shlomi Fish's C utility headers (CMake package)"
+license = "MIT"
+homepage = "https://github.com/shlomif/rinutils"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/shlomif/rinutils/releases/download/0.10.3/rinutils-0.10.3.tar.xz", sha256 = "f9e527d37a6cc8c7b8870ada63caa24f32ab0d29fd1116df3ebb686583030955" },
+]
+
+setup = '''
+%cmake \
+    -DWITH_TEST_SUITE=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/rinutils/LICENSE"
+'''

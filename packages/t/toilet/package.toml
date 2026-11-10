@@ -1,0 +1,24 @@
+name = "toilet"
+version = "0.3"
+release = 1
+summary = "Large colorful text in the terminal (figlet-compatible)"
+license = "WTFPL"
+homepage = "http://caca.zoy.org/wiki/toilet"
+hostdeps = ["pkgconf"]
+builddeps = ["libcaca-devel"]
+options = ["!check"]
+
+source = [
+    { url = "http://caca.zoy.org/raw-attachment/wiki/toilet/toilet-0.3.tar.gz", sha256 = "89d4b530c394313cc3f3a4e07a7394fa82a6091f44df44dfcd0ebcb3300a81de" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/toilet/COPYING"
+'''

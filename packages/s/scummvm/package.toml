@@ -1,0 +1,24 @@
+# Every engine, including the unstable ones, as most distributions build it.
+name = "scummvm"
+version = "2026.4.0"
+release = 1
+summary = "Engine for classic point-and-click adventure games"
+license = "GPL-3.0-or-later"
+homepage = "https://www.scummvm.org"
+builddeps = ["sdl2-compat-devel", "sdl2-net-devel", "libjpeg-turbo-devel", "libpng-devel", "freetype-devel", "fribidi-devel", "flac-devel", "libvorbis-devel", "libtheora-devel", "libmad-devel", "faad2-devel", "fluidsynth-devel", "giflib-devel", "curl-devel", "zlib-ng-compat-devel", "mesa-devel"]
+options = ["!check", "jobs:12"]
+
+source = [
+    { url = "https://github.com/scummvm/scummvm/archive/refs/tags/v2026.4.0.tar.gz", sha256 = "e9615bad3794121be740aef7270fe3bec75e9b372fbaadaf8a07bb8fe2aa016a" },
+]
+
+setup = '''
+./configure --prefix=/usr --enable-release --disable-debug --enable-all-engines --enable-opengl-game-shaders
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/scummvm/COPYING"
+'''

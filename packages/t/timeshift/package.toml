@@ -1,0 +1,26 @@
+# Timeshift 26.09.0 (Linux Mint's master.mint27 release).
+name = "timeshift"
+version = "26.09.0"
+release = 1
+summary = "System restore points (rsync or Btrfs snapshots)"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/linuxmint/timeshift"
+hostdeps = ["meson", "ninja", "pkgconf", "vala", "help2man", "gettext"]
+builddeps = ["gtk+3-devel", "json-glib-devel", "libgee-devel", "vte-devel", "xapp-devel"]
+rundeps = ["rsync", "btrfs-progs"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/linuxmint/timeshift/archive/refs/tags/master.mint27.tar.gz", sha256 = "d02c25cecae1acb7af67bf256e4e530e7d23cb549006b69b231a8dd4b6f6228c" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSES/GPL-2.0-or-later.txt "$pkgdir/usr/share/licenses/timeshift/GPL-2.0-or-later.txt"
+'''

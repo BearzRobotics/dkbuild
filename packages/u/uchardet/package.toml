@@ -1,0 +1,23 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/uchardet/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "uchardet"
+version = "0.0.8"
+release = 1
+summary = "Encoding detector library"
+license = "MPL-1.1"
+homepage = "https://www.freedesktop.org/wiki/Software/uchardet"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+
+source = [
+    { url = "https://distributions.freedesktop.org/software/uchardet/releases/uchardet-0.0.8.tar.xz", sha256 = "e97a60cfc00a1c147a674b097bb1422abd9fa78a2d9ce3f3fdcc2e78a34ac5f0" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

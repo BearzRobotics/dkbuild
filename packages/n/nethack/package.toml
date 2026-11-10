@@ -1,0 +1,32 @@
+# NetHack 5.0 for the terminal (curses and tty interfaces). Its build fetches
+# Lua; that tarball is the recipe's second source instead.
+name = "nethack"
+version = "5.0.0"
+release = 1
+summary = "Exploring the Dungeons of Doom (terminal roguelike)"
+license = "custom:NGPL"
+homepage = "https://www.nethack.org"
+hostdeps = ["bison", "flex", "pkgconf"]
+builddeps = ["ncurses-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/NetHack/NetHack/archive/refs/tags/NetHack-5.0.0_Released.tar.gz", sha256 = "5638ab7069f143ac4f8197677aee4d43ee3dd1a90a780e596e6ed4f526302703" },
+    { url = "https://www.lua.org/ftp/lua-5.4.8.tar.gz", sha256 = "4f18ddae154e793e46eeab727c59ef1c0c0c2b744e7b94219710d76f530629ae" },
+]
+
+setup = '''
+# Lua as NetHack's `make fetch-Lua` would download it (the second source)
+mkdir -p lib && cp -r ../lua-5.4.8 lib/lua-5.4.8
+(cd sys/unix && sh setup.sh hints/linux.500)
+'''
+build = '''
+make -j1 PREFIX=/usr HACKDIR=/usr/lib/nethack VARDIR=/var/games/nethack SHELLDIR=/usr/bin CC="$CC" LUA_VERSION=5.4.8 all
+'''
+install = '''
+make PREFIX=/usr HACKDIR=/usr/lib/nethack VARDIR=/var/games/nethack SHELLDIR=/usr/bin INSTDIR="$pkgdir/usr/lib/nethack" \
+    VARDIR="$pkgdir/var/games/nethack" SHELLDIR="$pkgdir/usr/bin" CHOWN=true CHGRP=true install
+install -Dm644 doc/nethack.6 "$pkgdir/usr/share/man/man6/nethack.6"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/nethack.conf"
+install -Dm644 dat/license "$pkgdir/usr/share/licenses/nethack/license"
+'''

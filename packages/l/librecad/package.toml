@@ -1,0 +1,25 @@
+# LibreCAD with Qt 6.
+name = "librecad"
+version = "2.2.1.6"
+release = 1
+summary = "2D CAD (DXF/DWG)"
+license = "GPL-2.0-or-later"
+homepage = "https://librecad.org"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtsvg-devel", "qt6-qt5compat-devel", "boost-devel", "muparser-devel", "freetype-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/LibreCAD/LibreCAD/archive/refs/tags/v2.2.1.6.tar.gz", sha256 = "d6dfca87786d7507bd55e92f3e2e478f03da6f215cfa01bdcfbdafb20b132c7d" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/librecad/LICENSE"
+'''

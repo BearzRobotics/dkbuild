@@ -1,0 +1,38 @@
+# Apache httpd 2.4 with every module shared and every MPM; runs as _http.
+name = "httpd"
+version = "2.4.70"
+release = 1
+summary = "Apache HTTP Server"
+license = "Apache-2.0"
+homepage = "https://httpd.apache.org"
+hostdeps = ["pkgconf", "perl"]
+builddeps = ["apr-devel", "apr-util-devel", "pcre2-devel", "openssl-devel", "zlib-ng-compat-devel", "libxml2-devel", "nghttp2-devel", "brotli-devel", "lua-devel", "curl-devel", "jansson-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://dlcdn.apache.org/httpd/httpd-2.4.70.tar.bz2", sha256 = "1eefd7dc95836c5872894ce8e6a37f773d5a6764f0766869d39b8bcf0b1bafc3" },
+]
+
+setup = '''
+%configure \
+    --sysconfdir=/etc/httpd \
+    --localstatedir=/var \
+    --libexecdir=/usr/lib/httpd/modules \
+    --datadir=/srv/http \
+    --enable-layout=RedHat \
+    --enable-mods-shared=reallyall \
+    --enable-mpms-shared=all \
+    --with-apr=/usr/bin/apr-1-config \
+    --with-apr-util=/usr/bin/apu-1-config \
+    --with-pcre=/usr/bin/pcre2-config
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 $pkgfiles/httpd "$pkgdir/etc/dinit.d/httpd"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/httpd.conf"
+sed -i -e 's/^User daemon/User _http/' -e 's/^Group daemon/Group _http/' "$pkgdir/etc/httpd/conf/httpd.conf" 2>/dev/null || true
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/httpd/LICENSE"
+'''

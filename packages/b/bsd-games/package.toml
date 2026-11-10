@@ -1,0 +1,48 @@
+# NetBSD's games ported to Linux (2.17, with Debian's patches): adventure, robots,
+# hangman, trek, worm, ... (fortune is fortune-mod).
+name = "bsd-games"
+version = "2.17"
+release = 1
+summary = "The classic BSD text games (adventure, robots, hangman, ...)"
+license = "BSD-3-Clause"
+homepage = "https://www.polyomino.org.uk/computer/software/bsd-games/"
+hostdeps = ["flex", "bison", "patch"]
+builddeps = ["ncurses-devel", "openssl-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://deb.debian.org/debian/pool/main/b/bsdgames/bsdgames_2.17.orig.tar.gz", sha256 = "066f924aef6c1c5ea946f588e36f303021f5dfc093944738f025d8edbc6fff60" },
+    { url = "https://deb.debian.org/debian/pool/main/b/bsdgames/bsdgames_2.17-35.debian.tar.xz", sha256 = "80be130b0a12b69e53f6dbc15b0dad7ffc4ffd2e7e2944aecd7f35bd64899c54", unpack = false },
+]
+
+setup = '''
+# Debian's patches, then the answers its interactive configure asks for
+tar -xf /build/sources/bsdgames_2.17-35.debian.tar.xz
+while read -r p; do case "$p" in ''|'#'*) continue ;; esac; patch -p1 < debian/patches/$p; done < debian/patches/series
+cat > config.params <<'EOF2'
+bsd_games_cfg_non_interactive=y
+bsd_games_cfg_install_prefix="$pkgdir"
+bsd_games_cfg_gamesdir=/usr/bin
+bsd_games_cfg_sbindir=/usr/bin
+bsd_games_cfg_usrbindir=/usr/bin
+bsd_games_cfg_libexecdir=/usr/lib/games
+bsd_games_cfg_man6dir=/usr/share/man/man6
+bsd_games_cfg_man8dir=/usr/share/man/man8
+bsd_games_cfg_man5dir=/usr/share/man/man5
+bsd_games_cfg_sharedir=/usr/share/games
+bsd_games_cfg_varlibdir=/var/games
+bsd_games_cfg_do_chown=n
+bsd_games_cfg_no_build_dirs="dm fortune factor"
+bsd_games_cfg_cc="$CC"
+bsd_games_cfg_optimize_flags="$CFLAGS"
+bsd_games_cfg_other_ldflags="$LDFLAGS"
+EOF2
+./configure
+'''
+build = '''
+make
+'''
+install = '''
+make install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/bsd-games/COPYING"
+'''

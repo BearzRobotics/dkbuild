@@ -1,0 +1,26 @@
+# Dia from git (the last release, 0.97.3, is GTK 2): the GTK 3 port.
+name = "dia"
+version = "0.98+git20260425"
+release = 1
+summary = "Diagram editor (flowcharts, UML, networks)"
+license = "GPL-2.0-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/dia"
+hostdeps = ["meson", "ninja", "pkgconf", "gettext", "libxslt", "docbook-xsl-nons"]
+builddeps = ["gtk+3-devel", "libxml2-devel", "libxslt-devel", "graphene-devel", "poppler-devel", "python-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.gnome.org/GNOME/dia/-/archive/ad68cc378b7a187706bc2648c48b44d16fb80819/dia-ad68cc378b7a187706bc2648c48b44d16fb80819.tar.gz", sha256 = "0e00e6b6dcdac7c81b3439b96b4e1c2f7281d54a8b1bf849cad6630ecc8822a0" },
+]
+
+setup = '''
+%meson \
+    -Dtests=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/dia/COPYING"
+'''
