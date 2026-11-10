@@ -1,0 +1,36 @@
+# OpenSCAD from git (the last formal release is 2021.01; the project publishes
+# development snapshots), with Manifold, OpenCSG and Clipper2 from its submodules.
+# The source is a git snapshot: its sha256 is set after the first `dkbuild fetch openscad`.
+name = "openscad"
+version = "2026.11.10"
+release = 1
+summary = "Script-based 3D CAD modeller (solids for printing)"
+license = "GPL-2.0-or-later"
+homepage = "https://openscad.org"
+hostdeps = ["cmake", "ninja", "pkgconf", "bison", "flex", "gettext", "python", "qt6-qttools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtsvg-devel", "qt6-qtmultimedia-devel", "qscintilla-devel", "cgal", "boost-devel", "eigen", "gmp-devel", "mpfr-devel", "harfbuzz-devel", "freetype-devel", "fontconfig-devel", "double-conversion-devel", "libzip-devel", "glew-devel", "mesa-devel", "cairo-devel", "lib3mf-devel", "onetbb-devel", "glib-devel", "libxml2-devel", "nlohmann-json"]
+options = ["!check", "jobs:12"]
+
+source = [
+    { url = "snapshot:git https://github.com/openscad/openscad.git df091e896a1fe87655065b0859239db0d36d250a", sha256 = "0000000000000000000000000000000000000000000000000000000000000000" },
+]
+
+setup = '''
+%cmake \
+    -DEXPERIMENTAL=ON \
+    -DENABLE_TESTS=OFF \
+    -DUSE_BUILTIN_OPENCSG=ON \
+    -DUSE_BUILTIN_MANIFOLD=ON \
+    -DUSE_BUILTIN_CLIPPER2=ON \
+    -DUSE_QT6=ON \
+    -DUSE_MIMALLOC=OFF \
+    -DENABLE_HIDAPI=OFF \
+    -DENABLE_SPNAV=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/openscad/COPYING"
+'''

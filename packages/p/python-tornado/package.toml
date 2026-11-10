@@ -1,0 +1,23 @@
+# tornado from PyPI.
+name = "python-tornado"
+version = "6.6.1"
+release = 1
+summary = "Tornado is a Python web framework and asynchronous networking library, originally developed at Frien"
+license = "Apache-2.0"
+homepage = "http://www.tornadoweb.org/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/64/2b/8ff2b41620cbba0eeb0862fed21dcaa5a2ad36c6dd9bb465f9ff7a147be2/tornado-6.6.1.tar.gz", sha256 = "28e6311402af59c8b02e3fa0f5e7d8eb465b25081381803b127d97e6a4395d5a" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-tornado/LICENSE"
+'''

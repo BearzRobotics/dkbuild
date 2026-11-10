@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/qhull/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "qhull"
+version = "2020.2"
+release = 1
+summary = "Library for computing convex hulls"
+license = "custom:qhull"
+homepage = "http://www.qhull.org"
+patches = ["overflow.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+
+source = [
+    { url = "https://github.com/qhull/qhull/archive/refs/tags/2020.2.tar.gz", sha256 = "59356b229b768e6e2b09a701448bfa222c37b797a84f87f864f97462d8dbc7c5" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DLINK_APPS_SHARED=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING.txt "$pkgdir/usr/share/licenses/qhull/COPYING.txt"
+'''

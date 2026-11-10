@@ -1,0 +1,22 @@
+# ordered-set from PyPI.
+name = "python-ordered-set"
+version = "4.1.0"
+release = 1
+summary = "An OrderedSet is a custom MutableSet that remembers its order, so that every"
+license = "custom"
+homepage = "https://pypi.org/project/ordered-set/"
+hostdeps = ["python", "python-flit-core"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/4c/ca/bfac8bc689799bcca4157e0e0ced07e70ce125193fc2e166d2e685b7e2fe/ordered-set-4.1.0.tar.gz", sha256 = "694a8e44c87657c59292ede72891eb91d34131f6531463aab3009191c77364a8" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

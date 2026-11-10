@@ -1,0 +1,23 @@
+# filetype from PyPI.
+name = "python-filetype"
+version = "1.2.0"
+release = 1
+summary = "Infer file type and MIME type of any file/buffer. No external dependencies."
+license = "MIT"
+homepage = "https://github.com/h2non/filetype.py"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/bb/29/745f7d30d47fe0f251d3ad3dc2978a23141917661998763bebb6da007eb1/filetype-1.2.0.tar.gz", sha256 = "66b56cd6474bf41d8c54660347d37afcc3f7d1970648de365c102ef77548aadb" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-filetype/LICENSE"
+'''

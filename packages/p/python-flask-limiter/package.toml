@@ -1,0 +1,23 @@
+# Flask-Limiter from PyPI.
+name = "python-flask-limiter"
+version = "4.1.1"
+release = 1
+summary = "Rate limiting for flask applications"
+license = "MIT"
+homepage = "https://flask-limiter.readthedocs.org"
+hostdeps = ["python", "python-hatchling", "python-hatch-vcs"]
+rundeps = ["python", "python-flask", "python-limits", "python-ordered-set", "python-typing-extensions"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/4e/98/71780be5d1afb941219c4b48d241d4e246e3062b017caa4e79c4dc71314c/flask_limiter-4.1.1.tar.gz", sha256 = "ca11608fc7eec43dcea606964ca07c3bd4ec1ae89043a0f67f717899a4f48106" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-flask-limiter/LICENSE.txt"
+'''

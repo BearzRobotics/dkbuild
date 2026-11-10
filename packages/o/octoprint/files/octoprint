@@ -1,0 +1,5 @@
+type = process
+command = /usr/bin/octoprint serve --basedir /var/lib/octoprint --host 0.0.0.0 --port 5000
+run-as = _octoprint
+smooth-recovery = true
+depends-on: rcboot

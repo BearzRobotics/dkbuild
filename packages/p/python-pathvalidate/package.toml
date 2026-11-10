@@ -1,0 +1,23 @@
+# pathvalidate from PyPI.
+name = "python-pathvalidate"
+version = "3.3.1"
+release = 1
+summary = "pathvalidate is a Python library to sanitize/validate a string such as filenames/file-paths/etc."
+license = "MIT License"
+homepage = "https://github.com/thombashi/pathvalidate"
+hostdeps = ["python", "python-setuptools", "python-setuptools-scm"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/fa/2a/52a8da6fe965dea6192eb716b357558e103aea0a1e9a8352ad575a8406ca/pathvalidate-3.3.1.tar.gz", sha256 = "b18c07212bfead624345bb8e1d6141cdcf15a39736994ea0b94035ad2b1ba177" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pathvalidate/LICENSE"
+'''

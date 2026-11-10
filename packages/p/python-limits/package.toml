@@ -1,0 +1,23 @@
+# limits from PyPI.
+name = "python-limits"
+version = "5.8.0"
+release = 1
+summary = "Rate limiting utilities"
+license = "MIT"
+homepage = "https://limits.readthedocs.org"
+hostdeps = ["python", "python-hatchling", "python-hatch-vcs"]
+rundeps = ["python", "python-deprecated", "python-packaging", "python-typing-extensions"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/71/69/826a5d1f45426c68d8f6539f8d275c0e4fcaa57f0c017ec3100986558a41/limits-5.8.0.tar.gz", sha256 = "c9e0d74aed837e8f6f50d1fcebcf5fd8130957287206bc3799adaee5092655da" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-limits/LICENSE.txt"
+'''

@@ -1,0 +1,23 @@
+# netifaces from PyPI.
+name = "python-netifaces"
+version = "0.11.0"
+release = 1
+summary = "Portable network interface information."
+license = "MIT License"
+homepage = "https://github.com/al45tair/netifaces"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/a6/91/86a6eac449ddfae239e93ffc1918cf33fd9bab35c04d1e963b311e347a73/netifaces-0.11.0.tar.gz", sha256 = "043a79146eb2907edf439899f262b3dfe41717d34124298ed281139a8b93ca32" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-netifaces/LICENSE"
+'''

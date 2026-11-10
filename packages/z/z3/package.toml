@@ -1,0 +1,29 @@
+# needed by: prusaslicer (4.15, the version it pins).
+name = "z3"
+version = "4.15.1"
+release = 1
+summary = "Z3 theorem prover (SMT solver) and library"
+license = "MIT"
+homepage = "https://github.com/Z3Prover/z3"
+hostdeps = ["cmake", "ninja", "pkgconf", "python"]
+builddeps = ["gmp-devel"]
+options = ["!check", "jobs:12"]
+
+source = [
+    { url = "https://github.com/Z3Prover/z3/archive/refs/tags/z3-4.15.1.tar.gz", sha256 = "ebf6eed5f2cb217d62abddaa94526189ae40bf3c415fb9c2e2128e099f16fda0" },
+]
+
+setup = '''
+%cmake \
+    -DZ3_INCLUDE_GIT_HASH=OFF \
+    -DZ3_INCLUDE_GIT_DESCRIBE=OFF \
+    -DZ3_BUILD_LIBZ3_SHARED=ON \
+    -DZ3_USE_LIB_GMP=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/z3/LICENSE.txt"
+'''

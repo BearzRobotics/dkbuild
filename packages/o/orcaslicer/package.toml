@@ -1,0 +1,45 @@
+# OrcaSlicer with the system's libraries; its wxWidgets fork, libnoise,
+# SolveSpace's library and Draco are built into a private prefix from the
+# recipe's other sources.
+name = "orcaslicer"
+version = "2.5.0"
+release = 1
+summary = "3D printing slicer (Bambu Studio/PrusaSlicer lineage)"
+license = "AGPL-3.0-only"
+homepage = "https://www.orcaslicer.com"
+hostdeps = ["cmake", "ninja", "pkgconf", "unzip", "gettext"]
+builddeps = ["boost-devel", "cgal", "curl-devel", "cereal", "eigen", "glew-devel", "gmp-devel", "mpfr-devel", "nlopt-devel", "opencascade-devel", "openexr-devel", "openvdb-devel", "libpng-devel", "libjpeg-turbo-devel", "qhull-devel", "onetbb-devel", "nlohmann-json", "z3-devel", "gtk+3-devel", "dbus-devel", "zlib-ng-compat-devel", "libexpat-devel", "mesa-devel", "libsecret-devel", "openssl-devel", "opencv-devel", "assimp-devel", "libdatachannel-devel", "glfw-devel", "ffmpeg-devel", "webkitgtk-devel", "gstreamer-devel", "gst-plugins-base-devel", "libnotify-devel", "libtiff-devel", "fontconfig-devel"]
+options = ["!check", "jobs:12"]
+
+source = [
+    { url = "https://github.com/OrcaSlicer/OrcaSlicer/archive/refs/tags/v2.5.0.tar.gz", sha256 = "f2130592babc4f48194ebe0031065572dc0556bbed46245d660dd259645f0713" },
+    { url = "https://github.com/OrcaSlicer/Orca-deps-wxWidgets/archive/b44c39c100975a0ac0e46f937aa3f3eae5e18631.tar.gz", sha256 = "13d5954019712b28b2c48a1e82131a1e8aebfdb95958095b708db9b229abd729" },
+    { url = "https://github.com/SoftFever/Orca-deps-libnoise/archive/refs/tags/1.0.zip", sha256 = "96ffd6cc47898dd8147aab53d7d1b1911b507d9dbaecd5613ca2649468afd8b6", unpack = false, name = "libnoise.zip" },
+    { url = "https://github.com/JacobStoren/SolveSpaceLib/archive/4d8704523e4bf212fadf5189f92484244f670fea.zip", sha256 = "1c4bdde9c3c6ef20ea4b50b73601de56769f2eb131b36927d7c6489f102e6c30", unpack = false, name = "slvs.zip" },
+    { url = "https://github.com/google/draco/archive/refs/tags/1.5.7.zip", sha256 = "27b72ba2d5ff3d0a9814ad40d4cb88f8dc89a35491c0866d952473f8f9416b77", unpack = false, name = "draco.zip" },
+]
+
+setup = '''
+# a private prefix for the small libraries only this program uses
+P="$PWD/_deps"
+cmk() { cmake -S "$1" -B "$1/_b" -G Ninja -DCMAKE_INSTALL_PREFIX="$P" -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_PREFIX_PATH="$P" "$@" && cmake --build "$1/_b" && cmake --install "$1/_b"; }
+mkdir -p _src
+cd _src
+for z in libnoise slvs draco; do unzip -q /build/sources/$z.zip -d $z; done
+cd ..
+# Orca's own wxWidgets (a fork it needs), GTK 3, against the system's image and zlib libraries
+cmk "$(ls -d ../Orca-deps-wxWidgets-*/)" -DwxBUILD_TOOLKIT=gtk3 -DwxBUILD_SHARED=OFF -DwxUSE_LIBPNG=sys -DwxUSE_LIBJPEG=sys \
+    -DwxUSE_LIBTIFF=sys -DwxUSE_ZLIB=sys -DwxUSE_EXPAT=sys -DwxUSE_WEBVIEW=ON -DwxUSE_GLCANVAS_EGL=OFF -DwxBUILD_PRECOMP=OFF
+cmk "$(ls -d _src/libnoise/*/)"
+cmk "$(ls -d _src/slvs/*/)"
+cmk "$(ls -d _src/draco/*/)" -DDRACO_TRANSCODER_SUPPORTED=OFF
+%cmake -DCMAKE_PREFIX_PATH="$P" -DSLIC3R_STATIC=OFF -DSLIC3R_GTK=3 -DSLIC3R_FHS=ON -DSLIC3R_PCH=OFF -DBBL_RELEASE_TO_PUBLIC=1 -DORCA_TOOLS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/orcaslicer/LICENSE.txt"
+'''

@@ -1,0 +1,23 @@
+# OctoPrint-PiSupport from PyPI.
+name = "python-octoprint-pisupport"
+version = "2025.7.23"
+release = 1
+summary = "Provides additional information about your Pi in the UI"
+license = "AGPL-3.0-or-later"
+homepage = "https://github.com/OctoPrint/OctoPrint-PiSupport"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/35/da/0abc3d70ec30c21b4db8f2e0ec8bd8cdf6de03d0bfa928e15e6291a7d66b/octoprint_pisupport-2025.7.23.tar.gz", sha256 = "90159ad0a3c020dc6abb3575712f3fd216eeb350e607bbe3b74106a137802bbc" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-octoprint-pisupport/LICENSE"
+'''

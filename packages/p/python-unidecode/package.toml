@@ -1,0 +1,23 @@
+# Unidecode from PyPI.
+name = "python-unidecode"
+version = "1.4.0"
+release = 1
+summary = "ASCII transliterations of Unicode text"
+license = "GPL"
+homepage = "https://pypi.org/project/Unidecode/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/94/7d/a8a765761bbc0c836e397a2e48d498305a865b70a8600fd7a942e85dcf63/Unidecode-1.4.0.tar.gz", sha256 = "ce35985008338b676573023acc382d62c264f307c8f7963733405add37ea2b23" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-unidecode/LICENSE"
+'''

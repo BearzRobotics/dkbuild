@@ -1,0 +1,23 @@
+# OctoPrint-FileCheck from PyPI.
+name = "python-octoprint-filecheck"
+version = "2025.7.23"
+release = 1
+summary = "Checks for common issues in uploaded files"
+license = "AGPL-3.0-or-later"
+homepage = "https://github.com/OctoPrint/OctoPrint-FileCheck"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/b4/31/c0143d6e14b7bb1b8513cb87c20a90b9d04220716b09332ea6db38fab985/octoprint_filecheck-2025.7.23.tar.gz", sha256 = "a7e43d440a8899b7a8c9eaae713d3ee2430d26055c8d4c68305329b86b7262ab" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-octoprint-filecheck/LICENSE"
+'''

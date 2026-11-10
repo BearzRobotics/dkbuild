@@ -1,0 +1,44 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/wxwidgets/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "wxwidgets"
+version = "3.2.8"
+release = 2
+summary = "WXwidgets GUI toolkit"
+license = "custom:wxWidgets"
+homepage = "https://www.wxwidgets.org"
+patches = ["invalid-header-syntax.patch", "largefile.patch", "musl-locale-l.patch", "no-langinfo-h.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["curl-devel", "glu-devel", "gspell-devel", "gst-plugins-base-devel", "gtk+3-devel", "libexpat-devel", "libjpeg-turbo-devel", "libnotify-devel", "libsecret-devel", "libsm-devel", "libtiff-devel", "mesa-devel", "pcre2-devel", "sdl2-compat-devel", "webkitgtk-devel", "xz-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.8/wxWidgets-3.2.8.tar.bz2", sha256 = "c74784904109d7229e6894c85cfa068f1106a4a07c144afd78af41f373ee0fe6" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DwxBUILD_PRECOMP=OFF \
+    -DwxBUILD_TESTS=OFF \
+    -DwxBUILD_TOOLKIT=gtk3 \
+    -DwxUSE_EXPAT=sys \
+    -DwxUSE_GLCANVAS_EGL=ON \
+    -DwxUSE_GTKPRINT=ON \
+    -DwxUSE_LIBJPEG=sys \
+    -DwxUSE_LIBLZMA=sys \
+    -DwxUSE_LIBPNG=sys \
+    -DwxUSE_LIBTIFF=sys \
+    -DwxUSE_OPENGL=ON \
+    -DwxUSE_PRIVATE_FONTS=ON \
+    -DwxUSE_REGEX=sys \
+    -DwxUSE_ZLIB=sys \
+    -DOPENGL_opengl_LIBRARY=/usr/lib/libGL.so
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 docs/licence.txt "$pkgdir/usr/share/licenses/wxwidgets/licence.txt"
+install -Dm644 wxwin.m4 "$pkgdir/usr/share/aclocal/wxwin.m4"
+'''

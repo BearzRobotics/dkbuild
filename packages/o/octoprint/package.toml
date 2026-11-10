@@ -1,0 +1,29 @@
+# OctoPrint: a web interface for 3D printers (USB serial), from PyPI. Runs as the
+# octoprint service (user _octoprint, in dialout for the serial port) on port
+# 5000, with its data in /var/lib/octoprint. Pure Python, so it runs on the
+# Raspberry Pi (aarch64) as on x86_64.
+name = "octoprint"
+version = "1.11.8"
+release = 1
+summary = "The snappy web interface for your 3D printer"
+license = "GNU Affero General Public License v3"
+homepage = "https://octoprint.org"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-octoprint-filecheck", "python-octoprint-firmwarecheck", "python-octoprint-pisupport", "python-argon2-cffi", "python-babel", "python-cachelib", "python-click", "python-colorlog", "python-emoji", "python-feedparser", "python-filetype", "python-flask-assets", "python-flask-babel", "python-flask-login", "python-flask-limiter", "python-flask", "python-frozendict", "python-limits", "python-markdown", "python-markupsafe", "python-netaddr", "python-netifaces", "python-packaging", "python-libpass", "python-pathvalidate", "python-psutil", "python-pydantic", "python-pylru", "python-pyserial", "python-pytz", "python-pyyaml", "python-requests", "python-sarge", "python-semantic-version", "python-sentry-sdk", "python-setuptools", "python-tornado", "python-watchdog", "python-websocket-client", "python-werkzeug", "python-wrapt", "python-zeroconf", "python-zipstream-ng", "python-blinker", "python-more-itertools", "python-regex", "python-unidecode", "python-future", "python-appdirs"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/3a/64/b638c13325c23ab403fb682e2f6572f691f785d9405c3d55b6dc84ae44bd/octoprint-1.11.8.tar.gz", sha256 = "ea7289b5149ecaef3dfc85aa6b53618abd96f791787a338ca3a4b3c8864fb679" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/octoprint/LICENSE.txt"
+install -Dm644 $pkgfiles/octoprint "$pkgdir/etc/dinit.d/octoprint"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/octoprint.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/octoprint.conf"
+'''

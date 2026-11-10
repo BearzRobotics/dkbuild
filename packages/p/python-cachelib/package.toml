@@ -1,0 +1,23 @@
+# cachelib from PyPI.
+name = "python-cachelib"
+version = "0.17.2"
+release = 1
+summary = "A collection of cache libraries in the same API interface."
+license = "BSD-3-Clause"
+homepage = "https://pypi.org/project/cachelib/"
+hostdeps = ["python", "python-flit-core"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/67/e8/f7e968e40ed6c07276a5ab20bda22e9ed6a3f152292787995f0d5ad2ef16/cachelib-0.17.2.tar.gz", sha256 = "583958fcf24a89b8fda57a4d9439162dfcb81a3a6199bcab7154b9844842bcdf" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-cachelib/LICENSE.txt"
+'''

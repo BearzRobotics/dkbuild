@@ -1,0 +1,23 @@
+# feedparser from PyPI.
+name = "python-feedparser"
+version = "6.0.14"
+release = 1
+summary = "Universal feed parser, handles RSS 0.9x, RSS 1.0, RSS 2.0, CDF, Atom 0.3, and Atom 1.0 feeds"
+license = "BSD-2-Clause"
+homepage = "https://github.com/kurtmckee/feedparser"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-feedparser-sgmllib"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/37/8a/a53da4a77352045d277978a2df322d5379369f9deb1707178899ff7e1121/feedparser-6.0.14.tar.gz", sha256 = "088679b0c4b543ee211a820dd544698c76a402122eae7473c04a43425f283d06" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-feedparser/LICENSE"
+'''

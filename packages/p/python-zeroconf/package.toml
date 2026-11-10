@@ -1,0 +1,23 @@
+# zeroconf from PyPI.
+name = "python-zeroconf"
+version = "0.154.0"
+release = 1
+summary = "A pure python implementation of multicast DNS service discovery"
+license = "LGPL-2.1-or-later"
+homepage = "https://pypi.org/project/zeroconf/"
+hostdeps = ["python", "python-poetry-core"]
+rundeps = ["python", "python-ifaddr"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/d6/dd/b1eb6a87dc0376289fb78c13231c4702797da49dd0da062c5d46a4cff865/zeroconf-0.154.0.tar.gz", sha256 = "830315497af9bbd75924c2218cd3b64f0bde0e808ee316aabb5d9288836c0c43" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/python-zeroconf/COPYING"
+'''

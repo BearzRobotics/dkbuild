@@ -1,0 +1,27 @@
+# needed by: openscad (3MF import and export). The source is a zip.
+name = "lib3mf"
+version = "2.5.0"
+release = 1
+summary = "3D Manufacturing Format (3MF) library"
+license = "BSD-2-Clause"
+homepage = "https://3mf.io"
+hostdeps = ["cmake", "ninja", "unzip", "pkgconf"]
+builddeps = ["libzip-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/3MFConsortium/lib3mf/releases/download/v2.5.0/lib3mf-2.5.0-source-with-submodules.zip", sha256 = "46914f7c7a82ee0839fdd09b339daf621540d5c8d8904b2a0449fd67353dd7cb" },
+]
+
+setup = '''
+unzip -q /build/sources/lib3mf-2.5.0-source-with-submodules.zip -d l3
+d=$(ls -d l3/*/ | head -n1)
+cmake -S "$d" -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DLIB3MF_TESTS=OFF -DUSE_INCLUDED_ZLIB=OFF -DUSE_INCLUDED_LIBZIP=OFF
+'''
+build = '''
+cmake --build build
+'''
+install = '''
+DESTDIR="$pkgdir" cmake --install build
+d=$(ls -d l3/*/ | head -n1); install -Dm644 "$d/LICENSE" "$pkgdir/usr/share/licenses/lib3mf/LICENSE"
+'''

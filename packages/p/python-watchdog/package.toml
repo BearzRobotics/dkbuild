@@ -1,0 +1,23 @@
+# watchdog from PyPI.
+name = "python-watchdog"
+version = "7.1.0"
+release = 1
+summary = "Filesystem events monitoring"
+license = "Apache-2.0"
+homepage = "https://github.com/gorakhargosh/watchdog"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/e2/55/087e45c2a3ed8223bc9f30d6b65f051de35513cfc30c989c2b1a14bf862e/watchdog-7.1.0.tar.gz", sha256 = "d3861e255416f49a1384474cb2efa097de165fb330d4c5432ce6708b509ed922" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/python-watchdog/COPYING"
+'''

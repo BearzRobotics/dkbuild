@@ -1,0 +1,23 @@
+# frozendict from PyPI.
+name = "python-frozendict"
+version = "2.5.1"
+release = 1
+summary = "A simple immutable dictionary"
+license = "LGPL-3.0-only"
+homepage = "https://github.com/Marco-Sulla/python-frozendict"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/ed/45/7335e29396dde7c9ec00c4758c46bb7d4a9f07ca0a351ae58b814ca6b6a4/frozendict-2.5.1.tar.gz", sha256 = "b79b0c133220c5976ff05b8bfe3c1215119caa6255f477a309151fd5e2c2c0c3" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-frozendict/LICENSE.txt"
+'''

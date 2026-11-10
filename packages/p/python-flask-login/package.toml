@@ -1,0 +1,23 @@
+# Flask-Login from PyPI.
+name = "python-flask-login"
+version = "0.6.3"
+release = 1
+summary = "User authentication and session management for Flask."
+license = "MIT"
+homepage = "https://github.com/maxcountryman/flask-login"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-flask", "python-werkzeug"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/c3/6e/2f4e13e373bb49e68c02c51ceadd22d172715a06716f9299d9df01b6ddb2/Flask-Login-0.6.3.tar.gz", sha256 = "5e23d14a607ef12806c699590b89d0f0e0d67baeec599d75947bf9c147330333" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-flask-login/LICENSE"
+'''

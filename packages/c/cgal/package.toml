@@ -1,0 +1,26 @@
+# needed by: prusaslicer, orcaslicer, openscad. Header-only.
+name = "cgal"
+version = "6.2.1"
+release = 1
+summary = "Computational Geometry Algorithms Library (headers)"
+license = "GPL-3.0-or-later AND LGPL-3.0-or-later"
+homepage = "https://www.cgal.org"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["boost-devel", "gmp-devel", "mpfr-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/CGAL/cgal/releases/download/v6.2.1/CGAL-6.2.1.tar.xz", sha256 = "b6be77c60765a8456335de991eeaf6ffec55256984e4a9ecc6a97c37bbfe85bf" },
+]
+
+setup = '''
+%cmake \
+    -DWITH_CGAL_Qt6=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/cgal/LICENSE.md"
+'''

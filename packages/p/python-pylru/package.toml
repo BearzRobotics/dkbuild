@@ -1,0 +1,23 @@
+# pylru from PyPI.
+name = "python-pylru"
+version = "1.3.3"
+release = 1
+summary = "A least recently used (LRU) cache implementation"
+license = "MIT"
+homepage = "https://github.com/jlhutch/pylru"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/ed/d2/a944dfae27670a4d230301acc83115eb8a5004f8c71549a3cf5d35a40fe0/pylru-1.3.3.tar.gz", sha256 = "c540c0f3aea3e03493b520807fbf2d67e95f4f97532a919989960707e2fabb2d" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-pylru/LICENSE.txt"
+'''

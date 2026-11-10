@@ -1,0 +1,43 @@
+# PrusaSlicer with the system's libraries. Three small ones it pins (heatshrink,
+# libbgcode, its NanoSVG fork) are built into a private prefix
+# from the recipe's other sources and linked in.
+name = "prusaslicer"
+version = "2.9.7"
+release = 1
+summary = "3D printing slicer (G-code from 3D models)"
+license = "AGPL-3.0-only"
+homepage = "https://www.prusa3d.com/prusaslicer/"
+hostdeps = ["cmake", "ninja", "pkgconf", "unzip", "gettext"]
+builddeps = ["boost-devel", "cgal", "curl-devel", "cereal", "eigen", "glew-devel", "gmp-devel", "mpfr-devel", "nlopt-devel", "opencascade-devel", "openexr-devel", "openvdb-devel", "libpng-devel", "libjpeg-turbo-devel", "qhull-devel", "onetbb-devel", "wxwidgets-devel", "nlohmann-json", "z3-devel", "gtk+3-devel", "dbus-devel", "zlib-ng-compat-devel", "libexpat-devel", "mesa-devel", "libsecret-devel", "openssl-devel"]
+options = ["!check", "jobs:12"]
+
+source = [
+    { url = "https://github.com/prusa3d/PrusaSlicer/archive/refs/tags/version_2.9.7.tar.gz", sha256 = "b0d42aa1c995541dd9028be61e3ec2e05d05fd4c92da28d1a65c7a26b049f478" },
+    { url = "https://github.com/atomicobject/heatshrink/archive/refs/tags/v0.4.1.zip", sha256 = "2e2db2366bdf36cb450f0b3229467cbc6ea81a8c690723e4227b0b46f92584fe", unpack = false, name = "heatshrink-0.4.1.zip" },
+    { url = "https://github.com/prusa3d/libbgcode/archive/167c8e19a26e74de42bbb3622480ee04a9420394.zip", sha256 = "68f82acf1855227d0db8b2af847638dfba0973dab6f568ce879bbb418b732266", unpack = false, name = "libbgcode.zip" },
+    { url = "https://github.com/fltk/nanosvg/archive/abcd277ea45e9098bed752cf9c6875b533c0892f.zip", sha256 = "e859938fbaee4b351bd8a8b3d3c7a75b40c36885ce00b73faa1ce0b98aa0ad34", unpack = false, name = "nanosvg.zip" },
+]
+
+setup = '''
+# a private prefix for the small libraries only this program uses
+P="$PWD/_deps"
+cmk() { cmake -S "$1" -B "$1/_b" -G Ninja -DCMAKE_INSTALL_PREFIX="$P" -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_PREFIX_PATH="$P" "$@" && cmake --build "$1/_b" && cmake --install "$1/_b"; }
+mkdir -p _src
+cd _src
+for z in heatshrink-0.4.1 libbgcode nanosvg; do unzip -q /build/sources/$z.zip -d $z; done
+cd ..
+# heatshrink: with the CMake files PrusaSlicer's own dependency build adds
+hs=$(ls -d _src/heatshrink-0.4.1/*/); cp deps/+heatshrink/CMakeLists.txt deps/+heatshrink/Config.cmake.in "$hs"
+cmk "$hs"
+cmk "$(ls -d _src/nanosvg/*/)"
+cmk "$(ls -d _src/libbgcode/*/)" -DLibBGCode_BUILD_TESTS=OFF -DLibBGCode_BUILD_CMD_TOOL=OFF
+%cmake -DCMAKE_PREFIX_PATH="$P" -DSLIC3R_STATIC=OFF -DSLIC3R_GTK=3 -DSLIC3R_FHS=ON -DSLIC3R_PCH=OFF -DSLIC3R_BUILD_TESTS=OFF -DSLIC3R_DESKTOP_INTEGRATION=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/prusaslicer/LICENSE"
+'''

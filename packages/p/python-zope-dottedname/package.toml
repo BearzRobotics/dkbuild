@@ -1,0 +1,23 @@
+# zope.dottedname from PyPI.
+name = "python-zope-dottedname"
+version = "7.1"
+release = 1
+summary = "Resolver for Python dotted names."
+license = "ZPL-2.1"
+homepage = "https://pypi.org/project/zope.dottedname/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/31/09/0bb0b869870a1278eae0bddd1217a9f9ccf0992bfd0d6c982159a9af6a17/zope_dottedname-7.1.tar.gz", sha256 = "b4f5d69c91c6e61a07e95f65f221d4c66de5b10755b8d50df6fc69584df7f3b8" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-zope-dottedname/LICENSE.txt"
+'''

@@ -1,0 +1,23 @@
+# regex from PyPI.
+name = "python-regex"
+version = "2026.11.9"
+release = 1
+summary = "Alternative regular expression module, to replace re."
+license = "Apache-2.0 AND CNRI-Python"
+homepage = "https://github.com/mrabarnett/mrab-regex"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/61/27/a5afeb952577b84ee5fe48b8b9ce47ae662dbb69cc5b76c28eff98f83b1e/regex-2026.11.9.tar.gz", sha256 = "316a70fbd70e999c9664681cb0eb5b4982b2cc0f623c7c86a8a112e1bd4c6277" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-regex/LICENSE.txt"
+'''

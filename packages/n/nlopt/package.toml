@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/nlopt/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "nlopt"
+version = "2.10.0"
+release = 1
+summary = "Library for nonlinear optimization"
+license = "MIT"
+homepage = "https://nlopt.readthedocs.io"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+
+source = [
+    { url = "https://github.com/stevengj/nlopt/archive/v2.10.0.tar.gz", sha256 = "506f83a9e778ad4f204446e99509cb2bdf5539de8beccc260a014bd560237be1" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/nlopt/COPYING"
+'''

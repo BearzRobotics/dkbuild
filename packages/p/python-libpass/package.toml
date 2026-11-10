@@ -1,0 +1,23 @@
+# libpass from PyPI.
+name = "python-libpass"
+version = "1.9.4"
+release = 1
+summary = "Fork of passlib, a comprehensive password hashing framework supporting over 30 schemes"
+license = "BSD"
+homepage = "https://github.com/notypecheck/passlib"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/b0/2d/953db970fa7bccd1d74e2870158878ab5b46776f3f34180ca49ce93c4ac8/libpass-1.9.4.tar.gz", sha256 = "4ff9a5ebf51aad1e8164453bc29c4a06926cf175a9501d87205612ba247f3cbd" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-libpass/LICENSE"
+'''

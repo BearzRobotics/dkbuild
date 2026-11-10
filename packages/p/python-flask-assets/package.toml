@@ -1,0 +1,23 @@
+# Flask-Assets from PyPI.
+name = "python-flask-assets"
+version = "2.1.0"
+release = 1
+summary = "Asset management for Flask, to compress and merge CSS and Javascript files."
+license = "BSD"
+homepage = "http://github.com/miracle2k/flask-assets"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-flask", "python-webassets"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/3e/8b/1bc3887678557a1ff85fe294ef7f1139ca0f8956195741c8fad39b69616f/Flask-Assets-2.1.0.tar.gz", sha256 = "f84d6532ffe59c9ff352885e8740ff4da25c0bcfacd805f0a806815e44354813" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-flask-assets/LICENSE"
+'''

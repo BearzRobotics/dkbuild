@@ -1,0 +1,23 @@
+# sarge from PyPI.
+name = "python-sarge"
+version = "0.1.8"
+release = 1
+summary = "A wrapper for subprocess which provides command pipeline functionality."
+license = "BSD-3-Clause"
+homepage = "https://github.com/vsajip/sarge"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/41/a5/f3992b2e372eb3d1398adb76dbe1218ba6dbc1a65c2b81050a2ae0256eb3/sarge-0.1.8.tar.gz", sha256 = "824d483974d09e7689ee9aca76413d07988f3cdc0f945515c6a3fc2ec1958dcc" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-sarge/LICENSE"
+'''

@@ -1,0 +1,23 @@
+# more-itertools from PyPI.
+name = "python-more-itertools"
+version = "11.2.1"
+release = 1
+summary = "More routines for operating on iterables, beyond itertools"
+license = "MIT"
+homepage = "https://github.com/more-itertools/more-itertools"
+hostdeps = ["python", "python-flit-core"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/52/b8/c63995bebbb9ac9c059350e0fb8c82c2420c85aeca7d34e40aecf3df9281/more_itertools-11.2.1.tar.gz", sha256 = "cbf08fd0af284dc69718b9b76a8e6203df624d70209ea511e4219d350c856f63" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-more-itertools/LICENSE"
+'''
