@@ -9,7 +9,7 @@ release = 6
 summary = "Core database of common types"
 license = "GPL-2.0-or-later"
 homepage = "https://freedesktop.org/wiki/Software/shared-mime-info"
-hostdeps = ["meson", "pkgconf", "gettext", "xmlto", "libxml2"]
+hostdeps = ["meson", "pkgconf", "gettext", "xmlto", "libxml2", "docbook-xml", "docbook-xsl-nons"]
 builddeps = ["glib-devel", "libxml2-devel"]
 
 source = [
