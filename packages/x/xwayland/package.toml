@@ -1,17 +1,16 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xwayland/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "xwayland"
+# Runs xkbcomp for keymaps (rundep), with the layouts from xkeyboard-config.
 version = "24.1.14"
 release = 1
 summary = "Xwayland X server"
 license = "MIT"
 homepage = "https://xorg.freedesktop.org"
 patches = ["allow-overflow-on-glamor_composite_clipped_region.patch", "no-sighandler-segv-etc.patch"]
-hostdeps = ["pkgconf", "wayland"]
+hostdeps = ["meson", "pkgconf", "wayland"]
 builddeps = ["dbus-devel", "font-util-devel", "libei-devel", "libepoxy-devel", "libtirpc-devel", "libxcb-devel", "libxcvt-devel", "libxfont2-devel", "libxkbfile-devel", "libxshmfence-devel", "mesa-devel", "nettle-devel", "pixman-devel", "wayland-devel", "wayland-protocols", "xorgproto", "xtrans"]
-rundeps = ["xserver-xorg-protocol"]
+rundeps = ["xserver-xorg-protocol", "xkbcomp", "xkeyboard-config"]
 options = ["!check"]
 
 source = [

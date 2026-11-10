@@ -3,15 +3,16 @@
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r3: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 # r4: static libraries too (in wlroots-static), for fully static programs on musl.
+# r5: Xwayland support (X11 programs on the desktop; the X server starts on first use).
 name = "wlroots"
 version = "0.20.2"
-release = 4
+release = 5
 summary = "Modular Wayland compositor library 0.20.x"
 license = "MIT"
 homepage = "https://gitlab.freedesktop.org/wlroots/wlroots"
 patches = ["sover.patch"]
 hostdeps = ["glslang", "meson", "pkgconf"]
-builddeps = ["hwdata-devel", "lcms2-devel", "libdisplay-info-devel", "libdrm-devel", "libinput-devel", "seatd-devel", "libxcb-devel", "libxkbcommon-devel", "linux-headers", "mesa-devel", "pixman-devel", "eudev-devel", "vulkan-headers", "vulkan-loader-devel", "wayland-devel", "wayland-protocols"]
+builddeps = ["hwdata-devel", "lcms2-devel", "libdisplay-info-devel", "libdrm-devel", "libinput-devel", "seatd-devel", "libxcb-devel", "libxkbcommon-devel", "linux-headers", "mesa-devel", "pixman-devel", "eudev-devel", "vulkan-headers", "vulkan-loader-devel", "wayland-devel", "wayland-protocols", "xcb-util-errors-devel", "xcb-util-renderutil-devel", "xcb-util-wm-devel", "xwayland-devel"]
 
 source = [
     { url = "https://gitlab.freedesktop.org/wlroots/wlroots/-/releases/0.20.2/downloads/wlroots-0.20.2.tar.gz", sha256 = "80c567d2ed4efb2cfa6b077f22c7a710d9c78ba4e185a75e8694001114af0733" },
@@ -19,7 +20,7 @@ source = [
 
 setup = '''
 %meson \
-    -Dxwayland=disabled \
+    -Dxwayland=enabled \
     -Dbackends=drm,libinput \
     -Drenderers=gles2 \
     -Dallocators=gbm \

@@ -1,14 +1,14 @@
 # The DKDE desktop, FenrirOS's default: dkde (panel, session and apps) on labwc,
 # with seat management, D-Bus, polkit, audio (PipeWire with WirePlumber), Mesa
-# with Vulkan, fonts and icons. `dkde-session` starts it.
+# with Vulkan, fonts and icons, and Xwayland for X11 programs. `dkde-session` starts it.
 name = "desktop-dkde"
 version = "1"
-release = 1
+release = 2
 summary = "DKDE desktop for FenrirOS (the default)"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"
 options = ["meta"]
 rundeps = [
     "dkde", "labwc", "seatd", "dbus", "polkit", "mesa", "vulkan-loader",
-    "pipewire", "wireplumber", "fonts-dejavu", "shared-mime-info", "hicolor-icon-theme",
+    "pipewire", "wireplumber", "fonts-dejavu", "shared-mime-info", "hicolor-icon-theme", "xwayland",
 ]

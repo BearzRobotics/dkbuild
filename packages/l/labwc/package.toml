@@ -3,14 +3,15 @@
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 # r3: static libraries too (in labwc-static), for fully static programs on musl.
+# r4: Xwayland support (the xwayland package is optional; desktop-dkde brings it); labwc starts Xwayland when the first X11 program connects.
 name = "labwc"
 version = "0.20.2"
-release = 3
+release = 4
 summary = "Stacking wayland compositor"
 license = "GPL-2.0-only"
 homepage = "https://github.com/labwc/labwc"
 hostdeps = ["gettext", "meson", "pkgconf", "scdoc", "wayland"]
-builddeps = ["cairo-devel", "glib-devel", "libdrm-devel", "librsvg-devel", "libsfdo-devel", "libxml2-devel", "pango-devel", "wayland-devel", "wayland-protocols", "wlroots-devel"]
+builddeps = ["cairo-devel", "glib-devel", "libdrm-devel", "librsvg-devel", "libsfdo-devel", "libxml2-devel", "pango-devel", "wayland-devel", "wayland-protocols", "wlroots-devel", "libxcb-devel", "xcb-util-wm-devel"]
 rundeps = []
 
 source = [
@@ -19,7 +20,7 @@ source = [
 
 setup = '''
 %meson \
-    -Dxwayland=disabled \
+    -Dxwayland=enabled \
     -Dsvg=disabled \
     -Dicon=disabled \
     -Dman-pages=disabled \

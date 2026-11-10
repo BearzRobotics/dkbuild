@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xkbcomp/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Xwayland runs it to turn the XKB keymap into the server's compiled form.
+name = "xkbcomp"
+version = "1.4.7"
+release = 1
+summary = "XKBD keymap compiler"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["autoconf", "automake", "pkgconf", "bison", "xorg-util-macros"]
+builddeps = ["libx11-devel", "libxkbfile-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/app/xkbcomp-1.4.7.tar.gz", sha256 = "00cecc490fcbe2f789cf13c408c459673c2c33ab758d802677321cffcda35373" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xkbcomp/COPYING"
+'''
