@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Code - OSS
+Comment=Code editing. Redefined.
+GenericName=Text Editor
+Exec=code-oss %F
+Icon=code-oss
+Type=Application
+StartupNotify=false
+StartupWMClass=Code - OSS
+Categories=TextEditor;Development;IDE;
+MimeType=text/plain;inode/directory;
+Keywords=vscode;

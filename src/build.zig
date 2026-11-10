@@ -234,6 +234,8 @@ fn removeBuildDir(arena: Allocator, io: std.Io, work: []const u8) void {
 /// Whether a source URL names a tar archive (anything else is copied, not unpacked).
 fn isTarArchive(url: []const u8) bool {
     const exts = [_][]const u8{ ".tar", ".tar.gz", ".tgz", ".tar.xz", ".txz", ".tar.bz2", ".tbz2", ".tbz", ".tar.zst", ".tar.lz", ".tar.lzma", ".tar.Z", ".crate" };
+    // Snapshots (fetch.zig) are zstd tarballs.
+    if (std.mem.startsWith(u8, url, "snapshot:")) return true;
     var u = url;
     if (std.mem.indexOfAny(u8, u, "?#")) |i| u = u[0..i];
     for (exts) |e| if (std.mem.endsWith(u8, u, e)) return true;
@@ -248,6 +250,7 @@ test "isTarArchive" {
     // crates.io packages are gzipped tarballs.
     try std.testing.expect(isTarArchive("https://static.crates.io/crates/bindgen-cli/bindgen-cli-0.73.2.crate"));
     try std.testing.expect(!isTarArchive("https://x.org/protocol-21.1.txt"));
+    try std.testing.expect(isTarArchive("snapshot:electron v43.8.3 150.0.7871.250 c4cdaeebba9b9ed92d041997317ffdbd042158ac"));
 }
 
 fn inTreeFiles(arena: Allocator, io: std.Io, opts: Options, r: recipe.Recipe, repo_abs: ?[]const u8) BuildError![]const []const u8 {

@@ -1,0 +1,36 @@
+# ripgrep (rg): recursive regex search that respects .gitignore. Code - OSS
+# uses it for search (in place of the binary its npm package ships).
+# With PCRE2 (-P), against the system library. Crates vendored on the host.
+name = "ripgrep"
+version = "15.2.0"
+release = 1
+summary = "Fast recursive search that respects .gitignore (rg)"
+license = "MIT OR Unlicense"
+homepage = "https://github.com/BurntSushi/ripgrep"
+hostdeps = ["rust", "pkgconf"]
+builddeps = ["pcre2-devel"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/BurntSushi/ripgrep/archive/refs/tags/15.2.0.tar.gz", sha256 = "7605249d3eb0d5f170e3414498e3344e26b1e7a147aec518b57090b80036a562" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export PCRE2_SYS_STATIC=0
+'''
+build = '''
+cargo build --release --frozen --offline --features pcre2 -j $jobs
+'''
+install = '''
+install -Dm755 target/release/rg "$pkgdir/usr/bin/rg"
+r=target/release/rg
+mkdir -p "$pkgdir/usr/share/man/man1" "$pkgdir/usr/share/bash-completion/completions" \
+         "$pkgdir/usr/share/zsh/site-functions" "$pkgdir/usr/share/fish/vendor_completions.d"
+$r --generate man > "$pkgdir/usr/share/man/man1/rg.1"
+$r --generate complete-bash > "$pkgdir/usr/share/bash-completion/completions/rg"
+$r --generate complete-zsh > "$pkgdir/usr/share/zsh/site-functions/_rg"
+$r --generate complete-fish > "$pkgdir/usr/share/fish/vendor_completions.d/rg.fish"
+install -Dm644 LICENSE-MIT "$pkgdir/usr/share/licenses/ripgrep/LICENSE-MIT"
+install -Dm644 UNLICENSE "$pkgdir/usr/share/licenses/ripgrep/UNLICENSE"
+'''

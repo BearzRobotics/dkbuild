@@ -1,0 +1,4 @@
+#!/bin/sh
+# Code - OSS on the system Electron.
+export ELECTRON_IS_DEV=0 VSCODE_DEV= ELECTRON_FORCE_IS_PACKAGED=true
+exec /usr/bin/electron /usr/lib/code-oss/app "$@"

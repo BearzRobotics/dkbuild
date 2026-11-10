@@ -1,0 +1,126 @@
+# Electron 43, for Code - OSS (VS Code 1.145.2 is built for 43.8.3), and the
+# first Chromium FenrirOS builds itself (Brave follows).
+# The source is a snapshot (SPEC.md 5.3, src/snapshot-electron.sh): Electron's
+# gclient checkout with its pinned Chromium, Electron's patches applied, and its
+# node_modules (yarn) and third_party/node's (npm) installed at fetch time, so
+# the build is offline.
+# Port of Alpine's testing/electron (APKBUILD by lauren n. liberda and Antoine
+# Martin): its patches are in patches/ as Alpine has them, for Electron 42 /
+# Chromium 148; each needs checking against Chromium 150, and the copium (cr1xx)
+# patches Alpine applies come from this tree's wip/chromium (Chimera's, newer).
+# Bundled, not system: llhttp, ada, hdrhistogram, simdutf, crc32c, flatbuffers
+# (no recipes yet).
+# DRAFT: not built yet. TODO: the snapshot's sha256 (the first fetch prints it).
+name = "electron"
+version = "43.8.3"
+release = 1
+summary = "Electron cross-platform desktop toolkit"
+license = "MIT AND BSD-3-Clause"
+homepage = "https://www.electronjs.org"
+archs = ["x86_64", "aarch64"]
+options = ["!check", "jobs:12"]
+patches = [
+    "compiler.patch", "disable-dns_config_service.patch", "fc-cache-version.patch",
+    "fix-ffmpeg-codec-list.patch", "fstatat-32bit.patch", "generic-sensor-include.patch",
+    "musl-sandbox.patch", "musl-tid-caching.patch", "no-execinfo.patch", "no-mallinfo.patch",
+    "no-res-ninit-nclose.patch", "no-sandbox-settls.patch", "partalloc-no-tagging-arm64.patch",
+    "pvalloc.patch", "temp-failure-retry.patch",
+    "electron_icon.patch", "electron_python-jinja-3.10.patch", "electron_webpack-hash.patch",
+    "electron_unbundle-node.patch", "electron_system-zlib-headers.patch",
+    "electron_do-not-strip-binaries.patch", "electron_shell-file-dialog-drop-glibc.patch",
+    "electron_do-not-build-environ-linux.patch",
+]
+hostdeps = ["bison", "esbuild", "libarchive", "flex", "gn", "gperf", "hwdata", "ninja", "nodejs", "openjdk21", "perl",
+            "pkgconf", "python3", "python-jinja2", "python-setuptools", "python-six", "rust", "bindgen", "xcbproto"]
+builddeps = ["alsa-lib-devel", "brotli-devel", "c-ares-devel", "cairo-devel", "cups-devel", "curl-devel",
+             "dav1d-devel", "double-conversion-devel", "eudev-devel", "ffmpeg-devel", "flac-devel",
+             "fontconfig-devel", "freetype-devel", "glib-devel", "gtk+3-devel", "harfbuzz-devel",
+             "heimdal-devel", "highway-devel", "hunspell-devel", "lcms2-devel", "libaom-devel",
+             "libavif-devel", "libcap-devel", "libdrm-devel", "libexif-devel", "libffi-devel",
+             "libjpeg-turbo-devel", "libnotify-devel", "libpulse-devel", "libsecret-devel",
+             "libusb-devel", "libva-devel", "libwebp-devel", "libxcomposite-devel", "libxcursor-devel",
+             "libxinerama-devel", "libxml2-devel", "libxrandr-devel", "libxscrnsaver-devel",
+             "libxslt-devel", "linux-headers", "llvm-devel", "mesa-devel", "minizip-devel",
+             "nghttp2-devel", "nss-devel", "openh264-devel", "opus-devel", "pciutils-devel",
+             "pipewire-devel", "snappy-devel", "speex-devel", "sqlite-devel", "zlib-ng-compat-devel",
+             "zstd-devel"]
+rundeps = ["gtk+3", "hwdata", "xdg-utils"]
+
+source = [
+    { url = "snapshot:electron v43.8.3 150.0.7871.250 c4cdaeebba9b9ed92d041997317ffdbd042158ac", sha256 = "0000000000000000000000000000000000000000000000000000000000000000" },
+]
+
+environment = '''
+export RUSTC_BOOTSTRAP=1
+export CXXFLAGS="${CXXFLAGS/-D_GLIBCXX_ASSERTIONS=1}"
+'''
+
+setup = '''
+# system tools where the build expects its downloaded ones
+mkdir -p third_party/node/linux/node-linux-x64/bin third_party/jdk/current/bin third_party/gperf/cipd/bin
+ln -sf /usr/bin/node third_party/node/linux/node-linux-x64/bin/node
+ln -sf /usr/bin/java third_party/jdk/current/bin/java
+ln -sf /usr/bin/gperf third_party/gperf/cipd/bin/gperf
+mkdir -p third_party/devtools-frontend/src/third_party/esbuild
+ln -sf /usr/bin/esbuild third_party/devtools-frontend/src/third_party/esbuild/esbuild
+
+# system libraries (Alpine's set, less the ones without recipes here)
+sys="brotli dav1d double-conversion ffmpeg flac fontconfig freetype harfbuzz highway libdrm libjpeg libsecret libusb libwebp libxml libxslt openh264 opus zlib zstd"
+for l in $sys jinja2 libjpeg_turbo unrar; do
+    find . -type f -path "*third_party/$l/*" \! -path "*third_party/$l/chromium/*" \! -path "*third_party/$l/google/*" \
+        \! -path './base/third_party/icu/*' \! -path './third_party/libxml/*' \
+        \! -path './third_party/pdfium/third_party/freetype/include/pstables.h' \
+        \! -path './third_party/crashpad/crashpad/third_party/zlib/zlib_crashpad.h' \
+        \! -regex '.*\.\(gn\|gni\|gyp\|gypi\|isolate\|py\)' -delete
+done
+node_sys="brotli cares nghttp2 zlib"
+for l in $node_sys openssl; do
+    find . -type f -path "*third_party/electron_node/deps/$l/*" \! -regex '.*\.\(gn\|gni\|gyp\|gypi\|isolate\|py\)' -delete
+done
+echo $node_sys > third_party/electron_node/use_system.txt
+touch chrome/test/data/webui/i18n_process_css_test.html
+sed -i 's|//third_party/usb_ids/usb.ids|/usr/share/hwdata/usb.ids|g' services/device/public/cpp/usb/BUILD.gn
+python3 build/linux/unbundle/replace_gn_files.py --system-libraries $sys
+sed -i 's/OFFICIAL_BUILD/GOOGLE_CHROME_BUILD/' tools/generate_shim_headers/generate_shim_headers.py
+echo "$(clang -dumpmachine)" >> build/rust/known-target-triples.txt
+
+gn gen out/Release --args="
+    import(\"//electron/build/args/release.gn\")
+    chrome_pgo_phase=0 clang_base_path=\"/usr\" clang_use_chrome_plugins=false
+    custom_toolchain=\"//build/toolchain/linux/unbundle:default\"
+    host_toolchain=\"//build/toolchain/linux/unbundle:default\"
+    disable_fieldtrial_testing_config=true enable_nocompile_tests=false enable_rust=true
+    enable_stripping=false fatal_linker_warnings=false ffmpeg_branding=\"Chrome\"
+    icu_use_data_file=false is_cfi=false is_clang=true is_component_ffmpeg=true is_debug=false
+    is_musl=true is_official_build=true link_pulseaudio=true node_version_check=false
+    proprietary_codecs=true rtc_link_pipewire=true rtc_use_pipewire=true
+    rustc_version=\"yes\" rust_bindgen_root=\"/usr\" rust_sysroot_absolute=\"/usr\"
+    safe_browsing_use_unrar=false symbol_level=0 treat_warnings_as_errors=false
+    use_clang_modules=false use_custom_libcxx=true use_lld=true use_pulseaudio=true
+    use_sysroot=false use_thin_lto=false use_vaapi=true v8_enable_maglev=true
+    skia_use_dawn=false use_dawn=false use_system_libffi=true use_system_lcms2=true
+    use_system_cares=true use_system_nghttp2=true
+"
+'''
+build = '''
+export ELECTRON_OUT_DIR="$PWD/out/Release/"
+ninja -C out/Release -j $jobs copy_node_headers electron_dist_zip node_gypi_headers node_version_header
+'''
+install = '''
+mkdir -p "$pkgdir/usr/lib/electron" "$pkgdir/usr/bin"
+bsdtar -xf out/Release/dist.zip -C "$pkgdir/usr/lib/electron"
+chmod u+s "$pkgdir/usr/lib/electron/chrome-sandbox"
+install -Dm755 $pkgfiles/electron-launcher.sh "$pkgdir/usr/bin/electron"
+install -Dm644 $pkgfiles/default.conf "$pkgdir/etc/electron/default.conf"
+# headers for native node modules (Code - OSS builds against them)
+mkdir -p "$pkgdir/usr/include/electron/node_headers/include/nan"
+cp -r out/Release/gen/node_headers/. "$pkgdir/usr/include/electron/node_headers/"
+cp third_party/nan/*.h "$pkgdir/usr/include/electron/node_headers/include/nan/"
+ln -s node_headers/include/node "$pkgdir/usr/include/electron/node"
+install -Dm644 electron/default_app/icon.png "$pkgdir/usr/share/icons/hicolor/1024x1024/apps/electron.png"
+install -Dm644 $pkgfiles/electron.desktop "$pkgdir/usr/share/applications/electron.desktop"
+'''
+
+[subpackages.devel]
+summary = "Headers for building native Node.js modules against Electron"
+paths   = ["/usr/include/electron"]

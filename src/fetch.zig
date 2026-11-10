@@ -2,7 +2,9 @@
 //!
 //! Tarballs are downloaded once into `<cache>/sources/<sha256>` and the
 //! checksum is verified before the file gets that name. `git|` sources are
-//! not handled yet.
+//! not handled yet. A `snapshot:<kind> <args>` URL is made, not downloaded: a
+//! script (snapshot-<kind>.sh) builds a reproducible tarball on the host from
+//! pinned upstream checkouts, and it is checked like a download.
 
 const std = @import("std");
 const recipe = @import("recipe.zig");
@@ -68,26 +70,37 @@ pub fn fetchOne(arena: Allocator, io: std.Io, cache: []const u8, src: recipe.Sou
                 return error.DownloadFailed;
             };
             const tmp = try std.fmt.allocPrint(arena, "{s}.part", .{final});
-            const res = std.process.run(arena, io, .{
-                .argv = &.{ "curl", "--fail", "--location", "--silent", "--show-error", "--retry", "4", "--retry-delay", "3", "--retry-all-errors", "--output", tmp, t.url },
-            }) catch |err| {
-                message.* = try std.fmt.allocPrint(arena, "cannot run curl: {s}", .{@errorName(err)});
-                return error.DownloadFailed;
-            };
-            const ok = switch (res.term) {
-                .exited => |c| c == 0,
-                else => false,
-            };
-            if (!ok) {
-                message.* = try std.fmt.allocPrint(arena, "download of {s} failed: {s}", .{ t.url, std.mem.trim(u8, res.stderr, "\n ") });
-                std.Io.Dir.cwd().deleteFile(io, tmp) catch {};
-                return error.DownloadFailed;
+            if (std.mem.startsWith(u8, t.url, "snapshot:")) {
+                try makeSnapshot(arena, io, cache, t.url["snapshot:".len..], tmp, message);
+            } else {
+                const res = std.process.run(arena, io, .{
+                    .argv = &.{ "curl", "--fail", "--location", "--silent", "--show-error", "--retry", "4", "--retry-delay", "3", "--retry-all-errors", "--output", tmp, t.url },
+                }) catch |err| {
+                    message.* = try std.fmt.allocPrint(arena, "cannot run curl: {s}", .{@errorName(err)});
+                    return error.DownloadFailed;
+                };
+                const ok = switch (res.term) {
+                    .exited => |c| c == 0,
+                    else => false,
+                };
+                if (!ok) {
+                    message.* = try std.fmt.allocPrint(arena, "download of {s} failed: {s}", .{ t.url, std.mem.trim(u8, res.stderr, "\n ") });
+                    std.Io.Dir.cwd().deleteFile(io, tmp) catch {};
+                    return error.DownloadFailed;
+                }
             }
             const got = hashFile(io, tmp) catch |err| {
                 message.* = try std.fmt.allocPrint(arena, "cannot read downloaded file: {s}", .{@errorName(err)});
                 return error.DownloadFailed;
             };
             if (!std.mem.eql(u8, &got, t.sha256)) {
+                if (std.mem.startsWith(u8, t.url, "snapshot:")) {
+                    // A new snapshot (the recipe cannot know its checksum before
+                    // the first one is made): kept under the checksum it has.
+                    std.Io.Dir.cwd().rename(tmp, std.Io.Dir.cwd(), try cachePath(arena, cache, &got), io) catch {};
+                    message.* = try std.fmt.allocPrint(arena, "the snapshot made for {s} has sha256 {s} (recipe says {s}); it is kept in the cache: put that checksum in the recipe if this is a new snapshot", .{ t.url, &got, t.sha256 });
+                    return error.BadChecksum;
+                }
                 message.* = try std.fmt.allocPrint(arena, "checksum mismatch for {s}: recipe says {s}, got {s}", .{ t.url, t.sha256, &got });
                 std.Io.Dir.cwd().deleteFile(io, tmp) catch {};
                 return error.BadChecksum;
@@ -95,6 +108,68 @@ pub fn fetchOne(arena: Allocator, io: std.Io, cache: []const u8, src: recipe.Sou
             try std.Io.Dir.cwd().rename(tmp, std.Io.Dir.cwd(), final, io);
             return .downloaded;
         },
+    }
+}
+
+const snapshot_scripts = [_][2][]const u8{
+    .{ "electron", @embedFile("snapshot-electron.sh") },
+};
+
+/// Make the tarball of a `snapshot:` source into `tmp`. The script's output
+/// goes to `<cache>/snapshots/<kind>-<args>.log`; its work directory
+/// (`<cache>/snapshots/<kind>-<args>/`) is kept, so a failed run resumes.
+fn makeSnapshot(arena: Allocator, io: std.Io, cache: []const u8, spec: []const u8, tmp: []const u8, message: *[]const u8) Error!void {
+    var words = std.mem.tokenizeScalar(u8, spec, ' ');
+    const kind = words.next() orelse "";
+    const script = for (snapshot_scripts) |s| {
+        if (std.mem.eql(u8, s[0], kind)) break s[1];
+    } else {
+        message.* = try std.fmt.allocPrint(arena, "unknown snapshot kind '{s}'", .{kind});
+        return error.Unsupported;
+    };
+    var id: std.ArrayList(u8) = .empty;
+    try id.appendSlice(arena, kind);
+    var args: std.ArrayList([]const u8) = .empty;
+    while (words.next()) |w| {
+        try id.append(arena, '-');
+        try id.appendSlice(arena, w);
+        try args.append(arena, w);
+    }
+    const dir = try std.fs.path.join(arena, &.{ cache, "snapshots" });
+    std.Io.Dir.cwd().createDirPath(io, dir) catch |err| {
+        message.* = try std.fmt.allocPrint(arena, "cannot create {s}: {s}", .{ dir, @errorName(err) });
+        return error.DownloadFailed;
+    };
+    const adir = std.Io.Dir.cwd().realPathFileAlloc(io, dir, arena) catch |err| {
+        message.* = try std.fmt.allocPrint(arena, "cannot resolve {s}: {s}", .{ dir, @errorName(err) });
+        return error.DownloadFailed;
+    };
+    const sh_path = try std.fmt.allocPrint(arena, "{s}/snapshot-{s}.sh", .{ adir, kind });
+    std.Io.Dir.cwd().writeFile(io, .{ .sub_path = sh_path, .data = script }) catch |err| {
+        message.* = try std.fmt.allocPrint(arena, "cannot write {s}: {s}", .{ sh_path, @errorName(err) });
+        return error.DownloadFailed;
+    };
+    const log = try std.fmt.allocPrint(arena, "{s}/{s}.log", .{ adir, id.items });
+    const work = try std.fmt.allocPrint(arena, "{s}/{s}", .{ adir, id.items });
+    const atmp = if (std.fs.path.isAbsolute(tmp)) tmp else blk: {
+        const cwd = std.Io.Dir.cwd().realPathFileAlloc(io, ".", arena) catch return error.DownloadFailed;
+        break :blk try std.fs.path.join(arena, &.{ cwd, tmp });
+    };
+    var argv: std.ArrayList([]const u8) = .empty;
+    try argv.appendSlice(arena, &.{ "sh", "-c", "log=$1; shift; exec sh \"$@\" > \"$log\" 2>&1", "sh", log, sh_path, atmp, work });
+    try argv.appendSlice(arena, args.items);
+    const res = std.process.run(arena, io, .{ .argv = argv.items }) catch |err| {
+        message.* = try std.fmt.allocPrint(arena, "cannot run the {s} snapshot: {s}", .{ kind, @errorName(err) });
+        return error.DownloadFailed;
+    };
+    const ok = switch (res.term) {
+        .exited => |c| c == 0,
+        else => false,
+    };
+    if (!ok) {
+        message.* = try std.fmt.allocPrint(arena, "the {s} snapshot failed; log: {s}", .{ kind, log });
+        std.Io.Dir.cwd().deleteFile(io, atmp) catch {};
+        return error.DownloadFailed;
     }
 }
 

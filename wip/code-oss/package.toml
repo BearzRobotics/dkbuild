@@ -1,0 +1,71 @@
+# Code - OSS: Visual Studio Code built from its MIT source, without Microsoft's
+# branding, telemetry endpoints or marketplace. Extensions come from Open VSX.
+# Runs on the system Electron (wip/electron: 43.8.3, the version 1.145.2 is
+# built for); native modules (node-pty, spdlog, sqlite3, kerberos,
+# native-keymap) are compiled against its headers. Search uses the system rg.
+# Off the repository ISO (the user's choice): `!repo-iso` (docs/roadmap.md).
+# npm packages of all 63 package-lock.json files come from the npm store
+# (`npmdeps`); `npm ci` and the postinstall's nested installs run offline.
+# DRAFT, not built: needs electron first. The packaging step (gulp
+# vscode-linux-x64-min-ci) expects an Electron zip in its download cache: it is
+# made from /usr/lib/electron, and only resources/app of the result is kept.
+name = "code-oss"
+version = "1.145.2"
+release = 1
+summary = "Code - OSS, the open-source build of Visual Studio Code"
+license = "MIT"
+homepage = "https://github.com/microsoft/vscode"
+archs = ["x86_64", "aarch64"]
+options = ["!check", "npmdeps", "!repo-iso"]
+hostdeps = ["nodejs", "python3", "pkgconf", "libarchive", "electron-devel", "zip"]
+builddeps = ["electron-devel", "heimdal-devel", "libsecret-devel", "libxkbfile-devel", "libx11-devel"]
+rundeps = ["electron", "ripgrep", "xdg-utils"]
+
+source = [
+    { url = "https://github.com/microsoft/vscode/archive/refs/tags/1.145.2.tar.gz", sha256 = "8b5d5b049af4b7d145a69b4f2e06fa744d58f00c9ab33ab03338e273352dacf4" },
+]
+
+environment = '''
+export ELECTRON_SKIP_BINARY_DOWNLOAD=1 PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+export VSCODE_SKIP_NODE_VERSION_CHECK=1
+export npm_config_nodedir=/usr/include/electron/node_headers
+export npm_config_build_from_source=true
+export npm_config_target=43.8.3 npm_config_runtime=electron npm_config_disturl=
+export CXXFLAGS="$CXXFLAGS -std=c++20"
+'''
+setup = '''
+# Open VSX as the extension gallery; no update server, no telemetry endpoints.
+python3 - <<'PY'
+import json
+p = json.load(open("product.json"))
+p["extensionsGallery"] = {
+    "serviceUrl": "https://open-vsx.org/vscode/gallery",
+    "itemUrl": "https://open-vsx.org/vscode/item",
+    "resourceUrlTemplate": "https://open-vsx.org/vscode/unpkg/{publisher}/{name}/{version}/{path}",
+}
+for k in ("updateUrl", "aiConfig", "enableTelemetry"): p.pop(k, None)
+json.dump(p, open("product.json", "w"), indent=2)
+PY
+npm ci
+'''
+build = '''
+# the Electron "download" gulp-electron packages: the system's, zipped
+mkdir -p "$HOME/.cache/electron"
+(cd /usr/lib/electron && zip -qr "$HOME/.cache/electron/electron-v43.8.3-linux-x64.zip" .)
+npm run gulp -- compile-build-without-mangling
+npm run gulp -- minify-vscode
+npm run gulp -- vscode-linux-x64-min-ci
+'''
+install = '''
+app="$pkgdir/usr/lib/code-oss"
+mkdir -p "$app"
+cp -r ../VSCode-linux-x64/resources/app "$app/"
+# the system rg, not the bundled binary
+for d in "$app"/app/node_modules/@vscode/ripgrep*/bin; do [ -d "$d" ] && rm -f "$d"/rg* && ln -s /usr/bin/rg "$d/rg"; done
+# prebuilt binaries for glibc and other systems
+find "$app" -path '*/prebuilds/*' -prune -exec rm -rf {} +
+install -Dm755 $pkgfiles/code-oss "$pkgdir/usr/bin/code-oss"
+install -Dm644 $pkgfiles/code-oss.desktop "$pkgdir/usr/share/applications/code-oss.desktop"
+install -Dm644 resources/linux/code.png "$pkgdir/usr/share/pixmaps/code-oss.png"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/code-oss/LICENSE.txt"
+'''
