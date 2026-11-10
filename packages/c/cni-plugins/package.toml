@@ -1,7 +1,5 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/cni-plugins/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "cni-plugins"
 version = "1.9.1"
 release = 4
@@ -16,10 +14,15 @@ source = [
     { url = "https://github.com/containernetworking/plugins/archive/refs/tags/v1.9.1.tar.gz", sha256 = "34bd82d47e981940751619c9cc44c095bb90bfcaf8d71865cbb822c37690a764" },
 ]
 
+environment = '''
+# Its Go dependencies are in the tarball's vendor/ (build_linux.sh: -mod=vendor).
+export GOTOOLCHAIN=local GOPROXY=off GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=1
+'''
 build = '''
-# TODO(cbuild): init_build() sets variables for this phase (cbuild line 25); port it by hand
-bash build_linux.sh -ldflags "-X github.com/containernetworking/plugins/pkg/utils/buildversion.BuildVersion=v1.9.1"
+bash build_linux.sh -ldflags "-X github.com/containernetworking/plugins/pkg/utils/buildversion.BuildVersion=v$version"
 '''
 install = '''
-# TODO(cbuild): self.install_file("bin/*", "usr/lib/cni", glob=True)
+install -dm755 "$pkgdir/usr/lib/cni"
+install -m755 bin/* "$pkgdir/usr/lib/cni/"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/cni-plugins/LICENSE"
 '''

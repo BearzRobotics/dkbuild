@@ -1,7 +1,5 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-html5lib/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "python-html5lib"
 version = "1.1"
 release = 4
@@ -9,7 +7,7 @@ summary = "Python html parser"
 license = "MIT"
 homepage = "https://github.com/html5lib/html5lib-python"
 patches = ["583.patch", "no-strict.patch"]
-hostdeps = ["python-setuptools"]
+hostdeps = ["python", "python-setuptools"]
 checkdeps = []
 rundeps = ["python-six", "python-webencodings"]
 options = ["!check"]
@@ -19,5 +17,7 @@ source = [
 ]
 
 install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-html5lib/LICENSE"
 '''

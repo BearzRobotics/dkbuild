@@ -1,7 +1,5 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/containers-common/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "containers-common"
 version = "0.68.1"
 release = 1
@@ -9,46 +7,31 @@ summary = "Shared docs and configs for Containers"
 license = "Apache-2.0"
 homepage = "https://github.com/containers/container-libs"
 patches = ["settings.patch"]
-hostdeps = ["go-md2man"]
+hostdeps = ["go-md2man", "make"]
 options = ["!check"]
 
 source = [
     { url = "https://github.com/containers/container-libs/archive/refs/tags/common/v0.68.1.tar.gz", sha256 = "6cfc76c4db34c30e560ab1bf5f297964fc755e8448a71f4b1ed8a68026431788" },
+    { url = "https://github.com/containers/shortnames/archive/refs/tags/v2025.03.19.tar.gz", sha256 = "1a2db4dca75b04d54623087972888459363392b9c4f64b6d0ac2f4b78cba3e45" },
 ]
 
 build = '''
-# TODO(cbuild): self.do("make", wrksrc="common/docs")
-# TODO(cbuild): self.do("make", wrksrc="storage/docs")
-# TODO(cbuild): self.do("make", "docs", wrksrc="image")
+make -C common/docs
+make -C storage/docs
+make -C image docs
 '''
 install = '''
-install -dm755 "$pkgdir/etc/containers/certs.d"
-install -dm755 "$pkgdir/etc/containers/oci/hooks.d"
-# TODO(cbuild): with self.pushd("common"):
-#         self.install_file("pkg/config/containers.conf", "etc/containers")
-#         self.install_file("pkg/config/containers.conf", "usr/share/containers")
-#         self.install_file("pkg/seccomp/seccomp.json", "etc/containers")
-#         self.install_file("pkg/seccomp/seccomp.json", "usr/share/containers")
-#         self.do(
-#             "make",
-#             "install",
-#             "PREFIX=/usr",
-#             f"DESTDIR={self.chroot_destdir}",
-#             wrksrc="docs",
-#         )
-# TODO(cbuild): with self.pushd("storage"):
-#         self.install_file("storage.conf", "etc/containers")
-#         self.install_file("storage.conf", "usr/share/containers")
-#         self.do(
-#             "make", "install", f"DESTDIR={self.chroot_destdir}", wrksrc="docs"
-#         )
-# TODO(cbuild): with self.pushd("image"):
-#         self.install_file("registries.conf", "etc/containers")
-#         self.do("make", "install", f"DESTDIR={self.chroot_destdir}")
-# TODO(cbuild): with self.pushd("shortnames"):
-#         self.install_file(
-#             "shortnames.conf",
-#             "etc/containers/registries.conf.d",
-#             name="00-shortnames.conf",
-#         )
+install -dm755 "$pkgdir/etc/containers/certs.d" "$pkgdir/etc/containers/oci/hooks.d"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/containers-common.conf"
+for d in etc/containers usr/share/containers; do
+    install -Dm644 common/pkg/config/containers.conf "$pkgdir/$d/containers.conf"
+    install -Dm644 common/pkg/seccomp/seccomp.json "$pkgdir/$d/seccomp.json"
+    install -Dm644 storage/storage.conf "$pkgdir/$d/storage.conf"
+done
+make -C common/docs install PREFIX=/usr DESTDIR="$pkgdir"
+make -C storage/docs install DESTDIR="$pkgdir"
+install -Dm644 image/registries.conf "$pkgdir/etc/containers/registries.conf"
+make -C image install DESTDIR="$pkgdir"
+install -Dm644 ../shortnames-2025.03.19/shortnames.conf "$pkgdir/etc/containers/registries.conf.d/00-shortnames.conf"
+install -Dm644 common/LICENSE "$pkgdir/usr/share/licenses/containers-common/LICENSE"
 '''

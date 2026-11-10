@@ -1,14 +1,12 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-josepy/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "python-josepy"
 version = "2.2.0"
 release = 1
 summary = "JOSE protocol implementation in Python"
 license = "Apache-2.0"
 homepage = "https://josepy.readthedocs.io/en/latest"
-hostdeps = ["python-poetry-core"]
+hostdeps = ["python", "python-poetry-core"]
 checkdeps = []
 rundeps = ["python-cryptography"]
 
@@ -17,6 +15,8 @@ source = [
 ]
 
 install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
 # TODO(cbuild): no install step could be derived
 true
 '''

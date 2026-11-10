@@ -1,14 +1,12 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-sphinx_rtd_theme/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "python-sphinx-rtd-theme"
 version = "3.1.0"
 release = 1
 summary = "Sphinx theme for readthedocs.org"
 license = "MIT"
 homepage = "https://github.com/readthedocs/sphinx_rtd_theme"
-hostdeps = ["python-setuptools"]
+hostdeps = ["python", "python-setuptools"]
 rundeps = ["python", "python-sphinxcontrib-jquery"]
 options = ["!check"]
 
@@ -17,5 +15,7 @@ source = [
 ]
 
 install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-sphinx_rtd_theme/LICENSE"
 '''

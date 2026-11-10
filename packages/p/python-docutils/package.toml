@@ -1,15 +1,14 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-docutils/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
+# r2: actually installs the module (r1 had only its license).
 name = "python-docutils"
 version = "0.23"
-release = 1
+release = 2
 summary = "Python documentation utilities"
 license = "custom:none AND BSD-2-Clause AND GPL-3.0-or-later AND Python-2.0"
 homepage = "http://docutils.sourceforge.net"
 patches = ["pygments.patch"]
-hostdeps = ["python-flit-core"]
+hostdeps = ["python", "python-flit-core"]
 checkdeps = ["python-pygments"]
 rundeps = ["python", "python-pygments"]
 
@@ -21,5 +20,7 @@ check = '''
 # TODO(cbuild): self.do("python", "alltests.py", wrksrc="test")
 '''
 install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
 install -Dm644 COPYING.rst "$pkgdir/usr/share/licenses/python-docutils/COPYING.rst"
 '''
