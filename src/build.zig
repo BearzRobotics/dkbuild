@@ -531,7 +531,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         if (cargo_list) |cl| {
             const text = Dir.cwd().readFileAlloc(io, cl, arena, .limited(1 << 22)) catch return error.UnpackFailed;
             try lay.appendSlice(arena, "mkdir -p vendor .cargo\n");
-            try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "cp '{s}' .cargo/config.toml\n", .{cargo_config.?}));
+            try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "cp '{s}' .cargo/config.toml\n", .{absPath(arena, io, cargo_config.?) catch return error.UnpackFailed}));
             var lines = std.mem.tokenizeScalar(u8, text, '\n');
             while (lines.next()) |l| {
                 var f = std.mem.tokenizeScalar(u8, l, ' ');

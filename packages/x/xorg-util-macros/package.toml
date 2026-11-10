@@ -4,9 +4,11 @@
 # r2: static libraries too (in xorg-util-macros-static), for fully static programs on musl.
 # r3: the aclocal macros stay in this package (not -devel): they are all it is, and
 #     X libraries' autoreconf needs them with only this package installed.
+# r4: -devel keeps xorg-macros.pc, so it is not empty (and still exists for the
+#     recipes that build-depend on xorg-util-macros-devel).
 name = "xorg-util-macros"
 version = "1.20.2"
-release = 3
+release = 4
 summary = "X.org autotools macros"
 license = "MIT"
 homepage = "https://gitlab.freedesktop.org/xorg/util/macros"
@@ -33,4 +35,4 @@ install -Dm644 COPYING "$pkgdir/usr/share/licenses/xorg-util-macros/COPYING"
 
 [subpackages.devel]
 summary = "Headers and development files"
-paths   = ["/usr/include", "/usr/lib/*.so", "/usr/lib/pkgconfig", "/usr/lib/cmake"]
+paths   = ["/usr/share/pkgconfig"]
