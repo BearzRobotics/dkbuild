@@ -1,0 +1,20 @@
+# FenrirOS: a prebuilt musl JDK 25 (Chimera's) as the seed for building openjdk25, as
+# Go and Rust start from a binary; it is only a build dependency.
+name = "openjdk25-bootstrap"
+version = "25.0.2_p10"
+release = 1
+summary = "Prebuilt OpenJDK 25 to build OpenJDK 25 with"
+license = "GPL-2.0-only WITH Classpath-exception-2.0"
+homepage = "https://openjdk.org"
+archs = ["x86_64"]
+hostdeps = []
+options = ["!check"]
+
+source = [
+    { url = "https://repo.chimera-linux.org/distfiles/openjdk-bootstrap-25.0.2_p10-x86_64.tar.zst", sha256 = "11efbacdfdde657d1aedf148ab60a64469994543b57f18f59762709fbcb41431" },
+]
+
+install = '''
+install -dm755 "$pkgdir/usr/lib/jvm/java-25-openjdk"
+cp -a . "$pkgdir/usr/lib/jvm/java-25-openjdk/"
+'''

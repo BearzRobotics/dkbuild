@@ -1,0 +1,69 @@
+# FenrirOS: one package with the JDK (Chimera splits jre-headless/jre/jdk/jmods/demos).
+# The JDK's own CA truststore is kept (no system Java keystore is generated yet).
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/openjdk17/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "openjdk17"
+version = "17.0.21.0.3_p1"
+release = 1
+summary = "OpenJDK 17 (Java development kit and runtime)"
+license = "GPL-2.0-only WITH Classpath-exception-2.0"
+homepage = "https://openjdk.org"
+patches = ["FixNullPtrCast.patch", "ppc64le.patch"]
+archs = ["x86_64", "aarch64"]
+hostdeps = ["autoconf", "automake", "bash", "file", "libtool", "linux-headers", "openjdk17-bootstrap", "openssl", "pkgconf", "zip", "unzip", "zlib-ng-compat-devel"]
+builddeps = ["alsa-lib-devel", "cups-devel", "fontconfig-devel", "freetype-devel", "giflib-devel", "lcms2-devel", "libjpeg-turbo-devel", "libxrandr-devel", "libxrender-devel", "libxt-devel", "libxtst-devel", "linux-headers"]
+options = ["!check", "jobs:12"]
+
+source = [
+    { url = "https://github.com/openjdk/jdk17u/archive/jdk-17.0.21.0.3+1.tar.gz", sha256 = "0c9850a48e99792768b85d7ed9ce7c56e372f24af375afef5c0428749ce9a206" },
+]
+environment = '''
+export LD_LIBRARY_PATH=/usr/lib/jvm/java-17-openjdk/lib:/usr/lib/jvm/java-17-openjdk/lib/server
+'''
+setup = '''
+# Built by the seed JDK (openjdk17-bootstrap, a prebuilt musl JDK), which is
+# installed where this one goes; the seed is only ever a build dependency.
+bash ./configure \
+    --prefix=/usr/lib/jvm/java-17-openjdk \
+    --with-boot-jdk=/usr/lib/jvm/java-17-openjdk \
+    --with-jobs=$jobs \
+    --with-extra-cflags="$CFLAGS" \
+    --with-extra-cxxflags="$CXXFLAGS" \
+    --with-extra-ldflags="$LDFLAGS" \
+    --disable-warnings-as-errors \
+    --disable-precompiled-headers \
+    --enable-dtrace=no \
+    --with-jvm-variants=server \
+    --with-zlib=system \
+    --with-libjpeg=system \
+    --with-libpng=system \
+    --with-giflib=system \
+    --with-lcms=system \
+    --with-jtreg=no \
+    --with-debug-level=release \
+    --with-native-debug-symbols=none \
+    --with-toolchain-type=clang \
+    --with-version-pre= \
+    --with-version-build=1 \
+    --with-version-opt=fenriros-r$release \
+    --with-vendor-name=FenrirOS \
+    --with-vendor-url=https://github.com/BearzRobotics/dkbuild \
+    --with-vendor-bug-url=https://github.com/BearzRobotics/dkbuild/issues \
+    --with-vendor-vm-bug-url=https://github.com/BearzRobotics/dkbuild/issues
+'''
+build = '''
+make JOBS=$jobs jdk-image
+'''
+install = '''
+d="$pkgdir/usr/lib/jvm/java-17-openjdk"
+mkdir -p "$d"
+cp -a build/*/images/jdk/. "$d/"
+install -m644 ASSEMBLY_EXCEPTION LICENSE README.md "$d/"
+# The JDK keeps its own CA truststore (lib/security/cacerts).
+ln -s java-17-openjdk "$pkgdir/usr/lib/jvm/default"
+mkdir -p "$pkgdir/usr/bin" "$pkgdir/usr/share/man/man1"
+for f in "$d"/bin/*; do ln -s ../lib/jvm/java-17-openjdk/bin/$(basename "$f") "$pkgdir/usr/bin/$(basename "$f")"; done
+for f in "$d"/man/man1/*; do [ -e "$f" ] && ln -s ../../../lib/jvm/java-17-openjdk/man/man1/$(basename "$f") "$pkgdir/usr/share/man/man1/$(basename "$f")"; done
+'''
