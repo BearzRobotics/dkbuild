@@ -122,10 +122,14 @@ exists and passes `dkbuild check`; the builds of 2026-11-08 onwards
 | Zeal, HandBrake (contribs as sources; no QSV/VCE/NVENC/fdk-aac), OpenShot (+ libopenshot, -audio), xemu, MAME, zls, taplo, basedpyright | written by hand |
 | flatpak (+ builder), Flathub as the default remote | written |
 | aimgr 0.2.0 | written (from the release's vendored source tarball) |
-| **Code - OSS** | **not started.** It needs Electron built from source: a full Chromium build (gclient, its own toolchain and sysroot, thousands of npm modules). Nobody builds Electron on musl from source today (Alpine, Chimera and Void ship no Electron). Options to decide: the npm store plus an Electron port (weeks of work), VSCodium from Flathub, or an editor without Electron (Zed, Lapce, Kate with clangd/zls) |
-| **npm/yarn dependency store** | not started: needed by basedpyright from TypeScript and anything Electron |
+| Code - OSS | drafted in wip/ (electron 43 from a dkbuild snapshot of Electron's gclient checkout, code-oss on the system Electron, Open VSX); waits on the Electron snapshot and its patches for Chromium 150. Off the repository ISO (`!repo-iso`) |
+| npm dependency store; NuGet, Gradle stores | written (npmdeps, gradledeps, nugetdeps). yarn and pnpm lockfiles not yet |
 | PDFium (OCRmyPDF's faster renderer), pngquant + libimagequant (no Cargo.lock to pin crates), epson-inkjet-printer-escpr2 (a source RPM), libgphoto2/v4l in SANE, groff | later |
-| **GCC (opt-in), GRUB, binutils, cross suites (arm-none-eabi, aarch64-none-elf, riscv64-unknown-elf, avr)** | not started; a design task. Chimera's gcc builds on libgcc-chimera (compiler-rt) and libc++ headers; here rust's package already provides `libgcc_s`, so GCC's own runtime would conflict. Chimera's bare-metal gcc has no C library: newlib (and avr-libc) are to be added. GRUB is the first user (`options = ["gcc"]`) |
+| GCC cross suites (arm-none-eabi, aarch64-none-elf, riscv64-unknown-elf with newlib; avr with AVR-LibC), avrdude, OpenOCD, stlink, dfu-util, picotool, esptool; GRUB (BIOS, EFI) with binutils as g<tool> + ld.bfd | written (2026-11-10). A native GCC for the system (opt-in per recipe) is still a design task |
+
+| musl with mimalloc (musl-mallocng beside it), dkman as man with the Linux and POSIX pages, Xwayland on dkde, claude-code | written (2026-11-10) |
+| Second list, drafted 2026-11-10: LXQt (all of it), Blender, FreeCAD, MuseScore, Audacity, Stellarium, KStars, Kalzium, GCompris, GoldenDict-ng, BibleTime, Xiphos, Fritzing, LibreCAD, Dia, timeshift, Lutris, ScummVM, RetroArch, MangoHud, NetHack, bsd-games, fortune-mod, toilet, lolcat, dos2unix, links, lynx, cdrtools, cdrkit, groff, dictd, httpd, MariaDB, Valkey, PostgreSQL, PHP, Jellyfin, Ghidra, ZAP, Cutter, radare2, NetExec, impacket, pwntools, pwndbg, kismet, John, hydra, masscan, rustscan, amass, sqlmap, nikto, ffuf, gobuster, aircrack-ng, OVMF, .NET 10, PowerShell, QDriverStation, microscope, security-* groups | written, not built yet: the next world run shows what fails |
+| Metasploit, Frida, Anki, GeoGebra, euro-office, Brave, PDFium, MatterControl | not recipes yet: wip/README.md says what each needs (MatterControl no longer builds for Linux) |
 
 ## Image definitions
 
