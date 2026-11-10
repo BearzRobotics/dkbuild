@@ -4,7 +4,7 @@
 # without recipes here (boto3, cloudflare, dnspython, ...).
 name = "certbot"
 version = "5.8.0"
-release = 1
+release = 2
 summary = "Tool to obtain certs from Let's Encrypt"
 license = "Apache-2.0 AND MIT"
 homepage = "https://github.com/certbot/certbot"

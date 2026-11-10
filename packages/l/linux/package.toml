@@ -9,7 +9,7 @@
 # live ISO's init can find an image on any stick Ventoy or a DVD uses.
 name = "linux"
 version = "6.19"
-release = 5
+release = 6
 summary = "The Linux kernel and its modules"
 license = "GPL-2.0-only WITH Linux-syscall-note"
 homepage = "https://kernel.org"

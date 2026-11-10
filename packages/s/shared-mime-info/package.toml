@@ -5,7 +5,7 @@
 # r6: static libraries too (in shared-mime-info-static), for fully static programs on musl.
 name = "shared-mime-info"
 version = "2.4"
-release = 6
+release = 7
 summary = "Core database of common types"
 license = "GPL-2.0-or-later"
 homepage = "https://freedesktop.org/wiki/Software/shared-mime-info"

@@ -11,7 +11,7 @@
 # r2: static libraries too (in pipewire-static), for fully static programs on musl.
 name = "pipewire"
 version = "1.6.10"
-release = 2
+release = 3
 summary = "Server and user space API to deal with multimedia pipelines"
 license = "MIT"
 homepage = "https://pipewire.org"
