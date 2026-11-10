@@ -1,0 +1,22 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-roman-numerals/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "python-roman-numerals"
+version = "4.1.0"
+release = 1
+summary = "Manipulate Roman numerals"
+license = "0BSD OR CC0-1.0"
+homepage = "https://github.com/AA-Turner/roman-numerals"
+hostdeps = ["python-flit-core", "python-setuptools"]
+checkdeps = []
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/r/roman-numerals/roman_numerals-4.1.0.tar.gz", sha256 = "1af8b147eb1405d5839e78aeb93131690495fe9da5c91856cb33ad55a7f1e5b2" },
+]
+
+install = '''
+install -Dm644 LICENCE.rst "$pkgdir/usr/share/licenses/python-roman-numerals/LICENCE.rst"
+'''

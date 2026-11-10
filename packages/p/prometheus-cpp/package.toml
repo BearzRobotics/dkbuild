@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/prometheus-cpp/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "prometheus-cpp"
+version = "1.3.0"
+release = 1
+summary = "Prometheus Client Library for Modern C++"
+license = "MIT"
+homepage = "https://github.com/jupp0r/prometheus-cpp"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["curl-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://github.com/jupp0r/prometheus-cpp/releases/download/v1.3.0/prometheus-cpp-with-submodules.tar.gz", sha256 = "62bc2cc9772db2314dbaae506ae2a75c8ee897dab053d8729e86a637b018fdb6" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/prometheus-cpp/LICENSE"
+'''

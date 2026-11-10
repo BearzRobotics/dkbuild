@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/mobile-broadband-provider-info/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "mobile-broadband-provider-info"
+version = "20251101"
+release = 1
+summary = "Database of mobile broadband service providers"
+license = "custom:none"
+homepage = "https://gitlab.gnome.org/GNOME/mobile-broadband-provider-info"
+hostdeps = ["pkgconf", "libxslt"]
+checkdeps = ["libxml2"]
+
+source = [
+    { url = "https://gitlab.gnome.org/GNOME/mobile-broadband-provider-info/-/archive/20251101/mobile-broadband-provider-info-20251101.tar.gz", sha256 = "8e8c34edb2264b0e7d9a3af17d5a92c689d9275a6329078e84ccfc8637c51cba" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/mobile-broadband-provider-info/COPYING"
+'''

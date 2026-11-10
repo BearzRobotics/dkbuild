@@ -2,7 +2,7 @@
 # Go modules vendored on the host (`godeps`); built offline like its Makefile.
 name = "ttt"
 version = "1.11.0"
-release = 1
+release = 2
 summary = "Terminal text editor that feels like a GUI"
 license = "MIT"
 homepage = "https://github.com/eugenioenko/ttt"

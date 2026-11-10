@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/nextcloud-client/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "nextcloud-client"
+version = "35.0.0"
+release = 1
+summary = "Desktop sync client for Nextcloud"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/nextcloud/desktop"
+patches = ["statvfs64fix.patch"]
+hostdeps = ["cmake", "extra-cmake-modules", "inkscape", "ninja", "pkgconf"]
+builddeps = ["karchive-devel", "kdsingleapplication-devel", "kguiaddons-devel", "kio-devel", "libp11-devel", "openssl-devel", "qt6-qt5compat-devel", "qt6-qtsvg-devel", "qt6-qttools-devel", "qt6-qtwebsockets-devel", "qtkeychain-devel", "sqlite-devel", "zlib-ng-compat-devel"]
+checkdeps = ["cmocka-devel"]
+
+source = [
+    { url = "https://github.com/nextcloud/desktop/archive/refs/tags/v35.0.0.tar.gz", sha256 = "bec43d2675b31230de847e54d15864e26409e2f0d5dee08a2e15a9d027a206fe" },
+]
+
+environment = '''
+export CXXFLAGS="${CXXFLAGS} -Wno-c++20-extensions -Wno-deprecated-declarations"
+'''
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/corrosion/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "corrosion"
+version = "0.6.1"
+release = 1
+summary = "Tool for integrating Rust into an existing CMake project"
+license = "MIT"
+homepage = "https://github.com/corrosion-rs/corrosion"
+hostdeps = ["cmake", "ninja", "rust"]
+builddeps = ["rust"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/corrosion-rs/corrosion/archive/refs/tags/v0.6.1.tar.gz", sha256 = "e9e95b1ee2bad52681f347993fb1a5af5cce458c5ce8a2636c9e476e4babf8e3" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/corrosion/LICENSE"
+'''

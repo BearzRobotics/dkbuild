@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/cabextract/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "cabextract"
+version = "1.11"
+release = 1
+summary = "Tool for extracting Microsoft cabinet files"
+license = "GPL-2.0-or-later"
+homepage = "https://www.cabextract.org.uk"
+patches = ["musl-test.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["libmspack-devel"]
+
+source = [
+    { url = "https://www.cabextract.org.uk/cabextract-1.11.tar.gz", sha256 = "b5546db1155e4c718ff3d4b278573604f30dd64c3c5bfd4657cd089b823a3ac6" },
+]
+
+setup = '''
+%configure \
+    --with-external-libmspack
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

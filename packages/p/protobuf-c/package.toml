@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/protobuf-c/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "protobuf-c"
+version = "1.5.2"
+release = 8
+summary = "Protobuf implementation in C"
+license = "BSD-2-Clause"
+homepage = "https://github.com/protobuf-c/protobuf-c"
+patches = ["797.patch"]
+hostdeps = ["automake", "libtool", "pkgconf", "protobuf"]
+builddeps = ["boost-devel", "protobuf-devel"]
+
+source = [
+    { url = "https://github.com/protobuf-c/protobuf-c/releases/download/v1.5.2/protobuf-c-1.5.2.tar.gz", sha256 = "e2c86271873a79c92b58fef7ebf8de1aa0df4738347a8bd5d4e65a80a16d0d24" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-protoc
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/protobuf-c/LICENSE"
+'''

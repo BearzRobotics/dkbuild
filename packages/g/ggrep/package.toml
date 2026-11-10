@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/ggrep/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "ggrep"
+version = "3.12"
+release = 1
+summary = "GNU grep"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/grep"
+hostdeps = ["pkgconf"]
+builddeps = ["pcre2-devel"]
+checkdeps = ["perl"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/grep/grep-3.12.tar.xz", sha256 = "2649b27c0e90e632eadcd757be06c6e9a4f48d941de51e7c0f83ff76408a07b9" },
+]
+
+setup = '''
+%configure \
+    --program-prefix=g
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

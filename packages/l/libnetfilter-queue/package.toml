@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/libnetfilter_queue/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libnetfilter-queue"
+version = "1.0.5"
+release = 1
+summary = "Interface to the kernel packet filter queue"
+license = "GPL-2.0-or-later"
+homepage = "https://netfilter.org/projects/libnetfilter_queue"
+hostdeps = ["automake", "pkgconf", "libtool"]
+builddeps = ["libmnl-devel", "libnfnetlink-devel", "linux-headers"]
+
+source = [
+    { url = "https://netfilter.org/projects/libnetfilter_queue/files/libnetfilter_queue-1.0.5.tar.bz2", sha256 = "f9ff3c11305d6e03d81405957bdc11aea18e0d315c3e3f48da53a24ba251b9f5" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

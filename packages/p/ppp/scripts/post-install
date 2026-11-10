@@ -1,0 +1,9 @@
+#!/bin/sh
+# directories and files (tmpfiles.conf)
+mkdir -p /etc/ppp/ipv6-down.d
+chmod 0755 /etc/ppp/ipv6-down.d
+chown root:root /etc/ppp/ipv6-down.d 2>/dev/null || true
+mkdir -p /etc/ppp/peers
+chmod 0755 /etc/ppp/peers
+chown root:root /etc/ppp/peers 2>/dev/null || true
+exit 0

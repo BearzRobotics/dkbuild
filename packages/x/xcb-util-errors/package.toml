@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xcb-util-errors/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "xcb-util-errors"
+version = "1.0.1"
+release = 2
+summary = "XCB errors library"
+license = "MIT"
+homepage = "https://xcb.freedesktop.org"
+hostdeps = ["automake", "libtool", "pkgconf", "xorg-util-macros"]
+builddeps = ["libxcb-devel"]
+
+source = [
+    { url = "https://xcb.freedesktop.org/dist/xcb-util-errors-1.0.1.tar.gz", sha256 = "cfbd3b022bdb27a6921a4abd6b41f4071b4e4960447598abd30955d3454f4d99" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xcb-util-errors/COPYING"
+'''

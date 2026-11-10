@@ -1,0 +1,22 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/perl-parse-yapp/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "perl-parse-yapp"
+version = "1.21"
+release = 3
+summary = "Yet Another Parser Parser for Perl"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/release/Parse-Yapp"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+rundeps = ["perl"]
+
+source = [
+    { url = "https://www.cpan.org/modules/by-module/Parse/Parse-Yapp-1.21.tar.gz", sha256 = "3810e998308fba2e0f4f26043035032b027ce51ce5c8a52a8b8e340ca65f13e5" },
+]
+
+install = '''
+# TODO(cbuild): no install step could be derived
+true
+'''

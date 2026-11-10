@@ -1,0 +1,18 @@
+#!/bin/sh
+# directories and files (tmpfiles.conf)
+mkdir -p /var/lib/swtpm-localca
+chmod 0750 /var/lib/swtpm-localca
+chown tss:root /var/lib/swtpm-localca 2>/dev/null || true
+chmod 644 /var/lib/swtpm-localca/certserial
+chown tss:tss /var/lib/swtpm-localca/certserial 2>/dev/null || true
+chmod 644 /var/lib/swtpm-localca/issuercert.pem
+chown tss:tss /var/lib/swtpm-localca/issuercert.pem 2>/dev/null || true
+chmod 640 /var/lib/swtpm-localca/signkey.pem
+chown tss:tss /var/lib/swtpm-localca/signkey.pem 2>/dev/null || true
+chmod 644 /var/lib/swtpm-localca/swtpm-localca-rootca-cert.pem
+chown tss:tss /var/lib/swtpm-localca/swtpm-localca-rootca-cert.pem 2>/dev/null || true
+chmod 640 /var/lib/swtpm-localca/swtpm-localca-rootca-privkey.pem
+chown tss:tss /var/lib/swtpm-localca/swtpm-localca-rootca-privkey.pem 2>/dev/null || true
+chmod 644 /var/lib/swtpm-localca/.lock.swtpm-localca
+chown tss:tss /var/lib/swtpm-localca/.lock.swtpm-localca 2>/dev/null || true
+exit 0

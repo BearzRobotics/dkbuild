@@ -1,0 +1,9 @@
+#!/bin/sh
+# directories and files (tmpfiles.conf)
+mkdir -p /etc/dnsmasq.d
+chmod 0755 /etc/dnsmasq.d
+chown root:root /etc/dnsmasq.d 2>/dev/null || true
+mkdir -p /var/lib/misc
+chmod 0755 /var/lib/misc
+chown root:root /var/lib/misc 2>/dev/null || true
+exit 0

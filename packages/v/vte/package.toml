@@ -1,0 +1,36 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/vte/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "vte"
+version = "0.84.1"
+release = 1
+summary = "Gtk terminal widget"
+license = "LGPL-2.0-or-later"
+homepage = "https://wiki.gnome.org/Apps/Terminal/VTE"
+patches = ["a5c88eccdf3c7ad3a48f6def0d51f7d49fa40c63.patch", "fix-W_EXITCODE.patch", "fmt-missing-include.patch", "loongarch.patch", "simdutf-latin1.patch", "simdutf-no-vsx-ppc64.patch"]
+hostdeps = ["bash", "gettext-devel", "glib-devel", "gobject-introspection", "gperf", "pkgconf", "vala"]
+builddeps = ["fribidi-devel", "glib-devel", "gnutls-devel", "gtk+3-devel", "gtk4-devel", "icu-devel", "linux-headers", "lz4-devel", "pango-devel", "pcre2-devel", "vala-devel", "zlib-ng-compat-devel"]
+options = ["!lto", "!cross"]
+
+source = [
+    { url = "https://download.gnome.org/sources/vte/0.84/vte-0.84.1.tar.xz", sha256 = "aca1caa8478aebcdbb1d67897fb3511eb7601debae6810e16a15b6fa25f31ac8" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -Wno-cast-function-type-strict"
+export CXXFLAGS="${CXXFLAGS} -Wno-cast-function-type-strict -Wno-cast-align -Wno-float-equal"
+'''
+setup = '''
+%meson \
+    -D_systemd=false \
+    -Dgir=true \
+    -Dvapi=true \
+    -Dgtk4=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

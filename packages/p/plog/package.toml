@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/plog/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "plog"
+version = "1.1.10"
+release = 2
+summary = "Portable, simple, and extensible C++ logging library"
+license = "MIT"
+homepage = "https://github.com/SergiusTheBest/plog"
+hostdeps = ["cmake", "ninja"]
+
+source = [
+    { url = "https://github.com/SergiusTheBest/plog/archive/refs/tags/1.1.10.tar.gz", sha256 = "55a090fc2b46ab44d0dde562a91fe5fc15445a3caedfaedda89fe3925da4705a" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DPLOG_BUILD_SAMPLES=OFF \
+    -DPLOG_BUILD_TESTS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/plog/LICENSE"
+'''

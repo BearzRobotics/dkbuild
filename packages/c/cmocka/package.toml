@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/cmocka/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "cmocka"
+version = "1.1.8"
+release = 1
+summary = "Unit testing framework in C"
+license = "Apache-2.0"
+homepage = "https://cmocka.org"
+patches = ["wordsize.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+
+source = [
+    { url = "https://cmocka.org/files/1.1/cmocka-1.1.8.tar.xz", sha256 = "58435b558766d7f4c729ba163bdf3aec38bed3bc766dab684e3526ed0aa7c780" },
+]
+
+setup = '''
+%cmake \
+    -DUNIT_TESTING=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

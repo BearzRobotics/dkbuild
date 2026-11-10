@@ -1,0 +1,21 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-snowballstemmer/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "python-snowballstemmer"
+version = "3.1.0"
+release = 1
+summary = "Snowball stemming library collection for Python"
+license = "BSD-3-Clause"
+homepage = "https://snowballstem.org"
+hostdeps = ["python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/s/snowballstemmer/snowballstemmer-3.1.0.tar.gz", sha256 = "fd9e34526b23340cd23ffea6c9f9760974ecc2c2ac9e1d81401443ccdb2a801f" },
+]
+
+install = '''
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/python-snowballstemmer/COPYING"
+'''

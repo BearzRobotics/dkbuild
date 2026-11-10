@@ -1,0 +1,38 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/spice/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "spice"
+version = "0.15.2"
+release = 4
+summary = "Simple Protocol for Independent Computing Environments"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.spice-space.org"
+patches = ["int.patch"]
+hostdeps = ["autoconf-archive", "automake", "libtool", "pkgconf", "python"]
+builddeps = ["gdk-pixbuf-devel", "gnutls-devel", "gst-plugins-base-devel", "gstreamer-devel", "libcacard-devel", "libjpeg-turbo-devel", "libsasl-devel", "lz4-devel", "openssl-devel", "opus-devel", "pixman-devel", "spice-protocol", "zlib-ng-compat-devel"]
+checkdeps = ["glib-networking"]
+
+source = [
+    { url = "https://www.spice-space.org/download/releases/spice-0.15.2.tar.bz2", sha256 = "6d9eb6117f03917471c4bc10004abecff48a79fb85eb85a1c45f023377015b81" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-static \
+    --enable-opengl \
+    --enable-opus \
+    --enable-smartcard \
+    --enable-xinerama \
+    --with-sasl
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

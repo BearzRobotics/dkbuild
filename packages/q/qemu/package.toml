@@ -1,0 +1,87 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/qemu/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "qemu"
+version = "11.0.1"
+release = 1
+summary = "Generic machine emulator and virtualizer"
+license = "GPL-2.0-only AND LGPL-2.1-only"
+homepage = "https://qemu.org"
+patches = ["0006-linux-user-signal.c-define-__SIGRTMIN-MAX-for-non-GN.patch", "CVE-2021-20255.patch", "MAP_SYNC-fix.patch", "bridge-helper-group.patch", "fix-shutdown.patch", "fix-sockios-header.patch", "guest-agent-shutdown.patch", "int128-overflow.patch", "loongarch-disable-atomic128.patch", "musl-initialise-msghdr.patch", "no-check-for-binfmt-gen.patch", "no-indent.patch", "no-venv.patch", "notest.patch", "ppc-hwcap.patch", "riscv-default-cpu-rv64.patch", "tcg-overflow.patch", "xattr_size_max.patch"]
+hostdeps = ["bash", "bison", "bzip2", "flex", "gettext", "ninja", "perl", "pkgconf", "python-sphinx", "python-sphinx-rtd-theme"]
+builddeps = ["bzip2-devel", "capstone-devel", "curl-devel", "dtc-devel", "elfutils-devel", "fuse-devel", "glib-devel", "gnutls-devel", "gtk+3-devel", "keyutils-devel", "libaio-devel", "libbpf-devel", "libcacard-devel", "libcap-ng-devel", "libcbor-devel", "libdrm-devel", "libiscsi-devel", "libjpeg-turbo-devel", "libnfs-devel", "libpulse-devel", "libsasl-devel", "libseccomp-devel", "libslirp-devel", "libssh-devel", "liburing-devel", "libusb-devel", "linux-headers", "lzo-devel", "ncurses-devel", "nss-devel", "numactl-devel", "pcsc-lite-devel", "pipewire-devel", "pixman-devel", "sdl2-compat-devel", "sdl2-image-devel", "snappy-devel", "usbredir-devel", "virglrenderer-devel", "vte-devel", "zlib-ng-compat-devel", "zstd-devel"]
+options = ["!cross", "!check"]
+
+source = [
+    { url = "https://download.qemu.org/qemu-11.0.1.tar.xz", sha256 = "0d235f5820278d914a3155ec27af8e4258d697ea892895570807d69c0cb8cd64" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -I/usr/include/bpf/uapi"
+export CXXFLAGS="${CXXFLAGS} -I/usr/include/bpf/uapi"
+'''
+setup = '''
+# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 137); port it by hand
+%configure \
+    --enable-bpf \
+    --enable-cap-ng \
+    --enable-capstone \
+    --enable-curl \
+    --enable-curses \
+    --enable-dbus-display \
+    --enable-docs \
+    --enable-gtk \
+    --enable-guest-agent \
+    --enable-jack \
+    --enable-kvm \
+    --enable-libdw \
+    --enable-libnfs \
+    --enable-libssh \
+    --enable-linux-aio \
+    --enable-linux-io-uring \
+    --enable-lzo \
+    --enable-numa \
+    --enable-pie \
+    --enable-sdl \
+    --enable-seccomp \
+    --enable-snappy \
+    --enable-system \
+    --enable-tpm \
+    --enable-usb-redir \
+    --enable-vhost-net \
+    --enable-virglrenderer \
+    --enable-virtfs \
+    --enable-vnc \
+    --enable-vnc-jpeg \
+    --enable-zstd \
+    --disable-bsd-user \
+    --disable-debug-info \
+    --disable-glusterfs \
+    --disable-linux-user \
+    --disable-oss \
+    --disable-werror \
+    --disable-xen \
+    --audio-drv-list=pa,pipewire,jack,sdl
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 $pkgfiles/qemu-ga "$pkgdir/etc/dinit.d/qemu-ga"
+# no elf files in /usr/share
+# TODO(cbuild): self.rename("usr/share/qemu", "usr/lib/qemu", relative=False)
+mkdir -p "$pkgdir/usr/share"
+ln -sf ../lib/qemu "$pkgdir/usr/share/qemu"
+install -Dm644 $pkgfiles/80-kvm.rules "$pkgdir/usr/lib/udev/rules.d/80-kvm.rules"
+install -Dm644 $pkgfiles/bridge.conf "$pkgdir/usr/lib/qemu/bridge.conf"
+rm -rf "$pkgdir/usr/share/doc"
+# TODO(cbuild): if self.profile.wordsize == 32:
+#         self.uninstall("usr/lib/qemu/palcode-clipper")
+#         self.uninstall("usr/lib/qemu/hppa-firmware.img")
+#         self.uninstall("usr/lib/qemu/hppa-firmware64.img")
+#         self.uninstall("usr/lib/qemu/opensbi-riscv64-generic-fw_dynamic.bin")
+#         self.uninstall("usr/lib/qemu/s390-ccw.img")
+#         self.uninstall("usr/lib/qemu/openbios-sparc64")
+'''

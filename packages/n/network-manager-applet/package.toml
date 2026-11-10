@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/network-manager-applet/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "network-manager-applet"
+version = "1.36.0"
+release = 2
+summary = "Network manager tray applet"
+license = "GPL-2.0-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/network-manager-applet"
+hostdeps = ["pkgconf", "gettext"]
+builddeps = ["glib-devel", "gtk+3-devel", "jansson-devel", "libayatana-appindicator-devel", "libdbusmenu-devel", "libnma-devel", "libsecret-devel", "modemmanager-devel", "networkmanager-devel"]
+
+source = [
+    { url = "https://download.gnome.org/sources/network-manager-applet/1.36/network-manager-applet-1.36.0.tar.xz", sha256 = "a84704487ea3afe1485c47fb2ab598b8f779f540ae0dcbf0a1c5f85e64a7e253" },
+]
+
+setup = '''
+%meson \
+    -Dselinux=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

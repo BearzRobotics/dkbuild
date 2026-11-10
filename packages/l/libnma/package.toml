@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libnma/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libnma"
+version = "1.10.6"
+release = 2
+summary = "NetworkManager GNOME applet runtime library"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/libnma"
+hostdeps = ["gettext", "glib-devel", "gobject-introspection", "pkgconf", "vala"]
+builddeps = ["gcr-devel", "gtk+3-devel", "gtk4-devel", "iso-codes", "mobile-broadband-provider-info", "networkmanager-devel"]
+rundeps = ["networkmanager", "iso-codes"]
+options = ["!cross"]
+
+source = [
+    { url = "https://gitlab.gnome.org/GNOME/libnma/-/archive/1.10.6/libnma-1.10.6.tar.gz", sha256 = "c88fd3408c4ff166b06179b5ce5186e08a57b64eb8c9b22e055ca0dbc5e8002b" },
+]
+
+setup = '''
+%meson \
+    -Dgtk_doc=false \
+    -Dlibnma_gtk4=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+# Conflicts with main/network-manager-applet
+# See https://gitlab.gnome.org/GNOME/network-manager-applet/-/commit/574fdd97ae38b89f6d3d1a1c3fbfd63754b25df2
+rm -rf "$pkgdir/usr/share/glib-2.0/schemas/org.gnome.nm-applet.gschema.xml"
+'''

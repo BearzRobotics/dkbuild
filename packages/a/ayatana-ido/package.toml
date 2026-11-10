@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/ayatana-ido/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "ayatana-ido"
+version = "0.10.4"
+release = 1
+summary = "Ayatana Indicator Display Objects"
+license = "GPL-3.0-only AND LGPL-2.1-or-later AND (LGPL-2.1-only OR LGPL-3.0-only)"
+homepage = "https://github.com/AyatanaIndicators/ayatana-ido"
+patches = ["disable-Weverything.patch"]
+hostdeps = ["cmake", "glib-devel", "gobject-introspection", "ninja", "pkgconf", "vala"]
+builddeps = ["glib-devel", "gtest-devel", "gtk+3-devel"]
+checkdeps = []
+options = ["!cross"]
+
+source = [
+    { url = "https://github.com/AyatanaIndicators/ayatana-ido/archive/refs/tags/0.10.4.tar.gz", sha256 = "bd59abd5f1314e411d0d55ce3643e91cef633271f58126be529de5fb71c5ab38" },
+]
+
+setup = '''
+%cmake \
+    -DENABLE_TESTS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

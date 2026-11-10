@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/passt/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "passt"
+version = "0"
+release = 1
+summary = "User-mode network translation layer between Layer 2 and 4"
+license = "BSD-3-Clause AND GPL-2.0-or-later"
+homepage = "https://passt.top/passt/about"
+patches = ["bullshit-cflags.patch", "cp-d.patch", "fmt.patch", "sed.patch"]
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://passt.top/passt/snapshot/passt-2026_09_25.df90211.tar.zst", sha256 = "8285146defc9b89b853142eee813135064bd518a76eabf8fb0f673fc74fc9231" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -fno-strict-aliasing -std=c23"
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr \
+    prefix=/usr
+install -Dm644 LICENSES/BSD-3-Clause.txt "$pkgdir/usr/share/licenses/passt/BSD-3-Clause.txt"
+'''

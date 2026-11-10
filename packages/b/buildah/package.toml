@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/buildah/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "buildah"
+version = "1.45.0"
+release = 3
+summary = "OCI image building tool"
+license = "Apache-2.0"
+homepage = "https://buildah.io"
+patches = ["basename.patch"]
+hostdeps = ["go", "pkgconf"]
+builddeps = ["btrfs-progs-devel", "gpgme-devel", "libseccomp-devel", "linux-headers", "lvm2-devel", "sqlite-devel"]
+rundeps = ["cni-plugins", "containers-common", "crun", "slirp4netns"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/podman-container-tools/buildah/archive/refs/tags/v1.45.0.tar.gz", sha256 = "d2bc03332c9f6ad5fcc210c68ad3190fe11d358214c88fb12a233f5045d5eddd" },
+]
+
+install = '''
+# TODO(cbuild): no install step could be derived
+true
+'''

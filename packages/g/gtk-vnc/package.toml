@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gtk-vnc/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "gtk-vnc"
+version = "1.5.0"
+release = 1
+summary = "VNC client viewer widget for GTK+3"
+license = "LGPL-2.1-or-later"
+homepage = "https://wiki.gnome.org/Projects/gtk-vnc"
+hostdeps = ["gettext", "gobject-introspection", "perl", "pkgconf"]
+builddeps = ["cairo-devel", "gdk-pixbuf-devel", "gnutls-devel", "gobject-introspection-devel", "gtk+3-devel", "libgcrypt-devel", "libpulse-devel", "libsasl-devel", "vala-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://download.gnome.org/sources/gtk-vnc/1.5/gtk-vnc-1.5.0.tar.xz", sha256 = "c0beb4747528ad931da43acc567c6a0190f7fc624465571ed9ccece02c34dd23" },
+]
+
+setup = '''
+%meson \
+    -Dintrospection=enabled \
+    -Dpulseaudio=enabled \
+    -Dsasl=enabled \
+    -Dwith-vala=enabled \
+    -Dwith-coroutine=gthread
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

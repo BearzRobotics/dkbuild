@@ -1,0 +1,47 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/wpa_supplicant/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "wpa-supplicant"
+version = "2.12"
+release = 1
+summary = "WPA/WPA2/IEEE 802.1X Supplicant"
+license = "BSD-3-Clause"
+homepage = "http://w1.fi/wpa_supplicant"
+patches = ["001-dbus-policy.patch", "002-dbus-syslog.patch", "003-allow-tlsv1.patch", "004-disable-eapol-werror.patch", "005-nl80211-add-extra-ies-only-if-allowed-by-driver.patch", "008-allow-legacy-renegotiation.patch", "defaults.patch", "wpa_supplicant-Revert-Mark-authorization-completed-on-driver-indica.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["dbus-devel", "libedit-devel", "libnl-devel", "linux-headers", "openssl-devel", "pcsc-lite-devel"]
+options = ["!check"]
+
+source = [
+    { url = "http://w1.fi/releases/wpa_supplicant-2.12.tar.gz", sha256 = "08e23937e16d0155e55cab2b51f51fbe10d80a1aa91c4e15442645059b737ef6" },
+]
+
+build = '''
+%make \
+    V=1
+'''
+install = '''
+install -dm755 "$pkgdir/usr/bin"
+%make_install \
+    STRIP=true \
+    PREFIX=/usr
+# dbus services
+# TODO(cbuild): for f in (self.cwd / "dbus").glob("*.service"):
+#         self.install_file(f, "usr/share/dbus-1/system-services")
+# dbus config
+install -Dm644 dbus/dbus-wpa_supplicant.conf "$pkgdir/usr/share/dbus-1/system.d/wpa_supplicant.conf"
+# default config
+install -Dm640 $pkgfiles/wpa_supplicant.conf "$pkgdir/etc/wpa_supplicant/wpa_supplicant.conf"
+# manpages
+# TODO(cbuild): for m in (self.cwd / "doc/docbook").glob("*.[58]"):
+#         if (
+#             m.stem == "wpa_gui"
+#             or m.stem == "wpa_priv"
+#             or m.stem == "eapol_test"
+#         ):
+#             continue
+#         self.install_man(m)
+# license
+install -Dm644 README "$pkgdir/usr/share/licenses/wpa_supplicant/README"
+'''

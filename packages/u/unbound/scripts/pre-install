@@ -1,0 +1,5 @@
+#!/bin/sh
+# users and groups (sysusers.conf)
+grep -q "^_unbound:" /etc/group || groupadd -r _unbound
+grep -q "^_unbound:" /etc/passwd || useradd -r -g _unbound -d /var/empty -s /usr/bin/nologin -c 'unbound user' _unbound
+exit 0

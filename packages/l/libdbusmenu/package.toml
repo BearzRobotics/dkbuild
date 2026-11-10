@@ -1,0 +1,36 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libdbusmenu/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libdbusmenu"
+version = "16.04.0"
+release = 3
+summary = "Library for passing menus over DBus"
+license = "GPL-3.0-or-later AND LGPL-3.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://launchpad.net/libdbusmenu"
+patches = ["json-glib.patch", "makefile-werror.patch", "no-tools.patch", "tests-no-gtk.patch", "tests-werror.patch"]
+hostdeps = ["automake", "intltool", "libtool", "pkgconf"]
+builddeps = ["atkmm-devel", "gettext-devel", "glib-devel", "gobject-introspection", "gtk+3-devel", "json-glib-devel", "vala-devel"]
+checkdeps = ["bash"]
+
+source = [
+    { url = "https://launchpad.net/libdbusmenu/16.04/16.04.0/+download/libdbusmenu-16.04.0.tar.gz", sha256 = "b9cc4a2acd74509435892823607d966d424bd9ad5d0b00938f27240a1bfa878a" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-dumper \
+    --disable-static \
+    --enable-gtk \
+    --enable-tests
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

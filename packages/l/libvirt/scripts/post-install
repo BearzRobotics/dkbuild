@@ -1,0 +1,30 @@
+#!/bin/sh
+# directories and files (tmpfiles.conf)
+mkdir -p /var/lib/libvirt/boot
+chmod 0755 /var/lib/libvirt/boot
+chown root:root /var/lib/libvirt/boot 2>/dev/null || true
+mkdir -p /var/lib/libvirt/images
+chmod 0755 /var/lib/libvirt/images
+chown root:root /var/lib/libvirt/images 2>/dev/null || true
+mkdir -p /var/lib/libvirt/sanlock
+chmod 0700 /var/lib/libvirt/sanlock
+chown root:root /var/lib/libvirt/sanlock 2>/dev/null || true
+mkdir -p /var/cache/libvirt
+chmod 0711 /var/cache/libvirt
+chown root:root /var/cache/libvirt 2>/dev/null || true
+mkdir -p /var/cache/libvirt/qemu
+chmod 0711 /var/cache/libvirt/qemu
+chown root:root /var/cache/libvirt/qemu 2>/dev/null || true
+mkdir -p /var/lib/libvirt/qemu
+chmod 0750 /var/lib/libvirt/qemu
+chown _libvirt-qemu:_libvirt-qemu /var/lib/libvirt/qemu 2>/dev/null || true
+mkdir -p /var/lib/libvirt/qemu/nvram
+chmod 0755 /var/lib/libvirt/qemu/nvram
+chown _libvirt-qemu:_libvirt-qemu /var/lib/libvirt/qemu/nvram 2>/dev/null || true
+mkdir -p /var/lib/libvirt/qemu/channel
+chmod 0750 /var/lib/libvirt/qemu/channel
+chown _libvirt-qemu:_libvirt-qemu /var/lib/libvirt/qemu/channel 2>/dev/null || true
+mkdir -p /var/lib/libvirt/qemu/channel/target
+chmod 0755 /var/lib/libvirt/qemu/channel/target
+chown _libvirt-qemu:_libvirt-qemu /var/lib/libvirt/qemu/channel/target 2>/dev/null || true
+exit 0

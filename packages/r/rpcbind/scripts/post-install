@@ -1,0 +1,6 @@
+#!/bin/sh
+# directories and files (tmpfiles.conf)
+mkdir -p /var/lib/rpcbind
+chmod 0700 /var/lib/rpcbind
+chown _rpc:_rpc /var/lib/rpcbind 2>/dev/null || true
+exit 0

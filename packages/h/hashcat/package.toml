@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/hashcat/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "hashcat"
+version = "7.1.2"
+release = 1
+summary = "Password recovery tool"
+license = "MIT"
+homepage = "https://hashcat.net/hashcat"
+patches = ["aarch64-autodetection.patch", "cargo-offline.patch", "fix-modules-path.patch", "ldflags.patch", "no_gcc.patch", "ppc.patch"]
+hostdeps = ["rust", "sed"]
+builddeps = ["linux-headers", "minizip-devel", "opencl-headers", "python-devel", "rust", "xxhash-devel", "zlib-ng-compat-devel"]
+options = ["!check", "!cross"]
+
+source = [
+    { url = "https://hashcat.net/files/hashcat-7.1.2.tar.gz", sha256 = "9546a6326d747530b44fcc079babad40304a87f32d3c9080016d58b39cfc8b96" },
+]
+
+build = '''
+# TODO(cbuild): init_build() sets variables for this phase (cbuild line 49); port it by hand
+%make
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr
+install -Dm644 docs/license.txt "$pkgdir/usr/share/licenses/hashcat/license.txt"
+'''

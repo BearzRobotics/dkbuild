@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/iir1/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "iir1"
+version = "1.10.0"
+release = 2
+summary = "DSP IIR realtime filter library"
+license = "MIT"
+homepage = "https://berndporr.github.io/iir1"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+
+source = [
+    { url = "https://github.com/berndporr/iir1/archive/refs/tags/1.10.0.tar.gz", sha256 = "13b53f14d276adf6cafd3564fcda1d4b3e72342108d1c40ec4b4f0c7fc3ac95a" },
+]
+
+setup = '''
+%cmake \
+    -DIIR1_BUILD_DEMO=OFF \
+    -DIIR1_INSTALL_STATIC=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/iir1/COPYING"
+'''

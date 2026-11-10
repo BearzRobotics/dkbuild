@@ -1,0 +1,40 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/chrony/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "chrony"
+version = "4.9"
+release = 1
+summary = "NTP client and server"
+license = "GPL-2.0-or-later"
+homepage = "https://chrony-project.org"
+patches = ["max_resolve_interval.patch", "no-pidfile-default.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["gnutls-devel", "libcap-devel", "libedit-devel", "libseccomp-devel", "linux-headers", "nettle-devel"]
+checkdeps = ["bash"]
+
+source = [
+    { url = "https://chrony-project.org/releases/chrony-4.9.tar.gz", sha256 = "4924c6f530105bcd5b9e9e33c48a2ae1bfd889222c8480bc41601110efc864d0" },
+]
+
+setup = '''
+%configure \
+    --with-user=_chrony \
+    --with-sendmail=/usr/bin/sendmail \
+    --enable-ntp-signd \
+    --enable-scfilter
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+# config
+install -Dm644 examples/chrony.conf.example1 "$pkgdir/etc/chrony.conf"
+# dinit services
+install -Dm644 $pkgfiles/chronyd "$pkgdir/etc/dinit.d/chronyd"
+# TODO(cbuild): self.install_service(self.files_path / "chrony", enable=True)
+'''

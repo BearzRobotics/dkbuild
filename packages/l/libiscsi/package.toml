@@ -1,0 +1,35 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libiscsi/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libiscsi"
+version = "1.20.2"
+release = 1
+summary = "ISCSI client library and utilities"
+license = "LGPL-2.1-or-later AND GPL-2.0-or-later"
+homepage = "https://github.com/sahlberg/libiscsi"
+patches = ["32bit.patch"]
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["linux-headers", "libgcrypt-devel"]
+
+source = [
+    { url = "https://github.com/sahlberg/libiscsi/archive/1.20.2.tar.gz", sha256 = "2b2a773ea0d3a708c1cafe61bbee780325fb1aafec6477f17d3f403e8732c9bf" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -Wno-strict-prototypes"
+'''
+setup = '''
+./autogen.sh
+%configure \
+    --disable-werror
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libpciaccess/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libpciaccess"
+version = "0.19"
+release = 1
+summary = "X11 PCI access library"
+license = "MIT"
+homepage = "http://xorg.freedesktop.org"
+hostdeps = ["pkgconf"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/lib/libpciaccess-0.19.tar.xz", sha256 = "3c55aa86c82e54a4e3109786f0463530d53b36b6d1cfd14616454f985dd2aa43" },
+]
+
+setup = '''
+%meson \
+    -Dinstall-scanpci=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libpciaccess/COPYING"
+'''

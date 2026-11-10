@@ -1,0 +1,18 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/android-udev-rules/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "android-udev-rules"
+version = "20260922"
+release = 1
+summary = "Comprehensive Android udev rules collection"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/M0Rf30/android-udev-rules"
+
+source = [
+    { url = "https://github.com/M0Rf30/android-udev-rules/archive/refs/tags/20260922.tar.gz", sha256 = "3cc14f34142e71837eb073cc10b09eb48a9f7282b7c9ade9259e7809eec5062e" },
+]
+
+install = '''
+install -Dm644 51-android.rules "$pkgdir/usr/lib/udev/rules.d/51-android.rules"
+'''

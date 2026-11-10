@@ -1,0 +1,7 @@
+#!/bin/sh
+# users and groups (qemu.conf)
+grep -q "^_qemu:" /etc/group || groupadd -r _qemu
+grep -q "^_qemu:" /etc/passwd || useradd -r -g _qemu -d /var/empty -s /usr/bin/nologin -c 'qemu user' _qemu
+grep -q "^kvm:" /etc/group || groupadd -r kvm
+usermod -a -G kvm _qemu 2>/dev/null || true
+exit 0

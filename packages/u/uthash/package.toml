@@ -1,0 +1,19 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/uthash/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "uthash"
+version = "2.3.0"
+release = 1
+summary = "Hash table for C structures"
+license = "BSD-2-Clause"
+homepage = "https://troydhanson.github.io/uthash"
+
+source = [
+    { url = "https://github.com/troydhanson/uthash/archive/refs/tags/v2.3.0.tar.gz", sha256 = "e10382ab75518bad8319eb922ad04f907cb20cccb451a3aa980c9d005e661acc" },
+]
+
+install = '''
+# TODO(cbuild): self.install_files("src", "usr", name="include")
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/uthash/LICENSE"
+'''

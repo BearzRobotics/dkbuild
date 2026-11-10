@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libmnl/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libmnl"
+version = "1.0.5"
+release = 1
+summary = "Minimalistic user-space library oriented to Netlink developers"
+license = "LGPL-2.1-or-later"
+homepage = "http://www.netfilter.org/projects/libmnl"
+hostdeps = ["automake", "pkgconf", "libtool"]
+builddeps = ["linux-headers"]
+checkdeps = []
+
+source = [
+    { url = "http://www.netfilter.org/projects/libmnl/files/libmnl-1.0.5.tar.bz2", sha256 = "274b9b919ef3152bfb3da3a13c950dd60d6e2bcd54230ffeca298d03b40d0525" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libqrtr-glib/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libqrtr-glib"
+version = "1.4.0"
+release = 1
+summary = "Qualcomm IPC Router protocol helper library"
+license = "LGPL-2.1-or-later"
+homepage = "https://gitlab.freedesktop.org/mobile-broadband/libqrtr-glib"
+hostdeps = ["pkgconf", "glib-devel", "gobject-introspection"]
+builddeps = ["glib-devel", "linux-headers"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/mobile-broadband/libqrtr-glib/-/archive/1.4.0/libqrtr-glib-1.4.0.tar.gz", sha256 = "9e5f988c6005af347f6d0ac95c872e473c9c10c3ec3714ee0b73d896db7d5766" },
+]
+
+setup = '''
+%meson \
+    -Dgtk_doc=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

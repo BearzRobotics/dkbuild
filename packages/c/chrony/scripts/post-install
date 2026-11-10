@@ -1,0 +1,12 @@
+#!/bin/sh
+# directories and files (tmpfiles.conf)
+mkdir -p /var/lib/chrony
+chmod 0755 /var/lib/chrony
+chown _chrony:_chrony /var/lib/chrony 2>/dev/null || true
+mkdir -p /var/log/chrony
+chmod 0755 /var/log/chrony
+chown _chrony:_chrony /var/log/chrony 2>/dev/null || true
+mkdir -p /run/chrony
+chmod 0750 /run/chrony
+chown _chrony:_chrony /run/chrony 2>/dev/null || true
+exit 0

@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/nftables/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "nftables"
+version = "1.1.7"
+release = 1
+summary = "Netfilter nftables userspace tools"
+license = "GPL-2.0-only AND GPL-2.0-or-later"
+homepage = "http://netfilter.org/projects/nftables"
+hostdeps = ["automake", "bash", "flex", "libtool", "pkgconf"]
+builddeps = ["gmp-devel", "jansson-devel", "libedit-devel", "libmnl-devel", "libnftnl-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "http://netfilter.org/projects/nftables/files/nftables-1.1.7.tar.xz", sha256 = "a6fbf060d8d4fff001517a2b94f356bb4366bfbf0ba366366f9d27cc38caa58f" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-cli=editline \
+    --with-json
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+# TODO(cbuild): fpath = self.files_path
+# TODO(cbuild): self.install_file(fpath / "nftables-start", "usr/lib", mode=0o755)
+# TODO(cbuild): self.install_service(fpath / "nftables")
+'''

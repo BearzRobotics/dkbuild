@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libliftoff/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libliftoff"
+version = "0.5.0"
+release = 1
+summary = "KMS plane library"
+license = "MIT"
+homepage = "https://gitlab.freedesktop.org/emersion/libliftoff"
+patches = ["no-werror.patch"]
+hostdeps = ["ninja", "pkgconf"]
+builddeps = ["libdrm-devel"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/emersion/libliftoff/-/archive/v0.5.0/libliftoff-0.5.0.tar.gz", sha256 = "53b059fa785f629420e7d37bd68f4b2a3e4f463dca5f691d8d805901d80c492d" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libliftoff/LICENSE"
+'''

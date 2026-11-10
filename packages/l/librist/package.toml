@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/librist/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "librist"
+version = "0.2.11"
+release = 1
+summary = "Reliable Internet Stream Transport"
+license = "BSD-2-Clause"
+homepage = "https://code.videolan.org/rist/librist"
+hostdeps = ["ninja", "pkgconf"]
+builddeps = ["cjson-devel", "cmocka-devel", "linux-headers", "mbedtls-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://code.videolan.org/rist/librist/-/archive/v0.2.11/librist-v0.2.11.tar.bz2", sha256 = "f254842900a9dd20fb477b05ea0cce3ec1a8004d85177eef2408eefddca68b86" },
+]
+
+setup = '''
+%meson \
+    -Dtest=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/librist/COPYING"
+'''

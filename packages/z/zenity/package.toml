@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/zenity/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "zenity"
+version = "4.2.2"
+release = 1
+summary = "Display Gtk+ dialogs from the command line"
+license = "LGPL-2.1-or-later"
+homepage = "https://wiki.gnome.org/Projects/Zenity"
+hostdeps = ["gettext", "help2man", "itstool", "pkgconf"]
+builddeps = ["glib-devel", "gtk4-devel", "libadwaita-devel", "libnotify-devel", "libx11-devel"]
+
+source = [
+    { url = "https://download.gnome.org/sources/zenity/4.2/zenity-4.2.2.tar.xz", sha256 = "019186a996096ef4fc356e21577b5673f5baa3a29ac8e3d608b753371c18018d" },
+]
+
+setup = '''
+%meson \
+    -Dwebkitgtk=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

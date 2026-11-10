@@ -1,0 +1,77 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/networkmanager/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "networkmanager"
+version = "1.58.1"
+release = 2
+summary = "Network management daemon"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://gitlab.freedesktop.org/NetworkManager/NetworkManager"
+patches = ["clang_dumpmachine.patch", "libnm-wwan-soname.patch"]
+hostdeps = ["bash", "bpftool", "docbook-xsl-nons", "gettext", "glib-devel", "gobject-introspection", "jansson-devel", "libxslt", "perl", "pkgconf", "python-gobject", "vala"]
+builddeps = ["curl-devel", "dbus-devel", "dbus", "gobject-introspection-devel", "jansson-devel", "libbpf-devel", "libgudev-devel", "libndp-devel", "libnl-devel", "libnvme-devel", "libpsl-devel", "linux-headers", "mobile-broadband-provider-info", "modemmanager-devel", "newt-devel", "nss-devel", "polkit-devel", "ppp-devel", "python-gobject", "readline-devel", "eudev-devel", "util-linux-devel"]
+checkdeps = ["python-dbus"]
+rundeps = ["dbus", "iproute2", "mobile-broadband-provider-info", "openresolv", "wpa-supplicant"]
+options = ["!check", "!cross"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/NetworkManager/NetworkManager/-/archive/1.58.1/NetworkManager-1.58.1.tar.gz", sha256 = "8d112eefc0e0e15d44e93453a8a16760ec07a4037e1f93097abdf55abd5dca2d" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -Wno-incompatible-function-pointer-types"
+'''
+setup = '''
+%meson \
+    -Dsystemd_journal=false \
+    -Dselinux=false \
+    -Dovs=false \
+    -Dqt=false \
+    -Dsession_tracking_consolekit=false \
+    -Ddhcpcd=/usr/bin/dhcpcd \
+    -Diptables=/usr/bin/iptables \
+    -Dmodprobe=/usr/bin/modprobe \
+    -Dnft=/usr/bin/nft \
+    -Dresolvconf=/usr/bin/resolvconf \
+    -Ddnsmasq=/usr/bin/dnsmasq \
+    -Dpppd=/usr/bin/pppd \
+    -Dlibaudit=no \
+    -Dsystemdsystemunitdir=no \
+    -Dconfig_logging_backend_default=syslog \
+    -Dconfig_dns_rc_manager_default=resolvconf \
+    -Dconfig_wifi_backend_default=wpa_supplicant \
+    -Dconfig_dhcp_default=internal \
+    -Dkernel_firmware_dir=/usr/lib/firmware \
+    -Ddbus_conf_dir=/usr/share/dbus-1/system.d \
+    -Dudev_dir=/usr/lib/udev \
+    -Dpppd_plugin_dir=/usr/lib/pppd/2.5.2 \
+    -Dsession_tracking=elogind \
+    -Dsuspend_resume=elogind \
+    -Dvapi=true \
+    -Dintrospection=true \
+    -Ddocs=true \
+    -Dcrypto=nss \
+    -Dreadline=libreadline \
+    -Dtests=no \
+    -Dsystemdsystemgeneratordir=no
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 $pkgfiles/networkmanager "$pkgdir/etc/dinit.d/networkmanager"
+install -Dm644 $pkgfiles/NetworkManager.conf "$pkgdir/etc/NetworkManager/NetworkManager.conf"
+install -Dm644 $pkgfiles/50-org.freedesktop.NetworkManager.rules "$pkgdir/usr/share/polkit-1/rules.d/50-org.freedesktop.NetworkManager.rules"
+# kill hardlinks
+# TODO(cbuild): for f in ["nmtui-connect", "nmtui-hostname", "nmtui-edit"]:
+#         self.uninstall(f"usr/share/man/man1/{f}.1")
+#         self.install_link(f"usr/share/man/man1/{f}.1", "nmtui.1")
+rm -rf "$pkgdir/usr/share/man/man5/nm-settings.5"
+mkdir -p "$pkgdir/usr/share/man/man5"
+ln -sf nm-settings-nmcli.5 "$pkgdir/usr/share/man/man5/nm-settings.5"
+rm -rf "$pkgdir/usr/share/man/man5/nm-system-settings.conf.5"
+mkdir -p "$pkgdir/usr/share/man/man5"
+ln -sf NetworkManager.conf.5 "$pkgdir/usr/share/man/man5/nm-system-settings.conf.5"
+'''

@@ -1,0 +1,22 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-pyyaml/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "python-pyyaml"
+version = "6.0.2"
+release = 3
+summary = "YAML parser and emitter for Python"
+license = "MIT"
+homepage = "http://pyyaml.org/wiki/PyYAML"
+hostdeps = ["python-cython", "python-setuptools"]
+builddeps = ["libyaml-devel", "python-devel"]
+checkdeps = []
+rundeps = ["python"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/p/pyyaml/pyyaml-6.0.2.tar.gz", sha256 = "d584d9ec91ad65861cc08d42e834324ef890a082e591037abe114850ff7bbc3e" },
+]
+
+install = '''
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pyyaml/LICENSE"
+'''

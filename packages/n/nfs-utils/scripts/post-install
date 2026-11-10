@@ -1,0 +1,21 @@
+#!/bin/sh
+# directories and files (tmpfiles.conf)
+mkdir -p /var/lib/nfs/rpc_pipefs
+chmod 0555 /var/lib/nfs/rpc_pipefs
+chown root:root /var/lib/nfs/rpc_pipefs 2>/dev/null || true
+mkdir -p /var/lib/nfs/sm
+chmod 0755 /var/lib/nfs/sm
+chown nobody:nogroup /var/lib/nfs/sm 2>/dev/null || true
+mkdir -p /var/lib/nfs/sm.bak
+chmod 0755 /var/lib/nfs/sm.bak
+chown nobody:nogroup /var/lib/nfs/sm.bak 2>/dev/null || true
+[ -e /var/lib/nfs/etab ] || : > /var/lib/nfs/etab
+chmod 0644 /var/lib/nfs/etab
+chown root:root /var/lib/nfs/etab 2>/dev/null || true
+[ -e /var/lib/nfs/rmtab ] || : > /var/lib/nfs/rmtab
+chmod 0644 /var/lib/nfs/rmtab
+chown root:root /var/lib/nfs/rmtab 2>/dev/null || true
+[ -e /var/lib/nfs/state ] || : > /var/lib/nfs/state
+chmod 0600 /var/lib/nfs/state
+chown root:root /var/lib/nfs/state 2>/dev/null || true
+exit 0

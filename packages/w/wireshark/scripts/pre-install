@@ -1,0 +1,4 @@
+#!/bin/sh
+# users and groups (wireshark.conf)
+grep -q "^_wireshark:" /etc/group || groupadd -r _wireshark
+exit 0

@@ -1,0 +1,39 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/modemmanager/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "modemmanager"
+version = "1.24.2"
+release = 1
+summary = "Mobile broadband modem management service"
+license = "GPL-2.0-or-later"
+homepage = "https://www.freedesktop.org/wiki/Software/ModemManager"
+patches = ["tests.patch"]
+hostdeps = ["gettext", "glib-devel", "gobject-introspection", "libxslt", "pkgconf", "vala"]
+builddeps = ["bash-completion", "dbus", "glib-devel", "libgudev-devel", "libmbim-devel", "libqmi-devel", "libxslt-devel", "linux-headers", "polkit-devel", "ppp", "python-dbus-devel", "python-gobject-devel", "vala-devel"]
+checkdeps = ["dbus"]
+rundeps = ["dbus", "ppp"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/mobile-broadband/ModemManager/-/archive/1.24.2/ModemManager-1.24.2.tar.gz", sha256 = "fbc75adcc0d7b0565f256e7ff4e8872b0a37c4413ff576665f7470932d9c1b68" },
+]
+
+setup = '''
+%meson \
+    -Ddbus_policy_dir=/usr/share/dbus-1/system.d \
+    -Ddefault_library=shared \
+    -Dintrospection=true \
+    -Dplugin_qcom_soc=enabled \
+    -Dpolkit=permissive \
+    -Dsystemd_journal=false \
+    -Dsystemdsystemunitdir=no \
+    -Dudevdir=/usr/lib/udev \
+    -Dvapi=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 $pkgfiles/modemmanager "$pkgdir/etc/dinit.d/modemmanager"
+'''

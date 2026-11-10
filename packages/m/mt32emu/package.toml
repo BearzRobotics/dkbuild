@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/mt32emu/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "mt32emu"
+version = "2.7.0"
+release = 1
+summary = "Pre-GM MIDI device emulation library"
+license = "LGPL-2.1-or-later AND GPL-3.0-or-later"
+homepage = "https://munt.sourceforge.net"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["alsa-lib-devel", "glib-devel", "libpulse-devel", "pipewire-devel", "portaudio-devel", "qt6-qtbase-devel"]
+
+source = [
+    { url = "https://github.com/munt/munt/archive/refs/tags/munt_2_7_0.tar.gz", sha256 = "29565cf02a213143d60e6f5c0c992eb80ce6a08874e4cc90456072c8dbcba581" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

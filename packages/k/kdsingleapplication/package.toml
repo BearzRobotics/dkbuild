@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/kdsingleapplication/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "kdsingleapplication"
+version = "1.2.1"
+release = 1
+summary = "Helper class for single-instance applications"
+license = "MIT"
+homepage = "https://github.com/KDAB/KDSingleApplication"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["qt6-qtbase-devel"]
+
+source = [
+    { url = "https://github.com/KDAB/KDSingleApplication/archive/refs/tags/v1.2.1.tar.gz", sha256 = "e3254ce9dc5ecf6d61ef83264bc61d486a307f0e3c9ed1bb2176f068cdbcbe09" },
+]
+
+setup = '''
+%cmake \
+    -DKDSingleApplication_EXAMPLES=OFF \
+    -DKDSingleApplication_TESTS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/kdsingleapplication/LICENSE.txt"
+'''

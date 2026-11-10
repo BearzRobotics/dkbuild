@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/cmatrix/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "cmatrix"
+version = "2.0"
+release = 1
+summary = "Simulator for display from the Matrix"
+license = "GPL-3.0-only"
+homepage = "https://github.com/abishekvashok/cmatrix"
+hostdeps = ["cmake", "kbd", "ninja", "pkgconf"]
+builddeps = ["ncurses-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/abishekvashok/cmatrix/archive/refs/tags/v2.0.zip", sha256 = "82228753f9cf7d28cb9772010e70d6f5e13639fb0fd918b1006ed2c3b9ed0ab5" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/cmatrix/COPYING"
+install -Dm644 cmatrix.1 "$pkgdir/usr/share/man/man1/cmatrix.1"
+'''

@@ -1,0 +1,42 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/luanti/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "luanti"
+version = "5.17.0"
+release = 1
+summary = "Voxel game creation platform"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.luanti.org"
+patches = ["lang.patch"]
+hostdeps = ["cmake", "doxygen", "gettext-devel", "graphviz", "ninja", "pkgconf"]
+builddeps = ["bzip2-devel", "curl-devel", "freetype-devel", "gettext-devel", "gmp-devel", "hiredis-devel", "jsoncpp-devel", "libjpeg-turbo-devel", "libogg-devel", "libpng-devel", "libvorbis-devel", "luajit-devel", "mesa-devel", "ncurses-devel", "openal-soft-devel", "openssl-devel", "prometheus-cpp-devel", "sdl3-devel", "sqlite-devel", "zstd-devel"]
+
+source = [
+    { url = "https://github.com/luanti-org/luanti/archive/refs/tags/5.17.0.tar.gz", sha256 = "52e7dd315ae0e5c3868a23231e691578cd694bcca5af627fc57c03f32bdc846f" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -DNDEBUG"
+export CXXFLAGS="${CXXFLAGS} -DNDEBUG"
+'''
+setup = '''
+%cmake \
+    -DBUILD_SERVER=TRUE \
+    -DENABLE_LTO=OFF \
+    -DENABLE_PROMETHEUS=ON \
+    -DENABLE_UPDATE_CHECKER=OFF \
+    -DUSE_SDL2=OFF \
+    -DUSE_SDL3=ON
+'''
+build = '''
+%cmake_build
+'''
+check = '''
+bin/luanti --run-unittests
+bin/luantiserver --run-unittests
+'''
+install = '''
+%cmake_install
+install -Dm644 minetest.conf.example "$pkgdir/etc/luanti/minetest.conf"
+'''

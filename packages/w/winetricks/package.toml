@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/winetricks/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "winetricks"
+version = "20260125"
+release = 1
+summary = "Helper script for Wine"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/Winetricks/winetricks"
+rundeps = ["7zip", "llvm", "cabextract", "curl", "unzip", "wine", "xz", "zenity"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/Winetricks/winetricks/archive/refs/tags/20260125.tar.gz", sha256 = "2890bd9fbbade4638e58b4999a237273192df03b58516ae7b8771e09c22d2f56" },
+]
+
+build = '''
+%make \
+    PREFIX=/usr
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr
+'''

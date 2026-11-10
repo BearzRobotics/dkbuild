@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/traceroute/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "traceroute"
+version = "2.1.6"
+release = 1
+summary = "Traces the route taken by packets over an IPv4/IPv6 network"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "http://traceroute.sourceforge.net"
+builddeps = ["linux-headers"]
+options = ["!cross", "!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/traceroute/traceroute-2.1.6.tar.gz", sha256 = "9ccef9cdb9d7a98ff7fbf93f79ebd0e48881664b525c4b232a0fcec7dcb9db5e" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -D_GNU_SOURCE"
+'''
+build = '''
+%make \
+    PREFIX=/usr \
+    prefix=/usr
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr \
+    prefix=/usr
+'''

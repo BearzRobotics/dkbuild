@@ -1,0 +1,9 @@
+#!/bin/sh
+# directories and files (tmpfiles.conf)
+mkdir -p /var/lib/samba
+chmod 0755 /var/lib/samba
+chown root:root /var/lib/samba 2>/dev/null || true
+mkdir -p /var/lib/samba/private
+chmod 0750 /var/lib/samba/private
+chown root:root /var/lib/samba/private 2>/dev/null || true
+exit 0

@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/usbredir/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "usbredir"
+version = "0.15.0"
+release = 1
+summary = "Protocol for redirection USB traffic"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://gitlab.freedesktop.org/spice/usbredir"
+hostdeps = ["pkgconf"]
+builddeps = ["libusb-devel", "glib-devel"]
+
+source = [
+    { url = "https://www.spice-space.org/download/usbredir/usbredir-0.15.0.tar.xz", sha256 = "6dc2a380277688a068191245dac2ab7063a552999d8ac3ad8e841c10ff050961" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

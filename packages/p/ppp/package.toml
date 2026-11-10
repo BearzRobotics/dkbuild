@@ -1,0 +1,52 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/ppp/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "ppp"
+version = "2.5.2"
+release = 2
+summary = "PPP (Point-to-Point Protocol) daemon"
+license = "BSD-3-Clause AND LGPL-2.0-or-later AND GPL-2.0-or-later"
+homepage = "https://ppp.samba.org"
+patches = ["fix-sigill.patch", "musl-fix-headers.patch", "musl.patch"]
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["libpcap-devel", "openssl-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://ftp.samba.org/pub/ppp/ppp-2.5.2.tar.gz", sha256 = "47da358de54a10cb10bf6ff2cf9b1c03c0d3555518f6182e8f701b8e55733cb2" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --prefix=/usr \
+    --enable-multilink \
+    --with-logfile-dir=/var/log/ppp \
+    --with-runtime-dir=/run/pppd
+'''
+build = '''
+%make \
+    CBCP=y
+'''
+install = '''
+%make_install
+install -Dm644 include/linux/ppp_defs.h "$pkgdir/usr/include/net/ppp_defs.h"
+# eliminate suid bits
+# TODO(cbuild): for f in (self.destdir / f"usr/lib/pppd/{pkgver}").glob("*.so"):
+#         f.chmod(0o755)
+# just says "lock"
+rm -rf "$pkgdir/etc/ppp/options.example"
+install -Dm644 $pkgfiles/options "$pkgdir/etc/ppp/options"
+install -Dm755 $pkgfiles/ip-up "$pkgdir/etc/ppp/ip-up"
+install -Dm755 $pkgfiles/ip-down "$pkgdir/etc/ppp/ip-down"
+install -Dm755 $pkgfiles/ipv6-up "$pkgdir/etc/ppp/ipv6-up"
+install -Dm755 $pkgfiles/ipv6-down "$pkgdir/etc/ppp/ipv6-down"
+install -Dm755 $pkgfiles/ip-up.d.dns.sh "$pkgdir/etc/ppp/ip-up.d/00-dns.sh"
+install -Dm755 $pkgfiles/ip-down.d.dns.sh "$pkgdir/etc/ppp/ip-down.d/00-dns.sh"
+install -Dm755 $pkgfiles/ipv6-up.d.iface-config.sh "$pkgdir/etc/ppp/ipv6-up.d/00-iface-config.sh"
+install -Dm755 scripts/pon "$pkgdir/usr/bin/pon"
+install -Dm644 scripts/pon.1 "$pkgdir/usr/share/man/man1/pon.1"
+install -Dm755 scripts/poff "$pkgdir/usr/bin/poff"
+install -Dm755 scripts/plog "$pkgdir/usr/bin/plog"
+'''

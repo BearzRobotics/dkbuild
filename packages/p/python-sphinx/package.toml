@@ -1,0 +1,22 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-sphinx/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "python-sphinx"
+version = "9.1.0"
+release = 2
+summary = "Python documentation generator"
+license = "BSD-2-Clause"
+homepage = "https://www.sphinx-doc.org/en/master"
+hostdeps = ["python-flit-core"]
+checkdeps = ["python-markupsafe"]
+rundeps = ["python", "python-alabaster", "python-babel", "python-docutils", "python-imagesize", "python-jinja2", "python-packaging", "python-pygments", "python-requests", "python-roman-numerals", "python-snowballstemmer", "python-sphinxcontrib-applehelp", "python-sphinxcontrib-devhelp", "python-sphinxcontrib-htmlhelp", "python-sphinxcontrib-jsmath", "python-sphinxcontrib-qthelp", "python-sphinxcontrib-serializinghtml"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/s/sphinx/sphinx-9.1.0.tar.gz", sha256 = "7741722357dd75f8190766926071fed3bdc211c74dd2d7d4df5404da95930ddb" },
+]
+
+install = '''
+install -Dm644 LICENSE.rst "$pkgdir/usr/share/licenses/python-sphinx/LICENSE.rst"
+'''

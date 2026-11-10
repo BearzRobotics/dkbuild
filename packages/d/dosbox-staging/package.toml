@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/dosbox-staging/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "dosbox-staging"
+version = "0.82.2"
+release = 3
+summary = "Modern continuation of DOSBox"
+license = "GPL-2.0-or-later"
+homepage = "https://www.dosbox-staging.org"
+patches = ["no-dynrec-ppc64.patch"]
+hostdeps = ["bash", "pkgconf"]
+builddeps = ["alsa-lib-devel", "fluidsynth-devel", "gtest-devel", "iir1-devel", "libpng-devel", "libslirp-devel", "mt32emu-devel", "opusfile-devel", "sdl2-compat-devel", "sdl2-net-devel", "speexdsp-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://github.com/dosbox-staging/dosbox-staging/archive/refs/tags/v0.82.2.tar.gz", sha256 = "387c97b373c3164ab5abbbc2b210bf94b5567057abe44ee1e8b4d4e725bd422c" },
+]
+
+setup = '''
+%meson \
+    -Duse_zlib_ng=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

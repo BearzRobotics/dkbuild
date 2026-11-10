@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/portaudio/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "portaudio"
+version = "19.7.0"
+release = 2
+summary = "C library for real-time audio i/o"
+license = "MIT"
+homepage = "https://www.portaudio.com"
+patches = ["fix-parallel.patch"]
+hostdeps = ["automake", "pkgconf", "libtool"]
+builddeps = ["alsa-lib-devel", "linux-headers", "pipewire-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/PortAudio/portaudio/archive/refs/tags/v19.7.0.tar.gz", sha256 = "5af29ba58bbdbb7bbcefaaecc77ec8fc413f0db6f4c4e286c40c3e1b83174fa0" },
+]
+
+setup = '''
+autoreconf -fi . bindings/cpp
+%configure \
+    --enable-cxx
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/portaudio/LICENSE.txt"
+'''

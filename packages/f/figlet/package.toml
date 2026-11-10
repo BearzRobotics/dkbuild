@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/figlet/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "figlet"
+version = "2.2.5"
+release = 1
+summary = "Program for making large letters out of ordinary text"
+license = "BSD-3-Clause"
+homepage = "http://www.figlet.org"
+patches = ["0001-Fix-build-with-musl-libc.patch", "makefile.patch"]
+
+source = [
+    { url = "https://github.com/cmatsuoka/figlet/archive/refs/tags/2.2.5.tar.gz", sha256 = "4d366c4a618ecdd6fdb81cde90edc54dbff9764efb635b3be47a929473f13930" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -Wno-deprecated-non-prototype"
+'''
+build = '''
+%make \
+    PREFIX=/usr
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/figlet/LICENSE"
+'''

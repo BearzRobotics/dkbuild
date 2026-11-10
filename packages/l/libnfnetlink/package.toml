@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libnfnetlink/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libnfnetlink"
+version = "1.0.2"
+release = 1
+summary = "Low-level library for netfilter kernel/userspace communication"
+license = "GPL-2.0-only"
+homepage = "https://www.netfilter.org/projects/libnfnetlink"
+patches = ["startfiles.patch"]
+hostdeps = ["automake", "pkgconf", "libtool"]
+builddeps = ["linux-headers"]
+
+source = [
+    { url = "https://www.netfilter.org/projects/libnfnetlink/files/libnfnetlink-1.0.2.tar.bz2", sha256 = "b064c7c3d426efb4786e60a8e6859b82ee2f2c5e49ffeea640cfe4fe33cbc376" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

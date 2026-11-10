@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/glfw/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "glfw"
+version = "3.5.1"
+release = 2
+summary = "Library for OpenGL window and input"
+license = "Zlib"
+homepage = "https://www.glfw.org"
+hostdeps = ["cmake", "ninja", "pkgconf", "wayland"]
+builddeps = ["libx11-devel", "libxcursor-devel", "libxi-devel", "libxinerama-devel", "libxkbcommon-devel", "libxrandr-devel", "linux-headers", "wayland-devel"]
+
+source = [
+    { url = "https://github.com/glfw/glfw/releases/download/3.5.1/glfw-3.5.1.zip", sha256 = "ea79bc5feffc254c87291980c2d0bce9acebb68c4983b79f961dcd2cb8a611a0" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DGLFW_BUILD_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

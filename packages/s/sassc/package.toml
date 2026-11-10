@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/sassc/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "sassc"
+version = "3.6.2"
+release = 1
+summary = "Command line driver for libsass"
+license = "MIT"
+homepage = "https://github.com/sass/sassc"
+hostdeps = ["pkgconf", "automake", "libtool"]
+builddeps = ["libsass-devel"]
+
+source = [
+    { url = "https://github.com/sass/sassc/archive/3.6.2.tar.gz", sha256 = "608dc9002b45a91d11ed59e352469ecc05e4f58fc1259fc9a9f5b8f0f8348a03" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/sassc/LICENSE"
+'''

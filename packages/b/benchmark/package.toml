@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/benchmark/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "benchmark"
+version = "1.9.4"
+release = 1
+summary = "Microbenchmark support library"
+license = "Apache-2.0"
+homepage = "https://github.com/google/benchmark"
+patches = ["version.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["gtest-devel"]
+
+source = [
+    { url = "https://github.com/google/benchmark/archive/v1.9.4.tar.gz", sha256 = "b334658edd35efcf06a99d9be21e4e93e092bd5f95074c1673d5c8705d95c104" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DBENCHMARK_ENABLE_ASSEMBLY_TESTS=OFF \
+    -DBENCHMARK_ENABLE_DOXYGEN=OFF \
+    -DBENCHMARK_ENABLE_WERROR=OFF \
+    -DBENCHMARK_USE_BUNDLED_GTEST=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

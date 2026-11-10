@@ -8,7 +8,7 @@
 # Uploading to a board needs access to its serial port (the dialout group).
 name = "arduino-cli"
 version = "1.5.1"
-release = 1
+release = 2
 summary = "Arduino command-line tool: build and upload sketches, manage boards and libraries"
 license = "GPL-3.0-only"
 homepage = "https://arduino.github.io/arduino-cli"

@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/sl/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "sl"
+version = "5.05"
+release = 1
+summary = "Steam Locomotive"
+license = "SL"
+homepage = "https://github.com/eyJhb/sl"
+builddeps = ["ncurses-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/eyJhb/sl/archive/refs/tags/5.05.tar.gz", sha256 = "6c941b526e3d01be7f91a3af4ae20a89d1e5d66b3b2d804c80123b1b1be96384" },
+]
+
+build = '''
+%make \
+    PREFIX=/usr
+'''
+install = '''
+install -Dm755 sl "$pkgdir/usr/bin/sl"
+install -Dm644 sl.1 "$pkgdir/usr/share/man/man1/sl.1"
+# TODO(cbuild): self.install_man("sl.1.ja", "sl", 1, lang="ja")
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/sl/LICENSE"
+'''

@@ -1,0 +1,74 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libvirt/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libvirt"
+version = "12.8.0"
+release = 1
+summary = "API, daemon, and management tool for virtualization"
+license = "LGPL-2.1-only"
+homepage = "https://libvirt.org"
+hostdeps = ["gettext", "libxml2", "libxslt", "perl", "pkgconf", "python-docutils"]
+builddeps = ["acl-devel", "attr-devel", "bash-completion", "curl-devel", "fuse-devel", "glib-devel", "gnutls-devel", "json-c-devel", "libcap-ng-devel", "libiscsi-devel", "libnl-devel", "libpcap-devel", "libpciaccess-devel", "libsasl-devel", "libssh-devel", "libssh2-devel", "libtirpc-devel", "libxml2-devel", "linux-headers", "lvm2-devel", "numactl-devel", "parted-devel", "polkit-devel", "readline-devel", "eudev-devel"]
+checkdeps = []
+rundeps = ["dbus", "dnsmasq"]
+
+source = [
+    { url = "https://download.libvirt.org/libvirt-12.8.0.tar.xz", sha256 = "0cd46a8f3a2b9b63c35c6e6f42a6c2989183ef3b3d1499ee92b4876db35e6fe9" },
+]
+
+setup = '''
+%meson \
+    -Dattr=enabled \
+    -Dblkid=enabled \
+    -Dcapng=enabled \
+    -Dcurl=enabled \
+    -Ddriver_qemu=enabled \
+    -Ddriver_secrets=enabled \
+    -Dfirewalld=enabled \
+    -Dfirewalld_zone=enabled \
+    -Dfuse=enabled \
+    -Djson_c=enabled \
+    -Dlibiscsi=enabled \
+    -Dlibnl=enabled \
+    -Dlibssh2=enabled \
+    -Dno_git=true \
+    -Dnumactl=enabled \
+    "-Dpackager=Chimera Linux" \
+    -Dpciaccess=enabled \
+    -Dstorage_dir=enabled \
+    -Dstorage_disk=enabled \
+    -Dstorage_fs=enabled \
+    -Dstorage_lvm=enabled \
+    -Dstorage_mpath=enabled \
+    -Dstorage_scsi=enabled \
+    -Dstorage_zfs=enabled \
+    -Dudev=enabled \
+    -Dpackager_version=12.8.0 \
+    -Dqemu_user=_libvirt-qemu \
+    -Dqemu_group=_libvirt-qemu \
+    -Dlibvirtd=disabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+rm -rf "$pkgdir/usr/lib/sysusers.d"
+# TODO(cbuild): for service in [
+#         "ch",
+#         "interface",
+#         "lock",
+#         "log",
+#         "lxc",
+#         "network",
+#         "nodedev",
+#         "nwfilter",
+#         "proxy",
+#         "qemu",
+#         "secret",
+#         "storage",
+#         "vbox",
+#     ]:
+#         self.install_service(self.files_path / f"virt{service}d")
+'''

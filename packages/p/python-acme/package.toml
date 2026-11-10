@@ -1,0 +1,22 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-acme/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "python-acme"
+version = "5.8.0"
+release = 1
+summary = "ACME protocol implementation"
+license = "Apache-2.0"
+homepage = "https://github.com/certbot/certbot/tree/master/acme"
+hostdeps = ["python-setuptools"]
+checkdeps = []
+rundeps = ["python-cryptography", "python-josepy", "python-openssl", "python-pyrfc3339", "python-pytz", "python-requests"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/certbot/certbot/archive/refs/tags/v5.8.0.tar.gz", sha256 = "84eed9f149b6dd9f43174b4c2cfaf93105a74b58b0eadc82946b65edfde8045b" },
+]
+
+install = '''
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-acme/LICENSE.txt"
+'''

@@ -1,0 +1,36 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/android-tools/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "android-tools"
+version = "37.0.0_p1"
+release = 1
+summary = "Android platform tools, such as adb and fastboot"
+license = "Apache-2.0 AND ISC AND GPL-2.0-only AND MIT"
+homepage = "https://github.com/nmeum/android-tools"
+archs = ["x86_64", "aarch64", "riscv64"]
+hostdeps = ["rust", "cmake", "corrosion", "ninja", "pkgconf", "protobuf"]
+builddeps = ["brotli-devel", "fmt-devel", "gtest-devel", "libusb-devel", "linux-headers", "lz4-devel", "pcre2-devel", "protobuf-devel", "rust", "zstd-devel"]
+rundeps = ["android-udev-rules", "python"]
+
+source = [
+    { url = "https://github.com/nmeum/android-tools/releases/download/37.0.0p1/android-tools-37.0.0p1.tar.xz", sha256 = "2c6de1abe16b211c7d9f59276217e14fd9e0e18b20e331d3c84358f5dffd576e" },
+]
+
+environment = '''
+export CXXFLAGS="${CXXFLAGS} -D_LARGEFILE64_SOURCE"
+'''
+setup = '''
+%cmake \
+    -DANDROID_TOOLS_ADB_ENABLE_MDNS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# TODO(cbuild): self.install_license("vendor/boringssl/LICENSE", name="boringssl.LICENSE")
+# TODO(cbuild): self.install_license(
+#         "vendor/boringssl/third_party/fiat/LICENSE", name="fiat.LICENSE"
+#     )
+'''

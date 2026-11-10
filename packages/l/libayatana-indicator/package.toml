@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/libayatana-indicator/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libayatana-indicator"
+version = "0.9.5"
+release = 1
+summary = "Ayatana Indicators Shared Library"
+license = "GPL-3.0-only"
+homepage = "https://github.com/AyatanaIndicators/libayatana-indicator"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["ayatana-ido-devel", "glib-devel", "gtk+3-devel"]
+checkdeps = []
+
+source = [
+    { url = "https://github.com/AyatanaIndicators/libayatana-indicator/archive/refs/tags/0.9.5.tar.gz", sha256 = "73d71c908b803f12e4a5ecd8392511b58afbdd0c82ad7909611a17bb7847c5c8" },
+]
+
+setup = '''
+%cmake \
+    -DENABLE_TESTS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

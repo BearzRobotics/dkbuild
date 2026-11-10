@@ -1,0 +1,43 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gdb/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "gdb"
+version = "17.2"
+release = 1
+summary = "GNU debugger"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/gdb"
+hostdeps = ["sed", "pkgconf", "texinfo", "python-devel"]
+builddeps = ["elfutils-devel", "gettext-devel", "gmp-devel", "libexpat-devel", "linux-headers", "mpfr-devel", "ncurses-devel", "python-devel", "readline-devel", "zlib-ng-compat-devel", "zstd-devel"]
+options = ["!check", "!cross"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/gdb/gdb-17.2.tar.xz", sha256 = "1c036c0d72e4b3d1fb5c94c88632add6f9d76f4d7c4d2ea793c12a9f19a3228c" },
+]
+
+environment = '''
+export SED=gsed
+'''
+setup = '''
+%configure \
+    --disable-werror \
+    --disable-nls \
+    --with-system-zlib \
+    --with-system-zstd \
+    --with-system-readline \
+    --with-system-gdbinit=/etc/gdb/gdbinint \
+    --with-python=/usr/bin/python
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+rm -rf "$pkgdir/usr/lib"
+rm -rf "$pkgdir/usr/include"
+# may conflict with binutils
+rm -rf "$pkgdir/usr/share/info/bfd.info"
+rm -rf "$pkgdir/usr/share/info/ctf-spec.info"
+rm -rf "$pkgdir/usr/share/info/sframe-spec.info"
+'''

@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libssh/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libssh"
+version = "0.11.4"
+release = 1
+summary = "Library for accessing ssh client services through C libraries"
+license = "LGPL-2.1-or-later WITH custom:openssl-exception AND BSD-2-Clause"
+homepage = "https://www.libssh.org"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["cmocka-devel", "heimdal-devel", "openssl-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://www.libssh.org/files/0.11/libssh-0.11.4.tar.xz", sha256 = "002ac320e3d66c9e100ec6576e3e84aa0c48949efde3bf5b40a2802992297701" },
+]
+
+setup = '''
+%cmake \
+    -DUNIT_TESTING=ON \
+    -DWITH_GSSAPI=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 BSD "$pkgdir/usr/share/licenses/libssh/BSD"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libssh/COPYING"
+'''

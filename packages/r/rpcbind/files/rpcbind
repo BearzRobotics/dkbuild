@@ -1,0 +1,6 @@
+# rpcbind service
+
+type = process
+command = /usr/bin/rpcbind -fw
+depends-on = rcboot
+depends-on = rcboot

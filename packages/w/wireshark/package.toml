@@ -1,0 +1,42 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/wireshark/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "wireshark"
+version = "4.7.2"
+release = 2
+summary = "Network protocol analyzer"
+license = "GPL-2.0-or-later"
+homepage = "https://www.wireshark.org"
+patches = ["dumpcap-group.patch", "no-ads.patch", "precision-loss.patch", "signed-overflow.patch"]
+hostdeps = ["asciidoctor", "cmake", "doxygen", "flex", "gettext-devel", "libcap", "ninja", "perl", "pkgconf", "qt6-qtbase", "qt6-qttools"]
+builddeps = ["c-ares-devel", "glib-devel", "gnutls-devel", "heimdal-devel", "libcap-devel", "libgcrypt-devel", "libnl-devel", "libpcap-devel", "libssh-devel", "libxml2-devel", "lua-devel", "lz4-devel", "minizip-ng-devel", "nghttp2-devel", "nghttp3-devel", "opus-devel", "pcre2-devel", "portaudio-devel", "qt6-qt5compat-devel", "qt6-qtbase-devel", "qt6-qtmultimedia-devel", "qt6-qtsvg-devel", "qt6-qttools-devel", "sbc-devel", "snappy-devel", "spandsp-devel", "speexdsp-devel", "zlib-ng-compat-devel", "zstd-devel"]
+checkdeps = []
+
+source = [
+    { url = "https://www.wireshark.org/download/src/all-versions/wireshark-4.7.2.tar.xz", sha256 = "f94df4731d9fcb86240950fde44b3db52ffdd04e918b558e613891d0b578dadc" },
+]
+
+setup = '''
+%cmake \
+    -DENABLE_GNUTLS=ON \
+    -DENABLE_LUA=ON \
+    -DENABLE_DEBUG=OFF \
+    -DENABLE_WERROR=OFF
+'''
+build = '''
+%cmake_build
+'''
+check = '''
+# extcaps can't work in our container
+# TODO(cbuild): self.do(
+#         "pytest",
+#         "-k",
+#         "not TestExtcaps",
+#         "--dist=worksteal",
+#         wrksrc=self.make_dir,
+#     )
+'''
+install = '''
+%cmake_install
+'''

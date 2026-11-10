@@ -1,0 +1,5 @@
+#!/bin/sh
+# users and groups (sysusers.conf)
+grep -q "^_rpc:" /etc/group || groupadd -r _rpc
+grep -q "^_rpc:" /etc/passwd || useradd -r -g _rpc -d /var/lib/rpcbind -s /usr/bin/nologin -c 'rpc user' _rpc
+exit 0

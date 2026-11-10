@@ -1,0 +1,35 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/talloc/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "talloc"
+version = "2.5.0"
+release = 1
+summary = "Hierarchical pool based memory allocator with destructors"
+license = "LGPL-3.0-or-later"
+homepage = "https://talloc.samba.org"
+patches = ["python-so.patch"]
+hostdeps = ["docbook-xsl-nons", "gettext", "libxslt", "pkgconf", "python"]
+builddeps = ["gettext-devel", "python-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://download.samba.org/pub/talloc/talloc-2.5.0.tar.gz", sha256 = "912afa237510ae542a7733998eb18a12bcda35ab6729c8e2ddb43e8d0ebab007" },
+]
+
+environment = '''
+export PYTHONHASHSEED=1
+export WAF_MAKE=1
+'''
+setup = '''
+# TODO(cbuild): self.do(
+#         self.chroot_cwd / "configure",
+#         "--prefix=/usr",
+#         "--libdir=/usr/lib",
+#         *configure_args,
+#     )
+'''
+install = '''
+# TODO(cbuild): no install step could be derived
+true
+'''

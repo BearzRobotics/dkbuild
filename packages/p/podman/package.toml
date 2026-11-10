@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/podman/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "podman"
+version = "6.1.4"
+release = 1
+summary = "Container and image management tool"
+license = "Apache-2.0"
+homepage = "https://podman.io"
+patches = ["install-bin.patch", "kill-all-only-rootful.patch", "no-remote-comp.patch", "revert-podman-run-fix-pids-limit-1-wrt-runc.patch"]
+hostdeps = ["bash", "ggrep", "go", "go-md2man", "mandoc", "pkgconf", "python"]
+builddeps = ["btrfs-progs-devel", "gpgme-devel", "libassuan-devel", "libseccomp-devel", "linux-headers", "lvm2-devel", "sqlite-devel"]
+rundeps = ["aardvark-dns", "catatonit", "cni-plugins", "conmon", "containers-common", "fuse-overlayfs", "netavark", "nftables", "crun", "passt"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/containers/podman/archive/v6.1.4.tar.gz", sha256 = "200fd9b4b6d820cae24fc99d8e290ec945512365cf3cda8283b3905c0c284ea8" },
+]
+
+build = '''
+make docs GREP=ggrep GOMD2MAN=/usr/bin/go-md2man
+'''
+install = '''
+make install.bin install.completions install.man PREFIX=/usr LIBEXECDIR=/usr/lib DESTDIR=$pkgdir
+install -Dm644 $pkgfiles/podman "$pkgdir/etc/dinit.d/podman"
+install -Dm644 $pkgfiles/podman.user "$pkgdir/usr/lib/dinit.d/user/podman"
+install -Dm644 $pkgfiles/podman-docker "$pkgdir/etc/dinit.d/podman-docker"
+install -Dm644 $pkgfiles/podman-restart "$pkgdir/etc/dinit.d/podman-restart"
+install -Dm755 $pkgfiles/podman-docker.libexec "$pkgdir/usr/lib/podman-docker"
+rm -rf "$pkgdir"/usr/share/man/man?/podman-quadlet*
+rm -rf "$pkgdir"/usr/share/man/man?/quadlet.*
+'''

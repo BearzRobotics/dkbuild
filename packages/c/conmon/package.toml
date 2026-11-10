@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/conmon/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "conmon"
+version = "2.2.1"
+release = 1
+summary = "OCI container monitor"
+license = "Apache-2.0"
+homepage = "https://github.com/containers/conmon"
+hostdeps = ["go-md2man", "pkgconf"]
+builddeps = ["glib-devel", "libseccomp-devel", "linux-headers"]
+
+source = [
+    { url = "https://github.com/containers/conmon/archive/v2.2.1.tar.gz", sha256 = "814fb5979a3a4b8576b1f901e606b482bebb41cb7e57926e6d5765ee786b96d3" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+go-md2man -in docs/conmon.8.md -out docs/conmon.8
+'''
+install = '''
+%meson_install
+install -Dm644 docs/conmon.8 "$pkgdir/usr/share/man/man8/conmon.8"
+'''

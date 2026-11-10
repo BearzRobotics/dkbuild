@@ -1,0 +1,44 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/certbot/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "certbot"
+version = "5.8.0"
+release = 1
+summary = "Tool to obtain certs from Let's Encrypt"
+license = "Apache-2.0 AND MIT"
+homepage = "https://github.com/certbot/certbot"
+hostdeps = ["python-setuptools"]
+checkdeps = []
+rundeps = ["python-acme", "python-configargparse", "python-configobj", "python-cryptography", "python-distro", "python-josepy", "python-parsedatetime"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/certbot/certbot/archive/refs/tags/v5.8.0.tar.gz", sha256 = "84eed9f149b6dd9f43174b4c2cfaf93105a74b58b0eadc82946b65edfde8045b" },
+]
+
+build = '''
+# TODO(cbuild): for plugin in _plugins:
+#         self.do(
+#             "python",
+#             "-m",
+#             "build",
+#             "--wheel",
+#             "--no-isolation",
+#             f"../{plugin}",
+#         )
+'''
+install = '''
+# TODO(cbuild): for plugin in _plugins:
+#         self.do(
+#             "python",
+#             "-m",
+#             "installer",
+#             "--compile-bytecode",
+#             "0",
+#             "--destdir",
+#             self.chroot_destdir,
+#             f"../{plugin}/dist/{plugin.replace('-', '_')}-{pkgver}-py3-none-any.whl",
+#         )
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/certbot/LICENSE.txt"
+'''

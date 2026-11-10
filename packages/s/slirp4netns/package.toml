@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/slirp4netns/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "slirp4netns"
+version = "1.3.3"
+release = 1
+summary = "User-mode networking for unprivileged network namespaces"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/rootless-containers/slirp4netns"
+hostdeps = ["automake", "pkgconf"]
+builddeps = ["glib-devel", "libcap-devel", "libseccomp-devel", "libslirp-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/rootless-containers/slirp4netns/archive/refs/tags/v1.3.3.tar.gz", sha256 = "8d24539967850bada944d56459eb9e9167357d57b39e864d95ed7d6c0dd0298d" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 $pkgfiles/modules-load.conf "$pkgdir/usr/lib/modules-load.d/slirp4netns.conf"
+'''

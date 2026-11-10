@@ -1,0 +1,130 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/php8.3/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "php"
+version = "8.3.36"
+release = 1
+summary = "HTML-embedded scripting language"
+license = "PHP-3.01"
+homepage = "https://www.php.net"
+patches = ["fix-clobbered-registers.patch", "fix-curl.patch", "fix-pear-shebang.patch", "fix_oom_tests.patch", "install-pear.patch", "testarg.patch"]
+hostdeps = ["automake", "bison", "libtool", "pkgconf"]
+builddeps = ["argon2-devel", "curl-devel", "freetype-devel", "gettext-devel", "gmp-devel", "icu-devel", "libedit-devel", "libffi-devel", "libgd-devel", "libjpeg-turbo-devel", "libsodium-devel", "libxml2-devel", "libxslt-devel", "libzip-devel", "oniguruma-devel", "openldap-devel", "openssl-devel", "pcre2-devel", "sqlite-devel", "unixodbc-devel", "zlib-ng-compat-devel"]
+checkdeps = ["procps"]
+rundeps = []
+options = ["!check"]
+
+source = [
+    { url = "https://www.php.net/distributions/php-8.3.36.tar.gz", sha256 = "c93f3441f87f6ab156bef4432db215d7e61ca2c0183bb3a2aa28d9886ab59f53" },
+]
+
+setup = '''
+%configure \
+    --program-prefix= \
+    --with-layout=GNU \
+    --enable-fpm \
+    --with-fpm-group=_php \
+    --with-fpm-user=_php \
+    --disable-all \
+    --enable-bcmath=shared \
+    --enable-calendar=shared \
+    --enable-ctype=shared \
+    --enable-dom=shared \
+    --enable-exif=shared \
+    --enable-fileinfo=shared \
+    --enable-filter=shared \
+    --enable-ftp=shared \
+    --enable-gd=shared \
+    --enable-intl=shared \
+    --enable-mbstring=shared \
+    --enable-opcache=shared \
+    --enable-pcntl=shared \
+    --enable-pdo=shared \
+    --enable-phar=shared \
+    --enable-posix=shared \
+    --enable-session=shared \
+    --enable-shmop=shared \
+    --enable-simplexml=shared \
+    --enable-soap=shared \
+    --enable-sockets=shared \
+    --enable-sysvmsg=shared \
+    --enable-sysvsem=shared \
+    --enable-sysvshm=shared \
+    --enable-tokenizer=shared \
+    --enable-xml=shared \
+    --enable-xmlreader=shared \
+    --enable-xmlwriter=shared \
+    --with-bz2=shared \
+    --with-curl=shared \
+    --with-external-gd \
+    --with-external-pcre \
+    --with-ffi=shared \
+    --with-gettext=shared \
+    --with-gmp=shared \
+    --with-iconv=shared \
+    --with-ldap-sasl \
+    --with-ldap=shared \
+    --with-libedit=shared \
+    --with-libxml \
+    --with-mhash \
+    --with-openssl=shared \
+    --with-password-argon2 \
+    --with-pdo-sqlite=shared \
+    --with-pear \
+    --with-sodium=shared \
+    --with-sqlite3=shared \
+    --with-unixODBC=shared \
+    --with-xsl=shared \
+    --with-zip=shared \
+    --with-zlib=shared
+'''
+build = '''
+%make \
+    LIBTOOL=/usr/bin/libtool
+'''
+check = '''
+%make test LIBTOOL=/usr/bin/libtool
+'''
+install = '''
+# TODO(cbuild): init_install() sets variables for this phase (cbuild line 214); port it by hand
+%make_install \
+    LIBTOOL=/usr/bin/libtool
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/php8.3/LICENSE"
+# TODO(cbuild): self.install_file("README.md", f"usr/share/doc/php{_majver}")
+# TODO(cbuild): self.install_service(self.files_path / f"php-fpm{_majver}")
+# default php-fpm config files
+# TODO(cbuild): self.rename(f"etc/php{_majver}/php-fpm.conf.default", "php-fpm.conf")
+# TODO(cbuild): for f in ["pear", "peardev", "pecl"]:
+#         self.rename(f"usr/bin/{f}", f"{f}{_majver}")
+# TODO(cbuild): self.install_file(
+#         self.files_path / "www.conf", f"etc/php{_majver}/php-fpm.d"
+#     )
+# these are unnecessary with apk backups
+# TODO(cbuild): self.uninstall(f"etc/php{_majver}/php-fpm.d/*.default", glob=True)
+# extensions
+# TODO(cbuild): extcp = self.destdir / f"etc/php{_majver}/conf.d"
+# TODO(cbuild): self.mkdir(extcp, parents=True)
+# TODO(cbuild): for f in (self.destdir / f"usr/lib/php{_majver}" / _apiver).glob("*.so"):
+#         extso = f.name.split("/")[-1]
+#         extn = extso.removesuffix(".so")
+#         with open(extcp / f"{extn}.ini", "w") as outf:
+#             if extn == "opcache":
+#                 outf.write(f"zend_extension={extso}\n")
+#             else:
+#                 outf.write(f"extension={extso}\n")
+# remove temporary files/dirs that shouldn't be part of package
+# TODO(cbuild): for f in [
+#         ".channels",
+#         ".depdb",
+#         ".depdblock",
+#         ".filemap",
+#         ".lock",
+#         f"usr/share/php{_majver}/pear/.channels",
+#         f"usr/share/php{_majver}/pear/.filemap",
+#         f"usr/share/php{_majver}/pear/.lock",
+#         f"usr/share/php{_majver}/pear/.registry",
+#         f"usr/share/php{_majver}/pear/test",
+#     ]:
+#         self.uninstall(f)
+'''

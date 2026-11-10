@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/bettercap/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "bettercap"
+version = "2.41.7"
+release = 5
+summary = "Swiss Army knife for network attacks"
+license = "GPL-3.0-only"
+homepage = "https://bettercap.org"
+hostdeps = ["go", "pkgconf"]
+builddeps = ["libnetfilter-queue-devel", "libpcap-devel", "libusb-devel"]
+
+source = [
+    { url = "https://github.com/bettercap/bettercap/archive/refs/tags/v2.41.7.tar.gz", sha256 = "797274ac3a4e35e40e640958c267a60f559213d9ae1322ab721d8f4ec71cbaeb" },
+]
+
+environment = '''
+export CGO_ENABLED=1
+'''
+install = '''
+# TODO(cbuild): no install step could be derived
+true
+'''

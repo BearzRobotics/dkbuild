@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libqmi/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libqmi"
+version = "1.38.0"
+release = 1
+summary = "QMI modem protocol helper library"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://www.freedesktop.org/wiki/Software/libqmi"
+hostdeps = ["bash-completion", "glib-devel", "gobject-introspection", "help2man", "libgudev-devel", "libmbim-devel", "libqrtr-glib-devel", "pkgconf"]
+builddeps = ["glib-devel", "libgudev-devel", "linux-headers"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/mobile-broadband/libqmi/-/archive/1.38.0/libqmi-1.38.0.tar.gz", sha256 = "8ee3b3a9002f2b45c825deade85710db006e01674f5f9359d351c192cc926015" },
+]
+
+setup = '''
+%meson \
+    -Dqrtr=true \
+    -Dintrospection=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

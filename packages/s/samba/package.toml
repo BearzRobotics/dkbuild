@@ -1,0 +1,35 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/samba/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "samba"
+version = "4.23.3"
+release = 4
+summary = "SMB/CIFS file, print, and login server for Unix"
+license = "GPL-3.0-or-later"
+homepage = "https://www.samba.org"
+patches = ["0001-usershare.patch", "0002-ctdb-syslog.patch", "0003-ctdb_etcd_lock-path.patch", "0004-silence-waf-uselib.patch", "0005-msg-sock-run-samba.patch", "0009-getpwent_r.patch", "0010-missing-headers.patch", "0012-musl-uintptr.patch", "0013-paths.patch", "0014-python-so.patch", "0015-samba-bgqd-signal.patch", "unistd.patch"]
+hostdeps = ["bison", "docbook-xsl-nons", "flex", "gettext-devel", "heimdal", "libtasn1", "libxslt", "perl", "perl-parse-yapp", "pkgconf", "python", "rpcsvc-proto", "tdb", "tevent"]
+builddeps = ["acl-devel", "attr-devel", "avahi-devel", "cmocka-devel", "cups-devel", "dbus-devel", "e2fsprogs-devel", "fuse-devel", "gettext-devel", "glib-devel", "gnutls-devel", "gpgme-devel", "heimdal-devel", "icu-devel", "jansson-devel", "libarchive-devel", "libedit-devel", "libtirpc-devel", "lmdb-devel", "ncurses-devel", "ngtcp2-devel", "openldap-devel", "popt-devel", "python-devel", "talloc-devel", "tdb-devel", "tevent-devel", "zlib-ng-compat-devel"]
+rundeps = ["tdb"]
+options = ["!cross", "!check"]
+
+source = [
+    { url = "https://download.samba.org/pub/samba/stable/samba-4.23.3.tar.gz", sha256 = "06cdbb27a6956978b045455fe0696d998ffbac8d24ba24de87a4ef8200813320" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -D_BSD_SOURCE"
+export PYTHONHASHSEED=1
+'''
+install = '''
+install -Dm644 examples/smb.conf.default "$pkgdir/etc/samba/smb.conf"
+install -Dm644 $pkgfiles/samba.pam "$pkgdir/usr/lib/pam.d/samba"
+rm -rf "$pkgdir/usr/share/man/man7/traffic_learner.7"
+rm -rf "$pkgdir/usr/share/man/man7/traffic_replay.7"
+# symlink cups backend
+install -dm755 "$pkgdir/usr/lib/cups/backend"
+mkdir -p "$pkgdir/usr/lib/cups/backend"
+ln -sf ../../../bin/smbspool "$pkgdir/usr/lib/cups/backend/smb"
+# private dir
+'''

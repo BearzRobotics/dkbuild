@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/dtc/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "dtc"
+version = "1.7.2"
+release = 3
+summary = "Device Tree Compiler"
+license = "GPL-2.0-only"
+homepage = "https://git.kernel.org/pub/scm/utils/dtc/dtc.git"
+patches = ["riscv-tests.patch", "swig-4.3.patch", "tests.patch"]
+hostdeps = ["bison", "flex", "pkgconf", "python-setuptools", "swig"]
+builddeps = ["libyaml-devel", "python-devel"]
+
+source = [
+    { url = "https://git.kernel.org/pub/scm/utils/dtc/dtc.git/snapshot/v1.7.2.tar.gz", sha256 = "04a30bd38b426ed771b8a8b5d9b773e54976d4f5d51a80a9e76a45b20c9a8272" },
+]
+
+setup = '''
+%meson \
+    -Dpython=enabled \
+    -Ddefault_library=shared
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

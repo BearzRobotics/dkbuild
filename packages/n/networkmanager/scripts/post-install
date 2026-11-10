@@ -1,0 +1,24 @@
+#!/bin/sh
+# directories and files (networkmanager.conf)
+mkdir -p /etc/NetworkManager/system-connections
+chmod 0755 /etc/NetworkManager/system-connections
+chown root:root /etc/NetworkManager/system-connections 2>/dev/null || true
+mkdir -p /etc/NetworkManager/dispatcher.d/pre-up.d
+chmod 0750 /etc/NetworkManager/dispatcher.d/pre-up.d
+chown root:root /etc/NetworkManager/dispatcher.d/pre-up.d 2>/dev/null || true
+mkdir -p /etc/NetworkManager/dispatcher.d/pre-down.d
+chmod 0750 /etc/NetworkManager/dispatcher.d/pre-down.d
+chown root:root /etc/NetworkManager/dispatcher.d/pre-down.d 2>/dev/null || true
+mkdir -p /etc/NetworkManager/VPN
+chmod 0755 /etc/NetworkManager/VPN
+chown root:root /etc/NetworkManager/VPN 2>/dev/null || true
+mkdir -p /var/lib/NetworkManager
+chmod 0755 /var/lib/NetworkManager
+chown root:root /var/lib/NetworkManager 2>/dev/null || true
+mkdir -p /etc/NetworkManager/conf.d
+chmod 0755 /etc/NetworkManager/conf.d
+chown root:root /etc/NetworkManager/conf.d 2>/dev/null || true
+mkdir -p /etc/NetworkManager/dnsmasq.d
+chmod 0755 /etc/NetworkManager/dnsmasq.d
+chown root:root /etc/NetworkManager/dnsmasq.d 2>/dev/null || true
+exit 0

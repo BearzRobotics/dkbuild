@@ -1,0 +1,6 @@
+type = process
+command = /usr/bin/NetworkManager -n
+smooth-recovery = true
+before: rcboot
+depends-on: dbus
+depends-on: pre-rcboot

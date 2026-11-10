@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/ngtcp2/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "ngtcp2"
+version = "1.25.0"
+release = 1
+summary = "C IETF QUIC protocol implementation"
+license = "MIT"
+homepage = "https://github.com/ngtcp2/ngtcp2"
+hostdeps = ["automake", "pkgconf", "libtool"]
+builddeps = ["gnutls", "openssl-devel"]
+
+source = [
+    { url = "https://github.com/ngtcp2/ngtcp2/releases/download/v1.25.0/ngtcp2-1.25.0.tar.xz", sha256 = "2a34d2484ba17847a5d11965704e9dd0fac4c6d8efc75ffe1ec7de66d8c6b6fb" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-gnutls \
+    --with-openssl
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/ngtcp2/COPYING"
+'''

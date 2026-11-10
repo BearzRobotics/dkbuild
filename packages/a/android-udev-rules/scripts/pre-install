@@ -1,0 +1,4 @@
+#!/bin/sh
+# users and groups (adbusers.conf)
+grep -q "^adbusers:" /etc/group || groupadd -r adbusers
+exit 0

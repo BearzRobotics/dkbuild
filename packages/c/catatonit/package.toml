@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/catatonit/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "catatonit"
+version = "0.2.1"
+release = 1
+summary = "Init for containers"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/openSUSE/catatonit"
+hostdeps = ["automake", "libtool"]
+builddeps = ["libatomic-chimera-static", "llvm-devel"]
+
+source = [
+    { url = "https://github.com/openSUSE/catatonit/archive/refs/tags/v0.2.1.tar.gz", sha256 = "771385049516fdd561fbb9164eddf376075c4c7de3900a8b18654660172748f1" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -dm755 "$pkgdir/usr/lib/podman"
+mkdir -p "$pkgdir/usr/lib/podman"
+ln -sf ../../bin/catatonit "$pkgdir/usr/lib/podman/catatonit"
+'''

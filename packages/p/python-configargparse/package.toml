@@ -1,0 +1,22 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-configargparse/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "python-configargparse"
+version = "1.7.1"
+release = 2
+summary = "Drop-in replacement for argparse"
+license = "MIT"
+homepage = "https://github.com/bw2/ConfigArgParse"
+hostdeps = ["python-setuptools"]
+checkdeps = ["python-pyyaml"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/C/ConfigArgParse/configargparse-1.7.1.tar.gz", sha256 = "79c2ddae836a1e5914b71d58e4b9adbd9f7779d4e6351a637b7d2d9b6c46d3d9" },
+]
+
+install = '''
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-configargparse/LICENSE"
+'''

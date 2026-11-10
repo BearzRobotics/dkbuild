@@ -1,0 +1,38 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/swtpm/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "swtpm"
+version = "0.10.1"
+release = 1
+summary = "TPM emulator with socket, character device, and Linux CUSE interface"
+license = "BSD-3-Clause"
+homepage = "https://github.com/stefanberger/swtpm"
+patches = ["failing-tests.patch", "fix-tests.patch", "no-expect.patch", "sed.patch", "tss-user.patch"]
+hostdeps = ["automake", "bash", "gawk", "gnutls", "libtool", "pkgconf", "socat"]
+builddeps = ["gnutls-devel", "json-glib-devel", "libseccomp-devel", "libtasn1-devel", "libtpms-devel", "linux-headers", "openssl-devel"]
+checkdeps = ["iproute2"]
+rundeps = ["gnutls"]
+
+source = [
+    { url = "https://github.com/stefanberger/swtpm/archive/refs/tags/v0.10.1.tar.gz", sha256 = "f8da11cadfed27e26d26c5f58a7b8f2d14d684e691927348906b5891f525c684" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-gnutls \
+    --with-tss-user=tss \
+    --with-tss-group=tss
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/swtpm/LICENSE"
+rm -rf "$pkgdir/usr/lib/installed-tests"
+'''

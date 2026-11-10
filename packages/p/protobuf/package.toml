@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/protobuf/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "protobuf"
+version = "35.1"
+release = 1
+summary = "Protocol buffers library"
+license = "BSD-3-Clause"
+homepage = "https://protobuf.dev"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["zlib-ng-compat-devel", "gtest-devel", "abseil-cpp-devel"]
+
+source = [
+    { url = "https://github.com/protocolbuffers/protobuf/archive/v35.1.tar.gz", sha256 = "22775f9376938295efa2d59a59bde4cd075a42df5a9b4d27aa9b99fa6a413bd2" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -Dprotobuf_USE_EXTERNAL_GTEST=ON \
+    -Dprotobuf_ABSL_PROVIDER=package
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/protobuf/LICENSE"
+'''

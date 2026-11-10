@@ -1,0 +1,37 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/keyutils/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "keyutils"
+version = "1.6.3"
+release = 1
+summary = "Linux key management utilities"
+license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
+homepage = "https://people.redhat.com/~dhowells/keyutils"
+hostdeps = ["file", "pkgconf"]
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/keyutils.git/snapshot/keyutils-1.6.3.tar.gz", sha256 = "a61d5706136ae4c05bd48f86186bcfdbd88dd8bd5107e3e195c924cfc1b39bb4" },
+]
+
+build = '''
+%make \
+    PREFIX=/usr \
+    NO_ARLIB=1 \
+    LIBDIR=/usr/lib \
+    USRLIBDIR=/usr/lib \
+    VERSION=1.6.3 \
+    RELEASE=-r0
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr \
+    NO_ARLIB=1 \
+    BINDIR=/usr/bin \
+    SBINDIR=/usr/bin \
+    LIBDIR=/usr/lib \
+    USRLIBDIR=/usr/lib
+'''

@@ -1,0 +1,6 @@
+#!/bin/sh
+# directories and files (tmpfiles.conf)
+[ -e /etc/qemu/bridge.conf ] || cp -a /usr/lib/qemu/bridge.conf /etc/qemu/bridge.conf
+chmod 0640 /etc/qemu/bridge.conf
+chown root:_qemu /etc/qemu/bridge.conf 2>/dev/null || true
+exit 0

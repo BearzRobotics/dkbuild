@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/tdb/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "tdb"
+version = "1.4.15"
+release = 1
+summary = "Simple database API similar to gdbm"
+license = "LGPL-3.0-or-later"
+homepage = "https://tdb.samba.org"
+hostdeps = ["docbook-xsl-nons", "gettext", "libxslt", "pkgconf", "python"]
+builddeps = ["python-devel", "gettext-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://download.samba.org/pub/tdb/tdb-1.4.15.tar.gz", sha256 = "fba09d8df1f1b9072aeae8e78b2bd43c5afef20b2f6deefa633aa14a377a8dd2" },
+]
+
+environment = '''
+export PYTHONHASHSEED=1
+export WAF_MAKE=1
+'''
+install = '''
+# TODO(cbuild): no install step could be derived
+true
+'''

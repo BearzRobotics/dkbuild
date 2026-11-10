@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-pytz/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "python-pytz"
+version = "2026.2"
+release = 1
+summary = "Python timezone library"
+license = "MIT"
+homepage = "https://pythonhosted.org/pytz"
+hostdeps = ["python-setuptools"]
+checkdeps = []
+rundeps = ["python", "tzdb"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/p/pytz/pytz-2026.2.tar.gz", sha256 = "0e60b47b29f21574376f218fe21abc009894a2321ea16c6754f3cad6eb7cdd6a" },
+]
+
+install = '''
+# TODO(cbuild): for f in (self.destdir / "usr/lib").glob(
+#         "python*/site-packages/pytz/zoneinfo"
+#     ):
+#         self.rm(f, recursive=True)
+#         f.symlink_to("/usr/share/zoneinfo")
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-pytz/LICENSE.txt"
+'''

@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/newt/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "newt"
+version = "0.52.25"
+release = 2
+summary = "Library for color text mode, widget based user interfaces"
+license = "LGPL-2.0-only"
+homepage = "https://pagure.io/newt"
+patches = ["gnu-ld.patch"]
+hostdeps = ["pkgconf", "python-devel"]
+builddeps = ["python-devel", "slang-devel", "popt-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://releases.pagure.org/newt/newt-0.52.25.tar.gz", sha256 = "ef0ca9ee27850d1a5c863bb7ff9aa08096c9ed312ece9087b30f3a426828de82" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

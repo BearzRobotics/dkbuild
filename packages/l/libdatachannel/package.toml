@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libdatachannel/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libdatachannel"
+version = "0.23.2"
+release = 1
+summary = "WebRTC network library"
+license = "MPL-2.0"
+homepage = "https://libdatachannel.org"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["libnice-devel", "libsrtp-devel", "openssl-devel", "plog", "usrsctp-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/paullouisageneau/libdatachannel/archive/refs/tags/v0.23.2.tar.gz", sha256 = "b9606efc5b2b173f2d22d0be3f6ba4f12af78c00ca02cde5932f3ff902980eb9" },
+]
+
+setup = '''
+%cmake \
+    -DNO_EXAMPLES=ON \
+    -DNO_TESTS=ON \
+    -DPREFER_SYSTEM_LIB=ON \
+    -DUSE_NICE=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

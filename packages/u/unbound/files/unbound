@@ -1,0 +1,5 @@
+type = process
+command = /usr/bin/unbound -dp
+smooth-recovery = true
+before: rcboot
+depends-on: pre-rcboot

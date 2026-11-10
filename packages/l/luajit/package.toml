@@ -1,0 +1,46 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/luajit/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "luajit"
+version = "2.1_p20250117"
+release = 1
+summary = "OpenResty's LuaJIT fork"
+license = "MIT"
+homepage = "https://github.com/openresty/luajit2"
+patches = ["bcsave-ppc64.patch", "grep.patch", "tests-fail.patch", "tests.patch"]
+archs = ["aarch64", "x86_64"]
+hostdeps = ["pkgconf"]
+checkdeps = ["perl", "sqlite-devel", "zlib-ng-compat-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://github.com/openresty/luajit2/archive/refs/tags/v2.1-20250117.tar.gz", sha256 = "68ff3dc2cc97969f7385679da7c9ff96738aa9cc275fa6bab77316eb3340ea8e" },
+    { url = "https://github.com/openresty/luajit2-test-suite/archive/a3a5deb5d97d57fb4da567017a621ae73ee7305e.tar.gz", sha256 = "b9862f002768dac55c8ab3d1ea21f3aa06d4075f6d022bb2eff76e82df264ffc" },
+]
+
+build = '''
+# TODO(cbuild): init_build() sets variables for this phase (cbuild line 41); port it by hand
+%make \
+    PREFIX=/usr \
+    Q= \
+    E=@:
+'''
+check = '''
+# TODO(cbuild): pfx = str(self.chroot_cwd / "test-suite/target")
+# TODO(cbuild): self.do("make", "install", "PREFIX=" + pfx)
+# TODO(cbuild): self.do(
+#         "./run-tests",
+#         pfx,
+#         f"{pfx}/bin/luajit",
+#         "clang",
+#         "clang++",
+#         wrksrc="test-suite",
+#     )
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr
+install -Dm644 COPYRIGHT "$pkgdir/usr/share/licenses/luajit/COPYRIGHT"
+'''

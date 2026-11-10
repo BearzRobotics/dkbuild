@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libnfs/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libnfs"
+version = "5.0.3"
+release = 1
+summary = "NFS client library"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/sahlberg/libnfs"
+patches = ["fix-musl.patch"]
+hostdeps = ["pkgconf", "automake", "libtool"]
+
+source = [
+    { url = "https://github.com/sahlberg/libnfs/archive/libnfs-5.0.3.tar.gz", sha256 = "d945cb4f4c8f82ee1f3640893a168810f794a28e1010bb007ec5add345e9df3e" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

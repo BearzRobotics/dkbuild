@@ -1,0 +1,35 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/yara/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "yara"
+version = "4.5.5"
+release = 1
+summary = "C library for pattern matching"
+license = "BSD-3-Clause"
+homepage = "https://virustotal.github.io/yara"
+patches = ["aarch64-tests.patch", "strtol.patch"]
+hostdeps = ["automake", "flex", "libtool", "pkgconf"]
+builddeps = ["file-devel", "jansson-devel", "linux-headers", "openssl-devel"]
+
+source = [
+    { url = "https://github.com/VirusTotal/yara/archive/refs/tags/v4.5.5.tar.gz", sha256 = "d38e30fd9c1e1c7921d1c4568262d94f5c2d6b5da139fe49572a43ffbc5c53f6" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-cuckoo \
+    --enable-dex \
+    --enable-magic
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/yara/COPYING"
+'''

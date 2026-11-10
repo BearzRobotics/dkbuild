@@ -1,0 +1,39 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/nmap/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "nmap"
+version = "7.993"
+release = 1
+summary = "Utility for network discovery and security auditing"
+license = "custom:Nmap"
+homepage = "https://nmap.org"
+patches = ["disable_ncat_dns_resolution_check.patch", "disable_proxy_chain_tests.patch", "no_install_ca_bundle.patch"]
+hostdeps = ["automake", "gettext-devel", "libtool"]
+builddeps = ["libpcap-devel", "libssh2-devel", "linux-headers", "lua-devel", "openssl-devel", "pcre2-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://nmap.org/dist/nmap-7.993.tar.bz2", sha256 = "270e55f04915bfcecb5db8feb959d4c5ba86a48c094520a4f1c07571e1c79c59" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-openssl=yes \
+    --with-libpcap=yes \
+    --with-libpcre=yes \
+    --with-liblua=yes \
+    --with-libssh2=yes \
+    --with-libz-prefix=/usr/lib \
+    --without-zenmap
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/nmap/LICENSE"
+'''

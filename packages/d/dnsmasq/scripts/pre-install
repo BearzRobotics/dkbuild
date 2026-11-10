@@ -1,0 +1,5 @@
+#!/bin/sh
+# users and groups (sysusers.conf)
+grep -q "^_dnsmasq:" /etc/group || groupadd -r _dnsmasq
+grep -q "^_dnsmasq:" /etc/passwd || useradd -r -g _dnsmasq -d /var/empty -s /usr/bin/nologin -c 'dnsmasq user' _dnsmasq
+exit 0

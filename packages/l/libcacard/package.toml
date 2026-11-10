@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libcacard/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "libcacard"
+version = "2.8.1"
+release = 1
+summary = "Common Access Card library"
+license = "LGPL-2.1-or-later"
+homepage = "https://gitlab.freedesktop.org/spice/libcacard"
+hostdeps = ["pkgconf"]
+builddeps = ["glib-devel", "nss-devel", "pcsc-lite-devel"]
+
+source = [
+    { url = "https://www.spice-space.org/download/libcacard/libcacard-2.8.1.tar.xz", sha256 = "fbbf4de8cb7db5bdff5ecb672ff0dbe6939fb9f344b900d51ba6295329a332e7" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''
