@@ -4,13 +4,13 @@
 # r2: static libraries too (in gdk-pixbuf-static), for fully static programs on musl.
 name = "gdk-pixbuf"
 version = "2.44.8"
-release = 2
+release = 3
 summary = "Image loading library for GTK"
 license = "LGPL-2.1-or-later"
 homepage = "https://wiki.gnome.org/Projects/GdkPixbuf"
 patches = ["glycin-no-alpha.patch", "no-pixbuf-fail.patch", "pixbuf-randomly-modified-test.patch", "xpm.patch"]
-hostdeps = ["gettext", "glib-devel", "glycin-loaders-none", "gobject-introspection", "meson", "pkgconf", "python-docutils"]
-builddeps = ["glib-devel", "glycin-devel", "glycin-loaders-none", "shared-mime-info"]
+hostdeps = ["gettext", "glib-devel", "gobject-introspection", "meson", "pkgconf", "python-docutils"]
+builddeps = ["glib-devel", "shared-mime-info"]
 rundeps = ["shared-mime-info"]
 options = ["!cross"]
 

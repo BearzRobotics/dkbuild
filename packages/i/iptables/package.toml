@@ -1,0 +1,43 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/iptables/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "iptables"
+version = "1.8.13"
+release = 1
+summary = "Linux packet filtering system"
+license = "GPL-2.0-only"
+homepage = "https://www.netfilter.org/projects/iptables"
+patches = ["musl-fix-headers.patch", "use-sh-iptables-apply.patch"]
+hostdeps = ["automake", "flex", "libtool", "pkgconf"]
+builddeps = ["flex-devel", "libmnl-devel", "libnetfilter-conntrack-devel", "libnfnetlink-devel", "libnftnl-devel", "libpcap-devel", "linux-headers"]
+checkdeps = ["python", "bash"]
+rundeps = ["iptables"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.netfilter.org/projects/iptables/files/iptables-1.8.13.tar.xz", sha256 = "1afcd33da9e8f913ace6a2126788162e207e26f5d5e29c6573c0e581ffc58b99" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-devel \
+    --enable-shared \
+    --enable-bpf-compiler
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+# service-related bits
+install -Dm755 $pkgfiles/iptables-flush "$pkgdir/usr/lib/iptables-flush"
+install -Dm755 $pkgfiles/iptables-start "$pkgdir/usr/lib/iptables-start"
+install -Dm644 $pkgfiles/iptables "$pkgdir/etc/dinit.d/iptables"
+install -Dm644 $pkgfiles/ip6tables "$pkgdir/etc/dinit.d/ip6tables"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/iptables.conf"
+# default rule sets (originally Void's)
+for f in empty simple_firewall; do install -Dm644 $pkgfiles/$f.rules "$pkgdir/usr/share/xtables/etc/$f.rules"; done
+for f in filter mangle nat raw security; do install -Dm644 $pkgfiles/empty-$f.rules "$pkgdir/usr/share/xtables/var/empty-$f.rules"; done
+# room for the iptables-nft / -legacy alternatives' names
+for f in tables tables-save tables-restore; do rm -f "$pkgdir/usr/bin/ip$f" "$pkgdir/usr/bin/ip6$f"; done
+'''

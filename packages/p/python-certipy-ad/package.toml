@@ -6,7 +6,7 @@ summary = "Active Directory Certificate Services enumeration and abuse"
 license = "MIT"
 homepage = "https://github.com/Pennyw0rth/Certipy"
 hostdeps = ["python", "python-setuptools"]
-rundeps = ["python", "python-asn1crypto", "python-cryptography", "python-impacket", "python-ldap3", "python-pyasn1", "python-dnspython", "python-pycryptodome", "python-requests", "python-openssl", "python-beautifulsoup4", "python-requests"]
+rundeps = ["python", "python-asn1crypto", "python-cryptography", "python-impacket", "python-ldap3", "python-pyasn1", "python-dnspython", "python-pycryptodome", "python-requests", "python-openssl", "python-beautifulsoup4"]
 options = ["!check"]
 
 source = [

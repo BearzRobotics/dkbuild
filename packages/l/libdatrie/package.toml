@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libdatrie/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libdatrie"
+version = "0.2.13"
+release = 1
+summary = "Implementation of double-array structure for representing trie"
+license = "LGPL-2.1-or-later"
+homepage = "https://linux.thai.net/projects/datrie"
+hostdeps = ["autoconf-archive", "automake", "pkgconf", "libtool"]
+
+source = [
+    { url = "https://linux.thai.net/pub/ThaiLinux/software/libthai/libdatrie-0.2.13.tar.xz", sha256 = "12231bb2be2581a7f0fb9904092d24b0ed2a271a16835071ed97bed65267f4be" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install \
+    -j1
+'''

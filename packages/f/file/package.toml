@@ -4,11 +4,11 @@
 # r2: static libraries too (in file-static), for fully static programs on musl.
 name = "file"
 version = "5.48"
-release = 2
+release = 3
 summary = "File type identification utility"
 license = "BSD-2-Clause"
 homepage = "http://www.darwinsys.com/file"
-hostdeps = ["automake", "pkgconf", "slibtool"]
+hostdeps = ["automake", "pkgconf", "libtool"]
 builddeps = ["zlib-ng-compat-devel"]
 
 source = [

@@ -5,12 +5,12 @@
 # r3: static libraries too (in libxml2-static), for fully static programs on musl.
 name = "libxml2"
 version = "2.15.4"
-release = 3
+release = 4
 summary = "XML parsing library"
 license = "MIT"
 homepage = "http://www.xmlsoft.org"
 patches = ["overflow.patch"]
-hostdeps = ["automake", "pkgconf", "slibtool"]
+hostdeps = ["automake", "pkgconf", "libtool"]
 builddeps = ["icu-devel", "readline-devel", "ncurses-devel", "xz-devel", "zlib-ng-compat-devel"]
 
 source = [

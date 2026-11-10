@@ -4,11 +4,11 @@
 # r2: static libraries too (in harfbuzz-static), for fully static programs on musl.
 name = "harfbuzz"
 version = "14.5.0"
-release = 2
+release = 3
 summary = "Text shaping engine"
 license = "MIT"
 homepage = "https://harfbuzz.github.io"
-hostdeps = ["freetype-bootstrap", "glib-devel", "gobject-introspection", "gtk-doc-tools", "help2man", "meson", "pkgconf"]
+hostdeps = ["freetype-bootstrap", "glib-devel", "gobject-introspection", "help2man", "meson", "pkgconf"]
 builddeps = ["cairo-devel", "freetype-bootstrap", "graphite2-devel", "icu-devel"]
 options = ["!cross"]
 

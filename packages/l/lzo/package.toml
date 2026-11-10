@@ -4,11 +4,11 @@
 # r2: static libraries too (in lzo-static), for fully static programs on musl.
 name = "lzo"
 version = "2.10"
-release = 2
+release = 3
 summary = "Portable lossless data compression library"
 license = "GPL-2.0-or-later"
 homepage = "http://www.oberhumer.com/opensource/lzo"
-hostdeps = ["automake", "pkgconf", "slibtool"]
+hostdeps = ["automake", "pkgconf", "libtool"]
 
 source = [
     { url = "http://www.oberhumer.com/opensource/lzo/download/lzo-2.10.tar.gz", sha256 = "c0f892943208266f9b6543b3ae308fab6284c5c90e627931446fb49b4221a072" },

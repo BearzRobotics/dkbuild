@@ -3,13 +3,13 @@
 # Reviewed by hand; dependency names are Chimera's and resolve from stage 0 until they are recipes.
 name = "iproute2"
 version = "7.1.0"
-release = 2
+release = 3
 summary = "IP routing utilities"
 license = "GPL-2.0-only"
 homepage = "https://wiki.linuxfoundation.org/networking/iproute2"
 patches = ["basename.patch", "clang.patch"]
 hostdeps = ["bison", "flex", "linux-headers", "perl", "pkgconf"]
-builddeps = ["elfutils-devel", "flex-devel-static", "iptables-devel", "libcap-devel", "libmnl-devel", "linux-headers"]
+builddeps = ["elfutils-devel", "flex-static", "iptables-devel", "libcap-devel", "libmnl-devel", "linux-headers"]
 
 source = [
     { url = "https://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-7.1.0.tar.xz", sha256 = "fd9fa1b95809417157ca83dd72957e3261bdbce896353cb936f80af0b33a4b5c" },

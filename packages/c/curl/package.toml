@@ -7,12 +7,12 @@
 # r3: static libraries too (in curl-static), for fully static programs on musl.
 name = "curl"
 version = "8.23.0"
-release = 4
+release = 5
 summary = "Command line tool for transferring data with URL syntax"
 license = "curl"
 homepage = "https://curl.se"
 patches = ["optimize.patch"]
-hostdeps = ["automake", "pkgconf", "perl", "mandoc", "slibtool"]
+hostdeps = ["automake", "pkgconf", "perl", "mandoc", "libtool"]
 builddeps = ["openssl-devel", "zlib-ng-compat-devel", "zstd-devel", "libpsl-devel", "libidn2-devel", "nghttp2-devel", "libssh2-devel"]
 checkdeps = ["nghttp2-progs", "python"]
 rundeps = ["ca-certificates"]

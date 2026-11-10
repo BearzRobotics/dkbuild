@@ -6,12 +6,12 @@
 # r3: static libraries too (in btrfs-progs-static), for fully static programs on musl.
 name = "btrfs-progs"
 version = "7.1"
-release = 3
+release = 4
 summary = "Btrfs file system utilities"
 license = "GPL-2.0-only AND LGPL-2.1-or-later"
 homepage = "https://btrfs.readthedocs.io/en/latest"
 patches = ["basename.patch", "cp.patch"]
-hostdeps = ["asciidoc", "automake", "libxml2", "pkgconf", "python-devel", "python-setuptools", "python-sphinx", "python-sphinx_rtd_theme", "xmlto"]
+hostdeps = ["asciidoc", "automake", "libxml2", "pkgconf", "python-devel", "python-setuptools", "python-sphinx", "python-sphinx-rtd-theme", "xmlto"]
 builddeps = ["acl-devel", "e2fsprogs-devel", "linux-headers", "lzo-devel", "python-devel", "eudev-devel", "util-linux-devel", "zlib-ng-compat-devel", "zstd-devel"]
 checkdeps = ["xz"]
 options = ["!check"]

@@ -9,6 +9,7 @@ const std = @import("std");
 const recipe = @import("recipe.zig");
 const fetch = @import("fetch.zig");
 const npmdeps = @import("npmdeps.zig");
+const gemdeps = @import("gemdeps.zig");
 /// Sets up npm's cache from the npm store in a build (npmdeps).
 const npm_offline_js = @embedFile("npm-offline.js");
 /// gradledeps: the resolve step's init script, the store copier, and the build's init script.
@@ -183,6 +184,9 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
             \\export PATH="/tmp/dkbin:$PATH"
             \\
         );
+    // Ruby (gemdeps): Bundler installs the source gems laid in vendor/cache.
+    if (contains(r.options, "gemdeps"))
+        try s.appendSlice(arena, "export BUNDLE_FORCE_RUBY_PLATFORM=true BUNDLE_DISABLE_VERSION_CHECK=true GEM_HOME=/tmp/gems\n");
     if (contains(r.options, "godeps"))
         try s.appendSlice(arena, "export GOMODCACHE=/dkdeps/go GOPROXY=off GOSUMDB=off GOTOOLCHAIN=local GOFLAGS=-mod=mod\n");
     // NuGet (nugetdeps): a private package folder; the store is the only feed
@@ -310,7 +314,7 @@ fn inTreeFiles(arena: Allocator, io: std.Io, opts: Options, r: recipe.Recipe, re
         if (contains(seen.items, d)) continue;
         try seen.append(arena, d);
         const pi = t.provider(d) orelse {
-            if (k < direct) out("    note: '{s}' is assumed to be in the base image (stage 1 does not check, SPEC.md 7.3)\n", .{d});
+            // (the run's summary lists these once: main.zig, baseImageNames)
             continue;
         };
         const pr = t.recipes[pi];
@@ -428,6 +432,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     var cargo_config: ?[]const u8 = null;
     var uses_go = false;
     var uses_npm = false;
+    var gem_lists: std.ArrayList([]const u8) = .empty;
     {
         for (r.source) |src| {
             const lock = fetchLock(src);
@@ -438,6 +443,15 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
                 return error.PrepareFailed;
             };
+            // Ruby gems: any unpacked tarball's Gemfile.lock
+            if (src == .tarball and src.tarball.unpack and contains(r.options, "gemdeps")) {
+                if (gemdeps.fetchGemDeps(arena, io, cache, src.tarball.sha256, &msg)) |_| {
+                    try gem_lists.append(arena, try gemdeps.listPath(arena, cache, src.tarball.sha256));
+                } else |err| if (!std.mem.eql(u8, msg, gemdeps.no_lockfile)) {
+                    out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
+                    return error.PrepareFailed;
+                }
+            }
             // npm lockfiles may be in any unpacked tarball (a web client as a second source)
             if (src == .tarball and src.tarball.unpack and contains(r.options, "npmdeps")) {
                 if (npmdeps.fetchNpmDeps(arena, io, cache, src.tarball.sha256, &msg)) |_| {
@@ -473,6 +487,10 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                     uses_go = true;
                 }
             }
+        }
+        if (contains(r.options, "gemdeps") and gem_lists.items.len == 0) {
+            out("error: {s}: {s} (in none of its sources)\n", .{ r.name, gemdeps.no_lockfile });
+            return error.PrepareFailed;
         }
         if (contains(r.options, "npmdeps") and !uses_npm) {
             out("error: {s}: {s} (in none of its sources)\n", .{ r.name, npmdeps.no_lockfile });
@@ -598,6 +616,14 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 const k = f.next() orelse continue;
                 try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "ln -sfn '/dkdeps/crates/{s}' 'vendor/{s}'\n", .{ k, n }));
             }
+        }
+        // Gems: vendor/cache in the source's top directory, linking into the
+        // store; `bundle install --local` installs from there.
+        if (gem_lists.items.len > 0) try lay.appendSlice(arena, "mkdir -p vendor/cache\n");
+        for (gem_lists.items) |gl| {
+            const text = Dir.cwd().readFileAlloc(io, gl, arena, .limited(1 << 22)) catch return error.UnpackFailed;
+            var gl_lines = std.mem.tokenizeScalar(u8, text, '\n');
+            while (gl_lines.next()) |f| try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "ln -sfn '/dkdeps/gems/{s}' 'vendor/cache/{s}'\n", .{ f, f }));
         }
         if (zig_list) |zl| {
             const text = Dir.cwd().readFileAlloc(io, zl, arena, .limited(1 << 22)) catch return error.UnpackFailed;
@@ -740,6 +766,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
             .{ .use = uses_npm, .sub = "npm", .dst = "/dkdeps/npm" },
             .{ .use = uses_gradle, .sub = "maven", .dst = "/dkdeps/maven" },
             .{ .use = uses_nuget, .sub = "nuget", .dst = "/dkdeps/nuget" },
+            .{ .use = gem_lists.items.len > 0, .sub = "gems", .dst = "/dkdeps/gems" },
         }) |st| {
             if (!st.use) continue;
             const rel = try std.fs.path.join(arena, &.{ cache, st.sub });
@@ -1044,6 +1071,7 @@ fn pruneDeps(arena: Allocator, io: std.Io, opts: Options, t: tree.Tree, dry_run:
         .{ .option = "cargodeps", .dir = "cargodeps", .store = "crates", .field = 1 },
         .{ .option = "zigdeps", .dir = "zigdeps", .store = "zigpkg", .field = 0 },
         .{ .option = "godeps", .dir = "godeps", .store = null, .field = 0 },
+        .{ .option = "gemdeps", .dir = "gemdeps", .store = "gems", .field = 0 },
     };
     var removed: usize = 0;
     for (kinds) |k| {

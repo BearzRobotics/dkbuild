@@ -4,12 +4,12 @@
 # r3: static libraries too (in psmisc-static), for fully static programs on musl.
 name = "psmisc"
 version = "23.7"
-release = 3
+release = 4
 summary = "Small utilities that use the proc file-system"
 license = "GPL-2.0-or-later"
 homepage = "https://gitlab.com/psmisc/psmisc"
 hostdeps = ["gettext-devel", "automake"]
-builddeps = ["ncurses-devel", "gnu-getopt", "linux-headers"]
+builddeps = ["ncurses-devel", "util-linux", "linux-headers"]
 options = ["!check"]
 
 source = [

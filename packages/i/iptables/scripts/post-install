@@ -1,0 +1,5 @@
+#!/bin/sh
+# directories and files (tmpfiles.conf)
+[ -e /etc/iptables ] || cp -a /usr/share/xtables/etc /etc/iptables
+[ -e /var/lib/iptables ] || cp -a /usr/share/xtables/var /var/lib/iptables
+exit 0

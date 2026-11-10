@@ -5,11 +5,11 @@
 # r3: static libraries too (in exfatprogs-static), for fully static programs on musl.
 name = "exfatprogs"
 version = "1.4.3"
-release = 3
+release = 4
 summary = "ExFAT filesystem utilities"
 license = "GPL-2.0-only"
 homepage = "https://github.com/exfatprogs/exfatprogs"
-hostdeps = ["automake", "pkgconf", "slibtool"]
+hostdeps = ["automake", "pkgconf", "libtool"]
 builddeps = ["linux-headers", "util-linux-devel"]
 
 source = [

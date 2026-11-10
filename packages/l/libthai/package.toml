@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libthai/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libthai"
+version = "0.1.30"
+release = 2
+summary = "Thai language support routines"
+license = "LGPL-2.1-or-later"
+homepage = "https://linux.thai.net/projects/libthai"
+hostdeps = ["pkgconf"]
+builddeps = ["libdatrie-devel"]
+
+source = [
+    { url = "https://linux.thai.net/pub/ThaiLinux/software/libthai/libthai-0.1.30.tar.xz", sha256 = "ddba8b53dfe584c3253766030218a88825488a51a7deef041d096e715af64bdd" },
+]
+
+setup = '''
+%configure \
+    libthai_cv_have_version_script=yes
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install \
+    -j1
+'''

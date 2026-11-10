@@ -3,6 +3,7 @@ const recipe = @import("recipe.zig");
 const tree = @import("tree.zig");
 const fetch = @import("fetch.zig");
 const npmdeps = @import("npmdeps.zig");
+const gemdeps = @import("gemdeps.zig");
 const build = @import("build.zig");
 const inputs = @import("inputs.zig");
 const term = @import("term.zig");
@@ -109,6 +110,7 @@ pub fn main(init: std.process.Init) !void {
             // lays them in (ollama's second tarball is llama.cpp, no Go modules).
             var first_tb = true;
             var npm_found = false;
+            var gem_found = false;
             for (r.source) |src| {
                 var msg: []const u8 = "";
                 if (fetch.fetchOne(arena, init.io, cache, src, &msg)) |st| {
@@ -129,6 +131,17 @@ pub fn main(init: std.process.Init) !void {
                         } else |cerr| {
                             failed = true;
                             std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(cerr) });
+                        }
+                    }
+                    if (src == .tarball and src.tarball.unpack and contains(r.options, "gemdeps")) {
+                        if (gemdeps.fetchGemDeps(arena, init.io, cache, src.tarball.sha256, &msg)) |gst| {
+                            gem_found = true;
+                            std.debug.print("{s}: Ruby gems {s}\n", .{ r.name, @tagName(gst) });
+                        } else |gerr2| {
+                            if (!std.mem.eql(u8, msg, gemdeps.no_lockfile)) {
+                                failed = true;
+                                std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(gerr2) });
+                            }
                         }
                     }
                     // every unpacked tarball may carry lockfiles (a web client as a second source)
@@ -155,6 +168,10 @@ pub fn main(init: std.process.Init) !void {
                     failed = true;
                     std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
                 }
+            }
+            if (contains(r.options, "gemdeps") and !gem_found and !failed) {
+                failed = true;
+                std.debug.print("{s}: {s} (in none of its sources)\n", .{ r.name, gemdeps.no_lockfile });
             }
             if (contains(r.options, "npmdeps") and !npm_found and !failed) {
                 failed = true;
@@ -297,6 +314,25 @@ pub fn main(init: std.process.Init) !void {
         const failed_names = res.failed;
         const skipped_names = res.skipped;
         writeRunSummary(arena, init.io, root, opts.arch, t, if (is_world) "world" else "pkg", jobs.items.len, failed_names, unbumped.items, skipped_names);
+        // What the builds took from the base image (dependencies no recipe
+        // provides; stage 1 does not check them, SPEC.md 7.3): once, not per build.
+        {
+            var base_names: std.ArrayList([]const u8) = .empty;
+            for (jobs.items) |jb| {
+                const jr = t.recipes[jb.idx];
+                for ([_][]const []const u8{ jr.hostdeps, jr.builddeps }) |deps| for (deps) |d| {
+                    if (t.provider(d) == null and !contains(base_names.items, d)) try base_names.append(arena, d);
+                };
+            }
+            if (base_names.items.len > 0) {
+                std.mem.sort([]const u8, base_names.items, {}, struct {
+                    fn lt(_: void, a: []const u8, b: []const u8) bool {
+                        return std.mem.order(u8, a, b) == .lt;
+                    }
+                }.lt);
+                term.print("note: taken from the base image (no recipe provides them): {s}\n", .{try std.mem.join(arena, " ", base_names.items)});
+            }
+        }
         if (failed_names.len > 0 and !keep_going) std.process.exit(1);
         if (failed_names.len > 0 or skipped_names.len > 0 or unbumped.items.len > 0) {
             term.print("\n{d} failed:", .{failed_names.len});
@@ -481,6 +517,7 @@ test {
     _ = @import("cbuild.zig");
     _ = @import("fetch.zig");
     _ = @import("npmdeps.zig");
+    _ = @import("gemdeps.zig");
     _ = @import("build.zig");
     _ = @import("split.zig");
     _ = @import("scan.zig");

@@ -1,0 +1,4 @@
+type = scripted
+command = /usr/lib/iptables-start -6
+stop-command = /usr/lib/iptables-flush -6
+depends-on: early-filesystems

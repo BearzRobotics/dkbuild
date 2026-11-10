@@ -5,12 +5,12 @@
 # r3: static libraries too (in wayland-static), for fully static programs on musl.
 name = "wayland"
 version = "1.26.0"
-release = 3
+release = 4
 summary = "Wayland compositor infrastructure"
 license = "MIT"
 homepage = "https://wayland.freedesktop.org"
 hostdeps = ["meson", "pkgconf", "flex"]
-builddeps = ["flex-devel-static", "libexpat-devel", "libffi-devel", "libxml2-devel"]
+builddeps = ["flex-static", "libexpat-devel", "libffi-devel", "libxml2-devel"]
 
 source = [
     { url = "https://gitlab.freedesktop.org/wayland/wayland/-/archive/1.26.0.tar.gz", sha256 = "5d92753c046c6dbd528a6f47edbab599a017d415aed8088875d8c36f39189b60" },

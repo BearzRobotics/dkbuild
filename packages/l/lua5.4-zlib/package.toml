@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/lua5.4-zlib/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "lua5.4-zlib"
+version = "1.3"
+release = 1
+summary = "Zlib streaming interface for Lua 5.4"
+license = "MIT"
+homepage = "https://github.com/brimworks/lua-zlib"
+patches = ["makefile.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["lua-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/brimworks/lua-zlib/archive/v1.3.tar.gz", sha256 = "d026eda33b7c3456696bcecdc0b26d7bd779de4f5a4d4215ebe3897095c6c9c8" },
+]
+
+build = '''
+%make \
+    PREFIX=/usr \
+    LUA_VER=5.4
+'''
+install = '''
+install -Dm644 README "$pkgdir/usr/share/licenses/lua5.4-zlib/README"
+install -Dm755 zlib.so "$pkgdir/usr/lib/lua/5.4/zlib.so"
+'''

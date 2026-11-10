@@ -4,12 +4,12 @@
 # r2: static libraries too (in libgpg-error-static), for fully static programs on musl.
 name = "libgpg-error"
 version = "1.61"
-release = 3
+release = 4
 summary = "Library for error values used by GnuPG components"
 license = "LGPL-2.1-or-later"
 homepage = "https://www.gnupg.org"
 patches = ["regen.patch", "tests.patch"]
-hostdeps = ["automake", "gettext-devel", "pkgconf", "slibtool"]
+hostdeps = ["automake", "gettext-devel", "pkgconf", "libtool"]
 
 source = [
     { url = "https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.61.tar.bz2", sha256 = "7a85413f2bc354f4f8aa832b718af122e48965e9e0eb9012ee659c13c6385c93" },
