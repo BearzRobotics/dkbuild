@@ -1,0 +1,22 @@
+# The system's Java, switchable: /usr/bin/java, javac, jar, ... are links into
+# /usr/lib/jvm/default/bin/, and /usr/lib/jvm/default points at the active JDK
+# (each openjdkN lives in its own /usr/lib/jvm/java-N-openjdk). `java-select`
+# lists, shows and sets it, like Arch's archlinux-java. A JDK's install sets
+# the default only when none is set; removing the active one picks another.
+name = "java-common"
+version = "1"
+release = 1
+summary = "Default Java links and java-select"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+hostdeps = []
+options = ["!check"]
+
+install = '''
+install -Dm755 $pkgfiles/java-select "$pkgdir/usr/bin/java-select"
+for t in jar jarsigner java javac javadoc javap jcmd jconsole jdb jdeprscan jdeps jfr jhsdb \
+         jimage jinfo jlink jmap jmod jpackage jps jrunscript jshell jstack jstat jstatd \
+         jwebserver keytool rmiregistry serialver; do
+    ln -s ../lib/jvm/default/bin/$t "$pkgdir/usr/bin/$t"
+done
+'''

@@ -1,0 +1,33 @@
+#!/bin/sh
+# java-select: which installed JDK is the system's Java. JDKs live in
+# /usr/lib/jvm/<name>; /usr/lib/jvm/default points at the active one, and
+# /usr/bin/java, javac, ... point through it.
+#
+#   java-select list          installed JDKs (* marks the default)
+#   java-select get           the default
+#   java-select set <name>    make <name> the default (root)
+#   java-select fix           make sure the default is an installed JDK
+set -eu
+jvm=/usr/lib/jvm
+cur() { [ -L "$jvm/default" ] && basename "$(readlink "$jvm/default")" || true; }
+jdks() { for d in "$jvm"/*/; do d=${d%/}; n=${d##*/}; [ "$n" = default ] && continue; [ -x "$d/bin/java" ] && echo "$n"; done; }
+case "${1:-list}" in
+    list)
+        c=$(cur)
+        for n in $(jdks); do if [ "$n" = "$c" ]; then echo "* $n"; else echo "  $n"; fi; done ;;
+    get) cur ;;
+    set)
+        n=${2:?usage: java-select set <name>}
+        [ -x "$jvm/$n/bin/java" ] || { echo "java-select: $n is not an installed JDK (java-select list)" >&2; exit 1; }
+        ln -sfn "$n" "$jvm/default.new" && mv -T "$jvm/default.new" "$jvm/default"
+        echo "default Java: $n" ;;
+    fix)
+        c=$(cur)
+        if [ -z "$c" ] || [ ! -x "$jvm/$c/bin/java" ]; then
+            # the newest installed JDK
+            n=$(jdks | sort -t- -k2 -n | tail -n1)
+            if [ -n "$n" ]; then ln -sfn "$n" "$jvm/default.new" && mv -T "$jvm/default.new" "$jvm/default"; echo "default Java: $n"
+            else rm -f "$jvm/default"; fi
+        fi ;;
+    *) echo "usage: java-select list|get|set <name>|fix" >&2; exit 2 ;;
+esac
