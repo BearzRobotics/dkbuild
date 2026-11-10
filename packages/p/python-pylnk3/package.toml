@@ -1,0 +1,23 @@
+# pylnk3 from PyPI.
+name = "python-pylnk3"
+version = "0.4.3"
+release = 1
+summary = "Windows LNK File Parser and Creator"
+license = "GNU Library or Lesser General Public License (LGPL)"
+homepage = "https://github.com/strayge/pylnk"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/b9/7c/8f824baeeb854ebb3c5f547c791cde05733a2e66ae4f249a70ff23c2b7ab/pylnk3-0.4.3.tar.gz", sha256 = "fbc5f512b581382c2a4c11e6df3796f9975bcfd99e3fca2afe531ea61b3c4ac2" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pylnk3/LICENSE"
+'''

@@ -1,0 +1,23 @@
+# colored-traceback from PyPI.
+name = "python-colored-traceback"
+version = "0.4.2"
+release = 1
+summary = "Automatically color uncaught exception tracebacks"
+license = "ISC"
+homepage = "https://pypi.org/project/colored-traceback/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-pygments"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/07/80/afcf567031ab8565f8f8d2bd14b007d313ea3258e50394e85b10a405099c/colored-traceback-0.4.2.tar.gz", sha256 = "ecbc8e41f0712ea81931d7cd436b8beb9f3eff1595d2498f183e0ef69b56fe84" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-colored-traceback/LICENSE"
+'''

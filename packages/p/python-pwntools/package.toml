@@ -1,0 +1,23 @@
+# pwntools from PyPI.
+name = "python-pwntools"
+version = "4.15.0"
+release = 1
+summary = "Pwntools CTF framework and exploit development library."
+license = "Mostly MIT, some GPL/BSD, see LICENSE-pwntools.txt"
+homepage = "https://pypi.org/project/pwntools/"
+hostdeps = ["python", "python-setuptools", "python-toml"]
+rundeps = ["python", "python-paramiko", "python-mako", "python-pyelftools", "python-capstone", "python-ropgadget", "python-pyserial", "python-requests", "python-pygments", "python-pysocks", "python-dateutil", "python-packaging", "python-psutil", "python-intervaltree", "python-sortedcontainers", "python-unicorn", "python-six", "python-rpyc", "python-colored-traceback", "python-unix-ar", "python-zstandard"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/f2/5c/9ae3d94c98b0b038ffd7f09ebdac506d346fe1b964999f71c96c8a904efd/pwntools-4.15.0.tar.gz", sha256 = "d99a917298c1ca7241b51bba9ad2212f2af441ef66488059b2426508e9a2a776" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE-pwntools.txt "$pkgdir/usr/share/licenses/python-pwntools/LICENSE-pwntools.txt"
+'''

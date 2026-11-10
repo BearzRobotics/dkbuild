@@ -1,0 +1,23 @@
+# python-libnmap from PyPI.
+name = "python-libnmap"
+version = "0.7.3"
+release = 1
+summary = "Python NMAP library enabling you to start async nmap tasks, parse and compare/diff scan results"
+license = "Apache 2.0"
+homepage = "http://pypi.python.org/pypi/python-libnmap/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/f0/b2/38e34576a715115e5bef9eff7d9989d48079c8138e5bb1d71bb8001df722/python-libnmap-0.7.3.tar.gz", sha256 = "d03629256c2ee9ab37390c28d4c4c2ae9637cd0861dd8ab9e0f32779545936c0" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENCE "$pkgdir/usr/share/licenses/python-libnmap/LICENCE"
+'''

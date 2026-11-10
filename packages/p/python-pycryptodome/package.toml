@@ -1,0 +1,23 @@
+# pycryptodome from PyPI.
+name = "python-pycryptodome"
+version = "4.4.0"
+release = 1
+summary = "Cryptographic library for Python"
+license = "BSD-2-Clause AND Unlicense AND MIT"
+homepage = "https://www.pycryptodome.org"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/51/f2/ccbeb91d186b2323fc99986499d2da3caab2151b1c2fb2ef74f7488d8934/pycryptodome-4.4.0.tar.gz", sha256 = "eab7620c60c85f3fa251d026ec06e094f036d96187bebb9752e46fbcebabbb55" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.rst "$pkgdir/usr/share/licenses/python-pycryptodome/LICENSE.rst"
+'''

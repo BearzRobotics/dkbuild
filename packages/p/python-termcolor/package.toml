@@ -1,0 +1,23 @@
+# termcolor from PyPI.
+name = "python-termcolor"
+version = "3.3.0"
+release = 1
+summary = "ANSI color formatting for output in terminal"
+license = "MIT"
+homepage = "https://github.com/termcolor/termcolor"
+hostdeps = ["python", "python-hatchling", "python-hatch-vcs"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/46/79/cf31d7a93a8fdc6aa0fbb665be84426a8c5a557d9240b6239e9e11e35fc5/termcolor-3.3.0.tar.gz", sha256 = "348871ca648ec6a9a983a13ab626c0acce02f515b9e1983332b17af7979521c5" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 COPYING.txt "$pkgdir/usr/share/licenses/python-termcolor/COPYING.txt"
+'''

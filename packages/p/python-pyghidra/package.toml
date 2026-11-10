@@ -1,0 +1,23 @@
+# pyghidra from PyPI.
+name = "python-pyghidra"
+version = "3.2.0"
+release = 1
+summary = "Native CPython for Ghidra"
+license = "Apache-2.0"
+homepage = "https://pypi.org/project/pyghidra/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-jpype1", "python-typing-extensions", "python-packaging"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/59/35/0d9816d4284a3684b14d75a97935e09bf55901ab6b8fc0140b8271273605/pyghidra-3.2.0.tar.gz", sha256 = "122859794e313947f875c8bd1807ab6386b9664d1ac9f181f6bf3fae6a183d8e" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pyghidra/LICENSE"
+'''

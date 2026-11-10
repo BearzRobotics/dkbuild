@@ -1,0 +1,23 @@
+# msldap from PyPI.
+name = "python-msldap"
+version = "0.5.15"
+release = 1
+summary = "Python library to play with MS LDAP"
+license = "custom"
+homepage = "https://github.com/skelsec/msldap"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-unicrypto", "python-asyauth", "python-asysocks", "python-asn1crypto", "python-winacl", "python-prompt-toolkit", "python-tqdm", "python-wcwidth", "python-tabulate"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/13/bb/2777d84cd62198ee8ca50abcf5aae51d7456464a9834fc2c0fdb3170202d/msldap-0.5.15.tar.gz", sha256 = "b8024a2c0559158ec407cb6317201ecc83627248baaeecee5dfd4419ca773e3d" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-msldap/LICENSE"
+'''

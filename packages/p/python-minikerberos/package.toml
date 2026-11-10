@@ -1,0 +1,23 @@
+# minikerberos from PyPI.
+name = "python-minikerberos"
+version = "0.4.12"
+release = 1
+summary = "Kerberos manipulation library in pure Python"
+license = "custom"
+homepage = "https://github.com/skelsec/minikerberos"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-asn1crypto", "python-oscrypto", "python-asysocks", "python-unicrypto", "python-tqdm", "python-six"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/e6/6b/3fe5bba950ea9c5f802cadf43f590757c014f9261cdab9f422f4f3c3f1d7/minikerberos-0.4.12.tar.gz", sha256 = "607498d430042d6ba53f390a5a11e0a29cb1d3744bbb130ef2e7bf2f5e86b06c" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-minikerberos/LICENSE"
+'''

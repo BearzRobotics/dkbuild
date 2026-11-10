@@ -1,0 +1,23 @@
+# neo4j from PyPI.
+name = "python-neo4j"
+version = "6.4.1"
+release = 1
+summary = "Neo4j Bolt driver for Python"
+license = "Apache-2.0 AND Python-2.0"
+homepage = "https://neo4j.com/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-pytz"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/d1/d1/bc40a291c60b06738ce92d5f0259d348eee1f07ba10d569a881c848c8afe/neo4j-6.4.1.tar.gz", sha256 = "fac99b7cb9679b93ef97dc23f22a3f0e7c3feb2db223eddfd2521f27005cfeaf" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.APACHE2.txt "$pkgdir/usr/share/licenses/python-neo4j/LICENSE.APACHE2.txt"
+'''

@@ -1,0 +1,23 @@
+# needed by: pwndbg (the commit it pins).
+name = "python-gdb-pt-dump"
+version = "0.0.0+git50227bd"
+release = 1
+summary = "Page table dumping for gdb (pwndbg's pt)"
+license = "MIT"
+homepage = "https://github.com/martinradev/gdb-pt-dump"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/martinradev/gdb-pt-dump/archive/50227bda0b6332e94027f811a15879588de6d5cb.tar.gz", sha256 = "319ab5ef8608cbafdb6561cf68d1922596abe7f86436361f851ad845e585a781" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/python-gdb-pt-dump/LICENSE.md"
+'''

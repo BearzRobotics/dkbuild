@@ -1,0 +1,22 @@
+# unicorn from PyPI.
+name = "python-unicorn"
+version = "2.1.4"
+release = 1
+summary = "Unicorn CPU emulator engine"
+license = "BSD License"
+homepage = "http://www.unicorn-engine.org"
+hostdeps = ["python", "python-setuptools", "python-build", "python-setuptools-scm", "cmake", "pkgconf"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/b2/1b/b4248aa8422e86de690cf8e85cf8feae4c33405a097d1ebe71570bdaa6f5/unicorn-2.1.4.tar.gz", sha256 = "00567a70e323f749b419cd86bee4f9115beab7ebba32194581c090cbb7c59cff" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

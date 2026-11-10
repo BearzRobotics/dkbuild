@@ -1,0 +1,23 @@
+# filelock from PyPI.
+name = "python-filelock"
+version = "4.2.10"
+release = 1
+summary = "A platform independent file lock."
+license = "MIT"
+homepage = "https://github.com/tox-dev/filelock"
+hostdeps = ["python", "python-hatchling", "python-hatch-fancy-pypi-readme", "python-hatch-vcs"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/a1/cf/05bcdacabdc0aec7dc8e19d76281bd82325df62dae3b6430e9ba57397689/filelock-4.2.10.tar.gz", sha256 = "fcc3c0cb8bfe7f4b3bb0e231c04b15dbad068cb3c2515f343d8fde4dce93bd5d" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-filelock/LICENSE"
+'''

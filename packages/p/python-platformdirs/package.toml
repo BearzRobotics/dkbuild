@@ -1,0 +1,23 @@
+# platformdirs from PyPI.
+name = "python-platformdirs"
+version = "4.14.5"
+release = 1
+summary = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
+license = "MIT"
+homepage = "https://github.com/tox-dev/platformdirs"
+hostdeps = ["python", "python-hatchling", "python-hatch-fancy-pypi-readme", "python-hatch-vcs"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/d7/9a/8475be631fb33ca1466915e70fd594c42a4e84b512db650eaa14f90fe75d/platformdirs-4.14.5.tar.gz", sha256 = "32e9921db7385aa8169bee4fe9501923e5715ba9fb7ea3b9c69b0d8e0639f7a1" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-platformdirs/LICENSE"
+'''

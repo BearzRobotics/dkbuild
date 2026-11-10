@@ -1,0 +1,24 @@
+# jpype1 from PyPI.
+name = "python-jpype1"
+version = "1.7.1"
+release = 1
+summary = "A Python to Java bridge"
+license = "Apache-2.0"
+homepage = "https://pypi.org/project/jpype1/"
+hostdeps = ["python", "python-scikit-build-core", "cmake", "ninja"]
+builddeps = ["openjdk21"]
+rundeps = ["python", "python-packaging"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/48/a2/5d27e81d24eef64668bf702bfe0e091cc48388b4666f36e025243eb9d827/jpype1-1.7.1.tar.gz", sha256 = "3cd88838dc3d2d546f7eaeadaaff864e590010c15f2b6a44b6f37e60796a14b2" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-jpype1/LICENSE"
+'''

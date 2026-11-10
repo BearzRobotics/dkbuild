@@ -1,0 +1,23 @@
+# ipython from PyPI.
+name = "python-ipython"
+version = "9.18.1"
+release = 1
+summary = "IPython: Productive Interactive Computing"
+license = "BSD-3-Clause"
+homepage = "https://ipython.org"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-prompt-toolkit", "python-ipython-pygments-lexers", "python-jedi", "python-matplotlib-inline", "python-pexpect", "python-psutil", "python-pygments", "python-stack-data", "python-traitlets"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/38/04/0d945c72d5b77527273ecb4c66aa2436de7a3b3bbe3da345bf053232b886/ipython-9.18.1.tar.gz", sha256 = "6319c0f5372c196397899479e6db1783dd7937abae06815d1317e8d5d51aaaaf" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 COPYING.rst "$pkgdir/usr/share/licenses/python-ipython/COPYING.rst"
+'''

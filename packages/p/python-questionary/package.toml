@@ -1,0 +1,23 @@
+# questionary from PyPI.
+name = "python-questionary"
+version = "2.1.1"
+release = 1
+summary = "Python library to build pretty command line user prompts ⭐️"
+license = "MIT"
+homepage = "https://github.com/tmbo/questionary"
+hostdeps = ["python", "python-poetry-core"]
+rundeps = ["python", "python-prompt-toolkit"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/f6/45/eafb0bba0f9988f6a2520f9ca2df2c82ddfa8d67c95d6625452e97b204a5/questionary-2.1.1.tar.gz", sha256 = "3d7e980292bb0107abaa79c68dd3eee3c561b83a0f89ae482860b181c8bd412d" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-questionary/LICENSE"
+'''

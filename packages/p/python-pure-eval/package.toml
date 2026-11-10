@@ -1,0 +1,23 @@
+# pure-eval from PyPI.
+name = "python-pure-eval"
+version = "0.2.4"
+release = 1
+summary = "Safely evaluate AST nodes without side effects"
+license = "MIT"
+homepage = "http://github.com/alexmojaki/pure_eval"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/da/9f/abfd2959e9261dd5217ca8551d4de211ca6ab26fe9b72cf44731ff6c4442/pure_eval-0.2.4.tar.gz", sha256 = "260c2774686e651b79f8b8e7fc9d80b3599ea6a66334b47d5f4abb69fc2c0ea1" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-pure-eval/LICENSE.txt"
+'''

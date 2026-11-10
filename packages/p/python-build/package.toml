@@ -1,0 +1,23 @@
+# build from PyPI.
+name = "python-build"
+version = "1.6.1"
+release = 1
+summary = "A simple, correct Python build frontend"
+license = "MIT"
+homepage = "https://pypi.org/project/build/"
+hostdeps = ["python", "python-flit-core"]
+rundeps = ["python", "python-packaging", "python-pyproject-hooks"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/bd/67/4898a44ea4f3f8e213b0954ec0aa0a16971d62a6212d6ea3931e97115b99/build-1.6.1.tar.gz", sha256 = "51cc11666391ab6f092070437ac747002ff46f3e4113a3622177ee6b488bfc53" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-build/LICENSE"
+'''

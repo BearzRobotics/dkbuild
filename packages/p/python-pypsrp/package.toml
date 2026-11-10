@@ -1,0 +1,23 @@
+# pypsrp from PyPI.
+name = "python-pypsrp"
+version = "0.9.1"
+release = 1
+summary = "PowerShell Remoting Protocol and WinRM for Python"
+license = "MIT"
+homepage = "https://pypi.org/project/pypsrp/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-cryptography", "python-pyspnego", "python-requests"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/e8/bb/e64c311746a4e6d0a5baea4da826a9d06ea997eed50d3209041722a99dc3/pypsrp-0.9.1.tar.gz", sha256 = "3ad41285739d5f8107dd8277ae00e86ee44153aae5e82fb578ac8048307e0d12" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pypsrp/LICENSE"
+'''

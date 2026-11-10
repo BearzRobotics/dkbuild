@@ -1,0 +1,23 @@
+# pyperclip from PyPI.
+name = "python-pyperclip"
+version = "1.11.0"
+release = 1
+summary = "A cross-platform clipboard module for Python. (Only handles plain text for now.)"
+license = "BSD"
+homepage = "https://github.com/asweigart/pyperclip"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/e8/52/d87eba7cb129b81563019d1679026e7a112ef76855d6159d24754dbd2a51/pyperclip-1.11.0.tar.gz", sha256 = "244035963e4428530d9e3a6101a1ef97209c6825edab1567beac148ccc1db1b6" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-pyperclip/LICENSE.txt"
+'''

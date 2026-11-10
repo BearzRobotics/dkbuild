@@ -1,0 +1,23 @@
+# pypykatz from PyPI.
+name = "python-pypykatz"
+version = "0.6.13"
+release = 1
+summary = "Python implementation of Mimikatz"
+license = "custom"
+homepage = "https://github.com/skelsec/pypykatz"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-unicrypto", "python-minidump", "python-minikerberos", "python-aiowinreg", "python-msldap", "python-winacl", "python-aiosmb", "python-aesedb", "python-tqdm"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/9e/34/b215fe85cb046080b285088a09f7c3d1a036c49c061a61e0aa4ff57ee4a6/pypykatz-0.6.13.tar.gz", sha256 = "f93d44fc393839c5daf2f061b29b81ffc576dd3391b175deb59a72956db94893" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pypykatz/LICENSE"
+'''

@@ -1,0 +1,23 @@
+# matplotlib-inline from PyPI.
+name = "python-matplotlib-inline"
+version = "0.2.2"
+release = 1
+summary = "Inline Matplotlib backend for Jupyter"
+license = "BSD-3-Clause"
+homepage = "https://github.com/ipython/matplotlib-inline"
+hostdeps = ["python", "python-flit-core"]
+rundeps = ["python", "python-traitlets"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/bd/c0/9f7c9a46090390368a4d7bcb76bb87a4a36c421e4c0792cdb53486ffac7a/matplotlib_inline-0.2.2.tar.gz", sha256 = "72f3fe8fce36b70d4a5b612f899090cd0401deddc4ea90e1572b9f4bfb058c79" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-matplotlib-inline/LICENSE"
+'''

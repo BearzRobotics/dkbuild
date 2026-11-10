@@ -1,0 +1,24 @@
+# aardwolf from PyPI.
+name = "python-aardwolf"
+version = "0.2.17"
+release = 1
+summary = "Asynchronous RDP protocol implementation"
+license = "MIT"
+homepage = "https://github.com/skelsec/aardwolf"
+hostdeps = ["python", "python-setuptools", "python-setuptools-rust", "rust"]
+rundeps = ["python", "python-unicrypto", "python-asyauth", "python-asysocks", "python-tqdm", "python-asn1crypto", "python-asn1tools", "python-pyperclip", "python-arc4", "python-pillow"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/6c/21/60829e9ab5fcc41b32886d80ad8fbe86e56ade3c68086aab0cef5cd30df7/aardwolf-0.2.17.tar.gz", sha256 = "42ee9e8d457e11b2bb8dc1400268c39c5898cc7b1fa9c3735a43ee2ee28505e0" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-aardwolf/LICENSE"
+'''

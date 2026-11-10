@@ -1,0 +1,23 @@
+# ldap3 from PyPI.
+name = "python-ldap3"
+version = "2.9.1"
+release = 1
+summary = "A strictly RFC 4510 conforming LDAP V3 pure Python client library"
+license = "LGPL v3"
+homepage = "https://github.com/cannatag/ldap3"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-pyasn1"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/43/ac/96bd5464e3edbc61595d0d69989f5d9969ae411866427b2500a8e5b812c0/ldap3-2.9.1.tar.gz", sha256 = "f3e7fc4718e3f09dda568b57100095e0ce58633bcabbed8667ce3f8fbaa4229f" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 COPYING.LESSER.txt "$pkgdir/usr/share/licenses/python-ldap3/COPYING.LESSER.txt"
+'''

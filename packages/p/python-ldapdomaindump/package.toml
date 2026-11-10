@@ -1,0 +1,23 @@
+# ldapdomaindump from PyPI.
+name = "python-ldapdomaindump"
+version = "0.10.0"
+release = 1
+summary = "Active Directory information dumper via LDAP"
+license = "MIT"
+homepage = "https://github.com/dirkjanm/ldapdomaindump/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-dnspython", "python-ldap3"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/14/48/2757e0453f828e33f7b41e5489976fbe7d504d513e07da53eb904030a288/ldapdomaindump-0.10.0.tar.gz", sha256 = "cbc66b32a7787473ffd169c5319acde46c02fdc9d444556e6448e0def91d3299" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-ldapdomaindump/LICENSE"
+'''

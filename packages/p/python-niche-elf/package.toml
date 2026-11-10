@@ -1,0 +1,23 @@
+# niche-elf from PyPI.
+name = "python-niche-elf"
+version = "0.3.7"
+release = 1
+summary = "A small library that optimizes some niche operations commonly used by debugger extensions."
+license = "GPLv3"
+homepage = "https://pypi.org/project/niche-elf/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/66/78/ccb7be3a215d8baeff4cf918fffa0b67dbc98f0333498baf6b22af814e65/niche_elf-0.3.7.tar.gz", sha256 = "fccb1d53ac31fda9569f0874fc3bb99ebd8ccd05f1173ae9d8616bc4b864a85f" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-niche-elf/LICENSE"
+'''

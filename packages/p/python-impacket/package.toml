@@ -1,0 +1,23 @@
+# impacket from PyPI.
+name = "python-impacket"
+version = "0.13.1"
+release = 1
+summary = "Network protocols Constructors and Dissectors"
+license = "Apache modified"
+homepage = "https://www.coresecurity.com"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-pyasn1", "python-pyasn1-modules", "python-pycryptodomex", "python-openssl", "python-six", "python-ldap3", "python-ldapdomaindump", "python-flask", "python-charset-normalizer"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/67/f2/fb8e14eb0a234b20b63a6685da2caee2c4269b3925d572a3a447b83fc9df/impacket-0.13.1.tar.gz", sha256 = "ed91c802b6beff6546afd2262942bc1a188b4671fb91ec751d46a1d66d28c2cf" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-impacket/LICENSE"
+'''

@@ -1,0 +1,23 @@
+# executing from PyPI.
+name = "python-executing"
+version = "2.3.0"
+release = 1
+summary = "Get the currently executing AST node of a frame, and other information"
+license = "MIT"
+homepage = "https://github.com/alexmojaki/executing"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/52/92/8a611141e42930c0f194f7504063ab87dfe970cf1a5af28e7703df448734/executing-2.3.0.tar.gz", sha256 = "15919cb5d667e5cb4e099511971d00d659573fff2dd5c4e6cd8b71636c7858d2" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-executing/LICENSE.txt"
+'''

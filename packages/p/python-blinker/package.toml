@@ -1,0 +1,23 @@
+# blinker from PyPI.
+name = "python-blinker"
+version = "1.9.0"
+release = 1
+summary = "Fast, simple object-to-object and broadcast signaling"
+license = "custom"
+homepage = "https://pypi.org/project/blinker/"
+hostdeps = ["python", "python-flit-core"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/21/28/9b3f50ce0e048515135495f198351908d99540d69bfdc8c1d15b73dc55ce/blinker-1.9.0.tar.gz", sha256 = "b4ce2265a7abece45e7cc896e98dbebe6cead56bcf805a3d23136d145f5445bf" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-blinker/LICENSE.txt"
+'''

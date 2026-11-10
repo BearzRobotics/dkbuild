@@ -1,0 +1,23 @@
+# capstone from PyPI.
+name = "python-capstone"
+version = "5.0.9"
+release = 1
+summary = "Capstone disassembly engine"
+license = "custom"
+homepage = "https://www.capstone-engine.org"
+hostdeps = ["python", "python-setuptools", "cmake"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/39/01/6516910f546fbb996068207b9dd0229b14bc8dae223114d5e0e27d3cad11/capstone-5.0.9.tar.gz", sha256 = "0429af292ddc604d3c9344696807e281d5e728db029f00e6a4ea9e3bff1aac9e" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.TXT "$pkgdir/usr/share/licenses/python-capstone/LICENSE.TXT"
+'''

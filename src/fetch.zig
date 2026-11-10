@@ -300,7 +300,7 @@ pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_s
         \\    # cargo finds them from any directory under it
         \\    m=Cargo.toml
         \\    [ -f "$top/Cargo.lock" ] || m=$(cd "$top" && find . -name Cargo.lock -not -path './vendor/*' | sort | head -n1 | sed 's|Cargo.lock$|Cargo.toml|')
-        \\    ( cd "$top" && timeout 1800 cargo vendor --locked --manifest-path "${{m:-Cargo.toml}}" vendor > "$t/vendor.toml" )
+        \\    ( cd "$top" && RUSTC_BOOTSTRAP=1 timeout 1800 cargo vendor --locked --manifest-path "${{m:-Cargo.toml}}" vendor > "$t/vendor.toml" )
         \\    {{ if [ -f "$top/.cargo/config.toml" ]; then cat "$top/.cargo/config.toml"; printf '\n'; fi; cat "$t/vendor.toml"; }} > "$t/config.toml"
         \\fi
         \\store="$cache/crates"; mkdir -p "$store"

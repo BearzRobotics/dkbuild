@@ -1,0 +1,23 @@
+# setuptools-rust from PyPI.
+name = "python-setuptools-rust"
+version = "1.13.0"
+release = 1
+summary = "Setuptools Rust extension plugin"
+license = "custom"
+homepage = "https://github.com/PyO3/setuptools-rust"
+hostdeps = ["python", "python-setuptools", "python-setuptools-scm"]
+rundeps = ["python", "python-setuptools", "python-semantic-version"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/68/ba/b31781d61bf9ee3c232a1d1160db11c11cdeae1d44e06c90723b25a8279f/setuptools_rust-1.13.0.tar.gz", sha256 = "f2afcf4baeee689910ce49cfa8aad4e08cce72f417449bcc32891b8664fdc726" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-setuptools-rust/LICENSE"
+'''

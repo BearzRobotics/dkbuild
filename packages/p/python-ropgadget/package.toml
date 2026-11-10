@@ -1,0 +1,23 @@
+# ROPGadget from PyPI.
+name = "python-ropgadget"
+version = "7.7"
+release = 1
+summary = "This tool lets you search your gadgets on your binaries to facilitate your ROP exploitation."
+license = "BSD"
+homepage = "https://github.com/JonathanSalwan/ROPgadget"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-capstone"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/88/9a/d5290486bb97f2bc9f7801e90659c0b26707d7997d8ff851846efc869db7/ropgadget-7.7.tar.gz", sha256 = "8aa7db0ce48ae6b09707fecc40bdd88ee5f76afd64249885ef3c9feab5bd9cfb" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE_BSD.txt "$pkgdir/usr/share/licenses/python-ropgadget/LICENSE_BSD.txt"
+'''

@@ -1,0 +1,22 @@
+# dsinternals from PyPI.
+name = "python-dsinternals"
+version = "1.2.5"
+release = 1
+summary = "Directory Services Internals Library"
+license = "MIT"
+homepage = "http://github.com/p0dalirius/pydsinternals"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-openssl", "python-pycryptodomex"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/f0/29/41a6937ecc61812d09b9177a09c6f4a3edc499c0e227180d572a23e24e7b/dsinternals-1.2.5-py3-none-any.whl", sha256 = "25c544558381a86644fc6ef3b131f2a7450675b35e324553cb414b696d86d7bd", unpack = false },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+# only a wheel is published (pure Python)
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr /build/sources/dsinternals-1.2.5-py3-none-any.whl
+'''

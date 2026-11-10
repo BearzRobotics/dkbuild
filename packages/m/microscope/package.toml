@@ -16,6 +16,8 @@ source = [
 
 environment = '''
 export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+# its Cargo.toml uses a nightly cargo feature (profile-rustflags)
+export RUSTC_BOOTSTRAP=1
 '''
 build = '''
 cargo build --release --frozen --offline -j $jobs

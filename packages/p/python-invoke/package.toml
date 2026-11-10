@@ -1,0 +1,23 @@
+# invoke from PyPI.
+name = "python-invoke"
+version = "3.0.3"
+release = 1
+summary = "Pythonic task execution"
+license = "BSD-2-Clause"
+homepage = "https://pypi.org/project/invoke/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/33/f6/227c48c5fe47fa178ccf1fda8f047d16c97ba926567b661e9ce2045c600c/invoke-3.0.3.tar.gz", sha256 = "437b6a622223824380bfb4e64f612711a6b648c795f565efc8625af66fb57f0c" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-invoke/LICENSE"
+'''

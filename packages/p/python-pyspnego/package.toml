@@ -1,0 +1,23 @@
+# pyspnego from PyPI.
+name = "python-pyspnego"
+version = "0.12.4"
+release = 1
+summary = "Windows Negotiate Authentication Client and Server"
+license = "MIT"
+homepage = "https://pypi.org/project/pyspnego/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-cryptography"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/4b/58/d7c9cfdf1394a8b4d85ac488888814b28d26c4bd732191bd4169687cbfdd/pyspnego-0.12.4.tar.gz", sha256 = "acb314d6ca5c9ce87994b1eebbe2d8b687e0d564f9d650b306afb4c8f9c2ffd5" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pyspnego/LICENSE"
+'''

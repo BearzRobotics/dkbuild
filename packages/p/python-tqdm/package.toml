@@ -1,0 +1,23 @@
+# tqdm from PyPI.
+name = "python-tqdm"
+version = "4.70.1"
+release = 1
+summary = "Fast, Extensible Progress Meter"
+license = "MPL-2.0 AND MIT"
+homepage = "https://pypi.org/project/tqdm/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/0d/ea/b2a5bd54b28a324dae8211928b2d730b6547500342c7e6c6dea08bd0a485/tqdm-4.70.1.tar.gz", sha256 = "cefd0eca11b2a37a3aee776544d4f4ae913f02688135b5556b8788dfa474afc4" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENCE "$pkgdir/usr/share/licenses/python-tqdm/LICENCE"
+'''

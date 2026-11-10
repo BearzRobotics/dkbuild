@@ -1,0 +1,23 @@
+# plumbum from PyPI.
+name = "python-plumbum"
+version = "2.0.2"
+release = 1
+summary = "Plumbum: shell combinators library"
+license = "MIT"
+homepage = "https://github.com/tomerfiliba/plumbum"
+hostdeps = ["python", "python-hatchling", "python-hatch-vcs"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/6c/d2/578712a979a50e9aba08ea173a38e7598461130d3c9899f176373bc03280/plumbum-2.0.2.tar.gz", sha256 = "233751d7819c9e6743ec1c2405927eb4fa52a284c7b894bd10e28106a9309a92" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-plumbum/LICENSE"
+'''

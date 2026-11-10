@@ -1,0 +1,23 @@
+# declib from PyPI.
+name = "python-declib"
+version = "4.5.0"
+release = 1
+summary = "Your Only Decompiler API Lib - A generic API to script in and out of decompilers"
+license = "BSD-2-Clause"
+homepage = "https://github.com/binsync/declib"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-toml", "python-ply", "python-pycparser", "python-setuptools", "python-prompt-toolkit", "python-tqdm", "python-psutil", "python-pyghidra", "python-platformdirs", "python-filelock", "python-networkx"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/59/06/f0494429f882ee4d5c4ca94c21e11abc4cee79fcd4939f4133887d919528/declib-4.5.0.tar.gz", sha256 = "333dd38992639eb7eb498fe18c26d88eaaa76b20ace504c59f92e2eb0bcb5a07" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-declib/LICENSE"
+'''

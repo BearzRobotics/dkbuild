@@ -1,0 +1,23 @@
+# arc4 from PyPI.
+name = "python-arc4"
+version = "0.5.0"
+release = 1
+summary = "A small and insanely fast ARCFOUR (RC4) cipher implementation of Python"
+license = "custom"
+homepage = "https://github.com/manicmaniac/arc4"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/b6/f0/881da69973abadac6848d27a0bf070b107ed5547ddbd1b092c30ab4c8b7c/arc4-0.5.0.tar.gz", sha256 = "259d4e505766639b7245d7199f3b4e72134d7adf20196820ffd3015954d85955" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-arc4/LICENSE"
+'''

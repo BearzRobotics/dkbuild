@@ -1,0 +1,23 @@
+# Certipy as NetExec uses it (Pennyw0rth's fork, git of 2026-10-14).
+name = "python-certipy-ad"
+version = "5.0.4+git20261014"
+release = 1
+summary = "Active Directory Certificate Services enumeration and abuse"
+license = "MIT"
+homepage = "https://github.com/Pennyw0rth/Certipy"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-asn1crypto", "python-cryptography", "python-impacket", "python-ldap3", "python-pyasn1", "python-dnspython", "python-pycryptodome", "python-requests", "python-openssl", "python-beautifulsoup4", "python-requests"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/Pennyw0rth/Certipy/archive/a47c2fdf1b7067d1120c90f33593514b342d8ee8.tar.gz", sha256 = "0fb6145ae81500d8c1c4d6b1704631e1ec0bd671b98be3febbdd23d8cb155e43" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-certipy-ad/LICENSE"
+'''

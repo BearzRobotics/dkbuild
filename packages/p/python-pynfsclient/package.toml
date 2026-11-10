@@ -1,0 +1,23 @@
+# NfsClient (Pennyw0rth's), as NetExec uses it.
+name = "python-pynfsclient"
+version = "0.1.5+git20260828"
+release = 1
+summary = "Pure-Python NFS client"
+license = "MIT"
+homepage = "https://github.com/Pennyw0rth/NfsClient"
+hostdeps = ["python", "python-setuptools", "python-poetry-core"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/Pennyw0rth/NfsClient/archive/730650439f12eb8b7d9f61c0019840e29cba4b77.tar.gz", sha256 = "76b413f9ddf3c4568100872583271e850f82dba20cfdaad63bc968dfc1f1af81" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pynfsclient/LICENSE"
+'''

@@ -1,0 +1,24 @@
+# dnspython from PyPI: 2.7.0, the last one built with hatchling (2.8 and newer
+# build with uv_build, which needs uv).
+name = "python-dnspython"
+version = "2.7.0"
+release = 1
+summary = "DNS toolkit"
+license = "ISC"
+homepage = "https://pypi.org/project/dnspython/"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/b5/4a/263763cb2ba3816dd94b08ad3a33d5fdae34ecb856678773cc40a3605829/dnspython-2.7.0.tar.gz", sha256 = "ce9c432eda0dc91cf618a5cedf1a4e142651196bbcd2c80e89ed5a907e5cfaf1" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-dnspython/LICENSE"
+'''

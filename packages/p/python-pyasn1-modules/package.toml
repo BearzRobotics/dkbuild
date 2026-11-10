@@ -1,0 +1,23 @@
+# pyasn1-modules from PyPI.
+name = "python-pyasn1-modules"
+version = "0.4.2"
+release = 1
+summary = "A collection of ASN.1-based protocols modules"
+license = "BSD"
+homepage = "https://github.com/pyasn1/pyasn1-modules"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-pyasn1"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/e9/e6/78ebbb10a8c8e4b61a59249394a4a594c1a7af95593dc933a349c8d00964/pyasn1_modules-0.4.2.tar.gz", sha256 = "677091de870a80aae844b1ca6134f54652fa2c8c5a52aa396440ac3106e941e6" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-pyasn1-modules/LICENSE.txt"
+'''

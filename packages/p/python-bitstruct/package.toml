@@ -1,0 +1,23 @@
+# bitstruct from PyPI.
+name = "python-bitstruct"
+version = "8.24.0"
+release = 1
+summary = "This module performs conversions between Python values and C bit field structs represented as Python"
+license = "MIT"
+homepage = "https://github.com/eerimoq/bitstruct"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/e0/15/ed0024e96ea5d90075874fb3288a93b45f275d97be3e21becac076273c78/bitstruct-8.24.0.tar.gz", sha256 = "c72d8bd3b1762a5bcc9fde16bfa4d52800a4bc8d79f81bc7ee0e0bca5b5e901e" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-bitstruct/LICENSE"
+'''

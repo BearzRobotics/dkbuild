@@ -1,0 +1,23 @@
+# aiosmb from PyPI.
+name = "python-aiosmb"
+version = "0.4.14"
+release = 1
+summary = "Asynchronous SMB protocol implementation"
+license = "Modified Apache Software License 1.1"
+homepage = "https://github.com/skelsec/aiosmb"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-unicrypto", "python-asyauth", "python-asysocks", "python-prompt-toolkit", "python-winacl", "python-six", "python-tqdm", "python-asn1crypto", "python-wcwidth", "python-cryptography"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/4e/a7/4a8e44d7536ed22c381525fea17df56d5826b18d15179c31a096aab38a7c/aiosmb-0.4.14.tar.gz", sha256 = "4a8eaefac5fb10e1088eb61e8df58aff3fe61fd6f11ce72efd8a6317555f02c3" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/python-aiosmb/LICENSE.md"
+'''

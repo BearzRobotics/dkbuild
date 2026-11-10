@@ -1,0 +1,23 @@
+# SQLAlchemy from PyPI.
+name = "python-sqlalchemy"
+version = "2.1.8"
+release = 1
+summary = "Database Abstraction Library"
+license = "MIT"
+homepage = "https://www.sqlalchemy.org"
+hostdeps = ["python", "python-setuptools", "python-cython"]
+rundeps = ["python", "python-typing-extensions"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/9c/e7/2855174facf54a83b4fa3eddcece3631c6bdae43605dacd69cc3b6794319/sqlalchemy-2.1.8.tar.gz", sha256 = "8bc4081dd7c17c073f2384ad0f5ee968e63b43507b2e024a3523c000a06d70da" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-sqlalchemy/LICENSE"
+'''

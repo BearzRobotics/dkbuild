@@ -1,0 +1,23 @@
+# lsassy from PyPI.
+name = "python-lsassy"
+version = "3.1.16"
+release = 1
+summary = "Python library to extract credentials from lsass remotely"
+license = "MIT"
+homepage = "https://github.com/Hackndo/lsassy/"
+hostdeps = ["python", "python-poetry-core"]
+rundeps = ["python", "python-impacket", "python-netaddr", "python-pypykatz", "python-rich"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/eb/c0/4347e9f02f7caef23af6b1fc3766d4107b3773cd8816d5c4094c13951ca9/lsassy-3.1.16.tar.gz", sha256 = "6948360f396c4c704643faadeff5fa5d18336ccc446806ad24e7937e531c57a3" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-lsassy/LICENSE"
+'''

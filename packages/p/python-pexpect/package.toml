@@ -1,0 +1,23 @@
+# pexpect from PyPI.
+name = "python-pexpect"
+version = "4.9.0"
+release = 1
+summary = "Pexpect allows easy control of interactive console applications."
+license = "ISC license"
+homepage = "https://pexpect.readthedocs.io/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-ptyprocess"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/42/92/cc564bf6381ff43ce1f4d06852fc19a2f11d180f23dc32d9588bee2f149d/pexpect-4.9.0.tar.gz", sha256 = "ee7d41123f3c9911050ea2c2dac107568dc43b2d3b0c7557a33212c398ead30f" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pexpect/LICENSE"
+'''

@@ -1,0 +1,23 @@
+# minidump from PyPI.
+name = "python-minidump"
+version = "0.0.24"
+release = 1
+summary = "Python library to parse Windows minidump file format"
+license = "custom"
+homepage = "https://github.com/skelsec/minidump"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/26/4b/bc695b99dc7d77d28223765c3ee5a31d34fd2850c52eb683ccdd1206067d/minidump-0.0.24.tar.gz", sha256 = "f7ae09b944f3b17ccf5cecc66f9ff5a7a45b053474a13aeb012f4c9204470437" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-minidump/LICENSE"
+'''

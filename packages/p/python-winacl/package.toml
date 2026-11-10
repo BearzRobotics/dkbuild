@@ -1,0 +1,23 @@
+# winacl from PyPI.
+name = "python-winacl"
+version = "0.1.9"
+release = 1
+summary = "ACL/ACE/Security Descriptor manipulation library in pure Python"
+license = "custom"
+homepage = "https://github.com/skelsec/winacl"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-cryptography"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/23/fc/70784bbc5521a4a59c78dea0050e1478d67b2e77a54abcc5aa5f835faaf5/winacl-0.1.9.tar.gz", sha256 = "af70c2ec30178bf9e3c8a1c48c25e8781235fe2c1b321adb46e2f2ae1f8d4aab" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-winacl/LICENSE"
+'''

@@ -1,0 +1,23 @@
+# pycryptodomex from PyPI.
+name = "python-pycryptodomex"
+version = "3.24.2"
+release = 1
+summary = "Cryptographic library for Python"
+license = "BSD, Public Domain"
+homepage = "https://www.pycryptodome.org"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/f3/c2/f5855412372e47d635599a97c00cfcf9fc40accac9436a11bf9ded19f859/pycryptodomex-3.24.2.tar.gz", sha256 = "e4dbc29e2575365d15e272f769329106277649aea081e2119cf43d66950f8f8f" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.rst "$pkgdir/usr/share/licenses/python-pycryptodomex/LICENSE.rst"
+'''

@@ -1,0 +1,23 @@
+# unicrypto from PyPI.
+name = "python-unicrypto"
+version = "0.0.12"
+release = 1
+summary = "Unified interface for cryptographic libraries"
+license = "custom"
+homepage = "https://github.com/skelsec/unicrypto"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-pycryptodomex"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/26/80/3bdb8a8677a190be548c86e9247c5949ca0c9bc96e1b42c9ac9accf6681e/unicrypto-0.0.12.tar.gz", sha256 = "7b7fc4f54d56422abbbc41f863f99b27a8674531f4a42003f3f953e4a722bde1" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-unicrypto/LICENSE"
+'''

@@ -1,0 +1,23 @@
+# asn1tools from PyPI.
+name = "python-asn1tools"
+version = "0.169.0"
+release = 1
+summary = "ASN.1 parsing, encoding and decoding."
+license = "MIT"
+homepage = "https://github.com/eerimoq/asn1tools"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-pyparsing", "python-bitstruct"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/1d/d3/80fef7cd73acd5909a3d1681b5e12af15e2012d2f37a49d0005e3a63bd1b/asn1tools-0.169.0.tar.gz", sha256 = "3d15caab63d8d27e8ddd0c3ad88975bbd3d48a359070d87be894bba1df767a50" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-asn1tools/LICENSE"
+'''

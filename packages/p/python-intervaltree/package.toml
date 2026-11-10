@@ -1,0 +1,27 @@
+# intervaltree from PyPI.
+name = "python-intervaltree"
+version = "3.2.1"
+release = 1
+summary = "Editable interval tree data structure for Python 2 and 3"
+license = "Apache-2.0"
+homepage = "https://github.com/chaimleib/intervaltree"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python", "python-sortedcontainers"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/53/c3/b2afa612aa0373f3e6bb190e6de35f293b307d1537f109e3e25dbfcdf212/intervaltree-3.2.1.tar.gz", sha256 = "f3f7e8baeb7dd75b9f7a6d33cf3ec10025984a8e66e3016d537e52130c73cfe2" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+setup = '''
+# a fixed version instead of uv-dynamic-versioning
+sed -i '/uv-dynamic-versioning/d; /\[tool.hatch.version\]/,/^$/d; s/dynamic = \["version"\]/version = "'"$version"'"/' pyproject.toml
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-intervaltree/LICENSE.txt"
+'''

@@ -1,0 +1,27 @@
+# NetExec (nxc): SMB, LDAP, WinRM, MSSQL, SSH, RDP, ... enumeration and execution.
+name = "netexec"
+version = "1.5.1"
+release = 1
+summary = "Network execution tool (CrackMapExec's successor)"
+license = "BSD-2-Clause"
+homepage = "https://github.com/Pennyw0rth/NetExec"
+hostdeps = ["python", "python-poetry-core"]
+rundeps = ["python", "python-aardwolf", "python-argcomplete", "python-asyauth", "python-beautifulsoup4", "python-bloodhound-ce", "python-dploot", "python-dsinternals", "python-jwt", "python-lsassy", "python-masky", "python-minikerberos", "python-neo4j", "python-paramiko", "python-pefile", "python-pyasn1-modules", "python-pylnk3", "python-pypsrp", "python-pypykatz", "python-dateutil", "python-libnmap", "python-requests", "python-rich", "python-sqlalchemy", "python-termcolor", "python-terminaltables", "python-xmltodict", "python-certipy-ad", "python-impacket", "python-oscrypto", "python-pynfsclient"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/Pennyw0rth/NetExec/archive/refs/tags/v1.5.1.tar.gz", sha256 = "75de40a2f93b39f502d80487c2cdad08b86167882daccb78c43cf4ebad817fa5" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+setup = '''
+# a fixed version: poetry-dynamic-versioning reads git, which a tarball has not
+sed -i 's/poetry_dynamic_versioning.backend/poetry.core.masonry.api/; s/"poetry-dynamic-versioning[^"]*"//' pyproject.toml
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/netexec/LICENSE"
+'''

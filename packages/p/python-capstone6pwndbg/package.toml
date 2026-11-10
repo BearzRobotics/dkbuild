@@ -1,0 +1,23 @@
+# capstone6pwndbg from PyPI.
+name = "python-capstone6pwndbg"
+version = "8.0.0"
+release = 1
+summary = "Capstone disassembly engine"
+license = "custom"
+homepage = "https://www.capstone-engine.org"
+hostdeps = ["python", "python-setuptools", "python-build", "cmake"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/c5/ee/c18b862ad6b254e6c2fdd6f6a9ed3e465dccc9617beb655500963c1f774f/capstone6pwndbg-8.0.0.tar.gz", sha256 = "8ba12480ba09562bd1cec5e714d851ce5490c2559939df7717622c9a6f4756de" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.TXT "$pkgdir/usr/share/licenses/python-capstone6pwndbg/LICENSE.TXT"
+'''

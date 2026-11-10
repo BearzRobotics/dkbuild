@@ -1,0 +1,28 @@
+# pwndbg as a gdb plugin: `pwndbg` runs gdb with it, or add
+# `source /usr/share/pwndbg/gdbinit.py` to ~/.gdbinit. The Zig and JPype extras
+# (for its Ghidra decompiler bridge) are left out.
+name = "pwndbg"
+version = "2026.10.28"
+release = 1
+summary = "GDB plugin for exploit development and reverse engineering"
+license = "MIT"
+homepage = "https://pwndbg.re"
+rundeps = ["gdb", "python", "python-capstone6pwndbg", "python-unicorn", "python-pwntools", "python-sortedcontainers", "python-tabulate", "python-typing-extensions", "python-pycparser", "python-pyelftools", "python-pygments", "python-psutil", "python-ipython", "python-ropgadget", "python-requests", "python-rich", "python-gdb-pt-dump", "python-niche-elf", "python-decomp2dbg"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/pwndbg/pwndbg/archive/refs/tags/2026.10.28.tar.gz", sha256 = "fb6d0341a4196ffa170630018d00f7e550fb8f9d63f77c4bbc4017000c7c7cb3" },
+]
+
+install = '''
+install -dm755 "$pkgdir/usr/share/pwndbg" "$pkgdir/usr/bin"
+cp -r pwndbg gdbinit.py pyproject.toml "$pkgdir/usr/share/pwndbg/"
+[ -f lldbinit.py ] && cp lldbinit.py "$pkgdir/usr/share/pwndbg/"
+cat > "$pkgdir/usr/bin/pwndbg" <<'EOF2'
+#!/bin/sh
+# gdb with pwndbg loaded (the system's Python packages are its dependencies)
+exec gdb -q -ex "source /usr/share/pwndbg/gdbinit.py" "$@"
+EOF2
+chmod 755 "$pkgdir/usr/bin/pwndbg"
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/pwndbg/LICENSE.md"
+'''

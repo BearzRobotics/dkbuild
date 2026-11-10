@@ -1,0 +1,23 @@
+# paramiko from PyPI.
+name = "python-paramiko"
+version = "5.1.0"
+release = 1
+summary = "SSH2 protocol library"
+license = "LGPL-2.1"
+homepage = "https://pypi.org/project/paramiko/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-bcrypt", "python-cryptography", "python-invoke", "python-pynacl"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/76/cb/b1fde76618d84b1acf54d3d03d2b833ba5878afd12b9899346cc080f209d/paramiko-5.1.0.tar.gz", sha256 = "239b5f9b2a53006cd54f83cf8495ee742083708ead947882c8dd2786de79f39b" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-paramiko/LICENSE"
+'''

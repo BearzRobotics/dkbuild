@@ -1,0 +1,23 @@
+# sortedcontainers from PyPI.
+name = "python-sortedcontainers"
+version = "2.4.0"
+release = 1
+summary = "Sorted Containers -- Sorted List, Sorted Dict, Sorted Set"
+license = "Apache 2.0"
+homepage = "http://www.grantjenks.com/docs/sortedcontainers/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/e8/c4/ba2f8066cceb6f23394729afe52f3bf7adec04bf9ed2c820b39e19299111/sortedcontainers-2.4.0.tar.gz", sha256 = "25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-sortedcontainers/LICENSE"
+'''

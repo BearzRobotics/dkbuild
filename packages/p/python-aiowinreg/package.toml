@@ -1,0 +1,22 @@
+# aiowinreg from PyPI.
+name = "python-aiowinreg"
+version = "0.0.13"
+release = 1
+summary = "Windows registry file reader"
+license = "custom"
+homepage = "https://github.com/skelsec/aiowinreg"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-prompt-toolkit", "python-winacl"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/42/37/22118ef661a287ca99d46b43e6206bca95cc7c268fa820b4334b2b66d7b7/aiowinreg-0.0.13-py3-none-any.whl", sha256 = "2e0809f05d62337cb2218d11dcf7ee08eb8c319382dd564293425f03cd332c9b", unpack = false },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+# only a wheel is published (pure Python)
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr /build/sources/aiowinreg-0.0.13-py3-none-any.whl
+'''

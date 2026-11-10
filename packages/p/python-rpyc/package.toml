@@ -1,0 +1,23 @@
+# rpyc from PyPI.
+name = "python-rpyc"
+version = "6.0.2"
+release = 1
+summary = "Remote Python Call (RPyC) is a transparent and symmetric distributed computing library"
+license = "MIT License"
+homepage = "https://rpyc.readthedocs.org"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python", "python-plumbum"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/8b/e7/1c17410673b634f4658bb5d2232d0c4507432a97508b2c6708e59481644a/rpyc-6.0.2.tar.gz", sha256 = "8e780a6a71b842128a80a337c64adfb6f919014e069951832161c9efc630c93b" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-rpyc/LICENSE"
+'''

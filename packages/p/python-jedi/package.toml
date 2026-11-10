@@ -1,0 +1,23 @@
+# jedi from PyPI.
+name = "python-jedi"
+version = "0.20.1"
+release = 1
+summary = "An autocompletion tool for Python that can be used for text editors."
+license = "MIT"
+homepage = "https://github.com/davidhalter/jedi"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-parso"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/a3/a4/4692ecd7fa700ac1066b1c1f6cadef60aa2e01e5e364710235137d823e0a/jedi-0.20.1.tar.gz", sha256 = "2f71208c3f9c1bca057c0e90d3f272aba44ace88fc4067d7587e9e069331b7e5" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-jedi/LICENSE.txt"
+'''

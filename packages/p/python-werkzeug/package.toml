@@ -1,0 +1,23 @@
+# Werkzeug from PyPI.
+name = "python-werkzeug"
+version = "3.1.9"
+release = 1
+summary = "The comprehensive WSGI web application library."
+license = "BSD-3-Clause"
+homepage = "https://pypi.org/project/Werkzeug/"
+hostdeps = ["python", "python-flit-core"]
+rundeps = ["python", "python-markupsafe"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/a4/34/4dd12fc8bb7d61c91467ec3efe415ffa7d5456f799954b40c5bbaeae470e/werkzeug-3.1.9.tar.gz", sha256 = "55ca7c70a75689be937aa27f8ff4b018f06ff4838fc73045560bf0f5a1291060" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-werkzeug/LICENSE.txt"
+'''

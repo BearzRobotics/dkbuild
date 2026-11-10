@@ -1,0 +1,23 @@
+# xmltodict from PyPI.
+name = "python-xmltodict"
+version = "1.0.4"
+release = 1
+summary = "Makes working with XML feel like you are working with JSON"
+license = "MIT"
+homepage = "https://github.com/martinblech/xmltodict"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/19/70/80f3b7c10d2630aa66414bf23d210386700aa390547278c789afa994fd7e/xmltodict-1.0.4.tar.gz", sha256 = "6d94c9f834dd9e44514162799d344d815a3a4faec913717a9ecbfa5be1bb8e61" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-xmltodict/LICENSE"
+'''

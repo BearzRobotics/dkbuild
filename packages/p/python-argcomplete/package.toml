@@ -1,0 +1,23 @@
+# argcomplete from PyPI.
+name = "python-argcomplete"
+version = "3.7.2"
+release = 1
+summary = "Bash tab completion for argparse"
+license = "Apache Software License"
+homepage = "https://github.com/kislyuk/argcomplete"
+hostdeps = ["python", "python-hatchling", "python-hatch-vcs"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/87/6f/5a73f04007ca950701765949209f068da628bd11f9c2da287278ce91e0ee/argcomplete-3.7.2.tar.gz", sha256 = "aad8b69a0b9969edb62db0d1752354c0d50717b10e0cbb00e2a958381b9fc6b9" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.rst "$pkgdir/usr/share/licenses/python-argcomplete/LICENSE.rst"
+'''

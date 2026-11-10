@@ -1,0 +1,23 @@
+# asysocks from PyPI.
+name = "python-asysocks"
+version = "0.2.19"
+release = 1
+summary = "asysocks"
+license = "custom"
+homepage = "https://github.com/skelsec/asysocks"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-asn1crypto", "python-cryptography", "python-h11"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/4f/83/5151a060e58582f1d395b84c106f64d61313fa157c224364646c170ad03c/asysocks-0.2.19.tar.gz", sha256 = "c8ffa154ad7ca46aaa06c1f86f347bc20f3b8c696186b08fc4193791212b2bec" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-asysocks/LICENSE"
+'''

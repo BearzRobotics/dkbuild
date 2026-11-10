@@ -1,0 +1,22 @@
+# aesedb from PyPI.
+name = "python-aesedb"
+version = "0.1.8"
+release = 1
+summary = "NTDS parser toolkit"
+license = "Modified Apache Software License 1.1"
+homepage = "https://github.com/skelsec/aesedb"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-unicrypto", "python-aiowinreg", "python-tqdm"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/13/2e/b802e59d54a14e9cf8bda8a4fc4b5ed32568323cce7c1475bb01fdd7ab1c/aesedb-0.1.8-py3-none-any.whl", sha256 = "e6a3bc77ab9187d79cfeca27620ae21e331ebb66f5ea9254a136e3e29dd8b23a", unpack = false },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+# only a wheel is published (pure Python)
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr /build/sources/aesedb-0.1.8-py3-none-any.whl
+'''

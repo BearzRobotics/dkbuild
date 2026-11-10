@@ -1,0 +1,23 @@
+# jwt from PyPI.
+name = "python-jwt"
+version = "1.4.0"
+release = 1
+summary = "JSON Web Token library for Python 3."
+license = "custom"
+homepage = "https://pypi.org/project/jwt/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-cryptography"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/7f/20/21254c9e601e6c29445d1e8854c2a81bdb554e07a82fb1f9846137a6965c/jwt-1.4.0.tar.gz", sha256 = "f6f789128ac247142c79ee10f3dba6e366ec4e77c9920d18c1592e28aa0a7952" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-jwt/LICENSE"
+'''

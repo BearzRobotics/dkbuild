@@ -1,0 +1,23 @@
+# asyauth from PyPI.
+name = "python-asyauth"
+version = "0.0.25"
+release = 1
+summary = "Unified authentication library"
+license = "custom"
+homepage = "https://github.com/skelsec/asyauth"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-asn1crypto", "python-asysocks", "python-minikerberos", "python-unicrypto"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/27/14/ef80b4933cd3a2bbfce17831d05f12daaaffe15f2f425a24ab67a7dc7e44/asyauth-0.0.25.tar.gz", sha256 = "6326599e7951bdf9fd1dfee20811dbbef41f5fdd591dbccb8d8af6d4edc36775" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-asyauth/LICENSE"
+'''

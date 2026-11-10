@@ -1,0 +1,23 @@
+# prompt_toolkit from PyPI.
+name = "python-prompt-toolkit"
+version = "3.0.53"
+release = 1
+summary = "Library for building powerful interactive command lines in Python"
+license = "custom"
+homepage = "https://github.com/prompt-toolkit/python-prompt-toolkit"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-wcwidth"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/7d/ea/39b988c938f75cb75d7045b5c69f8bfed47ee2152c8837fb403de29d6fb8/prompt_toolkit-3.0.53.tar.gz", sha256 = "9ec8a0ad96d5c56148b3f914aa79c1564c3fde5d2e6b876e7bc327e353cf8fa6" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-prompt-toolkit/LICENSE"
+'''

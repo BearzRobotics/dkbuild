@@ -1,0 +1,23 @@
+# decomp2dbg from PyPI.
+name = "python-decomp2dbg"
+version = "4.0.3"
+release = 1
+summary = "Symbol syncing framework for decompilers and debuggers"
+license = "BSD-2-Clause"
+homepage = "https://github.com/mahaloz/decomp2dbg"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-sortedcontainers", "python-pyelftools", "python-declib"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/2e/21/2036c41f20848815b289c0d02cffa609337f1390508baf3df65d721aa517/decomp2dbg-4.0.3.tar.gz", sha256 = "6415582ba2bda4c62f4a8de7e81d566a2b5250a69f8b50260458cf59fd74008d" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-decomp2dbg/LICENSE"
+'''

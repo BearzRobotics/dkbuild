@@ -1,0 +1,23 @@
+# bloodhound-ce from PyPI.
+name = "python-bloodhound-ce"
+version = "1.9.1"
+release = 1
+summary = "Python based ingestor for BloodHound Community Edition"
+license = "MIT"
+homepage = "https://github.com/dirkjanm/bloodhound.py"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-dnspython", "python-impacket", "python-ldap3", "python-pyasn1", "python-pycryptodome"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/93/38/74403e5730f3571a0cb42ddecc9b33af491eddb878db92be87b08add2180/bloodhound_ce-1.9.1.tar.gz", sha256 = "083df3dc3ad998edcff8fb63fdd8f5b464aab5fdac8e05cc9b3b6520210f79ab" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-bloodhound-ce/LICENSE"
+'''

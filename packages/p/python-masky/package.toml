@@ -1,0 +1,23 @@
+# masky from PyPI.
+name = "python-masky"
+version = "0.2.1"
+release = 1
+summary = "Python library with CLI allowing to remotely dump domain user credentials via an ADCS"
+license = "MIT"
+homepage = "https://pypi.org/project/masky/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-impacket", "python-cryptography", "python-pyasn1", "python-asn1crypto"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/c4/c4/e6605efb0884659c5c503265b66c72cebf6ae6535140250710927dda9181/masky-0.2.1.tar.gz", sha256 = "973615bebbd9455a1c2a81a6cec626a2032ec2209f242e3e69a6226e4b60b6fc" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-masky/LICENSE"
+'''

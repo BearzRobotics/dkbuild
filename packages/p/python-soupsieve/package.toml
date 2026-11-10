@@ -1,0 +1,23 @@
+# soupsieve from PyPI.
+name = "python-soupsieve"
+version = "4.1"
+release = 1
+summary = "A modern CSS selector implementation for Beautiful Soup."
+license = "MIT"
+homepage = "https://github.com/facelessuser/soupsieve"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/95/48/21a393ff731b8f928fa4f8176f9a7ceba2252ee60a5149f25b45c292aa5c/soupsieve-4.1.tar.gz", sha256 = "ca9abf7126667010d8f6e9b39bfc1bc3b23c8aed9bcb0f54a754dde969bb8aab" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/python-soupsieve/LICENSE.md"
+'''

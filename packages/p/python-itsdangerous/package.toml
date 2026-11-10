@@ -1,0 +1,23 @@
+# itsdangerous from PyPI.
+name = "python-itsdangerous"
+version = "2.2.0"
+release = 1
+summary = "Safely pass data to untrusted environments and back."
+license = "custom"
+homepage = "https://pypi.org/project/itsdangerous/"
+hostdeps = ["python", "python-flit-core"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/9c/cb/8ac0172223afbccb63986cc25049b154ecfb5e85932587206f42317be31d/itsdangerous-2.2.0.tar.gz", sha256 = "e0050c0b7da1eea53ffaf149c0cfbb5c6e2e2b69c4bef22c81fa6eb73e5f6173" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-itsdangerous/LICENSE.txt"
+'''
