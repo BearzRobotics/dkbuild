@@ -235,6 +235,15 @@ pub fn scriptHash(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options)
 /// Everything under `destdir` must sit in an allowed top-level directory,
 /// and nothing may be in /usr/local.
 pub fn checkPolicy(arena: Allocator, io: std.Io, destdir: []const u8, problems: *std.ArrayList([]const u8)) !void {
+    // /run (and /var/run, a link to it) is a tmpfs made at boot: many installs
+    // create empty directories there, which are dropped (tmpfiles.d makes
+    // them at boot). Files there are still an error.
+    for ([_][]const u8{ "run", "var/run" }) |sub| {
+        const path = try std.fs.path.join(arena, &.{ destdir, sub });
+        const res = std.process.run(arena, io, .{ .argv = &.{ "sh", "-c", "[ -d \"$1\" ] && [ ! -L \"$1\" ] && [ -z \"$(find \"$1\" ! -type d | head -n1)\" ] && rm -rf \"$1\" && echo removed", "sh", path } }) catch continue;
+        if (std.mem.startsWith(u8, res.stdout, "removed"))
+            out("    note: dropped the empty /{s} the install made (a tmpfs at boot; use tmpfiles.d)\n", .{sub});
+    }
     var d = try Dir.cwd().openDir(io, destdir, .{ .iterate = true });
     defer d.close(io);
     var it = d.iterate();
@@ -743,7 +752,11 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     if (!contains(r.options, "rootlayout"))
         checkPolicy(arena, io, try std.fs.path.join(arena, &.{ root_rel, "destdir" }), &problems) catch return error.PolicyViolation;
     if (problems.items.len > 0) {
-        for (problems.items) |p| out("error: {s}: {s}\n", .{ r.name, p });
+        for (problems.items) |p| {
+            out("error: {s}: {s}; log: {s}\n", .{ r.name, p, logpath });
+            // in the build's log too, where the rest of its story is
+            try log.appendSlice(arena, try std.fmt.allocPrint(arena, "\n==> policy: {s}\n", .{p}));
+        }
         return error.PolicyViolation;
     }
     const destdir_abs = absPath(arena, io, try std.fs.path.join(arena, &.{ root_rel, "destdir" })) catch return error.PrepareFailed;

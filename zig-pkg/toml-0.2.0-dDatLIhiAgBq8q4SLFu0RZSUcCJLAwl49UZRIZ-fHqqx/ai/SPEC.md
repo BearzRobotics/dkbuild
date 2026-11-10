@@ -1,6 +1,6 @@
 # toml-zig — Specification
 
-**Status:** 0.1.0, implemented and tested against the TOML 1.0.0 specification examples and the TOML 1.1.0 changes; see "Known deviations".
+**Status:** 0.2.0, implemented and tested against the TOML 1.0.0 specification examples and the TOML 1.1.0 changes; see "Known deviations".
 
 ## Purpose
 
@@ -17,6 +17,7 @@ A small, dependency-free TOML 1.1.0 parser and writer for Zig 0.17, written for 
 - **TOML-6 (MUST):** A writer producing valid TOML that parses back to an equal tree, with deterministic order (insertion order, scalars before sub-tables).
 - **TOML-7 (MUST):** Editing: values can be set by path; unknown keys in a parsed document survive a parse → edit → write cycle.
 - **TOML-9 (MUST):** Use `std.Io` for all input and output: parse incrementally from a `*std.Io.Reader` with bounded lookahead and write to a `*std.Io.Writer`; no file-system or OS calls. Tested with one-byte, failing and tiny-buffer readers and writers. See `docs/decisions/0001-streaming-parser.md`.
+- **TOML-10 (MUST):** Comments survive parse → edit → write: comment and blank lines before a key or header, a trailing comment on its line, and comments after the last item. They move with their item, are dropped with a removed key, and can be set through `Document.setComments`.
 - **TOML-8 (SHOULD):** No dependencies beyond the Zig standard library. Met.
 
 ## API summary
@@ -36,7 +37,7 @@ Ownership: strings and tables returned by getters borrow from the document and a
 
 ## Known deviations and limits
 
-- **Comments and formatting are not preserved** by the writer; the data model stores neither. A DKDE settings save therefore drops user comments. Preserving them is a possible future requirement (needs a CST or comment side-table).
+- Comments are kept in a side table (TOML-10). Comments **inside arrays and inline tables** are dropped, and other formatting (spacing, quoting style, multi-line arrays, key order between scalars and sub-tables) is normalized by the writer. Runs of blank lines collapse to one.
 - Datetime fractional seconds beyond nanoseconds are truncated.
 - `Table.lookup` splits on `.`; keys containing a dot need `get`.
 - TOML 1.1 additions (`\e`, `\xHH`, optional seconds, newlines in inline tables) are rejected on purpose.
