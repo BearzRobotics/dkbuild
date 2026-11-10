@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
+# r3: maps http://docbook.sourceforge.net/release/xsl/current/ too.
 name = "docbook-xsl-nons"
 version = "1.79.2"
-release = 2
+release = 3
 summary = "Docbook XSL modular stylesheet"
 license = "MIT"
 homepage = "https://docbook.org"
@@ -18,7 +19,13 @@ source = [
 install = '''
 install -Dm644 COPYING "$pkgdir/usr/share/licenses/docbook-xsl-nons/COPYING"
 install -Dm644 $pkgfiles/docbook-xsl-nons.conf "$pkgdir/usr/share/xml/catalogs/docbook-xsl-nons.conf"
-install -Dm644 catalog.xml "$pkgdir/usr/share/xsl-nons/docbook/catalog.xml"
+# The stylesheets' old home, docbook.sourceforge.net, is the URL most projects
+# (xmlto, git, ...) still ask for; map it here too so they resolve locally.
+sed 's|^</catalog>|  <rewriteURI uriStartString="http://docbook.sourceforge.net/release/xsl/current/" rewritePrefix="./"/>\
+  <rewriteSystem systemIdStartString="http://docbook.sourceforge.net/release/xsl/current/" rewritePrefix="./"/>\
+</catalog>|' catalog.xml > catalog.fenrir.xml
+grep -q docbook.sourceforge.net catalog.fenrir.xml
+install -Dm644 catalog.fenrir.xml "$pkgdir/usr/share/xsl-nons/docbook/catalog.xml"
 install -Dm644 VERSION "$pkgdir/usr/share/xsl-nons/docbook/VERSION"
 install -Dm644 VERSION.xsl "$pkgdir/usr/share/xsl-nons/docbook/VERSION.xsl"
 for d in assembly common eclipse epub epub3 fo highlighting html htmlhelp images javahelp lib manpages params profiling roundtrip template slides website xhtml xhtml-1_1 xhtml5; do

@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "xmlto"
 version = "0.0.29"
-release = 2
+release = 3
 summary = "Tool to help transform XML documents into other formats"
 license = "GPL-2.0-or-later"
 homepage = "https://pagure.io/xmlto"
@@ -16,8 +16,8 @@ source = [
 ]
 
 environment = '''
-# The DocBook stylesheets are local (docbook-xsl), not fetched from the web.
-export XML_CATALOG_FILES=/usr/share/xsl/docbook/catalog.xml
+# The DocBook stylesheets are local (docbook-xsl-nons maps the sourceforge URL), not fetched from the web.
+export XML_CATALOG_FILES=/usr/share/xsl-nons/docbook/catalog.xml
 '''
 setup = '''
 autoreconf -if -W none
