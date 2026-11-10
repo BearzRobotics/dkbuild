@@ -1,0 +1,25 @@
+# needed by: indi.
+name = "libnova"
+version = "0.15.0"
+release = 1
+summary = "Celestial mechanics, astrometry and astrodynamics library"
+license = "LGPL-2.0-or-later"
+homepage = "https://sourceforge.net/projects/libnova/"
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/libnova/libnova-0.15.0.tar.gz", sha256 = "7c5aa33e45a3e7118d77df05af7341e61784284f1e8d0d965307f1663f415bb1" },
+]
+
+setup = '''
+autoreconf -fi
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libnova/COPYING"
+'''

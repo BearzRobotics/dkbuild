@@ -1,0 +1,25 @@
+name = "qt6-qtdatavis3d"
+version = "6.12.0"
+release = 1
+summary = "Qt6 Data Visualization 3D component"
+license = "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only"
+homepage = "https://www.qt.io"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel"]
+options = ["!check", "!cross"]
+
+source = [
+    { url = "https://download.qt.io/official_releases/qt/6.12/6.12.0/submodules/qtdatavis3d-everywhere-src-6.12.0.tar.xz", sha256 = "5f79b948eb1e81ff7f69e335b075c1b48953d88f5d97970b537e348dbbaa98dc" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/tests"
+install -Dm644 LICENSES/LGPL-3.0-only.txt "$pkgdir/usr/share/licenses/qt6-qtdatavis3d/LGPL-3.0-only.txt"
+'''

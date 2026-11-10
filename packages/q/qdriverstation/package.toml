@@ -1,0 +1,25 @@
+# QDriverStation (Qt 5.15 era; built with Qt 6 and its Qt 5 compatibility module).
+name = "qdriverstation"
+version = "21.04"
+release = 1
+summary = "FRC Driver Station for FIRST Robotics teams"
+license = "MIT"
+homepage = "https://github.com/FRC-Utilities/QDriverStation"
+hostdeps = ["qt6-qtbase", "pkgconf"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "qt6-qt5compat-devel", "sdl2-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/FRC-Utilities/QDriverStation/archive/refs/tags/v21.04.tar.gz", sha256 = "a9ae83bf318340aa3669d7614910c7455470920c7eb19277d06bbdc761afe3e9" },
+]
+
+setup = '''
+qmake6 PREFIX=/usr QDriverStation.pro
+'''
+build = '''
+%make
+'''
+install = '''
+%make install INSTALL_ROOT="$pkgdir"
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/qdriverstation/LICENSE.md"
+'''

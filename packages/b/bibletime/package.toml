@@ -1,0 +1,28 @@
+name = "bibletime"
+version = "3.2.0"
+release = 1
+summary = "Bible study program (SWORD, Qt)"
+license = "GPL-2.0-only"
+homepage = "https://bibletime.info"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "sword-devel", "clucene-devel", "boost-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/bibletime/bibletime/archive/refs/tags/v3.2.0.tar.gz", sha256 = "0918ce1572d6a56392b19fb46e04512a79fdf4492d5731e2a942eb8fe426ef48" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_HANDBOOK_HTML=OFF \
+    -DBUILD_HANDBOOK_PDF=OFF \
+    -DBUILD_HOWTO_HTML=OFF \
+    -DBUILD_HOWTO_PDF=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/bibletime/LICENSE"
+'''

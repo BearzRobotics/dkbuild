@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/opencc/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "opencc"
+version = "1.1.9"
+release = 3
+summary = "Open Chinese conversion library"
+license = "Apache-2.0"
+homepage = "https://github.com/BYVoid/OpenCC"
+patches = ["gtest-1.17.0.patch"]
+hostdeps = ["pkgconf", "cmake", "ninja", "python"]
+builddeps = ["gtest-devel", "marisa-trie-devel", "rapidjson", "tclap"]
+
+source = [
+    { url = "https://github.com/BYVoid/OpenCC/archive/refs/tags/ver.1.1.9.tar.gz", sha256 = "ad4bcd8d87219a240a236d4a55c9decd2132a9436697d2882ead85c8939b0a99" },
+]
+
+setup = '''
+%cmake \
+    -DENABLE_GTEST=ON \
+    -DUSE_SYSTEM_GTEST=ON \
+    -DUSE_SYSTEM_MARISA=ON \
+    -DUSE_SYSTEM_RAPIDJSON=ON \
+    -DUSE_SYSTEM_TCLAP=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

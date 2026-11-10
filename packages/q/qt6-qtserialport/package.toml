@@ -1,0 +1,25 @@
+name = "qt6-qtserialport"
+version = "6.12.0"
+release = 1
+summary = "Qt6 Serial Port component"
+license = "LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only"
+homepage = "https://www.qt.io"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["qt6-qtbase-devel", "eudev-devel"]
+options = ["!check", "!cross"]
+
+source = [
+    { url = "https://download.qt.io/official_releases/qt/6.12/6.12.0/submodules/qtserialport-everywhere-src-6.12.0.tar.xz", sha256 = "ba8886a54eee466e57c9fa1341255cc09c462c84baab3ee7b19d67cdbcbd71c3" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/tests"
+install -Dm644 LICENSES/LGPL-3.0-only.txt "$pkgdir/usr/share/licenses/qt6-qtserialport/LGPL-3.0-only.txt"
+'''

@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/kparts/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kparts"
+version = "6.31.0"
+release = 1
+summary = "KDE Plugin framework for UI components"
+license = "LGPL-2.1-only AND LGPL-2.1-or-later AND (LGPL-2.1-only OR LGPL-3.0-only)"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja"]
+builddeps = ["kconfig-devel", "kcoreaddons-devel", "ki18n-devel", "kio-devel", "kxmlgui-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/kparts-6.31.0.tar.xz", sha256 = "edc52e34e6c0ec25811f1effe7c8c01be770671be71e7c2f1c58e5ffa09d3600" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

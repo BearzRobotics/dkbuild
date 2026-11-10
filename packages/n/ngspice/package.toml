@@ -1,0 +1,28 @@
+name = "ngspice"
+version = "47"
+release = 1
+summary = "Mixed-level circuit simulator (SPICE)"
+license = "BSD-3-Clause"
+homepage = "https://ngspice.sourceforge.io"
+builddeps = ["readline-devel", "ncurses-devel", "fftw-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/ngspice/ngspice-47.tar.gz", sha256 = "894e649651f1838a14095e5a5439e7d3aa63e87ede14d283173fda4fcdef675f" },
+]
+
+setup = '''
+# the program, then the shared library (fritzing simulates through it)
+mkdir -p b-prog b-lib
+(cd b-prog && ../configure --prefix=/usr --with-readline=yes --enable-xspice --enable-cider --enable-openmp --disable-debug --without-x)
+(cd b-lib && ../configure --prefix=/usr --with-ngshared --enable-xspice --enable-cider --enable-openmp --disable-debug)
+'''
+build = '''
+make -C b-prog -j$jobs
+make -C b-lib -j$jobs
+'''
+install = '''
+make -C b-lib DESTDIR="$pkgdir" install
+make -C b-prog DESTDIR="$pkgdir" install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/ngspice/COPYING"
+'''

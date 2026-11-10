@@ -1,0 +1,25 @@
+# needed by: fritzing. The source is a zip (unpacked here).
+name = "polyclipping"
+version = "6.4.2"
+release = 1
+summary = "Clipper polygon clipping library (version 1)"
+license = "BSL-1.0"
+homepage = "https://sourceforge.net/projects/polyclipping/"
+hostdeps = ["cmake", "ninja", "unzip"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/polyclipping/clipper_ver6.4.2.zip", sha256 = "a14320d82194807c4480ce59c98aa71cd4175a5156645c4e2b3edd330b930627" },
+]
+
+setup = '''
+unzip -q /build/sources/clipper_ver6.4.2.zip -d clipper
+cmake -S clipper/cpp -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+cmake --build build
+'''
+install = '''
+DESTDIR="$pkgdir" cmake --install build
+install -Dm644 clipper/License.txt "$pkgdir/usr/share/licenses/polyclipping/License.txt"
+'''

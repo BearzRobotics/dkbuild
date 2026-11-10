@@ -1,0 +1,30 @@
+# Stellarium with Qt 6 (GPS and ShowMySky atmosphere off: libraries not in the tree).
+name = "stellarium"
+version = "26.3"
+release = 1
+summary = "Planetarium: a realistic sky in 3D"
+license = "GPL-2.0-or-later"
+homepage = "https://stellarium.org"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "gettext", "perl"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtcharts-devel", "qt6-qtmultimedia-devel", "qt6-qtpositioning-devel", "qt6-qtserialport-devel", "qt6-qtwebengine-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "zlib-ng-compat-devel", "mesa-devel", "exiv2-devel"]
+options = ["!check", "jobs:12"]
+
+source = [
+    { url = "https://github.com/Stellarium/stellarium/releases/download/v26.3/stellarium-26.3.tar.xz", sha256 = "01cc5fce373c3fd2262ac0457f0b52be72adbfa30f8a959274be221b436b7ace" },
+]
+
+setup = '''
+%cmake \
+    -DENABLE_QT6=ON \
+    -DENABLE_TESTING=OFF \
+    -DUSE_PLUGIN_TELESCOPECONTROL=ON \
+    -DENABLE_GPS=OFF \
+    -DENABLE_SHOWMYSKY=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/stellarium/COPYING"
+'''

@@ -4,7 +4,7 @@
 # r3: rebuilt so its libperl.so (no soname, in CORE/) counts as private.
 name = "perl"
 version = "5.40.1"
-release = 5
+release = 6
 summary = "Practical Extraction and Report Language"
 license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
 homepage = "https://www.perl.org"

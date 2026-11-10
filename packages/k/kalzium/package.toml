@@ -1,0 +1,27 @@
+# Kalzium (the molecular editor needs Avogadro, not in the tree, and is off).
+name = "kalzium"
+version = "26.08.3"
+release = 1
+summary = "Periodic table of the elements"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/kalzium/"
+hostdeps = ["cmake", "ninja", "pkgconf", "extra-cmake-modules", "qt6-qttools", "gettext"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtsvg-devel", "qt6-qtdeclarative-devel", "kconfig-devel", "kcoreaddons-devel", "kdoctools-devel", "ki18n-devel", "kparts-devel", "kplotting-devel", "kunitconversion-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "knewstuff-devel", "solid-devel", "eigen"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kalzium-26.08.3.tar.xz", sha256 = "72c24842a840c10127fb231eb817bcaf7eac4718ab77fcd68f83049a7a33918b" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -dm755 "$pkgdir/usr/share/licenses/kalzium"
+cp LICENSES/* "$pkgdir/usr/share/licenses/kalzium/"
+'''

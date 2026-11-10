@@ -1,0 +1,26 @@
+# needed by: xiphos.
+name = "biblesync"
+version = "2.2.0"
+release = 1
+summary = "Multicast protocol for Bible study programs"
+license = "Unlicense"
+homepage = "https://github.com/karlkleinpaste/biblesync"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["util-linux-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/karlkleinpaste/biblesync/archive/refs/tags/2.2.0.tar.gz", sha256 = "0574204e4ef529dfe0d71642f2876e61d21763299fd7293f318e9bf1fde8b76f" },
+]
+
+setup = '''
+%cmake \
+    -DLIBBIBLESYNC_LIBRARY_TYPE=Shared
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/biblesync/LICENSE"
+'''

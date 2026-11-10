@@ -1,0 +1,26 @@
+# needed by: kstars.
+name = "libxisf"
+version = "0.2.17"
+release = 1
+summary = "XISF (PixInsight) image format library"
+license = "GPL-3.0-or-later"
+homepage = "https://gitea.nouspiro.space/nou/libXISF"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["lz4-devel", "zlib-ng-compat-devel", "zstd-devel", "pugixml-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitea.nouspiro.space/nou/libXISF/archive/v0.2.17.tar.gz", sha256 = "40d193a6351d142ab1fe04d5314227e964f34e415eac24ca07568c1b5847daf2" },
+]
+
+setup = '''
+%cmake \
+    -DUSE_BUNDLED_LIBS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libxisf/LICENSE"
+'''

@@ -1,0 +1,30 @@
+# Fritzing (source of build CD-625, the 1.0.6 release) with its parts library
+# (fritzing-parts of 2026-07-23; it has no tags for 1.0).
+name = "fritzing"
+version = "1.0.6"
+release = 1
+summary = "Electronics design: breadboard, schematic and PCB"
+license = "GPL-3.0-or-later"
+homepage = "https://fritzing.org"
+hostdeps = ["qt6-qtbase", "pkgconf"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtsvg-devel", "qt6-qtserialport-devel", "qt6-qt5compat-devel", "boost-devel", "libgit2-devel", "quazip-devel", "ngspice-devel", "polyclipping-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/fritzing/fritzing-app/archive/refs/tags/CD-625.tar.gz", sha256 = "738d7b6ef1386f42a0b3c374cf726d8a8da231d99ff0be26befe3fcc6cbd85ce" },
+    { url = "https://github.com/fritzing/fritzing-parts/archive/27535f2fd02097be9bed229b75aa8e9be282a4a0.tar.gz", sha256 = "93233d3d81151798a84e48ef1fa59635c565bab1cfbd5277078efd23e12dac6d" },
+]
+
+setup = '''
+qmake6 PREFIX=/usr phoenix.pro
+'''
+build = '''
+%make
+'''
+install = '''
+%make install INSTALL_ROOT="$pkgdir"
+install -dm755 "$pkgdir/usr/share/fritzing/fritzing-parts"
+cp -r ../fritzing-parts-27535f2fd02097be9bed229b75aa8e9be282a4a0/. "$pkgdir/usr/share/fritzing/fritzing-parts/"
+install -dm755 "$pkgdir/usr/share/licenses/fritzing"
+install -m644 LICENSE.GPL2 LICENSE.GPL3 LICENSE.CC-BY-SA "$pkgdir/usr/share/licenses/fritzing/"
+'''

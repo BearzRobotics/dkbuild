@@ -1,0 +1,30 @@
+# Cutter on the system rizin (0.9).
+name = "cutter"
+version = "2.5.0"
+release = 1
+summary = "Reverse engineering GUI (rizin)"
+license = "GPL-3.0-only"
+homepage = "https://cutter.re"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "python"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtsvg-devel", "rizin-devel", "graphviz-devel", "python-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/rizinorg/cutter/releases/download/v2.5.0/Cutter-v2.5.0-src.tar.gz", sha256 = "b524208f2b09fa5edb6720db007f2f8013089d64bebd87aabd147f79bf5f40b9" },
+]
+
+setup = '''
+%cmake \
+    -DCUTTER_USE_BUNDLED_RIZIN=OFF \
+    -DCUTTER_QT6=ON \
+    -DCUTTER_ENABLE_PYTHON=ON \
+    -DCUTTER_ENABLE_GRAPHVIZ=ON \
+    -DCUTTER_ENABLE_CRASH_REPORTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/cutter/COPYING"
+'''

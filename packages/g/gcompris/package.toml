@@ -1,0 +1,29 @@
+# GCompris (Qt 6). Its Box2D QML module comes in the tarball.
+name = "gcompris"
+version = "26.2"
+release = 1
+summary = "Educational games for children aged 2 to 10"
+license = "GPL-3.0-or-later"
+homepage = "https://gcompris.net"
+hostdeps = ["cmake", "ninja", "pkgconf", "extra-cmake-modules", "qt6-qttools", "gettext"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtmultimedia-devel", "qt6-qtsensors-devel", "qt6-qtsvg-devel", "qt6-qtcharts-devel", "qt6-qt5compat-devel", "qt6-qtshadertools-devel", "ki18n-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/gcompris/qt/src/gcompris-qt-26.2.tar.xz", sha256 = "f876239f39397f554006f4218a3c229627e2af4317a8765ecf9462f0058dfcb4" },
+]
+
+setup = '''
+%cmake \
+    -DQML_BOX2D_MODULE=submodule \
+    -DCOMPILE_DOC=OFF \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -dm755 "$pkgdir/usr/share/licenses/gcompris"
+cp LICENSES/* "$pkgdir/usr/share/licenses/gcompris/"
+'''

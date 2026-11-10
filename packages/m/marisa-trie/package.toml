@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/marisa-trie/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "marisa-trie"
+version = "0.3.1"
+release = 1
+summary = "Matching algorithm with recursively implemented storage"
+license = "BSD-2-Clause OR LGPL-2.1-or-later"
+homepage = "https://github.com/s-yata/marisa-trie"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+
+source = [
+    { url = "https://github.com/s-yata/marisa-trie/archive/refs/tags/v0.3.1.tar.gz", sha256 = "986ed5e2967435e3a3932a8c95980993ae5a196111e377721f0849cad4e807f3" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING.md "$pkgdir/usr/share/licenses/marisa-trie/COPYING.md"
+'''

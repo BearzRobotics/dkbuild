@@ -1,0 +1,28 @@
+# KStars with Ekos (INDI, StellarSolver), the KDE planetarium.
+name = "kstars"
+version = "3.8.5"
+release = 1
+summary = "Desktop planetarium with Ekos observatory control"
+license = "GPL-2.0-or-later"
+homepage = "https://kstars.kde.org"
+hostdeps = ["cmake", "ninja", "pkgconf", "extra-cmake-modules", "qt6-qttools", "gettext"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "qt6-qtwebsockets-devel", "qt6-qtdatavis3d-devel", "qt6-qtpositioning-devel", "kconfig-devel", "kdoctools-devel", "kwidgetsaddons-devel", "knewstuff-devel", "ki18n-devel", "kio-devel", "kxmlgui-devel", "kplotting-devel", "knotifications-devel", "knotifyconfig-devel", "kcrash-devel", "eigen", "cfitsio-devel", "wcslib-devel", "gsl-devel", "libraw-devel", "stellarsolver-devel", "indi-devel", "libxisf-devel", "qtkeychain-devel", "zlib-ng-compat-devel"]
+options = ["!check", "jobs:12"]
+
+source = [
+    { url = "https://download.kde.org/stable/kstars/3.8.5/kstars-3.8.5.tar.xz", sha256 = "18f578944bfba800f7091aef83550d898e0c36bddfe2969f7bb87807df60e5b3" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_TESTING=OFF \
+    -DBUILD_QT5=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -dm755 "$pkgdir/usr/share/licenses/kstars"
+cp LICENSES/* "$pkgdir/usr/share/licenses/kstars/"
+'''

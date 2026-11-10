@@ -1,0 +1,27 @@
+# needed by: kstars, stellarsolver.
+name = "wcslib"
+version = "8.5"
+release = 1
+summary = "World Coordinate System library (FITS)"
+license = "LGPL-3.0-or-later"
+homepage = "https://www.atnf.csiro.au/computing/software/wcs/"
+hostdeps = ["pkgconf"]
+builddeps = ["cfitsio-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.atnf.csiro.au/computing/software/wcs/wcslib-releases/wcslib-8.5.tar.bz2", sha256 = "f1fd1b78fbfdbabda363f8045e0c59e32735eca45482a5302191e56fe062eace" },
+]
+
+setup = '''
+%configure \
+    --without-pgplot \
+    --disable-fortran
+'''
+build = '''
+make -j1
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/wcslib/COPYING"
+'''

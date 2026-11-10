@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xapian-core/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xapian-core"
+version = "1.4.29"
+release = 1
+summary = "Open source search engine library"
+license = "GPL-2.0-or-later"
+homepage = "https://xapian.org"
+patches = ["disable-failing-tests.patch"]
+hostdeps = ["automake", "pkgconf", "libtool"]
+builddeps = ["zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://oligarchy.co.uk/xapian/1.4.29/xapian-core-1.4.29.tar.xz", sha256 = "c55c9bc8613ad3ec2c218eafca088c218ab7cddcba7ef08f3af0e542f4e521bc" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

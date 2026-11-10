@@ -1,0 +1,27 @@
+# needed by: xiphos. Deprecated upstream in favor of GDBus, still used by some programs.
+name = "dbus-glib"
+version = "0.114"
+release = 1
+summary = "GLib bindings for D-Bus (deprecated upstream; for older programs)"
+license = "AFL-2.1 OR GPL-2.0-or-later"
+homepage = "https://www.freedesktop.org/wiki/Software/DBusBindings/"
+hostdeps = ["pkgconf"]
+builddeps = ["dbus-devel", "glib-devel", "libexpat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://dbus.freedesktop.org/releases/dbus-glib/dbus-glib-0.114.tar.gz", sha256 = "c09c5c085b2a0e391b8ee7d783a1d63fe444e96717cc1814d61b5e8fc2827a7c" },
+]
+
+setup = '''
+%configure \
+    --disable-static=no \
+    --disable-tests
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/dbus-glib/COPYING"
+'''

@@ -1,0 +1,27 @@
+# needed by: kstars (Ekos drives telescopes, cameras and focusers through INDI).
+name = "indi"
+version = "2.2.5"
+release = 1
+summary = "Instrument Neutral Distributed Interface (telescope and camera control)"
+license = "LGPL-2.1-or-later"
+homepage = "https://indilib.org"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["cfitsio-devel", "libnova-devel", "libusb-devel", "zlib-ng-compat-devel", "curl-devel", "gsl-devel", "fftw-devel", "libjpeg-turbo-devel", "libev-devel", "libtheora-devel", "eudev-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/indilib/indi/archive/refs/tags/v2.2.5.tar.gz", sha256 = "938cae0b3bfbd34e73ae797bd4a0e5a64fe21753d2b560d88cafab0c61771628" },
+]
+
+setup = '''
+%cmake \
+    -DINDI_BUILD_UNITTESTS=OFF \
+    -DUDEVRULES_INSTALL_DIR=/usr/lib/udev/rules.d
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/indi/LICENSE"
+'''

@@ -1,0 +1,27 @@
+# needed by: kstars (Ekos).
+name = "stellarsolver"
+version = "2.9"
+release = 1
+summary = "Astrometric plate solver and star extractor (library)"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/rlancaste/stellarsolver"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["qt6-qtbase-devel", "cfitsio-devel", "gsl-devel", "wcslib-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/rlancaste/stellarsolver/archive/refs/tags/2.9.tar.gz", sha256 = "8eccfc6fb3fdc6bf95bf9b49a6d609b5bc8d3b8d2a82549562478d674b303da7" },
+]
+
+setup = '''
+%cmake \
+    -DUSE_QT5=OFF \
+    -DBUILD_TESTER=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/stellarsolver/LICENSE"
+'''

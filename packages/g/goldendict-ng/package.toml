@@ -1,0 +1,30 @@
+# GoldenDict-ng (EPWING off: libeb is not in the tree).
+name = "goldendict-ng"
+version = "26.11.0"
+release = 1
+summary = "Dictionary lookup program (many formats, Wikipedia)"
+license = "GPL-3.0-or-later"
+homepage = "https://xiaoyifang.github.io/goldendict-ng/"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtwebengine-devel", "qt6-qtmultimedia-devel", "qt6-qtsvg-devel", "qt6-qt5compat-devel", "hunspell-devel", "opencc-devel", "xapian-core-devel", "libzim-devel", "ffmpeg-devel", "lzo-devel", "zstd-devel", "bzip2-devel", "xz-devel", "libvorbis-devel", "fmt-devel", "zlib-ng-compat-devel", "libx11-devel", "libxtst-devel"]
+options = ["!check", "jobs:12"]
+
+source = [
+    { url = "https://github.com/xiaoyifang/goldendict-ng/archive/refs/tags/v26.11.0.tar.gz", sha256 = "6aa520851b6ffd632bf391f26651b795cfab6445f7a6ecb2aaf449d116c8e41f" },
+]
+
+setup = '''
+%cmake \
+    -DWITH_EPWING_SUPPORT=OFF \
+    -DWITH_FFMPEG_PLAYER=ON \
+    -DWITH_ZIM=ON \
+    -DWITH_XAPIAN=ON \
+    -DUSE_SYSTEM_FMT=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/goldendict-ng/LICENSE.txt"
+'''

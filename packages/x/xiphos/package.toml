@@ -1,0 +1,28 @@
+# Xiphos with WebKitGTK (4.1).
+name = "xiphos"
+version = "4.5.0"
+release = 1
+summary = "Bible study program (SWORD, GTK)"
+license = "GPL-2.0-or-later"
+homepage = "https://xiphos.org"
+hostdeps = ["cmake", "ninja", "pkgconf", "gettext", "itstool", "glib"]
+builddeps = ["gtk+3-devel", "webkitgtk-devel", "sword-devel", "biblesync-devel", "libxml2-devel", "dbus-glib-devel", "minizip-devel", "util-linux-devel", "glib-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/crosswire/xiphos/archive/refs/tags/4.5.0.tar.gz", sha256 = "ed45faa5fd00420c0036bc5c3f08d6551c41534a55717338456db37819e7fc30" },
+]
+
+setup = '''
+%cmake \
+    -DGTKHTML=OFF \
+    -DDBUS=ON \
+    -DHELP=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xiphos/COPYING"
+'''

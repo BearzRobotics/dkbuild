@@ -1,0 +1,26 @@
+# microscope (no releases yet: git of 2026-11-10). Built without its web UI (pnpm,
+# which the npm store does not cover yet): the terminal and DAP front ends work.
+name = "microscope"
+version = "0.0.0+git20261110"
+release = 1
+summary = "Debugger and profiler for Linux (terminal, browser, DAP)"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/microscope-dev/microscope"
+hostdeps = ["rust", "llvm-clang", "llvm"]
+builddeps = ["linux-headers", "libbpf-devel", "elfutils-devel"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/microscope-dev/microscope/archive/36cdcb1248c43ee4592d77929cb792b306d79b08.tar.gz", sha256 = "8a67f61219b28bf61c84da294458d94147748ee24f5ff79c8a6af323fb5ef595" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs
+'''
+install = '''
+install -Dm755 target/release/microscope "$pkgdir/usr/bin/microscope"
+install -Dm644 LICENSE-MIT "$pkgdir/usr/share/licenses/microscope/LICENSE-MIT"
+'''

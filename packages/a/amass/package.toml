@@ -1,0 +1,25 @@
+name = "amass"
+version = "5.1.3"
+release = 1
+summary = "Attack surface mapping and asset discovery (OWASP)"
+license = "Apache-2.0"
+homepage = "https://github.com/owasp-amass/amass"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/owasp-amass/amass/archive/refs/tags/v5.1.3.tar.gz", sha256 = "9f2023027ed418e49ff0a7d941dae050db0f73b948fefe997aef416876cfb416" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=1
+'''
+build = '''
+mkdir -p build
+go build -o build/  ./cmd/amass
+'''
+install = '''
+install -Dm755 build/amass "$pkgdir/usr/bin/amass"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/amass/LICENSE"
+'''

@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/libzim/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libzim"
+version = "9.8.2"
+release = 1
+summary = "Reference implementation of the ZIM file format"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/openzim/libzim"
+hostdeps = ["ninja", "pkgconf"]
+builddeps = ["icu-devel", "xapian-core-devel", "xz-devel", "zstd-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/openzim/libzim/archive/refs/tags/9.8.2.tar.gz", sha256 = "38f8e2139a089f00196f288f52f2d0677a6becc218f380b54ca70b6f162398bd" },
+]
+
+setup = '''
+%meson \
+    -Ddoc=false \
+    -Dexamples=false \
+    -Dtests=false \
+    -Dwith_xapian=true \
+    -Dwerror=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libzim/COPYING"
+'''
