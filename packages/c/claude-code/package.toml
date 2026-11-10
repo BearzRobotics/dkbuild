@@ -1,0 +1,37 @@
+# Claude Code, Anthropic's coding agent for the terminal (`claude`).
+# Repackaged, not built: Anthropic publishes it only as a binary. This is the
+# official native musl build from npm (@anthropic-ai/claude-code-linux-x64-musl,
+# the per-platform package that @anthropic-ai/claude-code installs), so it
+# needs neither Node.js nor glibc; it links only musl's libc.
+# Proprietary (see LICENSE.md): repo-only, not in any image. It talks to
+# Anthropic's API, so it needs the network and an Anthropic account to be of use.
+# The binary carries its program as a payload after the ELF, so it must not be
+# stripped. Its self-updater is off (profile.d): apk updates it, and an update
+# in ~/.local/bin would shadow /usr/bin/claude (~/.local/bin is first on PATH).
+# aarch64: @anthropic-ai/claude-code-linux-arm64-musl, same version
+# (sha256 df8840b5a1d68c79140bf33c4947dc2ed8341eae2e06c1f9291e3088879f1683),
+# once a recipe can have per-architecture sources.
+name = "claude-code"
+version = "2.1.322"
+release = 1
+summary = "Claude Code, Anthropic's agentic coding tool for the terminal"
+license = "custom:anthropic"
+homepage = "https://code.claude.com"
+archs = ["x86_64"]
+hostdeps = []
+rundeps = ["git", "bash"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64-musl/-/claude-code-linux-x64-musl-2.1.322.tgz", sha256 = "de01a18b42b579ac598620985b688bae4d714781af4b2f3686719fed0168172f" },
+]
+
+install = '''
+install -Dm755 claude "$pkgdir/usr/bin/claude"
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/claude-code/LICENSE.md"
+install -dm755 "$pkgdir/etc/profile.d"
+cat > "$pkgdir/etc/profile.d/claude-code.sh" <<'EOF'
+# Claude Code is updated by apk (claude-code), not by its own updater.
+export DISABLE_AUTOUPDATER=1
+EOF
+'''
