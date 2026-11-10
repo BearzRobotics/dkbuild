@@ -1,0 +1,11 @@
+# Basic security toolkit: scanning, capture, DNS and TLS checks: the security-* groups, as requested (core, network, web, wireless,
+# password, exploit, reverse, and all of them). Metasploit and Frida join when
+# their recipes build.
+name = "security-core"
+version = "1"
+release = 1
+summary = "Basic security toolkit: scanning, capture, DNS and TLS checks"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+options = ["meta"]
+rundeps = ["nmap", "tcpdump", "wireshark", "socat", "curl", "whois", "traceroute", "bind", "ldns", "sslscan", "openssl", "openssh", "tor", "strace", "yara"]

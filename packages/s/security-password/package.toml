@@ -1,0 +1,11 @@
+# Password cracking tools: the security-* groups, as requested (core, network, web, wireless,
+# password, exploit, reverse, and all of them). Metasploit and Frida join when
+# their recipes build.
+name = "security-password"
+version = "1"
+release = 1
+summary = "Password cracking tools"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+options = ["meta"]
+rundeps = ["john", "hashcat", "hydra"]

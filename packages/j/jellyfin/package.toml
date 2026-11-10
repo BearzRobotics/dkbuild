@@ -1,0 +1,45 @@
+# Jellyfin server (.NET 10, NuGet packages from the store) with its web client
+# (npm, from the store). Uses the system FFmpeg rather than jellyfin-ffmpeg.
+name = "jellyfin"
+version = "12.4.0"
+release = 1
+summary = "Media server (movies, shows, music, photos)"
+license = "GPL-2.0-only"
+homepage = "https://jellyfin.org"
+hostdeps = ["dotnet", "nodejs"]
+rundeps = ["dotnet", "ffmpeg", "sqlite"]
+options = ["!check", "nugetdeps", "npmdeps"]
+
+source = [
+    { url = "https://github.com/jellyfin/jellyfin/archive/refs/tags/v12.4.tar.gz", sha256 = "6a7c08811cabe6cd3f3ea5fc953f4b082f22ad40b7525f6cf44a786a4c7346ef" },
+    { url = "https://github.com/jellyfin/jellyfin-web/archive/refs/tags/v12.4.tar.gz", sha256 = "2978d0fbe3bc24d3bef637473c55e2628262fa725600e55788a45d9a42a53d44" },
+]
+
+restore = '''
+dotnet restore -r linux-musl-x64 Jellyfin.Server
+'''
+setup = '''
+# the web client (npm, offline from the store)
+(cd ../jellyfin-web-12.4 && npm ci --no-audit --no-fund)
+dotnet restore --source "$DKBUILD_NUGET" -r linux-musl-x64 Jellyfin.Server
+'''
+build = '''
+(cd ../jellyfin-web-12.4 && npm run build:production)
+dotnet publish Jellyfin.Server --configuration Release --runtime linux-musl-x64 --self-contained false --no-restore \
+    -p:DebugSymbols=false -p:DebugType=none --output out
+'''
+install = '''
+d="$pkgdir/usr/lib/jellyfin"
+mkdir -p "$d" "$pkgdir/usr/share/jellyfin" "$pkgdir/usr/bin"
+cp -r out/. "$d/"
+cp -r ../jellyfin-web-12.4/dist "$pkgdir/usr/share/jellyfin/web"
+cat > "$pkgdir/usr/bin/jellyfin" <<'EOF2'
+#!/bin/sh
+exec dotnet /usr/lib/jellyfin/jellyfin.dll --webdir /usr/share/jellyfin/web --ffmpeg /usr/bin/ffmpeg "$@"
+EOF2
+chmod 755 "$pkgdir/usr/bin/jellyfin"
+install -Dm644 $pkgfiles/jellyfin "$pkgdir/etc/dinit.d/jellyfin"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/jellyfin.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/jellyfin.conf"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/jellyfin/LICENSE"
+'''

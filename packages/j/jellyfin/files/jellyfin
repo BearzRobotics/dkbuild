@@ -1,0 +1,5 @@
+type = process
+command = /usr/bin/jellyfin --datadir /var/lib/jellyfin --cachedir /var/cache/jellyfin
+run-as = _jellyfin
+smooth-recovery = true
+depends-on: rcboot

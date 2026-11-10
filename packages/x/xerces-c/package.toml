@@ -1,0 +1,27 @@
+# needed by: freecad.
+name = "xerces-c"
+version = "3.3.0"
+release = 1
+summary = "Validating XML parser library (Apache)"
+license = "Apache-2.0"
+homepage = "https://xerces.apache.org/xerces-c/"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["icu-devel", "curl-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://archive.apache.org/dist/xerces/c/3/sources/xerces-c-3.3.0.tar.xz", sha256 = "a83e12af82dc4fea09c592979fdbb6f206eeaa968562d7d18a0a4dd032c51267" },
+]
+
+setup = '''
+%cmake \
+    -Dtranscoder=icu \
+    -Dnetwork-accessor=curl
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/xerces-c/LICENSE"
+'''

@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/ldns/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "ldns"
+version = "1.9.2"
+release = 1
+summary = "Modern DNS/DNSSEC library"
+license = "BSD-3-Clause"
+homepage = "http://www.nlnetlabs.nl/projects/ldns"
+hostdeps = ["automake", "dns-root-data", "perl", "pkgconf", "libtool"]
+builddeps = ["libpcap-devel", "openssl-devel", "dns-root-data"]
+options = ["!check"]
+
+source = [
+    { url = "http://www.nlnetlabs.nl/downloads/ldns/ldns-1.9.2.tar.gz", sha256 = "b524fa21994b6e834200ceb8c27f1b84bda5982fe35706f058196c079db94d5d" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-ssl=/usr \
+    --with-drill \
+    --with-examples \
+    --disable-dane-ta-usage \
+    --with-trust-anchor=/usr/share/dns/root.key
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ldns/LICENSE"
+'''

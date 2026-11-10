@@ -1,0 +1,40 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/bind/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "bind"
+version = "9.20.30"
+release = 1
+summary = "ISC DNS server"
+license = "MPL-2.0"
+homepage = "https://www.isc.org/bind"
+patches = ["skip-dispatch.patch", "skip-rwlock-test.patch"]
+hostdeps = ["automake", "doxygen", "libtool", "libxslt", "pkgconf", "python-sphinx"]
+builddeps = ["cmocka-devel", "heimdal-devel", "jemalloc-devel", "json-c-devel", "libcap-devel", "libidn2-devel", "libuv-devel", "libxml2-devel", "lmdb-devel", "nghttp2-devel", "openssl-devel", "userspace-rcu-devel"]
+checkdeps = ["python-dnspython"]
+options = ["!lto"]
+
+source = [
+    { url = "https://downloads.isc.org/isc/bind9/9.20.30/bind-9.20.30.tar.xz", sha256 = "9e1443a40a72a30272cbc3196d020a6b2e26937111c83e59e101e82e1e3b4fef" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-libidn2
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 $pkgfiles/named "$pkgdir/etc/dinit.d/named"
+# get rid of hard links
+rm -rf "$pkgdir/usr/bin/named-compilezone"
+rm -rf "$pkgdir/usr/bin/ddns-confgen"
+mkdir -p "$pkgdir/usr/bin"
+ln -sf named-checkzone "$pkgdir/usr/bin/named-compilezone"
+mkdir -p "$pkgdir/usr/bin"
+ln -sf tsig-keygen "$pkgdir/usr/bin/ddns-confgen"
+'''

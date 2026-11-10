@@ -1,0 +1,6 @@
+#!/bin/sh
+# directories and files (tmpfiles.conf)
+mkdir -p /var/lib/tor
+chmod 0755 /var/lib/tor
+chown _tor:_tor /var/lib/tor 2>/dev/null || true
+exit 0

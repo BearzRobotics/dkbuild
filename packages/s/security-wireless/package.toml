@@ -1,0 +1,11 @@
+# Wireless (Wi-Fi, Bluetooth) testing tools: the security-* groups, as requested (core, network, web, wireless,
+# password, exploit, reverse, and all of them). Metasploit and Frida join when
+# their recipes build.
+name = "security-wireless"
+version = "1"
+release = 1
+summary = "Wireless (Wi-Fi, Bluetooth) testing tools"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+options = ["meta"]
+rundeps = ["aircrack-ng", "kismet", "iw", "wpa-supplicant", "bettercap"]

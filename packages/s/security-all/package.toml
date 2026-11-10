@@ -1,0 +1,11 @@
+# Every FenrirOS security toolkit: the security-* groups, as requested (core, network, web, wireless,
+# password, exploit, reverse, and all of them). Metasploit and Frida join when
+# their recipes build.
+name = "security-all"
+version = "1"
+release = 1
+summary = "Every FenrirOS security toolkit"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+options = ["meta"]
+rundeps = ["security-core", "security-network", "security-web", "security-wireless", "security-password", "security-exploit", "security-reverse"]

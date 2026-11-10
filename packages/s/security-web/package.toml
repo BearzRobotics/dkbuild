@@ -1,0 +1,11 @@
+# Web application testing tools: the security-* groups, as requested (core, network, web, wireless,
+# password, exploit, reverse, and all of them). Metasploit and Frida join when
+# their recipes build.
+name = "security-web"
+version = "1"
+release = 1
+summary = "Web application testing tools"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+options = ["meta"]
+rundeps = ["nikto", "sqlmap", "ffuf", "gobuster", "zaproxy", "nuclei", "curl"]

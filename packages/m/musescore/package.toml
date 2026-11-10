@@ -1,0 +1,38 @@
+# MuseScore 4 (no auto-update, no crash reporter; its MS Basic soundfont is a
+# separate download it offers on first start).
+name = "musescore"
+version = "4.7.6"
+release = 1
+summary = "Music notation editor"
+license = "GPL-3.0-only"
+homepage = "https://musescore.org"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "qt6-qt5compat-devel", "qt6-qtnetworkauth-devel", "qt6-qtshadertools-devel", "freetype-devel", "harfbuzz-devel", "opus-devel", "libopusenc-devel", "flac-devel", "lame-devel", "libsndfile-devel", "libvorbis-devel", "alsa-lib-devel", "pipewire-devel", "portaudio-devel", "portmidi-devel", "zlib-ng-compat-devel", "tinyxml2-devel"]
+options = ["!check", "jobs:12"]
+
+source = [
+    { url = "https://github.com/musescore/MuseScore/archive/refs/tags/v4.7.6.tar.gz", sha256 = "9fb06edd88adc27b69606252790dd574e9de8ae6c28d6a993bdb06d4115f7886" },
+]
+
+setup = '''
+%cmake \
+    -DMUSE_APP_BUILD_MODE=release \
+    -DMUE_BUILD_UNIT_TESTS=OFF \
+    -DMUE_DOWNLOAD_SOUNDFONT=OFF \
+    -DMUE_COMPILE_USE_SYSTEM_FREETYPE=ON \
+    -DMUE_COMPILE_USE_SYSTEM_HARFBUZZ=ON \
+    -DMUE_COMPILE_USE_SYSTEM_OPUS=ON \
+    -DMUE_COMPILE_USE_SYSTEM_OPUSENC=ON \
+    -DMUE_COMPILE_USE_SYSTEM_FLAC=ON \
+    -DMUE_COMPILE_USE_SYSTEM_TINYXML=ON \
+    -DMUSE_MODULE_UPDATE=OFF \
+    -DMUSE_MODULE_DIAGNOSTICS_CRASHPAD_CLIENT=OFF \
+    -DMUSE_MODULE_CLOUD=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/musescore/LICENSE.txt"
+'''

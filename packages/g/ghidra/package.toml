@@ -1,0 +1,84 @@
+# Ghidra, the NSA's software reverse engineering suite, built from source.
+# Maven dependencies come from the Gradle store (`gradledeps`); the loose files
+# its fetchDependencies.gradle would download (FunctionID databases, the
+# Ghidra Server's YAJSW, BSim's PostgreSQL, the Python wheels its debugger and
+# PyGhidra ship) are sources here, laid into dependencies/ as that script does.
+# The Windows debugger parts and the Eclipse (GhidraDev) plugin are left out.
+name = "ghidra"
+version = "12.2"
+release = 1
+summary = "Software reverse engineering suite (disassembler, decompiler)"
+license = "Apache-2.0"
+homepage = "https://ghidra-sre.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["openjdk21", "unzip", "bison", "flex", "python"]
+rundeps = ["openjdk21", "bash"]
+options = ["!check", "!strip", "gradledeps", "jobs:12"]
+
+source = [
+    { url = "https://github.com/NationalSecurityAgency/ghidra/archive/refs/tags/Ghidra_12.2_build.tar.gz", sha256 = "ade4fd6e277a10c82db4e75ff5acaeedb3113ef0c7d126ea2c8b38c37128f3c3" },
+    { url = "https://services.gradle.org/distributions/gradle-8.14.6-bin.zip", sha256 = "7988ed071b2a07900e2ec715fca15c6ab72bce6db433af301fa7fa7e9407bd24", unpack = false },
+    { url = "https://github.com/NationalSecurityAgency/ghidra-data/raw/Ghidra_12.2/lib/java-sarif-2.1-modified.jar", sha256 = "7f736566494756d271aa5e4b1af6c89dc50d074ab1c6374a47df822264226b01", unpack = false, name = "java-sarif-2.1-modified.jar" },
+    { url = "https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/android4me/AXMLPrinter2.jar", sha256 = "00ed038eb6abaf6ddec8d202a3ed7a81b521458f4cd459948115cfd02ff59d6d", unpack = false, name = "AXMLPrinter2.jar" },
+    { url = "https://sourceforge.net/projects/yajsw/files/yajsw/yajsw-stable-13.18/yajsw-stable-13.18.zip", sha256 = "50b34e9817c54b2970fa511ff4584f6556c179f69833aa8b9b1ff6485b61684f", unpack = false, name = "yajsw-stable-13.18.zip" },
+    { url = "https://ftp.postgresql.org/pub/source/v15.18/postgresql-15.18.tar.gz", sha256 = "d32a533516edc688ebbb96ae221b605be2712edd94d7428b42a4af5644250943", unpack = false, name = "postgresql-15.18.tar.gz" },
+    { url = "https://github.com/NationalSecurityAgency/ghidra-data/raw/Ghidra_12.2/FunctionID/vs2012_x64.fidb", sha256 = "d4e98ab3f790b831793218430bba0d8b24a5fbf4da65b0c1ffa8cb0cfbeb0cdc", unpack = false, name = "vs2012_x64.fidb" },
+    { url = "https://github.com/NationalSecurityAgency/ghidra-data/raw/Ghidra_12.2/FunctionID/vs2012_x86.fidb", sha256 = "a490ed7e2ed21e587459feaeace7036b7ede4ce84e72e10dfd8c57434a6918b6", unpack = false, name = "vs2012_x86.fidb" },
+    { url = "https://github.com/NationalSecurityAgency/ghidra-data/raw/Ghidra_12.2/FunctionID/vs2015_x64.fidb", sha256 = "e04e9e40f9ecb601c85f4d84ed9bf66b45363be1d1e82c162e4c9902b8cb508f", unpack = false, name = "vs2015_x64.fidb" },
+    { url = "https://github.com/NationalSecurityAgency/ghidra-data/raw/Ghidra_12.2/FunctionID/vs2015_x86.fidb", sha256 = "b66ee696653e2ed365919deaaef885103120c792e22e79af70d1209d7e1d8644", unpack = false, name = "vs2015_x86.fidb" },
+    { url = "https://github.com/NationalSecurityAgency/ghidra-data/raw/Ghidra_12.2/FunctionID/vs2017_x64.fidb", sha256 = "d5fa5f697298174fa53d247d3599e6a12884605ad181c7b954e2380ec1f0bd89", unpack = false, name = "vs2017_x64.fidb" },
+    { url = "https://github.com/NationalSecurityAgency/ghidra-data/raw/Ghidra_12.2/FunctionID/vs2017_x86.fidb", sha256 = "d389cb8d76ff4a59ca35f891b8521c72ad5f0df96e253973a2d21a8614a4cc81", unpack = false, name = "vs2017_x86.fidb" },
+    { url = "https://github.com/NationalSecurityAgency/ghidra-data/raw/Ghidra_12.2/FunctionID/vs2019_x64.fidb", sha256 = "150007796fc36a4069660ad62449aadaaf3dd11b3864a5ef21e79831c9ce9118", unpack = false, name = "vs2019_x64.fidb" },
+    { url = "https://github.com/NationalSecurityAgency/ghidra-data/raw/Ghidra_12.2/FunctionID/vs2019_x86.fidb", sha256 = "eb630a36faa586a371eb734dc0bbd8d13ccaef697f3db5872596358f3dd2432a", unpack = false, name = "vs2019_x86.fidb" },
+    { url = "https://github.com/NationalSecurityAgency/ghidra-data/raw/Ghidra_12.2/FunctionID/vsOlder_x64.fidb", sha256 = "8c3b51f4660cd27e1a0d610a9f3f2d5fbc833a66ac9ee4393ee2f2481e855866", unpack = false, name = "vsOlder_x64.fidb" },
+    { url = "https://github.com/NationalSecurityAgency/ghidra-data/raw/Ghidra_12.2/FunctionID/vsOlder_x86.fidb", sha256 = "98605c6b6b9214a945d844e41c85860d54649a45bca7873ef6991c0e93720787", unpack = false, name = "vsOlder_x86.fidb" },
+    { url = "https://files.pythonhosted.org/packages/ee/01/1ed1d482960a5718fd99c82f6d79120181947cfd4667ec3944d448ed44a3/protobuf-6.31.0-py3-none-any.whl", sha256 = "6ac2e82556e822c17a8d23aa1190bbc1d06efb9c261981da95c71c9da09e9e23", unpack = false, name = "protobuf-6.31.0-py3-none-any.whl" },
+    { url = "https://files.pythonhosted.org/packages/90/c7/6dc0a455d111f68ee43f27793971cf03fe29b6ef972042549db29eec39a2/psutil-5.9.8.tar.gz", sha256 = "6be126e3225486dff286a8fb9a06246a5253f4c7c53b475ea5f5ac934e64194c", unpack = false, name = "psutil-5.9.8.tar.gz" },
+    { url = "https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl", sha256 = "062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922", unpack = false, name = "setuptools-80.9.0-py3-none-any.whl" },
+    { url = "https://files.pythonhosted.org/packages/0b/2c/87f3254fd8ffd29e4c02732eee68a83a1d3c346ae39bc6822dcbcb697f2b/wheel-0.45.1-py3-none-any.whl", sha256 = "708e7481cc80179af0e556bbf0cc00b8444c7321e2700b8d8580231d13017248", unpack = false, name = "wheel-0.45.1-py3-none-any.whl" },
+    { url = "https://files.pythonhosted.org/packages/20/12/38679034af332785aac8774540895e234f4d07f7545804097de4b666afd8/packaging-25.0-py3-none-any.whl", sha256 = "29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484", unpack = false, name = "packaging-25.0-py3-none-any.whl" },
+    { url = "https://files.pythonhosted.org/packages/49/d3/b8441a820a491ddfc024b0b0cf0393375b75ea13866d9c66727e54c2fc80/typing_extensions-4.16.0-py3-none-any.whl", sha256 = "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8", unpack = false, name = "typing_extensions-4.16.0-py3-none-any.whl" },
+    { url = "https://files.pythonhosted.org/packages/bd/68/47fa634cbd0418cbca86355e9421425f5892ee994f7338106327e49f9117/jpype1-1.5.2.tar.gz", sha256 = "74a42eccf21d30394c1832aec3985a14965fa5320da087b65029d172c0cec43b", unpack = false, name = "jpype1-1.5.2.tar.gz" },
+]
+
+environment = '''
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+'''
+setup = '''
+mkdir -p dependencies/flatRepo && cp "/build/sources/java-sarif-2.1-modified.jar" dependencies/flatRepo/
+mkdir -p dependencies/flatRepo && cp "/build/sources/AXMLPrinter2.jar" dependencies/flatRepo/
+mkdir -p dependencies/GhidraServer && cp "/build/sources/yajsw-stable-13.18.zip" dependencies/GhidraServer/
+mkdir -p dependencies/BSim && cp "/build/sources/postgresql-15.18.tar.gz" dependencies/BSim/
+mkdir -p dependencies/fidb && cp "/build/sources/vs2012_x64.fidb" dependencies/fidb/
+mkdir -p dependencies/fidb && cp "/build/sources/vs2012_x86.fidb" dependencies/fidb/
+mkdir -p dependencies/fidb && cp "/build/sources/vs2015_x64.fidb" dependencies/fidb/
+mkdir -p dependencies/fidb && cp "/build/sources/vs2015_x86.fidb" dependencies/fidb/
+mkdir -p dependencies/fidb && cp "/build/sources/vs2017_x64.fidb" dependencies/fidb/
+mkdir -p dependencies/fidb && cp "/build/sources/vs2017_x86.fidb" dependencies/fidb/
+mkdir -p dependencies/fidb && cp "/build/sources/vs2019_x64.fidb" dependencies/fidb/
+mkdir -p dependencies/fidb && cp "/build/sources/vs2019_x86.fidb" dependencies/fidb/
+mkdir -p dependencies/fidb && cp "/build/sources/vsOlder_x64.fidb" dependencies/fidb/
+mkdir -p dependencies/fidb && cp "/build/sources/vsOlder_x86.fidb" dependencies/fidb/
+mkdir -p dependencies/Debugger-rmi-trace && cp "/build/sources/protobuf-6.31.0-py3-none-any.whl" dependencies/Debugger-rmi-trace/
+mkdir -p dependencies/Debugger-rmi-trace && cp "/build/sources/psutil-5.9.8.tar.gz" dependencies/Debugger-rmi-trace/
+mkdir -p dependencies/Debugger-rmi-trace && cp "/build/sources/setuptools-80.9.0-py3-none-any.whl" dependencies/Debugger-rmi-trace/
+mkdir -p dependencies/PyGhidra && cp "/build/sources/setuptools-80.9.0-py3-none-any.whl" dependencies/PyGhidra/
+mkdir -p dependencies/Debugger-rmi-trace && cp "/build/sources/wheel-0.45.1-py3-none-any.whl" dependencies/Debugger-rmi-trace/
+mkdir -p dependencies/PyGhidra && cp "/build/sources/wheel-0.45.1-py3-none-any.whl" dependencies/PyGhidra/
+mkdir -p dependencies/PyGhidra && cp "/build/sources/packaging-25.0-py3-none-any.whl" dependencies/PyGhidra/
+mkdir -p dependencies/PyGhidra && cp "/build/sources/typing_extensions-4.16.0-py3-none-any.whl" dependencies/PyGhidra/
+mkdir -p dependencies/PyGhidra && cp "/build/sources/jpype1-1.5.2.tar.gz" dependencies/PyGhidra/
+'''
+build = '''
+gradle -I gradle/support/fetchDependencies.gradle -Doffline=true -DnoEclipse=true
+gradle -DnoEclipse=true buildGhidra -x ip
+'''
+install = '''
+d="$pkgdir/usr/lib/ghidra"
+mkdir -p "$d" "$pkgdir/usr/bin"
+unzip -q build/dist/ghidra_*_DEV_*.zip -d build/unpacked
+cp -r build/unpacked/ghidra_*/. "$d/"
+ln -s ../lib/ghidra/ghidraRun "$pkgdir/usr/bin/ghidra"
+ln -s ../lib/ghidra/support/analyzeHeadless "$pkgdir/usr/bin/ghidra-analyzeHeadless"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ghidra/LICENSE"
+'''

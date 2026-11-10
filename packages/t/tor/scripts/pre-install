@@ -1,0 +1,5 @@
+#!/bin/sh
+# users and groups (sysusers.conf)
+grep -q "^_tor:" /etc/group || groupadd -r _tor
+grep -q "^_tor:" /etc/passwd || useradd -r -g _tor -d /var/lib/tor -s /usr/bin/nologin -c 'tor user' _tor
+exit 0

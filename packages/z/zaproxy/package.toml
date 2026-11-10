@@ -1,0 +1,30 @@
+# ZAP from source (Gradle, dependencies from the store). Add-ons it downloads at
+# run time land in ~/.ZAP.
+name = "zaproxy"
+version = "2.17.0"
+release = 1
+summary = "OWASP ZAP web application security scanner"
+license = "Apache-2.0"
+homepage = "https://www.zaproxy.org"
+hostdeps = ["openjdk21", "unzip"]
+rundeps = ["openjdk21"]
+options = ["!check", "gradledeps"]
+
+source = [
+    { url = "https://github.com/zaproxy/zaproxy/archive/refs/tags/v2.17.0.tar.gz", sha256 = "66a45f6de04f594cb50672be00293c365255f8d238795bf9a3d69f6d0da592b2" },
+    { url = "https://services.gradle.org/distributions/gradle-8.13-bin.zip", sha256 = "20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78", unpack = false },
+]
+
+environment = '''
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+'''
+build = '''
+gradle :zap:distLinux
+'''
+install = '''
+d="$pkgdir/usr/lib/zaproxy"
+mkdir -p "$d" "$pkgdir/usr/bin"
+tar -xzf zap/build/distributions/ZAP_*_Linux.tar.gz -C "$d" --strip-components=1
+ln -s ../lib/zaproxy/zap.sh "$pkgdir/usr/bin/zaproxy"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/zaproxy/LICENSE"
+'''

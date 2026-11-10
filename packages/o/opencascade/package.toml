@@ -1,0 +1,35 @@
+# needed by: freecad. OCCT 7.9 (FreeCAD 1.1's; 8.0 changes its API).
+name = "opencascade"
+version = "7.9.3"
+release = 1
+summary = "Open CASCADE Technology: 3D CAD kernel"
+license = "LGPL-2.1-only WITH OCCT-exception-1.0"
+homepage = "https://dev.opencascade.org"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["freetype-devel", "fontconfig-devel", "mesa-devel", "libx11-devel", "onetbb-devel", "rapidjson", "vtk-devel", "eigen", "ffmpeg-devel", "zlib-ng-compat-devel", "tcl-devel", "tk-devel"]
+options = ["!check", "jobs:12"]
+
+source = [
+    { url = "https://github.com/Open-Cascade-SAS/OCCT/archive/refs/tags/V7_9_3.tar.gz", sha256 = "5ecf094ec6b12d5413dfb851d8c3590c354058aee556e32e408bdfbf8c357d57" },
+]
+
+setup = '''
+%cmake \
+    -DINSTALL_DIR_LIB=lib \
+    -DINSTALL_DIR_CMAKE=lib/cmake/opencascade \
+    -DUSE_TBB=ON \
+    -DUSE_RAPIDJSON=ON \
+    -DUSE_VTK=ON \
+    -DUSE_FFMPEG=OFF \
+    -DUSE_FREEIMAGE=OFF \
+    -DBUILD_DOC_Overview=OFF \
+    -DBUILD_RELEASE_DISABLE_EXCEPTIONS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE_LGPL_21.txt "$pkgdir/usr/share/licenses/opencascade/LICENSE_LGPL_21.txt"
+install -Dm644 OCCT_LGPL_EXCEPTION.txt "$pkgdir/usr/share/licenses/opencascade/OCCT_LGPL_EXCEPTION.txt"
+'''

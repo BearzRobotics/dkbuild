@@ -1,0 +1,11 @@
+# Reverse engineering tools: the security-* groups, as requested (core, network, web, wireless,
+# password, exploit, reverse, and all of them). Metasploit and Frida join when
+# their recipes build.
+name = "security-reverse"
+version = "1"
+release = 1
+summary = "Reverse engineering tools"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+options = ["meta"]
+rundeps = ["ghidra", "radare2", "rizin", "cutter", "binwalk", "imhex", "gdb", "pwndbg", "strace", "yara"]

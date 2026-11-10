@@ -1,0 +1,26 @@
+# needed by: freecad.
+name = "python-pivy"
+version = "0.6.11"
+release = 1
+summary = "Python bindings for Coin3D"
+license = "ISC"
+homepage = "https://github.com/coin3d/pivy"
+hostdeps = ["cmake", "ninja", "pkgconf", "swig", "python"]
+builddeps = ["coin-devel", "python-devel", "qt6-qtbase-devel"]
+rundeps = ["python", "coin"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/coin3d/pivy/archive/refs/tags/0.6.11.tar.gz", sha256 = "78f79bd7d1ce7e8140ceba4b1220136ea1f14b4403b1e463c59fa892feed961e" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pivy/LICENSE"
+'''

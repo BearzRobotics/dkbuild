@@ -1,0 +1,35 @@
+# OVMF (x86_64, Secure Boot and TPM 2 capable) for QEMU and libvirt. The source is a
+# git snapshot with EDK2's submodules (OpenSSL, Brotli, ...); its sha256 is set
+# after the first `dkbuild fetch edk2-ovmf` prints it.
+name = "edk2-ovmf"
+version = "2026.08"
+release = 1
+summary = "UEFI firmware for virtual machines (OVMF, from EDK2)"
+license = "BSD-2-Clause-Patent"
+homepage = "https://github.com/tianocore/edk2"
+hostdeps = ["acpica", "nasm", "python", "llvm-clang", "llvm-lld", "llvm", "util-linux-devel", "make", "bash"]
+options = ["!check"]
+
+source = [
+    { url = "snapshot:git https://github.com/tianocore/edk2.git edk2-stable202608", sha256 = "0000000000000000000000000000000000000000000000000000000000000000" },
+]
+
+setup = '''
+export PYTHON_COMMAND=python3
+make -C BaseTools CC=clang CXX=clang++ -j$jobs
+'''
+build = '''
+export PYTHON_COMMAND=python3 WORKSPACE=$PWD
+. ./edksetup.sh
+for v in X64; do
+    build -a X64 -t CLANGDWARF -b RELEASE -n $jobs -p OvmfPkg/OvmfPkgX64.dsc \
+        -D SECURE_BOOT_ENABLE=TRUE -D TPM2_ENABLE=TRUE -D NETWORK_HTTP_BOOT_ENABLE=TRUE -D NETWORK_TLS_ENABLE=TRUE
+done
+'''
+install = '''
+d="$pkgdir/usr/share/edk2/x64"
+mkdir -p "$d"
+fv=Build/OvmfX64/RELEASE_CLANGDWARF/FV
+install -m644 $fv/OVMF_CODE.fd $fv/OVMF_VARS.fd $fv/OVMF.fd "$d/"
+install -Dm644 License.txt "$pkgdir/usr/share/licenses/edk2-ovmf/License.txt"
+'''

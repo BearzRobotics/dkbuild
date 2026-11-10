@@ -1,0 +1,28 @@
+# needed by: freecad, pivy.
+name = "coin"
+version = "4.0.10"
+release = 1
+summary = "Open Inventor 3D graphics library (Coin3D)"
+license = "BSD-3-Clause"
+homepage = "https://coin3d.github.io"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["mesa-devel", "libx11-devel", "zlib-ng-compat-devel", "bzip2-devel", "freetype-devel", "fontconfig-devel", "libexpat-devel", "boost-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/coin3d/coin/releases/download/v4.0.10/coin-4.0.10-src.tar.gz", sha256 = "13fe68831292e7e725e7db1c6909d2b4fe5802080474c229fcac14ddf6445188" },
+]
+
+setup = '''
+%cmake \
+    -DCOIN_BUILD_DOCUMENTATION=OFF \
+    -DCOIN_BUILD_TESTS=OFF \
+    -DUSE_EXTERNAL_EXPAT=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/coin/COPYING"
+'''

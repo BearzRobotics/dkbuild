@@ -1,0 +1,36 @@
+# FreeCAD 1.1 with Qt 6 (PySide6), OpenCASCADE 7.9, Coin3D and VTK.
+name = "freecad"
+version = "1.1.4"
+release = 1
+summary = "Parametric 3D CAD modeler"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.freecad.org"
+hostdeps = ["cmake", "ninja", "pkgconf", "swig", "python", "qt6-qttools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "qt6-qt5compat-devel", "boost-devel", "xerces-c-devel", "opencascade-devel", "coin-devel", "python-pivy", "pyside6-devel", "pyside6-shiboken6", "eigen", "vtk-devel", "hdf5-devel", "yaml-cpp-devel", "fmt-devel", "zlib-ng-compat-devel", "python-devel", "python-pyyaml", "qt6-qttools-devel", "mesa-devel", "glu-devel"]
+rundeps = ["python-pivy", "pyside6", "python-pyyaml", "python-numpy", "python"]
+options = ["!check", "jobs:12"]
+
+source = [
+    { url = "https://github.com/FreeCAD/FreeCAD/releases/download/1.1.4/freecad_source_1.1.4.tar.gz", sha256 = "674f2c42dc060b71c8b052c70b04a9a995dde6cb868fe568615d3ff3f2717748" },
+]
+
+setup = '''
+%cmake \
+    -DFREECAD_QT_VERSION=6 \
+    -DBUILD_QT5=OFF \
+    -DFREECAD_USE_EXTERNAL_FMT=ON \
+    -DFREECAD_USE_PYBIND11=OFF \
+    -DBUILD_FEM_NETGEN=OFF \
+    -DBUILD_DESIGNER_PLUGIN=OFF \
+    -DENABLE_DEVELOPER_TESTS=OFF \
+    -DFREECAD_USE_EXTERNAL_SMESH=OFF \
+    -DBUILD_SMESH=ON \
+    -DOCC_INCLUDE_DIR=/usr/include/opencascade
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/freecad/LICENSE"
+'''

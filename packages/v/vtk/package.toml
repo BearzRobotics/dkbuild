@@ -1,0 +1,45 @@
+# needed by: freecad (FEM and mesh), opencascade.
+name = "vtk"
+version = "9.7.2"
+release = 1
+summary = "Visualization Toolkit (3D graphics and data processing)"
+license = "BSD-3-Clause"
+homepage = "https://vtk.org"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["mesa-devel", "libx11-devel", "libxt-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "python-devel", "eigen", "libexpat-devel", "freetype-devel", "hdf5-devel", "libjpeg-turbo-devel", "libpng-devel", "libtiff-devel", "libxml2-devel", "lz4-devel", "xz-devel", "zlib-ng-compat-devel", "jsoncpp-devel", "double-conversion-devel", "pugixml-devel", "utfcpp", "fmt-devel", "onetbb-devel"]
+options = ["!check", "jobs:12"]
+
+source = [
+    { url = "https://vtk.org/files/release/9.7/VTK-9.7.2.tar.gz", sha256 = "fecef55df5caec6298ce190024060a90ce3bb515033c0f18968b9ab5c12bf796" },
+]
+
+setup = '''
+%cmake \
+    -DVTK_BUILD_TESTING=OFF \
+    -DVTK_WRAP_PYTHON=ON \
+    -DVTK_GROUP_ENABLE_Qt=YES \
+    -DVTK_QT_VERSION=6 \
+    -DVTK_SMP_IMPLEMENTATION_TYPE=TBB \
+    -DVTK_MODULE_USE_EXTERNAL_VTK_hdf5=ON \
+    -DVTK_MODULE_USE_EXTERNAL_VTK_expat=ON \
+    -DVTK_MODULE_USE_EXTERNAL_VTK_freetype=ON \
+    -DVTK_MODULE_USE_EXTERNAL_VTK_jpeg=ON \
+    -DVTK_MODULE_USE_EXTERNAL_VTK_png=ON \
+    -DVTK_MODULE_USE_EXTERNAL_VTK_tiff=ON \
+    -DVTK_MODULE_USE_EXTERNAL_VTK_zlib=ON \
+    -DVTK_MODULE_USE_EXTERNAL_VTK_lz4=ON \
+    -DVTK_MODULE_USE_EXTERNAL_VTK_lzma=ON \
+    -DVTK_MODULE_USE_EXTERNAL_VTK_libxml2=ON \
+    -DVTK_MODULE_USE_EXTERNAL_VTK_jsoncpp=ON \
+    -DVTK_MODULE_USE_EXTERNAL_VTK_doubleconversion=ON \
+    -DVTK_MODULE_USE_EXTERNAL_VTK_eigen=ON \
+    -DVTK_MODULE_USE_EXTERNAL_VTK_pugixml=ON \
+    -DVTK_MODULE_USE_EXTERNAL_VTK_fmt=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 Copyright.txt "$pkgdir/usr/share/licenses/vtk/Copyright.txt"
+'''

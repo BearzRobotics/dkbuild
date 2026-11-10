@@ -1,0 +1,35 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/tor/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "tor"
+version = "0.4.9.14"
+release = 1
+summary = "Anonymizing overlay network"
+license = "BSD-3-Clause"
+homepage = "https://gitlab.com/torproject/tor"
+patches = ["no-practracker-test.patch"]
+hostdeps = ["asciidoc", "automake", "pkgconf"]
+builddeps = ["libevent-devel", "linux-headers", "openssl-devel", "xz-devel", "zlib-ng-compat-devel", "zstd-devel"]
+checkdeps = ["bash"]
+
+source = [
+    { url = "https://gitlab.com/torproject/tor/-/archive/tor-0.4.9.14/tor-tor-0.4.9.14.tar.gz", sha256 = "1eca189920bc14316e2f2c5e662916e4fc90eae898705d1374af870bde7d8d5d" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+# only contains a sample
+rm -rf "$pkgdir/etc"
+install -Dm644 src/config/torrc.sample.in "$pkgdir/usr/share/examples/tor/torrc.sample.in"
+install -Dm644 $pkgfiles/tor "$pkgdir/etc/dinit.d/tor"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/tor/LICENSE"
+'''

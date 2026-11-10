@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/sslscan/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "sslscan"
+version = "2.2.3"
+release = 1
+summary = "List supported ciphers in TLS servers"
+license = "GPL-3.0-or-later WITH custom:OpenSSL-exception"
+homepage = "https://github.com/rbsec/sslscan"
+builddeps = ["openssl-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/rbsec/sslscan/archive/refs/tags/2.2.3.tar.gz", sha256 = "b0498467604c3f4eb7a1b3258ee9f37b709f7844d7edf338d40e85af40ede960" },
+]
+
+build = '''
+%make \
+    PREFIX=/usr \
+    GIT_VERSION=2.2.3
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/sslscan/LICENSE"
+'''

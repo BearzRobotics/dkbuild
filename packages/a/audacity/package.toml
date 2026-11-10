@@ -1,0 +1,34 @@
+# Audacity 4 (Qt 6), every library from the system (no Conan downloads), no
+# update check or crash reporting.
+name = "audacity"
+version = "4.0.2"
+release = 1
+summary = "Audio editor and recorder"
+license = "GPL-3.0-or-later"
+homepage = "https://www.audacityteam.org"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "gettext"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "qt6-qt5compat-devel", "qt6-qtshadertools-devel", "libsndfile-devel", "soxr-devel", "lame-devel", "mpg123-devel", "opus-devel", "opusfile-devel", "flac-devel", "libvorbis-devel", "libogg-devel", "wavpack-devel", "twolame-devel", "ffmpeg-devel", "portaudio-devel", "portmidi-devel", "lilv-devel", "suil-devel", "lv2", "vamp-plugin-sdk-devel", "libexpat-devel", "zlib-ng-compat-devel", "sqlite-devel", "alsa-lib-devel", "pipewire-devel", "rapidjson", "libid3tag-devel", "harfbuzz-devel", "freetype-devel"]
+options = ["!check", "jobs:12"]
+
+source = [
+    { url = "https://github.com/audacity/audacity/archive/refs/tags/Audacity-4.0.2.tar.gz", sha256 = "2886ad5386b3927cab4314a0453f2976a1c31cd2c639f73eaf82c0a18df6ec49" },
+]
+
+setup = '''
+%cmake \
+    -Daudacity_conan_enabled=Off \
+    -Daudacity_lib_preference=system \
+    -Daudacity_has_updates_check=Off \
+    -Daudacity_has_networking=Off \
+    -Daudacity_has_crashreports=Off \
+    -Daudacity_has_sentry_reporting=Off \
+    -Daudacity_has_tests=Off \
+    -Daudacity_use_sbsms=local
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/audacity/LICENSE.txt"
+'''
