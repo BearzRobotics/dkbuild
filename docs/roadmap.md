@@ -129,7 +129,8 @@ exists and passes `dkbuild check`; the builds of 2026-11-08 onwards
 
 | musl with mimalloc (musl-mallocng beside it), dkman as man with the Linux and POSIX pages, Xwayland on dkde, claude-code | written (2026-11-10) |
 | Second list, drafted 2026-11-10: LXQt (all of it), Blender, FreeCAD, MuseScore, Audacity, Stellarium, KStars, Kalzium, GCompris, GoldenDict-ng, BibleTime, Xiphos, Fritzing, LibreCAD, Dia, timeshift, Lutris, ScummVM, RetroArch, MangoHud, NetHack, bsd-games, fortune-mod, toilet, lolcat, dos2unix, links, lynx, cdrtools, cdrkit, groff, dictd, httpd, MariaDB, Valkey, PostgreSQL, PHP, Jellyfin, Ghidra, ZAP, Cutter, radare2, NetExec, impacket, pwntools, pwndbg, kismet, John, hydra, masscan, rustscan, amass, sqlmap, nikto, ffuf, gobuster, aircrack-ng, OVMF, .NET 10, PowerShell, QDriverStation, microscope, security-* groups | written, not built yet: the next world run shows what fails |
-| Metasploit, Frida, Anki, GeoGebra, euro-office, Brave, PDFium, MatterControl | not recipes yet: wip/README.md says what each needs (MatterControl no longer builds for Linux) |
+| Metasploit (through the gem store, gemdeps), PrusaSlicer, OrcaSlicer, OpenSCAD, OctoPrint (also for the Raspberry Pi build) | written (2026-11-10) |
+| Frida, Anki, GeoGebra, euro-office, Brave, PDFium, MatterControl | not recipes yet: wip/README.md says what each needs (MatterControl no longer builds for Linux) |
 
 ## Image definitions
 
