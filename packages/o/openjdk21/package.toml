@@ -1,3 +1,5 @@
+# FenrirOS: one package with the JDK (Chimera splits jre-headless/jre/jdk/jmods/demos).
+# The JDK's own CA truststore is kept (no system Java keystore is generated yet).
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/openjdk21/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
@@ -5,55 +7,63 @@
 name = "openjdk21"
 version = "21.0.13.0.3_p1"
 release = 1
-summary = "TODO"
+summary = "OpenJDK 21 (Java development kit and runtime)"
 license = "GPL-2.0-only WITH Classpath-exception-2.0"
 homepage = "https://openjdk.org"
 patches = ["JDK-8218814_Wformat-security.patch", "ppc64le.patch", "riscv64.patch"]
-archs = ["aarch64", "x86_64"]
-hostdeps = ["automake", "bash", "file", "libtool", "linux-headers", "openssl", "pkgconf", "zip", "zlib-ng-compat-devel"]
+archs = ["x86_64", "aarch64"]
+hostdeps = ["autoconf", "automake", "bash", "file", "libtool", "linux-headers", "openjdk21-bootstrap", "openssl", "pkgconf", "zip", "unzip", "zlib-ng-compat-devel"]
 builddeps = ["alsa-lib-devel", "cups-devel", "fontconfig-devel", "freetype-devel", "giflib-devel", "lcms2-devel", "libjpeg-turbo-devel", "libxrandr-devel", "libxrender-devel", "libxt-devel", "libxtst-devel", "linux-headers"]
-options = ["!check"]
+options = ["!check", "jobs:12"]
 
 source = [
     { url = "https://github.com/openjdk/jdk21u/archive/jdk-21.0.13.0.3+1.tar.gz", sha256 = "860df2bacc8fb971712b67493a78c9440ac4a37bb4b52f28107fd761e1a7bf08" },
 ]
-
 environment = '''
-export CBUILD_BYPASS_STRIP_WRAPPER=1
+export LD_LIBRARY_PATH=/usr/lib/jvm/java-21-openjdk/lib:/usr/lib/jvm/java-21-openjdk/lib/server
 '''
 setup = '''
-# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 93); port it by hand
-# TODO(cbuild): from cbuild.util import gnu_configure
-# TODO(cbuild): gnu_configure.replace_guess(self)
-# TODO(cbuild): gnu_configure.configure(self, sysroot=False)
+# Built by the seed JDK (openjdk21-bootstrap, a prebuilt musl JDK), which is
+# installed where this one goes; the seed is only ever a build dependency.
+bash ./configure \
+    --prefix=/usr/lib/jvm/java-21-openjdk \
+    --with-boot-jdk=/usr/lib/jvm/java-21-openjdk \
+    --with-jobs=$jobs \
+    --with-extra-cflags="$CFLAGS" \
+    --with-extra-cxxflags="$CXXFLAGS" \
+    --with-extra-ldflags="$LDFLAGS" \
+    --disable-warnings-as-errors \
+    --disable-precompiled-headers \
+    --enable-dtrace=no \
+    --with-jvm-variants=server \
+    --with-zlib=system \
+    --with-libjpeg=system \
+    --with-libpng=system \
+    --with-giflib=system \
+    --with-lcms=system \
+    --with-jtreg=no \
+    --with-debug-level=release \
+    --with-native-debug-symbols=none \
+    --with-toolchain-type=clang \
+    --with-version-pre= \
+    --with-version-build=1 \
+    --with-version-opt=fenriros \
+    --with-vendor-name=FenrirOS \
+    --with-vendor-url=https://github.com/BearzRobotics/dkbuild \
+    --with-vendor-bug-url=https://github.com/BearzRobotics/dkbuild/issues \
+    --with-vendor-vm-bug-url=https://github.com/BearzRobotics/dkbuild/issues
 '''
 build = '''
-%make \
-    jdk-image
+make JOBS=$jobs jdk-image
 '''
 install = '''
-# install the stuff
-# TODO(cbuild): for f in (self.cwd / "build/images/jdk").iterdir():
-#         self.install_files(f, _java_home)
-# extras
-# TODO(cbuild): self.install_file("ASSEMBLY_EXCEPTION", _java_home)
-# TODO(cbuild): self.install_file("LICENSE", _java_home)
-# TODO(cbuild): self.install_file("README.md", _java_home)
-# shared cacerts store
-# TODO(cbuild): _cacerts = f"{_java_home}/lib/security/cacerts"
-# TODO(cbuild): self.uninstall(_cacerts)
-# TODO(cbuild): self.install_link(_cacerts, "../../../../../../etc/ssl/certs/java/cacerts")
-# system links
-install -dm755 "$pkgdir/usr/bin"
-install -dm755 "$pkgdir/usr/share/man/man1"
-# TODO(cbuild): self.install_link(f"{_java_base}/default", _java_name)
-# TODO(cbuild): for f in (self.destdir / _java_home / "bin").iterdir():
-#         self.install_link(
-#             f"usr/bin/{f.name}", f"../lib/jvm/{_java_name}/bin/{f.name}"
-#         )
-# TODO(cbuild): for f in (self.destdir / _java_home / "man/man1").iterdir():
-#         self.install_link(
-#             f"usr/share/man/man1/{f.name}",
-#             f"../../../lib/jvm/{_java_name}/man/man1/{f.name}",
-#         )
+d="$pkgdir/usr/lib/jvm/java-21-openjdk"
+mkdir -p "$d"
+cp -a build/*/images/jdk/. "$d/"
+install -m644 ASSEMBLY_EXCEPTION LICENSE README.md "$d/"
+# The JDK keeps its own CA truststore (lib/security/cacerts).
+ln -s java-21-openjdk "$pkgdir/usr/lib/jvm/default"
+mkdir -p "$pkgdir/usr/bin" "$pkgdir/usr/share/man/man1"
+for f in "$d"/bin/*; do ln -s ../lib/jvm/java-21-openjdk/bin/$(basename "$f") "$pkgdir/usr/bin/$(basename "$f")"; done
+for f in "$d"/man/man1/*; do [ -e "$f" ] && ln -s ../../../lib/jvm/java-21-openjdk/man/man1/$(basename "$f") "$pkgdir/usr/share/man/man1/$(basename "$f")"; done
 '''
