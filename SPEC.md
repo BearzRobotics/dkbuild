@@ -211,6 +211,15 @@ source = [
 - A `{ git, tag }` or `{ git, commit }` entry clones at that tag or commit. A tag is resolved to its commit
   on first fetch and recorded in `package.lock` next to the recipe, so later
   builds use exactly that commit.
+- A `{ url = "snapshot:<kind> <args>", sha256 }` entry is made, not
+  downloaded: at fetch time an embedded script (`src/snapshot-<kind>.sh`)
+  builds a reproducible tarball on the host from pinned upstream checkouts,
+  for sources no release tarball covers. `electron` (Electron tag, Chromium
+  version, depot_tools commit) runs gclient, applies Electron's patches and
+  installs its yarn and npm packages, so the build itself stays offline. Its
+  work directory and log are in `cache/snapshots/`. A new snapshot's checksum
+  is unknown until it is made: fetch keeps it under the checksum it has and
+  prints it for the recipe.
 - The first tarball is unpacked into the build directory, and the build
   steps start inside its top directory. Further tarballs are unpacked next to
   it (`/build/<their top directory>`): a vendored dependency's source, such as
