@@ -1,0 +1,22 @@
+# Nikto: web server scanner (Perl).
+name = "nikto"
+version = "2.6.1"
+release = 1
+summary = "Web server vulnerability scanner"
+license = "GPL-2.0-only"
+homepage = "https://cirt.net/Nikto2"
+rundeps = ["perl", "perl-net-ssleay"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/sullo/nikto/archive/refs/tags/2.6.1.tar.gz", sha256 = "d1ca1acb05d81a5a6f374c0afdd76b33afa0089278631a20673c0210a71d992f" },
+]
+
+install = '''
+install -dm755 "$pkgdir/usr/share/nikto" "$pkgdir/usr/bin"
+cp -r program/. "$pkgdir/usr/share/nikto/"
+printf '#!/bin/sh\nexec perl /usr/share/nikto/nikto.pl "$@"\n' > "$pkgdir/usr/bin/nikto"
+chmod 755 "$pkgdir/usr/bin/nikto"
+[ -f documentation/nikto.1 ] && install -Dm644 documentation/nikto.1 "$pkgdir/usr/share/man/man1/nikto.1"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/nikto/COPYING"
+'''

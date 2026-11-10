@@ -1,0 +1,28 @@
+# Aircrack-ng: WiFi security auditing (capture, WEP/WPA cracking, injection).
+name = "aircrack-ng"
+version = "1.7"
+release = 1
+summary = "WiFi security auditing tools"
+license = "GPL-2.0-or-later"
+homepage = "https://www.aircrack-ng.org"
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf"]
+builddeps = ["hwloc-devel", "libnl-devel", "libpcap-devel", "linux-headers", "openssl-devel", "pcre2-devel", "sqlite-devel", "zlib-ng-compat-devel"]
+rundeps = ["iw", "ethtool"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/aircrack-ng/aircrack-ng/archive/refs/tags/1.7.tar.gz", sha256 = "05a704e3c8f7792a17315080a21214a4448fd2452c1b0dd5226a3a55f90b58c3" },
+]
+
+setup = '''
+printf '%s\n' "$version" > AC_VERSION
+autoreconf -fi
+%configure --with-experimental --with-ext-scripts --without-opt
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/aircrack-ng/LICENSE"
+'''

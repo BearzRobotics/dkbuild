@@ -1,0 +1,23 @@
+# masscan: asynchronous TCP port scanner. It loads libpcap at run time.
+name = "masscan"
+version = "1.3.2"
+release = 1
+summary = "Fast asynchronous TCP port scanner"
+license = "AGPL-3.0-only"
+homepage = "https://github.com/robertdavidgraham/masscan"
+builddeps = ["linux-headers"]
+rundeps = ["libpcap"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/robertdavidgraham/masscan/archive/refs/tags/1.3.2.tar.gz", sha256 = "0363e82c07e6ceee68a2da48acd0b2807391ead9a396cf9c70b53a2a901e3d5f" },
+]
+
+build = '''
+%make CC="$CC" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
+'''
+install = '''
+install -Dm755 bin/masscan "$pkgdir/usr/bin/masscan"
+install -Dm644 doc/masscan.8 "$pkgdir/usr/share/man/man8/masscan.8"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/masscan/LICENSE"
+'''

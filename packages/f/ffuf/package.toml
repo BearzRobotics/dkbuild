@@ -1,0 +1,25 @@
+name = "ffuf"
+version = "2.3.0"
+release = 1
+summary = "Fast web fuzzer"
+license = "MIT"
+homepage = "https://github.com/ffuf/ffuf"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/ffuf/ffuf/archive/refs/tags/v2.3.0.tar.gz", sha256 = "cdb2e58259f380862850eba587f71a9dc1738fb5edc1ea60414fae30fd0ed4f2" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/ .
+'''
+install = '''
+install -Dm755 build/ffuf "$pkgdir/usr/bin/ffuf"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ffuf/LICENSE"
+'''

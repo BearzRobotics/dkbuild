@@ -1,0 +1,48 @@
+# radare2: reverse engineering framework (disassembler, debugger, hex editor).
+# System capstone (v5), libmagic, libzip, zlib, lz4, xxhash and OpenSSL. Its
+# own sdb, the QuickJS-ng it scripts with, otezip and the amalgamated zydis are
+# meson subprojects: their sources come with the recipe and are laid into
+# subprojects/ as meson would (overlays from subprojects/packagefiles, sdb's
+# patch), so nothing is downloaded.
+name = "radare2"
+version = "6.2.6"
+release = 1
+summary = "Reverse engineering framework"
+license = "LGPL-3.0-only AND GPL-2.0-or-later AND MIT"
+homepage = "https://rada.re"
+hostdeps = ["meson", "ninja", "pkgconf", "patch"]
+builddeps = ["capstone-devel", "file-devel", "libzip-devel", "linux-headers", "lz4-devel", "openssl-devel", "xxhash-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/radareorg/radare2/archive/refs/tags/6.2.6.tar.gz", sha256 = "ef5ae9a0785be28ff38ea61e3b1351232c068691868bab98613c67a8b7aa4872" },
+    { url = "https://github.com/radareorg/sdb/archive/refs/tags/2.6.2.tar.gz", sha256 = "ca634db0bc0f85f1e65b05c576b791905422426df0f0a6d99cd4d0e1a40b1e8a" },
+    { url = "https://github.com/quickjs-ng/quickjs/archive/b51e5278439b2fa0510fbb1f3b3dff9f0064d5d7.tar.gz", sha256 = "34e92aefe62e06638c72fe9d13e6f0c1cf445744aa0068f7fd29afba4d31fdf9" },
+    { url = "https://github.com/trufae/otezip/archive/refs/tags/0.6.0.tar.gz", sha256 = "356cfbddc9f9cc77224190a5e9e740b2381a6aff0153a301dad935fc77ccb0ee" },
+    { url = "https://github.com/zyantific/zydis/releases/download/v4.1.0/zydis-amalgamated.tar.gz", sha256 = "aa9b82be3a37a2998bd8e16cf583bbf2b6c3d80e97dc20504169dc32ca1ced59", unpack = false },
+]
+
+setup = '''
+# git wraps, as meson would check them out: the source, its overlay, its patches
+sp=subprojects
+mv ../sdb-2.6.2 $sp/sdb
+cp -r $sp/packagefiles/sdb/. $sp/sdb/ 2>/dev/null || true
+(cd $sp/sdb && patch -p1 < ../packagefiles/sdb/archive-create.patch)
+mv ../quickjs-b51e5278439b2fa0510fbb1f3b3dff9f0064d5d7 $sp/qjs
+[ -d $sp/packagefiles/qjs ] && cp -r $sp/packagefiles/qjs/. $sp/qjs/
+mv ../otezip-0.6.0 $sp/otezip
+# the file wrap: from meson's package cache (checked against the wrap's hash)
+mkdir -p $sp/packagecache
+cp /build/sources/zydis-amalgamated.tar.gz $sp/packagecache/
+%meson --wrap-mode=nodownload \
+    -Duse_sys_capstone=true -Duse_capstone_version=v5 \
+    -Duse_sys_magic=true -Duse_sys_zip=true -Duse_sys_zlib=true \
+    -Duse_sys_lz4=true -Duse_sys_xxhash=true -Duse_sys_openssl=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING.md "$pkgdir/usr/share/licenses/radare2/COPYING.md"
+'''

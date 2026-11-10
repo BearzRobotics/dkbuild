@@ -1,0 +1,30 @@
+# THC Hydra: network login cracker (many protocols). Without the GTK 2 front
+# end (xhydra).
+name = "hydra"
+version = "9.7"
+release = 1
+summary = "Parallelized network login cracker"
+license = "AGPL-3.0-only WITH openvpn-openssl-exception"
+homepage = "https://github.com/vanhauser-thc/thc-hydra"
+builddeps = ["libssh-devel", "ncurses-devel", "openssl-devel", "pcre2-devel", "postgresql-devel", "readline-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/vanhauser-thc/thc-hydra/archive/refs/tags/v9.7.tar.gz", sha256 = "8dbe11e5858b8c1aab7bd670bc39a3483accd09e147d3dd981fe11a7fa0d10de" },
+]
+
+setup = '''
+./configure --prefix=/usr --disable-xhydra
+'''
+build = '''
+%make CC="$CC" OPTS="$CFLAGS"
+'''
+install = '''
+install -dm755 "$pkgdir/usr/bin" "$pkgdir/usr/share/hydra" "$pkgdir/usr/share/man/man1"
+install -m755 hydra pw-inspector hydra-wizard.sh "$pkgdir/usr/bin/"
+sed -e 's|^INSTALLDIR=.*|INSTALLDIR=/usr|' -e 's|^LOCATION=.*|LOCATION=/share/hydra|' dpl4hydra.sh > "$pkgdir/usr/bin/dpl4hydra.sh"
+chmod 755 "$pkgdir/usr/bin/dpl4hydra.sh"
+install -m644 *.csv "$pkgdir/usr/share/hydra/"
+install -m644 hydra.1 pw-inspector.1 "$pkgdir/usr/share/man/man1/"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/hydra/LICENSE"
+'''

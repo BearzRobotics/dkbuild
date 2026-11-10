@@ -1,0 +1,24 @@
+# sqlmap: automatic SQL injection and database takeover tool (Python).
+name = "sqlmap"
+version = "1.10"
+release = 1
+summary = "Automatic SQL injection and database takeover tool"
+license = "GPL-2.0-or-later"
+homepage = "https://sqlmap.org"
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/sqlmapproject/sqlmap/archive/refs/tags/1.10.tar.gz", sha256 = "aea3bf921d9a2466bc0e33cf43bc941f527eabf7981ec1de104220def3a1cba4" },
+]
+
+install = '''
+install -dm755 "$pkgdir/usr/share/sqlmap" "$pkgdir/usr/bin"
+cp -r . "$pkgdir/usr/share/sqlmap/"
+rm -rf "$pkgdir/usr/share/sqlmap/.git"* "$pkgdir/usr/share/sqlmap/.github"
+for p in sqlmap sqlmapapi; do
+    printf '#!/bin/sh\nexec python3 /usr/share/sqlmap/%s.py "$@"\n' $p > "$pkgdir/usr/bin/$p"
+    chmod 755 "$pkgdir/usr/bin/$p"
+done
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/sqlmap/LICENSE"
+'''

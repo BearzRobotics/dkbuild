@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/ethtool/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: aircrack-ng (airmon-ng).
+name = "ethtool"
+version = "7.1"
+release = 1
+summary = "Utility for controlling network drivers and hardware"
+license = "GPL-2.0-only"
+homepage = "http://www.kernel.org/pub/software/network/ethtool"
+hostdeps = ["pkgconf", "automake", "libtool"]
+builddeps = ["libmnl-devel", "linux-headers"]
+
+source = [
+    { url = "http://www.kernel.org/pub/software/network/ethtool/ethtool-7.1.tar.xz", sha256 = "4d78c26edc0255bc92f4b995b5fd66108d75ff966ed4694f6025a6d370bc2496" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/ethtool/COPYING"
+'''

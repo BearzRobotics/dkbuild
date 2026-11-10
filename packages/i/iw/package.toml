@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/iw/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: aircrack-ng (airmon-ng).
+name = "iw"
+version = "6.17"
+release = 1
+summary = "Utility for nl80211 based CLI configuration of wireless devices"
+license = "ISC"
+homepage = "https://wireless.kernel.org/en/users/Documentation/iw"
+patches = ["no-Wstringop-overflow.patch"]
+hostdeps = ["sed", "pkgconf"]
+builddeps = ["libnl-devel", "linux-headers"]
+rundeps = ["wireless-regdb"]
+
+source = [
+    { url = "https://www.kernel.org/pub/software/network/iw/iw-6.17.tar.xz", sha256 = "7d182e498289ab39b257da6780d562e415377107f50358ee5b55b8cfe40b1e33" },
+]
+
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr \
+    SBINDIR=/usr/bin
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/iw/COPYING"
+'''

@@ -1,0 +1,6 @@
+type = process
+command = /usr/bin/valkey-server /etc/valkey/valkey.conf
+run-as = _valkey
+smooth-recovery = true
+depends-on: local.target
+depends-on: network.target
