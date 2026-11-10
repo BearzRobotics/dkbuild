@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
+# r9: `man` is dkman; mandoc keeps its formatter, apropos, whatis and makewhatis.
 name = "mandoc"
 version = "1.14.6"
-release = 8
+release = 9
 summary = "UNIX manpage compiler toolset"
 license = "ISC"
 homepage = "https://mandoc.bsd.lv"
@@ -43,5 +44,6 @@ check = '''
 '''
 install = '''
 %make_install
+rm -f "$pkgdir/usr/bin/man" "$pkgdir/usr/share/man/man1/man.1"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/mandoc/LICENSE"
 '''

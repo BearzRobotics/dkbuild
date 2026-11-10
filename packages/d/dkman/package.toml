@@ -1,8 +1,9 @@
 # Man page tool: finds, searches and renders man pages and Markdown docs.
 # Zig dependencies (md-zig, gtroff-zig) are fetched on the host (option `zigdeps`).
+# r2: the system's `man` (a link), with its own page as man(1) too.
 name = "dkman"
 version = "0.3.0"
-release = 1
+release = 2
 summary = "Man page tool: finds, searches and renders man pages and Markdown docs"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkman"
@@ -15,5 +16,13 @@ source = [
 
 install = '''
 %zig_build
+ln -s dkman "$pkgdir/usr/bin/man"
+install -Dm644 docs/manpages/dkman.1.md "$pkgdir/usr/share/man/man1/dkman.1.md"
+ln -s dkman.1.md "$pkgdir/usr/share/man/man1/man.1.md"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/dkman/LICENSE"
 '''
+
+# dkman.1.md is what `man dkman` shows, not documentation to split off.
+[subpackages.doc]
+summary = "Documentation"
+paths   = ["/usr/share/doc"]

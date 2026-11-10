@@ -1,0 +1,25 @@
+# The POSIX.1-2017 man pages (sections 0p, 1p, 3p): the standard's view of
+# each header, utility and function, beside the Linux ones (`man 3p printf`).
+name = "man-pages-posix"
+version = "2017a"
+release = 1
+summary = "POSIX.1-2017 man pages"
+license = "custom:posix-man-pages"
+homepage = "https://www.kernel.org/doc/man-pages"
+options = ["!check"]
+
+source = [
+    { url = "https://www.kernel.org/pub/linux/docs/man-pages/man-pages-posix/man-pages-posix-2017-a.tar.xz", sha256 = "ce67bb25b5048b20dad772e405a83f4bc70faf051afa289361c81f9660318bc3" },
+]
+
+install = '''
+for s in man0p man1p man3p; do
+    install -dm755 "$pkgdir/usr/share/man/$s"
+    install -m644 $s/* "$pkgdir/usr/share/man/$s/"
+done
+install -Dm644 POSIX-COPYRIGHT "$pkgdir/usr/share/licenses/man-pages-posix/POSIX-COPYRIGHT"
+'''
+
+[subpackages.doc]
+summary = "Documentation"
+paths   = ["/usr/share/doc"]

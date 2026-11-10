@@ -4,9 +4,10 @@
 # image, since they depend on the machine.
 # r2: bash-completion, both editors (msedit, the default EDITOR, and vim), and sd-tools
 #     (sysusers.d and tmpfiles.d, applied on install and at boot).
+# r3: man pages: dkman as `man`, with the Linux and POSIX pages.
 name = "base"
 version = "1"
-release = 2
+release = 3
 summary = "FenrirOS base system"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"
@@ -18,4 +19,5 @@ rundeps = [
     "which", "less", "file", "procps", "psmisc", "iproute2", "kbd", "sysklogd",
     "tar", "gzip", "xz", "zstd", "e2fsprogs", "dosfstools",
     "bash-completion", "msedit", "vim", "sd-tools",
+    "dkman", "man-pages", "man-pages-posix",
 ]

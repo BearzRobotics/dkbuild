@@ -1,0 +1,30 @@
+# The Linux man-pages project: system calls (2), library functions (3),
+# devices (4), file formats (5), overviews (7). Read with dkman (`man`).
+# Pages other packages ship are left to them: tzfile(5), tzselect(8), zdump(8)
+# and zic(8) (tzdb), man(7) (mandoc). Found by listing every built package.
+name = "man-pages"
+version = "6.20"
+release = 1
+summary = "Linux man pages: system calls, library functions, file formats"
+license = "GPL-2.0-or-later AND BSD-3-Clause AND MIT AND custom:man-pages"
+homepage = "https://www.kernel.org/doc/man-pages"
+hostdeps = ["make"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.kernel.org/pub/linux/docs/man-pages/man-pages-6.20.tar.xz", sha256 = "180f0d16a2142dd9671760ac0afeadcc25e861f695eb420293e1206a87ca083f" },
+]
+
+install = '''
+make -R install prefix=/usr DESTDIR="$pkgdir" LINK_PAGES=symlink SHELL=/bin/sh
+m="$pkgdir/usr/share/man"
+rm -f "$m/man5/tzfile.5" "$m/man8/tzselect.8" "$m/man8/zdump.8" "$m/man8/zic.8" "$m/man7/man.7"
+install -dm755 "$pkgdir/usr/share/licenses/man-pages"
+cp -r LICENSES/. "$pkgdir/usr/share/licenses/man-pages/"
+'''
+
+# They are the package itself, not documentation for it (the default -doc
+# subpackage would take them all).
+[subpackages.doc]
+summary = "Documentation"
+paths   = ["/usr/share/doc"]
