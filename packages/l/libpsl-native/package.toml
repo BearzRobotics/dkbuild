@@ -1,0 +1,24 @@
+# PowerShell's native helper library (system calls .NET does not expose).
+# needed by: powershell.
+name = "libpsl-native"
+version = "700.0.1"
+release = 1
+summary = "Native helper library for PowerShell"
+license = "MIT"
+homepage = "https://github.com/PowerShell/PowerShell-Native"
+hostdeps = ["cmake", "ninja"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/PowerShell/PowerShell-Native/archive/refs/tags/v700.0.1.tar.gz", sha256 = "816bf0e3ae991e41cf69a4871480eec49c7fe1339cf590fa521f51ed82cc7eaa" },
+]
+
+build = '''
+cd src/libpsl-native
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+cmake --build build
+'''
+install = '''
+install -Dm755 src/powershell-unix/libpsl-native.so "$pkgdir/usr/lib/libpsl-native.so"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/libpsl-native/LICENSE.txt"
+'''

@@ -18,6 +18,7 @@
 //! - With more than one build at a time, each build's console output is held
 //!   and printed whole when it ends; with one, it streams as before.
 
+const term = @import("term.zig");
 const std = @import("std");
 const recipe = @import("recipe.zig");
 const tree = @import("tree.zig");
@@ -167,7 +168,7 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
                 if (blocked) {
                     state[j] = .skipped;
                     try skipped.append(arena, r.name);
-                    std.debug.print("==> {s}: skipped, a package it needs failed\n", .{r.name});
+                    term.print("==> {s}: skipped, a package it needs failed\n", .{r.name});
                     continue;
                 }
                 if (!ready) continue;
@@ -176,12 +177,12 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
                 if (!jobs[j].certain) {
                     if (jobs[j].old_root) |old| if (!jobs[j].script_changed and std.mem.eql(u8, &old, &roots[j])) {
                         state[j] = .ok;
-                        std.debug.print("==> {s}: up to date\n", .{jobs[j].id});
+                        term.print("==> {s}: up to date\n", .{jobs[j].id});
                         continue;
                     };
                     if (!announced[j]) {
                         announced[j] = true;
-                        std.debug.print("==> {s}: {s}; rebuilding\n", .{ jobs[j].id, if (jobs[j].script_changed) "dkbuild's macros changed its build script" else "packages it builds against changed" });
+                        term.print("==> {s}: {s}; rebuilding\n", .{ jobs[j].id, if (jobs[j].script_changed) "dkbuild's macros changed its build script" else "packages it builds against changed" });
                     }
                 }
                 if (hold or running >= parallel) continue;
@@ -196,12 +197,12 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
                     workers[j].rebuild = .{ .previous = prev, .bump = Bump.call, .ctx = &workers[j].bump };
                 };
                 workers[j].thread = std.Thread.spawn(.{}, workerMain, .{&workers[j]}) catch |err| {
-                    std.debug.print("error: cannot start a thread for {s}: {s}\n", .{ r.name, @errorName(err) });
+                    term.print("error: cannot start a thread for {s}: {s}\n", .{ r.name, @errorName(err) });
                     std.process.exit(1);
                 };
                 state[j] = .running;
                 running += 1;
-                if (buffered) std.debug.print("--> {s}: started{s} ({d} running)\n", .{ jobs[j].id, if (heavy) ", alone" else "", running });
+                if (buffered) term.print("--> {s}: started{s} ({d} running)\n", .{ jobs[j].id, if (heavy) ", alone" else "", running });
                 if (heavy) {
                     heavy_running = true;
                     hold = true;
@@ -221,15 +222,15 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
             w.thread.join();
             running -= 1;
             if (build.isHeavy(w.r)) heavy_running = false;
-            if (w.console.items.len > 0) std.debug.print("{s}", .{w.console.items});
+            if (w.console.items.len > 0) term.emit(w.console.items);
             w.console.deinit(std.heap.smp_allocator);
             if (w.err) |err| {
-                std.debug.print("{s}: {s}\n", .{ w.r.name, @errorName(err) });
+                term.print("{s}: {s}\n", .{ w.r.name, @errorName(err) });
                 state[j] = .failed;
                 try failed.append(arena, w.r.name);
                 if (!keep_going and !stop) {
                     stop = true;
-                    if (running > 0) std.debug.print("stopping: waiting for {d} running build(s) to end\n", .{running});
+                    if (running > 0) term.print("stopping: waiting for {d} running build(s) to end\n", .{running});
                 }
                 continue;
             }
@@ -244,7 +245,7 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
             }
             const record = try inputs.format(arena, .{ .version = jobs[j].version, .inputs = jobs[j].own, .deps = roots[j], .output = w.result.produced.output, .interface = w.result.produced.interface, .script = jobs[j].script });
             std.Io.Dir.cwd().writeFile(io, .{ .sub_path = jobs[j].rec_path, .data = record }) catch |err| {
-                std.debug.print("warning: cannot write {s}: {s}\n", .{ jobs[j].rec_path, @errorName(err) });
+                term.print("warning: cannot write {s}: {s}\n", .{ jobs[j].rec_path, @errorName(err) });
             };
         }
     }

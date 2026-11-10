@@ -241,6 +241,7 @@ source = [
 | `godeps` | Go modules downloaded on the host (`go mod download`, needs `go`) into the shared module cache `cache/gomod/`; the build gets `GOMODCACHE`, `GOPROXY=off`, `GOFLAGS=-mod=mod` (7.4) |
 | `npmdeps` | npm packages of every `package-lock.json` in the source, fetched into the shared `cache/npm/` (each checked against its lockfile integrity hash); the build installs offline with `npm ci` (7.4) |
 | `gradledeps` | Gradle dependencies resolved once per source, in the build root with the network, into the shared Maven-layout `cache/maven/`; then the build runs Gradle offline against it. Needs a `gradle-<version>-bin.zip` source and `unzip` in `hostdeps` (7.4) |
+| `nugetdeps` | NuGet packages: the recipe's `restore` step (its `dotnet restore` commands) runs once per source with the network, in the build root, and the packages go into the shared `cache/nuget/` (a local NuGet feed); every build has `$DKBUILD_NUGET` (the store, read-only) and restores with `--source $DKBUILD_NUGET` offline (7.4) |
 | `cargodeps` | Rust crates vendored on the host (`cargo vendor`, needs `cargo`) into the shared `cache/crates/`, laid in as `vendor/` with a `.cargo/config.toml` pointing at it; build with `--offline` (7.4). The Cargo project is the one at the top of the source, or else the first `Cargo.lock` below it; `vendor/` and `.cargo/` stay at the top either way |
 | `meta` | A meta-package: no source and no steps, only `rundeps` (`base`, `desktop-hyprland`) |
 | `rootlayout` | May install outside `/usr /etc /var /opt /boot` (base-files: `/dev`, `/proc`, the usr-merge links) |
@@ -261,6 +262,10 @@ hold the toolchain decisions in one place, per target (6.1).
 | `%cmake_build`, `%cmake_install` | `cmake --build build`, `DESTDIR=$pkgdir cmake --install build --strip` |
 | `%zig_build` | `zig build --release=safe --prefix /usr -Dtarget=$zig_target -Dcpu=$zig_cpu` with `--system` for vendored dependencies, `-j$jobs`, and `DESTDIR=$pkgdir` |
 | `%kernel_make` | `make LLVM=1 ARCH=$kernel_arch` |
+
+Progress lines are colored by what they report (built green, failures red,
+skips yellow, ...) on a terminal; `--color=always` keeps the colors through a
+pipe such as `tee`, `--color=never` or `NO_COLOR` turns them off.
 
 After `pkg` or `world`, `logs/<arch>/last-run.txt` (and a dated copy in
 `logs/<arch>/runs/`) lists what failed, each with its build log, what was not

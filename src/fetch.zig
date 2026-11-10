@@ -113,6 +113,7 @@ pub fn fetchOne(arena: Allocator, io: std.Io, cache: []const u8, src: recipe.Sou
 
 const snapshot_scripts = [_][2][]const u8{
     .{ "electron", @embedFile("snapshot-electron.sh") },
+    .{ "dotnet", @embedFile("snapshot-dotnet.sh") },
 };
 
 /// Make the tarball of a `snapshot:` source into `tmp`. The script's output

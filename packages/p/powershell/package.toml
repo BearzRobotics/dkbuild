@@ -1,0 +1,66 @@
+# PowerShell 7 (pwsh), built with this tree's .NET. Its NuGet packages come from
+# the shared store (`nugetdeps`): the restore below runs once with the network,
+# then every build restores offline. The build replicates upstream's
+# build.psm1 Start-PSBuild, as Alpine's port does (its dependency-gatherer
+# target and NuGet source patch are used here).
+name = "powershell"
+version = "7.6.9"
+release = 1
+summary = "PowerShell, a cross-platform shell and scripting language"
+license = "MIT"
+homepage = "https://github.com/PowerShell/PowerShell"
+archs = ["x86_64"]
+patches = ["add-missing-nuget-src.patch"]
+hostdeps = ["dotnet", "git"]
+builddeps = ["libpsl-native"]
+rundeps = ["dotnet", "libpsl-native", "icu"]
+options = ["!check", "!strip", "nugetdeps"]
+
+source = [
+    { url = "https://github.com/PowerShell/PowerShell/archive/refs/tags/v7.6.9.tar.gz", sha256 = "51771cd828d42ac22e3ed5afa907edc25468400ca28c288c39a3b211e2ff36ce" },
+]
+
+restore = '''
+rm -f global.json
+dotnet restore --locked-mode -r linux-musl-x64 src/powershell-unix
+for p in src/TypeCatalogGen src/ResGen src/Modules src/Microsoft.PowerShell.GlobalTool.Shim; do
+    dotnet restore --locked-mode "$p"
+done
+'''
+setup = '''
+# the build reads its version from git
+git init -q && git add -f . && git -c user.name=dkbuild -c user.email=dkbuild@localhost commit -qm initial
+git -c user.name=dkbuild -c user.email=dkbuild@localhost tag -a "v$version" -m "v$version"
+rm -f global.json
+# offline, from the store
+dotnet restore --locked-mode --source "$DKBUILD_NUGET" -r linux-musl-x64 src/powershell-unix
+for p in src/TypeCatalogGen src/ResGen src/Modules src/Microsoft.PowerShell.GlobalTool.Shim; do
+    dotnet restore --locked-mode --source "$DKBUILD_NUGET" "$p"
+done
+'''
+build = '''
+(cd src/ResGen && dotnet run --no-restore)
+cp $pkgfiles/dependency-gatherer.targets src/Microsoft.PowerShell.SDK/obj/Microsoft.PowerShell.SDK.csproj.TypeCatalog.targets
+dotnet msbuild src/Microsoft.PowerShell.SDK -t:_GetDependencies -p:DesignTimeBuild=true \
+    -p:_DependencyFile="$PWD/src/TypeCatalogGen/powershell.inc" -nologo
+dotnet run --no-restore --project src/TypeCatalogGen \
+    src/System.Management.Automation/CoreCLR/CorePsTypeCatalog.cs "$PWD/src/TypeCatalogGen/powershell.inc"
+dotnet publish --configuration Linux src/powershell-unix/ --output lib --no-self-contained --no-restore \
+    --framework net10.0 --runtime linux-musl-x64 -p:PublishReadyToRun=true
+grep 'Microsoft.NETCore.App' src/TypeCatalogGen/powershell.inc | sed 's/;//' | while read -r a; do
+    install -Dm755 -t lib/ref "$a"
+done
+# modules upstream ships from NuGet packages
+for m in PackageManagement PowerShellGet Microsoft.PowerShell.Archive PSReadLine Microsoft.PowerShell.ThreadJob; do
+    p=$(echo $m | tr '[:upper:]' '[:lower:]')
+    cp -r "$(find "$NUGET_PACKAGES/$p"/* -maxdepth 0 | sort | tail -n1)" lib/Modules/$m
+done
+'''
+install = '''
+mkdir -p "$pkgdir/usr/lib" "$pkgdir/usr/bin"
+cp -r lib "$pkgdir/usr/lib/powershell"
+# the system's libpsl-native; the serial ports library is built for glibc
+rm -f "$pkgdir/usr/lib/powershell/libpsl-native.so" "$pkgdir/usr/lib/powershell/libSystem.IO.Ports.Native.so"
+ln -s ../lib/powershell/pwsh "$pkgdir/usr/bin/pwsh"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/powershell/LICENSE.txt"
+'''

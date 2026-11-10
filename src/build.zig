@@ -4,6 +4,7 @@
 //! Stage 1 (SPEC.md 7.3, 9.2): builds run on the DKRescue image (rootfs/dkrescue,
 //! from `dkbuild bootstrap-root`) under a writable layer, in our own sandbox.
 
+const term = @import("term.zig");
 const std = @import("std");
 const recipe = @import("recipe.zig");
 const fetch = @import("fetch.zig");
@@ -14,6 +15,8 @@ const npm_offline_js = @embedFile("npm-offline.js");
 const gradle_resolve = @embedFile("gradle-resolve.gradle");
 const gradle_store_sh = @embedFile("gradle-store.sh");
 const gradle_offline = @embedFile("gradle-offline.gradle");
+/// nugetdeps: copies a restore's packages into the shared store.
+const nuget_store_sh = @embedFile("nuget-store.sh");
 const macro = @import("macro.zig");
 const profile = @import("profile.zig");
 const tree = @import("tree.zig");
@@ -57,7 +60,7 @@ fn out(comptime fmt: []const u8, args: anytype) void {
         c.print(std.heap.smp_allocator, fmt, args) catch {};
         return;
     }
-    std.debug.print(fmt, args);
+    term.print(fmt, args);
 }
 
 /// Downloads and vendoring of one source happen one at a time (two builds that
@@ -182,6 +185,10 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
         );
     if (contains(r.options, "godeps"))
         try s.appendSlice(arena, "export GOMODCACHE=/dkdeps/go GOPROXY=off GOSUMDB=off GOTOOLCHAIN=local GOFLAGS=-mod=mod\n");
+    // NuGet (nugetdeps): a private package folder; the store is the only feed
+    // ($DKBUILD_NUGET, for `dotnet restore --source`); no telemetry.
+    if (contains(r.options, "nugetdeps"))
+        try s.appendSlice(arena, "export NUGET_PACKAGES=/tmp/nuget DKBUILD_NUGET=/dkdeps/nuget HOME=/tmp DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1 DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1\n");
     if (r.environment) |e| {
         try s.appendSlice(arena, try macro.expand(arena, ctx, e, bad_macro));
         try s.append(arena, '\n');
@@ -637,6 +644,53 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         }
     }
 
+    // 3c. NuGet (nugetdeps): like Gradle, the first build of a source runs the
+    // recipe's `restore` step once with the network, in this build root (so
+    // with this tree's dotnet and runtime ID), and keeps the packages in the
+    // shared store; every build restores offline from it.
+    const uses_nuget = contains(r.options, "nugetdeps") and first_tarball != null;
+    if (uses_nuget) {
+        const first_sha = std.fs.path.basename(first_tarball.?);
+        const store_rel = try std.fs.path.join(arena, &.{ cache, "nuget" });
+        const lists_rel = try std.fs.path.join(arena, &.{ cache, "nugetdeps" });
+        Dir.cwd().createDirPath(io, store_rel) catch return error.PrepareFailed;
+        Dir.cwd().createDirPath(io, lists_rel) catch return error.PrepareFailed;
+        const dk = try std.fs.path.join(arena, &.{ root_rel, "dkbuild" });
+        Dir.cwd().writeFile(io, .{ .sub_path = try std.fs.path.join(arena, &.{ dk, "nuget-store.sh" }), .data = nuget_store_sh }) catch return error.PrepareFailed;
+        const nlist = try std.fmt.allocPrint(arena, "{s}/{s}.list", .{ lists_rel, first_sha });
+        if (Dir.cwd().access(io, nlist, .{})) |_| {} else |_| {
+            out("    restoring NuGet packages (network, once for this source)\n", .{});
+            const sh = try std.fmt.allocPrint(arena,
+                \\set -e
+                \\export NUGET_PACKAGES=/tmp/nuget-restore HOME=/tmp DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1 DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+                \\export srcdir='{s}'
+                \\cd "$srcdir"
+                \\{s}
+                \\sh /dkbuild/nuget-store.sh /tmp/nuget-restore /dkstore/nuget /dkstore/nugetdeps/{s}.list
+            , .{ srcdir, r.restore.?, first_sha });
+            const ok = sandbox.run(arena, io, .{
+                .lower = base_root,
+                .upper = sb.upper,
+                .work = sb.work,
+                .merged = sb.merged,
+                .net = true,
+                .binds = &.{
+                    .{ .src = try std.fs.path.join(arena, &.{ root_abs, "build" }), .dst = "/build" },
+                    .{ .src = try std.fs.path.join(arena, &.{ root_abs, "dkbuild" }), .dst = "/dkbuild" },
+                    .{ .src = absPath(arena, io, store_rel) catch return error.PrepareFailed, .dst = "/dkstore/nuget" },
+                    .{ .src = absPath(arena, io, lists_rel) catch return error.PrepareFailed, .dst = "/dkstore/nugetdeps" },
+                    .{ .src = "/etc/resolv.conf", .dst = "/etc/resolv.conf", .read_only = true },
+                },
+                .env = &.{ "PATH=/usr/bin:/bin", "HOME=/tmp" },
+                .argv = &.{ "/usr/bin/sh", "-c", sh },
+            }, &log) catch false;
+            if (!ok) {
+                out("error: {s}: restoring its NuGet packages failed; log: {s}\n", .{ r.name, logpath });
+                return error.PrepareFailed;
+            }
+        }
+    }
+
     // 4. Steps, in the sandbox
     var bad: []const u8 = "";
     const text = script(arena, r, ctx, srcdir, opts, &bad) catch |err| switch (err) {
@@ -667,6 +721,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
             .{ .use = uses_go, .sub = "gomod", .dst = "/dkdeps/go" },
             .{ .use = uses_npm, .sub = "npm", .dst = "/dkdeps/npm" },
             .{ .use = uses_gradle, .sub = "maven", .dst = "/dkdeps/maven" },
+            .{ .use = uses_nuget, .sub = "nuget", .dst = "/dkdeps/nuget" },
         }) |st| {
             if (!st.use) continue;
             const rel = try std.fs.path.join(arena, &.{ cache, st.sub });

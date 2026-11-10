@@ -1,0 +1,52 @@
+# .NET 10 (SDK 10.0.114, runtime and ASP.NET Core 10.0.14), built from source
+# with upstream's offline "source-only" build, as Fedora and Alpine do.
+# The source is a snapshot (src/snapshot-dotnet.sh): the VMR (dotnet/dotnet),
+# the previously source-built artifacts with linux-musl-x64 packages
+# (prep-source-build.sh --bootstrap-rid), and the seed: Microsoft's own
+# linux-musl-x64 SDK, which the build runs on (as Go, Rust and Java start from
+# a binary). The result is a portable linux-musl-x64 SDK in /usr/lib/dotnet.
+# Source-build only builds the 1xx SDK feature band.
+# The first `dkbuild fetch dotnet` makes the snapshot and prints its sha256;
+# that replaces the zeros below.
+name = "dotnet"
+version = "10.0.114"
+release = 1
+summary = ".NET SDK, runtime and ASP.NET Core"
+license = "MIT"
+homepage = "https://dotnet.microsoft.com"
+archs = ["x86_64"]
+hostdeps = ["bash", "cmake", "curl", "findutils", "git", "llvm", "llvm-clang", "llvm-lld", "python", "zlib-ng-compat-devel"]
+builddeps = ["brotli-devel", "heimdal-devel", "icu-devel", "linux-headers", "openssl-devel", "zlib-ng-compat-devel"]
+rundeps = ["icu", "openssl", "heimdal-libs"]
+options = ["!check", "!strip", "jobs:12"]
+
+source = [
+    { url = "snapshot:dotnet v10.0.114 10.0.114", sha256 = "0000000000000000000000000000000000000000000000000000000000000000" },
+]
+
+environment = '''
+# the native parts take their own flags
+unset CFLAGS CXXFLAGS LDFLAGS CPPFLAGS
+export DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1 DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+export HOME=/tmp SHELL=/bin/bash
+'''
+build = '''
+ulimit -n 4096 || true
+./build.sh --source-only --with-sdk "$PWD/.dotnet-musl" --release-manifest /dev/null -- \
+    /p:TargetRid=linux-musl-x64 /p:PortableBuild=true /p:OfficialBuilder=FenrirOS \
+    /p:ContinueOnPrebuiltBaselineError=true /p:LogVerbosity=minimal /p:MinimalConsoleLogOutput=true \
+    /p:UseSystemLibs=brotli+zlib
+'''
+install = '''
+d="$pkgdir/usr/lib/dotnet"
+mkdir -p "$d" "$pkgdir/usr/bin" "$pkgdir/etc/dotnet"
+tar -xzf artifacts/assets/Release/dotnet-sdk-*-linux-musl-x64.tar.gz -C "$d" --no-same-owner
+ln -s ../lib/dotnet/dotnet "$pkgdir/usr/bin/dotnet"
+echo /usr/lib/dotnet > "$pkgdir/etc/dotnet/install_location"
+echo /usr/lib/dotnet > "$pkgdir/etc/dotnet/install_location_x64"
+# programs find the runtime through this
+install -Dm644 /dev/stdin "$pkgdir/etc/profile.d/dotnet.sh" <<'EOF2'
+export DOTNET_ROOT=/usr/lib/dotnet DOTNET_CLI_TELEMETRY_OPTOUT=1
+EOF2
+install -Dm644 LICENSE.TXT "$pkgdir/usr/share/licenses/dotnet/LICENSE.TXT"
+'''

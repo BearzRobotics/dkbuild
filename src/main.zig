@@ -5,6 +5,7 @@ const fetch = @import("fetch.zig");
 const npmdeps = @import("npmdeps.zig");
 const build = @import("build.zig");
 const inputs = @import("inputs.zig");
+const term = @import("term.zig");
 const bootstrap = @import("bootstrap.zig");
 const sandbox = @import("sandbox.zig");
 const doctor = @import("doctor.zig");
@@ -17,9 +18,9 @@ const usage =
     \\
     \\  check [name|file.toml]...   validate recipes (all of them if none given)
     \\  fetch [name]...            download sources into cache/sources and check them
-    \\  pkg [-j N] [-P N] [--key FILE] [--keep-root] [--no-check] [--keep-going] [--force] <name>...
+    \\  pkg [-j N] [-P N] [--key FILE] [--keep-root] [--no-check] [--keep-going] [--force] [--color=auto|always|never] <name>...
     \\                             build packages and the dependencies in the tree
-    \\  world [-j N] [-P N] [--key FILE] [--keep-root] [--no-check] [--keep-going] [--force]
+    \\  world [-j N] [-P N] [--key FILE] [--keep-root] [--no-check] [--keep-going] [--force] [--color=auto|always|never]
     \\                             build every recipe in the tree that is out of date
     \\                             (-j: jobs per build; -P: builds at once, default 1)
     \\  image <file.toml>          make a root filesystem from repo/ (tarball, squashfs or
@@ -169,6 +170,7 @@ pub fn main(init: std.process.Init) !void {
         var names: std.ArrayList([]const u8) = .empty;
         var force = false;
         var keep_going = false;
+        var color_mode: ?[]const u8 = null;
         var parallel: usize = 1;
         var k: usize = 0;
         while (k < rest.len) : (k += 1) {
@@ -190,8 +192,11 @@ pub fn main(init: std.process.Init) !void {
                 opts.no_check = true;
             } else if (std.mem.eql(u8, rest[k], "--force")) {
                 force = true;
+            } else if (std.mem.startsWith(u8, rest[k], "--color=")) {
+                color_mode = rest[k]["--color=".len..];
             } else try names.append(arena, rest[k]);
         }
+        term.setup(init.io, color_mode, init.environ_map.get("NO_COLOR") != null);
         if (names.items.len == 0 and !is_world) return die(usage);
         if (names.items.len > 0 and is_world) return die(usage);
         var t = try tree.load(arena, init.io, root, &problems);
@@ -285,18 +290,18 @@ pub fn main(init: std.process.Init) !void {
         writeRunSummary(arena, init.io, root, opts.arch, t, if (is_world) "world" else "pkg", jobs.items.len, failed_names, unbumped.items, skipped_names);
         if (failed_names.len > 0 and !keep_going) std.process.exit(1);
         if (failed_names.len > 0 or skipped_names.len > 0 or unbumped.items.len > 0) {
-            std.debug.print("\n{d} failed:", .{failed_names.len});
-            for (failed_names) |n| std.debug.print(" {s}", .{n});
+            term.print("\n{d} failed:", .{failed_names.len});
+            for (failed_names) |n| term.print(" {s}", .{n});
             if (unbumped.items.len > 0) {
-                std.debug.print("\n{d} changed without a release bump (not built):", .{unbumped.items.len});
-                for (unbumped.items) |n| std.debug.print(" {s}", .{n});
+                term.print("\n{d} changed without a release bump (not built):", .{unbumped.items.len});
+                for (unbumped.items) |n| term.print(" {s}", .{n});
             }
-            std.debug.print("\n{d} skipped:", .{skipped_names.len});
-            for (skipped_names) |n| std.debug.print(" {s}", .{n});
-            std.debug.print("\nsummary: logs/{s}/last-run.txt\n", .{opts.arch});
+            term.print("\n{d} skipped:", .{skipped_names.len});
+            for (skipped_names) |n| term.print(" {s}", .{n});
+            term.print("\nsummary: logs/{s}/last-run.txt\n", .{opts.arch});
             std.process.exit(1);
         }
-        std.debug.print("summary: logs/{s}/last-run.txt\n", .{opts.arch});
+        term.print("summary: logs/{s}/last-run.txt\n", .{opts.arch});
     } else if (std.mem.eql(u8, cmd, "outdated")) {
         // Recipes whose recipe, patches or files changed since they were built,
         // at the same version-release: world would refuse them (SPEC.md 7.2).

@@ -55,6 +55,9 @@ pub const Recipe = struct {
     triggers: []const []const u8 = &.{},
     options: []const []const u8 = &.{},
     environment: ?[]const u8 = null,
+    /// nugetdeps: the commands that restore the source's NuGet packages. Run
+    /// once per source with the network, to fill the shared store (SPEC.md 7.4).
+    restore: ?[]const u8 = null,
     setup: ?[]const u8 = null,
     build: ?[]const u8 = null,
     check: ?[]const u8 = null,
@@ -70,11 +73,11 @@ pub const Error = error{InvalidRecipe} || Allocator.Error;
 const known_keys = [_][]const u8{
     "name",      "version",   "release",     "summary",     "description", "license",
     "homepage",  "source",    "patches",     "archs",       "hostdeps",    "builddeps",
-    "checkdeps", "rundeps",   "options",     "environment", "setup",       "build",
+    "checkdeps", "rundeps",   "options",     "environment", "restore",     "setup",       "build",
     "check",     "install",   "subpackages", "provides",    "triggers",    "replaces",
 };
 
-const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap", "zigdeps", "godeps", "cargodeps", "npmdeps", "gradledeps", "meta", "rootlayout" };
+const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap", "zigdeps", "godeps", "cargodeps", "npmdeps", "gradledeps", "nugetdeps", "meta", "rootlayout" };
 const known_archs = [_][]const u8{ "x86_64", "aarch64", "riscv64" };
 
 /// Parse and validate `text`. All returned memory lives in `arena`.
@@ -106,6 +109,7 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
     r.description = try cfg.optString(arena, diag, root, "description");
     r.homepage = try cfg.optString(arena, diag, root, "homepage");
     r.environment = try cfg.optString(arena, diag, root, "environment");
+    r.restore = try cfg.optString(arena, diag, root, "restore");
     r.setup = try cfg.optString(arena, diag, root, "setup");
     r.build = try cfg.optString(arena, diag, root, "build");
     r.check = try cfg.optString(arena, diag, root, "check");
@@ -157,6 +161,8 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
         if (!dist) return cfg.fail(arena, diag, "option 'gradledeps' needs a Gradle distribution (gradle-<version>-bin.zip) among the sources", .{});
         if (!contains(r.hostdeps, "unzip")) return cfg.fail(arena, diag, "option 'gradledeps' needs 'unzip' in hostdeps", .{});
     }
+    if (contains(r.options, "nugetdeps") and r.restore == null)
+        return cfg.fail(arena, diag, "option 'nugetdeps' needs a 'restore' step (the dotnet restore commands)", .{});
     return r;
 }
 
