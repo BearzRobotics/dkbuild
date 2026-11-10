@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/apr/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "apr"
+version = "1.7.6"
+release = 1
+summary = "Apache Portable Runtime"
+license = "Apache-2.0"
+homepage = "https://apr.apache.org"
+patches = ["test-strtok.patch", "tests.patch"]
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["libexpat-devel", "util-linux-devel", "linux-headers"]
+options = ["!cross"]
+
+source = [
+    { url = "https://archive.apache.org/dist/apr/apr-1.7.6.tar.gz", sha256 = "6a10e7f7430510600af25fabf466e1df61aaae910bf1dc5d10c44a4433ccc81d" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-installbuilddir=/usr/lib/apr/build-1
+'''
+build = '''
+%make
+'''
+check = '''
+%make check -j1
+'''
+install = '''
+%make_install
+'''

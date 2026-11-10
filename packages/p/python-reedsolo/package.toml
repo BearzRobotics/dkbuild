@@ -1,0 +1,19 @@
+# needed by: esptool.
+name = "python-reedsolo"
+version = "1.7.0"
+release = 1
+summary = "Reed-Solomon codec in Python"
+license = "Unlicense OR MIT-0"
+homepage = "https://github.com/tomerfiliba-org/reedsolomon"
+hostdeps = ["python", "python-setuptools"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/r/reedsolo/reedsolo-1.7.0.tar.gz", sha256 = "c1359f02742751afe0f1c0de9f0772cc113835aa2855d2db420ea24393c87732" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-reedsolo/LICENSE"
+'''

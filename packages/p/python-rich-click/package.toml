@@ -1,0 +1,20 @@
+# needed by: esptool.
+name = "python-rich-click"
+version = "1.8.9"
+release = 1
+summary = "Rich formatting for Click"
+license = "MIT"
+homepage = "https://github.com/ewels/rich-click"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python-click", "python-rich"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/r/rich_click/rich_click-1.8.9.tar.gz", sha256 = "fd98c0ab9ddc1cf9c0b7463f68daf28b4d0033a74214ceb02f761b3ff2af3136" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-rich-click/LICENSE"
+'''

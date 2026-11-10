@@ -1,0 +1,71 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/grub/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "grub"
+version = "2.12"
+release = 3
+summary = "GRand Unified Bootloader version 2"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/grub"
+patches = ["0001-disable-floppies.patch", "0002-mkconfig-loopback.patch", "0003-gettext-quiet.patch", "0004-mkconfig-nonexistent-loopback.patch", "0005-default-grub-d.patch", "0006-install-powerpc-machtypes.patch", "0007-ieee1275-clear-reset.patch", "0008-ppc64le-disable-vsx.patch", "0009-zpool-full-device-name.patch", "0010-net-read-bracketed-ipv6-addr.patch", "0011-bootp-new-net_bootp6-command.patch", "0012-efinet-uefi-ipv6-pxe-support.patch", "0013-bootp-process-dhcpack-http-boot.patch", "0014-efinet-set-network-from-uefi-devpath.patch", "0015-efinet-set-dns-from-uefi-proto.patch", "0016-support-uefi-networking-protocols.patch", "0017-efinet-also-use-the-fw-accel-for-http.patch", "0018-efi-http-match-protocol-hostname.patch", "0019-add-fw-path-variable-efi.patch", "0020-use-fw-path-prefix.patch", "0021-try-prefixes-for-tftp-config.patch", "0022-prepend-prefix-when-http-relative.patch", "0023-efi-http-enclose-literal-ipv6.patch", "0024-http-prepend-prefix-path-relative.patch", "0025-discover-device-config-fallback.patch", "0026-efinet-add-dhcp-proxy-support.patch", "0027-rhboot-http-message-field-size.patch", "0028-insmod-xzio-and-lziopio-on-xen.patch", "0029-install-xen-binaries.patch", "0030-bash-completion-drop-have-checks.patch", "0031-at-keyboard-module-init.patch", "0033-xen-no-xsm.patch", "0034-pc-verifiers-module.patch", "0035-debug-verifiers.patch", "0036-mkimage-fix-section-sizes.patch", "0037-lvrename-boot-fail.patch", "0038-grub-os-prober.patch", "0039-revert-efi-fallback-to-legacy.patch", "0040-loader-framework.patch", "0041-efi-use-peimage-shim.patch", "0042-zstd-require-8-byte-buffer.patch", "0043-fat-fix-listing-root-dir.patch", "0044-fdt-add-debug.patch", "0045-fdt-fixup-protocol.patch", "0046-extra-deps-lst.patch", "add-grub-color-variables.patch", "arm64-212-clang-miscomp.patch", "arm64.patch", "build-force-no-pie.patch", "disable-falign-loops.patch", "freestanding-no-interp.patch", "i386-do-not-infer-ieee1275.patch", "lvm-harmless-warnings-probe.patch", "mkconfig-portability.patch", "nope.patch", "os-prober-osx86.patch", "portable-paste.patch", "riscv64-call.patch", "uefi-fw-remove-fsetup-check.patch", "x86_64-efi.patch"]
+hostdeps = ["autoconf-archive", "automake", "binutils", "llvm", "bison", "flex", "font-unifont-bdf", "gawk", "gettext", "help2man", "libtool", "pkgconf", "python"]
+builddeps = ["freetype-devel", "fuse-devel", "gettext-devel", "lvm2-devel", "ncurses-devel", "xz-devel"]
+rundeps = ["os-prober", "util-linux"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/grub/grub-2.12.tar.xz", sha256 = "f3c97391f7c4eaa677a78e090c7e97e6dc47b16f655f04683ebd37bef7fe0faa" },
+]
+
+environment = '''
+# configure's checks; GRUB's images are linked with GNU ld (binutils' ld.bfd)
+export CC="clang --start-no-unused-arguments -fuse-ld=bfd --end-no-unused-arguments"
+export TARGET_CC="$CC"
+'''
+setup = '''
+autoreconf -if
+common="--sysconfdir=/etc --prefix=/usr --libdir=/usr/lib --sbindir=/usr/bin --disable-werror \
+    --enable-device-mapper --enable-cache-stats --enable-nls --enable-grub-mkfont --enable-grub-mount AWK=gawk"
+# the tools, then BIOS and 32- and 64-bit EFI firmware images
+mkdir -p build && (cd build && ../configure --host=$target --with-platform=none $common)
+for p in i386:pc i386:efi x86_64:efi; do
+    a=${p%:*}; f=${p#*:}
+    mkdir -p build_${a}_$f
+    (cd build_${a}_$f && CFLAGS="-fno-stack-protector" LDFLAGS="-fuse-ld=bfd" BUILD_CFLAGS="-fno-stack-protector" \
+        TARGET_OBJCOPY=llvm-objcopy TARGET_RANLIB=llvm-ranlib TARGET_STRIP=llvm-strip TARGET_NM=llvm-nm MAKE=make \
+        ../configure --host=$target --target=$a --with-platform=$f --disable-efiemu $common)
+done
+'''
+build = '''
+make -C build -j$jobs
+for d in build_i386_pc build_i386_efi build_x86_64_efi; do make -C $d -j$jobs; done
+'''
+install = '''
+# the platforms first, keeping only their modules; then the tools
+for d in build_i386_pc build_i386_efi build_x86_64_efi; do
+    make -C $d install DESTDIR="$pkgdir"
+    rm -rf "$pkgdir/etc" "$pkgdir/usr/share" "$pkgdir/usr/bin"
+done
+make -C build install DESTDIR="$pkgdir"
+install -Dm755 $pkgfiles/99-grub.sh "$pkgdir/usr/lib/kernel.d/99-grub.sh"
+# conf file
+install -Dm644 $pkgfiles/grub.default "$pkgdir/etc/default/grub"
+# update-grub
+install -Dm755 $pkgfiles/update-grub "$pkgdir/usr/bin/update-grub"
+# move completions
+mkdir -p "$pkgdir/usr/share/bash-completion"
+mv "$pkgdir/etc/bash_completion.d" "$pkgdir/usr/share/bash-completion/completions"
+# unused tools
+rm -rf "$pkgdir/usr/bin/grub-ofpathname"
+rm -rf "$pkgdir/usr/bin/grub-sparc64-setup"
+'''
+
+[subpackages.i386-pc]
+summary = "x86 PC/BIOS modules"
+paths   = ["/usr/lib/grub/i386-pc"]
+
+[subpackages.i386-efi]
+summary = "x86 EFI modules"
+paths   = ["/usr/lib/grub/i386-efi"]
+
+[subpackages.x86_64-efi]
+summary = "x86_64 EFI modules"
+paths   = ["/usr/lib/grub/x86_64-efi"]

@@ -1,0 +1,26 @@
+# LXQt: LXQt archive manager. 2.4 series, like the rest of LXQt here.
+name = "lxqt-archiver"
+version = "1.4.0"
+release = 1
+summary = "LXQt archive manager"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/lxqt/lxqt-archiver"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "lxqt-build-tools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qttools-devel", "libfm-qt-devel", "json-glib-devel", "glib-devel"]
+rundeps = ["libarchive", "7zip"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/lxqt/lxqt-archiver/releases/download/1.4.0/lxqt-archiver-1.4.0.tar.xz", sha256 = "b93eda6d80391d373a47afd8b28fa401762300dcdb51d8bc1d3a2263bc186ae7" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/lxqt-archiver/LICENSE"
+'''

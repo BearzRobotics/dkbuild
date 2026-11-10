@@ -1,0 +1,19 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/pngquant/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "pngquant"
+version = "3.0.3"
+release = 2
+summary = "Lossy PNG compressor"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/kornelski/pngquant"
+hostdeps = ["rust", "pkgconf"]
+builddeps = ["lcms2-devel", "libpng-devel", "rust"]
+
+source = [
+    { url = "https://github.com/kornelski/pngquant/archive/refs/tags/3.0.3.tar.gz", sha256 = "ddd8889a9c269ba454d0c5e4f7167948d55d77c4570b23f671809fd3a68b6822" },
+    { url = "https://github.com/ImageOptim/libimagequant/archive/6e9805761851f1a8320380b9f563961f892ec6ba.tar.gz", sha256 = "d0167e69f9303029bd1df3ea728fe9e7a9c4b64050c266140b119443bd2da4b7" },
+]
+
+install = '''
+install -Dm644 pngquant.1 "$pkgdir/usr/share/man/man1/pngquant.1"
+'''

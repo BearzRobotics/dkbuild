@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/startup-notification/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "startup-notification"
+version = "0.12"
+release = 1
+summary = "Library for tracking application startup"
+license = "LGPL-2.1-only"
+homepage = "https://www.freedesktop.org/wiki/Software/startup-notification"
+hostdeps = ["automake", "pkgconf", "libtool"]
+builddeps = ["libx11-devel", "libsm-devel", "xcb-util-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://distributions.freedesktop.org/software/startup-notification/releases/startup-notification-0.12.tar.gz", sha256 = "3c391f7e930c583095045cd2d10eb73a64f085c7fde9d260f2652c7cb3cfbe4a" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    lf_cv_sane_realloc=yes \
+    lf_cv_sane_malloc=yes
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

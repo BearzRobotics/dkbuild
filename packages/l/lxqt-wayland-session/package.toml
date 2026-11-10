@@ -1,0 +1,26 @@
+# LXQt: LXQt on Wayland compositors (labwc, ...). 2.4 series, like the rest of LXQt here.
+name = "lxqt-wayland-session"
+version = "0.4.0"
+release = 1
+summary = "LXQt on Wayland compositors (labwc, ...)"
+license = "GPL-2.0-or-later AND BSD-3-Clause"
+homepage = "https://github.com/lxqt/lxqt-wayland-session"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "lxqt-build-tools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qttools-devel", "liblxqt-devel"]
+rundeps = ["labwc", "lxqt-session", "xwayland"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/lxqt/lxqt-wayland-session/releases/download/0.4.0/lxqt-wayland-session-0.4.0.tar.xz", sha256 = "b9aa41aa0ce3e187877dc6ccef1abb6542faeb1ec4b755cb9f8af716079da68e" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/lxqt-wayland-session/LICENSE"
+'''

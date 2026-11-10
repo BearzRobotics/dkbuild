@@ -1,0 +1,25 @@
+# LXQt: LXQt polkit authentication agent. 2.4 series, like the rest of LXQt here.
+name = "lxqt-policykit"
+version = "2.4.0"
+release = 1
+summary = "LXQt polkit authentication agent"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/lxqt/lxqt-policykit"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "lxqt-build-tools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qttools-devel", "liblxqt-devel", "polkit-qt-1-devel", "polkit-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/lxqt/lxqt-policykit/releases/download/2.4.0/lxqt-policykit-2.4.0.tar.xz", sha256 = "d151161ce639d3dee07f41e0fc623951da0d62c405b1cecd6960e76cfdc43846" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/lxqt-policykit/LICENSE"
+'''

@@ -1,0 +1,30 @@
+# Loads and inspects programs on RP2040/RP2350 boards. Builds against the
+# Pico SDK's sources (the second source).
+name = "picotool"
+version = "2.3.1"
+release = 1
+summary = "Raspberry Pi Pico (RP2040/RP2350) tool: load, info, reboot"
+license = "BSD-3-Clause"
+homepage = "https://github.com/raspberrypi/picotool"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["libusb-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/raspberrypi/picotool/archive/refs/tags/2.3.1.tar.gz", sha256 = "07946d294ab5c474b610660c53c5d94216e4ab13555de075ed521f98afc4f44c" },
+    { url = "https://github.com/raspberrypi/pico-sdk/archive/refs/tags/2.3.1.tar.gz", sha256 = "38d315b7091985134721cd3bb6a9656f0ef8462ec8dc7b62d5886bc7a9d275a2" },
+]
+
+setup = '''
+%cmake \
+    -DPICO_SDK_PATH=/build/pico-sdk-2.3.1 \
+    -DPICOTOOL_NO_LIBUSB=0
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.TXT "$pkgdir/usr/share/licenses/picotool/LICENSE.TXT"
+install -Dm644 udev/60-picotool.rules "$pkgdir/usr/lib/udev/rules.d/60-picotool.rules" 2>/dev/null || true
+'''

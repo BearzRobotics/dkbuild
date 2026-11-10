@@ -1,0 +1,49 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/apr-util/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "apr-util"
+version = "1.6.3"
+release = 1
+summary = "Apache Portable Runtime utility library"
+license = "Apache-2.0"
+homepage = "https://apr.apache.org"
+patches = ["tests.patch"]
+hostdeps = ["apr-devel", "libtool", "pkgconf"]
+builddeps = ["apr-devel", "libexpat-devel", "openssl-devel", "sqlite-devel", "unixodbc-devel", "zlib-ng-compat-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://archive.apache.org/dist/apr/apr-util-1.6.3.tar.gz", sha256 = "2b74d8932703826862ca305b094eef2983c27b39d5c9414442e9976a9acf1983" },
+]
+
+setup = '''
+%configure \
+    --with-apr=/usr \
+    --with-crypto \
+    --with-openssl \
+    --without-ldap \
+    --without-gdbm \
+    --without-berkeley-db
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+# the modules' static archives are of no use (libaprutil-1.a itself stays)
+rm -f "$pkgdir"/usr/lib/apr-util-1/*.a
+'''
+
+[subpackages.odbc]
+summary = "ODBC module"
+depends = ["apr-util"]
+install_if = ["apr-util", "unixodbc"]
+paths   = ["/usr/lib/apr-util-1/*odbc*"]
+
+[subpackages.sqlite]
+summary = "SQLite module"
+depends = ["apr-util"]
+install_if = ["apr-util", "sqlite"]
+paths   = ["/usr/lib/apr-util-1/*sqlite*"]

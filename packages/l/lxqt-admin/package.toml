@@ -1,0 +1,25 @@
+# LXQt: LXQt time and user administration. 2.4 series, like the rest of LXQt here.
+name = "lxqt-admin"
+version = "2.4.0"
+release = 1
+summary = "LXQt time and user administration"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/lxqt/lxqt-admin"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "lxqt-build-tools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qttools-devel", "liblxqt-devel", "polkit-qt-1-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/lxqt/lxqt-admin/releases/download/2.4.0/lxqt-admin-2.4.0.tar.xz", sha256 = "17b7c5e10bbdb2a6436ef237a7b0c5672a42a9b874f46cb147f81f0a2eff170a" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/lxqt-admin/COPYING"
+'''

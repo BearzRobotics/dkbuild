@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/pavucontrol-qt/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "pavucontrol-qt"
+version = "2.4.0"
+release = 1
+summary = "Qt Pulseaudio mixer"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/lxqt/pavucontrol-qt"
+hostdeps = ["cmake", "lxqt-build-tools", "ninja", "perl", "pkgconf"]
+builddeps = ["libpulse-devel", "qt6-qtbase-devel", "qt6-qttools-devel"]
+
+source = [
+    { url = "https://github.com/lxqt/pavucontrol-qt/releases/download/2.4.0/pavucontrol-qt-2.4.0.tar.xz", sha256 = "7f813d3029e9f1b66020cf3da143d07196dd8bce01a95bd754489287ca5b6380" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

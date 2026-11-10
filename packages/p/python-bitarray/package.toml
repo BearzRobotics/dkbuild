@@ -1,0 +1,20 @@
+# needed by: python-bitstring.
+name = "python-bitarray"
+version = "3.4.2"
+release = 1
+summary = "Efficient arrays of booleans"
+license = "PSF-2.0"
+homepage = "https://github.com/ilanschnell/bitarray"
+hostdeps = ["python", "python-setuptools"]
+builddeps = ["python-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/b/bitarray/bitarray-3.4.2.tar.gz", sha256 = "78ed2b911aabede3a31e3329b1de8abdc8104bd5e0545184ddbd9c7f668f4059" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-bitarray/LICENSE"
+'''

@@ -1,0 +1,25 @@
+# LXQt: File management library for LXQt. 2.4 series, like the rest of LXQt here.
+name = "libfm-qt"
+version = "2.4.0"
+release = 1
+summary = "File management library for LXQt"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/lxqt/libfm-qt"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "lxqt-build-tools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qttools-devel", "glib-devel", "libexif-devel", "menu-cache-devel", "libxcb-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/lxqt/libfm-qt/releases/download/2.4.0/libfm-qt-2.4.0.tar.xz", sha256 = "72766d7b41fd1aa06c0a7ef8be015205506ff75963b977e5307994555dcc023b" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libfm-qt/LICENSE"
+'''

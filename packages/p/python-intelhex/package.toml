@@ -1,0 +1,19 @@
+# needed by: esptool.
+name = "python-intelhex"
+version = "2.3.0"
+release = 1
+summary = "Intel HEX file handling"
+license = "BSD-3-Clause"
+homepage = "https://github.com/python-intelhex/intelhex"
+hostdeps = ["python", "python-setuptools"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/i/intelhex/intelhex-2.3.0.tar.gz", sha256 = "892b7361a719f4945237da8ccf754e9513db32f5628852785aea108dcd250093" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-intelhex/LICENSE.txt"
+'''

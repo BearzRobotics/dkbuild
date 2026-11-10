@@ -1,0 +1,25 @@
+# LXQt: Screenshot tool. 2.4 series, like the rest of LXQt here.
+name = "screengrab"
+version = "3.2.0"
+release = 1
+summary = "Screenshot tool"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/lxqt/screengrab"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "lxqt-build-tools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qttools-devel", "kwindowsystem-devel", "layer-shell-qt-devel", "libqtxdg-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/lxqt/screengrab/releases/download/3.2.0/screengrab-3.2.0.tar.xz", sha256 = "f43f27b261c3b22f05c79cb0131460bb144faf2720b590fc906c89cbcd3678bf" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/screengrab/COPYING"
+'''

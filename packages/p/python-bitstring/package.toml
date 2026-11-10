@@ -1,0 +1,20 @@
+# needed by: esptool.
+name = "python-bitstring"
+version = "4.3.1"
+release = 1
+summary = "Python module for binary data"
+license = "MIT"
+homepage = "https://github.com/scott-griffiths/bitstring"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python-bitarray"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/b/bitstring/bitstring-4.3.1.tar.gz", sha256 = "a08bc09d3857216d4c0f412a1611056f1cc2b64fd254fb1e8a0afba7cfa1a95a" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-bitstring/LICENSE"
+'''

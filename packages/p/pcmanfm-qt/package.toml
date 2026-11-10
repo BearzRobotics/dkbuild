@@ -1,0 +1,25 @@
+# LXQt: LXQt file manager and desktop. 2.4 series, like the rest of LXQt here.
+name = "pcmanfm-qt"
+version = "2.4.0"
+release = 1
+summary = "LXQt file manager and desktop"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/lxqt/pcmanfm-qt"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "lxqt-build-tools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qttools-devel", "libfm-qt-devel", "layer-shell-qt-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/lxqt/pcmanfm-qt/releases/download/2.4.0/pcmanfm-qt-2.4.0.tar.xz", sha256 = "53fb1acf5a818300487ceffabc5b768034fa4dee956b9d1bc0019bb456b48daf" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/pcmanfm-qt/LICENSE"
+'''

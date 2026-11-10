@@ -1,0 +1,28 @@
+# needed by: libfm-qt (application menus).
+name = "menu-cache"
+version = "1.1.1"
+release = 1
+summary = "Caches freedesktop.org application menus"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/lxde/menu-cache"
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf"]
+builddeps = ["glib-devel", "libfm-extra-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/lxde/menu-cache/archive/refs/tags/1.1.1.tar.gz", sha256 = "e8af90467df271c3c8700c840ca470ca2915699c6f213c502a87d74608748f08" },
+]
+
+setup = '''
+# no gtk-doc here: its API documentation is left out
+sed -i 's/^GTK_DOC_CHECK.*/AM_CONDITIONAL([ENABLE_GTK_DOC], [false])\nAM_CONDITIONAL([GTK_DOC_USE_LIBTOOL], [true])/' configure.ac
+autoreconf -fi
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/menu-cache/COPYING"
+'''

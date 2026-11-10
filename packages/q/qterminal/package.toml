@@ -1,0 +1,25 @@
+# LXQt: LXQt terminal emulator. 2.4 series, like the rest of LXQt here.
+name = "qterminal"
+version = "2.4.0"
+release = 1
+summary = "LXQt terminal emulator"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/lxqt/qterminal"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "lxqt-build-tools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qttools-devel", "qtermwidget-devel", "layer-shell-qt-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/lxqt/qterminal/releases/download/2.4.0/qterminal-2.4.0.tar.xz", sha256 = "aeb6cf5ff7f31f0b89e60f6cc1c83c4d6fbed57717196d2ebba2bc0dcb8436d4" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/qterminal/LICENSE"
+'''

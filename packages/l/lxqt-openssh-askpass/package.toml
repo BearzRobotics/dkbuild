@@ -1,0 +1,25 @@
+# LXQt: LXQt passphrase prompt for OpenSSH. 2.4 series, like the rest of LXQt here.
+name = "lxqt-openssh-askpass"
+version = "2.4.0"
+release = 1
+summary = "LXQt passphrase prompt for OpenSSH"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/lxqt/lxqt-openssh-askpass"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "lxqt-build-tools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qttools-devel", "liblxqt-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/lxqt/lxqt-openssh-askpass/releases/download/2.4.0/lxqt-openssh-askpass-2.4.0.tar.xz", sha256 = "1a4d5c9c9450cc08cacd1646fc55dc9c78c297ab1fbae49b8047df78665b5c55" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/lxqt-openssh-askpass/LICENSE"
+'''

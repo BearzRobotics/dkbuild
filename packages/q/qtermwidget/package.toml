@@ -1,0 +1,25 @@
+# LXQt: Terminal widget for Qt (qterminal's). 2.4 series, like the rest of LXQt here.
+name = "qtermwidget"
+version = "2.4.0"
+release = 1
+summary = "Terminal widget for Qt (qterminal's)"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/lxqt/qtermwidget"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "lxqt-build-tools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qttools-devel", "utf8proc-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/lxqt/qtermwidget/releases/download/2.4.0/qtermwidget-2.4.0.tar.xz", sha256 = "ceb7d1991ecc0e75b751b6b7786c4962598d367c6e9a0b55f78fc12a49f25304" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/qtermwidget/LICENSE"
+'''

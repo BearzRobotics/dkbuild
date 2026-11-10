@@ -1,0 +1,20 @@
+# Flashes and talks to ESP32/ESP8266 chips over serial.
+name = "esptool"
+version = "5.6.0"
+release = 1
+summary = "Espressif ESP32/ESP8266 flasher"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/espressif/esptool"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python-bitstring", "python-cryptography", "python-intelhex", "python-pyserial", "python-pyyaml", "python-reedsolo", "python-rich-click"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/espressif/esptool/archive/refs/tags/v5.6.0.tar.gz", sha256 = "33c1907f45513240d04057b93857b1e1b155396dc41d96cf2ae4cb7aabaa782c" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/esptool/LICENSE"
+'''

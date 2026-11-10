@@ -1,0 +1,35 @@
+# Debugs and flashes ARM, RISC-V and other chips over JTAG/SWD (ST-Link, CMSIS-DAP,
+# FTDI, Raspberry Pi GPIO, ...). With its udev rules for the adapters.
+name = "openocd"
+version = "0.12.0"
+release = 1
+summary = "On-chip debugger and programmer (JTAG/SWD)"
+license = "GPL-2.0-or-later"
+homepage = "https://openocd.org"
+hostdeps = ["pkgconf", "texinfo"]
+builddeps = ["hidapi-devel", "libftdi1-devel", "libgpiod-devel", "libusb-devel", "capstone-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/openocd/openocd/0.12.0/openocd-0.12.0.tar.bz2", sha256 = "af254788be98861f2bd9103fe6e60a774ec96a8c374744eef9197f6043075afa" },
+]
+
+setup = '''
+%configure \
+    --disable-werror \
+    --enable-sysfsgpio \
+    --enable-linuxgpiod \
+    --enable-remote-bitbang \
+    --enable-cmsis-dap \
+    --enable-ftdi \
+    --enable-stlink \
+    --enable-jlink=no
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 contrib/60-openocd.rules "$pkgdir/usr/lib/udev/rules.d/60-openocd.rules"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/openocd/COPYING"
+'''

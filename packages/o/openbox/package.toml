@@ -1,0 +1,28 @@
+# Openbox: LXQt's window manager on X11 (Wayland sessions use labwc).
+name = "openbox"
+version = "3.6.1"
+release = 1
+summary = "Stacking window manager for X (LXQt on X11)"
+license = "GPL-2.0-or-later"
+homepage = "http://openbox.org"
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf", "gettext"]
+builddeps = ["glib-devel", "imlib2-devel", "libxml2-devel", "pango-devel", "startup-notification-devel", "libxcursor-devel", "libxinerama-devel", "libxrandr-devel", "libxft-devel", "librsvg-devel"]
+options = ["!check"]
+
+source = [
+    { url = "http://openbox.org/dist/openbox/openbox-3.6.1.tar.gz", sha256 = "8b4ac0760018c77c0044fab06a4f0c510ba87eae934d9983b10878483bde7ef7" },
+]
+
+setup = '''
+autoreconf -fi
+%configure \
+    --sysconfdir=/etc \
+    --disable-static=no
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/openbox/COPYING"
+'''

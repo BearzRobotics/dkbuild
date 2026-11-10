@@ -1,0 +1,25 @@
+# LXQt: Openbox configuration tool. 2.4 series, like the rest of LXQt here.
+name = "obconf-qt"
+version = "0.16.5"
+release = 1
+summary = "Openbox configuration tool"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/lxqt/obconf-qt"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "lxqt-build-tools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qttools-devel", "openbox-devel", "glib-devel", "libxml2-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/lxqt/obconf-qt/releases/download/0.16.5/obconf-qt-0.16.5.tar.xz", sha256 = "034883680912f7ea24dbd4c28b8ee4cf096774aa588e39431d319d56a924160c" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/obconf-qt/COPYING"
+'''

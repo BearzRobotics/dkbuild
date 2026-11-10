@@ -1,0 +1,25 @@
+# Flashes boards over USB DFU (STM32, many Arduino-class boards).
+name = "dfu-util"
+version = "0.11"
+release = 1
+summary = "Device Firmware Upgrade (USB DFU) tool"
+license = "GPL-2.0-or-later"
+homepage = "https://dfu-util.sourceforge.net"
+hostdeps = ["pkgconf"]
+builddeps = ["libusb-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://dfu-util.sourceforge.net/releases/dfu-util-0.11.tar.gz", sha256 = "b4b53ba21a82ef7e3d4c47df2952adf5fa494f499b6b0b57c58c5d04ae8ff19e" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/dfu-util/COPYING"
+'''

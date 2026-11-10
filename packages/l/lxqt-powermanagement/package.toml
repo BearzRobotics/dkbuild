@@ -1,0 +1,25 @@
+# LXQt: LXQt power management. 2.4 series, like the rest of LXQt here.
+name = "lxqt-powermanagement"
+version = "2.4.0"
+release = 1
+summary = "LXQt power management"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/lxqt/lxqt-powermanagement"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "lxqt-build-tools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qttools-devel", "liblxqt-devel", "kidletime-devel", "solid-devel", "kwindowsystem-devel", "libqtxdg-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/lxqt/lxqt-powermanagement/releases/download/2.4.0/lxqt-powermanagement-2.4.0.tar.xz", sha256 = "24dcc7f668e97c8c0f8584115d376190493d47f36c73bab6042814c772280360" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/lxqt-powermanagement/LICENSE"
+'''

@@ -1,0 +1,25 @@
+# LXQt: LXQt platform integration for Qt. 2.4 series, like the rest of LXQt here.
+name = "lxqt-qtplugin"
+version = "2.4.0"
+release = 1
+summary = "LXQt platform integration for Qt"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/lxqt/lxqt-qtplugin"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "lxqt-build-tools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qttools-devel", "libfm-qt-devel", "libdbusmenu-lxqt-devel", "libqtxdg-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/lxqt/lxqt-qtplugin/releases/download/2.4.0/lxqt-qtplugin-2.4.0.tar.xz", sha256 = "8c36b572613ccb0e35d39e87c044ac07e115c2de85bbdb646ffe4533af788a45" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/lxqt-qtplugin/LICENSE"
+'''
