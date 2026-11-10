@@ -2,9 +2,11 @@
 # Mesa needs it for Intel's Vulkan and GL drivers and for rusticl, its OpenCL.
 # Standalone from the llvm-project source, against the installed LLVM and
 # clang, with llvm-spirv for the SPIR-V targets. Version locked to `llvm`.
+# r2: LLVM 23 builds one target per configure: spirv and spirv64, with the
+#     spirv*-mesa3d-.spv names and libclc.pc Mesa reads.
 name = "libclc"
 version = "23.1.5"
-release = 1
+release = 2
 summary = "Open source implementation of the OpenCL C library"
 license = "Apache-2.0 WITH LLVM-exception"
 homepage = "https://libclc.llvm.org"
@@ -17,12 +19,34 @@ source = [
 ]
 
 setup = '''
-cmake -S libclc -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DLLVM_DIR=/usr/lib/cmake/llvm
+# LLVM 23's libclc builds one target per configure (LLVM_DEFAULT_TARGET_TRIPLE).
+# Mesa (Rusticl, the Intel compilers) wants the two SPIR-V ones.
+for t in spirv-unknown-unknown spirv64-unknown-unknown; do
+    cmake -S libclc -B build-$t -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib \
+        -DCMAKE_BUILD_TYPE=Release -DLLVM_DIR=/usr/lib/cmake/llvm -DLLVM_DEFAULT_TARGET_TRIPLE=$t
+done
 '''
 build = '''
-ninja -C build -j$jobs
+for t in spirv-unknown-unknown spirv64-unknown-unknown; do ninja -C build-$t -j$jobs; done
 '''
 install = '''
-DESTDIR=$pkgdir ninja -C build install
+for t in spirv-unknown-unknown spirv64-unknown-unknown; do DESTDIR=$pkgdir ninja -C build-$t install; done
+# The names and the libclc.pc Mesa looks for (libclc before LLVM 23 made them).
+d="$pkgdir/usr/share/clc"
+ln -s spirv-unknown-unknown/libclc.spv "$d/spirv-mesa3d-.spv"
+ln -s spirv64-unknown-unknown/libclc.spv "$d/spirv64-mesa3d-.spv"
+test -e "$d/spirv-unknown-unknown/libclc.spv" && test -e "$d/spirv64-unknown-unknown/libclc.spv"
+mkdir -p "$pkgdir/usr/share/pkgconfig"
+cat > "$pkgdir/usr/share/pkgconfig/libclc.pc" <<EOF2
+prefix=/usr
+libexecdir=/usr/share/clc
+includedir=/usr/include
+
+Name: libclc
+Description: Library requirements of the OpenCL C programming language
+Version: 23.1.5
+Cflags: -I\${includedir}
+Libs: -L\${libexecdir}
+EOF2
 install -Dm644 LICENSE.TXT "$pkgdir/usr/share/licenses/libclc/LICENSE.TXT"
 '''

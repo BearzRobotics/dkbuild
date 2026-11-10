@@ -2,9 +2,11 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: the X libraries. Hyprland needs libXcursor (cursor themes), and that pulls in this small X stack.
 # r2: static libraries too (in xorgproto-static), for fully static programs on musl.
+# r3: headers and .pc files stay in xorgproto (what most recipes depend on);
+#     xorgproto-devel is empty and depends on it, for the recipes that name -devel.
 name = "xorgproto"
 version = "2024.1"
-release = 2
+release = 3
 summary = "Combined X.Org X11 protocol headers"
 license = "MIT"
 homepage = "https://xorg.freedesktop.org"
@@ -31,3 +33,9 @@ done
 # provided by libx11-devel
 rm -rf "$pkgdir/usr/include/X11/extensions/XKBgeom.h"
 '''
+
+[subpackages.devel]
+summary = "Development files (all in xorgproto)"
+paths   = []
+empty   = true
+depends = ["xorgproto"]

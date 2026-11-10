@@ -2,9 +2,11 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: libx11.
 # r2: static libraries too (in xtrans-static), for fully static programs on musl.
+# r3: headers and .pc files stay in xtrans (what most recipes depend on);
+#     xtrans-devel is empty and depends on it, for the recipes that name -devel.
 name = "xtrans"
 version = "1.6.0"
-release = 2
+release = 3
 summary = "Network API translation layer to insulate X"
 license = "MIT"
 homepage = "https://xorg.freedesktop.org"
@@ -28,3 +30,9 @@ install = '''
 %make_install
 install -Dm644 COPYING "$pkgdir/usr/share/licenses/xtrans/COPYING"
 '''
+
+[subpackages.devel]
+summary = "Development files (all in xtrans)"
+paths   = []
+empty   = true
+depends = ["xtrans"]

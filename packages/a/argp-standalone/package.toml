@@ -3,9 +3,11 @@
 # 1.5.0 as built for the DKRescue ISO (Chimera had 1.4.1, whose output path differs).
 # Reviewed: no TODOs; dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r2: static libraries too (in argp-standalone-static), for fully static programs on musl.
+# r3: headers and .pc files stay in argp-standalone (what most recipes depend on);
+#     argp-standalone-devel is empty and depends on it, for the recipes that name -devel.
 name = "argp-standalone"
 version = "1.5.0"
-release = 2
+release = 3
 summary = "Standalone argp implementation"
 license = "LGPL-2.1-or-later"
 homepage = "https://github.com/argp-standalone/argp-standalone"
@@ -33,3 +35,9 @@ install = '''
 install -Dm644 libargp.a "$pkgdir/usr/lib/libargp.a"
 install -Dm644 argp.h "$pkgdir/usr/include/argp.h"
 '''
+
+[subpackages.devel]
+summary = "Development files (all in argp-standalone)"
+paths   = []
+empty   = true
+depends = ["argp-standalone"]

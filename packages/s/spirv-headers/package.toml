@@ -1,9 +1,11 @@
 # Imported from Chimera Linux cports: main/spirv-headers/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: spirv-tools, glslang, shaderc, mesa.
+# r2: headers and .pc files stay in spirv-headers (what most recipes depend on);
+#     spirv-headers-devel is empty and depends on it, for the recipes that name -devel.
 name = "spirv-headers"
 version = "1.4.363.0"
-release = 1
+release = 2
 summary = "Machine-readable files for the SPIR-V Registry"
 license = "custom:spirv-headers"
 homepage = "https://github.com/KhronosGroup/SPIRV-Headers"
@@ -24,3 +26,9 @@ install = '''
 %cmake_install
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/spirv-headers/LICENSE"
 '''
+
+[subpackages.devel]
+summary = "Development files (all in spirv-headers)"
+paths   = []
+empty   = true
+depends = ["spirv-headers"]

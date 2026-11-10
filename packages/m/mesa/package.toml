@@ -19,7 +19,7 @@ license = "MIT"
 homepage = "https://www.mesa3d.org"
 patches = ["mesa-26.2.5-llvm23-1.patch"]
 hostdeps = ["bindgen", "bison", "cbindgen", "flex", "glslang", "meson", "pkgconf", "python-mako", "python-ply", "python-pycparser", "python-pyyaml", "rust", "wayland", "wayland-protocols"]
-builddeps = ["llvm-devel", "elfutils-devel", "libarchive-devel", "libclc", "libdrm-devel", "libexpat-devel", "libffi-devel", "libglvnd-devel", "libva-devel", "libx11-devel", "libxcb-devel", "libxdamage-devel", "libxext-devel", "libxfixes-devel", "libxml2-devel", "libxrandr-devel", "libxshmfence-devel", "libxv-devel", "libxxf86vm-devel", "lm-sensors-devel", "lua-devel", "ncurses-devel", "spirv-llvm-translator-devel", "spirv-tools-devel", "vulkan-headers-devel", "wayland-devel", "wayland-protocols", "zlib-ng-compat-devel", "zstd-devel"]
+builddeps = ["llvm-devel", "elfutils-devel", "libarchive-devel", "libclc", "libclc-devel", "libdrm-devel", "libexpat-devel", "libffi-devel", "libglvnd-devel", "libva-devel", "libx11-devel", "libxcb-devel", "libxdamage-devel", "libxext-devel", "libxfixes-devel", "libxml2-devel", "libxrandr-devel", "libxshmfence-devel", "libxv-devel", "libxxf86vm-devel", "lm-sensors-devel", "lua-devel", "ncurses-devel", "spirv-llvm-translator-devel", "spirv-tools-devel", "vulkan-headers-devel", "wayland-devel", "wayland-protocols", "zlib-ng-compat-devel", "zstd-devel"]
 rundeps = []
 options = ["!cross", "!lto"]
 
