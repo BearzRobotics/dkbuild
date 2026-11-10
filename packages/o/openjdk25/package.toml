@@ -67,3 +67,11 @@ mkdir -p "$pkgdir/usr/bin" "$pkgdir/usr/share/man/man1"
 for f in "$d"/bin/*; do ln -s ../lib/jvm/java-25-openjdk/bin/$(basename "$f") "$pkgdir/usr/bin/$(basename "$f")"; done
 for f in "$d"/man/man1/*; do [ -e "$f" ] && ln -s ../../../lib/jvm/java-25-openjdk/man/man1/$(basename "$f") "$pkgdir/usr/share/man/man1/$(basename "$f")"; done
 '''
+
+# /usr/bin/java and friends, the man pages and /usr/lib/jvm/default: the system's
+# default Java. One JDK's -default at a time (21, the LTS, comes with openjdk21).
+[subpackages.default]
+summary = "OpenJDK 25 as the default Java (/usr/bin/java ...)"
+paths   = ["/usr/bin", "/usr/share/man/man1", "/usr/lib/jvm/default"]
+depends = ["openjdk25"]
+
