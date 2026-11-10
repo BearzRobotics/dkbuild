@@ -262,6 +262,14 @@ hold the toolchain decisions in one place, per target (6.1).
 | `%zig_build` | `zig build --release=safe --prefix /usr -Dtarget=$zig_target -Dcpu=$zig_cpu` with `--system` for vendored dependencies, `-j$jobs`, and `DESTDIR=$pkgdir` |
 | `%kernel_make` | `make LLVM=1 ARCH=$kernel_arch` |
 
+After `pkg` or `world`, `logs/<arch>/last-run.txt` (and a dated copy in
+`logs/<arch>/runs/`) lists what failed, each with its build log, what was not
+built because its recipe changed without a release bump, and what was skipped
+because something it needs failed. With `--keep-going` a recipe changed
+without a bump does not stop the run; it is listed there. `dkbuild outdated`
+lists those recipes without building anything, and `outdated --bump` raises
+their `release`.
+
 Build roots are made in `work/<name>/`, or in `$DKBUILD_FAST_WORK/<name>/`
 when that variable is set (a faster disk than the project's): only for recipes
 that are not heavy (no `jobs:N`), and only while that file system has 30 GB

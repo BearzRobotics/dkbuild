@@ -25,6 +25,7 @@ const usage =
     \\  image <file.toml>          make a root filesystem from repo/ (tarball, squashfs or
     \\                             directory in out/<name>/); see SPEC.md 8
     \\  prune [--dry-run] [--key FILE]
+    \\  outdated [--bump]          recipes changed since their last build without a new release (--bump raises it)
     \\                             remove packages from repo/ that their recipe no longer
     \\                             builds (older versions), and rebuild the index
     \\  graph <name>...            print the build order for packages
@@ -230,6 +231,7 @@ pub fn main(init: std.process.Init) !void {
         const outputs = try arena.alloc(?inputs.Produced, t.recipes.len);
         @memset(outputs, null);
         var jobs: std.ArrayList(sched.Job) = .empty;
+        var unbumped: std.ArrayList([]const u8) = .empty;
         var certain: usize = 0;
         for (t.recipes, 0..) |r, idx| {
             const rec_path = try std.fmt.allocPrint(arena, "{s}/repo/{s}/{s}.dkhash", .{ root, opts.arch, r.name });
@@ -261,7 +263,11 @@ pub fn main(init: std.process.Init) !void {
                 // with nothing to compare against and no reason to bump it
             } else if (!std.mem.eql(u8, &rec.?.inputs, &own[idx])) {
                 std.debug.print("error: {s}: its recipe, patches or files changed but the release is still r{d}; bump `release` (or use --force)\n", .{ r.name, r.release });
-                std.process.exit(1);
+                if (!keep_going) std.process.exit(1);
+                // --keep-going: the rest of the tree still builds; this one is
+                // reported with the failures (its old package stays in repo/).
+                try unbumped.append(arena, r.name);
+                continue;
             } else {
                 job.certain = false;
                 job.old_root = rec.?.deps;
@@ -276,15 +282,60 @@ pub fn main(init: std.process.Init) !void {
         const res = try sched.run(arena, init.io, t, jobs.items, outputs, opts, parallel, keep_going);
         const failed_names = res.failed;
         const skipped_names = res.skipped;
+        writeRunSummary(arena, init.io, root, opts.arch, t, if (is_world) "world" else "pkg", jobs.items.len, failed_names, unbumped.items, skipped_names);
         if (failed_names.len > 0 and !keep_going) std.process.exit(1);
-        if (failed_names.len > 0 or skipped_names.len > 0) {
+        if (failed_names.len > 0 or skipped_names.len > 0 or unbumped.items.len > 0) {
             std.debug.print("\n{d} failed:", .{failed_names.len});
             for (failed_names) |n| std.debug.print(" {s}", .{n});
+            if (unbumped.items.len > 0) {
+                std.debug.print("\n{d} changed without a release bump (not built):", .{unbumped.items.len});
+                for (unbumped.items) |n| std.debug.print(" {s}", .{n});
+            }
             std.debug.print("\n{d} skipped:", .{skipped_names.len});
             for (skipped_names) |n| std.debug.print(" {s}", .{n});
-            std.debug.print("\n", .{});
+            std.debug.print("\nsummary: logs/{s}/last-run.txt\n", .{opts.arch});
             std.process.exit(1);
         }
+        std.debug.print("summary: logs/{s}/last-run.txt\n", .{opts.arch});
+    } else if (std.mem.eql(u8, cmd, "outdated")) {
+        // Recipes whose recipe, patches or files changed since they were built,
+        // at the same version-release: world would refuse them (SPEC.md 7.2).
+        // Builds nothing; --bump raises `release` in each package.toml.
+        var bump = false;
+        for (rest) |a| {
+            if (std.mem.eql(u8, a, "--bump")) bump = true else return die(usage);
+        }
+        const arch = "x86_64";
+        problems.clearRetainingCapacity();
+        const t = try tree.load(arena, init.io, root, &problems);
+        var n: usize = 0;
+        for (t.recipes) |r| {
+            const ver = try std.fmt.allocPrint(arena, "{s}-r{d}", .{ r.version, r.release });
+            const rec_path = try std.fmt.allocPrint(arena, "{s}/repo/{s}/{s}.dkhash", .{ root, arch, r.name });
+            const txt = std.Io.Dir.cwd().readFileAlloc(init.io, rec_path, arena, .limited(1 << 16)) catch continue;
+            const rec = (try inputs.parse(arena, txt)) orelse continue;
+            if (!std.mem.eql(u8, rec.version, ver) or rec.output == null) continue;
+            const own = try inputs.ownHash(arena, init.io, root, r.name, arch);
+            if (std.mem.eql(u8, &rec.inputs, &own)) continue;
+            n += 1;
+            if (!bump) {
+                std.debug.print("{s}: changed at r{d}\n", .{ r.name, r.release });
+                continue;
+            }
+            const path = try std.fmt.allocPrint(arena, "{s}/package.toml", .{try recipe.dirPath(arena, root, r.name)});
+            const text = try std.Io.Dir.cwd().readFileAlloc(init.io, path, arena, .limited(1 << 22));
+            const needle = try std.fmt.allocPrint(arena, "release = {d}\n", .{r.release});
+            const needle2 = try std.fmt.allocPrint(arena, "release   = {d}\n", .{r.release});
+            const which = if (std.mem.indexOf(u8, text, needle) != null) needle else if (std.mem.indexOf(u8, text, needle2) != null) needle2 else {
+                std.debug.print("{s}: changed at r{d}, but its release line is not plain; bump it by hand\n", .{ r.name, r.release });
+                continue;
+            };
+            const repl = try std.fmt.allocPrint(arena, "{s}{d}\n", .{ which[0 .. which.len - 1 - std.fmt.count("{d}", .{r.release})], r.release + 1 });
+            const out = try std.mem.replaceOwned(u8, arena, text, which, repl);
+            try std.Io.Dir.cwd().writeFile(init.io, .{ .sub_path = path, .data = out });
+            std.debug.print("{s}: r{d} -> r{d}\n", .{ r.name, r.release, r.release + 1 });
+        }
+        if (n == 0) std.debug.print("nothing changed without a release bump\n", .{});
     } else if (std.mem.eql(u8, cmd, "image")) {
         if (rest.len != 1) return die(usage);
         const text = std.Io.Dir.cwd().readFileAlloc(init.io, rest[0], arena, .limited(1 << 20)) catch |err| {
@@ -422,4 +473,44 @@ test {
     _ = @import("inputs.zig");
     _ = @import("sched.zig");
     _ = @import("image.zig");
+}
+
+/// After `pkg` or `world`: logs/<arch>/last-run.txt, and a dated copy in
+/// logs/<arch>/runs/, listing what failed (with each build log), what was not
+/// built because its recipe changed without a release bump, and what was
+/// skipped because something it needs failed. Read it instead of scrolling.
+fn writeRunSummary(arena: std.mem.Allocator, io: std.Io, root: []const u8, arch: []const u8, t: tree.Tree, what: []const u8, considered: usize, failed: []const []const u8, unbumped: []const []const u8, skipped: []const []const u8) void {
+    var b: std.ArrayList(u8) = .empty;
+    const stamp = blk: {
+        const res = std.process.run(arena, io, .{ .argv = &.{ "date", "+%F %T" } }) catch break :blk "?";
+        break :blk std.mem.trim(u8, res.stdout, "\n ");
+    };
+    const w = struct {
+        fn line(a: std.mem.Allocator, list: *std.ArrayList(u8), comptime fmt: []const u8, args: anytype) void {
+            const text = std.fmt.allocPrint(a, fmt, args) catch return;
+            list.appendSlice(a, text) catch {};
+        }
+    };
+    w.line(arena, &b, "dkbuild {s} ({s}), finished {s}\n", .{ what, arch, stamp });
+    w.line(arena, &b, "{d} package(s) considered; {d} failed, {d} changed without a release bump, {d} skipped\n\n", .{ considered, failed.len, unbumped.len, skipped.len });
+    w.line(arena, &b, "failed ({d}):\n", .{failed.len});
+    for (failed) |n| {
+        const pi = t.provider(n);
+        if (pi) |i| {
+            const r = t.recipes[i];
+            w.line(arena, &b, "  {s}  logs/{s}/{s}-{s}-r{d}.log\n", .{ n, arch, r.name, r.version, r.release });
+        } else w.line(arena, &b, "  {s}\n", .{n});
+    }
+    w.line(arena, &b, "\nchanged without a release bump, not built ({d}):\n", .{unbumped.len});
+    for (unbumped) |n| w.line(arena, &b, "  {s}\n", .{n});
+    w.line(arena, &b, "\nskipped, something they need failed ({d}):\n", .{skipped.len});
+    for (skipped) |n| w.line(arena, &b, "  {s}\n", .{n});
+    const dir = std.fs.path.join(arena, &.{ root, "logs", arch, "runs" }) catch return;
+    std.Io.Dir.cwd().createDirPath(io, dir) catch {};
+    const last = std.fs.path.join(arena, &.{ root, "logs", arch, "last-run.txt" }) catch return;
+    std.Io.Dir.cwd().writeFile(io, .{ .sub_path = last, .data = b.items }) catch {};
+    var name = std.ArrayList(u8).empty;
+    for (stamp) |c| name.append(arena, if (c == ' ' or c == ':') '-' else c) catch {};
+    const dated = std.fmt.allocPrint(arena, "{s}/{s}-{s}.txt", .{ dir, name.items, what }) catch return;
+    std.Io.Dir.cwd().writeFile(io, .{ .sub_path = dated, .data = b.items }) catch {};
 }
