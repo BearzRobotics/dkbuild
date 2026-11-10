@@ -2,9 +2,11 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: the X libraries (their autotools builds use its m4 macros).
 # r2: static libraries too (in xorg-util-macros-static), for fully static programs on musl.
+# r3: the aclocal macros stay in this package (not -devel): they are all it is, and
+#     X libraries' autoreconf needs them with only this package installed.
 name = "xorg-util-macros"
 version = "1.20.2"
-release = 2
+release = 3
 summary = "X.org autotools macros"
 license = "MIT"
 homepage = "https://gitlab.freedesktop.org/xorg/util/macros"
@@ -28,3 +30,7 @@ install = '''
 %make_install
 install -Dm644 COPYING "$pkgdir/usr/share/licenses/xorg-util-macros/COPYING"
 '''
+
+[subpackages.devel]
+summary = "Headers and development files"
+paths   = ["/usr/include", "/usr/lib/*.so", "/usr/lib/pkgconfig", "/usr/lib/cmake"]

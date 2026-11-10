@@ -20,6 +20,8 @@ source = [
 ]
 
 setup = '''
+# dkbuild exports $srcdir; autoconf's configure would take it as its own.
+unset srcdir
 # As LFS does: the system vimrc is /etc/vimrc (vim's default is
 # /usr/share/vim/vimrc), so it is configuration: apk keeps local edits on upgrade.
 echo '#define SYS_VIMRC_FILE "/etc/vimrc"' >> src/feature.h
