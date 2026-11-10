@@ -1,7 +1,5 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/unbound/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "unbound"
 version = "1.26.2"
 release = 1
@@ -41,7 +39,7 @@ install = '''
 %make_install
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/unbound/LICENSE"
 install -Dm644 doc/example.conf "$pkgdir/usr/share/examples/unbound/example.conf"
-# TODO(cbuild): (self.destdir / "etc/unbound/unbound.conf").unlink()
+rm -f "$pkgdir/etc/unbound/unbound.conf"
 install -Dm644 $pkgfiles/unbound.conf "$pkgdir/etc/unbound/unbound.conf"
 install -Dm644 $pkgfiles/unbound "$pkgdir/etc/dinit.d/unbound"
 '''

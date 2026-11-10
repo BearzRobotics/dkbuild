@@ -1,7 +1,5 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/talloc/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "talloc"
 version = "2.5.0"
 release = 1
@@ -18,18 +16,25 @@ source = [
 ]
 
 environment = '''
-export PYTHONHASHSEED=1
-export WAF_MAKE=1
+# waf, not its wrapper makefile
+export PYTHONHASHSEED=1 WAF_MAKE=1
 '''
 setup = '''
-# TODO(cbuild): self.do(
-#         self.chroot_cwd / "configure",
-#         "--prefix=/usr",
-#         "--libdir=/usr/lib",
-#         *configure_args,
-#     )
+./configure --prefix=/usr --libdir=/usr/lib \
+    --disable-rpath --disable-rpath-install \
+    --builtin-libraries=replace --bundled-libraries=NONE
+'''
+build = '''
+./buildtools/bin/waf build -j$jobs
 '''
 install = '''
-# TODO(cbuild): no install step could be derived
-true
+./buildtools/bin/waf install --destdir="$pkgdir"
 '''
+
+[subpackages.python-libs]
+summary = "Python utility library"
+paths   = ["/usr/lib/libpytalloc-util.so.*"]
+
+[subpackages.python]
+summary = "Python bindings"
+paths   = ["/usr/lib/python*"]

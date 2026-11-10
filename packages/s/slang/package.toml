@@ -1,7 +1,5 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/slang/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "slang"
 version = "2.3.3"
 release = 1
@@ -17,8 +15,8 @@ source = [
 ]
 
 setup = '''
-# TODO(cbuild): init_configure() sets variables for this phase (cbuild line 17); port it by hand
-%configure
+# its link steps need CFLAGS too
+LDFLAGS="$CFLAGS $LDFLAGS" %configure
 '''
 build = '''
 %make
@@ -26,11 +24,7 @@ build = '''
 install = '''
 %make_install
 # clear up unnecessary junk, maybe ship in contrib?
-# TODO(cbuild): self.rm(self.destdir / "etc", recursive=True)
-# TODO(cbuild): self.rm(self.destdir / "usr/bin", recursive=True)
-# TODO(cbuild): self.rm(self.destdir / "usr/lib/slang", recursive=True)
+rm -rf "$pkgdir/etc" "$pkgdir/usr/bin" "$pkgdir/usr/lib/slang"
 # documents largely just slsh
-# TODO(cbuild): self.rm(self.destdir / "usr/share/doc", recursive=True)
-# TODO(cbuild): self.rm(self.destdir / "usr/share/man/man1/slsh.1")
-# TODO(cbuild): self.rm(self.destdir / "usr/share/slsh", recursive=True)
+rm -rf "$pkgdir/usr/share/doc" "$pkgdir/usr/share/man/man1/slsh.1" "$pkgdir/usr/share/slsh"
 '''

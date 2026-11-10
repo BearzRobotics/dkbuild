@@ -1,7 +1,5 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/networkmanager/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "networkmanager"
 version = "1.58.1"
 release = 2
@@ -65,9 +63,10 @@ install -Dm644 $pkgfiles/networkmanager "$pkgdir/etc/dinit.d/networkmanager"
 install -Dm644 $pkgfiles/NetworkManager.conf "$pkgdir/etc/NetworkManager/NetworkManager.conf"
 install -Dm644 $pkgfiles/50-org.freedesktop.NetworkManager.rules "$pkgdir/usr/share/polkit-1/rules.d/50-org.freedesktop.NetworkManager.rules"
 # kill hardlinks
-# TODO(cbuild): for f in ["nmtui-connect", "nmtui-hostname", "nmtui-edit"]:
-#         self.uninstall(f"usr/share/man/man1/{f}.1")
-#         self.install_link(f"usr/share/man/man1/{f}.1", "nmtui.1")
+for f in nmtui-connect nmtui-hostname nmtui-edit; do
+    rm -f "$pkgdir/usr/share/man/man1/$f.1"
+    ln -s nmtui.1 "$pkgdir/usr/share/man/man1/$f.1"
+done
 rm -rf "$pkgdir/usr/share/man/man5/nm-settings.5"
 mkdir -p "$pkgdir/usr/share/man/man5"
 ln -sf nm-settings-nmcli.5 "$pkgdir/usr/share/man/man5/nm-settings.5"
