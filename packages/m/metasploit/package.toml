@@ -1,0 +1,48 @@
+# The Metasploit Framework. Its ~250 gems come from the gem store (`gemdeps`):
+# laid into vendor/cache, installed with `bundle install --local` into the
+# framework's own vendor/bundle (native ones built against the system's
+# libraries), so nothing is downloaded. The commands (msfconsole, msfvenom,
+# ...) run through Bundler from /usr/lib/metasploit. msfupdate is left out:
+# apk updates it.
+name = "metasploit"
+version = "6.5.9"
+release = 1
+summary = "Penetration testing framework"
+license = "BSD-3-Clause"
+homepage = "https://www.metasploit.com"
+hostdeps = ["ruby", "pkgconf", "git"]
+builddeps = ["ruby-devel", "libpcap-devel", "postgresql-devel", "sqlite-devel", "libxml2-devel", "libxslt-devel", "openssl-devel",
+             "zlib-ng-compat-devel", "libffi-devel", "ncurses-devel", "readline-devel", "libyaml-devel", "linux-headers"]
+rundeps = ["ruby", "nmap", "postgresql"]
+options = ["!check", "!strip", "gemdeps", "jobs:8"]
+
+source = [
+    { url = "https://github.com/rapid7/metasploit-framework/archive/refs/tags/6.5.9.tar.gz", sha256 = "c05eb8ac988ec4481e5a403ea7027d894ce41365222b1570d5a31207f84be995" },
+]
+
+environment = '''
+# nokogiri against the system's libxml2 and libxslt, not its bundled copies
+export NOKOGIRI_USE_SYSTEM_LIBRARIES=1 BUNDLE_BUILD__NOKOGIRI=--use-system-libraries
+'''
+build = '''
+bundle config set --local deployment true
+bundle config set --local path vendor/bundle
+bundle config set --local without 'development test coverage'
+bundle install --local --jobs $jobs
+'''
+install = '''
+d="$pkgdir/usr/lib/metasploit"
+mkdir -p "$d" "$pkgdir/usr/bin"
+cp -a . "$d/"
+rm -rf "$d/spec" "$d/test" "$d/.github" "$d/vendor/cache" "$d"/vendor/bundle/ruby/*/cache
+for c in msfconsole msfvenom msfdb msfrpc msfrpcd msfd; do
+    [ -e "$d/$c" ] || continue
+    cat > "$pkgdir/usr/bin/$c" <<EOF2
+#!/bin/sh
+export BUNDLE_GEMFILE=/usr/lib/metasploit/Gemfile
+exec bundle exec ruby /usr/lib/metasploit/$c "\$@"
+EOF2
+    chmod 755 "$pkgdir/usr/bin/$c"
+done
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/metasploit/LICENSE"
+'''

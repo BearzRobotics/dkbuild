@@ -20,6 +20,8 @@ pub fn listPath(arena: Allocator, cache: []const u8, tarball_sha256: []const u8)
 pub const no_lockfile = "gems: the source has no Gemfile.lock";
 
 const Gem = struct { name: []const u8, version: []const u8, sha256: ?[]const u8 = null };
+/// A gem from a GIT section (GitHub only: its archive of the revision).
+const GitGem = struct { name: []const u8, remote: []const u8, revision: []const u8 };
 
 /// A platform suffix on a locked version (`1.16.5-x86_64-linux`): those are
 /// prebuilt gems; the plain version is the source gem.
@@ -34,8 +36,11 @@ fn splitPlatform(v: []const u8) []const u8 {
 /// The gems of one Gemfile.lock: the specs of its GEM sections (4-space
 /// entries), with sha256 from CHECKSUMS when present. GIT sections are
 /// reported; PATH sections are the source's own gems.
-fn collect(arena: Allocator, text: []const u8, out: *std.ArrayList(Gem), git: *usize) !void {
+fn collect(arena: Allocator, text: []const u8, out: *std.ArrayList(Gem), gits: *std.ArrayList(GitGem)) !void {
     var section: []const u8 = "";
+    var remote: []const u8 = "";
+    var revision: []const u8 = "";
+    var git_specs = false;
     var in_specs = false;
     var sums: std.StringHashMapUnmanaged([]const u8) = .empty;
     var lines = std.mem.splitScalar(u8, text, '\n');
@@ -45,7 +50,18 @@ fn collect(arena: Allocator, text: []const u8, out: *std.ArrayList(Gem), git: *u
         if (line[0] != ' ') {
             section = line;
             in_specs = false;
-            if (std.mem.eql(u8, line, "GIT")) git.* += 1;
+            git_specs = false;
+            continue;
+        }
+        if (std.mem.eql(u8, section, "GIT")) {
+            const t = std.mem.trim(u8, line, " ");
+            if (std.mem.startsWith(u8, t, "remote: ")) remote = t["remote: ".len..];
+            if (std.mem.startsWith(u8, t, "revision: ")) revision = t["revision: ".len..];
+            if (std.mem.eql(u8, t, "specs:")) git_specs = true;
+            if (git_specs and line.len > 4 and std.mem.startsWith(u8, line, "    ") and line[4] != ' ') {
+                const sp = std.mem.indexOf(u8, t, " (") orelse continue;
+                try gits.append(arena, .{ .name = t[0..sp], .remote = remote, .revision = revision });
+            }
             continue;
         }
         if (std.mem.eql(u8, section, "CHECKSUMS")) {
@@ -96,20 +112,16 @@ pub fn fetchGemDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha
     }
     const locks = std.Io.Dir.cwd().readFileAlloc(io, try std.fmt.allocPrint(arena, "{s}/locks", .{tmp}), arena, .limited(1 << 20)) catch return error.DownloadFailed;
     var gems: std.ArrayList(Gem) = .empty;
-    var git: usize = 0;
+    var gits: std.ArrayList(GitGem) = .empty;
     var nlocks: usize = 0;
     var it = std.mem.tokenizeScalar(u8, locks, '\n');
     while (it.next()) |lp| {
         nlocks += 1;
         const text = std.Io.Dir.cwd().readFileAlloc(io, lp, arena, .limited(1 << 24)) catch return error.DownloadFailed;
-        collect(arena, text, &gems, &git) catch return error.DownloadFailed;
+        collect(arena, text, &gems, &gits) catch return error.DownloadFailed;
     }
     if (nlocks == 0) {
         message.* = no_lockfile;
-        return error.DownloadFailed;
-    }
-    if (git > 0) {
-        message.* = try std.fmt.allocPrint(arena, "gems: {d} GIT section(s) in the lockfile; gems from git are not vendored yet", .{git});
         return error.DownloadFailed;
     }
     // Unique gems the store lacks; checksums the lockfile does not give come
@@ -172,6 +184,44 @@ pub fn fetchGemDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha
             std.Io.Dir.cwd().rename(t.part, std.Io.Dir.cwd(), try std.fs.path.join(arena, &.{ store, t.file }), io) catch return error.DownloadFailed;
         }
     }
+    // Gems from git: GitHub's archive of the locked revision, kept in the
+    // store as git-<name>-<revision>.tar.gz. GitHub publishes no checksum for
+    // it: the first fetch records one (cache/gemsums/), later fetches must
+    // match it. The list line is "<file> <name>-<revision[0..12]>": the store
+    // file, then the directory Bundler looks for in vendor/cache.
+    for (gits.items) |g| {
+        const gh = "https://github.com/";
+        if (!std.mem.startsWith(u8, g.remote, gh) or g.revision.len < 12) {
+            message.* = try std.fmt.allocPrint(arena, "gems: {s} comes from {s}; only GitHub git gems are vendored", .{ g.name, g.remote });
+            return error.DownloadFailed;
+        }
+        const repo = std.mem.trimEnd(u8, if (std.mem.endsWith(u8, g.remote, ".git")) g.remote[0 .. g.remote.len - 4] else g.remote, "/");
+        const file = try std.fmt.allocPrint(arena, "git-{s}-{s}.tar.gz", .{ g.name, g.revision });
+        const line = try std.fmt.allocPrint(arena, "{s} {s}-{s}\n", .{ file, g.name, g.revision[0..12] });
+        if (std.mem.indexOf(u8, list.items, line) != null) continue;
+        try list.appendSlice(arena, line);
+        const full = try std.fs.path.join(arena, &.{ store, file });
+        // the recorded checksum lives outside the store (prune cleans the store)
+        const sums_dir = try std.fmt.allocPrint(arena, "{s}/gemsums", .{cache});
+        std.Io.Dir.cwd().createDirPath(io, sums_dir) catch return error.DownloadFailed;
+        const sumf = try std.fmt.allocPrint(arena, "{s}/{s}.sha256", .{ sums_dir, file });
+        if (std.Io.Dir.cwd().access(io, full, .{})) |_| continue else |_| {}
+        const part_g = try std.fmt.allocPrint(arena, "{s}/git-{s}", .{ tmp, g.name });
+        const url = try std.fmt.allocPrint(arena, "{s}/archive/{s}.tar.gz", .{ repo, g.revision });
+        const rg = std.process.run(arena, io, .{ .argv = &.{ "curl", "--fail", "--location", "--silent", "--show-error", "--retry", "4", "-o", part_g, url } }) catch return error.DownloadFailed;
+        if (!(rg.term == .exited and rg.term.exited == 0)) {
+            message.* = try std.fmt.allocPrint(arena, "gems: download of {s} failed: {s}", .{ url, std.mem.trim(u8, rg.stderr, "\n ") });
+            return error.DownloadFailed;
+        }
+        const got = fetch.hashFile(io, part_g) catch return error.DownloadFailed;
+        if (std.Io.Dir.cwd().readFileAlloc(io, sumf, arena, .limited(256))) |want| {
+            if (!std.mem.eql(u8, &got, std.mem.trim(u8, want, "\n "))) {
+                message.* = try std.fmt.allocPrint(arena, "gems: {s} differs from the archive first fetched", .{file});
+                return error.BadChecksum;
+            }
+        } else |_| std.Io.Dir.cwd().writeFile(io, .{ .sub_path = sumf, .data = &got }) catch return error.DownloadFailed;
+        std.Io.Dir.cwd().rename(part_g, std.Io.Dir.cwd(), full, io) catch return error.DownloadFailed;
+    }
     const part = try std.fmt.allocPrint(arena, "{s}.part", .{out_path});
     std.Io.Dir.cwd().writeFile(io, .{ .sub_path = part, .data = list.items }) catch return error.DownloadFailed;
     std.Io.Dir.cwd().rename(part, std.Io.Dir.cwd(), out_path, io) catch return error.DownloadFailed;
@@ -182,6 +232,13 @@ test "collect" {
     var a = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer a.deinit();
     const lock =
+        \\GIT
+        \\  remote: https://github.com/rapid7/LicenseFinder
+        \\  revision: 2b1aefcfd6d0745d17843050c1c89f973c1fa98c
+        \\  specs:
+        \\    license_finder (7.2.1)
+        \\      bundler
+        \\
         \\GEM
         \\  remote: https://rubygems.org/
         \\  specs:
@@ -198,9 +255,11 @@ test "collect" {
         \\
     ;
     var out: std.ArrayList(Gem) = .empty;
-    var git: usize = 0;
-    try collect(a.allocator(), lock, &out, &git);
+    var gits: std.ArrayList(GitGem) = .empty;
+    try collect(a.allocator(), lock, &out, &gits);
     try std.testing.expectEqual(@as(usize, 3), out.items.len);
     try std.testing.expectEqualStrings("1.16.5", out.items[1].version);
     try std.testing.expect(out.items[2].sha256 != null);
+    try std.testing.expectEqual(@as(usize, 1), gits.items.len);
+    try std.testing.expectEqualStrings("license_finder", gits.items[0].name);
 }

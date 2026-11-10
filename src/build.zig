@@ -623,7 +623,15 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         for (gem_lists.items) |gl| {
             const text = Dir.cwd().readFileAlloc(io, gl, arena, .limited(1 << 22)) catch return error.UnpackFailed;
             var gl_lines = std.mem.tokenizeScalar(u8, text, '\n');
-            while (gl_lines.next()) |f| try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "ln -sfn '/dkdeps/gems/{s}' 'vendor/cache/{s}'\n", .{ f, f }));
+            while (gl_lines.next()) |f| {
+                if (std.mem.indexOfScalar(u8, f, ' ') != null) {
+                    // "<archive> <dir>": a git gem, unpacked as Bundler's cached git gem
+                    var parts = std.mem.tokenizeScalar(u8, f, ' ');
+                    const arc = parts.next() orelse continue;
+                    const gdir = parts.next() orelse continue;
+                    try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "mkdir -p 'vendor/cache/{1s}' && tar -xzf '/dkdeps/gems/{0s}' -C 'vendor/cache/{1s}' --strip-components=1 && touch 'vendor/cache/{1s}/.bundlecache'\n", .{ arc, gdir }));
+                } else try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "ln -sfn '/dkdeps/gems/{s}' 'vendor/cache/{s}'\n", .{ f, f }));
+            }
         }
         if (zig_list) |zl| {
             const text = Dir.cwd().readFileAlloc(io, zl, arena, .limited(1 << 22)) catch return error.UnpackFailed;

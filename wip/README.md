@@ -9,8 +9,7 @@ Recipes being ported that must not build yet (dkbuild only reads packages/).
 
 Requested software that is not a recipe yet, and what each needs (2026-11-10):
 
-- metasploit: Ruby plus ~300 gems through Bundler. Needs a `gemdeps` store (like
-  npmdeps: the Gemfile.lock's gems fetched and checked at fetch time).
+- metasploit: written (2026-11-10) with the gem store (`gemdeps`).
 - frida: its build downloads a prebuilt toolchain and SDK (glibc) from
   build.frida.re; on musl both have to be built from source first
   (releng/deps.py), as a snapshot.
