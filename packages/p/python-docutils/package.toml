@@ -17,7 +17,7 @@ source = [
 ]
 
 check = '''
-# TODO(cbuild): self.do("python", "alltests.py", wrksrc="test")
+cd test && python3 alltests.py
 '''
 install = '''
 python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \

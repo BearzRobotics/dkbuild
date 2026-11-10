@@ -18,10 +18,9 @@ source = [
 install = '''
 python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
     --root "$pkgdir" --prefix /usr .
-# TODO(cbuild): for f in (self.destdir / "usr/lib").glob(
-#         "python*/site-packages/pytz/zoneinfo"
-#     ):
-#         self.rm(f, recursive=True)
-#         f.symlink_to("/usr/share/zoneinfo")
+# the system's time zone data, not a copy
+for d in "$pkgdir"/usr/lib/python*/site-packages/pytz/zoneinfo; do
+    rm -rf "$d"; ln -s /usr/share/zoneinfo "$d"
+done
 install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-pytz/LICENSE.txt"
 '''
