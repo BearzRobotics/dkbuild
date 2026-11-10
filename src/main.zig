@@ -161,6 +161,7 @@ pub fn main(init: std.process.Init) !void {
         var opts: build.Options = .{
             .root = root,
             .jobs = std.Thread.getCpuCount() catch 1,
+            .fast_work = init.environ_map.get("DKBUILD_FAST_WORK"),
         };
         if (init.environ_map.get("HOME")) |home|
             opts.key = try std.fs.path.join(arena, &.{ home, ".config", "dkbuild", "signing.rsa" });

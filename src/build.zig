@@ -37,6 +37,9 @@ pub const Options = struct {
     tree: ?tree.Tree = null,
     /// Private key that signs the repository index (never in the project).
     key: []const u8 = "",
+    /// DKBUILD_FAST_WORK: build roots of recipes that are not heavy go here
+    /// (a faster disk), while it has 30 GB free (buildWorkDir).
+    fast_work: ?[]const u8 = null,
 };
 
 /// Top-level directories a package may install into (SPEC.md 7 step 4).
@@ -88,6 +91,30 @@ fn runLogged(arena: Allocator, io: std.Io, argv: []const []const u8, log: *std.A
         .exited => |c| c == 0,
         else => false,
     };
+}
+
+/// Where a recipe's build root goes (SPEC.md 7): `<root>/work/<name>`, or
+/// `$DKBUILD_FAST_WORK/<name>` when that is set, the recipe is not heavy
+/// (no `jobs:N`) and the directory's file system has at least 30 GB free, so a
+/// fast but small disk is never filled.
+fn buildWorkDir(arena: Allocator, io: std.Io, opts: Options, r: recipe.Recipe) ![]const u8 {
+    const default = try std.fs.path.join(arena, &.{ opts.root, "work", r.name });
+    const fast = opts.fast_work orelse return default;
+    if (fast.len == 0) return default;
+    for (r.options) |o| if (std.mem.startsWith(u8, o, "jobs:")) return default;
+    Dir.cwd().createDirPath(io, fast) catch return default;
+    const res = std.process.run(arena, io, .{ .argv = &.{ "df", "-Pk", fast } }) catch return default;
+    var lines = std.mem.tokenizeScalar(u8, res.stdout, '\n');
+    _ = lines.next();
+    const line = lines.next() orelse return default;
+    var cols = std.mem.tokenizeScalar(u8, line, ' ');
+    var i: usize = 0;
+    while (cols.next()) |c| : (i += 1) if (i == 3) {
+        const kb = std.fmt.parseInt(u64, c, 10) catch return default;
+        if (kb < 30 * 1024 * 1024) return default;
+        return try std.fs.path.join(arena, &.{ fast, r.name });
+    };
+    return default;
 }
 
 fn absPath(arena: Allocator, io: std.Io, p: []const u8) ![]const u8 {
@@ -428,8 +455,9 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         }
     }
 
-    // 2. Build root
-    const work = try std.fs.path.join(arena, &.{ opts.root, "work", r.name });
+    // 2. Build root: in <root>/work, or in DKBUILD_FAST_WORK (a faster disk)
+    // for recipes that are not heavy (`jobs:N`), while it has 30 GB free.
+    const work = try buildWorkDir(arena, io, opts, r);
     removeBuildDir(arena, io, work);
     const root_rel = try std.fs.path.join(arena, &.{ work, "root" });
     Dir.cwd().createDirPath(io, root_rel) catch return error.PrepareFailed;

@@ -261,6 +261,11 @@ hold the toolchain decisions in one place, per target (6.1).
 | `%zig_build` | `zig build --release=safe --prefix /usr -Dtarget=$zig_target -Dcpu=$zig_cpu` with `--system` for vendored dependencies, `-j$jobs`, and `DESTDIR=$pkgdir` |
 | `%kernel_make` | `make LLVM=1 ARCH=$kernel_arch` |
 
+Build roots are made in `work/<name>/`, or in `$DKBUILD_FAST_WORK/<name>/`
+when that variable is set (a faster disk than the project's): only for recipes
+that are not heavy (no `jobs:N`), and only while that file system has 30 GB
+free, so a small fast disk is never filled.
+
 Variables available in every step: `$name`, `$version`, `$release` (the
 recipe's), `$pkgdir` (the install root), `$srcdir`,
 `$jobs`, `$target` (the LLVM triple), `$arch`, `$zig_target`, `$CC`,
