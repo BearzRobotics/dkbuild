@@ -1,7 +1,5 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/uthash/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "uthash"
 version = "2.3.0"
 release = 1
@@ -14,6 +12,7 @@ source = [
 ]
 
 install = '''
-# TODO(cbuild): self.install_files("src", "usr", name="include")
+install -dm755 "$pkgdir/usr/include"
+install -m644 src/*.h "$pkgdir/usr/include/"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/uthash/LICENSE"
 '''
