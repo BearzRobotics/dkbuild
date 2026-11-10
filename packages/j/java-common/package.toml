@@ -1,6 +1,7 @@
 # The system's Java, switchable: /usr/bin/java, javac, jar, ... are links into
 # /usr/lib/jvm/default/bin/, and /usr/lib/jvm/default points at the active JDK
-# (each openjdkN lives in its own /usr/lib/jvm/java-N-openjdk). `java-select`
+# (each openjdkN lives in its own /usr/lib/jvm/java-N-openjdk); the man pages in
+# /usr/share/man/man1 link through it the same way. `java-select`
 # lists, shows and sets it, like Arch's archlinux-java. A JDK's install sets
 # the default only when none is set; removing the active one picks another.
 name = "java-common"
@@ -18,5 +19,14 @@ for t in jar jarsigner java javac javadoc javap jcmd jconsole jdb jdeprscan jdep
          jimage jinfo jlink jmap jmod jpackage jps jrunscript jshell jstack jstat jstatd \
          jwebserver keytool rmiregistry serialver; do
     ln -s ../lib/jvm/default/bin/$t "$pkgdir/usr/bin/$t"
+    # `man java` follows the switch too.
+    mkdir -p "$pkgdir/usr/share/man/man1"
+    ln -s ../../../lib/jvm/default/man/man1/$t.1 "$pkgdir/usr/share/man/man1/$t.1"
 done
 '''
+
+# The man page links stay in this package (not java-common-doc): they are what
+# makes `man java` follow java-select, and they are only links.
+[subpackages.doc]
+summary = "Documentation"
+paths   = ["/usr/share/doc"]
