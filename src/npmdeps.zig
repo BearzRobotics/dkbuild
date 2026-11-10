@@ -105,6 +105,10 @@ fn digestOf(algo: []const u8, data: []const u8, buf: []u8) []const u8 {
 /// For recipes with the `npmdeps` option: every package of every
 /// package-lock.json in the source (outside node_modules), downloaded into the
 /// store unless it is there, each checked against its integrity hash.
+/// fetchNpmDeps's message for a source without lockfiles (with several
+/// sources, only one of them needs one).
+pub const no_lockfile = "npm: the source has no package-lock.json";
+
 pub fn fetchNpmDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, message: *[]const u8) fetch.Error!fetch.Status {
     const out_path = try listPath(arena, cache, tarball_sha256);
     if (std.Io.Dir.cwd().access(io, out_path, .{})) |_| return .cached else |_| {}
@@ -138,7 +142,7 @@ pub fn fetchNpmDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha
         };
     }
     if (nlocks == 0) {
-        message.* = "npm: the source has no package-lock.json";
+        message.* = no_lockfile;
         return error.DownloadFailed;
     }
     if (missing > 0) {

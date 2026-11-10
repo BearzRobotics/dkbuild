@@ -168,7 +168,7 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
     // lockfiles' tarball URLs.
     if (contains(r.options, "npmdeps"))
         try s.appendSlice(arena,
-            \\node /dkbuild/npm-offline.js /tmp/npm-cache $(find "$srcdir" -name package-lock.json -not -path '*/node_modules/*')
+            \\node /dkbuild/npm-offline.js /tmp/npm-cache $(find /build -path /build/sources -prune -o -name package-lock.json -not -path '*/node_modules/*' -print)
             \\export npm_config_cache=/tmp/npm-cache npm_config_offline=true npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
             \\
         );
@@ -438,6 +438,15 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
                 return error.PrepareFailed;
             };
+            // npm lockfiles may be in any unpacked tarball (a web client as a second source)
+            if (src == .tarball and src.tarball.unpack and contains(r.options, "npmdeps")) {
+                if (npmdeps.fetchNpmDeps(arena, io, cache, src.tarball.sha256, &msg)) |_| {
+                    uses_npm = true;
+                } else |err| if (!std.mem.eql(u8, msg, npmdeps.no_lockfile)) {
+                    out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
+                    return error.PrepareFailed;
+                }
+            }
             if (first_tarball == null and src == .tarball) {
                 first_tarball = try fetch.cachePath(arena, cache, src.tarball.sha256);
                 if (contains(r.options, "zigdeps")) {
@@ -455,13 +464,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                     cargo_list = try fetch.cargoDepsPath(arena, cache, src.tarball.sha256);
                     cargo_config = try std.fmt.allocPrint(arena, "{s}/cargodeps/{s}.config.toml", .{ cache, src.tarball.sha256 });
                 }
-                if (contains(r.options, "npmdeps")) {
-                    _ = npmdeps.fetchNpmDeps(arena, io, cache, src.tarball.sha256, &msg) catch |err| {
-                        out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
-                        return error.PrepareFailed;
-                    };
-                    uses_npm = true;
-                }
+
                 if (contains(r.options, "godeps")) {
                     _ = fetch.fetchGoDeps(arena, io, cache, src.tarball.sha256, &msg) catch |err| {
                         out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
@@ -470,6 +473,10 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                     uses_go = true;
                 }
             }
+        }
+        if (contains(r.options, "npmdeps") and !uses_npm) {
+            out("error: {s}: {s} (in none of its sources)\n", .{ r.name, npmdeps.no_lockfile });
+            return error.PrepareFailed;
         }
     }
 
@@ -1044,9 +1051,10 @@ fn pruneDeps(arena: Allocator, io: std.Io, opts: Options, t: tree.Tree, dry_run:
         var wanted: std.StringHashMapUnmanaged(void) = .empty;
         for (t.recipes) |r| {
             if (!contains(r.options, k.option)) continue;
+            // every tarball: npm lockfiles can be in any of them (others keep
+            // lists only for their first, and an unused name keeps nothing)
             for (r.source) |src| if (src == .tarball) {
                 try wanted.put(arena, src.tarball.sha256, {});
-                break;
             };
         }
         const dir_rel = try std.fs.path.join(arena, &.{ cache, k.dir });

@@ -108,6 +108,7 @@ pub fn main(init: std.process.Init) !void {
             // Dependencies are vendored for the first tarball only, as the build
             // lays them in (ollama's second tarball is llama.cpp, no Go modules).
             var first_tb = true;
+            var npm_found = false;
             for (r.source) |src| {
                 var msg: []const u8 = "";
                 if (fetch.fetchOne(arena, init.io, cache, src, &msg)) |st| {
@@ -130,12 +131,16 @@ pub fn main(init: std.process.Init) !void {
                             std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(cerr) });
                         }
                     }
-                    if (is_first and contains(r.options, "npmdeps")) {
+                    // every unpacked tarball may carry lockfiles (a web client as a second source)
+                    if (src == .tarball and src.tarball.unpack and contains(r.options, "npmdeps")) {
                         if (npmdeps.fetchNpmDeps(arena, init.io, cache, src.tarball.sha256, &msg)) |nst| {
+                            npm_found = true;
                             std.debug.print("{s}: npm packages {s}\n", .{ r.name, @tagName(nst) });
                         } else |nerr| {
-                            failed = true;
-                            std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(nerr) });
+                            if (!std.mem.eql(u8, msg, npmdeps.no_lockfile)) {
+                                failed = true;
+                                std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(nerr) });
+                            }
                         }
                     }
                     if (is_first and contains(r.options, "godeps")) {
@@ -150,6 +155,10 @@ pub fn main(init: std.process.Init) !void {
                     failed = true;
                     std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
                 }
+            }
+            if (contains(r.options, "npmdeps") and !npm_found and !failed) {
+                failed = true;
+                std.debug.print("{s}: {s} (in none of its sources)\n", .{ r.name, npmdeps.no_lockfile });
             }
         }
         for (rest) |n| if (t.find(n) == null) {
