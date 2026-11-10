@@ -168,6 +168,12 @@ as a repository (`/run/live/medium/apks/<arch>/Packages.adb`), so `apk add`
 and an installer work offline, and an installed system can use a mounted disc
 the same way (optionally tagged, `@cdrom ...`).
 
+A recipe with `options = ["!repo-iso"]` stays off the repository ISO: it is
+built into repo/ like any package, but `iso_repo = "all"` leaves it out and
+signs a `Packages.adb` without it (and checks that nothing on the disc depends
+on it). Code - OSS is the first (the user's choice, 2026-11-09); claude-code,
+though proprietary, goes on the disc.
+
 Two discs, made by `dkbuild image`: the **repository ISO** above (with
 `"all"`: every package, the offline package source for machines without a
 repository server, and a restore of any installed system), and a **source

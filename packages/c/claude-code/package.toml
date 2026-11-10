@@ -3,7 +3,8 @@
 # official native musl build from npm (@anthropic-ai/claude-code-linux-x64-musl,
 # the per-platform package that @anthropic-ai/claude-code installs), so it
 # needs neither Node.js nor glibc; it links only musl's libc.
-# Proprietary (see LICENSE.md): repo-only, not in any image. It talks to
+# Proprietary (see LICENSE.md): in the repository (and the repository ISO,
+# the user's choice), not in the boot images. It talks to
 # Anthropic's API, so it needs the network and an Anthropic account to be of use.
 # The binary carries its program as a payload after the ELF, so it must not be
 # stripped. Its self-updater is off (profile.d): apk updates it, and an update
