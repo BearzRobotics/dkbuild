@@ -2,6 +2,5 @@
 
 type = process
 command = /usr/bin/rpc.statd -F
-depends-on = local.target
-depends-on = network.target
+depends-on = rcboot
 depends-on = rpcbind

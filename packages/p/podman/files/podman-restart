@@ -3,4 +3,3 @@ type = scripted
 command = /usr/bin/podman start --all --filter restart-policy=always --filter restart-policy=unless-stopped
 after = podman
 depends-on = rcboot
-depends-on = rcboot

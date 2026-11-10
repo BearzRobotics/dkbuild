@@ -4,4 +4,3 @@ command = /usr/bin/chronyd -n -u _chrony -N 11
 ready-notification = pipefd:11
 smooth-recovery = true
 depends-on: rcboot
-depends-on: rcboot

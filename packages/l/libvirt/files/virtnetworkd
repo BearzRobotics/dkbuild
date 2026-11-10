@@ -2,7 +2,6 @@
 
 type = process
 command = /usr/bin/virtnetworkd
-depends-on = network.target
+depends-on = rcboot
 depends-on = dbus
-depends-on = local.target
-before = login.target
+before = loginready

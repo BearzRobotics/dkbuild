@@ -2,5 +2,3 @@ type = process
 command = /usr/bin/dnsmasq -k --enable-dbus -u _dnsmasq -g _dnsmasq
 depends-on: dbus
 depends-on: rcboot
-depends-on: pre-rcboot
-before: rcboot

@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "iwd"
 version = "3.12"
-release = 2
+release = 3
 summary = "Wireless daemon that replaces wpa_supplicant"
 license = "LGPL-2.1-or-later"
 homepage = "https://iwd.wiki.kernel.org"

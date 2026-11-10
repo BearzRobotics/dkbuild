@@ -6,5 +6,4 @@ run-as = _postgres
 stop-timeout = 60.0
 # fast shutdown (INT): the default smart shutdown waits for every client to go
 term-signal = INT
-depends-on: local.target
-depends-on: network.target
+depends-on: rcboot

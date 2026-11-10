@@ -2,4 +2,3 @@ type = process
 command = /usr/lib/kadmind
 smooth-recovery = true
 depends-on: rcboot
-depends-on: rcboot

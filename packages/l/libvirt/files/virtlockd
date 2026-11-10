@@ -2,5 +2,5 @@
 
 type = process
 command = /usr/bin/virtlockd
-depends-on = local.target
-before = login.target
+depends-on = rcboot
+before = loginready

@@ -1,7 +1,5 @@
 type = process
 command = /usr/lib/ead
 logfile = /var/log/ead.log
-before: rcboot
 depends-on: rcboot
-depends-on: pre-rcboot
 depends-on: dbus

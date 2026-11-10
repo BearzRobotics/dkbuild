@@ -2,5 +2,5 @@
 
 type = process
 command = /usr/bin/virtlogd
-depends-on = local.target
-before = login.target
+depends-on = rcboot
+before = loginready

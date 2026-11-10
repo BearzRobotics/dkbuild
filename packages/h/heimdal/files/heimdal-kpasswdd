@@ -2,4 +2,3 @@ type = process
 command = /usr/lib/kpasswdd
 smooth-recovery = true
 depends-on: rcboot
-depends-on: rcboot

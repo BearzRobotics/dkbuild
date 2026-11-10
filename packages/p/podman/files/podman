@@ -3,5 +3,4 @@
 type = process
 command = /usr/bin/podman system service --time 0
 depends-on = rcboot
-depends-on = rcboot
 logfile = /var/log/podman.log

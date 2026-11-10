@@ -1,6 +1,5 @@
 type = process
 command = /usr/bin/ModemManager
 smooth-recovery = true
-before: rcboot
 depends-on: dbus
-depends-on: pre-rcboot
+depends-on: rcboot
