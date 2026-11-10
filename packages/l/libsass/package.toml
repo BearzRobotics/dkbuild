@@ -1,7 +1,5 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libsass/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "libsass"
 version = "3.6.6"
 release = 1
@@ -16,8 +14,7 @@ source = [
 
 setup = '''
 # otherwise the .pc file will have 'na' version
-# TODO(cbuild): with open(self.cwd / "VERSION", "w") as vf:
-#         vf.write(pkgver)
+printf %s "$version" > VERSION
 autoreconf -if -W none
 %configure
 '''

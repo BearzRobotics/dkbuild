@@ -1,7 +1,5 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/chrony/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "chrony"
 version = "4.9"
 release = 1
@@ -36,5 +34,8 @@ install = '''
 install -Dm644 examples/chrony.conf.example1 "$pkgdir/etc/chrony.conf"
 # dinit services
 install -Dm644 $pkgfiles/chronyd "$pkgdir/etc/dinit.d/chronyd"
-# TODO(cbuild): self.install_service(self.files_path / "chrony", enable=True)
+install -Dm644 $pkgfiles/chrony "$pkgdir/etc/dinit.d/chrony"
+# its user and state directories (sd-tools applies these on install and at boot)
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/chrony.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/chrony.conf"
 '''

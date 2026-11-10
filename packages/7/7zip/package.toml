@@ -1,7 +1,5 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/7zip/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "7zip"
 version = "26.03"
 release = 1
@@ -15,35 +13,20 @@ source = [
 ]
 
 build = '''
-# TODO(cbuild): init_build() sets variables for this phase (cbuild line 34); port it by hand
-%make \
-    CFLAGS_WARN_WALL= \
-    CFLAGS_WARN=
+# Alone2: the command-line 7zz with every format. Without the assembler
+# (uasm, no recipe yet): C code only, somewhat slower on 7z.
+cd CPP/7zip/Bundles/Alone2
+%make -f ../../cmpl_clang.mak CC=clang CXX=clang++ \
+    CFLAGS_WARN_WALL= CFLAGS_WARN=
 '''
 check = '''
-# no actual tests, so just compress+decompress something as useful sanity
-# TODO(cbuild): self.do(
-#         # b/c is toolchain clang; b/g is gcc
-#         self.chroot_cwd / "b/c/7zz",
-#         "a",
-#         "-y",
-#         "xxx.7z",
-#         # XXX: this is self.sources_path but chroot
-#         self.chroot_srcdir / "Asm",
-#         self.chroot_srcdir / "C",
-#     )
-# TODO(cbuild): self.do(
-#         self.chroot_cwd / "b/c/7zz",
-#         "x",
-#         "-y",
-#         "-o/tmp",
-#         "xxx.7z",
-#     )
+cd CPP/7zip/Bundles/Alone2
+b/c/7zz a -y /tmp/xxx.7z ../../../../C ../../../../Asm
+b/c/7zz x -y -o/tmp/x /tmp/xxx.7z
 '''
 install = '''
-install -Dm644 ../../../../DOC/License.txt "$pkgdir/usr/share/licenses/7zip/License.txt"
-install -Dm644 ../../../../DOC/unRarLicense.txt "$pkgdir/usr/share/licenses/7zip/unRarLicense.txt"
-install -Dm755 b/c/7zz "$pkgdir/usr/bin/7zz"
-mkdir -p "$pkgdir/usr/bin"
+install -Dm644 DOC/License.txt "$pkgdir/usr/share/licenses/7zip/License.txt"
+install -Dm644 DOC/unRarLicense.txt "$pkgdir/usr/share/licenses/7zip/unRarLicense.txt"
+install -Dm755 CPP/7zip/Bundles/Alone2/b/c/7zz "$pkgdir/usr/bin/7zz"
 ln -sf 7zz "$pkgdir/usr/bin/7z"
 '''

@@ -1,7 +1,5 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/distrobox/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "distrobox"
 version = "1.8.2.5"
 release = 1
@@ -18,5 +16,6 @@ source = [
 install = '''
 ./install --prefix $pkgdir/usr
 install -Dm644 $pkgfiles/distrobox.conf "$pkgdir/usr/share/distrobox/distrobox.conf"
-# TODO(cbuild): self.install_file("docs/*.md", "usr/share/doc/distrobox", glob=True)
+install -dm755 "$pkgdir/usr/share/doc/distrobox"
+install -m644 docs/*.md "$pkgdir/usr/share/doc/distrobox/"
 '''

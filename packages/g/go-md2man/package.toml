@@ -1,7 +1,5 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/go-md2man/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
 name = "go-md2man"
 version = "2.0.7"
 release = 13
@@ -10,20 +8,23 @@ license = "MIT"
 homepage = "https://github.com/cpuguy83/go-md2man"
 hostdeps = ["go"]
 
+options = ["!check", "godeps"]
+
 source = [
     { url = "https://github.com/cpuguy83/go-md2man/archive/v2.0.7.tar.gz", sha256 = "ca3a5b57e2c01759f5a00ad2a578d034c5370fae9aa7a6c3af5648b2fc802a92" },
 ]
 
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
 build = '''
-# TODO(cbuild): self.do(
-#         f"{self.make_dir}/go-md2man",
-#         "-in",
-#         "go-md2man.1.md",
-#         "-out",
-#         "go-md2man.1",
-#     )
+mkdir -p build
+go build -o build/ .
+./build/go-md2man -in go-md2man.1.md -out go-md2man.1
 '''
 install = '''
+install -Dm755 build/go-md2man "$pkgdir/usr/bin/go-md2man"
 install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/go-md2man/LICENSE.md"
 install -Dm644 go-md2man.1 "$pkgdir/usr/share/man/man1/go-md2man.1"
 '''

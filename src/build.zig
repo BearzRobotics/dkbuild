@@ -127,6 +127,7 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
             jobs = @min(jobs, std.fmt.parseInt(usize, o["jobs:".len..], 10) catch jobs);
     }
     try w.add(arena, &s, "set -e\nexport jobs={d}\nexport srcdir='{s}'\nexport pkgdir=/destdir\n", .{ jobs, srcdir });
+    try w.add(arena, &s, "export name='{s}'\nexport version='{s}'\nexport release={d}\n", .{ r.name, r.version, r.release });
     // The variables SPEC 5.5 lists besides jobs/srcdir/pkgdir/CC/CFLAGS.
     try w.add(arena, &s, "export target='{s}'\nexport arch='{s}'\nexport zig_target='{s}'\nexport zig_cpu='{s}'\n", .{ ctx.target.triple, ctx.target.arch, ctx.target.zig_target, ctx.target.zig_cpu });
     try s.appendSlice(arena, try ctx.target.buildEnv(arena, ctx.target.isCross(ctx.host), ctx.static));
