@@ -1,0 +1,26 @@
+# libserialport (sigrok): cross-platform serial port access.
+# needed by: avrdude (serial programmers and bootloaders, e.g. Arduino's).
+name = "libserialport"
+version = "0.1.2"
+release = 1
+summary = "Library for accessing serial ports"
+license = "LGPL-3.0-or-later"
+homepage = "https://sigrok.org/wiki/Libserialport"
+hostdeps = ["pkgconf"]
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://sigrok.org/download/source/libserialport/libserialport-0.1.2.tar.gz", sha256 = "5deb92b5ca72c0347b07b786848350deca2dcfd975ce613b8e0e1d947a4b4ca9" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libserialport/COPYING"
+'''

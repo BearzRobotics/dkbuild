@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/isl/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: the GCC cross toolchains.
+name = "isl"
+version = "0.27"
+release = 1
+summary = "Integer Set Library"
+license = "MIT"
+homepage = "https://libisl.sourceforge.io"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["gmp-devel"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/libisl/isl-0.27.tar.bz2", sha256 = "626335529331f7c89fec493de929e2e92fb3d8cc860fc7af554e0518ee0029ee" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/isl/LICENSE"
+'''

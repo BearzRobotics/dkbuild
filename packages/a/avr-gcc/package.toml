@@ -1,0 +1,46 @@
+# GCC for AVR microcontrollers (avr): avr-gcc and -g++ with libgcc, built by
+# clang like the rest of the tree. The C library comes separately
+# (avr-libc). C++ is the compiler and libgcc; there is no libstdc++ for
+# this target (bare metal C++ normally runs without it).
+name = "avr-gcc"
+version = "16.2.0"
+release = 1
+summary = "GNU C compiler for AVR microcontrollers"
+license = "GPL-3.0-or-later"
+homepage = "https://gcc.gnu.org"
+hostdeps = ["avr-binutils", "bison", "flex", "perl", "texinfo"]
+builddeps = ["gmp-devel", "mpc-devel", "mpfr-devel", "isl-devel", "zlib-ng-compat-devel"]
+rundeps = ["avr-binutils"]
+options = ["!check", "!lto", "!strip", "!cross", "jobs:12"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/gcc/gcc-16.2.0/gcc-16.2.0.tar.xz", sha256 = "e6738e29597f733270731aa90600f37ffdc045079dfc27ec7e8192cc81085c3e" },
+]
+
+environment = '''
+# code for the target: small, and each function in its own section
+export CFLAGS_FOR_TARGET="-Os -ffunction-sections -fdata-sections"
+export CXXFLAGS_FOR_TARGET="$CFLAGS_FOR_TARGET"
+'''
+setup = '''
+mkdir -p build && cd build
+../configure --target=avr --prefix=/usr --libexecdir=/usr/lib --enable-languages=c,c++  --with-avrlibc --enable-multilib \
+    --disable-nls --disable-decimal-float --disable-libffi --disable-libgomp \
+    --disable-libquadmath --disable-libssp \
+    --disable-shared --disable-threads --disable-tls --disable-werror --disable-gcov \
+    --enable-__cxa_atexit --enable-c99 --enable-long-long --enable-plugins \
+    --with-gnu-as --with-gnu-ld --with-system-zlib --with-isl \
+    --with-python-dir=share/gcc-avr
+'''
+build = '''
+cd build
+%make all-gcc all-target-libgcc
+'''
+install = '''
+cd build
+%make DESTDIR="$pkgdir" install-gcc install-target-libgcc
+rm -rf "$pkgdir/usr/share/info" "$pkgdir/usr/share/man/man7" "$pkgdir"/usr/lib/libcc1.*
+cd ..
+install -Dm644 COPYING3 "$pkgdir/usr/share/licenses/avr-gcc/COPYING3"
+install -Dm644 COPYING.RUNTIME "$pkgdir/usr/share/licenses/avr-gcc/COPYING.RUNTIME"
+'''

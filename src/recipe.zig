@@ -47,6 +47,9 @@ pub const Recipe = struct {
     /// Names the main package provides besides what the scan finds
     /// (`so:libgcc_s.so.1` for a link the scanner cannot see through).
     provides: []const []const u8 = &.{},
+    /// Packages whose files the main package may take over (apk `replaces`):
+    /// for a package that supersedes another.
+    replaces: []const []const u8 = &.{},
     /// Directories whose changes run the main package's `scripts/trigger`
     /// (apk triggers: sd-tools applies /usr/lib/sysusers.d and tmpfiles.d).
     triggers: []const []const u8 = &.{},
@@ -68,7 +71,7 @@ const known_keys = [_][]const u8{
     "name",      "version",   "release",     "summary",     "description", "license",
     "homepage",  "source",    "patches",     "archs",       "hostdeps",    "builddeps",
     "checkdeps", "rundeps",   "options",     "environment", "setup",       "build",
-    "check",     "install",   "subpackages", "provides",    "triggers",
+    "check",     "install",   "subpackages", "provides",    "triggers",    "replaces",
 };
 
 const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap", "zigdeps", "godeps", "cargodeps", "npmdeps", "gradledeps", "meta", "rootlayout" };
@@ -114,6 +117,7 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
     r.checkdeps = try cfg.optStrings(arena, diag, root, "checkdeps");
     r.rundeps = try cfg.optStrings(arena, diag, root, "rundeps");
     r.provides = try cfg.optStrings(arena, diag, root, "provides");
+    r.replaces = try cfg.optStrings(arena, diag, root, "replaces");
     r.triggers = try cfg.optStrings(arena, diag, root, "triggers");
     r.options = try cfg.optStrings(arena, diag, root, "options");
 

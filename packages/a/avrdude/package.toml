@@ -1,0 +1,28 @@
+# AVRDUDE: programs AVR (and some other) microcontrollers' flash, EEPROM and
+# fuses through ISP programmers, bootloaders (Arduino), USB, serial, FTDI and
+# Linux GPIO/SPI. With every backend this tree has libraries for.
+name = "avrdude"
+version = "8.3"
+release = 1
+summary = "Programs AVR microcontrollers (flash, EEPROM, fuses)"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/avrdudes/avrdude"
+hostdeps = ["bison", "cmake", "flex", "ninja", "pkgconf"]
+builddeps = ["elfutils-devel", "hidapi-devel", "libftdi1-devel", "libgpiod-devel", "libserialport-devel", "libusb-devel", "linux-headers", "readline-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/avrdudes/avrdude/archive/refs/tags/v8.3.tar.gz", sha256 = "6c6fe3606f2ef331e502fb9c1d418ba09eb9705e811efbe18259025a9787ee3d" },
+]
+
+setup = '''
+%cmake -DHAVE_LINUXGPIO=ON -DHAVE_LINUXSPI=ON -DBUILD_SHARED_LIBS=ON \
+    -DFORCE_DISABLE_PYTHON_SUPPORT=ON -DCMAKE_INSTALL_SYSCONFDIR=/etc
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/avrdude/COPYING"
+'''

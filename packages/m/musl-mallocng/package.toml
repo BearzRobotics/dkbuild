@@ -1,0 +1,61 @@
+# musl with its stock allocator (mallocng) instead of mimalloc, for programs
+# where memory use or allocator hardening matters more than speed. It does not
+# replace the system libc: it is a second copy in /usr/lib/musl-mallocng, and
+#   mallocng-run <program> [args...]
+# runs one program with it (musl's libc.so is also its dynamic loader).
+# Same source and patches as musl (patches/ is a link to musl's).
+name = "musl-mallocng"
+version = "1.2.6"
+release = 1
+summary = "musl with its stock allocator, for running programs on it"
+license = "MIT"
+homepage = "https://musl.libc.org/"
+builddeps = ["linux-headers"]
+rundeps = ["musl"]
+options = ["!check"]
+patches = [
+    "0001-add-stub-for-pthread_mutexattr_setprioceiling.patch",
+    "0001-plumb-in-support-for-externally-provided-allocator-l.patch",
+    "001-6f6bd4a1896ba0be19168abc1346c8c7e3851709.patch",
+    "002-0572555dab1d1e10b5f7351a005ec588cab41e25.patch",
+    "003-40acb04b2c1291f7d3091c61080109da11eea48b.patch",
+    "004-67219f0130ec7c876ac0b299046460fad31caabf.patch",
+    "005-d2f20c49dfb556d9096251aa0acd92ca907b3400.patch",
+    "006-228da39e38c1cae13cbe637e771412c1984dba5d.patch",
+    "007-b3291b9a9f77f1f993d2b4f8c68a26cf09221ae7.patch",
+    "008-5122f9f3c99fee366167c5de98b31546312921ab.patch",
+    "CVE-2026-107891.patch",
+    "default-locpath.patch",
+    "nxthdr.patch",
+    "lto.patch",
+    "plt.patch",
+    "ppc-alt.patch",
+]
+
+source = [
+    { url = "https://musl.libc.org/releases/musl-1.2.6.tar.gz", sha256 = "d585fd3b613c66151fc3249e8ed44f77020cb5e6c1e635a616d3f9f82460512a" },
+]
+
+setup = '''
+printf '%s-mallocng' "$version" > VERSION
+rm -f src/string/x86_64/memcpy.s src/string/x86_64/memmove.s
+./configure --prefix=/usr --syslibdir=/usr/lib/musl-mallocng --libdir=/usr/lib/musl-mallocng \
+    --disable-gcc-wrapper --with-malloc=mallocng LIBCC="$($CC -print-libgcc-file-name)"
+'''
+build = '''
+make -j$jobs lib/libc.so
+'''
+install = '''
+install -Dm755 lib/libc.so "$pkgdir/usr/lib/musl-mallocng/libc.so"
+mkdir -p "$pkgdir/usr/bin"
+cat > "$pkgdir/usr/bin/mallocng-run" <<'EOF2'
+#!/bin/sh
+# Run a program with musl's stock allocator (mallocng) instead of mimalloc.
+[ $# -gt 0 ] || { echo "usage: mallocng-run <program> [args...]" >&2; exit 2; }
+p=$(command -v "$1") || { echo "mallocng-run: $1: not found" >&2; exit 127; }
+shift
+exec /usr/lib/musl-mallocng/libc.so "$p" "$@"
+EOF2
+chmod 755 "$pkgdir/usr/bin/mallocng-run"
+install -Dm644 COPYRIGHT "$pkgdir/usr/share/licenses/musl-mallocng/COPYRIGHT"
+'''

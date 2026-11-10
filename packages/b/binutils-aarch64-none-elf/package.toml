@@ -1,0 +1,40 @@
+# GNU binutils for AArch64 bare metal (aarch64-none-elf): aarch64-none-elf-as, -ld, -objcopy, ...
+# Part of the aarch64-none-elf cross suite (binutils, gcc, C library), as Arch packages them.
+name = "binutils-aarch64-none-elf"
+version = "2.45.1"
+release = 1
+summary = "GNU binutils for AArch64 bare metal"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/binutils"
+hostdeps = ["bison", "flex", "texinfo"]
+builddeps = ["zlib-ng-compat-devel"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/binutils/binutils-2.45.1.tar.xz", sha256 = "5fe101e6fe9d18fdec95962d81ed670fdee5f37e3f48f0bef87bddf862513aa5" },
+]
+
+setup = '''
+./configure --target=aarch64-none-elf --with-sysroot=/usr/aarch64-none-elf --prefix=/usr --libdir=/usr/lib \
+    --mandir=/usr/share/man --infodir=/usr/share/info \
+    --without-debuginfod --with-system-zlib --with-pic \
+    --disable-install-libbfd --disable-multilib --disable-werror --disable-shared \
+    --disable-gold --disable-nls --disable-gdb --disable-gdbserver --disable-sim \
+    --enable-deterministic-archives --enable-64-bit-bfd --enable-plugins
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+# the tools in /usr/aarch64-none-elf/bin are hard links to /usr/bin/aarch64-none-elf-*: make them links
+for f in "$pkgdir"/usr/aarch64-none-elf/bin/*; do
+    b=${f##*/}
+    rm -f "$pkgdir/usr/bin/aarch64-none-elf-$b"
+    ln -s ../aarch64-none-elf/bin/$b "$pkgdir/usr/bin/aarch64-none-elf-$b"
+done
+rm -f "$pkgdir/usr/aarch64-none-elf/bin/ld"; ln -s ld.bfd "$pkgdir/usr/aarch64-none-elf/bin/ld"
+# not needed, and binutils proper owns the info pages
+rm -rf "$pkgdir/usr/lib" "$pkgdir/usr/share/info"
+install -Dm644 COPYING3 "$pkgdir/usr/share/licenses/binutils-aarch64-none-elf/COPYING3"
+'''

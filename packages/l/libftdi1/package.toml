@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libftdi1/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: avrdude, openocd (FTDI-based programmers and debuggers).
+name = "libftdi1"
+version = "1.5"
+release = 1
+summary = "Library for communicating with FTDI USB devices"
+license = "LGPL-2.1-or-later AND GPL-2.0-only"
+homepage = "https://www.intra2net.com/en/developer/libftdi/download.php"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["libconfuse-devel", "libusb-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.intra2net.com/en/developer/libftdi/download/libftdi1-1.5.tar.bz2", sha256 = "7c7091e9c86196148bd41177b4590dccb1510bfe6cea5bf7407ff194482eb049" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DLIB_SUFFIX=
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libftdi1/LICENSE"
+'''

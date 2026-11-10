@@ -1,0 +1,40 @@
+# GNU binutils for AVR microcontrollers (avr): avr-as, -ld, -objcopy, ...
+# Part of the avr cross suite (binutils, gcc, C library), as Arch packages them.
+name = "avr-binutils"
+version = "2.45.1"
+release = 1
+summary = "GNU binutils for AVR microcontrollers"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/binutils"
+hostdeps = ["bison", "flex", "texinfo"]
+builddeps = ["zlib-ng-compat-devel"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/binutils/binutils-2.45.1.tar.xz", sha256 = "5fe101e6fe9d18fdec95962d81ed670fdee5f37e3f48f0bef87bddf862513aa5" },
+]
+
+setup = '''
+./configure --target=avr --prefix=/usr --libdir=/usr/lib \
+    --mandir=/usr/share/man --infodir=/usr/share/info \
+    --without-debuginfod --with-system-zlib --with-pic \
+    --disable-install-libbfd --disable-werror --disable-shared \
+    --disable-gold --disable-nls --disable-gdb --disable-gdbserver --disable-sim \
+    --enable-deterministic-archives --enable-64-bit-bfd --enable-plugins
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+# the tools in /usr/avr/bin are hard links to /usr/bin/avr-*: make them links
+for f in "$pkgdir"/usr/avr/bin/*; do
+    b=${f##*/}
+    rm -f "$pkgdir/usr/bin/avr-$b"
+    ln -s ../avr/bin/$b "$pkgdir/usr/bin/avr-$b"
+done
+rm -f "$pkgdir/usr/avr/bin/ld"; ln -s ld.bfd "$pkgdir/usr/avr/bin/ld"
+# not needed, and binutils proper owns the info pages
+rm -rf "$pkgdir/usr/lib" "$pkgdir/usr/share/info"
+install -Dm644 COPYING3 "$pkgdir/usr/share/licenses/avr-binutils/COPYING3"
+'''

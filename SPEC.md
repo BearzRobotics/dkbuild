@@ -191,6 +191,7 @@ guide to the rest of the syntax.
 | `checkdeps` | no | Extra packages needed only by `check` |
 | `rundeps` | no | Runtime dependencies that can't be detected (5.6) |
 | `provides` | no | Names the main package provides besides what the scan finds (5.6), e.g. `so:libgcc_s.so.1` for a link the scanner cannot see through |
+| `replaces` | no | Packages whose files the main package may take over (apk `replaces`), for a package that supersedes another |
 | `options` | no | List from 5.4 |
 | `environment` | no | Shell lines run before every step |
 | `setup`, `build`, `check`, `install` | `install` yes (not for `meta`) | Shell steps, with macros (5.5) |

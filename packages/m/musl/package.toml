@@ -1,25 +1,63 @@
+# r2: mimalloc as the allocator, as Chimera does (musl's own mallocng is the
+#     usual cause of musl's slowness in allocation-heavy programs): Chimera's
+#     patches to plumb in an external allocator and its unified, hardened
+#     mimalloc configuration (files/mimalloc.c: MI_SECURE, no environment
+#     variables, small arenas); their musl fixes since 1.2.6. musl-mallocng is
+#     the same libc with the stock allocator, for those who want it.
 name      = "musl"
 version   = "1.2.6"
-release   = 1
+release   = 2
 summary   = "The C standard library"
 license   = "MIT"
 homepage  = "https://musl.libc.org/"
 builddeps = ["linux-headers"]
+patches   = [
+    "0001-add-stub-for-pthread_mutexattr_setprioceiling.patch",
+    "0001-plumb-in-support-for-externally-provided-allocator-l.patch",
+    "001-6f6bd4a1896ba0be19168abc1346c8c7e3851709.patch",
+    "002-0572555dab1d1e10b5f7351a005ec588cab41e25.patch",
+    "003-40acb04b2c1291f7d3091c61080109da11eea48b.patch",
+    "004-67219f0130ec7c876ac0b299046460fad31caabf.patch",
+    "005-d2f20c49dfb556d9096251aa0acd92ca907b3400.patch",
+    "006-228da39e38c1cae13cbe637e771412c1984dba5d.patch",
+    "007-b3291b9a9f77f1f993d2b4f8c68a26cf09221ae7.patch",
+    "008-5122f9f3c99fee366167c5de98b31546312921ab.patch",
+    "CVE-2026-107891.patch",
+    "default-locpath.patch",
+    "nxthdr.patch",
+    "lto.patch",
+    "plt.patch",
+    "ppc-alt.patch",
+]
 options   = ["!check"]
 
 # Verified against musl's release key 8364 8929 0BB6 B70F 99FF DA05 56BC DB59 3020 450F
 # (musl-1.2.6.tar.gz.asc from musl.libc.org).
 source = [
     { url = "https://musl.libc.org/releases/musl-1.2.6.tar.gz", sha256 = "d585fd3b613c66151fc3249e8ed44f77020cb5e6c1e635a616d3f9f82460512a" },
+    { url = "https://github.com/microsoft/mimalloc/archive/refs/tags/v2.2.7.tar.gz", sha256 = "8e0ed89907a681276bff2e49e9a048b47ba51254ab60daf6b3c220acac456a95" },
 ]
 
 setup = '''
+# reported by `libc.so --version`
+printf %s "$version" > VERSION
+# mimalloc inside the tree, with Chimera's configuration and patches
+mv ../mimalloc-2.2.7 mimalloc
+cp $pkgfiles/mimalloc.c mimalloc/src/
+cp $pkgfiles/mimalloc-verify-syms.sh .
+patch -p1 < $pkgfiles/mimalloc-musl-integration.patch
+patch -p1 < $pkgfiles/mimalloc-errno.patch
+# musl's x86_64 assembly memcpy/memmove are slower than its C ones
+rm -f src/string/x86_64/memcpy.s src/string/x86_64/memmove.s
 # LIBCC names the runtime library libc.so links against; musl would find it
 # by itself, but this makes the dependency visible.
-./configure --prefix=/usr --syslibdir=/usr/lib LIBCC="$($CC -print-libgcc-file-name)"
+./configure --prefix=/usr --syslibdir=/usr/lib --disable-gcc-wrapper --with-malloc=external \
+    LIBCC="$($CC -print-libgcc-file-name)"
 '''
 build = '''
-make -j$jobs
+make -j$jobs MALLOC_DIR=external EXTRA_OBJ='$(srcdir)/src/malloc/external/mimalloc.o'
+# mimalloc must not have pulled in anything libc does not export
+nm -D lib/libc.so | grep -q ' T malloc$'
 '''
 install = '''
 make DESTDIR=$pkgdir install

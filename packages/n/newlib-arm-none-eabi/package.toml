@@ -1,0 +1,46 @@
+# newlib, the C library for ARM (Cortex-M/R/A) bare metal (arm-none-eabi), built by arm-none-eabi-gcc:
+# the standard newlib in /usr/arm-none-eabi/lib and newlib-nano (small printf and
+# malloc, for microcontrollers) as lib*_nano.a beside it (-specs=nano.specs).
+name = "newlib-arm-none-eabi"
+version = "4.6.0.20260123"
+release = 1
+summary = "C library for ARM (Cortex-M/R/A) bare metal"
+license = "BSD-3-Clause AND MIT AND custom:newlib"
+homepage = "https://sourceware.org/newlib"
+hostdeps = ["binutils-arm-none-eabi", "gcc-arm-none-eabi", "texinfo"]
+options = ["!check", "!lto", "!strip", "!cross"]
+
+source = [
+    { url = "https://sourceware.org/pub/newlib/newlib-4.6.0.20260123.tar.gz", sha256 = "6ff27e3bf022666f43f7802255be680eeff722ac181b1725d21e2e8318604ee3" },
+]
+
+environment = '''
+# target code: the host's flags do not apply
+unset CFLAGS CXXFLAGS LDFLAGS CPPFLAGS
+export CFLAGS_FOR_TARGET="-Os -ffunction-sections -fdata-sections"
+'''
+setup = '''
+common="--target=arm-none-eabi --prefix=/usr --disable-newlib-supplied-syscalls --enable-newlib-reent-small \
+    --disable-nls --enable-newlib-retargetable-locking --enable-newlib-io-long-long"
+mkdir -p build build-nano
+(cd build && ../configure $common --enable-newlib-io-c99-formats --enable-newlib-register-fini)
+(cd build-nano && ../configure $common --enable-newlib-nano-malloc --enable-newlib-nano-formatted-io \
+    --disable-newlib-fvwrite-in-streamio --disable-newlib-fseek-optimization --enable-lite-exit \
+    --disable-newlib-wide-orient --disable-newlib-unbuf-stream-opt --enable-newlib-global-atexit)
+'''
+build = '''
+make -C build -j$jobs
+make -C build-nano -j$jobs
+'''
+install = '''
+make -C build DESTDIR="$pkgdir" install
+# the nano variants, renamed beside the standard ones
+make -C build-nano DESTDIR="$PWD/nano" install
+find nano/usr/arm-none-eabi/lib -name '*.a' | while read -r f; do
+    rel=${f#nano/usr/arm-none-eabi/lib/}; d=$(dirname "$rel"); b=$(basename "$rel" .a)
+    case "$b" in libc|libg|librdimon|libm) install -Dm644 "$f" "$pkgdir/usr/arm-none-eabi/lib/$d/${b}_nano.a" ;; esac
+done
+install -Dm644 nano/usr/arm-none-eabi/include/newlib.h "$pkgdir/usr/arm-none-eabi/include/newlib-nano/newlib.h"
+rm -rf "$pkgdir/usr/share/info"
+install -Dm644 COPYING.NEWLIB "$pkgdir/usr/share/licenses/newlib-arm-none-eabi/COPYING.NEWLIB"
+'''

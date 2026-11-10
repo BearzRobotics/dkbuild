@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/libgpiod/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: avrdude (programming over the GPIO pins of a Raspberry Pi-like board).
+name = "libgpiod"
+version = "2.2.2"
+release = 1
+summary = "C library and tools for the linux GPIO character device"
+license = "LGPL-2.1-or-later"
+homepage = "https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git"
+hostdeps = ["autoconf-archive", "automake", "linux-headers", "pkgconf", "libtool"]
+
+source = [
+    { url = "https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-2.2.2.tar.gz", sha256 = "d0b1380c3cbabbb49b82f709b3288376d98347d4436613407d19cc4cbbfc45a6" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-tools=yes
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libgpiod/COPYING"
+'''

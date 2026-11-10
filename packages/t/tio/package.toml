@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/tio/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Serial console for boards (auto-reconnect, logging, Lua scripting).
+name = "tio"
+version = "3.9"
+release = 1
+summary = "Terminal Serial I/O tool"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/tio/tio"
+hostdeps = ["meson", "pkgconf"]
+builddeps = ["bash-completion", "glib-devel", "linux-headers", "lua-devel"]
+
+source = [
+    { url = "https://github.com/tio/tio/archive/refs/tags/v3.9.tar.gz", sha256 = "88e6fc49f458526a265357601e4fb3e7400685e9720a9150227cbd288432e6f1" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/tio/LICENSE"
+'''

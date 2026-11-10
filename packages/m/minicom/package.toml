@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/minicom/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Serial console.
+name = "minicom"
+version = "2.11.1"
+release = 1
+summary = "Serial communication program"
+license = "GPL-2.0-or-later"
+homepage = "https://salsa.debian.org/minicom-team/minicom"
+hostdeps = ["automake", "gettext-devel", "pkgconf"]
+builddeps = ["linux-headers", "ncurses-devel"]
+
+source = [
+    { url = "https://salsa.debian.org/minicom-team/minicom/-/archive/2.11.1/minicom-2.11.1.tar.gz", sha256 = "b296b0e5795ca143fb1ffa78f46fd294daddfccd720faf9909a842d2f70c564e" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/minicom/COPYING"
+'''

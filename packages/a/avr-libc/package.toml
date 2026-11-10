@@ -1,0 +1,31 @@
+# AVR-LibC: the C library for AVR microcontrollers (headers for every device,
+# libc, libm, startup files), built by avr-gcc into /usr/avr. Completes the
+# AVR suite with avr-binutils and avr-gcc; avrdude flashes the result.
+name = "avr-libc"
+version = "2.3.2"
+release = 1
+summary = "C library for AVR microcontrollers"
+license = "BSD-3-Clause"
+homepage = "https://github.com/avrdudes/avr-libc"
+hostdeps = ["avr-binutils", "avr-gcc", "python"]
+rundeps = ["avr-gcc"]
+options = ["!check", "!lto", "!strip", "!cross"]
+
+source = [
+    { url = "https://github.com/avrdudes/avr-libc/releases/download/avr-libc-2_3_2-release/avr-libc-2.3.2.tar.bz2", sha256 = "92eb253d30cec94f2861a82d40d0b17ad79c0d95fce32b74ffccc26a70afb150" },
+]
+
+environment = '''
+# AVR code: the host's flags do not apply
+unset CFLAGS CXXFLAGS LDFLAGS CPPFLAGS CC CXX AR NM RANLIB
+'''
+setup = '''
+./configure --build="$(./config.guess)" --host=avr --prefix=/usr
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/avr-libc/LICENSE"
+'''

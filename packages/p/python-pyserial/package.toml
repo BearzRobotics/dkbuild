@@ -1,0 +1,21 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-pyserial/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: esptool, platform tools that talk to boards over serial.
+name = "python-pyserial"
+version = "3.5"
+release = 1
+summary = "Python serial port module"
+license = "BSD-3-Clause"
+homepage = "https://github.com/pyserial/pyserial"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/p/pyserial/pyserial-3.5.tar.gz", sha256 = "3c77e014170dfffbd816e6ffc205e9842efb10be9f58ec16d3e8675b4925cddb" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-pyserial/LICENSE.txt"
+'''
