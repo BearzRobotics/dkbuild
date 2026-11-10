@@ -188,6 +188,23 @@ pub fn main(init: std.process.Init) !void {
         opts.tree = t;
         // `world` is every recipe in the tree; what is up to date is skipped below.
         if (is_world) for (t.recipes) |wr| try names.append(arena, wr.name);
+        // `pkg` builds what the named packages need at run time too (an image of
+        // `base` needs base's rundeps built, not only what base builds against).
+        if (!is_world) {
+            var k2: usize = 0;
+            while (k2 < names.items.len) : (k2 += 1) {
+                const pi = t.provider(names.items[k2]) orelse continue;
+                const pr = t.recipes[pi];
+                for ([_][]const []const u8{pr.rundeps}) |deps| for (deps) |d| {
+                    const di = t.provider(d) orelse continue;
+                    if (!contains(names.items, t.recipes[di].name)) try names.append(arena, t.recipes[di].name);
+                };
+                for (pr.subpackages) |sp| for (sp.depends) |d| {
+                    const di = t.provider(d) orelse continue;
+                    if (!contains(names.items, t.recipes[di].name)) try names.append(arena, t.recipes[di].name);
+                };
+            }
+        }
         const order = try t.order(arena, names.items, &problems);
         if (problems.items.len > 0) {
             report(problems.items);
