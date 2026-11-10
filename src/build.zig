@@ -10,6 +10,10 @@ const fetch = @import("fetch.zig");
 const npmdeps = @import("npmdeps.zig");
 /// Sets up npm's cache from the npm store in a build (npmdeps).
 const npm_offline_js = @embedFile("npm-offline.js");
+/// gradledeps: the resolve step's init script, the store copier, and the build's init script.
+const gradle_resolve = @embedFile("gradle-resolve.gradle");
+const gradle_store_sh = @embedFile("gradle-store.sh");
+const gradle_offline = @embedFile("gradle-offline.gradle");
 const macro = @import("macro.zig");
 const profile = @import("profile.zig");
 const tree = @import("tree.zig");
@@ -135,6 +139,17 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
         try s.appendSlice(arena,
             \\node /dkbuild/npm-offline.js /tmp/npm-cache $(find "$srcdir" -name package-lock.json -not -path '*/node_modules/*')
             \\export npm_config_cache=/tmp/npm-cache npm_config_offline=true npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+            \\
+        );
+    // Gradle (gradledeps): the recipe's Gradle distribution, and `gradle` on
+    // PATH always offline with the store as its only repository.
+    if (contains(r.options, "gradledeps"))
+        try s.appendSlice(arena,
+            \\mkdir -p /tmp/gradle-dist /tmp/dkbin
+            \\unzip -q -o "$(ls /build/sources/gradle-*-bin.zip | head -n1)" -d /tmp/gradle-dist
+            \\printf '#!/bin/sh\nexec %s/bin/gradle --offline --no-daemon -g /tmp/ghome -I /dkbuild/gradle-offline.gradle "$@"\n' "$(ls -d /tmp/gradle-dist/gradle-*)" > /tmp/dkbin/gradle
+            \\chmod 755 /tmp/dkbin/gradle
+            \\export PATH="/tmp/dkbin:$PATH"
             \\
         );
     if (contains(r.options, "godeps"))
@@ -540,6 +555,54 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         }
     }
 
+    // 3b. Gradle (gradledeps): the first build of a source resolves its
+    // dependencies once, in this build root with the network, into the shared
+    // Maven-layout store (SPEC.md 7.4); everything after runs offline.
+    const uses_gradle = contains(r.options, "gradledeps") and first_tarball != null;
+    if (uses_gradle) {
+        const first_sha = std.fs.path.basename(first_tarball.?);
+        const maven_rel = try std.fs.path.join(arena, &.{ cache, "maven" });
+        const glists_rel = try std.fs.path.join(arena, &.{ cache, "gradledeps" });
+        Dir.cwd().createDirPath(io, maven_rel) catch return error.PrepareFailed;
+        Dir.cwd().createDirPath(io, glists_rel) catch return error.PrepareFailed;
+        const dk = try std.fs.path.join(arena, &.{ root_rel, "dkbuild" });
+        for ([_][2][]const u8{ .{ "gradle-resolve.gradle", gradle_resolve }, .{ "gradle-store.sh", gradle_store_sh }, .{ "gradle-offline.gradle", gradle_offline } }) |f|
+            Dir.cwd().writeFile(io, .{ .sub_path = try std.fs.path.join(arena, &.{ dk, f[0] }), .data = f[1] }) catch return error.PrepareFailed;
+        const glist = try std.fmt.allocPrint(arena, "{s}/{s}.list", .{ glists_rel, first_sha });
+        if (Dir.cwd().access(io, glist, .{})) |_| {} else |_| {
+            out("    resolving Gradle dependencies (network, once for this source)\n", .{});
+            const sh = try std.fmt.allocPrint(arena,
+                \\set -e
+                \\z=$(ls /build/sources/gradle-*-bin.zip | head -n1)
+                \\mkdir -p /tmp/gradle-dist && unzip -q "$z" -d /tmp/gradle-dist
+                \\g=$(ls -d /tmp/gradle-dist/gradle-*)/bin/gradle
+                \\cd '{s}'
+                \\"$g" --no-daemon -g /tmp/ghome -I /dkbuild/gradle-resolve.gradle dkbuildResolveAll
+                \\sh /dkbuild/gradle-store.sh /tmp/ghome /dkstore/maven /dkstore/gradledeps/{s}.list
+            , .{ srcdir, first_sha });
+            const ok = sandbox.run(arena, io, .{
+                .lower = base_root,
+                .upper = sb.upper,
+                .work = sb.work,
+                .merged = sb.merged,
+                .net = true,
+                .binds = &.{
+                    .{ .src = try std.fs.path.join(arena, &.{ root_abs, "build" }), .dst = "/build" },
+                    .{ .src = try std.fs.path.join(arena, &.{ root_abs, "dkbuild" }), .dst = "/dkbuild" },
+                    .{ .src = absPath(arena, io, maven_rel) catch return error.PrepareFailed, .dst = "/dkstore/maven" },
+                    .{ .src = absPath(arena, io, glists_rel) catch return error.PrepareFailed, .dst = "/dkstore/gradledeps" },
+                    .{ .src = "/etc/resolv.conf", .dst = "/etc/resolv.conf", .read_only = true },
+                },
+                .env = &.{ "PATH=/usr/bin:/bin", "HOME=/tmp" },
+                .argv = &.{ "/usr/bin/sh", "-c", sh },
+            }, &log) catch false;
+            if (!ok) {
+                out("error: {s}: resolving its Gradle dependencies failed; log: {s}\n", .{ r.name, logpath });
+                return error.PrepareFailed;
+            }
+        }
+    }
+
     // 4. Steps, in the sandbox
     var bad: []const u8 = "";
     const text = script(arena, r, ctx, srcdir, opts, &bad) catch |err| switch (err) {
@@ -569,6 +632,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
             .{ .use = zig_list != null, .sub = "zigpkg", .dst = "/dkdeps/zig" },
             .{ .use = uses_go, .sub = "gomod", .dst = "/dkdeps/go" },
             .{ .use = uses_npm, .sub = "npm", .dst = "/dkdeps/npm" },
+            .{ .use = uses_gradle, .sub = "maven", .dst = "/dkdeps/maven" },
         }) |st| {
             if (!st.use) continue;
             const rel = try std.fs.path.join(arena, &.{ cache, st.sub });

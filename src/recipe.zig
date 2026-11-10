@@ -71,7 +71,7 @@ const known_keys = [_][]const u8{
     "check",     "install",   "subpackages", "provides",    "triggers",
 };
 
-const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap", "zigdeps", "godeps", "cargodeps", "npmdeps", "meta", "rootlayout" };
+const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap", "zigdeps", "godeps", "cargodeps", "npmdeps", "gradledeps", "meta", "rootlayout" };
 const known_archs = [_][]const u8{ "x86_64", "aarch64", "riscv64" };
 
 /// Parse and validate `text`. All returned memory lives in `arena`.
@@ -142,6 +142,17 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
         r.source = try parseSources(arena, diag, root);
     }
     r.subpackages = try parseSubpackages(arena, diag, root);
+    // gradledeps (SPEC.md 7.4): the Gradle used is a source of the recipe, kept
+    // as a file, and unzip unpacks it (the build image has none).
+    if (contains(r.options, "gradledeps")) {
+        var dist = false;
+        for (r.source) |src| if (src == .tarball) {
+            const base = std.fs.path.basename(src.tarball.url);
+            if (std.mem.startsWith(u8, base, "gradle-") and std.mem.endsWith(u8, base, "-bin.zip")) dist = true;
+        };
+        if (!dist) return cfg.fail(arena, diag, "option 'gradledeps' needs a Gradle distribution (gradle-<version>-bin.zip) among the sources", .{});
+        if (!contains(r.hostdeps, "unzip")) return cfg.fail(arena, diag, "option 'gradledeps' needs 'unzip' in hostdeps", .{});
+    }
     return r;
 }
 

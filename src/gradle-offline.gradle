@@ -1,0 +1,18 @@
+// dkbuild gradledeps, build side (SPEC.md 7.4): every repository a build or
+// its plugins would use is replaced by the shared Maven-layout store, read-only
+// in the sandbox, so Gradle works offline from exactly what the fetch kept.
+def store = System.getenv("DKBUILD_MAVEN_STORE") ?: "/dkdeps/maven"
+
+def useStore = { handler ->
+    handler.clear()
+    handler.maven { url = uri("file://" + store) }
+}
+
+beforeSettings { settings ->
+    useStore(settings.pluginManagement.repositories)
+    try { useStore(settings.dependencyResolutionManagement.repositories) } catch (ignored) { }
+}
+allprojects { p ->
+    useStore(p.buildscript.repositories)
+    p.afterEvaluate { useStore(p.repositories) }
+}

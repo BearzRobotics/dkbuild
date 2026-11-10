@@ -230,6 +230,7 @@ source = [
 | `zigdeps` | Zig dependencies fetched on the host into the shared `cache/zigpkg/` and laid in the source tree as `zig-pkg/` (7.4) |
 | `godeps` | Go modules downloaded on the host (`go mod download`, needs `go`) into the shared module cache `cache/gomod/`; the build gets `GOMODCACHE`, `GOPROXY=off`, `GOFLAGS=-mod=mod` (7.4) |
 | `npmdeps` | npm packages of every `package-lock.json` in the source, fetched into the shared `cache/npm/` (each checked against its lockfile integrity hash); the build installs offline with `npm ci` (7.4) |
+| `gradledeps` | Gradle dependencies resolved once per source, in the build root with the network, into the shared Maven-layout `cache/maven/`; then the build runs Gradle offline against it. Needs a `gradle-<version>-bin.zip` source and `unzip` in `hostdeps` (7.4) |
 | `cargodeps` | Rust crates vendored on the host (`cargo vendor`, needs `cargo`) into the shared `cache/crates/`, laid in as `vendor/` with a `.cargo/config.toml` pointing at it; build with `--offline` (7.4) |
 | `meta` | A meta-package: no source and no steps, only `rundeps` (`base`, `desktop-hyprland`) |
 | `rootlayout` | May install outside `/usr /etc /var /opt /boot` (base-files: `/dev`, `/proc`, the usr-merge links) |
@@ -695,8 +696,23 @@ entry for each tarball URL, as npm's fetcher looks them up; `npm ci` then
 installs with `npm_config_offline`, checking every tarball again. Lockfiles
 without integrity hashes, yarn and pnpm are not handled yet.
 
+Gradle (`gradledeps`) has no lockfile to read, so its dependencies are
+found by letting Gradle resolve them: the first build of a source runs the
+recipe's own Gradle (a `gradle-<version>-bin.zip` source) in its build root,
+with the network for that one step, with an init script that resolves every
+configuration of every project (`gradle-resolve.gradle`). What Gradle
+downloaded is copied into `cache/maven/`, a plain Maven repository
+(`<group>/<artifact>/<version>/<file>` with `.sha1` and `.sha256` files;
+released versions never change, so it is shared), and
+`cache/gradledeps/<sha256>.list` lists it. The build steps get `gradle` on
+PATH as a wrapper that always runs `--offline` with `gradle-offline.gradle`,
+which replaces every repository of the build and its plugins with the
+read-only store. Tested outside dkbuild with Gradle 9.9.0 (a project with
+Maven Central and plugin-portal dependencies built offline from the
+store); not yet with a recipe, as no JDK is built here yet.
+
 The build binds the stores read-only into the sandbox (`/dkdeps/crates`,
-`/dkdeps/zig`, `/dkdeps/go`, `/dkdeps/npm`) and lays `vendor/` and `zig-pkg/` into the source
+`/dkdeps/zig`, `/dkdeps/go`, `/dkdeps/npm`, `/dkdeps/maven`) and lays `vendor/` and `zig-pkg/` into the source
 tree as symbolic links to the entries its list names, so nothing is copied and
 no build can change a store. Go reads its module cache directly. Cargo checks
 every crate against its `.cargo-checksum.json` as it builds. Which entries a
