@@ -21,6 +21,10 @@ perl -0pi -e 's/#if ! \(JUCE_ANDROID \|\| JUCE_WASM\)\n(\s*)#include <execinfo.h
 perl -0pi -e 's/   #else\n    void\* stack\[128\];/   #elif ! __has_include(<execinfo.h>)\n    result << "(no stack trace on this system)" << newLine;\n   #else\n    void* stack[128];/' $m/system/juce_SystemStats.cpp
 grep -q '__has_include(<execinfo.h>)' $m/juce_core.cpp
 grep -q 'no stack trace on this system' $m/system/juce_SystemStats.cpp
+# stat64 is glibc's large-file name (musl's stat is 64-bit already and only
+# defines stat64 with _LARGEFILE64_SOURCE): JUCE uses it with glibc only
+sed -i 's/^   #if JUCE_LINUX || (JUCE_IOS \&\& (! TARGET_OS_MACCATALYST)/   #if (JUCE_LINUX \&\& defined (__GLIBC__)) || (JUCE_IOS \&\& (! TARGET_OS_MACCATALYST)/' $m/native/juce_SharedCode_posix.h
+grep -q 'JUCE_LINUX && defined (__GLIBC__)' $m/native/juce_SharedCode_posix.h
 %cmake
 '''
 build = '''
