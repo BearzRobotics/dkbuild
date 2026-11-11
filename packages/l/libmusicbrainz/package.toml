@@ -15,6 +15,11 @@ source = [
 ]
 
 setup = '''
+# DEPENDS on a literal *.inc: newer CMake no longer expands it (ninja: 'src/*.inc'
+# missing); glob the files before the command and depend on the list
+sed -i -e 's|cinterface.xml \*\.inc$|cinterface.xml ${MB_INC_FILES}|' \
+    -e '0,/^ADD_CUSTOM_COMMAND(/s||FILE(GLOB MB_INC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.inc)\nADD_CUSTOM_COMMAND(|' src/CMakeLists.txt
+grep -q 'cinterface.xml ${MB_INC_FILES}' src/CMakeLists.txt
 %cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 '''
 build = '''
