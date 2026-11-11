@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Scratch 3
+GenericName=Programming Environment
+Comment=Create stories, games and animations with block programming
+Exec=scratch-desktop %f
+Icon=scratch-desktop
+Terminal=false
+MimeType=application/x-scratch-project;
+Categories=Education;Development;

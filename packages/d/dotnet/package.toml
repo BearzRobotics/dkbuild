@@ -42,6 +42,12 @@ if [ -d /usr/lib/dotnet-bootstrap-gcc ]; then export LD_LIBRARY_PATH=/usr/lib/do
 # its archives are unpacked as root in the sandbox, where tar cannot chown
 export TAR_OPTIONS=--no-same-owner
 '''
+setup = '''
+# the snapshot's files carry 1970 times (it is packed reproducibly, mtime 0);
+# NuGet packs only zip-representable dates (1980 on) and the build turns that
+# warning (NU5132) into an error: a fixed later time instead
+find . -exec touch -h -d @946684800 {} +
+'''
 build = '''
 ulimit -n 4096 || true
 # Source Link needs the repository and commit; the snapshot is a tag archive

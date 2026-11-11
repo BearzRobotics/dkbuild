@@ -223,7 +223,9 @@ source = [
   is unknown until it is made: fetch keeps it under the checksum it has and
   prints it for the recipe. `git` (repository URL, tag or commit) is a shallow
   clone with all its submodules, for projects whose release archives leave
-  the submodules out.
+  the submodules out. `scratch-media` (an @scratch/scratch-gui version) downloads the
+  media library that version lists, each asset checked against the MD5 it
+  is named by, for Scratch Desktop.
 - The first tarball is unpacked into the build directory, and the build
   steps start inside its top directory. Further tarballs are unpacked next to
   it (`/build/<their top directory>`): a vendored dependency's source, such as

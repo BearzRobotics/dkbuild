@@ -1,0 +1,64 @@
+# Scratch Desktop: the Scratch 3 editor (Scratch Foundation) as an offline
+# desktop app, on the system Electron (3.32.0 is built for Electron 42, as
+# FenrirOS's). npm packages from the npm store (`npmdeps`); the media library
+# (costumes, sprites, sounds, backdrops), which its build downloads with
+# `npm run fetch`, is a snapshot made at fetch time (src/snapshot-scratch-media.sh,
+# each asset checked against the MD5 it is named by), for the scratch-gui
+# version package-lock.json pins.
+# Packaging with electron-builder downloads an Electron: instead webpack
+# builds dist/main and dist/renderer, which run as an app directory on
+# /usr/lib/electron; the static files' path (process.resourcesPath, Electron's
+# own directory there) becomes /usr/lib/scratch-desktop/static.
+# Telemetry is opt-in (it asks).
+# DRAFT, not built: needs electron. TODO: the media snapshot's sha256 (the
+# first fetch prints it).
+name = "scratch-desktop"
+version = "3.32.0"
+release = 1
+summary = "Scratch 3 editor as an offline desktop app"
+license = "AGPL-3.0-only"
+homepage = "https://scratch.mit.edu"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["nodejs"]
+rundeps = ["electron"]
+options = ["!check", "!strip", "npmdeps"]
+
+source = [
+    { url = "https://github.com/scratchfoundation/scratch-desktop/archive/refs/tags/v3.32.0.tar.gz", sha256 = "34225b34e13e543288f20ac83d554b74c1d6fadc12a9bf01b901eb5d4745bdba" },
+    { url = "snapshot:scratch-media 13.7.4-svg", sha256 = "0000000000000000000000000000000000000000000000000000000000000000" },
+]
+
+environment = '''
+export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
+    npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+export ELECTRON_SKIP_BINARY_DOWNLOAD=1 NODE_ENV=production
+'''
+setup = '''
+# the media snapshot is for the scratch-gui the lockfile pins
+grep -q '"@scratch/scratch-gui": "13.7.4-svg"' package.json
+node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
+npm ci --ignore-scripts
+f=webpack.makeConfig.js
+sed -i "s|'process.resourcesPath + \"/static\"'|'\"/usr/lib/scratch-desktop/static\"'|" $f
+grep -q '/usr/lib/scratch-desktop/static' $f
+mkdir -p static/fetched
+cp -a ../scratch-media-13.7.4-svg/. static/fetched/
+'''
+build = '''
+# `npm run compile` without prepare-electron (which needs the npm Electron's binary)
+npx webpack --config webpack.renderer.js
+npx webpack --config webpack.main.js
+test -f dist/main/main.js
+'''
+install = '''
+app="$pkgdir/usr/lib/scratch-desktop"
+mkdir -p "$app"
+cp -a dist package.json "$app/"
+cp -a static "$app/static"
+install -Dm755 $pkgfiles/scratch-desktop "$pkgdir/usr/bin/scratch-desktop"
+install -Dm644 $pkgfiles/scratch-desktop.desktop "$pkgdir/usr/share/applications/scratch-desktop.desktop"
+install -Dm644 src/icon/ScratchDesktop.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/scratch-desktop.svg"
+install -Dm644 src/icon/ScratchDesktop.png "$pkgdir/usr/share/icons/hicolor/1024x1024/apps/scratch-desktop.png"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/scratch-desktop/LICENSE"
+install -Dm644 TRADEMARK "$pkgdir/usr/share/licenses/scratch-desktop/TRADEMARK"
+'''

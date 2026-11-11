@@ -115,6 +115,7 @@ const snapshot_scripts = [_][2][]const u8{
     .{ "electron", @embedFile("snapshot-electron.sh") },
     .{ "dotnet", @embedFile("snapshot-dotnet.sh") },
     .{ "git", @embedFile("snapshot-git.sh") },
+    .{ "scratch-media", @embedFile("snapshot-scratch-media.sh") },
 };
 
 /// Make the tarball of a `snapshot:` source into `tmp`. The script's output
