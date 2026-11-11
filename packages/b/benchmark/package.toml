@@ -16,6 +16,10 @@ source = [
     { url = "https://github.com/google/benchmark/archive/v1.9.4.tar.gz", sha256 = "b334658edd35efcf06a99d9be21e4e93e092bd5f95074c1673d5c8705d95c104" },
 ]
 
+environment = '''
+# clang 23 calls __COUNTER__ a C2y extension, and its flags make that an error
+export CXXFLAGS="$CXXFLAGS -Wno-error=c2y-extensions -Wno-c2y-extensions"
+'''
 setup = '''
 %cmake -DBENCHMARK_ENABLE_WERROR=OFF -DBENCHMARK_ENABLE_TESTING=OFF \
     -DBUILD_SHARED_LIBS=ON \

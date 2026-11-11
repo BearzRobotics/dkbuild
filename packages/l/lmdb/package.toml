@@ -16,17 +16,18 @@ source = [
 ]
 
 build = '''
-%make
+# the library's Makefile is in libraries/liblmdb
+%make -C libraries/liblmdb
 '''
 check = '''
-%make test
+%make -C libraries/liblmdb test
 '''
 install = '''
-%make_install \
+%make_install -C libraries/liblmdb \
     STRIP=true \
     PREFIX=/usr \
     prefix=/usr
-install -Dm644 LICENSE "$pkgdir/usr/share/licenses/lmdb/LICENSE"
-install -Dm644 COPYRIGHT "$pkgdir/usr/share/licenses/lmdb/COPYRIGHT"
+install -Dm644 libraries/liblmdb/LICENSE "$pkgdir/usr/share/licenses/lmdb/LICENSE"
+install -Dm644 libraries/liblmdb/COPYRIGHT "$pkgdir/usr/share/licenses/lmdb/COPYRIGHT"
 install -Dm644 $pkgfiles/lmdb.pc "$pkgdir/usr/lib/pkgconfig/lmdb.pc"
 '''
