@@ -19,7 +19,7 @@ setup = '''
 # std::copy, std::fill and the like without it, and std::terminate without
 # <exception>: every file that does gets the header
 add() {
-    for h in $(grep -rlE "$2" src --include='*.h' --include='*.cpp' | xargs grep -L "#include <$1>"); do
+    for h in $(grep -rlE "$2" src --include='*.h' --include='*.cpp' | xargs -r grep -L "#include <$1>"); do
         sed -i "0,/^#include/s//#include <$1>\\n#include/" "$h"
     done
 }

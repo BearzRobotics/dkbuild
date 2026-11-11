@@ -15,14 +15,21 @@ source = [
 ]
 
 setup = '''
-# libc++ 23: error.h (installed) uses std::exception_ptr without <exception>
-sed -i '0,/^#include/s//#include <exception>\n#include/' include/zim/error.h
+# libc++ 23 no longer brings in standard headers through others: every file
+# (include/zim/error.h is installed) gets the ones whose names it uses
+add() {
+    for f in $(grep -rlE "$2" include src --include='*.h' --include='*.cpp' | xargs -r grep -L "#include <$1>"); do
+        sed -i "0,/^#include/s//#include <$1>\\n#include/" "$f"
+    done
+}
+add exception 'std::(exception_ptr|current_exception|rethrow_exception|make_exception_ptr|terminate)\b'
+add cerrno '\berrno\b|\bE[A-Z]{3,}\b'
+add algorithm 'std::(copy|fill|min|max|equal|sort|find|find_if|remove|remove_if|reverse|transform|for_each|count|count_if|all_of|any_of|none_of)\b'
+add cstdlib 'std::(strto[a-z]+|getenv|abort|exit|malloc|free|abs|atoi)\b'
+add cstring 'std::(memcpy|memset|memcmp|memmove|strlen|strcmp|strncmp|strerror)\b'
 grep -q '^#include <exception>' include/zim/error.h
-# and errno without <cerrno> in three source files
-for f in src/tools.cpp src/writer/binaryfile.cpp src/writer/creator.cpp; do
-    sed -i '0,/^#include/s//#include <cerrno>\n#include/' "$f"
-    grep -q '^#include <cerrno>' "$f"
-done
+grep -q '^#include <exception>' src/writer/creatordata.h
+grep -q '^#include <cerrno>' src/writer/binaryfile.cpp
 %meson \
     -Ddoc=false \
     -Dexamples=false \

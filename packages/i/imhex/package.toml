@@ -20,7 +20,7 @@ source = [
 setup = '''
 # libc++ 23 no longer brings in <cstdlib> through other headers: every file
 # using its functions (std::strtoull in libwolv's math evaluator, ...) gets it
-for f in $(grep -rlE 'std::(strto[a-z]+|getenv|abort|exit|malloc|calloc|realloc|free|atoi|atol|system|qsort|abs|labs|llabs)\b' --include='*.cpp' --include='*.hpp' --include='*.h' . | xargs grep -LE '#include <(cstdlib|stdlib.h)>'); do
+for f in $(grep -rlE 'std::(strto[a-z]+|getenv|abort|exit|malloc|calloc|realloc|free|atoi|atol|system|qsort|abs|labs|llabs)\b' --include='*.cpp' --include='*.hpp' --include='*.h' . | xargs -r grep -LE '#include <(cstdlib|stdlib.h)>'); do
     sed -i '0,/^#include/s//#include <cstdlib>\n#include/' "$f"
 done
 grep -q '^#include <cstdlib>' lib/external/libwolv/libs/math_eval/source/math_eval/math_evaluator.cpp
