@@ -18,6 +18,19 @@ source = [
 ]
 
 setup = '''
+# abseil (2026) dropped the absl::Nullable/Nonnull templates webrtc 2.1 still
+# writes (annotations only, replaced by absl_nullable/absl_nonnull): aliases
+# for them, included into every C++ file
+cat > "$srcdir/absl-nullability-compat.h" <<'EOH'
+#pragma once
+#include "absl/base/nullability.h"
+namespace absl {
+template <typename T> using Nullable = T;
+template <typename T> using Nonnull = T;
+template <typename T> using NullabilityUnknown = T;
+}
+EOH
+export CXXFLAGS="$CXXFLAGS -include $srcdir/absl-nullability-compat.h"
 %meson \
     -Dcpp_std=c++17
 '''
