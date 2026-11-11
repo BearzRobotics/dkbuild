@@ -50,7 +50,7 @@ build = '''
 install = '''
 %meson_install
 install -Dm644 COPYING "$pkgdir/usr/share/licenses/xserver-xorg/COPYING"
-chmod 4755 "$pkgdir/usr/lib/Xorg.wrap"
+chmod 4755 "$pkgdir/usr/libexec/Xorg.wrap"
 # provided by xserver-xorg-protocol
 rm -rf "$pkgdir/usr/lib/xorg/protocol.txt"
 # from debian: https://salsa.debian.org/xorg-team/xserver/xorg-server
