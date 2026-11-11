@@ -8,8 +8,8 @@ license = "GPL-3.0-or-later"
 homepage = "https://cwrap.org/pam_wrapper.html"
 patches = ["libpamtest-pc-version.patch"]
 hostdeps = ["cmake", "ninja", "pkgconf", "python-setuptools"]
-builddeps = ["python-devel", "linux-pam-devel"]
-checkdeps = ["cmocka-devel"]
+# cmocka at configure time: UNIT_TESTING is decided in setup, not check
+builddeps = ["python-devel", "linux-pam-devel", "cmocka-devel"]
 
 source = [
     { url = "https://ftp.samba.org/pub/cwrap/pam_wrapper-1.1.8.tar.gz", sha256 = "6549c0b3e41d1ebe0c94a1be63c25eec918191462b602ab6f47d4a5fa709c3e4" },
