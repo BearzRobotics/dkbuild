@@ -7,16 +7,20 @@ summary = "JavaScript and CSS bundler and minifier"
 license = "MIT"
 homepage = "https://esbuild.github.io"
 hostdeps = ["go", "nodejs"]
+options = ["godeps"]
 
 source = [
     { url = "https://github.com/evanw/esbuild/archive/v0.28.0.tar.gz", sha256 = "7aae83b197db3fd695e6f378d30fd6cbddeb93e4b1057b2c41d36ecb1dfebbc2" },
 ]
 
 build = '''
+# the Go binary first: the npm package's scripts are bundled by it
+go build -o build/esbuild ./cmd/esbuild
 node scripts/esbuild.js npm/esbuild/package.json --version
 node scripts/esbuild.js ./build/esbuild --neutral
 '''
 install = '''
+install -Dm755 build/esbuild "$pkgdir/usr/bin/esbuild"
 install -dm755 "$pkgdir/usr/lib/node_modules/esbuild/bin"
 install -Dm644 npm/esbuild/package.json "$pkgdir/usr/lib/node_modules/esbuild/package.json"
 cp -r npm/esbuild/lib "$pkgdir/usr/lib/node_modules/esbuild/"

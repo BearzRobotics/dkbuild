@@ -1,15 +1,18 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/sfml/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
+#
+# Libraries from the system (SFML_USE_SYSTEM_DEPS); SheenBidi, which SFML
+# always builds into itself, is the second source given to FetchContent, with
+# SFML's own patch to its CMakeLists run first (FetchContent's patch step does
+# not run for a given source directory).
 name = "sfml"
 version = "3.1.0"
 release = 1
-summary = "C++ multimedia Library"
+summary = "C++ multimedia library"
 license = "Zlib"
 homepage = "https://www.sfml-dev.org"
 hostdeps = ["cmake", "ninja", "pkgconf"]
-builddeps = ["flac-devel", "freetype-devel", "libogg-devel", "libssh2-devel", "libvorbis-devel", "libx11-devel", "libxcursor-devel", "libxi-devel", "libxrandr-devel", "mbedtls-devel", "mesa-devel"]
+builddeps = ["flac-devel", "freetype-devel", "libogg-devel", "libssh2-devel", "libvorbis-devel", "libx11-devel", "libxcursor-devel", "libxi-devel", "libxrandr-devel", "mbedtls-devel", "mesa-devel", "harfbuzz-devel", "libxrender-devel", "linux-headers"]
 
 source = [
     { url = "https://github.com/SFML/SFML/archive/refs/tags/3.1.0.tar.gz", sha256 = "91209a112c2bd0bc6f4ce0d5f3e413cfb48b57c0de59f5507dc81f71b1ad7a5c" },
@@ -17,9 +20,14 @@ source = [
 ]
 
 setup = '''
+cmake -DSHEENBIDI_DIR=/build/SheenBidi-3.0.0 -P tools/sheenbidi/PatchSheenBidi.cmake
 %cmake \
     -DBUILD_SHARED_LIBS=YES \
-    -DSFML_INSTALL_PKGCONFIG_FILES=NO
+    -DSFML_INSTALL_PKGCONFIG_FILES=YES \
+    -DSFML_USE_SYSTEM_DEPS=ON \
+    -DSFML_BUILD_TEST_SUITE=OFF \
+    -DFETCHCONTENT_FULLY_DISCONNECTED=ON \
+    -DFETCHCONTENT_SOURCE_DIR_SHEENBIDI=/build/SheenBidi-3.0.0
 '''
 build = '''
 %cmake_build

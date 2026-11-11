@@ -16,7 +16,8 @@ source = [
 
 setup = '''
 export PYTHON_COMMAND=python3
-make -C BaseTools CC=clang CXX=clang++ -j$jobs
+# clang 23's -Wunused-but-set-global, under BaseTools' -Werror (Elf32Convert.c)
+make -C BaseTools CC=clang CXX=clang++ EXTRA_OPTFLAGS=-Wno-unused-but-set-global -j$jobs
 '''
 build = '''
 export PYTHON_COMMAND=python3 WORKSPACE=$PWD
