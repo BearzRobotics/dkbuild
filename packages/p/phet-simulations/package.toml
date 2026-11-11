@@ -1,0 +1,162 @@
+# PhET Interactive Simulations (University of Colorado Boulder): the 127
+# HTML5 simulations, each one self-contained file with every language in it
+# (<sim>_all.html; the language follows the browser's, or ?locale=), pinned by
+# version from PhET's metadata service (2026-11-11). They run offline in any
+# browser: an index page in /usr/share/phet and a menu entry that opens it.
+# Simulations: CC-BY-4.0 (PhET's terms; their code is MIT/GPL-3.0, built into
+# each file). No build: the files are installed as they are.
+# To update: the list and versions come from
+# https://phet.colorado.edu/services/metadata/1.3/simulations?format=json&type=html&summary
+name = "phet-simulations"
+version = "2026.11.11"
+release = 1
+summary = "PhET interactive science and math simulations (offline HTML5)"
+license = "CC-BY-4.0"
+homepage = "https://phet.colorado.edu"
+archs = ["x86_64", "aarch64"]
+rundeps = ["xdg-utils"]
+options = ["!strip", "!check"]
+
+source = [
+    { url = "https://phet.colorado.edu/sims/html/acid-base-solutions/1.3.17/acid-base-solutions_all.html", sha256 = "aad0ed75951249543f648e631996bbe94ee31404da1a1e86fac198d687ad7382", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/alpha-decay/1.0.2/alpha-decay_all.html", sha256 = "6d10694dba6c4d43b70a3075b3a091ff3caad40bedce3691bd644d789b090b2c", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/area-builder/1.1.40/area-builder_all.html", sha256 = "8147a5dc45dafdb8876164ef9c46ea3ac93bd53d6f4b903bd4b30b1f3ca58e33", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/area-model-algebra/1.3.11/area-model-algebra_all.html", sha256 = "868c011f928e89fdfcede70a43f789e514a213549940b42688ea2839d208c584", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/area-model-decimals/1.3.10/area-model-decimals_all.html", sha256 = "bd2726685bac83d554bef0621acc841e47dd4ff1949e6234c0de152e7d0d48fa", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/area-model-introduction/1.3.10/area-model-introduction_all.html", sha256 = "660d7db6eadd5e4c27723786df82e780df99af7167b59aead4c454ea607f81ae", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/area-model-multiplication/1.3.11/area-model-multiplication_all.html", sha256 = "18fa5d983ea9531d08204199fcabad8bc1b4a8e4840ebd4998a3bc07fa6714b7", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/arithmetic/1.2.10/arithmetic_all.html", sha256 = "ae2fc24c38e3ebda28b29b034ad9c5158a243c0e43636bc17fae5c2e8cc30fa4", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/atomic-interactions/1.2.23/atomic-interactions_all.html", sha256 = "02b67cd58670e788ed2cf3926c5a2b0e0298a7f6dfa9e3819ec465d4c55a89f2", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/balancing-act/1.3.9/balancing-act_all.html", sha256 = "df657fc28286f8c23222ee265105fbacf30a19451fca282252b5a642fed86f8c", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/balancing-chemical-equations/2.1.4/balancing-chemical-equations_all.html", sha256 = "d2fd825b5b5439e77316d0cd7a14204b90cae0f17e147ce8f452289b1e602944", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/balloons-and-static-electricity/1.5.28/balloons-and-static-electricity_all.html", sha256 = "94698b4a73253bb6a3591e5a39589b95ad201e191150f1310e825a996ed1d506", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/band-structure/1.0.0/band-structure_all.html", sha256 = "aa23142263d20337a1d80f45352f10968b6f6847d44618a1300e65d56a48e58d", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/beers-law-lab/1.8.9/beers-law-lab_all.html", sha256 = "3a6991cf14c6a48c6ea6400ebfc6445fcfaf6ad71fefab1054304a3add699010", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/bending-light/1.2.7/bending-light_all.html", sha256 = "ca01650ab871a99586ad5078720ebdee3cc3160daec096f871d6cb8bb0666dd9", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/beta-decay/1.0.2/beta-decay_all.html", sha256 = "29a164e9e7e9cea4f88da378f46b62c272279c59ca6a726906ab730940dbb8a4", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/blackbody-spectrum/1.0.28/blackbody-spectrum_all.html", sha256 = "1b69ee070efce565c6d6a25bd6b7dc9cc5aa22932d78dae8b3295310eddb157c", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/bound-state-superposition/1.0.0/bound-state-superposition_all.html", sha256 = "7dd33677191d287b1ff637fd7b6349d905581c032c670a07e6e1c1d38fb85fa9", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/build-a-fraction/1.0.33/build-a-fraction_all.html", sha256 = "bbaca497fab2242b28c91c14a38308d9304445e67d72048dcdfc87f28e8a4371", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/build-a-molecule/1.0.27/build-a-molecule_all.html", sha256 = "b9417c0b65fa069b76698f926161962b06ac2a5fe5ca3abda0de2afb47b08228", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/build-a-nucleus/1.1.12/build-a-nucleus_all.html", sha256 = "7a0c44b2ed7ebc09b4596eeb6a1b8d9102ae8463a3645d4645a12cc35ede38de", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/build-an-atom/1.9.5/build-an-atom_all.html", sha256 = "bbad0e96ea0d62df84251124feeda4c05dcfc2001b71967ebd19b9c99e476d2c", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/buoyancy/1.2.14/buoyancy_all.html", sha256 = "5dd917392897889d821332b5c7ad3122cda00b67160b35220475e552d8ca1b57", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/buoyancy-basics/1.2.13/buoyancy-basics_all.html", sha256 = "3fc0283616363f776db2e633773a367b5c830bfd8edfa44a9632e78edb37719f", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/calculus-grapher/1.1.3/calculus-grapher_all.html", sha256 = "daa20ccc68e08a888dffd6865107a93bb0f514863581b9925555dede2627aabd", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/capacitor-lab-basics/1.6.41/capacitor-lab-basics_all.html", sha256 = "d50904bd2f3d51a92de3af8ad45ddcb48b6937ee7953d972175b7f63834c4348", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/center-and-variability/1.2.8/center-and-variability_all.html", sha256 = "d3f1d41d4a139510755d8b4b46ff1ecc282b323fd286a429a078cd69a460bfc7", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/charges-and-fields/1.0.69/charges-and-fields_all.html", sha256 = "85de8a60a32e731a1657eec2bbe339e78670a72eb426433faca85d52680f3603", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/circuit-construction-kit-ac/1.0.25/circuit-construction-kit-ac_all.html", sha256 = "d81321cc7f7213f562ecb0ac3cc6f2f80d81dc08fdbccee89a21e66a698e8604", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/circuit-construction-kit-ac-virtual-lab/1.0.24/circuit-construction-kit-ac-virtual-lab_all.html", sha256 = "4f1a8530fa5eec1df472051bc213953d91262c5cdd0606ac14ff5c441501ee86", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/circuit-construction-kit-dc/1.5.4/circuit-construction-kit-dc_all.html", sha256 = "563a406ce8e122dfd21886650bc1a9e15e85b988d5274603c26b726869d4194e", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/circuit-construction-kit-dc-virtual-lab/1.5.4/circuit-construction-kit-dc-virtual-lab_all.html", sha256 = "bd42e8bc6d6b50e00324ebaefce481dc997a036932dc667fe5cc6a3161e7b5fa", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/collision-lab/1.1.25/collision-lab_all.html", sha256 = "e172273a6054beecab2766f5544cd4161ae6659f82ad1d124b08a5520b1dcdd9", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/color-vision/1.3.9/color-vision_all.html", sha256 = "4476b9d49402efced011d4401d91d42f9482de8592c0b7be5a6df00eaa6ea785", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/concentration/1.8.8/concentration_all.html", sha256 = "6edb629e8042ae7fcfe571d3574d1984710976df6dedac12bf0c57b0bb2267b0", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/coulombs-law/1.0.34/coulombs-law_all.html", sha256 = "31683d6e9308f9c711c9d1badce4f8755f364bbf2c65d2b484e657dd47d02ec4", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/curve-fitting/1.0.22/curve-fitting_all.html", sha256 = "878f7f470b93a60aac93bd67cf6f4fae573db29fefdb8db9c5675625eb2bbe67", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/density/1.2.12/density_all.html", sha256 = "72476bf4128bfaa345bfa1452afb9c3cecbc1ff397fc549acc9b4bb2dc385c16", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/diffusion/1.1.9/diffusion_all.html", sha256 = "30de9e6e473aa178b029b00c8c0f21dcda30d31eb6e0665532e4733ada8e980c", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/double-wells-and-covalent-bonds/1.0.0/double-wells-and-covalent-bonds_all.html", sha256 = "e5bc6c17c7e9ebb6477aa21206761d9104a7af712abb73e2c261b174225eab69", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/energy-forms-and-changes/1.4.26/energy-forms-and-changes_all.html", sha256 = "d47c8134fedd8746450ab6c3bb246a891b693b53510d9c0a20e2ff103a0d42b3", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/energy-skate-park/1.6.2/energy-skate-park_all.html", sha256 = "f74a77df030beca944f7aa8c6f763ca4510d48bdd5cf4d3017961bedbba4d108", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/energy-skate-park-basics/1.6.2/energy-skate-park-basics_all.html", sha256 = "761154d49a0a8b366af45c7f845a2aaa54d914d7d4742b4fe1fbfed3774b6228", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/equality-explorer/1.2.7/equality-explorer_all.html", sha256 = "91eec0b3b340c321892e77610a27f6d3ece576d8cac2297f83ee411fc958f0f5", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/equality-explorer-basics/1.2.7/equality-explorer-basics_all.html", sha256 = "7c9d917c9567470157f4bcd98471f640328ee96b22fadd2bb848924395429a8e", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/equality-explorer-two-variables/1.2.7/equality-explorer-two-variables_all.html", sha256 = "7cf46539ef666ae54beeaf1e17b2e39a8ea5135d1b7c704ab26107e5dfc0cd32", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/expression-exchange/1.1.35/expression-exchange_all.html", sha256 = "d89748d99257a50a498c7ce07226203c8d58b47eee61ceeb6819ee5fe4f81fb7", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/faradays-electromagnetic-lab/1.0.9/faradays-electromagnetic-lab_all.html", sha256 = "1e5fd563e5b6988f727dbd076ea53225564070d13e5319d98f5fbc48ca6a5c61", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/faradays-law/1.4.27/faradays-law_all.html", sha256 = "fbaf23f3909ff16707bd8f7f888833d953e283f1d32abe2aef09ff1c3c290a91", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/forces-and-motion-basics/2.6.7/forces-and-motion-basics_all.html", sha256 = "9312cf4984b6783c2fc540c0d18ff8ee3b9f2b2fab4590b65ad551d8a0fa0150", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/fourier-making-waves/1.1.7/fourier-making-waves_all.html", sha256 = "83d4b580238fc5327dd6abadf10bd580e74f741514dae2323a9a86b8f81e49e1", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/fraction-matcher/1.2.23/fraction-matcher_all.html", sha256 = "7ee7ad64e1688e092db9414a87fed46ea81df57c6498d0ed756ebc5fb320437a", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/fractions-equality/1.1.24/fractions-equality_all.html", sha256 = "495c553b6d8ef636b9c58152dec3339ad9d384843b05f631515092f81b6e5019", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/fractions-intro/1.0.35/fractions-intro_all.html", sha256 = "91dbea2be3fa1215adf8eff5511e6b3578152a9f187cfd034e0d39ff781b547d", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/fractions-mixed-numbers/1.0.35/fractions-mixed-numbers_all.html", sha256 = "45194f670821d10038c7800506f9a2056ee3a17770c0c9219433defd60d3b178", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/friction/1.6.25/friction_all.html", sha256 = "567e868d87bc8368f26aefb449991b9b72eea5c65bcad4e2b6b5ba8a1fd22d45", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/function-builder/1.2.20/function-builder_all.html", sha256 = "c7c19defc1eb8e740e28450140e0f17d8cd7f633e6cdbd29f0a08910c7da74e7", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/function-builder-basics/1.2.21/function-builder-basics_all.html", sha256 = "6e56a51162b6ae74ab427a8c176b555fa1a52f5cfdacd2787359f9def011cb7b", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/gas-properties/1.1.12/gas-properties_all.html", sha256 = "11440b2a28cc72d0591ec7ca010e470fb5f9a94ca6f56c77ceb8c3d20fc34f24", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/gases-intro/1.1.9/gases-intro_all.html", sha256 = "fe1d357ff9cd2733fbd526774ced1ee80ea7849b557d4c51b85faad407918aff", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/gene-expression-essentials/1.0.38/gene-expression-essentials_all.html", sha256 = "3cb5266c695c617e3ed2ad52b27418092895cee82f84312be685cc29f2b5de70", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/generator/1.0.9/generator_all.html", sha256 = "621efcfaab98e004032f8198a147b0a2e583526078af79f441748eaafb3de48d", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/geometric-optics/1.3.18/geometric-optics_all.html", sha256 = "c58a59c7acd7f5f67a6dc23062c64e949b228e9c0a2e4ad25a57a63f15d2dac4", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/geometric-optics-basics/1.3.18/geometric-optics-basics_all.html", sha256 = "12032b782926262512aeda73e5717ffd25756efdfa77dd1f28242349d6ed7fec", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/graphing-lines/1.4.10/graphing-lines_all.html", sha256 = "35591e674922c9e6ec7f78b455bf9e7d413c4aa48767affdac568a74d8033ba5", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/graphing-quadratics/1.4.6/graphing-quadratics_all.html", sha256 = "20e170ecd8a85c426f37405422c59e4c91775101e536e2ada6a2b4f911b4826a", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/graphing-slope-intercept/1.2.10/graphing-slope-intercept_all.html", sha256 = "6477e6192ce41c4efaa7dd597d5845c6214ec855a1ace59ab3f33d84f502be08", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/gravity-and-orbits/1.6.30/gravity-and-orbits_all.html", sha256 = "b6f996993a78db9cf0fc4a00fbb88253ebf9e1663cf8eb0c26799798ea9736f9", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/gravity-force-lab/2.2.27/gravity-force-lab_all.html", sha256 = "0b729481d102d289d6a38bfa907847334f56dfe1147c7f87ce9dbbf8d9c6d6d2", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/gravity-force-lab-basics/1.1.29/gravity-force-lab-basics_all.html", sha256 = "0bc793ee9390b2f51c8e4ce7469cc1e917678b5d25eef54fab75bba80165fccd", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/greenhouse-effect/1.3.15/greenhouse-effect_all.html", sha256 = "24cf9dd4b9e79e323cdc576aafea12b69707bcf87de7e2c3f6a11f9305060fe0", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/hookes-law/1.2.6/hookes-law_all.html", sha256 = "7ad10a5b8b9194da3269dc0ec60c355cf6d0ecf91ebdbdc3e87b8978c6f9d6e2", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/isotopes-and-atomic-mass/1.2.3/isotopes-and-atomic-mass_all.html", sha256 = "570bea3ba626cc0d6dcc051f070d671f3f213c9396a705ea91de64c34b095419", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/john-travoltage/1.6.28/john-travoltage_all.html", sha256 = "74086d151953b5991ca0aa5caf2932c4a0f6c6775b5105532bd536d85db6c31a", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/keplers-laws/1.2.14/keplers-laws_all.html", sha256 = "dd2e319dde67f24bf520f48c79f1e677716a65078fa8c7db5c2ff0c680582831", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/least-squares-regression/1.2.7/least-squares-regression_all.html", sha256 = "760e9d4386927023c00b69ef2742b0f31bcbbd1315f5ff39d4090d9e9b5ec325", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/magnet-and-compass/1.0.9/magnet-and-compass_all.html", sha256 = "3d81aaa16484a9e82de6291b11367cd0b58fe3c9acb1dcccbdce7c746bf157b7", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/magnets-and-electromagnets/1.0.9/magnets-and-electromagnets_all.html", sha256 = "4263bde2be2e595cd398b9732776068e0efd1b0c763bb1e827156ada58173a57", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/make-a-ten/1.1.2/make-a-ten_all.html", sha256 = "d83899afcde8f1bf8c8b869ef825e5a249e55f965d9d38eccd59c82686189929", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/masses-and-springs/1.0.31/masses-and-springs_all.html", sha256 = "8170f45aa46154752eea8ac39e08b80a2bc5f465b037d29abf6f82cf81b8b4ff", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/masses-and-springs-basics/1.0.30/masses-and-springs-basics_all.html", sha256 = "b084dd8444395dad55195f60821568e34166ed2e82fd6d830e30034c69e38a62", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/mean-share-and-balance/1.1.11/mean-share-and-balance_all.html", sha256 = "db2e330e129041aac2a70e513bc150a7328a96fad7e0e3cf7e05684fc53d78e4", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/membrane-transport/1.0.8/membrane-transport_all.html", sha256 = "8c87584c97d988b82513a0edac88c8034ac4e2594ca02cfb320649266f0d04c3", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/models-of-the-hydrogen-atom/1.0.11/models-of-the-hydrogen-atom_all.html", sha256 = "e044bb0d70f3dece17aed100969983ffcd38bdf5090de1b119fb5322d60b6836", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/molarity/1.5.26/molarity_all.html", sha256 = "966f00b7fc053b172ff0e084f48940dc16a1aebd007f7d163fdd9c446c9085f8", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/molecule-polarity/2.0.5/molecule-polarity_all.html", sha256 = "5a1b1276dd701dfb4cfb5999d6c35ac5f4446c5e9c6d62822abd8c2dc1be16cf", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/molecule-shapes/1.6.21/molecule-shapes_all.html", sha256 = "c19c45831e33b0768a3acc48346f1ecabf9313f3da924309abe83868848e6d48", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/molecule-shapes-basics/1.6.21/molecule-shapes-basics_all.html", sha256 = "ee6bd74009107804c9b1173118e920c31cce05359d1ab4e9b1d9fb8c65483655", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/molecules-and-light/1.5.35/molecules-and-light_all.html", sha256 = "84be3029978dcb8ac124528bf5be5950818c459855a7cca49ed4b32c9a4619bb", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/my-solar-system/1.3.18/my-solar-system_all.html", sha256 = "686ce8510fd882e3f391c7beb8d9490e2ff57396d8039401a418038057796b1a", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/natural-selection/1.5.17/natural-selection_all.html", sha256 = "8896b9c2cb72969ddd532c3d178ff12f045cda263f04b8d1f15bcda4d1f26854", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/neuron/1.1.38/neuron_all.html", sha256 = "96df71f63c324e3687b8ebf9cc502bb00d35f664c195e97d8a457270cf3a9868", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/number-compare/1.0.15/number-compare_all.html", sha256 = "69fa8f789debed33f1066175569a3e65273c37f79f87999f43a0d752db39ff79", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/number-line-distance/1.1.13/number-line-distance_all.html", sha256 = "dfdfafd9009473f6e82a3e1e94c336e3fa56d499d42bda8245ed0670d2e7138c", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/number-line-integers/1.2.14/number-line-integers_all.html", sha256 = "bc67ff224a93faa86f905d133582da27f1366ff6aa867ff891aeb8b23d53e4a3", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/number-line-operations/1.1.12/number-line-operations_all.html", sha256 = "746bf4eeffa6dbdff62c2d7613a15186c7071521bddc2407b653985d9201e0ba", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/number-pairs/2.0.6/number-pairs_all.html", sha256 = "3b8c28fb529ea7d0a3438837d0eb489b80e5afbaa4fa4ab6cce4b1199e3a2158", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/number-play/1.1.15/number-play_all.html", sha256 = "6c7cb5007bf3ecaaceb6b83e992bcc85dcebc677e466227724410616aed275ef", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/ohms-law/1.4.33/ohms-law_all.html", sha256 = "f67547f2a64df02956d58c81a09bb0832a2ff7a3f1575406839b067bde2b9d31", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/particle-in-a-box/1.0.0/particle-in-a-box_all.html", sha256 = "521b6fbec7de46694e3109d2aeac3e13bb6336cd8e1d79f061d2d06d91c107bd", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/pendulum-lab/1.0.37/pendulum-lab_all.html", sha256 = "21e2b39d99929e330ad0aa7af4cb132536393e2f5984cdb53aca9a88322cbb5e", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/ph-scale/1.7.8/ph-scale_all.html", sha256 = "9c850fc4eb5302ad2ee3497905bf30e625e0e71786bb6efe0cce200915eba11d", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/ph-scale-basics/1.7.7/ph-scale-basics_all.html", sha256 = "587865805b166fee0eb46fed592bfdde4ce74f51179c122da3fca44ef2943b34", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/plinko-probability/1.1.38/plinko-probability_all.html", sha256 = "f35adfd9f3ff5603a19d8c7d159137524925786433892d1cc7698a6f0f61dfda", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/projectile-data-lab/1.0.14/projectile-data-lab_all.html", sha256 = "3dfed1d6796250364351782836d740fa690c4404f79508624d74dda5e80cd027", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/projectile-motion/1.0.36/projectile-motion_all.html", sha256 = "add66997b5bcaae7d4872bfe7f4d84c07174a6044cf09491dd0739852a129cd9", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/projectile-sampling-distributions/1.0.15/projectile-sampling-distributions_all.html", sha256 = "8a034793abe1b153261642d8fe428fba1c1922e916b1818f3b3dd9a043ad1f43", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/proportion-playground/1.0.35/proportion-playground_all.html", sha256 = "806df55f0b41e1ae61e4cefaed5b38d14a502cf4cf8d492e26cb879024c8aa26", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/quadrilateral/1.1.16/quadrilateral_all.html", sha256 = "74a659c9639832a10a385e2572c61476abb22b25a752611ac0ebfbbea5934e63", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/quantum-bound-states/1.0.0/quantum-bound-states_all.html", sha256 = "c0e6f1d0de1b3689f5b049d999b2e821f7d2354836a9c2470be11cdf59a7e63c", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/quantum-coin-toss/1.0.6/quantum-coin-toss_all.html", sha256 = "4ba0eb7a3dd94fa3fccf797ee8ae0a1c0fdbabf47006cc31feb4742b05c2346d", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/quantum-measurement/1.0.7/quantum-measurement_all.html", sha256 = "4a133eafe800fd580d9ba8d6620cabd964b0e4c82b6f6e03359796c0fcafaeaa", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/quantum-wave-interference/1.0.2/quantum-wave-interference_all.html", sha256 = "5cc2722c3dfa4a4c96215d58028bffa4d2e864076a4049ccb272265e9120a522", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/ratio-and-proportion/1.2.24/ratio-and-proportion_all.html", sha256 = "6fd88886364b851430ba59270e07da5720edb5f127c89ebd8cc713fb5703fbbc", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/reactants-products-and-leftovers/1.3.7/reactants-products-and-leftovers_all.html", sha256 = "82d44d3a95f83849245b8b4d3506e5d2cc012f90945aa50bb6debe8fd2e2b0ea", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/resistance-in-a-wire/1.7.2/resistance-in-a-wire_all.html", sha256 = "8f1ea6a0b970e80c09ee697eab6b86c8a4262c8b462dc3ddb484ed49ac61bf30", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/rutherford-scattering/1.2.2/rutherford-scattering_all.html", sha256 = "ab5cd282e88d8c6316d1b85579c44e0d89c2873ff088d2e791556ad85c80e410", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/states-of-matter/1.2.25/states-of-matter_all.html", sha256 = "1319b0f06b0c2a6b1419484a099bc414c3df1bd79e8cb4b8fdfd662754c0f630", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/states-of-matter-basics/1.2.25/states-of-matter-basics_all.html", sha256 = "98bc4a9ec216568133b0b75126b0490cd88db715bb603fe88eec7947b6caf049", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/trig-tour/1.1.11/trig-tour_all.html", sha256 = "ba984b788c2b679f7af66266140d957bb1abab8eeeb9c999a931e6a32727d908", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/under-pressure/1.1.38/under-pressure_all.html", sha256 = "1cbaae5977ead154d604d5a21e2d39216d9ee2bcebb0c0574184beac654df616", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/unit-rates/1.1.7/unit-rates_all.html", sha256 = "9efe9db4dae078fc7fb989adf78f50e47e46f76dc88a00ec46f2227f36b9b3ad", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/vector-addition/1.2.6/vector-addition_all.html", sha256 = "e2248f2af775572bc7da5071ac9243ab56dc0bdd170d745d9423321f674bcfa2", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/vector-addition-equations/1.2.6/vector-addition-equations_all.html", sha256 = "e57eb35fece178aba79ef5391372ac7a9fe63a51d37bc2dc42ad592ec1033736", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/wave-interference/2.1.2/wave-interference_all.html", sha256 = "1ec2ef27f6133169d12a96e20ebf9c26465177e14a0d565b897f1486ee70f7f4", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/wave-on-a-string/1.2.6/wave-on-a-string_all.html", sha256 = "0a5806c7bf46399f20ff9f333ab75a9d8a45ae5803fd84d73642161a167378b1", unpack = false },
+    { url = "https://phet.colorado.edu/sims/html/waves-intro/2.1.2/waves-intro_all.html", sha256 = "9b6f97343912578c36521934f7ee4d8296d7845e9bd1884e350ecd54b0dd378e", unpack = false },
+]
+
+install = '''
+d="$pkgdir/usr/share/phet"
+mkdir -p "$d"
+for f in /build/sources/*_all.html; do
+    n=$(basename "$f" _all.html)
+    install -m644 "$f" "$d/$n.html"
+done
+test $(ls "$d" | wc -l) -eq 127
+install -m644 $pkgfiles/index.html "$d/index.html"
+install -Dm644 $pkgfiles/phet-simulations.desktop "$pkgdir/usr/share/applications/phet-simulations.desktop"
+install -Dm755 $pkgfiles/phet-simulations "$pkgdir/usr/bin/phet-simulations"
+install -Dm644 $pkgfiles/LICENSE "$pkgdir/usr/share/licenses/phet-simulations/LICENSE"
+'''

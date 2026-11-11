@@ -1,0 +1,6 @@
+#!/bin/sh
+# Opens the PhET simulations index (or one simulation by name) in the browser.
+if [ -n "$1" ] && [ -f "/usr/share/phet/$1.html" ]; then
+    exec xdg-open "/usr/share/phet/$1.html"
+fi
+exec xdg-open /usr/share/phet/index.html
