@@ -16,7 +16,9 @@ source = [
 ]
 
 setup = '''
-# Debian's patches, then the answers its interactive configure asks for
+# Debian's patches, then the answers its interactive configure asks for. The
+# BSD sources use u_char and friends from <sys/types.h>, which glibc's headers
+# bring in and musl's do not: it is included for every file
 tar -xf /build/sources/bsdgames_2.17-35.debian.tar.xz
 while read -r p; do case "$p" in ''|'#'*) continue ;; esac; patch -p1 < debian/patches/$p; done < debian/patches/series
 cat > config.params <<'EOF2'
@@ -35,7 +37,7 @@ bsd_games_cfg_do_chown=n
 bsd_games_cfg_no_build_dirs="dm fortune factor"
 bsd_games_cfg_cc="$CC"
 bsd_games_cfg_cxx="$CXX"
-bsd_games_cfg_optimize_flags="$CFLAGS -D_DEFAULT_SOURCE"
+bsd_games_cfg_optimize_flags="$CFLAGS -D_DEFAULT_SOURCE -include sys/types.h"
 bsd_games_cfg_other_ldflags="$LDFLAGS"
 EOF2
 ./configure
