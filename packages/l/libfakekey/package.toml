@@ -1,5 +1,6 @@
 # Imported from Chimera Linux cports: main/libfakekey/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# The source is a git snapshot of tag 0.3: the cgit snapshot URL is gone.
 name = "libfakekey"
 version = "0.3"
 release = 1
@@ -10,7 +11,7 @@ hostdeps = ["automake", "libtool", "pkgconf"]
 builddeps = ["libxtst-devel"]
 
 source = [
-    { url = "http://git.yoctoproject.org/cgit/cgit.cgi/libfakekey/snapshot/libfakekey-0.3.tar.gz", sha256 = "d282fa6481a5b85f71e36e8bad4cfa938cc8eaac4c42ffa27f9203ac634813f4" },
+    { url = "snapshot:git https://git.yoctoproject.org/libfakekey 0.3", sha256 = "40b4f8b0625775a2b39b4400bfa11ba9599e7bc53f311b019f392051bf1242fc" },
 ]
 
 setup = '''

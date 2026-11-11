@@ -1,5 +1,7 @@
 # Imported from Chimera Linux cports: user/xfce4-screensaver/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Its bundled dbus-glib is a git snapshot of the same commit: GitLab's archive
+# of it changed (it no longer matches Chimera's checksum).
 name = "xfce4-screensaver"
 version = "4.20.0"
 release = 2
@@ -12,7 +14,7 @@ builddeps = ["dbus-devel", "elogind-devel", "garcon-devel", "gtk+3-devel", "libw
 rundeps = ["python-gobject"]
 
 source = [
-    { url = "https://gitlab.freedesktop.org/dbus/dbus-glib/-/archive/623a4f3386a675060335e20afd810c6e10ae2cc8/dbus-glib-623a4f3386a675060335e20afd810c6e10ae2cc8.tar.gz", sha256 = "e370298d002848fdb2065fee254cb5b0efa0f2699b74299c234019c8d79b852e" },
+    { url = "snapshot:git https://gitlab.freedesktop.org/dbus/dbus-glib.git 623a4f3386a675060335e20afd810c6e10ae2cc8", sha256 = "01f28d7716a877c766ad6e165b0eb900fc60c8be197840cb3935781d622cb7b0" },
 ]
 
 setup = '''

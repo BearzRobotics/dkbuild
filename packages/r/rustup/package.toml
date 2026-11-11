@@ -1,0 +1,50 @@
+# rustup, the Rust toolchain installer: `rustup default stable`, `rustup
+# toolchain install nightly`, `rustup target add ...`. Rust changes fast, and
+# the system's rust (/usr/bin/cargo, rustc) stays the version the packages are
+# built with. rustup's proxies (cargo, rustc, rustdoc, rustfmt, clippy, ...)
+# are links to it in /usr/lib/rustup/bin, not /usr/bin, so they never clash
+# with the rust package; /usr/lib/profile.d/rustup.sh puts them first on a
+# user's PATH once ~/.rustup exists. Package builds never read profile.d.
+# The toolchains it downloads are the official x86_64-unknown-linux-musl ones.
+# Built without self-update (it comes from the repository).
+name = "rustup"
+version = "1.29.3"
+release = 1
+summary = "Rust toolchain installer"
+license = "MIT OR Apache-2.0"
+homepage = "https://rustup.rs"
+hostdeps = ["rust", "pkgconf"]
+builddeps = ["curl-devel", "openssl-devel", "zlib-ng-compat-devel"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/rust-lang/rustup/archive/refs/tags/1.29.3.tar.gz", sha256 = "e830fb32300e2bb69068321e701a328a5ebbfe86ec468dbda82f4fc3f6d3f276" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export RUSTFLAGS="-C target-feature=-crt-static"
+# the system's libcurl and OpenSSL, not copies built from the crates
+export OPENSSL_NO_VENDOR=1 LIBZ_SYS_STATIC=0
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs --features no-self-update --bin rustup-init
+'''
+install = '''
+# rustup-init acts as rustup when called by that name, and as each proxy
+install -Dm755 target/release/rustup-init "$pkgdir/usr/bin/rustup"
+install -dm755 "$pkgdir/usr/lib/rustup/bin"
+for t in rustc rustdoc cargo rust-lldb rust-gdb rust-gdbgui rls cargo-clippy clippy-driver cargo-miri \
+         rust-analyzer rustfmt cargo-fmt; do
+    ln -s ../../../bin/rustup "$pkgdir/usr/lib/rustup/bin/$t"
+done
+install -Dm644 $pkgfiles/rustup.sh "$pkgdir/usr/lib/profile.d/rustup.sh"
+install -dm755 "$pkgdir/usr/share/bash-completion/completions" "$pkgdir/usr/share/zsh/site-functions" "$pkgdir/usr/share/fish/vendor_completions.d"
+./target/release/rustup-init --version > /dev/null
+ln -s rustup-init target/release/rustup
+./target/release/rustup completions bash rustup > "$pkgdir/usr/share/bash-completion/completions/rustup"
+./target/release/rustup completions zsh rustup > "$pkgdir/usr/share/zsh/site-functions/_rustup"
+./target/release/rustup completions fish rustup > "$pkgdir/usr/share/fish/vendor_completions.d/rustup.fish"
+install -Dm644 LICENSE-MIT "$pkgdir/usr/share/licenses/rustup/LICENSE-MIT"
+install -Dm644 LICENSE-APACHE "$pkgdir/usr/share/licenses/rustup/LICENSE-APACHE"
+'''

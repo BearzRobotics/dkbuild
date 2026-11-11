@@ -1,0 +1,38 @@
+# zvm, the Zig version manager: `zvm install 0.15.2`, `zvm use master`. Zig
+# changes fast, and the system's zig (/usr/bin/zig) stays the version the
+# packages are built with; zvm's Zigs (official static builds, fine on musl)
+# live in ~/.zvm, and /usr/lib/profile.d/zvm.sh puts ~/.zvm/bin first on a
+# user's PATH. Package builds never read profile.d, so they keep the system Zig.
+# From Chimera's user/zvm (BSD-2-Clause, Copyright (c) Chimera Linux
+# contributors): its patch turns off zvm's own update check; zvm comes from
+# the repository like everything else.
+name = "zvm"
+version = "0.9.5"
+release = 1
+summary = "Zig version manager"
+license = "MIT"
+homepage = "https://github.com/tristanisham/zvm"
+patches = ["dis-updchk.patch"]
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/tristanisham/zvm/archive/refs/tags/v0.9.5.tar.gz", sha256 = "fa11371d8d62523aa03a2b45075c39dab38ac9ee4ee901481a8098c871e7edee" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+go build -o zvm .
+for sh in bash fish zsh; do ./zvm completion $sh > zvm.$sh; done
+'''
+install = '''
+install -Dm755 zvm "$pkgdir/usr/bin/zvm"
+install -Dm644 $pkgfiles/zvm.sh "$pkgdir/usr/lib/profile.d/zvm.sh"
+install -Dm644 zvm.bash "$pkgdir/usr/share/bash-completion/completions/zvm"
+install -Dm644 zvm.fish "$pkgdir/usr/share/fish/vendor_completions.d/zvm.fish"
+install -Dm644 zvm.zsh "$pkgdir/usr/share/zsh/site-functions/_zvm"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/zvm/LICENSE"
+'''
