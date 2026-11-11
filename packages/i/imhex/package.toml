@@ -10,7 +10,7 @@ license = "GPL-2.0-or-later"
 homepage = "https://imhex.werwolv.net"
 patches = ["fix-lfs64.patch", "inserter.patch", "no-updater.patch"]
 hostdeps = ["cmake", "ninja", "pkgconf"]
-builddeps = ["capstone-devel", "curl-devel", "dbus-devel", "file-devel", "fmt-devel", "freetype-devel", "glfw-devel", "libarchive-devel", "libedit-devel", "llvm-devel", "mbedtls-devel", "nlohmann-json", "xz-devel", "yara-devel"]
+builddeps = ["libglvnd-devel", "mesa-devel", "capstone-devel", "curl-devel", "dbus-devel", "file-devel", "fmt-devel", "freetype-devel", "glfw-devel", "libarchive-devel", "libedit-devel", "llvm-devel", "mbedtls-devel", "nlohmann-json", "xz-devel", "yara-devel"]
 
 source = [
     { url = "https://github.com/WerWolv/ImHex/releases/download/v1.38.1/Full.Sources.tar.gz", sha256 = "cd3531066a41dde1f0751e5d3146a936897df35ad5ba1fa49a9f3ace88e6901d" },
