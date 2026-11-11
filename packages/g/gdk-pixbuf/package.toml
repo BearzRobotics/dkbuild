@@ -2,9 +2,11 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r2: static libraries too (in gdk-pixbuf-static), for fully static programs on musl.
+# 2026-11-11: GObject introspection on (gspell, libpeas, PyGObject apps need
+# the .gir files), with the options its dependencies now allow.
 name = "gdk-pixbuf"
 version = "2.44.8"
-release = 3
+release = 4
 summary = "Image loading library for GTK"
 license = "LGPL-2.1-or-later"
 homepage = "https://wiki.gnome.org/Projects/GdkPixbuf"
@@ -20,7 +22,7 @@ source = [
 
 setup = '''
 %meson \
-    -Dintrospection=disabled \
+    -Dintrospection=enabled \
     -Dinstalled_tests=false \
     -Dglycin=disabled \
     -Dman=false

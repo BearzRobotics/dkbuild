@@ -4,14 +4,16 @@
 # Changed from Chimera: no X11 (the system is Wayland-only, and the image has no
 # libX11), no introspection (gobject-introspection is not built yet), no docs.
 # r2: static libraries too (in at-spi2-core-static), for fully static programs on musl.
+# 2026-11-11: GObject introspection on (gspell, libpeas, PyGObject apps need
+# the .gir files), and its X11 bridge (Xfce and other X11 desktops).
 name = "at-spi2-core"
 version = "2.62.1"
-release = 2
+release = 3
 summary = "Assistive Technology Service Provider Interface"
 license = "GPL-2.0-or-later"
 homepage = "https://gitlab.gnome.org/GNOME/at-spi2-core"
-hostdeps = ["gettext", "glib-devel", "meson", "pkgconf"]
-builddeps = ["dbus-devel", "glib-devel", "libxml2-devel"]
+hostdeps = ["gettext", "glib-devel", "meson", "pkgconf", "gobject-introspection"]
+builddeps = ["dbus-devel", "glib-devel", "libxml2-devel", "libx11-devel", "libxtst-devel", "libxi-devel"]
 rundeps = ["dbus"]
 options = ["!check"]
 
@@ -23,8 +25,8 @@ setup = '''
 %meson \
     -Duse_systemd=false \
     -Dgtk2_atk_adaptor=false \
-    -Dx11=disabled \
-    -Dintrospection=disabled \
+    -Dx11=enabled \
+    -Dintrospection=enabled \
     -Ddocs=false
 '''
 build = '''

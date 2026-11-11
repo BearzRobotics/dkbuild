@@ -2,9 +2,11 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r3: static libraries too (in graphene-static), for fully static programs on musl.
+# 2026-11-11: GObject introspection on (gspell, libpeas, PyGObject apps need
+# the .gir files), with the options its dependencies now allow.
 name = "graphene"
 version = "1.10.8"
-release = 3
+release = 4
 summary = "Thin layer of graphic data types"
 license = "MIT"
 homepage = "https://github.com/ebassi/graphene"
@@ -20,7 +22,7 @@ setup = '''
 %meson \
     -Dinstalled_tests=false \
     -Dgcc_vector=true \
-    -Dintrospection=disabled
+    -Dintrospection=enabled
 '''
 build = '''
 %meson_build

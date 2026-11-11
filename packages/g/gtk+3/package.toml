@@ -6,15 +6,18 @@
 # in the image or the tree.
 # r8: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 # r9: static libraries too (in gtk+3-static), for fully static programs on musl.
+# 2026-11-11: the X11 backend (Xfce is an X11 desktop), introspection, CUPS
+# printing, colord and Broadway, now that the tree has them; cloudproviders
+# and Tracker are not in the tree.
 name = "gtk+3"
 version = "3.24.43"
-release = 9
+release = 10
 summary = "Gimp Toolkit version 3"
 license = "LGPL-2.1-or-later"
 homepage = "https://gtk.org"
 patches = ["geometry.patch"]
-hostdeps = ["gettext-devel", "glib-devel", "meson", "perl", "pkgconf", "wayland"]
-builddeps = ["at-spi2-core-devel", "gdk-pixbuf-devel", "libepoxy-devel", "libxkbcommon-devel", "mesa-devel", "pango-devel", "wayland-devel", "wayland-protocols"]
+hostdeps = ["gettext-devel", "glib-devel", "meson", "perl", "pkgconf", "wayland", "gobject-introspection"]
+builddeps = ["at-spi2-core-devel", "gdk-pixbuf-devel", "libepoxy-devel", "libxkbcommon-devel", "mesa-devel", "pango-devel", "wayland-devel", "wayland-protocols", "libx11-devel", "libxext-devel", "libxi-devel", "libxrandr-devel", "libxcursor-devel", "libxdamage-devel", "libxfixes-devel", "libxcomposite-devel", "libxinerama-devel", "cups-devel", "colord-devel", "fribidi-devel", "cairo-devel"]
 checkdeps = ["adwaita-icon-theme", "dbus", "fonts-dejavu-otf", "librsvg", "xwayland-run"]
 rundeps = ["adwaita-icon-theme", "shared-mime-info"]
 options = ["!cross", "!check"]
@@ -25,19 +28,19 @@ source = [
 
 setup = '''
 %meson \
-    -Dbroadway_backend=false \
+    -Dbroadway_backend=true \
     -Dcloudproviders=false \
-    -Dcolord=no \
+    -Dcolord=yes \
     -Dgtk_doc=false \
-    -Dintrospection=false \
+    -Dintrospection=true \
     -Dman=false \
-    -Dprint_backends=file \
+    -Dprint_backends=file,cups \
     -Dtests=false \
     -Dexamples=false \
     -Ddemos=false \
     -Dtracker3=false \
     -Dwayland_backend=true \
-    -Dx11_backend=false
+    -Dx11_backend=true
 '''
 build = '''
 %meson_build

@@ -8,7 +8,6 @@ release = 2
 summary = "GStreamer base plugins"
 license = "LGPL-2.1-or-later"
 homepage = "https://gstreamer.freedesktop.org"
-patches = ["tests.patch"]
 hostdeps = ["gettext", "glib-devel", "gobject-introspection", "orc", "pkgconf", "wayland"]
 builddeps = ["cairo-devel", "cdparanoia-devel", "glib-devel", "graphene-devel", "gstreamer-devel", "iso-codes", "libdrm-devel", "libglvnd-devel", "libgudev-devel", "libjpeg-turbo-devel", "libpng-devel", "libsm-devel", "libtheora-devel", "libvisual-devel", "libvorbis-devel", "libxext-devel", "libxi-devel", "libxml2-devel", "libxv-devel", "linux-headers", "mesa-devel", "opus-devel", "orc-devel", "pango-devel", "wayland-devel", "wayland-protocols"]
 checkdeps = ["fonts-liberation"]

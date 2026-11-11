@@ -2,9 +2,11 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r2: static libraries too (in harfbuzz-static), for fully static programs on musl.
+# 2026-11-11: GObject introspection on (gspell, libpeas, PyGObject apps need
+# the .gir files), and cairo, ICU and graphite2 (already build dependencies).
 name = "harfbuzz"
 version = "14.5.0"
-release = 3
+release = 4
 summary = "Text shaping engine"
 license = "MIT"
 homepage = "https://harfbuzz.github.io"
@@ -19,14 +21,14 @@ source = [
 setup = '''
 %meson \
     -Db_ndebug=true \
-    -Dcairo=disabled \
+    -Dcairo=enabled \
     -Dcpp_std=c++17 \
     -Ddocs=disabled \
     -Dfreetype=enabled \
     -Dglib=enabled \
-    -Dgraphite2=disabled \
-    -Dicu=disabled \
-    -Dintrospection=disabled
+    -Dgraphite2=enabled \
+    -Dicu=enabled \
+    -Dintrospection=enabled
 '''
 build = '''
 %meson_build
