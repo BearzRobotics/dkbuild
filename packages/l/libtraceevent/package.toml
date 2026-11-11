@@ -1,0 +1,25 @@
+# From Chimera Linux cports (main/libtraceevent; BSD-2-Clause, Copyright (c) Chimera Linux contributors).
+# needed by: libtracefs, ndctl.
+name = "libtraceevent"
+version = "1.8.4"
+release = 1
+summary = "Linux kernel trace event library"
+license = "LGPL-2.1-only AND GPL-2.0-only"
+homepage = "https://git.kernel.org/pub/scm/libs/libtrace/libtraceevent.git"
+hostdeps = ["asciidoc", "meson", "pkgconf", "xmlto"]
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://git.kernel.org/pub/scm/libs/libtrace/libtraceevent.git/snapshot/libtraceevent-1.8.4.tar.gz", sha256 = "dc456d4d2bf4b4cd4d0c737d3374a8093f9e5ca18c1d7fc2279a4bf41e613121" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

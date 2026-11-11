@@ -1,0 +1,31 @@
+# From Chimera Linux cports (main/libblockdev; BSD-2-Clause, Copyright (c) Chimera Linux contributors).
+# needed by: udisks.
+name = "libblockdev"
+version = "3.4.0"
+release = 2
+summary = "Library for manipulating block devices"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/storaged-project/libblockdev"
+patches = ["broken-checks.patch"]
+hostdeps = ["bash", "pkgconf", "python", "automake", "libtool"]
+builddeps = ["cryptsetup-devel", "e2fsprogs-devel", "glib-devel", "json-glib-devel", "keyutils-devel", "kmod-devel", "libatasmart-devel", "libbytesize-devel", "libnvme-devel", "libyaml-devel", "linux-headers", "lvm2-devel", "ndctl-devel", "parted-devel", "pcre2-devel", "util-linux-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/storaged-project/libblockdev/releases/download/3.4.0/libblockdev-3.4.0.tar.gz", sha256 = "65ef9a37babd44b85b8ff9b273f90f9f7d5f8ff7b0c76a8edb69240325fd83f4" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -Wno-error=typedef-redefinition -Wno-error=unused-variable"
+'''
+setup = '''
+autoreconf -if -W none
+%configure \
+    --without-escrow
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

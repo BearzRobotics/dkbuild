@@ -1,0 +1,54 @@
+# From Chimera Linux cports (main/gvfs; BSD-2-Clause, Copyright (c) Chimera Linux contributors).
+# needed by: dkde (network places: smb, sftp, ftp, dav, nfs; phones and cameras: mtp, afc, gphoto2; trash, archives).
+#
+# Split like Debian: gvfs is the daemon, its local backends (trash, recent,
+# computer, network, admin, burn, archive) and the udisks2 volume monitor;
+# gvfs-backends the network and device backends; gvfs-fuse the ~/.gvfs FUSE
+# bridge for programs that don't speak GIO. Both come in with gvfs.
+#
+# Without GNOME Online Accounts (goa, onedrive, google): those accounts are set
+# up in GNOME Settings, which FenrirOS doesn't have, so the backends would have
+# nothing to use.
+name = "gvfs"
+version = "1.60.0"
+release = 1
+summary = "GNOME virtual file system"
+license = "LGPL-2.0-or-later"
+homepage = "https://wiki.gnome.org/Projects/gvfs"
+hostdeps = ["docbook-xsl-nons", "gettext", "glib-devel", "libxslt", "meson", "openssh", "pkgconf", "polkit-devel"]
+builddeps = ["avahi-devel", "bluez-devel", "dbus-devel", "elogind-devel", "fuse-devel", "gcr-devel", "glib-devel", "gsettings-desktop-schemas-devel", "libarchive-devel", "libbluray-devel", "libcap-devel", "libcdio-paranoia-devel", "libgcrypt-devel", "libgphoto2-devel", "libgudev-devel", "libimobiledevice-devel", "libmtp-devel", "libnfs-devel", "libplist-devel", "libsecret-devel", "libsoup-devel", "libusb-devel", "libxml2-devel", "polkit-devel", "samba-devel", "udisks-devel"]
+rundeps = ["desktop-file-utils"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/gvfs/1.60/gvfs-1.60.0.tar.xz", sha256 = "648273f069e92c7e3c013b92148e82c901f08044e2b3b14c6cfbd52269f6b646" },
+]
+
+setup = '''
+%meson \
+    -Dsystemduserunitdir=no \
+    -Dtmpfilesdir=no \
+    -Dlogind=true \
+    -Dman=true \
+    -Dgoa=false \
+    -Donedrive=false \
+    -Dgoogle=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''
+
+[subpackages.fuse]
+summary = "FUSE bridge to GVfs mounts"
+depends = ["gvfs", "fuse"]
+install_if = ["gvfs"]
+paths   = ["/usr/libexec/gvfsd-fuse", "/usr/share/man/man1/gvfsd-fuse.1"]
+
+[subpackages.backends]
+summary = "Network and device backends (smb, sftp, ftp, dav, nfs, mtp, afc, gphoto2, ...)"
+depends = ["gvfs"]
+install_if = ["gvfs"]
+paths   = ["/usr/libexec/gvfsd-afc", "/usr/libexec/gvfsd-afp*", "/usr/libexec/gvfsd-cdda", "/usr/libexec/gvfsd-dav", "/usr/libexec/gvfsd-dnssd", "/usr/libexec/gvfsd-ftp", "/usr/libexec/gvfsd-gphoto2", "/usr/libexec/gvfsd-http", "/usr/libexec/gvfsd-mtp", "/usr/libexec/gvfsd-nfs", "/usr/libexec/gvfsd-sftp", "/usr/libexec/gvfsd-smb*", "/usr/libexec/gvfsd-wsdd", "/usr/libexec/gvfs-afc-volume-monitor", "/usr/libexec/gvfs-gphoto2-volume-monitor", "/usr/libexec/gvfs-mtp-volume-monitor", "/usr/share/dbus-1/services/org.gtk.vfs.AfcVolumeMonitor.service", "/usr/share/dbus-1/services/org.gtk.vfs.GPhoto2VolumeMonitor.service", "/usr/share/dbus-1/services/org.gtk.vfs.MTPVolumeMonitor.service", "/usr/share/gvfs/remote-volume-monitors/afc.monitor", "/usr/share/gvfs/remote-volume-monitors/gphoto2.monitor", "/usr/share/gvfs/remote-volume-monitors/mtp.monitor", "/usr/share/gvfs/mounts/afc.mount", "/usr/share/gvfs/mounts/afp*.mount", "/usr/share/gvfs/mounts/cdda.mount", "/usr/share/gvfs/mounts/dav*.mount", "/usr/share/gvfs/mounts/dns-sd.mount", "/usr/share/gvfs/mounts/ftp*.mount", "/usr/share/gvfs/mounts/gphoto2.mount", "/usr/share/gvfs/mounts/http.mount", "/usr/share/gvfs/mounts/mtp.mount", "/usr/share/gvfs/mounts/nfs.mount", "/usr/share/gvfs/mounts/sftp.mount", "/usr/share/gvfs/mounts/smb*.mount", "/usr/share/gvfs/mounts/wsdd.mount", "/usr/share/GConf/gsettings/gvfs-smb.convert", "/usr/share/GConf/gsettings/gvfs-dns-sd.convert", "/usr/share/glib-2.0/schemas/org.gnome.system.smb.gschema.xml", "/usr/share/glib-2.0/schemas/org.gnome.system.dns_sd.gschema.xml"]

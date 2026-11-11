@@ -1,0 +1,27 @@
+# From Chimera Linux cports (main/libatasmart; BSD-2-Clause, Copyright (c) Chimera Linux contributors).
+# needed by: udisks, libblockdev.
+name = "libatasmart"
+version = "0.19"
+release = 2
+summary = "ATA S.M.A.R.T. reading and parsing library"
+license = "LGPL-2.1-or-later"
+homepage = "https://0pointer.de/blog/projects/being-smart.html"
+patches = ["cross.patch"]
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["eudev-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://0pointer.de/public/libatasmart-0.19.tar.xz", sha256 = "61f0ea345f63d28ab2ff0dc352c22271661b66bf09642db3a4049ac9dbdb0f8d" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

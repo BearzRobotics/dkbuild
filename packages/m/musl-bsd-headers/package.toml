@@ -1,0 +1,25 @@
+# From Chimera Linux cports (main/musl-bsd-headers; BSD-2-Clause, Copyright (c)
+# Chimera Linux contributors): the BSD headers musl leaves out, <sys/cdefs.h>,
+# <sys/queue.h>, <sys/tree.h> and <error.h>. needed by: samba, bsd-games.
+# The headers are the package, so they stay in the main package.
+name = "musl-bsd-headers"
+version = "0.1"
+release = 1
+summary = "BSD compatibility headers for musl"
+license = "BSD-2-Clause AND BSD-3-Clause"
+homepage = "https://chimera-linux.org"
+hostdeps = []
+options = ["!check"]
+
+install = '''
+for f in cdefs queue tree; do
+    install -Dm644 $pkgfiles/$f.h "$pkgdir/usr/include/sys/$f.h"
+done
+install -Dm644 $pkgfiles/error.h "$pkgdir/usr/include/error.h"
+install -Dm644 $pkgfiles/LICENSE.BSD-3-Clause "$pkgdir/usr/share/licenses/musl-bsd-headers/LICENSE.BSD-3-Clause"
+install -Dm644 $pkgfiles/LICENSE.BSD-2-Clause "$pkgdir/usr/share/licenses/musl-bsd-headers/LICENSE.BSD-2-Clause"
+'''
+
+[subpackages.devel]
+summary = "Unused"
+paths   = []

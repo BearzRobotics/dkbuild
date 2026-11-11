@@ -1,0 +1,26 @@
+# From Chimera Linux cports (main/libtracefs; BSD-2-Clause, Copyright (c) Chimera Linux contributors).
+# needed by: ndctl.
+name = "libtracefs"
+version = "1.8.2"
+release = 1
+summary = "Linux kernel trace file system library"
+license = "LGPL-2.1-or-later"
+homepage = "https://git.kernel.org/pub/scm/libs/libtrace/libtracefs.git/about"
+hostdeps = ["asciidoc", "bison", "flex", "meson", "pkgconf", "xmlto"]
+builddeps = ["libtraceevent-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://git.kernel.org/pub/scm/libs/libtrace/libtracefs.git/snapshot/libtracefs-1.8.2.tar.gz", sha256 = "255980e1da5648fbbc32777ed8457b485b2b96f3449674610b46d9c437271209" },
+]
+
+setup = '''
+%meson \
+    -Dasciidoctor=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

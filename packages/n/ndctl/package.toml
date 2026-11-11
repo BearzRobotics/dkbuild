@@ -1,0 +1,29 @@
+# From Chimera Linux cports (main/ndctl; BSD-2-Clause, Copyright (c) Chimera Linux contributors).
+# needed by: libblockdev (its nvdimm plugin).
+name = "ndctl"
+version = "82"
+release = 1
+summary = "Tools and libraries for NVDIMMs and other platform memory"
+license = "GPL-2.0-only AND LGPL-2.1-only AND MIT AND CC0-1.0"
+homepage = "https://github.com/pmem/ndctl"
+patches = ["basename.patch"]
+hostdeps = ["asciidoctor", "bash-completion", "meson", "pkgconf"]
+builddeps = ["iniparser-devel", "json-c-devel", "keyutils-devel", "kmod-devel", "libtraceevent-devel", "libtracefs-devel", "linux-headers", "eudev-devel", "util-linux-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/pmem/ndctl/archive/refs/tags/v82.tar.gz", sha256 = "8c12d8228e2df4e05db075aa3e9be86bbef41ef5249829bb89b79c4859b74ee5" },
+]
+
+setup = '''
+%meson \
+    -Dmodprobedatadir=/usr/lib/modprobe.d \
+    -Dsystemd=disabled \
+    -Dversion-tag=82
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

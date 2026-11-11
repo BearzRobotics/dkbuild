@@ -1,0 +1,39 @@
+# From Chimera Linux cports (main/udisks; BSD-2-Clause, Copyright (c) Chimera Linux contributors).
+# needed by: gvfs (mounting drives in dkde's file manager).
+name = "udisks"
+version = "2.11.2"
+release = 1
+summary = "Daemon, tools and libraries for disk manipulation"
+license = "GPL-2.0-or-later"
+homepage = "https://www.freedesktop.org/wiki/Software/udisks"
+patches = ["tests.patch"]
+hostdeps = ["automake", "bash", "docbook-xsl-nons", "gettext-devel", "glib-devel", "gobject-introspection", "gtk-doc-tools", "libtool", "libxslt", "pkgconf", "polkit"]
+builddeps = ["acl-devel", "btrfs-progs-devel", "elogind-devel", "libatasmart-devel", "libblockdev-devel", "libgudev-devel", "lvm2-devel", "polkit-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/storaged-project/udisks/releases/download/udisks-2.11.2/udisks-2.11.2.tar.bz2", sha256 = "18630a8aad806bea0bc626ce97e71e50ec82c742956ac1c834a4275f8f22207b" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-udevdir=/usr/lib/udev \
+    --enable-lvm2 \
+    --enable-btrfs \
+    --enable-bcache \
+    --enable-vdo \
+    --enable-lvmcache \
+    --enable-introspection
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -dm750 "$pkgdir/var/lib/udisks2"
+# the completion is for udisksctl, the command it completes
+if [ -f "$pkgdir/usr/share/zsh/site-functions/_udisks2" ]; then
+    mv "$pkgdir/usr/share/zsh/site-functions/_udisks2" "$pkgdir/usr/share/zsh/site-functions/_udisksctl"
+fi
+'''

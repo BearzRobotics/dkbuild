@@ -4,9 +4,11 @@
 # Built without PAM, Kerberos, FIDO and LDNS, none of which the system has.
 # r2: rebuilt with the empty directories it installs (dkbuild's splitter dropped them).
 # r3: static libraries too (in openssh-static), for fully static programs on musl.
+# r4: split: openssh is the client (ssh, scp, sftp, ssh-agent, ssh-keygen), the
+#     server (sshd, sftp-server, its dinit services) is openssh-server.
 name = "openssh"
 version = "10.6_p2"
-release = 3
+release = 4
 summary = "OpenSSH client and server"
 license = "SSH-OpenSSH"
 homepage = "https://www.openssh.com"
@@ -43,3 +45,10 @@ install -Dm644 contrib/ssh-copy-id.1 "$pkgdir/usr/share/man/man1/ssh-copy-id.1"
 install -Dm644 $pkgfiles/sshd "$pkgdir/etc/dinit.d/sshd"
 install -Dm644 $pkgfiles/sshd-keys "$pkgdir/etc/dinit.d/sshd-keys"
 '''
+
+# sshd and what only it uses. The client stays in the main package, so a desktop
+# gets ssh/scp/sftp (dkde's file manager, gvfs's sftp backend) without a server.
+[subpackages.server]
+summary = "OpenSSH server (sshd, sftp-server)"
+depends = ["openssh"]
+paths   = ["/usr/sbin/sshd", "/usr/lib/ssh/sshd-session", "/usr/lib/ssh/sshd-auth", "/usr/lib/ssh/sftp-server", "/etc/ssh/sshd_config", "/etc/ssh/sshd_config.d", "/etc/ssh/moduli", "/etc/dinit.d/sshd", "/etc/dinit.d/sshd-keys", "/var/empty"]

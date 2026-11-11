@@ -1,17 +1,25 @@
-# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/samba/template.py
-# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
+# From Chimera Linux cports (main/samba; BSD-2-Clause, Copyright (c) Chimera
+# Linux contributors), patches included.
+#
+# needed by: gvfs-smb and dkde's file manager (libsmbclient, in samba-libs and
+# samba-devel), and anyone who wants `smbclient` (samba-client). The server
+# (smbd, nmbd, winbindd) stays in the main package, so installing the client
+# side doesn't bring it in.
+#
+# Built without PAM (the system has none) and without the AD domain controller,
+# as Chimera does. Uses the system's Heimdal, talloc, tevent and tdb; ldb is
+# part of Samba now and comes from here.
+# r5: rewritten (the import lost the waf configure), split client/libs/python.
 name = "samba"
 version = "4.23.3"
-release = 4
+release = 5
 summary = "SMB/CIFS file, print, and login server for Unix"
 license = "GPL-3.0-or-later"
 homepage = "https://www.samba.org"
 patches = ["0001-usershare.patch", "0002-ctdb-syslog.patch", "0003-ctdb_etcd_lock-path.patch", "0004-silence-waf-uselib.patch", "0005-msg-sock-run-samba.patch", "0009-getpwent_r.patch", "0010-missing-headers.patch", "0012-musl-uintptr.patch", "0013-paths.patch", "0014-python-so.patch", "0015-samba-bgqd-signal.patch", "unistd.patch"]
-hostdeps = ["bison", "docbook-xsl-nons", "flex", "gettext-devel", "heimdal", "libtasn1", "libxslt", "perl", "perl-parse-yapp", "pkgconf", "python", "rpcsvc-proto", "tdb", "tevent"]
-builddeps = ["acl-devel", "attr-devel", "avahi-devel", "cmocka-devel", "cups-devel", "dbus-devel", "e2fsprogs-devel", "fuse-devel", "gettext-devel", "glib-devel", "gnutls-devel", "gpgme-devel", "heimdal-devel", "icu-devel", "jansson-devel", "libarchive-devel", "libedit-devel", "libtirpc-devel", "lmdb-devel", "ncurses-devel", "ngtcp2-devel", "openldap-devel", "popt-devel", "python-devel", "talloc-devel", "tdb-devel", "tevent-devel", "zlib-ng-compat-devel"]
-rundeps = ["tdb"]
+hostdeps = ["bison", "docbook-xsl-nons", "flex", "gettext-devel", "heimdal", "libtasn1", "libxslt", "perl", "perl-parse-yapp", "pkgconf", "python", "rpcsvc-proto", "tdb-python", "tevent-python", "talloc-python"]
+builddeps = ["acl-devel", "attr-devel", "avahi-devel", "cmocka-devel", "cups-devel", "dbus-devel", "e2fsprogs-devel", "fuse-devel", "gettext-devel", "glib-devel", "gnutls-devel", "gpgme-devel", "heimdal-devel", "icu-devel", "jansson-devel", "libarchive-devel", "libedit-devel", "libtirpc-devel", "lmdb-devel", "musl-bsd-headers", "ncurses-devel", "ngtcp2-devel", "openldap-devel", "popt-devel", "python-devel", "talloc-devel", "tdb-devel", "tevent-devel", "zlib-ng-compat-devel"]
+rundeps = ["tdb-progs"]
 options = ["!cross", "!check"]
 
 source = [
@@ -20,16 +28,76 @@ source = [
 
 environment = '''
 export CFLAGS="${CFLAGS} -D_BSD_SOURCE"
-export PYTHONHASHSEED=1
+# waf, not its wrapper makefile
+export PYTHONHASHSEED=1 WAF_MAKE=1
+'''
+setup = '''
+./buildtools/bin/waf configure \
+    --prefix=/usr \
+    --libdir=/usr/lib \
+    --enable-fhs \
+    --sbindir=/usr/sbin \
+    --localstatedir=/var \
+    --sysconfdir=/etc \
+    --with-piddir=/run/samba \
+    --with-sockets-dir=/run/samba \
+    --with-privatelibdir=/usr/lib \
+    --with-lockdir=/run/lock/samba \
+    --with-modulesdir=/usr/lib/samba \
+    --with-statedir=/var/lib/samba \
+    --with-cachedir=/var/cache/samba \
+    --with-privatedir=/var/lib/samba/private \
+    --with-smbpasswd-file=/etc/samba/smbpasswd \
+    --with-socketpath=/run/ctdb/ctdbd.socket \
+    --with-logdir=/var/log/ctdb \
+    --enable-avahi \
+    --enable-spotlight \
+    --disable-rpath \
+    --disable-rpath-install \
+    --disable-fault-handling \
+    --without-systemd \
+    --bundled-libraries=libquic,NONE \
+    --with-system-heimdalkrb5 \
+    --with-cluster-support \
+    --with-automount \
+    --with-winbind \
+    --with-syslog \
+    --with-quota \
+    --without-pam \
+    --without-ad-dc \
+    --with-shared-modules=idmap_ad,idmap_rid,idmap_adex,idmap_hash,idmap_ldap,idmap_tdb2,vfs_nfs4acl_xattr
+'''
+build = '''
+./buildtools/bin/waf build -j$jobs
 '''
 install = '''
+./buildtools/bin/waf install --destdir="$pkgdir"
 install -Dm644 examples/smb.conf.default "$pkgdir/etc/samba/smb.conf"
-install -Dm644 $pkgfiles/samba.pam "$pkgdir/usr/lib/pam.d/samba"
-rm -rf "$pkgdir/usr/share/man/man7/traffic_learner.7"
-rm -rf "$pkgdir/usr/share/man/man7/traffic_replay.7"
-# symlink cups backend
+rm -f "$pkgdir/usr/share/man/man7/traffic_learner.7" "$pkgdir/usr/share/man/man7/traffic_replay.7"
+# smbspool is also the CUPS backend for SMB printers
 install -dm755 "$pkgdir/usr/lib/cups/backend"
-mkdir -p "$pkgdir/usr/lib/cups/backend"
 ln -sf ../../../bin/smbspool "$pkgdir/usr/lib/cups/backend/smb"
-# private dir
+install -dm755 "$pkgdir/var/log/samba" "$pkgdir/var/cache/samba" "$pkgdir/var/lib/samba"
+install -dm700 "$pkgdir/var/lib/samba/private"
 '''
+
+# The client programs: smbclient, smbget, smbtree, rpcclient, smbspool, ...
+[subpackages.client]
+summary = "SMB client programs"
+paths   = ["/usr/bin/cifsdd", "/usr/bin/mdsearch", "/usr/bin/rpcclient", "/usr/bin/smbcacls", "/usr/bin/smbclient", "/usr/bin/smbcquotas", "/usr/bin/smbget", "/usr/bin/smbspool", "/usr/bin/smbtar", "/usr/bin/smbtree", "/usr/bin/wspsearch", "/usr/lib/cups/backend/smb", "/usr/lib/samba/smbspool_krb5_wrapper"]
+
+[subpackages.python]
+summary = "Python bindings"
+depends = ["python"]
+paths   = ["/usr/lib/python*"]
+
+# Listed before libs, which takes all of /usr/lib.
+[subpackages.devel]
+summary = "Headers and development files"
+paths   = ["/usr/include", "/usr/lib/*.so", "/usr/lib/pkgconfig", "/usr/lib/cmake"]
+
+# libsmbclient, libwbclient, the private libraries they load and Samba's
+# modules: everything a client program needs, without the server.
+[subpackages.libs]
+summary = "Shared libraries (libsmbclient, libwbclient) and modules"
+paths   = ["/usr/lib"]

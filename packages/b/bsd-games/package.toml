@@ -7,7 +7,7 @@ summary = "The classic BSD text games (adventure, robots, hangman, ...)"
 license = "BSD-3-Clause"
 homepage = "https://www.polyomino.org.uk/computer/software/bsd-games/"
 hostdeps = ["flex", "bison", "patch"]
-builddeps = ["ncurses-devel", "openssl-devel"]
+builddeps = ["ncurses-devel", "openssl-devel", "musl-bsd-headers"]
 options = ["!check"]
 
 source = [

@@ -1,0 +1,27 @@
+# From Chimera Linux cports (main/libbytesize; BSD-2-Clause, Copyright (c) Chimera Linux contributors).
+# needed by: libblockdev.
+name = "libbytesize"
+version = "2.12"
+release = 1
+summary = "Library for operations with sizes in bytes"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/storaged-project/libbytesize"
+patches = ["skip-canary-tests.patch"]
+hostdeps = ["automake", "gettext", "libtool", "pkgconf", "python"]
+builddeps = ["gmp-devel", "mpfr-devel", "pcre2-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/storaged-project/libbytesize/releases/download/2.12/libbytesize-2.12.tar.gz", sha256 = "8356bac2cafd2f31f39bf1ad373cef8448cab08b817aeaee5c526d54e81c3c5a" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

@@ -7,7 +7,7 @@
 # xorriso), and rsync, ssh and curl for moving data off a machine.
 name = "rescue-tools"
 version = "1"
-release = 1
+release = 2
 summary = "FenrirOS rescue toolset (DKRescue's)"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"
@@ -20,5 +20,5 @@ rundeps = [
     "cryptsetup", "lvm2", "mdadm",
     "efibootmgr", "dklilo", "chntpw",
     "dmidecode", "pciutils", "usbutils",
-    "squashfs-tools", "xorriso", "openssh", "curl", "rsync",
+    "squashfs-tools", "xorriso", "openssh", "openssh-server", "curl", "rsync",
 ]

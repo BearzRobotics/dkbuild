@@ -1,0 +1,26 @@
+# From Chimera Linux cports (main/iniparser; BSD-2-Clause, Copyright (c) Chimera Linux contributors).
+# needed by: ndctl.
+name = "iniparser"
+version = "4.2.6"
+release = 1
+summary = "C library for INI file parsing"
+license = "MIT"
+homepage = "https://gitlab.com/iniparser/iniparser"
+hostdeps = ["cmake", "doxygen", "ninja", "pkgconf"]
+checkdeps = ["bash"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/iniparser/iniparser/-/archive/v4.2.6.tar.gz", sha256 = "bbed169ed965a3673f58dd14164558832aaae92201f95e829d503f1da634e963" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/iniparser/LICENSE"
+'''
