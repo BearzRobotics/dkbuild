@@ -34,7 +34,10 @@ build = '''
 # the generated headers first: with -j, lib/ is built before the rules that
 # write version.h and config.h have run
 make version.h config.h intl.h
-make CC="$CC" CFLAGS="$CFLAGS -fno-strict-aliasing" LDFLAGS="$LDFLAGS" -j$jobs
+# CFLAGS and LDFLAGS from the environment, not the command line: the
+# Makefiles add to them (lib/ adds -I.. for config.h and version.h), which
+# make ignores for a variable given on the command line
+CFLAGS="$CFLAGS -fno-strict-aliasing" LDFLAGS="$LDFLAGS" make CC="$CC" -j$jobs
 '''
 install = '''
 make DESTDIR="$pkgdir" BASEDIR="$pkgdir" BINDIR=/usr/bin SBINDIR=/usr/sbin install
