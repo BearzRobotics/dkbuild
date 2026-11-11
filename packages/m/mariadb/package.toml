@@ -35,6 +35,7 @@ sed -i 's/^\tERA,$/\tERA_,/' $d/src/include/duckdb/common/enums/date_part_specif
 grep -rlw 'DatePartSpecifier::ERA' $d/src $d/extension --include='*.cpp' --include='*.hpp' | grep -v /third_party/ | xargs -r sed -i 's/DatePartSpecifier::ERA\b/DatePartSpecifier::ERA_/g'
 grep -qw 'ERA_,' $d/src/include/duckdb/common/enums/date_part_specifier.hpp
 ! grep -rqw 'DatePartSpecifier::ERA' $d/src $d/extension --include='*.cpp' --include='*.hpp'
+# Heimdal's krb5-config gives only -lgssapi; the GSSAPI plugin calls krb5 too
 %cmake \
     -DBUILD_CONFIG=mysql_release \
     -DINSTALL_LAYOUT=RPM \
@@ -45,6 +46,7 @@ grep -qw 'ERA_,' $d/src/include/duckdb/common/enums/date_part_specifier.hpp
     -DWITH_UNIT_TESTS=OFF \
     -DWITH_EMBEDDED_SERVER=ON \
     -DWITH_SSL=system \
+    -DGSSAPI_FLAVOR=HEIMDAL -DGSSAPI_LIBS="gssapi;krb5" \
     -DWITH_ZLIB=system \
     -DWITH_PCRE=system \
     -DWITH_LIBFMT=system \
@@ -57,9 +59,11 @@ grep -qw 'ERA_,' $d/src/include/duckdb/common/enums/date_part_specifier.hpp
     -DPLUGIN_SPIDER=YES
 '''
 build = '''
+# Heimdal's krb5-config gives only -lgssapi; the GSSAPI plugin calls krb5 too
 %cmake_build
 '''
 install = '''
+# Heimdal's krb5-config gives only -lgssapi; the GSSAPI plugin calls krb5 too
 %cmake_install
 install -Dm644 $pkgfiles/mariadb "$pkgdir/etc/dinit.d/mariadb"
 install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/mariadb.conf"
