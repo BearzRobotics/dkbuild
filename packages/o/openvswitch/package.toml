@@ -1,0 +1,41 @@
+# Open vSwitch: a multilayer virtual switch for VMs and containers (bridges,
+# VLANs, VXLAN/Geneve tunnels, OpenFlow), using the kernel's openvswitch
+# datapath. ovsdb-server keeps the configuration, ovs-vswitchd switches;
+# ovs-vsctl configures it. Service `openvswitch` (dinit) starts both through
+# OVS's own ovs-ctl, which also creates the database the first time.
+name = "openvswitch"
+version = "4.0.0"
+release = 1
+summary = "Multilayer virtual switch"
+license = "Apache-2.0 AND LGPL-2.1-only AND SISSL"
+homepage = "https://www.openvswitch.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["python", "pkgconf", "perl"]
+builddeps = ["openssl-devel", "libcap-ng-devel", "linux-headers"]
+rundeps = ["python", "iproute2", "procps"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.openvswitch.org/releases/openvswitch-4.0.0.tar.gz", sha256 = "6c94e1e019a7f36ef40a9ae34fb21ab2534dbb78e5bea83338452e07a11becf2" },
+]
+
+setup = '''
+%configure \
+    --enable-shared \
+    --enable-ssl \
+    --enable-libcapng \
+    --with-rundir=/run/openvswitch \
+    --with-logdir=/var/log/openvswitch \
+    --with-dbdir=/var/lib/openvswitch \
+    --with-pkidir=/var/lib/openvswitch/pki
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 $pkgfiles/openvswitch "$pkgdir/etc/dinit.d/openvswitch"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/openvswitch.conf"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/openvswitch/LICENSE"
+install -Dm644 NOTICE "$pkgdir/usr/share/licenses/openvswitch/NOTICE"
+'''

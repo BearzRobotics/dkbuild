@@ -1,0 +1,6 @@
+# Open vSwitch: ovsdb-server and ovs-vswitchd, through ovs-ctl (which creates
+# the database the first time; a random system ID is kept in it)
+type = scripted
+command = /usr/share/openvswitch/scripts/ovs-ctl --system-id=random start
+stop-command = /usr/share/openvswitch/scripts/ovs-ctl stop
+depends-on: early-filesystems
