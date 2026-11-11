@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: main/smpeg/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "smpeg"
+version = "2.0.0"
+release = 3
+summary = "MPEG decoding library"
+license = "LGPL-2.1-or-later"
+homepage = "https://icculus.org/smpeg"
+patches = ["smpeg2-2.0.0-gcc6.patch", "smpeg2-2.0.0-smpeg2-config.patch"]
+hostdeps = ["automake", "pkgconf", "libtool"]
+builddeps = ["sdl2-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.libsdl.org/projects/smpeg/release/smpeg2-2.0.0.tar.gz", sha256 = "979a65b211744a44fa641a9b6e4d64e64a12ff703ae776bafe3c4c4cd85494b3" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -Wno-register"
+'''
+setup = '''
+# it breaks smpeg2-config
+rm -f acinclude/sdl2.m4
+./autogen.sh
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

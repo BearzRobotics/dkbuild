@@ -1,0 +1,27 @@
+# KDE Edu (Gear 26.08.3), for FenrirOS's education set.
+name = "kiten"
+version = "26.08.3"
+release = 1
+summary = "Japanese reference and study aid"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/kiten/"
+hostdeps = ["cmake", "ninja", "pkgconf", "extra-cmake-modules", "qt6-qttools", "gettext"]
+builddeps = ["qt6-qtbase-devel", "karchive-devel", "kcompletion-devel", "kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kcrash-devel", "kdoctools-devel", "ki18n-devel", "kio-devel", "kxmlgui-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kiten-26.08.3.tar.xz", sha256 = "2800ee26bcd3d46dcb9a52f3ab0746870f5d93c8dd9a378ab92422ddc234f282" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -dm755 "$pkgdir/usr/share/licenses/kiten"
+if [ -d LICENSES ]; then cp LICENSES/* "$pkgdir/usr/share/licenses/kiten/"; else cp COPYING* "$pkgdir/usr/share/licenses/kiten/" 2>/dev/null || true; fi
+'''

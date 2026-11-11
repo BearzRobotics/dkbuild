@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: main/qalculate-gtk/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "qalculate-gtk"
+version = "5.12.0"
+release = 1
+summary = "GTK+3 frontend for libqalculate"
+license = "GPL-2.0-or-later"
+homepage = "https://qalculate.github.io"
+hostdeps = ["automake", "gettext-devel", "intltool", "libtool", "pkgconf"]
+builddeps = ["gtk+3-devel", "libqalculate-devel", "libxml2-devel"]
+
+source = [
+    { url = "https://github.com/Qalculate/qalculate-gtk/releases/download/v5.12.0/qalculate-gtk-5.12.0.tar.gz", sha256 = "4225eacefc30354f867dc14b7974efe8e8fcef031117def1098db652e1ad48b7" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

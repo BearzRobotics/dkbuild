@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: main/tangle/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "tangle"
+version = "0.1.1"
+release = 1
+summary = "Subset of libsystemd providing sd-bus and sd-event"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/chimera-linux/tangle"
+hostdeps = ["bash", "docbook-xsl-nons", "gperf", "libxslt", "meson", "pkgconf", "python-jinja2"]
+builddeps = ["libcap-devel"]
+checkdeps = ["dbus"]
+
+source = [
+    { url = "https://github.com/chimera-linux/tangle/archive/refs/tags/v0.1.1.tar.gz", sha256 = "709b21b489af546e6376d09b4fe64a9f7131a9ac9651336727d557d58470360c" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+# remove while elogind still provides them...
+rm -rf "$pkgdir/usr/share/man/man3"
+'''

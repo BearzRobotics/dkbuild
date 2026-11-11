@@ -1,0 +1,30 @@
+# KDE Edu (Gear 26.08.3), for FenrirOS's education set. Without gpsd (no live GPS position plugin; gpsd is not in the tree).
+name = "marble"
+version = "26.08.3"
+release = 1
+summary = "Virtual globe and world atlas"
+license = "LGPL-2.1-or-later"
+homepage = "https://apps.kde.org/marble/"
+hostdeps = ["cmake", "ninja", "pkgconf", "extra-cmake-modules", "qt6-qttools", "gettext"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtsvg-devel", "qt6-qtdeclarative-devel", "qt6-qtpositioning-devel", "qt6-qtmultimedia-devel", "qt6-qt5compat-devel", "qt6-qtwebchannel-devel", "qt6-qtwebengine-devel", "kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "ki18n-devel", "kparts-devel", "protobuf-devel", "shapelib-devel", "phonon-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/marble-26.08.3.tar.xz", sha256 = "b7a1b52c5f1e429aa07230d547c863e150d4c48672cf5a92f9b7eeaac57182ca" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_TESTING=OFF \
+    -DBUILD_MARBLE_TOOLS=OFF \
+    -DBUILD_MARBLE_EXAMPLES=OFF \
+    -DBUILD_MARBLE_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -dm755 "$pkgdir/usr/share/licenses/marble"
+if [ -d LICENSES ]; then cp LICENSES/* "$pkgdir/usr/share/licenses/marble/"; else cp COPYING* "$pkgdir/usr/share/licenses/marble/" 2>/dev/null || true; fi
+'''

@@ -1,0 +1,27 @@
+# KDE Edu (Gear 26.08.3), for FenrirOS's education set.
+name = "parley"
+version = "26.08.3"
+release = 1
+summary = "Vocabulary trainer (flash cards, spaced repetition)"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/parley/"
+hostdeps = ["cmake", "ninja", "pkgconf", "extra-cmake-modules", "qt6-qttools", "gettext"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtsvg-devel", "qt6-qtmultimedia-devel", "qt6-qtwebengine-devel", "kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "kdoctools-devel", "ki18n-devel", "kio-devel", "knewstuff-devel", "knotifications-devel", "ktextwidgets-devel", "kxmlgui-devel", "sonnet-devel", "libkeduvocdocument-devel", "libxml2-devel", "libxslt-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/parley-26.08.3.tar.xz", sha256 = "67d35392b972c4ef13299df1f1151695f80c4caaada6eec4086d3b211adfab2b" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -dm755 "$pkgdir/usr/share/licenses/parley"
+if [ -d LICENSES ]; then cp LICENSES/* "$pkgdir/usr/share/licenses/parley/"; else cp COPYING* "$pkgdir/usr/share/licenses/parley/" 2>/dev/null || true; fi
+'''

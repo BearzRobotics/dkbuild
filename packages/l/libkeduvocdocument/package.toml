@@ -1,0 +1,27 @@
+# KDE Edu (Gear 26.08.3), for FenrirOS's education set. needed by: parley.
+name = "libkeduvocdocument"
+version = "26.08.3"
+release = 1
+summary = "Library for KDE Edu vocabulary documents"
+license = "LGPL-2.0-or-later"
+homepage = "https://invent.kde.org/education/libkeduvocdocument"
+hostdeps = ["cmake", "ninja", "pkgconf", "extra-cmake-modules", "qt6-qttools", "gettext"]
+builddeps = ["qt6-qtbase-devel", "karchive-devel", "ki18n-devel", "kio-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/libkeduvocdocument-26.08.3.tar.xz", sha256 = "c31d072cec35ad2c32f35d6ce305639aa6616e06d2662631c2c0b9120d1b63d9" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -dm755 "$pkgdir/usr/share/licenses/libkeduvocdocument"
+if [ -d LICENSES ]; then cp LICENSES/* "$pkgdir/usr/share/licenses/libkeduvocdocument/"; else cp COPYING* "$pkgdir/usr/share/licenses/libkeduvocdocument/" 2>/dev/null || true; fi
+'''

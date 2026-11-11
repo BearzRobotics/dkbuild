@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/sdl12-compat/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "sdl12-compat"
+version = "1.2.78"
+release = 1
+summary = "Compatibility layer for SDL 1.2"
+license = "Zlib"
+homepage = "https://github.com/libsdl-org/sdl12-compat"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["glu-devel", "sdl2-compat-devel"]
+rundeps = ["sdl2-compat"]
+
+source = [
+    { url = "https://github.com/libsdl-org/sdl12-compat/archive/refs/tags/release-1.2.78.tar.gz", sha256 = "40ec5f0bab13a217ffae7aab0c450f1f798761e91fb185051b5211925c9da11a" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

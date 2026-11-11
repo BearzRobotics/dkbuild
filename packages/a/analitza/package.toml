@@ -1,0 +1,27 @@
+# KDE Edu (Gear 26.08.3), for FenrirOS's education set. needed by: kalgebra.
+name = "analitza"
+version = "26.08.3"
+release = 1
+summary = "Library to work with mathematical objects (KAlgebra, Cantor)"
+license = "LGPL-2.0-or-later"
+homepage = "https://invent.kde.org/education/analitza"
+hostdeps = ["cmake", "ninja", "pkgconf", "extra-cmake-modules", "qt6-qttools", "gettext"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtsvg-devel", "qt6-qtdeclarative-devel", "eigen"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/analitza-26.08.3.tar.xz", sha256 = "be6db3edb57da004f0264635f4ac4652c74a05ad2f27bee2bf28fdca7a92240f" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -dm755 "$pkgdir/usr/share/licenses/analitza"
+if [ -d LICENSES ]; then cp LICENSES/* "$pkgdir/usr/share/licenses/analitza/"; else cp COPYING* "$pkgdir/usr/share/licenses/analitza/" 2>/dev/null || true; fi
+'''

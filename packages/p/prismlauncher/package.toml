@@ -1,0 +1,34 @@
+# Imported from Chimera Linux cports: user/prismlauncher/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Prism Launcher: the open-source Minecraft launcher (a Microsoft account
+# signs in to the game, which Prism downloads). Minecraft runs on the system's
+# OpenJDK (21 for 1.20.5 and later, 17 for 1.17-1.20.4): in Settings > Java,
+# pick /usr/lib/jvm/java-21-openjdk; Prism's own Java downloads are glibc
+# builds. Minecraft's LWJGL native libraries are glibc builds too: gcompat
+# loads them, and Settings > Minecraft > "Use system installation of GLFW /
+# OpenAL" uses the system's. Not yet tried on FenrirOS.
+name = "prismlauncher"
+version = "11.1.1"
+release = 1
+summary = "Minecraft launcher with multiple instances support"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/PrismLauncher/PrismLauncher"
+patches = ["default-native.patch"]
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "openjdk17", "pkgconf", "qt6-qtbase", "scdoc"]
+builddeps = ["cmark-devel", "gamemode-devel", "libarchive-devel", "qrencode-devel", "qt6-qtbase-devel", "qt6-qtnetworkauth-devel", "qt6-qtsvg-devel", "tomlplusplus-devel", "zlib-ng-compat-devel"]
+rundeps = ["openjdk21", "openjdk17", "gcompat", "glfw", "openal-soft"]
+
+source = [
+    { url = "https://github.com/PrismLauncher/PrismLauncher/releases/download/11.1.1/prismlauncher-11.1.1.tar.gz", sha256 = "9ea53f93714cd2a59dc0f38153690a59a3f06f439934d1410ec364cc7f363eb5" },
+]
+
+setup = '''
+%cmake \
+    -DLauncher_BUILD_PLATFORM=chimeralinux
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

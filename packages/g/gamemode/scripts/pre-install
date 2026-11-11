@@ -1,0 +1,4 @@
+#!/bin/sh
+# users and groups (sysusers.conf)
+grep -q "^_gamemode:" /etc/group || groupadd -r _gamemode
+exit 0

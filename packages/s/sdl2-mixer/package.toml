@@ -1,0 +1,44 @@
+# Imported from Chimera Linux cports: main/sdl2_mixer/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "sdl2-mixer"
+version = "2.8.2"
+release = 1
+summary = "SDL audio mixer library"
+license = "Zlib"
+homepage = "https://libsdl.org/projects/SDL_mixer"
+hostdeps = ["autoconf-archive", "automake", "libtool", "pkgconf"]
+builddeps = ["flac-devel", "fluidsynth-devel", "libmodplug-devel", "libvorbis-devel", "mpg123-devel", "opusfile-devel", "sdl2-compat-devel", "smpeg-devel", "wavpack-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://libsdl.org/projects/SDL_mixer/release/SDL2_mixer-2.8.2.tar.gz", sha256 = "938dff531d00ace2296557a6599abe6f34599e2f34f0a4a08a397e2ccac8b8f7" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-music-flac-libflac \
+    --enable-music-mp3-mpg123 \
+    --enable-music-ogg-vorbis \
+    --enable-music-wavpack \
+    --disable-music-flac-drflac \
+    --disable-music-flac-libflac-shared \
+    --disable-music-gme \
+    --disable-music-midi-fluidsynth-shared \
+    --disable-music-midi-timidity \
+    --disable-music-mod-modplug-shared \
+    --disable-music-mod-xmp \
+    --disable-music-mp3-minimp3 \
+    --disable-music-mp3-mpg123-shared \
+    --disable-music-ogg-stb \
+    --disable-music-ogg-vorbis-shared \
+    --disable-music-opus-shared \
+    --disable-music-wavpack-shared
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/sdl2_mixer/LICENSE.txt"
+'''

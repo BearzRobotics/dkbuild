@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/qalculate-qt/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "qalculate-qt"
+version = "5.12.0"
+release = 1
+summary = "Qt frontend for libqalculate"
+license = "GPL-2.0-or-later"
+homepage = "https://qalculate.github.io"
+hostdeps = ["pkgconf", "qt6-qtbase-devel", "qt6-qttools"]
+builddeps = ["libqalculate-devel", "qt6-qtbase-devel", "qt6-qttools-devel"]
+
+source = [
+    { url = "https://github.com/Qalculate/qalculate-qt/archive/refs/tags/v5.12.0.tar.gz", sha256 = "be460b472585a20a95754ff35495b179438a581af37708b49d28cb93f441c461" },
+]
+
+setup = '''
+qmake6 PREFIX=/usr QMAKE_CFLAGS="$CFLAGS" QMAKE_CXXFLAGS="$CXXFLAGS" QMAKE_LFLAGS="$LDFLAGS"
+'''
+build = '''
+%make
+'''
+install = '''
+make INSTALL_ROOT="$pkgdir" install
+'''

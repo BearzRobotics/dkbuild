@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: user/gamemode/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "gamemode"
+version = "1.8.2"
+release = 1
+summary = "Optimise Linux system performance on demand"
+license = "BSD-3-Clause"
+homepage = "https://github.com/FeralInteractive/gamemode"
+patches = ["dbus.patch", "posix.patch", "tangle.patch"]
+hostdeps = ["cmake", "git", "meson", "ninja", "pkgconf"]
+builddeps = ["dbus-devel", "dbus", "inih-devel", "linux-headers", "tangle-devel"]
+
+source = [
+    { url = "https://github.com/FeralInteractive/gamemode/archive/refs/tags/1.8.2.tar.gz", sha256 = "2b4a20894822caf04767af6a1601130d6b718fc30b8a77895607341b1674740f" },
+]
+
+setup = '''
+%meson \
+    -Dwith-examples=false \
+    -Dwith-sd-bus-provider=tangle \
+    -Dwith-privileged-group=_gamemode
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/gamemode/LICENSE.txt"
+'''

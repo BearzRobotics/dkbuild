@@ -1,0 +1,27 @@
+# KDE Edu (Gear 26.08.3), for FenrirOS's education set. Also calgebra, its console version.
+name = "kalgebra"
+version = "26.08.3"
+release = 1
+summary = "Graph calculator and plotter"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/kalgebra/"
+hostdeps = ["cmake", "ninja", "pkgconf", "extra-cmake-modules", "qt6-qttools", "gettext"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtsvg-devel", "qt6-qtdeclarative-devel", "qt6-qtwebengine-devel", "analitza-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kdoctools-devel", "ki18n-devel", "kio-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "libplasma-devel", "ncurses-devel", "readline-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kalgebra-26.08.3.tar.xz", sha256 = "7f8b73ac598e784dd053aaab4358db0560d5c30148e23f3fc684c7e8710bc376" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -dm755 "$pkgdir/usr/share/licenses/kalgebra"
+if [ -d LICENSES ]; then cp LICENSES/* "$pkgdir/usr/share/licenses/kalgebra/"; else cp COPYING* "$pkgdir/usr/share/licenses/kalgebra/" 2>/dev/null || true; fi
+'''

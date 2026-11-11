@@ -1,0 +1,25 @@
+# Shapelib: reads and writes ESRI shapefiles. needed by: marble (shapefile
+# map layers).
+name = "shapelib"
+version = "1.6.3"
+release = 1
+summary = "Library for ESRI shapefiles"
+license = "MIT OR LGPL-2.0-or-later"
+homepage = "https://shapelib.maptools.org"
+hostdeps = ["pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.osgeo.org/shapelib/shapelib-1.6.3.tar.gz", sha256 = "3ff5ead18ca6d2fe249f0e80b361e1ad6782165115268ed4a58c780a60c1e0eb" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 -t "$pkgdir/usr/share/licenses/shapelib" LICENSE-MIT LICENSE-LGPL
+'''

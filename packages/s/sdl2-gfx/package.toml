@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: user/sdl2_gfx/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "sdl2-gfx"
+version = "1.0.4"
+release = 1
+summary = "SDL2 graphics drawing primitives and other support functions"
+license = "Zlib"
+homepage = "https://www.ferzkopp.net/wordpress/2016/01/02/sdl_gfx-sdl2_gfx"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["sdl2-compat-devel"]
+
+source = [
+    { url = "http://www.ferzkopp.net/Software/SDL2_gfx/SDL2_gfx-1.0.4.tar.gz", sha256 = "63e0e01addedc9df2f85b93a248f06e8a04affa014a835c2ea34bfe34e576262" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-mmx
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/sdl2_gfx/COPYING"
+'''
