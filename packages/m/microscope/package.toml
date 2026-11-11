@@ -18,6 +18,9 @@ environment = '''
 export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
 # its Cargo.toml uses a nightly cargo feature (profile-rustflags)
 export RUSTC_BOOTSTRAP=1
+# its BPF programs: clang and the include path its dev shell names (libbpf's
+# headers and the kernel's UAPI headers, both in /usr/include here)
+export MICROSCOPE_BPF_CLANG=/usr/bin/clang MICROSCOPE_BPF_INCLUDE=/usr/include
 '''
 build = '''
 cargo build --release --frozen --offline -j $jobs
