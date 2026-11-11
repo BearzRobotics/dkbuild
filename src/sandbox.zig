@@ -238,10 +238,13 @@ fn bindMount(src: []const u8, dst_inside: []const u8, merged: []const u8, read_o
     sys(linux.mount(s, dst_path, null, linux.MS.BIND | linux.MS.REC, 0), "bind", dst_path);
     if (read_only) {
         // A read-only bind needs a remount. In a user namespace the remount must
-        // repeat the flags the source mount has locked in, so try plain first.
+        // repeat the flags the source mount has locked in, so try plain first,
+        // then nosuid,nodev, then also noexec (a file on /run, like systemd's
+        // /run/systemd/resolve/stub-resolv.conf behind /etc/resolv.conf).
         const base = linux.MS.BIND | linux.MS.REMOUNT | linux.MS.RDONLY;
         var rc = linux.mount(null, dst_path, null, base, 0);
         if (linux.errno(rc) == .PERM) rc = linux.mount(null, dst_path, null, base | linux.MS.NOSUID | linux.MS.NODEV, 0);
+        if (linux.errno(rc) == .PERM) rc = linux.mount(null, dst_path, null, base | linux.MS.NOSUID | linux.MS.NODEV | linux.MS.NOEXEC, 0);
         sys(rc, "remount read-only", dst_path);
     }
 }
