@@ -9,8 +9,8 @@
 # (no GUI, Java, D-Bus or GStreamer; merged libraries; Colibre icons), with
 # the system's libraries where they fit. Orcus 0.19 and mdds 2.1 are built
 # from the bundled copies: this core is older than the system's. Patches:
-# Chimera's for the desktop LibreOffice that apply here (musl stack size, GNU
-# install and cp); aarch64.patch does not apply to this tree and needs its own
+# Chimera's for the desktop LibreOffice that apply here (musl stack size and
+# others; not its BSD install/cp/sed ones); aarch64.patch does not apply to this tree and needs its own
 # version for the arm64 build. The other sources are the archives
 # download.lst names, except fonts and Java parts.
 name = "collabora-core"
@@ -19,7 +19,7 @@ release = 1
 summary = "LibreOffice core for Collabora Online (LibreOfficeKit, headless)"
 license = "MPL-2.0"
 homepage = "https://www.collaboraonline.com"
-patches = ["add-external-patches.patch", "gnucp.patch", "install-gnuisms.patch", "ltoplugin.patch", "musl-stacksize.patch", "ppc64-asm.patch", "ppc64-except.patch"]
+patches = ["add-external-patches.patch", "ltoplugin.patch", "musl-stacksize.patch", "ppc64-asm.patch", "ppc64-except.patch"]
 archs = ["x86_64", "aarch64"]
 hostdeps = ["automake", "bash", "bison", "flex", "gettext", "gperf", "libtool", "libxml2", "libxslt", "perl", "pkgconf", "python", "python-lxml", "python-setuptools", "unzip", "xz", "zip"]
 builddeps = ["abseil-cpp-devel", "argon2-devel", "boost-devel", "cairo-devel", "clucene-devel", "cppunit-devel", "curl-devel", "fontconfig-devel", "freetype-devel", "glm", "gpgme-devel", "graphite2-devel", "harfbuzz-devel", "hunspell-devel", "hyphen-devel", "icu-devel", "lcms2-devel", "libabw-devel", "libatomic-ops-devel", "libcdr-devel", "libe-book-devel", "libepoxy-devel", "libepubgen-devel", "libetonyek-devel", "libexpat-devel", "libexttextcat-devel", "libfreehand-devel", "libgcrypt-devel", "libjpeg-turbo-devel", "liblangtag-devel", "libmspub-devel", "libmwaw-devel", "libnumbertext-devel", "libodfgen-devel", "libpagemaker-devel", "libpng-devel", "libqxp-devel", "librevenge-devel", "librsvg-devel", "libtiff-devel", "libtool-devel", "libvisio-devel", "libwebp-devel", "libwpg-devel", "libwps-devel", "libxml2-devel", "libxslt-devel", "libxt-devel", "md4c-devel", "mythes-devel", "neon-devel", "nspr-devel", "nss-devel", "openjpeg-devel", "openldap-devel", "openssl-devel", "python-devel", "redland-devel", "unixodbc-devel", "xmlsec1-devel", "zlib-ng-compat-devel", "zstd-devel", "zxing-cpp-devel"]

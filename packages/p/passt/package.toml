@@ -8,7 +8,7 @@ release = 1
 summary = "User-mode network translation layer between Layer 2 and 4"
 license = "BSD-3-Clause AND GPL-2.0-or-later"
 homepage = "https://passt.top/passt/about"
-patches = ["bullshit-cflags.patch", "cp-d.patch", "fmt.patch", "sed.patch"]
+patches = ["bullshit-cflags.patch", "cp-d.patch", "fmt.patch"]
 builddeps = ["linux-headers"]
 options = ["!check"]
 
