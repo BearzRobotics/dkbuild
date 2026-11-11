@@ -1,6 +1,8 @@
 # The self-hosted RustDesk server: hbbs (ID/rendezvous) and hbbr (relay),
 # as services. The RustDesk desktop client is Flutter (glibc-only SDK); see
 # wip/README.md.
+# The source is a git snapshot: libs/hbb_common is a submodule, which GitHub's
+# release archive leaves out (and cargo needs it to vendor the crates).
 name = "rustdesk-server"
 version = "1.1.16"
 release = 1
@@ -11,7 +13,7 @@ hostdeps = ["rust"]
 options = ["!check", "cargodeps"]
 
 source = [
-    { url = "https://github.com/rustdesk/rustdesk-server/archive/refs/tags/1.1.16.tar.gz", sha256 = "846379e1555396ba8c8f26edbfbfb7f36618ef3e5d658b6022ed24617cf7edfa" },
+    { url = "snapshot:git https://github.com/rustdesk/rustdesk-server.git 1.1.16", sha256 = "00ac20a6e25477501e1e031a7fd86e254b1abad33897bb55c1da9ca577926787" },
 ]
 
 environment = '''

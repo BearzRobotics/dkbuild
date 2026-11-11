@@ -137,6 +137,11 @@ fn makeSnapshot(arena: Allocator, io: std.Io, cache: []const u8, spec: []const u
         try id.appendSlice(arena, w);
         try args.append(arena, w);
     }
+    // A repository URL among the arguments (snapshot:git) would make the
+    // name a path: keep it one file name.
+    for (id.items) |*c| if (c.* == '/' or c.* == ':') {
+        c.* = '_';
+    };
     const dir = try std.fs.path.join(arena, &.{ cache, "snapshots" });
     std.Io.Dir.cwd().createDirPath(io, dir) catch |err| {
         message.* = try std.fmt.allocPrint(arena, "cannot create {s}: {s}", .{ dir, @errorName(err) });

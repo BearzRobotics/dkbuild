@@ -1,6 +1,6 @@
 # OpenSCAD from git (the last formal release is 2021.01; the project publishes
 # development snapshots), with Manifold, OpenCSG and Clipper2 from its submodules.
-# The source is a git snapshot: its sha256 is set after the first `dkbuild fetch openscad`.
+# The source is a git snapshot (snapshot:git), pinned by commit.
 name = "openscad"
 version = "2026.11.10"
 release = 1
@@ -12,7 +12,7 @@ builddeps = ["qt6-qtbase-devel", "qt6-qtsvg-devel", "qt6-qtmultimedia-devel", "q
 options = ["!check", "jobs:12"]
 
 source = [
-    { url = "snapshot:git https://github.com/openscad/openscad.git df091e896a1fe87655065b0859239db0d36d250a", sha256 = "0000000000000000000000000000000000000000000000000000000000000000" },
+    { url = "snapshot:git https://github.com/openscad/openscad.git df091e896a1fe87655065b0859239db0d36d250a", sha256 = "316c351e64e4ac43fb59314aa7d6ac081fb7ea07ef2d5e12a15d5ce3461166cb" },
 ]
 
 setup = '''
