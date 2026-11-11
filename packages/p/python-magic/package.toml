@@ -2,7 +2,7 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "python-magic"
 version = "0.4.27"
-release = 6
+release = 7
 summary = "Python wrapper for libmagic"
 license = "MIT"
 homepage = "https://github.com/ahupp/python-magic"
@@ -17,5 +17,7 @@ source = [
 ]
 
 install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-magic/LICENSE"
 '''
