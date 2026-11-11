@@ -35,11 +35,12 @@ autoreconf -if -W none
 '''
 build = '''
 cd unix
-%make
+# on the command line too: it reaches the bundled packages' (itcl's) makefiles
+%make RANLIB=true
 '''
 install = '''
 cd unix
-make DESTDIR="$pkgdir" install install-private-headers
+make DESTDIR="$pkgdir" RANLIB=true install install-private-headers
 mkdir -p "$pkgdir/usr/bin"
 ln -sf tclsh8.6 "$pkgdir/usr/bin/tclsh"
 install -Dm644 ../license.terms "$pkgdir/usr/share/licenses/tcl/license.terms"
