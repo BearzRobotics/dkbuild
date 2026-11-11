@@ -1,0 +1,28 @@
+# GNU libmicrohttpd: a small embeddable HTTP server library (TLS through
+# GnuTLS); elfutils' debuginfod server uses it. Based on Chimera Linux cports
+# (BSD-2-Clause): main/libmicrohttpd.
+name = "libmicrohttpd"
+version = "1.0.5"
+release = 1
+summary = "Embeddable HTTP server library"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.gnu.org/software/libmicrohttpd"
+hostdeps = ["automake", "autoconf", "libtool", "pkgconf", "texinfo"]
+builddeps = ["gnutls-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-1.0.5.tar.gz", sha256 = "b46d00f58efa6f497b97d2e782c4ee66301d412ddd855dd3068518b3a2cd3ea2" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libmicrohttpd/COPYING"
+'''

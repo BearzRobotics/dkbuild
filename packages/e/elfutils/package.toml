@@ -3,16 +3,18 @@
 # Reviewed by hand: eustack symlink and rename written as shell.
 # r3: the whole of elfutils (libdw, libasm, the eu-* tools), with Chimera's musl
 #     patches; libelf.a kept. Only libelf was built before.
+# r4: debuginfod, the client library (elfutils-debuginfod-libs) and the server
+#   (elfutils-debuginfod), as Chimera splits them.
 # r2: static libraries too (in elfutils-static), for fully static programs on musl.
 name = "elfutils"
 version = "0.193"
-release = 3
+release = 4
 summary = "Utilities and libraries to handle ELF files and DWARF data"
 license = "GPL-3.0-or-later AND (GPL-2.0-or-later OR LGPL-3.0-or-later)"
 homepage = "https://sourceware.org/elfutils"
 patches = ["fix-aarch64_fregs.patch", "fix-uninitialized.patch", "musl-asm-ptrace-h.patch", "musl-macros.patch", "no-stack-conflict.patch", "stacktrace.patch"]
 hostdeps = ["bison", "flex", "pkgconf"]
-builddeps = ["sysprof-capture", "argp-standalone", "musl-obstack", "musl-fts", "zlib-ng-compat-devel", "zstd-devel", "xz-devel", "bzip2-devel", "linux-headers"]
+builddeps = ["sysprof-capture", "argp-standalone", "musl-obstack", "musl-fts", "zlib-ng-compat-devel", "zstd-devel", "xz-devel", "bzip2-devel", "curl-devel", "json-c-devel", "libarchive-devel", "libmicrohttpd-devel", "sqlite-devel", "linux-headers"]
 
 source = [
     { url = "https://sourceware.org/elfutils/ftp/0.193/elfutils-0.193.tar.bz2", sha256 = "7857f44b624f4d8d421df851aaae7b1402cfe6bcdd2d8049f15fc07d3dde7635" },
@@ -30,8 +32,8 @@ export LDFLAGS="$LDFLAGS -Wl,-z,stack-size=2097152"
 setup = '''
 %configure \
     --disable-nls \
-    --disable-debuginfod \
-    --enable-libdebuginfod=dummy \
+    --enable-debuginfod \
+    --enable-libdebuginfod \
     --enable-deterministic-archives \
     --enable-stacktrace \
     --with-zstd \
@@ -44,3 +46,13 @@ install = '''
 %make_install
 [ -e "$pkgdir/usr/bin/eu-eustack" ] && mv "$pkgdir/usr/bin/eu-eustack" "$pkgdir/usr/bin/eu-stack"
 '''
+
+# the debuginfod server (and its client tool, debuginfod-find)
+[subpackages.debuginfod]
+summary = "debuginfod server and client tool"
+paths   = ["/usr/bin/debuginfod*", "/usr/share/man/man1/debuginfod*", "/usr/share/man/man8/debuginfod*"]
+
+# the client library that debuggers and tools use to fetch debug info
+[subpackages.debuginfod-libs]
+summary = "debuginfod client library"
+paths   = ["/etc/profile.d", "/usr/lib/libdebuginfod.so.*", "/usr/lib/libdebuginfod-*.so"]
