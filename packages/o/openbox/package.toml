@@ -16,8 +16,7 @@ source = [
 setup = '''
 autoreconf -fi
 %configure \
-    --sysconfdir=/etc \
-    --disable-static=no
+    --sysconfdir=/etc
 '''
 build = '''
 %make

@@ -14,7 +14,8 @@ source = [
 ]
 
 setup = '''
-./configure \
+# its configure script is configure.sh
+./configure.sh \
     --container \
     --cxx-binding \
     --enable-all-features \

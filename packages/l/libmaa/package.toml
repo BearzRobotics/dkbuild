@@ -13,6 +13,11 @@ source = [
     { url = "https://downloads.sourceforge.net/dict/libmaa-1.5.1.tar.gz", sha256 = "3a30e25f038e99c4715125545516490d991fe3a505825cc832b1a956e31bf669" },
 ]
 
+environment = '''
+# timer.c uses getrusage without <sys/resource.h>, which musl's headers do
+# not pull in
+export CFLAGS="$CFLAGS -include sys/resource.h"
+'''
 build = '''
 cd maa
 awk -f arggram2c < arggram.txt > arggram.c
