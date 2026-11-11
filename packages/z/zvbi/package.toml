@@ -1,0 +1,31 @@
+# zvbi: library and tools for the vertical blanking interval of analogue and
+# digital TV (Teletext, closed captions, WSS) from V4L2 and DVB devices.
+# GStreamer's teletextdec (gst-plugins-bad) decodes Teletext subtitles with it.
+# The licence terms differ by file (COPYING.md lists them).
+name = "zvbi"
+version = "0.2.46"
+release = 1
+summary = "Teletext and closed caption decoding library (VBI)"
+license = "GPL-2.0-or-later AND LGPL-2.0-or-later AND LGPL-2.1-or-later AND BSD-2-Clause AND MIT"
+homepage = "https://github.com/zapping-vbi/zvbi"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["autoconf", "automake", "libtool", "gettext-devel", "pkgconf"]
+builddeps = ["libpng-devel", "libx11-devel", "linux-headers"]
+
+source = [
+    { url = "https://github.com/zapping-vbi/zvbi/archive/refs/tags/v0.2.46.tar.gz", sha256 = "817a26118e2654155ee761cd39414885986a4315fdb6617af5314090ddfffd10" },
+]
+
+setup = '''
+# the tag archive has no configure (its autogen.sh would also run it)
+autoreconf -fi
+%configure \
+    --without-doxygen
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING.md "$pkgdir/usr/share/licenses/zvbi/COPYING.md"
+'''
