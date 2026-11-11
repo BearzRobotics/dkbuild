@@ -1,0 +1,40 @@
+# Educational software for FenrirOS: everything in one, or by subject with
+# education-kids, -math, -science, -languages, -typing and -geography.
+name = "education"
+version = "1"
+release = 1
+summary = "Educational software (all subjects)"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+options = ["meta"]
+rundeps = ["education-kids", "education-math", "education-science", "education-languages", "education-typing", "education-geography"]
+
+[subpackages.kids]
+summary = "Young children and early learning: GCompris, Tux Paint, Tux Math, BamBam"
+empty = true
+depends = ["gcompris", "tuxpaint", "tuxmath", "bambam"]
+
+[subpackages.math]
+summary = "Mathematics: KAlgebra, KmPlot, Qalculate!, Tux Math"
+empty = true
+depends = ["kalgebra", "kmplot", "qalculate-qt", "tuxmath"]
+
+[subpackages.science]
+summary = "Science and astronomy: Stellarium, KStars, Kalzium, FreeCAD"
+empty = true
+depends = ["stellarium", "kstars", "kalzium", "freecad"]
+
+[subpackages.languages]
+summary = "Languages and reference: KLettres, Parley, Kiten"
+empty = true
+depends = ["klettres", "parley", "kiten"]
+
+[subpackages.typing]
+summary = "Typing: Klavaro, Tux Typing"
+empty = true
+depends = ["klavaro", "tuxtype"]
+
+[subpackages.geography]
+summary = "Geography: Marble, KGeography"
+empty = true
+depends = ["marble", "kgeography"]

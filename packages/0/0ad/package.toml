@@ -1,0 +1,57 @@
+# 0 A.D.: a real-time strategy game of ancient warfare (Wildfire Games),
+# single player against the computer or multiplayer (lobby or LAN). The
+# engine, Pyrogenesis, with the Atlas scenario editor; the game's art, maps
+# and sounds are 0ad-data.
+#
+# The release tarball carries the libraries it builds itself (SpiderMonkey
+# 128, premake 5, NVTT, FCollada, cxxtest) in libraries/source; they are
+# built offline with its build-source-libs.sh (SpiderMonkey's Rust crates
+# are vendored in its tarball, and mach is told not to download Python
+# packages). Installed the way distributions do: /usr/bin/pyrogenesis and
+# `0ad`, its libraries in /usr/lib/0ad, data in /usr/share/0ad/data.
+name = "0ad"
+version = "0.28.0"
+release = 1
+summary = "Real-time strategy game of ancient warfare"
+license = "GPL-2.0-or-later"
+homepage = "https://play0ad.com"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "pkgconf", "python", "rust", "perl", "m4", "zip", "unzip", "which"]
+builddeps = ["boost-devel", "curl-devel", "enet-devel", "fmt-devel", "freetype-devel", "gloox-devel", "icu-devel", "libpng-devel", "libsodium-devel", "libvorbis-devel", "libogg-devel", "libxml2-devel", "miniupnpc-devel", "openal-soft-devel", "sdl2-compat-devel", "wxwidgets-devel", "zlib-ng-compat-devel", "mesa-devel", "libx11-devel", "libxcursor-devel", "vulkan-headers", "linux-headers"]
+rundeps = ["0ad-data"]
+options = ["jobs:12", "!check", "!lto"]
+
+source = [
+    { url = "https://releases.wildfiregames.com/0ad-0.28.0-unix-build.tar.xz", sha256 = "27e217755ef76a922fe58dbf593d96e54b6ed2375d23f548c35619aa6bd5a42a" },
+]
+
+environment = '''
+export JOBS="-j$jobs"
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE=none
+export HOME=/tmp/home
+'''
+setup = '''
+# the bundled libraries, from the archives in libraries/source
+./libraries/build-source-libs.sh -j$jobs
+./build/workspaces/update-workspaces.sh -j$jobs \
+    --bindir=/usr/bin \
+    --libdir=/usr/lib/0ad \
+    --datadir=/usr/share/0ad/data \
+    --without-tests \
+    --without-pch
+'''
+build = '''
+make -C build/workspaces/gcc config=release -j$jobs
+'''
+install = '''
+install -Dm755 binaries/system/pyrogenesis "$pkgdir/usr/bin/pyrogenesis"
+[ -x binaries/system/ActorEditor ] && install -Dm755 binaries/system/ActorEditor "$pkgdir/usr/bin/0ad-ActorEditor"
+install -dm755 "$pkgdir/usr/lib/0ad"
+install -m755 binaries/system/*.so* "$pkgdir/usr/lib/0ad/"
+install -Dm755 build/resources/0ad.sh "$pkgdir/usr/bin/0ad"
+install -Dm644 build/resources/0ad.desktop "$pkgdir/usr/share/applications/0ad.desktop"
+install -Dm644 build/resources/0ad.png "$pkgdir/usr/share/pixmaps/0ad.png"
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/0ad/LICENSE.md"
+install -m644 license_*.txt "$pkgdir/usr/share/licenses/0ad/"
+'''

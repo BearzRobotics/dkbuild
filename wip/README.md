@@ -41,3 +41,21 @@ From the IT list (2026-11-10):
   work with it.
 - keepass2: a .NET Framework WinForms program, on Linux only through Mono (not
   in the tree; Alpine packages mono for musl). KeePassXC is written.
+
+From the education list (2026-11-11). Written: GCompris, Tux Paint (+stamps),
+Tux Math, Tux Typing, BamBam, KAlgebra, KmPlot, Qalculate!, Stellarium, KStars,
+Kalzium, FreeCAD, KLettres, Parley, Kiten, Klavaro, Marble, KGeography; games
+0 A.D., DOSBox Staging, Prism Launcher (Minecraft). Not yet:
+
+- phet: PhET's HTML5 simulations are single files
+  (phet.colorado.edu/sims/html/<sim>/<version>/<sim>_all.html, CC-BY-4.0, all
+  languages inside). A recipe with one source per simulation, pinned by
+  version, an index page and a desktop entry that opens it in the browser.
+  Needs the list of simulations and their current versions first.
+- scratch: Scratch Desktop is an Electron app (waits on electron). Without
+  Electron: scratch-gui built to static files (npm store) and opened in
+  Firefox, like PhET.
+- gdevelop: an Electron app (newIDE/electron-app; waits on electron).
+- childsplay: dead since 2013, Python 2 and pygame 1; GCompris covers its
+  activities. Not planned.
+- gbrainy: C# on Mono (GTK#); waits on Mono, like KeePass 2.

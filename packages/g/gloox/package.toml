@@ -1,0 +1,26 @@
+# gloox: XMPP (Jabber) client library. needed by: 0ad (its multiplayer
+# lobby).
+name = "gloox"
+version = "1.0.28"
+release = 1
+summary = "XMPP client library"
+license = "GPL-3.0-only"
+homepage = "https://camaya.net/gloox"
+hostdeps = ["pkgconf"]
+builddeps = ["openssl-devel", "zlib-ng-compat-devel", "libidn-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://camaya.net/download/gloox-1.0.28.tar.bz2", sha256 = "591bd12c249ede0b50a1ef6b99ac0de8ef9c1ba4fd2e186f97a740215cc5966c" },
+]
+
+setup = '''
+%configure --with-openssl --without-gnutls --with-zlib --with-libidn
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/gloox/LICENSE"
+'''

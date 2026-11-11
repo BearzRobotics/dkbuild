@@ -1,0 +1,26 @@
+# GNU Libidn 1: internationalized domain names (IDNA 2003) and stringprep.
+# needed by: gloox (stringprep of XMPP addresses). libidn2 is the IDNA 2008
+# library; they install side by side.
+name = "libidn"
+version = "1.44"
+release = 1
+summary = "Internationalized domain name and stringprep library"
+license = "LGPL-2.1-or-later OR GPL-2.0-or-later"
+homepage = "https://www.gnu.org/software/libidn"
+hostdeps = ["pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/libidn/libidn-1.44.tar.gz", sha256 = "499608bab3a65650a0ea52888c13a8deebe3f71408e319acd9ec52e02eb13959" },
+]
+
+setup = '''
+%configure --disable-java --disable-csharp --disable-doc
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libidn/COPYING"
+'''
