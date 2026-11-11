@@ -31,6 +31,9 @@ sed -i 's/ I18N n$/ I18N y/' config.in
 yes '' | make config
 '''
 build = '''
+# the generated headers first: with -j, lib/ is built before the rules that
+# write version.h and config.h have run
+make version.h config.h intl.h
 make CC="$CC" CFLAGS="$CFLAGS -fno-strict-aliasing" LDFLAGS="$LDFLAGS" -j$jobs
 '''
 install = '''
