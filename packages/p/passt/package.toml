@@ -8,7 +8,7 @@ release = 1
 summary = "User-mode network translation layer between Layer 2 and 4"
 license = "BSD-3-Clause AND GPL-2.0-or-later"
 homepage = "https://passt.top/passt/about"
-patches = ["bullshit-cflags.patch", "cp-d.patch", "fmt.patch"]
+patches = ["bullshit-cflags.patch", "cp-d.patch"]
 builddeps = ["linux-headers"]
 options = ["!check"]
 
@@ -18,6 +18,13 @@ source = [
 
 environment = '''
 export CFLAGS="${CFLAGS} -fno-strict-aliasing -std=c23"
+'''
+setup = '''
+# no getconf here (musl has none): the page size its Makefile asks for, 4 KiB
+# (the x86_64 page and the usual aarch64 one; a 16K/64K-page aarch64 kernel
+# would want its own)
+sed -i 's/\$(shell getconf PAGE_SIZE)/4096/' Makefile
+grep -q -- '-DPAGE_SIZE=4096' Makefile
 '''
 build = '''
 %make
