@@ -1,0 +1,47 @@
+# Incus: a manager for system containers (LXC) and virtual machines (QEMU),
+# on one host or a cluster, with ZFS/btrfs/LVM storage and bridge, OVS and OVN
+# networks; the closest open match to Proxmox (decided 2026-11-11). incusd is
+# the daemon (service `incus`), incus the client (incus-client); incus-agent,
+# static, runs inside VMs. Users in group _incus-admin manage it; incus-user
+# gives others their own projects.
+# Based on Chimera Linux cports (BSD-2-Clause): user/incus. Its gtar patch is
+# not used (GNU tar is `tar` here).
+name = "incus"
+version = "6.17.0"
+release = 1
+summary = "System container and virtual machine manager"
+license = "Apache-2.0"
+homepage = "https://linuxcontainers.org/incus"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["go", "pkgconf"]
+builddeps = ["acl-devel", "cowsql-devel", "libcap-devel", "libseccomp-devel", "libuv-devel", "lxc-devel", "raft-devel", "sqlite-devel", "eudev-devel", "linux-headers"]
+rundeps = ["acl", "attr", "dnsmasq", "tar", "nftables", "lego", "qemu", "lxc", "rsync", "squashfs-tools", "util-linux", "xz"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/lxc/incus/archive/v6.17.0.tar.gz", sha256 = "19bcceaab1fad128ae1b91de4f4a3526ec77097de4df0cff057832d6fccb2404" },
+]
+
+environment = '''
+export CGO_ENABLED=1
+'''
+build = '''
+mkdir -p build
+# the daemon and tools, against the system's SQLite and cowsql
+go build -trimpath -tags libsqlite3 -o build/ ./cmd/...
+# the VM agent, static (it runs inside any guest)
+CGO_LDFLAGS="-static-pie" go build -trimpath -tags "agent netgo osusergo" -o build/ ./cmd/incus-agent
+'''
+install = '''
+for b in build/*; do install -Dm755 "$b" "$pkgdir/usr/bin/$(basename "$b")"; done
+install -Dm755 $pkgfiles/incusd.wrapper "$pkgdir/usr/lib/incusd.wrapper"
+install -Dm644 $pkgfiles/incus "$pkgdir/etc/dinit.d/incus"
+install -Dm644 $pkgfiles/incus-user "$pkgdir/etc/dinit.d/incus-user"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/incus.conf"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/incus/COPYING"
+'''
+
+# the client alone, for managing remote Incus servers
+[subpackages.client]
+summary = "Incus client"
+paths   = ["/usr/bin/incus"]

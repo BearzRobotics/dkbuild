@@ -1,0 +1,28 @@
+# raft: the C implementation of the Raft consensus protocol cowsql replicates
+# with (Incus's cluster database). Based on Chimera Linux cports
+# (BSD-2-Clause).
+name = "raft"
+version = "0.22.1"
+release = 1
+summary = "C implementation of the Raft consensus protocol"
+license = "LGPL-3.0-only"
+options = ["!check"]
+homepage = "https://github.com/cowsql/raft"
+hostdeps = ["automake", "pkgconf", "libtool", "autoconf"]
+builddeps = ["linux-headers", "libuv-devel", "lz4-devel"]
+
+source = [
+    { url = "https://github.com/cowsql/raft/archive/v0.22.1.tar.gz", sha256 = "385f91a0b542ebe8b81c8f8500310dcd575fd028ea0cd2ede8807fa920dcf604" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/raft/LICENSE"
+'''

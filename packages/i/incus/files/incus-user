@@ -1,0 +1,4 @@
+# Incus's per-user access daemon (a system service)
+type = process
+command = /usr/bin/incus-user --group _incus
+depends-on: incus

@@ -1,0 +1,4 @@
+# Incus daemon: containers (LXC) and virtual machines (QEMU)
+type = process
+command = /usr/lib/incusd.wrapper --group _incus-admin --syslog
+depends-on: rcboot

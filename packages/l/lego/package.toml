@@ -1,0 +1,22 @@
+# lego: an ACME client (Let's Encrypt and other CAs) and library; Incus uses it
+# for its ACME certificates. Based on Chimera Linux cports (BSD-2-Clause).
+name = "lego"
+version = "5.5.2"
+release = 1
+summary = "Let's Encrypt/ACME client"
+license = "MIT"
+homepage = "https://github.com/go-acme/lego"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/go-acme/lego/archive/refs/tags/v5.5.2.tar.gz", sha256 = "5e0ead0ff177a3f896136817842a420eadc55cccaab9d3afe957b05506f17d27" },
+]
+
+build = '''
+go build -trimpath -ldflags "-X main.version=$version" -o build/lego ./cmd/lego
+'''
+install = '''
+install -Dm755 build/lego "$pkgdir/usr/bin/lego"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/lego/LICENSE"
+'''
