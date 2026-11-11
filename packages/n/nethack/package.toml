@@ -18,6 +18,9 @@ source = [
 setup = '''
 # Lua as NetHack's `make fetch-Lua` would download it (the second source)
 mkdir -p lib && cp -r ../lua-5.4.8 lib/lua-5.4.8
+# the crash report's stack trace calls glibc's backtrace(), which musl lacks
+sed -i 's/^NHCFLAGS+=-DDUMPLOG$/&\nNHCFLAGS+=-DNOCRASHREPORT/' sys/unix/hints/linux.500
+grep -q NOCRASHREPORT sys/unix/hints/linux.500
 (cd sys/unix && sh setup.sh hints/linux.500)
 '''
 build = '''
