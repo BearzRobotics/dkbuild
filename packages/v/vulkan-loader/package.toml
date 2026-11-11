@@ -3,14 +3,15 @@
 # needed by: llama.cpp and ollama (GPU), anything using Vulkan.
 # Wayland only: no XCB or Xlib surface support (the image has no X11).
 # r2: rebuilt with libraries in /usr/lib (the %cmake macro set no libdir; they went to /usr/lib64).
+# 2026-11-11: Vulkan surfaces on X11 (XCB, Xlib) too.
 name = "vulkan-loader"
 version = "1.4.365"
-release = 2
+release = 3
 summary = "Vulkan Installable Client Driver (ICD) loader"
 license = "Apache-2.0"
 homepage = "https://www.khronos.org/vulkan"
 hostdeps = ["cmake", "ninja", "pkgconf", "python"]
-builddeps = ["libxkbcommon-devel", "vulkan-headers-devel", "wayland-devel"]
+builddeps = ["libxkbcommon-devel", "vulkan-headers-devel", "wayland-devel", "libxcb-devel", "libx11-devel", "libxrandr-devel"]
 options = ["!check"]
 
 source = [
@@ -20,8 +21,8 @@ source = [
 setup = '''
 %cmake \
     -DBUILD_TESTS=OFF \
-    -DBUILD_WSI_XCB_SUPPORT=OFF \
-    -DBUILD_WSI_XLIB_SUPPORT=OFF
+    -DBUILD_WSI_XCB_SUPPORT=ON \
+    -DBUILD_WSI_XLIB_SUPPORT=ON
 '''
 build = '''
 %cmake_build

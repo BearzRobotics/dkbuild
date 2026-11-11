@@ -9,15 +9,19 @@
 # realtime limits come from PAM/rlimits. Patches and dinit services are Chimera's
 # (readiness.patch makes pipewire tell dinit when it is ready).
 # r2: static libraries too (in pipewire-static), for fully static programs on musl.
+# 2026-11-11: Bluetooth audio (SBC, AAC, aptX, LC3, Opus), AirPlay (RAOP) and Avahi,
+# pw-cat (sndfile), the PulseAudio tunnel, LV2 filters, X11 bell, its
+# GStreamer plugin and its JACK library. Not in the tree: LDAC, webrtc
+# echo cancelling, libmysofa, libcamera, ROC.
 name = "pipewire"
 version = "1.6.10"
-release = 5
+release = 6
 summary = "Server and user space API to deal with multimedia pipelines"
 license = "MIT"
 homepage = "https://pipewire.org"
 patches = ["lol.patch", "readiness.patch"]
 hostdeps = ["glib-devel", "meson", "pkgconf"]
-builddeps = ["alsa-lib-devel", "dbus-devel", "eudev-devel", "ncurses-devel", "readline-devel", "elogind-devel"]
+builddeps = ["alsa-lib-devel", "dbus-devel", "eudev-devel", "ncurses-devel", "readline-devel", "elogind-devel", "bluez-devel", "sbc-devel", "fdk-aac-devel", "libfreeaptx-devel", "liblc3-devel", "opus-devel", "avahi-devel", "libsndfile-devel", "libpulse-devel", "libusb-devel", "lilv-devel", "lv2", "libx11-devel", "libxfixes-devel", "libcanberra-devel", "gstreamer-devel", "gst-plugins-base-devel", "openssl-devel"]
 rundeps = ["dbus"]
 options = ["!check"]
 
@@ -47,9 +51,25 @@ setup = '''
     -Ddbus=enabled \
     -Dpipewire-alsa=enabled \
     -Dpipewire-v4l2=enabled \
-    -Dpw-cat=disabled \
+    -Dpw-cat=enabled \
     -Dreadline=enabled \
     -Dflatpak=enabled \
+    -Dbluez5=enabled \
+    -Dbluez5-codec-aac=enabled \
+    -Dbluez5-codec-aptx=enabled \
+    -Dbluez5-codec-lc3=enabled \
+    -Dbluez5-codec-opus=enabled \
+    -Davahi=enabled \
+    -Draop=enabled \
+    -Dsndfile=enabled \
+    -Dlibpulse=enabled \
+    -Dlibusb=enabled \
+    -Dlv2=enabled \
+    -Dx11=enabled \
+    -Dlibcanberra=enabled \
+    -Dgstreamer=enabled \
+    -Dpipewire-jack=enabled \
+    -Djack-devel=true \
     -Dpam-defaults-install=true \
     -Dlibv4l2-path=/usr/lib \
     -Dudevrulesdir=/usr/lib/udev/rules.d \

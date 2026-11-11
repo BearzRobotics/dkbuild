@@ -4,12 +4,12 @@
 # dependency names (they are Chimera's) before building.
 name = "libqmi"
 version = "1.38.0"
-release = 1
+release = 2
 summary = "QMI modem protocol helper library"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://www.freedesktop.org/wiki/Software/libqmi"
 hostdeps = ["bash-completion", "glib-devel", "gobject-introspection", "help2man", "libgudev-devel", "libmbim-devel", "libqrtr-glib-devel", "pkgconf"]
-builddeps = ["glib-devel", "libgudev-devel", "linux-headers"]
+builddeps = ["glib-devel", "libgudev-devel", "linux-headers", "libqrtr-glib-devel"]
 
 source = [
     { url = "https://gitlab.freedesktop.org/mobile-broadband/libqmi/-/archive/1.38.0/libqmi-1.38.0.tar.gz", sha256 = "8ee3b3a9002f2b45c825deade85710db006e01674f5f9359d351c192cc926015" },

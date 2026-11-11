@@ -1,5 +1,6 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/networkmanager/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# 2026-11-11: elogind (session tracking is set to it).
 name = "networkmanager"
 version = "1.58.1"
 release = 2
@@ -8,7 +9,7 @@ license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://gitlab.freedesktop.org/NetworkManager/NetworkManager"
 patches = ["clang_dumpmachine.patch", "libnm-wwan-soname.patch"]
 hostdeps = ["bash", "bpftool", "docbook-xsl-nons", "gettext", "glib-devel", "gobject-introspection", "jansson-devel", "libxslt", "perl", "pkgconf", "python-gobject", "vala"]
-builddeps = ["curl-devel", "dbus-devel", "dbus", "gobject-introspection-devel", "jansson-devel", "libbpf-devel", "libgudev-devel", "libndp-devel", "libnl-devel", "libnvme-devel", "libpsl-devel", "linux-headers", "mobile-broadband-provider-info", "modemmanager-devel", "newt-devel", "nss-devel", "polkit-devel", "ppp-devel", "python-gobject", "readline-devel", "eudev-devel", "util-linux-devel"]
+builddeps = ["curl-devel", "dbus-devel", "dbus", "gobject-introspection-devel", "jansson-devel", "libbpf-devel", "libgudev-devel", "libndp-devel", "libnl-devel", "libnvme-devel", "libpsl-devel", "linux-headers", "mobile-broadband-provider-info", "modemmanager-devel", "newt-devel", "nss-devel", "polkit-devel", "ppp-devel", "python-gobject", "readline-devel", "eudev-devel", "util-linux-devel", "elogind-devel"]
 checkdeps = ["python-dbus"]
 rundeps = ["dbus", "iproute2", "mobile-broadband-provider-info", "openresolv", "wpa-supplicant"]
 options = ["!check", "!cross"]

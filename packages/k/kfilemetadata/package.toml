@@ -9,7 +9,7 @@ summary = "KDE framework for file metadata"
 license = "LGPL-2.1-only AND LGPL-2.1-or-later"
 homepage = "https://community.kde.org/Frameworks"
 hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
-builddeps = ["attr-devel", "ebook-tools-devel", "exiv2-devel", "ffmpeg-devel", "karchive-devel", "kcodecs-devel", "kconfig-devel", "kcoreaddons-devel", "kdegraphics-mobipocket-devel", "ki18n-devel", "libepubgen-devel", "poppler-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel", "taglib-devel"]
+builddeps = ["attr-devel", "ebook-tools-devel", "exiv2-devel", "ffmpeg-devel", "karchive-devel", "kcodecs-devel", "kconfig-devel", "kcoreaddons-devel", "kdegraphics-mobipocket-devel", "ki18n-devel", "libepubgen-devel", "poppler-devel", "poppler-qt6-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel", "taglib-devel"]
 options = ["!cross"]
 
 source = [

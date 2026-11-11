@@ -7,15 +7,17 @@
 # dinit layout. NOT BUILT YET: needs dbus, eudev, libcap, libseccomp,
 # util-linux and meson in the tree (SPEC 9.3 waves 2-5). The systemd compat
 # patches are Chimera's and are untested here.
+# 2026-11-11: PAM on: pam_elogind registers the sessions SDDM opens (seats for Plasma
+# and Xfce); the system's login and su keep using /etc/shadow directly.
 name = "elogind"
 version = "255.17"
-release = 5
+release = 6
 summary = "Standalone version of logind"
 license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
 homepage = "https://github.com/elogind/elogind"
 patches = ["add-skip-inhibitors-flag.patch", "dbus-activation.patch", "getdents.patch", "gshadow.patch", "libxml215.patch", "linger-path.patch", "no-getent.patch", "no-runtime-dir.patch", "ppc64-bad-tuple.patch", "rlim-max.patch", "sleep.patch", "strerror_r.patch", "strerror_r_1.patch", "tests.patch", "turnstile-dbus-session.patch", "xxx-musl-fixes.patch"]
 hostdeps = ["bash", "gettext", "gperf", "meson", "pkgconf", "python-jinja2"]
-builddeps = ["libcap-devel", "libseccomp-devel", "eudev-devel", "util-linux-devel", "linux-headers"]
+builddeps = ["libcap-devel", "libseccomp-devel", "eudev-devel", "util-linux-devel", "linux-headers", "linux-pam-devel", "acl-devel"]
 rundeps = ["dbus"]
 
 source = [
@@ -36,7 +38,7 @@ setup = '''
     -Ddefault-kill-user-processes=false \
     -Dutmp=false \
     -Dpolkit=true \
-    -Dpam=false
+    -Dpam=true
 '''
 build = '''
 %meson_build

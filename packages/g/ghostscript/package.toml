@@ -5,6 +5,7 @@
 # OCR output devices (pdfocr8 ...) and cannot be the system's.
 # Printing: the cups raster device (and its gstoraster filter), IJS drivers
 # and libpaper paper sizes. Not built: X11 output (the desktop is Wayland).
+# 2026-11-11: the X11 display device.
 name = "ghostscript"
 version = "10.08.0"
 release = 1
@@ -13,7 +14,7 @@ license = "AGPL-3.0-or-later"
 homepage = "https://www.ghostscript.com"
 patches = ["allow-fopen.patch", "fix-sprintf.patch"]
 hostdeps = ["pkgconf"]
-builddeps = ["cups-devel", "dbus-devel", "ijs-devel", "libpaper-devel", "fontconfig-devel", "freetype-devel", "jbig2dec-devel", "lcms2-devel", "libidn2-devel", "libjpeg-turbo-devel", "libpng-devel", "libtiff-devel", "openjpeg-devel", "zlib-ng-compat-devel"]
+builddeps = ["cups-devel", "dbus-devel", "ijs-devel", "libpaper-devel", "fontconfig-devel", "freetype-devel", "jbig2dec-devel", "lcms2-devel", "libidn2-devel", "libjpeg-turbo-devel", "libpng-devel", "libtiff-devel", "openjpeg-devel", "zlib-ng-compat-devel", "libx11-devel", "libxext-devel", "libxt-devel"]
 options = ["!check"]
 
 source = [
@@ -28,7 +29,7 @@ CCAUX="$CC" CFLAGSAUX="$CFLAGS" LDFLAGS="$CFLAGS $LDFLAGS" \
     --enable-cups \
     --with-ijs \
     --with-libpaper \
-    --without-x \
+    --with-x \
     --enable-fontconfig \
     --enable-freetype \
     --enable-openjpeg \
