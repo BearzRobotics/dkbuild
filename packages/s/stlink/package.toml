@@ -14,8 +14,10 @@ source = [
 ]
 
 setup = '''
-# clang 23's -Wunused-but-set-global; its own -Werror comes after CMAKE_C_FLAGS
-export CFLAGS="$CFLAGS -Wno-unused-but-set-global"
+# clang 23's -Wunused-but-set-global, under its own -Werror: off after its
+# -Wall and -Werror (which it appends after the CFLAGS given to it)
+sed -i 's|    add_cflag_if_supported("-Werror")|    add_cflag_if_supported("-Werror")\n    add_cflag_if_supported("-Wno-unused-but-set-global")|' cmake/modules/c_flags.cmake
+grep -q 'add_cflag_if_supported("-Wno-unused-but-set-global")' cmake/modules/c_flags.cmake
 %cmake \
     -DSTLINK_UDEV_RULES_DIR=/usr/lib/udev/rules.d \
     -DSTLINK_MODPROBED_DIR=/usr/lib/modprobe.d
