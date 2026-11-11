@@ -1,10 +1,12 @@
 # Microsoft Edit: a simple modal-less terminal text editor.
+# From main at b7f8322 (2026-11-02), after 2.0.0: syntax highlighting for many
+# more languages. A git snapshot, pinned by commit.
 # Crates vendored on the host (`cargodeps`). Plain stable build: upstream's
 # smaller release profile (.cargo/release.toml) rebuilds std (build-std), which
 # needs the std sources and their crates offline. Installed as upstream's
 # installer does: /usr/bin/msedit, with `edit` linked to it.
 name = "msedit"
-version = "2.0.0"
+version = "2.0.0_git20261102"
 release = 1
 summary = "Microsoft Edit, a simple terminal text editor"
 license = "MIT"
@@ -13,7 +15,7 @@ hostdeps = ["rust"]
 options = ["!check", "cargodeps"]
 
 source = [
-    { url = "https://github.com/microsoft/edit/archive/refs/tags/v2.0.0.tar.gz", sha256 = "f35da309c5f3d92b10e5c4b2267e4d5e29d809b2aa460e80326b11f7feba72a5" },
+    { url = "snapshot:git https://github.com/microsoft/edit.git b7f83220868373945945e2218e852c24cbb4dcf0", sha256 = "dfad1fe875fc98a5ad600a26c52ffc8f20ab36652c7646792b8a4a8b8c97e69d" },
 ]
 
 environment = '''

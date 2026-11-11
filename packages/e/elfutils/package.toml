@@ -22,13 +22,14 @@ source = [
 # it): no debuginfod, no command-line tools.
 
 environment = '''
-export CFLAGS="$CFLAGS -D_GNU_SOURCE -Wno-unaligned-access"
+# -Wno-error: its Makefiles add -Werror (0.193 has no --disable-werror);
+# CFLAGS come after them, so clang 23's new warnings stay warnings
+export CFLAGS="$CFLAGS -D_GNU_SOURCE -Wno-unaligned-access -Wno-error"
 export LDFLAGS="$LDFLAGS -Wl,-z,stack-size=2097152"
 '''
 setup = '''
 %configure \
     --disable-nls \
-    --disable-werror \
     --disable-debuginfod \
     --enable-libdebuginfod=dummy \
     --enable-deterministic-archives \
