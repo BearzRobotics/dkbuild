@@ -21,8 +21,7 @@ source = [
 
 setup = '''
 %meson -Dtests=disabled \
-    -Ddocumentation=disabled \
-    -Dtests=enabled
+    -Ddocumentation=disabled
 '''
 build = '''
 %meson_build
