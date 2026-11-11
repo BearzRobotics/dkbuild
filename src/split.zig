@@ -96,12 +96,14 @@ pub fn covers(pattern: []const u8, path: []const u8) bool {
 /// Index of the first subpackage that claims `path`. A "*.so" pattern means the
 /// development symlink (libfoo.so -> libfoo.so.1), so it does not claim a regular
 /// file (gettext's libgettextlib-0.24.so, which programs load at run time) unless
-/// the subpackage is "libs", the one that holds libraries.
+/// the subpackage is "libs", the one that holds libraries. A path without a
+/// '*' names its file exactly and claims it either way (libedit's readline
+/// linker scripts, PostgreSQL's pltcl.so).
 fn owner(subs: []const recipe.Subpackage, path: []const u8, is_regular: bool) ?usize {
     for (subs, 0..) |sp, i| {
         for (sp.paths) |pat| {
             if (!covers(pat, path)) continue;
-            if (is_regular and std.mem.endsWith(u8, pat, ".so") and !std.mem.eql(u8, sp.name, "libs")) continue;
+            if (is_regular and std.mem.endsWith(u8, pat, ".so") and std.mem.indexOfScalar(u8, pat, '*') != null and !std.mem.eql(u8, sp.name, "libs")) continue;
             return i;
         }
     }
@@ -223,6 +225,16 @@ test "owner: .so patterns claim symlinks, and real .so files go to libs" {
     try std.testing.expectEqual(@as(?usize, 1), owner(&subs, "usr/lib/libz.so.1", false));
     try std.testing.expect(hasPrograms(&.{ "usr/bin/msgfmt", "usr/lib/x.so.1" }));
     try std.testing.expect(!hasPrograms(&.{ "usr/lib/x.so.1", "usr/include/x.h" }));
+}
+
+test "owner: an exact .so path claims a regular file" {
+    const subs = [_]recipe.Subpackage{
+        .{ .name = "readline", .summary = "", .paths = &.{"/usr/lib/libreadline.so"} },
+        .{ .name = "devel", .summary = "", .paths = &.{"/usr/lib/*.so"} },
+        .{ .name = "libs", .summary = "", .paths = &.{ "/usr/lib/*.so.*", "/usr/lib/*.so" } },
+    };
+    try std.testing.expectEqual(@as(?usize, 0), owner(&subs, "usr/lib/libreadline.so", true));
+    try std.testing.expectEqual(@as(?usize, 2), owner(&subs, "usr/lib/libgettextlib-0.24.so", true));
 }
 
 test "run removes only the directories moves emptied; empty ones a package made stay" {

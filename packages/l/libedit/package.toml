@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "libedit"
 version = "20250614"
-release = 1
+release = 2
 summary = "Port of the NetBSD command line editing library"
 license = "BSD-3-Clause"
 homepage = "https://github.com/chimera-linux/libedit-chimera"
@@ -40,3 +40,12 @@ ln -sf libedit.a "$pkgdir/usr/lib/libhistory.a"
 mkdir -p "$pkgdir/usr/lib/pkgconfig"
 ln -sf libedit.pc "$pkgdir/usr/lib/pkgconfig/readline.pc"
 '''
+
+# The readline compatibility layer (Chimera's libedit-readline-devel): its own
+# subpackage, installed only on request. In libedit-devel it overwrote GNU
+# readline's headers and libraries in any build root with both (bluez then
+# missed rl_clear_visible_line).
+[subpackages.readline]
+summary = "readline compatibility headers and libraries for libedit"
+depends = ["libedit-devel"]
+paths   = ["/usr/include/readline", "/usr/lib/libreadline.so", "/usr/lib/libhistory.so", "/usr/lib/libreadline.a", "/usr/lib/libhistory.a", "/usr/lib/pkgconfig/readline.pc"]
