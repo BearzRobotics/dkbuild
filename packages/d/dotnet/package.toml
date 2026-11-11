@@ -6,19 +6,27 @@
 # linux-musl-x64 SDK, which the build runs on (as Go, Rust and Java start from
 # a binary). The result is a portable linux-musl-x64 SDK in /usr/lib/dotnet.
 # Source-build only builds the 1xx SDK feature band.
+# Self-hosted (`selfhost`): a build runs on the SDK and the source-built
+# packages (dotnet-artifacts, Private.SourceBuilt.Artifacts) of the newest
+# dotnet in repo/, as Alpine and Fedora build each .NET with the previous one.
+# Only the first build (stage 0, no dotnet in repo/ yet) runs on Microsoft's
+# musl SDK and packages from the snapshot, which are linked against GCC's C++
+# runtime: its stage0deps bring that (dotnet-bootstrap-gcc-runtime, from
+# Alpine). What this recipe builds uses LLVM's libc++.
 # The first `dkbuild fetch dotnet` makes the snapshot and prints its sha256;
 # that replaces the zeros below.
 name = "dotnet"
 version = "10.0.114"
-release = 1
+release = 2
 summary = ".NET SDK, runtime and ASP.NET Core"
 license = "MIT"
 homepage = "https://dotnet.microsoft.com"
 archs = ["x86_64"]
-hostdeps = ["bash", "cmake", "curl", "findutils", "git", "llvm", "llvm-clang", "llvm-lld", "python", "zlib-ng-compat-devel", "dotnet-bootstrap-gcc-runtime"]
+hostdeps = ["bash", "cmake", "curl", "findutils", "git", "llvm", "llvm-clang", "llvm-lld", "python", "zlib-ng-compat-devel"]
+stage0deps = ["dotnet-bootstrap-gcc-runtime"]
 builddeps = ["brotli-devel", "heimdal-devel", "icu-devel", "linux-headers", "openssl-devel", "zlib-ng-compat-devel"]
 rundeps = ["icu", "openssl", "heimdal-libs"]
-options = ["!check", "!strip", "jobs:12"]
+options = ["!check", "!strip", "jobs:12", "selfhost"]
 
 source = [
     { url = "snapshot:dotnet v10.0.114 10.0.114", sha256 = "e02e84b3b28a8dbf79e67086ee5a6ddb5e27d8e9ad05fd78bd36cacdc52e217f" },
@@ -29,8 +37,8 @@ environment = '''
 unset CFLAGS CXXFLAGS LDFLAGS CPPFLAGS
 export DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1 DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 export HOME=/tmp SHELL=/bin/bash
-# the bootstrap SDK (Microsoft's musl build) needs GCC's C++ runtime
-export LD_LIBRARY_PATH=/usr/lib/dotnet-bootstrap-gcc
+# stage 0 only: Microsoft's musl SDK and packages need GCC's C++ runtime
+if [ -d /usr/lib/dotnet-bootstrap-gcc ]; then export LD_LIBRARY_PATH=/usr/lib/dotnet-bootstrap-gcc; fi
 # its archives are unpacked as root in the sandbox, where tar cannot chown
 export TAR_OPTIONS=--no-same-owner
 '''
@@ -38,7 +46,17 @@ build = '''
 ulimit -n 4096 || true
 # Source Link needs the repository and commit; the snapshot is a tag archive
 # with no .git and no release manifest (v10.0.114 is commit 0427b9ab...)
-./build.sh --source-only --with-sdk "$PWD/.dotnet-musl" \
+# the previous dotnet's SDK and source-built packages, or (stage 0, none in
+# repo/ yet) the snapshot's Microsoft ones
+if [ -x /usr/lib/dotnet/dotnet ]; then
+    a=$(ls /usr/lib/dotnet-artifacts/Private.SourceBuilt.Artifacts.*.tar.gz)
+    mkdir -p /tmp/previously-source-built
+    tar -xzf "$a" -C /tmp/previously-source-built --no-same-owner
+    seed="--with-sdk /usr/lib/dotnet --with-packages /tmp/previously-source-built"
+else
+    seed="--with-sdk $PWD/.dotnet-musl"
+fi
+./build.sh --source-only $seed \
     --source-repository https://github.com/dotnet/dotnet \
     --source-version 0427b9abbead3fa64c6655eb4290c537397131fa -- \
     /p:TargetRid=linux-musl-x64 /p:PortableBuild=true /p:OfficialBuilder=FenrirOS \
@@ -57,4 +75,10 @@ install -Dm644 /dev/stdin "$pkgdir/etc/profile.d/dotnet.sh" <<'EOF2'
 export DOTNET_ROOT=/usr/lib/dotnet DOTNET_CLI_TELEMETRY_OPTOUT=1
 EOF2
 install -Dm644 LICENSE.TXT "$pkgdir/usr/share/licenses/dotnet/LICENSE.TXT"
+# what the next dotnet build starts from (dotnet-artifacts)
+install -Dm644 -t "$pkgdir/usr/lib/dotnet-artifacts" artifacts/assets/Release/Private.SourceBuilt.Artifacts.*.tar.gz
 '''
+
+[subpackages.artifacts]
+summary = "Source-built .NET packages, for building the next .NET from source"
+paths   = ["/usr/lib/dotnet-artifacts"]

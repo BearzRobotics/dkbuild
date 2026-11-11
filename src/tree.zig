@@ -106,7 +106,9 @@ pub const Tree = struct {
         state[i] = .active;
         try stack.append(arena, i);
         const r = t.recipes[i];
-        for ([_][]const []const u8{ r.hostdeps, r.builddeps }) |deps| {
+        // stage0deps order too: a first build, with no earlier package of a
+        // selfhost recipe in repo/, uses them
+        for ([_][]const []const u8{ r.hostdeps, r.builddeps, r.stage0deps }) |deps| {
             for (deps) |d| {
                 const p = t.provider(d) orelse {
                     if (t.allow_external) continue;

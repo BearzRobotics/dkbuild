@@ -44,6 +44,10 @@ pub const Recipe = struct {
     builddeps: []const []const u8 = &.{},
     checkdeps: []const []const u8 = &.{},
     rundeps: []const []const u8 = &.{},
+    /// selfhost: what the build needs instead of its own earlier package when
+    /// repo/ has none yet (the first, "stage 0" build: dotnet from Microsoft's
+    /// SDK). Never used again once one build exists.
+    stage0deps: []const []const u8 = &.{},
     /// Names the main package provides besides what the scan finds
     /// (`so:libgcc_s.so.1` for a link the scanner cannot see through).
     provides: []const []const u8 = &.{},
@@ -74,10 +78,10 @@ const known_keys = [_][]const u8{
     "name",      "version",   "release",     "summary",     "description", "license",
     "homepage",  "source",    "patches",     "archs",       "hostdeps",    "builddeps",
     "checkdeps", "rundeps",   "options",     "environment", "restore",     "setup",       "build",
-    "check",     "install",   "subpackages", "provides",    "triggers",    "replaces",
+    "check",     "install",   "subpackages", "provides",    "triggers",    "replaces",    "stage0deps",
 };
 
-const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap", "zigdeps", "godeps", "cargodeps", "npmdeps", "gradledeps", "nugetdeps", "gemdeps", "meta", "rootlayout", "repo-iso" };
+const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap", "zigdeps", "godeps", "cargodeps", "npmdeps", "gradledeps", "nugetdeps", "gemdeps", "meta", "rootlayout", "repo-iso", "selfhost" };
 const known_archs = [_][]const u8{ "x86_64", "aarch64", "riscv64" };
 
 /// Parse and validate `text`. All returned memory lives in `arena`.
@@ -120,6 +124,7 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
     r.builddeps = try cfg.optStrings(arena, diag, root, "builddeps");
     r.checkdeps = try cfg.optStrings(arena, diag, root, "checkdeps");
     r.rundeps = try cfg.optStrings(arena, diag, root, "rundeps");
+    r.stage0deps = try cfg.optStrings(arena, diag, root, "stage0deps");
     r.provides = try cfg.optStrings(arena, diag, root, "provides");
     r.replaces = try cfg.optStrings(arena, diag, root, "replaces");
     r.triggers = try cfg.optStrings(arena, diag, root, "triggers");
@@ -146,6 +151,8 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
     }
 
     // A meta-package (`meta`) only depends on others: no source, no steps.
+    if (r.stage0deps.len > 0 and !contains(r.options, "selfhost"))
+        return cfg.fail(arena, diag, "'stage0deps' is only for a 'selfhost' recipe", .{});
     const meta = contains(r.options, "meta");
     if (meta) {
         if (root.get("source") != null or r.setup != null or r.build != null or r.install.len > 0)

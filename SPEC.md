@@ -190,6 +190,7 @@ guide to the rest of the syntax.
 | `builddeps` | no | Libraries and headers linked against: installed for the **target** architecture |
 | `checkdeps` | no | Extra packages needed only by `check` |
 | `rundeps` | no | Runtime dependencies that can't be detected (5.6) |
+| `stage0deps` | no | With `selfhost` only: what the build needs instead of its own earlier package while `repo/` has none (the first build) |
 | `provides` | no | Names the main package provides besides what the scan finds (5.6), e.g. `so:libgcc_s.so.1` for a link the scanner cannot see through |
 | `replaces` | no | Packages whose files the main package may take over (apk `replaces`), for a package that supersedes another |
 | `options` | no | List from 5.4 |
@@ -238,6 +239,7 @@ source = [
 | `!lto` | Turn off link-time optimization (when it's on by default) |
 | `static` | Link programs statically (rescue-critical tools): adds `-static` to `LDFLAGS`. Never on a recipe that ships a shared library: `-shared -static` links without a warning and gives a library that crashes its users (zstd 1.5.7-r1 crashed lld that way) |
 | `bootstrap` | Part of the bootstrap set (9); built in stage 0 |
+| `selfhost` | A compiler built with itself (dotnet): the build root also gets the newest package of this recipe in `repo/`, of any version, with that build's declared subpackages (all of them, or the build does not count). With none, the first build uses `stage0deps` (a seed such as a vendor binary and what it needs). Not part of the build-root hash, so a new build does not trigger another |
 | `jobs:N` | At most N parallel jobs for this recipe (LLVM: `jobs:10`). Also marks it heavy: with `-P`, it builds alone (10) |
 | `zigdeps` | Zig dependencies fetched on the host into the shared `cache/zigpkg/` and laid in the source tree as `zig-pkg/` (7.4) |
 | `godeps` | Go modules downloaded on the host (`go mod download`, needs `go`) into the shared module cache `cache/gomod/`; the build gets `GOMODCACHE`, `GOPROXY=off`, `GOFLAGS=-mod=mod` (7.4) |

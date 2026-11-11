@@ -343,6 +343,33 @@ fn inTreeFiles(arena: Allocator, io: std.Io, opts: Options, r: recipe.Recipe, re
     var seen: std.ArrayList([]const u8) = .empty;
     var files: std.ArrayList([]const u8) = .empty;
     for ([_][]const []const u8{ r.hostdeps, r.builddeps }) |deps| try work.appendSlice(arena, deps);
+    // selfhost (dotnet): the newest package of this recipe already in repo/,
+    // whatever its version, is the compiler the build runs, with what it
+    // needs; with none yet, this is the first build and stage0deps stand in.
+    if (contains(r.options, "selfhost")) {
+        // with its declared subpackages of that build (dotnet-artifacts: the
+        // packages the next build starts from); one without them all (made
+        // before the recipe declared one) does not count
+        var previous: ?[]const []const u8 = null;
+        if (try previousBuild(arena, io, r.name, repo_abs)) |f| {
+            var set: std.ArrayList([]const u8) = .empty;
+            try set.append(arena, f);
+            const ver = f[r.name.len + 1 .. f.len - ".apk".len];
+            for (r.subpackages) |sp| {
+                const sf = try std.fmt.allocPrint(arena, "{s}-{s}-{s}.apk", .{ r.name, sp.name, ver });
+                const path = try std.fs.path.join(arena, &.{ repo_abs.?, sf });
+                if (Dir.cwd().access(io, path, .{})) |_| try set.append(arena, sf) else |_| break;
+            } else previous = set.items;
+        }
+        if (previous) |set| {
+            try files.appendSlice(arena, set);
+            try work.appendSlice(arena, r.rundeps);
+            out("    selfhost: {s} from repo/\n", .{set[0]});
+        } else {
+            try work.appendSlice(arena, r.stage0deps);
+            out("    selfhost: no earlier {s} in repo/, a stage 0 build with its stage0deps\n", .{r.name});
+        }
+    }
     const direct = work.items.len;
     var k: usize = 0;
     while (k < work.items.len) : (k += 1) {
@@ -394,6 +421,47 @@ fn inTreeFiles(arena: Allocator, io: std.Io, opts: Options, r: recipe.Recipe, re
         }
     }
     return files.items;
+}
+
+/// The newest `<name>-<version>-r<release>.apk` in repo/ (by modification
+/// time: the last one built), for a selfhost recipe; not its subpackages
+/// (`<name>-devel-...`: a version starts with a digit).
+fn previousBuild(arena: Allocator, io: std.Io, name: []const u8, repo_abs: ?[]const u8) Allocator.Error!?[]const u8 {
+    const ra = repo_abs orelse return null;
+    var d = Dir.cwd().openDir(io, ra, .{ .iterate = true }) catch return null;
+    defer d.close(io);
+    var it = d.iterate();
+    var best: ?[]const u8 = null;
+    var best_time: i96 = 0;
+    while (it.next(io) catch null) |e| {
+        if (!isOwnPackage(name, e.name)) continue;
+        const st = d.statFile(io, e.name, .{}) catch continue;
+        const ns: i96 = st.mtime.nanoseconds;
+        if (best == null or ns > best_time) {
+            best = try arena.dupe(u8, e.name);
+            best_time = ns;
+        }
+    }
+    return best;
+}
+
+fn isOwnPackage(name: []const u8, file: []const u8) bool {
+    if (file.len <= name.len + 1 or !std.mem.startsWith(u8, file, name) or file[name.len] != '-') return false;
+    if (!std.ascii.isDigit(file[name.len + 1]) or !std.mem.endsWith(u8, file, ".apk")) return false;
+    const stem = file[0 .. file.len - ".apk".len];
+    const dash = std.mem.lastIndexOfScalar(u8, stem, '-') orelse return false;
+    if (dash <= name.len or stem.len < dash + 3 or stem[dash + 1] != 'r') return false;
+    for (stem[dash + 2 ..]) |c| if (!std.ascii.isDigit(c)) return false;
+    return true;
+}
+
+test "isOwnPackage: the recipe's main package of any version, not its subpackages" {
+    try std.testing.expect(isOwnPackage("dotnet", "dotnet-10.0.114-r1.apk"));
+    try std.testing.expect(isOwnPackage("dotnet", "dotnet-10.0.200-r12.apk"));
+    try std.testing.expect(!isOwnPackage("dotnet", "dotnet-devel-10.0.114-r1.apk"));
+    try std.testing.expect(!isOwnPackage("dotnet", "dotnet-bootstrap-gcc-runtime-15.2.0-r2.apk"));
+    try std.testing.expect(!isOwnPackage("dotnet", "dotnet-10.0.114-r1.apk.tmp"));
+    try std.testing.expect(!isOwnPackage("dotnet", "dotnet.dkhash"));
 }
 
 const SbDirs = struct { upper: []const u8, work: []const u8, merged: []const u8 };
