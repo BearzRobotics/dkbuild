@@ -20,6 +20,10 @@ environment = '''
 export SETUPTOOLS_SCM_PRETEND_VERSION=$version
 '''
 install = '''
+# 1.11 caps Python below 3.14 (each release caps the next, untested one); the
+# system's is 3.14, so the cap is lifted
+sed -i 's/^PYTHON_REQUIRES = ">=3.7, <3.14"$/PYTHON_REQUIRES = ">=3.7"/' setup.py
+grep -q '^PYTHON_REQUIRES = ">=3.7"$' setup.py
 python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
     --root "$pkgdir" --prefix /usr .
 install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/octoprint/LICENSE.txt"
