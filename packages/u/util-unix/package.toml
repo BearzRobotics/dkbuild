@@ -1,27 +1,42 @@
-# Unix utilities in Zig, one binary per command plus a multicall binary. They are
-# an alternative to GNU coreutils and friends, not a replacement yet (differential
-# tests against GNU are in the project), so only the multicall `util-unix` goes to
-# /usr/bin; the per-command binaries go to /usr/libexec/util-unix and do not
-# shadow the GNU ones.
+# util-unix: Unix/POSIX utilities in Zig (chmod, chown, chgrp, getent, id,
+# groups, tty, uname, stty, who, pinky, chcon, runcon, hostname), by
+# BearzRobotics, as an alternative to the GNU (and util-linux) ones, which
+# stay the default:
+#   util-unix          the multicall binary /usr/bin/util-unix and a link per
+#                      command in /usr/lib/util-unix/bin
+#   util-unix-default  puts /usr/lib/util-unix/bin first on every login's PATH
+#                      (/usr/lib/profile.d); remove it to go back.
+# Package builds never read profile.d.
 name = "util-unix"
-version = "0.2.0"
+version = "0.3.0"
 release = 1
-summary = "Unix utilities in Zig (multicall binary and per-command programs)"
-license = "GPL-2.0-only"
+summary = "Unix/POSIX utilities in Zig (alternative to the GNU ones)"
+license = "GPL-2.0-or-later"
 homepage = "https://github.com/BearzRobotics/util-unix"
 hostdeps = ["zig"]
-options = ["!check"]
+options = ["zigdeps", "!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/util-unix/releases/download/v0.2.0/util-unix-0.2.0.tar.gz", sha256 = "2d7fee861ec7734b774189ca143ee0d3c30a3f512e9e68c6833f1fdac31f7230" },
+    { url = "https://github.com/BearzRobotics/util-unix/archive/refs/tags/v0.3.0.tar.gz", sha256 = "b00684a584c5d4c093dceff1a92c742afcbc563d51942f6afec07423cbfd33dc" },
 ]
 
+build = '''
+# %zig_build's command, into a staging directory: only the multicall binary
+# is packaged (the one-per-command executables would sit on GNU's names)
+zig build --release=safe --prefix /tmp/stage -Dcpu=$zig_cpu --system zig-pkg -j$jobs
+'''
 install = '''
-%zig_build
-mkdir -p "$pkgdir/usr/libexec/util-unix"
-for f in "$pkgdir"/usr/bin/*; do
-    [ "$(basename "$f")" = util-unix ] && continue
-    mv "$f" "$pkgdir/usr/libexec/util-unix/"
+install -Dm755 /tmp/stage/bin/util-unix "$pkgdir/usr/bin/util-unix"
+install -dm755 "$pkgdir/usr/lib/util-unix/bin"
+for c in $(/tmp/stage/bin/util-unix --list); do
+    ln -s ../../../bin/util-unix "$pkgdir/usr/lib/util-unix/bin/$c"
 done
+test -e "$pkgdir/usr/lib/util-unix/bin/chmod"
+install -Dm644 $pkgfiles/util-unix.sh "$pkgdir/usr/lib/profile.d/util-unix.sh"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/util-unix/LICENSE"
 '''
+
+[subpackages.default]
+summary = "Use util-unix's commands in place of the GNU ones (PATH)"
+depends = ["util-unix"]
+paths   = ["/usr/lib/profile.d/util-unix.sh"]

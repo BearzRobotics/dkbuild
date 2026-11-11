@@ -1,0 +1,42 @@
+# util-core: core utilities (ls, cat, cp, sort, date, find, sed, ...) in Zig,
+# by BearzRobotics, as an alternative to GNU coreutils: GNU stays the default.
+# Like Ubuntu's rust-coreutils switch, but without taking /usr/bin away:
+#   util-core          the multicall binary /usr/bin/util-core (`util-core ls`)
+#                      and a link per command in /usr/lib/util-core/bin
+#   util-core-default  puts /usr/lib/util-core/bin first on every login's PATH
+#                      (/usr/lib/profile.d); remove it to go back to GNU.
+# Package builds never read profile.d, so recipes always use GNU.
+# Upstream builds the multicall binary as `main`; installed as util-core.
+# The repository has no licence yet (no LICENSE file or SPDX headers).
+name = "util-core"
+version = "0.0.0_git20261108"
+release = 1
+summary = "Core utilities in Zig (alternative to GNU coreutils)"
+license = "NOASSERTION"
+homepage = "https://github.com/BearzRobotics/util-core"
+hostdeps = ["zig"]
+options = ["zigdeps", "!check"]
+
+source = [
+    { url = "https://github.com/BearzRobotics/util-core/archive/ef49d23c98eb008714291dc5ee4ed18c6c19a6ed.tar.gz", sha256 = "7695387d6af0c87e852e1ff7377c421252e9cec1aa252e87f4d3a71c1037f5b4" },
+]
+
+build = '''
+# %zig_build's command, into a staging directory: only the multicall binary
+# is packaged (the one-per-command executables would sit on GNU's names)
+zig build --release=safe --prefix /tmp/stage -Dcpu=$zig_cpu --system zig-pkg -j$jobs
+'''
+install = '''
+install -Dm755 /tmp/stage/bin/main "$pkgdir/usr/bin/util-core"
+install -dm755 "$pkgdir/usr/lib/util-core/bin"
+for c in $(/tmp/stage/bin/main --list); do
+    ln -s ../../../bin/util-core "$pkgdir/usr/lib/util-core/bin/$c"
+done
+test -e "$pkgdir/usr/lib/util-core/bin/ls"
+install -Dm644 $pkgfiles/util-core.sh "$pkgdir/usr/lib/profile.d/util-core.sh"
+'''
+
+[subpackages.default]
+summary = "Use util-core's commands in place of GNU coreutils (PATH)"
+depends = ["util-core"]
+paths   = ["/usr/lib/profile.d/util-core.sh"]
