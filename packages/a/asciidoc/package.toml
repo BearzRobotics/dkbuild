@@ -4,12 +4,12 @@
 # dependency names (they are Chimera's) before building.
 name = "asciidoc"
 version = "10.2.1"
-release = 4
+release = 5
 summary = "Text-based document generation"
 license = "GPL-2.0-or-later"
 homepage = "https://asciidoc.org"
 hostdeps = ["docbook-xsl-nons", "libxslt", "python-setuptools", "python"]
-rundeps = ["python", "docbook-xsl-nons", "libxslt", "libxml2"]
+rundeps = ["python", "docbook-xsl-nons", "docbook-xml", "libxslt", "libxml2"]
 options = ["!check"]
 
 source = [

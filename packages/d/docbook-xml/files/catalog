@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE catalog PUBLIC "-//OASIS//DTD Entity Resolution XML Catalog V1.0//EN" "http://www.oasis-open.org/committees/entity/release/1.0/catalog.dtd">
+<!-- The system XML catalog (libxml2 reads it by default): the DocBook DTDs,
+     schemas and stylesheets installed on this system, so xsltproc, xmllint
+     and a2x never fetch them from the network. Catalogs of packages that
+     are not installed are skipped. -->
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+  <rewriteSystem systemIdStartString="http://www.oasis-open.org/docbook/xml/4.1.2" rewritePrefix="/usr/share/xml/docbook/4.2"/>
+  <rewriteSystem systemIdStartString="http://www.oasis-open.org/docbook/xml/4.2" rewritePrefix="/usr/share/xml/docbook/4.2"/>
+  <rewriteSystem systemIdStartString="http://www.oasis-open.org/docbook/xml/4.3" rewritePrefix="/usr/share/xml/docbook/4.3"/>
+  <rewriteSystem systemIdStartString="http://www.oasis-open.org/docbook/xml/4.4" rewritePrefix="/usr/share/xml/docbook/4.4"/>
+  <rewriteSystem systemIdStartString="http://www.oasis-open.org/docbook/xml/4.5" rewritePrefix="/usr/share/xml/docbook/4.5"/>
+  <nextCatalog catalog="/usr/share/xml/docbook/4.2/catalog"/>
+  <nextCatalog catalog="/usr/share/xml/docbook/4.2/catalog-4.1.2"/>
+  <nextCatalog catalog="/usr/share/xml/docbook/4.3/catalog"/>
+  <nextCatalog catalog="/usr/share/xml/docbook/4.4/catalog"/>
+  <nextCatalog catalog="/usr/share/xml/docbook/4.5/catalog"/>
+  <nextCatalog catalog="/usr/share/xml/docbook/5.0/catalog.xml"/>
+  <nextCatalog catalog="/usr/share/xsl-nons/docbook/catalog.xml"/>
+  <nextCatalog catalog="/usr/share/xsl/docbook/catalog.xml"/>
+</catalog>
