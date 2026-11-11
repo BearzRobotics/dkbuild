@@ -20,6 +20,18 @@ source = [
 ]
 
 setup = '''
+# libc++ 23 no longer brings in standard headers through others: every file
+# gets the C headers whose functions it uses (getenv in simddetect.cpp, ...)
+add() {
+    for f in $(grep -rlE "$2" src include --include='*.cpp' --include='*.h' | xargs -r grep -LE "#include <($1)>"); do
+        h=${1%%|*}
+        sed -i "0,/^#include/s//#include <$h>\n#include/" "$f"
+    done
+}
+add 'cstdlib|stdlib.h' '\b(getenv|strtol|strtod|strtoul|atoi|atof|malloc|free|abs|exit|abort)\b'
+add 'cstring|string.h' '\b(memcpy|memset|memcmp|memmove|strlen|strcmp|strncmp|strcpy|strchr|strstr)\b'
+add 'cstdio|stdio.h' '\b(printf|fprintf|snprintf|sprintf|fopen|fclose|FILE)\b'
+grep -q '^#include <cstdlib>' src/arch/simddetect.cpp
 ./autogen.sh
 %configure --disable-doc
 '''
