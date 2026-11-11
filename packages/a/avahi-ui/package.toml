@@ -1,0 +1,70 @@
+# Avahi's GTK and Python parts: libavahi-ui-gtk3 (service browsing dialogs for
+# GTK programs), the bssh/bvnc/bshell browsers, avahi-discover and
+# avahi-bookmarks, the avahi Python modules, and the GObject introspection
+# data of libavahi-gobject. A separate recipe because building them in avahi
+# itself would make a cycle (cups builds against avahi, gtk+3 against cups),
+# as poppler-qt6 is split from poppler. The same avahi source, configured with
+# them on; only these parts are installed (the rest is avahi's).
+name = "avahi-ui"
+version = "0.8"
+release = 1
+summary = "Avahi GTK dialogs, service browsers and Python bindings"
+license = "LGPL-2.1-or-later"
+homepage = "https://avahi.org"
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf", "gettext", "python", "python-gobject", "python-dbus", "gobject-introspection", "glib-devel"]
+builddeps = ["avahi-devel", "dbus-devel", "libexpat-devel", "glib-devel", "libcap-devel", "libdaemon-devel", "libevent-devel", "gtk+3-devel", "gobject-introspection", "python-devel"]
+rundeps = ["avahi", "python", "python-gobject", "python-dbus", "gtk+3"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/lathiat/avahi/releases/download/v0.8/avahi-0.8.tar.gz", sha256 = "060309d7a333d38d951bc27598c677af1796934dbd98e1024e7ad8de798fedda" },
+]
+
+setup = '''
+autoreconf -if
+%configure \
+    --disable-qt3 --disable-qt4 --disable-qt5 \
+    --disable-gtk --enable-gtk3 \
+    --disable-dbm --disable-gdbm \
+    --disable-mono --disable-monodoc \
+    --disable-doxygen-doc \
+    --enable-python --enable-pygobject \
+    --enable-introspection \
+    --disable-xmltoman --disable-manpages \
+    --enable-glib --enable-gobject \
+    --enable-libevent \
+    --enable-compat-libdns_sd \
+    --with-xml=expat \
+    --with-avahi-user=avahi --with-avahi-group=avahi \
+    --with-autoipd-user=avahi --with-autoipd-group=avahi \
+    --with-avahi-priv-access-group=wheel \
+    --with-dbus-sys=/usr/share/dbus-1/system.d \
+    --with-distro=none \
+    --with-dbus-system-socket=unix:path=/run/dbus/system_bus_socket \
+    --without-systemdsystemunitdir \
+    ssp_cv_lib=no
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install DESTDIR=/tmp/avahi-all
+a=/tmp/avahi-all
+# only what avahi itself does not ship
+keep() {
+    for p in "$@"; do
+        for f in $a/$p; do
+            [ -e "$f" ] || [ -L "$f" ] || continue
+            r=${f#$a}
+            mkdir -p "$pkgdir$(dirname "$r")"
+            cp -a "$f" "$pkgdir$r"
+        done
+    done
+}
+keep 'usr/lib/libavahi-ui*' 'usr/include/avahi-ui' 'usr/lib/pkgconfig/avahi-ui*' \
+    'usr/bin/bssh' 'usr/bin/bvnc' 'usr/bin/bshell' 'usr/bin/avahi-discover' 'usr/bin/avahi-discover-standalone' 'usr/bin/avahi-bookmarks' \
+    'usr/lib/python3*' 'usr/share/applications/*' 'usr/share/avahi/interfaces' \
+    'usr/lib/girepository-1.0' 'usr/share/gir-1.0'
+test -e "$pkgdir/usr/lib/libavahi-ui-gtk3.so"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/avahi-ui/LICENSE"
+'''
