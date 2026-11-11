@@ -1,0 +1,25 @@
+# llhttp: Node.js's HTTP parser, the release branch's generated C. Electron's
+# Node uses the system one (use_system_llhttp).
+name = "llhttp"
+version = "9.4.3"
+release = 1
+summary = "HTTP parser in C (Node.js's)"
+license = "MIT"
+homepage = "https://github.com/nodejs/llhttp"
+hostdeps = ["cmake", "ninja"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/nodejs/llhttp/archive/release/v9.4.3.tar.gz", sha256 = "1eb813c7437b31a87496a1cd3ed79f00746720f5e7e29c79b42c02cb69f36c39" },
+]
+
+setup = '''
+%cmake -DLLHTTP_BUILD_SHARED_LIBS=ON -DLLHTTP_BUILD_STATIC_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/llhttp/LICENSE"
+'''
