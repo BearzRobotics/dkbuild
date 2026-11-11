@@ -30,7 +30,8 @@ s = open(p, newline="").read()
 s = s.replace('"poetry>=0.12"', '"poetry-core"').replace('"poetry.masonry.api"', '"poetry.core.masonry.api"')
 open(p, "w", newline="").write(s)
 if '"poetry.core.masonry.api"' not in s:
-    raise SystemExit("pyproject.toml: build backend not changed")
+    import os
+    raise SystemExit("pyproject.toml: build backend not changed (in " + os.getcwd() + "):\n" + repr(s[:400]))
 PY
 python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
     --root "$pkgdir" --prefix /usr .
