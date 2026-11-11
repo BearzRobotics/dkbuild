@@ -1,0 +1,766 @@
+diff -ruN a/build.zig b/build.zig
+--- a/build.zig
++++ b/build.zig
+@@ -6,10 +6,12 @@
+ 
+     const exe = b.addExecutable(.{
+         .name = "poop",
+-        .root_source_file = b.path("src/main.zig"),
+-        .target = target,
+-        .optimize = optimize,
+-        .strip = b.option(bool, "strip", "strip the binary"),
++        .root_module = b.createModule(.{
++            .root_source_file = b.path("src/main.zig"),
++            .target = target,
++            .optimize = optimize,
++            .strip = b.option(bool, "strip", "strip the binary"),
++        }),
+     });
+ 
+     b.installArtifact(exe);
+@@ -38,10 +40,12 @@
+         const t = resolved_target.result;
+         const rel_exe = b.addExecutable(.{
+             .name = "poop",
+-            .root_source_file = b.path("src/main.zig"),
+-            .target = resolved_target,
+-            .optimize = .ReleaseSafe,
+-            .strip = true,
++            .root_module = b.createModule(.{
++                .root_source_file = b.path("src/main.zig"),
++                .target = resolved_target,
++                .optimize = .ReleaseSafe,
++                .strip = true,
++            }),
+         });
+ 
+         const install = b.addInstallArtifact(rel_exe, .{});
+diff -ruN a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -1,25 +0,0 @@
+-name: ci
+-on:
+-  pull_request:
+-  push:
+-    branches:
+-      - main
+-jobs:
+-  build:
+-    strategy:
+-      fail-fast: false
+-      matrix:
+-        target: [ x86-linux, x86_64-linux, aarch64-linux, riscv64-linux ]
+-    runs-on: ubuntu-latest
+-    steps:
+-    - uses: actions/checkout@v2
+-    - uses: mlugg/setup-zig@v1
+-
+-    - name: Build
+-      run: zig build -Doptimize=ReleaseSafe -Dtarget=${{ matrix.target }}
+-
+-    - name: Archive executable
+-      uses: actions/upload-artifact@v3
+-      with:
+-        name: poop
+-        path: zig-out/bin/*
+diff -ruN a/.gitignore b/.gitignore
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,2 +0,0 @@
+-.zig-cache/
+-/zig-out/
+diff -ruN a/src/main.zig b/src/main.zig
+--- a/src/main.zig
++++ b/src/main.zig
+@@ -1,7 +1,7 @@
+ const std = @import("std");
+ const PERF = std.os.linux.PERF;
+-const fd_t = std.posix.fd_t;
+-const pid_t = std.os.pid_t;
++const linux = std.os.linux;
++const fd_t = linux.fd_t;
+ const assert = std.debug.assert;
+ const progress = @import("./progress.zig");
+ const MAX_SAMPLES = 10000;
+@@ -76,18 +76,98 @@
+     ansi,
+ };
+ 
+-pub fn main() !void {
+-    var arena_instance = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+-    defer arena_instance.deinit();
+-    const arena = arena_instance.allocator();
+-
+-    const args = try std.process.argsAlloc(arena);
+-
+-    const stdout = std.io.getStdOut();
+-    var stdout_bw = std.io.bufferedWriter(stdout.writer());
+-    const stdout_w = stdout_bw.writer();
++/// Output for stdout, collected and written with `flush` (Zig 0.17 port: plain
++/// buffers and Linux system calls in place of the std.io writers of 0.14).
++const Out = struct {
++    buf: std.ArrayList(u8) = .empty,
++    gpa: std.mem.Allocator,
+ 
+-    var commands = std.ArrayList(Command).init(arena);
++    fn print(o: *Out, comptime fmt: []const u8, args: anytype) !void {
++        try o.buf.print(o.gpa, fmt, args);
++    }
++    fn writeAll(o: *Out, bytes: []const u8) !void {
++        try o.buf.appendSlice(o.gpa, bytes);
++    }
++    fn writeByteNTimes(o: *Out, byte: u8, n: usize) !void {
++        try o.buf.appendNTimes(o.gpa, byte, n);
++    }
++    fn flush(o: *Out) !void {
++        writeFd(1, o.buf.items);
++        o.buf.clearRetainingCapacity();
++    }
++};
++
++pub fn writeFd(fd: fd_t, bytes: []const u8) void {
++    var rest = bytes;
++    while (rest.len > 0) {
++        const rc = linux.write(fd, rest.ptr, rest.len);
++        switch (linux.errno(rc)) {
++            .SUCCESS => rest = rest[rc..],
++            .INTR => continue,
++            else => return,
++        }
++    }
++}
++
++/// Colors: escape codes, or nothing.
++const TtyConfig = enum {
++    no_color,
++    escape_codes,
++
++    const Color = enum { reset, bold, dim, red, green, yellow, magenta, cyan, white, bright_red, bright_green, bright_yellow };
++
++    fn setColor(conf: TtyConfig, w: *Out, color: Color) !void {
++        if (conf == .no_color) return;
++        try w.writeAll(switch (color) {
++            .reset => "\x1b[0m",
++            .bold => "\x1b[1m",
++            .dim => "\x1b[2m",
++            .red => "\x1b[31m",
++            .green => "\x1b[32m",
++            .yellow => "\x1b[33m",
++            .magenta => "\x1b[35m",
++            .cyan => "\x1b[36m",
++            .white => "\x1b[37m",
++            .bright_red => "\x1b[1;31m",
++            .bright_green => "\x1b[1;32m",
++            .bright_yellow => "\x1b[1;33m",
++        });
++    }
++};
++
++fn isTty(fd: fd_t) bool {
++    var termios: linux.termios = undefined;
++    return linux.errno(linux.tcgetattr(fd, &termios)) == .SUCCESS;
++}
++
++pub fn nowNs() u64 {
++    var ts: linux.timespec = undefined;
++    _ = linux.clock_gettime(.MONOTONIC, &ts);
++    return @as(u64, @intCast(ts.sec)) * std.time.ns_per_s + @as(u64, @intCast(ts.nsec));
++}
++
++/// The program `name` is: itself if it has a '/', else the first match on PATH.
++fn findProgram(arena: std.mem.Allocator, name: []const u8, path_env: ?[]const u8) ![:0]const u8 {
++    if (std.mem.indexOfScalar(u8, name, '/') != null) return arena.dupeSentinel(u8, name, 0);
++    var it = std.mem.tokenizeScalar(u8, path_env orelse "/usr/local/bin:/usr/bin:/bin", ':');
++    while (it.next()) |dir| {
++        const full = try std.fmt.allocPrintSentinel(arena, "{s}/{s}", .{ dir, name }, 0);
++        if (linux.errno(linux.access(full, linux.X_OK)) == .SUCCESS) return full;
++    }
++    std.debug.print("error: {s}: command not found\n", .{name});
++    std.process.exit(1);
++}
++
++pub fn main(init: std.process.Init) !void {
++    const arena = init.arena.allocator();
++
++    const args = try init.minimal.args.toSlice(arena);
++    const envp: [*:null]const ?[*:0]const u8 = init.minimal.environ.block.slice.ptr;
++    const path_env = init.environ_map.get("PATH");
++
++    var stdout_w: Out = .{ .gpa = arena };
++
++    var commands: std.ArrayList(Command) = .empty;
+     var max_nano_seconds: u64 = std.time.ns_per_s * 5;
+     var color: ColorMode = .auto;
+ 
+@@ -95,17 +175,17 @@
+     while (arg_i < args.len) : (arg_i += 1) {
+         const arg = args[arg_i];
+         if (!std.mem.startsWith(u8, arg, "-")) {
+-            var cmd_argv = std.ArrayList([]const u8).init(arena);
+-            try parseCmd(&cmd_argv, arg);
+-            try commands.append(.{
++            var cmd_argv: std.ArrayList([]const u8) = .empty;
++            try parseCmd(arena, &cmd_argv, arg);
++            try commands.append(arena, .{
+                 .raw_cmd = arg,
+-                .argv = try cmd_argv.toOwnedSlice(),
++                .argv = try cmd_argv.toOwnedSlice(arena),
+                 .measurements = undefined,
+                 .sample_count = undefined,
+             });
+         } else if (std.mem.eql(u8, arg, "-h") or std.mem.eql(u8, arg, "--help")) {
+-            try stdout.writeAll(usage_text);
+-            return std.process.cleanExit();
++            writeFd(1, usage_text);
++            std.process.exit(0);
+         } else if (std.mem.eql(u8, arg, "-d") or std.mem.eql(u8, arg, "--duration")) {
+             arg_i += 1;
+             if (arg_i >= args.len) {
+@@ -145,28 +225,31 @@
+     }
+ 
+     if (commands.items.len == 0) {
+-        try stdout.writeAll(usage_text);
++        writeFd(1, usage_text);
+         std.process.exit(1);
+     }
+ 
+-    var bar = try progress.ProgressBar.init(arena, stdout);
++    var bar = try progress.ProgressBar.init(arena, 1);
+ 
+-    const tty_conf: std.io.tty.Config = switch (color) {
+-        .auto => std.io.tty.detectConfig(stdout),
++    const tty_conf: TtyConfig = switch (color) {
++        .auto => if (isTty(1)) .escape_codes else .no_color,
+         .never => .no_color,
+         .ansi => .escape_codes,
+     };
+ 
+-    var perf_fds = [1]fd_t{-1} ** perf_measurements.len;
++    var perf_fds: [perf_measurements.len]fd_t = @splat(-1);
+     var samples_buf: [MAX_SAMPLES]Sample = undefined;
+ 
+     var stderr_buffer: [4096]u8 = undefined;
+-    var stderr_fba = std.heap.FixedBufferAllocator.init(&stderr_buffer);
+ 
+-    var timer = std.time.Timer.start() catch @panic("need timer to work");
++    const devnull = linux.open("/dev/null", .{ .ACCMODE = .RDWR, .CLOEXEC = true }, 0);
++    if (linux.errno(devnull) != .SUCCESS) @panic("cannot open /dev/null");
+ 
+     for (commands.items, 1..) |*command, command_n| {
+-        stderr_fba.reset();
++        // argv for execve, once per command
++        const exe_path = try findProgram(arena, command.argv[0], path_env);
++        const argv_z = try arena.allocSentinel(?[*:0]const u8, command.argv.len, null);
++        for (command.argv, argv_z) |a, *z| z.* = try arena.dupeSentinel(u8, a, 0);
+ 
+         const max_prog_name_len = 50;
+         const prog_name = blk: {
+@@ -179,10 +262,10 @@
+ 
+         const min_samples = 3;
+ 
+-        const first_start = timer.read();
++        const first_start = nowNs();
+         var sample_index: usize = 0;
+         while ((sample_index < min_samples or
+-            (timer.read() - first_start) < max_nano_seconds) and
++            (nowNs() - first_start) < max_nano_seconds) and
+             sample_index < samples_buf.len) : (sample_index += 1)
+         {
+             if (tty_conf != .no_color) try bar.render();
+@@ -198,52 +281,68 @@
+                         .enable_on_exec = true,
+                     },
+                 };
+-                perf_fd.* = std.posix.perf_event_open(&attr, 0, -1, perf_fds[0], PERF.FLAG.FD_CLOEXEC) catch |err| {
+-                    std.debug.panic("unable to open perf event: {s}\n", .{@errorName(err)});
+-                };
++                const rc = linux.perf_event_open(&attr, 0, -1, perf_fds[0], PERF.FLAG.FD_CLOEXEC);
++                if (linux.errno(rc) != .SUCCESS) {
++                    std.debug.print("error: unable to open perf event: {s}\n", .{@tagName(linux.errno(rc))});
++                    if (linux.errno(rc) == .ACCES or linux.errno(rc) == .PERM)
++                        std.debug.print("poop counts this user's own CPU events: kernel.perf_event_paranoid must be 2 or less\n(sysctl kernel.perf_event_paranoid; FenrirOS's kernel has 2)\n", .{});
++                    std.process.exit(1);
++                }
++                perf_fd.* = @intCast(rc);
+             }
+ 
+             _ = std.os.linux.ioctl(perf_fds[0], PERF.EVENT_IOC.DISABLE, PERF.IOC_FLAG_GROUP);
+             _ = std.os.linux.ioctl(perf_fds[0], PERF.EVENT_IOC.RESET, PERF.IOC_FLAG_GROUP);
+ 
+-            var child = std.process.Child.init(command.argv, arena);
+-
+-            child.stdin_behavior = .Ignore;
+-            child.stdout_behavior = .Ignore;
+-            child.stderr_behavior = .Pipe;
+-            child.request_resource_usage_statistics = true;
+-
+-            const start = timer.read();
+-            try child.spawn();
+-
+-            var poller = std.io.poll(stderr_fba.allocator(), enum { stderr }, .{ .stderr = child.stderr.? });
+-            defer poller.deinit();
++            // The child: stdin and stdout /dev/null, stderr a pipe; its
++            // resource usage (peak RSS) comes from wait4.
++            var pipe_fds: [2]fd_t = undefined;
++            if (linux.errno(linux.pipe2(&pipe_fds, .{ .CLOEXEC = true })) != .SUCCESS) @panic("pipe2 failed");
++
++            const start = nowNs();
++            const fork_rc = linux.fork();
++            if (linux.errno(fork_rc) != .SUCCESS) @panic("fork failed");
++            if (fork_rc == 0) {
++                _ = linux.dup2(@intCast(devnull), 0);
++                _ = linux.dup2(@intCast(devnull), 1);
++                _ = linux.dup2(pipe_fds[1], 2);
++                _ = linux.execve(exe_path, argv_z.ptr, envp);
++                linux.exit_group(127);
++            }
++            const pid: linux.pid_t = @intCast(fork_rc);
++            _ = linux.close(pipe_fds[1]);
+ 
+-            const child_stderr = poller.fifo(.stderr);
++            // Keep the first 4 KiB of stderr; read the rest so the child never blocks.
++            var stderr_len: usize = 0;
+             var stderr_truncated = false;
+-
+             while (true) {
+-                const keep_polling = poller.poll() catch {
+-                    stderr_truncated = true;
+-                    break;
+-                };
+-                if (!keep_polling) break;
+-            }
+-
+-            if (stderr_truncated) {
+-                // continue reading to consume all stderr to prevent deadlocking
+                 var overflow_buffer: [4096]u8 = undefined;
+-
+-                while (true) {
+-                    const amt = child.stderr.?.read(&overflow_buffer) catch break;
+-                    if (amt == 0) break;
++                const dest: []u8 = if (stderr_len < stderr_buffer.len) stderr_buffer[stderr_len..] else &overflow_buffer;
++                const n = linux.read(pipe_fds[0], dest.ptr, dest.len);
++                switch (linux.errno(n)) {
++                    .SUCCESS => {},
++                    .INTR => continue,
++                    else => break,
+                 }
++                if (n == 0) break;
++                if (stderr_len < stderr_buffer.len) stderr_len += n else stderr_truncated = true;
+             }
++            _ = linux.close(pipe_fds[0]);
++            const child_stderr = stderr_buffer[0..stderr_len];
+ 
+-            const term = try child.wait();
+-            const end = timer.read();
++            var status: i32 = 0;
++            var usage: linux.rusage = undefined;
++            while (true) {
++                const w = linux.wait4(pid, &status, 0, &usage);
++                if (linux.errno(w) == .INTR) continue;
++                break;
++            }
++            const end = nowNs();
+             _ = std.os.linux.ioctl(perf_fds[0], PERF.EVENT_IOC.DISABLE, PERF.IOC_FLAG_GROUP);
+-            const peak_rss = child.resource_usage_statistics.getMaxRss() orelse 0;
++            // ru_maxrss is in KiB
++            const peak_rss: u64 = @as(u64, @intCast(@max(usage.maxrss, 0))) * 1024;
++            const ustatus: u32 = @bitCast(status);
++            const term: union(enum) { Exited: u8, Other } = if (linux.W.IFEXITED(ustatus)) .{ .Exited = linux.W.EXITSTATUS(ustatus) } else .Other;
+ 
+             switch (term) {
+                 .Exited => |code| {
+@@ -262,7 +361,7 @@
+                                 \\──────────────────────────────────────────────
+                                 \\
+                             ,
+-                                .{child_stderr.buf[child_stderr.head..][0..child_stderr.count]},
++                                .{child_stderr},
+                             );
+                         } else {
+                             std.debug.print(
+@@ -271,7 +370,7 @@
+                                 \\──────────────────────────────────────────────
+                                 \\
+                             ,
+-                                .{child_stderr.buf[child_stderr.head..][0..child_stderr.count]},
++                                .{child_stderr},
+                             );
+                         }
+                         std.process.exit(1);
+@@ -293,14 +392,14 @@
+                 .branch_misses = readPerfFd(perf_fds[4]),
+             };
+             for (&perf_fds) |*perf_fd| {
+-                std.posix.close(perf_fd.*);
++                _ = linux.close(perf_fd.*);
+                 perf_fd.* = -1;
+             }
+ 
+             if (tty_conf != .no_color) {
+                 bar.estimate = est_total: {
+                     const cur_samples: u64 = sample_index + 1;
+-                    const ns_per_sample = (timer.read() - first_start) / cur_samples;
++                    const ns_per_sample = (nowNs() - first_start) / cur_samples;
+                     const estimate = std.math.divCeil(u64, max_nano_seconds, ns_per_sample) catch unreachable;
+                     break :est_total @intCast(@min(MAX_SAMPLES, @max(cur_samples, estimate, min_samples)));
+                 };
+@@ -329,79 +428,80 @@
+         command.sample_count = all_samples.len;
+ 
+         {
+-            try tty_conf.setColor(stdout_w, .bold);
+-            try stdout_w.print("Benchmark {d}", .{command_n});
+-            try tty_conf.setColor(stdout_w, .dim);
+-            try stdout_w.print(" ({d} runs)", .{command.sample_count});
+-            try tty_conf.setColor(stdout_w, .reset);
+-            try stdout_w.writeAll(":");
+-            for (command.argv) |arg| try stdout_w.print(" {s}", .{arg});
+-            try stdout_w.writeAll("\n");
+-
+-            try tty_conf.setColor(stdout_w, .bold);
+-            try stdout_w.writeAll("  measurement");
+-            try stdout_w.writeByteNTimes(' ', 23 - "  measurement".len);
+-            try tty_conf.setColor(stdout_w, .bright_green);
+-            try stdout_w.writeAll("mean");
+-            try tty_conf.setColor(stdout_w, .reset);
+-            try tty_conf.setColor(stdout_w, .bold);
+-            try stdout_w.writeAll(" ± ");
+-            try tty_conf.setColor(stdout_w, .green);
+-            try stdout_w.writeAll("σ");
+-            try tty_conf.setColor(stdout_w, .reset);
+-
+-            try tty_conf.setColor(stdout_w, .bold);
+-            try stdout_w.writeByteNTimes(' ', 12);
+-            try tty_conf.setColor(stdout_w, .cyan);
+-            try stdout_w.writeAll("min");
+-            try tty_conf.setColor(stdout_w, .reset);
+-            try tty_conf.setColor(stdout_w, .bold);
+-            try stdout_w.writeAll(" … ");
+-            try tty_conf.setColor(stdout_w, .magenta);
+-            try stdout_w.writeAll("max");
+-            try tty_conf.setColor(stdout_w, .reset);
+-
+-            try tty_conf.setColor(stdout_w, .bold);
+-            try stdout_w.writeByteNTimes(' ', 20 - " outliers".len);
+-            try tty_conf.setColor(stdout_w, .bright_yellow);
+-            try stdout_w.writeAll("outliers");
+-            try tty_conf.setColor(stdout_w, .reset);
++            const w = &stdout_w;
++            try tty_conf.setColor(w, .bold);
++            try w.print("Benchmark {d}", .{command_n});
++            try tty_conf.setColor(w, .dim);
++            try w.print(" ({d} runs)", .{command.sample_count});
++            try tty_conf.setColor(w, .reset);
++            try w.writeAll(":");
++            for (command.argv) |arg| try w.print(" {s}", .{arg});
++            try w.writeAll("\n");
++
++            try tty_conf.setColor(w, .bold);
++            try w.writeAll("  measurement");
++            try w.writeByteNTimes(' ', 23 - "  measurement".len);
++            try tty_conf.setColor(w, .bright_green);
++            try w.writeAll("mean");
++            try tty_conf.setColor(w, .reset);
++            try tty_conf.setColor(w, .bold);
++            try w.writeAll(" ± ");
++            try tty_conf.setColor(w, .green);
++            try w.writeAll("σ");
++            try tty_conf.setColor(w, .reset);
++
++            try tty_conf.setColor(w, .bold);
++            try w.writeByteNTimes(' ', 12);
++            try tty_conf.setColor(w, .cyan);
++            try w.writeAll("min");
++            try tty_conf.setColor(w, .reset);
++            try tty_conf.setColor(w, .bold);
++            try w.writeAll(" … ");
++            try tty_conf.setColor(w, .magenta);
++            try w.writeAll("max");
++            try tty_conf.setColor(w, .reset);
++
++            try tty_conf.setColor(w, .bold);
++            try w.writeByteNTimes(' ', 20 - " outliers".len);
++            try tty_conf.setColor(w, .bright_yellow);
++            try w.writeAll("outliers");
++            try tty_conf.setColor(w, .reset);
+ 
+             if (commands.items.len >= 2) {
+-                try tty_conf.setColor(stdout_w, .bold);
+-                try stdout_w.writeByteNTimes(' ', 9);
+-                try stdout_w.writeAll("delta");
+-                try tty_conf.setColor(stdout_w, .reset);
++                try tty_conf.setColor(w, .bold);
++                try w.writeByteNTimes(' ', 9);
++                try w.writeAll("delta");
++                try tty_conf.setColor(w, .reset);
+             }
+ 
+-            try stdout_w.writeAll("\n");
++            try w.writeAll("\n");
+ 
+-            inline for (@typeInfo(Command.Measurements).Struct.fields) |field| {
+-                const measurement = @field(command.measurements, field.name);
++            inline for (@typeInfo(Command.Measurements).@"struct".field_names) |field_name| {
++                const measurement = @field(command.measurements, field_name);
+                 const first_measurement = if (command_n == 1)
+                     null
+                 else
+-                    @field(commands.items[0].measurements, field.name);
+-                try printMeasurement(tty_conf, stdout_w, measurement, field.name, first_measurement, commands.items.len);
++                    @field(commands.items[0].measurements, field_name);
++                try printMeasurement(tty_conf, w, measurement, field_name, first_measurement, commands.items.len);
+             }
+ 
+-            try stdout_bw.flush(); // 💩
++            try stdout_w.flush(); // 💩
+         }
+     }
+ 
+-    try stdout_bw.flush(); // 💩
++    try stdout_w.flush(); // 💩
+ }
+ 
+-fn parseCmd(list: *std.ArrayList([]const u8), cmd: []const u8) !void {
++fn parseCmd(gpa: std.mem.Allocator, list: *std.ArrayList([]const u8), cmd: []const u8) !void {
+     var it = std.mem.tokenizeScalar(u8, cmd, ' ');
+-    while (it.next()) |s| try list.append(s);
++    while (it.next()) |s| try list.append(gpa, s);
+ }
+ 
+ fn readPerfFd(fd: fd_t) usize {
+     var result: usize = 0;
+-    const n = std.posix.read(fd, std.mem.asBytes(&result)) catch |err| {
+-        std.debug.panic("unable to read perf fd: {s}\n", .{@errorName(err)});
+-    };
++    const n = linux.read(fd, std.mem.asBytes(&result), @sizeOf(usize));
++    if (linux.errno(n) != .SUCCESS)
++        std.debug.panic("unable to read perf fd: {s}\n", .{@tagName(linux.errno(n))});
+     assert(n == @sizeOf(usize));
+     return result;
+ }
+@@ -475,8 +575,8 @@
+ };
+ 
+ fn printMeasurement(
+-    tty_conf: std.io.tty.Config,
+-    w: anytype,
++    tty_conf: TtyConfig,
++    w: *Out,
+     m: Measurement,
+     name: []const u8,
+     first_m: ?Measurement,
+@@ -485,41 +585,49 @@
+     try w.print("  {s}", .{name});
+ 
+     var buf: [200]u8 = undefined;
+-    var fbs = std.io.fixedBufferStream(&buf);
++    var fbs_alloc = std.heap.FixedBufferAllocator.init(&buf);
++    var fbs: Fbs = .{ .out = .{ .gpa = fbs_alloc.allocator() } };
+     var count: usize = 0;
+ 
+     const color_enabled = tty_conf != .no_color;
++    // The column arithmetic below counts the escape codes printUnit writes
++    // when colored; plain output counts them too, so both line up.
++    const unit_escapes_len = (progress.EscapeCodes.dim ++ progress.EscapeCodes.white ++ progress.EscapeCodes.reset).len;
+     const spaces = 32 - ("  (mean  ):".len + name.len + 2);
+     try w.writeByteNTimes(' ', spaces);
+     try tty_conf.setColor(w, .bright_green);
+-    try printUnit(fbs.writer(), m.mean, m.unit, m.std_dev, color_enabled);
+-    try w.writeAll(fbs.getWritten());
+-    count += fbs.pos;
+-    fbs.pos = 0;
++    try printUnit(&fbs.out, m.mean, m.unit, m.std_dev, color_enabled);
++    try w.writeAll(fbs.out.buf.items);
++    count += fbs.out.buf.items.len;
++    if (!color_enabled) count += unit_escapes_len;
++    fbs.out.buf.clearRetainingCapacity();
+     try tty_conf.setColor(w, .reset);
+     try w.writeAll(" ± ");
+     try tty_conf.setColor(w, .green);
+-    try printUnit(fbs.writer(), m.std_dev, m.unit, 0, color_enabled);
+-    try w.writeAll(fbs.getWritten());
+-    count += fbs.pos;
+-    fbs.pos = 0;
++    try printUnit(&fbs.out, m.std_dev, m.unit, 0, color_enabled);
++    try w.writeAll(fbs.out.buf.items);
++    count += fbs.out.buf.items.len;
++    if (!color_enabled) count += unit_escapes_len;
++    fbs.out.buf.clearRetainingCapacity();
+     try tty_conf.setColor(w, .reset);
+ 
+     try w.writeByteNTimes(' ', 64 - ("  measurement      ".len + count + 3));
+     count = 0;
+ 
+     try tty_conf.setColor(w, .cyan);
+-    try printUnit(fbs.writer(), @floatFromInt(m.min), m.unit, m.std_dev, color_enabled);
+-    try w.writeAll(fbs.getWritten());
+-    count += fbs.pos;
+-    fbs.pos = 0;
++    try printUnit(&fbs.out, @floatFromInt(m.min), m.unit, m.std_dev, color_enabled);
++    try w.writeAll(fbs.out.buf.items);
++    count += fbs.out.buf.items.len;
++    if (!color_enabled) count += unit_escapes_len;
++    fbs.out.buf.clearRetainingCapacity();
+     try tty_conf.setColor(w, .reset);
+     try w.writeAll(" … ");
+     try tty_conf.setColor(w, .magenta);
+-    try printUnit(fbs.writer(), @floatFromInt(m.max), m.unit, m.std_dev, color_enabled);
+-    try w.writeAll(fbs.getWritten());
+-    count += fbs.pos;
+-    fbs.pos = 0;
++    try printUnit(&fbs.out, @floatFromInt(m.max), m.unit, m.std_dev, color_enabled);
++    try w.writeAll(fbs.out.buf.items);
++    count += fbs.out.buf.items.len;
++    if (!color_enabled) count += unit_escapes_len;
++    fbs.out.buf.clearRetainingCapacity();
+     try tty_conf.setColor(w, .reset);
+ 
+     try w.writeByteNTimes(' ', 46 - (count + 1));
+@@ -530,10 +638,10 @@
+         try tty_conf.setColor(w, .yellow)
+     else
+         try tty_conf.setColor(w, .dim);
+-    try fbs.writer().print("{d: >4.0} ({d: >2.0}%)", .{ m.outlier_count, outlier_percent });
+-    try w.writeAll(fbs.getWritten());
+-    count += fbs.pos;
+-    fbs.pos = 0;
++    try fbs.out.print("{d: >4.0} ({d: >2.0}%)", .{ m.outlier_count, outlier_percent });
++    try w.writeAll(fbs.out.buf.items);
++    count += fbs.out.buf.items.len;
++    fbs.out.buf.clearRetainingCapacity();
+     try tty_conf.setColor(w, .reset);
+ 
+     try w.writeByteNTimes(' ', 19 - (count + 1));
+@@ -583,10 +691,10 @@
+                 }
+                 try w.writeAll("-");
+             }
+-            try fbs.writer().print("{d: >5.1}% ± {d: >4.1}%", .{ @abs(diff_mean_percent), half });
+-            try w.writeAll(fbs.getWritten());
+-            count += fbs.pos;
+-            fbs.pos = 0;
++            try fbs.out.print("{d: >5.1}% ± {d: >4.1}%", .{ @abs(diff_mean_percent), half });
++            try w.writeAll(fbs.out.buf.items);
++            count += fbs.out.buf.items.len;
++            fbs.out.buf.clearRetainingCapacity();
+         } else {
+             try tty_conf.setColor(w, .dim);
+             try w.writeAll("0%");
+@@ -597,7 +705,10 @@
+     try w.writeAll("\n");
+ }
+ 
+-fn printNum3SigFigs(w: anytype, num: f64) !void {
++/// A short-lived buffer for one cell of the table.
++const Fbs = struct { out: Out };
++
++fn printNum3SigFigs(w: *Out, num: f64) !void {
+     if (num >= 1000 or @round(num) == num) {
+         try w.print("{d: >4.0}", .{num});
+         // TODO Do we need special handling here since it overruns 3 sig figs?
+@@ -610,7 +721,7 @@
+     }
+ }
+ 
+-fn printUnit(w: anytype, x: f64, unit: Measurement.Unit, std_dev: f64, color_enabled: bool) !void {
++fn printUnit(w: *Out, x: f64, unit: Measurement.Unit, std_dev: f64, color_enabled: bool) !void {
+     _ = std_dev; // TODO something useful with this
+     const num = x;
+     var val: f64 = 0;
+diff -ruN a/src/progress.zig b/src/progress.zig
+--- a/src/progress.zig
++++ b/src/progress.zig
+@@ -34,12 +34,15 @@
+     ws_ypixel: c_ushort,
+ };
+ 
+-pub fn getScreenWidth(stdout: std.posix.fd_t) usize {
+-    var winsize: Winsize = undefined;
++pub fn getScreenWidth(stdout: std.os.linux.fd_t) usize {
++    var winsize: Winsize = .{ .ws_row = 0, .ws_col = 80, .ws_xpixel = 0, .ws_ypixel = 0 };
+     _ = std.os.linux.ioctl(stdout, TIOCGWINSZ, @intFromPtr(&winsize));
+-    return @intCast(winsize.ws_col);
++    // a bar needs some room; 80 columns when the width is unknown
++    return if (winsize.ws_col < 40) 80 else @intCast(winsize.ws_col);
+ }
+ 
++const main = @import("main.zig");
++
+ pub const EscapeCodes = struct {
+     pub const dim = "\x1b[2m";
+     pub const pink = "\x1b[38;5;205m";
+@@ -59,40 +62,40 @@
+     spinner: Spinner,
+     current: u64,
+     estimate: u64,
+-    stdout: std.fs.File,
++    stdout: std.os.linux.fd_t,
+     buf: std.ArrayList(u8),
+-    last_rendered: std.time.Instant,
++    gpa: std.mem.Allocator,
++    last_rendered: u64,
+ 
+-    pub fn init(allocator: std.mem.Allocator, stdout: std.fs.File) !Self {
+-        const width = getScreenWidth(stdout.handle);
++    pub fn init(allocator: std.mem.Allocator, stdout: std.os.linux.fd_t) !Self {
++        const width = getScreenWidth(stdout);
+         const buf = try std.ArrayList(u8).initCapacity(allocator, width + WIDTH_PADDING);
+         return Self{
+             .spinner = Spinner.init(),
+-            .last_rendered = try std.time.Instant.now(),
++            .last_rendered = main.nowNs(),
+             .current = 0,
+             .estimate = 1,
+             .stdout = stdout,
+             .buf = buf,
++            .gpa = allocator,
+         };
+     }
+ 
+     pub fn deinit(self: *Self) void {
+-        self.buf.deinit();
++        self.buf.deinit(self.gpa);
+     }
+ 
+     /// Clears then renders bar if enough time has passed since last render.
+     pub fn render(self: *Self) !void {
+-        const now = try std.time.Instant.now();
+-        if (now.since(self.last_rendered) < 50 * std.time.ns_per_ms) {
++        const now = main.nowNs();
++        if (now - self.last_rendered < 50 * std.time.ns_per_ms) {
+             return;
+         }
+         try self.clear();
+         self.last_rendered = now;
+-        const width = getScreenWidth(self.stdout.handle);
+-        if (width + WIDTH_PADDING > self.buf.capacity) {
+-            try self.buf.resize(width + WIDTH_PADDING);
+-        }
+-        var writer = self.buf.writer();
++        const width = getScreenWidth(self.stdout);
++        try self.buf.ensureTotalCapacity(self.gpa, width + WIDTH_PADDING);
++        const writer = self;
+         const bar_width = width - Spinner.frame1.len - " 10000 runs ".len - " 100% ".len;
+         const prog_len = (bar_width * 2) * self.current / self.estimate;
+         const full_bars_len: usize = @intCast(prog_len / 2);
+@@ -118,11 +121,15 @@
+         try writer.print(" {d: >3.0}% ", .{
+             @as(f64, @floatFromInt(self.current)) * 100 / @as(f64, @floatFromInt(self.estimate)),
+         });
+-        try self.stdout.writeAll(self.buf.items[0..self.buf.items.len]);
++        main.writeFd(self.stdout, self.buf.items[0..self.buf.items.len]);
++    }
++
++    fn print(self: *Self, comptime fmt: []const u8, args: anytype) !void {
++        try self.buf.print(self.gpa, fmt, args);
+     }
+ 
+     pub fn clear(self: *Self) !void {
+-        try self.stdout.writeAll(EscapeCodes.erase_line); // clear and reset line
++        main.writeFd(self.stdout, EscapeCodes.erase_line); // clear and reset line
+         self.buf.clearRetainingCapacity();
+     }
+ };

@@ -1,0 +1,32 @@
+# poop (Performance Optimizer Observation Platform), Andrew Kelley's
+# benchmarking tool: runs commands repeatedly and compares wall time, peak
+# memory and CPU counters (cycles, instructions, cache and branch misses) with
+# a significance test. `poop 'cmd1' 'cmd2'`.
+#
+# 0.5.0 is written for Zig 0.14; zig-0.17.patch ports it to the system's Zig:
+# the build API (root_module), and in place of std.io/process.Child (rewritten
+# since) the child runs through fork/execve with wait4, which also gives its
+# peak RSS. Plain output (--color never) lines up like colored output (the
+# column arithmetic counted the escape codes). A refused perf counter says
+# why: kernel.perf_event_paranoid must be 2 or less (FenrirOS's kernel has 2).
+name = "poop"
+version = "0.5.0"
+release = 1
+summary = "Compare the performance of commands (time, memory, CPU counters)"
+license = "MIT"
+homepage = "https://github.com/andrewrk/poop"
+patches = ["zig-0.17.patch"]
+hostdeps = ["zig"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/andrewrk/poop/archive/refs/tags/0.5.0.tar.gz", sha256 = "b67d62c3583994fb262ccaf05094b215d3514d4d2935a25a3867dcab0cf89c93" },
+]
+
+build = '''
+%zig_build
+'''
+install = '''
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/poop/LICENSE"
+install -Dm644 README.md "$pkgdir/usr/share/doc/poop/README.md"
+'''
