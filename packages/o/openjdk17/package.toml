@@ -27,6 +27,8 @@ export LD_LIBRARY_PATH=/usr/lib/jvm/java-17-openjdk/lib:/usr/lib/jvm/java-17-ope
 setup = '''
 # Built by the seed JDK (openjdk17-bootstrap, a prebuilt musl JDK), which is
 # installed where this one goes; the seed is only ever a build dependency.
+# no javac server (a background compile daemon reached over a socket, which
+# the build sandbox does not allow): javac runs per batch instead.
 # OpenJDK's configure wants CC to be a bare program name: the --target (and
 # any --sysroot) the profile puts in CC go into the extra flags instead
 tflags=${CC#clang }
@@ -38,6 +40,7 @@ CC=clang CXX=clang++ bash ./configure \
     --with-extra-cxxflags="$tflags $CXXFLAGS" \
     --with-extra-ldflags="$tflags $LDFLAGS" \
     --disable-warnings-as-errors \
+    --disable-javac-server \
     --disable-precompiled-headers \
     --enable-dtrace=no \
     --with-jvm-variants=server \
