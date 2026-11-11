@@ -3,9 +3,13 @@
 # release (it carries Cargo.lock); crates vendored on the host (`cargodeps`).
 # The kernel needs bindgen 0.65.1 or newer.
 # r2: linked against the shared musl, so it can load libclang (dlopen).
+# r3: files/template-union.patch, bindgen's fix (PR 3536, after 0.73.2) for
+#     its panic "Not an item" on recursive template unions, which libc++ 23's
+#     aligned_union is (Mesa's Rusticl bindings to LLVM). Applied to the
+#     vendored bindgen crate.
 name = "bindgen"
 version = "0.73.2"
-release = 2
+release = 3
 summary = "Generates Rust bindings to C and C++ libraries"
 license = "BSD-3-Clause"
 homepage = "https://rust-lang.github.io/rust-bindgen"
@@ -24,6 +28,14 @@ export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
 export RUSTFLAGS="-C target-feature=-crt-static"
 '''
 build = '''
+# The vendored bindgen crate is a link into the read-only crate store: patch
+# a copy; cargo then checks only its package checksum (the one in Cargo.lock)
+src=$(readlink -f vendor/bindgen)
+rm vendor/bindgen
+cp -r "$src" vendor/bindgen
+chmod -R u+w vendor/bindgen
+patch -d vendor/bindgen -p1 < $pkgfiles/template-union.patch
+sed -i 's/"files":{[^}]*}/"files":{}/' vendor/bindgen/.cargo-checksum.json
 cargo build --release --frozen --offline -j $jobs
 '''
 install = '''
