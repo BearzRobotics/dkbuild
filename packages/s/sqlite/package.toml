@@ -2,9 +2,12 @@
 # Chimera's recipe was not used.
 # r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 # r3: static libraries too (in sqlite-static), for fully static programs on musl.
+# r4: the features distributions build it with (Chimera's set): full-text
+#   search, column metadata (Qt's SQL driver needs it), DBSTAT, STAT4, unlock
+#   notify, secure delete, larger limits.
 name = "sqlite"
 version = "3.54.1"
-release = 3
+release = 4
 summary = "SQL database engine"
 license = "blessing"
 homepage = "https://sqlite.org"
@@ -15,8 +18,20 @@ source = [
     { url = "https://www.sqlite.org/2026/sqlite-autoconf-3540100.tar.gz", sha256 = "926ef8d3eab93fbf6e06011901273eec076b25594a4e1cdadd50c987f4f6d64e" },
 ]
 
+environment = '''
+export CFLAGS="$CFLAGS -DHAVE_FDATASYNC -DSQLITE_ENABLE_BATCH_ATOMIC_WRITE=1 \
+    -DSQLITE_ENABLE_COLUMN_METADATA -DSQLITE_ENABLE_DBSTAT_VTAB -DSQLITE_ENABLE_DESERIALIZE \
+    -DSQLITE_ENABLE_FTS3_PARENTHESIS -DSQLITE_ENABLE_FTS3_TOKENIZER=1 -DSQLITE_ENABLE_STAT4=1 \
+    -DSQLITE_ENABLE_UNLOCK_NOTIFY -DSQLITE_MAX_EXPR_DEPTH=5000 -DSQLITE_MAX_VARIABLE_NUMBER=250000 \
+    -DSQLITE_SECURE_DELETE"
+'''
 setup = '''
-%configure --soname=legacy
+%configure \
+    --enable-fts3 \
+    --enable-fts4 \
+    --enable-fts5 \
+    --enable-threadsafe \
+    --soname=legacy
 '''
 build = '''
 %make
