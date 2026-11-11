@@ -32,7 +32,11 @@ export HOME=/tmp SHELL=/bin/bash
 '''
 build = '''
 ulimit -n 4096 || true
-./build.sh --source-only --with-sdk "$PWD/.dotnet-musl" --release-manifest /dev/null -- \
+# Source Link needs the repository and commit; the snapshot is a tag archive
+# with no .git and no release manifest (v10.0.114 is commit 0427b9ab...)
+./build.sh --source-only --with-sdk "$PWD/.dotnet-musl" \
+    --source-repository https://github.com/dotnet/dotnet \
+    --source-version 0427b9abbead3fa64c6655eb4290c537397131fa -- \
     /p:TargetRid=linux-musl-x64 /p:PortableBuild=true /p:OfficialBuilder=FenrirOS \
     /p:ContinueOnPrebuiltBaselineError=true /p:LogVerbosity=minimal /p:MinimalConsoleLogOutput=true \
     /p:UseSystemLibs=brotli+zlib
