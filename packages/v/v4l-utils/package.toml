@@ -9,7 +9,7 @@ summary = "Userspace tools and libraries for V4L"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://linuxtv.org/wiki/index.php/V4l-utils"
 patches = ["dont-install-to-sbin.patch", "gsed.patch", "int-overflow.patch"]
-hostdeps = ["bash", "gettext-devel", "sed", "perl", "pkgconf"]
+hostdeps = ["llvm-clang", "llvm", "bash", "gettext-devel", "sed", "perl", "pkgconf"]
 builddeps = ["argp-standalone", "glu-devel", "json-c-devel", "libbpf-devel", "libjpeg-turbo-devel", "libx11-devel", "mesa-devel", "eudev-devel"]
 
 source = [
@@ -17,8 +17,9 @@ source = [
 ]
 
 environment = '''
-# _LIBCPP_FALLTHROUGH: libc++ 23 dropped this internal macro, which it uses
-export CXXFLAGS="${CXXFLAGS} -D_LARGEFILE64_SOURCE -D_LIBCPP_FALLTHROUGH=[[fallthrough]]"
+# libc++ 23: it uses the dropped internal _LIBCPP_FALLTHROUGH(), and std::exit
+# without <cstdlib>
+export CXXFLAGS="${CXXFLAGS} -D_LARGEFILE64_SOURCE -D_LIBCPP_FALLTHROUGH()=[[fallthrough]] -include cstdlib"
 export LDFLAGS="${LDFLAGS} -largp"
 '''
 setup = '''
