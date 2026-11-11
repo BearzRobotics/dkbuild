@@ -18,8 +18,10 @@ unzip -q /build/sources/lib3mf-2.5.0-source-with-submodules.zip -d l3
 # NMR_Time.cpp calls time() without <ctime> (libc++ 23 no longer brings it in)
 sed -i '0,/^#include/s//#include <ctime>\n#include/' l3/Source/Common/Platform/NMR_Time.cpp
 grep -q '^#include <ctime>' l3/Source/Common/Platform/NMR_Time.cpp
-# the zip has no top directory
-cmake -S l3 -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DLIB3MF_TESTS=OFF -DUSE_INCLUDED_ZLIB=OFF -DUSE_INCLUDED_LIBZIP=OFF
+# the zip has no top directory. CMAKE_INSTALL_LIBDIR typed PATH: lib3mf declares
+# it a PATH cache variable, which makes an untyped relative value absolute
+# against the build's working directory (/build/lib)
+cmake -S l3 -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR:PATH=lib -DCMAKE_BUILD_TYPE=Release -DLIB3MF_TESTS=OFF -DUSE_INCLUDED_ZLIB=OFF -DUSE_INCLUDED_LIBZIP=OFF
 '''
 build = '''
 cmake --build build
