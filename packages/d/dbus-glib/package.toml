@@ -15,7 +15,6 @@ source = [
 
 setup = '''
 %configure \
-    --disable-static=no \
     --disable-tests
 '''
 build = '''
