@@ -7,7 +7,7 @@ summary = "Anonymizing overlay network"
 license = "BSD-3-Clause"
 homepage = "https://gitlab.com/torproject/tor"
 patches = ["no-practracker-test.patch"]
-hostdeps = ["asciidoc", "automake", "pkgconf"]
+hostdeps = ["asciidoc", "automake", "pkgconf", "docbook-xsl", "libxslt"]
 builddeps = ["libevent-devel", "linux-headers", "openssl-devel", "xz-devel", "zlib-ng-compat-devel", "zstd-devel"]
 checkdeps = ["bash"]
 
@@ -15,6 +15,11 @@ source = [
     { url = "https://gitlab.com/torproject/tor/-/archive/tor-0.4.9.14/tor-tor-0.4.9.14.tar.gz", sha256 = "1eca189920bc14316e2f2c5e662916e4fc90eae898705d1374af870bde7d8d5d" },
 ]
 
+environment = '''
+# the man pages' date: from git unless SOURCE_DATE_EPOCH is set (a GitLab
+# archive has no .git); the ChangeLog's time in the archive
+export SOURCE_DATE_EPOCH=$(stat -c %Y "$srcdir/ChangeLog")
+'''
 setup = '''
 autoreconf -if -W none
 %configure
