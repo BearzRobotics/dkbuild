@@ -17,6 +17,11 @@ source = [
 ]
 
 setup = '''
+# configure takes the first existing directory of this list for the CUPS
+# filters and backends; $libdir is unexpanded there, so /lib (in the build
+# root) won: /usr/lib first
+sed -i 's|^LIBSEARCHPATH=\$libdir:/lib:|LIBSEARCHPATH=/usr/lib:|' configure.ac
+grep -q '^LIBSEARCHPATH=/usr/lib:' configure.ac
 ./make_configure
 PERL_INSTALLDIRS=vendor %configure --sbindir=/usr/sbin
 '''

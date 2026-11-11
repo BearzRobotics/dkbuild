@@ -14,11 +14,13 @@ source = [
 ]
 
 setup = '''
+# the document root, error pages, icons and manual in /var/www (packages may
+# not install into /srv)
 %configure \
     --sysconfdir=/etc/httpd \
     --localstatedir=/var \
     --libexecdir=/usr/lib/httpd/modules \
-    --datadir=/srv/http \
+    --datadir=/var/www \
     --enable-layout=RedHat \
     --enable-mods-shared=reallyall \
     --enable-mpms-shared=all \
