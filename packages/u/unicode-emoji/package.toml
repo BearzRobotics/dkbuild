@@ -17,7 +17,7 @@ source = [
 ]
 
 install = '''
-install -Dm644 emoji-sequences-17.0.txt "$pkgdir/usr/share/unicode/emoji/emoji-sequences.txt"
-install -Dm644 emoji-test-17.0.txt "$pkgdir/usr/share/unicode/emoji/emoji-test.txt"
-install -Dm644 emoji-zwj-sequences-17.0.txt "$pkgdir/usr/share/unicode/emoji/emoji-zwj-sequences.txt"
+install -Dm644 /build/sources/emoji-sequences.txt "$pkgdir/usr/share/unicode/emoji/emoji-sequences.txt"
+install -Dm644 /build/sources/emoji-test.txt "$pkgdir/usr/share/unicode/emoji/emoji-test.txt"
+install -Dm644 /build/sources/emoji-zwj-sequences.txt "$pkgdir/usr/share/unicode/emoji/emoji-zwj-sequences.txt"
 '''
