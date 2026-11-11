@@ -5,6 +5,9 @@ release = 1
 summary = "Portable network interface information."
 license = "MIT License"
 homepage = "https://github.com/al45tair/netifaces"
+# msghdr-musl.patch: from Chimera (cports, BSD-2-Clause): musl's struct msghdr
+# has padding fields, so its fields are set by name
+patches = ["msghdr-musl.patch"]
 hostdeps = ["python", "python-setuptools"]
 rundeps = ["python"]
 options = ["!check"]
