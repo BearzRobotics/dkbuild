@@ -10,7 +10,7 @@ homepage = "https://gitlab.freedesktop.org/NetworkManager/NetworkManager"
 patches = ["clang_dumpmachine.patch", "libnm-wwan-soname.patch"]
 # llvm-clang and llvm: the tree's clang has the BPF backend CLAT's eBPF program
 # needs (the base image's does not), as v4l-utils and bpftool
-hostdeps = ["llvm-clang", "llvm", "bash", "bpftool", "docbook-xsl-nons", "gettext", "glib-devel", "gobject-introspection", "jansson-devel", "libxslt", "perl", "pkgconf", "python-gobject", "vala"]
+hostdeps = ["llvm-clang", "llvm", "gtk-doc-tools", "bash", "bpftool", "docbook-xsl-nons", "gettext", "glib-devel", "gobject-introspection", "jansson-devel", "libxslt", "perl", "pkgconf", "python-gobject", "vala"]
 builddeps = ["curl-devel", "dbus-devel", "dbus", "gobject-introspection-devel", "jansson-devel", "libbpf-devel", "libgudev-devel", "libndp-devel", "libnl-devel", "libnvme-devel", "libpsl-devel", "linux-headers", "mobile-broadband-provider-info", "modemmanager-devel", "newt-devel", "nss-devel", "polkit-devel", "ppp-devel", "python-gobject", "readline-devel", "eudev-devel", "util-linux-devel", "elogind-devel"]
 checkdeps = ["python-dbus"]
 rundeps = ["dbus", "iproute2", "mobile-broadband-provider-info", "openresolv", "wpa-supplicant"]

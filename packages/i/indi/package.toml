@@ -23,6 +23,20 @@ sed -i 's|SET(COMP_FLAGS "${COMP_FLAGS} -Werror")|SET(COMP_FLAGS "${COMP_FLAGS}"
 # which glibc's <sys/socket.h> brings in and musl's does not
 sed -i 's|^#include <sys/socket.h> // select$|#include <sys/socket.h> // select\n#include <sys/select.h>|' libs/sockets/select.h
 grep -q '^#include <sys/select.h>$' libs/sockets/select.h
+# libc++ 23 no longer brings in standard headers through others: every file
+# gets the ones whose names it uses (errno in indiserver/LocalDvrInfo.cpp, ...);
+# the C names, which C and C++ both take, and <algorithm> in C++ only
+add() {
+    for f in $(grep -rlE "$2" $3 . | xargs -r grep -LE "#include <($1)>"); do
+        h=${1%%|*}
+        sed -i "0,/^#include/s//#include <$h>\n#include/" "$f"
+    done
+}
+add 'errno.h|cerrno' '\berrno\b' "--include=*.cpp --include=*.c --include=*.h"
+add 'string.h|cstring' '\b(memcpy|memset|memcmp|strlen|strcmp|strncmp|strcpy|strerror)\b' "--include=*.cpp --include=*.c --include=*.h"
+add 'stdlib.h|cstdlib' '\b(getenv|malloc|free|atoi|strtol|exit|abs)\b' "--include=*.cpp --include=*.c --include=*.h"
+add algorithm 'std::(copy|fill|min|max|sort|find|find_if|transform|remove_if|for_each)\b' "--include=*.cpp --include=*.hpp"
+grep -q '^#include <errno.h>' indiserver/LocalDvrInfo.cpp
 %cmake \
     -DINDI_BUILD_UNITTESTS=OFF \
     -DUDEVRULES_INSTALL_DIR=/usr/lib/udev/rules.d
