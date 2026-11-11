@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/strace/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "strace"
-version = "6.17"
+version = "7.3"
 release = 1
 summary = "System call tracer"
 license = "LGPL-2.1-or-later"
@@ -11,7 +11,7 @@ hostdeps = ["automake", "libtool"]
 builddeps = ["elfutils-devel", "linux-headers"]
 
 source = [
-    { url = "https://github.com/strace/strace/releases/download/v6.17/strace-6.17.tar.xz", sha256 = "0a7c7bedc7efc076f3242a0310af2ae63c292a36dd4236f079e88a93e98cb9c0" },
+    { url = "https://github.com/strace/strace/releases/download/v7.3/strace-7.3.tar.xz", sha256 = "529634c40910895a9a1f3c5c1e65da2ca9ed72fb158dfc4bcc89efdf05e39b72" },
 ]
 
 setup = '''
