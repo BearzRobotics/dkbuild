@@ -3,10 +3,11 @@
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 # r3: static libraries too (in libxkbcommon-static), for fully static programs on musl.
+# r5: X11 support (libxkbcommon-x11): Qt's xcb platform plugin and GStreamer's Vulkan on XCB need it.
 # r4: libxkbcommon-libs depends on xkeyboard-config: the library reads the keyboard layouts from xkeyboard-config's data; without it labwc found no keymap and crashed.
 name = "libxkbcommon"
 version = "1.13.2"
-release = 4
+release = 5
 summary = "Library to handle keyboard descriptions"
 license = "MIT"
 homepage = "https://xkbcommon.org"
@@ -20,7 +21,7 @@ source = [
 
 setup = '''
 %meson \
-    -Denable-x11=false \
+    -Denable-x11=true \
     -Denable-wayland=true \
     -Denable-xkbregistry=true \
     -Denable-docs=false
