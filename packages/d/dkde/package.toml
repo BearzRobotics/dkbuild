@@ -26,6 +26,12 @@ source = [
 ]
 
 install = '''
+# uucode's generator runs through ../.. from inside zig-pkg/uucode-*, which
+# must not be a link into the package store (as in dkconsole): copied instead
+for p in zig-pkg/*; do
+    [ -L "$p" ] || continue
+    t=$(readlink -f "$p"); rm "$p"; cp -a "$t" "$p"
+done
 %zig_build
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/dkde/LICENSE"
 '''
