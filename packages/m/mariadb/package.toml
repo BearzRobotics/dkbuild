@@ -7,7 +7,7 @@ summary = "MariaDB database server and client"
 license = "GPL-2.0-only"
 homepage = "https://mariadb.org"
 hostdeps = ["cmake", "ninja", "pkgconf", "bison", "perl"]
-builddeps = ["ncurses-devel", "openssl-devel", "zlib-ng-compat-devel", "libxml2-devel", "pcre2-devel", "lz4-devel", "zstd-devel", "xz-devel", "bzip2-devel", "snappy-devel", "liburing-devel", "curl-devel", "linux-headers", "heimdal-devel", "libedit-devel", "jemalloc-devel", "cracklib-devel", "fmt-devel"]
+builddeps = ["ncurses-devel", "openssl-devel", "zlib-ng-compat-devel", "libxml2-devel", "pcre2-devel", "lz4-devel", "zstd-devel", "xz-devel", "bzip2-devel", "snappy-devel", "liburing-devel", "curl-devel", "linux-headers", "heimdal-devel", "libedit-devel", "jemalloc-devel", "cracklib-devel", "fmt-devel", "linux-pam-devel"]
 options = ["!check", "jobs:12"]
 
 source = [
