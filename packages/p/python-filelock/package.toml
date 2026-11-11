@@ -17,6 +17,9 @@ environment = '''
 export SETUPTOOLS_SCM_PRETEND_VERSION=$version
 '''
 install = '''
+# the python-sbom build hook (an SBOM file in the wheel) is not packaged: left out
+sed -i '/"python-sbom\[hatch\]/d; /^build\.hooks\.python-sbom/d' pyproject.toml
+! grep -q 'python-sbom\[hatch\]\|^build.hooks.python-sbom' pyproject.toml
 python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
     --root "$pkgdir" --prefix /usr .
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-filelock/LICENSE"
