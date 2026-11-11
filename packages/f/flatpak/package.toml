@@ -12,7 +12,7 @@ homepage = "https://flatpak.org"
 hostdeps = ["bison", "bubblewrap", "docbook-xml", "gettext-devel", "gobject-introspection", "libxml2", "pkgconf", "python-pyparsing", "xdg-dbus-proxy", "xmlto"]
 builddeps = ["appstream-devel", "appstream-glib-devel", "curl-devel", "dconf-devel", "fuse-devel", "gcab-devel", "gdk-pixbuf-devel", "glib-devel", "gpgme-devel", "json-glib-devel", "libarchive-devel", "libcap-devel", "libseccomp-devel", "libxau-devel", "libxml2-devel", "ostree-devel", "polkit-devel", "wayland-devel", "wayland-protocols", "zstd-devel"]
 checkdeps = ["bash", "dbus", "socat"]
-rundeps = ["bubblewrap", "gtk+3", "shared-mime-info", "xdg-dbus-proxy"]
+rundeps = ["bubblewrap", "gtk+3", "shared-mime-info", "xdg-dbus-proxy", "desktop-file-utils"]
 options = ["!check", "!cross"]
 
 source = [

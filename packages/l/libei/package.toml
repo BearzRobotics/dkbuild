@@ -5,12 +5,12 @@
 # r2: static libraries too (in libei-static), for fully static programs on musl.
 name = "libei"
 version = "1.6.0"
-release = 2
+release = 3
 summary = "Emulated Input Library"
 license = "MIT"
 homepage = "https://gitlab.freedesktop.org/libinput/libei"
 hostdeps = ["meson", "pkgconf", "python-jinja2"]
-builddeps = ["libevdev-devel", "libxkbcommon-devel"]
+builddeps = ["libevdev-devel", "libxkbcommon-devel", "elogind-devel"]
 checkdeps = ["dbus", "glib", "python-attrs", "python-dbusmock", "python-gobject", "python-pytest", "python-pyyaml", "python-structlog"]
 
 source = [

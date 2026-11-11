@@ -8,7 +8,7 @@ license = "GPL-2.0-or-later"
 homepage = "https://linux-nfs.org"
 patches = ["0011-fix-heimdal-build.patch", "musl-getservbyport.patch"]
 hostdeps = ["automake", "libtool", "pkgconf", "rpcsvc-proto"]
-builddeps = ["heimdal-devel", "heimdal-static", "keyutils-devel", "libcap-devel", "libedit-devel", "libevent-devel", "libnl-devel", "libtirpc-devel", "libxml2-devel", "linux-headers", "lvm2-devel", "rpcbind", "sqlite-devel", "util-linux-devel"]
+builddeps = ["heimdal-devel", "heimdal-static", "keyutils-devel", "libcap-devel", "libedit-devel", "libevent-devel", "libnl-devel", "libtirpc-devel", "libxml2-devel", "linux-headers", "lvm2-devel", "rpcbind", "sqlite-devel", "util-linux-devel", "musl-bsd-headers"]
 rundeps = ["python", "rpcbind"]
 options = ["!check"]
 

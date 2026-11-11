@@ -9,7 +9,7 @@ summary = "Utilities for creating debuginfo and source file distributions"
 license = "GPL-3.0-or-later AND LGPL-2.0-or-later"
 homepage = "https://sourceware.org/debugedit"
 hostdeps = ["automake", "bash", "help2man", "pkgconf"]
-builddeps = ["elfutils-devel", "xxhash-devel"]
+builddeps = ["elfutils-devel", "xxhash-devel", "musl-bsd-headers"]
 options = ["!check", "!cross"]
 
 source = [

@@ -6,7 +6,7 @@
 # r4: the system bashrc reads bashrc.d with a glob; it ran run-parts, which no package has.
 name = "bash"
 version = "5.3"
-release = 4
+release = 5
 summary = "GNU Bourne Again Shell"
 license = "GPL-3.0-or-later"
 homepage = "http://www.gnu.org/software/bash"

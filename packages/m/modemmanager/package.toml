@@ -10,7 +10,7 @@ license = "GPL-2.0-or-later"
 homepage = "https://www.freedesktop.org/wiki/Software/ModemManager"
 patches = ["tests.patch"]
 hostdeps = ["gettext", "glib-devel", "gobject-introspection", "libxslt", "pkgconf", "vala"]
-builddeps = ["bash-completion", "dbus", "glib-devel", "libgudev-devel", "libmbim-devel", "libqmi-devel", "libxslt-devel", "linux-headers", "polkit-devel", "ppp", "python-dbus-devel", "python-gobject-devel", "vala-devel"]
+builddeps = ["bash-completion", "dbus", "glib-devel", "libgudev-devel", "libmbim-devel", "libqmi-devel", "libxslt-devel", "linux-headers", "polkit-devel", "ppp", "python-dbus-devel", "python-gobject-devel", "vala-devel", "elogind-devel"]
 checkdeps = ["dbus"]
 rundeps = ["dbus", "ppp"]
 

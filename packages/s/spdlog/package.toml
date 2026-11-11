@@ -10,7 +10,7 @@ license = "MIT"
 homepage = "https://github.com/gabime/spdlog"
 patches = ["musl.patch"]
 hostdeps = ["cmake", "ninja", "pkgconf"]
-builddeps = ["catch2-devel", "fmt-devel"]
+builddeps = ["catch2-devel", "fmt-devel", "elogind-devel"]
 checkdeps = ["tzdb"]
 
 source = [

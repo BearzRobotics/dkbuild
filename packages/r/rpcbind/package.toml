@@ -9,7 +9,7 @@ summary = "Universal addresses to RPC program number mapper"
 license = "BSD-3-Clause"
 homepage = "https://linux-nfs.org"
 hostdeps = ["automake", "pkgconf"]
-builddeps = ["libtirpc-devel"]
+builddeps = ["libtirpc-devel", "musl-bsd-headers"]
 options = ["!check"]
 
 source = [

@@ -9,7 +9,7 @@ summary = "Tools and libraries to work with AppStream metadata"
 license = "LGPL-2.1-or-later"
 homepage = "https://www.freedesktop.org/wiki/Distributions/AppStream"
 hostdeps = ["bash-completion", "docbook-xsl", "gettext", "gobject-introspection", "gperf", "itstool", "libxslt", "pkgconf"]
-builddeps = ["blake3-devel", "cairo-devel", "curl-devel", "fontconfig-devel", "freetype-devel", "glib-devel", "libfyaml-devel", "libvips-devel", "libxml2-devel", "libxmlb-devel", "pango-devel", "qt6-qtbase-devel"]
+builddeps = ["blake3-devel", "cairo-devel", "curl-devel", "fontconfig-devel", "freetype-devel", "glib-devel", "libfyaml-devel", "libvips-devel", "libxml2-devel", "libxmlb-devel", "pango-devel", "qt6-qtbase-devel", "elogind-devel"]
 rundeps = ["shared-mime-info"]
 options = ["!cross"]
 

@@ -11,13 +11,13 @@
 # r2: static libraries too (in pipewire-static), for fully static programs on musl.
 name = "pipewire"
 version = "1.6.10"
-release = 3
+release = 5
 summary = "Server and user space API to deal with multimedia pipelines"
 license = "MIT"
 homepage = "https://pipewire.org"
 patches = ["lol.patch", "readiness.patch"]
 hostdeps = ["glib-devel", "meson", "pkgconf"]
-builddeps = ["alsa-lib-devel", "dbus-devel", "eudev-devel", "ncurses-devel", "readline-devel"]
+builddeps = ["alsa-lib-devel", "dbus-devel", "eudev-devel", "ncurses-devel", "readline-devel", "elogind-devel"]
 rundeps = ["dbus"]
 options = ["!check"]
 

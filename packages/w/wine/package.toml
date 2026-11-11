@@ -11,7 +11,7 @@ homepage = "https://www.winehq.org"
 patches = ["0001-Revert-winmm-Always-load-mmdevapi-as-audio-driver.patch", "rpath.patch"]
 archs = ["aarch64", "x86_64"]
 hostdeps = ["automake", "pkgconf"]
-builddeps = ["bison", "cups-devel", "dbus-devel", "ffmpeg-devel", "flex", "fontconfig-devel", "freetype-devel", "gettext", "gnutls-devel", "gst-plugins-base-devel", "libgphoto2-devel", "libpcap-devel", "libpulse-devel", "libusb-devel", "libxcomposite-devel", "libxcursor-devel", "libxi-devel", "libxinerama-devel", "libxrandr-devel", "libxrender-devel", "linux-headers", "mesa-devel", "ncurses-devel", "ocl-icd-devel", "pcsc-lite-devel", "sane-backends-devel", "sdl2-compat-devel", "v4l-utils-devel", "vulkan-loader-devel", "wayland-devel"]
+builddeps = ["bison", "cups-devel", "dbus-devel", "ffmpeg-devel", "flex", "fontconfig-devel", "freetype-devel", "gettext", "gnutls-devel", "gst-plugins-base-devel", "libgphoto2-devel", "libpcap-devel", "libpulse-devel", "libusb-devel", "libxcomposite-devel", "libxcursor-devel", "libxi-devel", "libxinerama-devel", "libxrandr-devel", "libxrender-devel", "linux-headers", "mesa-devel", "ncurses-devel", "ocl-icd-devel", "pcsc-lite-devel", "sane-backends-devel", "sdl2-compat-devel", "v4l-utils-devel", "vulkan-loader-devel", "wayland-devel", "udisks-devel"]
 rundeps = ["libxrandr"]
 options = ["!lto", "!check"]
 
