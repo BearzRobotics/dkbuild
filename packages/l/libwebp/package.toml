@@ -4,7 +4,7 @@
 # r2: rebuilt with libraries in /usr/lib (the %cmake macro set no libdir; they went to /usr/lib64).
 name = "libwebp"
 version = "1.6.0"
-release = 2
+release = 3
 summary = "WebP image format library"
 license = "BSD-3-Clause"
 homepage = "https://chromium.googlesource.com/webm/libwebp"
@@ -19,8 +19,14 @@ environment = '''
 export CFLAGS="${CFLAGS} -DNDEBUG"
 '''
 setup = '''
+# the library only: the tools are libwebp-tools (they read TIFF, and libtiff
+# builds against libwebp, so here they would make a cycle)
 %cmake \
     -DBUILD_SHARED_LIBS=ON \
+    -DWEBP_BUILD_CWEBP=OFF \
+    -DWEBP_BUILD_DWEBP=OFF \
+    -DWEBP_BUILD_WEBPINFO=OFF \
+    -DWEBP_BUILD_WEBPMUX=OFF \
     -DWEBP_BUILD_VWEBP=OFF \
     -DWEBP_BUILD_GIF2WEBP=OFF \
     -DWEBP_BUILD_IMG2WEBP=OFF \

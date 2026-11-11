@@ -4,12 +4,12 @@
 # r2: static libraries too (in lcms2-static), for fully static programs on musl.
 name = "lcms2"
 version = "2.19.1"
-release = 2
+release = 3
 summary = "Small-footprint color management engine"
 license = "MIT"
 homepage = "https://littlecms.com"
 hostdeps = ["meson", "pkgconf"]
-builddeps = ["libjpeg-turbo-devel"]
+builddeps = ["libjpeg-turbo-devel", "libtiff-devel"]
 
 source = [
     { url = "https://github.com/mm2/Little-CMS/releases/download/lcms2.19.1/lcms2-2.19.1.tar.gz", sha256 = "bfc54f7bab59fbc921012014a8032e4cba4abd46db47d46b76416a8c0b2815c8" },
@@ -18,8 +18,8 @@ source = [
 setup = '''
 %meson \
     -Djpeg=enabled \
-    -Dtiff=disabled \
-    -Dutils=false
+    -Dtiff=enabled \
+    -Dutils=true
 '''
 build = '''
 %meson_build

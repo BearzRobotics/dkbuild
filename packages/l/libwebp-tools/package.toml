@@ -1,0 +1,44 @@
+# WebP's command-line tools: cwebp/dwebp (with TIFF, PNG, JPEG), gif2webp,
+# img2webp, webpmux, webpinfo, anim_diff/anim_dump and the vwebp viewer
+# (OpenGL). The same libwebp source; only the programs and their man pages
+# are installed (the libraries are libwebp's). Separate because libtiff builds
+# against libwebp.
+name = "libwebp-tools"
+version = "1.6.0"
+release = 1
+summary = "WebP image tools"
+license = "BSD-3-Clause"
+homepage = "https://developers.google.com/speed/webp"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["libwebp-devel", "libjpeg-turbo-devel", "libpng-devel", "libtiff-devel", "giflib-devel", "freeglut-devel", "glu-devel", "mesa-devel"]
+rundeps = ["libwebp"]
+options = ["!check"]
+
+source = [
+    { url = "http://downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz", sha256 = "e4ab7009bf0629fd11982d4c2aa83964cf244cffba7347ecd39019a9e38c4564" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DWEBP_BUILD_CWEBP=ON \
+    -DWEBP_BUILD_DWEBP=ON \
+    -DWEBP_BUILD_WEBPINFO=ON \
+    -DWEBP_BUILD_WEBPMUX=ON \
+    -DWEBP_BUILD_VWEBP=ON \
+    -DWEBP_BUILD_GIF2WEBP=ON \
+    -DWEBP_BUILD_IMG2WEBP=ON \
+    -DWEBP_BUILD_ANIM_UTILS=ON \
+    -DWEBP_BUILD_EXTRAS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+DESTDIR=/tmp/webp-all cmake --install build
+mkdir -p "$pkgdir/usr/bin" "$pkgdir/usr/share/man/man1"
+cp -a /tmp/webp-all/usr/bin/. "$pkgdir/usr/bin/"
+[ -d /tmp/webp-all/usr/share/man/man1 ] && cp -a /tmp/webp-all/usr/share/man/man1/. "$pkgdir/usr/share/man/man1/"
+test -x "$pkgdir/usr/bin/cwebp"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libwebp-tools/COPYING"
+'''
