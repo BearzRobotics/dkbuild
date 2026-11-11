@@ -1,0 +1,32 @@
+# Jim Tcl: a small Tcl interpreter (jimsh) and embeddable library (libjim),
+# with its default extensions (aio with TLS, regexp, UTF-8, math, ...).
+# OpenOCD's command language. Its configure (autosetup) builds a static or a
+# shared library: the static one is built from a second copy of the tree.
+name = "jimtcl"
+version = "0.84"
+release = 1
+summary = "Small embeddable Tcl interpreter"
+license = "BSD-2-Clause"
+homepage = "https://jim.tcl.tk"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["asciidoc", "pkgconf"]
+builddeps = ["openssl-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://github.com/msteveb/jimtcl/archive/refs/tags/0.84.tar.gz", sha256 = "435095b436b38b96dd85e8cda13878144813bf52066057f76368db178dd8fea2" },
+]
+
+setup = '''
+cp -a . /tmp/jim-static
+(cd /tmp/jim-static && ./configure --prefix=/usr --disable-docs)
+./configure --prefix=/usr --shared
+'''
+build = '''
+make -C /tmp/jim-static -j$jobs libjim.a
+make -j$jobs
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+install -m644 /tmp/jim-static/libjim.a "$pkgdir/usr/lib/libjim.a"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/jimtcl/LICENSE"
+'''

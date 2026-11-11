@@ -1,21 +1,27 @@
 # Debugs and flashes ARM, RISC-V and other chips over JTAG/SWD (ST-Link, CMSIS-DAP,
 # FTDI, Raspberry Pi GPIO, ...). With its udev rules for the adapters.
+#
+# A snapshot of its main branch (snapshot:git, pinned by commit): 0.12.0 (2023,
+# the last release) only knows libgpiod's 1.x API, and the tree has libgpiod
+# 2; the main branch has the 2.x API. It uses the system's Jim Tcl (jimtcl).
 name = "openocd"
-version = "0.12.0"
+version = "0.12.0_git20261110"
 release = 1
 summary = "On-chip debugger and programmer (JTAG/SWD)"
 license = "GPL-2.0-or-later"
 homepage = "https://openocd.org"
-hostdeps = ["pkgconf", "texinfo", "bash"]
-builddeps = ["hidapi-devel", "libftdi1-devel", "libgpiod-devel", "libusb-devel", "capstone-devel", "linux-headers"]
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf", "texinfo", "bash"]
+builddeps = ["jimtcl-devel", "hidapi-devel", "libftdi1-devel", "libgpiod-devel", "libusb-devel", "capstone-devel", "linux-headers"]
 options = ["!check"]
 
 source = [
-    { url = "https://downloads.sourceforge.net/project/openocd/openocd/0.12.0/openocd-0.12.0.tar.bz2", sha256 = "af254788be98861f2bd9103fe6e60a774ec96a8c374744eef9197f6043075afa" },
+    { url = "snapshot:git https://github.com/openocd-org/openocd.git 4900bcdfc82848e9cfa7f895b39aca6b9ca4b911", sha256 = "222deedc257daf1d4a9d9bbd873393e92aa0c4afa656dd95785f2347e2832322" },
 ]
 
 setup = '''
-# its configure is bash (`echo -e` writes jimtcl's configure.gnu, `==` in test)
+# a git snapshot: configure is generated (its ./bootstrap would also run git)
+autoreconf -fi
+# its configure is bash (`==` in test)
 export CONFIG_SHELL=/bin/bash
 bash %configure \
     --disable-werror \
