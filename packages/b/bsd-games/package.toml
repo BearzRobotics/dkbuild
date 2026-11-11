@@ -24,6 +24,8 @@ setup = '''
 # bring in and musl's do not: it is included for every file
 tar -xf /build/sources/bsdgames_2.17-35.debian.tar.xz
 while read -r p; do case "$p" in ''|'#'*) continue ;; esac; patch -p1 < debian/patches/$p; done < debian/patches/series
+# hack's own getdate() clashes with POSIX getdate() in <time.h>: renamed there
+sed -i 's/\bgetdate\b/hack_getdate/g' hack/*.c hack/*.h
 cat > config.params <<'EOF2'
 bsd_games_cfg_non_interactive=y
 bsd_games_cfg_install_prefix="$pkgdir"
