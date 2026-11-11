@@ -8,13 +8,17 @@ release = 1
 summary = "Provides a way to load and enumerate PKCS#11 modules"
 license = "BSD-3-Clause"
 homepage = "https://github.com/p11-glue/p11-kit"
-hostdeps = ["gettext", "libtasn1", "pkgconf"]
+hostdeps = ["gettext", "libtasn1", "pkgconf", "libxslt", "docbook-xsl-nons", "docbook-xml"]
 builddeps = ["libtasn1-devel", "libffi-devel"]
 
 source = [
     { url = "https://github.com/p11-glue/p11-kit/releases/download/0.26.5/p11-kit-0.26.5.tar.xz", sha256 = "f2cc09111e44bf3fea58f023180b33acea90aa82d042d6fbb623fbc5ba033bb7" },
 ]
 
+environment = '''
+# the man pages: DocBook's stylesheets and DTD from the local catalogs
+export XML_CATALOG_FILES="/usr/share/xsl-nons/docbook/catalog.xml /usr/share/xml/docbook/4.2/catalog /usr/share/xml/docbook/4.3/catalog /usr/share/xml/docbook/4.4/catalog /usr/share/xml/docbook/4.5/catalog"
+'''
 setup = '''
 %meson \
     -Dlibffi=enabled \

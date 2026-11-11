@@ -3,7 +3,7 @@
 # Reviewed by hand. needed by: polkit (its JavaScript rules engine).
 name = "duktape"
 version = "2.7.0"
-release = 1
+release = 2
 summary = "Embeddeable JavaScript engine"
 license = "MIT"
 homepage = "https://duktape.org"
@@ -15,7 +15,9 @@ source = [
 ]
 
 build = '''
-make -j$jobs CC="$CC" PREFIX=/usr -f Makefile.sharedlibrary
+# INSTALL_PREFIX here too: duktape.pc is written in this step (it said
+# /usr/local, and libproxy's -Werror=missing-include-dirs failed on it)
+make -j$jobs CC="$CC" PREFIX=/usr INSTALL_PREFIX=/usr -f Makefile.sharedlibrary
 '''
 check = '''
 %make  -f Makefile.cmdline
