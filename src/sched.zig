@@ -255,6 +255,10 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
                 jobs[j].version = try std.fmt.allocPrint(arena, "{s}-r{d}", .{ r_now.version, w.result.release });
                 jobs[j].id = try std.fmt.allocPrint(arena, "{s}-{s}", .{ r_now.name, jobs[j].version });
                 jobs[j].own = try inputs.ownHash(arena, io, opts.root, r_now.name, opts.arch);
+                // The script exports `release`, so its hash changes with the bump
+                // too: recorded for the old release, every later run would see
+                // "macros changed" and rebuild (and bump) again.
+                jobs[j].script = build.scriptHash(arena, io, r_now, opts) catch jobs[j].script;
             }
             const record = try inputs.format(arena, .{ .version = jobs[j].version, .inputs = jobs[j].own, .deps = roots[j], .output = w.result.produced.output, .interface = w.result.produced.interface, .script = jobs[j].script });
             std.Io.Dir.cwd().writeFile(io, .{ .sub_path = jobs[j].rec_path, .data = record }) catch |err| {

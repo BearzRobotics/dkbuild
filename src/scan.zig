@@ -101,12 +101,15 @@ pub fn pcRequires(arena: Allocator, text: []const u8) Allocator.Error![]const []
     var out: std.ArrayList([]const u8) = .empty;
     var lines = std.mem.splitScalar(u8, text, '\n');
     while (lines.next()) |line| {
-        const rest = if (std.mem.startsWith(u8, line, "Requires.private:"))
+        const rest_line = if (std.mem.startsWith(u8, line, "Requires.private:"))
             line["Requires.private:".len..]
         else if (std.mem.startsWith(u8, line, "Requires:"))
             line["Requires:".len..]
         else
             continue;
+        // '#' starts a comment, as for pkg-config: nettle's hogweed.pc has
+        // "Requires: # nettle" when built shared (@IF_NOT_SHARED@ is "#").
+        const rest = if (std.mem.indexOfScalar(u8, rest_line, '#')) |h| rest_line[0..h] else rest_line;
         // "a >= 1.0, b c" -> a, b, c. A token made only of operator characters
         // swallows the version after it; "name=1.0" keeps just the name.
         var toks = std.mem.tokenizeAny(u8, rest, ", \t\r");
@@ -295,4 +298,16 @@ test "pcRequires drops versions and variables" {
     try std.testing.expectEqualStrings("zlib", r[1]);
     try std.testing.expectEqualStrings("libpng", r[2]);
     try std.testing.expectEqualStrings("freetype2", r[3]);
+}
+
+test "pcRequires stops at a comment" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const r = try pcRequires(st.allocator(),
+        \\Requires: # nettle
+        \\Requires.private:  nettle
+        \\
+    );
+    try std.testing.expectEqual(@as(usize, 1), r.len);
+    try std.testing.expectEqualStrings("nettle", r[0]);
 }

@@ -20,13 +20,13 @@ setup = '''
     -Dlibffi=enabled \
     -Dsystemd=disabled \
     -Dbash_completion=disabled \
-    -Dgtk_doc=true \
+    -Dgtk_doc=false \
     -Dman=true \
     -Dnls=true \
     -Dtrust_module=enabled \
     -Dtrust_paths=/etc/ssl/certs/ca-certificates.crt \
     -Dglib_prefix=/usr \
-    -Dtest=true
+    -Dtest=false
 '''
 build = '''
 %meson_build

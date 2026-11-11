@@ -16,6 +16,11 @@ source = [
     { url = "https://github.com/heimdal/heimdal/releases/download/heimdal-7.8.0/heimdal-7.8.0.tar.gz", sha256 = "fd87a207846fa650fd377219adc4b8a8193e55904d8a752c2c3715b4155d8d38" },
 ]
 
+environment = '''
+# musl's wchar_t is ISO 10646, but clang only predefines this with glibc's
+# stdc-predef.h; the bundled libedit insists on it
+export CFLAGS="$CFLAGS -D__STDC_ISO_10646__=201706L"
+'''
 setup = '''
 autoreconf -if -W none
 %configure \

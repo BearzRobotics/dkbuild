@@ -15,6 +15,9 @@ source = [
 ]
 
 setup = '''
+# a braced { 0 } as a pointer argument is not C++ clang accepts; use_context
+# is 0, so OpenSSL never reads it
+sed -i 's/strlen( label ), { 0 }, 1, 0 )/strlen( label ), nullptr, 0, 0 )/' src/tlsopensslclient.cpp
 %configure --with-openssl --without-gnutls --with-zlib --with-libidn
 '''
 build = '''

@@ -17,7 +17,11 @@ source = [
 
 environment = '''
 # its preprocessor check pipes into the command
-export RAWCPP="clang -E -"
+# configure takes RAWCPP as a program path and feeds it stdin: a wrapper
+mkdir -p /tmp/bin
+printf '#!/bin/sh\nexec clang -E "$@" -\n' > /tmp/bin/rawcpp
+chmod +x /tmp/bin/rawcpp
+export RAWCPP=/tmp/bin/rawcpp
 '''
 setup = '''
 autoreconf -if -W none
