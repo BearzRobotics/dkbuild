@@ -28,7 +28,9 @@ bash %configure \
     --enable-jlink=no
 '''
 build = '''
-%make
+# not %make: CC on the command line reaches jimtcl's sub-make, where it
+# overrides its CC += -I. (configure has the compiler already)
+make -j$jobs
 '''
 install = '''
 %make_install
