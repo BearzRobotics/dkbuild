@@ -75,8 +75,8 @@ against Chimera's templates, 2026-11-11; the desktop-critical ones are done):
   libwebp: libtiff and the libwebp tools (freeglut, giflib). re2, libpsl, icu
   extras. frei0r, mlt, openimageio: opencv. sane-backends: libgphoto2,
   v4l-utils. transmission: its Qt client. wine: samba (NTLM).
-- PipeWire: LDAC, webrtc echo cancelling, libmysofa, libcamera, ROC (no
-  recipes yet).
+- PipeWire: libmysofa, libcamera, ROC (no recipes yet). LDAC (ldacbt) and
+  WebRTC echo cancelling (webrtc-audio-processing) were added 2026-11-11.
 - android-tools: adb's mDNS discovery (Rust, vendor/adb/client/adbmdns) is
   off: the release has no Cargo.lock, and cargodeps only vendors from a lock
   inside the source. dkbuild needs a way to vendor from a lockfile a recipe
