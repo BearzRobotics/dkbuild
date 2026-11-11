@@ -1,0 +1,34 @@
+# mingw-w64's Windows headers, for the Windows targets of FenrirOS's LLVM
+# toolchain (clang-mingw-w64): x86_64, i686 and aarch64, each in
+# /usr/<arch>-w64-mingw32 (UCRT by default). Based on Chimera Linux cports
+# (BSD-2-Clause): main/mingw-w64-headers (without armv7, which Windows dropped).
+name = "mingw-w64-headers"
+version = "13.0.0"
+release = 1
+summary = "Windows headers for cross-compiling Windows programs"
+license = "ZPL-2.1"
+homepage = "https://www.mingw-w64.org"
+hostdeps = ["automake", "libtool"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/mingw-w64/mingw-w64-v13.0.0.tar.bz2", sha256 = "5afe822af5c4edbf67daaf45eec61d538f49eef6b19524de64897c6b95828caf" },
+]
+
+environment = '''
+unset CC CXX CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+targets="x86_64 i686 aarch64"
+'''
+setup = '''
+for a in $targets; do
+    mkdir -p build-$a
+    (cd build-$a && ../mingw-w64-headers/configure --host=$a-w64-mingw32 --prefix=/usr/$a-w64-mingw32)
+done
+'''
+build = '''
+for a in $targets; do make -C build-$a; done
+'''
+install = '''
+for a in $targets; do make -C build-$a DESTDIR="$pkgdir" install; done
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/mingw-w64-headers/COPYING"
+'''

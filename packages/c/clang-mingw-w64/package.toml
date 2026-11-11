@@ -1,0 +1,30 @@
+# Windows cross-compiling with FenrirOS's LLVM toolchain (llvm-mingw style):
+# <arch>-w64-mingw32-clang, -clang++, -cc, -c++, -ld and the binutils-like
+# tools (-ar, -ranlib, -nm, -strip, -objcopy, -objdump, -dlltool, -windres)
+# for x86_64, i686 and aarch64. clang takes the target from its name and finds
+# /usr/<arch>-w64-mingw32 as the sysroot; it already defaults to lld,
+# compiler-rt, libunwind and libc++. Based on Chimera Linux cports
+# (BSD-2-Clause): main/clang-mingw-w64.
+name = "clang-mingw-w64"
+version = "23.1.5"
+release = 1
+summary = "Clang toolchain for cross-compiling Windows programs (mingw-w64)"
+license = "Apache-2.0 WITH LLVM-exception AND ZPL-2.1"
+homepage = "https://www.mingw-w64.org"
+rundeps = ["llvm", "llvm-clang", "llvm-lld", "mingw-w64-headers", "mingw-w64-crt", "mingw-w64-winpthreads", "clang-rt-builtins-mingw-w64", "llvm-runtimes-mingw-w64"]
+options = ["!check"]
+
+
+install = '''
+mkdir -p "$pkgdir/usr/bin"
+for a in x86_64 i686 aarch64; do
+    t=$a-w64-mingw32
+    for p in clang clang-cpp cc; do ln -s clang "$pkgdir/usr/bin/$t-$p"; done
+    for p in clang++ c++; do ln -s clang++ "$pkgdir/usr/bin/$t-$p"; done
+    ln -s ld.lld "$pkgdir/usr/bin/$t-ld"
+    ln -s ld.lld "$pkgdir/usr/bin/$t-ld.lld"
+    for p in ar ranlib nm strip objcopy objdump dlltool windres readelf strings addr2line; do
+        ln -s llvm-$p "$pkgdir/usr/bin/$t-$p"
+    done
+done
+'''

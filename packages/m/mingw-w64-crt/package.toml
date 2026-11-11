@@ -1,0 +1,40 @@
+# mingw-w64's C runtime (startup code, import libraries for the Windows DLLs,
+# UCRT glue) for x86_64, i686 and aarch64 Windows, built with clang. Based on
+# Chimera Linux cports (BSD-2-Clause): main/mingw-w64-crt.
+name = "mingw-w64-crt"
+version = "13.0.0"
+release = 1
+summary = "C runtime for cross-compiling Windows programs"
+license = "ZPL-2.1"
+homepage = "https://www.mingw-w64.org"
+hostdeps = ["automake", "libtool", "llvm", "llvm-clang", "llvm-lld", "mingw-w64-headers"]
+rundeps = ["mingw-w64-headers"]
+options = ["!check", "!strip", "!lto"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/mingw-w64/mingw-w64-v13.0.0.tar.bz2", sha256 = "5afe822af5c4edbf67daaf45eec61d538f49eef6b19524de64897c6b95828caf" },
+]
+
+environment = '''
+unset CXX CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+targets="x86_64 i686 aarch64"
+'''
+setup = '''
+for a in $targets; do
+    case $a in
+    x86_64) e=--disable-lib32 ;;
+    i686) e=--disable-lib64 ;;
+    *) e="--disable-lib32 --disable-lib64" ;;
+    esac
+    mkdir -p build-$a
+    (cd build-$a && CC="clang -target $a-w64-mingw32" CPP= AR=llvm-ar RANLIB=llvm-ranlib DLLTOOL=llvm-dlltool \
+        ../mingw-w64-crt/configure --disable-dependency-tracking --host=$a-w64-mingw32 --prefix=/usr/$a-w64-mingw32 $e)
+done
+'''
+build = '''
+for a in $targets; do make -C build-$a -j$jobs; done
+'''
+install = '''
+for a in $targets; do make -C build-$a DESTDIR="$pkgdir" install; done
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/mingw-w64-crt/COPYING"
+'''

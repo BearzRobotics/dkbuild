@@ -1,0 +1,39 @@
+# winpthreads: POSIX threads on Windows, for x86_64, i686 and aarch64 Windows
+# programs (libc++ and many ports use it). Based on Chimera Linux cports
+# (BSD-2-Clause): main/mingw-w64-winpthreads.
+name = "mingw-w64-winpthreads"
+version = "13.0.0"
+release = 1
+summary = "POSIX threads for cross-compiling Windows programs"
+license = "ZPL-2.1"
+homepage = "https://www.mingw-w64.org"
+hostdeps = ["automake", "libtool", "llvm", "llvm-clang", "llvm-lld", "mingw-w64-headers", "mingw-w64-crt"]
+rundeps = ["mingw-w64-crt"]
+options = ["!check", "!strip", "!lto"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/mingw-w64/mingw-w64-v13.0.0.tar.bz2", sha256 = "5afe822af5c4edbf67daaf45eec61d538f49eef6b19524de64897c6b95828caf" },
+]
+
+environment = '''
+unset CXX CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+targets="x86_64 i686 aarch64"
+'''
+setup = '''
+for a in $targets; do
+    mkdir -p build-$a
+    (cd build-$a && CC="clang -target $a-w64-mingw32" AR=llvm-ar RANLIB=llvm-ranlib DLLTOOL=llvm-dlltool \
+        ../mingw-w64-libraries/winpthreads/configure --disable-dependency-tracking --host=$a-w64-mingw32 --prefix=/usr/$a-w64-mingw32)
+done
+'''
+build = '''
+for a in $targets; do make -C build-$a -j$jobs; done
+'''
+install = '''
+for a in $targets; do
+    make -C build-$a DESTDIR="$pkgdir" install
+    # these are mingw-w64-headers'
+    rm -f "$pkgdir"/usr/$a-w64-mingw32/include/pthread_signal.h "$pkgdir"/usr/$a-w64-mingw32/include/pthread_time.h "$pkgdir"/usr/$a-w64-mingw32/include/pthread_unistd.h
+done
+install -Dm644 mingw-w64-libraries/winpthreads/COPYING "$pkgdir/usr/share/licenses/mingw-w64-winpthreads/COPYING"
+'''
