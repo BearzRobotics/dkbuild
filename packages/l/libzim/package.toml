@@ -15,6 +15,9 @@ source = [
 ]
 
 setup = '''
+# libc++ 23: error.h (installed) uses std::exception_ptr without <exception>
+sed -i '0,/^#include/s//#include <exception>\n#include/' include/zim/error.h
+grep -q '^#include <exception>' include/zim/error.h
 %meson \
     -Ddoc=false \
     -Dexamples=false \
