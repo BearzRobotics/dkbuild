@@ -1,7 +1,7 @@
 # needed by: hyprland (images, wallpapers). No JPEG XL or AVIF (libjxl, libheif not built).
 name = "hyprgraphics"
 version = "0.6.0"
-release = 1
+release = 2
 summary = "Graphics and resource utilities for the Hypr* ecosystem"
 license = "BSD-3-Clause"
 homepage = "https://github.com/hyprwm/hyprgraphics"

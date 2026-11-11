@@ -3,7 +3,7 @@
 # `dkbuild fetch` (option `zigdeps`) and built offline with --system zig-pkg.
 name = "dkconsole"
 version = "0.1.0"
-release = 1
+release = 2
 summary = "Text console for Linux virtual terminals; replaces agetty"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkconsole"

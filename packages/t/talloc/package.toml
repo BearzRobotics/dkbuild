@@ -2,7 +2,7 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "talloc"
 version = "2.5.0"
-release = 1
+release = 2
 summary = "Hierarchical pool based memory allocator with destructors"
 license = "LGPL-3.0-or-later"
 homepage = "https://talloc.samba.org"

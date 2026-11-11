@@ -3,7 +3,7 @@
 # tree), libimagequant (Rust, not in the tree), XCB screen grabs (Wayland desktop).
 name = "python-pillow"
 version = "13.0.0"
-release = 1
+release = 2
 summary = "pillow for Python"
 license = "MIT-CMU"
 homepage = "https://pypi.org/project/pillow"
