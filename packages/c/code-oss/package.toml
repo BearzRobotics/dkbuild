@@ -1,16 +1,17 @@
 # Code - OSS: Visual Studio Code built from its MIT source, without Microsoft's
 # branding, telemetry endpoints or marketplace. Extensions come from Open VSX.
-# Runs on the system Electron (wip/electron: 43.8.3, the version 1.145.2 is
-# built for); native modules (node-pty, spdlog, sqlite3, kerberos,
+# Runs on the system Electron (42.11.18; 1.138.0 is built for 42.10.0, the
+# last Code - OSS on Electron 42, as Arch's code package); native modules (node-pty, spdlog, sqlite3, kerberos,
 # native-keymap) are compiled against its headers. Search uses the system rg.
 # Off the repository ISO (the user's choice): `!repo-iso` (docs/roadmap.md).
-# npm packages of all 63 package-lock.json files come from the npm store
+# npm packages of all 65 package-lock.json files come from the npm store
 # (`npmdeps`); `npm ci` and the postinstall's nested installs run offline.
 # DRAFT, not built: needs electron first. The packaging step (gulp
-# vscode-linux-x64-min-ci) expects an Electron zip in its download cache: it is
-# made from /usr/lib/electron, and only resources/app of the result is kept.
+# vscode-linux-<arch>-min) wants an Electron zip: build/lib/electron.ts's asset
+# resolver hands it one made from /usr/lib/electron (DKBUILD_ELECTRON_ZIP),
+# checksum check off, and only resources/app of the result is kept.
 name = "code-oss"
-version = "1.145.2"
+version = "1.138.0"
 release = 1
 summary = "Code - OSS, the open-source build of Visual Studio Code"
 license = "MIT"
@@ -22,7 +23,7 @@ builddeps = ["electron-devel", "heimdal-devel", "libsecret-devel", "libxkbfile-d
 rundeps = ["electron", "ripgrep", "xdg-utils"]
 
 source = [
-    { url = "https://github.com/microsoft/vscode/archive/refs/tags/1.145.2.tar.gz", sha256 = "8b5d5b049af4b7d145a69b4f2e06fa744d58f00c9ab33ab03338e273352dacf4" },
+    { url = "https://github.com/microsoft/vscode/archive/refs/tags/1.138.0.tar.gz", sha256 = "d7875d5d325dffb672903281a2a1961be525819e6a712b94b921826747b698e0" },
 ]
 
 environment = '''
@@ -30,7 +31,8 @@ export ELECTRON_SKIP_BINARY_DOWNLOAD=1 PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 export VSCODE_SKIP_NODE_VERSION_CHECK=1
 export npm_config_nodedir=/usr/include/electron/node_headers
 export npm_config_build_from_source=true
-export npm_config_target=43.8.3 npm_config_runtime=electron npm_config_disturl=
+export npm_config_target=$(cat /usr/lib/electron/version) npm_config_runtime=electron npm_config_disturl=
+export DKBUILD_ELECTRON_ZIP=/tmp/electron-system.zip
 export CXXFLAGS="$CXXFLAGS -std=c++20"
 '''
 setup = '''
@@ -46,20 +48,30 @@ p["extensionsGallery"] = {
 for k in ("updateUrl", "aiConfig", "enableTelemetry"): p.pop(k, None)
 json.dump(p, open("product.json", "w"), indent=2)
 PY
+# native modules and the packager use the system Electron's version
+sed -i "s/^target=.*/target=\"$(cat /usr/lib/electron/version)\"/" .npmrc
+grep -q "^target=\"$(cat /usr/lib/electron/version)\"" .npmrc
+# the packager's Electron archive: the system's, no checksum (it is not
+# upstream's zip)
+f=build/lib/electron.ts
+sed -i 's|^\trepo: electronAssetResolver,|\trepo: process.env.DKBUILD_ELECTRON_ZIP ? (async () => new Response(Readable.toWeb(fs.createReadStream(process.env.DKBUILD_ELECTRON_ZIP!)) as ReadableStream<Uint8Array>, { status: 200 })) : electronAssetResolver,|; s|^\tvalidateChecksum: true,|\tvalidateChecksum: false,|' $f
+grep -q 'DKBUILD_ELECTRON_ZIP' $f
+grep -q 'validateChecksum: false,' $f
+# external source maps, not inline ones (removed at install; Arch's change)
+sed -r -i "s/\bsourcemap:\s*[\"'](inline|linked)[\"']/sourcemap: 'external'/" build/next/index.ts
 npm ci
 '''
 build = '''
-# the Electron "download" gulp-electron packages: the system's, zipped
-mkdir -p "$HOME/.cache/electron"
-(cd /usr/lib/electron && zip -qr "$HOME/.cache/electron/electron-v43.8.3-linux-x64.zip" .)
-npm run gulp -- compile-build-without-mangling
-npm run gulp -- minify-vscode
-npm run gulp -- vscode-linux-x64-min-ci
+(cd /usr/lib/electron && zip -qr "$DKBUILD_ELECTRON_ZIP" .)
+case "$arch" in aarch64) varch=arm64 ;; *) varch=x64 ;; esac
+npm run gulp -- vscode-linux-$varch-min
 '''
 install = '''
 app="$pkgdir/usr/lib/code-oss"
 mkdir -p "$app"
-cp -r ../VSCode-linux-x64/resources/app "$app/"
+case "$arch" in aarch64) varch=arm64 ;; *) varch=x64 ;; esac
+cp -r ../VSCode-linux-$varch/resources/app "$app/"
+find "$app" -name '*.map' -delete
 # the system rg, not the bundled binary
 for d in "$app"/app/node_modules/@vscode/ripgrep*/bin; do [ -d "$d" ] && rm -f "$d"/rg* && ln -s /usr/bin/rg "$d/rg"; done
 # prebuilt binaries for glibc and other systems
