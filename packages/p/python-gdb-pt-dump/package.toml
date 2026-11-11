@@ -5,7 +5,7 @@ release = 1
 summary = "Page table dumping for gdb (pwndbg's pt)"
 license = "MIT"
 homepage = "https://github.com/martinradev/gdb-pt-dump"
-hostdeps = ["python", "python-setuptools"]
+hostdeps = ["python", "python-setuptools", "python-poetry-core"]
 rundeps = ["python"]
 options = ["!check"]
 
