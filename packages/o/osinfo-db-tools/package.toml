@@ -1,0 +1,26 @@
+# Tools to install and query the osinfo database (osinfo-db-import, ...).
+# Based on Chimera Linux cports (BSD-2-Clause): main/osinfo-db-tools.
+name = "osinfo-db-tools"
+version = "1.12.0"
+release = 1
+summary = "Tools for managing osinfo database files"
+license = "GPL-2.0-or-later"
+homepage = "https://libosinfo.org"
+hostdeps = ["meson", "ninja", "pkgconf", "perl", "gettext"]
+builddeps = ["glib-devel", "json-glib-devel", "libarchive-devel", "libsoup-devel", "libxml2-devel", "libxslt-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/libosinfo/osinfo-db-tools/-/archive/v1.12.0/osinfo-db-tools-v1.12.0.tar.gz", sha256 = "5c2ef41e3395be7df090840d171996510c4c87ea8b40763ddf59ab9fb62e0be3" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/osinfo-db-tools/COPYING"
+'''

@@ -1,0 +1,22 @@
+# Python bindings for libvirt (virt-manager and virt-install use them).
+# Based on Chimera Linux cports (BSD-2-Clause): main/python-libvirt.
+name = "python-libvirt"
+version = "12.8.0"
+release = 1
+summary = "Python bindings for libvirt"
+license = "LGPL-2.1-or-later"
+homepage = "https://libvirt.org/python.html"
+hostdeps = ["python", "python-setuptools", "pkgconf"]
+builddeps = ["libvirt-devel", "python-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://libvirt.org/sources/python/libvirt_python-12.8.0.tar.gz", sha256 = "ab24a102ebf99b913ddc3459031aa71a48b0b1cdbb0f423b4ea278052791ac8a" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/python-libvirt/COPYING"
+'''

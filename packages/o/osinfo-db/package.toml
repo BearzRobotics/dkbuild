@@ -1,0 +1,23 @@
+# The osinfo database: operating systems, their install media, devices and
+# defaults, which libosinfo (virt-manager, GNOME Boxes) reads. Installed with
+# osinfo-db-import into /usr/share/osinfo. Based on Chimera Linux cports
+# (BSD-2-Clause): main/osinfo-db. Its releases are on GitLab now (pagure.org,
+# where Chimera fetches them, is gone); the newer 20260812 asset is the
+# source tree, not the built database, so this is the latest built one.
+name = "osinfo-db"
+version = "20251212"
+release = 1
+summary = "Osinfo database of information about operating systems"
+license = "GPL-2.0-or-later"
+homepage = "https://libosinfo.org"
+hostdeps = ["osinfo-db-tools"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://gitlab.com/api/v4/projects/libosinfo%2Fosinfo-db/packages/generic/release-assets/v20251212/osinfo-db-20251212%2Etar%2Exz", sha256 = "06379250c91306c98cb9726af44eae5909dfdd5449f90331e904ae1221d8d5e7", unpack = false, name = "osinfo-db-20251212.tar.xz" },
+]
+
+install = '''
+osinfo-db-import --root "$pkgdir" --system /build/sources/osinfo-db-20251212.tar.xz
+test -d "$pkgdir/usr/share/osinfo"
+'''
