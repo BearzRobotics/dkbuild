@@ -14,7 +14,9 @@ source = [
 ]
 
 setup = '''
+# ICU's headers need C++17 (xerces-c asks for gnu++14)
 %cmake \
+    -DCMAKE_CXX_STANDARD=17 \
     -Dtranscoder=icu \
     -Dnetwork-accessor=curl
 '''

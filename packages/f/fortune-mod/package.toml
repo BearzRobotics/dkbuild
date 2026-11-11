@@ -5,7 +5,7 @@ release = 1
 summary = "The fortune cookie program, with its cookie files"
 license = "BSD-4-Clause-UC"
 homepage = "https://github.com/shlomif/fortune-mod"
-hostdeps = ["perl-path-tiny", "cmake", "ninja", "pkgconf", "rinutils", "perl"]
+hostdeps = ["libxslt", "docbook-xsl", "perl-path-tiny", "cmake", "ninja", "pkgconf", "rinutils", "perl"]
 builddeps = ["recode-devel"]
 options = ["!check"]
 
@@ -14,12 +14,23 @@ source = [
 ]
 
 setup = '''
+# the man pages are made with `docmake manpages X.docbook5.xml` (CPAN's
+# App::Docmake, which runs xsltproc with DocBook's manpages stylesheet): the
+# same, as a small script
+mkdir -p /tmp/docmake-bin
+cat > /tmp/docmake-bin/docmake <<'EOS'
+#!/bin/sh
+[ "$1" = manpages ] || { echo "docmake: only manpages is supported" >&2; exit 1; }
+exec xsltproc --nonet /usr/share/xsl/docbook/manpages/docbook.xsl "$2"
+EOS
+chmod +x /tmp/docmake-bin/docmake
 %cmake \
     -DCOOKIEDIR=/usr/share/fortunes \
     -DLOCALDIR=/usr/local/share/fortunes \
     -DNO_OFFENSIVE=ON
 '''
 build = '''
+export PATH=/tmp/docmake-bin:$PATH
 %cmake_build
 '''
 install = '''

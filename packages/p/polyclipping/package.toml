@@ -14,7 +14,7 @@ source = [
 
 setup = '''
 unzip -q /build/sources/clipper_ver6.4.2.zip -d clipper
-cmake -S clipper/cpp -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
+cmake -S clipper/cpp -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 '''
 build = '''
 cmake --build build

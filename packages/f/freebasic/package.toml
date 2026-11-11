@@ -47,6 +47,15 @@ grep -q '( "cc"     , FBCTOOLFLAG_DEFAULT' $f
 grep -q '( "gas"    , FBCTOOLFLAG_DEFAULT' $f
 grep -q 'ld-musl-x86_64.so.1' $f
 grep -q 'ld-musl-aarch64.so.1' $f
+# clang refuses `goto *ptr` in a function with no &&label (FreeBASIC's
+# error-handler jump after fb_ErrorThrowAt): the jump gets a local label of
+# its own to fall back to (a null pointer traps), in the bootstrap C and in
+# what fbc emits
+sed -i -E 's/goto \*(vr\$[0-9]+);/{ __label__ fb$jt; goto *(\1 ? \1 : \&\&fb$jt); fb$jt: __builtin_trap(); }/' bootstrap/linux-*/*.c
+! grep -q 'goto \*vr\$[0-9]*;' bootstrap/linux-*/*.c
+f=src/compiler/ir-hlc.bas
+sed -i 's|hWriteLine( "goto \*" + exprFlush( exprNewVREG( v1 ), TRUE ) + ";" )|dim as string jt = "(" + exprFlush( exprNewVREG( v1 ), TRUE ) + ")" : hWriteLine( "{ __label__ fb$jt; goto *(" + jt + " ? " + jt + " : \&\&fb$jt); fb$jt: __builtin_trap(); }" )|' $f
+grep -q '__label__ fb$jt' $f
 '''
 build = '''
 # 1. the bootstrap compiler (and the runtime) with clang
