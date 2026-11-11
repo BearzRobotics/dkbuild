@@ -1,0 +1,41 @@
+# words: an English word list at /usr/share/dict/words (American spelling),
+# for `look`, word games (bsd-games' boggle and hangman) and other programs
+# that read the traditional dictionary file. Made from SCOWL's lists up to
+# size 70 (common and less common words, no rare or obscure ones), the way
+# Arch's `words` is.
+name = "words"
+version = "2020.12.07"
+release = 1
+summary = "English word list for /usr/share/dict/words"
+license = "LicenseRef-SCOWL"
+homepage = "http://wordlist.aspell.net"
+archs = ["x86_64", "aarch64"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/wordlist/scowl-2020.12.07.tar.gz", sha256 = "5587667caa20c4891390c2d42dbb4d5c4c3f41bee77af1457ece3ba23fb859cc" },
+]
+hostdeps = ["python"]
+
+build = '''
+# English and American lists of sizes up to 70, all five kinds (words, words
+# with capitals, proper names, contractions, abbreviations); the files are
+# Latin-1, the result UTF-8, sorted in the C locale as look(1) expects
+python3 - <<'PY'
+import glob
+words = set()
+for region in ("english", "american"):
+    for path in glob.glob(f"final/{region}-*.[0-9]*"):
+        size = int(path.rsplit(".", 1)[1])
+        if size <= 70:
+            with open(path, encoding="latin-1") as f:
+                words.update(w.strip() for w in f if w.strip())
+with open("words", "w", encoding="utf-8") as out:
+    out.write("".join(w + "\n" for w in sorted(words)))
+PY
+test "$(wc -l < words)" -gt 100000
+'''
+install = '''
+install -Dm644 words "$pkgdir/usr/share/dict/words"
+ln -s words "$pkgdir/usr/share/dict/american-english"
+install -Dm644 Copyright "$pkgdir/usr/share/licenses/words/Copyright"
+'''

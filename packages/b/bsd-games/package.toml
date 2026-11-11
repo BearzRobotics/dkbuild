@@ -6,8 +6,11 @@ release = 1
 summary = "The classic BSD text games (adventure, robots, hangman, ...)"
 license = "BSD-3-Clause"
 homepage = "https://www.polyomino.org.uk/computer/software/bsd-games/"
-hostdeps = ["flex", "bison", "patch"]
+# words: boggle's dictionary is made from /usr/share/dict/words at build time,
+# and hangman reads it when it runs
+hostdeps = ["flex", "bison", "patch", "words"]
 builddeps = ["ncurses-devel", "openssl-devel", "musl-bsd-headers"]
+rundeps = ["words"]
 options = ["!check"]
 
 source = [
