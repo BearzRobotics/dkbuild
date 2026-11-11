@@ -21,6 +21,11 @@ setup = '''
     --sysconfdir=/etc/dict
 '''
 build = '''
+# the scanners made with flex here: when make re-runs configure, autoconf's
+# AC_PROG_LEX(yywrap) wants a lex library even though both scanners define
+# yywrap(), gives up and sets LEX to ':' (the rule then makes nothing)
+flex -oclientscan.c clientscan.l
+flex -oservscan.c servscan.l
 # one job: every grammar's bison -y writes y.tab.c and y.tab.h, which parallel
 # rules then move from under each other
 make -j1
