@@ -18,6 +18,10 @@ source = [
 ]
 
 setup = '''
+# Its CMakeLists turns LTO on for Release builds; lld crashes (SIGSEGV) in
+# that ThinLTO link of its large generated parsers, every time (2026-11-11)
+sed -i 's/set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)/set(CMAKE_INTERPROCEDURAL_OPTIMIZATION FALSE)/' CMakeLists.txt
+grep -q 'CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE' CMakeLists.txt && exit 1
 # spdlog's bundled fmt calls free() without <cstdlib> (Clang 23, libc++)
 export CXXFLAGS="$CXXFLAGS -include cstdlib"
 %cmake \
