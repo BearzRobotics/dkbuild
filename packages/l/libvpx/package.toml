@@ -19,8 +19,6 @@ source = [
 
 setup = '''
 # libvpx names its targets itself (it does not know this system's triplet)
-# CROSS from the environment would prefix its toolchain file names
-unset CROSS
 case "$arch" in aarch64) t=arm64-linux-gcc ;; *) t=x86_64-linux-gcc ;; esac
 ./configure \
     --target=$t \
@@ -39,9 +37,12 @@ case "$arch" in aarch64) t=arm64-linux-gcc ;; *) t=x86_64-linux-gcc ;; esac
     --disable-install-srcs
 '''
 build = '''
+# dkbuild's exported $target would override its Makefile's own `target`
+unset target
 %make
 '''
 install = '''
+unset target
 make DESTDIR="$pkgdir" DIST_DIR="$pkgdir/usr" install
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libvpx/LICENSE"
 '''

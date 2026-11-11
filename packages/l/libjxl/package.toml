@@ -8,7 +8,7 @@ release = 2
 summary = "Reference JpegXL implementation"
 license = "BSD-3-Clause"
 homepage = "https://github.com/libjxl/libjxl"
-hostdeps = ["asciidoc", "cmake", "libxml2", "ninja", "pkgconf"]
+hostdeps = ["asciidoc", "cmake", "libxml2", "libxslt", "docbook-xsl-nons", "docbook-xml", "ninja", "pkgconf"]
 builddeps = ["brotli-devel", "gflags-devel", "giflib-devel", "gtest-devel", "highway-devel", "lcms2-devel", "libjpeg-turbo-devel", "libpng-devel", "openexr-devel"]
 
 source = [
@@ -17,6 +17,9 @@ source = [
 ]
 
 environment = '''
+# a2x (the man pages): DocBook's stylesheets and DTD from the local catalogs,
+# not the network
+export XML_CATALOG_FILES="/usr/share/xsl-nons/docbook/catalog.xml /usr/share/xml/docbook/4.5/catalog"
 export CXXFLAGS="${CXXFLAGS} -DNDEBUG"
 '''
 setup = '''

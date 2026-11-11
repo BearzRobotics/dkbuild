@@ -9,11 +9,13 @@
 # architecture FenrirOS supports and for microcontrollers (AVR, ARM, RISC-V).
 # Code for AVR must be built without LTO.
 # r3: static libraries too (in llvm-static), for fully static programs on musl.
+# r5: RTTI on (LLVM_ENABLE_RTTI), as Chimera, Alpine and Arch build it: Mesa
+#     and other LLVM users need it (Mesa: "LLVM was built without RTTI").
 # r4: llvm-devel depends on llvm-static: LLVM's CMake files name every static
 #     component library, so find_package(LLVM) failed without them (clang-tools-extra).
 name = "llvm"
 version = "23.1.5"
-release = 4
+release = 5
 summary = "LLVM libraries and tools"
 description = "LLVM with Clang, LLD, compiler-rt, libunwind, libc++abi and libc++ (X86 and AMDGPU targets)."
 license = "Apache-2.0 WITH LLVM-exception"
@@ -49,6 +51,7 @@ cmake -G Ninja -S llvm -B build                                     \
     -DLLVM_ENABLE_RUNTIMES="compiler-rt;libunwind;libcxxabi;libcxx" \
     -DLLVM_BUILD_LLVM_DYLIB=ON                                      \
     -DLLVM_LINK_LLVM_DYLIB=ON                                       \
+    -DLLVM_ENABLE_RTTI=ON                                           \
     -DCLANG_LINK_CLANG_DYLIB=ON                                     \
     -DLLVM_ENABLE_LIBCXX=ON                                         \
     -DLLVM_INSTALL_BINUTILS_SYMLINKS=ON                             \
