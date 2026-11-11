@@ -6,13 +6,14 @@ release = 7
 summary = "RAW format parsing library"
 license = "LGPL-3.0-or-later"
 homepage = "https://libopenraw.freedesktop.org"
-# its Rust part (lib/mp4) builds with the crates upstream vendored in the
-# archive; Chimera's update-crates.patch (newer versions in Cargo.lock) is not
-# used, since those versions are not in that vendor directory
-patches = ["FILE.patch", "fuck-you-libtool.patch", "no-demo.patch"]
+# Its Rust part (lib/mp4): Chimera's update-crates.patch moves Cargo.lock to
+# newer crates (a libc that does not call open64, which musl dropped); they are
+# vendored by dkbuild from the patched lock (cargodeps), and the older copies
+# the archive vendors in lib/mp4/vendor are removed in setup
+patches = ["FILE.patch", "fuck-you-libtool.patch", "no-demo.patch", "update-crates.patch"]
 hostdeps = ["autoconf-archive", "automake", "rust", "libtool", "pkgconf"]
 builddeps = ["boost-devel", "curl-devel", "gdk-pixbuf-devel", "libjpeg-turbo-devel", "libxml2-devel", "rust"]
-options = ["!lto"]
+options = ["!lto", "cargodeps"]
 
 source = [
     { url = "https://libopenraw.freedesktop.org/download/libopenraw-0.3.7.tar.xz", sha256 = "0ece41951b2cd91e43f6a8a5c6a894bbc8b5923b4e49a82ebb6d8ce62bded68c" },
@@ -25,6 +26,9 @@ export RUSTFLAGS="-C target-feature=-crt-static"
 unset CARGO_BUILD_TARGET
 '''
 setup = '''
+# the archive's own vendored crates and their cargo config would take
+# precedence over dkbuild's (newer, from the patched lock)
+rm -rf lib/mp4/vendor lib/mp4/.cargo
 # libc++ 23 no longer brings in standard headers through others: every file
 # gets the ones whose names it uses (struct tm in ciff/ciffifd.cpp, ...)
 add() {

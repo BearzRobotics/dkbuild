@@ -485,7 +485,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                     zig_list = try fetch.zigDepsPath(arena, cache, src.tarball.sha256);
                 }
                 if (contains(r.options, "cargodeps")) {
-                    _ = fetch.fetchCargoDeps(arena, io, cache, src.tarball.sha256, &msg) catch |err| {
+                    _ = fetch.fetchCargoDeps(arena, io, cache, src.tarball.sha256, try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, opts.root, r.name), "patches" }), r.patches, &msg) catch |err| {
                         out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
                         return error.PrepareFailed;
                     };

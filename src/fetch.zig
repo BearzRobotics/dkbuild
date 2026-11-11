@@ -290,20 +290,25 @@ pub fn fetchGoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha2
 /// and the `.cargo/config.toml` that points cargo at `vendor/` (the source's
 /// own config, if it has one, with the vendoring lines added). A tarball made
 /// by an older dkbuild (<sha256>.tar) is converted without the network.
-pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, message: *[]const u8) Error!Status {
+pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, patch_dir: []const u8, patches: []const []const u8, message: *[]const u8) Error!Status {
     const out_path = try cargoDepsPath(arena, cache, tarball_sha256);
     if (std.Io.Dir.cwd().access(io, out_path, .{})) |_| return .cached else |_| {}
     const tmp = try std.fmt.allocPrint(arena, "{s}/cargodeps/tmp-{s}", .{ cache, tarball_sha256 });
     const tarball = try cachePath(arena, cache, tarball_sha256);
     const old = try std.fmt.allocPrint(arena, "{s}/cargodeps/{s}.tar", .{ cache, tarball_sha256 });
     const config = try std.fmt.allocPrint(arena, "{s}/cargodeps/{s}.config.toml", .{ cache, tarball_sha256 });
+    // The recipe's patches first, as the build applies them: one that changes
+    // Cargo.lock (libopenraw's newer libc, for musl without open64) changes
+    // the crates to vendor.
+    var apply: std.ArrayList(u8) = .empty;
+    for (patches) |pt| try apply.appendSlice(arena, try std.fmt.allocPrint(arena, "    patch -Np1 -s -d \"$top\" -i \"$(cd '{s}' && pwd)/{s}\"\n", .{ patch_dir, pt }));
     const script = try std.fmt.allocPrint(arena, dep_prologue ++
         \\if [ -f '{4s}' ]; then
         \\    top="$t/src/old"; mkdir -p "$top"; tar -xf '{4s}' -C "$top"
         \\    cp "$top/.cargo/config.toml" "$t/config.toml"
         \\else
         \\
-    ++ dep_unpack ++
+    ++ dep_unpack ++ "{6s}" ++
         \\    export CARGO_HOME="$cache/cargo-home"
         \\    # the Cargo project at the top, or else the first one below it (hashcat's
         \\    # is in Rust/generic_hash); vendor/ and .cargo/ stay at the top, where
@@ -325,7 +330,7 @@ pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_s
         \\mv "$t/list" '{3s}.part'; mv '{3s}.part' '{3s}'
         \\rm -f '{4s}'
         \\rm -rf "$t"
-    , .{ tmp, cache, tarball, out_path, old, config });
+    , .{ tmp, cache, tarball, out_path, old, config, apply.items });
     return runDepScript(arena, io, cache, "cargodeps", script, "crate (needs `cargo` on PATH)", message);
 }
 
