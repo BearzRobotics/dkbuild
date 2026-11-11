@@ -23,7 +23,10 @@ setup = '''
 sed -i 's/^\tall-osx-hotplug man doc \\$/\tall-osx-hotplug man \\/' Makefile
 '''
 build = '''
-make CC="$CC" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" PREFIX=/usr all
+# its all-test rule runs `type $(CC)`, which a CC with arguments fails: the
+# profile's --target goes into the flags
+tflags=${CC#clang }
+make CC=clang CFLAGS="$tflags $CFLAGS" LDFLAGS="$tflags $LDFLAGS" PREFIX=/usr all
 '''
 install = '''
 # The wrappers have /usr built in; install with the package directory as prefix.
