@@ -19,6 +19,9 @@ environment = '''
 export CXXFLAGS="${CXXFLAGS} -D_LARGEFILE64_SOURCE"
 '''
 setup = '''
+# libc++ 23: fdevent.h uses std::vector without <vector>
+sed -i 's|^#include <variant>$|#include <variant>\n#include <vector>|' vendor/adb/fdevent/fdevent.h
+grep -q '^#include <vector>$' vendor/adb/fdevent/fdevent.h
 # mDNS discovery (adb's wireless-debugging pairing) is off for now: it is a
 # Rust crate with no Cargo.lock in the release, so its crates cannot be
 # pinned and vendored for the offline build (Chimera runs `cargo vendor` with
