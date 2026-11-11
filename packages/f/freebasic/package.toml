@@ -4,14 +4,15 @@
 # FreeBASIC's gcc backend turns BASIC into C, compiles it with gcc, assembles
 # with as and links with ld, taking crtbegin.o and libgcc from gcc. Ported to
 # FenrirOS's LLVM toolchain instead of requiring GCC:
-# - its tool names become cc (clang), gas (binutils' GNU assembler; clang
-#   emits AT&T assembly for it) and ld (LLD), and the dynamic linker musl's
-#   (setup: sed on fbc.bas, each change checked);
+# - its tool names become cc (clang), fbc-as (files/fbc-as: clang's integrated
+#   assembler behind GNU as's options, so it always reads what clang writes)
+#   and ld (LLD), and the dynamic linker musl's (setup: sed on fbc.bas, each
+#   change checked);
 # - crtbegin*.o, crtend*.o, libgcc.a and libgcc_eh.a in FreeBASIC's own lib
 #   directory, which fbc searches before asking the compiler, are links to
 #   compiler-rt's and LLVM libunwind's (found through cc at build time).
 # The build: the bootstrap fbc (the compiler shipped as C) is built with
-# clang, then compiles the patched compiler, told GCC=cc, AS=gas and musl's
+# clang, then compiles the patched compiler, told GCC=cc, AS=fbc-as and musl's
 # loader. ncurses: fbc links -ltinfo, which ncurses provides (a linker script
 # to the wide library).
 name = "freebasic"
@@ -31,8 +32,12 @@ source = [
 ]
 
 environment = '''
-# fbc reads a tool's path from the environment variable of its name
-export GCC=cc AS=gas
+# fbc reads a tool's path from the environment variable of its name; fbc-as
+# from the recipe's files
+mkdir -p /tmp/fbbin
+cp /dkbuild/files/fbc-as /tmp/fbbin/fbc-as
+chmod 755 /tmp/fbbin/fbc-as
+export PATH="/tmp/fbbin:$PATH" GCC=cc AS=fbc-as
 case "$arch" in
 aarch64) loader=/lib/ld-musl-aarch64.so.1 ;;
 *) loader=/lib/ld-musl-x86_64.so.1 ;;
@@ -41,10 +46,10 @@ export loader
 '''
 setup = '''
 f=src/compiler/fbc.bas
-sed -i -E 's/\( "gcc" +, FBCTOOLFLAG_DEFAULT/( "cc"     , FBCTOOLFLAG_DEFAULT/; s/\( "as" +, FBCTOOLFLAG_DEFAULT/( "gas"    , FBCTOOLFLAG_DEFAULT/' $f
+sed -i -E 's/\( "gcc" +, FBCTOOLFLAG_DEFAULT/( "cc"     , FBCTOOLFLAG_DEFAULT/; s/\( "as" +, FBCTOOLFLAG_DEFAULT/( "fbc-as" , FBCTOOLFLAG_DEFAULT/' $f
 sed -i 's|-dynamic-linker /lib64/ld-linux-x86-64.so.2|-dynamic-linker /lib/ld-musl-x86_64.so.1|; s|-dynamic-linker /lib/ld-linux-aarch64.so.1|-dynamic-linker /lib/ld-musl-aarch64.so.1|' $f
 grep -q '( "cc"     , FBCTOOLFLAG_DEFAULT' $f
-grep -q '( "gas"    , FBCTOOLFLAG_DEFAULT' $f
+grep -q '( "fbc-as" , FBCTOOLFLAG_DEFAULT' $f
 grep -q 'ld-musl-x86_64.so.1' $f
 grep -q 'ld-musl-aarch64.so.1' $f
 # clang refuses `goto *ptr` in a function with no &&label (FreeBASIC's
@@ -56,14 +61,14 @@ sed -i -E 's/goto \*(vr\$[0-9]+);/{ __label__ fb$jt; goto *(\1 ? \1 : \&\&fb$jt)
 f=src/compiler/ir-hlc.bas
 sed -i 's|hWriteLine( "goto \*" + exprFlush( exprNewVREG( v1 ), TRUE ) + ";" )|dim as string jt = "(" + exprFlush( exprNewVREG( v1 ), TRUE ) + ")" : hWriteLine( "{ __label__ fb$jt; goto *(" + jt + " ? " + jt + " : \&\&fb$jt); fb$jt: __builtin_trap(); }" )|' $f
 grep -q '__label__ fb$jt' $f
-# clang marks address-significant symbols with .addrsig_sym in the assembly it
-# writes, which GNU as does not know: fbc asks clang not to (-fno-addrsig)
+# clang marks address-significant symbols with .addrsig_sym in its assembly;
+# fbc asks it not to (-fno-addrsig: they matter only to linker ICF)
 sed -i 's|ln += "-S -nostdlib -nostdinc -Wall "|ln += "-S -nostdlib -nostdinc -Wall -fno-addrsig "|' src/compiler/fbc.bas
 grep -q -- '-Wall -fno-addrsig "' src/compiler/fbc.bas
 '''
 build = '''
 # 1. the bootstrap compiler (and the runtime) with clang
-make -j$jobs CC=cc AS=gas prefix=/usr bootstrap-minimal
+make -j$jobs CC=cc AS=fbc-as prefix=/usr bootstrap-minimal
 cp bin/fbc bin/fbc-bootstrap
 # 2. its lib directory gets compiler-rt and libunwind under gcc's names
 rt=$(cc -print-libgcc-file-name)
@@ -76,10 +81,10 @@ done
 # 3. the patched compiler, runtime and graphics library, by the bootstrap one
 # (made from the shipped C, so it is told -fno-addrsig itself)
 make clean-compiler
-make -j$jobs CC=cc AS=gas prefix=/usr FBC="$PWD/bin/fbc-bootstrap" FBFLAGS="-maxerr 1 -Wc -fno-addrsig -Wl --dynamic-linker=$loader"
+make -j$jobs CC=cc AS=fbc-as prefix=/usr FBC="$PWD/bin/fbc-bootstrap" FBFLAGS="-maxerr 1 -Wc -fno-addrsig -Wl --dynamic-linker=$loader"
 '''
 install = '''
-make CC=cc AS=gas prefix=/usr DESTDIR="$pkgdir" FBC="$PWD/bin/fbc-bootstrap" install
+make CC=cc AS=fbc-as prefix=/usr DESTDIR="$pkgdir" FBC="$PWD/bin/fbc-bootstrap" install
 rt=$(cc -print-libgcc-file-name)
 rtdir=$(dirname "$rt")
 for d in "$pkgdir"/usr/lib/freebasic/linux-*; do
@@ -87,6 +92,7 @@ for d in "$pkgdir"/usr/lib/freebasic/linux-*; do
     ln -sf /usr/lib/libunwind.a $d/libgcc_eh.a
     for o in crtbegin.o crtbeginS.o crtend.o crtendS.o; do ln -sf "$rtdir/$o" $d/$o; done
 done
+install -Dm755 /dkbuild/files/fbc-as "$pkgdir/usr/bin/fbc-as"
 install -Dm644 doc/fbc.1 "$pkgdir/usr/share/man/man1/fbc.1"
 # the licence terms (compiler GPL-2.0+, libraries LGPL-2.1+ with the static
 # linking exception) are in readme.txt

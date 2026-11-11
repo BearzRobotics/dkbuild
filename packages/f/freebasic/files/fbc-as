@@ -1,0 +1,14 @@
+#!/bin/sh
+# fbc's assembler on FenrirOS: clang's integrated assembler, which always reads
+# what clang writes (GNU as from binutils can lag behind new directives such as
+# .prefalign). fbc calls it with GNU as options; the ones clang does not take
+# (--64, --32, --strip-local-absolute) are dropped.
+n=$#
+while [ "$n" -gt 0 ]; do
+    a=$1; shift; n=$((n - 1))
+    case $a in
+    --64|--32|--strip-local-absolute) ;;
+    *) set -- "$@" "$a" ;;
+    esac
+done
+exec cc -c -x assembler "$@"
