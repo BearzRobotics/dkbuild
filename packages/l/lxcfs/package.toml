@@ -1,0 +1,35 @@
+# LXCFS: a FUSE filesystem that gives containers /proc and /sys views of their
+# own limits (meminfo, cpuinfo, stat, uptime, ...), mounted on
+# /var/lib/lxcfs; LXC and Incus bind it into containers. Service `lxcfs`
+# (dinit).
+name = "lxcfs"
+version = "6.0.6"
+release = 1
+summary = "FUSE filesystem for container resource views"
+license = "LGPL-2.1-or-later"
+homepage = "https://linuxcontainers.org/lxcfs"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["meson", "ninja", "pkgconf", "help2man", "python"]
+builddeps = ["fuse-devel", "linux-headers"]
+rundeps = ["fuse"]
+options = ["!check"]
+
+source = [
+    { url = "https://linuxcontainers.org/downloads/lxcfs/lxcfs-6.0.6.tar.gz", sha256 = "386339ba4cde289b0f6df4fe7a614caa1e45dd91bc0200b4aff6c51bf9d5ef9e" },
+]
+
+setup = '''
+%meson \
+    "-Dinit-script=[]" \
+    -Dfuse-version=3 \
+    -Druntime-path=/run
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+rm -rf "$pkgdir/usr/lib/systemd" "$pkgdir/etc/init.d"
+install -Dm644 $pkgfiles/lxcfs "$pkgdir/etc/dinit.d/lxcfs"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/lxcfs/COPYING"
+'''

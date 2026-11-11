@@ -1,0 +1,4 @@
+# LXCFS: container /proc and /sys views, on /var/lib/lxcfs
+type = process
+command = /usr/bin/lxcfs /var/lib/lxcfs
+depends-on: early-filesystems

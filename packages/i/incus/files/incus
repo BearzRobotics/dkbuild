@@ -2,3 +2,4 @@
 type = process
 command = /usr/lib/incusd.wrapper --group _incus-admin --syslog
 depends-on: rcboot
+waits-for: lxcfs

@@ -15,7 +15,7 @@ homepage = "https://linuxcontainers.org/incus"
 archs = ["x86_64", "aarch64"]
 hostdeps = ["go", "pkgconf"]
 builddeps = ["acl-devel", "cowsql-devel", "libcap-devel", "libseccomp-devel", "libuv-devel", "lxc-devel", "raft-devel", "sqlite-devel", "eudev-devel", "linux-headers"]
-rundeps = ["acl", "attr", "dnsmasq", "tar", "nftables", "lego", "qemu", "lxc", "rsync", "squashfs-tools", "util-linux", "xz"]
+rundeps = ["acl", "attr", "dnsmasq", "tar", "nftables", "lego", "qemu", "lxc", "lxcfs", "rsync", "squashfs-tools", "util-linux", "xz"]
 options = ["!check", "godeps"]
 
 source = [
