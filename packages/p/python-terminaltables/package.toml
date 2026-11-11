@@ -16,10 +16,6 @@ source = [
 environment = '''
 export SETUPTOOLS_SCM_PRETEND_VERSION=$version
 '''
-setup = '''
-# its backend is the full Poetry; poetry-core builds it the same
-sed -i 's/poetry.masonry.api/poetry.core.masonry.api/; s/"poetry[^"]*"/"poetry-core"/' pyproject.toml
-'''
 install = '''
 # its build backend is full Poetry's (poetry.masonry.api); poetry-core's reads
 # the same [tool.poetry] table
