@@ -1,0 +1,20 @@
+# 0 A.D.'s game data: art, maps, sounds and the public mod, for /usr/share/0ad/data.
+# Separate from the engine (0ad) so a rebuild of the engine does not repackage it.
+# The tarball's SHA-1 matched Wildfire Games' published one (2026-11-11).
+name = "0ad-data"
+version = "0.28.0"
+release = 1
+summary = "Data files for 0 A.D."
+license = "CC-BY-SA-3.0"
+homepage = "https://play0ad.com"
+hostdeps = []
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://releases.wildfiregames.com/0ad-0.28.0-unix-data.tar.xz", sha256 = "e844b30ae2102c47e0a4fff2f0e0ef05ba0cebb1890aa72276fa12457c39526f" },
+]
+
+install = '''
+install -dm755 "$pkgdir/usr/share/0ad"
+cp -r binaries/data "$pkgdir/usr/share/0ad/"
+'''
