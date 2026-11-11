@@ -1,0 +1,80 @@
+# FreeBASIC: a BASIC compiler (QuickBASIC-compatible dialect plus modern
+# features), with its runtime, graphics library (X11 and OpenGL) and headers.
+#
+# FreeBASIC's gcc backend turns BASIC into C, compiles it with gcc, assembles
+# with as and links with ld, taking crtbegin.o and libgcc from gcc. Ported to
+# FenrirOS's LLVM toolchain instead of requiring GCC:
+# - its tool names become cc (clang), gas (binutils' GNU assembler; clang
+#   emits AT&T assembly for it) and ld (LLD), and the dynamic linker musl's
+#   (setup: sed on fbc.bas, each change checked);
+# - crtbegin*.o, crtend*.o, libgcc.a and libgcc_eh.a in FreeBASIC's own lib
+#   directory, which fbc searches before asking the compiler, are links to
+#   compiler-rt's and LLVM libunwind's (found through cc at build time).
+# The build: the bootstrap fbc (the compiler shipped as C) is built with
+# clang, then compiles the patched compiler, told GCC=cc, AS=gas and musl's
+# loader. ncurses: fbc links -ltinfo, which ncurses provides (a linker script
+# to the wide library).
+name = "freebasic"
+version = "1.10.1"
+release = 1
+summary = "BASIC compiler (QuickBASIC-compatible) with graphics library"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later WITH FreeBASIC-exception"
+homepage = "https://www.freebasic.net"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["binutils", "make"]
+builddeps = ["ncurses-devel", "gpm-devel", "libffi-devel", "libx11-devel", "libxext-devel", "libxpm-devel", "libxrandr-devel", "libxrender-devel", "libglvnd-devel", "mesa-devel", "linux-headers"]
+rundeps = ["binutils", "llvm-clang", "ncurses-devel", "gpm-devel", "libffi-devel", "libx11-devel", "libxext-devel", "libxpm-devel", "libxrandr-devel", "libxrender-devel", "libglvnd-devel"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://github.com/freebasic/fbc/releases/download/1.10.1/FreeBASIC-1.10.1-source-bootstrap.tar.xz", sha256 = "2fae2c66b435240d4de11bb534843baa188574508a8a5bdaa5020bf729bf0a3e" },
+]
+
+environment = '''
+# fbc reads a tool's path from the environment variable of its name
+export GCC=cc AS=gas
+case "$arch" in
+aarch64) loader=/lib/ld-musl-aarch64.so.1 ;;
+*) loader=/lib/ld-musl-x86_64.so.1 ;;
+esac
+export loader
+'''
+setup = '''
+f=src/compiler/fbc.bas
+sed -i -E 's/\( "gcc" +, FBCTOOLFLAG_DEFAULT/( "cc"     , FBCTOOLFLAG_DEFAULT/; s/\( "as" +, FBCTOOLFLAG_DEFAULT/( "gas"    , FBCTOOLFLAG_DEFAULT/' $f
+sed -i 's|-dynamic-linker /lib64/ld-linux-x86-64.so.2|-dynamic-linker /lib/ld-musl-x86_64.so.1|; s|-dynamic-linker /lib/ld-linux-aarch64.so.1|-dynamic-linker /lib/ld-musl-aarch64.so.1|' $f
+grep -q '( "cc"     , FBCTOOLFLAG_DEFAULT' $f
+grep -q '( "gas"    , FBCTOOLFLAG_DEFAULT' $f
+grep -q 'ld-musl-x86_64.so.1' $f
+grep -q 'ld-musl-aarch64.so.1' $f
+'''
+build = '''
+# 1. the bootstrap compiler (and the runtime) with clang
+make -j$jobs CC=cc AS=gas prefix=/usr bootstrap-minimal
+cp bin/fbc bin/fbc-bootstrap
+# 2. its lib directory gets compiler-rt and libunwind under gcc's names
+rt=$(cc -print-libgcc-file-name)
+rtdir=$(dirname "$rt")
+for d in lib/freebasic/linux-*; do
+    ln -sf "$rt" $d/libgcc.a
+    ln -sf /usr/lib/libunwind.a $d/libgcc_eh.a
+    for o in crtbegin.o crtbeginS.o crtend.o crtendS.o; do ln -sf "$rtdir/$o" $d/$o; done
+done
+# 3. the patched compiler, runtime and graphics library, by the bootstrap one
+make clean-compiler
+make -j$jobs CC=cc AS=gas prefix=/usr FBC="$PWD/bin/fbc-bootstrap" FBFLAGS="-maxerr 1 -Wl --dynamic-linker=$loader"
+'''
+install = '''
+make CC=cc AS=gas prefix=/usr DESTDIR="$pkgdir" FBC="$PWD/bin/fbc-bootstrap" install
+rt=$(cc -print-libgcc-file-name)
+rtdir=$(dirname "$rt")
+for d in "$pkgdir"/usr/lib/freebasic/linux-*; do
+    ln -sf "$rt" $d/libgcc.a
+    ln -sf /usr/lib/libunwind.a $d/libgcc_eh.a
+    for o in crtbegin.o crtbeginS.o crtend.o crtendS.o; do ln -sf "$rtdir/$o" $d/$o; done
+done
+install -Dm644 doc/fbc.1 "$pkgdir/usr/share/man/man1/fbc.1"
+# the licence terms (compiler GPL-2.0+, libraries LGPL-2.1+ with the static
+# linking exception) are in readme.txt
+install -Dm644 readme.txt "$pkgdir/usr/share/licenses/freebasic/readme.txt"
+'''
