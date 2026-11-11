@@ -1,0 +1,24 @@
+#!/bin/sh
+# Stands in for Apache Ant (not packaged) for jpype's one Ant file,
+# native/build.xml, whose default target makes build/lib/org.jpype.jar:
+# javac of jpype_module/src/main/java except Reflector0.java, javac of
+# Reflector0.java into META-INF/versions/0, entities.txt included, jar.
+# CMake runs it as `ant -f <src>/native/build.xml`.
+set -e
+f=
+while [ $# -gt 0 ]; do
+    case $1 in -f) f=$2; shift 2 ;; *) shift ;; esac
+done
+[ -n "$f" ] || { echo "ant (jpype): -f build.xml expected" >&2; exit 1; }
+cd "$(dirname "$f")"
+s=jpype_module/src/main/java
+b=build
+rm -rf "$b/classes" "$b/lib"
+mkdir -p "$b/classes/META-INF/versions/0" "$b/lib"
+javac -source 9 -target 9 -nowarn -d "$b/classes" $(find "$s" -name '*.java' ! -name Reflector0.java)
+javac -source 9 -target 9 -nowarn -cp "$b/classes" -d "$b/classes/META-INF/versions/0" $(find "$s" -name Reflector0.java)
+(cd "$s" && find . -name entities.txt) | while read -r e; do
+    mkdir -p "$b/classes/$(dirname "$e")"
+    cp "$s/$e" "$b/classes/$e"
+done
+jar cf "$b/lib/org.jpype.jar" -C "$b/classes" .

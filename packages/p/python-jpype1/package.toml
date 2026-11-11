@@ -17,6 +17,10 @@ source = [
 environment = '''
 # FindJava finds the JDK through JAVA_HOME (it is not on the PATH)
 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk PATH="/usr/lib/jvm/java-21-openjdk/bin:$PATH"
+# its org.jpype.jar is built by Ant, which is not packaged: files/ant does what
+# its native/build.xml says (javac and jar)
+mkdir -p /tmp/antbin && cp /dkbuild/files/ant /tmp/antbin/ant && chmod 755 /tmp/antbin/ant
+export PATH="/tmp/antbin:$PATH"
 export SETUPTOOLS_SCM_PRETEND_VERSION=$version
 '''
 install = '''
