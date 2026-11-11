@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: main/patchelf/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# needed by: python-meson-python (it fixes extension modules' RPATH with it:
+# python-dbus, numpy).
+name = "patchelf"
+version = "0.19.1"
+release = 1
+summary = "Utility to modify the dynamic linker and RPATH of ELF executables"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/NixOS/patchelf"
+hostdeps = ["automake"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/NixOS/patchelf/releases/download/0.19.1/patchelf-0.19.1.tar.bz2", sha256 = "2cce01de93653829f6ab68a20c2ec275e1c00a946110704a27e928d2e6e88716" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/patchelf/COPYING"
+'''

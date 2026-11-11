@@ -1,12 +1,12 @@
 # meson-python from PyPI (it builds itself: its pyproject points at its own source).
 name = "python-meson-python"
 version = "0.22.1"
-release = 1
+release = 2
 summary = "The Python build backend for Meson projects"
 license = "MIT"
 homepage = "https://pypi.org/project/meson-python/"
 hostdeps = ["python", "meson", "ninja", "python-packaging", "python-pyproject-metadata"]
-rundeps = ["python", "meson", "python-packaging", "python-pyproject-metadata"]
+rundeps = ["python", "meson", "python-packaging", "python-pyproject-metadata", "patchelf"]
 options = ["!check"]
 
 source = [
