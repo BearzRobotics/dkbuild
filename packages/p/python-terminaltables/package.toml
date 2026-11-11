@@ -21,6 +21,10 @@ setup = '''
 sed -i 's/poetry.masonry.api/poetry.core.masonry.api/; s/"poetry[^"]*"/"poetry-core"/' pyproject.toml
 '''
 install = '''
+# its build backend is full Poetry's (poetry.masonry.api); poetry-core's reads
+# the same [tool.poetry] table
+sed -i 's/^requires = \["poetry>=0.12"\]$/requires = ["poetry-core"]/; s/^build-backend = "poetry.masonry.api"$/build-backend = "poetry.core.masonry.api"/' pyproject.toml
+grep -q '^build-backend = "poetry.core.masonry.api"$' pyproject.toml
 python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
     --root "$pkgdir" --prefix /usr .
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-terminaltables/LICENSE"
