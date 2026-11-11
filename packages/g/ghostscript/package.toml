@@ -21,6 +21,10 @@ source = [
     { url = "https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10080/ghostscript-10.08.0.tar.xz", sha256 = "c20492bc8ebb96c87fa2e52a0926e1cda8cde95d66145e018ac713fed5da38cf" },
 ]
 
+environment = '''
+# its bundled Tesseract calls getenv without <cstdlib> (libc++ 23)
+export CXXFLAGS="$CXXFLAGS -include cstdlib"
+'''
 setup = '''
 rm -rf cups/libs freetype ijs jbig2dec jpeg lcms2mt libpng openjpeg tiff zlib
 CCAUX="$CC" CFLAGSAUX="$CFLAGS" LDFLAGS="$CFLAGS $LDFLAGS" \
