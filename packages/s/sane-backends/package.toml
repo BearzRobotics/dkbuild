@@ -19,6 +19,11 @@ source = [
     { url = "https://gitlab.com/sane-project/backends/uploads/83bdbb6c9a115184c2d48f1fdc6847db/sane-backends-1.3.1.tar.gz", sha256 = "aa82f76f409b88f8ea9793d4771fce01254d9b6549ec84d6295b8f59a3879a0c" },
 ]
 
+environment = '''
+# genesys: std::uncaught_exceptions and std::back_inserter without <exception>
+# and <iterator> (libc++ 23 no longer pulls them in)
+export CXXFLAGS="$CXXFLAGS -include exception -include iterator"
+'''
 setup = '''
 %configure \
     --sbindir=/usr/sbin \
