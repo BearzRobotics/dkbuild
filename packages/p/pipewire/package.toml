@@ -58,6 +58,7 @@ setup = '''
     -Dbluez5-codec-aac=enabled \
     -Dbluez5-codec-aptx=enabled \
     -Dbluez5-codec-lc3=enabled \
+    -Dopus=enabled \
     -Dbluez5-codec-opus=enabled \
     -Davahi=enabled \
     -Draop=enabled \
