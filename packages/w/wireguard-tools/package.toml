@@ -17,14 +17,16 @@ source = [
 ]
 
 environment = '''
-export CFLAGS="${CFLAGS} -DRUNSTATEDIR="/run""
+# a C string: the quotes are escaped so they reach the compiler
+export CFLAGS="${CFLAGS} -DRUNSTATEDIR=\"/run\""
 '''
 build = '''
-%make \
+# the Makefile is in src/
+%make -C src \
     PREFIX=/usr
 '''
 install = '''
-%make_install \
+%make_install -C src \
     STRIP=true \
     PREFIX=/usr \
     WITH_BASHCOMPLETION=yes \
@@ -32,4 +34,6 @@ install = '''
     WITH_SYSTEMDUNITS=no
 install -Dm755 $pkgfiles/wg-quick-all.sh "$pkgdir/usr/lib/wg-quick-all"
 install -Dm644 $pkgfiles/wg-quick-all "$pkgdir/etc/dinit.d/wg-quick-all"
+# /etc/wireguard, 0700
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/wireguard-tools.conf"
 '''
