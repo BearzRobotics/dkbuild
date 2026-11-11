@@ -17,8 +17,12 @@ source = [
 
 build = '''
 make CC="$CC" CXX="$CXX" OPTIM_CFLAGS="$CFLAGS" OPTIM_CXXFLAGS="$CXXFLAGS" LDFLAGS="$LDFLAGS" DISABLE_JBIG=0 -j$jobs
+# the printer descriptions as CUPS driver files (DRV_ONLY): cups-driverd makes
+# the PPDs from them when a printer is set up, so the prebuilt PPDs (and recode
+# for their translations) are not needed
+make -C ppd drv
 '''
 install = '''
-make DESTDIR="$pkgdir" DISABLE_JBIG=0 install
+make DESTDIR="$pkgdir" DISABLE_JBIG=0 DRV_ONLY=1 install
 install -Dm644 COPYING "$pkgdir/usr/share/licenses/splix/COPYING"
 '''
