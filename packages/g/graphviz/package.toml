@@ -25,6 +25,13 @@ setup = '''
 '''
 build = '''
 export HOSTCC="$CC"
+# the bison grammars first, one at a time: each rule makes both foo.c and
+# foo.h, and parallel make ran it twice at once into the same file (grammar.c
+# came out with NUL bytes)
+make -C lib/cgraph grammar.c
+make -C lib/common htmlparse.c
+make -C lib/expr exparse.c
+make -C cmd/tools gmlparse.c
 %make
 '''
 install = '''
