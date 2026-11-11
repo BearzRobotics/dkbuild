@@ -18,6 +18,11 @@ setup = '''
 # libc++ 23: error.h (installed) uses std::exception_ptr without <exception>
 sed -i '0,/^#include/s//#include <exception>\n#include/' include/zim/error.h
 grep -q '^#include <exception>' include/zim/error.h
+# and errno without <cerrno> in three source files
+for f in src/tools.cpp src/writer/binaryfile.cpp src/writer/creator.cpp; do
+    sed -i '0,/^#include/s//#include <cerrno>\n#include/' "$f"
+    grep -q '^#include <cerrno>' "$f"
+done
 %meson \
     -Ddoc=false \
     -Dexamples=false \
