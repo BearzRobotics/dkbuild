@@ -14,10 +14,11 @@ source = [
 ]
 
 setup = '''
-# clang 23's -Wunused-but-set-global under indi's -Werror (sharedblob.c): off
-# after its -Wall -Werror (an earlier -Wno- in CFLAGS is undone by -Wall)
-sed -i 's|SET(COMP_FLAGS "${COMP_FLAGS} -Werror")|SET(COMP_FLAGS "${COMP_FLAGS} -Werror -Wno-unused-but-set-global")|' cmake_modules/CMakeCommon.cmake
-grep -q 'Werror -Wno-unused-but-set-global' cmake_modules/CMakeCommon.cmake
+# no -Werror: clang 23 warns about more than indi was written against
+# (-Wunused-but-set-global in sharedblob.c, -Wsign-compare with musl's types
+# in baseclient.cpp)
+sed -i 's|SET(COMP_FLAGS "${COMP_FLAGS} -Werror")|SET(COMP_FLAGS "${COMP_FLAGS}")|' cmake_modules/CMakeCommon.cmake
+! grep -q 'COMP_FLAGS} -Werror' cmake_modules/CMakeCommon.cmake
 # libs/sockets/select.h uses fd_set and struct timeval from <sys/select.h>,
 # which glibc's <sys/socket.h> brings in and musl's does not
 sed -i 's|^#include <sys/socket.h> // select$|#include <sys/socket.h> // select\n#include <sys/select.h>|' libs/sockets/select.h

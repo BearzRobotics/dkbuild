@@ -37,8 +37,21 @@ add memory 'std::(unique_ptr|shared_ptr|weak_ptr|make_unique|make_shared)\b'
 add optional 'std::(optional|nullopt)\b'
 add 'cstring|string.h' 'std::(memcpy|memset|memcmp|memmove|strlen|strcmp|strncmp)\b'
 add algorithm 'std::(copy|fill|sort|find|find_if|remove_if|reverse|transform|for_each|count_if|all_of|any_of|none_of|clamp)\b'
+add vector 'std::vector\b'
+add string 'std::(string|to_string|stoi|stol|stoul|stoull|stod)\b'
+add string_view 'std::string_view\b'
+add map 'std::(map|multimap)\b'
+add unordered_map 'std::unordered_map\b'
+add set 'std::(set|multiset)\b'
+add unordered_set 'std::unordered_set\b'
+add array 'std::array\b'
+add span 'std::span\b'
+add list 'std::list\b'
+add deque 'std::deque\b'
+add utility 'std::(pair|move|forward|swap|exchange|make_pair)\b'
 grep -q '^#include <cstdlib>' lib/external/libwolv/libs/math_eval/source/math_eval/math_evaluator.cpp
 grep -q '^#include <atomic>' lib/libimhex/include/hex/api/task_manager.hpp
+grep -q '^#include <vector>' lib/libimhex/source/helpers/udp_server.cpp
 %cmake \
     -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DIMHEX_BUNDLE_DOTNET=OFF \
