@@ -1,6 +1,6 @@
 # OVMF (x86_64, Secure Boot and TPM 2 capable) for QEMU and libvirt. The source is a
-# git snapshot with EDK2's submodules (OpenSSL, Brotli, ...); its sha256 is set
-# after the first `dkbuild fetch edk2-ovmf` prints it.
+# git snapshot with EDK2's submodules (OpenSSL, Brotli, ...); pinned by its tag
+# (the snapshot is reproducible).
 name = "edk2-ovmf"
 version = "2026.08"
 release = 1
@@ -11,7 +11,7 @@ hostdeps = ["acpica", "nasm", "python", "llvm-clang", "llvm-lld", "llvm", "util-
 options = ["!check"]
 
 source = [
-    { url = "snapshot:git https://github.com/tianocore/edk2.git edk2-stable202608", sha256 = "0000000000000000000000000000000000000000000000000000000000000000" },
+    { url = "snapshot:git https://github.com/tianocore/edk2.git edk2-stable202608", sha256 = "adf33522c1a4d990c760bcebecebd1ec49d12ed3e6023d38117443e4b59bd43e" },
 ]
 
 setup = '''
