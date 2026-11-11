@@ -264,19 +264,23 @@ const dep_unpack =
 /// needs into the shared module cache (cache/gomod) with the `go` on the
 /// host's PATH (GOTOOLCHAIN=auto fetches the Go version the module asks for),
 /// and list them. The build uses the cache read-only, with GOPROXY=off.
-pub fn fetchGoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, message: *[]const u8) Error!Status {
+pub fn fetchGoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, patch_dir: []const u8, patches: []const []const u8, message: *[]const u8) Error!Status {
     const out_path = try goDepsPath(arena, cache, tarball_sha256);
     if (std.Io.Dir.cwd().access(io, out_path, .{})) |_| return .cached else |_| {}
     const tmp = try std.fmt.allocPrint(arena, "{s}/godeps/tmp-{s}", .{ cache, tarball_sha256 });
     const tarball = try cachePath(arena, cache, tarball_sha256);
     const old = try std.fmt.allocPrint(arena, "{s}/godeps/{s}.tar", .{ cache, tarball_sha256 });
-    const script = try std.fmt.allocPrint(arena, dep_prologue ++ dep_unpack ++
+    // The recipe's patches first, as the build applies them: one that changes
+    // go.mod (nuclei's moves a module to a newer version) changes what to fetch.
+    var apply: std.ArrayList(u8) = .empty;
+    for (patches) |pt| try apply.appendSlice(arena, try std.fmt.allocPrint(arena, "patch -Np1 -s -d \"$top\" -i \"$(cd '{s}' && pwd)/{s}\"\n", .{ patch_dir, pt }));
+    const script = try std.fmt.allocPrint(arena, dep_prologue ++ dep_unpack ++ "{5s}" ++
         \\export GOMODCACHE="$cache/gomod" GOPATH="$t/gopath" GOCACHE="$t/gocache" GOTOOLCHAIN=auto GOFLAGS=-mod=mod
         \\( cd "$top" && timeout 1800 go mod download && go list -m -f '{{{{.Path}}}}@{{{{.Version}}}}' all ) > "$t/list"
         \\mv "$t/list" '{3s}.part'; mv '{3s}.part' '{3s}'
         \\rm -f '{4s}'
         \\chmod -R u+w "$t"; rm -rf "$t"
-    , .{ tmp, cache, tarball, out_path, old });
+    , .{ tmp, cache, tarball, out_path, old, apply.items });
     return runDepScript(arena, io, cache, "godeps", script, "Go module (needs `go` on PATH)", message);
 }
 

@@ -162,7 +162,7 @@ pub fn main(init: std.process.Init) !void {
                         }
                     }
                     if (is_first and contains(r.options, "godeps")) {
-                        if (fetch.fetchGoDeps(arena, init.io, cache, src.tarball.sha256, &msg)) |gst| {
+                        if (fetch.fetchGoDeps(arena, init.io, cache, src.tarball.sha256, try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, root, r.name), "patches" }), r.patches, &msg)) |gst| {
                             std.debug.print("{s}: Go modules {s}\n", .{ r.name, @tagName(gst) });
                         } else |gerr| {
                             failed = true;
