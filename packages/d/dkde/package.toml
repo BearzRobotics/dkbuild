@@ -11,7 +11,7 @@
 # Zig dependency fetch to have been run (`dkbuild fetch dkde`).
 name = "dkde"
 version = "0.1.0"
-release = 1
+release = 2
 summary = "A Wayland desktop shell in Zig on GTK4 and labwc"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkde"

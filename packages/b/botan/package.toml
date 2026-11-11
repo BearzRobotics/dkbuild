@@ -2,7 +2,7 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "botan"
 version = "3.11.1"
-release = 2
+release = 3
 summary = "Crypto and TLS for C++"
 license = "BSD-2-Clause"
 homepage = "https://botan.randombit.net"

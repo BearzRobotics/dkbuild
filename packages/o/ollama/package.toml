@@ -8,7 +8,7 @@
 # r2: rebuilt so its private ggml libraries (/usr/lib/ollama) are not provided system-wide.
 name = "ollama"
 version = "0.40.15"
-release = 3
+release = 4
 summary = "Run large language models locally, with Vulkan GPU support"
 license = "MIT"
 homepage = "https://ollama.com"
