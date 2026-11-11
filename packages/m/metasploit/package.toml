@@ -27,10 +27,10 @@ export NOKOGIRI_USE_SYSTEM_LIBRARIES=1 BUNDLE_BUILD__NOKOGIRI=--use-system-libra
 export BUNDLE_BUILD__SQLITE3=--enable-system-libraries
 # the gems' bundled sources are unpacked as root in the sandbox: no chown
 export TAR_OPTIONS=--no-same-owner
-# mkmf tests each flag with -Werror, and clang warns that the link flags mixed
-# into those test compiles are unused: every flag (nokogiri's -I for its gumbo
-# headers too) was refused
-export CFLAGS="$CFLAGS -Wno-unused-command-line-argument" CPPFLAGS="$CPPFLAGS -Wno-unused-command-line-argument"
+# mkmf tests each flag by compiling ruby.h with -Werror, and clang 23 warns in
+# Ruby 3.4's own rstring.h (-Wdefault-const-init-field-unsafe): every flag
+# (nokogiri's -I for its gumbo headers too) was refused
+export CFLAGS="$CFLAGS -Wno-default-const-init-field-unsafe"
 '''
 build = '''
 bundle config set --local deployment true
