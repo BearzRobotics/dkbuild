@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "hwloc"
 version = "2.14.0"
-release = 1
+release = 2
 summary = "Hardware resource locality library"
 license = "BSD-3-Clause"
 homepage = "https://www.open-mpi.org/projects/hwloc"

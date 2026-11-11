@@ -18,9 +18,12 @@ source = [
 ]
 
 setup = '''
+# --disable-shave: its quiet-build wrapper passes --shave-mode to a CC of
+# more than one word (clang --target=...)
 autoreconf -if -W none
 %configure \
-    --disable-network
+    --disable-network \
+    --disable-shave
 '''
 build = '''
 %make

@@ -2,7 +2,7 @@
 # pycairo, Cairo for Python. needed by: python-gobject.
 name = "python-cairo"
 version = "1.29.0"
-release = 1
+release = 2
 summary = "Python bindings for Cairo"
 license = "LGPL-2.1-only OR MPL-1.1"
 homepage = "https://pycairo.readthedocs.io"

@@ -17,14 +17,14 @@ source = [
 ]
 
 build = '''
+# the library only: the Firefox media plugin (plugin) needs Mozilla's
+# gmp-api headers, which its build downloads
 %make \
     BUILDTYPE=Release \
     CFLAGS_OPT= \
     ENABLEPIC=Yes \
     HAVE_AVX2=No \
-    HAVE_GMP_API=Yes \
-    libraries \
-    plugin
+    libraries
 '''
 check = '''
 %make test
@@ -38,7 +38,6 @@ install -Dm644 LICENSE "$pkgdir/usr/share/licenses/openh264/LICENSE"
 # symlinks; ensure the soname is right
 # manifest file
 # profile and other stuff
-install -Dm644 $pkgfiles/profile.conf "$pkgdir/etc/profile.d/firefox-openh264.sh"
 install -Dm644 $pkgfiles/prefs.js "$pkgdir/usr/lib/firefox/defaults/pref/gmpopenh264.js"
 p=usr/lib/nsbrowser/plugins/gmp-gmpopenh264/system-installed
 v=$(ls "$pkgdir"/usr/lib/libopenh264.so.*.*.* | head -n1); v=${v##*libopenh264.so.}

@@ -16,7 +16,8 @@ source = [
 ]
 
 build = '''
-%make \
+# its Makefile wants the platform as the target
+%make linux \
     PREFIX=/usr \
     LUA_VER=5.4
 '''

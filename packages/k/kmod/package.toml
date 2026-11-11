@@ -6,7 +6,7 @@
 # r3: static libraries too (in kmod-static), for fully static programs on musl.
 name = "kmod"
 version = "34.2"
-release = 4
+release = 5
 summary = "Linux kernel module handling"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://git.kernel.org/pub/scm/utils/kernel/kmod/kmod.git"

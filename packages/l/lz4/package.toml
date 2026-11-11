@@ -4,7 +4,7 @@
 # which the build environment already provides.
 name = "lz4"
 version = "1.10.0"
-release = 2
+release = 3
 summary = "LZ4 compression utilities"
 license = "BSD-2-Clause AND GPL-2.0-or-later"
 homepage = "https://lz4.github.io/lz4"
@@ -16,7 +16,9 @@ source = [
 ]
 
 build = '''
-%make
+# PREFIX here too: liblz4.pc is written in this step (it said /usr/local;
+# CMake users such as android-tools refuse the missing include path)
+%make PREFIX=/usr
 '''
 check = '''
 %make check -j1

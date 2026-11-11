@@ -17,13 +17,15 @@ source = [
 ]
 
 setup = '''
-%cmake -DJAS_STDC_VERSION=201710L -DJAS_ENABLE_DOC=OFF \
-    -DALLOW_IN_SOURCE_BUILD=ON
+# Its source tree has a build/ directory of its own (CMake modules), which
+# %cmake's "build" would collide with: CMake's checks failed there
+cmake -B _build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+    -DJAS_STDC_VERSION=201710L -DJAS_ENABLE_DOC=OFF
 '''
 build = '''
-%cmake_build
+cmake --build _build
 '''
 install = '''
-%cmake_install
+DESTDIR=$pkgdir cmake --install _build --strip
 install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/jasper/LICENSE.txt"
 '''
