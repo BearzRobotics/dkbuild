@@ -14,9 +14,11 @@ source = [
 ]
 
 setup = '''
-# ICU's headers need C++17 (xerces-c asks for gnu++14)
+# ICU's headers need C++17; xerces-c sets C++14 in its own CMake files, which
+# a -D on the command line does not override
+grep -rl 'set(CMAKE_CXX_STANDARD 14)' --include=CMakeLists.txt --include='*.cmake' . | xargs sed -i 's/set(CMAKE_CXX_STANDARD 14)/set(CMAKE_CXX_STANDARD 17)/'
+! grep -rq 'set(CMAKE_CXX_STANDARD 14)' --include=CMakeLists.txt --include='*.cmake' .
 %cmake \
-    -DCMAKE_CXX_STANDARD=17 \
     -Dtranscoder=icu \
     -Dnetwork-accessor=curl
 '''
