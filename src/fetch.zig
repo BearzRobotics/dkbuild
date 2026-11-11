@@ -290,7 +290,19 @@ pub fn fetchGoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha2
 /// and the `.cargo/config.toml` that points cargo at `vendor/` (the source's
 /// own config, if it has one, with the vendoring lines added). A tarball made
 /// by an older dkbuild (<sha256>.tar) is converted without the network.
-pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, patch_dir: []const u8, patches: []const []const u8, message: *[]const u8) Error!Status {
+/// A Cargo.lock a recipe keeps in files/ (option `cargolock=<dir>`), for a
+/// Rust project at <dir> of the source whose release ships no lockfile.
+pub const CargoLock = struct { dir: []const u8, file: []const u8 };
+
+/// The recipe's CargoLock, from its `cargolock=<dir>` option and files/Cargo.lock.
+pub fn recipeCargoLock(arena: Allocator, options: []const []const u8, recipe_dir: []const u8) !?CargoLock {
+    for (options) |o| if (std.mem.startsWith(u8, o, "cargolock=")) {
+        return .{ .dir = o["cargolock=".len..], .file = try std.fs.path.join(arena, &.{ recipe_dir, "files", "Cargo.lock" }) };
+    };
+    return null;
+}
+
+pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, patch_dir: []const u8, patches: []const []const u8, lock: ?CargoLock, message: *[]const u8) Error!Status {
     const out_path = try cargoDepsPath(arena, cache, tarball_sha256);
     if (std.Io.Dir.cwd().access(io, out_path, .{})) |_| return .cached else |_| {}
     const tmp = try std.fmt.allocPrint(arena, "{s}/cargodeps/tmp-{s}", .{ cache, tarball_sha256 });
@@ -302,6 +314,9 @@ pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_s
     // the crates to vendor.
     var apply: std.ArrayList(u8) = .empty;
     for (patches) |pt| try apply.appendSlice(arena, try std.fmt.allocPrint(arena, "    patch -Np1 -s -d \"$top\" -i \"$(cd '{s}' && pwd)/{s}\"\n", .{ patch_dir, pt }));
+    // a Cargo.lock the recipe keeps (the release has none): into its project
+    // directory, which is where the crates are vendored from
+    if (lock) |l| try apply.appendSlice(arena, try std.fmt.allocPrint(arena, "    top=\"$top/{s}\"; cp \"$(cd '{s}' && pwd)/{s}\" \"$top/Cargo.lock\"\n", .{ l.dir, std.fs.path.dirname(l.file) orelse ".", std.fs.path.basename(l.file) }));
     const script = try std.fmt.allocPrint(arena, dep_prologue ++
         \\if [ -f '{4s}' ]; then
         \\    top="$t/src/old"; mkdir -p "$top"; tar -xf '{4s}' -C "$top"

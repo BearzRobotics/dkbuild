@@ -2,12 +2,16 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "android-tools"
 version = "37.0.0_p1"
-release = 1
+release = 2
 summary = "Android platform tools, such as adb and fastboot"
 license = "Apache-2.0 AND ISC AND GPL-2.0-only AND MIT"
 homepage = "https://github.com/nmeum/android-tools"
 archs = ["x86_64", "aarch64", "riscv64"]
 hostdeps = ["rust", "cmake", "corrosion", "ninja", "pkgconf", "protobuf"]
+# adb mDNS: its Rust crate (vendor/adb/client/adbmdns) has no Cargo.lock in the
+# release; files/Cargo.lock was made for it (cargo generate-lockfile,
+# 2026-11-11) and its crates are vendored from it into that directory
+options = ["cargodeps", "cargolock=vendor/adb/client/adbmdns"]
 builddeps = ["brotli-devel", "fmt-devel", "gtest-devel", "libusb-devel", "linux-headers", "lz4-devel", "pcre2-devel", "protobuf-devel", "rust", "zstd-devel"]
 rundeps = ["android-udev-rules", "python"]
 
@@ -17,17 +21,16 @@ source = [
 
 environment = '''
 export CXXFLAGS="${CXXFLAGS} -D_LARGEFILE64_SOURCE"
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
 '''
 setup = '''
 # libc++ 23: fdevent.h uses std::vector without <vector>
 sed -i 's|^#include <variant>$|#include <variant>\n#include <vector>|' vendor/adb/fdevent/fdevent.h
 grep -q '^#include <vector>$' vendor/adb/fdevent/fdevent.h
-# mDNS discovery (adb's wireless-debugging pairing) is off for now: it is a
-# Rust crate with no Cargo.lock in the release, so its crates cannot be
-# pinned and vendored for the offline build (Chimera runs `cargo vendor` with
-# the network). Needs a lockfile dkbuild can vendor from (wip/README.md).
+# mDNS discovery (adb's wireless-debugging pairing), its crates vendored
+# from files/Cargo.lock
 %cmake \
-    -DANDROID_TOOLS_ADB_ENABLE_MDNS=OFF
+    -DANDROID_TOOLS_ADB_ENABLE_MDNS=ON
 '''
 build = '''
 %cmake_build

@@ -63,12 +63,10 @@ Kalzium, FreeCAD, KLettres, Parley, Kiten, Klavaro, Marble, KGeography; games
 Optional features the early, minimal recipes still leave out (from a sweep
 against Chimera's templates, 2026-11-11; the desktop-critical ones are done):
 
-- curl and nghttp2: c-ares, HTTP/3 (nghttp3, ngtcp2). Low in the tree: a
-  change rebuilds most things, so do it with another wide rebuild.
-- elfutils: debuginfod (curl, libarchive, json-c, sqlite); now the dummy client.
-- gtk4: ffmpeg media backend, libtiff, iso-codes; gtk+3: iso-codes.
-- avahi: its GTK and Python parts would make a cycle (cups builds against
-  avahi, gtk+3 against cups): a separate avahi-ui recipe, as poppler-qt6.
+- Done 2026-11-11: curl (HTTP/3, c-ares, brotli, LDAP, GSSAPI), elfutils
+  debuginfod (+ libmicrohttpd), gtk4 colord/sysprof/iso-codes (GTK 4.24 has no
+  ffmpeg backend any more; libtiff is required there now), gtk+3 iso-codes,
+  avahi-ui (avahi's GTK and Python parts, split out because of the cups cycle).
 - PAM in cups, heimdal, kbd, qemu, samba, shadow: deliberately off (login
   stays shadow-based); revisit only if a feature needs it.
 - gnutls: unbound (DANE). libgit2: libssh2, heimdal. rsync: acl. lcms2,
@@ -77,7 +75,6 @@ against Chimera's templates, 2026-11-11; the desktop-critical ones are done):
   v4l-utils. transmission: its Qt client. wine: samba (NTLM).
 - PipeWire: libmysofa, libcamera, ROC (no recipes yet). LDAC (ldacbt) and
   WebRTC echo cancelling (webrtc-audio-processing) were added 2026-11-11.
-- android-tools: adb's mDNS discovery (Rust, vendor/adb/client/adbmdns) is
-  off: the release has no Cargo.lock, and cargodeps only vendors from a lock
-  inside the source. dkbuild needs a way to vendor from a lockfile a recipe
-  carries in files/ (generated once, then pinned).
+- android-tools: adb's mDNS discovery is on (2026-11-11): the
+  `cargolock=<dir>` option vendors from the Cargo.lock a recipe keeps in
+  files/ (made once with cargo generate-lockfile, then pinned).

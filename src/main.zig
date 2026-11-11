@@ -131,7 +131,7 @@ pub fn main(init: std.process.Init) !void {
                         }
                     }
                     if (is_first and contains(r.options, "cargodeps")) {
-                        if (fetch.fetchCargoDeps(arena, init.io, cache, src.tarball.sha256, try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, root, r.name), "patches" }), r.patches, &msg)) |cst| {
+                        if (fetch.fetchCargoDeps(arena, init.io, cache, src.tarball.sha256, try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, root, r.name), "patches" }), r.patches, try fetch.recipeCargoLock(arena, r.options, try recipe.dirPath(arena, root, r.name)), &msg)) |cst| {
                             std.debug.print("{s}: Rust crates {s}\n", .{ r.name, @tagName(cst) });
                         } else |cerr| {
                             failed = true;

@@ -132,6 +132,12 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
     for (r.options) |o| {
         const bare = if (o.len > 0 and o[0] == '!') o[1..] else o;
         const key = if (std.mem.startsWith(u8, bare, "jobs:")) "jobs" else bare;
+        // cargolock=<dir>: a Cargo.lock in files/ for the Rust project at <dir>
+        if (std.mem.startsWith(u8, bare, "cargolock=")) {
+            if (bare.len == "cargolock=".len or !contains(r.options, "cargodeps"))
+                return cfg.fail(arena, diag, "option '{s}': cargolock=<dir> needs a directory and the cargodeps option", .{o});
+            continue;
+        }
         if (!std.mem.eql(u8, key, "jobs") and !contains(&known_options, key))
             return cfg.fail(arena, diag, "unknown option '{s}'", .{o});
         if (std.mem.eql(u8, key, "jobs") and

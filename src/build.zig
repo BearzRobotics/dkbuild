@@ -514,7 +514,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                     zig_list = try fetch.zigDepsPath(arena, cache, src.tarball.sha256);
                 }
                 if (contains(r.options, "cargodeps")) {
-                    _ = fetch.fetchCargoDeps(arena, io, cache, src.tarball.sha256, try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, opts.root, r.name), "patches" }), r.patches, &msg) catch |err| {
+                    _ = fetch.fetchCargoDeps(arena, io, cache, src.tarball.sha256, try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, opts.root, r.name), "patches" }), r.patches, try fetch.recipeCargoLock(arena, r.options, try recipe.dirPath(arena, opts.root, r.name)), &msg) catch |err| {
                         out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
                         return error.PrepareFailed;
                     };
@@ -671,6 +671,10 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         var lay: std.ArrayList(u8) = .empty;
         if (cargo_list) |cl| {
             const text = Dir.cwd().readFileAlloc(io, cl, arena, .limited(1 << 22)) catch return error.UnpackFailed;
+            // with `cargolock=<dir>`: the recipe's Cargo.lock, the crates and the
+            // config in that project's directory (a subshell keeps the rest at the top)
+            const clock = try fetch.recipeCargoLock(arena, r.options, try recipe.dirPath(arena, opts.root, r.name));
+            if (clock) |l| try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "(\ncd '{s}'\ncp '{s}' Cargo.lock\n", .{ l.dir, absPath(arena, io, l.file) catch return error.UnpackFailed }));
             try lay.appendSlice(arena, "mkdir -p vendor .cargo\n");
             try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "cp '{s}' .cargo/config.toml\n", .{absPath(arena, io, cargo_config.?) catch return error.UnpackFailed}));
             var lines = std.mem.tokenizeScalar(u8, text, '\n');
@@ -680,6 +684,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 const k = f.next() orelse continue;
                 try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "ln -sfn '/dkdeps/crates/{s}' 'vendor/{s}'\n", .{ k, n }));
             }
+            if (clock != null) try lay.appendSlice(arena, ")\n");
         }
         // Gems: vendor/cache in the source's top directory, linking into the
         // store; `bundle install --local` installs from there.
