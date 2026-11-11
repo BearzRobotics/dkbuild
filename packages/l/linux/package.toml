@@ -7,9 +7,11 @@
 # r2: install and upgrade scripts write systemd-boot entries (gen-systemd-boot),
 # when systemd-boot is installed. UDF is built in (=y), like exFAT and NTFS3, so the
 # live ISO's init can find an image on any stick Ventoy or a DVD uses.
+# r10: linux-devel, the build tree out-of-tree modules (ZFS) are built against:
+# /usr/src/linux-<release>, linked from /usr/lib/modules/<release>/build.
 name = "linux"
 version = "6.19"
-release = 9
+release = 10
 summary = "The Linux kernel and its modules"
 license = "GPL-2.0-only WITH Linux-syscall-note"
 homepage = "https://kernel.org"
@@ -38,4 +40,27 @@ install -Dm644 System.map "$pkgdir/boot/System.map-6.19-dkrescue"
 install -Dm644 .config "$pkgdir/boot/config-6.19-dkrescue"
 # build and source links point into the build tree
 rm -f "$pkgdir"/usr/lib/modules/*/build "$pkgdir"/usr/lib/modules/*/source
+# the build tree for out-of-tree modules (linux-devel): what `make -C <it>
+# M=<module>` needs, as distributions ship it (configuration and symbol
+# versions, the built scripts/, headers, objtool, x86's Makefiles, Kconfig)
+krel=$(make -s kernelrelease)
+b="$pkgdir/usr/src/linux-$krel"
+install -Dt "$b" -m644 .config Makefile Module.symvers System.map
+install -Dt "$b/kernel" -m644 kernel/Makefile
+install -Dt "$b/arch/x86" -m644 arch/x86/Makefile arch/x86/Makefile_32.cpu
+install -Dt "$b/arch/x86/kernel" -m644 arch/x86/kernel/asm-offsets.s
+cp -a scripts include "$b/"
+cp -a arch/x86/include "$b/arch/x86/"
+install -Dt "$b/tools/objtool" tools/objtool/objtool
+find . -name 'Kconfig*' -not -path './debian/*' | while read -r k; do install -Dm644 "$k" "$b/$k"; done
+# object files and build leftovers in scripts/ are not needed
+find "$b/scripts" -name '*.o' -delete -o -name '.*.cmd' -delete
+ln -s ../../../src/linux-$krel "$pkgdir/usr/lib/modules/$krel/build"
+test -x "$b/scripts/mod/modpost" && test -f "$b/Module.symvers"
 '''
+
+# the build tree out-of-tree modules are built against (ZFS's)
+[subpackages.devel]
+summary = "Build tree for out-of-tree kernel modules"
+paths   = ["/usr/src", "/usr/lib/modules/*/build"]
+depends = ["linux"]
