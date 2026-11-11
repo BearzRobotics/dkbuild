@@ -15,8 +15,9 @@ source = [
 ]
 
 setup = '''
+# LIBSWORD_LIBRARY_TYPE unset builds both libraries ("Both" matched neither
+# Shared nor Static, so none was built)
 %cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
-    -DLIBSWORD_LIBRARY_TYPE=Both \
     -DSWORD_BUILD_UTILS=Yes \
     -DSWORD_BUILD_EXAMPLES=No \
     -DSWORD_BUILD_TESTS=No \
