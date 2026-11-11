@@ -5,7 +5,7 @@
 # dependency names (they are Chimera's) before building.
 name = "libdovi"
 version = "3.3.2"
-release = 1
+release = 2
 summary = "Library to read & write Dolby Vision metadata"
 license = "MIT"
 homepage = "https://github.com/quietvoid/dovi_tool"
@@ -22,9 +22,14 @@ export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
 export RUSTFLAGS="-C target-feature=-crt-static"
 '''
 build = '''
-cargo cbuild --release --frozen --offline -j $jobs --prefix=/usr --libdir=/usr/lib --manifest-path dolby_vision/Cargo.toml
+# dolby_vision/Cargo.lock adds criterion, a benchmark-only dev-dependency the
+# vendored crates (from the top Cargo.lock) don't have: drop it and the bench,
+# and use the top lock, which pins the same versions of everything else.
+sed -i '/^\[dev-dependencies\]/,/^$/d; /^\[\[bench\]\]/,/^$/d' dolby_vision/Cargo.toml
+cp Cargo.lock dolby_vision/Cargo.lock
+cargo cbuild --release --offline -j $jobs --prefix=/usr --libdir=/usr/lib --manifest-path dolby_vision/Cargo.toml
 '''
 install = '''
-cargo cinstall --release --frozen --offline --prefix=/usr --libdir=/usr/lib --destdir="$pkgdir" --manifest-path dolby_vision/Cargo.toml
+cargo cinstall --release --offline --prefix=/usr --libdir=/usr/lib --destdir="$pkgdir" --manifest-path dolby_vision/Cargo.toml
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libdovi/LICENSE"
 '''

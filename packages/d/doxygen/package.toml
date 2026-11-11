@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "doxygen"
 version = "1.17.0"
-release = 1
+release = 2
 summary = "Source code documentation generator tool"
 license = "GPL-2.0-only"
 homepage = "https://doxygen.nl"
@@ -18,6 +18,8 @@ source = [
 ]
 
 setup = '''
+# spdlog's bundled fmt calls free() without <cstdlib> (Clang 23, libc++)
+export CXXFLAGS="$CXXFLAGS -include cstdlib"
 %cmake \
     -DCMAKE_BUILD_TYPE=Release \
     -Duse_sys_sqlite3=ON

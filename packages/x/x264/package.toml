@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "x264"
 version = "20250831"
-release = 2
+release = 3
 summary = "Free library for encoding H264/AVC video streams"
 license = "GPL-2.0-or-later"
 homepage = "https://www.videolan.org/developers/x264.html"
@@ -23,8 +23,9 @@ setup = '''
     --enable-shared
 '''
 build = '''
-%make
+# x264's Makefile runs $(AR)$@: AR has to end in "rc "
+%make AR="${AR:-llvm-ar} rc "
 '''
 install = '''
-%make_install
+%make_install AR="${AR:-llvm-ar} rc "
 '''

@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "ladspa-sdk"
 version = "1.17"
-release = 2
+release = 3
 summary = "Linux Audio Developer's Simple Plugin API"
 license = "LGPL-2.1-or-later"
 homepage = "http://www.ladspa.org"
@@ -24,18 +24,10 @@ check = '''
 make -C src test
 '''
 install = '''
-# header
-install -Dm644 src/ladspa.h "$pkgdir/usr/include/ladspa.h"
-# plugins
-# programs
-# docs
-install -dm755 "$pkgdir/usr/share/doc"
-mkdir -p "$pkgdir/usr/share/doc/ladspa-sdk"
-ln -sf ../../../include/ladspa.h "$pkgdir/usr/share/doc/ladspa-sdk/ladspa.h.txt"
 install -Dm644 src/ladspa.h "$pkgdir/usr/include/ladspa.h"
 install -d "$pkgdir/usr/lib/ladspa" "$pkgdir/usr/bin" "$pkgdir/usr/share/doc"
 install -m755 plugins/*.so* "$pkgdir/usr/lib/ladspa/"
 install -m755 bin/* "$pkgdir/usr/bin/"
 cp -r doc "$pkgdir/usr/share/doc/ladspa-sdk"
-ln -s ../../../include/ladspa.h "$pkgdir/usr/share/doc/ladspa-sdk/ladspa.h.txt"
+ln -sf ../../../include/ladspa.h "$pkgdir/usr/share/doc/ladspa-sdk/ladspa.h.txt"
 '''
