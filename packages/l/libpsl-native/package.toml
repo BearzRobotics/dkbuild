@@ -15,6 +15,8 @@ source = [
 
 build = '''
 cd src/libpsl-native
+# the tests need googletest, a git submodule not in the archive
+sed -i 's/^    add_subdirectory(test)$//' CMakeLists.txt
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 cmake --build build
 '''

@@ -9,7 +9,7 @@ homepage = "https://libopenraw.freedesktop.org"
 patches = ["FILE.patch", "fuck-you-libtool.patch", "no-demo.patch", "update-crates.patch"]
 hostdeps = ["autoconf-archive", "automake", "rust", "libtool", "pkgconf"]
 builddeps = ["boost-devel", "curl-devel", "gdk-pixbuf-devel", "libjpeg-turbo-devel", "libxml2-devel", "rust"]
-options = ["!lto", "cargodeps"]
+options = ["!lto"]
 
 source = [
     { url = "https://libopenraw.freedesktop.org/download/libopenraw-0.3.7.tar.xz", sha256 = "0ece41951b2cd91e43f6a8a5c6a894bbc8b5923b4e49a82ebb6d8ce62bded68c" },

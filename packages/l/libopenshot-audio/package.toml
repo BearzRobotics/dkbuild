@@ -5,7 +5,7 @@ release = 1
 summary = "Audio library for OpenShot"
 license = "GPL-3.0-or-later"
 homepage = "https://github.com/OpenShot/libopenshot-audio"
-hostdeps = ["cmake", "ninja", "pkgconf"]
+hostdeps = ["cmake", "ninja", "pkgconf", "perl"]
 builddeps = ["alsa-lib-devel", "zlib-ng-compat-devel"]
 options = ["!check"]
 
@@ -14,6 +14,13 @@ source = [
 ]
 
 setup = '''
+# musl has no <execinfo.h> (backtrace()): JUCE's stack-trace helper says so
+# instead of printing frames
+m=JuceLibraryCode/modules/juce_core
+perl -0pi -e 's/#if ! \(JUCE_ANDROID \|\| JUCE_WASM\)\n(\s*)#include <execinfo.h>/#if ! (JUCE_ANDROID || JUCE_WASM) \&\& __has_include(<execinfo.h>)\n$1#include <execinfo.h>/' $m/juce_core.cpp
+perl -0pi -e 's/   #else\n    void\* stack\[128\];/   #elif ! __has_include(<execinfo.h>)\n    result << "(no stack trace on this system)" << newLine;\n   #else\n    void* stack[128];/' $m/system/juce_SystemStats.cpp
+grep -q '__has_include(<execinfo.h>)' $m/juce_core.cpp
+grep -q 'no stack trace on this system' $m/system/juce_SystemStats.cpp
 %cmake
 '''
 build = '''
