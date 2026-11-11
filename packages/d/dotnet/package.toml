@@ -21,7 +21,7 @@ rundeps = ["icu", "openssl", "heimdal-libs"]
 options = ["!check", "!strip", "jobs:12"]
 
 source = [
-    { url = "snapshot:dotnet v10.0.114 10.0.114", sha256 = "0000000000000000000000000000000000000000000000000000000000000000" },
+    { url = "snapshot:dotnet v10.0.114 10.0.114", sha256 = "e02e84b3b28a8dbf79e67086ee5a6ddb5e27d8e9ad05fd78bd36cacdc52e217f" },
 ]
 
 environment = '''
