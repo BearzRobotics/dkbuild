@@ -1,0 +1,12 @@
+# Everything needed to rebuild FenrirOS with no network: every source tarball
+# the recipes name, the vendored Go, Rust, Zig, npm, NuGet and Ruby stores,
+# the dkbuild tree (a git bundle of what is committed) and dkrescue.iso.
+# Never the private signing key.
+#
+#   dkbuild discs images/source.toml               DVDs (about 4.5 GB each)
+#   dkbuild discs --media usb images/source.toml   one image for a USB stick or Ventoy
+name  = "fenriros-source"
+kind  = "source"
+arch  = "x86_64"
+media = "dvd"
+label = "FENRIROS_SRC"

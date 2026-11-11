@@ -167,6 +167,14 @@ care.
 
 ## ISO package repositories, and a source ISO
 
+Status: `dkbuild discs` makes both sets (images/repo.toml, images/source.toml):
+one image (`--media usb`) or a numbered set for cd, dvd, dvd-dl, bd25, bd50 or
+bd100. Every disc carries the signed MANIFEST, the public keys and `import.sh`,
+which copies a disc into a directory, checks every file, joins files cut across
+discs and says which discs are still missing. Tested on a 4-CD set: imported
+out of order, and apk read and fetched from the result. Still to do: packages on
+the install and rescue ISOs (a package list).
+
 `dkbuild image` can put packages on the ISO (`apks/<arch>/` with a signed
 `Packages.adb`), as Alpine's install media do: the live system lists the disc
 as a repository (`/run/live/medium/apks/<arch>/Packages.adb`), so `apk add`

@@ -13,6 +13,7 @@ const doctor = @import("doctor.zig");
 const cbuild = @import("cbuild.zig");
 const sched = @import("sched.zig");
 const imagefile = @import("image.zig");
+const discs = @import("discs.zig");
 
 const usage =
     \\usage: dkbuild [--tree DIR] <command> [args]
@@ -26,6 +27,10 @@ const usage =
     \\                             (-j: jobs per build; -P: builds at once, default 1)
     \\  image <file.toml>          make a root filesystem from repo/ (tarball, squashfs or
     \\                             directory in out/<name>/); see SPEC.md 8
+    \\  discs [--media M] <file.toml>
+    \\                             the repository (kind = "repo") or the sources ("source")
+    \\                             as ISO images in out/<name>/: one image (media usb) or a
+    \\                             set for discs (cd, dvd, dvd-dl, bd25, bd50, bd100)
     \\  prune [--dry-run] [--key FILE]
     \\  outdated [--bump]          recipes changed since their last build without a new release (--bump raises it)
     \\                             remove packages from repo/ that their recipe no longer
@@ -404,6 +409,47 @@ pub fn main(init: std.process.Init) !void {
             error.OutOfMemory => return err,
             else => std.process.exit(1),
         };
+    } else if (std.mem.eql(u8, cmd, "discs")) {
+        var media: ?[]const u8 = null;
+        var file: ?[]const u8 = null;
+        var k: usize = 0;
+        while (k < rest.len) : (k += 1) {
+            if (std.mem.eql(u8, rest[k], "--media") and k + 1 < rest.len) {
+                k += 1;
+                media = rest[k];
+            } else if (file == null and rest[k].len > 0 and rest[k][0] != '-') {
+                file = rest[k];
+            } else return die(usage);
+        }
+        const path = file orelse return die(usage);
+        const text = std.Io.Dir.cwd().readFileAlloc(init.io, path, arena, .limited(1 << 20)) catch |err| {
+            std.debug.print("{s}: {s}\n", .{ path, @errorName(err) });
+            std.process.exit(1);
+        };
+        var diag: discs.Diagnostic = .{};
+        var set = discs.parse(arena, text, &diag) catch |err| switch (err) {
+            error.InvalidSet => {
+                std.debug.print("{s}: {s}\n", .{ path, diag.message });
+                std.process.exit(1);
+            },
+            else => return err,
+        };
+        if (media) |m| {
+            set.media = m;
+            discs.check(arena, &diag, set) catch {
+                std.debug.print("--media: {s}\n", .{diag.message});
+                std.process.exit(1);
+            };
+        }
+        var t = try tree.load(arena, init.io, root, &problems);
+        t.allow_external = true;
+        var dopts: discs.Options = .{ .root = root };
+        if (init.environ_map.get("HOME")) |home|
+            dopts.key = try std.fs.path.join(arena, &.{ home, ".config", "dkbuild", "signing.rsa" });
+        discs.make(arena, init.io, t, set, dopts) catch |err| switch (err) {
+            error.OutOfMemory => return err,
+            else => std.process.exit(1),
+        };
     } else if (std.mem.eql(u8, cmd, "prune")) {
         var opts: build.Options = .{ .root = root };
         if (init.environ_map.get("HOME")) |home|
@@ -524,6 +570,7 @@ test {
     _ = @import("inputs.zig");
     _ = @import("sched.zig");
     _ = @import("image.zig");
+    _ = @import("discs.zig");
 }
 
 /// After `pkg` or `world`: logs/<arch>/last-run.txt, and a dated copy in
