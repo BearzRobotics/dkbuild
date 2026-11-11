@@ -16,7 +16,9 @@ source = [
 ]
 
 setup = '''
-./configure --prefix=/usr --with-openmp CC="$CC"
+# its configure runs "$CC" as one word: the profile's --target goes in the flags
+tflags=${CC#clang }
+./configure --prefix=/usr --with-openmp CC=clang --extra-cflags="$tflags $CFLAGS" --extra-ldflags="$tflags $LDFLAGS"
 '''
 build = '''
 make -j$jobs

@@ -5,7 +5,7 @@ release = 1
 summary = "Caches freedesktop.org application menus"
 license = "LGPL-2.1-or-later"
 homepage = "https://github.com/lxde/menu-cache"
-hostdeps = ["autoconf", "automake", "libtool", "pkgconf"]
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf", "gtk-doc-tools"]
 builddeps = ["glib-devel", "libfm-extra-devel"]
 options = ["!check"]
 
@@ -14,8 +14,8 @@ source = [
 ]
 
 setup = '''
-# no gtk-doc here: its API documentation is left out
-sed -i 's/^GTK_DOC_CHECK.*/AM_CONDITIONAL([ENABLE_GTK_DOC], [false])\nAM_CONDITIONAL([GTK_DOC_USE_LIBTOOL], [true])/' configure.ac
+# gtk-doc.make comes from gtkdocize (the API docs stay off by default)
+gtkdocize
 autoreconf -fi
 %configure
 '''
