@@ -15,13 +15,13 @@
 # echo cancelling, libmysofa, libcamera, ROC.
 name = "pipewire"
 version = "1.6.10"
-release = 6
+release = 7
 summary = "Server and user space API to deal with multimedia pipelines"
 license = "MIT"
 homepage = "https://pipewire.org"
 patches = ["lol.patch", "readiness.patch"]
 hostdeps = ["glib-devel", "meson", "pkgconf"]
-builddeps = ["alsa-lib-devel", "dbus-devel", "eudev-devel", "ncurses-devel", "readline-devel", "elogind-devel", "bluez-devel", "sbc-devel", "fdk-aac-devel", "libfreeaptx-devel", "liblc3-devel", "opus-devel", "avahi-devel", "libsndfile-devel", "libpulse-devel", "libusb-devel", "lilv-devel", "lv2", "libx11-devel", "libxfixes-devel", "libcanberra-devel", "gstreamer-devel", "gst-plugins-base-devel", "openssl-devel"]
+builddeps = ["alsa-lib-devel", "dbus-devel", "eudev-devel", "ncurses-devel", "readline-devel", "elogind-devel", "bluez-devel", "sbc-devel", "fdk-aac-devel", "libfreeaptx-devel", "liblc3-devel", "ldacbt-devel", "opus-devel", "avahi-devel", "libsndfile-devel", "libpulse-devel", "libusb-devel", "lilv-devel", "lv2", "libx11-devel", "libxfixes-devel", "libcanberra-devel", "gstreamer-devel", "gst-plugins-base-devel", "openssl-devel"]
 rundeps = ["dbus"]
 options = ["!check"]
 
@@ -60,6 +60,7 @@ setup = '''
     -Dbluez5-codec-lc3=enabled \
     -Dopus=enabled \
     -Dbluez5-codec-opus=enabled \
+    -Dbluez5-codec-ldac=enabled \
     -Davahi=enabled \
     -Draop=enabled \
     -Dsndfile=enabled \

@@ -1,0 +1,37 @@
+# ldacBT: Sony's LDAC Bluetooth audio encoder (AOSP's libldac) with its
+# adaptive bit rate library, as shared and static libraries with pkg-config
+# files (ldacBT-enc, ldacBT-abr). For LDAC to Bluetooth headphones in
+# GStreamer (gst-plugins-bad's ldac) and PipeWire.
+#
+# Its CMakeLists builds shared libraries only; the static ones are built from
+# a second copy of the tree with SHARED changed to STATIC.
+name = "ldacbt"
+version = "2.0.2.3"
+release = 1
+summary = "LDAC Bluetooth audio encoder library"
+license = "Apache-2.0"
+homepage = "https://github.com/EHfive/ldacBT"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja"]
+
+source = [
+    { url = "https://github.com/EHfive/ldacBT/releases/download/v2.0.2.3/ldacBT-2.0.2.3.tar.gz", sha256 = "4bd8eece78bb5c1361fab95743e7100506e2408a25c4a592a0f8d349746dc5b4" },
+]
+
+setup = '''
+cp -a . /tmp/ldac-static
+sed -i 's/^add_library(\(ldacBT_[a-z]*\) SHARED$/add_library(\1 STATIC/' /tmp/ldac-static/CMakeLists.txt
+test "$(grep -c ' STATIC$' /tmp/ldac-static/CMakeLists.txt)" = 2
+%cmake -DINSTALL_LIBDIR=/usr/lib -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+cmake -S /tmp/ldac-static -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DINSTALL_LIBDIR=/usr/lib -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+install = '''
+%cmake_install
+install -m644 build-static/libldacBT_enc.a build-static/libldacBT_abr.a "$pkgdir/usr/lib/"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ldacbt/LICENSE"
+install -Dm644 libldac/NOTICE "$pkgdir/usr/share/licenses/ldacbt/NOTICE"
+'''
