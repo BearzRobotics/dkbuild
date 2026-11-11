@@ -9,6 +9,8 @@ homepage = "https://www.wireguard.com"
 patches = ["opendoas.patch"]
 hostdeps = ["pkgconf", "bash"]
 builddeps = ["linux-headers"]
+# wg-quick is a bash script using ip and resolvconf
+rundeps = ["bash", "iproute2", "openresolv"]
 checkdeps = ["llvm", "perl"]
 options = ["!check"]
 
