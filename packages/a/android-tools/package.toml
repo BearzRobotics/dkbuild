@@ -19,8 +19,12 @@ environment = '''
 export CXXFLAGS="${CXXFLAGS} -D_LARGEFILE64_SOURCE"
 '''
 setup = '''
+# mDNS discovery (adb's wireless-debugging pairing) is off for now: it is a
+# Rust crate with no Cargo.lock in the release, so its crates cannot be
+# pinned and vendored for the offline build (Chimera runs `cargo vendor` with
+# the network). Needs a lockfile dkbuild can vendor from (wip/README.md).
 %cmake \
-    -DANDROID_TOOLS_ADB_ENABLE_MDNS=ON
+    -DANDROID_TOOLS_ADB_ENABLE_MDNS=OFF
 '''
 build = '''
 %cmake_build

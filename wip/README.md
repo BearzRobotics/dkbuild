@@ -77,3 +77,7 @@ against Chimera's templates, 2026-11-11; the desktop-critical ones are done):
   v4l-utils. transmission: its Qt client. wine: samba (NTLM).
 - PipeWire: LDAC, webrtc echo cancelling, libmysofa, libcamera, ROC (no
   recipes yet).
+- android-tools: adb's mDNS discovery (Rust, vendor/adb/client/adbmdns) is
+  off: the release has no Cargo.lock, and cargodeps only vendors from a lock
+  inside the source. dkbuild needs a way to vendor from a lockfile a recipe
+  carries in files/ (generated once, then pinned).
