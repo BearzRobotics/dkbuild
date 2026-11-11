@@ -15,6 +15,10 @@ source = [
 ]
 
 setup = '''
+# wsrep-lib's gtid.hpp uses ssize_t without <sys/types.h> (glibc's C++ headers
+# bring it in, musl's do not)
+sed -i 's|^#include <iosfwd>$|#include <sys/types.h>\n#include <iosfwd>|' wsrep-lib/include/wsrep/gtid.hpp
+grep -q '^#include <sys/types.h>$' wsrep-lib/include/wsrep/gtid.hpp
 %cmake \
     -DBUILD_CONFIG=mysql_release \
     -DINSTALL_LAYOUT=RPM \
