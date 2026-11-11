@@ -9,7 +9,7 @@ summary = "Linux kernel bpf manipulation tool"
 license = "GPL-2.0-only"
 homepage = "https://github.com/libbpf/bpftool"
 patches = ["epicbuildsystem.patch"]
-hostdeps = ["python"]
+hostdeps = ["llvm-clang", "llvm", "python"]
 builddeps = ["elfutils-devel", "libcap-devel", "linux-headers", "llvm-devel", "openssl-devel"]
 options = ["!check"]
 
