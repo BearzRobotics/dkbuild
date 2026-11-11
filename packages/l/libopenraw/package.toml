@@ -6,7 +6,10 @@ release = 7
 summary = "RAW format parsing library"
 license = "LGPL-3.0-or-later"
 homepage = "https://libopenraw.freedesktop.org"
-patches = ["FILE.patch", "fuck-you-libtool.patch", "no-demo.patch", "update-crates.patch"]
+# its Rust part (lib/mp4) builds with the crates upstream vendored in the
+# archive; Chimera's update-crates.patch (newer versions in Cargo.lock) is not
+# used, since those versions are not in that vendor directory
+patches = ["FILE.patch", "fuck-you-libtool.patch", "no-demo.patch"]
 hostdeps = ["autoconf-archive", "automake", "rust", "libtool", "pkgconf"]
 builddeps = ["boost-devel", "curl-devel", "gdk-pixbuf-devel", "libjpeg-turbo-devel", "libxml2-devel", "rust"]
 options = ["!lto"]
