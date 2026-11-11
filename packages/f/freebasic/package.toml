@@ -56,6 +56,10 @@ sed -i -E 's/goto \*(vr\$[0-9]+);/{ __label__ fb$jt; goto *(\1 ? \1 : \&\&fb$jt)
 f=src/compiler/ir-hlc.bas
 sed -i 's|hWriteLine( "goto \*" + exprFlush( exprNewVREG( v1 ), TRUE ) + ";" )|dim as string jt = "(" + exprFlush( exprNewVREG( v1 ), TRUE ) + ")" : hWriteLine( "{ __label__ fb$jt; goto *(" + jt + " ? " + jt + " : \&\&fb$jt); fb$jt: __builtin_trap(); }" )|' $f
 grep -q '__label__ fb$jt' $f
+# clang marks address-significant symbols with .addrsig_sym in the assembly it
+# writes, which GNU as does not know: fbc asks clang not to (-fno-addrsig)
+sed -i 's|ln += "-S -nostdlib -nostdinc -Wall "|ln += "-S -nostdlib -nostdinc -Wall -fno-addrsig "|' src/compiler/fbc.bas
+grep -q -- '-Wall -fno-addrsig "' src/compiler/fbc.bas
 '''
 build = '''
 # 1. the bootstrap compiler (and the runtime) with clang
@@ -70,8 +74,9 @@ for d in lib/freebasic/linux-*; do
     for o in crtbegin.o crtbeginS.o crtend.o crtendS.o; do ln -sf "$rtdir/$o" $d/$o; done
 done
 # 3. the patched compiler, runtime and graphics library, by the bootstrap one
+# (made from the shipped C, so it is told -fno-addrsig itself)
 make clean-compiler
-make -j$jobs CC=cc AS=gas prefix=/usr FBC="$PWD/bin/fbc-bootstrap" FBFLAGS="-maxerr 1 -Wl --dynamic-linker=$loader"
+make -j$jobs CC=cc AS=gas prefix=/usr FBC="$PWD/bin/fbc-bootstrap" FBFLAGS="-maxerr 1 -Wc -fno-addrsig -Wl --dynamic-linker=$loader"
 '''
 install = '''
 make CC=cc AS=gas prefix=/usr DESTDIR="$pkgdir" FBC="$PWD/bin/fbc-bootstrap" install
