@@ -6,7 +6,7 @@ release = 1
 summary = "OpenResty's LuaJIT fork"
 license = "MIT"
 homepage = "https://github.com/openresty/luajit2"
-patches = ["bcsave-ppc64.patch", "grep.patch", "tests-fail.patch", "tests.patch"]
+patches = ["bcsave-ppc64.patch", "grep.patch"]
 archs = ["aarch64", "x86_64"]
 hostdeps = ["pkgconf"]
 checkdeps = ["perl", "sqlite-devel", "zlib-ng-compat-devel"]
@@ -17,6 +17,14 @@ source = [
     { url = "https://github.com/openresty/luajit2-test-suite/archive/a3a5deb5d97d57fb4da567017a621ae73ee7305e.tar.gz", sha256 = "b9862f002768dac55c8ab3d1ea21f3aa06d4075f6d022bb2eff76e82df264ffc" },
 ]
 
+setup = '''
+# the test suite (the second source) goes in test-suite/, then gets its two
+# patches (they are relative to the source tree, so they cannot be applied
+# with the others before it is moved in)
+mv /build/luajit2-test-suite-a3a5deb5d97d57fb4da567017a621ae73ee7305e test-suite
+patch -Np1 -i /dkbuild/patches/tests-fail.patch
+patch -Np1 -i /dkbuild/patches/tests.patch
+'''
 build = '''
 # its makefile does not pass the link flags on by itself
 %make \
