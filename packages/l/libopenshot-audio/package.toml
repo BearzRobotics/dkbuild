@@ -25,6 +25,10 @@ grep -q 'no stack trace on this system' $m/system/juce_SystemStats.cpp
 # defines stat64 with _LARGEFILE64_SOURCE): JUCE uses it with glibc only
 sed -i 's/^   #if JUCE_LINUX || (JUCE_IOS \&\& (! TARGET_OS_MACCATALYST)/   #if (JUCE_LINUX \&\& defined (__GLIBC__)) || (JUCE_IOS \&\& (! TARGET_OS_MACCATALYST)/' $m/native/juce_SharedCode_posix.h
 grep -q 'JUCE_LINUX && defined (__GLIBC__)' $m/native/juce_SharedCode_posix.h
+# the user's language and region come from glibc-only nl_langinfo keys
+# (_NL_ADDRESS_*): on musl, JUCE's BSD way ($LANG, no region)
+perl -0pi -e 's/#if JUCE_BSD(\n\s+if \(auto langEnv)/#if JUCE_BSD || ! defined (__GLIBC__)$1/; s/#if JUCE_BSD(\n\s+return \{\};\n\s+#else\n\s+return getLocaleValue \(_NL_ADDRESS_COUNTRY_AB2\))/#if JUCE_BSD || ! defined (__GLIBC__)$1/' $m/native/juce_SystemStats_linux.cpp
+test "$(grep -c 'JUCE_BSD || ! defined (__GLIBC__)' $m/native/juce_SystemStats_linux.cpp)" = 2
 %cmake
 '''
 build = '''
