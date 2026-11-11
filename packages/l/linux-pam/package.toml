@@ -11,7 +11,7 @@ release = 1
 summary = "Pluggable Authentication Modules for Linux"
 license = "BSD-3-Clause"
 homepage = "https://github.com/linux-pam/linux-pam"
-hostdeps = ["docbook-xsl", "gettext-devel", "libxslt", "meson", "pkgconf", "flex"]
+hostdeps = ["docbook-xsl", "docbook5-xml", "gettext-devel", "libxslt", "libxml2", "meson", "pkgconf", "flex"]
 builddeps = ["flex-static", "gettext-devel", "linux-headers"]
 rundeps = ["linux-pam-base"]
 options = ["!check"]
@@ -20,13 +20,27 @@ source = [
     { url = "https://github.com/linux-pam/linux-pam/releases/download/v1.7.2/Linux-PAM-1.7.2.tar.xz", sha256 = "3d86b6383fb5fd9eb9578d2cd47d92801191f4bf3f9bc61419bfefc8aa1e531a" },
 ]
 
+environment = '''
+# The man pages: DocBook 5's schema and the namespaced DocBook XSL from the
+# local catalogs, through one catalog file (its configure checks both in it)
+mkdir -p /tmp/xml
+cat > /tmp/xml/catalog <<'EOF2'
+<?xml version="1.0"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+  <nextCatalog catalog="/usr/share/xml/docbook/5.0/catalog.xml"/>
+  <nextCatalog catalog="/usr/share/xsl/docbook/catalog.xml"/>
+</catalog>
+EOF2
+export XML_CATALOG_FILES=/tmp/xml/catalog
+'''
 setup = '''
 %meson \
     -Ddocdir=/usr/share/doc/pam \
     -Dnis=disabled \
     -Daudit=disabled \
     -Dselinux=disabled \
-    -Dvendordir=/usr/share/pam
+    -Dvendordir=/usr/share/pam \
+    -Dxml-catalog=/tmp/xml/catalog
 '''
 build = '''
 %meson_build
@@ -36,5 +50,5 @@ install = '''
 install -Dm644 COPYING "$pkgdir/usr/share/licenses/linux-pam/COPYING"
 rm -rf "$pkgdir/usr/lib/systemd"
 # pam_unix checks passwords through it, as the user (it reads /etc/shadow)
-chmod 4755 "$pkgdir/usr/bin/unix_chkpwd"
+chmod 4755 "$pkgdir"/usr/*bin/unix_chkpwd
 '''

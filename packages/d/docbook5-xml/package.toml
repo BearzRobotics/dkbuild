@@ -1,0 +1,24 @@
+# DocBook 5.0 schemas (RELAX NG, W3C XML Schema, DTD) with their XML catalog,
+# for validating DocBook 5 documents offline. needed by: linux-pam (its man
+# pages are checked against docbookxi.rng). docbook.org no longer serves the
+# 5.0 release, so the source is Debian's copy of it.
+name = "docbook5-xml"
+version = "5.0"
+release = 1
+summary = "DocBook 5.0 schemas and catalog"
+license = "custom:DocBook"
+homepage = "https://docbook.org"
+hostdeps = []
+options = ["!check"]
+
+source = [
+    { url = "https://deb.debian.org/debian/pool/main/d/docbook5-xml/docbook5-xml_5.0.orig.tar.gz", sha256 = "65b59448bb319ad39535b82856bb08959ea5d52588ac21fd0f45b7d45c5491a6" },
+]
+
+install = '''
+d="$pkgdir/usr/share/xml/docbook/5.0"
+install -dm755 "$d"
+cp -r docbook-5.0/catalog.xml docbook-5.0/rng docbook-5.0/xsd docbook-5.0/dtd docbook-5.0/sch "$d/" 2>/dev/null || cp -r docbook-5.0/. "$d/"
+test -e "$d/rng/docbookxi.rng"
+install -Dm644 docbook-5.0/README "$pkgdir/usr/share/licenses/docbook5-xml/README"
+'''

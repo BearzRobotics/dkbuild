@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "nspr"
 version = "4.40"
-release = 4
+release = 5
 summary = "NetScape Portable Runtime"
 license = "MPL-2.0"
 homepage = "https://www.mozilla.org/projects/nspr"
@@ -22,7 +22,10 @@ export CFLAGS="${CFLAGS} -D_PR_POLL_AVAILABLE -D_PR_HAVE_OFF64_T -D_PR_INET6 -D_
 '''
 setup = '''
 cd nspr
-%configure \
+# --enable-64bit on 64-bit machines: without it NSPR is configured as 32-bit
+# x86 and leaves out the x86_64 atomics NSS links against
+case "$arch" in x86_64|aarch64|riscv64) b64=--enable-64bit ;; *) b64= ;; esac
+%configure $b64 \
     --enable-optimize \
     --enable-debug \
     --enable-ipv6
