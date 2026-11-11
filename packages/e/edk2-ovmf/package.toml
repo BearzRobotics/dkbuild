@@ -17,8 +17,9 @@ source = [
 setup = '''
 # clang 23's -Wattribute-alias (CryptoPkg's memcpy alias has an unsigned int
 # size) under edk2's -Werror: off with its other clang warning overrides
-sed -i 's/^\(DEFINE CLANGDWARF_WARNING_OVERRIDES   = .*\)$/\1 -Wno-attribute-alias/' BaseTools/Conf/tools_def.template
-grep -q '^DEFINE CLANGDWARF_WARNING_OVERRIDES .*-Wno-attribute-alias$' BaseTools/Conf/tools_def.template
+# (the file has CRLF line ends: the flag goes before the \r)
+sed -i 's/^\(DEFINE CLANGDWARF_WARNING_OVERRIDES   = [^\r]*\)/\1 -Wno-attribute-alias/' BaseTools/Conf/tools_def.template
+grep -q '^DEFINE CLANGDWARF_WARNING_OVERRIDES .*-Wno-attribute-alias' BaseTools/Conf/tools_def.template
 export PYTHON_COMMAND=python3
 # clang 23's -Wunused-but-set-global, under BaseTools' -Werror (Elf32Convert.c)
 make -C BaseTools CC=clang CXX=clang++ EXTRA_OPTFLAGS=-Wno-unused-but-set-global -j$jobs
