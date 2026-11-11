@@ -8,7 +8,7 @@ release = 1
 summary = "Redlang Resource Description Framework"
 license = "GPL-2.0-or-later OR LGPL-2.1-or-later OR Apache-2.0"
 homepage = "https://librdf.org"
-hostdeps = ["pkgconf", "automake", "libtool", "perl"]
+hostdeps = ["pkgconf", "automake", "libtool", "perl", "gtk-doc-tools"]
 builddeps = ["libtool-devel", "rasqal-devel", "sqlite-devel", "unixodbc-devel"]
 
 source = [
