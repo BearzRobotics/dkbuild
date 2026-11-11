@@ -27,6 +27,11 @@ for f in wsrep-lib/include/wsrep/buffer.hpp wsrep-lib/include/wsrep/client_state
     sed -i '0,/^#include/s//#include <algorithm>\n#include/' "$f"
 done
 grep -q '^#include <iterator>' wsrep-lib/include/wsrep/buffer.hpp
+# musl's <langinfo.h> defines ERA as a macro, and DuckDB (storage/duckdb) has
+# an enum member ERA, with langinfo.h in the same unity build: undefined there
+h=storage/duckdb/third_parties/duckdb/src/include/duckdb/common/enums/date_part_specifier.hpp
+sed -i 's|^#include "duckdb/common/constants.hpp"$|#include "duckdb/common/constants.hpp"\n#ifdef ERA\n#undef ERA\n#endif|' $h
+grep -q '^#undef ERA$' $h
 %cmake \
     -DBUILD_CONFIG=mysql_release \
     -DINSTALL_LAYOUT=RPM \
