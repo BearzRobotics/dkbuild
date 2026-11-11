@@ -17,6 +17,6 @@ source = [
 
 install = '''
 python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
-    --root "$pkgdir" --prefix /usr acme
+    --root "$pkgdir" --prefix /usr ./acme
 install -Dm644 acme/LICENSE.txt "$pkgdir/usr/share/licenses/python-acme/LICENSE.txt"
 '''
