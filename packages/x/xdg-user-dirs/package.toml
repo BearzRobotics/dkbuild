@@ -14,6 +14,9 @@ source = [
 ]
 
 setup = '''
+# the shipped po/Makefile.in.in is from an old gettext (empty top_builddir):
+# autoreconf puts in the current one
+rm po/Makefile.in.in
 autoreconf -if -W none
 %configure
 '''

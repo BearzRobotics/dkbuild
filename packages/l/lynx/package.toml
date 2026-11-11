@@ -16,7 +16,8 @@ source = [
 ]
 
 setup = '''
-autoreconf -if -W none
+# the shipped configure (made with Thomas Dickey's autoconf); autoheader
+# cannot regenerate it
 %configure \
     --enable-widec \
     --enable-ipv6 \
