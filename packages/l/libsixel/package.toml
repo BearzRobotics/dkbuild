@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/libsixel/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libsixel"
+version = "1.10.5"
+release = 1
+summary = "SIXEL encoder/decoder"
+license = "MIT"
+homepage = "https://github.com/libsixel/libsixel"
+hostdeps = ["meson", "pkgconf"]
+builddeps = ["gdk-pixbuf-devel", "libjpeg-turbo-devel", "libpng-devel"]
+
+source = [
+    { url = "https://github.com/libsixel/libsixel/archive/refs/tags/v1.10.5.tar.gz", sha256 = "b6654928bd423f92e6da39eb1f40f10000ae2cc6247247fc1882dcff6acbdfc8" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libsixel/LICENSE"
+'''

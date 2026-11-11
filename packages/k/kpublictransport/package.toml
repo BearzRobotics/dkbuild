@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/kpublictransport/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kpublictransport"
+version = "26.08.2"
+release = 1
+summary = "KDE library for accessing public transport information"
+license = "LGPL-2.0-or-later"
+homepage = "https://community.kde.org/KDE_PIM"
+patches = ["muloverflow.patch"]
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["ki18n-devel", "kirigami-addons-devel", "networkmanager-qt-devel", "protobuf-devel", "qt6-qtdeclarative-devel", "qt6-qtlocation-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kpublictransport-26.08.2.tar.xz", sha256 = "929b0e12494892b4e3066919006e0d8f47d361111e42bde0502dfb638e93fe60" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

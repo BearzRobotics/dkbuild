@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/kstatusnotifieritem/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kstatusnotifieritem"
+version = "6.31.0"
+release = 1
+summary = "KDE Implementation of Status Notifier Items"
+license = "LGPL-2.0-or-later"
+homepage = "https://invent.kde.org/frameworks/kstatusnotifieritem"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf"]
+builddeps = ["kwindowsystem-devel", "qt6-qtbase-devel", "qt6-qttools-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/kstatusnotifieritem-6.31.0.tar.xz", sha256 = "24a23df7564a7e2916a211eb467470480e44c9e2a55f88350fc418ad8f211e83" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_PYTHON_BINDINGS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

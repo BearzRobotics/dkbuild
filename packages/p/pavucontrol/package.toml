@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/pavucontrol/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "pavucontrol"
+version = "6.2"
+release = 1
+summary = "PulseAudio volume control"
+license = "GPL-2.0-or-later"
+homepage = "https://freedesktop.org/software/pulseaudio/pavucontrol"
+hostdeps = ["gettext", "lynx", "meson", "pkgconf"]
+builddeps = ["gtk4-devel", "gtkmm-devel", "json-glib-devel", "libcanberra-devel", "libpulse-devel", "libsigc++-devel"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/pulseaudio/pavucontrol/-/archive/v6.2.tar.gz", sha256 = "b6c40918c0d4767f7cdbc04484adb7bbaacc41020678de6ac80d4b59640b94f8" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

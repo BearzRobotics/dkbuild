@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: user/xfce4-clipman-plugin/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xfce4-clipman-plugin"
+version = "1.7.0"
+release = 2
+summary = "Xfce clipboard manager app and panel plugin"
+license = "GPL-2.0-or-later"
+homepage = "https://docs.xfce.org/panel-plugins/xfce4-clipman-plugin/start"
+hostdeps = ["gettext", "glib-devel", "meson", "pkgconf"]
+builddeps = ["gtk+3-devel", "libx11-devel", "libxfce4ui-devel", "libxfce4util-devel", "libxtst-devel", "qrencode-devel", "wayland-devel", "xfce4-panel-devel", "xfconf-devel", "xorgproto"]
+
+source = [
+    { url = "https://archive.xfce.org/src/panel-plugins/xfce4-clipman-plugin/1.7/xfce4-clipman-plugin-1.7.0.tar.xz", sha256 = "903302c3070a951d44ee17a84fa3cf21d36c6787678af8fbfc79e469fd00cb46" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: main/bolt/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "bolt"
+version = "0.9.10"
+release = 1
+summary = "Thunderbolt device manager"
+license = "LGPL-2.1-or-later"
+homepage = "https://gitlab.freedesktop.org/bolt/bolt"
+patches = ["dbus-activation.patch"]
+hostdeps = ["asciidoc", "bash", "glib-devel", "libxml2", "meson", "pkgconf"]
+builddeps = ["glib-devel", "polkit-devel", "eudev-devel"]
+checkdeps = ["dbus"]
+rundeps = ["dbus"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/bolt/bolt/-/archive/0.9.10/bolt-0.9.10.tar.gz", sha256 = "0e9646ff153f4445d85bfaac1b0d77d86df9c639f84888f15ee7b0f1fa892b58" },
+]
+
+setup = '''
+%meson \
+    -Dman=true \
+    -Dsystemd=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 $pkgfiles/boltd "$pkgdir/etc/dinit.d/boltd"
+'''

@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: user/xfce4-notes-plugin/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xfce4-notes-plugin"
+version = "1.11.2"
+release = 2
+summary = "Xfce notes panel plugin"
+license = "GPL-2.0-or-later"
+homepage = "https://docs.xfce.org/panel-plugins/xfce4-notes-plugin/start"
+hostdeps = ["automake", "gettext-devel", "pkgconf", "libtool", "xfce4-dev-tools"]
+builddeps = ["gtk+3-devel", "gtksourceview4-devel", "libxfce4ui-devel", "libxfce4util-devel", "xfce4-panel-devel", "xfconf-devel"]
+
+source = [
+    { url = "https://archive.xfce.org/src/panel-plugins/xfce4-notes-plugin/1.11/xfce4-notes-plugin-1.11.2.tar.bz2", sha256 = "8301fcd397bbc98a3def3d94f04de30cc128b4a35477024d2bcb2952a161a3b5" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: main/xdg-desktop-portal/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xdg-desktop-portal"
+version = "1.22.1"
+release = 1
+summary = "Desktop integration portal"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/flatpak/xdg-desktop-portal"
+hostdeps = ["bubblewrap", "gettext", "glib-devel", "meson", "pkgconf", "python-docutils"]
+builddeps = ["flatpak-devel", "fuse-devel", "gdk-pixbuf-devel", "geoclue-devel", "gst-plugins-base-devel", "json-glib-devel", "libportal-devel", "pipewire-devel"]
+checkdeps = ["bash", "dbus", "gst-plugins-good", "gstreamer", "python-dbus", "python-gobject"]
+
+source = [
+    { url = "https://github.com/flatpak/xdg-desktop-portal/releases/download/1.22.1/xdg-desktop-portal-1.22.1.tar.xz", sha256 = "d4879ddb3d65ff1a8f19187497e6f13dc5d267bcac404a5d501218be355753d3" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+rm -rf "$pkgdir/usr/lib/systemd"
+install -Dm644 $pkgfiles/portals.conf "$pkgdir/usr/share/xdg-desktop-portal/portals.conf"
+'''

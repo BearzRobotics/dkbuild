@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/filelight/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "filelight"
+version = "26.08.2"
+release = 1
+summary = "KDE disk usage visualizer"
+license = "GPL-2.0-only OR GPL-3.0-only"
+homepage = "https://apps.kde.org/filelight"
+patches = ["st_blksize.patch"]
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcolorscheme-devel", "kcoreaddons-devel", "kcrash-devel", "kdoctools-devel", "ki18n-devel", "kio-devel", "kirigami-addons-devel", "kirigami-devel", "qqc2-desktop-style-devel", "qt6-qtdeclarative-devel"]
+checkdeps = []
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/filelight-26.08.2.tar.xz", sha256 = "c802521bef6cdce513a95c3c47b6a581d0bf5dfb3c852bb1d2cd0d7c2e69951b" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

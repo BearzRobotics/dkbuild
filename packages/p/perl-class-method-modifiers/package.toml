@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/perl-class-method-modifiers/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "perl-class-method-modifiers"
+version = "2.15"
+release = 2
+summary = "Perl module for Moose-like method modifiers"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/pod/Class::Method::Modifiers"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+rundeps = ["perl"]
+
+source = [
+    { url = "https://www.cpan.org/modules/by-module/Class/Class-Method-Modifiers-2.15.tar.gz", sha256 = "65cd85bfe475d066e9186f7a8cc636070985b30b0ebb1cde8681cf062c2e15fc" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

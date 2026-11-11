@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/discover/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "discover"
+version = "6.8.2"
+release = 1
+summary = "KDE application manager"
+license = "(GPL-2.0-only OR GPL-3.0-only) AND (LGPL-2.1-only OR LGPL-3.0-only)"
+homepage = "https://userbase.kde.org/Discover"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["appstream-devel", "attica-devel", "flatpak-devel", "fwupd-devel", "karchive-devel", "kauth-devel", "kcmutils-devel", "kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "ki18n-devel", "kiconthemes-devel", "kidletime-devel", "kio-devel", "kirigami-addons-devel", "kirigami-devel", "kitemmodels-devel", "knewstuff-devel", "knotifications-devel", "kstatusnotifieritem-devel", "kuserfeedback-devel", "kxmlgui-devel", "purpose-devel", "qcoro-devel", "qt6-qtdeclarative-devel"]
+checkdeps = ["dbus"]
+rundeps = ["kirigami-addons", "purpose"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/discover-6.8.2.tar.xz", sha256 = "2bc7280155adb003498a3b31817be8815673cc665b424b98b8250cc97dff5bc6" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

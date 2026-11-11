@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: user/thunar/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "thunar"
+version = "4.20.6"
+release = 2
+summary = "Xfce file manager"
+license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
+homepage = "https://docs.xfce.org/xfce/thunar/start"
+hostdeps = ["automake", "gettext-devel", "gobject-introspection", "gtk-doc-tools", "libtool", "pkgconf", "xfce4-dev-tools"]
+builddeps = ["exo-devel", "gdk-pixbuf-devel", "glib-devel", "gtk+3-devel", "libgudev-devel", "libnotify-devel", "libxfce4ui-devel", "libxfce4util-devel", "pango-devel", "xfce4-panel-devel", "xfconf-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://archive.xfce.org/src/xfce/thunar/4.20/thunar-4.20.6.tar.bz2", sha256 = "e815e034c073d634d0e77566837e1d9417b65c886924e3678e3325d5466c784d" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+rm -rf "$pkgdir/usr/lib/systemd/user"
+'''

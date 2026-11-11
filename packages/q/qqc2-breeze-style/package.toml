@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/qqc2-breeze-style/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "qqc2-breeze-style"
+version = "6.8.2"
+release = 1
+summary = "Breeze inspired QQC2 style"
+license = "LGPL-2.0-or-later"
+homepage = "https://invent.kde.org/plasma/qqc2-breeze-style"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf"]
+builddeps = ["kcolorscheme-devel", "kconfig-devel", "kcoreaddons-devel", "kguiaddons-devel", "kiconthemes-devel", "kirigami-devel", "kquickcharts-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/qqc2-breeze-style-6.8.2.tar.xz", sha256 = "f27528b3da92abefe3eb7f302c24707279871444996c9f1868c96fb0d040e6a0" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

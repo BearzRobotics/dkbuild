@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/kinfocenter/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kinfocenter"
+version = "6.8.2"
+release = 1
+summary = "Utility providing information about your system"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://invent.kde.org/plasma/kinfocenter"
+patches = ["fix-output.patch"]
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kauth-devel", "kcmutils-devel", "kconfig-devel", "kcoreaddons-devel", "kdoctools-devel", "ki18n-devel", "kio-devel", "kirigami-addons-devel", "libusb-devel", "qt6-qtbase-devel", "qt6-qtgraphs-devel"]
+rundeps = ["kdeclarative", "qt6-qtgraphs", "systemsettings"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/kinfocenter-6.8.2.tar.xz", sha256 = "2782ff66388124529a5dc4ecff28b4c69f2dec4c7658a35c205932cd64e06716" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

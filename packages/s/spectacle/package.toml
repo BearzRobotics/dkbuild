@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/spectacle/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "spectacle"
+version = "6.8.2"
+release = 1
+summary = "KDE Screenshot capture utility"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/spectacle"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "kglobalaccel-devel", "kguiaddons-devel", "ki18n-devel", "kio-devel", "kirigami-devel", "knotifications-devel", "kpipewire-devel", "kquickimageeditor-devel", "kstatusnotifieritem-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "layer-shell-qt-devel", "opencv-devel", "plasma-wayland-protocols", "prison-devel", "purpose-devel", "qt6-qtbase-devel", "qt6-qtmultimedia-devel", "qt6-qtwayland-devel", "tesseract-devel", "xcb-util-devel", "zxing-cpp-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/spectacle-6.8.2.tar.xz", sha256 = "95785faf9a97c5005956ff78fc812a32a3735b6a3c1b8543cb21e5838cb8b23f" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/lib/systemd/user"
+'''

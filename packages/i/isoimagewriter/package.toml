@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/isoimagewriter/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "isoimagewriter"
+version = "26.08.2"
+release = 1
+summary = "KDE ISO USB writer"
+license = "GPL-3.0-only"
+homepage = "https://apps.kde.org/isoimagewriter"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["karchive-devel", "kcoreaddons-devel", "kcrash-devel", "ki18n-devel", "kiconthemes-devel", "kwidgetsaddons-devel", "qgpgme-devel", "qt6-qtbase-devel", "solid-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/isoimagewriter-26.08.2.tar.xz", sha256 = "8cc5a8df149b32e9473a6a3d4355840d77fd80210d7e90ae98329c5be9c9f954" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

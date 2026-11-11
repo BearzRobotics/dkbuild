@@ -1,0 +1,18 @@
+# Imported from Chimera Linux cports: main/cover-thumbnailer/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "cover-thumbnailer"
+version = "0.10.2"
+release = 2
+summary = "Thumbnailer for music album and picture folder covers"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/flozz/cover-thumbnailer"
+hostdeps = ["bash", "gettext"]
+rundeps = ["gtk+3", "python-gobject", "python-pillow"]
+
+source = [
+    { url = "https://github.com/flozz/cover-thumbnailer/archive/refs/tags/v0.10.2.tar.gz", sha256 = "6365c2a15d3d4c512ebf8ca3b6b97ee121ea876579fa0dcc4de6ab70d21b3a03" },
+]
+
+install = '''
+./install.sh --package $pkgdir
+'''

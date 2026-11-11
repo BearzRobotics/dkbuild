@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/kactivitymanagerd/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kactivitymanagerd"
+version = "6.8.2"
+release = 1
+summary = "KDE Manage user's activities and track usage patterns"
+license = "GPL-2.0-only OR GPL-3.0-only"
+homepage = "https://invent.kde.org/plasma/kactivitymanagerd"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja"]
+builddeps = ["boost-devel", "kcrash-devel", "kdbusaddons-devel", "kglobalaccel-devel", "ki18n-devel", "kio-devel", "kxmlgui-devel", "qt6-qtdeclarative-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/kactivitymanagerd-6.8.2.tar.xz", sha256 = "2941253c0ed0ad5ff6286e772de8beb320b5eed2fc26383dc7c55ada8946ca62" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/lib/systemd/user"
+'''

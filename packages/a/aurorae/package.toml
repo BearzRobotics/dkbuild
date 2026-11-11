@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/aurorae/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "aurorae"
+version = "6.8.2"
+release = 1
+summary = "Themeable window decoration for KWin"
+license = "GPL-2.0-or-later"
+homepage = "https://develop.kde.org/docs/plasma/aurorae"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja"]
+builddeps = ["kcmutils-devel", "kcolorscheme-devel", "kcoreaddons-devel", "kdecoration-devel", "ki18n-devel", "knewstuff-devel", "kpackage-devel", "ksvg-devel", "kwindowsystem-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/aurorae-6.8.2.tar.xz", sha256 = "d17224dfc296f1fccb5180e6fcd2af25b7632015cd65cda8b44bbf30fc58caac" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

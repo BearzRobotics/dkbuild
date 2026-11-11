@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: main/kcalendarcore/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kcalendarcore"
+version = "6.31.0"
+release = 1
+summary = "KDE calendar access library"
+license = "LGPL-2.0-or-later"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["libical-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel"]
+checkdeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/kcalendarcore-6.31.0.tar.xz", sha256 = "dd09650c406ef60ddb3e3fe55dd4faca819a500175197f88f8f2279ebb4fe16e" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_PYTHON_BINDINGS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

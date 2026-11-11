@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: user/libxfce4windowing/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libxfce4windowing"
+version = "4.20.4"
+release = 3
+summary = "Xfce windowing abstraction library"
+license = "LGPL-2.1-or-later"
+homepage = "https://docs.xfce.org/xfce/libxfce4windowing/start"
+hostdeps = ["automake", "gettext-devel", "gobject-introspection", "gtk-doc-tools", "pkgconf", "libtool", "wayland", "xfce4-dev-tools"]
+builddeps = ["gtk+3-devel", "libdisplay-info-devel", "libwnck-devel", "libx11-devel", "libxrandr-devel", "wayland-devel", "wayland-protocols"]
+options = ["!cross"]
+
+source = [
+    { url = "https://archive.xfce.org/src/xfce/libxfce4windowing/4.20/libxfce4windowing-4.20.4.tar.bz2", sha256 = "db467f9ac4bac8f1c4e82667902841fc0957af835c29603d6659a57440b6f8cb" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-tests
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

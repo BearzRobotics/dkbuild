@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: main/libfakekey/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libfakekey"
+version = "0.3"
+release = 1
+summary = "Library for simulating X11 keypresses"
+license = "GPL-2.0-or-later"
+homepage = "https://git.yoctoproject.org/libfakekey"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["libxtst-devel"]
+
+source = [
+    { url = "http://git.yoctoproject.org/cgit/cgit.cgi/libfakekey/snapshot/libfakekey-0.3.tar.gz", sha256 = "d282fa6481a5b85f71e36e8bad4cfa938cc8eaac4c42ffa27f9203ac634813f4" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

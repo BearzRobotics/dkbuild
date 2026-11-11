@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/kdebugsettings/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kdebugsettings"
+version = "26.08.2"
+release = 1
+summary = "KDE QLoggingCategory display editor"
+license = "LGPL-2.1-or-later"
+homepage = "https://apps.kde.org/kdebugsettings"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcompletion-devel", "kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "ki18n-devel", "kiconthemes-devel", "kwidgetsaddons-devel", "kwindowsystem-devel", "kxmlgui-devel", "qt6-qtbase-devel"]
+checkdeps = []
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kdebugsettings-26.08.2.tar.xz", sha256 = "dc2f45a9ac0002c6eb6dfc591332460fd0298b970e73bfbdbc980484c9d67e61" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

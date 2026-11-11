@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/dvd+rw-tools/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "dvd+rw-tools"
+version = "7.1"
+release = 2
+summary = "DVD and blu-ray burning tools"
+license = "GPL-2.0-or-later"
+homepage = "https://fy.chalmers.se/~appro/linux/DVD+RW"
+patches = ["bluray_pow_freespace.patch", "bluray_srm+pow.patch", "cc.patch", "clang.patch", "dvddl.patch", "lastshort.patch", "layerbreak.patch", "noevent.patch", "reload.patch", "sysmacros.patch", "wctomb.patch", "wexit.patch"]
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://ftp.octaforge.org/q66/random/dvd+rw-tools-7.1.tar.gz", sha256 = "f8d60f822e914128bcbc5f64fbe3ed131cbff9045dca7e12c5b77b26edde72ca" },
+]
+
+build = '''
+%make
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    prefix="$pkgdir/usr"
+'''

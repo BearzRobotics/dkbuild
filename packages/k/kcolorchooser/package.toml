@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/kcolorchooser/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kcolorchooser"
+version = "26.08.2"
+release = 1
+summary = "KDE color palette tool"
+license = "MIT"
+homepage = "https://apps.kde.org/kcolorchooser"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcoreaddons-devel", "ki18n-devel", "kxmlgui-devel", "qt6-qtbase-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kcolorchooser-26.08.2.tar.xz", sha256 = "dbd21ec12a220c4f3bc3ddf9dc3513b38e20f1eca5d92961a635cc7fef82dace" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/kcolorchooser/COPYING"
+'''

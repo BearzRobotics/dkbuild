@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/baloo-widgets/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "baloo-widgets"
+version = "26.08.2"
+release = 1
+summary = "KDE Baloo widgets"
+license = "LGPL-3.0-only AND (GPL-2.0-only OR GPL-3.0-only)"
+homepage = "https://community.kde.org/Baloo"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["baloo-devel", "kconfig-devel", "ki18n-devel", "kio-devel", "kservice-devel"]
+checkdeps = []
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/baloo-widgets-26.08.2.tar.xz", sha256 = "445efd6a8e9aafcd2a86dd47ecc5459c39054303ba650c898893cde8db2f5bf6" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

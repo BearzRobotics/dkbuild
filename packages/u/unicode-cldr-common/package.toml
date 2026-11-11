@@ -1,0 +1,17 @@
+# Imported from Chimera Linux cports: main/unicode-cldr-common/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "unicode-cldr-common"
+version = "47"
+release = 1
+summary = "Common data from Unicode CLDR"
+license = "Unicode-DFS-2016"
+homepage = "https://cldr.unicode.org"
+
+source = [
+    { url = "https://github.com/unicode-org/cldr/archive/refs/tags/release-47.tar.gz", sha256 = "da858185edee37877c98951e12926970372eed45f209ef54a56b32013667bf9b" },
+]
+
+install = '''
+install -dm755 "$pkgdir/usr/share/unicode/cldr"
+cp -r common "$pkgdir/usr/share/unicode/cldr/"
+'''

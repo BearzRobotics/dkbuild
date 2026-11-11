@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: user/xfce4-taskmanager/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xfce4-taskmanager"
+version = "1.6.0"
+release = 2
+summary = "Xfce task manager"
+license = "GPL-2.0-or-later"
+homepage = "https://docs.xfce.org/apps/xfce4-taskmanager/start"
+hostdeps = ["gettext", "glib-devel", "meson", "pkgconf"]
+builddeps = ["cairo-devel", "glib-devel", "gtk+3-devel", "libwnck-devel", "libx11-devel", "libxfce4ui-devel", "libxmu-devel", "xfconf-devel"]
+
+source = [
+    { url = "https://archive.xfce.org/src/apps/xfce4-taskmanager/1.6/xfce4-taskmanager-1.6.0.tar.xz", sha256 = "29bdc7840ab8b9025f6c0e456a83a31090d1c9fd9e26b359baa4a4010cfb0b90" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

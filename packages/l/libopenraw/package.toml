@@ -1,0 +1,37 @@
+# Imported from Chimera Linux cports: main/libopenraw/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libopenraw"
+version = "0.3.7"
+release = 7
+summary = "RAW format parsing library"
+license = "LGPL-3.0-or-later"
+homepage = "https://libopenraw.freedesktop.org"
+patches = ["FILE.patch", "fuck-you-libtool.patch", "no-demo.patch", "update-crates.patch"]
+hostdeps = ["autoconf-archive", "automake", "rust", "libtool", "pkgconf"]
+builddeps = ["boost-devel", "curl-devel", "gdk-pixbuf-devel", "libjpeg-turbo-devel", "libxml2-devel", "rust"]
+options = ["!lto", "cargodeps"]
+
+source = [
+    { url = "https://libopenraw.freedesktop.org/download/libopenraw-0.3.7.tar.xz", sha256 = "0ece41951b2cd91e43f6a8a5c6a894bbc8b5923b4e49a82ebb6d8ce62bded68c" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export RUSTFLAGS="-C target-feature=-crt-static"
+# the build expects target/release, not target/<triple>/release
+unset CARGO_BUILD_TARGET
+'''
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-static
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/threadweaver/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "threadweaver"
+version = "6.31.0"
+release = 1
+summary = "KDE Multithreading helper library"
+license = "LGPL-2.1-or-later"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja"]
+builddeps = ["qt6-qttools-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/threadweaver-6.31.0.tar.xz", sha256 = "4a65944dcca12672ace6d54a48b3a993d4b46b6095106316c3a95ecae6af9906" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

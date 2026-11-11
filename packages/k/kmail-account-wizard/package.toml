@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/kmail-account-wizard/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kmail-account-wizard"
+version = "26.08.2"
+release = 1
+summary = "KDE KMail account wizard"
+license = "LGPL-2.1-only OR LGPL-3.0-only"
+homepage = "https://userbase.kde.org/KMail/Account_Wizard"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["akonadi-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "ki18n-devel", "kiconthemes-devel", "kidentitymanagement-devel", "kio-devel", "kmailtransport-devel", "kmime-devel", "qt6-qtdeclarative-devel", "qtkeychain-devel"]
+checkdeps = []
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kmail-account-wizard-26.08.2.tar.xz", sha256 = "12c80011c79bd9df7a452d911086fe63164e4a51fdc2749c366b51404b21a980" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: main/flashrom/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "flashrom"
+version = "1.7.0"
+release = 2
+summary = "Utility for flashing ROM chips"
+license = "GPL-2.0-only"
+homepage = "https://www.flashrom.org"
+patches = ["be-no-fmap-verify.patch", "pkgconf-ver.patch"]
+hostdeps = ["meson", "pkgconf", "python-sphinx"]
+builddeps = ["libftdi1-devel", "libusb-devel", "linux-headers", "pciutils-devel", "zlib-ng-compat-devel"]
+checkdeps = ["cmocka-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.flashrom.org/releases/flashrom-v1.7.0.tar.xz", sha256 = "4328ace9833f7efe7c334bdd73482cde8286819826cc00149e83fba96bf3ab4f" },
+]
+
+setup = '''
+%meson \
+    -Duse_internal_dmi=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+mv "$pkgdir/usr/share/bash-completion/completions/flashrom.bash" "$pkgdir/usr/share/bash-completion/completions/flashrom"
+'''

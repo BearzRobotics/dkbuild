@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/kmail/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kmail"
+version = "26.08.2"
+release = 1
+summary = "KDE Mail Client"
+license = "LGPL-2.0-or-later AND GPL-2.0-only"
+homepage = "https://apps.kde.org/kmail2"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["akonadi-contacts-devel", "akonadi-devel", "akonadi-mime-devel", "akonadi-search-devel", "gpgmepp-devel", "kbookmarks-devel", "kcalendarcore-devel", "kcalutils-devel", "kcmutils-devel", "kconfig-devel", "kconfigwidgets-devel", "kcontacts-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "kguiaddons-devel", "ki18n-devel", "kiconthemes-devel", "kidentitymanagement-devel", "kio-devel", "kitemviews-devel", "kjobwidgets-devel", "kldap-devel", "kmailtransport-devel", "kmime-devel", "knotifications-devel", "knotifyconfig-devel", "kontactinterface-devel", "kparts-devel", "kpimtextedit-devel", "kservice-devel", "kstatusnotifieritem-devel", "ktextaddons-devel", "ktextwidgets-devel", "ktnef-devel", "kuserfeedback-devel", "kwidgetsaddons-devel", "kwindowsystem-devel", "kxmlgui-devel", "libgravatar-devel", "libkdepim-devel", "libkleo-devel", "libksieve-devel", "mailcommon-devel", "messagelib-devel", "pimcommon-devel", "qt6-qtbase-devel", "qt6-qtwebengine-devel", "qtkeychain-devel", "sonnet-devel"]
+rundeps = ["kdepim-runtime", "kmail-account-wizard"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kmail-26.08.2.tar.xz", sha256 = "107c5b3a4c605250f76073c01e0e8eb73cfac969bd853d2e1fddd011c94f4e78" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

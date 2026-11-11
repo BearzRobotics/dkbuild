@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: user/gigolo/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "gigolo"
+version = "0.6.0"
+release = 2
+summary = "Xfce GIO/GVFS frontend"
+license = "GPL-2.0-only"
+homepage = "https://docs.xfce.org/apps/gigolo/start"
+hostdeps = ["gettext", "glib-devel", "meson", "pkgconf"]
+builddeps = ["glib-devel", "gtk+3-devel"]
+
+source = [
+    { url = "https://archive.xfce.org/src/apps/gigolo/0.6/gigolo-0.6.0.tar.xz", sha256 = "f27dbb51abe8144c1b981f2d820ad1b279c1bc4623d7333b7d4f5f4777eb45ed" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

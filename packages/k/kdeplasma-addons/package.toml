@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/kdeplasma-addons/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kdeplasma-addons"
+version = "6.8.2"
+release = 1
+summary = "KDE Plasma addons"
+license = "GPL-3.0-only AND CC0-1.0 AND LGPL-3.0-or-later"
+homepage = "https://invent.kde.org/plasma/kdeplasma-addons"
+hostdeps = ["rust", "cmake", "corrosion", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kauth-devel", "kcmutils-devel", "kconfig-devel", "kcoreaddons-devel", "kdbusaddons-devel", "kdeclarative-devel", "kglobalaccel-devel", "kholidays-devel", "ki18n-devel", "kio-devel", "kirigami-addons-devel", "kitemmodels-devel", "kjobwidgets-devel", "knewstuff-devel", "knotifications-devel", "krunner-devel", "kservice-devel", "ksvg-devel", "kunitconversion-devel", "kxmlgui-devel", "libplasma-devel", "plasma5support-devel", "purpose-devel", "qt6-qt5compat-devel", "qt6-qtdeclarative-devel", "qt6-qtquick3d-devel", "rust", "sonnet-devel"]
+checkdeps = []
+rundeps = ["kirigami-addons", "kitemmodels", "purpose", "qt6-qtquick3d"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/kdeplasma-addons-6.8.2.tar.xz", sha256 = "89458bb18c2d055f582467d920c413712aa5b639404a36d37643475b22bbf364" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

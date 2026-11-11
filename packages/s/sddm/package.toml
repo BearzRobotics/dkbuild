@@ -1,0 +1,50 @@
+# Imported from Chimera Linux cports: main/sddm/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# The login screen for Plasma and Xfce. Its greeter runs on X11 (00-x11.conf)
+# unless sddm-kwin is installed, which Plasma brings in: then on Wayland in
+# kwin, as Chimera does. Chimera's cage and weston variants are left out
+# (neither is in the tree). The upstream themes are Qt 5 only and removed: the
+# built-in one is used, or Breeze once Plasma is installed.
+name = "sddm"
+version = "0.21.0"
+release = 9
+summary = "QML based display manager"
+license = "GPL-2.0-or-later AND CC-BY-3.0"
+homepage = "https://github.com/sddm/sddm"
+patches = ["_sddm-greeter-user.patch", "cursor-theme.patch", "sddm-unused-tty.patch"]
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf", "python-docutils"]
+builddeps = ["dbus", "elogind", "elogind-devel", "openrc-settingsd", "qt6-qtdeclarative-devel", "qt6-qttools-devel", "linux-pam-devel"]
+rundeps = ["dbus", "elogind", "openrc-settingsd", "xrdb"]
+
+source = [
+    { url = "https://github.com/sddm/sddm/archive/refs/tags/v0.21.0.tar.gz", sha256 = "f895de2683627e969e4849dbfbbb2b500787481ca5ba0de6d6dfdae5f1549abf" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DBUILD_MAN_PAGES=ON \
+    -DBUILD_WITH_QT6=ON \
+    -DINSTALL_PAM_CONFIGURATION=OFF \
+    -DNO_SYSTEMD=ON \
+    -DUID_MAX=60513 \
+    -DRUNTIME_DIR=/run/sddm \
+    -DUSE_ELOGIND=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 $pkgfiles/sddm "$pkgdir/etc/dinit.d/sddm"
+for f in 00-default 00-x11 01-wayland-kwin; do install -Dm644 $pkgfiles/$f.conf "$pkgdir/usr/lib/sddm/sddm.conf.d/$f.conf"; done
+# all unusable
+rm -rf "$pkgdir/usr/share/sddm/themes"
+for f in sddm sddm-autologin sddm-greeter; do install -Dm644 $pkgfiles/$f.pam "$pkgdir/usr/lib/pam.d/$f"; done
+'''
+
+[subpackages.kwin]
+summary = "Run the SDDM greeter on Wayland in kwin"
+depends = ["sddm", "kwin", "plasma-keyboard"]
+install_if = ["sddm", "kwin"]
+paths   = ["/usr/lib/sddm/sddm.conf.d/01-wayland-kwin.conf"]

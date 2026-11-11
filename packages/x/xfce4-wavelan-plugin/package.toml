@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: user/xfce4-wavelan-plugin/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xfce4-wavelan-plugin"
+version = "0.7.0"
+release = 2
+summary = "Xfce WLAN stats panel plugin"
+license = "BSD-2-Clause"
+homepage = "https://docs.xfce.org/panel-plugins/xfce4-wavelan-plugin/start"
+hostdeps = ["gettext", "meson", "pkgconf"]
+builddeps = ["libxfce4ui-devel", "xfce4-panel-devel"]
+rundeps = ["network-manager-applet"]
+
+source = [
+    { url = "https://archive.xfce.org/src/panel-plugins/xfce4-wavelan-plugin/0.7/xfce4-wavelan-plugin-0.7.0.tar.xz", sha256 = "5fdce1e1b0d29d0a258dca86bab9d4edcbc12098134b92e00ea1502086a49116" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xfce4-wavelan-plugin/COPYING"
+'''

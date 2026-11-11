@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: user/xfce4-windowck-plugin/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xfce4-windowck-plugin"
+version = "0.6.1"
+release = 2
+summary = "Xfce window controls/title bar panel plugin"
+license = "GPL-3.0-or-later"
+homepage = "https://docs.xfce.org/panel-plugins/xfce4-windowck-plugin/start"
+hostdeps = ["gettext", "glib-devel", "meson", "pkgconf"]
+builddeps = ["gtk+3-devel", "libwnck-devel", "libx11-devel", "libxfce4ui-devel", "libxfce4util-devel", "xfce4-panel-devel", "xfconf-devel"]
+
+source = [
+    { url = "https://archive.xfce.org/src/panel-plugins/xfce4-windowck-plugin/0.6/xfce4-windowck-plugin-0.6.1.tar.xz", sha256 = "032e305d74f17bd65b28bd260cf192fcf8aa0df33d116087e485fd1368b7cf39" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

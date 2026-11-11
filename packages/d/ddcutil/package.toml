@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: main/ddcutil/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "ddcutil"
+version = "2.2.1"
+release = 1
+summary = "Control monitor settings using DDC/CI and USB"
+license = "GPL-2.0-or-later"
+homepage = "https://www.ddcutil.com"
+patches = ["no-werror.patch"]
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["glib-devel", "jansson-devel", "kmod-devel", "libdrm-devel", "libusb-devel", "libx11-devel", "libxext-devel", "libxrandr-devel", "linux-headers", "eudev-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/rockowitz/ddcutil/archive/refs/tags/v2.2.1.tar.gz", sha256 = "ff8eb39b4559fcbc83de7b16834a010262dfa825938625272212fcaeefaef692" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

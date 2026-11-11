@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/kopeninghours/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kopeninghours"
+version = "26.08.2"
+release = 1
+summary = "KDE library for working with OSM opening hours"
+license = "LGPL-2.0-or-later"
+homepage = "https://invent.kde.org/libraries/kopeninghours"
+hostdeps = ["bison", "cmake", "extra-cmake-modules", "flex", "gettext", "ninja", "pkgconf"]
+builddeps = ["boost-devel", "kholidays-devel", "ki18n-devel", "python-devel", "qt6-qtdeclarative-devel"]
+checkdeps = []
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kopeninghours-26.08.2.tar.xz", sha256 = "17f6710625f58a069b20ff6de36232abfb4c4ccdd90d93f739b5fb6a11726b14" },
+]
+
+setup = '''
+%cmake \
+    -DQT_MAJOR_VERSION=6
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

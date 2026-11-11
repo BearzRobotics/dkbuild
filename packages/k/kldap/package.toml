@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/kldap/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kldap"
+version = "26.08.2"
+release = 1
+summary = "KDE LDAP access API"
+license = "LGPL-2.0-or-later"
+homepage = "https://community.kde.org/KDE_PIM"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kdoctools-devel", "ki18n-devel", "kio-devel", "kwidgetsaddons-devel", "libsasl-devel", "openldap-devel", "qt6-qtdeclarative-devel", "qtkeychain-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kldap-26.08.2.tar.xz", sha256 = "17fb3e289692599b6aa0ad2c3d409e13f52dabcd6273544eb568cf6f025bac59" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

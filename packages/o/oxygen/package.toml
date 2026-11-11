@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/oxygen/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "oxygen"
+version = "6.8.2"
+release = 1
+summary = "Oxygen visual style for the KDE Plasma Desktop"
+license = "GPL-2.0-or-later"
+homepage = "https://invent.kde.org/plasma/oxygen"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["frameworkintegration-devel", "kcmutils-devel", "kcompletion-devel", "kcoreaddons-devel", "kdecoration-devel", "kguiaddons-devel", "ki18n-devel", "kservice-devel", "kwindowsystem-devel", "libplasma-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel"]
+rundeps = ["frameworkintegration", "oxygen-icons"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/oxygen-6.8.2.tar.xz", sha256 = "487ac7441c5242e5b5fd4259bfaf78920f56338ba4b071d2a26e37750226b65c" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_QT5=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

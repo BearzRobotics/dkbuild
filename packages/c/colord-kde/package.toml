@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/colord-kde/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "colord-kde"
+version = "26.08.2"
+release = 1
+summary = "KDE colord integration"
+license = "GPL-2.0-or-later"
+homepage = "https://invent.kde.org/graphics/colord-kde"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcmutils-devel", "kcoreaddons-devel", "kdbusaddons-devel", "ki18n-devel", "kitemmodels-devel", "kwidgetsaddons-devel", "kwindowsystem-devel", "lcms2-devel", "qt6-qtdeclarative-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/colord-kde-26.08.2.tar.xz", sha256 = "b3a12f1bab882d9aa0857889b93178dd2c2b45d31f9b069013b4d41b2dc3dcd9" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

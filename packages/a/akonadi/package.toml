@@ -1,0 +1,34 @@
+# Imported from Chimera Linux cports: main/akonadi/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "akonadi"
+version = "26.08.2"
+release = 1
+summary = "KDE storage service for PIM data"
+license = "LGPL-2.1-or-later"
+homepage = "https://userbase.kde.org/Akonadi"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "libxslt", "ninja", "pkgconf"]
+builddeps = ["kaccounts-integration-devel", "kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kcrash-devel", "ki18n-devel", "kiconthemes-devel", "kitemmodels-devel", "kwindowsystem-devel", "kxmlgui-devel", "libaccounts-qt-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel", "sqlite-devel", "xz-devel"]
+checkdeps = ["dbus"]
+rundeps = ["qt6-qtbase"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/akonadi-26.08.2.tar.xz", sha256 = "85746817161152a3c887c32caabaf2163396796f2ad8fc3ac638e2c91f4b0fbd" },
+]
+
+environment = '''
+export CXXFLAGS="${CXXFLAGS} -DNDEBUG"
+export LDFLAGS="${LDFLAGS} -Wl,-z,stack-size=0x200000"
+'''
+setup = '''
+%cmake \
+    -DBUILD_PYTHON_BINDINGS=OFF \
+    -DDATABASE_BACKEND=SQLITE \
+    -DINSTALL_APPARMOR=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/lib/systemd"
+'''

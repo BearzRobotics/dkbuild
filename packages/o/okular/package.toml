@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: main/okular/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "okular"
+version = "26.08.2"
+release = 1
+summary = "KDE document viewer"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/okular"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["discount-devel", "djvulibre-devel", "ebook-tools-devel", "karchive-devel", "kbookmarks-devel", "kcompletion-devel", "kcoreaddons-devel", "kcrash-devel", "kdegraphics-mobipocket-devel", "kdoctools-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kparts-devel", "kpty-devel", "ktextwidgets-devel", "kwallet-devel", "kwindowsystem-devel", "kxmlgui-devel", "libkexiv2-devel", "libspectre-devel", "libzip-devel", "phonon-devel", "plasma-activities-devel", "poppler-devel", "purpose-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtspeech-devel", "qt6-qtsvg-devel", "threadweaver-devel"]
+checkdeps = ["dbus"]
+options = ["!cross"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/okular-26.08.2.tar.xz", sha256 = "f9b39abcb7c6c3ace5d7acf669fa7ed47cf3aa7b932a8b6abe2abbd8075fc9f5" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -D_GNU_SOURCE"
+'''
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

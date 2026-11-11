@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: user/xfce4-netload-plugin/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xfce4-netload-plugin"
+version = "1.5.0"
+release = 2
+summary = "Xfce network load panel plugin"
+license = "GPL-2.0-or-later"
+homepage = "https://docs.xfce.org/panel-plugins/xfce4-netload-plugin/start"
+hostdeps = ["gettext", "meson", "pkgconf"]
+builddeps = ["gtk+3-devel", "libxfce4ui-devel", "xfce4-panel-devel"]
+
+source = [
+    { url = "https://archive.xfce.org/src/panel-plugins/xfce4-netload-plugin/1.5/xfce4-netload-plugin-1.5.0.tar.xz", sha256 = "a868be8f73e8396c2d61903d46646993c5130d16ded71ddb5da9088abf7cb7ba" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

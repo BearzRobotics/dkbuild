@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/plasma-browser-integration/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "plasma-browser-integration"
+version = "6.8.2"
+release = 1
+summary = "KDE integration with the system browser"
+license = "GPL-3.0-or-later AND MIT"
+homepage = "https://community.kde.org/Plasma/Browser_Integration"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kfilemetadata-devel", "ki18n-devel", "kio-devel", "kitemmodels-devel", "kjobwidgets-devel", "knotifications-devel", "krunner-devel", "kservice-devel", "kstatusnotifieritem-devel", "plasma-activities-devel", "plasma-workspace-devel", "purpose-devel", "qt6-qtdeclarative-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/plasma-browser-integration-6.8.2.tar.xz", sha256 = "8d6c9fc4222be13070fe20cb690f22a6b1c00da9cc1e197821127d9bf0321507" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

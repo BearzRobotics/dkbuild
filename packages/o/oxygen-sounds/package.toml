@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/oxygen-sounds/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "oxygen-sounds"
+version = "6.8.2"
+release = 1
+summary = "Ocean Sound Theme for KDE Plasma"
+license = "CC-BY-SA-4.0"
+homepage = "https://invent.kde.org/plasma/oxygen-sounds"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf"]
+builddeps = ["qt6-qtdeclarative-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/oxygen-sounds-6.8.2.tar.xz", sha256 = "89cfad4b243cdd6e031739566693df77ffdc7a29cedc10dad0b96507a2b3ea62" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

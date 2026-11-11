@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: user/xfce4-diskperf-plugin/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xfce4-diskperf-plugin"
+version = "2.8.0"
+release = 2
+summary = "Xfce disk performance panel plugin"
+license = "BSD-2-Clause"
+homepage = "https://docs.xfce.org/panel-plugins/xfce4-diskperf-plugin/start"
+hostdeps = ["gettext", "meson", "pkgconf"]
+builddeps = ["gtk+3-devel", "libxfce4ui-devel", "libxfce4util-devel", "xfce4-panel-devel"]
+
+source = [
+    { url = "https://archive.xfce.org/src/panel-plugins/xfce4-diskperf-plugin/2.8/xfce4-diskperf-plugin-2.8.0.tar.xz", sha256 = "3833920a3a4a81b3c676c4fab6dd178f4a222d66f316a0783a9149a0153b7fb6" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xfce4-diskperf-plugin/COPYING"
+'''

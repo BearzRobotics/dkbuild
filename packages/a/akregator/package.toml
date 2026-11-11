@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/akregator/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "akregator"
+version = "26.08.2"
+release = 1
+summary = "KDE RSS feed reader"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/akregator"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["akonadi-devel", "grantleetheme-devel", "kcmutils-devel", "kcodecs-devel", "kcrash-devel", "kdoctools-devel", "ki18n-devel", "kiconthemes-devel", "knotifications-devel", "knotifyconfig-devel", "kontactinterface-devel", "kparts-devel", "kstatusnotifieritem-devel", "ktextaddons-devel", "ktexttemplate-devel", "ktextwidgets-devel", "kuserfeedback-devel", "kxmlgui-devel", "libkdepim-devel", "messagelib-devel", "pimcommon-devel", "qt6-qtdeclarative-devel", "qt6-qtwebengine-devel", "syndication-devel"]
+checkdeps = []
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/akregator-26.08.2.tar.xz", sha256 = "d819df8e453e45167ed90c3bf99073017f325f792832b97ce9df5445f844deed" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: main/libkeybinder3/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libkeybinder3"
+version = "0.3.2"
+release = 3
+summary = "Gtk+3 library for registering global keyboard shortcuts"
+license = "MIT"
+homepage = "https://github.com/engla/keybinder"
+hostdeps = ["automake", "gettext", "gobject-introspection", "gtk-doc-tools", "libtool", "pkgconf"]
+builddeps = ["gtk+3-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://github.com/engla/keybinder/archive/keybinder-3.0-v0.3.2.tar.gz", sha256 = "2eec50be6dfafa672d719e719f639df10403f270b2473e60deb2fb8455d13c51" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libkeybinder3/COPYING"
+'''

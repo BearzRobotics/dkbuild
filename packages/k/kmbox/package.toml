@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/kmbox/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kmbox"
+version = "26.08.2"
+release = 1
+summary = "KDE PIM mbox access library"
+license = "LGPL-2.0-or-later"
+homepage = "https://community.kde.org/KDE_PIM"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kmime-devel", "qt6-qtdeclarative-devel"]
+checkdeps = []
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kmbox-26.08.2.tar.xz", sha256 = "a4b08915584d0b7ec5fa28adae1eb3d0bc63a1d95f15e40bfae529505d0307a5" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

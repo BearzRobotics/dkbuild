@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/libplasma/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libplasma"
+version = "6.8.2"
+release = 1
+summary = "Foundational libraries, components, and tools for Plasma workspaces"
+license = "LGPL-2.1-or-later AND GPL-2.0-or-later"
+homepage = "https://kde.org/plasma-desktop"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["karchive-devel", "kcmutils-devel", "kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kglobalaccel-devel", "kguiaddons-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kirigami-devel", "knotifications-devel", "kpackage-devel", "ksvg-devel", "plasma-activities-devel", "plasma-wayland-protocols", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "qt6-qttools-devel", "qt6-qtwayland-devel", "wayland-protocols"]
+checkdeps = []
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/libplasma-6.8.2.tar.xz", sha256 = "d63a270b5aaba6144c1ddd215d509ff3b350d3d7a0ac08e539d58a043b061b29" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

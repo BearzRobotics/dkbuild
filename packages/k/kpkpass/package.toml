@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/kpkpass/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kpkpass"
+version = "26.08.2"
+release = 1
+summary = "KDE PIM library for Apple Wallet pass files"
+license = "LGPL-2.0-or-later"
+homepage = "https://community.kde.org/KDE_PIM"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["karchive-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "shared-mime-info"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kpkpass-26.08.2.tar.xz", sha256 = "1e269e2a1517f91ccd0776dc137fece81b9f1bc23edc8cced9028b138a95cc1e" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

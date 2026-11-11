@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/kcharselect/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kcharselect"
+version = "26.08.2"
+release = 1
+summary = "KDE character picker"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/kcharselect"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kbookmarks-devel", "kcoreaddons-devel", "kcrash-devel", "kdoctools-devel", "ki18n-devel", "kiconthemes-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "qt6-qtdeclarative-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kcharselect-26.08.2.tar.xz", sha256 = "ce50299a111f8a6e346a52cbf65d77c90d991fb94c5219a19d339e17a6b3fa9b" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

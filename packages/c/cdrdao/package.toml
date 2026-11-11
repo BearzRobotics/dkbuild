@@ -1,0 +1,35 @@
+# Imported from Chimera Linux cports: main/cdrdao/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "cdrdao"
+version = "1.2.6"
+release = 1
+summary = "Disk-at-once CD writer"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/cdrdao/cdrdao"
+hostdeps = ["automake", "pkgconf"]
+builddeps = ["gtkmm3.0-devel", "lame-devel", "libao-devel", "libvorbis-devel", "linux-headers"]
+
+source = [
+    { url = "https://github.com/cdrdao/cdrdao/archive/refs/tags/rel_1_2_6.tar.gz", sha256 = "ba3eadcae7b62a709e9e23988d7fb41f822c408dcec9bd99ff1a343d1bcbc524" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-gcdmaster
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+# literally only thing installing anything here
+rm -rf "$pkgdir/usr/share/mime-info"
+# fix the pixmap location too while at it
+rm -rf "$pkgdir/usr/share/pixmaps"
+# less scuffed icon lol (the other is 48x48)
+install -Dm644 gcdmaster/gcdmaster-doc.png "$pkgdir/usr/share/icons/hicolor/96x96/apps/gcdmaster.png"
+'''

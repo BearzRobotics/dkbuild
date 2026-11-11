@@ -1,0 +1,5 @@
+#!/bin/sh
+# users and groups (sysusers.conf)
+grep -q "^_colord:" /etc/group || groupadd -r _colord
+grep -q "^_colord:" /etc/passwd || useradd -r -g _colord -d /var/lib/colord -s /usr/bin/nologin -c 'colord user' _colord
+exit 0

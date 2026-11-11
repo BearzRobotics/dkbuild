@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/libgravatar/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libgravatar"
+version = "26.08.2"
+release = 1
+summary = "KDE PIM Gravatar lookup library"
+license = "LGPL-2.0-or-later"
+homepage = "https://community.kde.org/KDE_PIM"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfig-devel", "ki18n-devel", "kio-devel", "ktextwidgets-devel", "kwidgetsaddons-devel", "pimcommon-devel", "qt6-qtdeclarative-devel"]
+checkdeps = []
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/libgravatar-26.08.2.tar.xz", sha256 = "bd71ec6fefd98402683dd00447e0cab8c29f1f690784462dbfaab1ec95234069" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

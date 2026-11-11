@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/libksane/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libksane"
+version = "26.08.2"
+release = 1
+summary = "KDE image scanning library"
+license = "LGPL-2.1-only OR LGPL-3.0-only"
+homepage = "https://invent.kde.org/graphics/libksane"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "gperf", "ninja", "pkgconf"]
+builddeps = ["ki18n-devel", "ksanecore-devel", "ktextwidgets-devel", "kwallet-devel", "kwidgetsaddons-devel", "qt6-qtdeclarative-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/libksane-26.08.2.tar.xz", sha256 = "dd990b977a3575f57304f6413f59dd9f67ab202828cf3103dcb5035efe3e7035" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_WITH_QT6=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

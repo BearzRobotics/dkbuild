@@ -1,0 +1,9 @@
+#!/bin/sh
+# directories and files (openrc-settingsd.conf)
+mkdir -p /etc/X11/xorg.conf.d
+chmod 0755 /etc/X11/xorg.conf.d
+chown root:root /etc/X11/xorg.conf.d 2>/dev/null || true
+[ -e /etc/X11/xorg.conf.d/00-keyboard.conf ] || : > /etc/X11/xorg.conf.d/00-keyboard.conf
+chmod 0644 /etc/X11/xorg.conf.d/00-keyboard.conf
+chown root:root /etc/X11/xorg.conf.d/00-keyboard.conf 2>/dev/null || true
+exit 0

@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/kdepim-runtime/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kdepim-runtime"
+version = "26.08.2"
+release = 1
+summary = "KDE PIM Akonadi agents and runtime resources"
+license = "LGPL-3.0-only AND GPL-2.0-or-later"
+homepage = "https://invent.kde.org/pim/kdepim-runtime"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "libxslt", "ninja", "pkgconf"]
+builddeps = ["akonadi-calendar-devel", "akonadi-contacts-devel", "akonadi-devel", "akonadi-mime-devel", "kcalendarcore-devel", "kcalutils-devel", "kcmutils-devel", "kcodecs-devel", "kconfig-devel", "kconfigwidgets-devel", "kcontacts-devel", "kdav-devel", "kidentitymanagement-devel", "kimap-devel", "kio-devel", "kitemmodels-devel", "kldap-devel", "kmailtransport-devel", "kmbox-devel", "kmime-devel", "knotifications-devel", "knotifyconfig-devel", "ktextaddons-devel", "ktextwidgets-devel", "kwallet-devel", "kwindowsystem-devel", "libkgapi-devel", "libsasl-devel", "pimcommon-devel", "qca-devel", "qt6-qtdeclarative-devel", "qt6-qtnetworkauth-devel", "qt6-qtspeech-devel", "qt6-qtwebengine-devel", "qtkeychain-devel", "shared-mime-info"]
+checkdeps = []
+rundeps = ["shared-mime-info"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kdepim-runtime-26.08.2.tar.xz", sha256 = "e9e27465fa9fdfdd068fff18e52f62118c76df62b44e49a969f891d6b4717e1a" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

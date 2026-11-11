@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/xdg-user-dirs-gtk/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xdg-user-dirs-gtk"
+version = "0.14"
+release = 1
+summary = "Gtk companion to xdg-user-dirs"
+license = "GPL-2.0-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/xdg-user-dirs-gtk"
+hostdeps = ["pkgconf", "meson", "gettext", "xdg-user-dirs"]
+builddeps = ["gtk+3-devel", "xdg-user-dirs"]
+rundeps = ["xdg-user-dirs"]
+
+source = [
+    { url = "https://download.gnome.org/sources/xdg-user-dirs-gtk/0.14/xdg-user-dirs-gtk-0.14.tar.xz", sha256 = "537fbe142b24736ed7894e4a01f69fd758cb6c7a677a382879529d217f4a2873" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

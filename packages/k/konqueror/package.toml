@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/konqueror/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "konqueror"
+version = "26.08.2"
+release = 1
+summary = "KDE web browser and file previewer"
+license = "LGPL-3.0-only AND GPL-2.0-or-later"
+homepage = "https://apps.kde.org/konqueror"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "hunspell", "ninja", "pkgconf"]
+builddeps = ["hunspell-devel", "karchive-devel", "kcmutils-devel", "kcodecs-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kdesu-devel", "kdoctools-devel", "kguiaddons-devel", "ki18n-devel", "kiconthemes-devel", "knotifications-devel", "kparts-devel", "ktextwidgets-devel", "kwallet-devel", "kwindowsystem-devel", "plasma-activities-devel", "qt6-qtbase-devel", "qt6-qtwebengine-devel", "sonnet-devel"]
+checkdeps = ["dbus"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/konqueror-26.08.2.tar.xz", sha256 = "df13ccf0350b898ad35c12f15a574229788945f59a352432d90ae1ae9b7b273b" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/kweathercore/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kweathercore"
+version = "26.08.2"
+release = 1
+summary = "KDE Weather library"
+license = "LGPL-2.0-or-later"
+homepage = "https://invent.kde.org/libraries/kweathercore"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kholidays-devel", "ki18n-devel", "qt6-qtbase-devel", "qt6-qtpositioning-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kweathercore-26.08.2.tar.xz", sha256 = "a8a5ad8ab8c10f3e8352aaa6e0bdf746a489b78f3ebed7e53e4d42d520994961" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

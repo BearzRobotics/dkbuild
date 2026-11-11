@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: main/powerdevil/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "powerdevil"
+version = "6.8.2"
+release = 1
+summary = "KDE Plasma shell power consumption settings manager"
+license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
+homepage = "https://invent.kde.org/plasma/powerdevil"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "libcap", "ninja", "pkgconf"]
+builddeps = ["ddcutil-devel", "kauth-devel", "kcmutils-devel", "kconfig-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "kglobalaccel-devel", "ki18n-devel", "kidletime-devel", "kio-devel", "kirigami-devel", "kitemmodels-devel", "knotifications-devel", "krunner-devel", "kxmlgui-devel", "libcap-devel", "libkscreen-devel", "libplasma-devel", "plasma-activities-devel", "plasma-wayland-protocols", "plasma-workspace-devel", "qcoro-devel", "qt6-qtbase-devel", "qt6-qtwayland-devel"]
+checkdeps = ["bash"]
+rundeps = ["upower"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/powerdevil-6.8.2.tar.xz", sha256 = "c663355adcfdfafe9824f48aa15881679fd71b0b16863a603a62ec0bce628d4a" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# TODO: dinit user services with graphical
+rm -rf "$pkgdir/usr/lib/systemd/user"
+'''

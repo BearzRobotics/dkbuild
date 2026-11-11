@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: main/kimageannotator/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kimageannotator"
+version = "0.7.1"
+release = 1
+summary = "Tool for annotating images"
+license = "LGPL-3.0-or-later"
+homepage = "https://github.com/ksnip/kImageAnnotator"
+patches = ["segv-test.patch"]
+hostdeps = ["cmake", "ninja"]
+builddeps = ["gtest-devel", "kcolorpicker-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel", "qt6-qttools-devel"]
+checkdeps = []
+
+source = [
+    { url = "https://github.com/ksnip/kImageAnnotator/archive/refs/tags/v0.7.1.tar.gz", sha256 = "2335c5be15a5dde34c3333c10a6339da114e2232e4c4642dea1793e491e09677" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_EXAMPLE=OFF \
+    -DBUILD_SHARED_LIBS=ON \
+    -DBUILD_TESTS=ON \
+    -DBUILD_WITH_QT6=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

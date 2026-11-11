@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: main/akonadi-search/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "akonadi-search"
+version = "26.08.2"
+release = 1
+summary = "KDE Akonadi search libraries"
+license = "LGPL-2.1-only AND (GPL-2.0-only OR GPL-3.0-only)"
+homepage = "https://community.kde.org/KDE_PIM"
+hostdeps = ["rust", "cmake", "corrosion", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["akonadi-devel", "akonadi-mime-devel", "kcalendarcore-devel", "kcmutils-devel", "kconfig-devel", "kcontacts-devel", "kcrash-devel", "kdbusaddons-devel", "ki18n-devel", "kio-devel", "kmime-devel", "krunner-devel", "ktextaddons-devel", "qt6-qtdeclarative-devel", "rust", "xapian-core-devel"]
+options = ["!check", "cargodeps"]
+checkdeps = []
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/akonadi-search-26.08.2.tar.xz", sha256 = "7508de35606f31bd9cfa2804a3686f232e50721cf7ad206603bdfc2b8bc48dca" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export RUSTFLAGS="-C target-feature=-crt-static"
+'''
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

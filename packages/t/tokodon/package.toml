@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: main/tokodon/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "tokodon"
+version = "26.08.2"
+release = 1
+summary = "KDE Mastodon client"
+license = "(GPL-2.0-only OR GPL-3.0-only) AND LGPL-2.0-or-later"
+homepage = "https://apps.kde.org/tokodon"
+patches = ["clanghack.patch"]
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcolorscheme-devel", "kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kirigami-addons-devel", "kirigami-devel", "kitemmodels-devel", "knotifications-devel", "kunifiedpush-devel", "purpose-devel", "qcoro-devel", "qqc2-desktop-style-devel", "qt6-qtmultimedia-devel", "qt6-qtsvg-devel", "qt6-qtwebsockets-devel", "qt6-qtwebview-devel", "qtkeychain-devel"]
+checkdeps = []
+rundeps = ["kirigami-addons", "kitemmodels"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/tokodon-26.08.2.tar.xz", sha256 = "28d8e392fd93c7a8fe59822c07894b49ca76fbd00471f3ca6ce5984d12dbfb25" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

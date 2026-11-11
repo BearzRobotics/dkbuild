@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/plasma-disks/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "plasma-disks"
+version = "6.8.2"
+release = 1
+summary = "KDE disk failure monitor"
+license = "GPL-2.0-only OR GPL-3.0-only"
+homepage = "https://invent.kde.org/plasma/plasma-disks"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kauth-devel", "kcmutils-devel", "kcoreaddons-devel", "kdbusaddons-devel", "ki18n-devel", "kio-devel", "knotifications-devel", "kservice-devel", "qt6-qtdeclarative-devel", "solid-devel"]
+checkdeps = []
+rundeps = ["smartmontools"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/plasma-disks-6.8.2.tar.xz", sha256 = "3432198413c86745e0fdf551361c55b26684b580ce5116a05d9cf973beb92a28" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

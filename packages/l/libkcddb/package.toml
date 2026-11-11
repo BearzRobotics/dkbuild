@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/libkcddb/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libkcddb"
+version = "26.08.2"
+release = 1
+summary = "KDE library for retrieving audio metadata"
+license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
+homepage = "https://invent.kde.org/multimedia/libkcddb"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcmutils-devel", "kconfig-devel", "kdoctools-devel", "ki18n-devel", "kio-devel", "kwidgetsaddons-devel", "libmusicbrainz-devel", "qt6-qtbase-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/libkcddb-26.08.2.tar.xz", sha256 = "cf1594adca2444aef8fadfc1c19bb9e803cae5f43de44a46871fc6cf48121e21" },
+]
+
+setup = '''
+%cmake \
+    -DQT_MAJOR_VERSION=6
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

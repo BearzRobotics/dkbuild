@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/ktexteditor/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "ktexteditor"
+version = "6.31.0"
+release = 1
+summary = "KDE Full text editor component"
+license = "LGPL-2.0-or-later AND (LGPL-2.0-only OR LGPL-3.0-only)"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja"]
+builddeps = ["editorconfig-devel", "karchive-devel", "kauth-devel", "kconfig-devel", "kguiaddons-devel", "ki18n-devel", "kio-devel", "kparts-devel", "ktextwidgets-devel", "qt6-qtdeclarative-devel", "qt6-qtspeech-devel", "qt6-qttools-devel", "sonnet-devel", "syntax-highlighting-devel"]
+checkdeps = ["dbus"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/ktexteditor-6.31.0.tar.xz", sha256 = "02e2d9dbe40b517861af7ad8dd7151d08cbf84be9f8c4e0fecf005b3fc741dac" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

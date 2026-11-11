@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/libmusicbrainz/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libmusicbrainz"
+version = "5.1.0"
+release = 2
+summary = "MusicBrainz client library"
+license = "LGPL-2.1-or-later"
+homepage = "https://musicbrainz.org/doc/libmusicbrainz"
+patches = ["558c9ba0e6d702d5c877f75be98176f57abf1b02.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["neon-devel", "libxml2-devel"]
+
+source = [
+    { url = "https://github.com/metabrainz/libmusicbrainz/releases/download/release-5.1.0/libmusicbrainz-5.1.0.tar.gz", sha256 = "6749259e89bbb273f3f5ad7acdffb7c47a2cf8fcaeab4c4695484cef5f4c6b46" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

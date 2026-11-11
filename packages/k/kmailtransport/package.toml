@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/kmailtransport/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kmailtransport"
+version = "26.08.2"
+release = 1
+summary = "KDE mail transport library"
+license = "LGPL-2.0-or-later"
+homepage = "https://community.kde.org/KDE_PIM"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfigwidgets-devel", "ki18n-devel", "kio-devel", "ksmtp-devel", "libkgapi-devel", "qt6-qtdeclarative-devel", "qtkeychain-devel"]
+checkdeps = []
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kmailtransport-26.08.2.tar.xz", sha256 = "8dae63e06e2014f03b7e6002a8dcf9bc5323173ac0e12a66ce63cb71aafecacb" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

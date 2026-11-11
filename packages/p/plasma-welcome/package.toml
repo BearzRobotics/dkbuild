@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/plasma-welcome/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "plasma-welcome"
+version = "6.8.2"
+release = 1
+summary = "KDE onboarding wizard"
+license = "GPL-3.0-only"
+homepage = "https://invent.kde.org/plasma/plasma-welcome"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcmutils-devel", "kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kglobalaccel-devel", "ki18n-devel", "kio-devel", "kirigami-addons-devel", "kirigami-devel", "kjobwidgets-devel", "knewstuff-devel", "kservice-devel", "ksvg-devel", "kuserfeedback-devel", "kwindowsystem-devel", "libplasma-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel"]
+rundeps = ["kuserfeedback", "plasma5support"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/plasma-welcome-6.8.2.tar.xz", sha256 = "16ced545dca365a03e42867ae33634d8c9bb0fe0e3fa9ba12eb3600774873d9c" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir"/usr/lib/*.a
+'''

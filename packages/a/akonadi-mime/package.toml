@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/akonadi-mime/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "akonadi-mime"
+version = "26.08.2"
+release = 1
+summary = "KDE Akonadi mime libraries"
+license = "LGPL-3.0-only"
+homepage = "https://community.kde.org/KDE_PIM"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "libxslt", "ninja", "pkgconf"]
+builddeps = ["akonadi-devel", "ki18n-devel", "kio-devel", "kitemmodels-devel", "kmime-devel", "kxmlgui-devel", "libxslt-devel", "qt6-qtdeclarative-devel", "shared-mime-info"]
+checkdeps = []
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/akonadi-mime-26.08.2.tar.xz", sha256 = "1f260c099b01ff5eefcba3c9d706b7ece17b251a5719afa43d8f40cdef0daaf5" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: main/xdg-desktop-portal-gtk/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xdg-desktop-portal-gtk"
+version = "1.15.3"
+release = 2
+summary = "Gtk implementation of xdg-desktop-portal"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/flatpak/xdg-desktop-portal-gtk"
+hostdeps = ["gettext", "glib-devel", "meson", "pkgconf"]
+builddeps = ["fontconfig-devel", "gsettings-desktop-schemas-devel", "gtk+3-devel", "xdg-desktop-portal-devel"]
+rundeps = ["xdg-desktop-portal", "gsettings-desktop-schemas"]
+
+source = [
+    { url = "https://github.com/flatpak/xdg-desktop-portal-gtk/releases/download/1.15.3/xdg-desktop-portal-gtk-1.15.3.tar.xz", sha256 = "47a3743d2419a8601e691db37e85bb5fac5ae4b26842177065cd5f22ada23b37" },
+]
+
+setup = '''
+%meson \
+    -Dwallpaper=disabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+rm -rf "$pkgdir/usr/lib/systemd"
+'''

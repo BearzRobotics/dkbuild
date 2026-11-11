@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/skanpage/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "skanpage"
+version = "26.08.2"
+release = 1
+summary = "Scanning utility for images and multi-page documents"
+license = "GPL-2.0-only OR GPL-3.0-only"
+homepage = "https://apps.kde.org/skanpage"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja"]
+builddeps = ["kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "ki18n-devel", "kio-devel", "kirigami-devel", "kquickimageeditor-devel", "ksanecore-devel", "kxmlgui-devel", "leptonica-devel", "purpose-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtwebengine-devel", "tesseract-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/skanpage-26.08.2.tar.xz", sha256 = "1e06c842ee774de21a02772c5bb646088c6de970af22e9b3e879273b615bfe6e" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: user/xfce4-battery-plugin/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xfce4-battery-plugin"
+version = "1.2.0"
+release = 2
+summary = "Xfce battery panel plugin"
+license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
+homepage = "https://docs.xfce.org/panel-plugins/xfce4-battery-plugin/start"
+hostdeps = ["meson", "gettext", "pkgconf"]
+builddeps = ["gtk+3-devel", "libxfce4ui-devel", "libxfce4util-devel", "xfce4-panel-devel"]
+
+source = [
+    { url = "https://archive.xfce.org/src/panel-plugins/xfce4-battery-plugin/1.2/xfce4-battery-plugin-1.2.0.tar.xz", sha256 = "1dba8f470d2b12517e7b86d83cd2ebf13eb57ff1a01a4f2d2d156cf5194d97b6" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

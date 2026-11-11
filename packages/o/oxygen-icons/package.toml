@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/oxygen-icons/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "oxygen-icons"
+version = "6.31.0"
+release = 1
+summary = "Oxygen icon themes"
+license = "GPL-2.0-or-later"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf"]
+builddeps = ["qt6-qtbase-devel"]
+checkdeps = ["fdupes"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/oxygen-icons-6.31.0.tar.xz", sha256 = "f63811206c7c01b78c625abfbe866484b71849be833272a7375bb9f86ac7d5b5" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

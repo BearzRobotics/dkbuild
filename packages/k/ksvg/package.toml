@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/ksvg/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "ksvg"
+version = "6.31.0"
+release = 1
+summary = "KDE Components for handling SVGs"
+license = "LGPL-2.0-or-later AND GPL-2.0-or-later"
+homepage = "https://invent.kde.org/frameworks/ksvg"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja"]
+builddeps = ["karchive-devel", "kcolorscheme-devel", "kconfig-devel", "kcoreaddons-devel", "kguiaddons-devel", "kirigami-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "qt6-qttools-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/ksvg-6.31.0.tar.xz", sha256 = "1cacfe9660cdb564edc4c0bf69578776a54001b114ae6fb2a4fa77da25fca2d1" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

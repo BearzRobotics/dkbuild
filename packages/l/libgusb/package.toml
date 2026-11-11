@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: main/libgusb/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libgusb"
+version = "0.4.9"
+release = 1
+summary = "GLib wrapper around libusb"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/hughsie/libgusb"
+hostdeps = ["meson", "pkgconf", "vala", "gobject-introspection"]
+builddeps = ["glib-devel", "json-glib-devel", "libgudev-devel", "libusb-devel", "vala-devel"]
+options = ["!check", "!cross"]
+
+source = [
+    { url = "https://github.com/hughsie/libgusb/releases/download/0.4.9/libgusb-0.4.9.tar.xz", sha256 = "9df5ef301d6a4b361002aa52cce1165a87a89744055879bdbab31e7e86f1e846" },
+]
+
+setup = '''
+%meson \
+    -Ddocs=false \
+    -Dintrospection=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

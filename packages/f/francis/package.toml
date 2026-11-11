@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/francis/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "francis"
+version = "26.08.2"
+release = 1
+summary = "KDE pomodoro time tracker"
+license = "GPL-3.0-or-later"
+homepage = "https://apps.kde.org/francis"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfig-devel", "kcoreaddons-devel", "kdbusaddons-devel", "ki18n-devel", "kirigami-addons-devel", "kirigami-devel", "knotifications-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel"]
+checkdeps = []
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/francis-26.08.2.tar.xz", sha256 = "fc504c2c7a2abc2af57e22f66302ecd515d2c40425c7ac60daef4b50a42de502" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

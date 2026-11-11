@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/kscreen/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kscreen"
+version = "6.8.2"
+release = 1
+summary = "KDE screen management"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://invent.kde.org/plasma/kscreen"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcmutils-devel", "kconfig-devel", "kcrash-devel", "kdbusaddons-devel", "kglobalaccel-devel", "ki18n-devel", "kitemmodels-devel", "ksvg-devel", "kwindowsystem-devel", "kxmlgui-devel", "layer-shell-qt-devel", "libkscreen-devel", "libplasma-devel", "plasma5support-devel", "qt6-qtbase-devel", "qt6-qtsensors-devel", "qt6-qtwayland-devel", "wayland-protocols", "xcb-util-devel"]
+rundeps = ["kdeclarative", "kimageformats", "plasma5support"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/kscreen-6.8.2.tar.xz", sha256 = "17841f29c50460f48923b537dac01e38d64bc2f3f34915f257b4941bff007e26" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/lib/systemd/user"
+'''

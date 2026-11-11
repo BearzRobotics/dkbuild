@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/pulseaudio-qt/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "pulseaudio-qt"
+version = "1.7.0"
+release = 1
+summary = "Pulseaudio Qt bindings"
+license = "LGPL-2.1-only OR LGPL-3.0-only"
+homepage = "https://invent.kde.org/libraries/pulseaudio-qt"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf"]
+builddeps = ["libpulse-devel", "qt6-qtdeclarative-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/pulseaudio-qt/pulseaudio-qt-1.7.0.tar.xz", sha256 = "6a18db76dd2bcc3df7d9a9379c025295817264baa1f2ed8caaac7da44e04e931" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_WITH_QT6=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

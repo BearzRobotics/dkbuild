@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/libqaccessibilityclient/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libqaccessibilityclient"
+version = "0.6.0"
+release = 1
+summary = "Accessibility helper library"
+license = "LGPL-2.1-only OR LGPL-3.0-only"
+homepage = "https://invent.kde.org/libraries/libqaccessibilityclient"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja"]
+builddeps = ["qt6-qtbase-devel"]
+checkdeps = ["dbus"]
+
+source = [
+    { url = "https://download.kde.org/stable/libqaccessibilityclient/libqaccessibilityclient-0.6.0.tar.xz", sha256 = "4c50c448622dc9c5041ed10da7d87b3e4e71ccb49d4831a849211d423c5f5d33" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_WITH_QT6=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

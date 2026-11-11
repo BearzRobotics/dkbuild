@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/krdc/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "krdc"
+version = "26.08.2"
+release = 1
+summary = "KDE remote desktop client"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/krdc"
+hostdeps = ["cmake", "extra-cmake-modules", "freerdp", "gettext", "ninja", "pkgconf"]
+builddeps = ["freerdp-devel", "kbookmarks-devel", "kcmutils-devel", "kcompletion-devel", "kconfig-devel", "kcrash-devel", "kdnssd-devel", "kdoctools-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "knotifications-devel", "knotifyconfig-devel", "kstatusnotifieritem-devel", "kwidgetsaddons-devel", "kwindowsystem-devel", "kxmlgui-devel", "libssh-devel", "libvncserver-devel", "plasma-activities-devel", "qt6-qtbase-devel", "qt6-qtwayland-devel", "qtkeychain-devel"]
+rundeps = ["freerdp"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/krdc-26.08.2.tar.xz", sha256 = "862d375f3e1f677ab62ed3b379ee2ff6e90c25fd4d04be6b8b6658c35a8dc196" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

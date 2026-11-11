@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/ghostwriter/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "ghostwriter"
+version = "26.08.2"
+release = 1
+summary = "KDE markdown editor"
+license = "GPL-3.0-or-later"
+homepage = "https://apps.kde.org/ghostwriter"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["hunspell-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kdoctools-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "qt6-qt5compat-devel", "qt6-qtsvg-devel", "qt6-qttools-devel", "qt6-qtwebengine-devel", "sonnet-devel"]
+rundeps = ["cmark"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/ghostwriter-26.08.2.tar.xz", sha256 = "03ad5d604205bc6a33f6dcd0cc4c1e04e7c4a4e0ba88ef3169e2aaf971d21700" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_WITH_QT6=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

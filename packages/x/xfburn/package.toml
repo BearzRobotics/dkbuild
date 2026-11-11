@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: user/xfburn/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xfburn"
+version = "0.8.0"
+release = 2
+summary = "Xfce burning software"
+license = "GPL-2.0-or-later"
+homepage = "https://docs.xfce.org/apps/xfburn/start"
+hostdeps = ["docbook-xsl-nons", "gettext", "glib-devel", "libxslt", "meson", "pkgconf"]
+builddeps = ["exo-devel", "glib-devel", "gst-plugins-base-devel", "gstreamer-devel", "gtk+3-devel", "libburn-devel", "libgudev-devel", "libisofs-devel", "libxfce4ui-devel"]
+
+source = [
+    { url = "https://archive.xfce.org/src/apps/xfburn/0.8/xfburn-0.8.0.tar.bz2", sha256 = "13a301aebcef27de18f63f8ca10b43bc42f9c1b9865dff1bfb3e97cfd95dd989" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/libkdegames/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libkdegames"
+version = "26.08.2"
+release = 1
+summary = "KDE common games library"
+license = "LGPL-2.0-only"
+homepage = "https://invent.kde.org/games/libkdegames"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["karchive-devel", "kcolorscheme-devel", "kcompletion-devel", "kconfig-devel", "kconfigwidgets-devel", "kdnssd-devel", "kguiaddons-devel", "ki18n-devel", "kiconthemes-devel", "knewstuff-devel", "kxmlgui-devel", "libsndfile-devel", "openal-soft-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel"]
+checkdeps = []
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/libkdegames-26.08.2.tar.xz", sha256 = "64f5c1a0c79833057ff23fa246a93873ad65730c825c2ba46296741bc079d3ae" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

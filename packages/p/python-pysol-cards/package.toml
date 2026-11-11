@@ -1,0 +1,20 @@
+# Imported from Chimera Linux cports: main/python-pysol_cards/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "python-pysol-cards"
+version = "0.24.0"
+release = 2
+summary = "Python module for dealing cards like various solitaire games"
+license = "MIT"
+homepage = "https://github.com/shlomif/pysol_cards"
+patches = ["nocov.patch"]
+hostdeps = ["python-setuptools"]
+checkdeps = []
+rundeps = ["python"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/p/pysol_cards/pysol_cards-0.24.0.tar.gz", sha256 = "a985492da81aa1588dfc056d9a7c6ca83f66254c0b90f25afc682a70713d4d4b" },
+]
+
+install = '''
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pysol_cards/LICENSE"
+'''

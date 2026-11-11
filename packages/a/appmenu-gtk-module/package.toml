@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/appmenu-gtk-module/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "appmenu-gtk-module"
+version = "25.04"
+release = 1
+summary = "GTK module for appmenu"
+license = "LGPL-3.0-only"
+homepage = "https://gitlab.com/vala-panel-project/vala-panel-appmenu"
+hostdeps = ["meson", "pkgconf"]
+builddeps = ["gtk+3-devel"]
+
+source = [
+    { url = "https://gitlab.com/vala-panel-project/vala-panel-appmenu/-/archive/25.04/vala-panel-appmenu-25.04.tar.gz", sha256 = "48d0be87b260056a65a9056a9be7e190b67a508540ebcb1fc18a67349cca0177" },
+]
+
+setup = '''
+%meson \
+    -Dgtk=3
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

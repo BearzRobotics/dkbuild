@@ -1,0 +1,45 @@
+# Imported from Chimera Linux cports: main/ibus/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "ibus"
+version = "1.5.34"
+release = 3
+summary = "Intelligent Input Bus"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/ibus/ibus"
+patches = ["gs51-001-5bbe88a1936246185a65f76e58cc85871401e59a.patch", "gs51-002-1a331e695d84fc6bae8f2d11c52d4776df49647b.patch", "tests.patch"]
+hostdeps = ["automake", "dconf", "gettext-devel", "glib-devel", "gobject-introspection", "gtk-doc-tools", "pkgconf", "python", "python-gobject-devel", "libtool", "unicode-character-database", "unicode-cldr-common", "unicode-emoji", "vala", "wayland-protocols"]
+builddeps = ["dconf-devel", "gtk+3-devel", "gtk4-devel", "iso-codes", "json-glib-devel", "libnotify-devel", "libx11-devel", "libxkbcommon-devel", "libxtst-devel", "wayland-devel"]
+checkdeps = ["fonts-dejavu", "setxkbmap", "bash"]
+rundeps = ["python-gobject", "iso-codes", "dbus"]
+options = ["!cross", "!check"]
+
+source = [
+    { url = "https://github.com/ibus/ibus/releases/download/1.5.34/ibus-1.5.34.tar.gz", sha256 = "12a72210ce5250f8a66df562a75e034e67b2bce74c4df2983dc86d1154894943" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-ui \
+    --enable-gtk3 \
+    --enable-gtk4 \
+    --enable-memconf \
+    --enable-dconf \
+    --enable-wayland \
+    --enable-emoji-dict \
+    --enable-unicode-dict \
+    --enable-introspection \
+    --enable-vala \
+    --enable-setup \
+    --disable-appindicator \
+    --disable-gtk2 \
+    --disable-schemas-compile \
+    --disable-systemd-services
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+mv "$pkgdir/usr/share/bash-completion/completions/ibus.bash" "$pkgdir/usr/share/bash-completion/completions/ibus"
+'''

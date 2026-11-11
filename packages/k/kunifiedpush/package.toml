@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/kunifiedpush/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kunifiedpush"
+version = "26.08.2"
+release = 1
+summary = "KDE library for push notifications"
+license = "LGPL-2.0-or-later"
+homepage = "https://invent.kde.org/libraries/kunifiedpush"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcmutils-devel", "kcoreaddons-devel", "kcrash-devel", "ki18n-devel", "kservice-devel", "qt6-qtbase-devel", "qt6-qtwebsockets-devel", "solid-devel"]
+checkdeps = ["dbus"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kunifiedpush-26.08.2.tar.xz", sha256 = "52d9c7a2555890834b4ea773b0968e2748bccababdd8c06d076ba8e628acd02b" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/lib/systemd/user"
+'''

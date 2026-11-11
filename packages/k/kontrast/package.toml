@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/kontrast/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kontrast"
+version = "26.08.2"
+release = 1
+summary = "KDE contrast inspection tool"
+license = "GPL-3.0-or-later"
+homepage = "https://apps.kde.org/kontrast"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["futuresql-devel", "kcoreaddons-devel", "kcrash-devel", "kdoctools-devel", "ki18n-devel", "kirigami-addons-devel", "kirigami-devel", "qcoro-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kontrast-26.08.2.tar.xz", sha256 = "9cb739637f4aa57ac50ac0f7fd371935fe0a7ea1d324b9e7b58ffbac2044ad48" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

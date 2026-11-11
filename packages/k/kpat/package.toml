@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: main/kpat/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kpat"
+version = "26.08.2"
+release = 1
+summary = "KDE solitaire collection"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/kpat"
+patches = ["muloverflow.patch"]
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["black-hole-solver-devel", "freecell-solver-devel", "kcompletion-devel", "kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "kguiaddons-devel", "ki18n-devel", "kio-devel", "knewstuff-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "libkdegames-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel"]
+checkdeps = []
+rundeps = ["libkdegames"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kpat-26.08.2.tar.xz", sha256 = "6f4b69ebde5602d808fe857e989568255be2c3a9b8f36c8adaa959fe529b1a17" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

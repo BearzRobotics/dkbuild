@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: main/qt6-qtconnectivity/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "qt6-qtconnectivity"
+version = "6.12.0"
+release = 1
+summary = "Qt6 Connectivity component"
+license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only WITH Qt-GPL-exception-1.0"
+homepage = "https://www.qt.io"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["bluez-devel", "linux-headers", "qt6-qtbase-devel", "qt6-qtdeclarative-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.qt.io/official_releases/qt/6.12/6.12.0/submodules/qtconnectivity-everywhere-src-6.12.0.tar.xz", sha256 = "ed51f7f02c1f437fcf8a42940c7a84f6c0908c0ec7a4f5a5304fe68f47521954" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/bin/sdpscanner6"
+mkdir -p "$pkgdir/usr/bin"
+ln -sf ../lib/qt6/libexec/sdpscanner "$pkgdir/usr/bin/sdpscanner6"
+'''

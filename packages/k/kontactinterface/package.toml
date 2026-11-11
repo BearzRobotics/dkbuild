@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/kontactinterface/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kontactinterface"
+version = "26.08.2"
+release = 1
+summary = "KDE Kontact plugin interface library"
+license = "LGPL-3.0-only"
+homepage = "https://community.kde.org/KDE_PIM"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcoreaddons-devel", "ki18n-devel", "kparts-devel", "kwindowsystem-devel", "kxmlgui-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kontactinterface-26.08.2.tar.xz", sha256 = "c318a9eaef9df8f3e3bce515f4379c5284255f7b2cb424950ae7cc5fff99eca3" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

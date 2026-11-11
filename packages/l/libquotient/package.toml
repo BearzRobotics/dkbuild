@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: main/libquotient/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libquotient"
+version = "0.9.6.1"
+release = 3
+summary = "Qt library for Matrix clients"
+license = "LGPL-2.1-or-later"
+homepage = "https://quotient-im.github.io/libQuotient"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["olm-devel", "qt6-qtbase-devel", "qtkeychain-devel"]
+
+source = [
+    { url = "https://github.com/quotient-im/libQuotient/archive/refs/tags/0.9.6.1.tar.gz", sha256 = "ac0fe5df480fa893d3e16da626bf5028c944e9b41f504f6fe0fe49273247d636" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DQuotient_INSTALL_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# android only
+rm -rf "$pkgdir/usr/share/ndk-modules"
+'''

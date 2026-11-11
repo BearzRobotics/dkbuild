@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/eventviews/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "eventviews"
+version = "26.08.2"
+release = 1
+summary = "KDE event views library"
+license = "LGPL-2.0-or-later AND GPL-2.0-or-later"
+homepage = "https://community.kde.org/KDE_PIM"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["akonadi-calendar-devel", "akonadi-devel", "calendarsupport-devel", "kcalendarcore-devel", "kcalutils-devel", "kcodecs-devel", "kcompletion-devel", "kconfigwidgets-devel", "kcontacts-devel", "kdiagram-devel", "kguiaddons-devel", "kholidays-devel", "ki18n-devel", "kiconthemes-devel", "kitemmodels-devel", "kmime-devel", "kservice-devel", "libkdepim-devel", "qt6-qtdeclarative-devel"]
+checkdeps = []
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/eventviews-26.08.2.tar.xz", sha256 = "e1c4e943f2e7cbde55639bb32822df80377f9d3cffd5f6a1c618dd91bb77117a" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

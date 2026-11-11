@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/networkmanager-qt/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "networkmanager-qt"
+version = "6.31.0"
+release = 1
+summary = "Qt NetworkManager D-Bus API wrapper"
+license = "LGPL-2.1-or-later"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf"]
+builddeps = ["networkmanager-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel"]
+checkdeps = ["dbus"]
+rundeps = ["networkmanager"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/networkmanager-qt-6.31.0.tar.xz", sha256 = "b045f7430f66f16c7bb9ee8c254fe6d3631a74260c1b9be6b4c9ab1873ec9f5e" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

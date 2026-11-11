@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/khelpcenter/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "khelpcenter"
+version = "26.08.2"
+release = 1
+summary = "KDE application documentation viewer"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/khelpcenter"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["karchive-devel", "kbookmarks-devel", "kcompletion-devel", "kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kdbusaddons-devel", "kdoctools-devel", "ki18n-devel", "kio-devel", "kservice-devel", "ktexttemplate-devel", "kwidgetsaddons-devel", "kwindowsystem-devel", "kxmlgui-devel", "qt6-qtdeclarative-devel", "qt6-qtwebengine-devel", "xapian-core-devel"]
+checkdeps = ["perl"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/khelpcenter-26.08.2.tar.xz", sha256 = "3be3417b8326ee49a02e83a6187698d777207f97d2ed8973b3375524798eb44c" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

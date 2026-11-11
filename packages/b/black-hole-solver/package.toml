@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: main/black-hole-solver/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "black-hole-solver"
+version = "1.14.0"
+release = 1
+summary = "Solver for various solitaire card games"
+license = "MIT"
+homepage = "https://github.com/shlomif/black-hole-solitaire"
+hostdeps = ["cmake", "ninja", "perl", "perl-path-tiny", "pkgconf", "python"]
+builddeps = ["rinutils", "xxhash-devel"]
+checkdeps = []
+options = ["!check"]
+
+source = [
+    { url = "https://fc-solve.shlomifish.org/downloads/fc-solve/black-hole-solver-1.14.0.tar.xz", sha256 = "5c47bd093dbb160f4b090fd670ab7c12b4371d39b17b3bbd8c6c4a12975557c0" },
+]
+
+setup = '''
+%cmake \
+    -DUSE_SYSTEM_XXHASH=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/black-hole-solver/COPYING"
+'''

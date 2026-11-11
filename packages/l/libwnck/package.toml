@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/libwnck/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libwnck"
+version = "43.3"
+release = 1
+summary = "Window Navigator Construction Kit"
+license = "LGPL-2.0-only"
+homepage = "https://gitlab.gnome.org/GNOME/libwnck"
+hostdeps = ["gettext", "gobject-introspection", "meson", "pkgconf"]
+builddeps = ["cairo-devel", "glib-devel", "gtk+3-devel", "libx11-devel", "libxres-devel", "startup-notification-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://download.gnome.org/sources/libwnck/43/libwnck-43.3.tar.xz", sha256 = "6af8ac41a8f067ade1d3caaed254a83423b5f61ad3f7a460fcacbac2e192bdf7" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

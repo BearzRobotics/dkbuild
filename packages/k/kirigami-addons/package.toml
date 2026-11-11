@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/kirigami-addons/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kirigami-addons"
+version = "1.12.1"
+release = 1
+summary = "Add-ons for the Kirigami framework"
+license = "LGPL-2.0-or-later AND GPL-2.0-or-later"
+homepage = "https://invent.kde.org/libraries/kirigami-addons"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcolorscheme-devel", "kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "kglobalaccel-devel", "kguiaddons-devel", "ki18n-devel", "kiconthemes-devel", "kirigami-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel"]
+checkdeps = ["qt6-qtmultimedia"]
+rundeps = ["kirigami", "qt6-qtmultimedia", "sonnet"]
+
+source = [
+    { url = "https://download.kde.org/stable/kirigami-addons/kirigami-addons-1.12.1.tar.xz", sha256 = "c543a493ce5875f405fb1c9ff6d531060ed082cc6d710e56d46ac42d164207bb" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

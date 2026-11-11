@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/kquickcharts/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kquickcharts"
+version = "6.31.0"
+release = 1
+summary = "QtQuick high-performance charts module"
+license = "LGPL-2.1-or-later"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "spirv-tools"]
+builddeps = ["qt6-qtdeclarative-devel", "qt6-qttools-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/kquickcharts-6.31.0.tar.xz", sha256 = "2c2c18c1eb1ea1c8d9df0dc084bd2770b0099dc10cc0cb6827c7dc6bd5d3c21d" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

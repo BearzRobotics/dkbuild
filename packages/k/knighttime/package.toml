@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/knighttime/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "knighttime"
+version = "6.8.2"
+release = 1
+summary = "KDE helpers for scheduling the dark-light cycle"
+license = "LGPL-2.1-or-later"
+homepage = "https://invent.kde.org/plasma/knighttime"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja"]
+builddeps = ["kconfig-devel", "kcoreaddons-devel", "kdbusaddons-devel", "kholidays-devel", "ki18n-devel", "qt6-qtbase-devel", "qt6-qtpositioning-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/knighttime-6.8.2.tar.xz", sha256 = "24a7bba1fb798a06b4dec5249b72d4dff94d01df6e2bddfa6665c122a1ab7b28" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/lib/systemd/user"
+'''

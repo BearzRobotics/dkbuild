@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/kde-cli-tools/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kde-cli-tools"
+version = "6.8.2"
+release = 1
+summary = "KDE command line tools to interact with Plasma"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://invent.kde.org/plasma/kde-cli-tools"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcmutils-devel", "kconfig-devel", "kdesu-devel", "kdoctools-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kparts-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/kde-cli-tools-6.8.2.tar.xz", sha256 = "4b04a8086a3049a24ef9eb7845db3cd36204cc656f95894dea9359e99bd31d1d" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

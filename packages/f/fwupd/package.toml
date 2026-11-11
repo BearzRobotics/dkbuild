@@ -1,0 +1,39 @@
+# Imported from Chimera Linux cports: main/fwupd/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "fwupd"
+version = "2.1.8"
+release = 1
+summary = "Firmware updater"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/fwupd/fwupd"
+hostdeps = ["fonts-dejavu", "gcab", "gettext", "gnutls", "gobject-introspection", "hwdata", "meson", "pkgconf", "protobuf-c", "python-gobject", "python-jinja2", "vala"]
+builddeps = ["cairo-devel", "curl-devel", "elogind-devel", "flashrom-devel", "gcab-devel", "gnutls-devel", "libdrm-devel", "libmbim-devel", "libqmi-devel", "libusb-devel", "libxmlb-devel", "linux-headers", "modemmanager-devel", "pango-devel", "polkit-devel", "sqlite-devel"]
+rundeps = ["hwdata", "polkit", "shared-mime-info", "udisks"]
+options = ["!cross"]
+
+source = [
+    { url = "https://github.com/fwupd/fwupd/archive/2.1.8.tar.gz", sha256 = "29ce4c6d7c5211f487474219474b422132b58f03adedf826816b9c8cce129274" },
+]
+
+setup = '''
+%meson \
+    -Ddefault_library=shared \
+    -Ddocs=disabled \
+    -Defi_binary=false \
+    -Dlogind=enabled \
+    -Dintrospection=enabled \
+    -Dsupported_build=enabled \
+    -Dsystemd=disabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 data/bash-completion/fwupdmgr "$pkgdir/usr/share/bash-completion/completions/fwupdmgr"
+install -Dm644 data/bash-completion/fwupdtool "$pkgdir/usr/share/bash-completion/completions/fwupdtool"
+# nuke installed tests
+rm -rf "$pkgdir/usr/share/fwupd/remotes.d/fwupd-tests.conf"
+rm -rf "$pkgdir/usr/lib/installed-tests"
+rm -rf "$pkgdir/usr/share/installed-tests"
+'''

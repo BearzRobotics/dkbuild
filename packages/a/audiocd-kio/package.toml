@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/audiocd-kio/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "audiocd-kio"
+version = "26.08.2"
+release = 1
+summary = "KDE bookmarks editor"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/kio_audiocd"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["cdparanoia-devel", "flac-devel", "kcmutils-devel", "kconfig-devel", "kdoctools-devel", "ki18n-devel", "kio-devel", "libkcddb-devel", "libvorbis-devel", "qt6-qtbase-devel"]
+rundeps = ["lame"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/audiocd-kio-26.08.2.tar.xz", sha256 = "f936e813eaa5515a2365b10f6238613229f6a17fa10a866d7ca20d4f95c0778c" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

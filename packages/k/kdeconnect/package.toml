@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: main/kdeconnect/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kdeconnect"
+version = "26.08.2"
+release = 1
+summary = "KDE plugin for communicating with a smartphone device"
+license = "GPL-2.0-only OR GPL-3.0-only"
+homepage = "https://community.kde.org/KDEConnect"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf", "wayland"]
+builddeps = ["kcmutils-devel", "kconfigwidgets-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "kguiaddons-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kirigami-addons-devel", "kirigami-devel", "kitemmodels-devel", "knotifications-devel", "kpackage-devel", "kpeople-devel", "kservice-devel", "kstatusnotifieritem-devel", "kwindowsystem-devel", "libei-devel", "libfakekey-devel", "modemmanager-qt-devel", "pulseaudio-qt-devel", "qqc2-desktop-style-devel", "qt6-qtbase-devel", "qt6-qtconnectivity-devel", "qt6-qtmultimedia-devel", "qt6-qtwayland-devel", "solid-devel", "wayland-protocols"]
+rundeps = ["kirigami-addons", "sshfs"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kdeconnect-kde-26.08.2.tar.xz", sha256 = "efd9d58deea6857f18d0c77c8bc68192839a83e4d4a518fc829a725459a3dba5" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# wrong name
+mv "$pkgdir/usr/share/zsh/site-functions/_kdeconnect" "$pkgdir/usr/share/zsh/site-functions/_kdeconnect-cli"
+# better path
+if [ -d "$pkgdir/etc/ufw" ]; then mkdir -p "$pkgdir/usr/lib" && mv "$pkgdir/etc/ufw" "$pkgdir/usr/lib/ufw"; fi
+'''

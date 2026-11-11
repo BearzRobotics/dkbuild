@@ -1,0 +1,17 @@
+# Imported from Chimera Linux cports: main/fonts-noto-emoji-ttf/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "fonts-noto-emoji-ttf"
+version = "2.051"
+release = 1
+summary = "Google Noto emoji fonts"
+license = "OFL-1.1"
+homepage = "https://github.com/googlefonts/noto-emoji"
+
+source = [
+    { url = "https://github.com/googlefonts/noto-emoji/archive/v2.051/font-noto-emoji-2.051.tar.gz", sha256 = "04f3d1e5605edebebac00a7a0becb390a4a3ead015066905b27935b30c18e745" },
+]
+
+install = '''
+install -Dm644 $pkgfiles/66-noto-color-emoji.conf "$pkgdir/usr/share/fontconfig/conf.avail/66-noto-color-emoji.conf"
+install -Dm644 fonts/NotoColorEmoji.ttf "$pkgdir/usr/share/fonts/noto/NotoColorEmoji.ttf"
+'''

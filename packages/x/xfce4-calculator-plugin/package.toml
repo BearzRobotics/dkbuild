@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: user/xfce4-calculator-plugin/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xfce4-calculator-plugin"
+version = "0.8.0"
+release = 3
+summary = "Xfce calculator panel plugin"
+license = "GPL-2.0-or-later"
+homepage = "https://docs.xfce.org/panel-plugins/xfce4-calculator-plugin/start"
+hostdeps = ["gettext", "meson", "pkgconf"]
+builddeps = ["gtk+3-devel", "libxfce4ui-devel", "libxfce4util-devel", "xfce4-panel-devel"]
+
+source = [
+    { url = "https://archive.xfce.org/src/panel-plugins/xfce4-calculator-plugin/0.8/xfce4-calculator-plugin-0.8.0.tar.xz", sha256 = "aaf3d7e9654ef6cf8ec442ad9e4316c481f9a6087a8e8949261140f5ae136aeb" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

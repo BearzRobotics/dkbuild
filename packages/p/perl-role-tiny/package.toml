@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/perl-role-tiny/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "perl-role-tiny"
+version = "2.002004"
+release = 2
+summary = "Perl module for role composition"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/pod/Role::Tiny"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+rundeps = ["perl"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/H/HA/HAARG/Role-Tiny-2.002004.tar.gz", sha256 = "d7bdee9e138a4f83aa52d0a981625644bda87ff16642dfa845dcb44d9a242b45" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: user/xfce4-settings/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xfce4-settings"
+version = "4.20.2"
+release = 2
+summary = "Xfce settings app"
+license = "GPL-2.0-only"
+homepage = "https://docs.xfce.org/xfce/xfce4-settings/start"
+patches = ["defaults.patch"]
+hostdeps = ["automake", "gettext-devel", "libxml2", "pkgconf", "libtool", "xfce4-dev-tools"]
+builddeps = ["colord-devel", "exo-devel", "fontconfig-devel", "garcon-devel", "glib-devel", "gtk+3-devel", "gtk-layer-shell-devel", "libnotify-devel", "libx11-devel", "libxcursor-devel", "libxfce4ui-devel", "libxfce4util-devel", "libxi-devel", "libxklavier-devel", "libxrandr-devel", "upower-devel", "xfconf-devel", "xorgproto", "xserver-xorg-input-libinput-devel"]
+
+source = [
+    { url = "https://archive.xfce.org/src/xfce/xfce4-settings/4.20/xfce4-settings-4.20.2.tar.bz2", sha256 = "6e11776e640798a1ac4168d53877f105bb3e8cf93b443c160841e3acdab63939" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-sound-settings \
+    --enable-upower-glib
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

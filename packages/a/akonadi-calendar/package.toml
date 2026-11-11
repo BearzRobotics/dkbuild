@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/akonadi-calendar/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "akonadi-calendar"
+version = "26.08.2"
+release = 1
+summary = "KDE Akonadi calendar libraries"
+license = "LGPL-2.1-or-later AND GPL-2.0-or-later"
+homepage = "https://community.kde.org/KDE_PIM"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["akonadi-contacts-devel", "akonadi-devel", "akonadi-mime-devel", "kcalendarcore-devel", "kcalutils-devel", "kcodecs-devel", "kcrash-devel", "kdbusaddons-devel", "ki18n-devel", "kidentitymanagement-devel", "kio-devel", "kmailtransport-devel", "kmime-devel", "knotifications-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "libkleo-devel", "messagelib-devel", "qgpgme-devel", "qt6-qtdeclarative-devel"]
+checkdeps = []
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/akonadi-calendar-26.08.2.tar.xz", sha256 = "efe0c094908a4febe939ff5c96fb191cf251d3821314108b5ebcfdd488c0346b" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_PYTHON_BINDINGS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

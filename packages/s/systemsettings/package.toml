@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: main/systemsettings/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "systemsettings"
+version = "6.8.2"
+release = 1
+summary = "KDE System settings"
+license = "GPL-2.0-or-later"
+homepage = "https://userbase.kde.org/System_Settings"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kauth-devel", "kcmutils-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "kguiaddons-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kirigami-devel", "kitemmodels-devel", "kitemviews-devel", "kpackage-devel", "krunner-devel", "kxmlgui-devel", "plasma-activities-devel", "plasma-workspace-devel", "qt6-qtdeclarative-devel"]
+rundeps = ["plasma-workspace"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/systemsettings-6.8.2.tar.xz", sha256 = "fd2c60fc07e6e897e0dc3ec357d5d0350a581ff26eeb3241c48b5901eeb410a5" },
+]
+
+environment = '''
+export LDFLAGS="${LDFLAGS} -Wl,-z,stack-size=0x100000"
+'''
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

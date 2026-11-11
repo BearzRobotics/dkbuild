@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/itinerary/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "itinerary"
+version = "26.08.2"
+release = 1
+summary = "KDE digital travel assistant"
+license = "LGPL-2.0-or-later"
+homepage = "https://apps.kde.org/itinerary"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcalendarcore-devel", "kcontacts-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kfilemetadata-devel", "khealthcertificate-devel", "kholidays-devel", "ki18n-devel", "kio-devel", "kirigami-addons-devel", "kitemmodels-devel", "kitinerary-devel", "knotifications-devel", "kopeninghours-devel", "kosmindoormap-devel", "kpkpass-devel", "kpublictransport-devel", "kunitconversion-devel", "kwindowsystem-devel", "libical-devel", "libquotient-devel", "networkmanager-qt-devel", "prison-devel", "qcoro-devel", "qqc2-desktop-style-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtlocation-devel", "qt6-qtmultimedia-devel", "qt6-qtpositioning-devel", "solid-devel", "zlib-ng-compat-devel"]
+rundeps = ["kirigami-addons", "kitemmodels", "kopeninghours", "prison", "qt6-qtlocation"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/itinerary-26.08.2.tar.xz", sha256 = "3a7562ef290bed88b87208aa5485f10f77885f096d976c09a1745f800e057a57" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

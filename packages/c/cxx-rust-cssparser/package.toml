@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/cxx-rust-cssparser/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "cxx-rust-cssparser"
+version = "1.1.0"
+release = 1
+summary = "Library for parsing CSS"
+license = "BSD-2-Clause"
+homepage = "https://invent.kde.org/libraries/cxx-rust-cssparser"
+hostdeps = ["rust", "cmake", "corrosion", "extra-cmake-modules", "ninja", "pkgconf", "qt6-qtbase"]
+builddeps = ["qt6-qtbase-devel", "rust"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/cxx-rust-cssparser/cxx-rust-cssparser-1.1.0.tar.xz", sha256 = "c88f883f67d132240f7ef5c8b8fe4f743a79c448b98ac88f2be3b68264840358" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSES/BSD-2-Clause.txt "$pkgdir/usr/share/licenses/cxx-rust-cssparser/BSD-2-Clause.txt"
+'''

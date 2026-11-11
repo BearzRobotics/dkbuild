@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/bluedevil/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "bluedevil"
+version = "6.8.2"
+release = 1
+summary = "KDE Plasma Bluetooth integration"
+license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
+homepage = "https://invent.kde.org/plasma/bluedevil"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja"]
+builddeps = ["bluez-qt-devel", "kcmutils-devel", "kcoreaddons-devel", "kdbusaddons-devel", "kdoctools-devel", "ki18n-devel", "kio-devel", "kirigami-devel", "knotifications-devel", "ksvg-devel", "kwidgetsaddons-devel", "kwindowsystem-devel", "libplasma-devel", "qt6-qtdeclarative-devel"]
+rundeps = ["kdeclarative"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/bluedevil-6.8.2.tar.xz", sha256 = "119647ee96619dea9ef10339984246367f44835941cceb725483964e113f75ba" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

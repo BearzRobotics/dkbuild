@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/mailcommon/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "mailcommon"
+version = "26.08.2"
+release = 1
+summary = "KDE PIM library for mail applications"
+license = "LGPL-3.0-only AND GPL-3.0-only"
+homepage = "https://community.kde.org/KDE_PIM"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "libxslt", "ninja", "pkgconf"]
+builddeps = ["akonadi-contacts-devel", "akonadi-devel", "akonadi-mime-devel", "karchive-devel", "kcodecs-devel", "kcompletion-devel", "kconfig-devel", "kdbusaddons-devel", "kguiaddons-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kitemmodels-devel", "kitemviews-devel", "kmailtransport-devel", "kmime-devel", "ktextaddons-devel", "ktextwidgets-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "libkdepim-devel", "mailimporter-devel", "messagelib-devel", "phonon-devel", "pimcommon-devel", "qgpgme-devel", "qt6-qtdeclarative-devel", "qt6-qtmultimedia-devel", "qt6-qttools-devel", "syntax-highlighting-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/mailcommon-26.08.2.tar.xz", sha256 = "a69a2c7c613ad1378c8bc31e89dc5394101534db64d9d83d9afa6f3ab85b39d8" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

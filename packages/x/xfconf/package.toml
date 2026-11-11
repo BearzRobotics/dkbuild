@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: user/xfconf/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xfconf"
+version = "4.20.0"
+release = 4
+summary = "Xfce configuration system"
+license = "GPL-2.0-only AND LGPL-2.0-or-later"
+homepage = "https://docs.xfce.org/xfce/xfconf/start"
+hostdeps = ["automake", "gettext-devel", "glib-devel", "gobject-introspection", "gtk-doc-tools", "pkgconf", "python", "libtool", "vala-devel", "xfce4-dev-tools"]
+builddeps = ["glib-devel", "libxfce4util-devel", "vala-devel"]
+checkdeps = ["dbus"]
+options = ["!cross"]
+
+source = [
+    { url = "https://archive.xfce.org/src/xfce/xfconf/4.20/xfconf-4.20.0.tar.bz2", sha256 = "8bc43c60f1716b13cf35fc899e2a36ea9c6cdc3478a8f051220eef0f53567efd" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-helper-path-prefix=/usr/lib \
+    --enable-gsettings-backend
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+rm -rf "$pkgdir/usr/lib/systemd/user"
+'''

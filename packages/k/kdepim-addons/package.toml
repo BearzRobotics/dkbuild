@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: main/kdepim-addons/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kdepim-addons"
+version = "26.08.2"
+release = 1
+summary = "KDE PIM application addons"
+license = "LGPL-2.0-or-later AND GPL-2.0-or-later"
+homepage = "https://invent.kde.org/pim/kdepim-addons"
+hostdeps = ["rust", "cmake", "corrosion", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["akonadi-calendar-devel", "akonadi-contacts-devel", "akonadi-devel", "akonadi-import-wizard-devel", "discount-devel", "eventviews-devel", "gpgmepp-devel", "grantleetheme-devel", "incidenceeditor-devel", "kaddressbook-devel", "kcalendarcore-devel", "kcalutils-devel", "kcmutils-devel", "kconfig-devel", "kcontacts-devel", "kdbusaddons-devel", "kdeclarative-devel", "kguiaddons-devel", "kholidays-devel", "ki18n-devel", "kiconthemes-devel", "kidentitymanagement-devel", "kimap-devel", "kio-devel", "kitinerary-devel", "kldap-devel", "kmailtransport-devel", "kmime-devel", "kparts-devel", "kpimtextedit-devel", "kpkpass-devel", "ktextaddons-devel", "ktexttemplate-devel", "ktnef-devel", "kxmlgui-devel", "libgravatar-devel", "libkdepim-devel", "libkleo-devel", "libksieve-devel", "mailcommon-devel", "mailimporter-devel", "messagelib-devel", "pimcommon-devel", "prison-devel", "qt6-qtdeclarative-devel", "qt6-qtwebengine-devel", "rust", "syntax-highlighting-devel"]
+checkdeps = ["dbus"]
+rundeps = ["kirigami-addons"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kdepim-addons-26.08.2.tar.xz", sha256 = "d01ea99b6e7938f05f0d3b6332c60e1a4148a14883f1b48acd69951d95c39dc2" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export RUSTFLAGS="-C target-feature=-crt-static"
+'''
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

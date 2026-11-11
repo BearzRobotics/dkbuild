@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/libksysguard/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libksysguard"
+version = "6.8.2"
+release = 1
+summary = "KDE system monitor library"
+license = "LGPL-2.1-or-later AND (GPL-2.0-only OR GPL-3.0-only)"
+homepage = "https://kde.org/plasma-desktop"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "libcap", "ninja", "pkgconf"]
+builddeps = ["kauth-devel", "kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kglobalaccel-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kjobwidgets-devel", "knewstuff-devel", "kpackage-devel", "kservice-devel", "kwidgetsaddons-devel", "kwindowsystem-devel", "libcap-devel", "libnl-devel", "libpcap-devel", "lm-sensors-devel", "qt6-qtdeclarative-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/libksysguard-6.8.2.tar.xz", sha256 = "b9dbdcf73f32b88bf6ada9ff9fdb90d7bea4edb66ce708abb107eb64fad26a3f" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

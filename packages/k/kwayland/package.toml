@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/kwayland/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kwayland"
+version = "6.8.2"
+release = 1
+summary = "Qt-style Client and Server library wrapper for the Wayland libraries"
+license = "LGPL-2.1-only OR LGPL-3.0-only"
+homepage = "https://invent.kde.org/frameworks/kwayland"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf"]
+builddeps = ["plasma-wayland-protocols", "qt6-qtbase-devel", "qt6-qtwayland-devel", "wayland-protocols"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/kwayland-6.8.2.tar.xz", sha256 = "98ee6ce9e03b9872a8503aebc60308b1feb9e931e53dee60948904072a4df8d3" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

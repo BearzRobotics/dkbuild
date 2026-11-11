@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/krunner/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "krunner"
+version = "6.31.0"
+release = 1
+summary = "KDE Framework for providing different actions given a string query"
+license = "LGPL-2.1-only AND LGPL-2.1-or-later"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja"]
+builddeps = ["kconfig-devel", "kcoreaddons-devel", "ki18n-devel", "kitemmodels-devel", "kwindowsystem-devel", "plasma-activities-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel"]
+checkdeps = ["dbus"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/krunner-6.31.0.tar.xz", sha256 = "9bcc2525842991bf0e13d8fe7d98986c8ee770e722eda8c9e1abd609f1d65492" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

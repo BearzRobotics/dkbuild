@@ -1,0 +1,34 @@
+# Imported from Chimera Linux cports: main/colord/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "colord"
+version = "1.4.8"
+release = 1
+summary = "Color management daemon"
+license = "GPL-2.0-only"
+homepage = "https://www.freedesktop.org/software/colord"
+patches = ["disable-udev-hwdb-tests.patch", "use-host-utils.patch"]
+hostdeps = ["gettext", "glib-devel", "gobject-introspection", "meson", "pkgconf", "vala"]
+builddeps = ["bash-completion", "dbus-devel", "dbus", "lcms2-devel", "libgudev-devel", "libgusb-devel", "polkit-devel", "sane-backends-devel", "sqlite-devel"]
+rundeps = ["dbus"]
+
+source = [
+    { url = "https://www.freedesktop.org/software/colord/releases/colord-1.4.8.tar.xz", sha256 = "21500bd68975312a7f0f3ce6019d9f75f42aacaa75ca7115ec720b5445406896" },
+]
+
+setup = '''
+%meson \
+    -Ddaemon_user=_colord \
+    -Dsystemd=false \
+    -Dargyllcms_sensor=false \
+    -Ddocs=false \
+    -Dman=false \
+    -Dsane=true \
+    -Dvapi=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 $pkgfiles/colord "$pkgdir/etc/dinit.d/colord"
+'''

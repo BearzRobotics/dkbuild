@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/krdp/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "krdp"
+version = "6.8.2"
+release = 1
+summary = "KDE RDP server library and examples"
+license = "LGPL-2.0-or-later"
+homepage = "https://invent.kde.org/plasma/krdp"
+hostdeps = ["cmake", "extra-cmake-modules", "freerdp", "gettext", "ninja", "pkgconf"]
+builddeps = ["freerdp-devel", "kcmutils-devel", "kconfig-devel", "kcrash-devel", "kdbusaddons-devel", "kguiaddons-devel", "ki18n-devel", "kirigami-addons-devel", "kirigami-devel", "kpipewire-devel", "kstatusnotifieritem-devel", "libei-devel", "plasma-wayland-protocols", "qt6-qtdeclarative-devel", "qtkeychain-devel", "linux-pam-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/krdp-6.8.2.tar.xz", sha256 = "d4e651aca79f83d6da71de1b36e87d38b123fa8fcf066c2294a55a43b3675de4" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/lib/systemd"
+install -Dm644 $pkgfiles/krdpserver.user "$pkgdir/usr/lib/dinit.d/user/krdpserver"
+'''

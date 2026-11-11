@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: user/xfce4-time-out-plugin/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xfce4-time-out-plugin"
+version = "1.2.0"
+release = 2
+summary = "Xfce time-out panel plugin"
+license = "GPL-2.0-or-later"
+homepage = "https://docs.xfce.org/panel-plugins/xfce4-time-out-plugin/start"
+hostdeps = ["gettext", "meson", "pkgconf"]
+builddeps = ["gtk+3-devel", "libx11-devel", "libxfce4ui-devel", "xfce4-panel-devel"]
+
+source = [
+    { url = "https://archive.xfce.org/src/panel-plugins/xfce4-time-out-plugin/1.2/xfce4-time-out-plugin-1.2.0.tar.xz", sha256 = "e344d9f82a8acd23d44e7cf9b2efe9599ffff856d9ba1a9be0e67b022c0d2eb2" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

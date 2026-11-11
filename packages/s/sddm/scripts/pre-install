@@ -1,0 +1,5 @@
+#!/bin/sh
+# users and groups (sysusers.conf)
+grep -q "^_sddm:" /etc/group || groupadd -r _sddm
+grep -q "^_sddm:" /etc/passwd || useradd -r -g _sddm -d /var/lib/sddm -s /usr/bin/nologin -c 'SDDM Greeter Account' _sddm
+exit 0

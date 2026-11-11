@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/kalk/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kalk"
+version = "26.08.2"
+release = 1
+summary = "KDE Calculator"
+license = "GPL-3.0-or-later AND CC0-1.0"
+homepage = "https://apps.kde.org/kalk"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfig-devel", "kcoreaddons-devel", "ki18n-devel", "kirigami-devel", "kunitconversion-devel", "libqalculate-devel", "qt6-qtdeclarative-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kalk-26.08.2.tar.xz", sha256 = "bb0062cd9d550d5b77f10060e739a4fe70c7d43f5ef54ca07f0a93f77a22ce11" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

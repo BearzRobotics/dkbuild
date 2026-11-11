@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/kwalletmanager/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kwalletmanager"
+version = "26.08.2"
+release = 1
+summary = "KDE KWallet GUI manager"
+license = "GPL-2.0-or-later"
+homepage = "https://invent.kde.org/utilities/kwalletmanager"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["karchive-devel", "kauth-devel", "kcmutils-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "ki18n-devel", "kio-devel", "kservice-devel", "kstatusnotifieritem-devel", "kwallet-devel", "kwindowsystem-devel", "kxmlgui-devel", "qt6-qtdeclarative-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kwalletmanager-26.08.2.tar.xz", sha256 = "579cf90c9d6e9aa9ff103747208c66a172efcf3338a5f0d7384e63c79e17b66a" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

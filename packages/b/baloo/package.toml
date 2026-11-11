@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: main/baloo/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "baloo"
+version = "6.31.0"
+release = 1
+summary = "KDE Framework for searching and metadata"
+license = "LGPL-3.0-only AND (GPL-2.0-only OR GPL-3.0-only)"
+homepage = "https://community.kde.org/Baloo"
+patches = ["disable-indexing-by-default.patch"]
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kfilemetadata-devel", "ki18n-devel", "kidletime-devel", "kio-devel", "lmdb-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel", "solid-devel"]
+checkdeps = ["dbus"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/baloo-6.31.0.tar.xz", sha256 = "178d6550a7c55a820322182814a96a7564343a506772971e4aac8b1e7e4d1829" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# TODO: dinit user service with graphical
+rm -rf "$pkgdir/usr/lib/systemd/user"
+'''

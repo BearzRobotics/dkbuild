@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: main/freecell-solver/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "freecell-solver"
+version = "6.14.0"
+release = 1
+summary = "Solver for various Freecell-based solitaire games"
+license = "MIT"
+homepage = "https://github.com/shlomif/fc-solve"
+patches = ["muloverflow.patch"]
+hostdeps = ["cmake", "gperf", "ninja", "perl-moo", "perl-path-tiny", "perl-template-toolkit", "pkgconf", "python-cffi", "python-pysol-cards", "python-random2", "python-six"]
+builddeps = ["gmp-devel", "rinutils"]
+rundeps = ["python-pysol-cards", "python-six"]
+
+source = [
+    { url = "https://fc-solve.shlomifish.org/downloads/fc-solve/freecell-solver-6.14.0.tar.xz", sha256 = "1d1125d85422bcd521102d7cb1e7c84b76863fe445dd21879f9779dc6b2ce7dc" },
+]
+
+setup = '''
+%cmake \
+    -DFCS_WITH_TEST_SUITE=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING.txt "$pkgdir/usr/share/licenses/freecell-solver/COPYING.txt"
+'''

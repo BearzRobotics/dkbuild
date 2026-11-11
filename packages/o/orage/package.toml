@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: user/orage/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "orage"
+version = "4.20.2"
+release = 2
+summary = "Xfce time-managing app"
+license = "GPL-2.0-or-later"
+homepage = "https://docs.xfce.org/apps/orage/start"
+hostdeps = ["automake", "gettext-devel", "pkgconf", "libtool", "xfce4-dev-tools"]
+builddeps = ["glib-devel", "gtk+3-devel", "libical-devel", "libnotify-devel", "libx11-devel", "libxfce4ui-devel", "libxfce4util-devel"]
+
+source = [
+    { url = "https://archive.xfce.org/src/apps/orage/4.20/orage-4.20.2.tar.bz2", sha256 = "6bfd3da084c2977fb5cee26c8e94bf55e358da8e86dd2a83c6fa9174f24672a1" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-x11-tray-icon
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

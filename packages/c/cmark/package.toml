@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: main/cmark/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "cmark"
+version = "0.31.2"
+release = 1
+summary = "C implementation of the CommonMark markdown specification"
+license = "BSD-2-Clause"
+homepage = "https://github.com/commonmark/cmark"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+checkdeps = ["python"]
+
+source = [
+    { url = "https://github.com/commonmark/cmark/archive/refs/tags/0.31.2.tar.gz", sha256 = "f9bc5ca38bcb0b727f0056100fac4d743e768872e3bacec7746de28f5700d697" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -DNDEBUG"
+export CXXFLAGS="${CXXFLAGS} -DNDEBUG"
+'''
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/cmark/COPYING"
+'''

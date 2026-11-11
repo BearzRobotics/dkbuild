@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: main/libphonenumber/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libphonenumber"
+version = "9.0.38"
+release = 1
+summary = "Library for parsing, formatting, and validating phone numbers"
+license = "Apache-2.0"
+homepage = "https://github.com/google/libphonenumber"
+patches = ["fuckoff.patch", "geocoder.patch", "protobuf.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["abseil-cpp-devel", "gtest-devel", "icu-devel", "protobuf-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://github.com/google/libphonenumber/archive/refs/tags/v9.0.38.tar.gz", sha256 = "75e0a15fdc8fab9efc8a101d1d36ba3866c407889faae6c025e6aac58957da77" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_STATIC_LIB=OFF \
+    -DREGENERATE_METADATA=OFF \
+    -DUSE_BOOST=OFF \
+    -DUSE_STDMUTEX=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

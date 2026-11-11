@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: main/editorconfig/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "editorconfig"
+version = "0.12.10"
+release = 1
+summary = "EditorConfig core C library"
+license = "BSD-2-Clause"
+homepage = "https://editorconfig.org"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["pcre2-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/editorconfig/editorconfig-core-c/archive/v0.12.10.tar.gz", sha256 = "ab9f897a90fb36cfc34e5b67221e55ab0e3119b3512de8e31029d376c6bab870" },
+    { url = "https://github.com/editorconfig/editorconfig-core-test/archive/5ca0b296dc31124d0303895c163013450bd97958.tar.gz", sha256 = "a1ca71c8f099c6ffc4fc1c0214732d4e27168fb2a5fbf2da47b5bc50fb7b5e79" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/editorconfig/LICENSE"
+'''

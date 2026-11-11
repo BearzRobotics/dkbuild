@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: user/libxfce4util/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libxfce4util"
+version = "4.20.1"
+release = 2
+summary = "Utility library for Xfce"
+license = "LGPL-2.0-or-later"
+homepage = "https://docs.xfce.org/xfce/libxfce4util/start"
+hostdeps = ["automake", "gettext-devel", "gobject-introspection", "gtk-doc-tools", "pkgconf", "libtool", "vala", "xfce4-dev-tools"]
+builddeps = ["glib-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://archive.xfce.org/src/xfce/libxfce4util/4.20/libxfce4util-4.20.1.tar.bz2", sha256 = "84bfc4daab9e466193540c3665eee42b2cf4d24e3f38fc3e8d1e0a2bebe3b8f1" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

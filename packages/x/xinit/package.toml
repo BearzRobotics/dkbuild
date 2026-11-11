@@ -1,0 +1,41 @@
+# Imported from Chimera Linux cports: main/xinit/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xinit"
+version = "1.4.4"
+release = 1
+summary = "X init program"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "pkgconf", "xorg-util-macros"]
+builddeps = ["libx11-devel"]
+rundeps = []
+
+source = [
+    { url = "https://www.x.org/releases/individual/app/xinit-1.4.4.tar.gz", sha256 = "45cca1b0f3a963105f43cecc24e9cc4db0d14faa87bd9860b9ec563e8c73fc47" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-xinitdir=/etc/X11/xinit
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xinit/COPYING"
+# remove all the broken upstream junk
+# also TODO: write a manpage for new startx
+rm -rf "$pkgdir/usr/bin/startx"
+rm -rf "$pkgdir/usr/share/man/man1/startx.1"
+rm -rf "$pkgdir/etc/X11/xinit"
+install -Dm755 $pkgfiles/startx "$pkgdir/usr/bin/startx"
+install -Dm755 $pkgfiles/Xsession "$pkgdir/etc/X11/Xsession"
+# default xsession scripts
+install -dm755 "$pkgdir/etc/X11/Xsession.d"
+install -Dm755 $pkgfiles/00default "$pkgdir/etc/X11/Xsession.d/00default"
+'''

@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/kdav/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kdav"
+version = "6.31.0"
+release = 1
+summary = "KDE DAV library"
+license = "LGPL-2.0-or-later"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcoreaddons-devel", "ki18n-devel", "kio-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel"]
+checkdeps = []
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/kdav-6.31.0.tar.xz", sha256 = "da8e92d3201c5566b9318cf52788a4e9e034fbe556ea1e7a6ca8ee7de03df4d0" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/plasma-nm/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "plasma-nm"
+version = "6.8.2"
+release = 1
+summary = "KDE Plasma NetworkManager integration"
+license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
+homepage = "https://invent.kde.org/plasma/plasma-nm"
+patches = ["m-b-p-i-20250613.patch"]
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcmutils-devel", "kcolorscheme-devel", "kcompletion-devel", "kcoreaddons-devel", "kdbusaddons-devel", "ki18n-devel", "kio-devel", "kirigami-addons-devel", "kirigami-devel", "knotifications-devel", "ksvg-devel", "kwallet-devel", "libplasma-devel", "modemmanager-qt-devel", "networkmanager-qt-devel", "prison-devel", "qca-devel", "qcoro-devel", "qt6-qtdeclarative-devel", "qtkeychain-devel"]
+rundeps = ["prison"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/plasma-nm-6.8.2.tar.xz", sha256 = "e1b41433bf2d4e6d60f63f6c6e3d466c242b5be46f87fecc178de0fe845c12a0" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

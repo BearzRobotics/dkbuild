@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/ktnef/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "ktnef"
+version = "26.08.2"
+release = 1
+summary = "KDE library for TNEF data"
+license = "LGPL-2.0-or-later"
+homepage = "https://community.kde.org/KDE_PIM"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcalendarcore-devel", "kcalutils-devel", "kcontacts-devel", "ki18n-devel", "qt6-qtbase-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/ktnef-26.08.2.tar.xz", sha256 = "07950712fee0b4965405ce0498e66505adf9c850fd2a7463111c38a474866ad8" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

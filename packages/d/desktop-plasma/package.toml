@@ -1,0 +1,47 @@
+# KDE Plasma 6.8 (Wayland, X11 too): kwin, the Plasma shell and System
+# Settings, with screen locking (kscreenlocker, through linux-pam), networks
+# (plasma-nm, NetworkManager), audio (plasma-pa, PipeWire), Bluetooth, power,
+# displays, printing, Discover with Flatpak, and SDDM with its greeter on kwin.
+# desktop-plasma-apps (the everyday KDE applications) comes with it;
+# desktop-plasma-pim (Kontact, KMail, KOrganizer...) is separate: it brings the
+# Akonadi stack.
+name = "desktop-plasma"
+version = "6.8.2"
+release = 1
+summary = "KDE Plasma desktop"
+license = "MIT"
+homepage = "https://kde.org/plasma-desktop"
+options = ["meta"]
+rundeps = [
+    "plasma-desktop", "plasma-workspace", "kwin", "systemsettings", "kscreen", "kscreenlocker",
+    "powerdevil", "plasma-nm", "plasma-pa", "bluedevil", "breeze", "breeze-gtk", "kde-gtk-config",
+    "kinfocenter", "kmenuedit", "kde-cli-tools", "kdeplasma-addons", "kglobalacceld",
+    "kactivitymanagerd", "milou", "plasma-systemmonitor", "ksystemstats", "plasma-disks",
+    "plasma-thunderbolt", "plasma-browser-integration", "plasma-integration", "plasma-welcome",
+    "plasma-workspace-wallpapers", "polkit-kde-agent-1", "print-manager", "qqc2-breeze-style",
+    "sddm", "sddm-kcm", "xdg-desktop-portal-kde", "kwallet-pam", "ksshaskpass", "ocean-sound-theme",
+    "oxygen-sounds", "discover", "flatpak-kcm", "kpipewire", "plasma-keyboard", "aurorae",
+    "breeze-icons", "networkmanager", "bluez", "pipewire", "wireplumber", "elogind", "polkit",
+    "udisks", "mesa", "dbus", "xdg-user-dirs", "fonts-noto", "xwayland",
+]
+
+[subpackages.apps]
+summary = "KDE applications"
+empty = true
+install_if = ["desktop-plasma"]
+depends = [
+    "konsole", "dolphin", "dolphin-plugins", "kate", "ark", "gwenview", "okular", "spectacle", "kalk",
+    "filelight", "partitionmanager", "kwalletmanager", "ksystemlog", "kdeconnect", "elisa", "k3b",
+    "kcharselect", "kcolorchooser", "kolourpaint", "sweeper", "kdialog", "khelpcenter", "kio-extras",
+    "kio-admin", "kio-fuse", "kio-zeroconf", "ffmpegthumbs", "kdegraphics-thumbnailers",
+    "kdenetwork-filesharing", "isoimagewriter", "skanlite", "kruler", "keditbookmarks", "kget",
+    "krdc", "konversation", "ktorrent", "yakuake", "kweather", "kclock", "kpat",
+]
+
+[subpackages.pim]
+summary = "KDE personal information management (Kontact, KMail, KOrganizer...)"
+empty = true
+depends = [
+    "kontact", "kmail", "korganizer", "kaddressbook", "akregator", "kdepim-runtime", "kdepim-addons",
+    "merkuro", "kalarm", "kmail-account-wizard", "akonadi-import-wizard",
+]

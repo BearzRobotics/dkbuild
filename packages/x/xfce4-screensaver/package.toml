@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: user/xfce4-screensaver/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xfce4-screensaver"
+version = "4.20.0"
+release = 2
+summary = "Xfce screensaver"
+license = "GPL-2.0-or-later"
+homepage = "https://docs.xfce.org/apps/xfce4-screensaver/start"
+patches = ["dbus-glib.patch"]
+hostdeps = ["automake", "gettext-devel", "glib-devel", "pkgconf", "libtool", "xfce4-dev-tools"]
+builddeps = ["dbus-devel", "elogind-devel", "garcon-devel", "gtk+3-devel", "libwnck-devel", "libx11-devel", "libxext-devel", "libxfce4ui-devel", "libxfce4util-devel", "libxklavier-devel", "libxscrnsaver-devel", "mesa-devel", "shadow-devel", "xfconf-devel", "linux-pam-devel"]
+rundeps = ["python-gobject"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/dbus/dbus-glib/-/archive/623a4f3386a675060335e20afd810c6e10ae2cc8/dbus-glib-623a4f3386a675060335e20afd810c6e10ae2cc8.tar.gz", sha256 = "e370298d002848fdb2065fee254cb5b0efa0f2699b74299c234019c8d79b852e" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+if [ -d "$pkgdir/etc/pam.d" ]; then mkdir -p "$pkgdir/usr/lib" && mv "$pkgdir/etc/pam.d" "$pkgdir/usr/lib/pam.d"; fi
+'''

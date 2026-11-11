@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: main/ksystemstats/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "ksystemstats"
+version = "6.8.2"
+release = 1
+summary = "KDE Plugin based system monitoring daemon"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://invent.kde.org/plasma/ksystemstats"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "libcap", "ninja", "pkgconf"]
+builddeps = ["elogind-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "libcap-devel", "libksysguard-devel", "libnl-devel", "lm-sensors-devel", "networkmanager-qt-devel", "qt6-qtdeclarative-devel", "solid-devel"]
+checkdeps = ["dbus"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/ksystemstats-6.8.2.tar.xz", sha256 = "2a71fa12b3dd8ad4a6c31feae253b1d1ed7fb0ddd44c8d27a32b63583f8b4889" },
+]
+
+environment = '''
+export CXXFLAGS="${CXXFLAGS} -Wno-deprecated-declarations"
+'''
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/lib/systemd/user"
+'''

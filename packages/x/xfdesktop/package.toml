@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: user/xfdesktop/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xfdesktop"
+version = "4.20.1"
+release = 2
+summary = "Xfce desktop manager"
+license = "GPL-2.0-or-later"
+homepage = "https://docs.xfce.org/xfce/xfdesktop/start"
+hostdeps = ["automake", "gettext", "gettext-devel", "pkgconf", "libtool", "xfce4-dev-tools"]
+builddeps = ["cairo-devel", "exo-devel", "garcon-devel", "glib-devel", "gtk+3-devel", "gtk-layer-shell-devel", "libnotify-devel", "libxfce4ui-devel", "libxfce4util-devel", "libxfce4windowing-devel", "libyaml-devel", "thunar-devel", "xfconf-devel"]
+rundeps = []
+
+source = [
+    { url = "https://archive.xfce.org/src/xfce/xfdesktop/4.20/xfdesktop-4.20.1.tar.bz2", sha256 = "acccde849265bbf4093925ba847977b7abf70bb2977e4f78216570e887c157b8" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-default-backdrop-filename=/usr/share/backgrounds/chimera/bg-l.svg
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

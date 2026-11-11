@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/kio-extras/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kio-extras"
+version = "26.08.2"
+release = 1
+summary = "KDE KIO additional plugins"
+license = "LGPL-3.0-or-later"
+homepage = "https://invent.kde.org/network/kio-extras"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "gperf", "ninja", "pkgconf"]
+builddeps = ["karchive-devel", "kcmutils-devel", "kconfigwidgets-devel", "kdbusaddons-devel", "kdnssd-devel", "kdoctools-devel", "kdsoap-ws-discover-client-devel", "kguiaddons-devel", "ki18n-devel", "kio-devel", "knotifications-devel", "ktextwidgets-devel", "libimobiledevice-devel", "libkexiv2-devel", "libmtp-devel", "libplist-devel", "libssh-devel", "openexr-devel", "phonon-devel", "plasma-activities-devel", "plasma-activities-stats-devel", "qcoro-devel", "qt6-qt5compat-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "samba-devel", "syntax-highlighting-devel", "taglib-devel"]
+checkdeps = []
+options = ["!cross"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kio-extras-26.08.2.tar.xz", sha256 = "b5fc98552eea1f9279fb1f03c7e3ffb36a46ffddd0bf0bba9868331d8c461e6e" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

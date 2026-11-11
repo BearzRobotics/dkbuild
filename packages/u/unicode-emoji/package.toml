@@ -1,0 +1,20 @@
+# Imported from Chimera Linux cports: main/unicode-emoji/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "unicode-emoji"
+version = "17.0"
+release = 1
+summary = "Unicode Emoji data files"
+license = "Unicode-DFS-2016"
+homepage = "https://home.unicode.org/emoji"
+
+source = [
+    { url = "https://www.unicode.org/Public/emoji/17.0/emoji-sequences.txt", sha256 = "bec5f82bc4c846ccba508b2c617aae239c0804dde0106f06eee62e011cb494f6" },
+    { url = "https://www.unicode.org/Public/emoji/17.0/emoji-test.txt", sha256 = "07ee0565612af5d8cf36ea7d2cd7d255429441059133c60f863e97e648ebeb29" },
+    { url = "https://www.unicode.org/Public/emoji/17.0/emoji-zwj-sequences.txt", sha256 = "5b25441daed2322b068c5e70cda522946a4f0274df864445a1965a92e5fc5cad" },
+]
+
+install = '''
+install -Dm644 emoji-sequences-17.0.txt "$pkgdir/usr/share/unicode/emoji/emoji-sequences.txt"
+install -Dm644 emoji-test-17.0.txt "$pkgdir/usr/share/unicode/emoji/emoji-test.txt"
+install -Dm644 emoji-zwj-sequences-17.0.txt "$pkgdir/usr/share/unicode/emoji/emoji-zwj-sequences.txt"
+'''

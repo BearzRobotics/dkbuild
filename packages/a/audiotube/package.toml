@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: main/audiotube/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "audiotube"
+version = "26.08.2"
+release = 1
+summary = "KDE Youtube Music player"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/audiotube"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["futuresql-devel", "kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "ki18n-devel", "kiconthemes-devel", "kirigami-addons-devel", "kirigami-devel", "kwindowsystem-devel", "python-devel", "python-pybind11-devel", "qcoro-devel", "qt6-qtdeclarative-devel", "qt6-qtmultimedia-devel", "qt6-qtsvg-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/audiotube-26.08.2.tar.xz", sha256 = "46d46af51427f6da0cebc217ec2219161dd6f9d8a0d8f25248f3257ee14d4ff7" },
+]
+
+environment = '''
+export CXXFLAGS="${CXXFLAGS} -I/usr/include/python3.14"
+export LDFLAGS="${LDFLAGS} -lpython3.14"
+'''
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

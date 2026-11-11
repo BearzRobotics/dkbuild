@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: main/libxpresent/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libxpresent"
+version = "1.0.2"
+release = 1
+summary = "XPresent extension library"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "pkgconf", "libtool", "xorg-util-macros"]
+builddeps = ["xorgproto", "libxfixes-devel", "libxrandr-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/lib/libXpresent-1.0.2.tar.gz", sha256 = "e98a211e51d8b9381d16b24a57cecb926a23e743b9e0b1ffc3e870206b7dee1a" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libxpresent/COPYING"
+'''

@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: main/libportal/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libportal"
+version = "0.9.1"
+release = 12
+summary = "Flatpak portal library"
+license = "LGPL-3.0-only"
+homepage = "https://github.com/flatpak/libportal"
+patches = ["796053d2eebe4532aad6bd3fd80cdf3b197806ec.patch", "pid_t.patch"]
+hostdeps = ["glib-devel", "gobject-introspection", "meson", "pkgconf", "vala"]
+builddeps = ["glib-devel", "gtk+3-devel", "gtk4-devel", "qt6-qtbase-devel"]
+
+source = [
+    { url = "https://github.com/flatpak/libportal/releases/download/0.9.1/libportal-0.9.1.tar.xz", sha256 = "de801ee349ed3c255a9af3c01b1a401fab5b3fc1c35eb2fd7dfb35d4b8194d7f" },
+]
+
+setup = '''
+%meson \
+    -Ddocs=false \
+    -Dbackend-gtk3=enabled \
+    -Dbackend-gtk4=enabled \
+    -Dbackend-qt6=enabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/plasma-vault/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "plasma-vault"
+version = "6.8.2"
+release = 1
+summary = "KDE encrypted storage applet"
+license = "(GPL-2.0-only OR GPL-3.0-only) AND (LGPL-2.1-only AND LGPL-3.0-only)"
+homepage = "https://invent.kde.org/plasma/plasma-vault"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kdbusaddons-devel", "ki18n-devel", "kio-devel", "kitemmodels-devel", "kservice-devel", "kwidgetsaddons-devel", "libksysguard-devel", "libplasma-devel", "networkmanager-qt-devel", "plasma-activities-devel", "qt6-qtdeclarative-devel"]
+rundeps = []
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/plasma-vault-6.8.2.tar.xz", sha256 = "acc4167ef8f8701af4437378797c41c573d27f7573341ff39a1476930406f729" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/markdownpart/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "markdownpart"
+version = "26.08.2"
+release = 1
+summary = "KParts plugin for Markdown"
+license = "LGPL-2.1-or-later"
+homepage = "https://apps.kde.org/markdownpart"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["ki18n-devel", "kparts-devel", "qt6-qtdeclarative-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/markdownpart-26.08.2.tar.xz", sha256 = "7786fa67079b23ddedb39660e06d124f2bccf8fe8486c386d80ead1bcd4118c2" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

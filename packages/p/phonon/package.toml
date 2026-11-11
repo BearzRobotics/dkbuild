@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/phonon/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "phonon"
+version = "4.12.0"
+release = 2
+summary = "KDE Multimedia backend"
+license = "LGPL-2.1-or-later"
+homepage = "https://userbase.kde.org/Phonon"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf"]
+builddeps = ["libpulse-devel", "qt6-qt5compat-devel", "qt6-qtbase-devel", "qt6-qttools-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/phonon/4.12.0/phonon-4.12.0.tar.xz", sha256 = "3287ffe0fbcc2d4aa1363f9e15747302d0b080090fe76e5f211d809ecb43f39a" },
+]
+
+setup = '''
+%cmake \
+    -DPHONON_BUILD_QT5=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

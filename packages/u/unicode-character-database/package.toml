@@ -1,0 +1,18 @@
+# Imported from Chimera Linux cports: main/unicode-character-database/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "unicode-character-database"
+version = "16.0.0"
+release = 2
+summary = "Unicode Character Database"
+license = "Unicode-DFS-2016"
+homepage = "https://www.unicode.org"
+
+source = [
+    { url = "https://www.unicode.org/Public/zipped/16.0.0/UCD.zip", sha256 = "c86dd81f2b14a43b0cc064aa5f89aa7241386801e35c59c7984e579832634eb2" },
+    { url = "https://www.unicode.org/Public/zipped/16.0.0/Unihan.zip", sha256 = "b8f000df69de7828d21326a2ffea462b04bc7560022989f7cc704f10521ef3e0" },
+]
+
+install = '''
+install -dm755 "$pkgdir/usr/share/unicode/ucd"
+cp -r ./* "$pkgdir/usr/share/unicode/ucd/"
+'''

@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: user/xfce4-places-plugin/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xfce4-places-plugin"
+version = "1.9.0"
+release = 2
+summary = "Xfce folders and media quick access panel plugin"
+license = "GPL-2.0-or-later"
+homepage = "https://docs.xfce.org/panel-plugins/xfce4-places-plugin/start"
+hostdeps = ["gettext", "meson", "pkgconf"]
+builddeps = ["exo-devel", "gtk+3-devel", "libnotify-devel", "libwnck-devel", "libxfce4ui-devel", "libxfce4util-devel", "xfce4-panel-devel", "xfconf-devel"]
+
+source = [
+    { url = "https://archive.xfce.org/src/panel-plugins/xfce4-places-plugin/1.9/xfce4-places-plugin-1.9.0.tar.xz", sha256 = "76d95687e0bea267465e832eea6266563a18d2219192f9e8af6f88e899262e43" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

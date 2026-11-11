@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/print-manager/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "print-manager"
+version = "6.8.2"
+release = 1
+summary = "KDE tool for printers"
+license = "GPL-2.0-or-later AND LGPL-2.0-or-later AND (LGPL-2.1-only OR LGPL-3.0-only)"
+homepage = "https://invent.kde.org/plasma/print-manager"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcmutils-devel", "kdbusaddons-devel", "kdeclarative-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kirigami-addons-devel", "kirigami-devel", "kitemmodels-devel", "knotifications-devel", "kwidgetsaddons-devel", "kwindowsystem-devel", "libplasma-devel", "qt6-qtdeclarative-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/print-manager-6.8.2.tar.xz", sha256 = "648dc29862b49fc9eb62e0bda89016ec6b76e1236f0285f3450c8ea9c5a00cf5" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

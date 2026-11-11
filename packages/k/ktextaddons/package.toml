@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/ktextaddons/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "ktextaddons"
+version = "2.1.2"
+release = 1
+summary = "KDE text handling addons library"
+license = "LGPL-2.1-or-later"
+homepage = "https://invent.kde.org/libraries/ktextaddons"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja"]
+builddeps = ["karchive-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "ktextwidgets-devel", "qt6-qtdeclarative-devel", "qt6-qtspeech-devel", "qt6-qttools-devel", "qtkeychain-devel", "sonnet-devel", "syntax-highlighting-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/ktextaddons/ktextaddons-2.1.2.tar.xz", sha256 = "f3b4448904f1656d6d7cd5a557d22fe1c50624eb32ed369f34726beff9ce0589" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_WITH_QT6=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

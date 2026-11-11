@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/plasma5support/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "plasma5support"
+version = "6.8.2"
+release = 1
+summary = "KDE Support components for porting from Qt5/KF5 to Qt6/KF6"
+license = "LGPL-2.0-or-later"
+homepage = "https://invent.kde.org/plasma/plasma5support"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfig-devel", "kcoreaddons-devel", "kguiaddons-devel", "kholidays-devel", "ki18n-devel", "kidletime-devel", "kio-devel", "knotifications-devel", "kservice-devel", "kunitconversion-devel", "libksysguard-devel", "networkmanager-qt-devel", "plasma-activities-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "solid-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/plasma5support-6.8.2.tar.xz", sha256 = "6d98603d6ec0826bd1fb7348a15e73d9011fd2035f03bda5f8e55210d62b24ed" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

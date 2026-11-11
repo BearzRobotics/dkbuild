@@ -1,0 +1,9 @@
+#!/bin/sh
+# directories and files (tmpfiles.conf)
+mkdir -p /var/lib/AccountsService/users
+chmod 0755 /var/lib/AccountsService/users
+chown root:root /var/lib/AccountsService/users 2>/dev/null || true
+mkdir -p /var/lib/AccountsService/icons
+chmod 0755 /var/lib/AccountsService/icons
+chown root:root /var/lib/AccountsService/icons 2>/dev/null || true
+exit 0

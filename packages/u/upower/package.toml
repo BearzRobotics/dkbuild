@@ -1,0 +1,36 @@
+# Imported from Chimera Linux cports: main/upower/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "upower"
+version = "1.91.2"
+release = 1
+summary = "Abstraction for enumerating power devices"
+license = "GPL-2.0-or-later"
+homepage = "https://upower.freedesktop.org"
+patches = ["skip-fail.patch"]
+hostdeps = ["docbook-xsl-nons", "gettext-devel", "glib-devel", "gobject-introspection", "libxslt", "meson", "pkgconf"]
+builddeps = ["glib-devel", "libgudev-devel", "libimobiledevice-devel", "libusb-devel", "linux-headers"]
+checkdeps = ["dbus", "python-dbus", "python-gobject", "python-packaging"]
+options = ["!cross"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/upower/upower/-/archive/v1.91.2/upower-v1.91.2.tar.gz", sha256 = "cd9a3a3f5e0aa21eac131253228757bbdc90ecd39768f46c325754e32daa3083" },
+]
+
+setup = '''
+%meson \
+    -Ddefault_library=shared \
+    -Dos_backend=linux \
+    -Dsystemdsystemunitdir=no \
+    -Dintrospection=enabled \
+    -Dgtk-doc=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+rm -rf "$pkgdir/usr/lib/upower/integration-test.py"
+rm -rf "$pkgdir/usr/lib/upower/output_checker.py"
+rm -rf "$pkgdir/usr/lib/upower/tests"
+rm -rf "$pkgdir/usr/share/installed-tests"
+'''

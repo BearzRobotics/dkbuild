@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/kmenuedit/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kmenuedit"
+version = "6.8.2"
+release = 1
+summary = "KDE menu editor"
+license = "GPL-2.0-only"
+homepage = "https://invent.kde.org/plasma/kmenuedit"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "kglobalaccel-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kitemviews-devel", "kwindowsystem-devel", "kxmlgui-devel", "qt6-qtdeclarative-devel", "sonnet-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/kmenuedit-6.8.2.tar.xz", sha256 = "56ee8da65ea1ee384930c518fca29a516bcecca84e224ad3d606d42bb37de398" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

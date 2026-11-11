@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/olm/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "olm"
+version = "3.2.16"
+release = 1
+summary = "Implementation of the Olm and Megolm cryptographic ratchets"
+license = "Apache-2.0"
+homepage = "https://gitlab.matrix.org/matrix-org/olm"
+patches = ["build.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+
+source = [
+    { url = "https://gitlab.matrix.org/matrix-org/olm/-/archive/3.2.16.tar.gz", sha256 = "f77032dbdc9a2040879bcc21c3e62cb6656b62e9550a1bb8da5a5b38ba21352a" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: main/libvncserver/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libvncserver"
+version = "0.9.15"
+release = 1
+summary = "VNC client/server libraries"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/LibVNC/libvncserver"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["ffmpeg-devel", "libjpeg-turbo-devel", "libpng-devel", "lzo-devel", "openssl-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://github.com/LibVNC/libvncserver/archive/refs/tags/LibVNCServer-0.9.15.tar.gz", sha256 = "62352c7795e231dfce044beb96156065a05a05c974e5de9e023d688d8ff675d7" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DWITH_EXAMPLES=OFF \
+    -DWITH_GCRYPT=OFF \
+    -DWITH_GNUTLS=OFF \
+    -DWITH_SYSTEMD=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

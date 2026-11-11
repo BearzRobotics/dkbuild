@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/perl-sub-quote/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "perl-sub-quote"
+version = "2.006009"
+release = 1
+summary = "Perl module for eval-based subroutine generation"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/pod/Sub::Quote"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+rundeps = ["perl"]
+
+source = [
+    { url = "https://www.cpan.org/modules/by-module/Sub/Sub-Quote-2.006009.tar.gz", sha256 = "967282d54d2d51b198c67935594f93e4dea3e54d1e5bced158c94e29be868a4b" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

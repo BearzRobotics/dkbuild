@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/merkuro/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "merkuro"
+version = "26.08.2"
+release = 2
+summary = "KDE calendar with cloud sync"
+license = "LGPL-3.0-only AND GPL-3.0-or-later"
+homepage = "https://apps.kde.org/merkuro.calendar"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["akonadi-calendar-devel", "akonadi-contacts-devel", "akonadi-devel", "akonadi-search-devel", "gpgmepp-devel", "kcalendarcore-devel", "kcalutils-devel", "kconfigwidgets-devel", "kcontacts-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kholidays-devel", "ki18n-devel", "kiconthemes-devel", "kidentitymanagement-devel", "kio-devel", "kirigami-addons-devel", "kirigami-devel", "kitemmodels-devel", "kmailtransport-devel", "kmime-devel", "knotifications-devel", "kwindowsystem-devel", "libplasma-devel", "mailcommon-devel", "messagelib-devel", "mimetreeparser-devel", "pimcommon-devel", "qqc2-desktop-style-devel", "qt6-qtdeclarative-devel", "qt6-qtlocation-devel", "qt6-qtsvg-devel"]
+checkdeps = []
+rundeps = ["kdepim-runtime", "kirigami-addons", "qt6-qt5compat", "qt6-qtlocation"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/merkuro-26.08.2.tar.xz", sha256 = "ca036db50a0e3daaac96be9e1da48f1e8d73ce5dfb942bcbaedf3785cb66a91f" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

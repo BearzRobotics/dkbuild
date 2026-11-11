@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: main/openrc-settingsd/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "openrc-settingsd"
+version = "1.5.0"
+release = 7
+summary = "Implementation of hostnamed, localed, and timedated"
+license = "GPL-2.0-or-later"
+homepage = "https://gitlab.com/postmarketOS/openrc-settingsd"
+patches = ["0001-adjust-files-to-match-Chimera-s-setup.patch", "0002-implement-dinit-integration-outside-of-ntp-handling.patch", "0003-update-manpage.patch", "localectl.patch"]
+hostdeps = ["meson", "pkgconf"]
+builddeps = ["dbus-devel", "dbus", "glib-devel", "linux-headers", "polkit-devel"]
+rundeps = ["dbus", "polkit"]
+
+source = [
+    { url = "https://gitlab.com/postmarketOS/openrc-settingsd/-/archive/v1.5.0/openrc-settingsd-v1.5.0.tar.gz", sha256 = "f4a74262e0012783047ec1d12dfdf4ef3a983e9abaeb436e17703d6881f72292" },
+]
+
+setup = '''
+%meson \
+    -Dopenrc=disabled \
+    -Denv-update=
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 $pkgfiles/openrc-settingsd "$pkgdir/etc/dinit.d/openrc-settingsd"
+'''

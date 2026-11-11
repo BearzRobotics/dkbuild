@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/ksmtp/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "ksmtp"
+version = "26.08.2"
+release = 1
+summary = "KDE SMTP library"
+license = "LGPL-2.1-or-later"
+homepage = "https://community.kde.org/KDE_PIM"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcoreaddons-devel", "ki18n-devel", "kio-devel", "libsasl-devel", "qt6-qtdeclarative-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/ksmtp-26.08.2.tar.xz", sha256 = "8d948815bbcd7f4f5c3f19e31651124e36771df19c2bd10cd68763023d24b1e5" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

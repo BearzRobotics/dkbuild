@@ -1,0 +1,9 @@
+#!/bin/sh
+# directories and files (tmpfiles.conf)
+mkdir -p /var/lib/sddm
+chmod 0750 /var/lib/sddm
+chown _sddm:_sddm /var/lib/sddm 2>/dev/null || true
+mkdir -p /run/sddm
+chmod 0711 /run/sddm
+chown root:root /run/sddm 2>/dev/null || true
+exit 0

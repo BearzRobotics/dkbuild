@@ -1,0 +1,20 @@
+# Imported from Chimera Linux cports: main/python-random2/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "python-random2"
+version = "1.0.2"
+release = 3
+summary = "Python3-compatible Python2 random module"
+license = "PSF-2.0"
+homepage = "https://pypi.org/project/random2"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/r/random2/random2-1.0.2.tar.gz", sha256 = "3754fcef48267567cd5705fa7da6bbc3809cb3f808740313e6705acc3c057e77" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

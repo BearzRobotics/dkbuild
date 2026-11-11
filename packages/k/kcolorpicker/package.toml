@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: main/kcolorpicker/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kcolorpicker"
+version = "0.3.1"
+release = 1
+summary = "Qt based color picker"
+license = "LGPL-3.0-or-later"
+homepage = "https://github.com/ksnip/kColorPicker"
+hostdeps = ["cmake", "ninja"]
+builddeps = ["qt6-qtbase-devel"]
+checkdeps = []
+
+source = [
+    { url = "https://github.com/ksnip/kColorPicker/archive/refs/tags/v0.3.1.tar.gz", sha256 = "e78c785ec4a8a22a48a91835c97601f5704b5076b154415353b0d2697dc0b4f7" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_EXAMPLE=OFF \
+    -DBUILD_SHARED_LIBS=ON \
+    -DBUILD_TESTS=ON \
+    -DBUILD_WITH_QT6=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

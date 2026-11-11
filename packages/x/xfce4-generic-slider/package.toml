@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: user/xfce4-generic-slider/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xfce4-generic-slider"
+version = "1.1.0"
+release = 2
+summary = "Xfce generic slider panel plugin"
+license = "GPL-3.0-only"
+homepage = "https://docs.xfce.org/panel-plugins/xfce4-generic-slider/start"
+hostdeps = ["gettext", "meson", "pkgconf"]
+builddeps = ["gtk+3-devel", "libxfce4ui-devel", "xfce4-panel-devel"]
+
+source = [
+    { url = "https://archive.xfce.org/src/panel-plugins/xfce4-generic-slider/1.1/xfce4-generic-slider-1.1.0.tar.xz", sha256 = "0cef3174157621e14d123a9d246ee3b1d7c8ef89579377398305a4eb33636f5f" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

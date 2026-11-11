@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: main/kwin/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kwin"
+version = "6.8.2"
+release = 1
+summary = "KDE Wayland compositor"
+license = "GPL-2.0-or-later AND (GPL-2.0-only OR GPL-3.0-only) AND LGPL-2.1-only"
+homepage = "https://invent.kde.org/plasma/kwin"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "libcap", "ninja", "pkgconf"]
+builddeps = ["breeze-devel", "kauth-devel", "kcmutils-devel", "kconfig-devel", "kconfigwidgets-devel", "kcrash-devel", "kdbusaddons-devel", "kdeclarative-devel", "kdecoration-devel", "kdoctools-devel", "kglobalaccel-devel", "kglobalacceld-devel", "kguiaddons-devel", "ki18n-devel", "kidletime-devel", "kirigami-devel", "knewstuff-devel", "knighttime-devel", "knotifications-devel", "kpackage-devel", "kpipewire-devel", "krunner-devel", "kscreenlocker-devel", "kservice-devel", "ksvg-devel", "kwayland-devel", "kwindowsystem-devel", "kxmlgui-devel", "lcms2-devel", "libcanberra-devel", "libcap-devel", "libdisplay-info-devel", "libei-devel", "libplasma-devel", "libqaccessibilityclient-devel", "libxcvt-devel", "milou", "plasma-activities-devel", "plasma-wayland-protocols", "qt6-qt5compat-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsensors-devel", "qt6-qtsvg-devel", "qt6-qttools-devel", "qt6-qtwayland-devel", "wayland-protocols", "xcb-util-devel"]
+checkdeps = ["breeze", "dbus"]
+rundeps = ["aurorae", "hwdata", "milou", "qt6-qtmultimedia", "xwayland"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/kwin-6.8.2.tar.xz", sha256 = "ea5e68d957c7d70abed97222a592d4445fda29129e20942658badd224ee138b4" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/lib/systemd/user"
+'''

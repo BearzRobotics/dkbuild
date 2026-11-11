@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: main/xdg-desktop-portal-kde/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xdg-desktop-portal-kde"
+version = "6.8.2"
+release = 1
+summary = "Backend implementation for xdg-desktop-portal using Qt/KF6"
+license = "LGPL-2.0-or-later"
+homepage = "https://invent.kde.org/plasma/xdg-desktop-portal-kde"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "kglobalaccel-devel", "kguiaddons-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kirigami-devel", "knotifications-devel", "kpipewire-devel", "kstatusnotifieritem-devel", "kwayland-devel", "plasma-wayland-protocols", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtwayland-devel", "wayland-protocols"]
+checkdeps = ["dbus", "python-gobject"]
+rundeps = ["kiconthemes", "kio-fuse", "plasma-workspace", "xdg-desktop-portal"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/xdg-desktop-portal-kde-6.8.2.tar.xz", sha256 = "f67e2b7fee07a941b0de6294335d879a9bc0b5dc7dd3b48654dde373c67a9eb6" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/lib/systemd/user"
+'''

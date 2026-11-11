@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/libkgapi/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libkgapi"
+version = "26.08.2"
+release = 1
+summary = "KDE library for accessing Google services"
+license = "LGPL-3.0-only"
+homepage = "https://community.kde.org/KDE_PIM"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcalendarcore-devel", "kcontacts-devel", "kwallet-devel", "libsasl-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/libkgapi-26.08.2.tar.xz", sha256 = "091b3b6e37f8ccf5fcbe2dd354db05958f48889f87568fad24815ab85354fe25" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

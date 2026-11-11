@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: user/catfish/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "catfish"
+version = "4.20.1"
+release = 3
+summary = "Xfce file search tool"
+license = "GPL-2.0-or-later"
+homepage = "https://docs.xfce.org/apps/catfish/start"
+hostdeps = ["desktop-file-utils", "gettext", "meson", "pkgconf"]
+builddeps = ["gtk+3-devel", "pango-devel", "xfconf-devel"]
+rundeps = ["gtk+3", "pango", "xfconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://archive.xfce.org/src/apps/catfish/4.20/catfish-4.20.1.tar.xz", sha256 = "fe00d45b163cf86b4c85ebdd23a73d53aa55bc97ba3f691a248ec403d4ade62b" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: user/xfce4-verve-plugin/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xfce4-verve-plugin"
+version = "2.1.0"
+release = 2
+summary = "Xfce command line panel plugin"
+license = "GPL-2.0-or-later"
+homepage = "https://docs.xfce.org/panel-plugins/xfce4-verve-plugin/start"
+hostdeps = ["gettext", "meson", "pkgconf"]
+builddeps = ["gtk+3-devel", "libxfce4ui-devel", "pcre2-devel", "xfce4-panel-devel"]
+
+source = [
+    { url = "https://archive.xfce.org/src/panel-plugins/xfce4-verve-plugin/2.1/xfce4-verve-plugin-2.1.0.tar.xz", sha256 = "237e0da802cdc02e0ec0c3cdefecb6fa2992ade9f59ce2999779cc30d59c9f24" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

@@ -1,0 +1,36 @@
+# Imported from Chimera Linux cports: main/plasma-workspace/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "plasma-workspace"
+version = "6.8.2"
+release = 1
+summary = "KDE Plasma Workspace"
+license = "MIT AND GPL-3.0-only AND LGPL-3.0-only"
+homepage = "https://kde.org/plasma-desktop"
+patches = ["32bit-narrowing.patch", "default-wallpaper.patch", "fix-broken-testdata-paths.patch", "locales.patch"]
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["appmenu-gtk-module-devel", "appstream-devel", "baloo-devel", "breeze-devel", "fontconfig-devel", "karchive-devel", "kauth-devel", "kcmutils-devel", "kcrash-devel", "kdbusaddons-devel", "kdeclarative-devel", "kded-devel", "kdoctools-devel", "kglobalaccel-devel", "kguiaddons-devel", "kholidays-devel", "ki18n-devel", "kiconthemes-devel", "kidletime-devel", "kio-devel", "kirigami-addons-devel", "kirigami-devel", "kitemmodels-devel", "knewstuff-devel", "knighttime-devel", "knotifications-devel", "knotifyconfig-devel", "kparts-devel", "kpipewire-devel", "kquickcharts-devel", "krunner-devel", "kscreenlocker-devel", "kstatusnotifieritem-devel", "ksvg-devel", "ktexteditor-devel", "ktextwidgets-devel", "kunitconversion-devel", "kuserfeedback-devel", "kwallet-devel", "kwayland-devel", "kwin-devel", "layer-shell-qt-devel", "libcanberra-devel", "libice-devel", "libkexiv2-devel", "libkscreen-devel", "libksysguard-devel", "libplasma-devel", "libqalculate-devel", "libsm-devel", "networkmanager-qt-devel", "phonon-devel", "plasma-activities-devel", "plasma-activities-stats-devel", "plasma-wayland-protocols", "plasma5support-devel", "prison-devel", "qcoro-devel", "qt6-qt5compat-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtlocation-devel", "qt6-qtpositioning-devel", "qt6-qtsvg-devel", "qt6-qtwayland-devel", "union-devel", "wayland-protocols", "xcb-util-devel"]
+checkdeps = ["dbus", "python-gobject"]
+rundeps = ["appmenu-gtk-module", "iso-codes", "kio-extras", "kio-fuse", "kirigami-addons", "kquickcharts", "kwin", "milou", "xwayland"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/plasma-workspace-6.8.2.tar.xz", sha256 = "52bee29adbac15d0e2f8db98e6440d4ae042fc38340423ed736ac20189778b64" },
+]
+
+setup = '''
+%cmake \
+    -DGLIBC_LOCALE_GEN=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSES/MIT.txt "$pkgdir/usr/share/licenses/plasma-workspace/MIT.txt"
+# in KF5 kservice shipped this, but in KF6 it's been moved to here; but also not named this anymore
+# krunner via invocation of kbuildsycoca6 then fails to see any applications outside of kde
+# TODO: find out how this is meant to work at all
+mkdir -p "$pkgdir/etc/xdg/menus"
+ln -sf plasma-applications.menu "$pkgdir/etc/xdg/menus/applications.menu"
+for theme in breeze breezedark breezetwilight; do rm -rf "$pkgdir/usr/share/plasma/look-and-feel/org.kde.$theme.desktop/contents/previews/"*; done
+rm -rf "$pkgdir/usr/lib/systemd/user"
+'''

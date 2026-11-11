@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: user/xfce4-smartbookmark-plugin/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xfce4-smartbookmark-plugin"
+version = "0.6.0"
+release = 2
+summary = "Xfce browser search panel plugin"
+license = "GPL-2.0-or-later"
+homepage = "https://docs.xfce.org/panel-plugins/xfce4-smartbookmark-plugin/start"
+hostdeps = ["gettext", "meson", "pkgconf"]
+builddeps = ["libxfce4ui-devel", "xfce4-panel-devel"]
+
+source = [
+    { url = "https://archive.xfce.org/src/panel-plugins/xfce4-smartbookmark-plugin/0.6/xfce4-smartbookmark-plugin-0.6.0.tar.xz", sha256 = "d8a619dcad703071f7fcda538cc34154f9952cf4ec0816df23a56e98e3cc05d8" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

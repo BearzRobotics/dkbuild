@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/kuserfeedback/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kuserfeedback"
+version = "6.31.0"
+release = 1
+summary = "KDE user feedback integration"
+license = "LGPL-2.1-or-later"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["bison", "cmake", "extra-cmake-modules", "flex", "gettext", "ninja", "pkgconf"]
+builddeps = ["qt6-qtdeclarative-devel", "qt6-qttools-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/kuserfeedback-6.31.0.tar.xz", sha256 = "6a761f2eb1507110107b2ddf2a723bbe6fa205eac086ce04a4272fdfabb7c31a" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

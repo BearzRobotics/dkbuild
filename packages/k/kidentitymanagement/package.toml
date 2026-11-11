@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/kidentitymanagement/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kidentitymanagement"
+version = "26.08.2"
+release = 1
+summary = "KDE library for managing user identities"
+license = "LGPL-3.0-only"
+homepage = "https://community.kde.org/KDE_PIM"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcodecs-devel", "kconfig-devel", "kcoreaddons-devel", "ki18n-devel", "kio-devel", "kirigami-addons-devel", "kpimtextedit-devel", "ktextaddons-devel", "kxmlgui-devel", "qt6-qtdeclarative-devel"]
+checkdeps = []
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kidentitymanagement-26.08.2.tar.xz", sha256 = "f1448f9ab0de1eaa5a8a52e5938004c61710051ce2994cc3b6d1db9fa159c208" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

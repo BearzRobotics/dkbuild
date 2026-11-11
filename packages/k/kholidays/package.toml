@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/kholidays/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kholidays"
+version = "6.31.0"
+release = 1
+summary = "KDE library for holiday dates"
+license = "LGPL-2.0-or-later"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["bison", "cmake", "extra-cmake-modules", "flex", "ninja"]
+builddeps = ["qt6-qtdeclarative-devel", "qt6-qttools-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/kholidays-6.31.0.tar.xz", sha256 = "bdbbe8b1ae6ad6af2116e3ca2c986a317e00f215f58ad32000e2aae2b9d7d612" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

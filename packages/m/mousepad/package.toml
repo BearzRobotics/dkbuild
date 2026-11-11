@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: user/mousepad/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "mousepad"
+version = "0.7.0"
+release = 1
+summary = "Xfce text editor"
+license = "GPL-2.0-or-later"
+homepage = "https://docs.xfce.org/apps/mousepad/start"
+hostdeps = ["gettext-devel", "meson", "pkgconf", "xfce4-dev-tools"]
+builddeps = ["glib-devel", "gspell-devel", "gtk+3-devel", "gtksourceview4-devel", "libxfce4ui-devel", "polkit-devel"]
+
+source = [
+    { url = "https://archive.xfce.org/src/apps/mousepad/0.7/mousepad-0.7.0.tar.xz", sha256 = "e86c59feb08126d4cace368432c16b2dee8e519aaca8a9d2b409ae1cdd200802" },
+]
+
+setup = '''
+%meson \
+    -Ddefault_library=shared
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

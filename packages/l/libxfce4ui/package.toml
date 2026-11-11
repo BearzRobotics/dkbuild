@@ -1,0 +1,32 @@
+# Imported from Chimera Linux cports: user/libxfce4ui/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libxfce4ui"
+version = "4.20.2"
+release = 2
+summary = "Xfce UI library"
+license = "LGPL-2.0-or-later"
+homepage = "https://docs.xfce.org/xfce/libxfce4ui/start"
+hostdeps = ["automake", "gettext-devel", "glib-devel", "gobject-introspection", "gtk-doc-tools", "pkgconf", "python", "libtool", "vala-devel", "xfce4-dev-tools"]
+builddeps = ["glib-devel", "gtk+3-devel", "libepoxy-devel", "libgtop-devel", "libgudev-devel", "libsm-devel", "libxfce4util-devel", "libxml2-devel", "startup-notification-devel", "vala-devel", "xfconf-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://archive.xfce.org/src/xfce/libxfce4ui/4.20/libxfce4ui-4.20.2.tar.bz2", sha256 = "5d3d67b1244a10cee0e89b045766c05fe1035f7938f0410ac6a3d8222b5df907" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-tests \
+    --disable-static \
+    "--with-vendor-info=Chimera Linux"
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

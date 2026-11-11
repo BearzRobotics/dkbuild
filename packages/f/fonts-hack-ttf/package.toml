@@ -1,0 +1,18 @@
+# Imported from Chimera Linux cports: main/fonts-hack-ttf/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "fonts-hack-ttf"
+version = "3.003"
+release = 1
+summary = "Typeface designed for source code"
+license = "MIT AND custom:Bitstream-Vera"
+homepage = "https://sourcefoundry.org/hack"
+
+source = [
+    { url = "https://github.com/source-foundry/Hack/archive/refs/tags/v3.003.tar.gz", sha256 = "3c6f1a20e86744077e83c9bacf879a5b13f659f1c07e9c5c57d6efc3cbe66c07" },
+]
+
+install = '''
+install -Dm644 config/fontconfig/45-Hack.conf "$pkgdir/usr/share/fontconfig/conf.avail/45-Hack.conf"
+install -Dm644 -t "$pkgdir/usr/share/fonts/hack" build/ttf/*.ttf
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/fonts-hack-ttf/LICENSE.md"
+'''

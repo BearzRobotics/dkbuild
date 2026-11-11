@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/kgraphviewer/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kgraphviewer"
+version = "26.08.2"
+release = 1
+summary = "Graphviz DOT file viewer"
+license = "GPL-2.0-only"
+homepage = "https://invent.kde.org/graphics/kgraphviewer"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["boost-devel", "graphviz-devel", "kcoreaddons-devel", "kdoctools-devel", "ki18n-devel", "kparts-devel", "kwidgetsaddons-devel", "qt6-qt5compat-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel"]
+rundeps = ["graphviz"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kgraphviewer-26.08.2.tar.xz", sha256 = "2841af8c2228f933febd0c3ae89923690923b29b7b9a0e0fb2ebeec74d153177" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

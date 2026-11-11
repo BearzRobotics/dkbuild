@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/plasma-integration/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "plasma-integration"
+version = "6.8.2"
+release = 1
+summary = "Qt Platform Theme integration plugins for the Plasma workspaces"
+license = "LGPL-2.0-or-later"
+homepage = "https://invent.kde.org/plasma/plasma-integration"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfig-devel", "kconfigwidgets-devel", "kguiaddons-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "knotifications-devel", "kstatusnotifieritem-devel", "kxmlgui-devel", "plasma-wayland-protocols", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtwayland-devel", "wayland-devel"]
+checkdeps = ["breeze", "dbus"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/plasma-integration-6.8.2.tar.xz", sha256 = "2107a8247553cf7a54f8701191c7b1cfe802f53d0f38b3e2ce908135035c6c82" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_QT5=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

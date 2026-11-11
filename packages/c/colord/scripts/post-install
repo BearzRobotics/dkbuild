@@ -1,0 +1,9 @@
+#!/bin/sh
+# directories and files (tmpfiles.conf)
+mkdir -p /var/lib/colord
+chmod 0755 /var/lib/colord
+chown _colord:_colord /var/lib/colord 2>/dev/null || true
+mkdir -p /var/lib/colord/icc
+chmod 0755 /var/lib/colord/icc
+chown _colord:_colord /var/lib/colord/icc 2>/dev/null || true
+exit 0

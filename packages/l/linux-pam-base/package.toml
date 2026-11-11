@@ -1,0 +1,18 @@
+# Imported from Chimera Linux cports: main/linux-pam-base/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# The default PAM configuration (from Void Linux, public domain): pam_unix
+# against /etc/shadow, sha512 hashes. Programs' own files include these.
+name = "linux-pam-base"
+version = "0.111"
+release = 1
+summary = "Default PAM configuration"
+license = "custom:none"
+homepage = "https://chimera-linux.org"
+hostdeps = []
+options = ["!check"]
+
+install = '''
+for f in other system-auth system-local-login system-login system-remote-login system-services; do
+    install -Dm644 $pkgfiles/$f "$pkgdir/usr/lib/pam.d/$f"
+done
+'''

@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/kosmindoormap/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kosmindoormap"
+version = "26.08.2"
+release = 1
+summary = "KDE OSM multi-floor renderer"
+license = "LGPL-2.0-or-later"
+homepage = "https://invent.kde.org/libraries/kosmindoormap"
+hostdeps = ["bison", "cmake", "extra-cmake-modules", "flex", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcoreaddons-devel", "ki18n-devel", "kirigami-addons-devel", "kopeninghours-devel", "kpublictransport-devel", "kservice-devel", "protobuf-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kosmindoormap-26.08.2.tar.xz", sha256 = "229020496b84f899b57993e99c9c2f750989bcb6fbe709610b7813b01f038c1e" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

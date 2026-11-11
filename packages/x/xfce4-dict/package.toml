@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: user/xfce4-dict/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "xfce4-dict"
+version = "0.8.9"
+release = 2
+summary = "Xfce dictionary search app"
+license = "GPL-2.0-or-later"
+homepage = "https://docs.xfce.org/apps/xfce4-dict/start"
+hostdeps = ["automake", "gettext-devel", "glib-devel", "pkgconf", "libtool", "xfce4-dev-tools"]
+builddeps = ["glib-devel", "gtk+3-devel", "libxfce4ui-devel", "libxfce4util-devel", "xfce4-panel-devel"]
+
+source = [
+    { url = "https://archive.xfce.org/src/apps/xfce4-dict/0.8/xfce4-dict-0.8.9.tar.xz", sha256 = "f1a81baad1e60496aeffc8f8ef1be6413c732b09e250d52d062d293ade001a8c" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

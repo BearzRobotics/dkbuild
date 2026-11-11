@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/ocean-sound-theme/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "ocean-sound-theme"
+version = "6.8.2"
+release = 1
+summary = "Ocean Sound Theme for KDE Plasma"
+license = "CC-BY-SA-4.0"
+homepage = "https://invent.kde.org/plasma/ocean-sound-theme"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja"]
+builddeps = ["qt6-qtbase-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/ocean-sound-theme-6.8.2.tar.xz", sha256 = "354f0e7ff7bf7eb90defd4e0609b3a47d2349744aab7cb238ab8e12668c36316" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

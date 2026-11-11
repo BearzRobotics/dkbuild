@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/milou/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "milou"
+version = "6.8.2"
+release = 1
+summary = "KDE Dedicated search application"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://invent.kde.org/plasma/milou"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja"]
+builddeps = ["kconfig-devel", "ki18n-devel", "krunner-devel", "ksvg-devel", "kwindowsystem-devel", "libplasma-devel", "qt6-qtdeclarative-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/milou-6.8.2.tar.xz", sha256 = "8fca3d90574476c70d258f30b9af9714a71e57270534ece203fdfb5ba8bcae15" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

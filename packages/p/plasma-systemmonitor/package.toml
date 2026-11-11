@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/plasma-systemmonitor/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "plasma-systemmonitor"
+version = "6.8.2"
+release = 1
+summary = "KDE System Resource Usage Monitor"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://apps.kde.org/plasma-systemmonitor"
+patches = ["replace-unsupported-applications-view-with-processes.patch"]
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfig-devel", "kcrash-devel", "kdbusaddons-devel", "kglobalaccel-devel", "ki18n-devel", "kio-devel", "kirigami-addons-devel", "kirigami-devel", "kitemmodels-devel", "knewstuff-devel", "kpackage-devel", "kservice-devel", "libksysguard-devel", "qt6-qtdeclarative-devel"]
+rundeps = ["kquickcharts", "ksystemstats"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/plasma-systemmonitor-6.8.2.tar.xz", sha256 = "d3d795edd70579a967f0b146864610c2cb58379f283356eaadd18fd7e57e4524" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/kpeople/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kpeople"
+version = "6.31.0"
+release = 1
+summary = "KDE contact api"
+license = "LGPL-2.1-or-later"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja"]
+builddeps = ["kcontacts-devel", "kitemviews-devel", "kwidgetsaddons-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel"]
+rundeps = ["qt6-qtbase"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/kpeople-6.31.0.tar.xz", sha256 = "7edf58309c9236877af6fd0c5e335054a8564dfce4407433a6c294c1ac400877" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: main/kio-fuse/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kio-fuse"
+version = "5.1.1"
+release = 1
+summary = "KDE KIO fuse interface"
+license = "GPL-3.0-or-later"
+homepage = "https://invent.kde.org/system/kio-fuse"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["fuse-devel", "kcoreaddons-devel", "kio-devel", "qt6-qtdeclarative-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/kio-fuse/kio-fuse-5.1.1.tar.xz", sha256 = "adf6aa7ce055c0987e716a93ac01f3c0a97c1280421443cd6b21e0e71d763d14" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# TODO: port to dinit user instead
+install -Dm644 $pkgfiles/kio-fuse.desktop "$pkgdir/etc/xdg/autostart/kio-fuse.desktop"
+rm -rf "$pkgdir/usr/lib/systemd/user"
+install -Dm644 $pkgfiles/modules-load.conf "$pkgdir/usr/lib/modules-load.d/kio-fuse.conf"
+'''

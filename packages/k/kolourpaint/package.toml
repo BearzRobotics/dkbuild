@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: main/kolourpaint/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kolourpaint"
+version = "26.08.2"
+release = 1
+summary = "KDE paint program"
+license = "BSD-2-Clause AND LGPL-2.0-or-later"
+homepage = "https://invent.kde.org/graphics/kolourpaint"
+hostdeps = ["cmake", "ninja", "extra-cmake-modules", "gettext"]
+builddeps = ["kcrash-devel", "kdoctools-devel", "kguiaddons-devel", "ki18n-devel", "kio-devel", "ktextwidgets-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "libksane-devel", "qt6-qtbase-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kolourpaint-26.08.2.tar.xz", sha256 = "1cde60ce0d7f4c3962b6e0755f0835d0d1a2ff275e48110be70cdfccda5ab372" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/kolourpaint/COPYING"
+'''

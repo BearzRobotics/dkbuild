@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/modemmanager-qt/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "modemmanager-qt"
+version = "6.31.0"
+release = 1
+summary = "Qt ModemManager D-Bus API wrapper"
+license = "LGPL-2.1-or-later"
+homepage = "https://community.kde.org/Frameworks"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf"]
+builddeps = ["modemmanager-devel", "qt6-qttools-devel"]
+checkdeps = ["dbus"]
+rundeps = ["modemmanager"]
+
+source = [
+    { url = "https://download.kde.org/stable/frameworks/6.31/modemmanager-qt-6.31.0.tar.xz", sha256 = "e816565ce4b915fa885a6b039e582a477e84bb01bca3229df5f1b79dfa01b810" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

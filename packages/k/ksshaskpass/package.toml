@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/ksshaskpass/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "ksshaskpass"
+version = "6.8.2"
+release = 1
+summary = "KDE askpass helper"
+license = "GPL-2.0-or-later"
+homepage = "https://invent.kde.org/plasma/ksshaskpass"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfig-devel", "kcoreaddons-devel", "kdoctools-devel", "ki18n-devel", "kwidgetsaddons-devel", "qt6-qtdeclarative-devel", "qtkeychain-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/plasma/6.8.2/ksshaskpass-6.8.2.tar.xz", sha256 = "7ec5bb7db2da000097536ffe4081028967289af4fc564f40cff54100966e5445" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

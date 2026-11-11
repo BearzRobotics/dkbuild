@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: main/svgpart/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "svgpart"
+version = "26.08.2"
+release = 1
+summary = "KParts plugin for SVG"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/svgpart"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfigwidgets-devel", "kcoreaddons-devel", "ki18n-devel", "kparts-devel", "kxmlgui-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/svgpart-26.08.2.tar.xz", sha256 = "9f6a7a4d93e702102cf9c303feddc87e54deeef6642be165ec7fb16819db321a" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/sshfs/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "sshfs"
+version = "3.7.6"
+release = 1
+summary = "FUSE client for SSH"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/libfuse/sshfs"
+patches = ["no-lnr.patch"]
+hostdeps = ["meson", "ninja", "pkgconf", "python-docutils", "scdoc"]
+builddeps = ["fuse-devel", "glib-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/libfuse/sshfs/releases/download/sshfs-3.7.6/sshfs-3.7.6.tar.xz", sha256 = "6a1bcb31450a077e9cb1b7ff158c71de34db697c3c0da6cb362502131e495893" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

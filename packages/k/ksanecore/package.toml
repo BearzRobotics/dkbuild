@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: main/ksanecore/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "ksanecore"
+version = "26.08.2"
+release = 1
+summary = "KDE integration for SANE"
+license = "LGPL-2.1-only OR LGPL-3.0-only"
+homepage = "https://invent.kde.org/libraries-ksanecore"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "gperf", "ninja", "pkgconf"]
+builddeps = ["ki18n-devel", "qt6-qtdeclarative-devel", "sane-backends-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/ksanecore-26.08.2.tar.xz", sha256 = "532b69ef17ed29c787b0da4050117fb3fab6499242d23f9207e5d5894caaab9a" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_WITH_QT6=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

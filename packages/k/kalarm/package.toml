@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports: main/kalarm/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "kalarm"
+version = "26.08.2"
+release = 1
+summary = "KDE personal alarm scheduler"
+license = "LGPL-2.0-or-later AND GPL-2.0-or-later"
+homepage = "https://apps.kde.org/kalarm"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["akonadi-contacts-devel", "akonadi-devel", "akonadi-mime-devel", "kauth-devel", "kcalendarcore-devel", "kcalutils-devel", "kcodecs-devel", "kcompletion-devel", "kconfig-devel", "kconfigwidgets-devel", "kcontacts-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "kglobalaccel-devel", "kguiaddons-devel", "kholidays-devel", "ki18n-devel", "kiconthemes-devel", "kidentitymanagement-devel", "kio-devel", "kitemmodels-devel", "kjobwidgets-devel", "kmailtransport-devel", "kmime-devel", "knotifications-devel", "knotifyconfig-devel", "kservice-devel", "kstatusnotifieritem-devel", "ktextaddons-devel", "ktextwidgets-devel", "kwidgetsaddons-devel", "kwindowsystem-devel", "kxmlgui-devel", "libcanberra-devel", "mpv-devel", "qt6-qtbase-devel"]
+rundeps = ["kdepim-runtime"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kalarm-26.08.2.tar.xz", sha256 = "b8b68cf4c20903adecdacf867df0fe3c538593fca0506a3719fe7d249dd917c4" },
+]
+
+setup = '''
+%cmake \
+    -DENABLE_LIBMPV=ON \
+    -DENABLE_LIBVLC=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

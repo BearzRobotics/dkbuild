@@ -1,0 +1,24 @@
+# Imported from Chimera Linux cports: user/ristretto/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "ristretto"
+version = "0.13.4"
+release = 2
+summary = "Xfce image viewer"
+license = "GPL-2.0-or-later"
+homepage = "https://docs.xfce.org/apps/ristretto/start"
+hostdeps = ["gettext", "glib-devel", "meson", "pkgconf"]
+builddeps = ["cairo-devel", "exo-devel", "file-devel", "glib-devel", "gtk+3-devel", "libexif-devel", "libx11-devel", "libxfce4ui-devel", "libxfce4util-devel", "xfconf-devel"]
+
+source = [
+    { url = "https://archive.xfce.org/src/apps/ristretto/0.13/ristretto-0.13.4.tar.xz", sha256 = "a84ef8cb80638681d9b9ef09cddff86a5d7a0e028603b4a601cf0ff6c2869ce8" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''
