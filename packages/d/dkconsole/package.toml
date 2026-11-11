@@ -16,6 +16,9 @@ source = [
 ]
 
 install = '''
+# an absolute local cache: a build step runs a generator it compiled
+# (uucode_generate) by a relative path from another directory
+export ZIG_LOCAL_CACHE_DIR="$(pwd)/.zig-cache"
 %zig_build
 # The dinit template service: one instance per VT (dinitctl enable dkconsole@1).
 install -Dm644 data/dinit.d/dkconsole@ "$pkgdir/etc/dinit.d/dkconsole@"
