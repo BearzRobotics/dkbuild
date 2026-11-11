@@ -1,0 +1,46 @@
+# The Incus web UI: Canonical's LXD UI as Zabbly maintains it for Incus
+# (zabbly/incus-ui-canonical), with Zabbly's LXD-to-Incus renames
+# (files/ui-canonical-renames.sed, from zabbly/incus). Static files in
+# /usr/share/incus/ui, which incusd serves at https://<host>:8443/ui/ (its
+# wrapper sets INCUS_UI when this is installed).
+#
+# Upstream locks its packages with yarn (yarn.lock v1); files/package-lock.json
+# was made from it once (npm install --package-lock-only --legacy-peer-deps,
+# 2026-11-11; every version matches the yarn.lock) and is vendored by
+# npmdeps. --legacy-peer-deps as yarn v1 ignores peer dependencies.
+name = "incus-ui"
+version = "0.22.1"
+release = 1
+summary = "Web interface for Incus"
+license = "GPL-3.0-only"
+homepage = "https://github.com/zabbly/incus-ui-canonical"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["nodejs"]
+rundeps = ["incus"]
+options = ["!check", "!strip", "npmdeps"]
+
+source = [
+    { url = "https://github.com/zabbly/incus-ui-canonical/archive/refs/tags/incus-0.22.1.tar.gz", sha256 = "772a93d222be7c4fb6f86d51e3061c5d78c77ddbd400ee64f6f2301925b2d286" },
+]
+
+environment = '''
+export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
+    npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+'''
+setup = '''
+cp $pkgfiles/package-lock.json .
+node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
+npm ci --legacy-peer-deps --ignore-scripts
+find src -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.scss' \) -exec sed -i -f $pkgfiles/ui-canonical-renames.sed {} +
+'''
+build = '''
+npx vite build
+node fix-asset-paths.js
+cp build/ui/index.html build/index.html
+'''
+install = '''
+mkdir -p "$pkgdir/usr/share/incus"
+cp -a build/ui "$pkgdir/usr/share/incus/ui"
+test -f "$pkgdir/usr/share/incus/ui/index.html"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/incus-ui/LICENSE"
+'''

@@ -6,4 +6,9 @@ if [ -r /etc/default/incus ]; then
     set +a
 fi
 
+# the web UI (incus-ui), when installed and not set otherwise
+if [ -z "$INCUS_UI" ] && [ -f /usr/share/incus/ui/index.html ]; then
+    export INCUS_UI=/usr/share/incus/ui
+fi
+
 exec /usr/bin/incusd "$@"
