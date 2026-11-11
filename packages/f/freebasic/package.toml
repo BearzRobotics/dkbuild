@@ -37,6 +37,8 @@ environment = '''
 mkdir -p /tmp/fbbin
 cp /dkbuild/files/fbc-as /tmp/fbbin/fbc-as
 chmod 755 /tmp/fbbin/fbc-as
+cp /dkbuild/files/fbc-cc-bootstrap /tmp/fbbin/fbc-cc-bootstrap
+chmod 755 /tmp/fbbin/fbc-cc-bootstrap
 export PATH="/tmp/fbbin:$PATH" GCC=cc AS=fbc-as
 case "$arch" in
 aarch64) loader=/lib/ld-musl-aarch64.so.1 ;;
@@ -79,9 +81,11 @@ for d in lib/freebasic/linux-*; do
     for o in crtbegin.o crtbeginS.o crtend.o crtendS.o; do ln -sf "$rtdir/$o" $d/$o; done
 done
 # 3. the patched compiler, runtime and graphics library, by the bootstrap one
-# (made from the shipped C, so it is told -fno-addrsig itself)
+# (made from the shipped C, so it is told -fno-addrsig itself, given the
+# tree's inc/ since it looks in /usr/include/freebasic, and its C goes through
+# fbc-cc-bootstrap, which rewrites the computed gotos its code generator writes)
 make clean-compiler
-make -j$jobs CC=cc AS=fbc-as prefix=/usr FBC="$PWD/bin/fbc-bootstrap" FBFLAGS="-maxerr 1 -Wc -fno-addrsig -Wl --dynamic-linker=$loader"
+GCC=fbc-cc-bootstrap make -j$jobs CC=cc AS=fbc-as prefix=/usr FBC="$PWD/bin/fbc-bootstrap" FBFLAGS="-maxerr 1 -i $PWD/inc -Wc -fno-addrsig -Wl --dynamic-linker=$loader"
 '''
 install = '''
 make CC=cc AS=fbc-as prefix=/usr DESTDIR="$pkgdir" FBC="$PWD/bin/fbc-bootstrap" install

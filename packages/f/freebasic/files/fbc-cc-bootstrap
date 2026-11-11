@@ -1,0 +1,11 @@
+#!/bin/sh
+# Step 3 of the build only: the bootstrap fbc (made from the shipped C, with
+# the upstream code generator) writes `goto *vr$N;` in functions with no
+# &&label, which clang refuses. The same rewrite the patched compiler emits is
+# applied to each C file it hands over, then clang compiles it.
+for a in "$@"; do
+    case $a in
+    *.c) [ -f "$a" ] && sed -i -E 's/goto \*(vr\$[0-9]+);/{ __label__ fb$jt; goto *(\1 ? \1 : \&\&fb$jt); fb$jt: __builtin_trap(); }/' "$a" ;;
+    esac
+done
+exec cc "$@"
