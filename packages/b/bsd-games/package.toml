@@ -30,6 +30,10 @@ sed -i 's/\bgetdate\b/hack_getdate/g' hack/*.c hack/*.h
 # which musl does not have: the POSIX calls instead
 perl -0pi -e 's/old_mask = sigblock\(sigmask\(SIGALRM\)\);\n(\s*)setitimer\(ITIMER_REAL, &pause_time, NULL\);\n\s*sigpause\(old_mask\);\n\s*sigsetmask\(old_mask\);/{ sigset_t a_, o_; sigemptyset(&a_); sigaddset(&a_, SIGALRM); sigprocmask(SIG_BLOCK, &a_, &o_);\n$1setitimer(ITIMER_REAL, &pause_time, NULL);\n$1sigsuspend(&o_);\n$1sigprocmask(SIG_SETMASK, &o_, NULL); (void) old_mask; }/' hunt/hunt/otto.c
 grep -q 'sigsuspend(&o_)' hunt/hunt/otto.c
+# mille's varpush takes readv/writev with an int count (POSIX, and musl); its
+# branch for Linux without glibc means the old libc5's size_t
+sed -i 's/^#if defined(__linux__) \&\& !defined(__GLIBC__)$/#if 0 \/* libc5 *\//' mille/varpush.c mille/mille.h
+test "$(grep -c '^#if 0 /\* libc5 \*/$' mille/varpush.c mille/mille.h | awk -F: '{s+=$2} END {print s}')" -ge 2
 cat > config.params <<'EOF2'
 bsd_games_cfg_non_interactive=y
 bsd_games_cfg_install_prefix="$pkgdir"
