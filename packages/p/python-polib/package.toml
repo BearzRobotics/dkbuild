@@ -1,0 +1,20 @@
+# needed by: collabora-online (its build checks the translations with it).
+name = "python-polib"
+version = "1.2.0"
+release = 1
+summary = "Python library to manipulate gettext files (po and mo)"
+license = "MIT"
+homepage = "https://github.com/izimobil/polib"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/10/9a/79b1067d27e38ddf84fe7da6ec516f1743f31f752c6122193e7bce38bdbf/polib-1.2.0.tar.gz", sha256 = "f3ef94aefed6e183e342a8a269ae1fc4742ba193186ad76f175938621dbfc26b" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-polib/LICENSE"
+'''

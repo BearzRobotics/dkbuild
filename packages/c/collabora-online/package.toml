@@ -1,0 +1,58 @@
+# Collabora Online (CODE) 25.04.9: LibreOffice as a web office suite. coolwsd
+# serves documents to browsers over WebSockets and runs each one in a jail
+# with its own LibreOfficeKit process (collabora-core, in /opt/collaboraoffice).
+# Nextcloud, ownCloud, Seafile and other WOPI hosts open documents in it.
+#
+# Service `coolwsd` (dinit), user `cool`, https://<host>:9980. Settings:
+# /etc/coolwsd/coolwsd.xml (`coolconfig` edits it; add the WOPI hosts allowed
+# to use it under storage.wopi). TLS is on by default, so installing makes a
+# self-signed certificate (/etc/coolwsd/cert.pem, key.pem): replace it, or set
+# ssl.enable=false and ssl.termination=true behind a TLS proxy.
+#
+# The browser part builds offline from the npm packages upstream ships in
+# browser/node_shrinkpack. systemplate-musl.patch: the jail template gets the
+# system libraries and fonts the core uses (it is built with the system's
+# libraries, not bundled ones), found with musl's loader in place of ldd.
+name = "collabora-online"
+version = "25.04.9.4"
+release = 1
+summary = "Collabora Online: LibreOffice in the browser (coolwsd)"
+license = "MPL-2.0"
+homepage = "https://www.collaboraonline.com"
+patches = ["systemplate-musl.patch"]
+hostdeps = ["autoconf", "automake", "libtool", "m4", "pkgconf", "python", "python-lxml", "python-polib", "nodejs", "bash"]
+builddeps = ["collabora-core-devel", "poco-devel", "cppunit-devel", "libcap-devel", "linux-pam-devel", "libpng-devel", "zlib-ng-compat-devel", "zstd-devel", "openssl-devel"]
+rundeps = ["collabora-core", "libcap", "openssl", "cpio", "bash", "fontconfig", "shadow"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/CollaboraOnline/online/archive/refs/tags/cp-25.04.9-4.tar.gz", sha256 = "7d4e5fc92e7ee8bf9de5cf32bd0056af95844e5f36f268590967819e727fca2b" },
+]
+
+environment = '''
+# npm: only what browser/node_shrinkpack holds
+export npm_config_offline=true npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+export HOME=/tmp/home UV_USE_IO_URING=0
+'''
+setup = '''
+./autogen.sh
+%configure \
+    --enable-silent-rules \
+    --localstatedir=/var \
+    --sysconfdir=/etc \
+    --with-lokit-path=/opt/collaboraoffice/include \
+    --with-lo-path=/opt/collaboraoffice/lib/libreoffice \
+    --with-vendor=FenrirOS \
+    --disable-tests \
+    --disable-cypress \
+    --disable-werror
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 $pkgfiles/coolwsd "$pkgdir/etc/dinit.d/coolwsd"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/collabora-online/COPYING"
+rm -rf "$pkgdir/usr/lib/systemd" "$pkgdir/etc/apparmor.d"
+'''

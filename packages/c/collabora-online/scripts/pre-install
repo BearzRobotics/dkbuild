@@ -1,0 +1,4 @@
+#!/bin/sh
+grep -q "^cool:" /etc/group || groupadd -r cool
+grep -q "^cool:" /etc/passwd || useradd -r -g cool -d /opt/cool -s /usr/bin/nologin -c "Collabora Online" cool
+exit 0

@@ -1,0 +1,28 @@
+# GNU cpio: copies files into and out of cpio and tar archives. needed by:
+# collabora-online (coolwsd-systemplate-setup copies the jail template with
+# `cpio -p`).
+name = "cpio"
+version = "2.15"
+release = 1
+summary = "Copy files to and from archives"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/cpio"
+hostdeps = ["pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/cpio/cpio-2.15.tar.bz2", sha256 = "937610b97c329a1ec9268553fb780037bcfff0dcffe9725ebc4fd9c1aa9075db" },
+]
+
+setup = '''
+%configure --disable-rpath
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+# mt is tar's (or mt-st's); rmt goes with tar
+rm -f "$pkgdir/usr/bin/mt" "$pkgdir/usr/share/man/man1/mt.1"
+rm -rf "$pkgdir/usr/libexec"
+'''

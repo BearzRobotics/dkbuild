@@ -1,0 +1,47 @@
+# POCO C++ Libraries: networking (HTTP, WebSocket, TLS), XML, JSON, crypto,
+# utilities and data access. needed by: collabora-online (coolwsd).
+# Unbundled: the system's zlib, PCRE2, expat and utf8proc. All the data
+# backends are built (SQLite, MariaDB, PostgreSQL, ODBC). Built twice, shared
+# and static (poco-static).
+name = "poco"
+version = "1.15.4"
+release = 1
+summary = "POCO C++ libraries for network and internet applications"
+license = "BSL-1.0"
+homepage = "https://pocoproject.org"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["openssl-devel", "zlib-ng-compat-devel", "pcre2-devel", "libexpat-devel", "utf8proc-devel", "sqlite-devel", "mariadb-devel", "postgresql-devel", "unixodbc-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/pocoproject/poco/archive/refs/tags/poco-1.15.4-release.tar.gz", sha256 = "4635007f593646b3db8754bbb31ded34cd533487519d4d4a45c788dbff3fe07f" },
+]
+
+setup = '''
+for kind in shared static; do
+    if [ $kind = shared ]; then shared=ON; else shared=OFF; fi
+    cmake -B build-$kind -G Ninja \
+        -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_SHARED_LIBS=$shared \
+        -DPOCO_UNBUNDLED=ON \
+        -DENABLE_TESTS=OFF \
+        -DENABLE_SAMPLES=OFF \
+        -DENABLE_DATA_SQLITE=ON \
+        -DENABLE_DATA_MYSQL=ON \
+        -DENABLE_DATA_POSTGRESQL=ON \
+        -DENABLE_DATA_ODBC=ON \
+        -DENABLE_NETSSL=ON \
+        -DENABLE_CRYPTO=ON \
+        -DENABLE_JWT=ON
+done
+'''
+build = '''
+cmake --build build-shared
+cmake --build build-static
+'''
+install = '''
+# static first: the shared install's CMake files are the ones kept
+DESTDIR="$pkgdir" cmake --install build-static
+DESTDIR="$pkgdir" cmake --install build-shared
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/poco/LICENSE"
+'''

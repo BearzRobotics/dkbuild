@@ -1,0 +1,37 @@
+--- a/coolwsd-systemplate-setup
++++ b/coolwsd-systemplate-setup
+@@ -36,6 +36,16 @@
+ 
+ cd / || exit 1
+ 
++# musl has no ldd program: its dynamic loader lists a program's libraries
++# when called with --list (FenrirOS).
++if ! command -v ldd >/dev/null 2>&1; then
++    ldd() {
++        for l in /lib/ld-musl-*.so.1 /usr/lib/ld-musl-*.so.1; do
++            [ -x "$l" ] && { "$l" --list "$@"; return; }
++        done
++    }
++fi
++
+ (
+ # Produce a list of file names, one per line, that will be copied
+ # into the template tree of system files for the chroot jails.
+@@ -56,6 +66,7 @@
+      usr/share/zoneinfo/* \
+      usr/share/liblangtag \
+      usr/share/hyphen \
++     usr/share/fonts \
+ 	 -type f 2>/dev/null
+ 
+ find etc/fonts \
+@@ -75,7 +86,8 @@
+ 
+ # Go through the LO shared objects and check what system libraries
+ # they link to.
+-find $INSTDIR -name 'xpdfimport' |
++# A core built with the system's libraries (FenrirOS) needs all of theirs.
++find $INSTDIR/program -type f \( -name 'xpdfimport' -o -name '*.so' -o -name '*.so.*' -o -name 'soffice.bin' -o -name 'coolforkit*' \) |
+ while read file; do
+     ldd $file 2>/dev/null
+ done |
