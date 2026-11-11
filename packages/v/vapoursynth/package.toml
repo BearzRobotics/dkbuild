@@ -16,11 +16,14 @@ source = [
 ]
 
 environment = '''
-# C++20: it uses std::aligned_storage, gone from libc++ in newer modes; and
 # std::terminate without <exception>
-export CXXFLAGS="$CXXFLAGS -std=gnu++20 -include exception"
+export CXXFLAGS="$CXXFLAGS -include exception"
 '''
 setup = '''
+# std::aligned_storage is gone from libc++ 23: the same storage as an aligned
+# byte array
+sed -i 's/typename std::aligned_storage<sizeof(T), alignof(T)>::type staticData\[staticSize\];/struct alignas(T) Slot { unsigned char b[sizeof(T)]; }; Slot staticData[staticSize];/' src/core/vscore.h
+grep -q 'Slot staticData' src/core/vscore.h
 ./autogen.sh
 %configure
 '''

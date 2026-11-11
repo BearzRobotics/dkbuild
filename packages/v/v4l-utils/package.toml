@@ -17,7 +17,8 @@ source = [
 ]
 
 environment = '''
-export CXXFLAGS="${CXXFLAGS} -D_LARGEFILE64_SOURCE"
+# _LIBCPP_FALLTHROUGH: libc++ 23 dropped this internal macro, which it uses
+export CXXFLAGS="${CXXFLAGS} -D_LARGEFILE64_SOURCE -D_LIBCPP_FALLTHROUGH=[[fallthrough]]"
 export LDFLAGS="${LDFLAGS} -largp"
 '''
 setup = '''
