@@ -8,7 +8,7 @@ license = "BSD-3-Clause"
 homepage = "https://www.polyomino.org.uk/computer/software/bsd-games/"
 # words: boggle's dictionary is made from /usr/share/dict/words at build time,
 # and hangman reads it when it runs
-hostdeps = ["flex", "bison", "patch", "words"]
+hostdeps = ["flex", "bison", "patch", "perl", "words"]
 builddeps = ["ncurses-devel", "openssl-devel", "musl-bsd-headers"]
 rundeps = ["words"]
 options = ["!check"]
@@ -26,6 +26,10 @@ tar -xf /build/sources/bsdgames_2.17-35.debian.tar.xz
 while read -r p; do case "$p" in ''|'#'*) continue ;; esac; patch -p1 < debian/patches/$p; done < debian/patches/series
 # hack's own getdate() clashes with POSIX getdate() in <time.h>: renamed there
 sed -i 's/\bgetdate\b/hack_getdate/g' hack/*.c hack/*.h
+# hunt's otto.c waits for SIGALRM with BSD's sigblock/sigpause/sigsetmask,
+# which musl does not have: the POSIX calls instead
+perl -0pi -e 's/old_mask = sigblock\(sigmask\(SIGALRM\)\);\n(\s*)setitimer\(ITIMER_REAL, &pause_time, NULL\);\n\s*sigpause\(old_mask\);\n\s*sigsetmask\(old_mask\);/{ sigset_t a_, o_; sigemptyset(&a_); sigaddset(&a_, SIGALRM); sigprocmask(SIG_BLOCK, &a_, &o_);\n$1setitimer(ITIMER_REAL, &pause_time, NULL);\n$1sigsuspend(&o_);\n$1sigprocmask(SIG_SETMASK, &o_, NULL); (void) old_mask; }/' hunt/hunt/otto.c
+grep -q 'sigsuspend(&o_)' hunt/hunt/otto.c
 cat > config.params <<'EOF2'
 bsd_games_cfg_non_interactive=y
 bsd_games_cfg_install_prefix="$pkgdir"
