@@ -1,0 +1,19 @@
+# Tux Paint's stamp collection: thousands of pictures (animals, vehicles,
+# plants, food, space...) with sounds and descriptions.
+name = "tuxpaint-stamps"
+version = "2025.05.26"
+release = 1
+summary = "Stamp pictures for Tux Paint"
+license = "GPL-2.0-or-later"
+homepage = "https://tuxpaint.org"
+hostdeps = ["gettext"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/tuxpaint/tuxpaint-stamps/2025-05-26/tuxpaint-stamps-2025.05.26.tar.gz", sha256 = "09f4a29f8036c93a64c28134e3afaefb4b9d95a09a71e68fb7537f3c5f82949f" },
+]
+
+install = '''
+make DATA_PREFIX="$pkgdir/usr/share/tuxpaint/" install-all
+install -Dm644 docs/COPYING.txt "$pkgdir/usr/share/licenses/tuxpaint-stamps/COPYING.txt"
+'''

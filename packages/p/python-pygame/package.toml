@@ -1,0 +1,23 @@
+# pygame: SDL2 game library for Python. needed by: bambam.
+# On the system's SDL2 (sdl2-compat over SDL3), SDL2_image, SDL2_mixer,
+# SDL2_ttf, FreeType, PortMidi and NumPy.
+name = "python-pygame"
+version = "2.6.1"
+release = 1
+summary = "Python game development library (SDL2)"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.pygame.org"
+hostdeps = ["python", "python-setuptools", "python-cython", "pkgconf"]
+builddeps = ["python-devel", "sdl2-compat-devel", "sdl2-image-devel", "sdl2-mixer-devel", "sdl2-ttf-devel", "freetype-devel", "libpng-devel", "libjpeg-turbo-devel", "portmidi-devel", "python-numpy"]
+rundeps = ["python", "python-numpy"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/49/cc/08bba60f00541f62aaa252ce0cfbd60aebd04616c0b9574f755b583e45ae/pygame-2.6.1.tar.gz", sha256 = "56fb02ead529cee00d415c3e007f75e0780c655909aaa8e8bf616ee09c9feb1f" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 docs/LGPL.txt "$pkgdir/usr/share/licenses/python-pygame/LGPL.txt"
+'''

@@ -1,0 +1,33 @@
+# From Debian's tuxtype 1.8.3-5.1: its sources and its patches (applied in setup).
+# For FenrirOS's education set (2011-era Tux4Kids, kept building by Debian).
+name = "tuxtype"
+version = "1.8.3"
+release = 1
+summary = "Typing tutor game for children"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/tux4kids/tuxtype"
+hostdeps = ["pkgconf", "autoconf", "automake", "libtool", "gettext-devel"]
+builddeps = ["t4k-common-devel", "sdl12-compat-devel", "sdl-image-devel", "sdl-mixer-devel", "sdl-ttf-devel", "sdl-net-devel", "sdl-pango-devel", "librsvg-devel", "libxml2-devel", "libpng-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://deb.debian.org/debian/pool/main/t/tuxtype/tuxtype_1.8.3.orig.tar.gz", sha256 = "e720b0a3131764630a8b8d0bd108e0aed6f72572222a3529a4cbed04f94c8fb3" },
+    { url = "https://deb.debian.org/debian/pool/main/t/tuxtype/tuxtype_1.8.3-5.1.debian.tar.xz", sha256 = "cf13e38d6ee47be926b1652a3b68cce5015ee57e8b5298eba03f55f66a057d0c" },
+]
+
+setup = '''
+# Debian's patches (debian.tar.xz unpacks beside the source, in ../debian)
+while read -r p opt || [ -n "$p" ]; do
+    case "$p" in ''|'#'*) continue ;; esac
+    patch ${opt:--p1} < ../debian/patches/$p
+done < ../debian/patches/series
+autoreconf -fi
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/tuxtype/COPYING"
+'''

@@ -1,0 +1,33 @@
+# From Debian's sdlpango 0.1.2-8: its sources and its patches (applied in setup).
+# needed by: t4k-common, tuxmath, tuxtype.
+name = "sdl-pango"
+version = "0.1.2"
+release = 1
+summary = "Pango text rendering for SDL 1.2"
+license = "LGPL-2.1-or-later"
+homepage = "https://sdlpango.sourceforge.net"
+hostdeps = ["pkgconf", "autoconf", "automake", "libtool", "gettext-devel"]
+builddeps = ["sdl12-compat-devel", "pango-devel", "fontconfig-devel", "freetype-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://deb.debian.org/debian/pool/main/s/sdlpango/sdlpango_0.1.2.orig.tar.gz", sha256 = "7f75d3b97acf707c696ea126424906204ebfa07660162de925173cdd0257eba4" },
+    { url = "https://deb.debian.org/debian/pool/main/s/sdlpango/sdlpango_0.1.2-8.debian.tar.xz", sha256 = "0ee1e3bbb9f24e974fd12252c2493b1dd1c03d07418d7ceb8dc64d7dd7d7d92e" },
+]
+
+setup = '''
+# Debian's patches (debian.tar.xz unpacks beside the source, in ../debian)
+while read -r p opt || [ -n "$p" ]; do
+    case "$p" in ''|'#'*) continue ;; esac
+    patch ${opt:--p1} < ../debian/patches/$p
+done < ../debian/patches/series
+autoreconf -fi
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/sdl-pango/COPYING"
+'''

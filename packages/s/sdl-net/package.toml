@@ -1,0 +1,33 @@
+# From Debian's sdl-net1.2 1.2.8-6: its sources and its patches (applied in setup).
+# needed by: t4k-common, tuxmath, tuxtype.
+name = "sdl-net"
+version = "1.2.8"
+release = 1
+summary = "Network library for SDL 1.2"
+license = "Zlib"
+homepage = "https://www.libsdl.org/projects/SDL_net/release-1.2.html"
+hostdeps = ["pkgconf", "autoconf", "automake", "libtool", "gettext-devel"]
+builddeps = ["sdl12-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://deb.debian.org/debian/pool/main/s/sdl-net1.2/sdl-net1.2_1.2.8.orig.tar.gz", sha256 = "5f4a7a8bb884f793c278ac3f3713be41980c5eedccecff0260411347714facb4" },
+    { url = "https://deb.debian.org/debian/pool/main/s/sdl-net1.2/sdl-net1.2_1.2.8-6.debian.tar.xz", sha256 = "51cb9055c701939b2c9db6a932002ecff7ac4177595da8590aa077d03c732ec7" },
+]
+
+setup = '''
+# Debian's patches (debian.tar.xz unpacks beside the source, in ../debian)
+while read -r p opt || [ -n "$p" ]; do
+    case "$p" in ''|'#'*) continue ;; esac
+    patch ${opt:--p1} < ../debian/patches/$p
+done < ../debian/patches/series
+autoreconf -fi
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/sdl-net/COPYING"
+'''

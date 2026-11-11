@@ -1,0 +1,33 @@
+# From Debian's t4kcommon 0.1.1-13: its sources and its patches (applied in setup).
+# needed by: tuxmath, tuxtype.
+name = "t4k-common"
+version = "0.1.1"
+release = 1
+summary = "Library shared by the Tux4Kids games (Tux Math, Tux Typing)"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/tux4kids/t4kcommon"
+hostdeps = ["pkgconf", "autoconf", "automake", "libtool", "gettext-devel"]
+builddeps = ["sdl12-compat-devel", "sdl-image-devel", "sdl-mixer-devel", "sdl-ttf-devel", "sdl-net-devel", "sdl-pango-devel", "librsvg-devel", "cairo-devel", "libxml2-devel", "libpng-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://deb.debian.org/debian/pool/main/t/t4kcommon/t4kcommon_0.1.1.orig.tar.gz", sha256 = "42c155816dae2c5dad560faa50edaa1ca84536530283d37859c4b91e82675110" },
+    { url = "https://deb.debian.org/debian/pool/main/t/t4kcommon/t4kcommon_0.1.1-13.debian.tar.xz", sha256 = "215c4a4bc577ddd5c81eeb4f10a7b20d8922607fd533ba49c663f806dd90b136" },
+]
+
+setup = '''
+# Debian's patches (debian.tar.xz unpacks beside the source, in ../debian)
+while read -r p opt || [ -n "$p" ]; do
+    case "$p" in ''|'#'*) continue ;; esac
+    patch ${opt:--p1} < ../debian/patches/$p
+done < ../debian/patches/series
+autoreconf -fi
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/t4k-common/COPYING"
+'''

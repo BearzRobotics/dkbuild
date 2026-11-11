@@ -1,0 +1,26 @@
+# Klavaro: touch-typing tutor (basic course, adaptability, speed and fluidity
+# exercises, with progress charts), any keyboard layout.
+name = "klavaro"
+version = "3.14"
+release = 1
+summary = "Touch typing tutor"
+license = "GPL-3.0-or-later"
+homepage = "https://klavaro.sourceforge.io"
+hostdeps = ["pkgconf", "gettext", "intltool"]
+builddeps = ["gtk+3-devel", "gtkdatabox-devel", "pango-devel", "cairo-devel", "curl-devel", "gettext-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/klavaro/klavaro-3.14.tar.bz2", sha256 = "87187e49d301c510e6964098cdb612126bf030d2a875fd799eadcad3eae56dab" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/klavaro/COPYING"
+'''

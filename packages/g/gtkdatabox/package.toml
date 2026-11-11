@@ -1,0 +1,25 @@
+# GtkDatabox: a GTK 3 widget for live charts and plots. needed by: klavaro.
+name = "gtkdatabox"
+version = "1.0.0"
+release = 1
+summary = "GTK widget for displaying large amounts of numerical data"
+license = "LGPL-2.1-or-later"
+homepage = "https://gtkdatabox.sourceforge.io"
+hostdeps = ["pkgconf"]
+builddeps = ["gtk+3-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/gtkdatabox/gtkdatabox-1/gtkdatabox-1.0.0.tar.gz", sha256 = "8bee70206494a422ecfec9a88d32d914c50bb7a0c0e8fedc4512f5154aa9d3e3" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/gtkdatabox/COPYING"
+'''

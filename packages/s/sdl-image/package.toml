@@ -1,0 +1,37 @@
+# From Debian's sdl-image1.2 1.2.12-14: its sources and its patches (applied in setup).
+# needed by: t4k-common, tuxmath, tuxtype.
+name = "sdl-image"
+version = "1.2.12"
+release = 1
+summary = "Image loading library for SDL 1.2"
+license = "Zlib"
+homepage = "https://www.libsdl.org/projects/SDL_image/release-1.2.html"
+hostdeps = ["pkgconf", "autoconf", "automake", "libtool", "gettext-devel"]
+builddeps = ["sdl12-compat-devel", "libpng-devel", "libjpeg-turbo-devel", "libtiff-devel", "libwebp-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://deb.debian.org/debian/pool/main/s/sdl-image1.2/sdl-image1.2_1.2.12.orig.tar.gz", sha256 = "0b90722984561004de84847744d566809dbb9daf732a9e503b91a1b5a84e5699" },
+    { url = "https://deb.debian.org/debian/pool/main/s/sdl-image1.2/sdl-image1.2_1.2.12-14.debian.tar.xz", sha256 = "d4bd30dca41be39a9e553588161fee54ac9918b8232938d3c70d7a1f434361c2" },
+]
+
+setup = '''
+# Debian's patches (debian.tar.xz unpacks beside the source, in ../debian)
+while read -r p opt || [ -n "$p" ]; do
+    case "$p" in ''|'#'*) continue ;; esac
+    patch ${opt:--p1} < ../debian/patches/$p
+done < ../debian/patches/series
+autoreconf -fi
+%configure \
+    --disable-png-shared \
+    --disable-jpg-shared \
+    --disable-tif-shared \
+    --disable-webp-shared
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/sdl-image/COPYING"
+'''

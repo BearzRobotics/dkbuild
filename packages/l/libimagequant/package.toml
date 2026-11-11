@@ -1,0 +1,28 @@
+# libimagequant: high-quality conversion of images to 256-colour palettes.
+# needed by: tuxpaint. 2.18, the C library (4.x is Rust and ships no
+# Cargo.lock, so its crates cannot be pinned); the same liq_* C API.
+name = "libimagequant"
+version = "2.18.0"
+release = 1
+summary = "Palette quantization library"
+license = "GPL-3.0-or-later"
+homepage = "https://pngquant.org/lib/"
+hostdeps = ["pkgconf"]
+builddeps = ["openmp-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/ImageOptim/libimagequant/archive/refs/tags/2.18.0.tar.gz", sha256 = "790d2593a587f9a27cec6245ee7a212b34b0aa63cac6383e550eda01236be636" },
+]
+
+setup = '''
+./configure --prefix=/usr --with-openmp CC="$CC"
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+ln -sf libimagequant.so.0 "$pkgdir/usr/lib/libimagequant.so"
+install -Dm644 COPYRIGHT "$pkgdir/usr/share/licenses/libimagequant/COPYRIGHT"
+'''

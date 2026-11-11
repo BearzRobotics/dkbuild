@@ -1,0 +1,35 @@
+# BamBam: a keyboard-mashing and doodling game for babies and toddlers. Any
+# key or click shows a picture and plays a sound; the screen locks until
+# `quit` is typed, so little hands cannot reach other programs. Also a session
+# (bambam-session.desktop) for a display manager.
+name = "bambam"
+version = "1.4.2"
+release = 1
+summary = "Keyboard mashing game for babies and toddlers"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/porridge/bambam"
+hostdeps = ["gettext"]
+rundeps = ["python", "python-pygame"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/porridge/bambam/archive/refs/tags/v1.4.2.tar.gz", sha256 = "c3e7aadfa7b81405202f3eba2c564823d2424fd232d48f3188be3e48de338622" },
+]
+
+build = '''
+make all-mo
+# Debian puts games in /usr/games; here they are in /usr/bin
+sed -i 's|/usr/games/bambam|/usr/bin/bambam|' bambam.desktop bambam-session.desktop
+'''
+install = '''
+# bambam finds its pictures and sounds in ../share/bambam from where it runs
+install -Dm755 bambam.py "$pkgdir/usr/bin/bambam"
+install -dm755 "$pkgdir/usr/share/bambam"
+cp -r data extensions "$pkgdir/usr/share/bambam/"
+make PREFIX="$pkgdir" install-mo
+install -Dm644 bambam.6 "$pkgdir/usr/share/man/man6/bambam.6"
+install -Dm644 bambam.desktop "$pkgdir/usr/share/applications/bambam.desktop"
+install -Dm644 bambam-session.desktop "$pkgdir/usr/share/xsessions/bambam-session.desktop"
+install -Dm644 icon.gif "$pkgdir/usr/share/pixmaps/bambam.gif"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/bambam/COPYING"
+'''

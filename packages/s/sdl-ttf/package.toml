@@ -1,0 +1,33 @@
+# From Debian's sdl-ttf2.0 2.0.11-6: its sources and its patches (applied in setup).
+# needed by: t4k-common, tuxmath, tuxtype.
+name = "sdl-ttf"
+version = "2.0.11"
+release = 1
+summary = "TrueType font library for SDL 1.2"
+license = "Zlib"
+homepage = "https://www.libsdl.org/projects/SDL_ttf/release-1.2.html"
+hostdeps = ["pkgconf", "autoconf", "automake", "libtool", "gettext-devel"]
+builddeps = ["sdl12-compat-devel", "freetype-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://deb.debian.org/debian/pool/main/s/sdl-ttf2.0/sdl-ttf2.0_2.0.11.orig.tar.gz", sha256 = "724cd895ecf4da319a3ef164892b72078bd92632a5d812111261cde248ebcdb7" },
+    { url = "https://deb.debian.org/debian/pool/main/s/sdl-ttf2.0/sdl-ttf2.0_2.0.11-6.debian.tar.xz", sha256 = "99517d37738dcd12894494cab753e56a3b580c525da0c186933776ba199e1a51" },
+]
+
+setup = '''
+# Debian's patches (debian.tar.xz unpacks beside the source, in ../debian)
+while read -r p opt || [ -n "$p" ]; do
+    case "$p" in ''|'#'*) continue ;; esac
+    patch ${opt:--p1} < ../debian/patches/$p
+done < ../debian/patches/series
+autoreconf -fi
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/sdl-ttf/COPYING"
+'''
