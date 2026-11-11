@@ -14,7 +14,10 @@ source = [
 ]
 
 setup = '''
+# both scanners define their own yywrap(), so no lex library is needed; the
+# check for one failed, and configure then left flex out (LEX=:)
 %configure \
+    ac_cv_lib_lex='none needed' \
     --sysconfdir=/etc/dict
 '''
 build = '''
