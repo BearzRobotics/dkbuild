@@ -50,6 +50,12 @@ add list 'std::list\b'
 add deque 'std::deque\b'
 add utility 'std::(pair|move|forward|swap|exchange|make_pair)\b'
 grep -q '^#include <cstdlib>' lib/external/libwolv/libs/math_eval/source/math_eval/math_evaluator.cpp
+# libc++ 23 drops std::is_trivial (deprecated in C++26): written out as what
+# it means, trivially default-constructible and trivially copyable
+grep -rlE 'std::is_trivial(_v)?<' --include='*.cpp' --include='*.hpp' --include='*.h' . | xargs -r sed -i -E \
+    -e 's/std::is_trivial_v<([^<>]+)>/(std::is_trivially_default_constructible_v<\1> \&\& std::is_trivially_copyable_v<\1>)/g' \
+    -e 's/std::is_trivial<([^<>]+)>::value/(std::is_trivially_default_constructible<\1>::value \&\& std::is_trivially_copyable<\1>::value)/g'
+! grep -rqE 'std::is_trivial(_v)?<' --include='*.cpp' --include='*.hpp' --include='*.h' .
 grep -q '^#include <atomic>' lib/libimhex/include/hex/api/task_manager.hpp
 grep -q '^#include <vector>' lib/libimhex/source/helpers/udp_server.cpp
 %cmake \
