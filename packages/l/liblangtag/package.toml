@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "liblangtag"
 version = "0.6.8"
-release = 2
+release = 3
 summary = "Interface library to access tags for identifying languages"
 license = "MPL-2.0 OR LGPL-3.0-or-later"
 homepage = "https://gitlab.com/tagoh/liblangtag"

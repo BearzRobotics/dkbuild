@@ -7,7 +7,7 @@
 # libraries are shared (BUILD_SHARED_LIBS=ON), as Arch builds it.
 name = "spirv-tools"
 version = "1.4.363.0"
-release = 12
+release = 13
 summary = "API and commands for processing SPIR-V modules"
 license = "Apache-2.0"
 homepage = "https://github.com/KhronosGroup/SPIRV-Tools"

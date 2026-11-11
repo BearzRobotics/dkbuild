@@ -5,7 +5,8 @@
 # gclient checkout with its pinned Chromium (148.0.7778.280, as its DEPS has
 # it), Electron's patches applied, and its node_modules (Electron's own yarn
 # release) and third_party/node's (npm ci) installed at fetch time, so the
-# build is offline.
+# build is offline. depot_tools is a 2026 commit, not Alpine's (April 2024):
+# that one uses ast.Str, gone in the host's Python 3.14.
 # Port of Alpine's testing/electron 42.11.18 (APKBUILD by lauren n. liberda and
 # Antoine Martin): patches/ has Alpine's patches as they are, then the copium
 # 148.1 ones (codeberg.org/selfisekai/copium) Alpine applies after them. Left
@@ -63,7 +64,7 @@ builddeps = ["alsa-lib-devel", "brotli-devel", "crc32c-devel", "hdrhistogram-c-d
 rundeps = ["gtk+3", "hwdata", "xdg-utils"]
 
 source = [
-    { url = "snapshot:electron v42.11.18 148.0.7778.280 495b23b39aaba2ca3b55dd27cadc523f1cb17ee6", sha256 = "0000000000000000000000000000000000000000000000000000000000000000" },
+    { url = "snapshot:electron v42.11.18 148.0.7778.280 1afcf0756e47f3a6ee82d7736b9fcda2d57b268e", sha256 = "0000000000000000000000000000000000000000000000000000000000000000" },
     { url = "https://registry.npmjs.org/@rollup/wasm-node/-/wasm-node-4.22.4.tgz", sha256 = "ee49bf67bd9bee869405af78162d028e2af0fcfca80497404f56b1b99f272717" },
 ]
 

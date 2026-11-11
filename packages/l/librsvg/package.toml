@@ -8,7 +8,7 @@
 # 2026-11-11: the gdk-pixbuf SVG loader (SVG icons in GTK), introspection, Vala, AVIF.
 name = "librsvg"
 version = "2.63.2"
-release = 5
+release = 6
 summary = "SVG library for GNOME"
 license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
 homepage = "https://wiki.gnome.org/Projects/LibRsvg"
