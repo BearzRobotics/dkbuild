@@ -11,13 +11,13 @@
 # and Tracker are not in the tree.
 name = "gtk+3"
 version = "3.24.43"
-release = 10
+release = 11
 summary = "Gimp Toolkit version 3"
 license = "LGPL-2.1-or-later"
 homepage = "https://gtk.org"
 patches = ["geometry.patch"]
 hostdeps = ["gettext-devel", "glib-devel", "meson", "perl", "pkgconf", "wayland", "gobject-introspection"]
-builddeps = ["at-spi2-core-devel", "gdk-pixbuf-devel", "libepoxy-devel", "libxkbcommon-devel", "mesa-devel", "pango-devel", "wayland-devel", "wayland-protocols", "libx11-devel", "libxext-devel", "libxi-devel", "libxrandr-devel", "libxcursor-devel", "libxdamage-devel", "libxfixes-devel", "libxcomposite-devel", "libxinerama-devel", "cups-devel", "colord-devel", "fribidi-devel", "cairo-devel"]
+builddeps = ["at-spi2-core-devel", "gdk-pixbuf-devel", "libepoxy-devel", "libxkbcommon-devel", "mesa-devel", "pango-devel", "wayland-devel", "wayland-protocols", "libx11-devel", "libxext-devel", "libxi-devel", "libxrandr-devel", "libxcursor-devel", "libxdamage-devel", "libxfixes-devel", "libxcomposite-devel", "libxinerama-devel", "cups-devel", "colord-devel", "fribidi-devel", "cairo-devel", "iso-codes"]
 checkdeps = ["adwaita-icon-theme", "dbus", "fonts-dejavu-otf", "librsvg", "xwayland-run"]
 rundeps = ["adwaita-icon-theme", "shared-mime-info"]
 options = ["!cross", "!check"]

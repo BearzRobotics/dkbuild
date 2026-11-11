@@ -8,13 +8,13 @@
 # GStreamer media playback and Broadway, now that the tree has them.
 name = "gtk4"
 version = "4.24.1"
-release = 4
+release = 5
 summary = "Gimp Toolkit version 4"
 license = "LGPL-2.1-or-later"
 homepage = "https://gtk.org"
 patches = ["int.patch", "no-gsk-test.patch", "test-timeouts.patch", "tests-nodeparser-ref.patch"]
 hostdeps = ["gettext-devel", "glib-devel", "meson", "perl", "pkgconf", "python-docutils", "shaderc", "wayland", "wayland-protocols", "gobject-introspection"]
-builddeps = ["at-spi2-core-devel", "gdk-pixbuf-devel", "graphene-devel", "libepoxy-devel", "libxcursor-devel", "libxkbcommon-devel", "mesa-devel", "pango-devel", "sysprof-capture", "vulkan-headers", "vulkan-loader-devel", "wayland-devel", "wayland-protocols", "libx11-devel", "libxext-devel", "libxi-devel", "libxrandr-devel", "libxdamage-devel", "libxfixes-devel", "libxinerama-devel", "cups-devel", "colord-devel", "gstreamer-devel", "gst-plugins-base-devel", "gst-plugins-bad-devel"]
+builddeps = ["at-spi2-core-devel", "gdk-pixbuf-devel", "graphene-devel", "libepoxy-devel", "libxcursor-devel", "libxkbcommon-devel", "mesa-devel", "pango-devel", "sysprof-capture", "vulkan-headers", "vulkan-loader-devel", "wayland-devel", "wayland-protocols", "libx11-devel", "libxext-devel", "libxi-devel", "libxrandr-devel", "libxdamage-devel", "libxfixes-devel", "libxinerama-devel", "cups-devel", "colord-devel", "iso-codes", "gstreamer-devel", "gst-plugins-base-devel", "gst-plugins-bad-devel"]
 checkdeps = ["adwaita-icon-theme", "bash", "dbus", "fonts-cantarell-otf", "fonts-dejavu", "fonts-noto", "python-gobject", "xwayland-run"]
 rundeps = ["adwaita-icon-theme", "shared-mime-info"]
 options = ["!cross", "!check", "!lto"]
@@ -31,6 +31,8 @@ setup = '''
     -Dmedia-gstreamer=enabled \
     -Dprint-cups=enabled \
     -Dvulkan=enabled \
+    -Dcolord=enabled \
+    -Dsysprof=enabled \
     -Dintrospection=enabled \
     -Ddocumentation=false \
     -Dman-pages=false \
