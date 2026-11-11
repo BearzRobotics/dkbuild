@@ -15,7 +15,7 @@ source = [
 ]
 
 setup = '''
-%cmake \
+%cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DLIBSWORD_LIBRARY_TYPE=Both \
     -DSWORD_BUILD_UTILS=Yes \
     -DSWORD_BUILD_EXAMPLES=No \

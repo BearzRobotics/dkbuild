@@ -2,7 +2,7 @@
 # needed by: pangomm, gtkmm. Its tests need boost, which is not in the tree yet.
 name = "cairomm"
 version = "1.19.1"
-release = 1
+release = 2
 summary = "C++ bindings for the Cairo graphics library"
 license = "LGPL-2.1-or-later"
 homepage = "https://www.cairographics.org/cairomm"

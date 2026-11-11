@@ -14,7 +14,8 @@ source = [
 ]
 
 setup = '''
-./configure \
+# its configure is a Python script
+./configure.py \
     --prefix=/usr \
     --with-boost \
     --with-bzip2 \

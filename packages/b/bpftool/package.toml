@@ -19,7 +19,8 @@ source = [
 ]
 
 build = '''
-%make \
+# bpftool's Makefile is in src/
+%make -C src \
     LLVM=1 \
     STRIP=/bin/true \
     V=1 \
@@ -29,7 +30,7 @@ build = '''
     sbindir=/usr/bin
 '''
 install = '''
-%make_install \
+%make_install -C src \
     STRIP=true \
     PREFIX=/usr
 '''
