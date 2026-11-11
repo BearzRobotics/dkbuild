@@ -5,7 +5,7 @@ release = 1
 summary = "Run a subprocess in a pseudo terminal"
 license = "custom"
 homepage = "https://github.com/pexpect/ptyprocess"
-hostdeps = ["python", "python-flit-core"]
+hostdeps = ["python", "python-setuptools"]
 rundeps = ["python"]
 options = ["!check"]
 
@@ -17,6 +17,9 @@ environment = '''
 export SETUPTOOLS_SCM_PRETEND_VERSION=$version
 '''
 install = '''
+# its pyproject.toml is flit's old [tool.flit.metadata], which flit_core 4
+# no longer reads: the setup.py flit wrote into the release builds it instead
+rm pyproject.toml
 python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
     --root "$pkgdir" --prefix /usr .
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-ptyprocess/LICENSE"
