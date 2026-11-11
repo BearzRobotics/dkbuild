@@ -1,0 +1,31 @@
+# GCC's C++ runtime (libstdc++.so.6, libgcc_s.so.1) for musl, prebuilt by
+# Alpine Linux (3.23, GCC 15.2), in a private directory. FenrirOS's C++
+# runtime is LLVM's libc++; the musl .NET SDK that dotnet's source build starts
+# from (Microsoft's, built on Alpine) is linked against GCC's, so the dotnet
+# build runs that SDK with these on its library path. Only a build dependency,
+# like the bootstrap JDKs: nothing else finds these libraries (not in /usr/lib,
+# so the package provides no so: names).
+name = "dotnet-bootstrap-gcc-runtime"
+version = "15.2.0"
+release = 1
+summary = "GCC C++ runtime for musl, to run dotnet's bootstrap SDK"
+license = "GPL-3.0-or-later WITH GCC-exception-3.1"
+homepage = "https://gcc.gnu.org"
+archs = ["x86_64"]
+options = ["!strip", "!check"]
+
+source = [
+    { url = "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libstdc++-15.2.0-r2.apk", sha256 = "d4be2967a06d78b499f5e136323f4ebe51ad367b381933b3369539499c4f5752", unpack = false },
+    { url = "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libgcc-15.2.0-r2.apk", sha256 = "4279d14cbf43311312d3a7d43619f4c15ede2e46d5608ba421ed157ded57c700", unpack = false },
+]
+
+install = '''
+d="$pkgdir/usr/lib/dotnet-bootstrap-gcc"
+mkdir -p "$d" /tmp/alpine
+# an Alpine package is gzipped tar streams one after another
+for a in /build/sources/libstdc++-15.2.0-r2.apk /build/sources/libgcc-15.2.0-r2.apk; do
+    tar -xzf "$a" -C /tmp/alpine usr 2>/dev/null || tar -xzf "$a" -C /tmp/alpine
+done
+cp -P /tmp/alpine/usr/lib/libstdc++.so.6* /tmp/alpine/usr/lib/libgcc_s.so.1 "$d/"
+test -e "$d/libstdc++.so.6" && test -e "$d/libgcc_s.so.1"
+'''
