@@ -15,8 +15,8 @@ source = [
 ]
 
 setup = '''
-%cmake \
-    -DBUILD_STATIC_LIB=OFF \
+%cmake -S cpp \
+    -DBUILD_STATIC_LIB=ON \
     -DREGENERATE_METADATA=OFF \
     -DUSE_BOOST=OFF \
     -DUSE_STDMUTEX=ON

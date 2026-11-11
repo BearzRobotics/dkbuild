@@ -13,6 +13,10 @@ source = [
     { url = "https://github.com/indilib/indi/archive/refs/tags/v2.2.5.tar.gz", sha256 = "938cae0b3bfbd34e73ae797bd4a0e5a64fe21753d2b560d88cafab0c61771628" },
 ]
 
+environment = '''
+# clang 23's -Wunused-but-set-global under indi's -Werror (sharedblob.c)
+export CFLAGS="$CFLAGS -Wno-unused-but-set-global" CXXFLAGS="$CXXFLAGS -Wno-unused-but-set-global"
+'''
 setup = '''
 %cmake \
     -DINDI_BUILD_UNITTESTS=OFF \

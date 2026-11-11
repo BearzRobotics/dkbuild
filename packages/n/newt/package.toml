@@ -8,7 +8,6 @@ release = 2
 summary = "Library for color text mode, widget based user interfaces"
 license = "LGPL-2.0-only"
 homepage = "https://pagure.io/newt"
-patches = ["gnu-ld.patch"]
 hostdeps = ["automake", "libtool", "pkgconf", "python-devel"]
 builddeps = ["python-devel", "slang-devel", "popt-devel"]
 options = ["!check"]
@@ -20,6 +19,8 @@ source = [
 setup = '''
 # The GitHub tag archive (releases.pagure.org is gone) has no configure yet.
 ./autogen.sh
+# its patch is to the generated configure
+patch -Np1 -i /dkbuild/patches/gnu-ld.patch
 %configure
 '''
 build = '''
