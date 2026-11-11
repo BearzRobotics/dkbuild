@@ -20,6 +20,9 @@ source = [
 
 environment = '''
 export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+# Rust's musl target links statically by default; vaultwarden links the
+# system's OpenSSL, SQLite and libpq dynamically, as the other Rust programs here
+export RUSTFLAGS="-C target-feature=-crt-static"
 '''
 build = '''
 cargo build --release --frozen --offline -j $jobs  --features sqlite,postgresql

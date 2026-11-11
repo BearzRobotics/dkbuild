@@ -36,7 +36,8 @@ build = '''
     sbindir=/usr/bin
 '''
 install = '''
+# its Makefile's variable is prefix (default /usr/local)
 %make_install -C src \
     STRIP=true \
-    PREFIX=/usr
+    prefix=/usr
 '''
