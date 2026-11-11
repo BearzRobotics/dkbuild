@@ -19,6 +19,14 @@ setup = '''
 # bring it in, musl's do not)
 sed -i 's|^#include <iosfwd>$|#include <sys/types.h>\n#include <iosfwd>|' wsrep-lib/include/wsrep/gtid.hpp
 grep -q '^#include <sys/types.h>$' wsrep-lib/include/wsrep/gtid.hpp
+# and, with libc++ 23, standard headers it used to get through others
+for f in wsrep-lib/include/wsrep/buffer.hpp wsrep-lib/src/id.cpp; do
+    sed -i '0,/^#include/s//#include <iterator>\n#include/' "$f"
+done
+for f in wsrep-lib/include/wsrep/buffer.hpp wsrep-lib/include/wsrep/client_state.hpp; do
+    sed -i '0,/^#include/s//#include <algorithm>\n#include/' "$f"
+done
+grep -q '^#include <iterator>' wsrep-lib/include/wsrep/buffer.hpp
 %cmake \
     -DBUILD_CONFIG=mysql_release \
     -DINSTALL_LAYOUT=RPM \
