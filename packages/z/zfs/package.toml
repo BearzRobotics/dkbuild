@@ -1,0 +1,74 @@
+# OpenZFS: the ZFS filesystem and volume manager. The tools and libraries
+# (zfs), and the kernel modules built against linux-devel in zfs-kmod, which
+# installs itself whenever zfs and linux are both installed. Prebuilt for
+# FenrirOS's kernel (2026-11-11, docs: kernel flavors will each get their own
+# zfs-kmod-<flavor>). The modules go to /usr/lib/modules/<release>/extra;
+# linux's trigger runs depmod. Service `zfs` (dinit) imports the pools and
+# mounts their datasets at boot; `zed` is the event daemon.
+# Based on Chimera Linux cports (BSD-2-Clause): main/zfs, with its musl
+# strftime patch.
+name = "zfs"
+version = "2.4.4"
+release = 1
+summary = "OpenZFS filesystem and volume manager"
+license = "CDDL-1.0"
+homepage = "https://openzfs.github.io/openzfs-docs"
+archs = ["x86_64"]
+patches = ["musl-strftime.patch"]
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf", "python"]
+builddeps = ["linux-devel", "attr-devel", "libtirpc-devel", "linux-pam-devel", "openssl-devel", "eudev-devel", "util-linux-devel", "zlib-ng-compat-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/openzfs/zfs/releases/download/zfs-2.4.4/zfs-2.4.4.tar.gz", sha256 = "2a3c70d55a37cc71618a95a60e81ad66530201eb118d37741dc92efcf848c8b1" },
+]
+
+environment = '''
+# the modules with the kernel's own compiler and linker (KERNEL_LLVM for ZFS's
+# build, LLVM for the kernel Makefile's modules_install it calls)
+export KERNEL_LLVM=1 LLVM=1
+'''
+setup = '''
+autoreconf -fi
+krel=$(ls /usr/src | sed -n 's/^linux-//p' | head -n1)
+test -n "$krel"
+%configure \
+    --with-config=all \
+    --with-linux=/usr/src/linux-$krel \
+    --with-mounthelperdir=/usr/bin \
+    --with-udevdir=/usr/lib/udev \
+    --with-udevruledir=/usr/lib/udev/rules.d \
+    --with-tirpc \
+    --without-libunwind \
+    --disable-systemd \
+    --disable-sysvinit \
+    KERNEL_LLVM=1
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+# the modules under /usr/lib (/lib is a link to it)
+if [ -d "$pkgdir/lib/modules" ]; then
+    mkdir -p "$pkgdir/usr/lib"
+    mv "$pkgdir/lib/modules" "$pkgdir/usr/lib/"
+    rmdir "$pkgdir/lib" 2>/dev/null || true
+fi
+ls "$pkgdir"/usr/lib/modules/*/extra/zfs.ko* "$pkgdir"/usr/lib/modules/*/extra/spl.ko* >/dev/null
+# depmod's files belong to linux (its trigger rebuilds them)
+rm -f "$pkgdir"/usr/lib/modules/*/modules.*
+rm -rf "$pkgdir/usr/share/zfs/zfs-tests" "$pkgdir/etc/init.d" "$pkgdir/usr/share/initramfs-tools" \
+    "$pkgdir/usr/share/pam-configs" "$pkgdir/usr/lib/dracut"
+install -Dm755 $pkgfiles/zfs-boot "$pkgdir/usr/lib/zfs-boot"
+install -Dm644 $pkgfiles/zfs "$pkgdir/etc/dinit.d/zfs"
+install -Dm644 $pkgfiles/zed "$pkgdir/etc/dinit.d/zed"
+for f in COPYRIGHT LICENSE NOTICE; do install -Dm644 $f "$pkgdir/usr/share/licenses/zfs/$f"; done
+'''
+
+# the kernel modules, for FenrirOS's kernel; installed with zfs and linux
+[subpackages.kmod]
+summary = "OpenZFS kernel modules for linux"
+paths   = ["/usr/lib/modules"]
+depends = ["linux"]
+install_if = ["zfs", "linux"]

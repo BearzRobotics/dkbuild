@@ -1,0 +1,11 @@
+#!/bin/sh
+# At boot: load the ZFS module, import the pools (those in the cache file, or
+# every pool found when there is none) and mount their datasets.
+modprobe zfs || exit 1
+if [ -f /etc/zfs/zpool.cache ]; then
+    zpool import -c /etc/zfs/zpool.cache -aN
+else
+    zpool import -aN
+fi
+zfs mount -a
+exit 0

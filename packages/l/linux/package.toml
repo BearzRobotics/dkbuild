@@ -21,6 +21,8 @@ builddeps = ["openssl-devel", "elfutils", "zlib-ng-compat-devel"]
 # The kernel compiles one small file per job, so it uses every core (-j limits
 # it); lower priority like llvm.
 options = ["!check", "!strip"]
+# out-of-tree modules (zfs-kmod) in /usr/lib/modules/<release>/extra: depmod
+triggers = ["/usr/lib/modules/*/extra"]
 
 source = [
     { url = "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.19.tar.xz", sha256 = "303079a8250b8f381f82b03f90463d12ac98d4f6b149b761ea75af1323521357" },

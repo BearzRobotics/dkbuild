@@ -1,0 +1,5 @@
+# ZFS event daemon (scrubs, resilvers, faults; notifications)
+type = process
+command = /usr/bin/zed -F
+depends-on: zfs
+smooth-recovery = true

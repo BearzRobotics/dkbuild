@@ -1,0 +1,6 @@
+# ZFS: the module, the pools and their datasets
+type = scripted
+command = /usr/lib/zfs-boot
+depends-on: udevd
+depends-on: early-filesystems
+before = loginready
