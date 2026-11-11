@@ -5,14 +5,20 @@
 # build runs that SDK with these on its library path. Only a build dependency,
 # like the bootstrap JDKs: nothing else finds these libraries (not in /usr/lib,
 # so the package provides no so: names).
+# Licence: GPL-3.0+ with the GCC Runtime Library Exception (the exception
+# covers what the libraries are linked into; the libraries themselves stay
+# GPL). Shipping these binaries would oblige shipping GCC 15.2's source with
+# them, so the package stays off the repository ISO (`!repo-iso`): it is used
+# only on the build machine. The licence texts (COPYING3, COPYING.RUNTIME from
+# GCC 15.2.0) are installed with it. Approved by the user 2026-11-11.
 name = "dotnet-bootstrap-gcc-runtime"
 version = "15.2.0"
-release = 1
+release = 2
 summary = "GCC C++ runtime for musl, to run dotnet's bootstrap SDK"
 license = "GPL-3.0-or-later WITH GCC-exception-3.1"
 homepage = "https://gcc.gnu.org"
 archs = ["x86_64"]
-options = ["!strip", "!check"]
+options = ["!strip", "!check", "!repo-iso"]
 
 source = [
     { url = "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libstdc++-15.2.0-r2.apk", sha256 = "d4be2967a06d78b499f5e136323f4ebe51ad367b381933b3369539499c4f5752", unpack = false },
@@ -28,4 +34,6 @@ for a in /build/sources/libstdc++-15.2.0-r2.apk /build/sources/libgcc-15.2.0-r2.
 done
 cp -P /tmp/alpine/usr/lib/libstdc++.so.6* /tmp/alpine/usr/lib/libgcc_s.so.1 "$d/"
 test -e "$d/libstdc++.so.6" && test -e "$d/libgcc_s.so.1"
+install -Dm644 $pkgfiles/COPYING3 "$pkgdir/usr/share/licenses/dotnet-bootstrap-gcc-runtime/COPYING3"
+install -Dm644 $pkgfiles/COPYING.RUNTIME "$pkgdir/usr/share/licenses/dotnet-bootstrap-gcc-runtime/COPYING.RUNTIME"
 '''
