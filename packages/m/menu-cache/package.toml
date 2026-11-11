@@ -15,6 +15,7 @@ source = [
 
 setup = '''
 # gtk-doc.make comes from gtkdocize (the API docs stay off by default)
+mkdir -p m4
 gtkdocize
 autoreconf -fi
 %configure
