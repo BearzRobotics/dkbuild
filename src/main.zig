@@ -178,6 +178,20 @@ pub fn main(init: std.process.Init) !void {
                 failed = true;
                 std.debug.print("{s}: {s} (in none of its sources)\n", .{ r.name, gemdeps.no_lockfile });
             }
+            // lockfiles the recipe keeps in its files/
+            if (contains(r.options, "npmdeps")) {
+                const fdir = try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, root, r.name), "files" });
+                for (try npmdeps.recipeLocks(arena, init.io, fdir)) |lp| {
+                    var msg: []const u8 = "";
+                    if (npmdeps.fetchNpmLockFile(arena, init.io, cache, lp, &msg)) |nst| {
+                        npm_found = true;
+                        std.debug.print("{s}: npm packages ({s}) {s}\n", .{ r.name, std.fs.path.basename(lp), @tagName(nst) });
+                    } else |nerr| {
+                        failed = true;
+                        std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(nerr) });
+                    }
+                }
+            }
             if (contains(r.options, "npmdeps") and !npm_found and !failed) {
                 failed = true;
                 std.debug.print("{s}: {s} (in none of its sources)\n", .{ r.name, npmdeps.no_lockfile });

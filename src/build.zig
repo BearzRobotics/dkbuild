@@ -506,6 +506,18 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
             out("error: {s}: {s} (in none of its sources)\n", .{ r.name, gemdeps.no_lockfile });
             return error.PrepareFailed;
         }
+        // lockfiles the recipe keeps in its files/ (made from a yarn.lock, ...)
+        if (contains(r.options, "npmdeps")) {
+            const fdir = try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, opts.root, r.name), "files" });
+            for (try npmdeps.recipeLocks(arena, io, fdir)) |lp| {
+                var msg: []const u8 = "";
+                _ = npmdeps.fetchNpmLockFile(arena, io, cache, lp, &msg) catch |err| {
+                    out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
+                    return error.PrepareFailed;
+                };
+                uses_npm = true;
+            }
+        }
         if (contains(r.options, "npmdeps") and !uses_npm) {
             out("error: {s}: {s} (in none of its sources)\n", .{ r.name, npmdeps.no_lockfile });
             return error.PrepareFailed;

@@ -129,6 +129,54 @@ pub fn fetchNpmDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha
         return error.DownloadFailed;
     }
     const locks = std.Io.Dir.cwd().readFileAlloc(io, try std.fmt.allocPrint(arena, "{s}/locks", .{tmp}), arena, .limited(1 << 20)) catch return error.DownloadFailed;
+    return fromLocks(arena, io, cache, tmp, out_path, locks, message);
+}
+
+/// For a lockfile a recipe keeps in its files/ (a web UI whose upstream ships a
+/// yarn.lock: the package-lock.json made from it once, then pinned there). Its
+/// list is keyed by the lockfile's own sha256, so editing it refetches.
+pub fn fetchNpmLockFile(arena: Allocator, io: std.Io, cache: []const u8, lock_path: []const u8, message: *[]const u8) fetch.Error!fetch.Status {
+    const data = std.Io.Dir.cwd().readFileAlloc(io, lock_path, arena, .limited(1 << 28)) catch {
+        message.* = try std.fmt.allocPrint(arena, "npm: cannot read {s}", .{lock_path});
+        return error.DownloadFailed;
+    };
+    const key = try lockKey(arena, data);
+    const out_path = try listPath(arena, cache, key);
+    if (std.Io.Dir.cwd().access(io, out_path, .{})) |_| return .cached else |_| {}
+    const tmp = try std.fmt.allocPrint(arena, "{s}/npmdeps/tmp-{s}", .{ cache, key });
+    std.Io.Dir.cwd().createDirPath(io, tmp) catch {
+        message.* = try std.fmt.allocPrint(arena, "cannot create {s}", .{tmp});
+        return error.DownloadFailed;
+    };
+    defer std.Io.Dir.cwd().deleteTree(io, tmp) catch {};
+    return fromLocks(arena, io, cache, tmp, out_path, try std.fmt.allocPrint(arena, "{s}\n", .{lock_path}), message);
+}
+
+/// The package-lock.json files a recipe keeps in its files/ directory
+/// (`package-lock.json`, or `<name>.package-lock.json` for several).
+pub fn recipeLocks(arena: Allocator, io: std.Io, files_dir: []const u8) ![]const []const u8 {
+    var out: std.ArrayList([]const u8) = .empty;
+    var d = std.Io.Dir.cwd().openDir(io, files_dir, .{ .iterate = true }) catch return out.items;
+    defer d.close(io);
+    var it = d.iterate();
+    while (it.next(io) catch null) |e| {
+        if (e.kind != .file) continue;
+        if (std.mem.eql(u8, e.name, "package-lock.json") or std.mem.endsWith(u8, e.name, ".package-lock.json"))
+            try out.append(arena, try std.fs.path.join(arena, &.{ files_dir, e.name }));
+    }
+    return out.items;
+}
+
+/// The sha256 (hex) a recipe lockfile's list is named by.
+pub fn lockKey(arena: Allocator, data: []const u8) ![]const u8 {
+    var h: [32]u8 = undefined;
+    std.crypto.hash.sha2.Sha256.hash(data, &h, .{});
+    return std.fmt.allocPrint(arena, "{x}", .{&h});
+}
+
+/// The packages of the lockfiles listed in `locks` (paths, one per line) into
+/// the store, then their list to `out_path`.
+fn fromLocks(arena: Allocator, io: std.Io, cache: []const u8, tmp: []const u8, out_path: []const u8, locks: []const u8, message: *[]const u8) fetch.Error!fetch.Status {
     var pkgs: std.ArrayList(Pkg) = .empty;
     var missing: usize = 0;
     var nlocks: usize = 0;
