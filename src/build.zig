@@ -308,6 +308,35 @@ test "isTarArchive" {
     try std.testing.expect(isTarArchive("snapshot:electron v43.8.3 150.0.7871.250 c4cdaeebba9b9ed92d041997317ffdbd042158ac"));
 }
 
+/// A subpackage dependency `name=@built` becomes `name=<version>`: the version
+/// of `name` (or of `name-devel`, the same build) that was in the build root.
+/// zfs-kmod's `linux=@built` pins it to the kernel its modules were built for.
+/// Anything else is returned as it is.
+fn builtDep(arena: Allocator, dep: []const u8, root_files: []const []const u8) ![]const u8 {
+    if (!std.mem.endsWith(u8, dep, "=@built")) return dep;
+    const name = dep[0 .. dep.len - "=@built".len];
+    for ([_][]const u8{ name, try std.fmt.allocPrint(arena, "{s}-devel", .{name}) }) |n| {
+        for (root_files) |f| {
+            const base = std.fs.path.basename(f);
+            if (!std.mem.startsWith(u8, base, n) or base.len <= n.len + 1 or base[n.len] != '-') continue;
+            const rest = base[n.len + 1 ..];
+            if (rest.len == 0 or !std.ascii.isDigit(rest[0]) or !std.mem.endsWith(u8, rest, ".apk")) continue;
+            return std.fmt.allocPrint(arena, "{s}={s}", .{ name, rest[0 .. rest.len - ".apk".len] });
+        }
+    }
+    out("error: {s}: no {s} in the build root to pin to\n", .{ dep, name });
+    return error.PrepareFailed;
+}
+
+test "builtDep pins to the version in the build root" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const files = [_][]const u8{ "/x/repo/x86_64/linux-headers-6.19-r3.apk", "/x/repo/x86_64/linux-devel-6.19-r10.apk" };
+    try std.testing.expectEqualStrings("linux=6.19-r10", try builtDep(a, "linux=@built", &files));
+    try std.testing.expectEqualStrings("zfs", try builtDep(a, "zfs", &files));
+}
+
 fn inTreeFiles(arena: Allocator, io: std.Io, opts: Options, r: recipe.Recipe, repo_abs: ?[]const u8) BuildError![]const []const u8 {
     const t = opts.tree orelse return &.{};
     var work: std.ArrayList([]const u8) = .empty;
@@ -549,12 +578,15 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     const local_repo = try std.fmt.allocPrint(arena, "{s}/repo/{s}", .{ opts.root, opts.arch });
     const local_abs: ?[]const u8 = absPath(arena, io, local_repo) catch null;
     const keys_dir: ?[]const u8 = absPath(arena, io, try std.fs.path.join(arena, &.{ opts.root, "keys" })) catch null;
+    // the repo packages laid in the build root (for `name=@built` depends)
+    var root_files: []const []const u8 = &.{};
     {
         // Stage 1: the toolchain and libraries are the image's. The packages
         // this tree built are laid over it from repo/ with `apk extract`, which
         // checks each signature but not dependencies: the image has no package
         // database, so there is nothing for a solver to work with (SPEC.md 7.3).
         const files = try inTreeFiles(arena, io, opts, r, local_abs);
+        root_files = files;
         out("    preparing build root ({d} package(s) from repo/ on top of the base image)\n", .{files.len});
         if (files.len > 0) {
             var binds: std.ArrayList(sandbox.Bind) = .empty;
@@ -908,7 +940,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
             "";
         var declared: std.ArrayList([]const u8) = .empty;
         if (need.len > 0) try declared.append(arena, need);
-        try declared.appendSlice(arena, sp_depends);
+        for (sp_depends) |dep| try declared.append(arena, try builtDep(arena, dep, root_files));
         var sub = try withScan(arena, io, try std.fs.path.join(arena, &.{ subs_abs, m.name }), declared.items);
         sub.name = try std.fmt.allocPrint(arena, "{s}-{s}", .{ r.name, m.name });
         sub.summary = summary;

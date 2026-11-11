@@ -67,8 +67,10 @@ for f in COPYRIGHT LICENSE NOTICE; do install -Dm644 $f "$pkgdir/usr/share/licen
 '''
 
 # the kernel modules, for FenrirOS's kernel; installed with zfs and linux
+# pinned to the exact kernel build the modules were made for (dkbuild turns
+# linux=@built into linux=<the version in the build root>)
 [subpackages.kmod]
 summary = "OpenZFS kernel modules for linux"
 paths   = ["/usr/lib/modules"]
-depends = ["linux"]
+depends = ["linux=@built"]
 install_if = ["zfs", "linux"]
