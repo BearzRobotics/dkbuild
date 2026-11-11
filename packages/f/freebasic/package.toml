@@ -67,6 +67,11 @@ grep -q '__label__ fb$jt' $f
 # fbc asks it not to (-fno-addrsig: they matter only to linker ICF)
 sed -i 's|ln += "-S -nostdlib -nostdinc -Wall "|ln += "-S -nostdlib -nostdinc -Wall -fno-addrsig "|' src/compiler/fbc.bas
 grep -q -- '-Wall -fno-addrsig "' src/compiler/fbc.bas
+# LLD has no built-in library path (GNU ld has /usr/lib), and fbc only asks the
+# compiler where libgcc.a and libstdc++.so are, which clang has not: it also
+# asks for libc.so, which gives /usr/lib
+sed -i 's|^\(\t*\)fbcAddLibPathFor( "libstdc++.so" )$|&\n\1fbcAddLibPathFor( "libc.so" )|' src/compiler/fbc.bas
+grep -q 'fbcAddLibPathFor( "libc.so" )' src/compiler/fbc.bas
 '''
 build = '''
 # 1. the bootstrap compiler (and the runtime) with clang
@@ -82,10 +87,10 @@ for d in lib/freebasic/linux-*; do
 done
 # 3. the patched compiler, runtime and graphics library, by the bootstrap one
 # (made from the shipped C, so it is told -fno-addrsig itself, given the
-# tree's inc/ since it looks in /usr/include/freebasic, and its C goes through
+# tree's inc/ since it looks in /usr/include/freebasic, /usr/lib for LLD, and its C goes through
 # fbc-cc-bootstrap, which rewrites the computed gotos its code generator writes)
 make clean-compiler
-GCC=fbc-cc-bootstrap make -j$jobs CC=cc AS=fbc-as prefix=/usr FBC="$PWD/bin/fbc-bootstrap" FBFLAGS="-maxerr 1 -i $PWD/inc -Wc -fno-addrsig -Wl --dynamic-linker=$loader"
+GCC=fbc-cc-bootstrap make -j$jobs CC=cc AS=fbc-as prefix=/usr FBC="$PWD/bin/fbc-bootstrap" FBFLAGS="-maxerr 1 -i $PWD/inc -p /usr/lib -Wc -fno-addrsig -Wl --dynamic-linker=$loader"
 '''
 install = '''
 make CC=cc AS=fbc-as prefix=/usr DESTDIR="$pkgdir" FBC="$PWD/bin/fbc-bootstrap" install
