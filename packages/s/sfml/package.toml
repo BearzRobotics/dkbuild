@@ -7,7 +7,7 @@
 # not run for a given source directory).
 name = "sfml"
 version = "3.1.0"
-release = 1
+release = 2
 summary = "C++ multimedia library"
 license = "Zlib"
 homepage = "https://www.sfml-dev.org"
@@ -28,10 +28,21 @@ cmake -DSHEENBIDI_DIR=/build/SheenBidi-3.0.0 -P tools/sheenbidi/PatchSheenBidi.c
     -DSFML_BUILD_TEST_SUITE=OFF \
     -DFETCHCONTENT_FULLY_DISCONNECTED=ON \
     -DFETCHCONTENT_SOURCE_DIR_SHEENBIDI=/build/SheenBidi-3.0.0
+# CMake builds one kind of library per configure: a second build makes the
+# static ones (libsfml-*-s.a, with their own CMake targets)
+cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_SHARED_LIBS=NO -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+    -DSFML_INSTALL_PKGCONFIG_FILES=YES \
+    -DSFML_USE_SYSTEM_DEPS=ON \
+    -DSFML_BUILD_TEST_SUITE=OFF \
+    -DFETCHCONTENT_FULLY_DISCONNECTED=ON \
+    -DFETCHCONTENT_SOURCE_DIR_SHEENBIDI=/build/SheenBidi-3.0.0
 '''
 build = '''
 %cmake_build
+cmake --build build-static
 '''
 install = '''
+DESTDIR="$pkgdir" cmake --install build-static
 %cmake_install
 '''
