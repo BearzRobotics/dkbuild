@@ -5,7 +5,7 @@
 # Based on Chimera Linux cports (BSD-2-Clause): main/webrtc-audio-processing.
 name = "webrtc-audio-processing"
 version = "2.1"
-release = 1
+release = 2
 summary = "WebRTC audio processing: echo cancellation, noise suppression, gain control"
 license = "BSD-3-Clause"
 homepage = "https://freedesktop.org/software/pulseaudio/webrtc-audio-processing"
@@ -19,18 +19,25 @@ source = [
 
 setup = '''
 # abseil (2026) dropped the absl::Nullable/Nonnull templates webrtc 2.1 still
-# writes (annotations only, replaced by absl_nullable/absl_nonnull): aliases
-# for them, included into every C++ file
-cat > "$srcdir/absl-nullability-compat.h" <<'EOH'
-#pragma once
+# writes, installed headers included (annotations only, replaced by the
+# absl_nullable/absl_nonnull macros): every file using them gets aliases,
+# guarded so that several such headers together define them once
+cat > /tmp/absl-compat.txt <<'EOH'
 #include "absl/base/nullability.h"
+#ifndef WEBRTC_ABSL_NULLABILITY_ALIASES
+#define WEBRTC_ABSL_NULLABILITY_ALIASES
 namespace absl {
 template <typename T> using Nullable = T;
 template <typename T> using Nonnull = T;
 template <typename T> using NullabilityUnknown = T;
 }
+#endif
 EOH
-export CXXFLAGS="$CXXFLAGS -include $srcdir/absl-nullability-compat.h"
+for f in $(grep -rlE 'absl::(Nullable|Nonnull|NullabilityUnknown)' webrtc); do
+    n=$(grep -n '^#include' "$f" | tail -n1 | cut -d: -f1)
+    sed -i "${n}r /tmp/absl-compat.txt" "$f"
+done
+grep -q WEBRTC_ABSL_NULLABILITY_ALIASES webrtc/api/scoped_refptr.h
 %meson \
     -Dcpp_std=c++17
 '''
