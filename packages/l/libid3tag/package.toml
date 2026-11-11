@@ -2,7 +2,7 @@
 # ID3 tags (the Tenacity team's maintained libid3tag). needed by: sox_ng.
 name = "libid3tag"
 version = "0.16.3"
-release = 1
+release = 2
 summary = "ID3 tag manipulation library"
 license = "GPL-2.0-or-later"
 homepage = "https://codeberg.org/tenacityteam/libid3tag"

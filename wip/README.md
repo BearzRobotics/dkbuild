@@ -25,3 +25,19 @@ Requested software that is not a recipe yet, and what each needs (2026-11-10):
 - pdfium: a gclient checkout like Chromium's (snapshot:electron's approach).
 - mattercontrol: no longer builds for Linux (net6.0-windows, WinForms). Options:
   Wine, or the old 1.7.x on Mono (no Mono in the tree).
+
+From the IT list (2026-11-10):
+
+- openkiosk: an application directory (codeberg.org/openkiosk_mirror/openkiosk_src,
+  no tags: pin a commit) placed into the Firefox source tree, plus
+  openkiosk-core-changes.patch from openkiosk_build, built with
+  --enable-application=openkiosk. It tracks mozilla-release, the branch our
+  firefox recipe builds: derive the recipe from firefox's.
+- rustdesk (client): the desktop app is Flutter, whose SDK ships only glibc
+  builds (the older Sciter UI needs a prebuilt glibc library). rustdesk-server
+  (hbbs/hbbr) is written.
+- bitwarden desktop: Electron (waits on wip/electron). The official server
+  needs Microsoft SQL Server; vaultwarden is written and the Bitwarden apps
+  work with it.
+- keepass2: a .NET Framework WinForms program, on Linux only through Mono (not
+  in the tree; Alpine packages mono for musl). KeePassXC is written.

@@ -1,0 +1,34 @@
+# Remmina with FreeRDP 3, SSH, SPICE and web plugins (its VNC plugin needs
+# libvncserver, not in the tree yet).
+name = "remmina"
+version = "1.4.43"
+release = 1
+summary = "Remote desktop client (RDP, VNC, SPICE, SSH, ...)"
+license = "GPL-2.0-or-later"
+homepage = "https://remmina.org"
+hostdeps = ["cmake", "ninja", "pkgconf", "gettext"]
+builddeps = ["gtk+3-devel", "freerdp-devel", "libssh-devel", "vte-devel", "libsecret-devel", "avahi-devel", "spice-gtk-devel", "libsodium-devel", "json-glib-devel", "curl-devel", "harfbuzz-devel", "openssl-devel", "webkitgtk-devel", "libx11-devel", "libxkbfile-devel", "wayland-devel", "pcre2-devel", "libayatana-appindicator-devel", "glib-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/Remmina/Remmina/-/archive/v1.4.43/Remmina-v1.4.43.tar.gz", sha256 = "16533f8a806daff524649bb45ae51e51f61685da94846006018b3c279ebe7035" },
+]
+
+setup = '''
+%cmake \
+    -DWITH_FREERDP3=ON \
+    -DWITH_LIBVNCSERVER=OFF \
+    -DWITH_X2GO=OFF \
+    -DWITH_KF5WALLET=OFF \
+    -DWITH_PYTHONLIBS=OFF \
+    -DWITH_NEWS=OFF \
+    -DWITH_WWW=ON \
+    -DWITH_GVNC=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/remmina/LICENSE"
+'''

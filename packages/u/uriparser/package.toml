@@ -1,0 +1,26 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/uriparser/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "uriparser"
+version = "0.9.8"
+release = 1
+summary = "RFC 3986 compliant URI parsing and handling library"
+license = "BSD-3-Clause"
+homepage = "https://github.com/uriparser/uriparser"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["gtest-devel"]
+
+source = [
+    { url = "https://github.com/uriparser/uriparser/archive/refs/tags/uriparser-0.9.8.tar.gz", sha256 = "d6289387eaf2495e38ed80d709ad673fe04d63fad707badfee96f3d2dabc7c35" },
+]
+
+setup = '''
+%cmake \
+    -DURIPARSER_BUILD_DOCS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/uriparser/COPYING"
+'''

@@ -1,0 +1,35 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/wireguard-tools/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "wireguard-tools"
+version = "1.0.20260223"
+release = 3
+summary = "Next generation secure network tunnel - tools for configuration"
+license = "GPL-2.0-only"
+homepage = "https://www.wireguard.com"
+patches = ["fix-wg-quick-stat.patch", "opendoas.patch"]
+hostdeps = ["pkgconf", "bash"]
+builddeps = ["linux-headers"]
+checkdeps = ["llvm", "perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://git.zx2c4.com/wireguard-tools/snapshot/wireguard-tools-1.0.20260223.tar.xz", sha256 = "af459827b80bfd31b83b08077f4b5843acb7d18ad9a33a2ef532d3090f291fbf" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -DRUNSTATEDIR="/run""
+'''
+build = '''
+%make \
+    PREFIX=/usr
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr \
+    WITH_BASHCOMPLETION=yes \
+    WITH_WGQUICK=yes \
+    WITH_SYSTEMDUNITS=no
+install -Dm755 $pkgfiles/wg-quick-all.sh "$pkgdir/usr/lib/wg-quick-all"
+install -Dm644 $pkgfiles/wg-quick-all "$pkgdir/etc/dinit.d/wg-quick-all"
+'''

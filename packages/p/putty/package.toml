@@ -1,0 +1,25 @@
+name = "putty"
+version = "0.85"
+release = 1
+summary = "SSH, Telnet and serial client (GTK)"
+license = "MIT"
+homepage = "https://www.chiark.greenend.org.uk/~sgtatham/putty/"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["gtk+3-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://the.earth.li/~sgtatham/putty/0.85/putty-0.85.tar.gz", sha256 = "13fd4db2936d03b73812a7bcc2a658e4dd29cc776a56c3670a7fc6f1a0ee8af8" },
+]
+
+setup = '''
+%cmake \
+    -DPUTTY_GSSAPI=DYNAMIC
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENCE "$pkgdir/usr/share/licenses/putty/LICENCE"
+'''

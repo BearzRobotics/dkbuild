@@ -4,7 +4,7 @@
 # r4: static libraries too (in xorriso-static), for fully static programs on musl.
 name = "xorriso"
 version = "1.5.6.2"
-release = 4
+release = 5
 summary = "ISO 9660 Rock Ridge Filesystem Manipulator"
 license = "GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/xorriso"

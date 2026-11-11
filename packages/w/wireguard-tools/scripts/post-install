@@ -1,0 +1,6 @@
+#!/bin/sh
+# directories and files (tmpfiles.conf)
+mkdir -p /etc/wireguard
+chmod 0700 /etc/wireguard
+chown root:root /etc/wireguard 2>/dev/null || true
+exit 0

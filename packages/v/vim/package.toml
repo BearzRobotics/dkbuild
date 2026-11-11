@@ -6,7 +6,7 @@
 # xxd is its own package (vim-xxd), as other programs use it alone.
 name = "vim"
 version = "9.2.1302"
-release = 1
+release = 2
 summary = "Vi-style text editor"
 license = "Vim"
 homepage = "https://www.vim.org"

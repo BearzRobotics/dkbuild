@@ -1,0 +1,11 @@
+# A router/firewall toolset: packet filtering (nftables, conntrack), routing
+# and links (iproute2, ethtool), DHCP/DNS (dnsmasq, unbound), VPN (WireGuard),
+# time (chrony) and capture (tcpdump).
+name = "firewall"
+version = "1"
+release = 1
+summary = "Firewall and router tools"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+options = ["meta"]
+rundeps = ["nftables", "iproute2", "conntrack-tools", "dnsmasq", "unbound", "wireguard-tools", "chrony", "ethtool", "tcpdump"]

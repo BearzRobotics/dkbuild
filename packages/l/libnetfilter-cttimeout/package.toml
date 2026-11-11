@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/libnetfilter_cttimeout/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libnetfilter-cttimeout"
+version = "1.0.1"
+release = 2
+summary = "Netlink interface for conntrack timeout"
+license = "GPL-2.0-only"
+homepage = "https://www.netfilter.org/projects/libnetfilter_cttimeout"
+patches = ["clang.patch"]
+hostdeps = ["automake", "pkgconf", "libtool"]
+builddeps = ["libmnl-devel", "linux-headers"]
+
+source = [
+    { url = "https://www.netfilter.org/projects/libnetfilter_cttimeout/files/libnetfilter_cttimeout-1.0.1.tar.bz2", sha256 = "0b59da2f3204e1c80cb85d1f6d72285fc07b01a2f5678abf5dccfbbefd650325" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

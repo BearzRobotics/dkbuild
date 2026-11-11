@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/libnetfilter_cthelper/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "libnetfilter-cthelper"
+version = "1.0.1"
+release = 1
+summary = "Netfilter netlink library for connection tracking helpers"
+license = "GPL-2.0-only"
+homepage = "https://www.netfilter.org/projects/libnetfilter_cthelper"
+hostdeps = ["automake", "pkgconf", "libtool"]
+builddeps = ["libmnl-devel", "linux-headers"]
+
+source = [
+    { url = "https://www.netfilter.org/projects/libnetfilter_cthelper/files/libnetfilter_cthelper-1.0.1.tar.bz2", sha256 = "14073d5487233897355d3ff04ddc1c8d03cc5ba8d2356236aa88161a9f2dc912" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

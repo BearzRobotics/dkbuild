@@ -1,0 +1,6 @@
+type = process
+command = /usr/bin/hbbr
+working-dir = /var/lib/rustdesk-server
+run-as = _rustdesk
+smooth-recovery = true
+depends-on: rcboot

@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/conntrack-tools/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "conntrack-tools"
+version = "1.4.9"
+release = 1
+summary = "Connection tracking userspace tools"
+license = "GPL-2.0-only"
+homepage = "https://www.netfilter.org/projects/conntrack-tools"
+hostdeps = ["automake", "pkgconf", "libtool"]
+builddeps = ["libmnl-devel", "libnetfilter-conntrack-devel", "libnetfilter-cthelper-devel", "libnetfilter-cttimeout-devel", "libnetfilter-queue-devel", "libnfnetlink-devel", "libtirpc-devel", "linux-headers"]
+
+source = [
+    { url = "https://www.netfilter.org/projects/conntrack-tools/files/conntrack-tools-1.4.9.tar.xz", sha256 = "c15afe488a8d408c9d6d61e97dbd19f3c591942f62c13df6453a961ca4231cae" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 $pkgfiles/conntrackd "$pkgdir/etc/dinit.d/conntrackd"
+'''

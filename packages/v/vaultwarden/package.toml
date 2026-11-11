@@ -1,0 +1,38 @@
+# Vaultwarden (SQLite and PostgreSQL) with Bitwarden's web vault from
+# bw_web_builds (prebuilt web files: the vault is Bitwarden's clients project, a
+# large npm build). Configure /etc/vaultwarden.env (WEB_VAULT_FOLDER is set
+# there); data in /var/lib/vaultwarden. The Bitwarden apps work with it.
+name = "vaultwarden"
+version = "1.37.5"
+release = 1
+summary = "Bitwarden-compatible password server (Rust)"
+license = "AGPL-3.0-only"
+homepage = "https://github.com/dani-garcia/vaultwarden"
+hostdeps = ["rust"]
+builddeps = ["openssl-devel", "sqlite-devel", "postgresql-devel"]
+rundeps = ["openssl", "sqlite", "postgresql-client-libs"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/dani-garcia/vaultwarden/archive/refs/tags/1.37.5.tar.gz", sha256 = "6be37dcc95b91a058ecbe614f1a7acff68ca8d23dc2c016cec18517c7173e4cc" },
+    { url = "https://github.com/dani-garcia/bw_web_builds/releases/download/v2026.10.1/bw_web_v2026.10.1.tar.gz", sha256 = "354de9056c871e48db84975985e7d57c111ac6537bd4e4720488019e8638060f" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs  --features sqlite,postgresql
+'''
+install = '''
+install -Dm755 target/release/vaultwarden "$pkgdir/usr/bin/vaultwarden"
+install -dm755 "$pkgdir/usr/share/vaultwarden"
+cp -r ../web-vault "$pkgdir/usr/share/vaultwarden/web-vault"
+install -Dm640 .env.template "$pkgdir/etc/vaultwarden.env"
+# this system's places for the web vault and the data
+printf '\nWEB_VAULT_FOLDER=/usr/share/vaultwarden/web-vault\nDATA_FOLDER=/var/lib/vaultwarden\n' >> "$pkgdir/etc/vaultwarden.env"
+install -Dm644 $pkgfiles/vaultwarden "$pkgdir/etc/dinit.d/vaultwarden"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/vaultwarden.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/vaultwarden.conf"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/vaultwarden/LICENSE.txt"
+'''
