@@ -1,0 +1,30 @@
+# webrtc-audio-processing: the audio processing module of WebRTC (echo
+# cancellation, noise suppression, automatic gain control), as PulseAudio
+# packages it for other programs. Used by PipeWire's echo-cancel module and
+# GStreamer's webrtcdsp plugin (gst-plugins-bad).
+# Based on Chimera Linux cports (BSD-2-Clause): main/webrtc-audio-processing.
+name = "webrtc-audio-processing"
+version = "2.1"
+release = 1
+summary = "WebRTC audio processing: echo cancellation, noise suppression, gain control"
+license = "BSD-3-Clause"
+homepage = "https://freedesktop.org/software/pulseaudio/webrtc-audio-processing"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["meson", "ninja", "pkgconf", "cmake"]
+builddeps = ["abseil-cpp-devel", "linux-headers"]
+
+source = [
+    { url = "https://freedesktop.org/software/pulseaudio/webrtc-audio-processing/webrtc-audio-processing-2.1.tar.gz", sha256 = "35e86b986d02ea15f3d04741a1a5a735ba399bc0fac0ee089c39480e35fc3253" },
+]
+
+setup = '''
+%meson \
+    -Dcpp_std=c++17
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/webrtc-audio-processing/COPYING"
+'''
