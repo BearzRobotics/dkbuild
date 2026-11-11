@@ -10,7 +10,7 @@ summary = "GNU Transport Layer Security library"
 license = "LGPL-2.1-or-later"
 homepage = "https://gnutls.org"
 patches = ["disable-failing-test.patch", "no-mini-dtls-fragments.patch", "no-timespectest.patch", "skip-ktls.patch", "tests.patch"]
-hostdeps = ["automake", "gettext-devel", "libtool", "pkgconf"]
+hostdeps = ["automake", "gettext-devel", "libtool", "pkgconf", "gtk-doc-tools"]
 builddeps = ["brotli-devel", "gmp-devel", "libidn2-devel", "libtasn1-devel", "libunistring-devel", "linux-headers", "nettle-devel", "p11-kit-devel", "zlib-ng-compat-devel", "zstd-devel"]
 checkdeps = ["texinfo"]
 

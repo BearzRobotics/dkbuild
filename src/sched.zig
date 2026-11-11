@@ -112,15 +112,38 @@ fn waitLists(arena: Allocator, t: tree.Tree, jobs: []const Job) Allocator.Error!
     const job_of = try arena.alloc(?usize, t.recipes.len);
     @memset(job_of, null);
     for (jobs, 0..) |jb, j| job_of[jb.idx] = j;
-    const waits = try arena.alloc([]const usize, jobs.len);
-    for (jobs, 0..) |jb, j| {
-        var list: std.ArrayList(usize) = .empty;
-        for (try t.needs(arena, jb.idx)) |p| if (job_of[p]) |pj| {
-            if (pj < j) try list.append(arena, pj);
-        };
-        waits[j] = list.items;
+    const lists = try arena.alloc(std.ArrayList(usize), jobs.len);
+    const later = try arena.alloc(std.ArrayList(usize), jobs.len);
+    for (lists, later) |*l, *x| {
+        l.* = .empty;
+        x.* = .empty;
     }
+    for (jobs, 0..) |jb, j| {
+        for (try t.needs(arena, jb.idx)) |p| if (job_of[p]) |pj| {
+            if (pj < j) try lists[j].append(arena, pj) else if (pj != j) try later[j].append(arena, pj);
+        };
+    }
+    // A package's build root also gets what its dependencies need at run time
+    // (python-meson-python's patchelf). The build order follows build
+    // dependencies only, so such a package can come later; wait for it too,
+    // unless it waits (through any chain) for this job: that would deadlock.
+    const seen = try arena.alloc(bool, jobs.len);
+    for (later, 0..) |l, j| for (l.items) |pj| {
+        @memset(seen, false);
+        if (!reaches(lists, pj, j, seen)) try lists[j].append(arena, pj);
+    };
+    const waits = try arena.alloc([]const usize, jobs.len);
+    for (lists, waits) |l, *w| w.* = l.items;
     return waits;
+}
+
+/// Does job `from` wait, directly or through others, for job `to`?
+fn reaches(lists: []const std.ArrayList(usize), from: usize, to: usize, seen: []bool) bool {
+    if (from == to) return true;
+    if (seen[from]) return false;
+    seen[from] = true;
+    for (lists[from].items) |n| if (reaches(lists, n, to, seen)) return true;
+    return false;
 }
 
 /// `outputs` holds, per recipe, the hash of what it last produced (from the
@@ -323,10 +346,42 @@ test "releaseValue finds the top-level release, however it is spaced" {
 }
 
 fn rc(name: []const u8, build_deps: []const []const u8) recipe.Recipe {
+    return rcr(name, build_deps, &.{});
+}
+
+fn rcr(name: []const u8, build_deps: []const []const u8, run_deps: []const []const u8) recipe.Recipe {
     return .{
         .name = name, .version = "1", .release = 1, .summary = "s", .license = "MIT",
-        .source = &.{}, .install = "x", .builddeps = build_deps,
+        .source = &.{}, .install = "x", .builddeps = build_deps, .rundeps = run_deps,
     };
+}
+
+test "a job waits for a later job its dependencies need at run time, unless that would deadlock" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const t: tree.Tree = .{ .recipes = &.{
+        rc("app", &.{"tool"}),
+        rcr("tool", &.{}, &.{"helper"}),
+        rc("helper", &.{}),
+        rcr("loop", &.{}, &.{"loopuser"}),
+        rc("loopuser", &.{"loop"}),
+    } };
+    // order: tool, app, helper (helper after app: a run-time need only);
+    // loop, loopuser (loopuser builds against loop, which needs it at run time)
+    const jobs = [_]Job{
+        .{ .idx = 1, .id = "tool", .rec_path = "", .version = "1-r1", .own = undefined, .certain = true, .script = undefined },
+        .{ .idx = 0, .id = "app", .rec_path = "", .version = "1-r1", .own = undefined, .certain = true, .script = undefined },
+        .{ .idx = 2, .id = "helper", .rec_path = "", .version = "1-r1", .own = undefined, .certain = true, .script = undefined },
+        .{ .idx = 3, .id = "loop", .rec_path = "", .version = "1-r1", .own = undefined, .certain = true, .script = undefined },
+        .{ .idx = 4, .id = "loopuser", .rec_path = "", .version = "1-r1", .own = undefined, .certain = true, .script = undefined },
+    };
+    const w = try waitLists(a, t, &jobs);
+    // app waits for tool and for helper, which tool runs with
+    try std.testing.expectEqualSlices(usize, &.{ 0, 2 }, w[1]);
+    // loopuser waits for loop; loop's run-time need of loopuser adds nothing
+    try std.testing.expectEqualSlices(usize, &.{3}, w[4]);
+    try std.testing.expectEqual(@as(usize, 0), w[3].len);
 }
 
 test "a job waits only for earlier jobs it needs; up-to-date packages are not waited for" {
