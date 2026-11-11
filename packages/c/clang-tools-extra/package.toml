@@ -8,7 +8,7 @@
 # use its clang resource headers in /usr/lib/clang/23).
 name = "clang-tools-extra"
 version = "23.1.5"
-release = 1
+release = 2
 summary = "clangd, clang-tidy and other Clang tools"
 license = "Apache-2.0 WITH LLVM-exception"
 homepage = "https://clang.llvm.org/extra"
