@@ -649,7 +649,10 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                     var parts = std.mem.tokenizeScalar(u8, f, ' ');
                     const arc = parts.next() orelse continue;
                     const gdir = parts.next() orelse continue;
-                    try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "mkdir -p 'vendor/cache/{1s}' && tar -xzf '/dkdeps/gems/{0s}' -C 'vendor/cache/{1s}' --strip-components=1 && touch 'vendor/cache/{1s}/.bundlecache'\n", .{ arc, gdir }));
+                    // unpacked now, on the host, so from the store's host path
+                    // (/dkdeps exists only inside the build sandbox)
+                    const gem_store = absPath(arena, io, try std.fs.path.join(arena, &.{ cache, "gems" })) catch return error.UnpackFailed;
+                    try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "mkdir -p 'vendor/cache/{1s}' && tar -xzf '{2s}/{0s}' -C 'vendor/cache/{1s}' --strip-components=1 && touch 'vendor/cache/{1s}/.bundlecache'\n", .{ arc, gdir, gem_store }));
                 } else try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "ln -sfn '/dkdeps/gems/{s}' 'vendor/cache/{s}'\n", .{ f, f }));
             }
         }
