@@ -21,6 +21,10 @@ source = [
     { url = "https://poppler.freedesktop.org/poppler-26.08.0.tar.xz", sha256 = "dc906e68cea698109706ac6aa3d2c9d4512fcfcac42d90b8afcda486d1b9abd0" },
 ]
 
+environment = '''
+# FontInfo.h uses std::vector without <vector> (libc++ 23 no longer pulls it in)
+export CXXFLAGS="$CXXFLAGS -include vector"
+'''
 setup = '''
 %cmake \
     -DENABLE_UNSTABLE_API_ABI_HEADERS=ON \
