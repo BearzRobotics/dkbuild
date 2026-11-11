@@ -10,7 +10,7 @@ license = "AGPL-3.0-only"
 homepage = "https://github.com/dani-garcia/vaultwarden"
 hostdeps = ["rust"]
 builddeps = ["openssl-devel", "sqlite-devel", "postgresql-devel"]
-rundeps = ["openssl", "sqlite", "postgresql-client-libs"]
+rundeps = ["openssl", "sqlite", "postgresql-libs"]
 options = ["!check", "cargodeps"]
 
 source = [

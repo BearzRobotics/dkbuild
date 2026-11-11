@@ -7,7 +7,7 @@
 # then enable the postgresql service.
 name = "postgresql"
 version = "16.15"
-release = 2
+release = 3
 summary = "Sophisticated object-relational database system"
 license = "PostgreSQL"
 homepage = "https://www.postgresql.org"
@@ -55,7 +55,9 @@ install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/postgresql.co
 install -Dm644 COPYRIGHT "$pkgdir/usr/share/licenses/postgresql/COPYRIGHT"
 '''
 
-[subpackages.client-libs]
+# "libs", the name dkbuild installs with -devel and the programs (libpq.so is a
+# link to it); as client-libs, a -lpq build found only libpq.a
+[subpackages.libs]
 summary = "Client library (libpq)"
 paths   = ["/usr/lib/libpq.so.*"]
 
