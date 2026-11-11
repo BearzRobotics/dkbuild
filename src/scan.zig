@@ -97,8 +97,11 @@ pub fn parseElf(arena: Allocator, src: anytype) Allocator.Error!?Elf {
 }
 
 /// `Requires:` and `Requires.private:` package names of a .pc file.
-pub fn pcRequires(arena: Allocator, text: []const u8) Allocator.Error![]const []const u8 {
+pub fn pcRequires(arena: Allocator, text_in: []const u8) Allocator.Error![]const []const u8 {
     var out: std.ArrayList([]const u8) = .empty;
+    // A line ending in a backslash continues on the next (poppler's
+    // "Requires.private: \" with the names below it).
+    const text = try std.mem.replaceOwned(u8, arena, text_in, "\\\n", " ");
     var lines = std.mem.splitScalar(u8, text, '\n');
     while (lines.next()) |line| {
         const rest_line = if (std.mem.startsWith(u8, line, "Requires.private:"))
@@ -298,6 +301,15 @@ test "pcRequires drops versions and variables" {
     try std.testing.expectEqualStrings("zlib", r[1]);
     try std.testing.expectEqualStrings("libpng", r[2]);
     try std.testing.expectEqualStrings("freetype2", r[3]);
+}
+
+test "pcRequires joins continued lines" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const r = try pcRequires(st.allocator(), "Requires.private: \\\n  cairo \\\n  zlib\nLibs: -lp\n");
+    try std.testing.expectEqual(@as(usize, 2), r.len);
+    try std.testing.expectEqualStrings("cairo", r[0]);
+    try std.testing.expectEqualStrings("zlib", r[1]);
 }
 
 test "pcRequires stops at a comment" {
