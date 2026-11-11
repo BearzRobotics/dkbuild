@@ -17,8 +17,15 @@ environment = '''
 export SETUPTOOLS_SCM_PRETEND_VERSION=$version
 '''
 setup = '''
-# a fixed version instead of uv-dynamic-versioning
-sed -i '/uv-dynamic-versioning/d; /\[tool.hatch.version\]/,/^$/d; s/dynamic = \["version"\]/version = "'"$version"'"/' pyproject.toml
+# a fixed version instead of uv-dynamic-versioning: its build requirement and
+# both of its tool sections go, the version is written in
+sed -i -e 's/, "uv-dynamic-versioning"\]/]/' \
+    -e '/^\[tool\.uv-dynamic-versioning\]/,/^$/d' \
+    -e '/^\[tool\.hatch\.version\]/,/^$/d' \
+    -e "s/^dynamic = \\[[\"']version[\"']\\]/version = \"$version\"/" pyproject.toml
+grep -q '^requires = \["hatchling"\]' pyproject.toml
+grep -q "^version = \"$version\"" pyproject.toml
+! grep -q 'uv-dynamic-versioning' pyproject.toml
 '''
 install = '''
 python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
