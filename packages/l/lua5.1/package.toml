@@ -19,7 +19,7 @@ environment = '''
 export CFLAGS="$CFLAGS -fPIC -DLUA_USE_LINUX"
 '''
 build = '''
-make linux CC="$CC" AR="${AR:-llvm-ar} rcu" RANLIB="${RANLIB:-llvm-ranlib}" MYCFLAGS="$CFLAGS" MYLDFLAGS="$LDFLAGS"
+make linux CC="$CC" AR="${AR:-llvm-ar} rc" RANLIB="${RANLIB:-llvm-ranlib}" MYCFLAGS="$CFLAGS" MYLDFLAGS="$LDFLAGS"
 '''
 install = '''
 make install \

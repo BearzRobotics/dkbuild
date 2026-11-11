@@ -2,7 +2,7 @@
 # Image processing library. needed by: tesseract.
 name = "leptonica"
 version = "1.85.0"
-release = 1
+release = 2
 summary = "Image processing and analysis library"
 license = "BSD-2-Clause"
 homepage = "http://www.leptonica.org"
@@ -26,5 +26,8 @@ cmake --build build-static
 install = '''
 DESTDIR=$pkgdir cmake --install build-static
 %cmake_install
+# CMake installs the pkg-config file as lept_<config>.pc; pkg-config users
+# (jbig2enc) look for lept.pc
+[ -e "$pkgdir/usr/lib/pkgconfig/lept.pc" ] || ln -s lept_Release.pc "$pkgdir/usr/lib/pkgconfig/lept.pc"
 install -Dm644 leptonica-license.txt "$pkgdir/usr/share/licenses/leptonica/leptonica-license.txt"
 '''

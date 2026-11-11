@@ -18,6 +18,9 @@ source = [
 ]
 
 setup = '''
+# libc++ 23: table.cpp writes to std::ostream with only <iomanip>
+sed -i 's|#include <iomanip>|#include <iomanip>\n#include <ostream>|' src/libixion/table.cpp
+grep -q '#include <ostream>' src/libixion/table.cpp
 autoreconf -if -W none
 %configure
 '''

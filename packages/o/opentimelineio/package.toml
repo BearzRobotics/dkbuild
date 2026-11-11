@@ -17,6 +17,9 @@ source = [
 ]
 
 setup = '''
+# rapidjson (a git submodule upstream) is the second source
+rmdir src/deps/rapidjson
+mv /build/rapidjson-24b5e7a8b27f42fa16b96fc70aade9106cf7102f src/deps/rapidjson
 %cmake \
     -DCMAKE_BUILD_TYPE=Release \
     -DOTIO_FIND_IMATH=ON
