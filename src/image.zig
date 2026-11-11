@@ -250,10 +250,13 @@ pub const Options = struct {
 };
 
 pub fn build(arena: Allocator, io: std.Io, img: Image, opts: Options) !void {
-    const out_rel = try std.fs.path.join(arena, &.{ opts.root, "out", img.name });
+    // The image is made in out/.<name>.new and replaces out/<name> only when it
+    // succeeds: a failed run leaves the last good ISO where it was.
+    const final_rel = try std.fs.path.join(arena, &.{ opts.root, "out", img.name });
+    const out_rel = try std.fs.path.join(arena, &.{ opts.root, "out", try std.fmt.allocPrint(arena, ".{s}.new", .{img.name}) });
     const target_rel = try std.fs.path.join(arena, &.{ out_rel, "rootfs" });
     const work = try std.fs.path.join(arena, &.{ opts.root, "work", try std.fmt.allocPrint(arena, "image-{s}", .{img.name}) });
-    // Start from nothing: an old root, tarball or squashfs is replaced.
+    // Start from nothing: an unfinished earlier attempt is removed.
     for ([_][]const u8{ out_rel, work }) |d| {
         _ = std.process.run(arena, io, .{ .argv = &.{ "chmod", "-R", "u+rwX", d } }) catch {};
         Dir.cwd().deleteTree(io, d) catch {};
@@ -308,27 +311,40 @@ pub fn build(arena: Allocator, io: std.Io, img: Image, opts: Options) !void {
         .argv = &.{ "/usr/bin/sh", "/image.sh" },
         .ids = ids,
     }, &log) catch false;
-    const logpath = try std.fmt.allocPrint(arena, "{s}/image.log", .{out_rel});
-    Dir.cwd().writeFile(io, .{ .sub_path = logpath, .data = log.items }) catch {};
     sandbox.makeRemovable(io, sb[1]);
     Dir.cwd().deleteTree(io, work) catch {};
     if (!ok) {
+        // The log goes beside the old image, which stays.
+        const logpath = try std.fmt.allocPrint(arena, "{s}-failed.log", .{final_rel});
+        Dir.cwd().writeFile(io, .{ .sub_path = logpath, .data = log.items }) catch {};
+        _ = std.process.run(arena, io, .{ .argv = &.{ "chmod", "-R", "u+rwX", out_rel } }) catch {};
+        Dir.cwd().deleteTree(io, out_rel) catch {};
         const tail_start = if (log.items.len > 2000) log.items.len - 2000 else 0;
-        std.debug.print("{s}\nerror: image {s} failed; log: {s}\n", .{ log.items[tail_start..], img.name, logpath });
+        std.debug.print("{s}\nerror: image {s} failed; log: {s} (out/{s}/ is unchanged)\n", .{ log.items[tail_start..], img.name, logpath, img.name });
         return error.BuildFailed;
     }
+    const logpath = try std.fmt.allocPrint(arena, "{s}/image.log", .{out_rel});
+    Dir.cwd().writeFile(io, .{ .sub_path = logpath, .data = log.items }) catch {};
     if (!contains(img.output, "rootfs")) {
         _ = std.process.run(arena, io, .{ .argv = &.{ "chmod", "-R", "u+rwX", target_rel } }) catch {};
         Dir.cwd().deleteTree(io, target_rel) catch {};
     }
+    // Succeeded: the new image replaces the old one.
+    _ = std.process.run(arena, io, .{ .argv = &.{ "chmod", "-R", "u+rwX", final_rel } }) catch {};
+    Dir.cwd().deleteTree(io, final_rel) catch {};
+    Dir.cwd().rename(out_rel, Dir.cwd(), final_rel, io) catch |err| {
+        std.debug.print("error: cannot move {s} to {s}: {s}\n", .{ out_rel, final_rel, @errorName(err) });
+        return error.BuildFailed;
+    };
+    Dir.cwd().deleteFile(io, try std.fmt.allocPrint(arena, "{s}-failed.log", .{final_rel})) catch {};
     std.debug.print("    made", .{});
     for (img.output) |o| {
-        if (std.mem.eql(u8, o, "rootfs")) std.debug.print(" {s}/rootfs/", .{out_rel});
-        if (std.mem.eql(u8, o, "tar")) std.debug.print(" {s}/{s}.tar.zst", .{ out_rel, img.name });
-        if (std.mem.eql(u8, o, "squashfs")) std.debug.print(" {s}/{s}.sfs", .{ out_rel, img.name });
-        if (std.mem.eql(u8, o, "iso")) std.debug.print(" {s}/{s}.iso", .{ out_rel, img.name });
+        if (std.mem.eql(u8, o, "rootfs")) std.debug.print(" {s}/rootfs/", .{final_rel});
+        if (std.mem.eql(u8, o, "tar")) std.debug.print(" {s}/{s}.tar.zst", .{ final_rel, img.name });
+        if (std.mem.eql(u8, o, "squashfs")) std.debug.print(" {s}/{s}.sfs", .{ final_rel, img.name });
+        if (std.mem.eql(u8, o, "iso")) std.debug.print(" {s}/{s}.iso", .{ final_rel, img.name });
     }
-    std.debug.print("; log: {s}\n", .{logpath});
+    std.debug.print("; log: {s}/image.log\n", .{final_rel});
 }
 
 fn contains(hay: []const []const u8, needle: []const u8) bool {

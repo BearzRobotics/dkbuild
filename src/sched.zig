@@ -158,17 +158,24 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
             for (0..n) |j| {
                 if (state[j] != .pending) continue;
                 var ready = true;
-                var blocked = false;
+                var blocked: ?usize = null;
                 for (waits[j]) |w| switch (state[w]) {
-                    .failed, .skipped => blocked = true,
+                    // The first one that failed names the cause; else one that was skipped.
+                    .failed => {
+                        if (blocked == null or state[blocked.?] != .failed) blocked = w;
+                    },
+                    .skipped => {
+                        if (blocked == null) blocked = w;
+                    },
                     .pending, .running => ready = false,
                     .ok => {},
                 };
                 const r = t.recipes[jobs[j].idx];
-                if (blocked) {
+                if (blocked) |b| {
                     state[j] = .skipped;
                     try skipped.append(arena, r.name);
-                    term.print("==> {s}: skipped, a package it needs failed\n", .{r.name});
+                    const why = if (state[b] == .failed) "failed" else "was skipped";
+                    term.print("==> {s}: skipped, it needs {s}, which {s}\n", .{ r.name, t.recipes[jobs[b].idx].name, why });
                     continue;
                 }
                 if (!ready) continue;
