@@ -6,7 +6,7 @@ release = 1
 summary = "System call tracer"
 license = "LGPL-2.1-or-later"
 homepage = "https://strace.io"
-patches = ["configure-gen.patch", "lfs64.patch"]
+patches = ["lfs64.patch"]
 hostdeps = ["automake", "libtool"]
 builddeps = ["elfutils-devel", "linux-headers"]
 

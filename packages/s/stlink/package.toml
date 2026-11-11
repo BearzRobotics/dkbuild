@@ -14,7 +14,9 @@ source = [
 ]
 
 setup = '''
-%cmake -DCMAKE_C_FLAGS=-Wno-error \
+# clang 23's -Wunused-but-set-global; its own -Werror comes after CMAKE_C_FLAGS
+export CFLAGS="$CFLAGS -Wno-unused-but-set-global"
+%cmake \
     -DSTLINK_UDEV_RULES_DIR=/usr/lib/udev/rules.d \
     -DSTLINK_MODPROBED_DIR=/usr/lib/modprobe.d
 '''
