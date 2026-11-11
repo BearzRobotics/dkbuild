@@ -6,12 +6,12 @@
 # come in the release tarball.
 name = "transmission"
 version = "4.1.4"
-release = 1
+release = 2
 summary = "BitTorrent client"
 license = "GPL-2.0-or-later"
 homepage = "https://transmissionbt.com"
 hostdeps = ["cmake", "ninja", "pkgconf", "gettext", "libxml2", "python"]
-builddeps = ["curl-devel", "gtkmm-devel", "libdeflate-devel", "libevent-devel", "libpsl-devel", "linux-headers", "miniupnpc-devel", "openssl-devel", "zlib-ng-compat-devel"]
+builddeps = ["curl-devel", "gtkmm-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel", "qt6-qttools-devel", "libdeflate-devel", "libevent-devel", "libpsl-devel", "linux-headers", "miniupnpc-devel", "openssl-devel", "zlib-ng-compat-devel"]
 options = ["!check"]
 
 source = [
@@ -22,7 +22,8 @@ setup = '''
 %cmake \
     -DENABLE_DAEMON=ON \
     -DENABLE_GTK=ON \
-    -DENABLE_QT=OFF \
+    -DENABLE_QT=ON \
+    -DUSE_QT_VERSION=6 \
     -DENABLE_CLI=ON \
     -DENABLE_UTILS=ON \
     -DENABLE_TESTS=OFF \
@@ -45,4 +46,9 @@ install -Dm644 COPYING "$pkgdir/usr/share/licenses/transmission/COPYING"
 [subpackages.gtk]
 summary = "BitTorrent client (GTK app)"
 paths   = ["/usr/bin/transmission-gtk", "/usr/share/applications/transmission-gtk.desktop", "/usr/share/metainfo", "/usr/share/locale", "/usr/share/man/man1/transmission-gtk.1"]
+depends = ["transmission"]
+
+[subpackages.qt]
+summary = "BitTorrent client (Qt app)"
+paths   = ["/usr/bin/transmission-qt", "/usr/share/applications/transmission-qt.desktop", "/usr/share/man/man1/transmission-qt.1", "/usr/share/transmission/translations"]
 depends = ["transmission"]

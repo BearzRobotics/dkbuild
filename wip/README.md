@@ -69,10 +69,10 @@ against Chimera's templates, 2026-11-11; the desktop-critical ones are done):
   avahi-ui (avahi's GTK and Python parts, split out because of the cups cycle).
 - PAM in cups, heimdal, kbd, qemu, samba, shadow: deliberately off (login
   stays shadow-based); revisit only if a feature needs it.
-- gnutls: unbound (DANE). libgit2: libssh2, heimdal. rsync: acl. lcms2,
-  libwebp: libtiff and the libwebp tools (freeglut, giflib). re2, libpsl, icu
-  extras. frei0r, mlt, openimageio: opencv. sane-backends: libgphoto2,
-  v4l-utils. transmission: its Qt client. wine: samba (NTLM).
+- gnutls: unbound (DANE). libgit2: libssh2, heimdal. rsync: acl. re2,
+  libpsl, icu extras. frei0r, mlt, openimageio: opencv. sane-backends:
+  libgphoto2, v4l-utils. wine: samba (NTLM). (Done 2026-11-11: lcms2 with TIFF
+  and its utilities, libwebp-tools, transmission's Qt client.)
 - PipeWire: libmysofa, libcamera, ROC (no recipes yet). LDAC (ldacbt) and
   WebRTC echo cancelling (webrtc-audio-processing) were added 2026-11-11.
 - android-tools: adb's mDNS discovery is on (2026-11-11): the
