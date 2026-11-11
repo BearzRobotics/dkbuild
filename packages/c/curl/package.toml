@@ -5,15 +5,17 @@
 # List (libpsl) and sftp/scp (libssh2). Not HTTP/3: ngtcp2/nghttp3 need a QUIC
 # TLS stack, a separate decision.
 # r3: static libraries too (in curl-static), for fully static programs on musl.
+# 2026-11-11: HTTP/3 (ngtcp2, nghttp3), c-ares with HTTPS records, brotli,
+# LDAP and GSSAPI (Heimdal), as distributions build it (Chimera's options).
 name = "curl"
 version = "8.23.0"
-release = 5
+release = 6
 summary = "Command line tool for transferring data with URL syntax"
 license = "curl"
 homepage = "https://curl.se"
 patches = ["optimize.patch"]
 hostdeps = ["automake", "pkgconf", "perl", "mandoc", "libtool"]
-builddeps = ["openssl-devel", "zlib-ng-compat-devel", "zstd-devel", "libpsl-devel", "libidn2-devel", "nghttp2-devel", "libssh2-devel"]
+builddeps = ["openssl-devel", "zlib-ng-compat-devel", "zstd-devel", "brotli-devel", "libpsl-devel", "libidn2-devel", "nghttp2-devel", "nghttp3-devel", "ngtcp2-devel", "c-ares-devel", "libssh2-devel", "openldap-devel", "heimdal-devel"]
 checkdeps = ["nghttp2-progs", "python"]
 rundeps = ["ca-certificates"]
 
@@ -28,15 +30,17 @@ setup = '''
     --with-zstd \
     --with-libpsl \
     --with-libidn2 \
+    --with-brotli \
     --with-nghttp2 \
+    --with-nghttp3 \
+    --with-ngtcp2 \
     --with-libssh2 \
+    --with-gssapi \
     --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt \
-    --without-nghttp3 \
-    --without-ngtcp2 \
-    --disable-ldap \
-    --disable-ares \
+    --enable-ldap \
+    --enable-ares \
+    --enable-httpsrr \
     --enable-ipv6 \
-    --enable-threaded-resolver \
     --enable-websockets \
     ac_cv_sizeof_off_t=8
 '''
