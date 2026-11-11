@@ -13,6 +13,11 @@ source = [
     { url = "https://github.com/Orc/discount/archive/refs/tags/v3.0.1.2.tar.gz", sha256 = "4ea6cc8782c6508b3051c469ed7a1b6ca20b023c2a0c26ccd9c83bc7e61dfc16" },
 ]
 
+environment = '''
+# tools/rep.c's K&R main leaves argc's type out (implicit int), which C23 and
+# clang's defaults refuse
+export CFLAGS="$CFLAGS -std=gnu17 -Wno-implicit-int"
+'''
 setup = '''
 # its configure script is configure.sh
 ./configure.sh \

@@ -18,7 +18,9 @@ setup = '''
     --sysconfdir=/etc/dict
 '''
 build = '''
-%make
+# one job: every grammar's bison -y writes y.tab.c and y.tab.h, which parallel
+# rules then move from under each other
+make -j1
 '''
 install = '''
 %make_install
