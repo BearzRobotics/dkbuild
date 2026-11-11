@@ -3,7 +3,7 @@
 # Reviewed by hand: CC and BUILD_CC added to the make calls, as cports' init_configure did.
 name = "libcap"
 version = "2.78"
-release = 1
+release = 2
 summary = "POSIX.1e capabilities suite"
 license = "GPL-2.0-only"
 homepage = "http://sites.google.com/site/fullycapable"

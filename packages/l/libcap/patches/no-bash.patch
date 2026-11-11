@@ -104,7 +104,7 @@ index 890cccd..392c9eb 100755
  
  for x in $(find . -name 'go.mod'); do
 -    sed -i -e 's@kernel.org/\([^ ]*\) v.*$@kernel.org/\1 '"${version}@" "${x}"
-+    sed -i '' -e 's@kernel.org/\([^ ]*\) v.*$@kernel.org/\1 '"${version}@" "${x}"
++    sed -i -e 's@kernel.org/\([^ ]*\) v.*$@kernel.org/\1 '"${version}@" "${x}"
  done
 diff --git a/progs/capsh.c b/progs/capsh.c
 index f753291..31909d1 100644

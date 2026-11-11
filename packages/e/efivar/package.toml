@@ -4,11 +4,11 @@
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
 name = "efivar"
 version = "39"
-release = 2
+release = 3
 summary = "Tools and libraries to work with EFI variables"
 license = "LGPL-2.1-or-later"
 homepage = "https://github.com/rhboot/efivar"
-patches = ["fuckoff.patch", "sed-i.patch", "tests.patch"]
+patches = ["fuckoff.patch", "tests.patch"]
 hostdeps = ["mandoc", "pkgconf"]
 builddeps = ["linux-headers"]
 
