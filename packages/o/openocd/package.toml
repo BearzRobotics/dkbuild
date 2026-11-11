@@ -6,7 +6,7 @@ release = 1
 summary = "On-chip debugger and programmer (JTAG/SWD)"
 license = "GPL-2.0-or-later"
 homepage = "https://openocd.org"
-hostdeps = ["pkgconf", "texinfo"]
+hostdeps = ["pkgconf", "texinfo", "bash"]
 builddeps = ["hidapi-devel", "libftdi1-devel", "libgpiod-devel", "libusb-devel", "capstone-devel", "linux-headers"]
 options = ["!check"]
 
@@ -15,7 +15,9 @@ source = [
 ]
 
 setup = '''
-%configure \
+# its configure is bash (`echo -e` writes jimtcl's configure.gnu, `==` in test)
+export CONFIG_SHELL=/bin/bash
+bash %configure \
     --disable-werror \
     --enable-sysfsgpio \
     --enable-linuxgpiod \
