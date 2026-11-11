@@ -25,6 +25,9 @@ environment = '''
 export LD_LIBRARY_PATH=/usr/lib/jvm/java-25-openjdk/lib:/usr/lib/jvm/java-25-openjdk/lib/server
 '''
 setup = '''
+# libc++ 23: jpackage's SysInfo.h uses std::nothrow_t without <new>
+sed -i 's|^#include "tstrings.h"$|#include <new>\n#include "tstrings.h"|' src/jdk.jpackage/share/native/common/SysInfo.h
+grep -q '^#include <new>$' src/jdk.jpackage/share/native/common/SysInfo.h
 # Built by the seed JDK (openjdk25-bootstrap, a prebuilt musl JDK), which is
 # installed where this one goes; the seed is only ever a build dependency.
 # no javac server (a background compile daemon reached over a socket, which
