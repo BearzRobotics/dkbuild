@@ -18,12 +18,27 @@ source = [
 ]
 
 setup = '''
-# libc++ 23 no longer brings in <cstdlib> through other headers: every file
-# using its functions (std::strtoull in libwolv's math evaluator, ...) gets it
-for f in $(grep -rlE 'std::(strto[a-z]+|getenv|abort|exit|malloc|calloc|realloc|free|atoi|atol|system|qsort|abs|labs|llabs)\b' --include='*.cpp' --include='*.hpp' --include='*.h' . | xargs -r grep -LE '#include <(cstdlib|stdlib.h)>'); do
-    sed -i '0,/^#include/s//#include <cstdlib>\n#include/' "$f"
-done
+# libc++ 23 no longer brings in standard headers through others: every file
+# gets the ones whose names it uses (std::strtoull in libwolv's math
+# evaluator, std::atomic_flag in libimhex's task_manager.hpp, ...)
+add() {
+    for f in $(grep -rlE "$2" --include='*.cpp' --include='*.hpp' --include='*.h' . | xargs -r grep -LE "#include <($1)>"); do
+        h=${1%%|*}
+        sed -i "0,/^#include/s//#include <$h>\n#include/" "$f"
+    done
+}
+add 'cstdlib|stdlib.h' 'std::(strto[a-z]+|getenv|abort|exit|malloc|calloc|realloc|free|atoi|atol|system|qsort|abs|labs|llabs)\b'
+add atomic 'std::(atomic|atomic_flag|atomic_bool|memory_order[a-z_]*)\b'
+add mutex 'std::(mutex|recursive_mutex|lock_guard|unique_lock|scoped_lock|once_flag|call_once)\b'
+add thread 'std::(thread|this_thread)\b'
+add condition_variable 'std::condition_variable\b'
+add functional 'std::(function|invoke|bind|ref|cref|hash)\b'
+add memory 'std::(unique_ptr|shared_ptr|weak_ptr|make_unique|make_shared)\b'
+add optional 'std::(optional|nullopt)\b'
+add 'cstring|string.h' 'std::(memcpy|memset|memcmp|memmove|strlen|strcmp|strncmp)\b'
+add algorithm 'std::(copy|fill|sort|find|find_if|remove_if|reverse|transform|for_each|count_if|all_of|any_of|none_of|clamp)\b'
 grep -q '^#include <cstdlib>' lib/external/libwolv/libs/math_eval/source/math_eval/math_evaluator.cpp
+grep -q '^#include <atomic>' lib/libimhex/include/hex/api/task_manager.hpp
 %cmake \
     -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DIMHEX_BUNDLE_DOTNET=OFF \
