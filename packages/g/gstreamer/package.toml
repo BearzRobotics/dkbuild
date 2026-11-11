@@ -9,7 +9,7 @@ summary = "Core GStreamer libraries and elements"
 license = "LGPL-2.1-or-later"
 homepage = "https://gstreamer.freedesktop.org"
 patches = ["disable-gst-leaks-test.patch", "tests.patch"]
-hostdeps = ["bison", "docbook-xsl-nons", "flex", "gettext", "glib-devel", "gobject-introspection", "libcap", "pkgconf", "python", "rust"]
+hostdeps = ["bison", "docbook-xsl-nons", "flex", "gettext", "glib-devel", "gobject-introspection", "gobject-introspection-devel", "libcap", "pkgconf", "python", "rust"]
 builddeps = ["bash-completion", "glib-devel", "libcap-devel", "libxml2-devel", "rust"]
 options = ["!cross"]
 

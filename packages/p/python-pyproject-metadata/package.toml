@@ -1,0 +1,23 @@
+# pyproject-metadata from PyPI.
+name = "python-pyproject-metadata"
+version = "0.12.1"
+release = 1
+summary = "PEP 621 metadata parsing"
+license = "MIT"
+homepage = "https://pypi.org/project/pyproject-metadata/"
+hostdeps = ["python", "python-flit-core"]
+rundeps = ["python", "python-packaging"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/4f/76/1cae539918a7b1746d624c2f01560b793c22cd8c081157505bb9bbf0e34d/pyproject_metadata-0.12.1.tar.gz", sha256 = "8809a4df6fe08279b39a8890669506ed3158e0617855ac9aff098fcbe772ae4c" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pyproject-metadata/LICENSE"
+'''

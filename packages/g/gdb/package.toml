@@ -27,7 +27,7 @@ setup = '''
     --with-system-zstd \
     --with-system-readline \
     --with-system-gdbinit=/etc/gdb/gdbinint \
-    --with-python=/usr/bin/python
+    --with-python=/usr/bin/python3
 '''
 build = '''
 %make

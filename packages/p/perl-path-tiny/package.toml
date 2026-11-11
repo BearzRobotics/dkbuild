@@ -1,0 +1,24 @@
+# needed by: fortune-mod (its build scripts use Path::Tiny).
+name = "perl-path-tiny"
+version = "0.150"
+release = 1
+summary = "File path utility for Perl"
+license = "Apache-2.0"
+homepage = "https://metacpan.org/pod/Path::Tiny"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+rundeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN/Path-Tiny-0.150.tar.gz", sha256 = "ff20713d1a14d257af9c78209001f40dc177e4b9d1496115cbd8726d577946c7" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

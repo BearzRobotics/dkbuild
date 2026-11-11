@@ -8,7 +8,7 @@ release = 1
 summary = "Interface library to access tags for identifying languages"
 license = "MPL-2.0 OR LGPL-3.0-or-later"
 homepage = "https://gitlab.com/tagoh/liblangtag"
-hostdeps = ["autoconf-archive", "automake", "gobject-introspection", "sed", "libtool", "pkgconf"]
+hostdeps = ["gtk-doc-tools", "autoconf-archive", "automake", "gobject-introspection", "sed", "libtool", "pkgconf"]
 builddeps = ["glib-devel", "libxml2-devel"]
 
 source = [

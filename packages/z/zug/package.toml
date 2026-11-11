@@ -18,7 +18,7 @@ source = [
 ]
 
 setup = '''
-%cmake
+%cmake -Dzug_BUILD_TESTS=OFF -Dzug_BUILD_EXAMPLES=OFF -Dzug_BUILD_DOCS=OFF
 '''
 build = '''
 %cmake_build

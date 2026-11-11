@@ -14,7 +14,7 @@ source = [
 ]
 
 setup = '''
-%cmake \
+%cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DBUILD_BENCHMARKS=OFF \
     -DBUILD_FUZZERS=OFF \
     -DPREFER_EXTERNAL_LZ4=ON \

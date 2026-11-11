@@ -14,7 +14,7 @@ source = [
 ]
 
 setup = '''
-%cmake \
+%cmake -DCMAKE_C_FLAGS=-Wno-error \
     -DSTLINK_UDEV_RULES_DIR=/usr/lib/udev/rules.d \
     -DSTLINK_MODPROBED_DIR=/usr/lib/modprobe.d
 '''

@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "docbook-xml"
 version = "4.5"
-release = 3
+release = 4
 summary = "XML DTD designed for computer documentation"
 license = "MIT"
 homepage = "http://www.oasis-open.org/docbook"
@@ -13,10 +13,10 @@ rundeps = ["xmlcatmgr"]
 hostdeps = ["unzip"]
 
 source = [
-    { url = "http://www.oasis-open.org/docbook/xml/4.5/docbook-xml-4.5.zip", sha256 = "4e4e037a2b83c98c6c94818390d4bdd3f6e10f6ec62dd79188594e26190dc7b4" },
-    { url = "http://www.oasis-open.org/docbook/xml/4.4/docbook-xml-4.4.zip", sha256 = "02f159eb88c4254d95e831c51c144b1863b216d909b5ff45743a1ce6f5273090" },
-    { url = "http://www.oasis-open.org/docbook/xml/4.3/docbook-xml-4.3.zip", sha256 = "23068a94ea6fd484b004c5a73ec36a66aa47ea8f0d6b62cc1695931f5c143464" },
-    { url = "http://www.oasis-open.org/docbook/xml/4.2/docbook-xml-4.2.zip", sha256 = "acc4601e4f97a196076b7e64b368d9248b07c7abf26b34a02cca40eeebe60fa2" },
+    { url = "http://www.oasis-open.org/docbook/xml/4.5/docbook-xml-4.5.zip", sha256 = "4e4e037a2b83c98c6c94818390d4bdd3f6e10f6ec62dd79188594e26190dc7b4", unpack = false },
+    { url = "http://www.oasis-open.org/docbook/xml/4.4/docbook-xml-4.4.zip", sha256 = "02f159eb88c4254d95e831c51c144b1863b216d909b5ff45743a1ce6f5273090", unpack = false },
+    { url = "http://www.oasis-open.org/docbook/xml/4.3/docbook-xml-4.3.zip", sha256 = "23068a94ea6fd484b004c5a73ec36a66aa47ea8f0d6b62cc1695931f5c143464", unpack = false },
+    { url = "http://www.oasis-open.org/docbook/xml/4.2/docbook-xml-4.2.zip", sha256 = "acc4601e4f97a196076b7e64b368d9248b07c7abf26b34a02cca40eeebe60fa2", unpack = false },
 ]
 
 install = '''

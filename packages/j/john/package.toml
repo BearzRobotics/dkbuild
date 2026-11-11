@@ -1,7 +1,7 @@
 # John the Ripper, the community jumbo version (bleeding-jumbo of 2026-11-04;
 # no releases since 1.9.0), with OpenMP and OpenCL.
 name = "john"
-version = "1.9.0+jumbo20261104"
+version = "1.9.0_git20261104"
 release = 1
 summary = "John the Ripper password cracker (jumbo)"
 license = "GPL-2.0-or-later"

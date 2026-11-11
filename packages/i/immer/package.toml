@@ -20,7 +20,7 @@ environment = '''
 export CXXFLAGS="${CXXFLAGS} -Wno-c2y-extensions -U_FORTIFY_SOURCE"
 '''
 setup = '''
-%cmake \
+%cmake -Dimmer_BUILD_TESTS=OFF -Dimmer_BUILD_EXAMPLES=OFF -Dimmer_BUILD_DOCS=OFF \
     -DDISABLE_WERROR=ON
 '''
 build = '''

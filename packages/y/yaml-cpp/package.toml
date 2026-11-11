@@ -17,7 +17,7 @@ source = [
 ]
 
 setup = '''
-%cmake \
+%cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DYAML_CPP_BUILD_TESTS=ON \
     -DYAML_BUILD_SHARED_LIBS=ON
 '''

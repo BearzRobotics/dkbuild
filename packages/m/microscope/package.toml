@@ -1,7 +1,7 @@
 # microscope (no releases yet: git of 2026-11-10). Built without its web UI (pnpm,
 # which the npm store does not cover yet): the terminal and DAP front ends work.
 name = "microscope"
-version = "0.0.0+git20261110"
+version = "0.0.0_git20261110"
 release = 1
 summary = "Debugger and profiler for Linux (terminal, browser, DAP)"
 license = "MIT OR Apache-2.0"

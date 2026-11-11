@@ -20,6 +20,7 @@ pub const Tool = struct {
 pub const tools = [_]Tool{
     .{ .name = "curl", .apt = "curl", .why = "downloads sources (dkbuild fetch, pkg)" },
     .{ .name = "tar", .apt = "tar", .why = "unpacks source tarballs and root tarballs" },
+    .{ .name = "unzip", .apt = "unzip", .why = "unpacks .zip sources" },
     .{ .name = "xz", .apt = "xz-utils", .why = "most source tarballs are .tar.xz" },
     .{ .name = "xorriso", .apt = "xorriso", .why = "reads the DKRescue ISO (bootstrap-root)" },
     .{ .name = "unsquashfs", .apt = "squashfs-tools", .why = "unpacks the DKRescue root (bootstrap-root)" },
@@ -184,6 +185,6 @@ pub fn run(arena: Allocator, io: std.Io, root: []const u8, path_var: []const u8,
 test "aptCommand lists each package once, with ca-certificates" {
     var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer arena.deinit();
-    const cmd = try aptCommand(arena.allocator(), &.{ tools[0], tools[2], tools[2], tools[4] });
+    const cmd = try aptCommand(arena.allocator(), &.{ tools[0], tools[3], tools[3], tools[5] });
     try std.testing.expectEqualStrings("ca-certificates curl xz-utils squashfs-tools", cmd);
 }

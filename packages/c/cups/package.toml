@@ -24,7 +24,7 @@ export CFLAGS="$CFLAGS -Wno-unused-command-line-argument"
 export CXXFLAGS="$CXXFLAGS -Wno-unused-command-line-argument"
 '''
 setup = '''
-%configure \
+%configure --libdir=/usr/lib \
     --sbindir=/usr/sbin \
     --with-optim="$CFLAGS $LDFLAGS" \
     --enable-relro \

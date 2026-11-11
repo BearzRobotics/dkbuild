@@ -17,6 +17,7 @@ source = [
 ]
 
 build = '''
+sed -i 's/-Werror//' Makefile
 %make \
     PREFIX=/usr \
     NO_ARLIB=1 \

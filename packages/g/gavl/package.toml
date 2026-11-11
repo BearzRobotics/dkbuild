@@ -16,6 +16,7 @@ source = [
 ]
 
 environment = '''
+export CFLAGS="$CFLAGS -Wno-error=implicit-function-declaration -include string.h"
 export CFLAGS="${CFLAGS} -Wno-ignored-optimization-argument"
 '''
 setup = '''

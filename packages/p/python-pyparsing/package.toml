@@ -14,9 +14,6 @@ source = [
     { url = "https://github.com/pyparsing/pyparsing/archive/3.2.3.tar.gz", sha256 = "3ad3397385c3f68c89d313529af4cafc9a9117845bc0cb6b38f02e621d151d38" },
 ]
 
-build = '''
-python -m flit_core.wheel
-'''
 install = '''
 python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
     --root "$pkgdir" --prefix /usr .

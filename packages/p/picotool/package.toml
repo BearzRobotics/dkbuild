@@ -15,6 +15,10 @@ source = [
     { url = "https://github.com/raspberrypi/pico-sdk/archive/refs/tags/2.3.1.tar.gz", sha256 = "38d315b7091985134721cd3bb6a9656f0ef8462ec8dc7b62d5886bc7a9d275a2" },
 ]
 
+environment = '''
+# libc++ 23 no longer includes these indirectly
+export CXXFLAGS="$CXXFLAGS -include exception -include ctime -include functional -include cstdlib -include cstring"
+'''
 setup = '''
 %cmake \
     -DPICO_SDK_PATH=/build/pico-sdk-2.3.1 \

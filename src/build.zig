@@ -280,6 +280,13 @@ fn removeBuildDir(arena: Allocator, io: std.Io, work: []const u8) void {
 /// main package next to a `-devel`). Dependencies the tree does not provide are
 /// the image's (stage 1 assumes it has them).
 /// Whether a source URL names a tar archive (anything else is copied, not unpacked).
+/// A .zip source, unpacked like a tarball unless the recipe says unpack = false.
+fn isZipArchive(url: []const u8) bool {
+    var u = url;
+    if (std.mem.indexOfAny(u8, u, "?#")) |i| u = u[0..i];
+    return std.mem.endsWith(u8, u, ".zip");
+}
+
 fn isTarArchive(url: []const u8) bool {
     const exts = [_][]const u8{ ".tar", ".tar.gz", ".tgz", ".tar.xz", ".txz", ".tar.bz2", ".tbz2", ".tbz", ".tar.zst", ".tar.lz", ".tar.lzma", ".tar.Z", ".crate" };
     // Snapshots (fetch.zig) are zstd tarballs.
@@ -321,9 +328,16 @@ fn inTreeFiles(arena: Allocator, io: std.Io, opts: Options, r: recipe.Recipe, re
         // Also the provider's -libs, when it has one: its programs and -devel need the
         // libraries, and `apk extract` does not follow dependencies.
         const libs_name = try std.fmt.allocPrint(arena, "{s}-libs", .{pr.name});
-        for ([_][]const u8{ d, pr.name, libs_name }) |want| {
+        // With a -devel, its -static too: CMake and pkg-config files often name
+        // the static libraries, and every library ships one (SPEC.md 5.7).
+        const static_name = if (std.mem.endsWith(u8, d, "-devel") or std.mem.eql(u8, d, pr.name)) try std.fmt.allocPrint(arena, "{s}-static", .{pr.name}) else libs_name;
+        // A build dependency on a package's bare name brings its -devel too:
+        // header-only libraries (eigen, mdds, xorgproto, ...) keep their
+        // headers and .pc in -devel, and recipes name them without it.
+        const devel_name = if (std.mem.eql(u8, d, pr.name)) try std.fmt.allocPrint(arena, "{s}-devel", .{pr.name}) else libs_name;
+        for ([_][]const u8{ d, pr.name, libs_name, devel_name, static_name }) |want| {
             const file = try std.fmt.allocPrint(arena, "{s}-{s}-r{d}.apk", .{ want, pr.version, pr.release });
-            const optional = std.mem.eql(u8, want, libs_name);
+            const optional = std.mem.eql(u8, want, libs_name) or std.mem.eql(u8, want, static_name) or std.mem.eql(u8, want, devel_name);
             if (contains(files.items, file)) continue;
             const present = if (repo_abs) |ra| blk: {
                 const path = try std.fs.path.join(arena, &.{ ra, file });
@@ -564,14 +578,16 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
             }
         }
         // Sources in order: a tar archive is unpacked into /build (the first
-        // one's top directory is $srcdir; the others land next to it); any
-        // other file (a .zip, a .txt) is copied to /build/sources/<name>.
+        // one's top directory is $srcdir; the others land next to it), and
+        // so are zips; any other file (a .txt, a .whl), and any source with
+        // unpack = false or a name, is copied to /build/sources/<name>.
         if (first_tarball != null) {
             var first = true;
             for (r.source) |src| {
                 if (src != .tarball) continue;
                 const file = try fetch.cachePath(arena, cache, src.tarball.sha256);
-                if (!src.tarball.unpack or src.tarball.name != null or !isTarArchive(src.tarball.url)) {
+                const zip = isZipArchive(src.tarball.url);
+                if (!src.tarball.unpack or src.tarball.name != null or (!isTarArchive(src.tarball.url) and !zip)) {
                     const sdir = try std.fs.path.join(arena, &.{ build_rel, "sources" });
                     Dir.cwd().createDirPath(io, sdir) catch return error.UnpackFailed;
                     const base = src.tarball.name orelse std.fs.path.basename(src.tarball.url);
@@ -580,7 +596,11 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                     first = false;
                     continue;
                 }
-                const ok = runLogged(arena, io, &.{ "tar", "-xf", file, "-C", build_rel, "--no-same-owner" }, &log) catch false;
+                // zips with the host's unzip (tar does not read them)
+                const ok = if (zip)
+                    runLogged(arena, io, &.{ "unzip", "-q", "-o", file, "-d", build_rel }, &log) catch false
+                else
+                    runLogged(arena, io, &.{ "tar", "-xf", file, "-C", build_rel, "--no-same-owner" }, &log) catch false;
                 if (!ok) {
                     out("error: cannot unpack {s}\n", .{file});
                     return error.UnpackFailed;
@@ -985,6 +1005,13 @@ fn publish(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options, id: []
         const ok = runTool(arena, io, base_root, sb, all_binds.items, argv.items, log) catch false;
         if (!ok) {
             Dir.cwd().deleteFile(io, part) catch {};
+            // the metadata it was given, for the log (an invalid depends or version is the usual cause)
+            try log.appendSlice(arena, "\n==> apk mkpkg was run as:");
+            for (argv.items) |a| {
+                try log.append(arena, ' ');
+                try log.appendSlice(arena, a);
+            }
+            try log.append(arena, '\n');
             out("error: apk mkpkg failed for {s}\n", .{pk.name});
             return error.BuildFailed;
         }

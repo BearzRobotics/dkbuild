@@ -17,7 +17,7 @@ source = [
 ]
 
 setup = '''
-%cmake \
+%cmake -DBUILD_TESTS=OFF \
     -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DINSTALL_HELPER_SCRIPTS=OFF \
     -DBUILD_TESTS=ON

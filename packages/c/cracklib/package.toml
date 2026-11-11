@@ -6,7 +6,7 @@ release = 1
 summary = "Password checking library"
 license = "LGPL-2.1-or-later"
 homepage = "https://github.com/cracklib/cracklib"
-hostdeps = ["automake", "bash", "gettext-devel", "libtool", "pkgconf"]
+hostdeps = ["gzip", "automake", "bash", "gettext-devel", "libtool", "pkgconf"]
 rundeps = []
 
 source = [
@@ -27,7 +27,8 @@ check = '''
 '''
 install = '''
 %make_install
-install -Dm644 ./words/cracklib-words-2.10.3 "$pkgdir/usr/share/cracklib/cracklib-words"
+install -dm755 "$pkgdir/usr/share/cracklib"
+gzip -dc /build/sources/cracklib-words-2.10.3.gz > "$pkgdir/usr/share/cracklib/cracklib-words"
 # compress
 for f in "$pkgdir"/usr/share/cracklib/*; do gzip -9n "$f"; done
 '''

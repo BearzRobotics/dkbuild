@@ -1,0 +1,25 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/gtk-doc-tools/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+name = "gtk-doc-tools"
+version = "1.35.1"
+release = 2
+summary = "Documentation tool for public library API"
+license = "GPL-2.0-or-later AND GFDL-1.1-or-later"
+homepage = "http://www.gtk.org/gtk-doc"
+hostdeps = ["docbook-xml", "docbook-xsl-nons", "gettext", "itstool", "libxslt", "pkgconf", "python-pygments"]
+rundeps = ["docbook-xml", "docbook-xsl-nons", "libxslt", "python-lxml", "python-pygments"]
+
+source = [
+    { url = "https://download.gnome.org/sources/gtk-doc/1.35/gtk-doc-1.35.1.tar.xz", sha256 = "611c9f24edd6d88a8ae9a79d73ab0dc63c89b81e90ecc31d6b9005c5f05b25e2" },
+]
+
+setup = '''
+%meson \
+    -Dtests=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

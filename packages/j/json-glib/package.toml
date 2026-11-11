@@ -8,7 +8,7 @@ release = 1
 summary = "JSON parser for glib-based projects"
 license = "LGPL-2.1-or-later"
 homepage = "https://wiki.gnome.org/action/show/Projects/JsonGlib"
-hostdeps = ["gettext", "glib-devel", "gobject-introspection", "pkgconf"]
+hostdeps = ["gettext", "glib-devel", "gobject-introspection", "gobject-introspection-devel", "pkgconf"]
 builddeps = ["glib-devel"]
 
 source = [

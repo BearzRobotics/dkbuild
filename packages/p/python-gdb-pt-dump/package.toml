@@ -1,6 +1,6 @@
 # needed by: pwndbg (the commit it pins).
 name = "python-gdb-pt-dump"
-version = "0.0.0+git50227bd"
+version = "0.0.0_git20240401"
 release = 1
 summary = "Page table dumping for gdb (pwndbg's pt)"
 license = "MIT"

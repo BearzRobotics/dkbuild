@@ -16,7 +16,7 @@ source = [
 ]
 
 setup = '''
-%cmake \
+%cmake -S c \
     -DBUILD_SHARED_LIBS=ON \
     -DBLAKE3_USE_TBB=ON
 '''

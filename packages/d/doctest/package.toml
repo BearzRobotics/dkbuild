@@ -16,7 +16,7 @@ source = [
 ]
 
 setup = '''
-%cmake \
+%cmake -DDOCTEST_WITH_TESTS=OFF \
     -DDOCTEST_USE_STD_HEADERS=ON
 '''
 build = '''

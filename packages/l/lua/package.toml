@@ -1,7 +1,7 @@
 # Follows the DKRescue post's build of lua 5.4.8.
 name = "lua"
 version = "5.4.8"
-release = 2
+release = 3
 summary = "Lua scripting language"
 license = "MIT"
 homepage = "https://www.lua.org"
@@ -16,7 +16,7 @@ build = '''
 make linux CC="$CC" AR="llvm-ar rcu" RANLIB=llvm-ranlib MYCFLAGS=-fPIC -j$jobs
 '''
 install = '''
-make INSTALL_TOP=$pkgdir/usr install
+make INSTALL_TOP=$pkgdir/usr INSTALL_MAN=$pkgdir/usr/share/man/man1 install
 install -d "$pkgdir/usr/lib/pkgconfig"
 cat > "$pkgdir/usr/lib/pkgconfig/lua.pc" <<'PC'
 prefix=/usr

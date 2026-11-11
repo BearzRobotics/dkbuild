@@ -17,8 +17,7 @@ source = [
 setup = '''
 %meson \
     -Dmaintainer-mode=false \
-    -Dbuild-documentation=false \
-    -Dbuild-examples=false
+    -Dbuild-documentation=false
 '''
 build = '''
 %meson_build

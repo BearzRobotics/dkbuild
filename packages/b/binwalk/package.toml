@@ -7,7 +7,7 @@ summary = "Firmware analysis tool"
 license = "MIT"
 homepage = "https://github.com/ReFirmLabs/binwalk"
 hostdeps = ["rust", "pkgconf"]
-builddeps = ["bzip2-devel", "fontconfig-devel", "xz-devel", "zlib-ng-compat-devel"]
+builddeps = ["freetype-devel", "bzip2-devel", "fontconfig-devel", "xz-devel", "zlib-ng-compat-devel"]
 
 options = ["!check", "cargodeps"]
 

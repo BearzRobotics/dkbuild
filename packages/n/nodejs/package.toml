@@ -17,6 +17,10 @@ options = ["!check", "!cross"]
 source = [
     { url = "https://nodejs.org/dist/v26.12.1/node-v26.12.1.tar.gz", sha256 = "717244a8d757672ec86aae5077fca31e50f84b094441ec51bdf397aab12c304e" },
 ]
+environment = '''
+# libc++ 23 no longer includes these indirectly
+export CXXFLAGS="$CXXFLAGS -include exception -include ctime -include functional -include cstdlib -include cstring"
+'''
 setup = '''
 # The system's brotli, c-ares, OpenSSL, zlib and jinja2 instead of the bundled copies.
 mv deps/openssl/nodejs-openssl.cnf .

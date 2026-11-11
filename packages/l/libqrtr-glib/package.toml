@@ -8,7 +8,7 @@ release = 1
 summary = "Qualcomm IPC Router protocol helper library"
 license = "LGPL-2.1-or-later"
 homepage = "https://gitlab.freedesktop.org/mobile-broadband/libqrtr-glib"
-hostdeps = ["pkgconf", "glib-devel", "gobject-introspection"]
+hostdeps = ["pkgconf", "glib-devel", "gobject-introspection", "gobject-introspection-devel"]
 builddeps = ["glib-devel", "linux-headers"]
 
 source = [

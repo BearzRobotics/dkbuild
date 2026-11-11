@@ -6,7 +6,7 @@ release = 1
 summary = "Speech provider resources"
 license = "Apache-2.0"
 homepage = "https://project-spiel.org"
-hostdeps = ["gobject-introspection", "pkgconf"]
+hostdeps = ["gobject-introspection", "gobject-introspection-devel", "pkgconf"]
 builddeps = ["glib-devel"]
 checkdeps = ["python-gobject"]
 

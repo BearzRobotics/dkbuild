@@ -17,7 +17,7 @@ source = [
 ]
 
 setup = '''
-%cmake \
+%cmake -DJAS_STDC_VERSION=201710L -DJAS_ENABLE_DOC=OFF \
     -DALLOW_IN_SOURCE_BUILD=ON
 '''
 build = '''

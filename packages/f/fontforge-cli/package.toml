@@ -17,6 +17,10 @@ source = [
     { url = "https://github.com/fontforge/fontforge/archive/20251009.tar.gz", sha256 = "613424039e0e1b6bb106f8f0df287e1d249ac285d854f4e1964d68e9b9ad7eb0" },
 ]
 
+environment = '''
+# libc++ 23 no longer includes these indirectly
+export CXXFLAGS="$CXXFLAGS -include exception -include ctime -include functional -include cstdlib -include cstring"
+'''
 setup = '''
 %cmake \
     -DENABLE_GUI=OFF

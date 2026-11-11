@@ -6,7 +6,7 @@ release = 1
 summary = "GNU binutils for RISC-V bare metal"
 license = "GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/binutils"
-hostdeps = ["bison", "flex", "texinfo"]
+hostdeps = ["flex-static", "bison", "flex", "texinfo"]
 builddeps = ["zlib-ng-compat-devel"]
 options = ["!check", "!lto"]
 

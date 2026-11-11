@@ -9,6 +9,7 @@ summary = "Library for computing the discrete Fourier transform"
 license = "GPL-2.0-or-later"
 homepage = "http://www.fftw.org"
 hostdeps = ["pkgconf", "automake", "libtool"]
+builddeps = ["openmp-devel"]
 options = ["!check"]
 
 source = [

@@ -1,0 +1,23 @@
+# meson-python from PyPI (it builds itself: its pyproject points at its own source).
+name = "python-meson-python"
+version = "0.22.1"
+release = 1
+summary = "The Python build backend for Meson projects"
+license = "MIT"
+homepage = "https://pypi.org/project/meson-python/"
+hostdeps = ["python", "meson", "ninja", "python-packaging", "python-pyproject-metadata"]
+rundeps = ["python", "meson", "python-packaging", "python-pyproject-metadata"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/b4/40/343ae23722d5d66a7b94b752d1b194202640995296379333b274b1860871/meson_python-0.22.1.tar.gz", sha256 = "52c88628b0e5671592dc2306613fb5f6f3615fd24def059b9894f143b7f9a139" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-meson-python/LICENSE"
+'''

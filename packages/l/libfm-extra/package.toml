@@ -16,8 +16,7 @@ source = [
 setup = '''
 %configure \
     --with-extra-only \
-    --with-gtk=no \
-    --disable-static=no
+    --with-gtk=no
 '''
 build = '''
 %make

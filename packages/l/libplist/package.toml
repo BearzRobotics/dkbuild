@@ -19,7 +19,7 @@ source = [
 
 setup = '''
 autoreconf -if -W none
-%configure \
+%configure --without-cython \
     --disable-static
 '''
 build = '''

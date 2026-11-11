@@ -8,7 +8,7 @@ release = 1
 summary = "Filtering proxy for D-Bus connections"
 license = "GPL-3.0-or-later"
 homepage = "https://github.com/flatpak/xdg-dbus-proxy"
-hostdeps = ["docbook-xsl-nons", "libxslt", "ninja", "pkgconf"]
+hostdeps = ["docbook-xsl-nons", "docbook-xml", "libxslt", "ninja", "pkgconf"]
 builddeps = ["glib-devel"]
 checkdeps = ["dbus"]
 
@@ -16,6 +16,10 @@ source = [
     { url = "https://github.com/flatpak/xdg-dbus-proxy/releases/download/0.1.9/xdg-dbus-proxy-0.1.9.tar.xz", sha256 = "5450dda586ec3bb3ca709d311e845487883faa3b09cf562608d7e84f4311dced" },
 ]
 
+environment = '''
+# its man pages are DocBook: the local stylesheets, not the web
+export XML_CATALOG_FILES="/usr/share/xsl-nons/docbook/catalog.xml /usr/share/xml/docbook/4.2/catalog /usr/share/xml/docbook/4.5/catalog"
+'''
 setup = '''
 %meson \
     -Dman=enabled

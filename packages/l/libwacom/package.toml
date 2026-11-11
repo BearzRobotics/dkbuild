@@ -20,7 +20,7 @@ source = [
 ]
 
 setup = '''
-%meson \
+%meson -Dtests=disabled \
     -Ddocumentation=disabled \
     -Dtests=enabled
 '''

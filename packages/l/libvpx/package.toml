@@ -18,7 +18,11 @@ source = [
 ]
 
 setup = '''
+# libvpx names its targets itself (it does not know this system's triplet)
+case "$arch" in aarch64) t=arm64-linux-gcc ;; *) t=x86_64-linux-gcc ;; esac
 ./configure \
+    --target=$t \
+    --prefix=/usr \
     --enable-shared \
     --enable-pic \
     --enable-vp8 \
@@ -30,7 +34,6 @@ setup = '''
     --enable-vp9-temporal-denoising \
     --enable-experimental \
     --enable-runtime-cpu-detect \
-    --disable-static \
     --disable-install-srcs
 '''
 build = '''

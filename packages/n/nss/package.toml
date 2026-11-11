@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "nss"
 version = "3.132"
-release = 1
+release = 2
 summary = "Mozilla Network Security Services"
 license = "MPL-2.0"
 homepage = "https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS"
@@ -26,6 +26,8 @@ export NSS_ENABLE_WERROR=0
 export NSS_ENABLE_ECC=1
 export NSS_DISABLE_GTESTS=1
 export USE_64=1
+# NSPR's headers are in /usr/include/nspr, not on the default path
+export NSPR_INCLUDE_DIR=/usr/include/nspr NSPR_LIB_DIR=/usr/lib
 export CFLAGS="$CFLAGS -DNS_PTR_GT_32"
 '''
 build = '''

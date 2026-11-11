@@ -10,7 +10,7 @@ builddeps = ["libzip-devel", "zlib-ng-compat-devel"]
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/3MFConsortium/lib3mf/releases/download/v2.5.0/lib3mf-2.5.0-source-with-submodules.zip", sha256 = "46914f7c7a82ee0839fdd09b339daf621540d5c8d8904b2a0449fd67353dd7cb" },
+    { url = "https://github.com/3MFConsortium/lib3mf/releases/download/v2.5.0/lib3mf-2.5.0-source-with-submodules.zip", sha256 = "46914f7c7a82ee0839fdd09b339daf621540d5c8d8904b2a0449fd67353dd7cb", unpack = false },
 ]
 
 setup = '''
