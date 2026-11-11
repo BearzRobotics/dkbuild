@@ -1,0 +1,35 @@
+# LXC: Linux containers (liblxc and the lxc-* tools). Based on Chimera Linux
+# cports (BSD-2-Clause): user/lxc. Chimera's patches (ugetopt, BSD sed -i "",
+# BSD date) are for its BSD userland and not used: FenrirOS has util-linux's
+# getopt and GNU sed/date.
+name = "lxc"
+version = "6.0.4"
+release = 1
+summary = "Linux containers"
+license = "GPL-2.0-only AND LGPL-2.1-only"
+homepage = "https://linuxcontainers.org"
+hostdeps = ["meson", "ninja", "pkgconf"]
+builddeps = ["dbus-devel", "libcap-devel", "libseccomp-devel", "openssl-devel", "linux-pam-devel", "linux-headers"]
+rundeps = ["util-linux", "xz", "wget2"]
+
+source = [
+    { url = "https://linuxcontainers.org/downloads/lxc/lxc-6.0.4.tar.gz", sha256 = "872d26ce8512b9f993d194816e336bf9f3ad8326f22dc24ef0f01f85599fa8b9" },
+]
+
+setup = '''
+%meson \
+    -Dapparmor=false \
+    -Dselinux=false \
+    -Dman=false \
+    -Dpam-cgroup=true \
+    "-Dinit-script=[]" \
+    -Ddistrosysconfdir=default
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+# the sysvinit defaults file
+rm -rf "$pkgdir/etc/default/lxc"
+'''
