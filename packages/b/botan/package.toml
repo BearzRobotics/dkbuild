@@ -16,12 +16,18 @@ source = [
 setup = '''
 # libc++ 23 no longer brings in <algorithm> through other headers; botan's
 # headers (secmem.h, buffer_stuffer.h and others, some installed) use
-# std::copy, std::fill and the like without it: every header that does gets it
-for h in $(grep -rlE 'std::(copy|fill|min|max|equal|sort|find|reverse|rotate|transform|all_of|any_of|none_of|ranges::)\b' src --include='*.h' | xargs grep -L '#include <algorithm>'); do
-    sed -i '0,/^#include/s//#include <algorithm>\n#include/' "$h"
-done
+# std::copy, std::fill and the like without it, and std::terminate without
+# <exception>: every file that does gets the header
+add() {
+    for h in $(grep -rlE "$2" src --include='*.h' --include='*.cpp' | xargs grep -L "#include <$1>"); do
+        sed -i "0,/^#include/s//#include <$1>\\n#include/" "$h"
+    done
+}
+add algorithm 'std::(copy|fill|min|max|equal|sort|find|reverse|rotate|transform|all_of|any_of|none_of|ranges::)\b'
+add exception 'std::(terminate|exception_ptr|current_exception|rethrow_exception|uncaught_exceptions)\b'
 grep -q '^#include <algorithm>' src/lib/base/secmem.h
 grep -q '^#include <algorithm>' src/lib/utils/buffer_stuffer.h
+grep -q '^#include <exception>' src/lib/utils/mem_pool/mem_pool.cpp
 # its configure is a Python script
 ./configure.py \
     --prefix=/usr \
