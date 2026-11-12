@@ -1,0 +1,2 @@
+# GLPI's automatic actions (notifications, inventory tasks), every minute
+* * * * * _php /usr/bin/php /usr/share/glpi/front/cron.php >> /var/log/glpi/cron.log 2>&1

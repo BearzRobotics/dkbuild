@@ -1,0 +1,14 @@
+GLPI on FenrirOS
+================
+
+Code in /usr/share/glpi (web root: public/); configuration in /etc/glpi, data
+in /var/lib/glpi, logs in /var/log/glpi (inc/downstream.php). PHP runs as _php.
+
+1. Create a MariaDB database and user for GLPI.
+2. Install from the command line:
+     su -s /bin/sh _php -c 'php /usr/share/glpi/bin/console db:install \
+         --db-host=localhost --db-name=glpi --db-user=glpi --db-password=...'
+   or open the web installer after step 3.
+3. nginx: /usr/share/doc/glpi/nginx-glpi.conf; enable php-fpm and nginx.
+4. Enable crond (dinitctl enable crond): /etc/cron.d/glpi runs GLPI's
+   automatic actions; set them to "CLI" mode in GLPI's settings.

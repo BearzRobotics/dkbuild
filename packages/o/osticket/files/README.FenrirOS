@@ -1,0 +1,15 @@
+osTicket on FenrirOS
+====================
+
+Code in /usr/share/osticket; its configuration file is
+/etc/osticket/ost-config.php (include/ost-config.php links to it).
+
+1. Create a MariaDB database and user for osTicket.
+2. Make the configuration writable for the web installer:
+     chown _php /etc/osticket/ost-config.php
+3. nginx: /usr/share/doc/osticket/nginx-osticket.conf; enable php-fpm and nginx,
+   then open http://<host>/setup/ and follow the installer.
+4. Afterwards: chown root /etc/osticket/ost-config.php (read-only again),
+   and remove /usr/share/osticket/setup if you like (osTicket asks for it).
+5. Enable crond (dinitctl enable crond): /etc/cron.d/osticket fetches mail
+   and runs the scheduled tasks.
