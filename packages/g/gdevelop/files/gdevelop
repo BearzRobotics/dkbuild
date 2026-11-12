@@ -1,0 +1,5 @@
+#!/bin/sh
+# GDevelop on the system Electron, as a packaged app (not the development
+# server electron-is-dev would otherwise pick for an unpackaged app).
+export ELECTRON_IS_DEV=0
+exec /usr/bin/electron /usr/lib/gdevelop "$@"

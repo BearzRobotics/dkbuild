@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=GDevelop
+GenericName=Game Engine
+Comment=Make 2D and 3D games without programming
+Exec=gdevelop %F
+Icon=gdevelop
+Terminal=false
+MimeType=application/x-gdevelop-project;
+Categories=Development;Game;Education;

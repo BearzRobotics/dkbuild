@@ -52,13 +52,7 @@ Kalzium, FreeCAD, KLettres, Parley, Kiten, Klavaro, Marble, KGeography; games
   Needs the list of simulations and their current versions first.
 - scratch: written as scratch-desktop (packages/; on the system Electron, media
   library as a scratch-media snapshot).
-- gdevelop: an Electron app (newIDE/electron-app, v5.6.287 targets Electron 32).
-  Its core, libGD.js, is GDevelop.js built with Emscripten (the user chose
-  from source over the prebuilt CI copy): emscripten 6.0.3 and binaryen 129
-  are written for it. GDevelop pins Emscripten 3.1.21; if 6.0.3 fails, a
-  pinned 3.1.21 toolchain with its own LLVM. Its build also downloads three
-  zipped editors (piskel, jfxr, yarn) with sha256s in package.json: vendor
-  them as sources.
+- gdevelop: written 2026-11-11 as packages/g/gdevelop (5.6.287 on the system Electron; libGD.js from source with emscripten 6.0.3; GitHub npm dependencies as sources).
 - childsplay: dead since 2013, Python 2 and pygame 1; GCompris covers its
   activities. Not planned.
 - gbrainy: C# on Mono (GTK#); waits on Mono, like KeePass 2.
