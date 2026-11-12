@@ -35,13 +35,29 @@ export DEPOT_TOOLS_UPDATE=0 DEPOT_TOOLS_METRICS=0 GCLIENT_SUPPRESS_GIT_VERSION_W
 export VPYTHON_BYPASS="manually managed python not supported by chrome operations"
 export CHROMIUM_BUILDTOOLS_PATH="$work/src/buildtools"
 
+# On a re-run (an interrupted or failed sync), gclient fetches a repository's
+# whole history (tens of GB for Chromium) for any revision given as a tag;
+# given a commit it already has, it fetches nothing. So: fetch the two tags
+# shallowly in the existing checkouts and pin the commits they point to.
+src_rev=$cver
+e_rev=$etag
+if [ -d src/.git ]; then
+    log "shallow fetch of tag $cver in src"
+    git -C src fetch -q --depth 1 origin "+refs/tags/$cver:refs/tags/$cver" &&
+        src_rev=$(git -C src rev-parse "refs/tags/$cver^{commit}") || true
+fi
+if [ -d src/electron/.git ]; then
+    log "shallow fetch of tag $etag in src/electron"
+    git -C src/electron fetch -q --depth 1 origin "+refs/tags/$etag:refs/tags/$etag" &&
+        e_rev=$(git -C src/electron rev-parse "refs/tags/$etag^{commit}") || true
+fi
 cat > .gclient <<EOF
 solutions = [{
     "name": "src/electron",
-    "url": "https://github.com/electron/electron.git@$etag",
+    "url": "https://github.com/electron/electron.git@$e_rev",
     "deps_file": "DEPS",
     "managed": False,
-    "custom_deps": { "src": "https://chromium.googlesource.com/chromium/src.git@$cver" },
+    "custom_deps": { "src": "https://chromium.googlesource.com/chromium/src.git@$src_rev" },
     "custom_vars": {
         "checkout_pgo_profiles": False,
         # no Google Cloud Storage or CIPD downloads: prebuilt tools, sysroots,
@@ -53,17 +69,6 @@ solutions = [{
     },
 }]
 EOF
-# On a re-run (an interrupted or failed sync), gclient finds the pinned tags
-# only if they are local refs; otherwise it fetches the repository's whole
-# history (tens of GB for Chromium). The first clone is shallow
-# (--no-history): fetch the tags the same way first.
-for pair in "src $cver" "src/electron $etag"; do
-    set -- $pair
-    if [ -d "$1/.git" ]; then
-        log "shallow fetch of tag $2 in $1"
-        git -C "$1" fetch -q --depth 1 origin "+refs/tags/$2:refs/tags/$2" || true
-    fi
-done
 log "gclient sync (Electron $etag, Chromium $cver): a large download"
 python3 depot_tools/gclient.py sync --no-history --nohooks --force --reset
 
