@@ -625,6 +625,18 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 }
             }
         }
+        if (contains(r.options, "pubdeps")) {
+            const pl = try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, opts.root, r.name), "files", "pubspec.lock" });
+            if (Dir.cwd().access(io, pl, .{})) |_| {
+                var pmsg: []const u8 = "";
+                _ = pubdeps.fetchPubLockFile(arena, io, cache, pl, &pmsg) catch |err| {
+                    out("error: {s}: {s}\n", .{ r.name, if (pmsg.len > 0) pmsg else @errorName(err) });
+                    return error.PrepareFailed;
+                };
+                const data = Dir.cwd().readFileAlloc(io, pl, arena, .limited(1 << 24)) catch return error.PrepareFailed;
+                try pub_lists.append(arena, try pubdeps.listPath(arena, cache, try pubdeps.lockKey(arena, data)));
+            } else |_| {}
+        }
         if (contains(r.options, "pubdeps") and pub_lists.items.len == 0) {
             out("error: {s}: {s} (in none of its sources)\n", .{ r.name, pubdeps.no_lockfile });
             return error.PrepareFailed;
@@ -1278,7 +1290,6 @@ fn pruneDeps(arena: Allocator, io: std.Io, opts: Options, t: tree.Tree, dry_run:
         .{ .option = "zigdeps", .dir = "zigdeps", .store = "zigpkg", .field = 0 },
         .{ .option = "godeps", .dir = "godeps", .store = null, .field = 0 },
         .{ .option = "gemdeps", .dir = "gemdeps", .store = "gems", .field = 0 },
-        .{ .option = "pubdeps", .dir = "pubdeps", .store = null, .field = 0 },
     };
     var removed: usize = 0;
     for (kinds) |k| {

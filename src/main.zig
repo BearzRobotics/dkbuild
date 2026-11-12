@@ -187,6 +187,20 @@ pub fn main(init: std.process.Init) !void {
                     std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
                 }
             }
+            // a pubspec.lock the recipe keeps in its files/
+            if (contains(r.options, "pubdeps")) {
+                const pl = try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, root, r.name), "files", "pubspec.lock" });
+                if (std.Io.Dir.cwd().access(init.io, pl, .{})) |_| {
+                    var pmsg: []const u8 = "";
+                    if (pubdeps.fetchPubLockFile(arena, init.io, cache, pl, &pmsg)) |pst| {
+                        pub_found = true;
+                        std.debug.print("{s}: Dart packages (files/pubspec.lock) {s}\n", .{ r.name, @tagName(pst) });
+                    } else |perr| {
+                        failed = true;
+                        std.debug.print("{s}: {s}\n", .{ r.name, if (pmsg.len > 0) pmsg else @errorName(perr) });
+                    }
+                } else |_| {}
+            }
             if (contains(r.options, "pubdeps") and !pub_found and !failed) {
                 failed = true;
                 std.debug.print("{s}: {s} (in none of its sources)\n", .{ r.name, pubdeps.no_lockfile });
