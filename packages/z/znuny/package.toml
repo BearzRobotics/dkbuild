@@ -10,6 +10,8 @@
 # (files/cpan-order.txt) into /usr/lib/znuny/perl5. DBD::mysql is 4.052, the
 # last that builds against MariaDB's client. JavaScript::Minifier::XS is not
 # included (Znuny falls back to its pure-Perl minifier).
+# To update: files/resolve-cpan.py <modules> lists the distributions (needs
+# network and a host Perl of the same version for its core-module list).
 # Home: /opt/znuny, as upstream expects. Setup: /usr/share/doc/znuny/README.FenrirOS.
 name = "znuny"
 version = "7.3.8"
