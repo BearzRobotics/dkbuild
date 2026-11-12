@@ -35,7 +35,9 @@ sed -i 's/^\tERA,$/\tERA_,/' $d/src/include/duckdb/common/enums/date_part_specif
 grep -rlw 'DatePartSpecifier::ERA' $d/src $d/extension --include='*.cpp' --include='*.hpp' | grep -v /third_party/ | xargs -r sed -i 's/DatePartSpecifier::ERA\b/DatePartSpecifier::ERA_/g'
 grep -qw 'ERA_,' $d/src/include/duckdb/common/enums/date_part_specifier.hpp
 ! grep -rqw 'DatePartSpecifier::ERA' $d/src $d/extension --include='*.cpp' --include='*.hpp'
-# Heimdal's krb5-config gives only -lgssapi; the GSSAPI plugin calls krb5 too
+# Heimdal's krb5-config gives only -lgssapi; the GSSAPI plugin calls krb5 too.
+# Position-independent code throughout: the embedded server (libmariadbd.so)
+# links the static tpool and server libraries.
 %cmake \
     -DBUILD_CONFIG=mysql_release \
     -DINSTALL_LAYOUT=RPM \
@@ -45,6 +47,7 @@ grep -qw 'ERA_,' $d/src/include/duckdb/common/enums/date_part_specifier.hpp
     -DWITH_SYSTEMD=no \
     -DWITH_UNIT_TESTS=OFF \
     -DWITH_EMBEDDED_SERVER=ON \
+    -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
     -DWITH_SSL=system \
     -DGSSAPI_FLAVOR=HEIMDAL -DGSSAPI_LIBS="gssapi;krb5" \
     -DWITH_ZLIB=system \
