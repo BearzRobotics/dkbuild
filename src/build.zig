@@ -10,6 +10,7 @@ const recipe = @import("recipe.zig");
 const fetch = @import("fetch.zig");
 const npmdeps = @import("npmdeps.zig");
 const gemdeps = @import("gemdeps.zig");
+const pubdeps = @import("pubdeps.zig");
 /// Sets up npm's cache from the npm store in a build (npmdeps).
 const npm_offline_js = @embedFile("npm-offline.js");
 const pnpm_registry_js = @embedFile("pnpm-registry.js");
@@ -199,6 +200,9 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
     // Ruby (gemdeps): Bundler installs the source gems laid in vendor/cache.
     if (contains(r.options, "gemdeps"))
         try s.appendSlice(arena, "export BUNDLE_FORCE_RUBY_PLATFORM=true BUNDLE_DISABLE_VERSION_CHECK=true GEM_HOME=/tmp/gems\n");
+    // Dart (pubdeps): the pub cache laid out in the source tree before the build.
+    if (contains(r.options, "pubdeps"))
+        try s.appendSlice(arena, "export PUB_CACHE=\"$srcdir/.dkpub\" PUB_ENVIRONMENT=dkbuild DART_SUPPRESS_ANALYTICS=true\n");
     if (contains(r.options, "godeps"))
         try s.appendSlice(arena, "export GOMODCACHE=/dkdeps/go GOPROXY=off GOSUMDB=off GOTOOLCHAIN=local GOFLAGS=-mod=mod\n");
     // NuGet (nugetdeps): a private package folder; the store is the only feed
@@ -556,6 +560,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     var uses_go = false;
     var uses_npm = false;
     var gem_lists: std.ArrayList([]const u8) = .empty;
+    var pub_lists: std.ArrayList([]const u8) = .empty;
     {
         for (r.source) |src| {
             const lock = fetchLock(src);
@@ -571,6 +576,15 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 if (gemdeps.fetchGemDeps(arena, io, cache, src.tarball.sha256, &msg)) |_| {
                     try gem_lists.append(arena, try gemdeps.listPath(arena, cache, src.tarball.sha256));
                 } else |err| if (!std.mem.eql(u8, msg, gemdeps.no_lockfile)) {
+                    out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
+                    return error.PrepareFailed;
+                }
+            }
+            // Dart: any unpacked tarball's pubspec.lock
+            if (src == .tarball and src.tarball.unpack and contains(r.options, "pubdeps")) {
+                if (pubdeps.fetchPubDeps(arena, io, cache, src.tarball.sha256, &msg)) |_| {
+                    try pub_lists.append(arena, try pubdeps.listPath(arena, cache, src.tarball.sha256));
+                } else |err| if (!std.mem.eql(u8, msg, pubdeps.no_lockfile)) {
                     out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
                     return error.PrepareFailed;
                 }
@@ -610,6 +624,10 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                     uses_go = true;
                 }
             }
+        }
+        if (contains(r.options, "pubdeps") and pub_lists.items.len == 0) {
+            out("error: {s}: {s} (in none of its sources)\n", .{ r.name, pubdeps.no_lockfile });
+            return error.PrepareFailed;
         }
         if (contains(r.options, "gemdeps") and gem_lists.items.len == 0) {
             out("error: {s}: {s} (in none of its sources)\n", .{ r.name, gemdeps.no_lockfile });
@@ -783,6 +801,22 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                     const gem_store = absPath(arena, io, try std.fs.path.join(arena, &.{ cache, "gems" })) catch return error.UnpackFailed;
                     try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "mkdir -p 'vendor/cache/{1s}' && tar -xzf '{2s}/{0s}' -C 'vendor/cache/{1s}' --strip-components=1 && touch 'vendor/cache/{1s}/.bundlecache'\n", .{ arc, gdir, gem_store }));
                 } else try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "ln -sfn '/dkdeps/gems/{s}' 'vendor/cache/{s}'\n", .{ f, f }));
+            }
+        }
+        // Dart packages: unpacked into .dkpub as pub's own cache lays them
+        // out (hosted/pub.dev/<name>-<version>, and the archive's sha256 in
+        // hosted-hashes), from the store's host path
+        for (pub_lists.items) |pl| {
+            const text = Dir.cwd().readFileAlloc(io, pl, arena, .limited(1 << 22)) catch return error.UnpackFailed;
+            const pub_store = absPath(arena, io, try std.fs.path.join(arena, &.{ cache, "pub" })) catch return error.UnpackFailed;
+            try lay.appendSlice(arena, "mkdir -p .dkpub/hosted/pub.dev .dkpub/hosted-hashes/pub.dev\n");
+            var pl_lines = std.mem.tokenizeScalar(u8, text, '\n');
+            while (pl_lines.next()) |l| {
+                var f = std.mem.tokenizeScalar(u8, l, ' ');
+                const n = f.next() orelse continue;
+                const v = f.next() orelse continue;
+                const h = f.next() orelse continue;
+                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "mkdir -p '.dkpub/hosted/pub.dev/{0s}-{1s}' && tar -xzf '{3s}/{0s}-{1s}.tar.gz' -C '.dkpub/hosted/pub.dev/{0s}-{1s}' && printf '%s' '{2s}' > '.dkpub/hosted-hashes/pub.dev/{0s}-{1s}.sha256'\n", .{ n, v, h, pub_store }));
             }
         }
         if (zig_list) |zl| {
@@ -1244,6 +1278,7 @@ fn pruneDeps(arena: Allocator, io: std.Io, opts: Options, t: tree.Tree, dry_run:
         .{ .option = "zigdeps", .dir = "zigdeps", .store = "zigpkg", .field = 0 },
         .{ .option = "godeps", .dir = "godeps", .store = null, .field = 0 },
         .{ .option = "gemdeps", .dir = "gemdeps", .store = "gems", .field = 0 },
+        .{ .option = "pubdeps", .dir = "pubdeps", .store = null, .field = 0 },
     };
     var removed: usize = 0;
     for (kinds) |k| {

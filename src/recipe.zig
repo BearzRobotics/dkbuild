@@ -81,7 +81,7 @@ const known_keys = [_][]const u8{
     "check",     "install",   "subpackages", "provides",    "triggers",    "replaces",    "stage0deps",
 };
 
-const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap", "zigdeps", "godeps", "cargodeps", "npmdeps", "gradledeps", "nugetdeps", "gemdeps", "meta", "rootlayout", "repo-iso", "selfhost" };
+const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap", "zigdeps", "godeps", "cargodeps", "npmdeps", "gradledeps", "nugetdeps", "gemdeps", "pubdeps", "meta", "rootlayout", "repo-iso", "selfhost" };
 const known_archs = [_][]const u8{ "x86_64", "aarch64", "riscv64" };
 
 /// Parse and validate `text`. All returned memory lives in `arena`.

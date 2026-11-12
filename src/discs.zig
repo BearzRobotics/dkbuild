@@ -160,7 +160,7 @@ pub fn plan(arena: Allocator, sizes: []const u64, usable: u64) Allocator.Error![
 /// the vendored stores and the lists of what each package uses from them.
 /// Not cargo-home or zig-global (download caches) nor snapshots (work
 /// directories; the snapshots themselves are tarballs in cache/sources).
-const source_stores = [_][]const u8{ "crates", "cargodeps", "godeps", "gomod", "npm", "npmdeps", "zigpkg", "zigdeps", "gems", "gemdeps", "gemsums", "nuget" };
+const source_stores = [_][]const u8{ "crates", "cargodeps", "godeps", "gomod", "npm", "npmdeps", "zigpkg", "zigdeps", "gems", "gemdeps", "gemsums", "nuget", "pub", "pubdeps" };
 
 pub const Options = struct {
     root: []const u8,

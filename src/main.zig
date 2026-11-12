@@ -4,6 +4,7 @@ const tree = @import("tree.zig");
 const fetch = @import("fetch.zig");
 const npmdeps = @import("npmdeps.zig");
 const gemdeps = @import("gemdeps.zig");
+const pubdeps = @import("pubdeps.zig");
 const build = @import("build.zig");
 const inputs = @import("inputs.zig");
 const term = @import("term.zig");
@@ -116,6 +117,7 @@ pub fn main(init: std.process.Init) !void {
             var first_tb = true;
             var npm_found = false;
             var gem_found = false;
+            var pub_found = false;
             for (r.source) |src| {
                 var msg: []const u8 = "";
                 if (fetch.fetchOne(arena, init.io, cache, src, &msg)) |st| {
@@ -149,6 +151,17 @@ pub fn main(init: std.process.Init) !void {
                             }
                         }
                     }
+                    if (src == .tarball and src.tarball.unpack and contains(r.options, "pubdeps")) {
+                        if (pubdeps.fetchPubDeps(arena, init.io, cache, src.tarball.sha256, &msg)) |pst| {
+                            pub_found = true;
+                            std.debug.print("{s}: Dart packages {s}\n", .{ r.name, @tagName(pst) });
+                        } else |perr| {
+                            if (!std.mem.eql(u8, msg, pubdeps.no_lockfile)) {
+                                failed = true;
+                                std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(perr) });
+                            }
+                        }
+                    }
                     // every unpacked tarball may carry lockfiles (a web client as a second source)
                     if (src == .tarball and src.tarball.unpack and contains(r.options, "npmdeps")) {
                         if (npmdeps.fetchNpmDeps(arena, init.io, cache, src.tarball.sha256, &msg)) |nst| {
@@ -173,6 +186,10 @@ pub fn main(init: std.process.Init) !void {
                     failed = true;
                     std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
                 }
+            }
+            if (contains(r.options, "pubdeps") and !pub_found and !failed) {
+                failed = true;
+                std.debug.print("{s}: {s} (in none of its sources)\n", .{ r.name, pubdeps.no_lockfile });
             }
             if (contains(r.options, "gemdeps") and !gem_found and !failed) {
                 failed = true;
@@ -578,6 +595,7 @@ test {
     _ = @import("fetch.zig");
     _ = @import("npmdeps.zig");
     _ = @import("gemdeps.zig");
+    _ = @import("pubdeps.zig");
     _ = @import("build.zig");
     _ = @import("split.zig");
     _ = @import("scan.zig");

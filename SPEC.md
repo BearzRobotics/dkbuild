@@ -251,6 +251,7 @@ source = [
 | `nugetdeps` | NuGet packages: the recipe's `restore` step (its `dotnet restore` commands) runs once per source with the network, in the build root, and the packages go into the shared `cache/nuget/` (a local NuGet feed); every build has `$DKBUILD_NUGET` (the store, read-only) and restores with `--source $DKBUILD_NUGET` offline (7.4) |
 | `gemdeps` | Ruby gems of every `Gemfile.lock` in the recipe's unpacked sources, fetched into the shared `cache/gems/` (checked against the lockfile's CHECKSUMS, or rubygems.org's sha256), always the ruby-platform gem; laid into `vendor/cache` for `bundle install --local` (7.4) |
 | `cargodeps` | Rust crates vendored on the host (`cargo vendor`, needs `cargo`) into the shared `cache/crates/`, laid in as `vendor/` with a `.cargo/config.toml` pointing at it; build with `--offline` (7.4). The Cargo project is the one at the top of the source, or else the first `Cargo.lock` below it; `vendor/` and `.cargo/` stay at the top either way |
+| `pubdeps` | Dart packages of every `pubspec.lock` in the recipe's unpacked sources, fetched from pub.dev into the shared `cache/pub/` (each checked against the lockfile's sha256); unpacked into a pub cache in the source tree (`$PUB_CACHE`, `.dkpub`) for `dart pub get --offline --enforce-lockfile` |
 | `meta` | A meta-package: no source and no steps, only `rundeps` (`base`, `desktop-hyprland`) |
 | `rootlayout` | May install outside `/usr /etc /var /opt /boot` (base-files: `/dev`, `/proc`, the usr-merge links) |
 
