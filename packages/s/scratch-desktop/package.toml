@@ -10,8 +10,7 @@
 # /usr/lib/electron; the static files' path (process.resourcesPath, Electron's
 # own directory there) becomes /usr/lib/scratch-desktop/static.
 # Telemetry is opt-in (it asks).
-# DRAFT, not built: needs electron. TODO: the media snapshot's sha256 (the
-# first fetch prints it).
+# DRAFT, not built: needs electron. The media library: 1328 assets.
 name = "scratch-desktop"
 version = "3.32.0"
 release = 1
@@ -25,7 +24,7 @@ options = ["!check", "!strip", "npmdeps"]
 
 source = [
     { url = "https://github.com/scratchfoundation/scratch-desktop/archive/refs/tags/v3.32.0.tar.gz", sha256 = "34225b34e13e543288f20ac83d554b74c1d6fadc12a9bf01b901eb5d4745bdba" },
-    { url = "snapshot:scratch-media 13.7.4-svg", sha256 = "0000000000000000000000000000000000000000000000000000000000000000" },
+    { url = "snapshot:scratch-media 13.7.4-svg", sha256 = "d97423498dc7f812c339567a521265fd2c3f1c88e20749ddae3f98fbae7076b3" },
 ]
 
 environment = '''
