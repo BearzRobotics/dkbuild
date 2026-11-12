@@ -2,7 +2,7 @@
 # Alpine's testing/libserialport.
 name = "libserialport"
 version = "0.1.2"
-release = 1
+release = 2
 summary = "Minimal C library for serial ports"
 license = "LGPL-3.0-only"
 homepage = "https://sigrok.org/wiki/Libserialport"
