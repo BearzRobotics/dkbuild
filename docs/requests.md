@@ -33,7 +33,7 @@ sysusers.d/tmpfiles.d: those open nothing.)
 | GLPI | written (12.0.1) |
 | FreeScout | written (1.8.250) |
 | Znuny | written (7.3.8; 133 CPAN dists vendored) |
-| Zammad | in progress: pnpm support (dkbuild) and Ruby 3.4.12 done; waits on a decision about Dart Sass (its stylesheet compiler: prebuilt binary, or a Dart SDK to build it) |
+| Zammad | in progress. Done: pnpm support (dkbuild), Ruby 3.4.12. User chose (2026-11-11) Dart Sass from source: needs a Dart SDK (stage 0 from a prebuilt SDK, then self-hosting; its source a gclient snapshot like Electron's), a pub (Dart package) store in dkbuild, `buf` (protobuf tool, Go), dart-sass, and the sass-embedded gem patched to use the system dart-sass |
 
 ## Electronics (2026-11-11)
 
