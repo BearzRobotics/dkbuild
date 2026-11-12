@@ -1,0 +1,29 @@
+# Port of Chimera's xdg-utils. xdg-open, xdg-mime, xdg-settings, ...: what
+# browsers (Chromium, Electron apps) and other programs run to open a file or
+# link in the user's preferred application. The scripts and their man pages
+# are generated from scripts/desc/*.xml (xmlto, lynx). Chimera's
+# xdg-utils-x11 (an empty package pulling in xset) is left out: xdg-screensaver
+# calls xset only on X11, and xset is installable on its own.
+name = "xdg-utils"
+version = "1.2.1"
+release = 1
+summary = "Basic desktop integration scripts"
+license = "MIT"
+homepage = "https://www.freedesktop.org/wiki/Software/xdg-utils"
+hostdeps = ["xmlto", "lynx"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/xdg/xdg-utils/-/archive/v1.2.1.tar.gz", sha256 = "61315926667f979921d3fda4471bed22aaeefcf84996e854786528bbcbcfbd8d" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/xdg-utils/LICENSE"
+'''

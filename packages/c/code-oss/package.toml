@@ -18,7 +18,7 @@ license = "MIT"
 homepage = "https://github.com/microsoft/vscode"
 archs = ["x86_64", "aarch64"]
 options = ["!check", "npmdeps", "!repo-iso"]
-hostdeps = ["nodejs", "python3", "pkgconf", "libarchive", "electron-devel", "zip"]
+hostdeps = ["nodejs", "python", "pkgconf", "libarchive", "electron-devel", "zip"]
 builddeps = ["electron-devel", "heimdal-devel", "libsecret-devel", "libxkbfile-devel", "libx11-devel"]
 rundeps = ["electron", "ripgrep", "xdg-utils"]
 

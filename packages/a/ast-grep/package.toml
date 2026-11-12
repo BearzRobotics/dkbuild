@@ -1,0 +1,33 @@
+# ast-grep: structural search and rewriting of source code with tree-sitter
+# patterns. Brave applies its rewrite/ rules to Chromium's sources with it at
+# checkout time (Brave pins 0.45.3). Only the `ast-grep` command is
+# installed: its short alias `sg` is shadow's sg (run a command as a group).
+name = "ast-grep"
+version = "0.51.2"
+release = 1
+summary = "Structural code search, lint and rewriting tool"
+license = "MIT"
+homepage = "https://ast-grep.github.io"
+hostdeps = ["rust"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/ast-grep/ast-grep/archive/refs/tags/0.51.2.tar.gz", sha256 = "757f89f99b2559af7314b460c8397fda0221ad6b958cf6439358b83ef0364ada" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline -p ast-grep --bin ast-grep -j $jobs
+'''
+install = '''
+a=target/release/ast-grep
+install -Dm755 $a "$pkgdir/usr/bin/ast-grep"
+mkdir -p "$pkgdir/usr/share/bash-completion/completions" "$pkgdir/usr/share/zsh/site-functions" \
+         "$pkgdir/usr/share/fish/vendor_completions.d"
+$a completions bash > "$pkgdir/usr/share/bash-completion/completions/ast-grep"
+$a completions zsh > "$pkgdir/usr/share/zsh/site-functions/_ast-grep"
+$a completions fish > "$pkgdir/usr/share/fish/vendor_completions.d/ast-grep.fish"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ast-grep/LICENSE"
+'''

@@ -1,0 +1,38 @@
+# TypeScript 7 (the Go port, typescript-go), built from source. Chromium's
+# WebUI build runs it (third_party/typescript/linux-amd64/src/lib/tsc), where
+# Chimera and Chromium use Microsoft's prebuilt npm package; this is that
+# package's layout: tsc with the lib.*.d.ts files beside it.
+# Built with the noembed tag, as Microsoft's npm build (Herebyfile.mjs,
+# buildTsgo): tsc reads its lib files from the directory it lives in instead
+# of carrying them inside the binary, so a user (Chromium) can copy the
+# directory and patch the libs.
+name = "typescript-go"
+version = "7.0.2"
+release = 1
+summary = "TypeScript 7 compiler (native Go port)"
+license = "Apache-2.0"
+homepage = "https://github.com/microsoft/typescript-go"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/microsoft/typescript-go/archive/refs/tags/typescript/v7.0.2.tar.gz", sha256 = "25cca8ec9d89e4ceec5181a677ded2c6d690fa18b81e1277846303973eb71fcf" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -tags noembed -ldflags="-s -w" -o build/tsc ./cmd/tsgo
+'''
+install = '''
+d="$pkgdir/usr/lib/typescript-go"
+install -Dm755 build/tsc "$d/tsc"
+install -m644 internal/bundled/libs/*.d.ts "$d/"
+mkdir -p "$pkgdir/usr/bin"
+ln -s ../lib/typescript-go/tsc "$pkgdir/usr/bin/tsgo"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/typescript-go/LICENSE"
+install -Dm644 NOTICE.txt "$pkgdir/usr/share/licenses/typescript-go/NOTICE.txt"
+'''

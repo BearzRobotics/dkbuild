@@ -1,3 +1,7 @@
+FenrirOS: Alpine's patch with its triples changed: clang's --target to FenrirOS's
+(*-fenriros-linux-musl, what our clang is built for), and rust_abi_target to
+upstream Rust's *-unknown-linux-musl (FenrirOS's Rust is upstream's toolchain).
+
 --- ./build/config/compiler/BUILD.gn.orig
 +++ ./build/config/compiler/BUILD.gn
 @@ -625,13 +625,6 @@
@@ -43,8 +47,8 @@
        if (is_clang && !is_android && !is_fuchsia && !is_chromeos_device) {
 -        cflags += [ "--target=x86_64-unknown-linux-gnu" ]
 -        ldflags += [ "--target=x86_64-unknown-linux-gnu" ]
-+        cflags += [ "--target=x86_64-alpine-linux-musl" ]
-+        ldflags += [ "--target=x86_64-alpine-linux-musl" ]
++        cflags += [ "--target=x86_64-fenriros-linux-musl" ]
++        ldflags += [ "--target=x86_64-fenriros-linux-musl" ]
        } else {
          cflags += [ "-m64" ]
          ldflags += [ "-m64" ]
@@ -54,8 +58,8 @@
        if (is_clang && !is_android && !is_chromeos_device) {
 -        cflags += [ "--target=i386-unknown-linux-gnu" ]
 -        ldflags += [ "--target=i386-unknown-linux-gnu" ]
-+        cflags += [ "--target=i586-alpine-linux-musl" ]
-+        ldflags += [ "--target=i586-alpine-linux-musl" ]
++        cflags += [ "--target=i586-fenriros-linux-musl" ]
++        ldflags += [ "--target=i586-fenriros-linux-musl" ]
        } else {
          cflags += [ "-m32" ]
          ldflags += [ "-m32" ]
@@ -65,8 +69,8 @@
        if (is_clang && !is_android && !is_chromeos_device) {
 -        cflags += [ "--target=arm-linux-gnueabihf" ]
 -        ldflags += [ "--target=arm-linux-gnueabihf" ]
-+        cflags += [ "--target=armv7-alpine-linux-musleabihf" ]
-+        ldflags += [ "--target=armv7-alpine-linux-musleabihf" ]
++        cflags += [ "--target=armv7-fenriros-linux-musleabihf" ]
++        ldflags += [ "--target=armv7-fenriros-linux-musleabihf" ]
        }
        cflags += [
          "-march=$arm_arch",
@@ -76,8 +80,8 @@
        if (is_clang && !is_android && !is_fuchsia && !is_chromeos_device) {
 -        cflags += [ "--target=aarch64-linux-gnu" ]
 -        ldflags += [ "--target=aarch64-linux-gnu" ]
-+        cflags += [ "--target=aarch64-alpine-linux-musl" ]
-+        ldflags += [ "--target=aarch64-alpine-linux-musl" ]
++        cflags += [ "--target=aarch64-fenriros-linux-musl" ]
++        ldflags += [ "--target=aarch64-fenriros-linux-musl" ]
        }
        if (target_os == "chromeos" && cros_target_cpu_arch != "" &&
            is_a_target_toolchain) {
@@ -87,8 +91,8 @@
        } else if (is_clang) {
 -        cflags += [ "--target=powerpc64le-unknown-linux-gnu" ]
 -        ldflags += [ "--target=powerpc64le-unknown-linux-gnu" ]
-+        cflags += [ "--target=powerpc64le-alpine-linux-musl" ]
-+        ldflags += [ "--target=powerpc64le-alpine-linux-musl" ]
++        cflags += [ "--target=powerpc64le-fenriros-linux-musl" ]
++        ldflags += [ "--target=powerpc64le-fenriros-linux-musl" ]
        } else {
          cflags += [ "-m64" ]
          ldflags += [ "-m64" ]
@@ -97,16 +101,16 @@
        if (is_clang && !is_android) {
 -        cflags += [ "--target=riscv64-linux-gnu" ]
 -        ldflags += [ "--target=riscv64-linux-gnu" ]
-+        cflags += [ "--target=riscv64-alpine-linux-musl" ]
-+        ldflags += [ "--target=riscv64-alpine-linux-musl" ]
++        cflags += [ "--target=riscv64-fenriros-linux-musl" ]
++        ldflags += [ "--target=riscv64-fenriros-linux-musl" ]
        }
        cflags += [ "-mabi=lp64d" ]
      } else if (current_cpu == "loong64") {
        if (is_clang) {
 -        cflags += [ "--target=loongarch64-linux-gnu" ]
 -        ldflags += [ "--target=loongarch64-linux-gnu" ]
-+        cflags += [ "--target=loongarch64-alpine-linux-musl" ]
-+        ldflags += [ "--target=loongarch64-alpine-linux-musl" ]
++        cflags += [ "--target=loongarch64-fenriros-linux-musl" ]
++        ldflags += [ "--target=loongarch64-fenriros-linux-musl" ]
        }
        cflags += [
          "-mabi=lp64d",
@@ -116,8 +120,8 @@
        if (is_clang) {
 -        cflags += [ "--target=s390x-unknown-linux-gnu" ]
 -        ldflags += [ "--target=s390x-unknown-linux-gnu" ]
-+        cflags += [ "--target=s390x-alpine-linux-musl" ]
-+        ldflags += [ "--target=s390x-alpine-linux-musl" ]
++        cflags += [ "--target=s390x-fenriros-linux-musl" ]
++        ldflags += [ "--target=s390x-fenriros-linux-musl" ]
        }
        cflags += [ "-m64" ]
        ldflags += [ "-m64" ]
@@ -150,13 +154,13 @@
  if (is_linux || is_chromeos) {
    if (current_cpu == "arm64") {
 -    rust_abi_target = "aarch64-unknown-linux-gnu"
-+    rust_abi_target = "aarch64-alpine-linux-musl"
++    rust_abi_target = "aarch64-unknown-linux-musl"
    } else if (current_cpu == "x86") {
 -    rust_abi_target = "i686-unknown-linux-gnu"
-+    rust_abi_target = "i586-alpine-linux-musl"
++    rust_abi_target = "i586-unknown-linux-musl"
    } else if (current_cpu == "x64") {
 -    rust_abi_target = "x86_64-unknown-linux-gnu"
-+    rust_abi_target = "x86_64-alpine-linux-musl"
++    rust_abi_target = "x86_64-unknown-linux-musl"
    } else if (current_cpu == "arm") {
      if (arm_float_abi == "hard") {
        float_suffix = "hf"
@@ -165,27 +169,27 @@
        # targets in fact target Thumb, see:
        # https://github.com/rust-lang/rust/issues/44722
 -      rust_abi_target = "thumbv7neon-unknown-linux-gnueabi" + float_suffix
-+      rust_abi_target = "armv7-alpine-linux-musleabi" + float_suffix
++      rust_abi_target = "armv7-unknown-linux-musleabi" + float_suffix
      } else {
 -      rust_abi_target = "arm-unknown-linux-gnueabi" + float_suffix
-+      rust_abi_target = "armv6-alpine-linux-musleabi" + float_suffix
++      rust_abi_target = "armv6-unknown-linux-musleabi" + float_suffix
      }
    } else if (current_cpu == "riscv64") {
 -    rust_abi_target = "riscv64gc-unknown-linux-gnu"
-+    rust_abi_target = "riscv64-alpine-linux-musl"
++    rust_abi_target = "riscv64-unknown-linux-musl"
    } else if (current_cpu == "ppc64") {
 -    rust_abi_target = "powerpc64le-unknown-linux-gnu"
-+    rust_abi_target = "powerpc64le-alpine-linux-musl"
++    rust_abi_target = "powerpc64le-unknown-linux-musl"
    } else if (current_cpu == "s390x") {
 -    rust_abi_target = "s390x-unknown-linux-gnu"
-+    rust_abi_target = "s390x-alpine-linux-musl"
++    rust_abi_target = "s390x-unknown-linux-musl"
    } else if (current_cpu == "loong64") {
 -    rust_abi_target = "loongarch64-unknown-linux-gnu"
-+    rust_abi_target = "loongarch64-alpine-linux-musl"
++    rust_abi_target = "loongarch64-unknown-linux-musl"
    } else {
      # Best guess for other future platforms.
 -    rust_abi_target = current_cpu + "-unknown-linux-gnu"
-+    rust_abi_target = current_cpu + "-alpine-linux-musl"
++    rust_abi_target = current_cpu + "-unknown-linux-musl"
    }
  } else if (is_android) {
    import("//build/config/android/abi.gni")
