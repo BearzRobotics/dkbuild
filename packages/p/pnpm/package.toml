@@ -1,0 +1,27 @@
+# pnpm: fast, disk-efficient Node.js package manager. Its npm package is
+# self-contained (bundled JavaScript, no dependencies); installed under
+# /usr/lib/node_modules/pnpm with pnpm and pnpx on PATH. Recipes with
+# pnpm-lock.yaml files install offline through npmdeps (dkbuild serves the
+# store to pnpm as a registry on 127.0.0.1).
+name = "pnpm"
+version = "11.25.0"
+release = 1
+summary = "Fast, disk space efficient package manager for Node.js"
+license = "MIT"
+homepage = "https://pnpm.io"
+archs = ["x86_64", "aarch64"]
+rundeps = ["nodejs"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://registry.npmjs.org/pnpm/-/pnpm-11.25.0.tgz", sha256 = "33dd0748f27e7916c4f1c8b6943461983e3453b06bbda6312a6280130b4881e5" },
+]
+
+install = '''
+d="$pkgdir/usr/lib/node_modules/pnpm"
+mkdir -p "$d" "$pkgdir/usr/bin"
+cp -a . "$d/"
+ln -s ../lib/node_modules/pnpm/bin/pnpm.mjs "$pkgdir/usr/bin/pnpm"
+ln -s ../lib/node_modules/pnpm/bin/pnpx.mjs "$pkgdir/usr/bin/pnpx"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/pnpm/LICENSE"
+'''

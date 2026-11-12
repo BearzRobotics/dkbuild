@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "ruby"
-version = "3.4.7"
+version = "3.4.12"
 release = 1
 summary = "Ruby scripting language"
 license = "Ruby OR BSD-2-Clause"
@@ -14,7 +14,7 @@ builddeps = ["libedit-devel", "libffi-devel", "libyaml-devel", "openssl-devel", 
 options = ["!cross", "!check"]
 
 source = [
-    { url = "https://cache.ruby-lang.org/pub/ruby/3.4/ruby-3.4.7.tar.xz", sha256 = "db425a86f6e07546957578f4946cc700a91e7fd51115a86c56e096f30e0530c7" },
+    { url = "https://cache.ruby-lang.org/pub/ruby/3.4/ruby-3.4.12.tar.xz", sha256 = "db6c147940d7ad0b706823d42c8e6713c36dec70a1f83f635f1d3a7f0599ec90" },
 ]
 
 setup = '''
