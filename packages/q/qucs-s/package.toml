@@ -1,0 +1,26 @@
+# Qucs-S: Qucs with SPICE: a circuit simulation GUI over ngspice (also Xyce
+# and QucsatorRF), with filter, attenuator and transmission-line tools. Qt 6.
+name = "qucs-s"
+version = "26.1.1"
+release = 1
+summary = "Circuit simulation GUI for ngspice and other SPICE engines"
+license = "GPL-2.0-or-later"
+homepage = "https://ra3xdh.github.io"
+hostdeps = ["cmake", "ninja", "qt6-qttools", "gperf", "flex", "bison"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtsvg-devel", "qt6-qttools-devel"]
+rundeps = ["ngspice", "qt6-qtsvg"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/ra3xdh/qucs_s/archive/refs/tags/26.1.1.tar.gz", sha256 = "bf4ccff9e975680129ba850c5045145ad121f4e0f7eef86799398abe2f68eb24" },
+]
+
+setup = '''
+%cmake -DWITH_QT6=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

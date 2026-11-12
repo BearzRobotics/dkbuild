@@ -1,0 +1,28 @@
+# Xschem: schematic capture for VLSI/IC and hierarchical circuits, netlisting
+# for ngspice, Xyce, Verilog and VHDL; Tcl/Tk UI with cairo text. Its own
+# configure (scconfig).
+name = "xschem"
+version = "3.4.7"
+release = 1
+summary = "Schematic capture and netlisting for VLSI and circuit design"
+license = "GPL-2.0-or-later"
+homepage = "https://xschem.sourceforge.io"
+hostdeps = ["bison", "flex", "gawk"]
+builddeps = ["tcl-devel", "tk-devel", "libx11-devel", "libxpm-devel", "libxrender-devel", "libxcb-devel", "cairo-devel"]
+rundeps = ["tcl", "tk", "ngspice"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/StefanSchippers/xschem/archive/refs/tags/3.4.7.tar.gz", sha256 = "8f6c7165c38f528b6cbae8f9fae72cde3b765652df90597011a5f7b5e7fdb273" },
+]
+
+setup = '''
+./configure --prefix=/usr
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/xschem/LICENSE"
+'''
