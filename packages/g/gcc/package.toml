@@ -1,10 +1,12 @@
 # GCC 15, the GNU Compiler Collection, as an exception beside FenrirOS's LLVM
 # toolchain (the user's decision, 2026-11-11): for what only GCC compiles (GHDL
 # is written in Ada) and for its other languages. Languages: C, C++, Ada
-# (GNAT), Fortran, D, Go, Objective-C/C++, Modula-2 and COBOL.
+# (GNAT), Fortran, D, Go, Objective-C/C++, Modula-2, COBOL and Rust (gccrs,
+# experimental), plus libgccjit (a second, host-shared build, as Alpine's).
 # It does not take over the system's compilers: everything is in its own
 # prefix, /usr/lib/gcc15; /usr/bin gets the drivers only under versioned
-# names (gcc-15, g++-15, gfortran-15, gdc-15, gccgo-15, gm2-15, gcobol-15) and
+# names (gcc-15, g++-15, gfortran-15, gdc-15, gccgo-15, gm2-15, gcobol-15,
+# gccrs-15) and
 # the gnat* tools (which nothing else provides), so cc/c++ stay clang,
 # Fortran's default stays flang, and go/gofmt stay Go's. Programs it builds
 # find its runtime libraries through /usr/lib/gcc15/lib (link with
@@ -19,12 +21,12 @@
 name = "gcc"
 version = "15.2.0"
 release = 1
-summary = "GNU Compiler Collection (C, C++, Ada, Fortran, D, Go, Objective-C, Modula-2, COBOL)"
+summary = "GNU Compiler Collection (C, C++, Ada, Fortran, D, Go, Objective-C, Modula-2, COBOL, Rust)"
 license = "GPL-3.0-or-later AND GPL-3.0-or-later WITH GCC-exception-3.1"
 homepage = "https://gcc.gnu.org"
 archs = ["x86_64"]
 patches = ["0001-posix_memalign.patch", "0002-gcc-poison-system-directories.patch", "0003-specs-turn-on-Wl-z-now-by-default.patch", "0004-Turn-on-D_FORTIFY_SOURCE-2-by-default-for-C-C-ObjC-O.patch", "0005-On-linux-targets-pass-as-needed-by-default-to-the-li.patch", "0006-Enable-Wformat-and-Wformat-security-by-default.patch", "0007-Enable-Wtrampolines-by-default.patch", "0008-gcc-disable-SSP-on-ffreestanding-nostdlib-and-nodefa.patch", "0009-gcc-params-set-default-ssp-buffer-size-to-4.patch", "0010-Ensure-that-msgfmt-doesn-t-encounter-problems-during.patch", "0011-Don-t-declare-asprintf-if-defined-as-a-macro.patch", "0012-libiberty-copy-PIC-objects-during-build-process.patch", "0013-libgcc_s.patch", "0014-nopie.patch", "0015-ada-fix-shared-linking.patch", "0016-build-fix-CXXFLAGS_FOR_BUILD-passing.patch", "0017-add-fortify-headers-paths.patch", "0019-DP-Use-push-state-pop-state-for-gold-as-well-when-li.patch", "0020-aarch64-disable-multilib-support.patch", "0021-s390x-disable-multilib-support.patch", "0022-ppc64-le-disable-multilib-support.patch", "0023-x86_64-disable-multilib-support.patch", "0024-riscv-disable-multilib-support.patch", "0025-always-build-libgcc_eh.a.patch", "0026-ada-libgnarl-remove-use-of-glibc-specific-pthread_rw.patch", "0027-ada-libgnarl-use-posix_openpt-instead-of-glibc-speci.patch", "0028-ada-libgnarl-adaint-fix-sched.h-inclusion-for-musl.patch", "0029-configure-Add-enable-autolink-libatomic-use-in-LINK_.patch", "0030-configure-fix-detection-of-atomic-builtins-in-libato.patch", "0031-libstdc-do-not-throw-exceptions-for-non-C-locales-on.patch", "0032-gdc-unconditionally-link-libgphobos-against-libucont.patch", "0033-druntime-link-against-libucontext-on-all-platforms.patch", "0034-libgnat-time_t-is-always-64-bit-on-musl-libc.patch", "0035-libphobos-do-not-use-LFS64-symbols.patch", "0036-libgo-fix-lfs64-use.patch", "0037-loongarch-disable-multilib-support.patch", "0038-static-PIE-ensure-static-reaches-the-linker.patch", "0039-except-Don-t-use-the-cached-value-of-the-gcc_except_.patch", "0040-ada-libgnat-use-stub-symbolic-module-name-functions.patch", "0041-ada-libgnat-recognize-linux-musleabi-and-linux-muslg.patch", "0001-tree-object-size.cc-Fix-assert-constant-offset-in-ch.patch", "0001-LoongArch-Only-allow-valid-binary-op-when-optimize-c.patch"]
-hostdeps = ["binutils", "bison", "flex", "gawk", "make", "perl", "python", "texinfo", "findutils"]
+hostdeps = ["binutils", "bison", "flex", "gawk", "make", "perl", "python", "texinfo", "findutils", "rust"]
 builddeps = ["gmp-devel", "mpfr-devel", "mpc-devel", "isl-devel", "zlib-ng-compat-devel", "zstd-devel",
              "libucontext-devel", "linux-headers"]
 stage0deps = ["gcc-bootstrap"]
@@ -56,31 +58,35 @@ export libat_cv_have_ifunc=no
 '''
 setup = '''
 echo $version > gcc/BASE-VER
-mkdir -p build
+mkdir -p build build-jit
 cd build
-../configure \
+gcc_configure() { ../configure \
     --prefix=/usr/lib/gcc15 \
     --build=x86_64-fenriros-linux-musl --host=x86_64-fenriros-linux-musl --target=x86_64-fenriros-linux-musl \
     --with-as=/usr/bin/gas --with-ld=/usr/bin/ld.bfd \
-    --enable-languages=c,c++,ada,fortran,d,go,objc,obj-c++,m2,cobol \
     --enable-checking=release --disable-cet --disable-fixed-point --disable-libstdcxx-pch \
     --disable-multilib --disable-nls --disable-werror --disable-symvers --enable-__cxa_atexit \
     --enable-default-pie --enable-default-ssp --enable-link-serialization=2 --enable-linker-build-id \
     --disable-libssp --enable-libsanitizer --enable-shared --enable-threads --enable-tls \
     --with-system-zlib --with-linker-hash-style=gnu \
-    --with-pkgversion="FenrirOS $version-r$release" --with-bugurl=https://github.com/BearzRobotics/dkbuild
+    --with-pkgversion="FenrirOS $version-r$release" --with-bugurl=https://github.com/BearzRobotics/dkbuild "$@"; }
+gcc_configure --enable-languages=c,c++,ada,fortran,d,go,objc,obj-c++,m2,cobol,rust
+# libgccjit: GCC as a library, built position-independent on its own
+cd ../build-jit
+gcc_configure --enable-languages=jit --disable-bootstrap --enable-host-shared
 '''
 build = '''
-cd build
-make -j$jobs
+(cd build && make -j$jobs)
+(cd build-jit && make -j$jobs all-gcc)
 '''
 install = '''
+make -C build-jit/gcc DESTDIR="$pkgdir" jit.install-common
 cd build
 make DESTDIR="$pkgdir" install
 p=/usr/lib/gcc15
 # the drivers under versioned names only, next to the system compilers
 mkdir -p "$pkgdir/usr/bin"
-for t in gcc g++ gfortran gdc gccgo gm2 gcobol cpp; do
+for t in gcc g++ gfortran gdc gccgo gm2 gcobol gccrs cpp; do
     [ -e "$pkgdir$p/bin/$t" ] && ln -s $p/bin/$t "$pkgdir/usr/bin/$t-15"
 done
 # the GNAT tools find gcc through PATH: wrappers that put this GCC first
