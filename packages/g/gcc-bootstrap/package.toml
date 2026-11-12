@@ -1,0 +1,53 @@
+# GCC's stage 0 seed: Alpine Linux's prebuilt GCC 15.2 for musl (3.23) with
+# C, C++, Ada (GNAT) and D (GDC), unpacked in a private directory,
+# /usr/lib/gcc-bootstrap. GCC's Ada and D front ends are written in Ada and D,
+# so the first build of gcc needs an existing GNAT and GDC; only that first
+# build uses this (gcc's stage0deps), every later one is built by the
+# previous gcc (selfhost), as with dotnet. Nothing else finds these files.
+# Licence: GPL-3.0+ with the GCC Runtime Library Exception; shipping the
+# binaries would mean shipping GCC's source with them, so this stays off the
+# repository ISO and on the build machine (as dotnet-bootstrap-gcc-runtime).
+name = "gcc-bootstrap"
+version = "15.2.0"
+release = 1
+summary = "Prebuilt GCC with Ada and D (Alpine's), to bootstrap gcc once"
+license = "GPL-3.0-or-later WITH GCC-exception-3.1"
+homepage = "https://gcc.gnu.org"
+archs = ["x86_64"]
+options = ["!strip", "!check", "!repo-iso"]
+
+source = [
+    { url = "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/gcc-15.2.0-r2.apk", sha256 = "039886b6ad6e36a040a18db0ffa898f8ad1d0fc69eadd49d3c77270eafdc5e7e", unpack = false },
+    { url = "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/g++-15.2.0-r2.apk", sha256 = "2519885a63d85f3b6c8771464ec0bf6d44def11b93b5ad987ffc4a1e14cd51df", unpack = false },
+    { url = "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libstdc++-15.2.0-r2.apk", sha256 = "d4be2967a06d78b499f5e136323f4ebe51ad367b381933b3369539499c4f5752", unpack = false },
+    { url = "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libstdc++-dev-15.2.0-r2.apk", sha256 = "dee79044d2efdc6229896971fc86fd481c554eb0c3cd3ad337bf3d6356c08b49", unpack = false },
+    { url = "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libgcc-15.2.0-r2.apk", sha256 = "4279d14cbf43311312d3a7d43619f4c15ede2e46d5608ba421ed157ded57c700", unpack = false },
+    { url = "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libgomp-15.2.0-r2.apk", sha256 = "7eda0581da0d10365e9ebd62f9b4e3a973cd2b791d6a174d2f7a1150c2753d64", unpack = false },
+    { url = "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libatomic-15.2.0-r2.apk", sha256 = "81fe3f7d9935ba883bc84f4622b2738a4e9a646d0ae7c1f944fd4b799bc768f2", unpack = false },
+    { url = "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/gcc-gnat-15.2.0-r2.apk", sha256 = "7fa4716a0f18594c29908a02baa9d795700f0d7c68e745bac1e4f55873e01299", unpack = false },
+    { url = "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libgnat-15.2.0-r2.apk", sha256 = "72d32608663f4748198115df6d50ad9c0ccccd515b7516be62512e6d7a31be70", unpack = false },
+    { url = "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libgnat-static-15.2.0-r2.apk", sha256 = "0b416746c8ed00f494c7a6840b6850519c0ba51cdd782c8722e13b0e2544c8c4", unpack = false },
+    { url = "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/gcc-gdc-15.2.0-r2.apk", sha256 = "5e97ea074e49efa7ba8a24c405f23b683f2cddb700d0c66f872d1be048c20e0a", unpack = false },
+    { url = "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libgphobos-15.2.0-r2.apk", sha256 = "4d5b9272f1b095dc8f28cb01d0fbbd134cb20c39e110850f6ffe9fa824ace2db", unpack = false },
+    { url = "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libucontext-1.3.3-r0.apk", sha256 = "a9548f7c9b134db2f4f847572ff97f4c18c244c500dfaa300d0a9985f79c84ae", unpack = false },
+    { url = "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/libucontext-dev-1.3.3-r0.apk", sha256 = "dc5733757dea1069034541342a24871151aa99b9a4693de94407ff1186fc89ae", unpack = false },
+    { url = "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/isl26-0.26-r1.apk", sha256 = "ad583e51f55f16d83db85f0a8279ddfd15b3909f7158afff25d93c72b018a2a1", unpack = false },
+    { url = "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/x86_64/mpc1-1.3.1-r1.apk", sha256 = "114dcb18a4e5c7739fdab19414e156295c2783d56cdd226bcee4b5afc6a88c76", unpack = false },
+]
+
+install = '''
+d="$pkgdir/usr/lib/gcc-bootstrap"
+mkdir -p "$d"
+# an Alpine package is gzipped tar streams one after another
+for a in /build/sources/*.apk; do
+    tar -xzf "$a" -C "$d" --exclude='.PKGINFO' --exclude='.SIGN.*' --exclude='.pre-*' --exclude='.post-*' 2>/dev/null || \
+        tar -xzf "$a" -C "$d"
+done
+rm -f "$d"/.PKGINFO "$d"/.SIGN.* "$d"/.pre-* "$d"/.post-*
+test -x "$d/usr/bin/gcc" && test -x "$d/usr/bin/gnatmake" && test -x "$d/usr/bin/gdc"
+install -Dm644 /dev/stdin "$pkgdir/usr/share/licenses/gcc-bootstrap/README" <<EOF2
+Alpine Linux 3.23's GCC 15.2.0 packages, unchanged: GPL-3.0-or-later with the
+GCC Runtime Library Exception 3.1 (libraries). Source: https://gcc.gnu.org and
+https://gitlab.alpinelinux.org/alpine/aports/-/tree/3.23-stable/main/gcc
+EOF2
+'''
