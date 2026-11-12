@@ -1,0 +1,39 @@
+# Dart Sass: the reference Sass compiler, AOT-compiled with the system Dart
+# and run by dartaotruntime. Zammad's stylesheets compile through it (the
+# sass-embedded gem talks to `sass --embedded`). From Alpine's
+# testing/dart-sass 1.97.3: its pubspec.lock (upstream commits none) is in
+# files/, the Dart packages it locks come from the pub store (`pubdeps`), and
+# the embedded protocol's specification is the second source. The protocol
+# code is generated with buf and the locked protoc_plugin.
+name = "dart-sass"
+version = "1.97.3"
+release = 1
+summary = "Sass compiler (Dart implementation)"
+license = "MIT"
+homepage = "https://sass-lang.com/dart-sass"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["dart", "buf"]
+rundeps = ["dart"]
+options = ["!check", "pubdeps"]
+
+source = [
+    { url = "https://github.com/sass/dart-sass/archive/refs/tags/1.97.3/dart-sass-1.97.3.tar.gz", sha256 = "22ea1f689060edf10ee533047f553ad1c558209ea642687998f4ccb465faa9fc" },
+    { url = "https://github.com/sass/sass/archive/refs/tags/embedded-protocol-3.2.0.tar.gz", sha256 = "4e1f81684bc1666f03e52ddc790d0c2c22d99a5313fa2efe1dde4a5b5733c186" },
+]
+
+setup = '''
+cp $pkgfiles/pubspec.lock pubspec.lock
+mkdir -p build
+cp -a /build/sass-embedded-protocol-3.2.0 build/language
+dart pub get --offline --enforce-lockfile
+'''
+build = '''
+UPDATE_SASS_SASS_REPO=false dart run grinder protobuf
+dart compile aot-snapshot -Dversion="$version" ./bin/sass.dart
+dartaotruntime ./bin/sass.aot --version
+'''
+install = '''
+install -Dm644 bin/sass.aot "$pkgdir/usr/lib/dart-sass/sass.aot"
+install -Dm755 $pkgfiles/sass "$pkgdir/usr/bin/sass"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/dart-sass/LICENSE"
+'''

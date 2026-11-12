@@ -1,0 +1,29 @@
+# buf: Protocol Buffers tool (generation, linting, breaking-change checks);
+# dart-sass generates its embedded-protocol code with it. Go, with its modules
+# from the Go store (`godeps`). As Alpine's testing/buf, without its protoc
+# setup (only generation through plugins is used here).
+name = "buf"
+version = "1.75.0"
+release = 1
+summary = "CLI for working with Protocol Buffers"
+license = "Apache-2.0"
+homepage = "https://buf.build"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/bufbuild/buf/archive/refs/tags/v1.75.0.tar.gz", sha256 = "e1b688283938b19ff072789d37f371e9bdfbc866ebb719b20c1f1bdc4a9ca8ff" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/ ./cmd/buf ./cmd/protoc-gen-buf-breaking ./cmd/protoc-gen-buf-lint
+'''
+install = '''
+for t in buf protoc-gen-buf-breaking protoc-gen-buf-lint; do install -Dm755 build/$t "$pkgdir/usr/bin/$t"; done
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/buf/LICENSE"
+'''
