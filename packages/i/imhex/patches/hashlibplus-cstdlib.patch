@@ -1,0 +1,13 @@
+FenrirOS: HashLibPlus's Converters.h calls strtol without <cstdlib>, which
+glibc's C++ headers pull in by the way and musl's do not.
+
+--- a/lib/third_party/HashLibPlus/Utils/Converters.h	2026-11-12 11:06:53.167467143 -0500
++++ b/lib/third_party/HashLibPlus/Utils/Converters.h	2026-11-12 11:06:53.168292767 -0500
+@@ -25,6 +25,7 @@
+ 
+ #include <algorithm>
+ #include <iterator>
++#include <cstdlib> // strtol
+ #include "../Utils/Bits.h"
+ #include "../Utils/BitConverter.h"
+ 

@@ -8,7 +8,7 @@ release = 2
 summary = "Hex editor for reverse engineers"
 license = "GPL-2.0-or-later"
 homepage = "https://imhex.werwolv.net"
-patches = ["fix-lfs64.patch", "inserter.patch", "no-updater.patch"]
+patches = ["fix-lfs64.patch", "inserter.patch", "no-updater.patch", "hashlibplus-cstdlib.patch"]
 hostdeps = ["cmake", "ninja", "pkgconf"]
 builddeps = ["libglvnd-devel", "mesa-devel", "capstone-devel", "curl-devel", "dbus-devel", "file-devel", "fmt-devel", "freetype-devel", "glfw-devel", "libarchive-devel", "libedit-devel", "llvm-devel", "mbedtls-devel", "nlohmann-json", "xz-devel", "yara-devel"]
 
