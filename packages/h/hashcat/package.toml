@@ -3,7 +3,7 @@
 # Its Rust bridge (Rust/generic_hash) has its crates vendored (`cargodeps`).
 name = "hashcat"
 version = "7.1.2"
-release = 3
+release = 4
 summary = "Password recovery tool"
 license = "MIT"
 homepage = "https://hashcat.net/hashcat"

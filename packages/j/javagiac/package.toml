@@ -26,7 +26,9 @@ export JAVA_HOME=/usr/lib/jvm/java-25-openjdk
 '''
 build = '''
 cd src
-flags="-DIN_GIAC -DGIAC_GENERIC_CONSTANTS -DHAVE_CONFIG_H -DGIAC_GGB -DTIMEOUT -DSIZEOF_LONG=4
+# HAVE_TGAMMAF: the float Gamma is tgammaf (C99, musl has it); without it giac
+# calls gammaf, an old glibc alias musl does not have
+flags="-DIN_GIAC -DGIAC_GENERIC_CONSTANTS -DHAVE_CONFIG_H -DGIAC_GGB -DTIMEOUT -DSIZEOF_LONG=4 -DHAVE_TGAMMAF
     -DHAVE_UNISTD_H -DSIZEOF_VOID_P=8 -fexceptions -O2 -fno-strict-aliasing -DPIC -fPIC -fpermissive
     -I. -Igiac/headers -I$JAVA_HOME/include -I$JAVA_HOME/include/linux"
 mkdir -p /tmp/obj
