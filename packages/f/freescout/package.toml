@@ -1,0 +1,40 @@
+# FreeScout: lightweight help desk and shared mailbox (a Help Scout
+# alternative): email tickets, assignments, customer history, modules. Laravel
+# on PHP with MariaDB, served by nginx and php-fpm. Upstream keeps its PHP
+# dependencies (vendor/) and built assets in the repository, so the release
+# tag is complete. Writable parts (storage, Modules, bootstrap/cache) are in
+# /var/lib/freescout and .env in /etc/freescout; the scheduler runs from
+# /etc/cron.d/freescout. Setup: /usr/share/doc/freescout/README.FenrirOS.
+name = "freescout"
+version = "1.8.250"
+release = 1
+summary = "Lightweight help desk and shared mailbox"
+license = "AGPL-3.0-only"
+homepage = "https://freescout.net"
+archs = ["x86_64", "aarch64"]
+rundeps = ["php", "php-fpm", "nginx", "cronie"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/freescout-help-desk/freescout/archive/refs/tags/1.8.250.tar.gz", sha256 = "6d2c49355d7bd0093962556982dcae7de8fcf7e64a30610191d26fe17363c30f" },
+]
+
+install = '''
+d="$pkgdir/usr/share/freescout"
+mkdir -p "$d"
+cp -a app artisan bootstrap config database Modules overrides public resources routes server.php storage vendor \
+    composer.json composer.lock .env.example "$d/"
+# the writable directories: skeletons copied to /var/lib/freescout when missing
+mv "$d/storage" "$d/storage.dist"
+mv "$d/Modules" "$d/Modules.dist"
+ln -s /var/lib/freescout/storage "$d/storage"
+ln -s /var/lib/freescout/Modules "$d/Modules"
+rm -rf "$d/bootstrap/cache"
+ln -s /var/lib/freescout/bootstrap-cache "$d/bootstrap/cache"
+ln -s /etc/freescout/env "$d/.env"
+install -Dm644 $pkgfiles/freescout.cron "$pkgdir/etc/cron.d/freescout"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/freescout.conf"
+install -Dm644 $pkgfiles/nginx-freescout.conf "$pkgdir/usr/share/doc/freescout/nginx-freescout.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/freescout/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/freescout/LICENSE"
+'''

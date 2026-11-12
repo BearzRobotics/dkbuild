@@ -1,0 +1,14 @@
+FreeScout on FenrirOS
+=====================
+
+Code in /usr/share/freescout (web root: public/). Its .env is
+/etc/freescout/env; storage/, Modules/ and bootstrap/cache live in
+/var/lib/freescout (links from the code directory). PHP runs as _php.
+
+1. Create a MariaDB database and user for FreeScout.
+2. cp /usr/share/freescout/.env.example /etc/freescout/env, chown _php it,
+   and set APP_URL and the database (or let the web installer fill it).
+3. nginx: /usr/share/doc/freescout/nginx-freescout.conf; enable php-fpm and
+   nginx, then open https://<host>/install and follow the installer.
+4. Enable crond (dinitctl enable crond): /etc/cron.d/freescout runs the
+   scheduler (mail fetching and queues).

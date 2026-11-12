@@ -1,0 +1,2 @@
+# FreeScout's scheduler (mail fetching, queue, notifications), every minute
+* * * * * _php /usr/bin/php /usr/share/freescout/artisan schedule:run >> /var/log/freescout/cron.log 2>&1
