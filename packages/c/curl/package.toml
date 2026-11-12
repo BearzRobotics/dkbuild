@@ -6,7 +6,9 @@
 # TLS stack, a separate decision.
 # r3: static libraries too (in curl-static), for fully static programs on musl.
 # 2026-11-11: HTTP/3 (ngtcp2, nghttp3), c-ares with HTTPS records, brotli,
-# LDAP and GSSAPI (Heimdal), as distributions build it (Chimera's options).
+# LDAP, as distributions build it (Chimera's options). No GSSAPI: curl dropped
+# Heimdal (docs/HISTORY.md) and supports only MIT Kerberos and GNU GSS;
+# FenrirOS's Kerberos is Heimdal (Chimera's curl has no GSSAPI either).
 name = "curl"
 version = "8.23.0"
 release = 6
@@ -15,9 +17,7 @@ license = "curl"
 homepage = "https://curl.se"
 patches = ["optimize.patch"]
 hostdeps = ["automake", "pkgconf", "perl", "mandoc", "libtool"]
-builddeps = ["openssl-devel", "zlib-ng-compat-devel", "zstd-devel", "brotli-devel", "libpsl-devel", "libidn2-devel", "nghttp2-devel", "nghttp3-devel", "ngtcp2-devel", "c-ares-devel", "libssh2-devel", "openldap-devel", "heimdal-devel", "heimdal"]
-# heimdal: configure finds Heimdal's GSSAPI only through krb5-config (in the
-# main package); without it, it looks for MIT's headers and stops.
+builddeps = ["openssl-devel", "zlib-ng-compat-devel", "zstd-devel", "brotli-devel", "libpsl-devel", "libidn2-devel", "nghttp2-devel", "nghttp3-devel", "ngtcp2-devel", "c-ares-devel", "libssh2-devel", "openldap-devel"]
 checkdeps = ["nghttp2-progs", "python"]
 rundeps = ["ca-certificates"]
 
@@ -37,7 +37,7 @@ setup = '''
     --with-nghttp3 \
     --with-ngtcp2 \
     --with-libssh2 \
-    --with-gssapi \
+    --without-gssapi \
     --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt \
     --enable-ldap \
     --enable-ares \

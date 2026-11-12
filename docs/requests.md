@@ -156,3 +156,17 @@ Servers and parts ("everything needed to run a mail server"):
 | Chromium (standalone) | written (157.0.8103.38, Chimera's port; with typescript-go, rustc-dev, xdg-utils) |
 | Brave, Euro-Office | planned (after Chromium) |
 | Proxmox VE | planned (after Brave and Euro-Office) |
+
+## Questions for the user (collected 2026-11-12, overnight)
+
+1. **Kerberos for curl.** curl no longer supports Heimdal (its docs/HISTORY.md:
+   "We drop support for krb-ftp, Heimdal, ..."); its GSSAPI (Negotiate/SPNEGO
+   authentication, Kerberos FTP/IMAP/SMTP logins) needs MIT Kerberos or GNU
+   GSS. FenrirOS's Kerberos is Heimdal (samba, mariadb, curl's old r5...).
+   For now curl is built without GSSAPI, as Chimera's. Options: leave it;
+   add MIT krb5 (it installs libgssapi_krb5/libkrb5 and krb5-config, which
+   collide with Heimdal's: one or the other per system, or MIT in its own
+   prefix just for curl); or switch the tree from Heimdal to MIT.
+2. **Android NDK** stays blocked: Google ships it for glibc only.
+3. **ast-grep** (written as a general tool while surveying Brave, which turned
+   out not to need it at build time): keep it or drop it?

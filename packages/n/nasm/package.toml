@@ -4,7 +4,7 @@
 # r2: static libraries too (in nasm-static), for fully static programs on musl.
 name = "nasm"
 version = "2.16.03"
-release = 4
+release = 5
 summary = "80x86 assembler designed for portability and modularity"
 license = "BSD-2-Clause"
 homepage = "https://www.nasm.us"

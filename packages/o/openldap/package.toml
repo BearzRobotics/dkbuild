@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "openldap"
 version = "2.6.13"
-release = 1
+release = 2
 summary = "FOSS implementation of the Lightweight Directory Access Protocol"
 license = "OLDAP-2.8"
 homepage = "https://www.openldap.org"

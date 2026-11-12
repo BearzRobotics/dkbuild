@@ -5,7 +5,7 @@
 # tc is off: it does not build against current kernel headers.
 name = "busybox"
 version = "1.37.0"
-release = 2
+release = 3
 summary = "Many common UNIX utilities in one small static executable"
 license = "GPL-2.0-only"
 homepage = "https://busybox.net"
