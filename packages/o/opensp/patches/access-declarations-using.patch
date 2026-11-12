@@ -1,0 +1,72 @@
+FenrirOS: access declarations ("Base::member;" in a class body) were removed
+in C++11 and clang rejects them; GCC, which Alpine builds with, still takes
+them. Each becomes the using-declaration that replaced it (same meaning).
+
+--- a/lib/Parser.h	2026-11-12 10:57:38.369856727 -0500
++++ b/lib/Parser.h	2026-11-12 10:57:38.385900518 -0500
+@@ -62,16 +62,16 @@
+   Parser(const SgmlParser::Params &);
+   Event *nextEvent();
+   void parseAll(EventHandler &, const volatile sig_atomic_t *cancelPtr);
+-  ParserState::sdPointer;
+-  ParserState::instanceSyntaxPointer;
+-  ParserState::prologSyntaxPointer;
+-  ParserState::activateLinkType;
+-  ParserState::allLinkTypesActivated;
+-  ParserState::entityManager;
+-  ParserState::entityCatalog;
+-  ParserState::baseDtd;
+-  ParserState::options;
+-  ParserState::instantiateDtd;
++  using ParserState::sdPointer;
++  using ParserState::instanceSyntaxPointer;
++  using ParserState::prologSyntaxPointer;
++  using ParserState::activateLinkType;
++  using ParserState::allLinkTypesActivated;
++  using ParserState::entityManager;
++  using ParserState::entityCatalog;
++  using ParserState::baseDtd;
++  using ParserState::options;
++  using ParserState::instantiateDtd;
+   friend class PiAttspecParser;
+ private:
+   Parser(const Parser &);	// undefined
+--- a/include/IListIter.h	2026-11-12 10:57:38.360743852 -0500
++++ b/include/IListIter.h	2026-11-12 10:57:38.387034567 -0500
+@@ -17,8 +17,8 @@
+   IListIter(const IList<T> &list) : IListIterBase(list) { }
+   T *cur() const { return (T *)IListIterBase::cur(); }
+   
+-  IListIterBase::next;
+-  IListIterBase::done;
++  using IListIterBase::next;
++  using IListIterBase::done;
+ };
+ 
+ #ifdef SP_NAMESPACE
+--- a/include/IList.h	2026-11-12 10:57:38.359230442 -0500
++++ b/include/IList.h	2026-11-12 10:57:38.387979722 -0500
+@@ -26,8 +26,8 @@
+   void swap(IList<T> &list) { IListBase::swap(list); }
+   T *head() const { return (T *)IListBase::head(); }
+   T *get() { return (T *)IListBase::get(); }
+-  IListBase::clear;
+-  IListBase::empty;
++  using IListBase::clear;
++  using IListBase::empty;
+ friend class IListIter<T>;
+ private:
+   IList(const IList<T> &);	// undefined
+--- a/include/Ptr.h	2026-11-12 10:57:38.359319852 -0500
++++ b/include/Ptr.h	2026-11-12 10:57:38.389450296 -0500
+@@ -69,8 +69,8 @@
+   const T *operator->() const { return Ptr<T>::pointer(); }
+   const T &operator*() const { return *Ptr<T>::pointer(); }
+   void swap(ConstPtr<T> &p) { Ptr<T>::swap(p); }
+-  Ptr<T>::isNull;
+-  Ptr<T>::clear;
++  using Ptr<T>::isNull;
++  using Ptr<T>::clear;
+   Boolean operator==(const Ptr<T> &p) const { return Ptr<T>::operator==(p); }
+   Boolean operator!=(const Ptr<T> &p) const { return Ptr<T>::operator!=(p); }
+   Boolean operator==(const ConstPtr<T> &p) const {
