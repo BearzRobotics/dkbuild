@@ -29,8 +29,10 @@ build = '''
 mkdir -p build
 # the daemon and tools, against the system's SQLite and cowsql
 go build -trimpath -tags libsqlite3 -o build/ ./cmd/...
-# the VM agent, static (it runs inside any guest)
-CGO_LDFLAGS="-static-pie" go build -trimpath -tags "agent netgo osusergo" -o build/ ./cmd/incus-agent
+# the VM agent, static (it runs inside any guest): pure Go, as upstream's
+# Makefile builds it (CGO_ENABLED=0; a cgo -static-pie link fails: Go asks for
+# a non-PIE link)
+CGO_ENABLED=0 go build -trimpath -tags "agent netgo osusergo" -o build/ ./cmd/incus-agent
 '''
 install = '''
 for b in build/*; do install -Dm755 "$b" "$pkgdir/usr/bin/$(basename "$b")"; done
