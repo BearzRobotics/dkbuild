@@ -4,7 +4,7 @@
 # r2: /usr/sbin/init points at ../bin/dinit (dinit is in /usr/bin; the link said ./dinit).
 name = "dinit"
 version = "0.22.0"
-release = 2
+release = 3
 summary = "Service manager and init system"
 license = "Apache-2.0"
 homepage = "https://davmac.org/projects/dinit"

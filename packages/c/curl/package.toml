@@ -15,7 +15,9 @@ license = "curl"
 homepage = "https://curl.se"
 patches = ["optimize.patch"]
 hostdeps = ["automake", "pkgconf", "perl", "mandoc", "libtool"]
-builddeps = ["openssl-devel", "zlib-ng-compat-devel", "zstd-devel", "brotli-devel", "libpsl-devel", "libidn2-devel", "nghttp2-devel", "nghttp3-devel", "ngtcp2-devel", "c-ares-devel", "libssh2-devel", "openldap-devel", "heimdal-devel"]
+builddeps = ["openssl-devel", "zlib-ng-compat-devel", "zstd-devel", "brotli-devel", "libpsl-devel", "libidn2-devel", "nghttp2-devel", "nghttp3-devel", "ngtcp2-devel", "c-ares-devel", "libssh2-devel", "openldap-devel", "heimdal-devel", "heimdal"]
+# heimdal: configure finds Heimdal's GSSAPI only through krb5-config (in the
+# main package); without it, it looks for MIT's headers and stops.
 checkdeps = ["nghttp2-progs", "python"]
 rundeps = ["ca-certificates"]
 
