@@ -20,7 +20,12 @@ Requested software that is not a recipe yet, and what each needs (2026-11-10):
   native parts come as prebuilt glibc libraries inside Maven jars and need
   building from source for musl first: JOGL and GlueGen 2.6.0 (jogamp, Ant),
   javagiac 70501 (Giac CAS + JNI; GeoGebra's giac build) and JNA 5.18.1's
-  libjnidispatch (Alpine builds java-jna against the system libffi). The
+  libjnidispatch (Alpine builds java-jna against the system libffi).
+  Written 2026-11-11: apache-ant, jna, javagiac (libjavagiac64.so in
+  /usr/lib/geogebra; GeoGebra falls back to System.loadLibrary when its
+  natives jar is left out). JogAmp's sources (gluegen/jogl v2.6.0 .tar.xz,
+  jcpp inside) are in the source cache: their server drops connections, so
+  they were fetched with resumed downloads. The
   build also asks foojay to download a JDK 25 toolchain: point it at
   openjdk25 instead. Its language files and some resources are CC BY-NC-SA.
 - euro-office: an OnlyOffice fork (~30 repositories; core builds V8 and Qt
