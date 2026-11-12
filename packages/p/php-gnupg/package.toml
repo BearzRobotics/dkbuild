@@ -1,0 +1,38 @@
+# PHP's gnupg extension (PECL), GnuPG through GPGME: Passbolt signs and
+# encrypts with it.
+name = "php-gnupg"
+version = "1.5.4"
+release = 1
+summary = "PHP wrapper around GPGME (GnuPG Made Easy)"
+license = "BSD-2-Clause"
+homepage = "https://pecl.php.net/package/gnupg"
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf", "php"]
+builddeps = ["gpgme-devel", "php-devel"]
+rundeps = ["php", "gnupg"]
+
+source = [
+    { url = "https://pecl.php.net/get/gnupg-1.5.4.tgz", sha256 = "4d4a0980759bf259e4129ef02cb592bbeb103b4005e7b4bb6945d79488951a50" },
+]
+
+setup = '''
+# the PECL archive has package.xml beside its directory
+cd gnupg-$version
+phpize
+%configure --with-php-config=/usr/bin/php-config
+'''
+build = '''
+cd gnupg-$version
+%make
+'''
+check = '''
+cd gnupg-$version
+%make test NO_INTERACTION=1
+'''
+install = '''
+cd gnupg-$version
+%make INSTALL_ROOT="$pkgdir" install
+install -Dm644 /dev/stdin "$pkgdir/etc/php/conf.d/gnupg.ini" <<EOF2
+extension=gnupg.so
+EOF2
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/php-gnupg/LICENSE"
+'''

@@ -1,0 +1,29 @@
+Passbolt CE on FenrirOS
+=======================
+
+Code: /usr/share/passbolt (config/ is /etc/passbolt, tmp/ is
+/var/lib/passbolt/tmp, logs/ is /var/log/passbolt). PHP runs as _php
+(php-fpm); its GnuPG home is /var/lib/passbolt/.gnupg.
+
+1. Database: install mariadb (or postgresql), then
+     CREATE DATABASE passbolt CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+     CREATE USER 'passbolt'@'localhost' IDENTIFIED BY '<password>';
+     GRANT ALL ON passbolt.* TO 'passbolt'@'localhost';
+2. Server key (no passphrase; Passbolt needs it unattended), as _php:
+     su -s /bin/sh _php -c 'HOME=/var/lib/passbolt gpg --batch --no-tty --gen-key' <<KEY
+     Key-Type: RSA
+     Key-Length: 3072
+     Name-Real: Passbolt server
+     Name-Email: passbolt@example.org
+     Expire-Date: 0
+     %no-protection
+     %commit
+     KEY
+   then export it to /etc/passbolt/gpg/serverkey.asc and
+   serverkey_private.asc (gpg --armor --export / --export-secret-keys).
+3. cp /etc/passbolt/passbolt.default.php /etc/passbolt/passbolt.php and set
+   App.fullBaseUrl, the database, email, the server key fingerprint, and
+   'gpg' => ['keyring' => '/var/lib/passbolt/.gnupg'].
+4. su -s /bin/sh _php -c 'HOME=/var/lib/passbolt /usr/share/passbolt/bin/cake passbolt install'
+5. nginx: /usr/share/doc/passbolt/nginx-passbolt.conf; enable php-fpm, nginx
+   and passbolt-cron (dinitctl enable ...).

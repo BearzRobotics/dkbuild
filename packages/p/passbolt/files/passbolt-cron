@@ -1,0 +1,7 @@
+# Passbolt's periodic jobs (bin/cron: the email queue, each minute), as
+# Passbolt's packages run them from cron; FenrirOS has no cron daemon yet.
+type = process
+command = /usr/lib/passbolt/passbolt-cron-loop
+run-as = _php
+smooth-recovery = true
+depends-on: rcboot

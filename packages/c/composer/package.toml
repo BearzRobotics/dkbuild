@@ -1,0 +1,29 @@
+# Composer: PHP's dependency manager, as Alpine packages it: upstream's
+# composer.phar (the PHP sources in a Phar archive; checksum from
+# getcomposer.org), run by the system PHP. Recipes that need PHP packages list
+# each one's archive as a source and point composer.lock at them, so builds
+# stay offline (passbolt).
+name = "composer"
+version = "2.11.2"
+release = 1
+summary = "Dependency manager for PHP"
+license = "MIT"
+homepage = "https://getcomposer.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["php"]
+rundeps = ["php", "unzip"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://getcomposer.org/download/2.11.2/composer.phar", sha256 = "dd158c0afd41d15fac89e1b4e47b5d42911fe316c3687cd5edac98319b25d028", unpack = false },
+]
+
+build = '''
+php /build/sources/composer.phar --no-interaction completion bash > /tmp/composer.bash
+'''
+install = '''
+install -Dm755 /build/sources/composer.phar "$pkgdir/usr/bin/composer.phar"
+printf '#!/bin/sh\nexec /usr/bin/php /usr/bin/composer.phar "$@"\n' > "$pkgdir/usr/bin/composer"
+chmod 755 "$pkgdir/usr/bin/composer"
+install -Dm644 /tmp/composer.bash "$pkgdir/usr/share/bash-completion/completions/composer"
+'''

@@ -2,16 +2,18 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # FenrirOS packages one PHP, as `php`: unsuffixed names and directories
 # (/etc/php, /usr/lib/php, php-fpm), every extension built shared and enabled
-# in /etc/php/conf.d (remove an .ini to turn one off).
+# in /etc/php/conf.d (remove an .ini to turn one off). r2: MySQL/MariaDB
+# (mysqli, pdo_mysql; mysqlnd built in, so no .ini load order matters) and
+# PostgreSQL (pgsql, pdo_pgsql), for Passbolt and other web apps.
 name = "php"
 version = "8.3.36"
-release = 1
+release = 2
 summary = "HTML-embedded scripting language"
 license = "PHP-3.01"
 homepage = "https://www.php.net"
 patches = ["fix-clobbered-registers.patch", "fix-curl.patch", "fix-pear-shebang.patch", "fix_oom_tests.patch", "install-pear.patch", "testarg.patch"]
 hostdeps = ["automake", "bison", "libtool", "pkgconf"]
-builddeps = ["argon2-devel", "curl-devel", "freetype-devel", "gettext-devel", "gmp-devel", "icu-devel", "libedit-devel", "libffi-devel", "libgd-devel", "libjpeg-turbo-devel", "libsodium-devel", "libxml2-devel", "libxslt-devel", "libzip-devel", "oniguruma-devel", "openldap-devel", "openssl-devel", "pcre2-devel", "sqlite-devel", "unixodbc-devel", "zlib-ng-compat-devel"]
+builddeps = ["argon2-devel", "curl-devel", "freetype-devel", "gettext-devel", "gmp-devel", "icu-devel", "libedit-devel", "libffi-devel", "libgd-devel", "libjpeg-turbo-devel", "libsodium-devel", "libxml2-devel", "libxslt-devel", "libzip-devel", "oniguruma-devel", "openldap-devel", "openssl-devel", "pcre2-devel", "postgresql-devel", "sqlite-devel", "unixodbc-devel", "zlib-ng-compat-devel"]
 checkdeps = ["procps"]
 rundeps = []
 options = ["!check"]
@@ -78,6 +80,11 @@ setup = '''
     --with-mhash \
     --with-openssl=shared \
     --with-password-argon2 \
+    --enable-mysqlnd \
+    --with-mysqli=shared \
+    --with-pdo-mysql=shared \
+    --with-pdo-pgsql=shared \
+    --with-pgsql=shared \
     --with-pdo-sqlite=shared \
     --with-pear \
     --with-sodium=shared \

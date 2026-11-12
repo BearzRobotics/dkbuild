@@ -1,0 +1,159 @@
+# Passbolt CE: the open-source password manager for teams (server side; the
+# browser extensions come from the browser stores). CakePHP on PHP 8 with
+# MariaDB or PostgreSQL, GnuPG through php-gnupg, served by nginx and php-fpm.
+# Built from source: the 104 Composer packages composer.lock pins are the
+# recipe's sources (GitHub archives of the locked commits), and composer.lock
+# is pointed at them (files/composer-local.py), so composer installs offline.
+# The web UI's compiled JavaScript is in the source (webroot/js, from
+# passbolt-styleguide).
+# Layout as Passbolt's Debian package: code in /usr/share/passbolt, config in
+# /etc/passbolt, state in /var/lib/passbolt, logs in /var/log/passbolt; the
+# email queue runs from the passbolt-cron dinit service (no cron daemon yet).
+# Setup: /usr/share/doc/passbolt/README.FenrirOS.
+# To update: regenerate the sources from the new composer.lock (each
+# dist.reference archive's sha256).
+name = "passbolt"
+version = "5.17.0"
+release = 1
+summary = "Open-source password manager for teams (server)"
+license = "AGPL-3.0-only"
+homepage = "https://www.passbolt.com"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["php", "composer", "unzip", "python"]
+rundeps = ["php", "php-fpm", "php-gnupg", "gnupg", "nginx", "composer"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/passbolt/passbolt_api/archive/refs/tags/v5.17.0.tar.gz", sha256 = "8c9463771dd98d022b5df8be7d5da46627acfae473a6929ac75b090d951b1b04" },
+    { url = "https://codeload.github.com/Bacon/BaconQrCode/legacy.zip/4da2233e72eeecd9be3b62e0dc2cc9ed8e2e31c2", sha256 = "a00d3e62f7c41ed790d57b85e3f465b87ba4cf4686609d66644a2c9307072cf9", unpack = false },  # bacon/bacon-qr-code
+    { url = "https://codeload.github.com/passbolt/cakephp-api-pagination/legacy.zip/b103542e1b02c2a000862d91a804ecde6d4669b0", sha256 = "a2e2f702ed14e888a2d34a614d7a18d0e288622d99782d3d200ae2fe1385c118", unpack = false },  # bcrowe/cakephp-api-pagination
+    { url = "https://codeload.github.com/brick/math/legacy.zip/82944324d1c1bdb2c2618e89978d4e2ad78d69ad", sha256 = "6ed7b8668630df853aad5b8249932d351120829bf88d58f86ef4d1a4c32c9b2a", unpack = false },  # brick/math
+    { url = "https://codeload.github.com/cakephp/authentication/legacy.zip/a96a198816549d603a990730a861b756b887be95", sha256 = "c2eea88a28f9c89db03bb2598c78ac6b971f6f36f86eaf0e567b429971c38fe7", unpack = false },  # cakephp/authentication
+    { url = "https://codeload.github.com/cakephp/cakephp/legacy.zip/887b641de9f7aba06071f98f17edcbc573cbcf63", sha256 = "82b75963494035d5998d9ffee1c6b4338ea2371a807fb0a95e1ae3161f4918d1", unpack = false },  # cakephp/cakephp
+    { url = "https://codeload.github.com/cakephp/chronos/legacy.zip/e6e777b534244911566face8a5dbdbd7f7bda5a6", sha256 = "2ff5734bb72dbfaa7acc6e8f64973619811367cb27008a8c531ed2194b1a0700", unpack = false },  # cakephp/chronos
+    { url = "https://codeload.github.com/cakephp/migrations/legacy.zip/7745bb8489b1aaaa17811db9ca4f3a1f153d7d98", sha256 = "6527609e45896d653893c02578d3a44992d176d9fd1648dfe7caeb775b7b4dbf", unpack = false },  # cakephp/migrations
+    { url = "https://codeload.github.com/cakephp/plugin-installer/legacy.zip/40bfecb4565ab29cd8c34b0d02d0007d2d5ebd2b", sha256 = "4ddc57657935a797cd73b172a182e3020e3df9c4f59555f78d97e1e2ce819b18", unpack = false },  # cakephp/plugin-installer
+    { url = "https://codeload.github.com/CarbonPHP/carbon-doctrine-types/legacy.zip/18ba5ddfec8976260ead6e866180bd5d2f71aa1d", sha256 = "fbe0d87a4ea720ccd5ece247b2e8423cf6e6195241731ae6f84a6eeb9fec6c13", unpack = false },  # carbonphp/carbon-doctrine-types
+    { url = "https://codeload.github.com/composer/ca-bundle/legacy.zip/c008272789979f709f7fcb32c2ecf1d2db5e84e5", sha256 = "c713bcbf355a3ae774df8d090f78bd940235ecf86568ae922d0c9fd1b78a15d5", unpack = false },  # composer/ca-bundle
+    { url = "https://codeload.github.com/composer/class-map-generator/legacy.zip/86d8208fc3c649a3a999daf1a63c25201be2990f", sha256 = "8d42acb22aa271eda0467172f861059a77b71d14fb850d2021249662a177243c", unpack = false },  # composer/class-map-generator
+    { url = "https://codeload.github.com/composer/composer/legacy.zip/f0de0bf90226853b841672f086d8b58b02332504", sha256 = "f66e0519d068dc7e365bf7906e7b1d6480ea77c52cd6e42d5b345646e36d230f", unpack = false },  # composer/composer
+    { url = "https://codeload.github.com/composer/metadata-minifier/legacy.zip/8e86142e3ade750b837d55e55f0cdc786d8da006", sha256 = "6e166558e1c18550b912fda59642483df867385c078462ca5ec093c5453eb304", unpack = false },  # composer/metadata-minifier
+    { url = "https://codeload.github.com/composer/pcre/legacy.zip/b2bed4734f0cc156ee1fe9c0da2550420d99a21e", sha256 = "c2b9daddc8d3341c50fc91eeecabb2b8f2a0fbd81e02b8b93ae22c35b61639b2", unpack = false },  # composer/pcre
+    { url = "https://codeload.github.com/composer/semver/legacy.zip/198166618906cb2de69b95d7d47e5fa8aa1b2b95", sha256 = "f2058249711f728b6ab62d2251cce97905634cfa63fc553a6aad9a34676033c1", unpack = false },  # composer/semver
+    { url = "https://codeload.github.com/composer/spdx-licenses/legacy.zip/5ecd0cb4177696f9fd48f1605dda81db3dee7889", sha256 = "ac91b81fceab041b8bb75e2a1c95b6a71067b7e1c490bf2ae6222aad74ec1911", unpack = false },  # composer/spdx-licenses
+    { url = "https://codeload.github.com/composer/xdebug-handler/legacy.zip/6c1925561632e83d60a44492e0b344cf48ab85ef", sha256 = "b36277498bf6068cbb4c9f12c79b922ab922912c56694f0fd8dd5f718aa8e0b1", unpack = false },  # composer/xdebug-handler
+    { url = "https://codeload.github.com/DASPRiD/Enum/legacy.zip/b5874fa9ed0043116c72162ec7f4fb50e02e7cce", sha256 = "1d2c1b552a83dce5a25392fae3afcf6ab81ce1481fa0f117714117464e32d4ac", unpack = false },  # dasprid/enum
+    { url = "https://codeload.github.com/DirectoryTree/LdapRecord/legacy.zip/a1cab9f078eb4756fc6fad58caea1e3d11cad0ec", sha256 = "6c090c07de3fc232b93a56573a3bbe3ae950dd8dcc2c90fbfb8a809833fa54ee", unpack = false },  # directorytree/ldaprecord
+    { url = "https://codeload.github.com/doctrine/deprecations/legacy.zip/d4fe3e6fd9bb9e72557a19674f44d8ac7db4c6ca", sha256 = "a14915085dc61e181aa11b277ce2f268e62bdb72e579aab307e7cfa95860e0d7", unpack = false },  # doctrine/deprecations
+    { url = "https://codeload.github.com/donatj/PhpUserAgent/legacy.zip/f76fed972ce4a3d7d58fe99a8627132606b58046", sha256 = "c164871f1f8c23e6974ee7ac0ca4c9c128020b8548244af670db5c9a43c0990d", unpack = false },  # donatj/phpuseragentparser
+    { url = "https://codeload.github.com/duosecurity/duo_universal_php/legacy.zip/7045587e8a0a850355ed55f019090a033e49b29a", sha256 = "e32d73f7f82f59b0ab2e911ddb50887e96cf051df5f9bf9e8a57f2e2722bd9af", unpack = false },  # duosecurity/duo_universal_php
+    { url = "https://codeload.github.com/enygma/yubikey/legacy.zip/9eaa725ecc200fbb930f51c344adb4b272d87ae6", sha256 = "aeafd97f024ae33eed647c045c7c9a4ba0fe2763269fcb44b45e6845b82b1f7e", unpack = false },  # enygma/yubikey
+    { url = "https://codeload.github.com/googleapis/php-jwt/legacy.zip/9bc93bd7e3ee5bead4cd23c365ec12f3c1fb0a6a", sha256 = "4aed3975f18216ac30df41738b9b73d6da5feae370605753aad7d7ad08b2df04", unpack = false },  # firebase/php-jwt
+    { url = "https://codeload.github.com/guzzle/guzzle/legacy.zip/ae311b8f045ea93ce7b1c9cdb7cec06c53f944bc", sha256 = "fb4a41489da0d7c698a2d95075e0001d50c575808446e173411bc449b3302e32", unpack = false },  # guzzlehttp/guzzle
+    { url = "https://codeload.github.com/guzzle/promises/legacy.zip/2823687acff28b2dbe67b2508a6b300e2c3fa4ce", sha256 = "5f4426ae6fec374a9b4a136cd18442aedfb067975655b863c20d11832dece3d2", unpack = false },  # guzzlehttp/promises
+    { url = "https://codeload.github.com/guzzle/psr7/legacy.zip/dad89620b7a6edb60c15858442eb2e408b45d8f4", sha256 = "289c718b6e720686e087aab89e97f3f573df14a9bce27c661a8e7e788d6ffa9e", unpack = false },  # guzzlehttp/psr7
+    { url = "https://codeload.github.com/illuminate/collections/legacy.zip/83313b009c4afb6f02dbc090bdb67809756eefa2", sha256 = "ccf1beb146656b76a6a51dbb4b303aa3bca294e2ca34ff0ef876ec6eb5df3214", unpack = false },  # illuminate/collections
+    { url = "https://codeload.github.com/illuminate/conditionable/legacy.zip/ec677967c1f2faf90b8428919124d2184a4c9b49", sha256 = "1c895ae74da2d98e67239cd32f71d76bf0aeeb3959c6049e23c00bf1a4306a15", unpack = false },  # illuminate/conditionable
+    { url = "https://codeload.github.com/illuminate/contracts/legacy.zip/c16fd7ba7d8e6b8f336639ceb6b7e1ff6ed0efb5", sha256 = "8cc71ea826c83e92ea6d97731e5ec017bde1370a926e2009ce6557a50077e240", unpack = false },  # illuminate/contracts
+    { url = "https://codeload.github.com/illuminate/macroable/legacy.zip/e295d62d89dcdb87e2b1bd70dd14d074a0ed73cc", sha256 = "b49eb9673bcbedae1e68181d195a0cc0b322df9a006ca5102ac75ad93b76a3ee", unpack = false },  # illuminate/macroable
+    { url = "https://codeload.github.com/php-imagine/Imagine/legacy.zip/dd57a4c290ff4d223d17bcd219dac9ac8bf1cc16", sha256 = "86a696fb2b28de9b70d82005df8b94852bad0ff7b51faeeda9c89587dde5230f", unpack = false },  # imagine/imagine
+    { url = "https://codeload.github.com/jsonrainbow/json-schema/legacy.zip/8b1308a9d7bdbdb20ce87ef920f82b4564bb2d33", sha256 = "e6e065f5d3d5e10483ab02e40b79b6856eb4fd720dde336acd42b7dd0710f794", unpack = false },  # justinrainbow/json-schema
+    { url = "https://codeload.github.com/laminas/laminas-diactoros/legacy.zip/60c182916b2749480895601649563970f3f12ec4", sha256 = "cb64737fba8d1bd226d0c85b91a6b9d53075493dd1151bb1ebbdb138883ae644", unpack = false },  # laminas/laminas-diactoros
+    { url = "https://codeload.github.com/laminas/laminas-httphandlerrunner/legacy.zip/181eaeeb838ad3d80fbbcfb0657a46bc212bbd4e", sha256 = "bf14af7c12277212ced05c315a013a47c4d5f475241b60017b566ac853511d76", unpack = false },  # laminas/laminas-httphandlerrunner
+    { url = "https://codeload.github.com/thephpleague/container/legacy.zip/58accbc032f0090a9bd08326f93062c5a658b2c5", sha256 = "45fa249b8cf46a1f2a97a46f0598ee5de07ba85843cb0f17276664210ebfd36a", unpack = false },  # league/container
+    { url = "https://codeload.github.com/thephpleague/flysystem/legacy.zip/f7fb152932f30072d573510cbd4dd657d6475b25", sha256 = "bfc414966ecdab46d18e64975a6344f7574a409afef5774f4e182d3e60792fe1", unpack = false },  # league/flysystem
+    { url = "https://codeload.github.com/thephpleague/flysystem-local/legacy.zip/2f669db18a4c20c755c2bb7d3a7b0b2340488079", sha256 = "9f5fdc7dcf441d1274bef8e2c1f86264ce0379dd08450da6f32af581530ccf40", unpack = false },  # league/flysystem-local
+    { url = "https://codeload.github.com/thephpleague/mime-type-detection/legacy.zip/f5f47eff7c48ed1003069a2ca67f316fb4021c76", sha256 = "660321223c2dc58b27e4d038f5bc54da98ca862d096c725735696ba1ea4f8905", unpack = false },  # league/mime-type-detection
+    { url = "https://codeload.github.com/thephpleague/oauth2-client/legacy.zip/8cedfef9d01a8d1fd2ecfabb41734b17592c4b71", sha256 = "57cf2c62e256a95a8c2cfd16b3d5e25f944338f91a1104852cd0dd42bbc72dc6", unpack = false },  # league/oauth2-client
+    { url = "https://codeload.github.com/passbolt/cakephp-email-queue/legacy.zip/30c24a0dbebd5a91ce7db9ce3a67db1a0d4711e3", sha256 = "c6b5228ca734ca6c437789bccded78d7f86f004dbf8eb4755a96552307488e40", unpack = false },  # lorenzo/cakephp-email-queue
+    { url = "https://codeload.github.com/marc-mabe/php-enum/legacy.zip/bb426fcdd65c60fb3638ef741e8782508fda7eef", sha256 = "4990ed1d5e02df8e5da18085635d48a8537676222d2d54c469f12a6db5112eae", unpack = false },  # marc-mabe/php-enum
+    { url = "https://codeload.github.com/serbanghita/Mobile-Detect/legacy.zip/ab39168b7556f44c11c80be1222b44b239f5c2e4", sha256 = "d34e34b0928f51a66af397873ae0e099b3ad4b7bde56941cba209f48c8d6ae3a", unpack = false },  # mobiledetect/mobiledetectlib
+    { url = "https://codeload.github.com/CarbonPHP/carbon/legacy.zip/a1c54919f5fff9800cd03c32bd01defd5a4061cb", sha256 = "7cdfc384f06c09f52bc1d9822cc6cb8973f3439cb142923c66fc188b18620504", unpack = false },  # nesbot/carbon
+    { url = "https://codeload.github.com/paragonie/constant_time_encoding/legacy.zip/d5b01a39b3415c2cd581d3bd3a3575c1ebbd8e77", sha256 = "a2997299df0a6307136355ec36e8aee3c0b730e3602f80a7dcf2839dc30662dc", unpack = false },  # paragonie/constant_time_encoding
+    { url = "https://codeload.github.com/paragonie/random_compat/legacy.zip/996434e5492cb4c3edcb9168db6fbb1359ef965a", sha256 = "ddcfc73490d9c864de6a52185058fb1f516cd2ba63869c4c7230b654a8a2c74f", unpack = false },  # paragonie/random_compat
+    { url = "https://codeload.github.com/phpDocumentor/ReflectionCommon/legacy.zip/1d01c49d4ed62f25aa84a747ad35d5a16924662b", sha256 = "39fca6dc8730bdc4f70c41e58e16595fc6695b4ae42327c32144c4131410a7f3", unpack = false },  # phpdocumentor/reflection-common
+    { url = "https://codeload.github.com/phpDocumentor/ReflectionDocBlock/legacy.zip/7bae67520aa9f5ecc506d646810bd40d9da54582", sha256 = "86ab303f5fa29859601422f4ccbc66e014a8348ffce8a9f47877795686b889e8", unpack = false },  # phpdocumentor/reflection-docblock
+    { url = "https://codeload.github.com/phpDocumentor/TypeResolver/legacy.zip/327a05bbee54120d4786a0dc67aad30226ad4cf9", sha256 = "d332d8a893916642985e5f257aaa5f2a69600b4fd4485dc198efba340c9beccd", unpack = false },  # phpdocumentor/type-resolver
+    { url = "https://codeload.github.com/phpseclib/phpseclib/legacy.zip/d17e0ddaeaf6f22f7e007cbb437d78792fe2a0e4", sha256 = "2cc53234db94fa7367deb4f5e29ca034ff4eba0e4ae19942434361d3d2eebbdb", unpack = false },  # phpseclib/phpseclib
+    { url = "https://codeload.github.com/phpstan/phpdoc-parser/legacy.zip/fb19eedd2bb67ff8cf7a5502ad329e701d6398a3", sha256 = "9e717f836b296b4bfdc7207815fc07e616d173e55dd51d4da9499d500903566c", unpack = false },  # phpstan/phpdoc-parser
+    { url = "https://codeload.github.com/php-fig/clock/legacy.zip/e41a24703d4560fd0acb709162f73b8adfc3aa0d", sha256 = "72a2682083efc51108e5d7d0e880d45d85236100692c86d093c3f6f9205ae573", unpack = false },  # psr/clock
+    { url = "https://codeload.github.com/php-fig/container/legacy.zip/c71ecc56dfe541dbd90c5360474fbc405f8d5963", sha256 = "3111f5b69d3a0f690f5f92d7aeacfb247f5ebd3c175088cce4b098e5d1b06ad7", unpack = false },  # psr/container
+    { url = "https://codeload.github.com/php-fig/event-dispatcher/legacy.zip/dbefd12671e8a14ec7f180cab83036ed26714bb0", sha256 = "4d6a674cfd89a9957ead82e31ee4df785b2b1d215693add73184729a9a66d116", unpack = false },  # psr/event-dispatcher
+    { url = "https://codeload.github.com/php-fig/http-client/legacy.zip/bb5906edc1c324c9a05aa0873d40117941e5fa90", sha256 = "5d3fc583e721d451a0cc2073680476236199cd1680a0d9da1756e8152496deb5", unpack = false },  # psr/http-client
+    { url = "https://codeload.github.com/php-fig/http-factory/legacy.zip/2b4765fddfe3b508ac62f829e852b1501d3f6e8a", sha256 = "a3c397252b6c1c15e60ad6fae927d61edbf4059f3473080bb1b3b40deabf80d2", unpack = false },  # psr/http-factory
+    { url = "https://codeload.github.com/php-fig/http-message/legacy.zip/402d35bcb92c70c026d1a6a9883f06b2ead23d71", sha256 = "d561d2c36e2e3c0ee8b54e0e9652b3bfa13cd763e5e6f93400969001f3a7968d", unpack = false },  # psr/http-message
+    { url = "https://codeload.github.com/php-fig/http-server-handler/legacy.zip/84c4fb66179be4caaf8e97bd239203245302e7d4", sha256 = "b4e05ba08e4a03f66b4a94936bf0a4f8f885f69bfe64d770a0c867d64340aa31", unpack = false },  # psr/http-server-handler
+    { url = "https://codeload.github.com/php-fig/http-server-middleware/legacy.zip/c1481f747daaa6a0782775cd6a8c26a1bf4a3829", sha256 = "4bc24a30f219b1eb46f8f175fe27e125cf8b029d4ce3e6c4f34b2429c6877b82", unpack = false },  # psr/http-server-middleware
+    { url = "https://codeload.github.com/php-fig/link/legacy.zip/84b159194ecfd7eaa472280213976e96415433f7", sha256 = "eff564e3f0ed591d93908ecd49387926bd98ef2d5f12202eceb74ae62ec2de60", unpack = false },  # psr/link
+    { url = "https://codeload.github.com/php-fig/log/legacy.zip/f16e1d5863e37f8d8c2a01719f5b34baa2b714d3", sha256 = "1e8dcf2df933fc3440b29146c5ca4e93ece51c5c7a9ac9653d926ec971c90892", unpack = false },  # psr/log
+    { url = "https://codeload.github.com/php-fig/simple-cache/legacy.zip/764e0b3939f5ca87cb904f570ef9be2d78a07865", sha256 = "e899e363a85c26b3f1a621182b6eed2a37a71d823410ac949a1cbfd4b655ec41", unpack = false },  # psr/simple-cache
+    { url = "https://codeload.github.com/ralouphie/getallheaders/legacy.zip/120b605dfeb996808c31b6477290a714d356e822", sha256 = "ef0165da5690da666ab4cb88bb4cec0d50372e3e7c922532c5795a3567b367af", unpack = false },  # ralouphie/getallheaders
+    { url = "https://codeload.github.com/ramsey/collection/legacy.zip/344572933ad0181accbf4ba763e85a0306a8c5e2", sha256 = "a9d0d7949173c4fb8735a019f0052d3f1910d58fb10ed19e8003cab70f462c72", unpack = false },  # ramsey/collection
+    { url = "https://codeload.github.com/ramsey/uuid/legacy.zip/1df15849d00943a67d677dc9cfd80795f038c9f8", sha256 = "71d718c3530ed9e2d6526198b562ced882b9e547ffd5a24ef9c5aeb67d174c25", unpack = false },  # ramsey/uuid
+    { url = "https://codeload.github.com/reactphp/promise/legacy.zip/23444f53a813a3296c1368bb104793ce8d88f04a", sha256 = "3af4c958f4bd618f6e6dc000a78c8e5bcf3ea52a203039935585884b741d7dc1", unpack = false },  # react/promise
+    { url = "https://codeload.github.com/cakephp/phinx/legacy.zip/83f83ec105e55e3abba7acc23c0272b5fcf66929", sha256 = "3fdd56c5b4dc594b4b22f2bd6f11a6a58774fc0bb36191d4214668b4826ae7c8", unpack = false },  # robmorgan/phinx
+    { url = "https://codeload.github.com/Seldaek/jsonlint/legacy.zip/9a90eb5d32d5a500296bf43f946d60246444d5f7", sha256 = "e4e43b666f28ac86f739508759bf6dfe1d8937b76d85a81f630976ed8b5eda79", unpack = false },  # seld/jsonlint
+    { url = "https://codeload.github.com/Seldaek/phar-utils/legacy.zip/990bbd0e92caa216d52eca0935f6e35e589bfaa5", sha256 = "873f4cbdc6d6600fa4568ec8d1fb5127d06904b231be577c606bace8f9629488", unpack = false },  # seld/phar-utils
+    { url = "https://codeload.github.com/Seldaek/signal-handler/legacy.zip/04a6112e883ad76c0ada8e4a9f7520bbfdb6bb98", sha256 = "928599589ff88e966d12e55964e8b35e03d2c7bc30921031cdf7d0802f221c8d", unpack = false },  # seld/signal-handler
+    { url = "https://codeload.github.com/singpolyma/openpgp-php/legacy.zip/b55996c1942bf676d4531c9b4c0ed226f7fe2b60", sha256 = "5f54ee59625e1dbf8d7ee76a54de2bbf2ce1e4c48ffe1235a801189c3a811c07", unpack = false },  # singpolyma/openpgp-php
+    { url = "https://codeload.github.com/Spomky-Labs/cbor-php/legacy.zip/1cac24eeae4be47122d505542a170623b2a35ea3", sha256 = "5ba8efd2904092c4fa4a0986254e23b54daed769dbb28def6d81ac8044afd72f", unpack = false },  # spomky-labs/cbor-php
+    { url = "https://codeload.github.com/Spomky-Labs/otphp/legacy.zip/877683d6352b80cdc7020fd43a725629c2524435", sha256 = "54ad5d4c533a10316fa03892e75f39574b8e57a4feb981097ba6dab8bc3b142b", unpack = false },  # spomky-labs/otphp
+    { url = "https://codeload.github.com/Spomky-Labs/pki-framework/legacy.zip/8f333bebe104ea24f1a160a6fb69e2dead4f1882", sha256 = "489fc0ee74c6f92cc8fbf7c4721a0c5df38732b61e3601dadb71008dfa497635", unpack = false },  # spomky-labs/pki-framework
+    { url = "https://codeload.github.com/symfony/clock/legacy.zip/674fa3b98e21531dd040e613479f5f6fa8f32111", sha256 = "9e454ca72b043c931b0fae081aa7bc5d64e93354572c2799cc80eebf526f5e76", unpack = false },  # symfony/clock
+    { url = "https://codeload.github.com/symfony/config/legacy.zip/e896f5e874e6983d0a098f554ca82a08a924c298", sha256 = "75b152910cd1125a788bc7f5fc0bfc6fef2eb27f01ada716659ce1a7b7345d5f", unpack = false },  # symfony/config
+    { url = "https://codeload.github.com/symfony/console/legacy.zip/f4c69c9aed03abf933b294257d618bdd9b30a06d", sha256 = "16c84ca9dfc6dae89da696f4ab2ff115beca6d0b830be24db95990af6f02e27d", unpack = false },  # symfony/console
+    { url = "https://codeload.github.com/symfony/deprecation-contracts/legacy.zip/f3202fa1b5097b0af062dc978b32ecf63404e31d", sha256 = "3d91410609aa4f579406a4908e2960155fc3efd6c643884869f875aa73f9687d", unpack = false },  # symfony/deprecation-contracts
+    { url = "https://codeload.github.com/symfony/filesystem/legacy.zip/ff16a16bf87fdf264638b8f6995b3515975e3c79", sha256 = "b7e9bb7351ab86a65f471d712249cb9b533347d974bc82ec014e2409aaa0cf98", unpack = false },  # symfony/filesystem
+    { url = "https://codeload.github.com/symfony/finder/legacy.zip/13b38720174286f55d1761152b575a8d1436fc25", sha256 = "a45d7f9a205fa44c1a0659c3d4f7f5d74c880ad03be9402d0637c2ee622719a6", unpack = false },  # symfony/finder
+    { url = "https://codeload.github.com/symfony/polyfill-ctype/legacy.zip/141046a8f9477948ff284fa65be2095baafb94f2", sha256 = "922b0c6b24d1bcb6447d051edc1fc4526bcca5f88ddc4a27d885507872ceecc1", unpack = false },  # symfony/polyfill-ctype
+    { url = "https://codeload.github.com/symfony/polyfill-intl-grapheme/legacy.zip/bb899c1db0aa8127dc3afe8cda4a67eb24915f8d", sha256 = "e789490fbac9691af1127a269a45f86ebe676b71d90551790dea2329184340db", unpack = false },  # symfony/polyfill-intl-grapheme
+    { url = "https://codeload.github.com/symfony/polyfill-intl-normalizer/legacy.zip/2d446c214bdbe5b71bde5011b060a05fece3ae6b", sha256 = "ad6b8ae2e7cfa7838c20bada21e8996ee9a0b3e063a50d7fd2724d1d16c62df3", unpack = false },  # symfony/polyfill-intl-normalizer
+    { url = "https://codeload.github.com/symfony/polyfill-mbstring/legacy.zip/d3d318bad5e7a1bfbd026009c8bfb8d8f99ae6b6", sha256 = "36b2903d9d9b319bdcf6ec968604ad4bbfa0aabc1f9088ac18c8f633c6e76d31", unpack = false },  # symfony/polyfill-mbstring
+    { url = "https://codeload.github.com/symfony/polyfill-php73/legacy.zip/0f68c03565dcaaf25a890667542e8bd75fe7e5bb", sha256 = "9ea3f21f6216cff62a22786c0dd69a6ffe09ae4af0b4abbf04d3d5195d07afb7", unpack = false },  # symfony/polyfill-php73
+    { url = "https://codeload.github.com/symfony/polyfill-php80/legacy.zip/dfb55726c3a76ea3b6459fcfda1ec2d80a682411", sha256 = "66e4e37e44e0b6bd089c355ce528260f20ee2d8656c7a82b009670dae22c186e", unpack = false },  # symfony/polyfill-php80
+    { url = "https://codeload.github.com/symfony/polyfill-php81/legacy.zip/6bfb9c766cacffbc8e118cb87217d08ed84e5cd7", sha256 = "0900aaf6c07b85f982df651749eb43685b0503afc32d03ac4121f3b9ee8238b2", unpack = false },  # symfony/polyfill-php81
+    { url = "https://codeload.github.com/symfony/polyfill-php83/legacy.zip/5ea99087fb99c273a9b9236ed4c31e78b16103c6", sha256 = "9a171f0e0c7223f26306ac51b88f8c84444d9f4aeeb822e9213ba2a110de09c3", unpack = false },  # symfony/polyfill-php83
+    { url = "https://codeload.github.com/symfony/polyfill-php84/legacy.zip/f4e1dfaee5b74aba5964fe1fd4dfc7ba5e3085fa", sha256 = "a7ffa7695afe395a6a4810b3e79cd6473afb17839ced62e01f9a3ee257242b8f", unpack = false },  # symfony/polyfill-php84
+    { url = "https://codeload.github.com/symfony/polyfill-php85/legacy.zip/255fab485aaa1006ed411040c42aecd7b5302d7a", sha256 = "26982edafe1983ad14c42a51976aa51ef2c058a73109a2b08f3bb81c54385469", unpack = false },  # symfony/polyfill-php85
+    { url = "https://codeload.github.com/symfony/polyfill-uuid/legacy.zip/26dfec253c4cf3e51b541b52ddf7e42cb0908e94", sha256 = "63eb40bd0033a55c155fc4a281036f58b59e74200f8bb8ef863448983176d642", unpack = false },  # symfony/polyfill-uuid
+    { url = "https://codeload.github.com/symfony/process/legacy.zip/f5804be144caceb570f6747519999636b664f24c", sha256 = "b09d99f4e488cc373c4c0c128f8d0029748fd229b282ae8c4fe3a20546d6384f", unpack = false },  # symfony/process
+    { url = "https://codeload.github.com/symfony/property-access/legacy.zip/c3dce76a6697c6428f7d80d5cd1cf0aa5d9679f3", sha256 = "a8bdb10435521d1bbbd40c4c7fb69379dc23c4217f970a3c4994b31385535c2b", unpack = false },  # symfony/property-access
+    { url = "https://codeload.github.com/symfony/property-info/legacy.zip/52420d499b03ec20c0d38f0dc2f940bc9c43dc8e", sha256 = "a1ca3863cde9d3d36c7725dd71e183500ba434550ac682bedaeee97e492b00b4", unpack = false },  # symfony/property-info
+    { url = "https://codeload.github.com/symfony/serializer/legacy.zip/1f31d4e902c85b820af5dce27dbe17435524bed0", sha256 = "77619327cd9982d34e4f3e8b6486a5ed76cc125255d86b273ca84f7573e74664", unpack = false },  # symfony/serializer
+    { url = "https://codeload.github.com/symfony/service-contracts/legacy.zip/c0a284bab1ed8aa0417e3d69250ab437739563a0", sha256 = "b09bbb37d2b358cc2075dde62fea7cccaf8c4c4a3d5848812504e6bc44035afa", unpack = false },  # symfony/service-contracts
+    { url = "https://codeload.github.com/symfony/string/legacy.zip/e394af32256bf9e7bf80849d95e589167c10097b", sha256 = "ffa214d0371e808d275031ed6c243b5ebce857b66f24cb52fa57f5dbd6552182", unpack = false },  # symfony/string
+    { url = "https://codeload.github.com/symfony/translation/legacy.zip/501e0ff4553c744209ca1a68790d8a4541563710", sha256 = "edcb29057ab6801a554153c903d0671277aafd20497e8208d9efa127546bb6ef", unpack = false },  # symfony/translation
+    { url = "https://codeload.github.com/symfony/translation-contracts/legacy.zip/ccb206b98faccc511ebae8e5fad50f2dc0b30621", sha256 = "a56c767440ea61bf22d16b2bc8102b1cf07c635da7a47bc809b4d4699a741820", unpack = false },  # symfony/translation-contracts
+    { url = "https://codeload.github.com/symfony/type-info/legacy.zip/62d0ad6995630a4f7ea8fd270aadb3e2545c8e31", sha256 = "1ec4d3405e839afed0624b3d187a7333ab440411d9353f94ebed8ac65ad1ae52", unpack = false },  # symfony/type-info
+    { url = "https://codeload.github.com/symfony/uid/legacy.zip/69d732355a139c6f8881337d28515aa01f12b8be", sha256 = "9d31141e622255fe7799d46b38bd6360a6fa1bb614afd45478809db56fab992e", unpack = false },  # symfony/uid
+    { url = "https://codeload.github.com/web-auth/cose-lib/legacy.zip/e698b150049141f2f9ec03d2a4d681a2d020ab83", sha256 = "2c22de4c98db9455bdfeb8c150b37667d9cfd240717027e2829cfb177b3730ff", unpack = false },  # web-auth/cose-lib
+    { url = "https://codeload.github.com/web-auth/webauthn-lib/legacy.zip/85d8ae791c87a34be91a7ff5cdb5606f67dedaab", sha256 = "0e2bebd71bcf4b60b8c915280bb7bc48a3ef367642c0d22028371d298cc413b7", unpack = false },  # web-auth/webauthn-lib
+    { url = "https://codeload.github.com/webmozarts/assert/legacy.zip/2ccb7c2e821038c03a3e6e1700c570c158c55f70", sha256 = "5bb34f22839b658e60e80e32f7dffb3ae06b1eb8574b985386d4e504883dbbb4", unpack = false },  # webmozart/assert
+]
+
+environment = '''
+export COMPOSER_HOME=/tmp/composer COMPOSER_CACHE_DIR=/tmp/composer-cache COMPOSER_DISABLE_NETWORK=1 \
+    COMPOSER_NO_INTERACTION=1 COMPOSER_ALLOW_SUPERUSER=1
+'''
+build = '''
+python3 $pkgfiles/composer-local.py composer.lock /build/sources
+# extensions are checked at run time (php-gnupg and the rest are rundeps)
+composer install --no-dev --no-scripts --prefer-dist --optimize-autoloader --ignore-platform-reqs
+test -f vendor/autoload.php
+'''
+install = '''
+d="$pkgdir/usr/share/passbolt"
+mkdir -p "$d" "$pkgdir/etc"
+cp -a bin config index.php plugins resources src templates vendor webroot composer.json composer.lock "$d/"
+# config in /etc, state and logs in /var
+mv "$d/config" "$pkgdir/etc/passbolt"
+ln -s /etc/passbolt "$d/config"
+ln -s /var/lib/passbolt/tmp "$d/tmp"
+ln -s /var/log/passbolt "$d/logs"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/passbolt.conf"
+install -Dm644 $pkgfiles/passbolt-cron "$pkgdir/etc/dinit.d/passbolt-cron"
+install -Dm755 $pkgfiles/passbolt-cron-loop "$pkgdir/usr/lib/passbolt/passbolt-cron-loop"
+install -Dm644 $pkgfiles/nginx-passbolt.conf "$pkgdir/usr/share/doc/passbolt/nginx-passbolt.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/passbolt/README.FenrirOS"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/passbolt/LICENSE.txt"
+'''
