@@ -15,8 +15,14 @@ Requested software that is not a recipe yet, and what each needs (2026-11-10):
 - anki: its build (a Rust "ninja" runner) downloads Node, Python wheels and
   crates as it goes; needs a snapshot that pre-runs those, or the npm, crate and
   Python stores wired into its build.
-- geogebra: the GitHub repository is a mirror of a large Gradle/GWT web build;
-  the desktop app is an Electron shell (waits on electron).
+- geogebra: the user chose Classic 5 (Java desktop, `source/desktop`, Gradle
+  9.4.1, gradledeps; branch main, e.g. commit e73c77cb, no release tags). Its
+  native parts come as prebuilt glibc libraries inside Maven jars and need
+  building from source for musl first: JOGL and GlueGen 2.6.0 (jogamp, Ant),
+  javagiac 70501 (Giac CAS + JNI; GeoGebra's giac build) and JNA 5.18.1's
+  libjnidispatch (Alpine builds java-jna against the system libffi). The
+  build also asks foojay to download a JDK 25 toolchain: point it at
+  openjdk25 instead. Its language files and some resources are CC BY-NC-SA.
 - euro-office: an OnlyOffice fork (~30 repositories; core builds V8 and Qt
   pieces with downloads). A snapshot of its build-tools checkout first.
 - brave: chromium (here in wip) plus brave-core on top; with electron's snapshot
@@ -46,15 +52,20 @@ Tux Math, Tux Typing, BamBam, KAlgebra, KmPlot, Qalculate!, Stellarium, KStars,
 Kalzium, FreeCAD, KLettres, Parley, Kiten, Klavaro, Marble, KGeography; games
 0 A.D., DOSBox Staging, Prism Launcher (Minecraft). Not yet:
 
-- phet: PhET's HTML5 simulations are single files
+- phet: written as phet-simulations (packages/, 127 simulations). Was: PhET's HTML5 simulations are single files
   (phet.colorado.edu/sims/html/<sim>/<version>/<sim>_all.html, CC-BY-4.0, all
   languages inside). A recipe with one source per simulation, pinned by
   version, an index page and a desktop entry that opens it in the browser.
   Needs the list of simulations and their current versions first.
-- scratch: Scratch Desktop is an Electron app (waits on electron). Without
-  Electron: scratch-gui built to static files (npm store) and opened in
-  Firefox, like PhET.
-- gdevelop: an Electron app (newIDE/electron-app; waits on electron).
+- scratch: written as scratch-desktop (packages/; on the system Electron, media
+  library as a scratch-media snapshot).
+- gdevelop: an Electron app (newIDE/electron-app, v5.6.287 targets Electron 32).
+  Its core, libGD.js, is GDevelop.js built with Emscripten (the user chose
+  from source over the prebuilt CI copy): emscripten 6.0.3 and binaryen 129
+  are written for it. GDevelop pins Emscripten 3.1.21; if 6.0.3 fails, a
+  pinned 3.1.21 toolchain with its own LLVM. Its build also downloads three
+  zipped editors (piskel, jfxr, yarn) with sha256s in package.json: vendor
+  them as sources.
 - childsplay: dead since 2013, Python 2 and pygame 1; GCompris covers its
   activities. Not planned.
 - gbrainy: C# on Mono (GTK#); waits on Mono, like KeePass 2.
