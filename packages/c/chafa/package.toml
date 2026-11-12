@@ -1,0 +1,31 @@
+# Chafa: terminal graphics (images as character art, sixels, kitty and iTerm
+# protocols). Ported from Chimera's main/chafa. fastfetch draws image logos
+# with it.
+name = "chafa"
+version = "1.18.2"
+release = 1
+summary = "Character art facsimile generator"
+license = "LGPL-3.0-or-later AND GPL-3.0-or-later"
+homepage = "https://hpjansson.org/chafa"
+hostdeps = ["automake", "docbook-xsl-nons", "m4", "libtool", "libxml2", "libxslt", "pkgconf"]
+builddeps = ["freetype-devel", "glib-devel", "libavif-devel", "libjpeg-turbo-devel", "librsvg-devel", "libtiff-devel", "libwebp-devel"]
+
+source = [
+    { url = "https://github.com/hpjansson/chafa/archive/refs/tags/1.18.2.tar.gz", sha256 = "9bdeba46446ac64ed61704fc54b5458cf0dca08b44031b26fbda7b78591984b8" },
+]
+
+setup = '''
+NOCONFIGURE=1 ./autogen.sh
+%configure --enable-man
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 tools/completions/fish-completion.fish "$pkgdir/usr/share/fish/vendor_completions.d/chafa.fish"
+install -Dm644 tools/completions/zsh-completion.zsh "$pkgdir/usr/share/zsh/site-functions/_chafa"
+'''

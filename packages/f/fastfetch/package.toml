@@ -1,0 +1,45 @@
+# fastfetch: system information at a glance (a faster neofetch). Ported from
+# Chimera's main/fastfetch, at 2.71.0 (Chimera's turnstile patch is not
+# needed here). Most libraries are opened at run time (dlopen), so the build
+# needs their headers: Vulkan, Wayland, XCB/Xrandr, DRM, VA-API, VDPAU, GIO,
+# dconf, D-Bus, SQLite, ImageMagick, zlib, chafa, EGL/GLX, OpenCL, libelf,
+# Lua and libzfs. Not in the tree: EFL's eet (Enlightenment's settings) and
+# rpm. System yyjson; no flashfetch.
+name = "fastfetch"
+version = "2.71.0"
+release = 1
+summary = "Neofetch-like system information fetching tool"
+license = "MIT"
+homepage = "https://github.com/fastfetch-cli/fastfetch"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["chafa-devel", "dbus-devel", "dconf-devel", "ddcutil-devel", "elfutils-devel", "glib-devel",
+             "imagemagick-devel", "libdrm-devel", "libpulse-devel", "libva-devel", "libvdpau-devel",
+             "libxcb-devel", "libxrandr-devel", "lua-devel", "mesa-devel", "ocl-icd-devel", "sqlite-devel",
+             "vulkan-headers", "vulkan-loader-devel", "wayland-devel", "yyjson-devel", "zfs-devel",
+             "zlib-ng-compat-devel"]
+rundeps = ["util-linux"]
+
+source = [
+    { url = "https://github.com/fastfetch-cli/fastfetch/archive/refs/tags/2.71.0.tar.gz", sha256 = "e71d93de41e8e4b2554c36d2ae51758112a21ecf3a8c98605a2c689251e62987" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -DNDEBUG"
+'''
+setup = '''
+%cmake \
+    -DBUILD_FLASHFETCH=OFF \
+    -DBUILD_TESTS=ON \
+    -DENABLE_SYSTEM_YYJSON=ON \
+    -DIS_MUSL=ON \
+    -DSET_TWEAK=OFF
+'''
+build = '''
+%cmake_build
+'''
+check = '''
+ctest --test-dir build --output-on-failure
+'''
+install = '''
+%cmake_install
+'''

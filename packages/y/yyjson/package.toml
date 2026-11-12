@@ -1,0 +1,33 @@
+# yyjson: fast JSON library in C. Ported from Chimera's main/yyjson (its
+# no.patch drops -Werror from the test flags). fastfetch uses it.
+# The static library is a second build.
+name = "yyjson"
+version = "0.12.0"
+release = 1
+summary = "High performance C JSON library"
+license = "MIT"
+homepage = "https://ibireme.github.io/yyjson"
+patches = ["no.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+
+source = [
+    { url = "https://github.com/ibireme/yyjson/archive/refs/tags/0.12.0.tar.gz", sha256 = "b16246f617b2a136c78d73e5e2647c6f1de1313e46678062985bdcf1f40bb75d" },
+]
+
+setup = '''
+%cmake -DBUILD_SHARED_LIBS=ON -DYYJSON_BUILD_TESTS=ON
+cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+check = '''
+ctest --test-dir build --output-on-failure
+'''
+install = '''
+DESTDIR="$pkgdir" cmake --install build-static
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/yyjson/LICENSE"
+'''
