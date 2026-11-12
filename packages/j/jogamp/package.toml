@@ -1,0 +1,52 @@
+# JogAmp's GlueGen and JOGL (OpenGL for Java, with NativeWindow and NEWT),
+# 2.6.0, built from JogAmp's source archives with their Ant builds and clang
+# (gcc.compat.compiler=clang). The Maven jars GeoGebra uses carry glibc
+# builds of the native libraries, which musl cannot load: Java programs here
+# take /usr/lib/jogamp/*.so from java.library.path instead (with
+# -Djogamp.gluegen.UseTempJarCache=false). The jars go to /usr/share/java.
+# JOGL's build finds GlueGen at ../gluegen (the second source, linked there).
+# Java 11 byte code (JogAmp's default, 8, is deprecated in JDK 25).
+# Archives: jogamp.org drops long downloads; a fetch may need retrying.
+name = "jogamp"
+version = "2.6.0"
+release = 1
+summary = "Java bindings for OpenGL (JOGL) and their native glue (GlueGen)"
+license = "BSD-2-Clause AND BSD-3-Clause"
+homepage = "https://jogamp.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["apache-ant", "openjdk25"]
+builddeps = ["libx11-devel", "libxxf86vm-devel", "libxrender-devel", "libxrandr-devel", "libxcursor-devel",
+             "libxi-devel", "mesa-devel", "libdrm-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://jogamp.org/deployment/v2.6.0/archive/Sources/jogl-v2.6.0.tar.xz", sha256 = "248c5b8fefe94dc115f4d8b0a1a919cf1f2485de0ab71f94b7aea62fd9ca43a1" },
+    { url = "https://jogamp.org/deployment/v2.6.0/archive/Sources/gluegen-v2.6.0.tar.xz", sha256 = "2d4d58094bc34e32fa7d414cda87665ac1ee00623f988ef7829d957b04792526" },
+]
+
+environment = '''
+export JAVA_HOME=/usr/lib/jvm/java-25-openjdk
+export PATH="$JAVA_HOME/bin:$PATH" ANT_HOME=/usr/share/java/apache-ant
+export ANT_OPTS="-Xmx2g"
+antflags="-Dgcc.compat.compiler=clang -Dtarget.sourcelevel=11 -Dtarget.targetlevel=11 -Dtarget.rt.jar= -Djavacdebug=false -Dc.compiler.debug=false"
+'''
+setup = '''
+ln -sfn gluegen-v2.6.0 ../gluegen
+'''
+build = '''
+(cd ../gluegen/make && ant $antflags base.compile)
+cd make
+ant $antflags init build.nativewindow build.jogl build.newt one.dir
+'''
+install = '''
+lib="$pkgdir/usr/lib/jogamp"
+jar="$pkgdir/usr/share/java"
+mkdir -p "$lib" "$jar"
+install -m755 ../gluegen/build/obj/libgluegen_rt.so "$lib/"
+find build -name 'lib*.so' -path '*/obj/*' -exec install -m755 {} "$lib/" \;
+test -f "$lib/libjogl_desktop.so" && test -f "$lib/libnativewindow_x11.so" && test -f "$lib/libnewt_head.so"
+install -m644 ../gluegen/build/gluegen-rt.jar "$jar/gluegen-rt.jar"
+install -m644 build/jar/jogl-all.jar "$jar/jogl-all.jar"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/jogamp/LICENSE.txt"
+install -Dm644 ../gluegen/LICENSE.txt "$pkgdir/usr/share/licenses/jogamp/LICENSE-gluegen.txt"
+'''
