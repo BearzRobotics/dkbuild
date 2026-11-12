@@ -153,4 +153,6 @@ Servers and parts ("everything needed to run a mail server"):
 | Passbolt (server) | written |
 | fastfetch | written |
 | GCC (all languages that do not shadow LLVM/Go) | written |
+| Chromium (standalone) | written (157.0.8103.38, Chimera's port; with typescript-go, rustc-dev, xdg-utils) |
+| Brave, Euro-Office | planned (after Chromium) |
 | Proxmox VE | planned (after Brave and Euro-Office) |

@@ -15,7 +15,7 @@
 #     component library, so find_package(LLVM) failed without them (clang-tools-extra).
 name = "llvm"
 version = "23.1.5"
-release = 5
+release = 6
 summary = "LLVM libraries and tools"
 description = "LLVM with Clang, LLD, compiler-rt, libunwind, libc++abi and libc++ (X86 and AMDGPU targets)."
 license = "Apache-2.0 WITH LLVM-exception"

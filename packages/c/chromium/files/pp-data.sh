@@ -1,4 +1,5 @@
 #!/bin/sh
+# FenrirOS: Chimera's script, with FenrirOS's issue tracker as the bug URL.
 
 sed \
     -e 's/@@MENUNAME/Chromium/g' \
@@ -25,7 +26,7 @@ sed \
     -e 's/@@DEVELOPER_NAME/The Chromium Authors/g' \
     -e 's/@@PROJECT_LICENSE/BSD-3-Clause/g' \
     -e 's|@@PRODUCTURL|https://www.chromium.org/|g' \
-    -e 's|@@BUGTRACKERURL|https://github.com/chimera-linux/cports/issues|g' \
+    -e 's|@@BUGTRACKERURL|https://github.com/BearzRobotics/dkbuild/issues|g' \
     -e '/@@MAINTMAIL/d' \
     -e '/@@HELPURL/d' \
     -e '/@@appstream_screenshot_url/d' \

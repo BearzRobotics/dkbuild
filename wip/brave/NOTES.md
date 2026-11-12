@@ -51,14 +51,10 @@ starting point.
 2. rust-wasm (upstream wasm32 std).
 3. Recipe from packages/c/chromium (crubit, gnrt, typescript-go, unbundling).
 
-## ast-grep (source rewriting at sync time)
+## ast-grep: not needed to build
 
-rewrite/ has 857 ast-grep rule files (*.yaml) that Brave applies to
-Chromium's sources alongside its patches. Brave builds ast-grep itself
-(third_party/ast-grep/build_ast_grep.py) at ast-grep commit
-979c143639e3588c31f563091e69398683ed34f0, plus a tree-sitter-gn grammar
-library (tree-sitter-grammars/tree-sitter-gn @ bc06955bc1e3c9ff8e9b2b2a55b38b94da923c05)
-that ast-grep loads for BUILD.gn files (sgconfig.yml registers it). Here: an
-ast-grep recipe (cargodeps) and the grammar built in the Brave recipe or the
-snapshot. Find the driver (tools/cr/... or build/commands/lib) that runs
-ast-grep over rewrite/ to know its command line.
+rewrite/ has 857 "plaster" files (tools/cr/plaster.py, docs/plaster.md):
+ast-grep/regex rules Brave's developers run to *generate* the patch files in
+patches/, which are checked in. A checkout applies only patches/ (git apply,
+build/commands/lib/gitPatcher.js), so the build does not run ast-grep. (An
+ast-grep recipe was written before this was clear; it stays as a tool.)

@@ -1,6 +1,8 @@
 #!/bin/sh
 #
 # Adapted from Alpine Linux
+# FenrirOS: Chimera's launcher with `stat -c` (GNU and uutils stat) in place
+# of BSD stat's `stat -f`, and FenrirOS as the version suffix.
 
 for f in /etc/chromium/*.conf; do
   [ -f "$f" ] && . "$f"
@@ -30,7 +32,7 @@ case ":$PATH:" in
   ;;
 esac
 
-if [ $(id -u) -eq 0 ] && [ $(stat -f %u -L ${XDG_CONFIG_HOME:-${HOME}}) -eq 0 ]; then
+if [ $(id -u) -eq 0 ] && [ $(stat -c %u -L ${XDG_CONFIG_HOME:-${HOME}}) -eq 0 ]; then
   # Running as root with HOME owned by root.
   # Pass --user-data-dir to work around upstream failsafe.
   CHROMIUM_FLAGS="--user-data-dir=${XDG_CONFIG_HOME:-"$HOME"/.config}/chromium $CHROMIUM_FLAGS"
@@ -38,6 +40,6 @@ fi
 
 # Set the .desktop file name
 export CHROME_DESKTOP="chromium.desktop"
-export CHROME_VERSION_EXTRA="Chimera Linux"
+export CHROME_VERSION_EXTRA="FenrirOS"
 
 exec "$PROGDIR/chromium" ${CHROMIUM_FLAGS} "$@"

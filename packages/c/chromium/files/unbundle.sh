@@ -1,9 +1,10 @@
 #!/bin/sh
+# FenrirOS: Chimera's script with `gfind` (GNU find on Chimera) as `find`.
 
 _lib="$1"
 
 echo "Removing buildscripts for system provided $_lib"
-gfind . -type f -path "*third_party/$_lib/*" \
+find . -type f -path "*third_party/$_lib/*" \
     \! -path "*third_party/$_lib/chromium/*" \
     \! -path "*third_party/$_lib/google/*" \
     \! -path './base/third_party/icu/*' \
