@@ -745,7 +745,10 @@ with the network for that one step, with an init script that resolves every
 configuration of every project (`gradle-resolve.gradle`), on a copy of the
 source with the recipe's patches applied (so a change to the Gradle files
 belongs in a patch, not in `setup`, which runs later); a configuration that
-cannot be resolved fails the step, so no partial list is kept. What Gradle
+cannot be resolved fails the step, so no partial list is kept. Gradle's
+native integration (file events, file-system watching) is turned off in both
+steps (`org.gradle.native=false`, `org.gradle.vfs.watch=false`): its helper
+libraries are glibc builds. What Gradle
 downloaded is copied into `cache/maven/`, a plain Maven repository
 (`<group>/<artifact>/<version>/<file>` with `.sha1` and `.sha256` files;
 released versions never change, so it is shared), and
