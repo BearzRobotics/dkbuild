@@ -53,6 +53,17 @@ solutions = [{
     },
 }]
 EOF
+# On a re-run (an interrupted or failed sync), gclient finds the pinned tags
+# only if they are local refs; otherwise it fetches the repository's whole
+# history (tens of GB for Chromium). The first clone is shallow
+# (--no-history): fetch the tags the same way first.
+for pair in "src $cver" "src/electron $etag"; do
+    set -- $pair
+    if [ -d "$1/.git" ]; then
+        log "shallow fetch of tag $2 in $1"
+        git -C "$1" fetch -q --depth 1 origin "+refs/tags/$2:refs/tags/$2" || true
+    fi
+done
 log "gclient sync (Electron $etag, Chromium $cver): a large download"
 python3 depot_tools/gclient.py sync --no-history --nohooks --force --reset
 
