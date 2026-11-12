@@ -560,6 +560,8 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     var uses_go = false;
     var uses_npm = false;
     var gem_lists: std.ArrayList([]const u8) = .empty;
+    // further sources' Cargo projects: { archive, list, config }
+    var extra_cargo: std.ArrayList([3][]const u8) = .empty;
     var pub_lists: std.ArrayList([]const u8) = .empty;
     {
         for (r.source) |src| {
@@ -597,6 +599,19 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                     out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
                     return error.PrepareFailed;
                 }
+            }
+            if (first_tarball != null and src == .tarball and src.tarball.unpack and contains(r.options, "cargodeps") and
+                fetch.hasTopCargoLock(arena, io, try fetch.cachePath(arena, cache, src.tarball.sha256)))
+            {
+                _ = fetch.fetchCargoDeps(arena, io, cache, src.tarball.sha256, "", &.{}, null, &msg) catch |err| {
+                    out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
+                    return error.PrepareFailed;
+                };
+                try extra_cargo.append(arena, .{
+                    try fetch.cachePath(arena, cache, src.tarball.sha256),
+                    try fetch.cargoDepsPath(arena, cache, src.tarball.sha256),
+                    try std.fmt.allocPrint(arena, "{s}/cargodeps/{s}.config.toml", .{ cache, src.tarball.sha256 }),
+                });
             }
             if (first_tarball == null and src == .tarball) {
                 first_tarball = try fetch.cachePath(arena, cache, src.tarball.sha256);
@@ -796,6 +811,19 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
             }
             if (clock != null) try lay.appendSlice(arena, ")\n");
         }
+        // further sources' crates, in their own directories (next to this one)
+        for (extra_cargo.items) |ec| {
+            const text = Dir.cwd().readFileAlloc(io, ec[1], arena, .limited(1 << 22)) catch return error.UnpackFailed;
+            try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "(\nd=$(tar -tf '{s}' | head -n1 | sed 's|^\\./||' | cut -d/ -f1)\ncd \"../$d\"\nmkdir -p vendor .cargo\ncp '{s}' .cargo/config.toml\n", .{ absPath(arena, io, ec[0]) catch return error.UnpackFailed, absPath(arena, io, ec[2]) catch return error.UnpackFailed }));
+            var lines = std.mem.tokenizeScalar(u8, text, '\n');
+            while (lines.next()) |l| {
+                var f = std.mem.tokenizeScalar(u8, l, ' ');
+                const n = f.next() orelse continue;
+                const k = f.next() orelse continue;
+                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "ln -sfn '/dkdeps/crates/{s}' 'vendor/{s}'\n", .{ k, n }));
+            }
+            try lay.appendSlice(arena, ")\n");
+        }
         // Gems: vendor/cache in the source's top directory, linking into the
         // store; `bundle install --local` installs from there.
         if (gem_lists.items.len > 0) try lay.appendSlice(arena, "mkdir -p vendor/cache\n");
@@ -971,7 +999,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         });
         // The shared dependency stores, read-only.
         for ([_]struct { use: bool, sub: []const u8, dst: []const u8 }{
-            .{ .use = cargo_list != null, .sub = "crates", .dst = "/dkdeps/crates" },
+            .{ .use = cargo_list != null or extra_cargo.items.len > 0, .sub = "crates", .dst = "/dkdeps/crates" },
             .{ .use = zig_list != null, .sub = "zigpkg", .dst = "/dkdeps/zig" },
             .{ .use = uses_go, .sub = "gomod", .dst = "/dkdeps/go" },
             .{ .use = uses_npm, .sub = "npm", .dst = "/dkdeps/npm" },

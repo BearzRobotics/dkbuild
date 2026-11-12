@@ -132,6 +132,17 @@ pub fn main(init: std.process.Init) !void {
                             std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(zerr) });
                         }
                     }
+                    // further sources with a Cargo project at their top (crubit beside Chromium)
+                    if (!is_first and src.tarball.unpack and contains(r.options, "cargodeps") and
+                        fetch.hasTopCargoLock(arena, init.io, try fetch.cachePath(arena, cache, src.tarball.sha256)))
+                    {
+                        if (fetch.fetchCargoDeps(arena, init.io, cache, src.tarball.sha256, "", &.{}, null, &msg)) |cst| {
+                            std.debug.print("{s}: Rust crates of a further source {s}\n", .{ r.name, @tagName(cst) });
+                        } else |cerr| {
+                            failed = true;
+                            std.debug.print("{s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(cerr) });
+                        }
+                    }
                     if (is_first and contains(r.options, "cargodeps")) {
                         if (fetch.fetchCargoDeps(arena, init.io, cache, src.tarball.sha256, try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, root, r.name), "patches" }), r.patches, try fetch.recipeCargoLock(arena, r.options, try recipe.dirPath(arena, root, r.name)), &msg)) |cst| {
                             std.debug.print("{s}: Rust crates {s}\n", .{ r.name, @tagName(cst) });

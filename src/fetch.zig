@@ -318,6 +318,14 @@ pub fn recipeCargoLock(arena: Allocator, options: []const []const u8, recipe_dir
     return null;
 }
 
+/// Whether a source archive has a Cargo project at its top (a Cargo.lock
+/// there): a further source of a cargodeps recipe is vendored only then.
+pub fn hasTopCargoLock(arena: Allocator, io: std.Io, tarball: []const u8) bool {
+    const cmd = std.fmt.allocPrint(arena, "tar -tf '{s}' 2>/dev/null | grep -qE '^(\\./)?[^/]+/Cargo.lock$'", .{tarball}) catch return false;
+    const r = std.process.run(arena, io, .{ .argv = &.{ "sh", "-c", cmd } }) catch return false;
+    return r.term == .exited and r.term.exited == 0;
+}
+
 pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, patch_dir: []const u8, patches: []const []const u8, lock: ?CargoLock, message: *[]const u8) Error!Status {
     const out_path = try cargoDepsPath(arena, cache, tarball_sha256);
     if (std.Io.Dir.cwd().access(io, out_path, .{})) |_| return .cached else |_| {}
