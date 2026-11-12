@@ -18,7 +18,7 @@
 # use_custom_libcxx=false).
 # The second source is rollup's WebAssembly build: devtools-frontend's rollup
 # has a native module for glibc only.
-# DRAFT: not built yet. TODO: the snapshot's sha256 (the first fetch prints it).
+# Not built yet.
 name = "electron"
 version = "42.11.18"
 release = 1
@@ -64,7 +64,7 @@ builddeps = ["alsa-lib-devel", "brotli-devel", "crc32c-devel", "hdrhistogram-c-d
 rundeps = ["gtk+3", "hwdata", "xdg-utils"]
 
 source = [
-    { url = "snapshot:electron v42.11.18 148.0.7778.280 1afcf0756e47f3a6ee82d7736b9fcda2d57b268e", sha256 = "0000000000000000000000000000000000000000000000000000000000000000" },
+    { url = "snapshot:electron v42.11.18 148.0.7778.280 1afcf0756e47f3a6ee82d7736b9fcda2d57b268e", sha256 = "3b1bca939722412df06a20ffd2177df729a31c84b82e401ad6f6a3e7f3e50560" },
     { url = "https://registry.npmjs.org/@rollup/wasm-node/-/wasm-node-4.22.4.tgz", sha256 = "ee49bf67bd9bee869405af78162d028e2af0fcfca80497404f56b1b99f272717" },
 ]
 
