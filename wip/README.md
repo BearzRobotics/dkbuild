@@ -15,19 +15,7 @@ Requested software that is not a recipe yet, and what each needs (2026-11-10):
 - anki: its build (a Rust "ninja" runner) downloads Node, Python wheels and
   crates as it goes; needs a snapshot that pre-runs those, or the npm, crate and
   Python stores wired into its build.
-- geogebra: the user chose Classic 5 (Java desktop, `source/desktop`, Gradle
-  9.4.1, gradledeps; branch main, e.g. commit e73c77cb, no release tags). Its
-  native parts come as prebuilt glibc libraries inside Maven jars and need
-  building from source for musl first: JOGL and GlueGen 2.6.0 (jogamp, Ant),
-  javagiac 70501 (Giac CAS + JNI; GeoGebra's giac build) and JNA 5.18.1's
-  libjnidispatch (Alpine builds java-jna against the system libffi).
-  Written 2026-11-11: apache-ant, jna, javagiac (libjavagiac64.so in
-  /usr/lib/geogebra; GeoGebra falls back to System.loadLibrary when its
-  natives jar is left out). JogAmp's sources (gluegen/jogl v2.6.0 .tar.xz,
-  jcpp inside) are in the source cache: their server drops connections, so
-  they were fetched with resumed downloads. The
-  build also asks foojay to download a JDK 25 toolchain: point it at
-  openjdk25 instead. Its language files and some resources are CC BY-NC-SA.
+- geogebra: written 2026-11-11 as packages/g/geogebra (Classic 5, Gradle, gradledeps) with apache-ant, jna, javagiac and jogamp for its native parts (musl builds on java.library.path instead of the glibc ones in its Maven jars).
 - euro-office: an OnlyOffice fork (~30 repositories; core builds V8 and Qt
   pieces with downloads). A snapshot of its build-tools checkout first.
 - brave: chromium (here in wip) plus brave-core on top; with electron's snapshot

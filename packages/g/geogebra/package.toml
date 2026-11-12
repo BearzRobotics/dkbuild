@@ -1,0 +1,49 @@
+# GeoGebra Classic 5: the Java desktop app (graphing, geometry, 3D, CAS,
+# spreadsheet), built from GeoGebra's source (branch main; the repository has
+# no release tags, so a pinned commit) with Gradle, its dependencies from the
+# Maven store (`gradledeps`), on the system OpenJDK (toolchain 17; the
+# foojay resolver is not allowed to download one).
+# Native parts: GeoGebra's Maven natives jars are glibc builds, so they are
+# left out of the installed classpath and the app loads FenrirOS's builds
+# from java.library.path instead: JOGL/GlueGen from jogamp, Giac from
+# javagiac (libjavagiac64.so), JNA's libjnidispatch from jna (jna.nosys=false).
+# Licence: GeoGebra's code is GPL-3.0-or-later with exceptions; its
+# translations and some resources are CC BY-NC-SA 3.0 (non-commercial use),
+# and the name and logo are trademarks (geogebra.org/license).
+# DRAFT, not built.
+name = "geogebra"
+version = "5.4_git20261111"
+release = 1
+summary = "GeoGebra Classic 5: dynamic mathematics for graphing, geometry, algebra and 3D"
+license = "GPL-3.0-or-later AND CC-BY-NC-SA-3.0"
+homepage = "https://www.geogebra.org"
+archs = ["x86_64"]
+hostdeps = ["openjdk17", "openjdk21", "unzip"]
+rundeps = ["openjdk21", "jogamp", "javagiac", "jna"]
+options = ["!check", "gradledeps"]
+
+source = [
+    { url = "https://github.com/geogebra/geogebra/archive/e73c77cb505964e5cb2b9bc52486847d88a3b43e.tar.gz", sha256 = "81606fdb0252d5b7096049c467820e74504cc213203cfcf4bae39ec035f5de2c" },
+    { url = "https://services.gradle.org/distributions/gradle-9.4.1-bin.zip", sha256 = "2ab2958f2a1e51120c326cad6f385153bb11ee93b3c216c5fccebfdfbb7ec6cb", unpack = false },
+]
+
+environment = '''
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+export GRADLE_OPTS="-Dorg.gradle.java.installations.paths=/usr/lib/jvm/java-17-openjdk,/usr/lib/jvm/java-21-openjdk -Dorg.gradle.java.installations.auto-download=false -Dorg.gradle.java.installations.auto-detect=false"
+'''
+build = '''
+gradle -p source/desktop :desktop:installDist
+'''
+install = '''
+d="$pkgdir/usr/lib/geogebra"
+mkdir -p "$d"
+cp -a source/desktop/desktop/build/install/desktop/lib "$d/lib"
+# the glibc natives jars (JOGL, GlueGen, javagiac for Linux, Windows, macOS)
+find "$d/lib" -name '*-natives-*.jar' -delete
+find "$d/lib" -name 'javagiac-*-*.jar' -delete
+! ls "$d/lib" | grep -q natives
+install -Dm755 $pkgfiles/geogebra "$pkgdir/usr/bin/geogebra"
+install -Dm644 $pkgfiles/geogebra.desktop "$pkgdir/usr/share/applications/geogebra.desktop"
+install -Dm644 source/desktop/desktop/src/main/resources/org/geogebra/desktop/gui/images/64px/geogebra.png \
+    "$pkgdir/usr/share/icons/hicolor/64x64/apps/geogebra.png"
+'''

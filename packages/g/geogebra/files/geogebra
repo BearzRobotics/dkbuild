@@ -1,0 +1,12 @@
+#!/bin/sh
+# GeoGebra Classic 5 on the system Java, with FenrirOS's native libraries
+# (JOGL/GlueGen, Giac, JNA) instead of the glibc ones in GeoGebra's jars.
+exec /usr/lib/jvm/java-21-openjdk/bin/java \
+    -Djava.library.path=/usr/lib/jogamp:/usr/lib/geogebra:/usr/lib \
+    -Djogamp.gluegen.UseTempJarCache=false \
+    -Djna.nosys=false -Djna.boot.library.path=/usr/lib \
+    --add-exports java.base/java.lang=ALL-UNNAMED \
+    --add-exports java.desktop/sun.awt=ALL-UNNAMED \
+    --add-exports java.desktop/sun.java2d=ALL-UNNAMED \
+    --enable-native-access=ALL-UNNAMED \
+    -cp '/usr/lib/geogebra/lib/*' org.geogebra.desktop.GeoGebra3D "$@"
