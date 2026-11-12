@@ -24,7 +24,9 @@ export PATH="$JAVA_HOME/bin:$PATH"
 '''
 build = '''
 ./bootstrap.sh
-bootstrap/bin/ant dist
+# javadoc.notrequired: no API documentation (javadoc fails on the optional
+# tasks whose jars are left out, see above; the javadocs are not packaged)
+bootstrap/bin/ant -Djavadoc.notrequired=true dist
 '''
 install = '''
 home=/usr/share/java/apache-ant
