@@ -164,7 +164,7 @@ Servers and parts ("everything needed to run a mail server"):
 | htop | written (3.5.3; capabilities, delay accounting, sensors) |
 | btop | written (1.4.8; GPU support, man page via go-md2man) |
 | bottom (btm) | written (0.15.0; battery, NVIDIA, ZFS; man page and completions) |
-| GNOME Online Accounts (libgoa, goa-daemon) | written (3.58.1, Kerberos via Heimdal), with librest 0.10.2 |
+| GNOME Online Accounts (libgoa, goa-daemon) | written (3.58.1, Kerberos via Heimdal), with librest 0.10.2; an optional dependency of dkde (being added there): add it to the dkde recipe with the release that uses it |
 
 ## Questions for the user (collected 2026-11-12, overnight)
 

@@ -6,6 +6,8 @@
 # Google and Microsoft use GNOME's registered OAuth client ids (upstream's
 # defaults). Nothing is configured by installing: accounts are added by the
 # user; the daemon is D-Bus activated in the user's session.
+# Also an optional dependency of dkde (online accounts support being added
+# there, 2026-11-12).
 name = "gnome-online-accounts"
 version = "3.58.1"
 release = 1
