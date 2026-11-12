@@ -24,6 +24,15 @@ source = [
 
 environment = '''
 export CMAKE_POLICY_VERSION_MINIMUM=3.5
+# Roc passes CC to OpenFEC's cmake as CMAKE_C_COMPILER, which must be one word:
+# dkbuild's CC ("clang --target=...") becomes a wrapper script with the target.
+if [ "$CC" != /tmp/cc-wrap/cc ]; then
+    mkdir -p /tmp/cc-wrap
+    printf '#!/bin/sh\nexec %s "$@"\n' "$CC" > /tmp/cc-wrap/cc
+    printf '#!/bin/sh\nexec %s "$@"\n' "$CXX" > /tmp/cc-wrap/c++
+    chmod 755 /tmp/cc-wrap/cc /tmp/cc-wrap/c++
+    export CC=/tmp/cc-wrap/cc CXX=/tmp/cc-wrap/c++
+fi
 roc_scons() {
     scons -j$jobs --prefix=/usr --libdir=/usr/lib --with-libraries=/usr/lib \
         --disable-sox --build-3rdparty=openfec "$@"
