@@ -1,0 +1,43 @@
+# Apache Ant: the Java build tool (JNA, JOGL and GlueGen build with it).
+# Bootstrapped from source as Alpine does (bootstrap.sh, then `ant dist`), but
+# without Alpine's `ant -f fetch.xml` step, which downloads the jars of the
+# optional tasks (JUnit, ...) during the build: the core and the optional
+# tasks that need nothing extra are built. ANT_HOME is /usr/share/java/apache-ant.
+name = "apache-ant"
+version = "1.10.18"
+release = 1
+summary = "Java-based build tool"
+license = "Apache-2.0"
+homepage = "https://ant.apache.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["openjdk25"]
+rundeps = ["openjdk25"]
+options = ["!check"]
+
+source = [
+    { url = "https://archive.apache.org/dist/ant/source/apache-ant-1.10.18-src.tar.bz2", sha256 = "9c8b71ca430bc5135c4914d37c947ea6b8f044c81aae3adfffbe8fbac7b0e185" },
+]
+
+environment = '''
+export JAVA_HOME=/usr/lib/jvm/java-25-openjdk
+export PATH="$JAVA_HOME/bin:$PATH"
+'''
+build = '''
+./bootstrap.sh
+bootstrap/bin/ant dist
+'''
+install = '''
+home=/usr/share/java/apache-ant
+d="$pkgdir$home"
+cd apache-ant-$version
+rm -f bin/*.bat bin/*.cmd
+install -dm755 "$d/bin" "$d/lib" "$pkgdir/usr/bin"
+install -m755 bin/* "$d/bin/"
+cp -r etc "$d/"
+install -m644 lib/*.jar "$d/lib/"
+ln -s $home/bin/ant "$pkgdir/usr/bin/ant"
+for f in LICENSE NOTICE; do install -Dm644 $f "$pkgdir/usr/share/licenses/apache-ant/$f"; done
+install -Dm644 /dev/stdin "$pkgdir/etc/profile.d/apache-ant.sh" <<EOF2
+export ANT_HOME=$home
+EOF2
+'''
