@@ -1,0 +1,21 @@
+# cairocffi for Python (KiCad's SVG and PDF plotting uses CairoSVG). From Alpine's
+# py3-cairocffi.
+name = "python-cairocffi"
+version = "1.7.1"
+release = 1
+summary = "cffi-based cairo bindings for Python"
+license = "BSD-3-Clause"
+homepage = "https://github.com/Kozea/cairocffi"
+hostdeps = ["python", "python-flit-core"]
+rundeps = ["python-cffi", "cairo", "gdk-pixbuf"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/c/cairocffi/cairocffi-1.7.1.tar.gz", sha256 = "2e48ee864884ec4a3a34bfa8c9ab9999f688286eb714a15a43ec9d068c36557b" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-cairocffi/LICENSE"
+'''

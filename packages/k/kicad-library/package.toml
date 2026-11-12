@@ -1,0 +1,31 @@
+# KiCad's official libraries: schematic symbols, PCB footprints and project
+# templates (the 3D models are kicad-packages3d). From Alpine's
+# community/kicad-library, plus the templates.
+name = "kicad-library"
+version = "10.0.7"
+release = 1
+summary = "KiCad symbol, footprint and template libraries"
+license = "CC-BY-SA-4.0 WITH KiCad-libraries-exception"
+homepage = "https://kicad.github.io"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja"]
+rundeps = ["kicad"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://gitlab.com/kicad/libraries/kicad-symbols/-/archive/10.0.7/kicad-symbols-10.0.7.tar.gz", sha256 = "951f1392d3de6a258eea9b67fccce7d0bfd5af3e768e85c445a2240e19138c98" },
+    { url = "https://gitlab.com/kicad/libraries/kicad-footprints/-/archive/10.0.7/kicad-footprints-10.0.7.tar.gz", sha256 = "dcbe41c2ceb28c5a7a2a2b0c51c258ff1cb086c8516d7fcbd01cfd82861c37c7" },
+    { url = "https://gitlab.com/kicad/libraries/kicad-templates/-/archive/10.0.7/kicad-templates-10.0.7.tar.gz", sha256 = "c60aebcb9872282d3f240a0874a847d7f28c23ddd0f4a3bb7c56c4b6ef1319a5" },
+]
+
+build = '''
+for d in kicad-symbols kicad-footprints kicad-templates; do
+    (cd /build/$d-$version && cmake -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr && cmake --build build)
+done
+'''
+install = '''
+for d in kicad-symbols kicad-footprints kicad-templates; do
+    DESTDIR="$pkgdir" cmake --install /build/$d-$version/build
+done
+install -Dm644 /build/kicad-symbols-$version/LICENSE.md "$pkgdir/usr/share/licenses/kicad-library/LICENSE.md"
+'''

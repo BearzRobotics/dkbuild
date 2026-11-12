@@ -1,0 +1,26 @@
+# KiCad's 3D models (STEP and VRML) for its footprints: the 3D viewer and
+# STEP export use them. Large (a 663 MB archive, several GB installed): its
+# own package, so KiCad installs without it. From Alpine's kicad-library-3d.
+name = "kicad-packages3d"
+version = "10.0.7"
+release = 1
+summary = "3D models for KiCad's footprint libraries"
+license = "CC-BY-SA-4.0 WITH KiCad-libraries-exception"
+homepage = "https://kicad.github.io"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja"]
+rundeps = ["kicad-library"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://gitlab.com/kicad/libraries/kicad-packages3D/-/archive/10.0.7/kicad-packages3D-10.0.7.tar.gz", sha256 = "72197c01d77def8df098cd0ca87432ac71d740c3da94835e99070757f709bc15" },
+]
+
+build = '''
+cmake -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr
+cmake --build build
+'''
+install = '''
+DESTDIR="$pkgdir" cmake --install build
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/kicad-packages3d/LICENSE.md"
+'''

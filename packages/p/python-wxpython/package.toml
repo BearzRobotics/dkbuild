@@ -1,0 +1,29 @@
+# wxPython 4 (Phoenix): Python bindings for the system wxWidgets; KiCad's
+# Python plugins use it. As Alpine's py3-wxpython: the SIP bindings are
+# regenerated for the system wxWidgets, then built with the waf the archive
+# carries (build.py checks its sha256; no download).
+name = "python-wxpython"
+version = "4.2.5"
+release = 1
+summary = "Cross-platform GUI toolkit for Python (wxWidgets bindings)"
+license = "LGPL-2.0-or-later WITH WxWindows-exception-3.1"
+homepage = "https://wxpython.org"
+patches = ["no-stacktrace.patch"]
+hostdeps = ["python", "python-sip", "python-setuptools", "python-cython", "pkgconf"]
+builddeps = ["wxwidgets-devel", "python-devel"]
+rundeps = ["python", "python-numpy", "python-pillow", "python-six"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/source/w/wxpython/wxpython-4.2.5.tar.gz", sha256 = "44e836d1bccd99c38790bb034b6ecf70d9060f6734320560f7c4b0d006144793" },
+]
+
+build = '''
+python3 build.py sip build_py --use_syswx --release -j$jobs
+'''
+install = '''
+python3 build.py install --destdir="$pkgdir"
+find "$pkgdir/usr/lib" -type f -exec chmod 644 {} \;
+find "$pkgdir/usr/lib" -name '*.so' -exec chmod 755 {} \;
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-wxpython/LICENSE.txt"
+'''

@@ -1,0 +1,26 @@
+# libspnav: client library for 3D mice (spacenavd); KiCad's 3D viewer uses it.
+# From Alpine's community/libspnav.
+name = "libspnav"
+version = "1.2"
+release = 1
+summary = "Library for 3D input devices (space navigators)"
+license = "BSD-3-Clause"
+homepage = "https://spacenav.sourceforge.net"
+builddeps = ["libx11-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/FreeSpacenav/libspnav/releases/download/v1.2/libspnav-1.2.tar.gz", sha256 = "093747e7e03b232e08ff77f1ad7f48552c06ac5236316a5012db4269951c39db" },
+]
+
+setup = '''
+# its own configure script, not autoconf's: only these options
+./configure --prefix=/usr --libdir=lib
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libspnav/LICENSE"
+'''

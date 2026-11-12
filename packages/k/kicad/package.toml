@@ -1,0 +1,50 @@
+# KiCad: electronics design suite (schematics, PCB layout, 3D viewer, SPICE
+# simulation through ngspice, Python scripting with wxPython plugins, the IPC
+# API over nng/protobuf). From Alpine's community/kicad. Its libraries are
+# kicad-library (symbols, footprints, templates) and kicad-packages3d.
+# QA tests are not built (Alpine's two patches only fix tests). Alpine pins
+# Boost 1.84; this builds against the system Boost.
+name = "kicad"
+version = "10.0.7"
+release = 1
+summary = "Electronics design automation suite (schematic and PCB)"
+license = "GPL-3.0-or-later"
+homepage = "https://www.kicad.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja", "pkgconf", "swig", "gettext", "patchelf", "python"]
+builddeps = ["boost-devel", "cairo-devel", "curl-devel", "glew-devel", "glm-devel", "glu-devel", "libgit2-devel",
+             "libspnav-devel", "mesa-devel", "ngspice-devel", "nng-devel", "opencascade-devel", "poppler-devel",
+             "protobuf-devel", "python-devel", "python-wxpython", "unixodbc-devel", "wxwidgets-devel",
+             "zlib-ng-compat-devel", "zstd-devel", "harfbuzz-devel", "fontconfig-devel", "freetype-devel",
+             "libsecret-devel", "gtk+3-devel"]
+rundeps = ["python", "python-wxpython", "python-cairosvg", "ngspice"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/kicad/code/kicad/-/archive/10.0.7/kicad-10.0.7.tar.gz", sha256 = "f0592c1348851e3e4917270f72443404fbc3a9a0daa60b2ed80419ce7ef45993" },
+]
+
+setup = '''
+%cmake -Wno-dev \
+    -DKICAD_USE_EGL=ON \
+    -DKICAD_SCRIPTING_WXPYTHON=ON \
+    -DKICAD_BUILD_I18N=ON \
+    -DKICAD_BUILD_QA_TESTS=OFF \
+    -DKICAD_UPDATE_CHECK=OFF \
+    -DKICAD_SPICE_QA=OFF \
+    -DOPENGL_opengl_LIBRARY=/usr/lib/libGL.so
+'''
+build = '''
+# a generated header other targets need first (Alpine: still needed in 10.0)
+cmake --build build --target common/pcb_lexer.h
+%cmake_build
+'''
+install = '''
+%cmake_install
+site=$(python3 -c "import site; print(site.getsitepackages()[0])")
+patchelf --remove-rpath "$pkgdir$site/_pcbnew.so"
+'''
+
+[subpackages.demos]
+summary = "Example projects for KiCad"
+paths   = ["/usr/share/kicad/demos"]
