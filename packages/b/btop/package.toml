@@ -1,0 +1,36 @@
+# btop: resource monitor (CPU, memory, disks, network, processes, GPUs).
+# GPU support is on: NVIDIA's NVML and AMD's ROCm SMI are opened at run time
+# when present, Intel GPUs are read from the kernel. Btop's own LTO and
+# _FORTIFY_SOURCE flags are off (as Chimera's), the toolchain's hardening
+# applies. The man page is made from manpage.md with go-md2man (btop's cmake
+# wants lowdown, which is not in the tree).
+name = "btop"
+version = "1.4.8"
+release = 1
+summary = "TUI monitor of system resources"
+license = "Apache-2.0"
+homepage = "https://github.com/aristocratos/btop"
+patches = ["nomisc.patch"]
+hostdeps = ["cmake", "go-md2man", "ninja"]
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/aristocratos/btop/archive/v1.4.8/btop-1.4.8.tar.gz", sha256 = "67e07c21b770a6d884c5e50ba1d2cfc90732ea57459367d8732ec7ecbeb3be5f" },
+]
+
+setup = '''
+%cmake \
+    -DBTOP_GPU=ON \
+    -DBTOP_LTO=OFF \
+    -DBTOP_FORTIFY=OFF
+'''
+build = '''
+%cmake_build
+go-md2man -in manpage.md -out build/btop.1
+'''
+install = '''
+%cmake_install
+install -Dm644 build/btop.1 "$pkgdir/usr/share/man/man1/btop.1"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/btop/LICENSE"
+'''

@@ -157,6 +157,15 @@ Servers and parts ("everything needed to run a mail server"):
 | Brave, Euro-Office | planned (after Chromium) |
 | Proxmox VE | planned (after Brave and Euro-Office) |
 
+## System monitors and GNOME accounts (2026-11-12)
+
+| Package | Status |
+|---|---|
+| htop | written (3.5.3; capabilities, delay accounting, sensors) |
+| btop | written (1.4.8; GPU support, man page via go-md2man) |
+| bottom (btm) | written (0.15.0; battery, NVIDIA, ZFS; man page and completions) |
+| GNOME Online Accounts (libgoa, goa-daemon) | written (3.58.1, Kerberos via Heimdal), with librest 0.10.2 |
+
 ## Questions for the user (collected 2026-11-12, overnight)
 
 1. **Kerberos for curl.** curl no longer supports Heimdal (its docs/HISTORY.md:

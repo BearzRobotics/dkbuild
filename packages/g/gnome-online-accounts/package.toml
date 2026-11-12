@@ -1,0 +1,40 @@
+# GNOME Online Accounts: the goa-daemon and the libgoa/libgoa-backend
+# libraries that GNOME applications (Evolution, Files, Calendar, Contacts...)
+# use for Google, Microsoft 365, Exchange, Nextcloud/ownCloud, WebDAV,
+# IMAP/SMTP and Kerberos accounts. As Chimera's: Kerberos through Heimdal
+# (patched), introspection and Vala bindings, man pages; no API docs.
+# Google and Microsoft use GNOME's registered OAuth client ids (upstream's
+# defaults). Nothing is configured by installing: accounts are added by the
+# user; the daemon is D-Bus activated in the user's session.
+name = "gnome-online-accounts"
+version = "3.58.1"
+release = 1
+summary = "GNOME service to access online accounts"
+license = "LGPL-2.0-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/gnome-online-accounts"
+patches = ["heimdal.patch", "crash-goa.patch"]
+hostdeps = ["docbook-xsl-nons", "gettext-devel", "glib-devel", "gobject-introspection", "libxslt", "meson",
+            "pkgconf", "vala"]
+builddeps = ["dbus-devel", "gcr-devel", "glib-devel", "gtk4-devel", "heimdal-devel", "json-glib-devel",
+             "keyutils-devel", "libadwaita-devel", "librest-devel", "libsecret-devel", "libsoup-devel",
+             "libxml2-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/gnome-online-accounts/3.58/gnome-online-accounts-3.58.1.tar.xz", sha256 = "9ec1900cc51409c2067c07c828c10be06fe3bf68d2999bb72d7d5ed325ed9bbc" },
+]
+
+setup = '''
+%meson \
+    -Ddocumentation=false \
+    -Dintrospection=true \
+    -Dvapi=true \
+    -Dman=true \
+    -Dkerberos=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''
