@@ -1,0 +1,15 @@
+FenrirOS: the Gradle toolchain asks for Java 19, which the tree does not have;
+Java 21 (an LTS release) builds it. A patch, not a sed in setup, so that
+dkbuild's Gradle dependency resolution (which sees patches) uses it too.
+
+--- a/app/build.gradle.kts	2026-11-12 08:26:50.517164924 -0500
++++ b/app/build.gradle.kts	2026-11-12 08:26:50.520953495 -0500
+@@ -46,7 +46,7 @@
+ // Apply a specific Java toolchain to ease working on different environments.
+ java {
+     toolchain {
+-        languageVersion.set(JavaLanguageVersion.of(19))
++        languageVersion.set(JavaLanguageVersion.of(21))
+     }
+ }
+ 

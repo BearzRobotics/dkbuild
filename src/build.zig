@@ -892,16 +892,21 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
             out("    resolving Gradle dependencies (network, once for this source)\n", .{});
             // The recipe's environment too (ghidra's JAVA_HOME: Gradle needs a JDK).
             const genv = try std.fmt.allocPrint(arena, "export name='{s}' version='{s}' srcdir='{s}' jobs={d}\n{s}\n", .{ r.name, r.version, srcdir, opts.jobs, r.environment orelse "" });
+            var gpatches: std.ArrayList(u8) = .empty;
+            for (r.patches) |pt| try gpatches.appendSlice(arena, try std.fmt.allocPrint(arena, "patch -Np1 -s -i '/dkbuild/patches/{s}'\n", .{pt}));
             const sh = try std.fmt.allocPrint(arena,
                 \\set -e
                 \\{s}
                 \\z=$(ls /build/sources/gradle-*-bin.zip | head -n1)
                 \\mkdir -p /tmp/gradle-dist && unzip -q "$z" -d /tmp/gradle-dist
                 \\g=$(ls -d /tmp/gradle-dist/gradle-*)/bin/gradle
-                \\cd '{s}'
-                \\"$g" --no-daemon -g /tmp/ghome -I /dkbuild/gradle-resolve.gradle dkbuildResolveAll
+                \\# on a copy with the recipe's patches applied (the build applies them to
+                \\# its own tree later): what is resolved is what the patched build uses
+                \\rm -rf /tmp/gradle-src && cp -a '{s}' /tmp/gradle-src && cd /tmp/gradle-src
+                \\{s}
+                \\"$g" --no-daemon --continue -g /tmp/ghome -I /dkbuild/gradle-resolve.gradle dkbuildResolveAll
                 \\sh /dkbuild/gradle-store.sh /tmp/ghome /dkstore/maven /dkstore/gradledeps/{s}.list
-            , .{ genv, srcdir, first_sha });
+            , .{ genv, srcdir, gpatches.items, first_sha });
             const ok = sandbox.run(arena, io, .{
                 .lower = base_root,
                 .upper = sb.upper,

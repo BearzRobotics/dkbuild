@@ -2,7 +2,7 @@
 # (Kotlin and Java on java-gtk, which calls GTK through the JVM's foreign
 # function API: no native jars). Gradle with its dependencies from the Maven
 # store (`gradledeps`, Maven Central and JitPack). Its toolchain asks for
-# Java 19, not in the tree: built with 21 instead.
+# Java 19, not in the tree: built with 21 instead (patches/java-21-toolchain.patch).
 name = "coulomb"
 version = "0.6.1"
 release = 1
@@ -13,6 +13,7 @@ archs = ["x86_64", "aarch64"]
 hostdeps = ["openjdk21", "unzip"]
 rundeps = ["openjdk21", "gtk4", "libadwaita"]
 options = ["!check", "gradledeps"]
+patches = ["java-21-toolchain.patch"]
 
 source = [
     { url = "https://github.com/hamza-algohary/Coulomb/archive/refs/tags/v0.6.1.tar.gz", sha256 = "8fe05fd43471947458c74f244e9c4e87ee55e5662b0a488a6761eb92e0036f70" },
@@ -22,11 +23,6 @@ source = [
 environment = '''
 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
 export GRADLE_OPTS="-Dorg.gradle.java.installations.paths=/usr/lib/jvm/java-21-openjdk -Dorg.gradle.java.installations.auto-download=false"
-'''
-setup = '''
-# the Gradle toolchain asks for Java 19, which the tree does not have: 21
-sed -i 's/JavaLanguageVersion.of(19)/JavaLanguageVersion.of(21)/' app/build.gradle.kts
-grep -q 'JavaLanguageVersion.of(21)' app/build.gradle.kts
 '''
 build = '''
 gradle :app:shadowJar

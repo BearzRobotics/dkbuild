@@ -1,18 +1,24 @@
 // dkbuild gradledeps, fetch side (SPEC.md 7.4): resolves every resolvable
 // configuration of every project, and the build script classpaths, so that
 // Gradle downloads everything the build will need into its user home. dkbuild
-// then copies those files into the shared Maven-layout store.
+// then copies those files into the shared Maven-layout store. A configuration
+// that cannot be resolved fails its project's task (after trying them all;
+// dkbuild runs this with --continue), so a partial result is never kept as the
+// source's list.
 //
-//   gradle -I gradle-resolve.gradle dkbuildResolveAll
+//   gradle --continue -I gradle-resolve.gradle dkbuildResolveAll
 allprojects { p ->
     p.tasks.register("dkbuildResolveAll") {
         doLast {
+            def failed = []
             p.buildscript.configurations.each { c ->
-                if (c.canBeResolved) { try { c.resolve() } catch (e) { logger.warn("dkbuild: ${p.path} buildscript ${c.name}: ${e.message}") } }
+                if (c.canBeResolved) { try { c.resolve() } catch (e) { failed << "buildscript ${c.name}"; logger.warn("dkbuild: ${p.path} buildscript ${c.name}: ${e.message}") } }
             }
             p.configurations.each { c ->
-                if (c.canBeResolved) { try { c.resolve() } catch (e) { logger.warn("dkbuild: ${p.path} ${c.name}: ${e.message}") } }
+                if (c.canBeResolved) { try { c.resolve() } catch (e) { failed << c.name; logger.warn("dkbuild: ${p.path} ${c.name}: ${e.message}") } }
             }
+            if (!failed.isEmpty())
+                throw new GradleException("dkbuild: ${p.path}: ${failed.size()} configuration(s) could not be resolved: ${failed.join(', ')}")
         }
     }
 }
