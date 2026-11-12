@@ -14,7 +14,8 @@ source = [
 ]
 
 build = '''
-go build -trimpath -ldflags "-X main.version=$version" -o build/lego ./cmd/lego
+# lego 5: the command is the module's top package (cmd/lego is gone)
+go build -trimpath -ldflags "-X main.version=$version" -o build/lego .
 '''
 install = '''
 install -Dm755 build/lego "$pkgdir/usr/bin/lego"
