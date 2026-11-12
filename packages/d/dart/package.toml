@@ -1,0 +1,84 @@
+# Dart SDK: the language's VM, AOT compiler (dart compile), pub, the analyzer
+# and DevTools; dart-sass (Zammad's stylesheets) is built with it. Ported from
+# Alpine's testing/dart 3.10.3 (its patches: system ICU and zlib, no -Werror,
+# toolchains without target prefixes, the system's flags and LLD).
+# The source is a snapshot (src/snapshot-dart.sh): the SDK's gclient checkout,
+# Cloud Storage test data left out, no prebuilt binaries.
+# Bootstrapping: the SDK is built with a Dart SDK. The first build (stage 0)
+# uses Alpine's (dart-bootstrap, with GCC's C++ runtime from
+# dotnet-bootstrap-gcc-runtime); every later one the previous dart package
+# (selfhost). Dart's "gcc" toolchain is given clang under those names.
+# DRAFT, not built. TODO: the snapshot's sha256 (the first fetch prints it).
+name = "dart"
+version = "3.10.3"
+release = 1
+summary = "Dart programming language SDK"
+license = "BSD-3-Clause"
+homepage = "https://dart.dev"
+archs = ["x86_64", "aarch64"]
+patches = ["build-config.patch", "gcc13.patch", "no-werror.patch", "unbundle.patch", "unbundle-icu.patch",
+           "where-we-are-heading-prefixes-are-not-needed.patch", "zlib-not-found.patch"]
+hostdeps = ["gn", "ninja", "python", "llvm-lld", "zstd", "findutils"]
+builddeps = ["icu-devel", "zlib-ng-compat-devel", "linux-headers"]
+stage0deps = ["dart-bootstrap", "dotnet-bootstrap-gcc-runtime"]
+options = ["!check", "selfhost", "!lto"]
+
+source = [
+    { url = "snapshot:dart 3.10.3 1afcf0756e47f3a6ee82d7736b9fcda2d57b268e", sha256 = "0000000000000000000000000000000000000000000000000000000000000000" },
+]
+
+environment = '''
+# the Dart that builds Dart: the previous package's, or (stage 0) Alpine's
+if [ -x /usr/lib/dart/bin/dart ] && [ ! -d /usr/lib/dart-bootstrap ]; then
+    bootdart=/usr/lib/dart
+else
+    bootdart=/usr/lib/dart-bootstrap/usr/lib/dart
+    export LD_LIBRARY_PATH=/usr/lib/dotnet-bootstrap-gcc
+fi
+# Dart's gcc toolchain, with clang
+mkdir -p /tmp/cc-bin
+ln -sf /usr/bin/clang /tmp/cc-bin/gcc
+ln -sf /usr/bin/clang++ /tmp/cc-bin/g++
+for t in ar nm readelf strip; do ln -sf /usr/bin/llvm-$t /tmp/cc-bin/$t; done
+export PATH="/tmp/cc-bin:$PATH"
+case "$arch" in aarch64) darch=arm64; out=out/ReleaseARM64 ;; *) darch=x64; out=out/ReleaseX64 ;; esac
+'''
+setup = '''
+mkdir -p .git/logs
+echo '' > .git/logs/HEAD
+rm -rf tools/sdks/dart-sdk
+ln -s $bootdart tools/sdks/dart-sdk
+ln -sf /usr/bin/gn buildtools/gn
+mkdir -p buildtools/ninja
+ln -sf /usr/bin/ninja buildtools/ninja/ninja
+# what gclient's hooks would have run
+python3 tools/generate_package_config.py
+python3 tools/generate_sdk_version_file.py
+# no analytics (as Alpine)
+echo '' > tools/bots/dartdoc_footer.html
+rm -f third_party/devtools/web/devtools_analytics.js
+grep -rlZ --exclude='*.map' 'google-analytics\.com' . 2>/dev/null | xargs -0 -r sed -i -E 's|([^/]+\.)?google-analytics\.com|0.0.0.0|g'
+grep -rlZ 'UA-[0-9]\+-[0-9]\+' . 2>/dev/null | xargs -0 -r sed -i -E 's|UA-[0-9]+-[0-9]+|UA-2137-0|g'
+sed -i 's/Unknown timestamp/release/' tools/make_version.py
+# system ICU and zlib
+for l in icu zlib; do
+    find . -type f -path "*third_party/$l/*" \! -path "*third_party/$l/chromium/*" \! -path "*third_party/$l/google/*" \
+        \! -regex '.*\.\(gn\|gni\|isolate\|py\)' -delete
+done
+python3 build/linux/unbundle/replace_gn_files.py --system-libraries icu zlib
+'''
+build = '''
+python3 ./tools/build.py --no-clang --arch=$darch --mode=release --no-verify-sdk-hash \
+    --gn-args='dart_embed_icu_data=false dart_snapshot_kind="app-jit" dart_sysroot=""' \
+    create_sdk runtime
+$out/dart-sdk/bin/dart --version
+'''
+install = '''
+mkdir -p "$pkgdir/usr/bin" "$pkgdir/usr/lib" "$pkgdir/usr/include"
+cp -r $out/dart-sdk "$pkgdir/usr/lib/dart"
+ln -s ../lib/dart/include "$pkgdir/usr/include/dart"
+install -Dm755 $pkgfiles/dart-wrapper.sh "$pkgdir/usr/bin/dart"
+ln -s ../lib/dart/bin/dartaotruntime "$pkgdir/usr/bin/dartaotruntime"
+find "$pkgdir/usr/lib/dart/bin/resources/devtools" -type f -exec chmod 644 {} \; 2>/dev/null || true
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/dart/LICENSE"
+'''

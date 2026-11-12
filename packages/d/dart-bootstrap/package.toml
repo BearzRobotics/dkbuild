@@ -1,0 +1,35 @@
+# Dart's stage 0 seed: Alpine Linux's musl build of the Dart SDK 3.10.3 (edge
+# testing), unpacked in /usr/lib/dart-bootstrap. Dart's SDK is built with a
+# Dart SDK, so the first build of dart needs one (its stage0deps); every later
+# one uses the previous dart package (selfhost), as Alpine's own does. It links
+# GCC's C++ runtime: dotnet-bootstrap-gcc-runtime (Alpine's libstdc++ and
+# libgcc_s, kept private) supplies it. Build use only: off the ISO.
+name = "dart-bootstrap"
+version = "3.10.3"
+release = 1
+summary = "Prebuilt Dart SDK (Alpine's) to bootstrap dart once"
+license = "BSD-3-Clause"
+homepage = "https://dart.dev"
+archs = ["x86_64"]
+rundeps = ["dotnet-bootstrap-gcc-runtime", "icu"]
+options = ["!strip", "!check", "!repo-iso"]
+
+source = [
+    { url = "https://dl-cdn.alpinelinux.org/alpine/edge/testing/x86_64/dart-3.10.3-r1.apk", sha256 = "601e4e8f7188ee23bc81363970a57b0950a01edb2c8c658223f47bc40123536f", unpack = false },
+    { url = "https://dl-cdn.alpinelinux.org/alpine/edge/testing/x86_64/dart-sdk-3.10.3-r1.apk", sha256 = "7bd95165b766cdf6726e52aca158780fa21a01bc17c221edfaa6f6ce76052374", unpack = false },
+    { url = "https://dl-cdn.alpinelinux.org/alpine/edge/testing/x86_64/dartaotruntime-3.10.3-r1.apk", sha256 = "79d6f5007ab4cd9b29d6d3db92aa0294900c666143f021a089798fdecf0132ec", unpack = false },
+]
+
+install = '''
+d="$pkgdir/usr/lib/dart-bootstrap"
+mkdir -p "$d"
+for a in /build/sources/*.apk; do
+    tar -xzf "$a" -C "$d" 2>/dev/null || tar -xzf "$a" -C "$d"
+done
+rm -f "$d"/.PKGINFO "$d"/.SIGN.* "$d"/.pre-* "$d"/.post-*
+test -x "$d/usr/lib/dart/bin/dart"
+install -Dm644 /dev/stdin "$pkgdir/usr/share/licenses/dart-bootstrap/README" <<EOF2
+Alpine Linux's dart, dart-sdk and dartaotruntime 3.10.3-r1 packages (edge
+testing), unchanged. Dart is BSD-3-Clause: https://github.com/dart-lang/sdk
+EOF2
+'''

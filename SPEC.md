@@ -223,7 +223,8 @@ source = [
   is unknown until it is made: fetch keeps it under the checksum it has and
   prints it for the recipe. `git` (repository URL, tag or commit) is a shallow
   clone with all its submodules, for projects whose release archives leave
-  the submodules out. `scratch-media` (an @scratch/scratch-gui version) downloads the
+  the submodules out. `dart` (Dart tag, depot_tools commit) is the Dart SDK's gclient checkout, as
+  Alpine's dart snapshot. `scratch-media` (an @scratch/scratch-gui version) downloads the
   media library that version lists, each asset checked against the MD5 it
   is named by, for Scratch Desktop.
 - The first tarball is unpacked into the build directory, and the build
