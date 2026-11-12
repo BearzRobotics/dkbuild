@@ -1,0 +1,29 @@
+# Verilator: compiles Verilog/SystemVerilog to C++ for fast simulation. From
+# Alpine's community/verilator.
+name = "verilator"
+version = "5.050"
+release = 1
+summary = "Verilog/SystemVerilog to C++ simulator"
+license = "LGPL-3.0-only OR Artistic-2.0"
+homepage = "https://verilator.org"
+hostdeps = ["autoconf", "automake", "bison", "flex", "help2man", "perl", "python"]
+builddeps = ["flex-devel", "zlib-ng-compat-devel"]
+rundeps = ["perl", "python", "make"]
+
+source = [
+    { url = "https://github.com/verilator/verilator/archive/refs/tags/v5.050/verilator-5.050.tar.gz", sha256 = "ec6723f30c1798b1fbbbed97364f09c431fb4875577c314f37240e99b60a4a04" },
+]
+
+setup = '''
+autoconf
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make test
+'''
+install = '''
+%make_install
+'''

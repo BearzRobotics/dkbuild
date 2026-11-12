@@ -1,0 +1,37 @@
+# libsigrok: sigrok's hardware access library for logic analyzers,
+# oscilloscopes, multimeters and other test equipment, with its C++ bindings
+# (libsigrokcxx, which PulseView uses). Its last release, 0.5.2, is from 2019;
+# PulseView's Qt 6 support is only on master, so both are pinned master
+# commits (libsigrok 2025-11-20). udev rules for device access from Alpine's
+# recipe.
+name = "libsigrok"
+version = "0.6.0_git20251120"
+release = 1
+summary = "Library for logic analyzers and other measurement hardware"
+license = "GPL-3.0-or-later"
+homepage = "https://sigrok.org/wiki/Libsigrok"
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf", "doxygen", "python"]
+builddeps = ["glib-devel", "glibmm2.4-devel", "libzip-devel", "libserialport-devel", "libusb-devel",
+             "libftdi1-devel", "check-devel", "linux-headers"]
+
+source = [
+    { url = "https://github.com/sigrokproject/libsigrok/archive/0bc2487778e660f4d3116729b6f4aee2b1996bb0.tar.gz", sha256 = "6bdaa8ae47929050ab6aa125da9eb1cbeeeb0d7b2cef7e1f13f3809a7c13b40a" },
+]
+
+setup = '''
+./autogen.sh
+%configure --disable-java --disable-ruby --disable-python
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+# PulseView needs the C++ bindings
+test -f "$pkgdir/usr/lib/pkgconfig/libsigrokcxx.pc"
+install -Dm644 contrib/60-libsigrok.rules "$pkgdir/usr/lib/udev/rules.d/60-libsigrok.rules"
+install -Dm644 contrib/61-libsigrok-plugdev.rules "$pkgdir/usr/lib/udev/rules.d/61-libsigrok-plugdev.rules"
+'''

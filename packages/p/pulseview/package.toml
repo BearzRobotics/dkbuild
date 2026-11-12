@@ -1,0 +1,27 @@
+# PulseView: sigrok's Qt GUI for logic analyzers and oscilloscopes, with
+# protocol decoding. The 0.4.2 release (2020) is Qt 5 only; master builds with
+# Qt 6: a pinned commit (2025-11-10), with libsigrok's master to match.
+name = "pulseview"
+version = "0.5.0_git20251110"
+release = 1
+summary = "Qt GUI for sigrok logic analyzers and oscilloscopes"
+license = "GPL-3.0-or-later"
+homepage = "https://sigrok.org/wiki/PulseView"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools"]
+builddeps = ["boost-devel", "glib-devel", "glibmm2.4-devel", "libsigrok-devel", "libsigrokdecode-devel",
+             "libserialport-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel", "qt6-qttools-devel", "python-devel"]
+rundeps = ["qt6-qtsvg"]
+
+source = [
+    { url = "https://github.com/sigrokproject/pulseview/archive/af02198741b4e57c9f9b796bd5e6c0f2ae9f2f2b.tar.gz", sha256 = "c52ceb33fc528adc0e00a713930ae29742d704b8a08c1e875622216f80285915" },
+]
+
+setup = '''
+%cmake -DENABLE_TESTS=OFF -DENABLE_DECODE=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

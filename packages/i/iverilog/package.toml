@@ -1,0 +1,28 @@
+# Icarus Verilog: Verilog compiler and simulator. From Alpine's
+# community/iverilog.
+name = "iverilog"
+version = "13.0"
+release = 1
+summary = "Icarus Verilog compiler and simulation tool"
+license = "GPL-2.0-or-later"
+homepage = "https://steveicarus.github.io/iverilog/"
+hostdeps = ["autoconf", "automake", "bison", "flex", "gperf"]
+builddeps = ["zlib-ng-compat-devel", "readline-devel", "bzip2-devel"]
+
+source = [
+    { url = "https://github.com/steveicarus/iverilog/archive/refs/tags/v13_0.tar.gz", sha256 = "c897bbfa9848688982c6d5c30529fc29d68df0b9ff22ffa73bad89db73a7ce49" },
+]
+
+setup = '''
+sh autoconf.sh
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

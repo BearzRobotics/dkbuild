@@ -1,0 +1,30 @@
+# libsigrokdecode: sigrok's protocol decoders (Python 3 scripts with a C
+# library). From Alpine's testing/libsigrokdecode with its patches (version
+# detection without git; Python 3.14).
+name = "libsigrokdecode"
+version = "0.5.3"
+release = 1
+summary = "Library to decode protocols captured by logic analyzers"
+license = "GPL-3.0-or-later"
+homepage = "https://sigrok.org/wiki/Libsigrokdecode"
+patches = ["version.patch", "python-3.14.patch"]
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf"]
+builddeps = ["glib-devel", "python-devel", "check-devel"]
+
+source = [
+    { url = "https://github.com/sigrokproject/libsigrokdecode/archive/refs/tags/libsigrokdecode-0.5.3.tar.gz", sha256 = "65b4e6ce0519ffec0b1d61ff4beb8243ba68d1e02e3f92f2a34d9ab670e9236f" },
+]
+
+setup = '''
+autoreconf -vif
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

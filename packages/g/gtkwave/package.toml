@@ -1,0 +1,29 @@
+# GTKWave: waveform viewer (VCD, LXT, LXT2, VZT, FST, GHW). The GTK 3 line,
+# from Alpine's testing/gtkwave.
+name = "gtkwave"
+version = "3.3.120"
+release = 1
+summary = "Waveform viewer for VCD, LXT, FST and GHW files"
+license = "GPL-2.0-or-later"
+homepage = "https://gtkwave.sourceforge.net"
+hostdeps = ["gperf", "pkgconf"]
+builddeps = ["gtk+3-devel", "bzip2-devel", "xz-devel", "dconf-devel", "zlib-ng-compat-devel", "tcl-devel", "tk-devel"]
+rundeps = ["desktop-file-utils"]
+
+source = [
+    { url = "https://gtkwave.sourceforge.net/gtkwave-gtk3-3.3.120.tar.gz", sha256 = "5da94863fb2e5d88cc019e2bfdc676022398113894b585d864e11ca8341b24d8" },
+]
+
+setup = '''
+%configure --disable-mime-update --with-gsettings --enable-gtk3 \
+    --with-tcl=/usr/lib --with-tk=/usr/lib
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''
