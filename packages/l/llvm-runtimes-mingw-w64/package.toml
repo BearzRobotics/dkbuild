@@ -5,7 +5,7 @@
 # main/llvm-runtimes-mingw-w64.
 name = "llvm-runtimes-mingw-w64"
 version = "23.1.5"
-release = 1
+release = 2
 summary = "LLVM libc++ and libunwind for cross-compiling Windows programs"
 license = "Apache-2.0 WITH LLVM-exception AND NCSA"
 homepage = "https://llvm.org"

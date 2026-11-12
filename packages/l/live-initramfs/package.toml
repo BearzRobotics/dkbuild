@@ -8,7 +8,7 @@
 # r2: no /run in the live fstab: the /run the initramfs moved into the root holds /run/live (the disc), and a second tmpfs would hide it.
 name = "live-initramfs"
 version = "1"
-release = 3
+release = 4
 summary = "Initramfs for FenrirOS live ISOs"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"

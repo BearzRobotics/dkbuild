@@ -2,7 +2,7 @@
 # which the npm store does not cover yet): the terminal and DAP front ends work.
 name = "microscope"
 version = "0.0.0_git20261110"
-release = 1
+release = 2
 summary = "Debugger and profiler for Linux (terminal, browser, DAP)"
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/microscope-dev/microscope"
