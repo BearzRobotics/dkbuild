@@ -2,7 +2,7 @@
 # Image processing library. needed by: tesseract.
 name = "leptonica"
 version = "1.85.0"
-release = 2
+release = 3
 summary = "Image processing and analysis library"
 license = "BSD-2-Clause"
 homepage = "http://www.leptonica.org"

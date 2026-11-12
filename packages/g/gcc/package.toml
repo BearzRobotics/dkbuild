@@ -55,6 +55,19 @@ unset CPPFLAGS LDFLAGS
 export CFLAGS="-O2 -g0" CXXFLAGS="-O2 -g0"
 export CFLAGS_FOR_TARGET="-O2 -g0" CXXFLAGS_FOR_TARGET="-O2 -g0" LDFLAGS_FOR_TARGET=" "
 export libat_cv_have_ifunc=no
+# libssp_nonshared.a: GCC configured for musl with --enable-default-ssp (Alpine's
+# seed as well as this one) links every program with -lssp_nonshared, the
+# static helper __stack_chk_fail_local that Alpine builds into its musl and
+# FenrirOS's musl does not have ("cannot find -lssp_nonshared" made the seed
+# fail configure's first test). Built here with the compiler at hand, found
+# through LIBRARY_PATH, and installed in GCC 15's own library directory below.
+mkdir -p /tmp/ssp
+if [ ! -f /tmp/ssp/libssp_nonshared.a ]; then
+    printf 'extern void __stack_chk_fail(void);\n__attribute__((visibility("hidden"))) void __stack_chk_fail_local(void) { __stack_chk_fail(); }\n' > /tmp/ssp/ssp.c
+    "$CC" -O2 -fPIC -fno-stack-protector -c /tmp/ssp/ssp.c -o /tmp/ssp/ssp.o
+    ar rcs /tmp/ssp/libssp_nonshared.a /tmp/ssp/ssp.o
+fi
+export LIBRARY_PATH=/tmp/ssp
 '''
 setup = '''
 echo $version > gcc/BASE-VER
@@ -96,6 +109,8 @@ for t in "$pkgdir$p"/bin/gnat*; do
     chmod 755 "$pkgdir/usr/bin/$n"
 done
 test -x "$pkgdir/usr/bin/gnatmake" && test -e "$pkgdir/usr/bin/gcc-15"
+# libssp_nonshared.a (see environment) where this GCC's driver finds it
+install -m644 /tmp/ssp/libssp_nonshared.a "$pkgdir$p/lib/gcc/x86_64-fenriros-linux-musl/$version/"
 # libtool archives and info pages' directory index
 find "$pkgdir" -name '*.la' -delete
 rm -f "$pkgdir$p/share/info/dir"
