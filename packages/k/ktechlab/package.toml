@@ -1,0 +1,30 @@
+# KTechLab: IDE for microcontrollers and electronics (circuit simulation with
+# PIC programs running alongside). KDE Frameworks 6 / Qt 6, from KDE's
+# repository at the commit Alpine's community/ktechlab uses (no KF6 release
+# yet).
+name = "ktechlab"
+version = "0.51.0_git20260206"
+release = 1
+summary = "IDE for microcontrollers and electronics"
+license = "GPL-2.0-only"
+homepage = "https://apps.kde.org/ktechlab/"
+hostdeps = ["cmake", "ninja", "extra-cmake-modules", "kdoctools", "gettext"]
+builddeps = ["kcompletion-devel", "kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kdoctools-devel",
+             "ki18n-devel", "kiconthemes-devel", "kio-devel", "kparts-devel", "ktexteditor-devel",
+             "ktextwidgets-devel", "kwidgetsaddons-devel", "kwindowsystem-devel", "kxmlgui-devel",
+             "qt6-qtbase-devel", "qt6-qtserialport-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://invent.kde.org/sdk/ktechlab/-/archive/1ce00695e70af005a86f0afbf6912469d9b23273.tar.gz", sha256 = "4a3ffe2dccbb71d4fb3fcdac685b1988d53130a2d26dea99c8608f11ceaa1be3" },
+]
+
+setup = '''
+%cmake -DBUILD_TESTING=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

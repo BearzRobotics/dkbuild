@@ -1,0 +1,37 @@
+# Logisim-evolution: digital logic design and simulation (gates to
+# processors, with FPGA export). Gradle, dependencies from the Maven store
+# (`gradledeps`), on OpenJDK 21. From Alpine's community/logisim-evolution
+# (its desktop-file patch).
+name = "logisim-evolution"
+version = "4.0.0"
+release = 1
+summary = "Digital logic design tool and simulator"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/logisim-evolution/logisim-evolution"
+archs = ["x86_64", "aarch64"]
+patches = ["Desktop-file.patch"]
+hostdeps = ["openjdk21", "unzip"]
+rundeps = ["openjdk21", "hicolor-icon-theme"]
+options = ["!check", "gradledeps"]
+
+source = [
+    { url = "https://github.com/logisim-evolution/logisim-evolution/archive/v4.0.0/logisim-evolution-4.0.0.tar.gz", sha256 = "95bc9e67de7294ed3d09869edc692eff4c7308d86e3d7a9802328e03d77310f8" },
+    { url = "https://services.gradle.org/distributions/gradle-9.0.0-bin.zip", sha256 = "8fad3d78296ca518113f3d29016617c7f9367dc005f932bd9d93bf45ba46072b", unpack = false },
+]
+
+environment = '''
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+'''
+build = '''
+gradle shadowJar
+'''
+install = '''
+install -Dm644 build/libs/logisim-evolution-$version-all.jar "$pkgdir/usr/share/logisim-evolution/logisim-evolution.jar"
+install -Dm644 support/Flatpak/com.github.reds.LogisimEvolution.xml "$pkgdir/usr/share/mime/packages/logisim-evolution.xml"
+install -Dm644 support/Flatpak/com.github.reds.LogisimEvolution.desktop "$pkgdir/usr/share/applications/logisim-evolution.desktop"
+install -Dm755 $pkgfiles/logisim-evolution "$pkgdir/usr/bin/logisim-evolution"
+for size in 16 32 48 128 256; do
+    install -Dm644 src/main/resources/resources/logisim/img/logisim-icon-$size.png \
+        "$pkgdir/usr/share/icons/hicolor/${size}x${size}/apps/com.github.reds.LogisimEvolution.png"
+done
+'''
