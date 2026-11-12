@@ -10,5 +10,7 @@ in /var/lib/glpi, logs in /var/log/glpi (inc/downstream.php). PHP runs as _php.
          --db-host=localhost --db-name=glpi --db-user=glpi --db-password=...'
    or open the web installer after step 3.
 3. nginx: /usr/share/doc/glpi/nginx-glpi.conf; enable php-fpm and nginx.
-4. Enable crond (dinitctl enable crond): /etc/cron.d/glpi runs GLPI's
-   automatic actions; set them to "CLI" mode in GLPI's settings.
+4. Automatic actions: install the example cron job, enable crond, and set
+   them to "CLI" mode in GLPI's settings:
+     cp /usr/share/doc/glpi/glpi.cron /etc/cron.d/glpi
+     dinitctl enable crond

@@ -102,6 +102,10 @@ pkg`, and it can go in an image.
 
 ## Requested applications (2026-11-08)
 
+Requests from 2026-11-11 on, and the rule for server packages (installed
+inert: no enabled services, no default credentials, no active web site or
+cron job), are in requests.md.
+
 Everything asked for. All of it native: Flatpak (with Flathub as its default
 remote) is there for Steam, not instead of these. "Written" means the recipe
 exists and passes `dkbuild check`; the builds of 2026-11-08 onwards

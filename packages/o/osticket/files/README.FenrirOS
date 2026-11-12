@@ -11,5 +11,7 @@ Code in /usr/share/osticket; its configuration file is
    then open http://<host>/setup/ and follow the installer.
 4. Afterwards: chown root /etc/osticket/ost-config.php (read-only again),
    and remove /usr/share/osticket/setup if you like (osTicket asks for it).
-5. Enable crond (dinitctl enable crond): /etc/cron.d/osticket fetches mail
-   and runs the scheduled tasks.
+5. Mail fetching and scheduled tasks: install the example cron job and
+   enable crond:
+     cp /usr/share/doc/osticket/osticket.cron /etc/cron.d/osticket
+     dinitctl enable crond

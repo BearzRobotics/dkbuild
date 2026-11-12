@@ -4,7 +4,9 @@
 # dependencies (vendor/) and built assets in the repository, so the release
 # tag is complete. Writable parts (storage, Modules, bootstrap/cache) are in
 # /var/lib/freescout and .env in /etc/freescout; the scheduler runs from
-# /etc/cron.d/freescout. Setup: /usr/share/doc/freescout/README.FenrirOS.
+# an example cron job the user installs. Setup: /usr/share/doc/freescout/README.FenrirOS.
+# Installed inert (docs/requests.md): no service enabled, no site, no cron
+# job, no credentials; the README says how to set it up.
 name = "freescout"
 version = "1.8.250"
 release = 1
@@ -12,7 +14,7 @@ summary = "Lightweight help desk and shared mailbox"
 license = "AGPL-3.0-only"
 homepage = "https://freescout.net"
 archs = ["x86_64", "aarch64"]
-rundeps = ["php", "php-fpm", "nginx", "cronie"]
+rundeps = ["php", "php-fpm", "nginx"]
 options = ["!check", "!strip"]
 
 source = [
@@ -32,7 +34,7 @@ ln -s /var/lib/freescout/Modules "$d/Modules"
 rm -rf "$d/bootstrap/cache"
 ln -s /var/lib/freescout/bootstrap-cache "$d/bootstrap/cache"
 ln -s /etc/freescout/env "$d/.env"
-install -Dm644 $pkgfiles/freescout.cron "$pkgdir/etc/cron.d/freescout"
+install -Dm644 $pkgfiles/freescout.cron "$pkgdir/usr/share/doc/freescout/freescout.cron"
 install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/freescout.conf"
 install -Dm644 $pkgfiles/nginx-freescout.conf "$pkgdir/usr/share/doc/freescout/nginx-freescout.conf"
 install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/freescout/README.FenrirOS"

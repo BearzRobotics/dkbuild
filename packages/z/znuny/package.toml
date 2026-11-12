@@ -13,6 +13,8 @@
 # To update: files/resolve-cpan.py <modules> lists the distributions (needs
 # network and a host Perl of the same version for its core-module list).
 # Home: /opt/znuny, as upstream expects. Setup: /usr/share/doc/znuny/README.FenrirOS.
+# Installed inert (docs/requests.md): its services are shipped, not enabled;
+# no site, no cron job, no credentials; the README says how to set it up.
 name = "znuny"
 version = "7.3.8"
 release = 1
@@ -28,7 +30,7 @@ builddeps = ["perl", "libxml2-devel", "libxslt-devel", "mariadb", "mariadb-devel
              "perl-parse-yapp", "perl-locale-gettext"]
 rundeps = ["perl", "perl-moo", "perl-json", "perl-io-socket-ssl", "perl-net-ssleay", "perl-uri", "perl-template-toolkit",
            "perl-xml-parser", "perl-role-tiny", "perl-sub-quote", "perl-class-method-modifiers", "perl-path-tiny",
-           "perl-parse-yapp", "perl-locale-gettext", "nginx", "cronie"]
+           "perl-parse-yapp", "perl-locale-gettext", "nginx"]
 options = ["!check"]
 
 source = [

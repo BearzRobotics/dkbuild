@@ -4,7 +4,9 @@
 # libraries in vendor/ as source, and its built web assets). Packaged as GLPI
 # documents for distributions: inc/downstream.php puts configuration in
 # /etc/glpi, data in /var/lib/glpi, logs in /var/log/glpi. Automatic actions
-# from /etc/cron.d/glpi (cronie). Setup: /usr/share/doc/glpi/README.FenrirOS.
+# from an example cron job (installed by the user). Setup: /usr/share/doc/glpi/README.FenrirOS.
+# Installed inert (docs/requests.md): no service enabled, no site, no cron
+# job, no credentials; the README says how to set it up.
 name = "glpi"
 version = "12.0.1"
 release = 1
@@ -12,7 +14,7 @@ summary = "IT asset management and service desk"
 license = "GPL-3.0-or-later"
 homepage = "https://glpi-project.org"
 archs = ["x86_64", "aarch64"]
-rundeps = ["php", "php-fpm", "nginx", "cronie"]
+rundeps = ["php", "php-fpm", "nginx"]
 options = ["!check", "!strip"]
 
 source = [
@@ -27,7 +29,7 @@ cp -a . "$d/"
 mv "$d/files" "$d/files.dist"
 rm -rf "$d/config"
 install -Dm644 $pkgfiles/downstream.php "$d/inc/downstream.php"
-install -Dm644 $pkgfiles/glpi.cron "$pkgdir/etc/cron.d/glpi"
+install -Dm644 $pkgfiles/glpi.cron "$pkgdir/usr/share/doc/glpi/glpi.cron"
 install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/glpi.conf"
 install -Dm644 $pkgfiles/nginx-glpi.conf "$pkgdir/usr/share/doc/glpi/nginx-glpi.conf"
 install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/glpi/README.FenrirOS"

@@ -2,8 +2,10 @@
 # departments, queues, SLAs). PHP with MariaDB, served by nginx and php-fpm.
 # Upstream's release archive (its PHP libraries, laminas-mail and mPDF, are
 # in it as PHP source). Layout: code in /usr/share/osticket, configuration in
-# /etc/osticket, logs in /var/log/osticket; scheduled tasks from
-# /etc/cron.d/osticket (cronie). Setup: /usr/share/doc/osticket/README.FenrirOS.
+# /etc/osticket, logs in /var/log/osticket; scheduled tasks from an
+# example cron job (installed by the user). Setup: /usr/share/doc/osticket/README.FenrirOS.
+# Installed inert (docs/requests.md): no service enabled, no site, no cron
+# job, no credentials; the README says how to set it up.
 name = "osticket"
 version = "1.18.4"
 release = 1
@@ -11,7 +13,7 @@ summary = "Web-based help desk ticketing system"
 license = "GPL-2.0-only"
 homepage = "https://osticket.com"
 archs = ["x86_64", "aarch64"]
-rundeps = ["php", "php-fpm", "nginx", "cronie"]
+rundeps = ["php", "php-fpm", "nginx"]
 options = ["!check", "!strip"]
 
 source = [
@@ -25,7 +27,7 @@ cp -a /build/upload/. "$d/"
 install -Dm640 "$d/include/ost-sampleconfig.php" "$pkgdir/etc/osticket/ost-config.php"
 ln -s /etc/osticket/ost-config.php "$d/include/ost-config.php"
 install -Dm644 /build/scripts/rcron.php "$pkgdir/usr/share/doc/osticket/scripts/rcron.php"
-install -Dm644 $pkgfiles/osticket.cron "$pkgdir/etc/cron.d/osticket"
+install -Dm644 $pkgfiles/osticket.cron "$pkgdir/usr/share/doc/osticket/osticket.cron"
 install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/osticket.conf"
 install -Dm644 $pkgfiles/nginx-osticket.conf "$pkgdir/usr/share/doc/osticket/nginx-osticket.conf"
 install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/osticket/README.FenrirOS"
