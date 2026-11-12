@@ -1,7 +1,7 @@
 # masscan: asynchronous TCP port scanner. It loads libpcap at run time.
 name = "masscan"
 version = "1.3.2"
-release = 1
+release = 2
 summary = "Fast asynchronous TCP port scanner"
 license = "AGPL-3.0-only"
 homepage = "https://github.com/robertdavidgraham/masscan"
