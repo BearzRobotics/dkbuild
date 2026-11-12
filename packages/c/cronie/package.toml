@@ -1,0 +1,46 @@
+# cronie: the cron daemon (with anacron, for machines that are not always on).
+# From Chimera's main/cronie. Without PAM: FenrirOS keeps linux-pam as a
+# library and logins shadow-based. crond is a dinit service (enable with
+# `dinitctl enable crond`); /etc/cron.{hourly,daily,weekly,monthly} run
+# through run-parts (debianutils).
+name = "cronie"
+version = "1.7.2"
+release = 1
+summary = "Cron daemon with anacron"
+license = "ISC AND BSD-2-Clause AND BSD-3-Clause AND GPL-2.0-or-later"
+homepage = "https://github.com/cronie-crond/cronie"
+patches = ["cfi.patch", "no-bash.patch"]
+hostdeps = ["autoconf", "automake", "libtool"]
+builddeps = ["musl-obstack-devel"]
+rundeps = ["debianutils"]
+
+source = [
+    { url = "https://github.com/cronie-crond/cronie/releases/download/cronie-1.7.2/cronie-1.7.2.tar.gz", sha256 = "f1da374a15ba7605cf378347f96bc8b678d3d7c0765269c8242cfe5b0789c571" },
+]
+
+environment = '''
+export LDFLAGS="${LDFLAGS} -lobstack"
+'''
+setup = '''
+autoreconf -if -W none
+%configure --enable-anacron --with-inotify --without-pam --without-selinux
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+chmod 4755 "$pkgdir/usr/bin/crontab"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/cronie/COPYING"
+install -Dm644 $pkgfiles/crond "$pkgdir/etc/dinit.d/crond"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/cronie.conf"
+install -Dm644 contrib/anacrontab "$pkgdir/etc/anacrontab"
+install -Dm644 $pkgfiles/crontab "$pkgdir/etc/crontab"
+install -Dm755 contrib/0anacron "$pkgdir/etc/cron.hourly/0anacron"
+install -Dm644 contrib/0hourly "$pkgdir/etc/cron.d/0hourly"
+install -Dm644 $pkgfiles/cron.deny "$pkgdir/etc/cron.deny"
+install -Dm644 $pkgfiles/anacron.default "$pkgdir/etc/default/anacron"
+'''

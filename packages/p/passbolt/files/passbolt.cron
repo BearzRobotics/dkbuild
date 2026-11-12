@@ -1,0 +1,2 @@
+# Passbolt's email queue and periodic jobs, every minute, as the PHP user
+* * * * * _php HOME=/var/lib/passbolt /usr/share/passbolt/bin/cron >> /var/log/passbolt/cron.log 2>&1

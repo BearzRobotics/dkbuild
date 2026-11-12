@@ -1,7 +1,0 @@
-#!/bin/sh
-# Runs Passbolt's bin/cron once a minute, at the start of each minute.
-export HOME=/var/lib/passbolt
-while :; do
-    /usr/share/passbolt/bin/cron || echo "passbolt: bin/cron failed ($?)" >&2
-    sleep $((60 - $(date +%S | sed 's/^0//')))
-done

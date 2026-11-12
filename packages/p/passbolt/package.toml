@@ -8,7 +8,7 @@
 # passbolt-styleguide).
 # Layout as Passbolt's Debian package: code in /usr/share/passbolt, config in
 # /etc/passbolt, state in /var/lib/passbolt, logs in /var/log/passbolt; the
-# email queue runs from the passbolt-cron dinit service (no cron daemon yet).
+# email queue runs from /etc/cron.d/passbolt (cronie).
 # Setup: /usr/share/doc/passbolt/README.FenrirOS.
 # To update: regenerate the sources from the new composer.lock (each
 # dist.reference archive's sha256).
@@ -20,7 +20,7 @@ license = "AGPL-3.0-only"
 homepage = "https://www.passbolt.com"
 archs = ["x86_64", "aarch64"]
 hostdeps = ["php", "composer", "unzip", "python"]
-rundeps = ["php", "php-fpm", "php-gnupg", "gnupg", "nginx", "composer"]
+rundeps = ["php", "php-fpm", "php-gnupg", "gnupg", "nginx", "composer", "cronie"]
 options = ["!check", "!strip"]
 
 source = [
@@ -151,8 +151,7 @@ ln -s /etc/passbolt "$d/config"
 ln -s /var/lib/passbolt/tmp "$d/tmp"
 ln -s /var/log/passbolt "$d/logs"
 install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/passbolt.conf"
-install -Dm644 $pkgfiles/passbolt-cron "$pkgdir/etc/dinit.d/passbolt-cron"
-install -Dm755 $pkgfiles/passbolt-cron-loop "$pkgdir/usr/lib/passbolt/passbolt-cron-loop"
+install -Dm644 $pkgfiles/passbolt.cron "$pkgdir/etc/cron.d/passbolt"
 install -Dm644 $pkgfiles/nginx-passbolt.conf "$pkgdir/usr/share/doc/passbolt/nginx-passbolt.conf"
 install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/passbolt/README.FenrirOS"
 install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/passbolt/LICENSE.txt"

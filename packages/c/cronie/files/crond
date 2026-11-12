@@ -1,0 +1,5 @@
+# cronie's cron daemon (system crontab, /etc/cron.d, users' crontabs, anacron)
+type = process
+command = /usr/bin/crond -n -s
+smooth-recovery = true
+depends-on: rcboot

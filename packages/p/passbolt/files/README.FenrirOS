@@ -26,4 +26,4 @@ Code: /usr/share/passbolt (config/ is /etc/passbolt, tmp/ is
    'gpg' => ['keyring' => '/var/lib/passbolt/.gnupg'].
 4. su -s /bin/sh _php -c 'HOME=/var/lib/passbolt /usr/share/passbolt/bin/cake passbolt install'
 5. nginx: /usr/share/doc/passbolt/nginx-passbolt.conf; enable php-fpm, nginx
-   and passbolt-cron (dinitctl enable ...).
+   and crond (dinitctl enable ...); the jobs are in /etc/cron.d/passbolt.

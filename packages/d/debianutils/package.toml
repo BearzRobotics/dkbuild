@@ -1,0 +1,25 @@
+# debianutils' run-parts (cron's /etc/cron.{hourly,daily,...} run through it),
+# savelog and ischroot, compiled directly as Chimera's main/debianutils does
+# (its other tools are elsewhere in the tree or obsolete).
+name = "debianutils"
+version = "5.23.2"
+release = 1
+summary = "run-parts, savelog and ischroot from Debian"
+license = "GPL-2.0-or-later"
+homepage = "https://tracker.debian.org/pkg/debianutils"
+
+source = [
+    { url = "https://deb.debian.org/debian/pool/main/d/debianutils/debianutils_5.23.2.tar.xz", sha256 = "79e524b7526dba2ec5c409d0ee52ebec135815cf5b2907375d444122e0594b69" },
+]
+
+build = '''
+flags="-DHAVE_GETOPT_H -DPACKAGE_VERSION=\"$version\" -Wall -Wextra"
+$CC $CFLAGS $flags $LDFLAGS ischroot.c -o ischroot
+$CC $CFLAGS $flags $LDFLAGS run-parts.c -o run-parts
+'''
+install = '''
+for t in ischroot run-parts savelog; do install -Dm755 $t "$pkgdir/usr/bin/$t"; done
+install -Dm644 ischroot.1 "$pkgdir/usr/share/man/man1/ischroot.1"
+install -Dm644 run-parts.8 "$pkgdir/usr/share/man/man8/run-parts.8"
+install -Dm644 savelog.8 "$pkgdir/usr/share/man/man8/savelog.8"
+'''
