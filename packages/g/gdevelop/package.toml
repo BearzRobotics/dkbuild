@@ -57,7 +57,10 @@ node /dkbuild/npm-offline.js /tmp/npm-cache $locks
 # GDJS, the game engine runtime (TypeScript, built by the IDE's import step)
 (cd GDJS && npm ci --ignore-scripts)
 (cd GDevelop.js && npm install --offline --ignore-scripts --install-links)
-(cd newIDE/app && npm install --offline --ignore-scripts --install-links && npx patch-package)
+# --legacy-peer-deps: with its lockfile entry gone, npm re-resolves the local
+# @lingui/react, whose peer React (^15 || ^16) the app's "react": "$react"
+# override meets with React 18 only as "react@undefined" (ERESOLVE)
+(cd newIDE/app && npm install --offline --ignore-scripts --install-links --legacy-peer-deps && npx patch-package)
 (cd newIDE/electron-app && npm ci --ignore-scripts)
 (cd newIDE/electron-app/app && npm ci --ignore-scripts)
 # the bundled editors, where import-zipped-editor.js would download them
