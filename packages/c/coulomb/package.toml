@@ -1,0 +1,39 @@
+# Coulomb: a simple circuit simulator with a GTK 4 / libadwaita interface
+# (Kotlin and Java on java-gtk, which calls GTK through the JVM's foreign
+# function API: no native jars). Gradle with its dependencies from the Maven
+# store (`gradledeps`, Maven Central and JitPack). Its toolchain asks for
+# Java 19, not in the tree: built with 21 instead.
+name = "coulomb"
+version = "0.6.1"
+release = 1
+summary = "Simple electronic circuit simulator (GTK 4)"
+license = "GPL-3.0-only"
+homepage = "https://github.com/hamza-algohary/Coulomb"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["openjdk21", "unzip"]
+rundeps = ["openjdk21", "gtk4", "libadwaita"]
+options = ["!check", "gradledeps"]
+
+source = [
+    { url = "https://github.com/hamza-algohary/Coulomb/archive/refs/tags/v0.6.1.tar.gz", sha256 = "8fe05fd43471947458c74f244e9c4e87ee55e5662b0a488a6761eb92e0036f70" },
+    { url = "https://services.gradle.org/distributions/gradle-8.5-bin.zip", sha256 = "9d926787066a081739e8200858338b4a69e837c3a821a33aca9db09dd4a41026", unpack = false },
+]
+
+environment = '''
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+export GRADLE_OPTS="-Dorg.gradle.java.installations.paths=/usr/lib/jvm/java-21-openjdk -Dorg.gradle.java.installations.auto-download=false"
+'''
+setup = '''
+sed -i 's/JavaLanguageVersion.of(19)/JavaLanguageVersion.of(21)/' app/build.gradle.kts
+grep -q 'JavaLanguageVersion.of(21)' app/build.gradle.kts
+'''
+build = '''
+gradle :app:shadowJar
+'''
+install = '''
+install -Dm644 "$(ls app/build/libs/*-all.jar | head -n1)" "$pkgdir/usr/share/coulomb/coulomb.jar"
+install -Dm755 $pkgfiles/coulomb "$pkgdir/usr/bin/coulomb"
+sed 's/^Icon=.*/Icon=applications-science/' app/src/main/resources/io.github.hamza_algohary.Coulomb.desktop > /tmp/coulomb.desktop
+install -Dm644 /tmp/coulomb.desktop "$pkgdir/usr/share/applications/io.github.hamza_algohary.Coulomb.desktop"
+install -Dm644 app/src/main/resources/io.github.hamza_algohary.Coulomb.metainfo.xml "$pkgdir/usr/share/metainfo/io.github.hamza_algohary.Coulomb.metainfo.xml"
+'''
