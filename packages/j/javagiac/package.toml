@@ -1,0 +1,40 @@
+# javagiac: the Giac computer algebra system (Bernard Parisse) as the JNI
+# library GeoGebra's desktop app loads (libjavagiac64.so), built from
+# GeoGebra's giac repository (no release tags: a pinned commit) against the
+# system GMP and MPFR. GeoGebra's Maven natives jar carries a glibc build with
+# GMP/MPFR linked in; this replaces it. The Java side (SWIG's classes) stays
+# GeoGebra's javagiac jar. Upstream builds it with Gradle's old `cpp` plugin;
+# here the same sources, defines and flags (build.gradle: javagiac,
+# giacSpecificSettings, linux64) are compiled directly.
+name = "javagiac"
+version = "0_git20261012"
+release = 1
+summary = "Giac computer algebra system as a JNI library for GeoGebra"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/geogebra/giac"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["openjdk25"]
+builddeps = ["gmp-devel", "mpfr-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/geogebra/giac/archive/19a710aea9d528afa272ea582f3283f242e17af3.tar.gz", sha256 = "a7f63cf3cd19040b81be7e35ccf0a396d2b2d9629a6db902c47529cf95ef6e36" },
+]
+
+environment = '''
+export JAVA_HOME=/usr/lib/jvm/java-25-openjdk
+'''
+build = '''
+cd src
+flags="-DIN_GIAC -DGIAC_GENERIC_CONSTANTS -DHAVE_CONFIG_H -DGIAC_GGB -DTIMEOUT -DSIZEOF_LONG=4
+    -DHAVE_UNISTD_H -DSIZEOF_VOID_P=8 -fexceptions -O2 -fno-strict-aliasing -DPIC -fPIC -fpermissive
+    -I. -Igiac/headers -I$JAVA_HOME/include -I$JAVA_HOME/include/linux"
+mkdir -p /tmp/obj
+ls giac/cpp/*.cc giac/cpp/*.cpp jni/cpp/*.cxx | xargs -P "$jobs" -I{} sh -c \
+    'o=/tmp/obj/$(basename "$1").o; $CXX $CXXFLAGS $2 -c "$1" -o "$o"' sh {} "$flags"
+$CXX -shared $LDFLAGS -o libjavagiac64.so /tmp/obj/*.o -lmpfr -lgmp -lpthread
+test -f libjavagiac64.so
+'''
+install = '''
+install -Dm755 src/libjavagiac64.so "$pkgdir/usr/lib/geogebra/libjavagiac64.so"
+'''
