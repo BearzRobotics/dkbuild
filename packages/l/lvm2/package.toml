@@ -2,7 +2,7 @@
 # r4: static libraries too (in lvm2-static), for fully static programs on musl.
 name      = "lvm2"
 version   = "2.03.35"
-release   = 4
+release   = 5
 summary   = "Logical Volume Manager"
 license   = "GPL-2.0-only AND LGPL-2.1-only"
 homepage  = "https://sourceware.org/lvm2/"

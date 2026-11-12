@@ -4,7 +4,7 @@
 # r3: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 name = "gptfdisk"
 version = "1.0.10"
-release = 3
+release = 4
 summary = "Fdisk-like partitioning tool for GPT disks"
 license = "GPL-2.0-or-later"
 homepage = "https://sourceforge.net/projects/gptfdisk"

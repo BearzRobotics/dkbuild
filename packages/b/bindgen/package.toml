@@ -9,7 +9,7 @@
 #     vendored bindgen crate.
 name = "bindgen"
 version = "0.73.2"
-release = 3
+release = 4
 summary = "Generates Rust bindings to C and C++ libraries"
 license = "BSD-3-Clause"
 homepage = "https://rust-lang.github.io/rust-bindgen"

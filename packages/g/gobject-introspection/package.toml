@@ -10,7 +10,7 @@
 # system's GLib, and the tree has no cycle.
 name = "gobject-introspection"
 version = "1.86.0"
-release = 1
+release = 2
 summary = "Introspection system for GObject-based libraries"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://gitlab.gnome.org/GNOME/gobject-introspection"

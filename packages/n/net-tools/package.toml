@@ -7,7 +7,7 @@
 # AX.25, NET/ROM, ROSE, X.25) are not built; TCP/IP, IPv6 and UNIX are.
 name = "net-tools"
 version = "2.10"
-release = 1
+release = 2
 summary = "Classic networking tools (ifconfig, route, netstat, arp)"
 license = "GPL-2.0-or-later"
 homepage = "https://net-tools.sourceforge.io"
