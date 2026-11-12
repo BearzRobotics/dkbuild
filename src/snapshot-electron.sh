@@ -57,7 +57,12 @@ solutions = [{
     "url": "https://github.com/electron/electron.git@$e_rev",
     "deps_file": "DEPS",
     "managed": False,
-    "custom_deps": { "src": "https://chromium.googlesource.com/chromium/src.git@$src_rev" },
+    "custom_deps": {
+        "src": "https://chromium.googlesource.com/chromium/src.git@$src_rev",
+        # Cloud Storage test data with no condition (non_git_source does not
+        # cover it): left out
+        "src/base/tracing/test/data": None,
+    },
     "custom_vars": {
         "checkout_pgo_profiles": False,
         # no Google Cloud Storage or CIPD downloads: prebuilt tools, sysroots,
