@@ -29,6 +29,10 @@ export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
 '''
 setup = '''
 cp $pkgfiles/package-lock.json .
+# package.json pins wrap-ansi and path-to-regexp with yarn's "resolutions",
+# which npm ignores: without the same pins as npm "overrides", npm ci finds the
+# lockfile (made with them) disagreeing and asks the registry. Adds the field.
+node -e 'const fs=require("fs"),p=JSON.parse(fs.readFileSync("package.json"));p.overrides=p.resolutions;fs.writeFileSync("package.json",JSON.stringify(p,null,2)+"\n")'
 node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
 npm ci --legacy-peer-deps --ignore-scripts
 # Canonical's UI says LXD: files/ui-canonical-renames.sed renames it to Incus
