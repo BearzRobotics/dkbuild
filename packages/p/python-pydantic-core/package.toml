@@ -4,7 +4,7 @@
 # so Python can load it.
 name = "python-pydantic-core"
 version = "2.50.4"
-release = 5
+release = 6
 summary = "Core functionality for Pydantic validation and serialization"
 license = "MIT"
 homepage = "https://github.com/pydantic/pydantic-core"

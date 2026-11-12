@@ -6,7 +6,7 @@
 # 2; the main branch has the 2.x API. It uses the system's Jim Tcl (jimtcl).
 name = "openocd"
 version = "0.12.0_git20261110"
-release = 1
+release = 2
 summary = "On-chip debugger and programmer (JTAG/SWD)"
 license = "GPL-2.0-or-later"
 homepage = "https://openocd.org"

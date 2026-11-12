@@ -36,7 +36,9 @@ setup = '''
 # the media snapshot is for the scratch-gui the lockfile pins
 grep -q '"@scratch/scratch-gui": "13.7.4-svg"' package.json
 node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
-npm ci --ignore-scripts
+# --include=dev: NODE_ENV=production (for webpack) would make npm leave out the
+# devDependencies, which are the whole build (webpack, babel, ...)
+npm ci --ignore-scripts --include=dev
 f=webpack.makeConfig.js
 # the static files' path: Electron's own resources directory when run on
 # the system Electron, so the installed /usr/lib/scratch-desktop/static

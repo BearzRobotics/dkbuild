@@ -42,7 +42,9 @@ bundle config set --local deployment true
 bundle config set --local path vendor/bundle
 bundle config set --local without 'development test mysql'
 bundle install --local --jobs $jobs
-pnpm install --frozen-lockfile
+# --production=false: with NODE_ENV=production pnpm would leave out the
+# devDependencies, which the asset build (vite) needs
+pnpm install --frozen-lockfile --production=false
 '''
 build = '''
 # the assets need no database: a placeholder address only

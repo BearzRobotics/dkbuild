@@ -4,7 +4,7 @@
 # and turns itself on when installed (vendor/autoload).
 name = "nushell"
 version = "0.116.1"
-release = 2
+release = 3
 summary = "Shell with a focus on structured data"
 license = "MIT"
 homepage = "https://www.nushell.sh"
