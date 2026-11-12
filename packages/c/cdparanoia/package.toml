@@ -11,7 +11,10 @@ homepage = "https://www.xiph.org/paranoia"
 patches = ["autoconf-init-ac_cv_objext.patch", "byteswap-null-check.patch", "fix-clang-17.patch", "gcc.patch", "makefile.in-install.patch", "musl.patch"]
 hostdeps = ["pkgconf", "automake", "libtool"]
 builddeps = ["linux-headers"]
-options = ["!check"]
+# jobs:1: interface/Makefile builds the static and the shared library from the
+# same .o files (without and with -fpic) in one directory; in parallel the
+# shared library can link the non-PIC objects (R_X86_64_PC32 ... recompile with -fPIC).
+options = ["!check", "jobs:1"]
 
 source = [
     { url = "https://downloads.xiph.org/releases/cdparanoia/cdparanoia-III-10.2.src.tgz", sha256 = "005db45ef4ee017f5c32ec124f913a0546e77014266c6a1c50df902a55fe64df" },
