@@ -54,7 +54,7 @@ Invoicing / ERP / accounting:
 | SolidInvoice | invoicing and quotes | MIT | later |
 | Dolibarr | invoices, accounting, CRM, inventory | GPL-3.0+ | later |
 | ERPNext | full ERP, accounting, inventory, HR | GPL-3.0 | later |
-| GnuCash | desktop accounting | GPL-2.0+ | planned (after the help desks; Alpine has a port) |
+| GnuCash | desktop accounting | GPL-2.0+ | written (5.17, with OFX, AqBanking, SQL, Python) |
 | Frappe Books | desktop accounting and invoicing | AGPL-3.0 | later |
 | LedgerSMB | web double-entry accounting | GPL-2.0 | later |
 
