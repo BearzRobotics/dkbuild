@@ -1,7 +1,7 @@
 // Makes npm install offline from the shared npm store (dkbuild's npmdeps,
 // SPEC.md 7.4). The store holds every tarball in npm's cache content layout
-// (content-v2/<algo>/<hex>); here a private npm cache gets that store as its
-// content and an index entry for each tarball URL of the package-lock.json
+// (content-v2/<algo>/<hex>); here a private npm cache gets links to its
+// tarballs as content and an index entry for each tarball URL of the package-lock.json
 // files given on the command line, keyed as npm's fetcher (make-fetch-happen)
 // looks them up. `npm ci --offline` then finds every tarball in the cache and
 // still checks it against the lockfile's integrity hash. The lockfiles are
@@ -25,9 +25,13 @@ function digest(integrity) {
   return best;
 }
 
+// content-v2 is a directory of its own with a link to the store for each
+// tarball the lockfiles name (not a link to the whole store): npm also writes
+// into it (packing file: dependencies with --install-links), and the store
+// is read-only in a build.
 fs.mkdirSync(cacache, { recursive: true });
-const contentLink = path.join(cacache, "content-v2");
-if (!fs.existsSync(contentLink)) fs.symlinkSync(path.join(store, "content-v2"), contentLink);
+const content = path.join(cacache, "content-v2");
+try { if (fs.lstatSync(content).isSymbolicLink()) fs.unlinkSync(content); } catch {}
 
 let added = 0;
 function index(entry) {
@@ -39,6 +43,12 @@ function index(entry) {
   const file = path.join(store, "content-v2", d.algo, d.hex.slice(0, 2), d.hex.slice(2, 4), d.hex.slice(4));
   let size;
   try { size = fs.statSync(file).size; } catch { console.error(`not in the store: ${url}`); process.exitCode = 1; return; }
+  const rel = path.join(d.algo, d.hex.slice(0, 2), d.hex.slice(2, 4), d.hex.slice(4));
+  const link = path.join(content, rel);
+  if (!fs.existsSync(link)) {
+    fs.mkdirSync(path.dirname(link), { recursive: true });
+    fs.symlinkSync(file, link);
+  }
   const key = `make-fetch-happen:request-cache:${url}`;
   const record = JSON.stringify({
     key, integrity: `${d.algo}-${d.b64}`, time: 0, size,
