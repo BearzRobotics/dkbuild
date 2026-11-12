@@ -1,0 +1,28 @@
+# AqBanking: online banking (HBCI/FinTS, OFX Direct Connect) for GnuCash.
+# From Alpine's community/aqbanking (its libintl patch).
+name = "aqbanking"
+version = "6.9.2"
+release = 1
+summary = "Online banking library (FinTS/HBCI, OFX Direct Connect)"
+license = "GPL-2.0-or-later"
+homepage = "https://www.aquamaniac.de/rdm/projects/aqbanking"
+patches = ["libintl.patch"]
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf"]
+builddeps = ["gwenhywfar-devel", "gmp-devel", "gettext-devel", "bzip2-devel"]
+
+source = [
+    { url = "https://www.aquamaniac.de/rdm/attachments/download/654/aqbanking-6.9.2.tar.gz", sha256 = "244b5f7a139f829928f5cdc3f5f7488517b3e8aa63625a92741c3efc1892bb3f" },
+]
+
+setup = '''
+%configure --with-backends="aqhbci aqofxconnect aqnone"
+'''
+build = '''
+%make -j1
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

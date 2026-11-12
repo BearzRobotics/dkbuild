@@ -1,0 +1,30 @@
+# OpenSP: SGML/XML parser library (James Clark's SP, maintained by OpenJade);
+# libofx parses OFX statements with it. From Alpine's main/opensp (its
+# patches). Documentation is not built (xmlto).
+name = "opensp"
+version = "1.5.2"
+release = 1
+summary = "SGML and XML parser library"
+license = "MIT"
+homepage = "https://openjade.sourceforge.net"
+patches = ["opensp-1.5-install.patch", "removed-failing-tests.patch", "opensp-1.5.2-configure-clang16.patch", "fix-tests.patch"]
+hostdeps = ["autoconf", "automake", "libtool", "gettext"]
+builddeps = ["gettext-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/openjade/OpenSP-1.5.2.tar.gz", sha256 = "57f4898498a368918b0d49c826aa434bb5b703d2c3b169beb348016ab25617ce" },
+]
+
+setup = '''
+rm -f m4/progtest.m4
+autoreconf -vif
+%configure --disable-doc-build --enable-shared
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/opensp/COPYING"
+'''

@@ -1,0 +1,35 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/guile/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# GnuCash's report engine and scripting. With its static library (Chimera
+# builds none; no reason given).
+name = "guile"
+version = "3.0.10"
+release = 1
+summary = "GNU Scheme implementation"
+license = "LGPL-3.0-or-later AND GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/guile"
+patches = ["0002-Mark-mutex-with-owner-not-retained-threads-test-as-u.patch", "aarch64.patch", "disable-broken.patch", "failing-encoding-test.patch", "failing-filesys-test.patch", "posix.patch"]
+hostdeps = ["automake", "gettext-devel", "gperf", "libtool", "pkgconf"]
+builddeps = ["gc-devel", "gmp-devel", "libffi-devel", "libunistring-devel", "ncurses-devel", "readline-devel"]
+options = ["!lto"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/guile/guile-3.0.10.tar.gz", sha256 = "2dbdbc97598b2faf31013564efb48e4fed44131d28e996c26abe8a5b23b56c2a" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-error-on-warning \
+    --disable-lto
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+rm -f "$pkgdir"/usr/lib/charset.alias
+'''

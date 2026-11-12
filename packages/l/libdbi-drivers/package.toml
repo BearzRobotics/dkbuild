@@ -1,0 +1,26 @@
+# libdbi's database drivers: MariaDB/MySQL, PostgreSQL and SQLite 3 (GnuCash's
+# SQL backends). From Alpine's community/libdbi-drivers (its gcc14 patch).
+name = "libdbi-drivers"
+version = "0.9.0"
+release = 1
+summary = "Database drivers for libdbi (MySQL/MariaDB, PostgreSQL, SQLite)"
+license = "LGPL-2.1-or-later"
+homepage = "http://libdbi-drivers.sourceforge.net"
+patches = ["gcc14.patch"]
+hostdeps = ["autoconf", "automake", "libtool"]
+builddeps = ["libdbi-devel", "mariadb", "mariadb-devel", "postgresql-devel", "sqlite-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/libdbi-drivers/libdbi-drivers/libdbi-drivers-0.9.0/libdbi-drivers-0.9.0.tar.gz", sha256 = "43d2eacd573a4faff296fa925dd97fbf2aedbf1ae35c6263478210c61004c854" },
+]
+
+setup = '''
+%configure --with-mysql --with-pgsql --with-sqlite3 --disable-docs --with-dbi-libdir=/usr/lib
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

@@ -1,0 +1,49 @@
+# GnuCash: double-entry accounting for personal and small-business use:
+# accounts, reconciliation, invoicing, budgets, reports (Guile), online
+# banking (AqBanking: FinTS/HBCI, OFX Direct Connect), OFX/QIF/CSV import,
+# the SQL backends (libdbi: SQLite, MariaDB, PostgreSQL) and its Python
+# bindings. From Alpine's community/gnucash, with OFX import on (Alpine
+# leaves it off). GSettings schemas are compiled by glib's trigger.
+name = "gnucash"
+version = "5.17"
+release = 1
+summary = "Double-entry accounting program"
+license = "GPL-2.0-or-later OR GPL-3.0-or-later"
+homepage = "https://gnucash.org"
+hostdeps = ["cmake", "ninja", "pkgconf", "swig", "perl", "gettext", "python"]
+builddeps = ["aqbanking-devel", "boost-devel", "glib-devel", "guile-devel", "gwenhywfar-devel", "libdbi-devel",
+             "libofx-devel", "libsecret-devel", "libxml2-devel", "libxslt-devel", "python-devel", "webkitgtk-devel",
+             "gtk+3-devel", "icu-devel", "zlib-ng-compat-devel"]
+rundeps = ["dconf", "guile", "libdbi-drivers"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/gnucash/gnucash-5.17.tar.bz2", sha256 = "3d18a88f5b8230f01e04c2d2d73bf95e7dcd3bf8d8cee6ffa54bb24dee58b85f" },
+]
+
+environment = '''
+export CFLAGS="$CFLAGS -Wno-error=deprecated-declarations"
+export CXXFLAGS="$CXXFLAGS -Wno-error=deprecated-declarations -Wno-error=sign-compare"
+'''
+setup = '''
+find . -name '._*' -delete
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DCOMPILE_GSCHEMAS=OFF \
+    -DWITH_PYTHON=ON \
+    -DWITH_AQBANKING=ON \
+    -DWITH_OFX=ON \
+    -DWITH_SQL=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/gnucash/LICENSE"
+'''
+
+[subpackages.python]
+summary = "Python bindings for GnuCash"
+depends = ["python"]
+paths   = ["/usr/lib/python*"]

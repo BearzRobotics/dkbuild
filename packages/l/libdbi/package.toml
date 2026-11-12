@@ -1,0 +1,30 @@
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libdbi/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# libdbi: database-independent abstraction layer (GnuCash's SQL backend);
+# the drivers are libdbi-drivers.
+name = "libdbi"
+version = "0.9.0"
+release = 2
+summary = "Database-independent abstraction layer for C"
+license = "LGPL-2.0-or-later"
+homepage = "http://libdbi.sourceforge.net"
+hostdeps = ["automake", "libtool", "pkgconf"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/libdbi/libdbi/libdbi-0.9.0/libdbi-0.9.0.tar.gz", sha256 = "dafb6cdca524c628df832b6dd0bf8fabceb103248edb21762c02d3068fca4503" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-docs
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

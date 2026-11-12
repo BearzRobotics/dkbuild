@@ -1,0 +1,28 @@
+# Gwenhywfar: helper library for AqBanking (and its GTK 3 dialogs). From
+# Alpine's community/gwenhywfar (its test patch).
+name = "gwenhywfar"
+version = "5.14.1"
+release = 1
+summary = "Multi-platform helper library for networking and security (AqBanking)"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.aquamaniac.de/rdm/projects/gwenhywfar"
+patches = ["fix-tests.patch"]
+hostdeps = ["pkgconf"]
+builddeps = ["libgcrypt-devel", "gnutls-devel", "gettext-devel", "gtk+3-devel"]
+
+source = [
+    { url = "https://www.aquamaniac.de/rdm/attachments/download/630/gwenhywfar-5.14.1.tar.gz", sha256 = "8916feaa99cb954f963f2cba8dd2dffe57cacf7f284daf00eab071aad6fe2ab3" },
+]
+
+setup = '''
+%configure --with-guis=gtk3 --enable-ssl --enable-visibility
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''
