@@ -1,0 +1,50 @@
+# JNA (Java Native Access) with its native part, libjnidispatch, built
+# against the system libffi, as Alpine's java-jna. Its patches: jna.nosys
+# defaults to false, so the system library is used; no -Werror. (Alpine's
+# jar-without-natives patch is upstream now.) JNA's own jar carries glibc
+# builds of libjnidispatch that musl cannot load; Java programs here
+# (GeoGebra) find /usr/lib/libjnidispatch.so instead. Jars: /usr/share/java.
+name = "jna"
+version = "5.18.1"
+release = 1
+summary = "Java Native Access: Java access to native shared libraries"
+license = "Apache-2.0 OR LGPL-2.1-or-later"
+homepage = "https://github.com/java-native-access/jna"
+archs = ["x86_64", "aarch64"]
+patches = ["nosys-default-false.patch", "no-Werror.patch"]
+hostdeps = ["apache-ant", "autoconf", "automake", "libtool", "openjdk25"]
+builddeps = ["libffi-devel"]
+rundeps = ["openjdk25"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/java-native-access/jna/archive/refs/tags/5.18.1.tar.gz", sha256 = "9af4d468a8b94def8c08761780766e919a0806d636b4c2ac55be0afe94cb8bb9" },
+]
+
+environment = '''
+export JAVA_HOME=/usr/lib/jvm/java-25-openjdk
+export PATH="$JAVA_HOME/bin:$PATH" ANT_HOME=/usr/share/java/apache-ant
+'''
+setup = '''
+# no Java AWT support (it needs X libraries at build time)
+sed -i -E "s/^(CDEFINES=.*)$/\1 -DNO_JAWT/g" native/Makefile
+# no prebuilt jars (dist/: the release's natives); the archive has no
+# bundled libffi any more, so the build takes the system's (dynlink.native)
+rm -r dist
+'''
+build = '''
+ant clean
+# a parallel make breaks the native part
+MAKEFLAGS=-j1 ant native -Drelease=true -Ddynlink.native=true
+ant jar platform-jar -Domit-jnilib=true
+'''
+install = '''
+install -Dm644 build/jna.jar "$pkgdir/usr/share/java/jna-$version.jar"
+install -Dm644 contrib/platform/dist/jna-platform.jar "$pkgdir/usr/share/java/jna-platform-$version.jar"
+ln -s jna-$version.jar "$pkgdir/usr/share/java/jna.jar"
+ln -s jna-platform-$version.jar "$pkgdir/usr/share/java/jna-platform.jar"
+# Java loads it as libjnidispatch.so: the file itself under that name (a
+# .so link would be split into jna-devel)
+install -Dm755 build/native-linux-*/libjnidispatch.so "$pkgdir/usr/lib/libjnidispatch.so"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/jna/LICENSE"
+'''
