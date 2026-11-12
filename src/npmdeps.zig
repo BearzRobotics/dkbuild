@@ -66,6 +66,100 @@ fn collect(arena: Allocator, text: []const u8, out: *std.ArrayList(Pkg), missing
     if (root.object.get("dependencies")) |deps| try collectV1(arena, deps, out, missing);
 }
 
+/// Packages of one pnpm-lock.yaml (lockfileVersion 9), read line by line:
+/// the `packages:` section's entries (`  'name@version':`, two spaces in) and
+/// their `resolution: {integrity: ...[, tarball: url]}`. Without a tarball the
+/// URL is the npm registry's, as pnpm derives it. Local directories, links and
+/// workspace members have no integrity and are skipped; git sources without
+/// one count as missing.
+fn collectPnpm(arena: Allocator, text: []const u8, out: *std.ArrayList(Pkg), missing: *usize) !void {
+    if (std.mem.indexOf(u8, text, "lockfileVersion: '9") == null) return error.BadLockfile;
+    var in_packages = false;
+    var key: ?[]const u8 = null;
+    var lines = std.mem.splitScalar(u8, text, '\n');
+    while (lines.next()) |raw| {
+        const line = std.mem.trimEnd(u8, raw, "\r");
+        if (line.len == 0) continue;
+        if (line[0] != ' ') {
+            in_packages = std.mem.eql(u8, line, "packages:");
+            key = null;
+            continue;
+        }
+        if (!in_packages) continue;
+        if (line.len > 2 and line[0] == ' ' and line[1] == ' ' and line[2] != ' ') {
+            var k = std.mem.trimEnd(u8, line[2..], ":");
+            k = std.mem.trim(u8, k, "'\"");
+            key = k;
+            continue;
+        }
+        const t = std.mem.trim(u8, line, " ");
+        if (!std.mem.startsWith(u8, t, "resolution: {")) continue;
+        const k = key orelse continue;
+        const integ = field(t, "integrity: ");
+        const tarball = field(t, "tarball: ");
+        if (integ == null) {
+            if (std.mem.indexOf(u8, t, "directory:") == null and std.mem.indexOf(u8, t, "type: directory") == null) missing.* += 1;
+            continue;
+        }
+        const url = tarball orelse blk: {
+            // name@version: the name may be scoped (@scope/name)
+            const at = std.mem.lastIndexOfScalar(u8, k, '@') orelse continue;
+            if (at == 0) continue;
+            const pname = k[0..at];
+            const ver = k[at + 1 ..];
+            const base = if (std.mem.lastIndexOfScalar(u8, pname, '/')) |sl| pname[sl + 1 ..] else pname;
+            break :blk try std.fmt.allocPrint(arena, "https://registry.npmjs.org/{s}/-/{s}-{s}.tgz", .{ pname, base, ver });
+        };
+        try out.append(arena, .{ .url = url, .integrity = integ.? });
+    }
+}
+
+/// The value of `name: value` inside a flow mapping (`{a: x, b: y}`).
+fn field(t: []const u8, name: []const u8) ?[]const u8 {
+    const i = std.mem.indexOf(u8, t, name) orelse return null;
+    const rest = t[i + name.len ..];
+    const end = std.mem.indexOfAny(u8, rest, ",}") orelse rest.len;
+    return std.mem.trim(u8, rest[0..end], " '\"");
+}
+
+test "collectPnpm: registry and tarball entries, directories skipped" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const lock =
+        \\lockfileVersion: '9.0'
+        \\
+        \\packages:
+        \\
+        \\  '@adobe/css-tools@4.5.0':
+        \\    resolution: {integrity: sha512-AAAA==}
+        \\
+        \\  left-pad@1.3.0:
+        \\    resolution: {integrity: sha512-BBBB==}
+        \\    engines: {node: '>=10'}
+        \\
+        \\  odd@1.0.0:
+        \\    resolution: {integrity: sha512-CCCC==, tarball: https://example.org/odd-1.0.0.tgz}
+        \\
+        \\  plugin@file:.eslint-plugin:
+        \\    resolution: {directory: .eslint-plugin, type: directory}
+        \\
+        \\snapshots:
+        \\
+        \\  left-pad@1.3.0: {}
+        \\
+    ;
+    var pkgs: std.ArrayList(Pkg) = .empty;
+    var missing: usize = 0;
+    try collectPnpm(a, lock, &pkgs, &missing);
+    try std.testing.expectEqual(@as(usize, 3), pkgs.items.len);
+    try std.testing.expectEqual(@as(usize, 0), missing);
+    try std.testing.expectEqualStrings("https://registry.npmjs.org/@adobe/css-tools/-/css-tools-4.5.0.tgz", pkgs.items[0].url);
+    try std.testing.expectEqualStrings("https://registry.npmjs.org/left-pad/-/left-pad-1.3.0.tgz", pkgs.items[1].url);
+    try std.testing.expectEqualStrings("https://example.org/odd-1.0.0.tgz", pkgs.items[2].url);
+    try std.testing.expectEqualStrings("sha512-CCCC==", pkgs.items[2].integrity);
+}
+
 fn collectV1(arena: Allocator, deps: std.json.Value, out: *std.ArrayList(Pkg), missing: *usize) !void {
     if (deps != .object) return;
     var it = deps.object.iterator();
@@ -107,7 +201,7 @@ fn digestOf(algo: []const u8, data: []const u8, buf: []u8) []const u8 {
 /// store unless it is there, each checked against its integrity hash.
 /// fetchNpmDeps's message for a source without lockfiles (with several
 /// sources, only one of them needs one).
-pub const no_lockfile = "npm: the source has no package-lock.json";
+pub const no_lockfile = "npm: the source has no package-lock.json or pnpm-lock.yaml";
 
 pub fn fetchNpmDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, message: *[]const u8) fetch.Error!fetch.Status {
     const out_path = try listPath(arena, cache, tarball_sha256);
@@ -122,7 +216,7 @@ pub fn fetchNpmDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha
     // 1. Unpack and find the lockfiles (shell: tar and find only).
     const tarball = try fetch.cachePath(arena, cache, tarball_sha256);
     const find = try std.fmt.allocPrint(arena, "set -e; mkdir -p '{0s}/src'; tar -xf '{1s}' -C '{0s}/src'; " ++
-        "find '{0s}/src' -name package-lock.json -not -path '*/node_modules/*' > '{0s}/locks'", .{ tmp, tarball });
+        "find '{0s}/src' \\( -name package-lock.json -o -name pnpm-lock.yaml \\) -not -path '*/node_modules/*' > '{0s}/locks'", .{ tmp, tarball });
     const r1 = std.process.run(arena, io, .{ .argv = &.{ "sh", "-c", find } }) catch return error.DownloadFailed;
     if (!(r1.term == .exited and r1.term.exited == 0)) {
         message.* = try std.fmt.allocPrint(arena, "npm: cannot unpack the source: {s}", .{std.mem.trim(u8, r1.stderr, "\n ")});
@@ -184,7 +278,12 @@ fn fromLocks(arena: Allocator, io: std.Io, cache: []const u8, tmp: []const u8, o
     while (lines.next()) |lp| {
         nlocks += 1;
         const text = std.Io.Dir.cwd().readFileAlloc(io, lp, arena, .limited(1 << 28)) catch return error.DownloadFailed;
-        collect(arena, text, &pkgs, &missing) catch {
+        if (std.mem.endsWith(u8, lp, "pnpm-lock.yaml")) {
+            collectPnpm(arena, text, &pkgs, &missing) catch {
+                message.* = try std.fmt.allocPrint(arena, "npm: {s} is not a pnpm lockfile (v9) dkbuild can read", .{lp});
+                return error.DownloadFailed;
+            };
+        } else collect(arena, text, &pkgs, &missing) catch {
             message.* = try std.fmt.allocPrint(arena, "npm: {s} is not a lockfile npm wrote", .{lp});
             return error.DownloadFailed;
         };

@@ -730,7 +730,11 @@ each tarball against its hash. In the build, `npm-offline.js` (embedded in
 dkbuild) gives a private npm cache the store as its content and an index
 entry for each tarball URL, as npm's fetcher looks them up; `npm ci` then
 installs with `npm_config_offline`, checking every tarball again. Lockfiles
-without integrity hashes, yarn and pnpm are not handled yet.
+without integrity hashes and yarn are not handled yet. pnpm-lock.yaml (lockfile v9)
+files are read too: their packages go into the same store, and the build
+serves the store to pnpm as a registry on 127.0.0.1 (`pnpm-registry.js`;
+the sandbox's loopback interface is up), so `pnpm install --frozen-lockfile`
+works offline.
 
 Gradle (`gradledeps`) has no lockfile to read, so its dependencies are
 found by letting Gradle resolve them: the first build of a source runs the

@@ -12,6 +12,7 @@ const npmdeps = @import("npmdeps.zig");
 const gemdeps = @import("gemdeps.zig");
 /// Sets up npm's cache from the npm store in a build (npmdeps).
 const npm_offline_js = @embedFile("npm-offline.js");
+const pnpm_registry_js = @embedFile("pnpm-registry.js");
 /// gradledeps: the resolve step's init script, the store copier, and the build's init script.
 const gradle_resolve = @embedFile("gradle-resolve.gradle");
 const gradle_store_sh = @embedFile("gradle-store.sh");
@@ -171,6 +172,17 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
         try s.appendSlice(arena,
             \\node /dkbuild/npm-offline.js /tmp/npm-cache $(find /build -path /build/sources -prune -o -name package-lock.json -not -path '*/node_modules/*' -print)
             \\export npm_config_cache=/tmp/npm-cache npm_config_offline=true npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+            \\# pnpm (pnpm-lock.yaml): the store served as a registry on 127.0.0.1
+            \\pnpm_locks=$(find /build -path /build/sources -prune -o -name pnpm-lock.yaml -not -path '*/node_modules/*' -print)
+            \\if [ -n "$pnpm_locks" ] && [ ! -f /tmp/pnpm-registry.ready ]; then
+            \\    node /dkbuild/pnpm-registry.js 4873 /tmp/pnpm-registry.ready $pnpm_locks > /tmp/pnpm-registry.log 2>&1 &
+            \\    for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do [ -f /tmp/pnpm-registry.ready ] && break; sleep 0.5; done
+            \\    [ -f /tmp/pnpm-registry.ready ] || { echo "pnpm-registry did not start"; cat /tmp/pnpm-registry.log; exit 1; }
+            \\fi
+            \\if [ -n "$pnpm_locks" ]; then
+            \\    export npm_config_registry=http://127.0.0.1:4873/ npm_config_store_dir=/tmp/pnpm-store PNPM_HOME=/tmp/pnpm-home
+            \\    unset npm_config_offline
+            \\fi
             \\
         );
     // Gradle (gradledeps): the recipe's Gradle distribution, and `gradle` on
@@ -896,8 +908,10 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         else => return error.OutOfMemory,
     };
     Dir.cwd().writeFile(io, .{ .sub_path = try std.fs.path.join(arena, &.{ root_rel, "dkbuild", "script.sh" }), .data = text }) catch return error.PrepareFailed;
-    if (contains(r.options, "npmdeps"))
+    if (contains(r.options, "npmdeps")) {
         Dir.cwd().writeFile(io, .{ .sub_path = try std.fs.path.join(arena, &.{ root_rel, "dkbuild", "npm-offline.js" }), .data = npm_offline_js }) catch return error.PrepareFailed;
+        Dir.cwd().writeFile(io, .{ .sub_path = try std.fs.path.join(arena, &.{ root_rel, "dkbuild", "pnpm-registry.js" }), .data = pnpm_registry_js }) catch return error.PrepareFailed;
+    }
 
     out("    building\n", .{});
     {

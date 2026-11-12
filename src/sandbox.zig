@@ -7,7 +7,7 @@
 //!     `upper`; `lower` is never touched, so one unpacked root serves every build.
 //!   - its own user (the caller is uid 0 inside, nothing outside), mount, PID,
 //!     UTS, IPC and, unless asked otherwise, network namespaces. No network
-//!     means only a down loopback interface.
+//!     means only the loopback interface (brought up: 127.0.0.1 works).
 //!   - /proc for its own PID namespace, a small tmpfs /dev (null, zero, full,
 //!     random, urandom, tty), and tmpfs /tmp and /run.
 //!   - the directories it was given with `binds`, and nothing else of the host.
@@ -370,6 +370,11 @@ pub fn childMain(args: []const [:0]const u8) noreturn {
         writeFile("/proc/self/gid_map", z("0 {d} 1\n", .{gid}));
     }
 
+    // A network namespace of its own starts with loopback down: bring it up,
+    // so builds can use 127.0.0.1 (pnpm's local registry, test servers). It
+    // still has no route out.
+    if (!net) loopbackUp();
+
     // The first fork lands in the new PID namespace as its PID 1. This process
     // stays outside it and passes on the exit status.
     const pid_rc = linux.fork();
@@ -445,4 +450,19 @@ pub fn childMain(args: []const [:0]const u8) noreturn {
     envp[env.items.len] = null;
     const rc = linux.execve(cmd[0], @ptrCast(argv_c.ptr), @ptrCast(envp.ptr));
     die("exec {s}: {s}", .{ cmd[0], @tagName(linux.errno(rc)) });
+}
+
+/// Sets `lo` up in the current network namespace (SIOCSIFFLAGS); a failure
+/// leaves it down, which only matters to builds that use 127.0.0.1.
+fn loopbackUp() void {
+    const rc = linux.socket(linux.AF.INET, linux.SOCK.DGRAM | linux.SOCK.CLOEXEC, 0);
+    if (linux.errno(rc) != .SUCCESS) return;
+    const fd: linux.fd_t = @intCast(rc);
+    defer _ = linux.close(fd);
+    var ifr = std.mem.zeroes(linux.ifreq);
+    @memcpy(ifr.ifrn.name[0..2], "lo");
+    if (linux.errno(linux.ioctl(fd, linux.SIOCGIFFLAGS, @intFromPtr(&ifr))) != .SUCCESS) return;
+    ifr.ifru.flags.UP = true;
+    ifr.ifru.flags.RUNNING = true;
+    _ = linux.ioctl(fd, linux.SIOCSIFFLAGS, @intFromPtr(&ifr));
 }
