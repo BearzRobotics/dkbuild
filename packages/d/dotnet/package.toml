@@ -4,7 +4,10 @@
 # the previously source-built artifacts with linux-musl-x64 packages
 # (prep-source-build.sh --bootstrap-rid), and the seed: Microsoft's own
 # linux-musl-x64 SDK, which the build runs on (as Go, Rust and Java start from
-# a binary). The result is a portable linux-musl-x64 SDK in /usr/lib/dotnet.
+# a binary): the version the VMR's global.json pins (tools.dotnet, 10.0.112),
+# which matches the previously source-built packages; a newer seed (10.0.114)
+# asks for packs they do not have (ILLink.Tasks >= 10.0.14, NU1102).
+# The result is a portable linux-musl-x64 SDK in /usr/lib/dotnet.
 # Source-build only builds the 1xx SDK feature band.
 # Self-hosted (`selfhost`): a build runs on the SDK and the source-built
 # packages (dotnet-artifacts, Private.SourceBuilt.Artifacts) of the newest
@@ -29,7 +32,7 @@ rundeps = ["icu", "openssl", "heimdal-libs"]
 options = ["!check", "!strip", "jobs:12", "selfhost"]
 
 source = [
-    { url = "snapshot:dotnet v10.0.114 10.0.114", sha256 = "e02e84b3b28a8dbf79e67086ee5a6ddb5e27d8e9ad05fd78bd36cacdc52e217f" },
+    { url = "snapshot:dotnet v10.0.114 10.0.112", sha256 = "9b4a5b419f57b92762113325fa69ae1cd780d77d3871aae83ea174a831db20eb" },
 ]
 
 environment = '''
