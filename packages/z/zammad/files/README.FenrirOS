@@ -1,0 +1,18 @@
+Zammad on FenrirOS
+==================
+
+Zammad lives in /opt/zammad (as upstream's packages), owned by the zammad
+user. Three dinit services, none enabled: zammad-web (localhost:3000),
+zammad-websocket (localhost:6042), zammad-worker. Commands run through
+/usr/lib/zammad/run (it loads /etc/zammad/env). Nothing is set up for you.
+
+Needs PostgreSQL and Valkey/Redis; Elasticsearch/OpenSearch is optional.
+
+1. PostgreSQL: a role and database for Zammad (createuser zammad; createdb -O zammad zammad_production).
+2. cp /usr/share/doc/zammad/database.yml.example /opt/zammad/config/database.yml
+   (owned by zammad) and fill in the credentials.
+3. /etc/zammad/env: REDIS_URL=redis://localhost:6379 (and anything else).
+4. As zammad: /usr/lib/zammad/run bundle exec rake db:create db:migrate db:seed
+5. nginx: /usr/share/doc/zammad/nginx-zammad.conf; enable nginx and the three
+   services (dinitctl enable zammad-web ...), then open the site and create
+   the first administrator there.

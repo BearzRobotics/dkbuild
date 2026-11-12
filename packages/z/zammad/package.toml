@@ -1,0 +1,73 @@
+# Zammad: web-based help desk and customer support (email, chat, phone,
+# social channels; knowledge base, reporting, SLAs). Ruby on Rails with
+# PostgreSQL and Valkey/Redis (Elasticsearch optional), served by nginx in
+# front of Puma, a websocket server and a background worker (three dinit
+# services). Upstream's release archive, built as upstream's packages are:
+# its gems from the gem store (`gemdeps`), its front end's pnpm packages from
+# the npm store (`npmdeps`, pnpm-lock.yaml; pnpm through dkbuild's local
+# registry), the assets precompiled. Its stylesheets compile through the
+# system Dart Sass (dart-sass): the sass-embedded gem is rebuilt to use it
+# instead of downloading a prebuilt one (files/sass-embedded-system.sh).
+# Ruby: Zammad pins 3.4.12.
+# Installed inert (docs/requests.md): services not enabled, no site, no
+# database, no accounts. Home: /opt/zammad. Setup:
+# /usr/share/doc/zammad/README.FenrirOS.
+name = "zammad"
+version = "7.2.3"
+release = 1
+summary = "Web-based help desk and customer support system"
+license = "AGPL-3.0-only"
+homepage = "https://zammad.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["ruby", "nodejs", "pnpm", "dart-sass", "pkgconf", "make", "git"]
+builddeps = ["ruby-devel", "postgresql-devel", "imlib2-devel", "libyaml-devel", "openssl-devel", "libffi-devel",
+             "zlib-ng-compat-devel", "gmp-devel", "libxml2-devel", "libxslt-devel", "linux-headers", "jemalloc-devel"]
+rundeps = ["ruby", "dart-sass", "nginx", "shared-mime-info", "imlib2"]
+options = ["!check", "!strip", "gemdeps", "npmdeps", "jobs:8"]
+
+source = [
+    { url = "https://ftp.zammad.com/zammad-7.2.3.tar.gz", sha256 = "f119f4535be8ab02c860079cdfa8f8589d8934fb2e120932876004082bc98e17" },
+]
+
+environment = '''
+export NOKOGIRI_USE_SYSTEM_LIBRARIES=1 BUNDLE_BUILD__NOKOGIRI=--use-system-libraries
+export TAR_OPTIONS=--no-same-owner
+export CFLAGS="$CFLAGS -Wno-default-const-init-field-unsafe"
+export RAILS_ENV=production NODE_ENV=production
+'''
+setup = '''
+# the archive has no top directory: dkbuild unpacks it into /build itself
+sh $pkgfiles/sass-embedded-system.sh "$PWD/vendor/cache"
+bundle config set --local deployment true
+bundle config set --local path vendor/bundle
+bundle config set --local without 'development test mysql'
+bundle install --local --jobs $jobs
+pnpm install --frozen-lockfile
+'''
+build = '''
+# the assets need no database: a placeholder address only
+ZAMMAD_SAFE_MODE=1 DATABASE_URL=postgresql://zammad:build@127.0.0.1/zammad_build \
+    bundle exec rake assets:precompile
+'''
+install = '''
+d="$pkgdir/opt/zammad"
+mkdir -p "$d"
+cp -a . "$d/"
+rm -rf "$d/node_modules" "$d/vendor/cache" "$d"/vendor/bundle/ruby/*/cache "$d/tmp"/* "$d/.dkpub" "$d/spec" "$d/test" "$d/.github"
+install -Dm755 $pkgfiles/run "$pkgdir/usr/lib/zammad/run"
+for s in web websocket worker; do install -Dm644 $pkgfiles/zammad-$s "$pkgdir/etc/dinit.d/zammad-$s"; done
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/zammad.conf"
+install -Dm644 /dev/stdin "$pkgdir/usr/lib/tmpfiles.d/zammad.conf" <<EOF2
+d /etc/zammad 0750 root zammad -
+Z /opt/zammad/tmp 0750 zammad zammad -
+Z /opt/zammad/log 0750 zammad zammad -
+Z /opt/zammad/storage 0750 zammad zammad -
+Z /opt/zammad/public/assets 0755 zammad zammad -
+z /opt/zammad/config 0755 zammad zammad -
+EOF2
+install -Dm644 $pkgfiles/database.yml.example "$pkgdir/usr/share/doc/zammad/database.yml.example"
+install -Dm644 $pkgfiles/nginx-zammad.conf "$pkgdir/usr/share/doc/zammad/nginx-zammad.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/zammad/README.FenrirOS"
+install -Dm644 LICENSE-3RD-PARTY.txt "$pkgdir/usr/share/licenses/zammad/LICENSE-3RD-PARTY.txt"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/zammad/LICENSE"
+'''

@@ -1,0 +1,7 @@
+# Zammad: the websocket server on localhost:6042
+type = process
+command = /usr/lib/zammad/run bundle exec script/websocket-server.rb -b 127.0.0.1 -p 6042 start
+run-as = zammad
+working-dir = /opt/zammad
+smooth-recovery = true
+depends-on: rcboot

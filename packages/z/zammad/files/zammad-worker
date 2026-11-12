@@ -1,0 +1,7 @@
+# Zammad: the background worker (mail, scheduler, notifications)
+type = process
+command = /usr/lib/zammad/run bundle exec script/background-worker.rb start
+run-as = zammad
+working-dir = /opt/zammad
+smooth-recovery = true
+depends-on: rcboot

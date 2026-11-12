@@ -1,0 +1,7 @@
+# Zammad: the web application (Puma) on localhost:3000
+type = process
+command = /usr/lib/zammad/run bundle exec script/rails server -b 127.0.0.1 -p 3000
+run-as = zammad
+working-dir = /opt/zammad
+smooth-recovery = true
+depends-on: rcboot
