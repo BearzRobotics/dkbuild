@@ -1,0 +1,209 @@
+# Znuny: service management and ticketing (the community continuation of
+# OTRS): queues, escalations, SLAs, processes, a customer portal, ITSM.
+# Perl; served by nginx proxying to its PSGI application under Starman, with
+# Znuny's daemon beside it (two dinit services), on MariaDB or PostgreSQL.
+# Its CPAN dependencies (the required modules, the MariaDB, PostgreSQL and
+# ODBC drivers, LDAP, JSON::XS, Text::CSV_XS, XSLT, the Excel writers, JWT,
+# bcrypt, X.509, Plack and Starman: 133 distributions, resolved through
+# MetaCPAN with their own dependencies, less Perl's core and what the tree
+# packages) are this recipe's sources, built in dependency order
+# (files/cpan-order.txt) into /usr/lib/znuny/perl5. DBD::mysql is 4.052, the
+# last that builds against MariaDB's client. JavaScript::Minifier::XS is not
+# included (Znuny falls back to its pure-Perl minifier).
+# Home: /opt/znuny, as upstream expects. Setup: /usr/share/doc/znuny/README.FenrirOS.
+name = "znuny"
+version = "7.3.8"
+release = 1
+summary = "Service management and ticketing system (OTRS community edition)"
+license = "GPL-3.0-only"
+homepage = "https://www.znuny.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["perl", "make", "pkgconf"]
+builddeps = ["perl", "libxml2-devel", "libxslt-devel", "mariadb", "mariadb-devel", "postgresql-devel", "unixodbc-devel",
+             "openssl-devel", "zlib-ng-compat-devel", "libexpat-devel",
+             "perl-moo", "perl-json", "perl-io-socket-ssl", "perl-net-ssleay", "perl-uri", "perl-template-toolkit",
+             "perl-xml-parser", "perl-role-tiny", "perl-sub-quote", "perl-class-method-modifiers", "perl-path-tiny",
+             "perl-parse-yapp", "perl-locale-gettext"]
+rundeps = ["perl", "perl-moo", "perl-json", "perl-io-socket-ssl", "perl-net-ssleay", "perl-uri", "perl-template-toolkit",
+           "perl-xml-parser", "perl-role-tiny", "perl-sub-quote", "perl-class-method-modifiers", "perl-path-tiny",
+           "perl-parse-yapp", "perl-locale-gettext", "nginx", "cronie"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.znuny.org/releases/znuny-7.3.8.tar.gz", sha256 = "798848ee079333db31cab58014e7cab195345d2d5c230686215670132ae35ff9" },
+    { url = "https://cpan.metacpan.org/authors/id/R/RJ/RJBS/Algorithm-Diff-1.201.tar.gz", sha256 = "0022da5982645d9ef0207f3eb9ef63e70e9713ed2340ed7b3850779b0d842a7d", unpack = false },  # Algorithm-Diff 1.201
+    { url = "https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN/Capture-Tiny-0.50.tar.gz", sha256 = "ca6e8d7ce7471c2be54e1009f64c367d7ee233a2894cacf52ebe6f53b04e81e5", unpack = false },  # Capture-Tiny 0.50
+    { url = "https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/File-Which-1.27.tar.gz", sha256 = "3201f1a60e3f16484082e6045c896842261fc345de9fb2e620fd2a2c7af3a93a", unpack = false },  # File-Which 1.27
+    { url = "https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/FFI-CheckLib-0.31.tar.gz", sha256 = "04d885fc377d44896e5ea1c4ec310f979bb04f2f18658a7e7a4d509f7e80bb80", unpack = false },  # FFI-CheckLib 0.31
+    { url = "https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN/File-chdir-0.1011.tar.gz", sha256 = "31ebf912df48d5d681def74b9880d78b1f3aca4351a0ed1fe3570b8e03af6c79", unpack = false },  # File-chdir 0.1011
+    { url = "https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/Alien-Build-2.88.tar.gz", sha256 = "c14346bace2b50cae62f1ee70a907f4c7383fabf90b034272ee52a5b1345fbba", unpack = false },  # Alien-Build 2.88
+    { url = "https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/Alien-Build-Plugin-Download-GitLab-0.01.tar.gz", sha256 = "c1f089c8ea152a789909d48a83dbfcf2626f773daf30431c8622582b26aba902", unpack = false },  # Alien-Build-Plugin-Download-GitLab 0.01
+    { url = "https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/Alien-Libxml2-0.20.tar.gz", sha256 = "56aae7b339bbeb02f77c5801f57a821be5791b51f43bf7f9062bb3bfa444c328", unpack = false },  # Alien-Libxml2 0.20
+    { url = "https://cpan.metacpan.org/authors/id/L/LE/LEONT/ExtUtils-Config-0.010.tar.gz", sha256 = "82e7e4e90cbe380e152f5de6e3e403746982d502dd30197a123652e46610c66d", unpack = false },  # ExtUtils-Config 0.010
+    { url = "https://cpan.metacpan.org/authors/id/L/LE/LEONT/ExtUtils-Helpers-0.028.tar.gz", sha256 = "c8574875cce073e7dc5345a7b06d502e52044d68894f9160203fcaab379514fe", unpack = false },  # ExtUtils-Helpers 0.028
+    { url = "https://cpan.metacpan.org/authors/id/L/LE/LEONT/ExtUtils-InstallPaths-0.015.tar.gz", sha256 = "7d64eb2dfa87ead010cdf55c8a1bdfde50b7b5852d7cb8cf2304f55bea2eb007", unpack = false },  # ExtUtils-InstallPaths 0.015
+    { url = "https://cpan.metacpan.org/authors/id/L/LE/LEONT/Module-Build-Tiny-0.053.tar.gz", sha256 = "3726d622da6f655e88fdf89e4fd597709c44970b47de65082003e8d86b5e193a", unpack = false },  # Module-Build-Tiny 0.053
+    { url = "https://cpan.metacpan.org/authors/id/K/KA/KAZEBURO/POSIX-strftime-Compiler-0.46.tar.gz", sha256 = "bf88873248ef88cc5e68ed074493496be684ec334e11273d4654306dd9dae485", unpack = false },  # POSIX-strftime-Compiler 0.46
+    { url = "https://cpan.metacpan.org/authors/id/K/KA/KAZEBURO/Apache-LogFormat-Compiler-0.36.tar.gz", sha256 = "94509503ee74ea820183d070c11630ee5bc0fd8c12cb74fae953ed62e4a1ac17", unpack = false },  # Apache-LogFormat-Compiler 0.36
+    { url = "https://cpan.metacpan.org/authors/id/P/PH/PHRED/Archive-Zip-1.68.tar.gz", sha256 = "984e185d785baf6129c6e75f8eb44411745ac00bf6122fb1c8e822a3861ec650", unpack = false },  # Archive-Zip 1.68
+    { url = "https://cpan.metacpan.org/authors/id/D/DD/DDICK/Crypt-URandom-0.55.tar.gz", sha256 = "ef9f44141073c13573e85b148ff9a9089c45825b7d6608d832e4263899d3a2d4", unpack = false },  # Crypt-URandom 0.55
+    { url = "https://cpan.metacpan.org/authors/id/A/AR/ARODLAND/Digest-HMAC-1.05.tar.gz", sha256 = "215cb59cba610745cfb2d4b3f8ef756d590e57e3ad7986a992e87c4969fcdc7a", unpack = false },  # Digest-HMAC 1.05
+    { url = "https://cpan.metacpan.org/authors/id/E/EH/EHUELS/Authen-SASL-2.2100.tar.gz", sha256 = "4f0f100aeed34b52977a94b7df973e7f0b8f92d167b09f2b249bab81e8590e57", unpack = false },  # Authen-SASL 2.2100
+    { url = "https://cpan.metacpan.org/authors/id/H/HA/HAARG/Module-Runtime-0.018.tar.gz", sha256 = "0bf77ef68e53721914ff554eada20973596310b4e2cf1401fc958601807de577", unpack = false },  # Module-Runtime 0.018
+    { url = "https://cpan.metacpan.org/authors/id/E/ET/ETHER/Try-Tiny-0.32.tar.gz", sha256 = "ef2d6cab0bad18e3ab1c4e6125cc5f695c7e459899f512451c8fa3ef83fa7fc0", unpack = false },  # Try-Tiny 0.32
+    { url = "https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/Module-Implementation-0.09.tar.gz", sha256 = "c15f1a12f0c2130c9efff3c2e1afe5887b08ccd033bd132186d1e7d5087fd66d", unpack = false },  # Module-Implementation 0.09
+    { url = "https://cpan.metacpan.org/authors/id/F/FR/FREW/Sub-Exporter-Progressive-0.001013.tar.gz", sha256 = "d535b7954d64da1ac1305b1fadf98202769e3599376854b2ced90c382beac056", unpack = false },  # Sub-Exporter-Progressive 0.001013
+    { url = "https://cpan.metacpan.org/authors/id/E/ET/ETHER/B-Hooks-EndOfScope-0.28.tar.gz", sha256 = "edac77a17fc36620c8324cc194ce1fad2f02e9fcbe72d08ad0b2c47f0c7fd8ef", unpack = false },  # B-Hooks-EndOfScope 0.28
+    { url = "https://cpan.metacpan.org/authors/id/G/GT/GTERMARS/CSS-Minifier-XS-0.15.tar.gz", sha256 = "8a9ad223162da4671e3f812c4a55f297739483bd316abda41f4c27e8add78553", unpack = false },  # CSS-Minifier-XS 0.15
+    { url = "https://cpan.metacpan.org/authors/id/M/ML/MLEHMANN/Canary-Stability-2013.tar.gz", sha256 = "a5c91c62cf95fcb868f60eab5c832908f6905221013fea2bce3ff57046d7b6ea", unpack = false },  # Canary-Stability 2013
+    { url = "https://cpan.metacpan.org/authors/id/K/KA/KASEI/Class-Accessor-0.51.tar.gz", sha256 = "bf12a3e5de5a2c6e8a447b364f4f5a050bf74624c56e315022ae7992ff2f411c", unpack = false },  # Class-Accessor 0.51
+    { url = "https://cpan.metacpan.org/authors/id/R/RC/RCLAMP/Class-Accessor-Chained-0.01.tar.gz", sha256 = "a5bf49d3804f83ad25a1b16f327d14d4cbee2270132104b28705031dbccc34d2", unpack = false },  # Class-Accessor-Chained 0.01
+    { url = "https://cpan.metacpan.org/authors/id/R/RS/RSHERER/Class-Data-Inheritable-0.10.tar.gz", sha256 = "aa1ae68a611357b7bfd9a2f64907cc196ddd6d047cae64ef9d0ad099d98ae54a", unpack = false },  # Class-Data-Inheritable 0.10
+    { url = "https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/Class-Inspector-1.36.tar.gz", sha256 = "cc295d23a472687c24489d58226ead23b9fdc2588e522f0b5f0747741700694e", unpack = false },  # Class-Inspector 1.36
+    { url = "https://cpan.metacpan.org/authors/id/L/LE/LEONT/Module-Build-0.4234.tar.gz", sha256 = "66aeac6127418be5e471ead3744648c766bd01482825c5b66652675f2bc86a8f", unpack = false },  # Module-Build 0.4234
+    { url = "https://cpan.metacpan.org/authors/id/Z/ZE/ZEFRAM/Params-Classify-0.015.tar.gz", sha256 = "398ec15cd899fcd8bef3db9ea1748bf631f15f6c32be203e475b67df510a5914", unpack = false },  # Params-Classify 0.015
+    { url = "https://cpan.metacpan.org/authors/id/Z/ZE/ZEFRAM/Class-Mix-0.006.tar.gz", sha256 = "8747f643893914f8c44979f1716d0c1ec8a41394796555447944e860f1ff7c0b", unpack = false },  # Class-Mix 0.006
+    { url = "https://cpan.metacpan.org/authors/id/S/SH/SHAY/Class-Singleton-1.6.tar.gz", sha256 = "27ba13f0d9512929166bbd8c9ef95d90d630fc80f0c9a1b7458891055e9282a4", unpack = false },  # Class-Singleton 1.6
+    { url = "https://cpan.metacpan.org/authors/id/A/AT/ATOOMIC/Clone-0.51.tar.gz", sha256 = "f17f66fec97dacca67ac9585701d2d079cfc80539fe6e8160c201c4e55f67507", unpack = false },  # Clone 0.51
+    { url = "https://cpan.metacpan.org/authors/id/H/HE/HERMES/Clone-Choose-0.010.tar.gz", sha256 = "5623481f58cee8edb96cd202aad0df5622d427e5f748b253851dfd62e5123632", unpack = false },  # Clone-Choose 0.010
+    { url = "https://cpan.metacpan.org/authors/id/N/NE/NEILB/Clone-PP-1.09.tar.gz", sha256 = "4bb44697ef82105bd8d6204e550796a1eea89ce7108a98e0b7bf3ae4700d1c34", unpack = false },  # Clone-PP 1.09
+    { url = "https://cpan.metacpan.org/authors/id/T/TI/TIMLEGGE/Convert-ASN1-0.36.tar.gz", sha256 = "50439aedff4b403f24c9373eefd3c25770e33a9190d93a331e7a744f8b4e7cd3", unpack = false },  # Convert-ASN1 0.36
+    { url = "https://cpan.metacpan.org/authors/id/K/KA/KAZEBURO/Cookie-Baker-0.13.tar.gz", sha256 = "113ab2b76e32200e69966819bbf2e02afaa29cddbea85a5cd1ea78188c9271bf", unpack = false },  # Cookie-Baker 0.13
+    { url = "https://cpan.metacpan.org/authors/id/Z/ZE/ZEFRAM/Crypt-Eksblowfish-0.009.tar.gz", sha256 = "3cc7126d5841107237a9be2dc5c7fbc167cf3c4b4ce34678a8448b850757014c", unpack = false },  # Crypt-Eksblowfish 0.009
+    { url = "https://cpan.metacpan.org/authors/id/M/MI/MIK/CryptX-0.091.tar.gz", sha256 = "3a82d5cf786985e5de5339d1236ce4b27306db5e6b1ed5fa15038ded6d44859a", unpack = false },  # CryptX 0.091
+    { url = "https://cpan.metacpan.org/authors/id/M/MI/MIK/Crypt-JWT-0.038.tar.gz", sha256 = "160e64e26cfce81556b9f376dab4535ff0a17b80f44d1ffe3f41977a785c51c3", unpack = false },  # Crypt-JWT 0.038
+    { url = "https://cpan.metacpan.org/authors/id/A/AK/AKIYM/Crypt-OpenSSL-Guess-0.15.tar.gz", sha256 = "1c5033381819fdb4c9087dd291b90ec70e7810d31d57eade9b388eccfd70386d", unpack = false },  # Crypt-OpenSSL-Guess 0.15
+    { url = "https://cpan.metacpan.org/authors/id/J/JO/JONASBN/Crypt-OpenSSL-X509-2.1.5.tar.gz", sha256 = "ca40b8dbc741a9df792bb0495f2c1dce8043c63c8ee654673d5565dae40f4560", unpack = false },  # Crypt-OpenSSL-X509 2.1.5
+    { url = "https://cpan.metacpan.org/authors/id/S/SI/SIFUKURT/Crypt-RC4-2.02.tar.gz", sha256 = "5ec4425c6bc22207889630be7350d99686e62a44c6136960110203cd594ae0ea", unpack = false },  # Crypt-RC4 2.02
+    { url = "https://cpan.metacpan.org/authors/id/H/HM/HMBRAND/DBI-1.656.tgz", sha256 = "ab5f2b9aef00951ed4598723d6131a00b03e68193478dd5e5f211015520a6ef0", unpack = false },  # DBI 1.656
+    { url = "https://cpan.metacpan.org/authors/id/M/MJ/MJEVANS/DBD-ODBC-1.61.tar.gz", sha256 = "96def438c9610d72d0e24d007ea0eacd0059b5203c17eadb623bdea22fa9f40a", unpack = false },  # DBD-ODBC 1.61
+    { url = "https://cpan.metacpan.org/authors/id/T/TU/TURNSTEP/DBD-Pg-3.21.2.tar.gz", sha256 = "d79179255ccb0c87b029db2eecaea56828e581255c48445d5fc0e79fa4e9245b", unpack = false },  # DBD-Pg 3.21.2
+    { url = "https://cpan.metacpan.org/authors/id/M/MA/MATTN/Devel-CheckLib-1.16.tar.gz", sha256 = "869d38c258e646dcef676609f0dd7ca90f085f56cf6fd7001b019a5d5b831fca", unpack = false },  # Devel-CheckLib 1.16
+    { url = "https://cpan.metacpan.org/authors/id/D/DV/DVEEDEN/DBD-mysql-4.052.tar.gz", sha256 = "a83f57af7817787de0ef56fb15fdfaf4f1c952c8f32ff907153b66d2da78ff5b", unpack = false },  # DBD-mysql 4.052
+    { url = "https://cpan.metacpan.org/authors/id/G/GA/GARU/Data-Dump-1.25.tar.gz", sha256 = "a4aa6e0ddbf39d5ad49bddfe0f89d9da864e3bc00f627125d1bc580472f53fbd", unpack = false },  # Data-Dump 1.25
+    { url = "https://cpan.metacpan.org/authors/id/G/GT/GTERMARS/Data-UUID-1.227.tar.gz", sha256 = "95bda7276265f57bc48ffdeddec5ef28cd6f765e3a183757fa5f09f0ce6b98ac", unpack = false },  # Data-UUID 1.227
+    { url = "https://cpan.metacpan.org/authors/id/D/DO/DOY/Dist-CheckConflicts-0.11.tar.gz", sha256 = "ea844b9686c94d666d9d444321d764490b2cde2f985c4165b4c2c77665caedc4", unpack = false },  # Dist-CheckConflicts 0.11
+    { url = "https://cpan.metacpan.org/authors/id/E/ET/ETHER/File-ShareDir-Install-0.14.tar.gz", sha256 = "8f9533b198f2d4a9a5288cbc7d224f7679ad05a7a8573745599789428bc5aea0", unpack = false },  # File-ShareDir-Install 0.14
+    { url = "https://cpan.metacpan.org/authors/id/R/RE/REHSACK/File-ShareDir-1.118.tar.gz", sha256 = "3bb2a20ba35df958dc0a4f2306fc05d903d8b8c4de3c8beefce17739d281c958", unpack = false },  # File-ShareDir 1.118
+    { url = "https://cpan.metacpan.org/authors/id/D/DO/DOY/Eval-Closure-0.14.tar.gz", sha256 = "ea0944f2f5ec98d895bef6d503e6e4a376fea6383a6bc64c7670d46ff2218cad", unpack = false },  # Eval-Closure 0.14
+    { url = "https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/Devel-StackTrace-2.05.tar.gz", sha256 = "63cb6196e986a7e578c4d28b3c780e7194835bfc78b68eeb8f00599d4444888c", unpack = false },  # Devel-StackTrace 2.05
+    { url = "https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/Exception-Class-1.46.tar.gz", sha256 = "e2f8c0708ff8de8b1bb7be1faa3cdb240fdd9774bc741627350577ea7e0e76a1", unpack = false },  # Exception-Class 1.46
+    { url = "https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/Params-ValidationCompiler-0.31.tar.gz", sha256 = "7b6497173f1b6adb29f5d51d8cf9ec36d2f1219412b4b2410e9d77a901e84a6d", unpack = false },  # Params-ValidationCompiler 0.31
+    { url = "https://cpan.metacpan.org/authors/id/H/HA/HAARG/MRO-Compat-0.15.tar.gz", sha256 = "0d4535f88e43babd84ab604866215fc4d04398bd4db7b21852d4a31b1c15ef61", unpack = false },  # MRO-Compat 0.15
+    { url = "https://cpan.metacpan.org/authors/id/R/RJ/RJBS/Test-Fatal-0.019.tar.gz", sha256 = "d8f6b6c87bb399a7d60c295a94a4b741a85b23889cfd6b72f1ff62f0c55cf70b", unpack = false },  # Test-Fatal 0.019
+    { url = "https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/Specio-0.53.tar.gz", sha256 = "0d0eecfb9e89bd0f5f710fac42e1200a882d513a862f98497eaef5927ac6c183", unpack = false },  # Specio 0.53
+    { url = "https://cpan.metacpan.org/authors/id/E/ET/ETHER/Package-Stash-0.40.tar.gz", sha256 = "5a9722c6d9cb29ee133e5f7b08a5362762a0b5633ff5170642a5b0686e95e066", unpack = false },  # Package-Stash 0.40
+    { url = "https://cpan.metacpan.org/authors/id/R/RI/RIBASUSHI/namespace-clean-0.27.tar.gz", sha256 = "8a10a83c3e183dc78f9e7b7aa4d09b47c11fb4e7d3a33b9a12912fd22e31af9d", unpack = false },  # namespace-clean 0.27
+    { url = "https://cpan.metacpan.org/authors/id/E/ET/ETHER/namespace-autoclean-0.31.tar.gz", sha256 = "d3b32c82e1d2caa9d58b8c8075965240e6cab66ab9350bd6f6bea4ca07e938d6", unpack = false },  # namespace-autoclean 0.31
+    { url = "https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/DateTime-Locale-1.47.tar.gz", sha256 = "c0b25e1cdb2825d4469b96c7bbd1d7f20c5fc5fc5ae7f5e2bf6e69e08bfb9ecd", unpack = false },  # DateTime-Locale 1.47
+    { url = "https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/DateTime-TimeZone-2.72.tar.gz", sha256 = "23b4b5d7e49905d2dc9c3f8a78ce668311d1e4411038695158e99c8c0f375492", unpack = false },  # DateTime-TimeZone 2.72
+    { url = "https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/DateTime-1.68.tar.gz", sha256 = "dddaf4a0def18dce6b301079881a17b4a8c91184ae3fa3dc58723a3005eab9d3", unpack = false },  # DateTime 1.68
+    { url = "https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/Params-Validate-1.31.tar.gz", sha256 = "1bf2518ef2c4869f91590e219f545c8ef12ed53cf313e0eb5704adf7f1b2961e", unpack = false },  # Params-Validate 1.31
+    { url = "https://cpan.metacpan.org/authors/id/F/FG/FGLOCK/Set-Infinite-0.65.tar.gz", sha256 = "07bc880734492de40b4a3a8b5a331762f64e69b4629029fd9a9d357b25b87e1f", unpack = false },  # Set-Infinite 0.65
+    { url = "https://cpan.metacpan.org/authors/id/F/FG/FGLOCK/DateTime-Set-0.3900.tar.gz", sha256 = "94f41c3924aafde4ef7fa6b58e0595d4038d8ac5ffd62ba111b13c5f4dbc0946", unpack = false },  # DateTime-Set 0.3900
+    { url = "https://cpan.metacpan.org/authors/id/F/FG/FGLOCK/DateTime-Event-Recurrence-0.19.tar.gz", sha256 = "f9408789a461107766ca1a232bb3ec1e702eec7ca8167401ea6ec3f4b6d0b5a5", unpack = false },  # DateTime-Event-Recurrence 0.19
+    { url = "https://cpan.metacpan.org/authors/id/F/FG/FGLOCK/DateTime-Event-ICal-0.13.tar.gz", sha256 = "53da4384ef5cf30ee87dc0131f4b6eee2121cc0eba347162a328b9bcfaf475ea", unpack = false },  # DateTime-Event-ICal 0.13
+    { url = "https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/DateTime-Format-ICal-0.09.tar.gz", sha256 = "8b09f6539f5e9c0df0e6135031699ed4ef9eef8165fc80aefeecc817ef997c33", unpack = false },  # DateTime-Format-ICal 0.09
+    { url = "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Devel-StackTrace-AsHTML-0.15.tar.gz", sha256 = "6283dbe2197e2f20009cc4b449997742169cdd951bfc44cbc6e62c2a962d3147", unpack = false },  # Devel-StackTrace-AsHTML 0.15
+    { url = "https://cpan.metacpan.org/authors/id/D/DE/DELTA/Digest-Perl-MD5-1.91.tar.gz", sha256 = "718e41717fb82a9ab3f0809d211fddcdbdef91dc198887d82b88723aa54afcd5", unpack = false },  # Digest-Perl-MD5 1.91
+    { url = "https://cpan.metacpan.org/authors/id/A/AU/AUDREYT/Encode-HanExtra-0.23.tar.gz", sha256 = "1fd4b06cada70858003af153f94c863b3b95f2e3d03ba18d0451a81d51db443a", unpack = false },  # Encode-HanExtra 0.23
+    { url = "https://cpan.metacpan.org/authors/id/G/GA/GAAS/Encode-Locale-1.05.tar.gz", sha256 = "176fa02771f542a4efb1dbc2a4c928e8f4391bf4078473bd6040d8f11adb0ec1", unpack = false },  # Encode-Locale 1.05
+    { url = "https://cpan.metacpan.org/authors/id/J/JM/JMCNAMARA/Excel-Writer-XLSX-1.15.tar.gz", sha256 = "7931b4d8e2fa8b4f806db4bf523be396483f55f53e4f4738fdff5e9a0d875331", unpack = false },  # Excel-Writer-XLSX 1.15
+    { url = "https://cpan.metacpan.org/authors/id/A/AT/ATOOMIC/TimeDate-2.35.tar.gz", sha256 = "baddd0306ae2e86e9ec28d3de5439e514643e80b3735e43bd0fbb426d73304de", unpack = false },  # TimeDate 2.35
+    { url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/HTTP-Date-6.08.tar.gz", sha256 = "b57d80ca6d821c6949ca48b27467d45aba7a9c77346562306facca781a003e44", unpack = false },  # HTTP-Date 6.08
+    { url = "https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/File-Listing-6.16.tar.gz", sha256 = "189b3a13fc0a1ba412b9d9ec5901e9e5e444cc746b9f0156d4399370d33655c6", unpack = false },  # File-Listing 6.16
+    { url = "https://cpan.metacpan.org/authors/id/C/CA/CAPOEIRAB/File-Slurp-9999.32.tar.gz", sha256 = "4c3c21992a9d42be3a79dd74a3c83d27d38057269d65509a2f555ea0fb2bc5b0", unpack = false },  # File-Slurp 9999.32
+    { url = "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Filesys-Notify-Simple-0.14.tar.gz", sha256 = "1fda712d4ba5e1868159ed35f6f8efbfae9d435d6376f5606d533bcb080555a4", unpack = false },  # Filesys-Notify-Simple 0.14
+    { url = "https://cpan.metacpan.org/authors/id/I/IL/ILYAZ/modules/FreezeThaw-1.00.tar.gz", sha256 = "75e6431a865e8d1ce0baf1438ec33706661227c2b4fb28bbaec2a6b4e84f16ed", unpack = false },  # FreezeThaw 1.00
+    { url = "https://cpan.metacpan.org/authors/id/P/PE/PETDANCE/HTML-Tagset-3.24.tar.gz", sha256 = "eb89e145a608ed1f8f141a57472ee5f69e67592a432dcd2e8b1dbb445f2b230b", unpack = false },  # HTML-Tagset 3.24
+    { url = "https://cpan.metacpan.org/authors/id/C/CJ/CJM/IO-HTML-1.004.tar.gz", sha256 = "c87b2df59463bbf2c39596773dfb5c03bde0f7e1051af339f963f58c1cbd8bf5", unpack = false },  # IO-HTML 1.004
+    { url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/LWP-MediaTypes-6.05.tar.gz", sha256 = "abb2dcfbf069317fe65b098e3b2ad58c5eb33e9a839b9190cce6d371f8966cc1", unpack = false },  # LWP-MediaTypes 6.05
+    { url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/HTTP-Message-7.04.tar.gz", sha256 = "699f3350dbb7bd8fdc9f3b013b0c91b7c059783708443e39bc395fa33352f006", unpack = false },  # HTTP-Message 7.04
+    { url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/HTML-Parser-3.86.tar.gz", sha256 = "5305e1d5faa70ee0aa282d85a5c9aa93911e8c7afa590ad1ced5703a544e20f6", unpack = false },  # HTML-Parser 3.86
+    { url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/HTTP-Cookies-6.12.tar.gz", sha256 = "4e460c4bae76285bfc726f641349402fc9038fcd9ca0f33346bec036d73876b8", unpack = false },  # HTTP-Cookies 6.12
+    { url = "https://cpan.metacpan.org/authors/id/R/RJ/RJBS/Test-Deep-1.205.tar.gz", sha256 = "42781e9943a7a215e662c4973b9feafdc019fd16469bdb849a8537ee58956273", unpack = false },  # Test-Deep 1.205
+    { url = "https://cpan.metacpan.org/authors/id/C/CH/CHANSEN/HTTP-MultiPartParser-0.02.tar.gz", sha256 = "5eddda159f54d16f868e032440ac2b024e55aac48931871b62627f1a16d00b12", unpack = false },  # HTTP-MultiPartParser 0.02
+    { url = "https://cpan.metacpan.org/authors/id/A/AR/ARISTOTLE/Hash-MultiValue-0.16.tar.gz", sha256 = "66181df7aa68e2786faf6895c88b18b95c800a8e4e6fb4c07fd176410a3c73f4", unpack = false },  # Hash-MultiValue 0.16
+    { url = "https://cpan.metacpan.org/authors/id/E/ET/ETHER/JSON-MaybeXS-1.004008.tar.gz", sha256 = "cd3937afa78831f80a2ad5abab6c51b9e82fca4c31e5856ea208d598db5dc867", unpack = false },  # JSON-MaybeXS 1.004008
+    { url = "https://cpan.metacpan.org/authors/id/D/DO/DOY/Stream-Buffered-0.03.tar.gz", sha256 = "9b2d4390b5de6b0cf4558e4ad04317a73c5e13dd19af29149c4e47c37fb2423b", unpack = false },  # Stream-Buffered 0.03
+    { url = "https://cpan.metacpan.org/authors/id/K/KA/KAZEBURO/WWW-Form-UrlEncoded-0.26.tar.gz", sha256 = "c0480b5f1f15b71163ec327b8e7842298f0cb3ace97e63d7034af1e94a2d90f4", unpack = false },  # WWW-Form-UrlEncoded 0.26
+    { url = "https://cpan.metacpan.org/authors/id/K/KA/KAZEBURO/HTTP-Entity-Parser-0.25.tar.gz", sha256 = "3a8cd0d8cba3d17cd8c04ee82d7341dfaa247dbdd94a49eb94b53f69e483ec3a", unpack = false },  # HTTP-Entity-Parser 0.25
+    { url = "https://cpan.metacpan.org/authors/id/T/TO/TOKUHIROM/HTTP-Headers-Fast-0.22.tar.gz", sha256 = "cc431db68496dd884db4bc0c0b7112c1f4a4f1dc68c4f5a3caa757a1e7481b48", unpack = false },  # HTTP-Headers-Fast 0.22
+    { url = "https://cpan.metacpan.org/authors/id/G/GA/GAAS/HTTP-Negotiate-6.01.tar.gz", sha256 = "1c729c1ea63100e878405cda7d66f9adfd3ed4f1d6cacaca0ee9152df728e016", unpack = false },  # HTTP-Negotiate 6.01
+    { url = "https://cpan.metacpan.org/authors/id/K/KA/KAZUHO/HTTP-Parser-XS-0.18.tar.gz", sha256 = "4a3c409b40ec56b18e23c302339bff2411a66e1ed6a822412f268eb698600afd", unpack = false },  # HTTP-Parser-XS 0.18
+    { url = "https://cpan.metacpan.org/authors/id/H/HE/HERMES/Hash-Merge-0.302.tar.gz", sha256 = "ae0522f76539608b61dde14670e79677e0f391036832f70a21f31adde2538644", unpack = false },  # Hash-Merge 0.302
+    { url = "https://cpan.metacpan.org/authors/id/G/GA/GAAS/IO-String-1.08.tar.gz", sha256 = "2a3f4ad8442d9070780e58ef43722d19d1ee21a803bf7c8206877a10482de5a0", unpack = false },  # IO-String 1.08
+    { url = "https://cpan.metacpan.org/authors/id/C/CA/CAPOEIRAB/IO-Stringy-2.113.tar.gz", sha256 = "51220fcaf9f66a639b69d251d7b0757bf4202f4f9debd45bdd341a6aca62fe4e", unpack = false },  # IO-Stringy 2.113
+    { url = "https://cpan.metacpan.org/authors/id/M/ML/MLEHMANN/common-sense-3.75.tar.gz", sha256 = "a86a1c4ca4f3006d7479064425a09fa5b6689e57261fcb994fe67d061cba0e7e", unpack = false },  # common-sense 3.75
+    { url = "https://cpan.metacpan.org/authors/id/M/ML/MLEHMANN/Types-Serialiser-1.01.tar.gz", sha256 = "f8c7173b0914d0e3d957282077b366f0c8c70256715eaef3298ff32b92388a80", unpack = false },  # Types-Serialiser 1.01
+    { url = "https://cpan.metacpan.org/authors/id/M/ML/MLEHMANN/JSON-XS-4.04.tar.gz", sha256 = "8eff1e9f304c5625b59ab7b42258415f6d3e3681c1ddab6b725518a018a7f5e0", unpack = false },  # JSON-XS 4.04
+    { url = "https://cpan.metacpan.org/authors/id/J/JT/JTBRAUN/Parse-RecDescent-1.967015.tar.gz", sha256 = "1943336a4cb54f1788a733f0827c0c55db4310d5eae15e542639c9dd85656e37", unpack = false },  # Parse-RecDescent 1.967015
+    { url = "https://cpan.metacpan.org/authors/id/P/PL/PLOBBES/Mail-IMAPClient-3.43.tar.gz", sha256 = "093c97fac15b47a8fe4d2936ef2df377abf77cc8ab74092d2128bb945d1fb46f", unpack = false },  # Mail-IMAPClient 3.43
+    { url = "https://cpan.metacpan.org/authors/id/N/NL/NLNETLABS/Net-DNS-1.57.tar.gz", sha256 = "7c98de329cb5d6a99abbb03aaad2866cb041092ed9936a7246908e170005b058", unpack = false },  # Net-DNS 1.57
+    { url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/Net-HTTP-6.24.tar.gz", sha256 = "290ed9a97b05c7935b048e6d2a356035871fca98ad72c01c5961726adf85c83c", unpack = false },  # Net-HTTP 6.24
+    { url = "https://cpan.metacpan.org/authors/id/B/BB/BBB/Net-Server-2.018.tar.gz", sha256 = "4d6bd1adb0de600d6b44b9a8629b943fe86700b055186791ea397b7cf3a456b3", unpack = false },  # Net-Server 2.018
+    { url = "https://cpan.metacpan.org/authors/id/J/JM/JMCNAMARA/OLE-Storage_Lite-0.24.tar.gz", sha256 = "71c3b6ef082176c9585e620dd48f0f4782c282be73f2a653ea4b618f757bb3fd", unpack = false },  # OLE-Storage_Lite 0.24
+    { url = "https://cpan.metacpan.org/authors/id/E/EX/EXODIST/Test-SharedFork-0.35.tar.gz", sha256 = "2932e865610e80758f764c586757ef8e11db1284d958e25e4b7a85098414c59f", unpack = false },  # Test-SharedFork 0.35
+    { url = "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Test-TCP-2.22.tar.gz", sha256 = "3e53c3c06d6d0980a2bfeb915602b714e682ee211ae88c11748cf2cc714e7b57", unpack = false },  # Test-TCP 2.22
+    { url = "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Plack-1.0057.tar.gz", sha256 = "01cfe036276703f62cf6c1cec7c7e630420677498dfa7bc333ad88eca9d7a765", unpack = false },  # Plack 1.0057
+    { url = "https://cpan.metacpan.org/authors/id/J/JM/JMCNAMARA/Spreadsheet-ParseExcel-0.66.tar.gz", sha256 = "bfd76acfba988601dc051bda73b4bb25f6839a006dd960b6a7401c249245f65b", unpack = false },  # Spreadsheet-ParseExcel 0.66
+    { url = "https://cpan.metacpan.org/authors/id/A/AS/ASB/Spreadsheet-XLSX-0.20.tar.gz", sha256 = "5add7b91c4845809b065a1b61e326627b0019aaec91078b1efa54842c9a7ab5d", unpack = false },  # Spreadsheet-XLSX 0.20
+    { url = "https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/Starman-0.4019.tar.gz", sha256 = "4a33f20a6a3250938fc85e21779e34c56e156895fe4a8fa8c83ac4e96ecaef61", unpack = false },  # Starman 0.4019
+    { url = "https://cpan.metacpan.org/authors/id/T/TI/TINITA/YAML-1.321.tar.gz", sha256 = "d461167b8b4aa9244f736a7a740830141e61dddee301e456bf642e81d3cea193", unpack = false },  # YAML 1.321
+    { url = "https://cpan.metacpan.org/authors/id/S/SC/SCHWIGON/String-Diff-0.11.tar.gz", sha256 = "cb70a62639c8d5a5f5978a9c50ecc3213c0065e515b1b6a3f3706c3edb84733e", unpack = false },  # String-Diff 0.11
+    { url = "https://cpan.metacpan.org/authors/id/H/HM/HMBRAND/Text-CSV_XS-1.65.tgz", sha256 = "4f0c16457c87def295a994e9c4ba397a8baafad96cefaf2d61483125f90ff974", unpack = false },  # Text-CSV_XS 1.65
+    { url = "https://cpan.metacpan.org/authors/id/A/AM/AMBS/Text-Diff-FormattedHTML-0.08.tar.gz", sha256 = "39ab775a5c056745f2abd8cc7c1cbc5496dfef7e52a9f4bd8ada6aa6c9c7b70d", unpack = false },  # Text-Diff-FormattedHTML 0.08
+    { url = "https://cpan.metacpan.org/authors/id/R/RC/RCLAMP/Text-vFile-asData-0.08.tar.gz", sha256 = "b291ab5e0f987c5172560a692234711a75e4596d83475f72d01278369532f82a", unpack = false },  # Text-vFile-asData 0.08
+    { url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/WWW-RobotRules-6.03.tar.gz", sha256 = "8522b532935a11bfa688c2e113bac66729df4851be50c2c26d4b06f45fade472", unpack = false },  # WWW-RobotRules 6.03
+    { url = "https://cpan.metacpan.org/authors/id/P/PE/PERIGRIN/XML-NamespaceSupport-1.12.tar.gz", sha256 = "47e995859f8dd0413aa3f22d350c4a62da652e854267aa0586ae544ae2bae5ef", unpack = false },  # XML-NamespaceSupport 1.12
+    { url = "https://cpan.metacpan.org/authors/id/G/GR/GRANTM/XML-SAX-Base-1.09.tar.gz", sha256 = "66cb355ba4ef47c10ca738bd35999723644386ac853abbeb5132841f5e8a2ad0", unpack = false },  # XML-SAX-Base 1.09
+    { url = "https://cpan.metacpan.org/authors/id/G/GR/GRANTM/XML-SAX-1.02.tar.gz", sha256 = "4506c387043aa6a77b455f00f57409f3720aa7e553495ab2535263b4ed1ea12a", unpack = false },  # XML-SAX 1.02
+    { url = "https://cpan.metacpan.org/authors/id/T/TO/TODDR/XML-LibXML-2.0213.tar.gz", sha256 = "2af21c5d61ac34ea26a5fabf15ba5a5841e648f7189db3e33b6f28b5489802ab", unpack = false },  # XML-LibXML 2.0213
+    { url = "https://cpan.metacpan.org/authors/id/S/SH/SHLOMIF/XML-LibXSLT-2.003000.tar.gz", sha256 = "7caa5aee72f53be59d8b84eecb6864a07c612a12ea6b27d5c706960edcd54587", unpack = false },  # XML-LibXSLT 2.003000
+    { url = "https://cpan.metacpan.org/authors/id/T/TI/TINITA/YAML-LibYAML-v0.910.0.tar.gz", sha256 = "04310e9840b918383a5b9ae9ca4b3bde1b2771ec786c758bd2fffd79d409332b", unpack = false },  # YAML-LibYAML v0.910.0
+    { url = "https://cpan.metacpan.org/authors/id/R/RI/RIXED/iCal-Parser-1.21.tar.gz", sha256 = "0d7939a644a8e67017ec7239d3d9604f3986bb9a4ff80be68fe7299ebfd2270c", unpack = false },  # iCal-Parser 1.21
+    { url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/libwww-perl-6.83.tar.gz", sha256 = "e75f0fa9d3c6f0daf5a5a72fa9f8b1c9c0d23e3a84a8522ccb4f835232b95505", unpack = false },  # libwww-perl 6.83
+    { url = "https://cpan.metacpan.org/authors/id/M/MA/MARSCHAP/perl-ldap-0.68.tar.gz", sha256 = "e2f389fe3e7a9e4b61488692919ad723b98f3b479b5288f610daa8c27995b351", unpack = false },  # perl-ldap 0.68
+]
+
+environment = '''
+export PERL_MM_USE_DEFAULT=1 PERL_MM_NONINTERACTIVE=1 ALIEN_INSTALL_TYPE=system NO_NETWORK_TESTING=1
+export PERL5LIB=/tmp/zperl/lib/perl5 PATH="/tmp/zperl/bin:$PATH"
+'''
+build = '''
+mkdir -p /tmp/cpan /tmp/zperl
+grep -v '^#' $pkgfiles/cpan-order.txt | while read -r t; do
+    echo "==> $t"
+    rm -rf /tmp/cpan/src && mkdir -p /tmp/cpan/src
+    tar -xzf "/build/sources/$t" -C /tmp/cpan/src --no-same-owner
+    cd /tmp/cpan/src/*/
+    if [ -f Makefile.PL ]; then
+        perl Makefile.PL INSTALL_BASE=/tmp/zperl && make -j$jobs && make install
+    else
+        perl Build.PL --install_base /tmp/zperl && ./Build && ./Build install
+    fi
+    cd /build
+done
+test -x /tmp/zperl/bin/starman
+'''
+install = '''
+d="$pkgdir/opt/znuny"
+mkdir -p "$d"
+cp -a . "$d/"
+mkdir -p "$pkgdir/usr/lib/znuny"
+cp -a /tmp/zperl "$pkgdir/usr/lib/znuny/perl5"
+find "$pkgdir/usr/lib/znuny/perl5" \( -name .packlist -o -name perllocal.pod \) -delete
+install -Dm755 $pkgfiles/znuny-web.sh "$pkgdir/usr/lib/znuny/znuny-web"
+install -Dm755 $pkgfiles/znuny-daemon.sh "$pkgdir/usr/lib/znuny/znuny-daemon"
+install -Dm755 $pkgfiles/znuny.sh "$pkgdir/usr/bin/znuny"
+install -Dm644 $pkgfiles/znuny-web "$pkgdir/etc/dinit.d/znuny-web"
+install -Dm644 $pkgfiles/znuny-daemon "$pkgdir/etc/dinit.d/znuny-daemon"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/znuny.conf"
+install -Dm644 /dev/stdin "$pkgdir/usr/lib/tmpfiles.d/znuny.conf" <<EOF2
+Z /opt/znuny/var 0755 znuny znuny -
+z /opt/znuny/Kernel 0755 znuny znuny -
+EOF2
+install -Dm644 $pkgfiles/nginx-znuny.conf "$pkgdir/usr/share/doc/znuny/nginx-znuny.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/znuny/README.FenrirOS"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/znuny/COPYING"
+'''

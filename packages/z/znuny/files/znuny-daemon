@@ -1,0 +1,7 @@
+# Znuny's daemon (scheduler, email fetching, escalations)
+type = process
+command = /usr/lib/znuny/znuny-daemon
+run-as = znuny
+working-dir = /opt/znuny
+smooth-recovery = true
+depends-on: rcboot

@@ -1,0 +1,15 @@
+Znuny on FenrirOS
+=================
+
+Znuny lives in /opt/znuny (its usual home; it writes into var/), owned by the
+znuny user. Its CPAN libraries are in /usr/lib/znuny/perl5. Two dinit
+services: znuny-web (the web application under Starman, localhost:5000) and
+znuny-daemon (scheduler, mail, escalations). `znuny` runs its console.
+
+1. Create a MariaDB (or PostgreSQL) database and user for Znuny; MariaDB
+   needs max_allowed_packet >= 64M and innodb_log_file_size >= 256M.
+2. cp /opt/znuny/Kernel/Config.pm.dist /opt/znuny/Kernel/Config.pm
+   (owned by znuny), or let the web installer write it.
+3. nginx: /usr/share/doc/znuny/nginx-znuny.conf; enable nginx and znuny-web
+   (dinitctl enable ...), then open http://<host>/znuny/installer.pl.
+4. After the installer: dinitctl enable znuny-daemon.

@@ -1,0 +1,8 @@
+# Znuny's web application (PSGI) under Starman on localhost:5000; nginx
+# proxies /znuny/ to it (/usr/share/doc/znuny/nginx-znuny.conf)
+type = process
+command = /usr/lib/znuny/znuny-web
+run-as = znuny
+working-dir = /opt/znuny
+smooth-recovery = true
+depends-on: rcboot
