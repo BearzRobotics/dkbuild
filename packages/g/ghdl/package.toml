@@ -1,0 +1,42 @@
+# GHDL: VHDL simulator and synthesis front end (VHDL-87 to VHDL-2019), with
+# libghdl (for language servers and pyGHDL) and synthesis (ghdl --synth, and
+# the Yosys plugin's base). Written in Ada: built with GCC's GNAT (gcc, in
+# /usr/lib/gcc15), the mcode backend (generates x86_64 code in memory; no
+# LLVM or GCC sources needed). Programs link GNAT's runtime from
+# /usr/lib/gcc15/lib (rpath).
+name = "ghdl"
+version = "6.0.0"
+release = 1
+summary = "VHDL simulator and synthesis front end"
+license = "GPL-2.0-or-later"
+homepage = "https://ghdl.github.io/ghdl/"
+archs = ["x86_64"]
+hostdeps = ["gcc", "binutils", "make"]
+builddeps = ["zlib-ng-compat-devel"]
+rundeps = ["gcc"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://github.com/ghdl/ghdl/archive/refs/tags/v6.0.0.tar.gz", sha256 = "2d84fbd0b238a26928e89a0256274072c6b40af1969a4f4c7be57ec3515bc622" },
+]
+
+environment = '''
+# GNAT and its GCC (not clang), with GNU as/ld
+mkdir -p /tmp/gnu-bin
+for t in as ar nm ranlib objcopy; do ln -sf /usr/bin/g$t /tmp/gnu-bin/$t; done
+ln -sf /usr/bin/ld.bfd /tmp/gnu-bin/ld
+export PATH="/tmp/gnu-bin:/usr/lib/gcc15/bin:$PATH"
+export CC=/usr/lib/gcc15/bin/gcc CXX=/usr/lib/gcc15/bin/g++ GNATMAKE=/usr/lib/gcc15/bin/gnatmake AR=ar
+unset CPPFLAGS
+export CFLAGS="-O2" CXXFLAGS="-O2" LDFLAGS="-Wl,-rpath,/usr/lib/gcc15/lib"
+'''
+setup = '''
+./configure --prefix=/usr --enable-libghdl --enable-synth --default-pic
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+install -Dm644 COPYING.md "$pkgdir/usr/share/licenses/ghdl/COPYING.md"
+'''
