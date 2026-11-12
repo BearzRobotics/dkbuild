@@ -11,6 +11,11 @@ source = [
     { url = "https://ftp.gnu.org/gnu/gengetopt/gengetopt-2.23.tar.xz", sha256 = "b941aec9011864978dd7fdeb052b1943535824169d2aa2b0e7eae9ab807584ac" },
 ]
 
+# C++14: gm_utils.h derives from std::unary_function, which libc++ drops in
+# C++17 and later (clang's default); libc++ still has it in C++14 mode.
+environment = '''
+export CXXFLAGS="$CXXFLAGS -std=gnu++14"
+'''
 setup = '''
 %configure
 '''
