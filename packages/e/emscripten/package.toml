@@ -1,0 +1,50 @@
+# Emscripten: compiles C and C++ to WebAssembly and JavaScript. Needed for
+# GDevelop's core (libGD.js), built from source instead of GDevelop's
+# prebuilt copy.
+# 6.0.3 is the last release for LLVM 23 (EXPECTED_LLVM_VERSION), with
+# binaryen 129, so it runs on the system clang and wasm-ld (Debian packages it
+# that way too). Upstream tests each release against the LLVM development
+# commit it shipped with; if the system LLVM falls short, the fallback is
+# Arch's: that LLVM commit built under /opt/emscripten-llvm for Emscripten only.
+# Installed as tools/install.py lays it out, with its production npm
+# packages (`npmdeps`), in /usr/lib/emscripten; emcc and the rest on PATH
+# through /etc/profile.d. The C library, libc++ and compiler-rt for wasm are
+# built from Emscripten's own sources on first use, into ~/.cache/emscripten
+# (EM_CACHE overrides it).
+name = "emscripten"
+version = "6.0.3"
+release = 1
+summary = "Compiler toolchain from C/C++ to WebAssembly"
+license = "MIT OR NCSA"
+homepage = "https://emscripten.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["nodejs", "python"]
+rundeps = ["binaryen", "llvm-clang", "llvm-lld", "nodejs", "python"]
+options = ["!check", "!strip", "npmdeps"]
+
+source = [
+    { url = "https://github.com/emscripten-core/emscripten/archive/refs/tags/6.0.3.tar.gz", sha256 = "033241f96a5c50993b43d8383c3356d2804932f5b3548e94c9839c4f68e8b5bd" },
+]
+
+environment = '''
+export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
+    npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+'''
+build = '''
+# the launchers (emcc, em++, ...) are generated since 4.0
+python3 tools/maint/create_entry_points.py
+node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
+npm ci --omit=dev --ignore-scripts
+rm -rf /tmp/emroot
+python3 tools/install.py /tmp/emroot
+cp -a node_modules /tmp/emroot/
+test -x /tmp/emroot/emcc
+'''
+install = '''
+mkdir -p "$pkgdir/usr/lib"
+cp -a /tmp/emroot "$pkgdir/usr/lib/emscripten"
+find "$pkgdir/usr/lib/emscripten" -type d -exec chmod 755 {} +
+install -Dm644 $pkgfiles/emscripten-config "$pkgdir/usr/lib/emscripten/.emscripten"
+install -Dm644 $pkgfiles/emscripten.sh "$pkgdir/etc/profile.d/emscripten.sh"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/emscripten/LICENSE"
+'''

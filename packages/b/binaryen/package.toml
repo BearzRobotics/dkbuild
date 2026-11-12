@@ -1,0 +1,36 @@
+# Binaryen: WebAssembly optimizer and compiler toolchain library (wasm-opt,
+# wasm-metadce, ...), the version Emscripten 6.0.3 expects (129).
+# Ported from Chimera's user/binaryen. GTest tests need submodules the archive
+# lacks: not built. The static library is a second build (BUILD_STATIC_LIB,
+# no tools).
+name = "binaryen"
+version = "129"
+release = 1
+summary = "Optimizer and compiler/toolchain library for WebAssembly"
+license = "Apache-2.0"
+homepage = "https://github.com/WebAssembly/binaryen"
+hostdeps = ["cmake", "ninja", "python"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/WebAssembly/binaryen/archive/refs/tags/version_129.tar.gz", sha256 = "0bbfc0f414a18235f47a3e13a333cc14f702ab3324fb10653ab08865680fcbb8" },
+]
+
+environment = '''
+export LDFLAGS="$LDFLAGS -Wl,-z,stack-size=0x200000"
+'''
+setup = '''
+opts="-DBUILD_TESTS=OFF -DENABLE_WERROR=OFF -DBYN_ENABLE_LTO=OFF"
+%cmake $opts -DBUILD_SHARED_LIBS=ON
+cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+    $opts -DBUILD_STATIC_LIB=ON -DBUILD_TOOLS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+install = '''
+DESTDIR="$pkgdir" cmake --install build-static
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/binaryen/LICENSE"
+'''

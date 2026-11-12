@@ -1,0 +1,9 @@
+# Emscripten's configuration: the system's LLVM, Binaryen and Node.js; the
+# wasm system libraries are built on first use into a per-user cache.
+import os
+
+NODE_JS = '/usr/bin/node'
+LLVM_ROOT = '/usr/bin'
+BINARYEN_ROOT = '/usr'
+EMSCRIPTEN_ROOT = '/usr/lib/emscripten'
+CACHE = os.environ.get('EM_CACHE') or os.path.expanduser('~/.cache/emscripten')
