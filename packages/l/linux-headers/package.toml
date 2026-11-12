@@ -1,10 +1,9 @@
 name     = "linux-headers"
 version  = "6.19"
-release  = 3
+release  = 4
 summary  = "Linux kernel API headers for userspace"
 license  = "GPL-2.0-only WITH Linux-syscall-note"
 homepage = "https://www.kernel.org/"
-hostdeps = ["rsync"]
 options  = ["!check", "!strip"]
 
 source = [
@@ -14,9 +13,15 @@ source = [
 build = '''
 %kernel_make headers
 '''
+# headers_install is `rsync -mrl --include='*/' --include='*.h' --exclude='*'`
+# of the generated usr/include: the same with find and cp, so linux-headers
+# does not need rsync (rsync with ACLs needs acl, which needs linux-headers)
 install = '''
-%kernel_make headers_install INSTALL_HDR_PATH=$pkgdir/usr
-find $pkgdir/usr/include \( -name '.install' -o -name '..install.cmd' \) -delete
+cd usr/include
+find . -name '*.h' -type f | while read -r h; do
+    install -Dm644 "$h" "$pkgdir/usr/include/$h"
+done
+test -f "$pkgdir/usr/include/linux/types.h" && test -f "$pkgdir/usr/include/asm/unistd.h"
 '''
 
 # needed by: musl, and every program that includes <linux/...>.

@@ -4,15 +4,16 @@
 # dependency names (they are Chimera's) before building.
 name = "wine"
 version = "11.20"
-release = 1
+release = 2
 summary = "Compatibility layer for running Windows programs on Linux"
 license = "LGPL-2.1-or-later"
 homepage = "https://www.winehq.org"
 patches = ["0001-Revert-winmm-Always-load-mmdevapi-as-audio-driver.patch", "rpath.patch"]
 archs = ["aarch64", "x86_64"]
 hostdeps = ["automake", "pkgconf"]
-builddeps = ["bison", "cups-devel", "dbus-devel", "ffmpeg-devel", "flex", "fontconfig-devel", "freetype-devel", "gettext", "gnutls-devel", "gst-plugins-base-devel", "libgphoto2-devel", "libpcap-devel", "libpulse-devel", "libusb-devel", "libxcomposite-devel", "libxcursor-devel", "libxi-devel", "libxinerama-devel", "libxrandr-devel", "libxrender-devel", "linux-headers", "mesa-devel", "ncurses-devel", "ocl-icd-devel", "pcsc-lite-devel", "sane-backends-devel", "sdl2-compat-devel", "v4l-utils-devel", "vulkan-loader-devel", "wayland-devel", "udisks-devel"]
+builddeps = ["samba-devel", "bison", "cups-devel", "dbus-devel", "ffmpeg-devel", "flex", "fontconfig-devel", "freetype-devel", "gettext", "gnutls-devel", "gst-plugins-base-devel", "libgphoto2-devel", "libpcap-devel", "libpulse-devel", "libusb-devel", "libxcomposite-devel", "libxcursor-devel", "libxi-devel", "libxinerama-devel", "libxrandr-devel", "libxrender-devel", "linux-headers", "mesa-devel", "ncurses-devel", "ocl-icd-devel", "pcsc-lite-devel", "sane-backends-devel", "sdl2-compat-devel", "v4l-utils-devel", "vulkan-loader-devel", "wayland-devel", "udisks-devel"]
 rundeps = ["libxrandr"]
+# NTLM logins (ntlm_auth) need samba-winbind; netapi32 uses Samba's libnetapi
 options = ["!lto", "!check"]
 
 source = [

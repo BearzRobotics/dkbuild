@@ -4,12 +4,12 @@
 # (llhttp) is libgit2's own copy.
 name = "libgit2"
 version = "1.9.7"
-release = 1
+release = 2
 summary = "Linkable library for using git"
 license = "GPL-2.0-only WITH GCC-exception-2.0"
 homepage = "https://libgit2.org"
 hostdeps = ["cmake", "ninja", "pkgconf", "python"]
-builddeps = ["openssl-devel", "pcre2-devel", "zlib-ng-compat-devel"]
+builddeps = ["openssl-devel", "pcre2-devel", "zlib-ng-compat-devel", "libssh2-devel", "heimdal-devel", "llhttp-devel"]
 options = ["!check"]
 
 source = [
@@ -18,14 +18,14 @@ source = [
 
 setup = '''
 %cmake \
-    -DUSE_SSH=exec \
+    -DUSE_SSH=libssh2 -DUSE_GSSAPI=ON \
     -DREGEX_BACKEND=pcre2 \
     -DUSE_BUNDLED_ZLIB=OFF \
-    -DUSE_HTTP_PARSER=builtin \
+    -DUSE_HTTP_PARSER=llhttp \
     -DUSE_HTTPS=OpenSSL \
     -DBUILD_TESTS=OFF
 # CMake builds one kind of library per configure: a second build makes the static one.
-cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DUSE_SSH=exec -DREGEX_BACKEND=pcre2 -DUSE_BUNDLED_ZLIB=OFF -DUSE_HTTP_PARSER=builtin -DUSE_HTTPS=OpenSSL -DBUILD_TESTS=OFF -DBUILD_CLI=OFF
+cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DUSE_SSH=libssh2 -DUSE_GSSAPI=ON -DREGEX_BACKEND=pcre2 -DUSE_BUNDLED_ZLIB=OFF -DUSE_HTTP_PARSER=llhttp -DUSE_HTTPS=OpenSSL -DBUILD_TESTS=OFF -DBUILD_CLI=OFF
 '''
 build = '''
 %cmake_build

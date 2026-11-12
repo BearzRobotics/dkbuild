@@ -5,12 +5,12 @@
 # r2: static libraries too (in libpsl-static), for fully static programs on musl.
 name = "libpsl"
 version = "0.23.3"
-release = 2
+release = 3
 summary = "Public Suffix List library"
 license = "MIT"
 homepage = "https://rockdaboot.github.io/libpsl"
 hostdeps = ["meson", "pkgconf"]
-builddeps = ["libidn2-devel", "libunistring-devel"]
+builddeps = ["icu-devel", "libidn2-devel", "libunistring-devel"]
 
 source = [
     { url = "https://github.com/rockdaboot/libpsl/releases/download/0.23.3/libpsl-0.23.3.tar.gz", sha256 = "93941f85a1e7bd593fa94f299233cb5dfc91cd144fd9a78a6ceb75001c5b03be" },

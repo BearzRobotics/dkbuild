@@ -5,13 +5,13 @@
 # dependency names (they are Chimera's) before building.
 name = "mlt"
 version = "7.40.0"
-release = 1
+release = 2
 summary = "Multimedia framework for video editors"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later AND GPL-3.0-or-later"
 homepage = "https://www.mltframework.org"
 patches = ["build.patch"]
 hostdeps = ["cmake", "ninja", "pkgconf", "swig"]
-builddeps = ["ffmpeg-devel", "fftw-devel", "fontconfig-devel", "frei0r-devel", "gdk-pixbuf-devel", "ladspa-sdk", "libarchive-devel", "libebur128-devel", "libexif-devel", "libpulse-devel", "libsamplerate-devel", "libvidstab-devel", "libvorbis-devel", "libxml2-devel", "mesa-devel", "pipewire-devel", "python-devel", "qt6-qt5compat-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel", "rnnoise-devel", "rubberband-devel", "sdl2-compat-devel", "zlib-ng-compat-devel"]
+builddeps = ["ffmpeg-devel", "fftw-devel", "fontconfig-devel", "frei0r-devel", "gdk-pixbuf-devel", "ladspa-sdk", "libarchive-devel", "libebur128-devel", "libexif-devel", "libpulse-devel", "libsamplerate-devel", "libvidstab-devel", "libvorbis-devel", "libxml2-devel", "mesa-devel", "pipewire-devel", "python-devel", "qt6-qt5compat-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel", "rnnoise-devel", "rubberband-devel", "sdl2-compat-devel", "zlib-ng-compat-devel", "opencv-devel"]
 
 source = [
     { url = "https://github.com/mltframework/mlt/releases/download/v7.40.0/mlt-7.40.0.tar.gz", sha256 = "f11c30e21670f62a3dfc56a31306ac02f3feea00908a2821a4a0bf3e989d3d6a" },
@@ -27,7 +27,7 @@ setup = '''
     -DCLANG_FORMAT=OFF \
     -DMOD_GLAXNIMATE_QT6=ON \
     -DMOD_MOVIT=OFF \
-    -DMOD_OPENCV=OFF \
+    -DMOD_OPENCV=ON \
     -DMOD_SOX=OFF \
     -DMOD_QT6=ON \
     -DMOD_QT=OFF \

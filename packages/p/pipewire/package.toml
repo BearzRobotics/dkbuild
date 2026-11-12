@@ -12,16 +12,16 @@
 # 2026-11-11: Bluetooth audio (SBC, AAC, aptX, LC3, Opus), AirPlay (RAOP) and Avahi,
 # pw-cat (sndfile), the PulseAudio tunnel, LV2 filters, X11 bell, its
 # GStreamer plugin and its JACK library; LDAC and WebRTC echo cancelling
-# (r7, r8). Not in the tree: libmysofa, libcamera, ROC.
+# (r7, r8). r9: spatial audio (libmysofa), cameras (libcamera), network audio (ROC).
 name = "pipewire"
 version = "1.6.10"
-release = 8
+release = 9
 summary = "Server and user space API to deal with multimedia pipelines"
 license = "MIT"
 homepage = "https://pipewire.org"
 patches = ["lol.patch", "readiness.patch"]
 hostdeps = ["glib-devel", "meson", "pkgconf"]
-builddeps = ["alsa-lib-devel", "dbus-devel", "eudev-devel", "ncurses-devel", "readline-devel", "elogind-devel", "bluez-devel", "sbc-devel", "fdk-aac-devel", "libfreeaptx-devel", "liblc3-devel", "ldacbt-devel", "webrtc-audio-processing-devel", "opus-devel", "avahi-devel", "libsndfile-devel", "libpulse-devel", "libusb-devel", "lilv-devel", "lv2", "libx11-devel", "libxfixes-devel", "libcanberra-devel", "gstreamer-devel", "gst-plugins-base-devel", "openssl-devel"]
+builddeps = ["alsa-lib-devel", "dbus-devel", "eudev-devel", "ncurses-devel", "readline-devel", "elogind-devel", "bluez-devel", "sbc-devel", "fdk-aac-devel", "libfreeaptx-devel", "liblc3-devel", "ldacbt-devel", "webrtc-audio-processing-devel", "opus-devel", "avahi-devel", "libsndfile-devel", "libpulse-devel", "libusb-devel", "lilv-devel", "lv2", "libx11-devel", "libxfixes-devel", "libcanberra-devel", "gstreamer-devel", "gst-plugins-base-devel", "openssl-devel", "libmysofa-devel", "libcamera-devel", "roc-toolkit-devel"]
 rundeps = ["dbus"]
 options = ["!check"]
 
@@ -70,6 +70,9 @@ setup = '''
     -Dlv2=enabled \
     -Dx11=enabled \
     -Dlibcanberra=enabled \
+    -Dlibmysofa=enabled \
+    -Dlibcamera=enabled \
+    -Droc=enabled \
     -Dgstreamer=enabled \
     -Dpipewire-jack=enabled \
     -Djack-devel=true \

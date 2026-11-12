@@ -4,12 +4,12 @@
 # dependency names (they are Chimera's) before building.
 name = "frei0r"
 version = "2.3.3"
-release = 4
+release = 5
 summary = "Collection of video plugins"
 license = "GPL-2.0-or-later"
 homepage = "https://frei0r.dyne.org"
 hostdeps = ["cmake", "ninja", "pkgconf"]
-builddeps = ["cairo-devel", "gavl-devel"]
+builddeps = ["cairo-devel", "gavl-devel", "opencv-devel"]
 
 source = [
     { url = "https://github.com/dyne/frei0r/archive/refs/tags/v2.3.3.tar.gz", sha256 = "aeeefe3a9b44761b2cf110017d2b1dfa2ceeb873da96d283ba5157380c5d0ce5" },
@@ -17,7 +17,8 @@ source = [
 
 setup = '''
 %cmake \
-    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DWITHOUT_OPENCV=OFF
 '''
 build = '''
 %cmake_build

@@ -12,7 +12,7 @@
 # r5: rewritten (the import lost the waf configure), split client/libs/python.
 name = "samba"
 version = "4.23.3"
-release = 5
+release = 6
 summary = "SMB/CIFS file, print, and login server for Unix"
 license = "GPL-3.0-or-later"
 homepage = "https://www.samba.org"
@@ -85,6 +85,13 @@ install -dm700 "$pkgdir/var/lib/samba/private"
 [subpackages.client]
 summary = "SMB client programs"
 paths   = ["/usr/bin/cifsdd", "/usr/bin/mdsearch", "/usr/bin/rpcclient", "/usr/bin/smbcacls", "/usr/bin/smbclient", "/usr/bin/smbcquotas", "/usr/bin/smbget", "/usr/bin/smbspool", "/usr/bin/smbtar", "/usr/bin/smbtree", "/usr/bin/wspsearch", "/usr/lib/cups/backend/smb", "/usr/lib/samba/smbspool_krb5_wrapper"]
+
+# winbindd and ntlm_auth (Wine's NTLM authentication runs ntlm_auth; as
+# Chimera's samba-winbind)
+[subpackages.winbind]
+summary = "Winbind daemon and ntlm_auth helper"
+depends = ["samba-libs"]
+paths   = ["/usr/bin/ntlm_auth", "/usr/bin/wbinfo", "/usr/bin/winbindd", "/usr/sbin/winbindd", "/usr/share/man/man1/ntlm_auth.1", "/usr/share/man/man1/wbinfo.1", "/usr/share/man/man8/winbindd.8", "/usr/share/man/man8/winbind_krb5_locator.8"]
 
 [subpackages.python]
 summary = "Python bindings"

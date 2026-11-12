@@ -1,0 +1,42 @@
+# Roc Toolkit: real-time audio streaming over the network with forward error
+# correction; PipeWire's roc-sink/roc-source modules use libroc. From Alpine's
+# community/roc-toolkit (its samurai patch). SCons's third-party step would
+# download OpenFEC (Roc's fork): it is a source here, put where the step looks
+# for vendored files (3rdparty/_distfiles), and built static into libroc as
+# upstream does. Tools: roc-send, roc-recv, roc-copy (with PulseAudio and
+# ALSA devices).
+name = "roc-toolkit"
+version = "0.4.0"
+release = 1
+summary = "Real-time audio streaming over the network"
+license = "MPL-2.0"
+homepage = "https://roc-streaming.org"
+patches = ["samurai.patch"]
+hostdeps = ["scons", "gengetopt", "ragel", "cmake", "ninja", "pkgconf", "python"]
+builddeps = ["libsndfile-devel", "libuv-devel", "openssl-devel", "speexdsp-devel", "alsa-lib-devel", "libpulse-devel",
+             "llvm-libcxx-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/roc-streaming/roc-toolkit/archive/v0.4.0/roc-toolkit-0.4.0.tar.gz", sha256 = "60501dfdc8c0de385898dbd1eb8239d93ef962667ddb064ad796b887a41a1a46" },
+    { url = "https://github.com/roc-streaming/openfec/archive/v1.4.2.9.tar.gz", sha256 = "237b7af72eab7bd6e1314c4aaacd38bf318bdac762ae30c0d3cee3bb23ed8934", unpack = false, name = "openfec_v1.4.2.9.tar.gz" },
+]
+
+environment = '''
+export CMAKE_POLICY_VERSION_MINIMUM=3.5
+roc_scons() {
+    scons -j$jobs --prefix=/usr --libdir=/usr/lib --with-libraries=/usr/lib \
+        --disable-sox --build-3rdparty=openfec "$@"
+}
+'''
+setup = '''
+mkdir -p 3rdparty/_distfiles
+cp /build/sources/openfec_v1.4.2.9.tar.gz 3rdparty/_distfiles/
+'''
+build = '''
+roc_scons
+'''
+install = '''
+DESTDIR="$pkgdir" roc_scons install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/roc-toolkit/LICENSE"
+'''

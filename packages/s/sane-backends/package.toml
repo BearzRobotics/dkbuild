@@ -1,18 +1,17 @@
 # After Chimera Linux cports: main/sane-backends. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # SANE: scanner drivers (scanimage, saned and the backends, eSCL/AirScan for
 # driverless scanners among them). needed by: hplip (its hpaio backend).
-# Scanners belong to the scanner group (udev rule). Not built yet: the
-# gphoto2 (cameras) and v4l (webcams) backends, whose libraries
-# (libgphoto2, v4l-utils) come with the photo and video applications.
+# Scanners belong to the scanner group (udev rule). With the gphoto2
+# (cameras) and v4l (webcams) backends.
 name = "sane-backends"
 version = "1.3.1"
-release = 1
+release = 2
 summary = "Scanner Access Now Easy: scanner drivers"
 license = "GPL-2.0-or-later WITH SANE-exception"
 homepage = "http://www.sane-project.org"
 patches = ["fix-test-data.patch", "fix-tests-build.patch", "newref.patch", "sane-desc-cross.patch"]
 hostdeps = ["automake", "gettext-devel", "libtool", "pkgconf", "python"]
-builddeps = ["avahi-devel", "curl-devel", "libjpeg-turbo-devel", "libpng-devel", "libtiff-devel", "libusb-devel", "libxml2-devel", "linux-headers", "net-snmp-devel", "openssl-devel", "poppler-devel"]
+builddeps = ["avahi-devel", "curl-devel", "libjpeg-turbo-devel", "libpng-devel", "libtiff-devel", "libusb-devel", "libxml2-devel", "linux-headers", "net-snmp-devel", "openssl-devel", "poppler-devel", "libgphoto2-devel", "v4l-utils-devel"]
 options = ["!check", "!lto"]
 
 source = [
@@ -34,8 +33,8 @@ setup = '''
     --with-avahi \
     --with-snmp \
     --with-poppler-glib \
-    --without-gphoto2 \
-    --without-v4l \
+    --with-gphoto2 \
+    --with-v4l \
     --docdir=/usr/share/doc/sane \
     ac_cv_func_mmap_fixed_mapped=yes
 '''

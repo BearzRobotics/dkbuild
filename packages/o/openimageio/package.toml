@@ -2,13 +2,13 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "openimageio"
 version = "3.1.16.0"
-release = 2
+release = 3
 summary = "Toolset for manipulating VFX-related image file formats"
 license = "Apache-2.0"
 homepage = "https://github.com/AcademySoftwareFoundation/OpenImageIO"
 patches = ["BaseTypeFromC.patch", "default-font.patch", "wat.patch"]
 hostdeps = ["cmake", "ninja", "pkgconf"]
-builddeps = ["boost-devel", "ffmpeg-devel", "fmt-devel", "freetype-devel", "giflib-devel", "libheif-devel", "libjxl-devel", "libpng-devel", "libraw-devel", "libtiff-devel", "libwebp-devel", "mesa-devel", "onetbb-devel", "opencolorio-devel", "openexr-devel", "openjpeg-devel", "openjph-devel", "openvdb-devel", "ptex-devel", "pugixml-devel", "python-pybind11-devel", "robin-map"]
+builddeps = ["boost-devel", "ffmpeg-devel", "fmt-devel", "freetype-devel", "giflib-devel", "libheif-devel", "libjxl-devel", "libpng-devel", "libraw-devel", "libtiff-devel", "libwebp-devel", "mesa-devel", "onetbb-devel", "opencolorio-devel", "openexr-devel", "openjpeg-devel", "openjph-devel", "openvdb-devel", "ptex-devel", "pugixml-devel", "python-pybind11-devel", "robin-map", "opencv-devel", "qt6-qtbase-devel"]
 checkdeps = ["bash", "fonts-dejavu"]
 
 source = [
@@ -23,7 +23,8 @@ setup = '''
     -DINSTALL_FONTS=OFF \
     -DSTOP_ON_WARNING=OFF \
     -DUSE_EXTERNAL_PUGIXML=ON \
-    -DUSE_QT=OFF
+    -DUSE_QT=ON \
+    -DUSE_OPENCV=ON
 '''
 build = '''
 %cmake_build

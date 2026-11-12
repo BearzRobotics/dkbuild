@@ -5,13 +5,13 @@
 # dependency names (they are Chimera's) before building.
 name = "gnutls"
 version = "3.8.13"
-release = 2
+release = 3
 summary = "GNU Transport Layer Security library"
 license = "LGPL-2.1-or-later"
 homepage = "https://gnutls.org"
 patches = ["disable-failing-test.patch", "no-mini-dtls-fragments.patch", "no-timespectest.patch", "skip-ktls.patch", "tests.patch"]
 hostdeps = ["automake", "gettext-devel", "libtool", "pkgconf", "gtk-doc-tools"]
-builddeps = ["brotli-devel", "gmp-devel", "libidn2-devel", "libtasn1-devel", "libunistring-devel", "linux-headers", "nettle-devel", "p11-kit-devel", "zlib-ng-compat-devel", "zstd-devel"]
+builddeps = ["brotli-devel", "gmp-devel", "libidn2-devel", "libtasn1-devel", "libunistring-devel", "linux-headers", "nettle-devel", "p11-kit-devel", "zlib-ng-compat-devel", "zstd-devel", "unbound-devel"]
 checkdeps = ["texinfo"]
 
 
@@ -31,7 +31,7 @@ autoreconf -if -W none
     --with-default-trust-store-file=/etc/ssl/certs/ca-certificates.crt \
     --without-tpm2 \
     --without-tpm \
-    --disable-libdane \
+    --enable-libdane \
     --with-zlib=link \
     --with-zstd=link
 '''

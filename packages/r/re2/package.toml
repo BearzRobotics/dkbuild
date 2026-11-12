@@ -4,12 +4,12 @@
 # r3: rebuilt with libraries in /usr/lib (the %cmake macro set no libdir; they went to /usr/lib64).
 name = "re2"
 version = "2025.11.05"
-release = 3
+release = 4
 summary = "C++ regular expression library"
 license = "BSD-3-Clause"
 homepage = "https://github.com/google/re2"
 hostdeps = ["cmake", "ninja", "pkgconf"]
-builddeps = ["abseil-cpp-devel"]
+builddeps = ["abseil-cpp-devel", "icu-devel"]
 
 source = [
     { url = "https://github.com/google/re2/archive/refs/tags/2025-11-05.tar.gz", sha256 = "87f6029d2f6de8aa023654240a03ada90e876ce9a4676e258dd01ea4c26ffd67" },
@@ -21,13 +21,18 @@ export CXXFLAGS="${CXXFLAGS} -DNDEBUG"
 setup = '''
 %cmake \
     -DBUILD_SHARED_LIBS=ON \
-    -DRE2_USE_ICU=OFF \
+    -DRE2_USE_ICU=ON \
     -DRE2_BUILD_TESTING=OFF
+# the static library: a second build
+cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DRE2_USE_ICU=ON -DRE2_BUILD_TESTING=OFF
 '''
 build = '''
 %cmake_build
+cmake --build build-static
 '''
 install = '''
+DESTDIR="$pkgdir" cmake --install build-static
 %cmake_install
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/re2/LICENSE"
 '''

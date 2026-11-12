@@ -1,0 +1,25 @@
+# GNU gengetopt: generates C command-line parsers (roc-toolkit's tools use it).
+name = "gengetopt"
+version = "2.23"
+release = 1
+summary = "Generator of C command-line option parsers"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/gengetopt/"
+hostdeps = ["texinfo"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/gengetopt/gengetopt-2.23.tar.xz", sha256 = "b941aec9011864978dd7fdeb052b1943535824169d2aa2b0e7eae9ab807584ac" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make -j1
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''
