@@ -24,6 +24,7 @@ export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
 export GRADLE_OPTS="-Dorg.gradle.java.installations.paths=/usr/lib/jvm/java-21-openjdk -Dorg.gradle.java.installations.auto-download=false"
 '''
 setup = '''
+# the Gradle toolchain asks for Java 19, which the tree does not have: 21
 sed -i 's/JavaLanguageVersion.of(19)/JavaLanguageVersion.of(21)/' app/build.gradle.kts
 grep -q 'JavaLanguageVersion.of(21)' app/build.gradle.kts
 '''

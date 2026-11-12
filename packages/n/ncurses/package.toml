@@ -16,6 +16,7 @@ source = [
 ]
 
 setup = '''
+# configure prefers mawk when it finds one; the system awk instead
 sed -i s/mawk// configure
 ./configure --prefix=/usr --mandir=/usr/share/man --with-shared --with-normal \
     --without-debug --without-cxx-binding --without-ada --enable-pc-files \

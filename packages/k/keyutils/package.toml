@@ -17,6 +17,7 @@ source = [
 ]
 
 build = '''
+# no -Werror: clang warns about more than keyutils was written against
 sed -i 's/-Werror//' Makefile
 %make \
     PREFIX=/usr \

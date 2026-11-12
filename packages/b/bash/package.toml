@@ -21,6 +21,8 @@ source = [
 ]
 
 setup = '''
+# config-top.h: enable the system-wide bashrc (/usr/share/bash/bashrc) and
+# source it for non-interactive login shells too (as distributions configure bash)
 sed -i 's|^/\* #define SYS_BASHRC.*|#define SYS_BASHRC "/usr/share/bash/bashrc"|; s|^/\* #define NON_INTERACTIVE_LOGIN_SHELLS.*|#define NON_INTERACTIVE_LOGIN_SHELLS 1|' config-top.h
 %configure \
     --without-bash-malloc \

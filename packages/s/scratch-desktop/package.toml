@@ -38,6 +38,8 @@ grep -q '"@scratch/scratch-gui": "13.7.4-svg"' package.json
 node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
 npm ci --ignore-scripts
 f=webpack.makeConfig.js
+# the static files' path: Electron's own resources directory when run on
+# the system Electron, so the installed /usr/lib/scratch-desktop/static
 sed -i "s|'process.resourcesPath + \"/static\"'|'\"/usr/lib/scratch-desktop/static\"'|" $f
 grep -q '/usr/lib/scratch-desktop/static' $f
 mkdir -p static/fetched

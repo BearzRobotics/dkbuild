@@ -18,6 +18,8 @@ source = [
 
 setup = '''
 make defconfig HOSTCC="$CC"
+# defconfig with two changes: tc off (it does not build against current
+# kernel headers) and a static binary (for rescue and the live initramfs)
 sed -i -e 's/^CONFIG_TC=y/# CONFIG_TC is not set/' \
        -e 's/^# CONFIG_STATIC is not set/CONFIG_STATIC=y/' .config
 '''

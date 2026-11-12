@@ -47,6 +47,8 @@ esac
 export loader
 '''
 setup = '''
+# fbc.bas: the tool names (cc for gcc, fbc-as for as) and musl's dynamic
+# linker instead of glibc's; each change checked below
 f=src/compiler/fbc.bas
 sed -i -E 's/\( "gcc" +, FBCTOOLFLAG_DEFAULT/( "cc"     , FBCTOOLFLAG_DEFAULT/; s/\( "as" +, FBCTOOLFLAG_DEFAULT/( "fbc-as" , FBCTOOLFLAG_DEFAULT/' $f
 sed -i 's|-dynamic-linker /lib64/ld-linux-x86-64.so.2|-dynamic-linker /lib/ld-musl-x86_64.so.1|; s|-dynamic-linker /lib/ld-linux-aarch64.so.1|-dynamic-linker /lib/ld-musl-aarch64.so.1|' $f

@@ -35,6 +35,8 @@ rm vendor/bindgen
 cp -r "$src" vendor/bindgen
 chmod -R u+w vendor/bindgen
 patch -d vendor/bindgen -p1 < $pkgfiles/template-union.patch
+# the vendored crate was just patched: empty its file checksums so cargo
+# accepts the changed files
 sed -i 's/"files":{[^}]*}/"files":{}/' vendor/bindgen/.cargo-checksum.json
 cargo build --release --frozen --offline -j $jobs
 '''

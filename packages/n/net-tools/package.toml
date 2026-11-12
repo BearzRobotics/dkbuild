@@ -25,6 +25,8 @@ setup = '''
 for k in HAVE_AFIPX HAVE_AFATALK HAVE_AFAX25 HAVE_AFNETROM HAVE_AFROSE HAVE_AFX25 \
          HAVE_HWAX25 HAVE_HWROSE HAVE_HWNETROM HAVE_HWX25 \
          HAVE_HOSTNAME_TOOLS HAVE_HOSTNAME_SYMLINKS; do
+    # off: AppleTalk/IPX/AX.25/NET/ROM/ROSE/X.25 (protocols the kernel no
+    # longer has) and hostname (util-linux and inetutils provide it); on: i18n
     sed -i "s/ $k y$/ $k n/" config.in
 done
 sed -i 's/ I18N n$/ I18N y/' config.in

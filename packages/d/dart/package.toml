@@ -57,8 +57,11 @@ python3 tools/generate_sdk_version_file.py
 # no analytics (as Alpine)
 echo '' > tools/bots/dartdoc_footer.html
 rm -f third_party/devtools/web/devtools_analytics.js
+# replace Google Analytics hosts and tracking IDs in the SDK's web parts
+# (DevTools, dartdoc) with dead addresses, as Alpine does
 grep -rlZ --exclude='*.map' 'google-analytics\.com' . 2>/dev/null | xargs -0 -r sed -i -E 's|([^/]+\.)?google-analytics\.com|0.0.0.0|g'
 grep -rlZ 'UA-[0-9]\+-[0-9]\+' . 2>/dev/null | xargs -0 -r sed -i -E 's|UA-[0-9]+-[0-9]+|UA-2137-0|g'
+# a fixed version timestamp (the snapshot has no git history)
 sed -i 's/Unknown timestamp/release/' tools/make_version.py
 # system ICU and zlib
 for l in icu zlib; do

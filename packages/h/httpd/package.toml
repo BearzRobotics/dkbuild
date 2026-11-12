@@ -35,6 +35,7 @@ install = '''
 %make_install
 install -Dm644 $pkgfiles/httpd "$pkgdir/etc/dinit.d/httpd"
 install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/httpd.conf"
+# Apache runs as the _http system user (sysusers.d), not daemon
 sed -i -e 's/^User daemon/User _http/' -e 's/^Group daemon/Group _http/' "$pkgdir/etc/httpd/conf/httpd.conf" 2>/dev/null || true
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/httpd/LICENSE"
 '''

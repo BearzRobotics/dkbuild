@@ -26,6 +26,7 @@ build = '''
 '''
 install = '''
 %make_install
+# lvm.conf: lock memory with mlockall, as Alpine's lvm2 does on musl
 sed -i 's/^\(\s*\)# use_mlockall = 0/\1use_mlockall = 1/' $pkgdir/etc/lvm/lvm.conf
 grep -q 'use_mlockall = 1' $pkgdir/etc/lvm/lvm.conf
 '''

@@ -23,5 +23,7 @@ install = '''
 mkdir -p "$pkgdir/usr/sbin" "$pkgdir/usr/share/man/man8"
 mv "$pkgdir/usr/bin/chroot" "$pkgdir/usr/sbin/chroot"
 mv "$pkgdir/usr/share/man/man1/chroot.1" "$pkgdir/usr/share/man/man8/chroot.8"
+# chroot is an admin command: its manual moves to section 8, so its .TH
+# header says 8
 sed -i 's/"1"/"8"/' "$pkgdir/usr/share/man/man8/chroot.8"
 '''

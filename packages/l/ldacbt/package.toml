@@ -20,6 +20,8 @@ source = [
 
 setup = '''
 cp -a . /tmp/ldac-static
+# the static libraries: a second build from a copy whose CMakeLists asks
+# for STATIC instead of SHARED
 sed -i 's/^add_library(\(ldacBT_[a-z]*\) SHARED$/add_library(\1 STATIC/' /tmp/ldac-static/CMakeLists.txt
 test "$(grep -c ' STATIC$' /tmp/ldac-static/CMakeLists.txt)" = 2
 %cmake -DINSTALL_LIBDIR=/usr/lib -DCMAKE_POLICY_VERSION_MINIMUM=3.5

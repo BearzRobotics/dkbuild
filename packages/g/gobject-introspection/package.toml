@@ -32,6 +32,7 @@ setup = '''
     && ninja -C build-gi -j$jobs && DESTDIR=/tmp/glib-for-gi ninja -C build-gi install )
 export PKG_CONFIG_SYSROOT_DIR= PKG_CONFIG_PATH=/tmp/glib-for-gi/usr/lib/pkgconfig
 export PATH="/tmp/glib-for-gi/usr/bin:$PATH" LD_LIBRARY_PATH=/tmp/glib-for-gi/usr/lib
+# the temporary glib's pkg-config files point at where it was installed
 sed -i "s|^prefix=/usr|prefix=/tmp/glib-for-gi/usr|" /tmp/glib-for-gi/usr/lib/pkgconfig/*.pc
 %meson -Ddoctool=disabled -Dgtk_doc=false
 '''

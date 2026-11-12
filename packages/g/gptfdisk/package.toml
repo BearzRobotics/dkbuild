@@ -15,6 +15,7 @@ source = [
 ]
 
 setup = '''
+# ncurses' wide headers are in /usr/include here, not ncursesw/
 sed -i 's|ncursesw/||' gptcurses.cc
 '''
 build = '''

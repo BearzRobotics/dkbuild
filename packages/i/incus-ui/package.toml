@@ -31,6 +31,8 @@ setup = '''
 cp $pkgfiles/package-lock.json .
 node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
 npm ci --legacy-peer-deps --ignore-scripts
+# Canonical's UI says LXD: files/ui-canonical-renames.sed renames it to Incus
+# (the list of replacements is in that file)
 find src -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.scss' \) -exec sed -i -f $pkgfiles/ui-canonical-renames.sed {} +
 '''
 build = '''

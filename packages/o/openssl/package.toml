@@ -1,8 +1,10 @@
 # Follows the DKRescue post's build of openssl 3.6.1; the importer's draft of
 # Chimera's recipe was not used.
+# r11: the static libraries too (openssl-static), as every library ships them;
+# r10 and earlier removed them from the install (no reason recorded).
 name = "openssl"
 version = "3.6.1"
-release = 10
+release = 11
 summary = "TLS and cryptography library"
 license = "Apache-2.0"
 homepage = "https://www.openssl.org"
@@ -20,6 +22,5 @@ build = '''
 make -j$jobs
 '''
 install = '''
-sed -i '/INSTALL_LIBS/s/libcrypto.a libssl.a//' Makefile
 make DESTDIR=$pkgdir MANSUFFIX=ssl install
 '''
