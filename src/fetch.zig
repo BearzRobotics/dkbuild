@@ -164,7 +164,12 @@ fn makeSnapshot(arena: Allocator, io: std.Io, cache: []const u8, spec: []const u
         break :blk try std.fs.path.join(arena, &.{ cwd, tmp });
     };
     var argv: std.ArrayList([]const u8) = .empty;
-    try argv.appendSlice(arena, &.{ "sh", "-c", "log=$1; shift; exec sh \"$@\" > \"$log\" 2>&1", "sh", log, sh_path, atmp, work });
+    // One maker per snapshot at a time (a world's build and a separate
+    // `dkbuild fetch` would otherwise share the work directory, the log and
+    // the .part file): flock on <work>.lock, without waiting; held, it exits
+    // 75 before anything runs.
+    const lock = try std.fmt.allocPrint(arena, "{s}.lock", .{work});
+    try argv.appendSlice(arena, &.{ "flock", "-n", "-E", "75", lock, "sh", "-c", "log=$1; shift; exec sh \"$@\" > \"$log\" 2>&1", "sh", log, sh_path, atmp, work });
     try argv.appendSlice(arena, args.items);
     const res = std.process.run(arena, io, .{ .argv = argv.items }) catch |err| {
         message.* = try std.fmt.allocPrint(arena, "cannot run the {s} snapshot: {s}", .{ kind, @errorName(err) });
@@ -174,6 +179,15 @@ fn makeSnapshot(arena: Allocator, io: std.Io, cache: []const u8, spec: []const u
         .exited => |c| c == 0,
         else => false,
     };
+    const busy = switch (res.term) {
+        .exited => |c| c == 75,
+        else => false,
+    };
+    if (busy) {
+        // another fetch is making it: leave its files alone
+        message.* = try std.fmt.allocPrint(arena, "the {s} snapshot is being made by another fetch (lock {s}); try again when it is done", .{ kind, lock });
+        return error.DownloadFailed;
+    }
     if (!ok) {
         message.* = try std.fmt.allocPrint(arena, "the {s} snapshot failed; log: {s}", .{ kind, log });
         std.Io.Dir.cwd().deleteFile(io, atmp) catch {};
