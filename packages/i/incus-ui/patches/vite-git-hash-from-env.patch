@@ -1,0 +1,15 @@
+FenrirOS: vite.config.ts stamps the UI with `git rev-parse --short HEAD`,
+which fails in a release archive (no .git). With UI_GIT_HASH set (the recipe
+sets the release tag), that value is used instead; otherwise git as before.
+
+--- a/vite.config.ts	2026-11-12 11:05:00.532382993 -0500
++++ b/vite.config.ts	2026-11-12 11:05:00.558696229 -0500
+@@ -16,6 +16,8 @@
+ const scssSettings = fs.readFileSync("src/sass/_settings.scss", "utf-8").trim();
+ 
+ const getGitHash = () => {
++  // a build from a release archive (no git) gives the version instead
++  if (process.env.UI_GIT_HASH) return JSON.stringify(process.env.UI_GIT_HASH);
+   // set permissions for workshop, ignore this in other environments
+   execSync(
+     "[ -d /home/ubuntu/lxd-ui ] && git config --global --add safe.directory /home/ubuntu/lxd-ui || true",

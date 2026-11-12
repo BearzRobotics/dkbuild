@@ -18,12 +18,15 @@ archs = ["x86_64", "aarch64"]
 hostdeps = ["nodejs"]
 rundeps = ["incus"]
 options = ["!check", "!strip", "npmdeps"]
+patches = ["vite-git-hash-from-env.patch"]
 
 source = [
     { url = "https://github.com/zabbly/incus-ui-canonical/archive/refs/tags/incus-0.22.1.tar.gz", sha256 = "772a93d222be7c4fb6f86d51e3061c5d78c77ddbd400ee64f6f2301925b2d286" },
 ]
 
 environment = '''
+# the UI's build stamp (patches/vite-git-hash-from-env.patch): the release tag
+export UI_GIT_HASH=incus-$version
 export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
     npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
 '''
