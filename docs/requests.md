@@ -33,7 +33,7 @@ sysusers.d/tmpfiles.d: those open nothing.)
 | GLPI | written (12.0.1) |
 | FreeScout | written (1.8.250) |
 | Znuny | written (7.3.8; 133 CPAN dists vendored) |
-| Zammad | in progress: needs pnpm support in dkbuild (pnpm-lock.yaml) and Ruby 3.4.12 |
+| Zammad | in progress: pnpm support (dkbuild) and Ruby 3.4.12 done; waits on a decision about Dart Sass (its stylesheet compiler: prebuilt binary, or a Dart SDK to build it) |
 
 ## Electronics (2026-11-11)
 

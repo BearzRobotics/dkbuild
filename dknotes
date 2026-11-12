@@ -1,1 +1,325 @@
-Swap to toml files for this
+❯ Make sure to save these request to disk so we can retrive them later. With these sever packages we want to explicity leave setting up to the user. No default creditionals not automatic starts, etc. I wouldn't want someone to install a package and have it without them know open a websever with some defalut creditionals..
+  Software    Purpose    License    My assessment
+  InvoicePlane    Invoices, estimates, clients, payments    MIT    Test first
+  InvoiceShelf    Invoices, estimates, expenses, payments    AGPL-3.0    Test first
+  SolidInvoice    Invoicing and quotes    MIT    Worth testing
+  Dolibarr    Invoices, accounting, CRM, inventory    GPL-3.0+    Test first
+  ERPNext    Full ERP, accounting, inventory, HR    GPL-3.0    More ambitious
+  GnuCash    Desktop accounting and bookkeeping    GPL    Test first
+  Frappe Books    Desktop accounting and invoicing    AGPL-3.0    Worth testing
+  LedgerSMB    Web-based double-entry accounting    GPL-2.0    Worth testing
+  Twenty
+  Modern CRM with contacts, companies, sales pipelines and workflows.
+
+  License: AGPL-3.0
+
+  Website · Source
+
+
+
+
+
+
+
+
+
+
+
+
+
+  SuiteCRM
+  Mature CRM with sales, customer service, marketing and reporting.
+
+  License: AGPL-3.0
+
+  Website · Source
+
+
+
+
+
+
+
+
+
+
+
+
+  Dolibarr
+  Also worth considering here because it combines CRM and business man
+  Software    What it does    License
+  OpenProject    Project management, Gantt charts, work tracking    GP
+  Leantime    Lightweight project management    AGPL-3.0
+  Taiga    Agile project management    MPL-2.0
+  Kimai    Employee time tracking and billable hours    AGPL-3.0
+  Vikunja    Tasks, lists and personal/team planning    AGPL-3.0
+  Software    Purpose
+  Paperless-ngx    Document scanning, OCR and archiving
+  Nextcloud    File sharing, synchronization and collaboration
+  ONLYOFFICE    Office suite
+  LibreOffice    Desktop office suite
+  Stirling PDF    PDF manipulation
+  Joplin    Notes and synchronization
+  BookStack    Documentation and knowledge base
+  Mayan EDMS    Enterprise document management
+  Software    Purpose
+  Zabbix    Infrastructure monitoring
+  Netdata    System performance monitoring
+  Uptime Kuma    Service uptime monitoring
+  Cockpit    Linux server administration
+  Webmin    Web-based system administration
+  AdGuard Home    DNS filtering
+  Pi-hole    Network-wide DNS blocking
+  OPNsense    Firewall and router platform
+  WireGuard    VPN
+  Syncthing    Peer-to-peer file synchronization
+  Stirling PDF    PDF manipulation
+  Joplin    Notes and synchronization
+  BookStack    Documentation and knowledge base
+  Mayan EDMS    Enterprise document management
+  Software    Purpose
+  Zabbix    Infrastructure monitoring
+  Netdata    System performance monitoring
+  Uptime Kuma    Service uptime monitoring
+  Cockpit    Linux server administration
+  Webmin    Web-based system administration
+  AdGuard Home    DNS filtering
+  Pi-hole    Network-wide DNS blocking
+  OPNsense    Firewall and router platform
+  WireGuard    VPN
+  Syncthing    Peer-to-peer file synchronization
+  FileZilla blender Remmina docker
+  GnuCash
+  Strong candidate
+  - Double-entry accounting.
+  - Bank accounts, transactions and reconciliation.
+  - Invoicing and business accounting.
+  - Reports and financial statements.
+  License: GPL-2.0+
+
+  Website · Source
+
+
+
+
+
+
+
+
+
+
+
+
+
+  KMyMoney
+  - Personal finance management.
+  - Account and transaction tracking.
+  - Budgets and scheduled transactions.
+  - Investment tracking.
+  License: GPL-2.0+
+
+  Website · Source
+
+
+
+
+
+
+
+
+
+
+
+
+
+  HomeBank
+  - Personal budgeting.
+  - Expense categorization.
+  - Account tracking and reports.
+  - Lightweight desktop application.
+  License: GPL-2.0+
+
+  Website · Source
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Skrooge
+  - Personal finance management.
+  - Budgeting and forecasting.
+  - Investment tracking.
+  - Import and export financial data.
+  License: GPL-3.0+
+
+  Website · Source
+
+
+
+  2. Self-hosted financial software
+  These are more interesting from a DKBuilder perspective because theyen't necessarily included in standard desktop repositories.
+
+
+
+
+
+
+
+
+
+
+  Firefly III
+  Strong candidate
+  - Personal finance management.
+  - Transactions, budgets and recurring bills.
+  - Financial reports and charts.
+  - REST API and data import tools.
+  License: AGPL-3.0
+
+  Website · Source
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Beancount + Fava
+  - Text-based double-entry bookkeeping.
+  - Financial records stored in human-readable files.
+  - Web-based financial reports through Fava.
+  - Excellent for people who prefer version-controlled financial records.
+  Licenses: GPL-2.0+ (Beancount), MIT (Fava).
+
+  Beancount · Fava
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Maybe Finance
+  - Personal finance dashboard.
+  - Accounts, investments and net worth.
+
+  Worth investigating, but verify the current repository activity and license before considering it for DKBuilder.
+  Source
+  Thunderbird    Full-featured cross-platform email client    MPL-2.0
+  Betterbird    Thunderbird-based client with additional fixes and fea
+  Evolution    Email, calendar, contacts and tasks    LGPL-2.1+
+  KMail    KDE email client    GPL-2.0+
+  Claws Mail    Lightweight GTK email client    GPL
+  aerc    Terminal-based email client    MIT
+  NeoMutt    Highly configurable terminal email client    GPL-2.0
+  DKBuilder could eventually provide the components needed to operate an entire mail server.
+
+
+
+
+
+
+
+
+
+
+  Stalwart Mail Server
+  My first choice to investigate
+  - SMTP, IMAP, POP3 and JMAP.
+  - CalDAV and CardDAV.
+  - Written in Rust.
+  - Integrated mail and collaboration server.
+  License: AGPL-3.0 Community Edition.
+
+  Particularly interesting because it's a unified server rather than assembling numerous separate services.
+
+  Website · Source
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Postfix
+  - SMTP mail transfer agent.
+  - Mail routing and delivery.
+  - Queue management.
+  - Mature and widely deployed.
+  License: EPL-2.0 / IPL-1.0.
+  Website
+
+
+
+
+
+
+
+
+
+
+
+
+  Dovecot
+  - IMAP and POP3 server.
+  - Mailbox storage and access.
+  - Authentication.
+  - Mail delivery integration.
+  License: LGPL-2.1 with exceptions.
+  Website
+
+
+
+
+
+
+
+
+
+
+
+
+  Rspamd
+  - Spam filtering.
+  - Phishing detection.
+  - Email reputation checks.
+  - Integrates with Postfix and other MTAs.
+  License: Apache-2.0.
+  Website
+
+
+  Other useful components:
+  Software    Purpose
+  Roundcube    Browser-based webmail
+  SnappyMail    Lightweight browser-based webmail
+  SOGo    Email, calendar and contacts groupware
+  OpenSMTPD    Alternative SMTP server
+  Exim    Mail transfer agent
+  Mox    Integrated mail server
+  listmonk    Newsletter and mailing-list management
