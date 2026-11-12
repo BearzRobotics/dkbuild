@@ -1,0 +1,53 @@
+# Digital (Helmut Neemann): educational digital logic designer and simulator,
+# with tests, FPGA export and VHDL/Verilog generation. Its Maven build is
+# replaced by javac and jar (dkbuild has no Maven store): the run-time
+# dependencies are pinned jars from Maven Central (checked against Central's
+# sha1 when added), bundled into Digital.jar as its assembly does. Example
+# circuits in /usr/share/digital/examples.
+name = "digital"
+version = "0.31"
+release = 1
+summary = "Digital logic designer and circuit simulator"
+license = "GPL-3.0-only"
+homepage = "https://github.com/hneemann/Digital"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["openjdk21", "unzip"]
+rundeps = ["openjdk21"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/hneemann/Digital/archive/refs/tags/v0.31.tar.gz", sha256 = "c17f68c8e9cf80a13f8deb70ecb36d937c4abfec5fbc73d5d9c43b1d7f0f81ef" },
+    { url = "https://repo1.maven.org/maven2/com/thoughtworks/xstream/xstream/1.4.20/xstream-1.4.20.jar", sha256 = "87df0f0be57c92037d0110fbb225a30b651702dc275653d285afcfef31bc2e81", unpack = false },
+    { url = "https://repo1.maven.org/maven2/io/github/x-stream/mxparser/1.2.2/mxparser-1.2.2.jar", sha256 = "aeeee23a3303d811bca8790ea7f25b534314861c03cff36dafdcc2180969eb97", unpack = false },
+    { url = "https://repo1.maven.org/maven2/xmlpull/xmlpull/1.1.3.1/xmlpull-1.1.3.1.jar", sha256 = "34e08ee62116071cbb69c0ed70d15a7a5b208d62798c59f2120bb8929324cb63", unpack = false },
+    { url = "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.24/slf4j-api-1.7.24.jar", sha256 = "baf3c7fe15fefeaf9e5b000d94547379dc48370f22a8797e239c127e7d7756ec", unpack = false },
+    { url = "https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.24/slf4j-simple-1.7.24.jar", sha256 = "f355241d362fe9a3400c7bcb4e4d49927fecf09901dc46d940a6ca91bcf48191", unpack = false },
+    { url = "https://repo1.maven.org/maven2/org/json/json/20220924/json-20220924.jar", sha256 = "57d65f5883bd65fa41e6d06cb7dcaceb73a49338bb8a4611c9e22d2a3f674a97", unpack = false },
+]
+
+environment = '''
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+export PATH="$JAVA_HOME/bin:$PATH"
+'''
+build = '''
+cp=$(ls /build/sources/*.jar | tr '\n' ':')
+mkdir -p /tmp/classes
+find src/main/java -name '*.java' > /tmp/sources.txt
+javac -encoding UTF-8 --release 11 -nowarn -d /tmp/classes -cp "$cp" @/tmp/sources.txt
+cp -r src/main/resources/. /tmp/classes/
+# the dependencies inside, as Digital's assembly (jar-with-dependencies)
+(cd /tmp/classes && for j in /build/sources/*.jar; do unzip -qo "$j" -x 'META-INF/*'; done)
+printf 'Main-Class: de.neemann.digital.gui.Main\nBuild-SCM-Revision: v%s\nBuild-Time: release\n' "$version" > /tmp/manifest.txt
+jar cfm Digital.jar /tmp/manifest.txt -C /tmp/classes .
+'''
+install = '''
+d="$pkgdir/usr/share/digital"
+install -Dm644 Digital.jar "$d/Digital.jar"
+mkdir -p "$d/examples"
+cp -r src/main/dig src/main/fsm src/main/asm "$d/examples/"
+install -Dm755 $pkgfiles/digital "$pkgdir/usr/bin/digital"
+install -Dm644 $pkgfiles/digital.desktop "$pkgdir/usr/share/applications/digital.desktop"
+install -Dm644 distribution/linux/digital-simulator.xml "$pkgdir/usr/share/mime/packages/digital-simulator.xml"
+install -Dm644 src/main/svg/icon.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/digital.svg"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/digital/LICENSE"
+'''
