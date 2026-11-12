@@ -1,0 +1,13 @@
+FenrirOS: SerializedMsg.hpp uses ssize_t without <sys/types.h>, which glibc's
+C++ headers pull in by the way and musl's do not.
+
+--- a/indiserver/SerializedMsg.hpp	2026-11-12 11:05:38.824295662 -0500
++++ b/indiserver/SerializedMsg.hpp	2026-11-12 11:05:38.827483328 -0500
+@@ -20,6 +20,7 @@
+ 
+ #include "SerializationRequirement.hpp"
+ 
++#include <sys/types.h> // ssize_t
+ #include <mutex>
+ #include <vector>
+ #include <list>
