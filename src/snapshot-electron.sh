@@ -57,12 +57,7 @@ solutions = [{
     "url": "https://github.com/electron/electron.git@$e_rev",
     "deps_file": "DEPS",
     "managed": False,
-    "custom_deps": {
-        "src": "https://chromium.googlesource.com/chromium/src.git@$src_rev",
-        # Cloud Storage test data with no condition (non_git_source does not
-        # cover it): left out
-        "src/base/tracing/test/data": None,
-    },
+    "custom_deps": { "src": "https://chromium.googlesource.com/chromium/src.git@$src_rev" },
     "custom_vars": {
         "checkout_pgo_profiles": False,
         # no Google Cloud Storage or CIPD downloads: prebuilt tools, sysroots,
@@ -75,7 +70,9 @@ solutions = [{
 }]
 EOF
 log "gclient sync (Electron $etag, Chromium $cver): a large download"
-python3 depot_tools/gclient.py sync --no-history --nohooks --force --reset
+# --ignore-dep-type: no Cloud Storage or CIPD downloads at all (non_git_source
+# above covers most; a few test-data entries have no condition)
+python3 depot_tools/gclient.py sync --no-history --nohooks --force --reset --ignore-dep-type=gcs --ignore-dep-type=cipd
 
 log "generated version headers"
 python3 src/build/util/lastchange.py -m DAWN_COMMIT_HASH -s src/third_party/dawn \
