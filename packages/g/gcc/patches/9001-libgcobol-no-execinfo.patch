@@ -1,0 +1,13 @@
+FenrirOS: libgcobol.cc includes <execinfo.h> (glibc's backtrace API) but uses
+nothing from it; musl has no such header. The include is dropped.
+
+--- a/libgcobol/libgcobol.cc	2026-11-12 10:42:10.456784502 -0500
++++ b/libgcobol/libgcobol.cc	2026-11-12 10:42:10.458857758 -0500
+@@ -70,7 +70,6 @@
+ #include <sys/stat.h>
+ #include <sys/types.h>
+ #include <sys/time.h>
+-#include <execinfo.h>
+ #include "exceptl.h"
+ 
+ /* BSD extension.  */
