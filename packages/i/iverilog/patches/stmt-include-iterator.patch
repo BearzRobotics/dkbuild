@@ -1,0 +1,13 @@
+FenrirOS: std::inserter is declared in <iterator>, which stmt.cc relied on
+<algorithm> pulling in (libstdc++ does; libc++ does not).
+
+--- a/tgt-vhdl/stmt.cc	2026-11-12 04:11:13.708351299 -0500
++++ b/tgt-vhdl/stmt.cc	2026-11-12 04:11:13.709280314 -0500
+@@ -29,6 +29,7 @@
+ #include <limits>
+ #include <set>
+ #include <algorithm>
++#include <iterator>
+ 
+ using namespace std;
+ 

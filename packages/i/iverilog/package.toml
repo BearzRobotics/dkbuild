@@ -8,6 +8,7 @@ license = "GPL-2.0-or-later"
 homepage = "https://steveicarus.github.io/iverilog/"
 hostdeps = ["autoconf", "automake", "bison", "flex", "gperf"]
 builddeps = ["zlib-ng-compat-devel", "readline-devel", "bzip2-devel"]
+patches = ["stmt-include-iterator.patch"]
 
 source = [
     { url = "https://github.com/steveicarus/iverilog/archive/refs/tags/v13_0.tar.gz", sha256 = "c897bbfa9848688982c6d5c30529fc29d68df0b9ff22ffa73bad89db73a7ce49" },
