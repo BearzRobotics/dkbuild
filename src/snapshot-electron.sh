@@ -42,7 +42,15 @@ solutions = [{
     "deps_file": "DEPS",
     "managed": False,
     "custom_deps": { "src": "https://chromium.googlesource.com/chromium/src.git@$cver" },
-    "custom_vars": { "checkout_pgo_profiles": False },
+    "custom_vars": {
+        "checkout_pgo_profiles": False,
+        # no Google Cloud Storage or CIPD downloads: prebuilt tools, sysroots,
+        # Node, test data (gsutil also refuses Python 3.14). The build uses
+        # the system's toolchain, Node and tools instead.
+        "non_git_source": False,
+        "llvm_force_head_revision": True,
+        "rust_force_head_revision": True,
+    },
 }]
 EOF
 log "gclient sync (Electron $etag, Chromium $cver): a large download"
