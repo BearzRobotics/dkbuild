@@ -16,19 +16,21 @@
 # musl SDK and packages from the snapshot, which are linked against GCC's C++
 # runtime: its stage0deps bring that (dotnet-bootstrap-gcc-runtime, from
 # Alpine). What this recipe builds uses LLVM's libc++.
+# r4: lttng-ust-devel (the runtime's CMake configure requires lttng/tracepoint.h on Linux;
+# the event-tracing provider is built, not disabled).
 # The first `dkbuild fetch dotnet` makes the snapshot and prints its sha256;
 # that replaces the zeros below.
 name = "dotnet"
 version = "10.0.114"
-release = 3
+release = 4
 summary = ".NET SDK, runtime and ASP.NET Core"
 license = "MIT"
 homepage = "https://dotnet.microsoft.com"
 archs = ["x86_64"]
 hostdeps = ["bash", "cmake", "curl", "findutils", "git", "llvm", "llvm-clang", "llvm-lld", "python", "zlib-ng-compat-devel"]
 stage0deps = ["dotnet-bootstrap-gcc-runtime"]
-builddeps = ["brotli-devel", "heimdal-devel", "icu-devel", "linux-headers", "openssl-devel", "zlib-ng-compat-devel"]
-rundeps = ["icu", "openssl", "heimdal-libs"]
+builddeps = ["brotli-devel", "heimdal-devel", "icu-devel", "linux-headers", "lttng-ust-devel", "openssl-devel", "zlib-ng-compat-devel"]
+rundeps = ["icu", "openssl", "heimdal-libs", "lttng-ust"]
 options = ["!check", "!strip", "jobs:12", "selfhost"]
 
 source = [
