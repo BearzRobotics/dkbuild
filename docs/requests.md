@@ -81,7 +81,7 @@ CRM:
 
 | Package | License | Status |
 |---|---|---|
-| OpenProject | GPL-3.0 | blocked: needs Ruby 4.0 (the tree has 3.4.12) |
+| OpenProject | GPL-3.0 | written (2026-11-12, 17.9.7 on ruby4.0) |
 | Leantime | AGPL-3.0 | written (2026-11-12) |
 | Taiga | MPL-2.0 | blocked: many python-* recipes |
 | Kimai | AGPL-3.0 | written (2026-11-12) |
@@ -232,3 +232,15 @@ Servers and parts ("everything needed to run a mail server"):
     `so:libc.musl-x86_64.so.1` (Alpine's name for musl). Adding that alias to
     musl rebuilds the whole tree; a small separate package (a symlink) does not.
     Which?
+
+## Questions from the 2026-11-12 follow-ups
+
+20. **Zabbix Java gateway libraries**: logback, slf4j and dnsjava are pinned
+    Maven Central jars (as the digital recipe), not built from source. OK?
+21. **Stalwart's AGPL build** still compiles one SEL-licensed crate (scim-proto)
+    and two one-line SEL snippets, unreachable without the enterprise feature.
+    Acceptable, or patch them out?
+22. **Zabbix APM collector**: port Chimera's grpc (all its libraries are in the
+    tree) and turn it on?
+23. **AppSignal agent** (OpenProject's optional monitoring): a closed binary
+    from a commercial service; left out. Pin it as a source instead?

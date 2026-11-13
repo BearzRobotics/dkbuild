@@ -61,6 +61,15 @@ pass have fixes committed but untested (list in git log since 88b01af).
   (`dkbuild upstream --all`). Daily notification: user units in
   contrib/systemd/ (not installed; the user enables them).
 
+## Follow-ups after the user's answers (all committed)
+
+- php 8.4.27 + php8.5 (663894e), FileZilla + libfilezilla + fzssh (fc7951e),
+  commercial add-ons reviewed (c55f9ec, 8a5ef06: Stalwart enterprise and
+  Stirling proprietary out - their licences forbid redistribution; Zabbix Java
+  gateway built from source), ruby4.0 + OpenProject (see git log). New
+  questions 20-23 in docs/requests.md. User policies: memory
+  feedback-app-policies.
+
 ## Android NDK from source (Claude's own task)
 
 Plan and survey: wip/android-ndk/NOTES.md. Next steps:
