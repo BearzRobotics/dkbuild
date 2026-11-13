@@ -2,7 +2,7 @@
 # SDR and MQTT parts are off (libraries not in the tree yet).
 name = "kismet"
 version = "2026.10.R1"
-release = 1
+release = 2
 summary = "Wireless network detector, sniffer and IDS"
 license = "GPL-2.0-or-later"
 homepage = "https://www.kismetwireless.net"
@@ -15,7 +15,13 @@ source = [
 ]
 
 setup = '''
+# --with-openssl=/usr: m4/ax_check_openssl.m4 tests `test x"$SSL_DIRS" == x""`,
+# which /bin/sh does not know ("test: x: unexpected operator"); the pkg-config
+# branch is then skipped, no OpenSSL flags are set and the link test fails
+# ("Failed to find OpenSSL library"). Given a directory, the macro looks for
+# include/openssl/ssl.h there and uses -lssl -lcrypto.
 %configure \
+    --with-openssl=/usr \
     --sysconfdir=/etc/kismet \
     --disable-python-tools \
     --disable-librtlsdr \
