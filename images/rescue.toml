@@ -7,9 +7,14 @@ name     = "rescue"
 arch     = "x86_64"
 hostname = "fenriros-rescue"
 label    = "FENRIROS_RESCUE"
-packages = ["base", "base-net", "linux", "live-initramfs", "dkinstaller", "firmware-linux-meta", "rescue-tools", "desktop-dkde"]
-exclude  = ["*-devel", "*-doc", "*-static"]
+packages = ["base", "base-net", "linux", "live-initramfs", "dkinstaller", "firmware-linux-meta", "rescue-tools", "desktop-dkde", "base-devel"]
+exclude  = ["*-static"]
 services = ["udevd", "udev-trigger", "udev-settle", "modules", "dhcpcd", "syslogd", "seatd", "dbus"]
+issue    = """
+FenrirOS Rescue \\r (\\l)
+
+Log in as: rescue   (no password; sudo works)
+"""
 output   = ["iso"]
 autologin = "rescue"
 session   = "dkde-session"

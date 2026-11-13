@@ -6,9 +6,14 @@ name     = "base"
 arch     = "x86_64"
 hostname = "fenriros"
 label    = "FENRIROS"
-packages = ["base", "base-net", "linux", "live-initramfs", "dkinstaller", "firmware-linux-meta"]
-exclude  = ["*-devel", "*-doc", "*-static"]
+packages = ["base", "base-net", "linux", "live-initramfs", "dkinstaller", "firmware-linux-meta", "man-pages", "man-pages-posix", "dkman"]
+#exclude  = ["*-devel", "*-doc", "*-static"]
 services = ["udevd", "udev-trigger", "udev-settle", "modules", "dhcpcd", "syslogd"]
+issue    = """
+FenrirOS Live \\r (\\l)
+
+Log in as: live   (no password; sudo works)
+"""
 output   = ["iso", "tar"]
 autologin = "live"
 
