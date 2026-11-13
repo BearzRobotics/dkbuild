@@ -1,0 +1,7 @@
+# Zabbix Java gateway (JMX monitoring for the server or proxy). Not enabled
+# by default (README.FenrirOS): needs /etc/zabbix/zabbix_java_gateway.conf.
+type = process
+command = /usr/lib/zabbix/java-gateway/run
+run-as = zabbix
+logfile = /var/log/zabbix/java-gateway.log
+depends-on: rcboot

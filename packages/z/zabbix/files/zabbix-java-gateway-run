@@ -1,0 +1,25 @@
+#!/bin/sh
+# Zabbix Java gateway in the foreground (for dinit), as upstream's
+# startup.sh without a PID file. Settings: /etc/zabbix/zabbix_java_gateway.conf
+# (shell variables, upstream's settings.sh; PID_FILE is ignored here). Logs
+# go to standard output (upstream's logback-console.xml).
+conf=/etc/zabbix/zabbix_java_gateway.conf
+if [ ! -r "$conf" ]; then
+	echo "zabbix-java-gateway: $conf is missing (see /usr/share/doc/zabbix/README.FenrirOS)" >&2
+	exit 1
+fi
+. "$conf"
+d=/usr/lib/zabbix/java-gateway
+CLASSPATH="$d/lib"
+for jar in "$d"/lib/*.jar "$d"/bin/*.jar; do
+	CLASSPATH="$CLASSPATH:$jar"
+done
+opts="-Dlogback.configurationFile=$d/lib/logback-console.xml"
+[ -n "$SERVER" ] && opts="$opts -Dzabbix.server=$SERVER"
+[ -n "$LISTEN_IP" ] && opts="$opts -Dzabbix.listenIP=$LISTEN_IP"
+[ -n "$LISTEN_PORT" ] && opts="$opts -Dzabbix.listenPort=$LISTEN_PORT"
+[ -n "$START_POLLERS" ] && opts="$opts -Dzabbix.startPollers=$START_POLLERS"
+[ -n "$TIMEOUT" ] && opts="$opts -Dzabbix.timeout=$TIMEOUT"
+[ -n "$PROPERTIES_FILE" ] && opts="$opts -Dzabbix.propertiesFile=$PROPERTIES_FILE"
+opts="$opts -Dsun.rmi.transport.tcp.responseTimeout=${TIMEOUT:-3}000"
+exec /usr/lib/jvm/java-21-openjdk/bin/java $JAVA_OPTIONS -server -classpath "$CLASSPATH" $opts com.zabbix.gateway.JavaGateway

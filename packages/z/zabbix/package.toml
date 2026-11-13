@@ -8,10 +8,20 @@
 # libcurl (web monitoring, HTTP agent), libxml2, unixODBC (database
 # monitoring), OpenLDAP, OpenSSL (TLS between components), PCRE2, libevent,
 # c-ares, libmodbus (agent's modbus.get).
+# The Java gateway (JMX monitoring; zabbix-java-gateway) is built from its
+# Java source in the archive (src/zabbix_java, javac on OpenJDK 21). The
+# archive's prebuilt third-party jars in src/zabbix_java/lib are deleted and
+# replaced: logback-core/-classic 1.5.25, slf4j-api 2.0.16 and dnsjava 3.6.4
+# are pinned jars from Maven Central (byte-identical to the archive's, checked
+# against Central's sha1 when added; dkbuild has no Maven store, as in
+# packages/d/digital), and android-json (Android libcore's org.json, which
+# Zabbix compiles itself from AOSP; not on Maven Central under that name) is
+# compiled here from the same code's sources jar on Maven Central
+# (com.vaadin.external.google:android-json, Apache-2.0).
 # Left out: the OTLP/gRPC collector in the proxy (--with-apm): it needs the
-# gRPC C++ library, which has no recipe yet. The Java gateway: the archive
-# ships it as prebuilt jars (src/zabbix_java/lib) - left for the user's
-# decision.
+# gRPC C++ library (grpc++ >= 1.40 with grpc_cpp_plugin), which has no recipe
+# yet (Chimera's user/grpc could be ported: abseil-cpp, protobuf, re2, c-ares,
+# benchmark are all in the tree).
 # Installed inert (docs/requests.md): dinit services shipped, none enabled;
 # configs as /etc/zabbix/*.conf.example; no database (upstream's data.sql,
 # loaded by the administrator, creates web user Admin/zabbix - the README
@@ -21,9 +31,9 @@ name = "zabbix"
 version = "8.0.0"
 release = 1
 summary = "Enterprise-class monitoring solution"
-license = "AGPL-3.0-only"
+license = "AGPL-3.0-only AND Apache-2.0 AND BSD-3-Clause AND MIT AND (EPL-1.0 OR LGPL-2.1-only)"
 homepage = "https://www.zabbix.com"
-hostdeps = ["go", "pkgconf", "make"]
+hostdeps = ["go", "pkgconf", "make", "openjdk21", "unzip"]
 builddeps = ["postgresql-devel", "mariadb-devel", "sqlite-devel", "net-snmp-devel", "libssh-devel", "openipmi-devel",
              "curl-devel", "libxml2-devel", "unixodbc-devel", "openldap-devel", "openssl-devel", "pcre2-devel",
              "libevent-devel", "c-ares-devel", "zlib-ng-compat-devel", "libmodbus-devel", "linux-headers"]
@@ -31,20 +41,41 @@ options = ["!check"]
 
 source = [
     { url = "https://cdn.zabbix.com/zabbix/sources/stable/8.0/zabbix-8.0.0.tar.gz", sha256 = "55469ac599fd1443370ecf4288655d4d62109ad3a686711c4f3e0d428338ca77" },
+    # the Java gateway's libraries (src/zabbix_java/Makefile.am's LIB)
+    { url = "https://repo1.maven.org/maven2/ch/qos/logback/logback-core/1.5.25/logback-core-1.5.25.jar", sha256 = "aeb86d749936a960a1ec897aa821fe611ab6b105f1170ad334ae5eadc4bd689c", unpack = false },
+    { url = "https://repo1.maven.org/maven2/ch/qos/logback/logback-classic/1.5.25/logback-classic-1.5.25.jar", sha256 = "93163d85a0972e3d4813385af2d037bc94eed0542c4d74abc131830c84af070e", unpack = false },
+    { url = "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.16/slf4j-api-2.0.16.jar", sha256 = "a12578dde1ba00bd9b816d388a0b879928d00bab3c83c240f7013bf4196c579a", unpack = false },
+    { url = "https://repo1.maven.org/maven2/dnsjava/dnsjava/3.6.4/dnsjava-3.6.4.jar", sha256 = "39d50d2b5bdee1161978bf85a1b01e95fee490e92bbe98d76d3ceb9642183570", unpack = false },
+    { url = "https://repo1.maven.org/maven2/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1-sources.jar", sha256 = "54c781eea645c450cbbc4a5a1b5a474745465452cec1354cb567b781ea6622c3", unpack = false },
 ]
 
 environment = '''
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+export PATH="$JAVA_HOME/bin:$PATH"
 export GOTOOLCHAIN=local GOPROXY=off GOFLAGS=-mod=vendor GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=1
 common="--sysconfdir=/etc/zabbix --enable-ipv6 --with-net-snmp --with-ssh --with-openipmi --with-libcurl
     --with-libxml2 --with-unixodbc --with-ldap --with-openssl --with-libpcre2 --with-libevent --with-zlib
     --with-ares --with-libmodbus"
 '''
 setup = '''
+# the Java gateway: no prebuilt jars from the archive (header comment)
+rm -f src/zabbix_java/lib/*.jar src/zabbix_java/lib/*.jar.md5
+for j in logback-core-1.5.25 logback-classic-1.5.25 slf4j-api-2.0.16 dnsjava-3.6.4; do
+    cp /build/sources/$j.jar src/zabbix_java/lib/
+done
+# its Makefile names the android-json jar after the AOSP tag Zabbix built it
+# from; the one compiled here (build) is plain android-json.jar
+sed -i 's|lib/android-json-4.3_r3.1.jar|lib/android-json.jar|' src/zabbix_java/Makefile.in
 # one build tree per database backend
 for db in mysql sqlite3; do cp -a . ../zabbix-$db; done
 '''
 build = '''
-%configure $common --enable-server --enable-proxy --enable-agent --enable-agent2 --enable-webservice --with-postgresql
+# android-json: Android libcore's org.json, from its sources jar
+mkdir -p /tmp/android-json/src /tmp/android-json/classes
+unzip -qo /build/sources/android-json-0.0.20131108.vaadin1-sources.jar -d /tmp/android-json/src
+javac -encoding UTF-8 -nowarn -d /tmp/android-json/classes /tmp/android-json/src/org/json/*.java
+jar cf src/zabbix_java/lib/android-json.jar -C /tmp/android-json/classes .
+%configure $common --enable-server --enable-proxy --enable-agent --enable-agent2 --enable-webservice --enable-java --with-postgresql
 %make
 ( cd ../zabbix-mysql && %configure $common --enable-server --enable-proxy --with-mysql && %make )
 ( cd ../zabbix-sqlite3 && %configure $common --enable-proxy --with-sqlite3 && %make )
@@ -59,6 +90,16 @@ install -m755 ../zabbix-mysql/src/zabbix_proxy/zabbix_proxy "$s/zabbix_proxy_mys
 install -m755 ../zabbix-sqlite3/src/zabbix_proxy/zabbix_proxy "$s/zabbix_proxy_sqlite3"
 # configs as examples (README.FenrirOS); agent 2's plugin includes stay
 for f in "$pkgdir"/etc/zabbix/*.conf; do mv "$f" "$f.example"; done
+# the Java gateway: upstream installs it as /usr/sbin/zabbix_java with its
+# start/stop scripts and settings.sh; here the jars go to
+# /usr/lib/zabbix/java-gateway, run by our script (foreground, for dinit),
+# and settings.sh becomes /etc/zabbix/zabbix_java_gateway.conf.example
+jg="$pkgdir/usr/lib/zabbix/java-gateway"
+install -d "$jg"
+mv "$pkgdir/usr/sbin/zabbix_java/bin" "$pkgdir/usr/sbin/zabbix_java/lib" "$jg/"
+install -m644 "$pkgdir/usr/sbin/zabbix_java/settings.sh" "$pkgdir/etc/zabbix/zabbix_java_gateway.conf.example"
+rm -r "$pkgdir/usr/sbin/zabbix_java"
+install -m755 $pkgfiles/zabbix-java-gateway-run "$jg/run"
 # database schemas and data
 for db in postgresql mysql sqlite3; do
     install -d "$pkgdir/usr/share/zabbix/database/$db"
@@ -67,7 +108,7 @@ done
 # the web frontend; its config comes from /etc/zabbix/web
 cp -a ui "$pkgdir/usr/share/zabbix/frontend"
 ln -s /etc/zabbix/web/zabbix.conf.php "$pkgdir/usr/share/zabbix/frontend/conf/zabbix.conf.php"
-for s in server-pgsql server-mysql proxy-pgsql proxy-mysql proxy-sqlite3 agent agent2 web-service; do
+for s in server-pgsql server-mysql proxy-pgsql proxy-mysql proxy-sqlite3 agent agent2 web-service java-gateway; do
     install -Dm644 $pkgfiles/zabbix-$s "$pkgdir/etc/dinit.d/zabbix-$s"
 done
 install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/zabbix.conf"
@@ -118,6 +159,11 @@ depends = ["zabbix"]
 summary = "Zabbix web service (scheduled PDF reports)"
 paths   = ["/usr/sbin/zabbix_web_service", "/etc/dinit.d/zabbix-web-service", "/etc/zabbix/zabbix_web_service.conf.example"]
 depends = ["zabbix"]
+
+[subpackages.java-gateway]
+summary = "Zabbix Java gateway (JMX monitoring)"
+paths   = ["/usr/lib/zabbix/java-gateway", "/etc/dinit.d/zabbix-java-gateway", "/etc/zabbix/zabbix_java_gateway.conf.example"]
+depends = ["zabbix", "openjdk21"]
 
 [subpackages.frontend]
 summary = "Zabbix web frontend (PHP)"

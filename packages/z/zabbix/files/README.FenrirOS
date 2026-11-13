@@ -9,6 +9,7 @@ Packages
   zabbix-proxy-pgsql / -mysql / -sqlite3      the proxy
   zabbix-agent, zabbix-agent2                 the agents (C; Go with plugins)
   zabbix-web-service                          PDF reports (needs Chromium)
+  zabbix-java-gateway                         JMX monitoring of Java applications
   zabbix-frontend                             the PHP web interface
   zabbix-utils                                zabbix_get, zabbix_sender, zabbix_js
 Configuration examples: /etc/zabbix/*.conf.example. Copy the ones you need:
@@ -42,5 +43,13 @@ Agents
   set Server= / ServerActive= / Hostname=, then dinitctl enable zabbix-agent
   (or zabbix_agent2.conf and zabbix-agent2; agent 2's plugin settings are in
   /etc/zabbix/zabbix_agent2.d/plugins.d).
+
+Java gateway (JMX)
+  cp /etc/zabbix/zabbix_java_gateway.conf.example /etc/zabbix/zabbix_java_gateway.conf
+  set SERVER= (the server/proxy addresses allowed to connect; default
+  127.0.0.1,::1) and LISTEN_IP= (default 0.0.0.0, port 10052), then
+  dinitctl enable zabbix-java-gateway (log: /var/log/zabbix/java-gateway.log).
+  In zabbix_server.conf (or the proxy's): JavaGateway=<address> and
+  StartJavaPollers=1 or more.
 
 ICMP checks use /usr/sbin/fping (setuid root, it drops privileges).
