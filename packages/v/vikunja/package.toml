@@ -15,7 +15,7 @@
 # Setup: /usr/share/doc/vikunja/README.FenrirOS.
 name = "vikunja"
 version = "2.8.0"
-release = 1
+release = 2
 summary = "Self-hosted to-do list and project management"
 license = "AGPL-3.0-or-later"
 homepage = "https://vikunja.io"
@@ -29,12 +29,17 @@ source = [
 
 environment = '''
 export HOME=/tmp/home CGO_ENABLED=1
-# package.json asks for pnpm 12 (packageManager); the system pnpm must not
-# try to download that version
-export npm_config_manage_package_manager_versions=false npm_config_package_manager_strict=false
+# package.json asks for pnpm 12 (packageManager); the system pnpm (11) must not
+# try to download that version (it stopped: "Refusing to run pnpm@12.16.1: its
+# npm registry signature could not be verified"). pnpm 11 has the setting
+# pmOnFail for this; "ignore" skips the version switch (also in .npmrc, in
+# case the environment variable is not read as a pnpm setting).
+export npm_config_manage_package_manager_versions=false npm_config_package_manager_strict=false \
+    npm_config_pm_on_fail=ignore
 '''
 setup = '''
 cd frontend
+echo 'pm-on-fail=ignore' >> .npmrc
 pnpm install --frozen-lockfile
 '''
 build = '''
