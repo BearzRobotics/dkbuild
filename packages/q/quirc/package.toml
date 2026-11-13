@@ -1,0 +1,49 @@
+# quirc, QR code recognition library (FFmpeg --enable-libquirc). Plain Makefile
+# with PREFIX and no pkg-config file, so install is done here: header, static
+# and shared libraries (libquirc.so.1.2 plus the soname and development links
+# the Makefile does not make) and a quirc.pc written for consumers.
+# Only the library and quirc-scanner (v4l camera + libjpeg) are built. Not
+# built, with reasons: the SDL demos (quirc-demo, inspect) need SDL 1.2 and
+# SDL_gfx, the OpenCV variants need OpenCV, and qrtest/inspect are test tools
+# that need the upstream test images (not in the tarball).
+name = "quirc"
+version = "1.2"
+release = 1
+summary = "QR code decoder library"
+license = "ISC"
+homepage = "https://github.com/dlbeer/quirc"
+hostdeps = ["pkgconf"]
+builddeps = ["libjpeg-turbo-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/dlbeer/quirc/archive/refs/tags/v1.2.tar.gz", sha256 = "73c12ea33d337ec38fb81218c7674f57dba7ec0570bddd5c7f7a977c0deb64c5" },
+]
+
+build = '''
+make libquirc.a libquirc.so quirc-scanner CFLAGS="$CFLAGS -fPIC"
+'''
+install = '''
+install -Dm644 lib/quirc.h "$pkgdir/usr/include/quirc.h"
+install -Dm644 libquirc.a "$pkgdir/usr/lib/libquirc.a"
+install -Dm755 libquirc.so.1.2 "$pkgdir/usr/lib/libquirc.so.1.2"
+# The Makefile installs only libquirc.so.1.2; the library has no soname set
+# (it is linked without -Wl,-soname), so both links are created here.
+ln -s libquirc.so.1.2 "$pkgdir/usr/lib/libquirc.so.1"
+ln -s libquirc.so.1.2 "$pkgdir/usr/lib/libquirc.so"
+install -Dm755 quirc-scanner "$pkgdir/usr/bin/quirc-scanner"
+mkdir -p "$pkgdir/usr/lib/pkgconfig"
+cat > "$pkgdir/usr/lib/pkgconfig/quirc.pc" <<PC
+prefix=/usr
+libdir=\${prefix}/lib
+includedir=\${prefix}/include
+
+Name: quirc
+Description: QR code decoder library
+Version: 1.2
+Cflags: -I\${includedir}
+Libs: -L\${libdir} -lquirc
+Libs.private: -lm
+PC
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/quirc/LICENSE"
+'''
