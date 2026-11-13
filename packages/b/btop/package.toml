@@ -6,7 +6,7 @@
 # wants lowdown, which is not in the tree).
 name = "btop"
 version = "1.4.8"
-release = 1
+release = 2
 summary = "TUI monitor of system resources"
 license = "Apache-2.0"
 homepage = "https://github.com/aristocratos/btop"
@@ -20,7 +20,10 @@ source = [
 ]
 
 setup = '''
+# btop's tests (include(CTest)) fetch googletest from GitHub at configure time;
+# builds are offline and the recipe has !check, so the tests are not configured
 %cmake \
+    -DBUILD_TESTING=OFF \
     -DBTOP_GPU=ON \
     -DBTOP_LTO=OFF \
     -DBTOP_FORTIFY=OFF
