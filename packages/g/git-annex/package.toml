@@ -1,0 +1,81 @@
+# git-annex 10.20261026: manages large files with git without checking their
+# contents into git. Upstream's default build, which includes the assistant
+# (`git-annex assistant`, syncing in the background), the webapp (`git-annex
+# webapp`, a local web interface it opens in the browser) and the watch
+# command; plus what Alpine also enables: Botan (faster hashing), XXH3,
+# BLAKE3, libmagic MIME types, D-Bus, torrent parsing, benchmarks.
+# Nothing runs by itself: no service, and the assistant's autostart entry
+# (which starts it at login for the repositories a user listed) is an
+# example in /usr/share/doc/git-annex, not in /etc/xdg/autostart.
+# Built with cabal-install, offline, from the hackagedeps store:
+# files/hackage.lock, made by `dkbuild hackage-lock` from
+# files/cabal.project.freeze (Alpine's freeze for this release on GHC 9.14.1,
+# with the changes its header lists: the system's SQLite and xxHash, blake3
+# added), which is also the build's cabal.project.freeze and carries the
+# flags. Patch (from Alpine): allow-newer for the four releases whose bounds
+# predate GHC 9.14 (see its header). Alpine also edits git-annex.cabal to cap
+# crypton at 1.0.6 and require botan-bindings 0.3; the freeze pins both
+# versions, so those edits are not needed here.
+# Source: the GitHub mirror's tag archive, as Alpine (the Hackage tarball
+# leaves out the documentation the manual pages are made from).
+# Manual pages: upstream's Build/mdwn2man (perl) over doc/git-annex*.mdwn and
+# doc/git-remote-*.mdwn, as Build/MakeMans does, without compiling MakeMans
+# (which needs git-annex's own modules and their dependencies). No HTML
+# documentation (needs ikiwiki).
+# The webapp's jQuery and Bootstrap files are upstream's prebuilt copies.
+name = "git-annex"
+version = "10.20261026"
+release = 1
+summary = "Manage files with git, without checking their contents into git"
+license = "AGPL-3.0-or-later"
+homepage = "https://git-annex.branchable.com"
+archs = ["x86_64"]
+patches = ["ghc-9.14.patch"]
+hostdeps = ["ghc", "cabal-install", "pkgconf", "perl"]
+builddeps = ["gmp-devel", "libffi-devel", "numactl-devel", "zlib-ng-compat-devel", "file-devel", "botan-devel", "sqlite-devel", "xxhash-devel"]
+rundeps = ["git", "rsync", "curl"]
+options = ["hackagedeps"]
+
+source = [
+    { url = "https://github.com/con/git-annex/archive/refs/tags/10.20261026.tar.gz", sha256 = "cd3c04c4deeec4595b27f9463b82e299b17fdca5ba687e00247fc125f9eb4eec" },
+]
+
+environment = '''
+export HOME=/tmp LANG=C.UTF-8
+'''
+setup = '''
+cp "$pkgfiles/cabal.project.freeze" cabal.project.freeze
+'''
+build = '''
+cabal v2-build --offline -j$jobs git-annex:exe:git-annex
+cp "$(cabal list-bin --offline git-annex:exe:git-annex)" ./git-annex
+mkdir -p man
+for s in doc/git-annex*.mdwn doc/git-remote-*.mdwn; do
+    n=${s#doc/}; n=${n%.mdwn}
+    perl ./Build/mdwn2man "$n" 1 "$s" > "man/$n.1"
+done
+'''
+check = '''
+./git-annex version
+'''
+install = '''
+# install-bins in upstream's Makefile
+install -Dm755 git-annex "$pkgdir/usr/bin/git-annex"
+for l in git-annex-shell git-remote-annex git-remote-tor-annex git-remote-p2p-annex; do
+    ln -s git-annex "$pkgdir/usr/bin/$l"
+done
+install -d "$pkgdir/usr/share/man/man1"
+install -m644 man/*.1 "$pkgdir/usr/share/man/man1/"
+# install-completions in upstream's Makefile
+install -Dm644 bash-completion.bash "$pkgdir/usr/share/bash-completion/completions/git-annex"
+install -d "$pkgdir/usr/share/zsh/site-functions" "$pkgdir/usr/share/fish/vendor_completions.d"
+./git-annex --zsh-completion-script git-annex > "$pkgdir/usr/share/zsh/site-functions/_git-annex"
+./git-annex --fish-completion-script git-annex > "$pkgdir/usr/share/fish/vendor_completions.d/git-annex.fish"
+install -Dm644 "$pkgfiles/git-annex.desktop" "$pkgdir/usr/share/applications/git-annex.desktop"
+install -Dm644 doc/logo.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/git-annex.svg"
+install -Dm644 doc/logo_16x16.png "$pkgdir/usr/share/icons/hicolor/16x16/apps/git-annex.png"
+install -Dm644 doc/logo_32x32.png "$pkgdir/usr/share/icons/hicolor/32x32/apps/git-annex.png"
+install -Dm644 "$pkgfiles/git-annex-autostart.desktop" "$pkgdir/usr/share/doc/git-annex/git-annex-autostart.desktop"
+install -Dm644 README "$pkgdir/usr/share/doc/git-annex/README"
+install -Dm644 COPYRIGHT "$pkgdir/usr/share/licenses/git-annex/COPYRIGHT"
+'''

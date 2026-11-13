@@ -1,0 +1,7 @@
+#!/bin/sh
+# GHC reads its global package database through package.cache: rebuild it
+# after Haskell libraries were added to or removed from package.conf.d
+if [ -x /usr/bin/ghc-pkg ]; then
+    /usr/bin/ghc-pkg recache --global || :
+fi
+exit 0

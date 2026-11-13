@@ -1,0 +1,68 @@
+# hledger 1.52.4, plain-text double-entry accounting: hledger (command
+# line), and subpackages hledger-ui (curses-style terminal interface) and
+# hledger-web (web interface). Each with its manual page, info manual and,
+# for hledger, bash completion.
+# hledger-web is a local web app run by the user (`hledger-web`, which
+# serves on 127.0.0.1 and opens a browser, or `--serve`): no service is
+# shipped or enabled (rule 5); README.FenrirOS says how to run it.
+# Built with cabal-install, offline, from the hackagedeps store:
+# files/hackage.lock, made by `dkbuild hackage-lock` from
+# files/cabal.project.freeze (Alpine's freeze for this release on GHC 9.14.1,
+# see its header), which is also the build's cabal.project.freeze.
+# Patch (from Alpine): lets cabal use persistent 2.18 with GHC 9.14.1's
+# template-haskell (see its header).
+# Flags: upstream's defaults (no debug or dev builds; hledger-web with its
+# executable, not library-only).
+name = "hledger"
+version = "1.52.4"
+release = 1
+summary = "Plain-text double-entry accounting (command line)"
+license = "GPL-3.0-or-later"
+homepage = "https://hledger.org"
+archs = ["x86_64"]
+patches = ["update-persistent.patch"]
+hostdeps = ["ghc", "cabal-install", "pkgconf"]
+builddeps = ["gmp-devel", "libffi-devel", "numactl-devel", "zlib-ng-compat-devel", "ncurses-devel"]
+options = ["hackagedeps"]
+
+source = [
+    { url = "https://github.com/simonmichael/hledger/archive/refs/tags/1.52.4.tar.gz", sha256 = "42806ef717db4dfecba6a2bfa326d97036ea946e4810dd0b7421ed4980f1d4aa" },
+]
+
+environment = '''
+export HOME=/tmp LANG=C.UTF-8
+'''
+setup = '''
+cp "$pkgfiles/cabal.project.freeze" cabal.project.freeze
+'''
+build = '''
+cabal v2-build --offline -j$jobs hledger:exe:hledger hledger-ui:exe:hledger-ui hledger-web:exe:hledger-web
+'''
+check = '''
+h=$(cabal list-bin --offline hledger:exe:hledger)
+$h --version
+printf '2026-01-01 opening\n    assets:bank  100\n    equity\n' > /tmp/t.journal
+$h -f /tmp/t.journal balance | grep -q 'assets:bank'
+"$(cabal list-bin --offline hledger-ui:exe:hledger-ui)" --version
+"$(cabal list-bin --offline hledger-web:exe:hledger-web)" --version
+'''
+install = '''
+for p in hledger hledger-ui hledger-web; do
+    install -Dm755 "$(cabal list-bin --offline $p:exe:$p)" "$pkgdir/usr/bin/$p"
+    install -Dm644 $p/$p.1 "$pkgdir/usr/share/man/man1/$p.1"
+    install -Dm644 $p/$p.info "$pkgdir/usr/share/info/$p.info"
+done
+install -Dm644 hledger/shell-completion/hledger-completion.bash \
+    "$pkgdir/usr/share/bash-completion/completions/hledger"
+install -Dm644 "$pkgfiles/README.FenrirOS" "$pkgdir/usr/share/doc/hledger-web/README.FenrirOS"
+install -Dm644 README.md "$pkgdir/usr/share/doc/hledger/README.md"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/hledger/LICENSE"
+'''
+
+[subpackages.ui]
+summary = "Curses-style terminal interface for hledger"
+paths = ["/usr/bin/hledger-ui"]
+
+[subpackages.web]
+summary = "Web interface for hledger (a local web app, not a service)"
+paths = ["/usr/bin/hledger-web", "/usr/share/doc/hledger-web"]

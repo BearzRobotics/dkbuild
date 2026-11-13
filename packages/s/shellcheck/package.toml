@@ -1,100 +1,43 @@
 # ShellCheck: static analysis for sh/bash scripts (the shellcheck program and
 # its manual page). Written in Haskell, built with the system GHC.
 # Its Hackage dependencies (aeson and what it needs, Diff, fgl, QuickCheck,
-# regex-tdfa) are pinned sources, the versions Alpine's shellcheck 0.11.0
-# freezes for GHC 9.14.1 (aports community/shellcheck/cabal.config), less the
-# test suite's (tasty, optparse-applicative, prettyprinter, ansi-terminal,
-# colour); each at its newest Hackage revision (the revised .cabal is copied
-# over the tarball's, as cabal-install does). They are built one after another
-# with Cabal's Setup (the Cabal library GHC ships), into a package database in
-# /tmp: no cabal-install, no index, no network. Static Haskell libraries only
-# (GHC links them into the program); nothing of them is shipped.
+# regex-tdfa) come from the hackagedeps store: files/hackage.lock, made by
+# `dkbuild hackage-lock` from files/hackage-pins.txt (the versions Alpine's
+# shellcheck 0.11.0 freezes for GHC 9.14.1, aports
+# community/shellcheck/cabal.config, less the test suite's: tasty,
+# optparse-applicative, prettyprinter, ansi-terminal, colour), each at its
+# newest Hackage revision (the revised .cabal is copied over the tarball's, as
+# cabal-install does). They are built one after another with Cabal's Setup
+# (the Cabal library GHC ships), into a package database in /tmp: no
+# cabal-install, no index, no network. Static Haskell libraries only (GHC
+# links them into the program); nothing of them is shipped.
 # The ShellCheck library itself is not shipped either: nothing in the tree
 # uses it, so only the program is installed.
 # striptests (upstream's script for packagers, as Alpine and Arch run it)
 # removes the unit tests from the sources and QuickCheck from ShellCheck's own
 # dependencies: a smaller program. aeson still needs QuickCheck, so it stays.
-# Manual page: upstream makes it from shellcheck.1.md with pandoc, which the
-# tree does not have (it is a large Haskell program itself); go-md2man makes
-# it instead (it reads the same pandoc title block).
+# Manual page: made from shellcheck.1.md with pandoc, as upstream's manpage
+# script does (pandoc is a hostdep only; it does not need shellcheck).
 name = "shellcheck"
 version = "0.11.0"
-release = 1
+release = 2
 summary = "Static analysis tool for shell scripts"
 license = "GPL-3.0-or-later"
 homepage = "https://www.shellcheck.net"
 archs = ["x86_64"]
-hostdeps = ["ghc", "go-md2man", "bash"]
+hostdeps = ["ghc", "pandoc", "bash"]
 builddeps = ["gmp-devel", "libffi-devel", "numactl-devel"]
+options = ["hackagedeps"]
 
 source = [
     { url = "https://github.com/koalaman/shellcheck/archive/v0.11.0.tar.gz", sha256 = "8b07554f92e4fbfc33f1539a1f475f21c6503ceae8f806efcc518b1f529f7102" },
-    { url = "https://hackage.haskell.org/package/base-orphans-0.9.4/base-orphans-0.9.4.tar.gz", sha256 = "08cc283a31350f7bd28b2a5d31af693ee337f2593d3e7222999b72dd4954c72b", unpack = false },
-    { url = "https://hackage.haskell.org/package/hashable-1.5.1.0/hashable-1.5.1.0.tar.gz", sha256 = "ed0b7c10ce92c9ffe45420dadc38c6d39db486ff3633ff13567cc9f75f79b112", unpack = false },
-    { url = "https://hackage.haskell.org/package/OneTuple-0.4.3/OneTuple-0.4.3.tar.gz", sha256 = "643d1f48e63480ac6d03a8f0ab5976d66527c9b42b1fca81d1bf373d10099c6b", unpack = false },
-    { url = "https://hackage.haskell.org/package/splitmix-0.1.3.2/splitmix-0.1.3.2.tar.gz", sha256 = "a61d4e8b30f5a16526d7d31171b674ae7924d2207f378060d13363bd8794de8c", unpack = false },
-    { url = "https://hackage.haskell.org/package/random-1.3.1/random-1.3.1.tar.gz", sha256 = "d840ac83f265b0cfa2a678f8ec78627eb50cf9be2f067c52c8a4239c29b71a35", unpack = false },
-    { url = "https://hackage.haskell.org/package/QuickCheck-2.16.0.0/QuickCheck-2.16.0.0.tar.gz", sha256 = "0b563fa6ea11653d76d57e96625f4a476e02b9fdaeba9c05d2ccc10d8da802c0", unpack = false },
-    { url = "https://hackage.haskell.org/package/character-ps-0.1/character-ps-0.1.tar.gz", sha256 = "22de71fde38b236d3e9168a832b5e1e75d1fb4f4028667bdf747b3b4c8c1529c", unpack = false },
-    { url = "https://hackage.haskell.org/package/data-fix-0.3.4/data-fix-0.3.4.tar.gz", sha256 = "8df052d18c047ab9e9200536a8799b5af3997ebecbbb091a7384b6be8416ab37", unpack = false },
-    { url = "https://hackage.haskell.org/package/data-fix-0.3.4/revision/2.cabal", sha256 = "200360c49cc81cf8b8bbdf49afd4aee03fffd09d3395b080a7e7c65fcf01d313", unpack = false, name = "data-fix-0.3.4-r2.cabal" },
-    { url = "https://hackage.haskell.org/package/dlist-1.0/dlist-1.0.tar.gz", sha256 = "173d637328bb173fcc365f30d29ff4a94292a1e0e5558aeb3dfc11de81510115", unpack = false },
-    { url = "https://hackage.haskell.org/package/dlist-1.0/revision/2.cabal", sha256 = "854727594c5a816ab3d10f15b1bc4fedaf9e3f7d1ef517a2bb9011f29ba261d2", unpack = false, name = "dlist-1.0-r2.cabal" },
-    { url = "https://hackage.haskell.org/package/indexed-traversable-0.1.5/indexed-traversable-0.1.5.tar.gz", sha256 = "6423597d3528ac66c54beaab9f5408429c0a29b8cb98c45a1645f255aef7fef0", unpack = false },
-    { url = "https://hackage.haskell.org/package/primitive-0.9.1.0/primitive-0.9.1.0.tar.gz", sha256 = "44b4de41813c7bc5db8a57f87c3612a069b65086946268ba165097252ebd3d76", unpack = false },
-    { url = "https://hackage.haskell.org/package/primitive-0.9.1.0/revision/1.cabal", sha256 = "756b222c715bc6ef5ba81fa69cdbaa20c5c53beb6f16f174b8bacc93a6d239f0", unpack = false, name = "primitive-0.9.1.0-r1.cabal" },
-    { url = "https://hackage.haskell.org/package/integer-conversion-0.1.1/integer-conversion-0.1.1.tar.gz", sha256 = "c18164a048073310f6353ebc64c9037b52a4b8299963ce05e027bcf60e22155a", unpack = false },
-    { url = "https://hackage.haskell.org/package/integer-conversion-0.1.1/revision/2.cabal", sha256 = "123d1b088404f0976500c68d8105978aa2e32908ce5508e32aebd237f0447c9f", unpack = false, name = "integer-conversion-0.1.1-r2.cabal" },
-    { url = "https://hackage.haskell.org/package/integer-logarithms-1.0.5/integer-logarithms-1.0.5.tar.gz", sha256 = "66dff6f1f778fe1ec689139fe125cd4e6a95643734c651c891eafa2c50669459", unpack = false },
-    { url = "https://hackage.haskell.org/package/th-compat-0.1.7/th-compat-0.1.7.tar.gz", sha256 = "9e26f12230d38ae56dcf94f8c139799dc3b7376f3434d35ce74847a0a24fd5ff", unpack = false },
-    { url = "https://hackage.haskell.org/package/network-uri-2.6.4.2/network-uri-2.6.4.2.tar.gz", sha256 = "9c188973126e893250b881f20e8811dca06c223c23402b06f7a1f2e995797228", unpack = false },
-    { url = "https://hackage.haskell.org/package/network-uri-2.6.4.2/revision/1.cabal", sha256 = "6fffb57373962b5651a2db8b0af732098b3bf029a7ced76a9855615de2026588", unpack = false, name = "network-uri-2.6.4.2-r1.cabal" },
-    { url = "https://hackage.haskell.org/package/scientific-0.3.8.1/scientific-0.3.8.1.tar.gz", sha256 = "ad3781be149dfc7936e62eb9c3ad78ded0e9985b4dae16d2f62d9ba957ccdcfe", unpack = false },
-    { url = "https://hackage.haskell.org/package/tagged-0.8.10/tagged-0.8.10.tar.gz", sha256 = "17ef791eb4caf314a3b4b158827a0f1f4b695c2a24af0875f09e3d8c10f56c5d", unpack = false },
-    { url = "https://hackage.haskell.org/package/tagged-0.8.10/revision/2.cabal", sha256 = "435d941c96a187f55b27803ad08ac387f5ec89f11e604f3cd7c959c29136dcd6", unpack = false, name = "tagged-0.8.10-r2.cabal" },
-    { url = "https://hackage.haskell.org/package/unordered-containers-0.2.21/unordered-containers-0.2.21.tar.gz", sha256 = "3b2ad1522b546e61960153257d1e5d239eeec5e83da847d5cb4d896a5bb7f9c0", unpack = false },
-    { url = "https://hackage.haskell.org/package/unordered-containers-0.2.21/revision/2.cabal", sha256 = "c5de1fb3377ed3c5f4cd851a771d1acc5c37d2f6bef0a499295c0e8857da5605", unpack = false, name = "unordered-containers-0.2.21-r2.cabal" },
-    { url = "https://hackage.haskell.org/package/vector-stream-0.1.0.1/vector-stream-0.1.0.1.tar.gz", sha256 = "d0f507334bdea5431a2f07f525a97f29e76522c32210f5de6d5a2b4f1d42bf7c", unpack = false },
-    { url = "https://hackage.haskell.org/package/vector-stream-0.1.0.1/revision/4.cabal", sha256 = "483be6df13c72169a917640589666f9fece7bea9fa13fcd41d052dab37ea289e", unpack = false, name = "vector-stream-0.1.0.1-r4.cabal" },
-    { url = "https://hackage.haskell.org/package/vector-0.13.2.0/vector-0.13.2.0.tar.gz", sha256 = "28f203c786cbf8ac6dc3fea3378ec36f34173d505fb4a1dd60fc8418ad91c423", unpack = false },
-    { url = "https://hackage.haskell.org/package/vector-0.13.2.0/revision/5.cabal", sha256 = "3ec12de580ee31ceac89b314fd00b5057ed40198c0b3d9e9dafa54c1941e6942", unpack = false, name = "vector-0.13.2.0-r5.cabal" },
-    { url = "https://hackage.haskell.org/package/indexed-traversable-instances-0.1.2.1/indexed-traversable-instances-0.1.2.1.tar.gz", sha256 = "e69d41f23a95463c2e03aee03374a4f489c72f7bf235be251499c4cca9411fec", unpack = false },
-    { url = "https://hackage.haskell.org/package/assoc-1.1.1/assoc-1.1.1.tar.gz", sha256 = "231149b7fef09f5dd95af51228615e3b296dbd0faadeca053e0644a4b13b0ff6", unpack = false },
-    { url = "https://hackage.haskell.org/package/assoc-1.1.1/revision/2.cabal", sha256 = "766b1040eda5255bfcf10e1a9859c06d0ed6ad0e2ac87ed915bb035574d10ae4", unpack = false, name = "assoc-1.1.1-r2.cabal" },
-    { url = "https://hackage.haskell.org/package/distributive-0.6.3/distributive-0.6.3.tar.gz", sha256 = "aeeb028a23db9f9b073e24a6bd766b79b9d58c2b407b06bf33296c27e9264baa", unpack = false },
-    { url = "https://hackage.haskell.org/package/comonad-5.0.10/comonad-5.0.10.tar.gz", sha256 = "e9739df2bf5944958062a4ea73bde3bf35c0879cee0944edf7f05bebf993f9c1", unpack = false },
-    { url = "https://hackage.haskell.org/package/th-abstraction-0.7.2.0/th-abstraction-0.7.2.0.tar.gz", sha256 = "946654bcd8ea2dff7d0058061861a8c898be9addf20c92d3cfa53b679e737622", unpack = false },
-    { url = "https://hackage.haskell.org/package/transformers-compat-0.8/transformers-compat-0.8.tar.gz", sha256 = "f05c2145ee8d77ed773908d27a77c7f8be4d9419af90a757076b799c4a194da8", unpack = false },
-    { url = "https://hackage.haskell.org/package/bifunctors-5.6.3/bifunctors-5.6.3.tar.gz", sha256 = "ad7a357f022f4c780c505040d73f1c06a4fd697b4a0bab6123bbd73b55d8115c", unpack = false },
-    { url = "https://hackage.haskell.org/package/bifunctors-5.6.3/revision/1.cabal", sha256 = "58f1d66db71ed9dd70648eaca1a0986b29354b3a69b5bfd729ce1a896766466e", unpack = false, name = "bifunctors-5.6.3-r1.cabal" },
-    { url = "https://hackage.haskell.org/package/StateVar-1.2.2/StateVar-1.2.2.tar.gz", sha256 = "5e4b39da395656a59827b0280508aafdc70335798b50e5d6fd52596026251825", unpack = false },
-    { url = "https://hackage.haskell.org/package/contravariant-1.5.6/contravariant-1.5.6.tar.gz", sha256 = "65f3260354ee5fd1f2c7ffc54cff99d22b794c254f053734979ad37820e6efe3", unpack = false },
-    { url = "https://hackage.haskell.org/package/semigroupoids-6.0.2/semigroupoids-6.0.2.tar.gz", sha256 = "e48258e49542245ef6c58d7f419a83d1d1ab91b013d92c3b5c8c7c048daaa12e", unpack = false },
-    { url = "https://hackage.haskell.org/package/semigroupoids-6.0.2/revision/1.cabal", sha256 = "52c5a346fdf74380618f67ff784989ef9078498dbbdff09e4d8e2fed20202e2c", unpack = false, name = "semigroupoids-6.0.2-r1.cabal" },
-    { url = "https://hackage.haskell.org/package/these-1.2.1/these-1.2.1.tar.gz", sha256 = "17d6d933365edabf801a16842c1403bdd37cc5300faa2fcca980decdab22e4de", unpack = false },
-    { url = "https://hackage.haskell.org/package/these-1.2.1/revision/3.cabal", sha256 = "ba1aec9a502eb2b3f90ef254f420468a3c4e5b9b7e8324e3ddc7035143c92640", unpack = false, name = "these-1.2.1-r3.cabal" },
-    { url = "https://hackage.haskell.org/package/semialign-1.4/semialign-1.4.tar.gz", sha256 = "0f51389e57af646042dcec2511960617bee2857231ac291228cf4ef6621a9464", unpack = false },
-    { url = "https://hackage.haskell.org/package/strict-0.5.1/strict-0.5.1.tar.gz", sha256 = "77719280c2a86312e748227bfa732eeaae0e7df48d57acc3c2e5b7b07afe2f8b", unpack = false },
-    { url = "https://hackage.haskell.org/package/strict-0.5.1/revision/1.cabal", sha256 = "58c373b7c7748cbb4a5a6c8c15073f99a1c10a9a9bb6894ac33f43a5cdb901f2", unpack = false, name = "strict-0.5.1-r1.cabal" },
-    { url = "https://hackage.haskell.org/package/time-compat-1.9.9/time-compat-1.9.9.tar.gz", sha256 = "90fadded53cf9c15855eebf809e9536af8f85d00e32b82f7c8b506d2fadf7c25", unpack = false },
-    { url = "https://hackage.haskell.org/package/time-compat-1.9.9/revision/1.cabal", sha256 = "0c291e0c3c87ee08b2517107b62901b102a040dc86203b53bdf07a96ff5632e0", unpack = false, name = "time-compat-1.9.9-r1.cabal" },
-    { url = "https://hackage.haskell.org/package/text-iso8601-0.1.1.1/text-iso8601-0.1.1.1.tar.gz", sha256 = "603b68d1135e9373edf2c20a993ea226b9f1fec11189c1b2b8a647262ceb8b3e", unpack = false },
-    { url = "https://hackage.haskell.org/package/text-short-0.1.6.1/text-short-0.1.6.1.tar.gz", sha256 = "83669f402354274fbcdc75126443af733267b955e451f72c0c6d86ae8da87416", unpack = false },
-    { url = "https://hackage.haskell.org/package/uuid-types-1.0.6.1/uuid-types-1.0.6.1.tar.gz", sha256 = "9f00f278b9711104b6acc1404d9f0d45c1183b4987cf9c07403bebc05c0c3024", unpack = false },
-    { url = "https://hackage.haskell.org/package/witherable-0.5/witherable-0.5.tar.gz", sha256 = "48434cc1e465b13cbc0133a90c3ec0d827c93b77ce95807fe0a38b65f4918cd1", unpack = false },
-    { url = "https://hackage.haskell.org/package/witherable-0.5/revision/2.cabal", sha256 = "a5600431df5d297f098c322c7fbc2ece804e44ade0bb2022a838de24604d6275", unpack = false, name = "witherable-0.5-r2.cabal" },
-    { url = "https://hackage.haskell.org/package/aeson-2.2.5.0/aeson-2.2.5.0.tar.gz", sha256 = "e22f9883adce9e02d77de6a1bba36f2f98d322c8a9fa3bc51596d31493d00ac5", unpack = false },
-    { url = "https://hackage.haskell.org/package/Diff-1.0.2/Diff-1.0.2.tar.gz", sha256 = "cd7e26d3d5ebf7f2c1a7525aebe251fbcbffee2a6362db634b4be23b9e354d85", unpack = false },
-    { url = "https://hackage.haskell.org/package/fgl-5.8.3.1/fgl-5.8.3.1.tar.gz", sha256 = "02f71384d3f286f8473a58c55ed3ca040f4d142ca4badf5c024ab077bc40362f", unpack = false },
-    { url = "https://hackage.haskell.org/package/regex-base-0.94.0.3/regex-base-0.94.0.3.tar.gz", sha256 = "e8ca2dee598c790dd1c1c4359bdd1e495d9b881f5aa1f539c22f0dd5563747bf", unpack = false },
-    { url = "https://hackage.haskell.org/package/regex-tdfa-1.3.2.5/regex-tdfa-1.3.2.5.tar.gz", sha256 = "2e3dfb449a548484f7d3b4e2a1b1040b39be26c4f3182a47004dc5eddf028a78", unpack = false },
 ]
 
 environment = '''
 export HOME=/tmp LANG=C.UTF-8
 hs=/tmp/hsdeps
 db=$hs/package.db
-# Hackage dependencies in build order (each after what it needs)
+# files/hackage-pins.txt in build order (each after what it needs)
 hsdeps="base-orphans-0.9.4 hashable-1.5.1.0 OneTuple-0.4.3 splitmix-0.1.3.2 random-1.3.1
     QuickCheck-2.16.0.0 character-ps-0.1 data-fix-0.3.4 dlist-1.0 indexed-traversable-0.1.5
     primitive-0.9.1.0 integer-conversion-0.1.1 integer-logarithms-1.0.5 th-compat-0.1.7
@@ -121,15 +64,16 @@ ghc --make -package-env=- -O0 -outputdir $hs/setup-obj -o $hs/setup $hs/Setup.hs
 build = '''
 for p in $hsdeps; do
     n=${p%-*}
-    tar -xzf /build/sources/$p.tar.gz -C $hs/src
-    # the newest Hackage revision of its .cabal (bounds and metadata fixes)
-    for c in /build/sources/$p-r*.cabal; do if [ -e "$c" ]; then cp "$c" $hs/src/$p/$n.cabal; fi; done
+    tar -xzf "$DKBUILD_HACKAGE/$p.tar.gz" -C $hs/src
+    # the newest Hackage revision of its .cabal (hackage.lock), if any
+    if [ -e "$DKBUILD_HACKAGE/$p.cabal" ]; then cp "$DKBUILD_HACKAGE/$p.cabal" $hs/src/$p/$n.cabal; fi
     (cd $hs/src/$p && $hs/setup configure $hsconf --prefix=$hs/inst && \
         $hs/setup build -j$jobs && $hs/setup install)
 done
 $hs/setup configure $hsconf --prefix=/usr
 $hs/setup build -j$jobs
-go-md2man -in shellcheck.1.md -out shellcheck.1
+# upstream's manpage script
+pandoc -s -f markdown-smart -t man shellcheck.1.md -o shellcheck.1
 '''
 check = '''
 sc=./dist/build/shellcheck/shellcheck

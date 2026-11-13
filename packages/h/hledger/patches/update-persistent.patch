@@ -1,0 +1,16 @@
+From Alpine's community/hledger (update-persistent.patch).
+persistent 2.18.1.0, the newest release, says template-haskell < 2.24; GHC
+9.14.1 ships 2.24. Require persistent >= 2.18 and lift that one bound
+(cabal.project already lifts its aeson bound), so cabal can use it on GHC
+9.14.1.
+
+diff --git a/cabal.project b/cabal.project
+index 4b451c2ce..3aa38f2d0 100644
+--- a/cabal.project
++++ b/cabal.project
+@@ -28,3 +28,5 @@ write-ghc-environment-files: always
+ -- package *
+ --     -- Speeds up a bit
+ --     library-vanilla: False
++constraints: persistent >=2.18
++allow-newer: persistent:template-haskell

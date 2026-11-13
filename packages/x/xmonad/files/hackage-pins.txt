@@ -1,0 +1,14 @@
+# xmonad 0.18.1's and xmonad-contrib 0.18.2's Hackage dependencies, in build
+# order: the versions of Stackage nightly-2026-11-13 (a GHC 9.12.4 snapshot;
+# Stackage has none for GHC 9.14 yet, and Alpine does not package xmonad),
+# each checked against its .cabal's bounds for GHC 9.14.1's boot packages
+# (newest Hackage revisions). xmonad itself is the recipe's main source.
+data-default 0.8.0.2
+data-default-class 0.2.0.0
+X11 1.10.3
+setlocale 1.0.0.10
+splitmix 0.1.3.2
+random 1.3.1
+utf8-string 1.0.2
+X11-xft 0.3.4
+xmonad-contrib 0.18.2

@@ -1,0 +1,19 @@
+From Alpine's community/git-annex (ghc-9.14.patch, by Antoine Martin).
+Lets cabal use, on GHC 9.14.1, releases whose bounds predate it:
+persistent (template-haskell < 2.24), feed, botan-low and botan-bindings
+(base < 4.22). Upstream issues: yesodweb/persistent#1619, and feed's fix
+(haskell-party/feed#78) awaits its 1.3.2.2 release.
+
+diff --git a/cabal.project b/cabal.project
+index c4651e9..5d2cd8d 100644
+--- a/cabal.project
++++ b/cabal.project
+@@ -2,3 +2,8 @@ packages:
+   .
+ jobs: $ncpus
+ semaphore: True
++
++allow-newer: persistent:template-haskell
++allow-newer: feed:base
++allow-newer: botan-low:base
++allow-newer: botan-bindings:base

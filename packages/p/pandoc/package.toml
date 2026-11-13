@@ -1,0 +1,68 @@
+# pandoc 3.14, the universal markup converter: the `pandoc` program of
+# pandoc-cli (also run as pandoc-lua, a Lua interpreter with pandoc's
+# modules, and pandoc-server, a web API that runs only when started by hand:
+# no service). Manual pages: the ones pandoc-cli ships.
+# Built with cabal-install, offline, from the hackagedeps store:
+# files/hackage.lock, made by `dkbuild hackage-lock` from
+# files/cabal.project.freeze, Alpine's freeze for pandoc-cli 3.13 on GHC
+# 9.14.1 with what 3.14 needs raised to its releases: pandoc, pandoc-cli,
+# pandoc-lua-engine, pandoc-server, pandoc-lua-marshal 0.3.3, citeproc
+# 0.14.2, commonmark 0.3.2, commonmark-extensions 0.2.8, emojis 0.1.6,
+# skylighting(-core) 0.15.0.1, texmath 0.13.3.5, typst 0.12.1. The freeze
+# is also the build's cabal.project.freeze.
+# Features (pandoc-cli's flags): Lua filters and readers/writers (+lua),
+# pandoc-lua's REPL (+repl), pandoc-server (+server); data files embedded in
+# the program (pandoc +embed_data_files), so it needs no /usr/share/pandoc.
+# Lua: the hslua `lua` package bundles Lua 5.4.8's C sources; here it is
+# built against the tree's lua 5.4.8 instead (lua +system-lua, which links
+# its liblua.a: the tree's lua builds only the static library).
+# Left out: pandoc's http flag (fetching remote images and resources over
+# HTTP/HTTPS, on by default upstream). It needs tls, and every tls release
+# needs serialise and cborg, whose newest releases are not for GHC 9.14 (base
+# < 4.22, containers < 0.8); Alpine builds pandoc without it for the same
+# reason. citeproc's icu flag stays off as upstream (collation comes from
+# unicode-collation, in Haskell).
+# cabal.project: haddock-library 1.11.0 (pandoc's Haddock reader) says
+# containers < 0.8, though the same version in GHC 9.14.1's own source tree
+# allows < 0.9: allow-newer for that bound only.
+name = "pandoc"
+version = "3.14"
+release = 1
+summary = "Universal markup converter"
+license = "GPL-2.0-or-later"
+homepage = "https://pandoc.org"
+archs = ["x86_64"]
+hostdeps = ["ghc", "cabal-install", "pkgconf"]
+builddeps = ["gmp-devel", "libffi-devel", "numactl-devel", "zlib-ng-compat-devel", "lua-devel", "lua-static"]
+options = ["hackagedeps"]
+
+source = [
+    { url = "https://hackage.haskell.org/package/pandoc-cli-3.14/pandoc-cli-3.14.tar.gz", sha256 = "2cfb349edcb37acc77818d252de5e591fd47c0cac3b4907ccdbcffbd99ed3108" },
+]
+
+environment = '''
+export HOME=/tmp LANG=C.UTF-8
+'''
+setup = '''
+cp "$pkgfiles/cabal.project.freeze" cabal.project.freeze
+printf 'packages: .\nallow-newer: haddock-library:containers\n' > cabal.project
+'''
+build = '''
+cabal v2-build --offline -j$jobs pandoc-cli:exe:pandoc
+'''
+check = '''
+p=$(cabal list-bin --offline pandoc-cli:exe:pandoc)
+$p --version
+printf '# Hello\n\n*world*\n' | $p -f markdown -t html | grep -q '<em>world</em>'
+# a Lua filter, run by the tree's Lua
+printf 'function Str(s) return pandoc.Str(s.text:upper()) end\n' > /tmp/upper.lua
+printf 'hello\n' | $p --lua-filter=/tmp/upper.lua -t plain | grep -qx HELLO
+'''
+install = '''
+install -Dm755 "$(cabal list-bin --offline pandoc-cli:exe:pandoc)" "$pkgdir/usr/bin/pandoc"
+# the same program, by the names it answers to
+ln -s pandoc "$pkgdir/usr/bin/pandoc-lua"
+ln -s pandoc "$pkgdir/usr/bin/pandoc-server"
+for m in man/*.1; do install -Dm644 "$m" "$pkgdir/usr/share/man/man1/${m#man/}"; done
+install -Dm644 COPYING.md "$pkgdir/usr/share/licenses/pandoc/COPYING.md"
+'''

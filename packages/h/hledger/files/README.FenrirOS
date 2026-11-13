@@ -1,0 +1,13 @@
+hledger-web on FenrirOS
+=======================
+
+hledger-web is installed as a program only: no service is enabled, and
+nothing listens until you start it.
+
+    hledger-web -f ~/finance.journal
+
+serves the journal on http://127.0.0.1:5000 and opens it in your browser.
+`hledger-web --serve` runs it without opening a browser; `--host` and
+`--port` choose where it listens, and `--allow=view|add|edit` what visitors
+may do. It has no login of its own: to offer it beyond this machine, put it
+behind a web server that authenticates (see `man hledger-web`).

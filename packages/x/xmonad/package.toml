@@ -1,0 +1,132 @@
+# xmonad 0.18.1, the tiling X11 window manager written and configured in
+# Haskell, and (subpackage xmonad-contrib) xmonad-contrib 0.18.2, its library
+# of layouts, hooks and utilities, built together so their libraries match.
+# A user's ~/.config/xmonad/xmonad.hs is compiled by xmonad itself with GHC
+# (`xmonad --recompile`), against the xmonad and xmonad-contrib libraries:
+# so unlike other Haskell programs here, the Haskell libraries are shipped,
+# registered in GHC's global package database (package.conf.d, its cache
+# rebuilt by scripts/: post-install, post-upgrade, post-deinstall, and a
+# trigger on package.conf.d for xmonad-contrib coming and going).
+# Static Haskell libraries only, as GHC links programs by default (shared
+# ones would need GHC's private libHS*.so, which no package provides): fine
+# for `xmonad --recompile`; ghci (a dynamic GHC) cannot load them.
+# Hackage dependencies from the hackagedeps store: files/hackage.lock, made
+# by `dkbuild hackage-lock` from files/hackage-pins.txt (see its header for
+# where the versions come from). Built one after another with Cabal's Setup
+# (the Cabal library GHC ships), each registered in place in a package
+# database in /tmp for the next, then copied into the package with the
+# registration GHC's database needs. No cabal-install, no network.
+# Features: all of them. X11 with Xinerama and XScreenSaver (libXss),
+# xmonad-contrib with Xft fonts (use_xft, the default).
+# Runtime: GHC and the X libraries' development links (to compile and link
+# the configuration). xmonad shows configuration
+# errors with xmessage when it is installed (the tree has no xmessage yet).
+name = "xmonad"
+version = "0.18.1"
+release = 1
+summary = "Tiling window manager for X11, configured in Haskell"
+license = "BSD-3-Clause"
+homepage = "https://xmonad.org"
+archs = ["x86_64"]
+hostdeps = ["ghc", "pkgconf"]
+builddeps = ["gmp-devel", "libffi-devel", "numactl-devel", "libx11-devel", "libxext-devel", "libxrandr-devel", "libxinerama-devel", "libxscrnsaver-devel", "libxft-devel", "libxrender-devel", "xorgproto"]
+rundeps = ["ghc", "libx11-devel", "libxext-devel", "libxrandr-devel", "libxinerama-devel", "libxscrnsaver-devel"]
+options = ["hackagedeps"]
+triggers = ["/usr/lib/ghc-9.14.1/lib/package.conf.d"]
+
+source = [
+    { url = "https://hackage.haskell.org/package/xmonad-0.18.1/xmonad-0.18.1.tar.gz", sha256 = "988b5f3104ac03aa078248afea7efcaed86661dfb239efd44995f58cd4f7a1f0" },
+]
+
+environment = '''
+export HOME=/tmp LANG=C.UTF-8
+hs=/tmp/hsdeps
+db=$hs/package.db
+# GHC's global package database, as triggers names it
+gdb=/usr/lib/ghc-9.14.1/lib/package.conf.d
+# in build order: files/hackage-pins.txt, with xmonad (this source) before
+# what only xmonad-contrib needs
+hspkgs="data-default-0.8.0.2 data-default-class-0.2.0.0 X11-1.10.3 setlocale-1.0.0.10
+    xmonad-0.18.1 splitmix-0.1.3.2 random-1.3.1 utf8-string-1.0.2 X11-xft-0.3.4
+    xmonad-contrib-0.18.2"
+hsdir() { if [ "$1" = "xmonad-$version" ]; then echo "$srcdir"; else echo "$hs/src/$1"; fi; }
+# Cabal's Setup, configured against GHC's global database and ours only;
+# installed under /usr/lib/haskell (libraries) and /usr/share
+hsconf="--package-db=clear --package-db=global --package-db=$db --disable-shared
+    --disable-library-profiling --disable-tests --disable-benchmarks
+    --disable-executable-stripping --ghc-options=-j$jobs
+    --prefix=/usr --libdir=/usr/lib/haskell --datadir=/usr/share
+    --docdir=/usr/share/doc/\$pkgid"
+'''
+setup = '''
+test "$(ghc --print-global-package-db)" = "$gdb"
+mkdir -p $hs/src $hs/setup-obj $hs/setup-conf-obj $hs/conf
+ghc-pkg init $db
+# two Setups: build-type Simple, and Configure (X11 runs its ./configure)
+printf 'import Distribution.Simple\nmain = defaultMain\n' > $hs/Setup.hs
+printf 'import Distribution.Simple\nmain = defaultMainWithHooks autoconfUserHooks\n' > $hs/SetupConf.hs
+ghc --make -package-env=- -O0 -outputdir $hs/setup-obj -o $hs/setup $hs/Setup.hs
+ghc --make -package-env=- -O0 -outputdir $hs/setup-conf-obj -o $hs/setup-conf $hs/SetupConf.hs
+for p in $hspkgs; do
+    [ "$p" = "xmonad-$version" ] && continue
+    tar -xzf "$DKBUILD_HACKAGE/$p.tar.gz" -C $hs/src
+    # the newest Hackage revision of its .cabal (hackage.lock), if any
+    if [ -e "$DKBUILD_HACKAGE/$p.cabal" ]; then cp "$DKBUILD_HACKAGE/$p.cabal" "$hs/src/$p/${p%-*}.cabal"; fi
+done
+'''
+build = '''
+for p in $hspkgs; do
+    d=$(hsdir $p)
+    s=$hs/setup
+    if grep -qi '^build-type: *configure' "$d/${p%-*}.cabal"; then s=$hs/setup-conf; fi
+    echo "$s" > "$d/.dksetup"
+    # registered in place (in its build tree) for the packages after it
+    (cd "$d" && $s configure $hsconf && $s build -j$jobs && $s register --inplace)
+done
+'''
+check = '''
+./dist/build/xmonad/xmonad --version
+# the sample configuration, and one using xmonad-contrib, type-check
+# against these libraries
+ghc -package-env=- -package-db=$db -fno-code man/xmonad.hs
+printf 'import XMonad\nimport XMonad.Hooks.EwmhDesktops\nimport XMonad.Layout.Spacing\nmain = xmonad . ewmh $ def { layoutHook = spacing 4 (Tall 1 0.03 0.5) }\n' > /tmp/contrib.hs
+ghc -package-env=- -package-db=$db -fno-code /tmp/contrib.hs
+'''
+install = '''
+for p in $hspkgs; do
+    d=$(hsdir $p)
+    s=$(cat "$d/.dksetup")
+    (cd "$d" && $s copy --destdir="$pkgdir" && \
+        $s register --gen-pkg-config="$hs/conf/$p.conf")
+    # a package with sublibraries gets a directory of registrations
+    if [ -d "$hs/conf/$p.conf" ]; then
+        for c in "$hs/conf/$p.conf"/*; do install -Dm644 "$c" "$pkgdir$gdb/$p-${c##*/}.conf"; done
+    elif [ -e "$hs/conf/$p.conf" ]; then
+        install -Dm644 "$hs/conf/$p.conf" "$pkgdir$gdb/$p.conf"
+    fi
+done
+install -Dm644 man/xmonad.1 "$pkgdir/usr/share/man/man1/xmonad.1"
+install -Dm644 man/xmonad.hs "$pkgdir/usr/share/doc/xmonad/xmonad.hs"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/xmonad/LICENSE"
+install -Dm644 $hs/src/xmonad-contrib-0.18.2/LICENSE "$pkgdir/usr/share/licenses/xmonad-contrib/LICENSE"
+test -x "$pkgdir/usr/bin/xmonad"
+'''
+
+[subpackages.contrib]
+summary = "Third-party extensions for xmonad (layouts, hooks, prompts)"
+# linking a configuration that uses it needs Xft
+depends = ["xmonad", "libxft-devel"]
+paths = [
+    "/usr/lib/haskell/x86_64-linux-ghc-9.14.1/xmonad-contrib-*",
+    "/usr/lib/haskell/x86_64-linux-ghc-9.14.1/X11-xft-*",
+    "/usr/lib/haskell/x86_64-linux-ghc-9.14.1/utf8-string-*",
+    "/usr/lib/haskell/x86_64-linux-ghc-9.14.1/random-*",
+    "/usr/lib/haskell/x86_64-linux-ghc-9.14.1/splitmix-*",
+    "/usr/lib/ghc-9.14.1/lib/package.conf.d/xmonad-contrib-*",
+    "/usr/lib/ghc-9.14.1/lib/package.conf.d/X11-xft-*",
+    "/usr/lib/ghc-9.14.1/lib/package.conf.d/utf8-string-*",
+    "/usr/lib/ghc-9.14.1/lib/package.conf.d/random-*",
+    "/usr/lib/ghc-9.14.1/lib/package.conf.d/splitmix-*",
+    "/usr/share/doc/xmonad-contrib-*",
+    "/usr/share/licenses/xmonad-contrib",
+]
