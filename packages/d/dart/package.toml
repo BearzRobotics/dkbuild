@@ -11,7 +11,7 @@
 # Not built yet.
 name = "dart"
 version = "3.10.3"
-release = 2
+release = 3
 summary = "Dart programming language SDK"
 license = "BSD-3-Clause"
 homepage = "https://dart.dev"
@@ -65,6 +65,9 @@ rm -f third_party/devtools/web/devtools_analytics.js
 # (DevTools, dartdoc) with dead addresses, as Alpine does
 grep -rlZ --exclude='*.map' 'google-analytics\.com' . 2>/dev/null | xargs -0 -r sed -i -E 's|([^/]+\.)?google-analytics\.com|0.0.0.0|g'
 grep -rlZ 'UA-[0-9]\+-[0-9]\+' . 2>/dev/null | xargs -0 -r sed -i -E 's|UA-[0-9]+-[0-9]+|UA-2137-0|g'
+# samples/embedder/run_main.cc uses std::vector without including <vector>
+# (libstdc++ no longer provides it transitively: "no template named 'vector'")
+sed -i '0,/^#include/s//#include <vector>\n#include/' samples/embedder/run_main.cc
 # a fixed version timestamp (the snapshot has no git history)
 sed -i 's/Unknown timestamp/release/' tools/make_version.py
 # system ICU and zlib
