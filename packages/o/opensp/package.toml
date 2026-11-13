@@ -3,7 +3,7 @@
 # patches). Documentation is not built (xmlto).
 name = "opensp"
 version = "1.5.2"
-release = 1
+release = 2
 summary = "SGML and XML parser library"
 license = "MIT"
 homepage = "https://openjade.sourceforge.net"
@@ -19,6 +19,9 @@ source = [
 setup = '''
 rm -f m4/progtest.m4
 autoreconf -vif
+# OpenSP (2005 code) uses the `register` storage class, an error in C++17 that
+# clang defaults to; build it as C++14
+export CXXFLAGS="$CXXFLAGS -std=c++14"
 %configure --disable-doc-build --enable-shared
 '''
 build = '''
