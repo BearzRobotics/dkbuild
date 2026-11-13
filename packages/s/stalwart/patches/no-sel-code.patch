@@ -1,0 +1,49 @@
+Keep the SEL-licensed (Stalwart Enterprise License) code out of the AGPL
+build. With the enterprise feature off, three SEL pieces were still compiled:
+the scim-proto crate (an unconditional dependency of crates/scim, whose own
+modules are all behind the feature), the DOMAIN_FLAG_SCIM_PROVISIONING
+constant and DomainCache::allows_scim_provisioning(). Every user of them is
+already behind #[cfg(feature = "enterprise")], so this puts them behind it
+too: scim-proto becomes an optional dependency enabled by the feature.
+FenrirOS change (the user's decision, docs/requests.md question 21).
+
+diff -ru a/crates/common/src/auth/mod.rs b/crates/common/src/auth/mod.rs
+--- a/crates/common/src/auth/mod.rs	2026-11-13 04:35:08.442860342 -0500
++++ b/crates/common/src/auth/mod.rs	2026-11-13 04:35:08.717803147 -0500
+@@ -90,6 +90,7 @@
+ // SPDX-SnippetBegin
+ // SPDX-FileCopyrightText: 2020 Stalwart Labs LLC <hello@stalw.art>
+ // SPDX-License-Identifier: LicenseRef-SEL
++#[cfg(feature = "enterprise")]
+ pub const DOMAIN_FLAG_SCIM_PROVISIONING: u8 = 1 << 2;
+ // SPDX-SnippetEnd
+ 
+@@ -448,6 +449,7 @@
+     // SPDX-SnippetBegin
+     // SPDX-FileCopyrightText: 2020 Stalwart Labs LLC <hello@stalw.art>
+     // SPDX-License-Identifier: LicenseRef-SEL
++    #[cfg(feature = "enterprise")]
+     #[inline]
+     pub fn allows_scim_provisioning(&self) -> bool {
+         (self.flags & DOMAIN_FLAG_SCIM_PROVISIONING) != 0
+diff -ru a/crates/scim/Cargo.toml b/crates/scim/Cargo.toml
+--- a/crates/scim/Cargo.toml	2026-11-13 04:35:08.434860346 -0500
++++ b/crates/scim/Cargo.toml	2026-11-13 04:35:08.451273476 -0500
+@@ -4,7 +4,7 @@
+ edition = "2024"
+ 
+ [dependencies]
+-scim-proto = { path = "../scim-proto" }
++scim-proto = { path = "../scim-proto", optional = true }
+ common = { path = "../common" }
+ jmap = { path = "../jmap" }
+ services = { path = "../services" }
+@@ -27,7 +27,7 @@
+ 
+ [features]
+ dev_mode = []
+-enterprise = ["common/enterprise", "jmap/enterprise", "services/enterprise", "store/enterprise", "directory/enterprise", "trc/enterprise", "registry/enterprise", "http_proto/enterprise", "jmap_proto/enterprise", "utils/enterprise"]
++enterprise = ["dep:scim-proto", "common/enterprise", "jmap/enterprise", "services/enterprise", "store/enterprise", "directory/enterprise", "trc/enterprise", "registry/enterprise", "http_proto/enterprise", "jmap_proto/enterprise", "utils/enterprise"]
+ 
+ [lints]
+ workspace = true

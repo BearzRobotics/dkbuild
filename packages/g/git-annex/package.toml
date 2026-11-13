@@ -23,11 +23,17 @@
 # (which needs git-annex's own modules and their dependencies). No HTML
 # documentation (needs ikiwiki).
 # The webapp's jQuery and Bootstrap files are upstream's prebuilt copies.
+# Licence: the expression follows COPYRIGHT (installed in
+# /usr/share/licenses/git-annex): AGPL-3+ for most of it, GPL-3+ (Remote/Ddar,
+# helper scripts), BSD-2-clause (Utility/*), BSD-3-clause (Utility/Attoparsec,
+# CloseOnExec), GPL-2 (Utility/MD5.hs), Expat (Database/RawFilePath.hs,
+# Bootstrap), jQuery under Expat or GPL-2, and the logo's own "free to modify
+# and redistribute with due credit" licence.
 name = "git-annex"
 version = "10.20261026"
-release = 1
+release = 2
 summary = "Manage files with git, without checking their contents into git"
-license = "AGPL-3.0-or-later"
+license = "AGPL-3.0-or-later AND GPL-3.0-or-later AND GPL-2.0-only AND BSD-2-Clause AND BSD-3-Clause AND MIT AND (MIT OR GPL-2.0-only) AND LicenseRef-git-annex-icon"
 homepage = "https://git-annex.branchable.com"
 archs = ["x86_64"]
 patches = ["ghc-9.14.patch"]

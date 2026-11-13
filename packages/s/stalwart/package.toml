@@ -16,11 +16,11 @@
 #   itself", and 4.4 grants no right to "create derivative works for public
 #   distribution". (It also needs a paid subscription to use at all: 2.2,
 #   3.1.) So a package built with it could not be shipped; left out. Upstream's
-#   own binaries include it because Stalwart Labs is the licensor. The AGPL
-#   build here compiles the SEL-only crate scim-proto (an unconditional
-#   dependency of crates/scim) but nothing in it is reachable without the
-#   feature, and two one-line SEL-marked snippets in common/src/auth (the
-#   SCIM domain flag and its getter).
+#   own binaries include it because Stalwart Labs is the licensor.
+#   patches/no-sel-code.patch keeps the last SEL pieces that were compiled
+#   without the feature out of the build too (the scim-proto crate, the SCIM
+#   domain flag and its getter; all their users are behind the feature), so
+#   the package contains no SEL code (docs/requests.md question 21).
 # - foundationdb: needs FoundationDB's client library (libfdb_c), no recipe.
 # - kafka: rdkafka builds its bundled librdkafka with CMake (the crate's
 #   cmake-build feature is fixed in Stalwart's Cargo.toml); no librdkafka recipe.
@@ -39,12 +39,12 @@
 # Setup: /usr/share/doc/stalwart/README.FenrirOS.
 name = "stalwart"
 version = "1.1.0"
-release = 1
+release = 2
 summary = "Mail and collaboration server (SMTP, IMAP, JMAP, CalDAV, CardDAV)"
 license = "AGPL-3.0-only"
 homepage = "https://stalw.art"
 archs = ["x86_64", "aarch64"]
-patches = ["webui-from-package.patch"]
+patches = ["webui-from-package.patch", "no-sel-code.patch"]
 hostdeps = ["rust", "nodejs", "zip", "pkgconf", "cmake", "llvm-clang"]
 builddeps = ["rocksdb-devel", "snappy-devel", "sqlite-devel", "openssl-devel", "zstd-devel", "bzip2-devel", "zlib-ng-compat-devel"]
 options = ["!check", "cargodeps", "npmdeps"]

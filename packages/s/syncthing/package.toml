@@ -8,9 +8,12 @@
 # default configuration: each user's configuration is made on first start.
 # The relay/discovery servers ship no services (run by hand or packaged
 # services later).
+# The sysctl file that raises the socket buffer limits (for QUIC) is an
+# example in /usr/share/doc/syncthing, not active: it changes limits for the
+# whole system, so it is the user's choice (copy it to /etc/sysctl.d).
 name = "syncthing"
 version = "2.1.7"
-release = 1
+release = 2
 summary = "Continuous file synchronization program"
 license = "MPL-2.0"
 homepage = "https://syncthing.net"
@@ -51,7 +54,7 @@ install -Dm644 cmd/strelaysrv/etc/firewall-ufw/strelaysrv "$pkgdir/usr/lib/ufw/a
 for f in etc/linux-desktop/*.desktop; do
     install -Dm644 "$f" "$pkgdir/usr/share/applications/${f##*/}"
 done
-install -Dm644 etc/linux-sysctl/30-syncthing.conf "$pkgdir/usr/lib/sysctl.d/30-syncthing.conf"
+install -Dm644 etc/linux-sysctl/30-syncthing.conf "$pkgdir/usr/share/doc/syncthing/30-syncthing.conf"
 for f in man/*.[157]; do
     s=${f##*.}
     install -Dm644 "$f" "$pkgdir/usr/share/man/man$s/${f##*/}"
