@@ -1,0 +1,115 @@
+# Whisper speech recognition in C/C++ (libwhisper, whisper-cli, whisper-server,
+# parakeet-cli ...), written for FFmpeg's `--enable-whisper` (needs libwhisper,
+# whisper.h, whisper.pc and ggml). Models are not packaged: they are downloaded
+# by the user (https://huggingface.co/ggerganov/whisper.cpp).
+#
+# ggml: this is whisper.cpp's own copy, and llama-cpp ships its own too (neither
+# has a separate ggml package), the two at different versions. Both would install
+# /usr/lib/libggml*.so, /usr/include/ggml*.h and ggml.pc/cmake files, so whisper.cpp
+# keeps its ggml private:
+#   /usr/lib/whisper.cpp/        libggml, libggml-base, the backend modules, static libggml*.a
+#   /usr/include/whisper.cpp/    ggml.h, ggml-cpu.h, ggml-backend.h, gguf.h ...
+# (dkbuild treats a library in a subdirectory as private: no so: provides, so the
+# two ggml copies never conflict). whisper.h itself includes "ggml.h", so
+# whisper.pc adds -I/usr/include/whisper.cpp, the library path and an rpath.
+# Backends, as in llama-cpp: Vulkan (radv/lavapipe) and BLAS (OpenBLAS), loaded
+# at run time (GGML_BACKEND_DL), the CPU backend in every x86_64 feature level.
+# Static libraries: CMake only installs whisper's shared library, so the static
+# ones come from a second configure (no backend modules: they are linked in, at
+# the baseline x86-64 level because one static library has one CPU level).
+# Source edits: none. The upstream cmake/pkgconfig files are replaced (they would
+# point at /usr/lib/libggml.so and /usr/lib/cmake/ggml, which are not there) and the
+# cmake config packages are dropped for the same reason.
+name = "whisper.cpp"
+version = "1.9.5"
+release = 1
+summary = "Whisper speech recognition in C/C++, with Vulkan and BLAS backends"
+license = "MIT"
+homepage = "https://github.com/ggml-org/whisper.cpp"
+hostdeps = ["cmake", "ninja", "pkgconf", "shaderc"]
+builddeps = ["vulkan-headers-devel", "vulkan-loader-devel", "openmp-devel", "openblas-devel"]
+rundeps = ["vulkan-loader"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/ggml-org/whisper.cpp/archive/refs/tags/v1.9.5.tar.gz", sha256 = "ff1a9053feb509ff9d7729703355541ae9690073a6b1c40eb692c962e0dc1720" },
+]
+
+# First the static build; its archives are kept, then the shared build.
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DGGML_NATIVE=OFF \
+    -DGGML_BACKEND_DL=OFF \
+    -DGGML_AVX=OFF -DGGML_AVX2=OFF -DGGML_AVX512=OFF -DGGML_FMA=OFF -DGGML_F16C=OFF -DGGML_BMI2=OFF \
+    -DGGML_VULKAN=ON \
+    -DGGML_BLAS=ON -DGGML_BLAS_VENDOR=OpenBLAS \
+    -DGGML_OPENMP=ON \
+    -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+    -DWHISPER_BUILD_TESTS=OFF \
+    -DWHISPER_BUILD_EXAMPLES=OFF \
+    -DWHISPER_BUILD_SERVER=OFF
+'''
+build = '''
+%cmake_build
+mkdir -p static-out
+find build -name '*.a' -exec cp {} static-out/ \;
+rm -rf build
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DGGML_NATIVE=OFF \
+    -DGGML_BACKEND_DL=ON \
+    -DGGML_BACKEND_DIR=/usr/lib/whisper.cpp \
+    -DGGML_CPU_ALL_VARIANTS=ON \
+    -DGGML_VULKAN=ON \
+    -DGGML_BLAS=ON -DGGML_BLAS_VENDOR=OpenBLAS \
+    -DGGML_OPENMP=ON \
+    -DCMAKE_INSTALL_RPATH=/usr/lib/whisper.cpp \
+    -DWHISPER_BUILD_TESTS=OFF \
+    -DWHISPER_BUILD_EXAMPLES=ON \
+    -DWHISPER_BUILD_SERVER=ON
+%cmake_build
+'''
+install = '''
+%cmake_install
+top=$PWD
+cd "$pkgdir/usr"
+mkdir -p lib/whisper.cpp include/whisper.cpp
+# private ggml (see the header of this recipe)
+mv lib/libggml*.so* lib/whisper.cpp/
+mv include/ggml*.h include/gguf.h include/whisper.cpp/
+rm -rf lib/cmake lib/pkgconfig/ggml.pc
+# static libraries: whisper and parakeet in /usr/lib, ggml's in the private directory
+for a in "$top"/static-out/*.a; do
+    case $(basename "$a") in
+        libwhisper.a|libparakeet.a) install -Dm644 "$a" lib/ ;;
+        *) install -Dm644 "$a" lib/whisper.cpp/ ;;
+    esac
+done
+# pkg-config files that know where the private ggml is
+for p in whisper parakeet; do
+    cat > lib/pkgconfig/$p.pc <<PC
+prefix=/usr
+exec_prefix=\${prefix}
+libdir=\${prefix}/lib
+includedir=\${prefix}/include
+
+Name: $p
+Description: whisper.cpp: $p speech recognition in C/C++
+Version: $version
+Libs: -L\${libdir} -l$p -L\${libdir}/whisper.cpp -lggml -lggml-base -Wl,-rpath,\${libdir}/whisper.cpp
+Libs.private: -lggml-cpu -lggml-vulkan -lggml-blas -lvulkan -lopenblas -lomp -lstdc++
+Cflags: -I\${includedir} -I\${includedir}/whisper.cpp
+PC
+done
+cd "$top"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/whisper.cpp/LICENSE"
+'''
+
+[subpackages.devel]
+summary = "Headers and development files"
+paths = ["/usr/include", "/usr/lib/*.so", "/usr/lib/whisper.cpp/*.so", "/usr/lib/pkgconfig", "/usr/share/pkgconfig", "/usr/lib/cmake", "/usr/share/aclocal"]
+
+[subpackages.static]
+summary = "Static libraries"
+paths = ["/usr/lib/*.a", "/usr/lib/whisper.cpp/*.a"]
