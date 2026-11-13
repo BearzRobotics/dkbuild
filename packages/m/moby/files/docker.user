@@ -1,0 +1,4 @@
+# Rootless Docker for one user (dockerd-rootless; needs subuid/subgid ranges).
+type = process
+command = /usr/bin/dockerd-rootless
+before = loginready

@@ -1,0 +1,31 @@
+# runc: the OCI container runtime Docker and containerd use (podman here uses
+# crun). With seccomp (libseccomp) and libpathrs (safe path resolution, runc
+# 1.5's default; packages/l/libpathrs), as upstream builds it. Dynamic PIE.
+# Based on Chimera Linux cports (BSD-2-Clause): main/runc. Its Go
+# dependencies are in the tarball's vendor/.
+name = "runc"
+version = "1.5.3"
+release = 1
+summary = "CLI tool for spawning and running OCI containers"
+license = "Apache-2.0"
+homepage = "https://github.com/opencontainers/runc"
+hostdeps = ["go", "go-md2man", "bash", "make", "pkgconf"]
+builddeps = ["libseccomp-devel", "libpathrs-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/opencontainers/runc/archive/refs/tags/v1.5.3.tar.gz", sha256 = "22e3e29e93c71b9d56caa95fed66b6448dd2db282129067ead987b2003837d1a" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOPROXY=off GOFLAGS=-mod=vendor GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=1
+'''
+build = '''
+# COMMIT: the Makefile asks git (no .git in the tarball); the v1.5.3 tag's commit
+make runc man COMMIT=46365c62967c76a765a5e347f48f0c7b3b571fe9
+'''
+install = '''
+make install install-bash install-man DESTDIR="$pkgdir" PREFIX=/usr BINDIR=/usr/bin MANDIR=/usr/share/man \
+    COMMIT=46365c62967c76a765a5e347f48f0c7b3b571fe9
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/runc/LICENSE"
+'''

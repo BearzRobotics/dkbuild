@@ -1,0 +1,46 @@
+Zabbix on FenrirOS
+==================
+
+Everything is installed inert: no service is enabled, no database is created,
+no web site is configured.
+
+Packages
+  zabbix-server-pgsql / zabbix-server-mysql   the server (PostgreSQL or MariaDB)
+  zabbix-proxy-pgsql / -mysql / -sqlite3      the proxy
+  zabbix-agent, zabbix-agent2                 the agents (C; Go with plugins)
+  zabbix-web-service                          PDF reports (needs Chromium)
+  zabbix-frontend                             the PHP web interface
+  zabbix-utils                                zabbix_get, zabbix_sender, zabbix_js
+Configuration examples: /etc/zabbix/*.conf.example. Copy the ones you need:
+    cp /etc/zabbix/zabbix_server.conf.example /etc/zabbix/zabbix_server.conf
+Logs go where LogFile says (set LogFile=/var/log/zabbix/<name>.log and
+PidFile=/run/zabbix/<name>.pid); state in /var/lib/zabbix.
+
+Server with PostgreSQL
+  1. Create a role and database (as postgres):
+       createuser --pwprompt zabbix
+       createdb -O zabbix -E Unicode zabbix
+  2. Load the schema, then the images and data:
+       cd /usr/share/zabbix/database/postgresql
+       cat schema.sql images.sql data.sql | psql -U zabbix zabbix
+     (MariaDB: /usr/share/zabbix/database/mysql, with a utf8mb4_bin database.)
+  3. Set DBName, DBUser, DBPassword in /etc/zabbix/zabbix_server.conf.
+  4. dinitctl enable zabbix-server-pgsql
+  IMPORTANT: upstream's data.sql creates the web user "Admin" with the
+  password "zabbix". Log in and change it at once (or disable the account).
+
+Frontend (nginx + php-fpm)
+  /usr/share/doc/zabbix/nginx-zabbix.conf -> /etc/nginx/http.d/zabbix.conf
+  /usr/share/doc/zabbix/php-zabbix.ini    -> /etc/php/conf.d/zabbix.ini
+  Enable php-fpm and nginx, open the site and follow the setup wizard. The
+  wizard cannot write its result: download zabbix.conf.php from it and save
+  it as /etc/zabbix/web/zabbix.conf.php (root:_php, 0640); the frontend reads
+  it from there (/usr/share/zabbix/frontend/conf/zabbix.conf.php links to it).
+
+Agents
+  cp /etc/zabbix/zabbix_agentd.conf.example /etc/zabbix/zabbix_agentd.conf
+  set Server= / ServerActive= / Hostname=, then dinitctl enable zabbix-agent
+  (or zabbix_agent2.conf and zabbix-agent2; agent 2's plugin settings are in
+  /etc/zabbix/zabbix_agent2.d/plugins.d).
+
+ICMP checks use /usr/sbin/fping (setuid root, it drops privileges).

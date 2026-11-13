@@ -1,0 +1,129 @@
+# Zabbix: enterprise monitoring (server, proxy, agents, PHP web frontend).
+# Built from upstream's release archive three times, once per database:
+# PostgreSQL (server, proxy, agent, agent 2, web service), MariaDB/MySQL
+# (server, proxy) and SQLite 3 (proxy). Agent 2 and the web service are Go;
+# their modules are in the archive's src/go/vendor. The frontend is the
+# archive's ui/ with its PHP libraries (ui/vendor, source).
+# Enabled: IPv6, Net-SNMP, libssh (SSH checks), OpenIPMI (IPMI poller),
+# libcurl (web monitoring, HTTP agent), libxml2, unixODBC (database
+# monitoring), OpenLDAP, OpenSSL (TLS between components), PCRE2, libevent,
+# c-ares, libmodbus (agent's modbus.get).
+# Left out: the OTLP/gRPC collector in the proxy (--with-apm): it needs the
+# gRPC C++ library, which has no recipe yet. The Java gateway: the archive
+# ships it as prebuilt jars (src/zabbix_java/lib) - left for the user's
+# decision.
+# Installed inert (docs/requests.md): dinit services shipped, none enabled;
+# configs as /etc/zabbix/*.conf.example; no database (upstream's data.sql,
+# loaded by the administrator, creates web user Admin/zabbix - the README
+# says to change it); no nginx site (an example in /usr/share/doc/zabbix).
+# Setup: /usr/share/doc/zabbix/README.FenrirOS.
+name = "zabbix"
+version = "8.0.0"
+release = 1
+summary = "Enterprise-class monitoring solution"
+license = "AGPL-3.0-only"
+homepage = "https://www.zabbix.com"
+hostdeps = ["go", "pkgconf", "make"]
+builddeps = ["postgresql-devel", "mariadb-devel", "sqlite-devel", "net-snmp-devel", "libssh-devel", "openipmi-devel",
+             "curl-devel", "libxml2-devel", "unixodbc-devel", "openldap-devel", "openssl-devel", "pcre2-devel",
+             "libevent-devel", "c-ares-devel", "zlib-ng-compat-devel", "libmodbus-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://cdn.zabbix.com/zabbix/sources/stable/8.0/zabbix-8.0.0.tar.gz", sha256 = "55469ac599fd1443370ecf4288655d4d62109ad3a686711c4f3e0d428338ca77" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOPROXY=off GOFLAGS=-mod=vendor GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=1
+common="--sysconfdir=/etc/zabbix --enable-ipv6 --with-net-snmp --with-ssh --with-openipmi --with-libcurl
+    --with-libxml2 --with-unixodbc --with-ldap --with-openssl --with-libpcre2 --with-libevent --with-zlib
+    --with-ares --with-libmodbus"
+'''
+setup = '''
+# one build tree per database backend
+for db in mysql sqlite3; do cp -a . ../zabbix-$db; done
+'''
+build = '''
+%configure $common --enable-server --enable-proxy --enable-agent --enable-agent2 --enable-webservice --with-postgresql
+%make
+( cd ../zabbix-mysql && %configure $common --enable-server --enable-proxy --with-mysql && %make )
+( cd ../zabbix-sqlite3 && %configure $common --enable-proxy --with-sqlite3 && %make )
+'''
+install = '''
+%make_install
+s="$pkgdir/usr/sbin"
+mv "$s/zabbix_server" "$s/zabbix_server_pgsql"
+mv "$s/zabbix_proxy" "$s/zabbix_proxy_pgsql"
+install -m755 ../zabbix-mysql/src/zabbix_server/zabbix_server "$s/zabbix_server_mysql"
+install -m755 ../zabbix-mysql/src/zabbix_proxy/zabbix_proxy "$s/zabbix_proxy_mysql"
+install -m755 ../zabbix-sqlite3/src/zabbix_proxy/zabbix_proxy "$s/zabbix_proxy_sqlite3"
+# configs as examples (README.FenrirOS); agent 2's plugin includes stay
+for f in "$pkgdir"/etc/zabbix/*.conf; do mv "$f" "$f.example"; done
+# database schemas and data
+for db in postgresql mysql sqlite3; do
+    install -d "$pkgdir/usr/share/zabbix/database/$db"
+    install -m644 database/$db/*.sql "$pkgdir/usr/share/zabbix/database/$db/"
+done
+# the web frontend; its config comes from /etc/zabbix/web
+cp -a ui "$pkgdir/usr/share/zabbix/frontend"
+ln -s /etc/zabbix/web/zabbix.conf.php "$pkgdir/usr/share/zabbix/frontend/conf/zabbix.conf.php"
+for s in server-pgsql server-mysql proxy-pgsql proxy-mysql proxy-sqlite3 agent agent2 web-service; do
+    install -Dm644 $pkgfiles/zabbix-$s "$pkgdir/etc/dinit.d/zabbix-$s"
+done
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/zabbix.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/zabbix.conf"
+install -Dm644 $pkgfiles/tmpfiles-frontend.conf "$pkgdir/usr/lib/tmpfiles.d/zabbix-frontend.conf"
+install -Dm644 $pkgfiles/nginx-zabbix.conf "$pkgdir/usr/share/doc/zabbix/nginx-zabbix.conf"
+install -Dm644 $pkgfiles/php-zabbix.ini "$pkgdir/usr/share/doc/zabbix/php-zabbix.ini"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/zabbix/README.FenrirOS"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/zabbix/COPYING"
+'''
+
+[subpackages.server-pgsql]
+summary = "Zabbix server for PostgreSQL"
+paths   = ["/usr/sbin/zabbix_server_pgsql", "/etc/dinit.d/zabbix-server-pgsql", "/usr/share/zabbix/database/postgresql"]
+depends = ["zabbix", "fping"]
+
+[subpackages.server-mysql]
+summary = "Zabbix server for MariaDB/MySQL"
+paths   = ["/usr/sbin/zabbix_server_mysql", "/etc/dinit.d/zabbix-server-mysql", "/usr/share/zabbix/database/mysql"]
+depends = ["zabbix", "fping"]
+
+[subpackages.proxy-pgsql]
+summary = "Zabbix proxy for PostgreSQL"
+paths   = ["/usr/sbin/zabbix_proxy_pgsql", "/etc/dinit.d/zabbix-proxy-pgsql"]
+depends = ["zabbix", "fping"]
+
+[subpackages.proxy-mysql]
+summary = "Zabbix proxy for MariaDB/MySQL"
+paths   = ["/usr/sbin/zabbix_proxy_mysql", "/etc/dinit.d/zabbix-proxy-mysql"]
+depends = ["zabbix", "fping"]
+
+[subpackages.proxy-sqlite3]
+summary = "Zabbix proxy for SQLite 3"
+paths   = ["/usr/sbin/zabbix_proxy_sqlite3", "/etc/dinit.d/zabbix-proxy-sqlite3", "/usr/share/zabbix/database/sqlite3"]
+depends = ["zabbix", "fping"]
+
+[subpackages.agent]
+summary = "Zabbix agent"
+paths   = ["/usr/sbin/zabbix_agentd", "/etc/dinit.d/zabbix-agent", "/etc/zabbix/zabbix_agentd.conf.example", "/etc/zabbix/zabbix_agentd.d", "/usr/share/man/man8/zabbix_agentd.8"]
+depends = ["zabbix"]
+
+[subpackages.agent2]
+summary = "Zabbix agent 2 (Go, with plugins)"
+paths   = ["/usr/sbin/zabbix_agent2", "/etc/dinit.d/zabbix-agent2", "/etc/zabbix/zabbix_agent2.conf.example", "/etc/zabbix/zabbix_agent2.d", "/usr/share/man/man8/zabbix_agent2.8"]
+depends = ["zabbix"]
+
+[subpackages.web-service]
+summary = "Zabbix web service (scheduled PDF reports)"
+paths   = ["/usr/sbin/zabbix_web_service", "/etc/dinit.d/zabbix-web-service", "/etc/zabbix/zabbix_web_service.conf.example"]
+depends = ["zabbix"]
+
+[subpackages.frontend]
+summary = "Zabbix web frontend (PHP)"
+paths   = ["/usr/share/zabbix/frontend", "/usr/lib/tmpfiles.d/zabbix-frontend.conf", "/usr/share/doc/zabbix/nginx-zabbix.conf", "/usr/share/doc/zabbix/php-zabbix.ini"]
+depends = ["php", "php-fpm", "nginx"]
+
+[subpackages.utils]
+summary = "Zabbix command-line tools (zabbix_get, zabbix_sender, zabbix_js)"
+paths   = ["/usr/bin/zabbix_get", "/usr/bin/zabbix_sender", "/usr/bin/zabbix_js", "/usr/share/man/man1"]

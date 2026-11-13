@@ -1,0 +1,31 @@
+# iputils: ping, arping, tracepath and clockdiff. The system has no other
+# ping (busybox's applets are not linked); Uptime Kuma, Zabbix's agents and
+# scripts call `ping`. With libcap (ping drops its capabilities) and IDN
+# (libidn2), man pages from DocBook. ping is installed setuid root, as file
+# capabilities cannot be shipped (it drops privileges after opening its raw
+# socket; unprivileged ICMP sockets are used when the kernel allows them).
+# Based on Chimera Linux cports (BSD-2-Clause): main/iputils.
+name = "iputils"
+version = "20250605"
+release = 1
+summary = "Network utilities: ping, arping, tracepath, clockdiff"
+license = "BSD-3-Clause AND GPL-2.0-or-later"
+homepage = "https://github.com/iputils/iputils"
+hostdeps = ["meson", "ninja", "pkgconf", "libxslt", "docbook-xsl", "gettext"]
+builddeps = ["libcap-devel", "libidn2-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/iputils/iputils/archive/20250605.tar.gz", sha256 = "19e680c9eef8c079da4da37040b5f5453763205b4edfb1e2c114de77908927e4" },
+]
+
+build = '''
+%meson -DNO_SETCAP_OR_SUID=true -DUSE_IDN=true -DUSE_CAP=true -DBUILD_MANS=true -DBUILD_HTML_MANS=false -DSKIP_TESTS=true
+%meson_build
+'''
+install = '''
+%meson_install
+chmod 4755 "$pkgdir/usr/bin/ping"
+install -Dm644 Documentation/LICENSE.BSD3 "$pkgdir/usr/share/licenses/iputils/LICENSE.BSD3"
+install -Dm644 Documentation/LICENSE.GPL2 "$pkgdir/usr/share/licenses/iputils/LICENSE.GPL2"
+'''

@@ -1,0 +1,4 @@
+# Fava for one user (example). Replace /home/USER/... with your ledger.
+type = process
+command = /usr/bin/fava --host 127.0.0.1 --port 5000 /home/USER/finance/main.beancount
+before = loginready

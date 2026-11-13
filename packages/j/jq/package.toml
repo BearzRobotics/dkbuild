@@ -1,0 +1,29 @@
+# jq: a command-line JSON processor (with its libjq library), with
+# Oniguruma regular expressions. Pi-hole's scripts use it. Built from the
+# release archive with its generated configure and man page.
+# Based on Chimera Linux cports (BSD-2-Clause): main/jq (its pcver patch is
+# for git checkouts that run autoreconf; the release archive needs none).
+name = "jq"
+version = "1.8.2"
+release = 1
+summary = "Command-line JSON processor"
+license = "MIT"
+homepage = "https://jqlang.org"
+hostdeps = ["pkgconf", "make"]
+builddeps = ["oniguruma-devel"]
+
+source = [
+    { url = "https://github.com/jqlang/jq/releases/download/jq-1.8.2/jq-1.8.2.tar.gz", sha256 = "71b8d6e8f5fe81f6c6d0d110e3892251f6ce76ed095abd315e26e6e1193af3af" },
+]
+
+build = '''
+%configure --with-oniguruma=yes
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/jq/COPYING"
+'''

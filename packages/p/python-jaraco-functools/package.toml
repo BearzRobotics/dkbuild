@@ -1,0 +1,26 @@
+# jaraco.functools: additional function tools. Needed by cheroot. Its
+# build requirement coherent.licensed (a setuptools plugin that fills in the
+# licence metadata) is not packaged: pip does not check build requirements
+# without build isolation, and the metadata is not needed.
+name = "python-jaraco-functools"
+version = "4.6.0"
+release = 1
+summary = "Functools-like additions (jaraco.functools)"
+license = "MIT"
+homepage = "https://github.com/jaraco/jaraco.functools"
+hostdeps = ["python", "python-setuptools", "python-setuptools-scm"]
+rundeps = ["python", "python-more-itertools"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/6c/1f/c23395957d41ccf27c4e535c3d334c4051e5395b3752057ba4cbaec35c56/jaraco_functools-4.6.0.tar.gz", sha256 = "880c577ec9720b3a052d5bc611fb9f2269b3d87902ef42440df443b88e443280" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-jaraco-functools/LICENSE"
+'''

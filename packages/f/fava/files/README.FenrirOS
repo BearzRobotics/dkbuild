@@ -1,0 +1,14 @@
+Fava on FenrirOS
+================
+
+Fava is a web interface for a Beancount ledger. Run it as yourself:
+
+    fava ~/finance/main.beancount
+
+and open http://127.0.0.1:5000. It listens on 127.0.0.1 unless you pass
+--host; it has no login of its own, so do not expose it without a reverse
+proxy that authenticates (or an SSH tunnel). An example dinit user service
+(not installed or enabled) is /usr/share/doc/fava/fava.user: copy it to
+~/.config/dinit.d/fava, set the ledger path, and `dinitctl --user enable fava`.
+
+Fava makes no outbound connections of its own (no telemetry, no update check).

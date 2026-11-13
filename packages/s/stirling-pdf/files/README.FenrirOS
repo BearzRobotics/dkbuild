@@ -1,0 +1,19 @@
+Stirling PDF on FenrirOS
+========================
+
+The open-source ("core") build: merge, split, convert, OCR, sign, compress
+and edit PDFs in the browser. It has NO login (user accounts are in the
+proprietary edition, not built here), so anyone who reaches it can use it.
+
+Installed inert:
+    dinitctl enable stirling-pdf
+
+It listens on 127.0.0.1:8080 only (/usr/lib/stirling-pdf/run). Put an
+authenticating reverse proxy in front of it, or use an SSH tunnel.
+Its settings are written to /var/lib/stirling-pdf/configs/settings.yml on
+first start. Analytics (PostHog, Scarf) are turned off by the run script
+(SYSTEM_ENABLEANALYTICS=false).
+
+Optional tools it uses when installed: libreoffice (office conversions),
+tesseract and ocrmypdf (OCR), qpdf (repair/compress), ghostscript,
+unpaper, weasyprint (HTML to PDF).

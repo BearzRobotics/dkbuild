@@ -1,0 +1,54 @@
+# moby: the Docker engine (dockerd, docker-proxy), with rootless mode
+# (dockerd-rootless, rootlesskit) and docker-init (tini). It runs containers
+# through the system containerd and runc. Dynamic build
+# (`hack/make.sh dynbinary`); the man page built with the system go-md2man.
+# The Go dependencies are in the tarball's vendor/. Upstream's optional
+# library build tags are on: libnftables (the nftables firewall backend
+# through the system libnftables rather than the `nft` command) and
+# libpathrs (safe path resolution, packages/l/libpathrs).
+# Left out: the journald log driver (no systemd).
+# Based on Chimera Linux cports (BSD-2-Clause): user/moby.
+# Installed inert: the dinit services (docker, and docker for a user) are
+# shipped, not enabled; the `docker` group is created empty and no one is
+# added; no /etc/docker/daemon.json. Setup:
+# /usr/share/doc/moby/README.FenrirOS. The client is docker-cli.
+name = "moby"
+version = "29.9.3"
+release = 1
+summary = "Docker container engine (dockerd)"
+license = "Apache-2.0"
+homepage = "https://mobyproject.org"
+hostdeps = ["go", "go-md2man", "bash", "make", "pkgconf"]
+builddeps = ["linux-headers", "nftables-devel", "libpathrs-devel"]
+rundeps = ["containerd", "runc", "tini", "docker-cli", "iptables", "nftables", "e2fsprogs", "xfsprogs", "xz", "pigz", "procps", "rootlesskit", "slirp4netns"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/moby/moby/archive/refs/tags/docker-v29.9.3.tar.gz", sha256 = "cd6ce54e46ac19f5dd0b5226a9b292965ba542bc16bdf9edbbca946da8930b15" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOPROXY=off GOFLAGS=-mod=vendor GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=1
+# the docker-v29.9.3 tag's commit (hack/make.sh asks git otherwise)
+export VERSION=$version DOCKER_GITCOMMIT=70efc0e31da3a115fc87574d1b786fa2b867c346
+export DOCKER_BUILDTAGS="libnftables libpathrs"
+'''
+build = '''
+hack/make.sh dynbinary
+make -C man GO_MD2MAN=/usr/bin/go-md2man
+'''
+install = '''
+install -Dm755 bundles/dynbinary-daemon/dockerd "$pkgdir/usr/bin/dockerd"
+install -Dm755 bundles/dynbinary-daemon/docker-proxy "$pkgdir/usr/bin/docker-proxy"
+ln -s tini-static "$pkgdir/usr/bin/docker-init"
+install -Dm755 contrib/dockerd-rootless.sh "$pkgdir/usr/bin/dockerd-rootless"
+install -Dm755 contrib/dockerd-rootless-setuptool.sh "$pkgdir/usr/bin/dockerd-rootless-setuptool.sh"
+make -C man install GO_MD2MAN=/usr/bin/go-md2man DESTDIR="$pkgdir" prefix=/usr/share
+install -Dm644 $pkgfiles/docker "$pkgdir/etc/dinit.d/docker"
+install -Dm644 $pkgfiles/docker.user "$pkgdir/usr/lib/dinit.d/user/docker"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/docker.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/moby/README.FenrirOS"
+install -Dm644 contrib/check-config.sh "$pkgdir/usr/share/doc/moby/check-config.sh"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/moby/LICENSE"
+install -Dm644 NOTICE "$pkgdir/usr/share/licenses/moby/NOTICE"
+'''

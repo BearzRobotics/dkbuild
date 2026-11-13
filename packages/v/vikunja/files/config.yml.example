@@ -1,0 +1,17 @@
+# Vikunja configuration example (FenrirOS). Copy to /etc/vikunja/config.yml
+# and adjust; every key is documented at https://vikunja.io/docs/config-options
+service:
+  # a long random string, e.g. from `openssl rand -hex 32`; REQUIRED
+  secret: ""
+  publicurl: "https://tasks.example.org/"
+  interface: "127.0.0.1:3456"
+  # anyone who reaches the site can create an account while this is true
+  enableregistration: false
+database:
+  type: "sqlite"
+  path: "/var/lib/vikunja/vikunja.db"
+  # or: type "postgres" / "mysql" with host, user, password, database
+files:
+  basepath: "/var/lib/vikunja/files"
+log:
+  path: "/var/log"

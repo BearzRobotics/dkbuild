@@ -1,0 +1,59 @@
+# Uptime Kuma: a self-hosted monitoring tool (HTTP, TCP, ping, DNS, Docker,
+# databases, ...) with status pages and notifications. Node.js; the npm
+# packages from the store (npmdeps, its package-lock.json), the web front end
+# built with vite (instead of upstream's prebuilt dist download). Native
+# modules built from source: @louislam/sqlite3 against the system SQLite, and
+# ssh2's crypto binding and cpu-features. The build tools' npm packages
+# include esbuild's and rollup's platform binaries (as for every vite build
+# in this tree). oracledb's prebuilt glibc binaries (thick mode) are removed:
+# its thin mode needs none.
+# Installed inert (docs/requests.md): the dinit service is shipped, not
+# enabled, and listens on 127.0.0.1 only; no account (the first visitor makes
+# the admin, see the README); no web server site (an nginx example in
+# /usr/share/doc/uptime-kuma). Setup: /usr/share/doc/uptime-kuma/README.FenrirOS.
+name = "uptime-kuma"
+version = "2.5.11"
+release = 1
+summary = "Self-hosted monitoring tool with status pages"
+license = "MIT"
+homepage = "https://uptime.kuma.pet"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["nodejs", "python", "make", "pkgconf"]
+builddeps = ["sqlite-devel"]
+rundeps = ["nodejs", "iputils"]
+options = ["!check", "!strip", "npmdeps"]
+
+source = [
+    { url = "https://github.com/louislam/uptime-kuma/archive/refs/tags/2.5.11.tar.gz", sha256 = "84cb0d784e57f4991b62352ae0c76c9e4a1c3d14da72d326ea0693b8b2e58d62" },
+]
+
+environment = '''
+export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
+    npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+# native modules: node-gyp against the system Node.js headers, never a download
+export npm_config_nodedir=/usr npm_config_build_from_source=true npm_config_sqlite=/usr
+export NODE_ENV=production
+'''
+setup = '''
+node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
+npm ci --include=dev --ignore-scripts
+npm rebuild @louislam/sqlite3 ssh2 cpu-features esbuild
+'''
+build = '''
+npx vite build --config ./config/vite.config.js
+npm prune --omit=dev
+'''
+install = '''
+d="$pkgdir/usr/lib/uptime-kuma"
+mkdir -p "$d"
+cp -a server db dist extra src node_modules package.json package-lock.json "$d/"
+# node-oracledb's prebuilt binaries (thick mode, glibc builds)
+rm -rf "$d"/node_modules/oracledb/build
+test -f "$d"/node_modules/@louislam/sqlite3/lib/binding/*/node_sqlite3.node
+install -Dm644 $pkgfiles/uptime-kuma "$pkgdir/etc/dinit.d/uptime-kuma"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/uptime-kuma.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/uptime-kuma.conf"
+install -Dm644 $pkgfiles/nginx-uptime-kuma.conf "$pkgdir/usr/share/doc/uptime-kuma/nginx-uptime-kuma.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/uptime-kuma/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/uptime-kuma/LICENSE"
+'''

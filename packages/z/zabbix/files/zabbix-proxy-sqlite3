@@ -1,0 +1,6 @@
+# Zabbix proxy (sqlite3). Not enabled by default (README.FenrirOS): needs
+# /etc/zabbix/zabbix_proxy.conf and a database.
+type = process
+command = /usr/sbin/zabbix_proxy_sqlite3 -f -c /etc/zabbix/zabbix_proxy.conf
+run-as = zabbix
+depends-on: rcboot

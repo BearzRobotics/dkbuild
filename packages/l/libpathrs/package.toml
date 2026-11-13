@@ -1,0 +1,32 @@
+# libpathrs: safe path resolution on Linux (openat2/O_PATH based, resists
+# symlink races), a Rust library with a C API. runc 1.5 uses it by default
+# (its `libpathrs` build tag); built here rather than turning that tag off.
+# Shared and static library, both as upstream's Makefile builds them (each
+# crate type in its own cargo build), installed with upstream's install.sh.
+# Crates vendored on the host (cargodeps).
+name = "libpathrs"
+version = "0.2.6"
+release = 1
+summary = "Safe path resolution library for Linux (C API)"
+license = "MPL-2.0 OR LGPL-3.0-or-later"
+homepage = "https://github.com/cyphar/libpathrs"
+hostdeps = ["rust", "bash", "make"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/cyphar/libpathrs/releases/download/v0.2.6/libpathrs-0.2.6.tar.xz", sha256 = "7b1e3a2c3cc0bd9f94187edbb6d1ba9737deb2bf7f724df1ee37653ea405b2b0" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+# `make release`: cargo build --release --features=capi, once as cdylib and
+# once as staticlib (hack/with-crate-type.sh switches Cargo.toml's crate-type
+# for each and restores it)
+make release EXTRA_CARGO_FLAGS="--frozen --offline -j $jobs"
+'''
+install = '''
+DESTDIR="$pkgdir" ./install.sh --prefix=/usr --libdir=/usr/lib --enable-static --enable-shared
+install -Dm644 COPYING.md "$pkgdir/usr/share/licenses/libpathrs/COPYING.md"
+'''

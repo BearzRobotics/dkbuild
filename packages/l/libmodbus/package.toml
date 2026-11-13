@@ -1,0 +1,26 @@
+# libmodbus: a library to talk Modbus (RTU over serial, TCP) to PLCs and
+# other industrial devices; Zabbix's agent uses it for modbus.get.
+name = "libmodbus"
+version = "3.2.0"
+release = 1
+summary = "Modbus protocol library (RTU and TCP)"
+license = "LGPL-2.1-or-later"
+homepage = "https://libmodbus.org"
+hostdeps = ["pkgconf", "make"]
+builddeps = ["linux-headers"]
+
+source = [
+    { url = "https://github.com/stephane/libmodbus/releases/download/v3.2.0/libmodbus-3.2.0.tar.gz", sha256 = "72239f319b9b8483e3d393c5a60865d734fcff18a8abbb2486e389834a2f6ef1" },
+]
+
+build = '''
+%configure
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING.LESSER "$pkgdir/usr/share/licenses/libmodbus/COPYING.LESSER"
+'''

@@ -1,0 +1,18 @@
+Uptime Kuma on FenrirOS
+=======================
+
+Installed inert: the service is not enabled and there is no account.
+
+    dinitctl enable uptime-kuma
+
+It listens on 127.0.0.1:3001 only (see /etc/dinit.d/uptime-kuma); data
+(SQLite by default) in /var/lib/uptime-kuma. Open it through a reverse proxy
+(/usr/share/doc/uptime-kuma/nginx-uptime-kuma.conf) or an SSH tunnel: the
+first visitor creates the administrator account, so do that before exposing
+it. To use MariaDB instead of SQLite, choose it in the first-run setup.
+
+Outbound connections it makes on its own: an update check
+(Settings > About > "Check update", on by default; turn it off there).
+The Oracle Database monitor works in node-oracledb's "thin" mode only (the
+prebuilt thick-mode binaries are removed). Browser-engine monitors need a
+Chromium you point it to (Settings > General).

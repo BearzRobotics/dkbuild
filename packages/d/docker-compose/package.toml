@@ -1,0 +1,28 @@
+# docker-compose: the Docker CLI plugin for multi-container applications
+# described in compose files (`docker compose`). Go modules from the store
+# (godeps). Based on Chimera Linux cports (BSD-2-Clause): main/docker-compose.
+name = "docker-compose"
+version = "5.7.1"
+release = 1
+summary = "Docker CLI plugin for compose files"
+license = "Apache-2.0"
+homepage = "https://docs.docker.com/compose"
+hostdeps = ["go"]
+rundeps = ["docker-cli"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/docker/compose/archive/refs/tags/v5.7.1.tar.gz", sha256 = "bd108789759d3e17ae5532dd6eee67b427dade4c85089daa2f85d6c8f3e3ccb6" },
+]
+
+environment = '''
+export CGO_ENABLED=1
+'''
+build = '''
+go build -trimpath -buildmode=pie -o build/docker-compose \
+    -ldflags "-X github.com/docker/compose/v5/internal.Version=v$version" ./cmd
+'''
+install = '''
+install -Dm755 build/docker-compose "$pkgdir/usr/lib/docker/cli-plugins/docker-compose"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/docker-compose/LICENSE"
+'''

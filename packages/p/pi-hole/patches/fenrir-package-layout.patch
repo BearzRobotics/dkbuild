@@ -1,0 +1,213 @@
+Pi-hole core scripts as a FenrirOS package (written for FenrirOS).
+
+Upstream installs the core by cloning its git repository to /etc/.pihole and
+the `pihole` command to /usr/local/bin, and updates itself from git. Here the
+package owns the files:
+- the read-only copy of the core tree is /usr/share/pihole/core (was
+  /etc/.pihole), the command /usr/bin/pihole (was /usr/local/bin);
+- `pihole -up`, `repair`, `uninstall` and `checkout` say that apk manages
+  Pi-hole (the same path upstream's Docker image takes) instead of running
+  git or the installer;
+- updatecheck.sh reads each component's version and commit from a
+  .fenrir-version file the package writes, instead of asking git.
+diff -ruN a/advanced/Scripts/database_migration/gravity-db.sh b/advanced/Scripts/database_migration/gravity-db.sh
+--- a/advanced/Scripts/database_migration/gravity-db.sh
++++ b/advanced/Scripts/database_migration/gravity-db.sh
+@@ -10,7 +10,7 @@
+ # This file is copyright under the latest version of the EUPL.
+ # Please see LICENSE file for your rights under this license.
+ 
+-readonly scriptPath="/etc/.pihole/advanced/Scripts/database_migration/gravity"
++readonly scriptPath="/usr/share/pihole/core/advanced/Scripts/database_migration/gravity"
+ 
+ upgrade_gravityDB(){
+     local database version
+diff -ruN a/advanced/Scripts/piholeCheckout.sh b/advanced/Scripts/piholeCheckout.sh
+--- a/advanced/Scripts/piholeCheckout.sh
++++ b/advanced/Scripts/piholeCheckout.sh
+@@ -8,7 +8,7 @@
+ # This file is copyright under the latest version of the EUPL.
+ # Please see LICENSE file for your rights under this license.
+ 
+-readonly PI_HOLE_FILES_DIR="/etc/.pihole"
++readonly PI_HOLE_FILES_DIR="/usr/share/pihole/core"
+ SKIP_INSTALL="true"
+ # shellcheck source="./automated install/basic-install.sh"
+ source "${PI_HOLE_FILES_DIR}/automated install/basic-install.sh"
+diff -ruN a/advanced/Scripts/piholeDebug.sh b/advanced/Scripts/piholeDebug.sh
+--- a/advanced/Scripts/piholeDebug.sh
++++ b/advanced/Scripts/piholeDebug.sh
+@@ -65,12 +65,12 @@
+ 
+ # Directories required by Pi-hole
+ # https://discourse.pi-hole.net/t/what-files-does-pi-hole-use/1684
+-CORE_GIT_DIRECTORY="/etc/.pihole"
++CORE_GIT_DIRECTORY="/usr/share/pihole/core"
+ CRON_D_DIRECTORY="/etc/cron.d"
+ DNSMASQ_D_DIRECTORY="/etc/dnsmasq.d"
+ PIHOLE_DIRECTORY="/etc/pihole"
+ PIHOLE_SCRIPTS_DIRECTORY="/opt/pihole"
+-BIN_DIRECTORY="/usr/local/bin"
++BIN_DIRECTORY="/usr/bin"
+ LOG_DIRECTORY="/var/log/pihole"
+ HTML_DIRECTORY="$(get_ftl_conf_value "webserver.paths.webroot")"
+ WEBHOME_PATH="$(get_ftl_conf_value "webserver.paths.webhome")"
+diff -ruN a/advanced/Scripts/updatecheck.sh b/advanced/Scripts/updatecheck.sh
+--- a/advanced/Scripts/updatecheck.sh
++++ b/advanced/Scripts/updatecheck.sh
+@@ -30,21 +30,18 @@
+     exit "$?"
+ fi
+ 
++# FenrirOS: no git checkouts; the package writes each component's release
++# tag and commit to .fenrir-version (line 1 and 2) in its directory
+ function get_local_branch() {
+-    # Return active branch
+-    cd "${1}" 2>/dev/null || { echo "null"; return; }
+-    git rev-parse --abbrev-ref HEAD || echo "null"
++    [ -f "${1}/.fenrir-version" ] && echo "master" || echo "null"
+ }
+ 
+ function get_local_version() {
+-    # Return active version
+-    cd "${1}" 2>/dev/null || { echo "null"; return; }
+-    git describe --tags --always 2>/dev/null || echo "null"
++    sed -n 1p "${1}/.fenrir-version" 2>/dev/null || echo "null"
+ }
+ 
+ function get_local_hash() {
+-    cd "${1}" 2>/dev/null || { echo "null"; return; }
+-    git rev-parse --short=8 HEAD || echo "null"
++    sed -n 2p "${1}/.fenrir-version" 2>/dev/null | cut -c1-8 || echo "null"
+ }
+ 
+ function get_remote_version() {
+@@ -97,13 +94,13 @@
+ 
+ # get Core versions
+ 
+-CORE_VERSION="$(get_local_version /etc/.pihole)"
++CORE_VERSION="$(get_local_version /usr/share/pihole/core)"
+ addOrEditKeyValPair "${VERSION_FILE_TMP}" "CORE_VERSION" "${CORE_VERSION}"
+ 
+-CORE_BRANCH="$(get_local_branch /etc/.pihole)"
++CORE_BRANCH="$(get_local_branch /usr/share/pihole/core)"
+ addOrEditKeyValPair "${VERSION_FILE_TMP}" "CORE_BRANCH" "${CORE_BRANCH}"
+ 
+-CORE_HASH="$(get_local_hash /etc/.pihole)"
++CORE_HASH="$(get_local_hash /usr/share/pihole/core)"
+ addOrEditKeyValPair "${VERSION_FILE_TMP}" "CORE_HASH" "${CORE_HASH}"
+ 
+ GITHUB_CORE_VERSION="$(get_remote_version pi-hole "${CORE_BRANCH}")"
+diff -ruN a/advanced/Scripts/update.sh b/advanced/Scripts/update.sh
+--- a/advanced/Scripts/update.sh
++++ b/advanced/Scripts/update.sh
+@@ -13,7 +13,7 @@
+ # Variables
+ readonly ADMIN_INTERFACE_GIT_URL="https://github.com/pi-hole/web.git"
+ readonly PI_HOLE_GIT_URL="https://github.com/pi-hole/pi-hole.git"
+-readonly PI_HOLE_FILES_DIR="/etc/.pihole"
++readonly PI_HOLE_FILES_DIR="/usr/share/pihole/core"
+ 
+ SKIP_INSTALL=true
+ 
+@@ -206,7 +206,7 @@
+         echo ""
+         echo -e "  ${INFO} Pi-hole core files out of date, updating local repo."
+         getGitFiles "${PI_HOLE_FILES_DIR}" "${PI_HOLE_GIT_URL}"
+-        echo -e "  ${INFO} If you had made any changes in '/etc/.pihole/', they have been stashed using 'git stash'"
++        echo -e "  ${INFO} If you had made any changes in '/usr/share/pihole/core/', they have been stashed using 'git stash'"
+     fi
+ 
+     if [[ "${web_update}" == true ]]; then
+diff -ruN a/gravity.sh b/gravity.sh
+--- a/gravity.sh
++++ b/gravity.sh
+@@ -30,10 +30,10 @@
+ # shellcheck source=./advanced/Scripts/COL_TABLE
+ . "${coltable}"
+ # shellcheck source=./advanced/Scripts/database_migration/gravity-db.sh
+-. "/etc/.pihole/advanced/Scripts/database_migration/gravity-db.sh"
++. "/usr/share/pihole/core/advanced/Scripts/database_migration/gravity-db.sh"
+ 
+ basename="pihole"
+-PIHOLE_COMMAND="/usr/local/bin/${basename}"
++PIHOLE_COMMAND="/usr/bin/${basename}"
+ 
+ piholeDir="/etc/${basename}"
+ 
+@@ -43,7 +43,7 @@
+ regexFile="${piholeDir}/regex.list"
+ adListFile="${piholeDir}/adlists.list"
+ 
+-piholeGitDir="/etc/.pihole"
++piholeGitDir="/usr/share/pihole/core"
+ GRAVITYDB=$(getFTLConfigValue files.gravity)
+ GRAVITY_TMPDIR=$(getFTLConfigValue files.gravity_tmp)
+ gravityDBschema="${piholeGitDir}/advanced/Templates/gravity.db.sql"
+diff -ruN a/pihole b/pihole
+--- a/pihole
++++ b/pihole
+@@ -14,7 +14,7 @@
+ # PI_HOLE_BIN_DIR is not readonly here because in some functions (checkout),
+ # they might get set again when the installer is sourced. This causes an
+ # error due to modifying a readonly variable.
+-PI_HOLE_BIN_DIR="/usr/local/bin"
++PI_HOLE_BIN_DIR="/usr/bin"
+ 
+ readonly colfile="${PI_HOLE_SCRIPT_DIR}/COL_TABLE"
+ # shellcheck source=./advanced/Scripts/COL_TABLE
+@@ -98,7 +98,7 @@
+ }
+ 
+ updatePiholeFunc() {
+-  if [ -n "${DOCKER_VERSION}" ]; then
++  if true; then
+     unsupportedFunc
+   else
+     shift
+@@ -108,10 +108,10 @@
+ }
+ 
+ repairPiholeFunc() {
+-  if [ -n "${DOCKER_VERSION}" ]; then
++  if true; then
+     unsupportedFunc
+   else
+-    /etc/.pihole/automated\ install/basic-install.sh --repair
++    /usr/share/pihole/core/automated\ install/basic-install.sh --repair
+     exit 0;
+   fi
+ }
+@@ -133,7 +133,7 @@
+ 
+ 
+ uninstallFunc() {
+-  if [ -n "${DOCKER_VERSION}" ]; then
++  if true; then
+     unsupportedFunc
+   else
+     "${PI_HOLE_SCRIPT_DIR}"/uninstall.sh
+@@ -401,11 +401,8 @@
+ }
+ 
+ piholeCheckoutFunc() {
+-  if [ -n "${DOCKER_VERSION}" ]; then
+-    echo -e "${CROSS} Function not supported in Docker images"
+-    echo "Please build a custom image following the steps at"
+-    echo "https://github.com/pi-hole/docker-pi-hole?tab=readme-ov-file#building-the-image-locally"
+-    exit 0
++  if true; then
++    unsupportedFunc
+   else
+     if [[ "$2" == "-h" ]] || [[ "$2" == "--help" ]]; then
+       echo "Switch Pi-hole subsystems to a different GitHub branch
+@@ -461,7 +458,7 @@
+ }
+ 
+ unsupportedFunc(){
+-  echo "Function not supported in Docker images"
++  echo "Not available: Pi-hole is installed from the FenrirOS package; update or remove it with apk"
+   exit 0
+ }
+ 

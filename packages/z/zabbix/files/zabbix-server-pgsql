@@ -1,0 +1,6 @@
+# Zabbix server (pgsql). Not enabled by default (README.FenrirOS): needs
+# /etc/zabbix/zabbix_server.conf and a database.
+type = process
+command = /usr/sbin/zabbix_server_pgsql -f -c /etc/zabbix/zabbix_server.conf
+run-as = zabbix
+depends-on: rcboot

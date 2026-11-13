@@ -1,0 +1,6 @@
+# containerd: the container runtime daemon (Docker's dockerd uses it).
+# Not enabled by default: `dinitctl enable containerd`.
+type = process
+command = /usr/bin/containerd
+logfile = /var/log/containerd.log
+depends-on: rcboot

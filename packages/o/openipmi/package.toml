@@ -1,0 +1,32 @@
+# OpenIPMI: a library and tools for IPMI (server management controllers:
+# sensors, SEL, power control, serial-over-LAN), used by Zabbix's IPMI
+# poller. Libraries (shared and static), ipmitool-like commands (ipmish,
+# ipmi_ui, openipmicmd, solterm, rmcp_ping), with net-snmp (SNMP traps),
+# OpenSSL (RMCP+ authentication), glib (its glib OS handler library) and popt.
+# Left out: the Perl, Python and Tcl SWIG bindings and the IPMI simulator's
+# Python/Tk GUI (language modules, not libraries other packages link
+# against; they can be added on request).
+name = "openipmi"
+version = "2.0.37"
+release = 1
+summary = "IPMI library and tools"
+license = "LGPL-2.1-or-later AND GPL-2.0-or-later AND BSD-3-Clause"
+homepage = "https://openipmi.sourceforge.io"
+hostdeps = ["pkgconf", "make"]
+builddeps = ["net-snmp-devel", "openssl-devel", "glib-devel", "popt-devel", "ncurses-devel", "readline-devel", "linux-headers"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/openipmi/OpenIPMI%202.0%20Library/OpenIPMI-2.0.37.tar.gz", sha256 = "c62d38f5da7df4299ac3a652508e959537752440181e34c76b2aecebd7f301b9" },
+]
+
+build = '''
+%configure --with-perl=no --with-python=no --with-tcl=no --with-tkinter=no --with-swig=no \
+    --with-glib=yes --with-openssl=yes
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/openipmi/COPYING"
+install -Dm644 COPYING.LIB "$pkgdir/usr/share/licenses/openipmi/COPYING.LIB"
+install -Dm644 COPYING.BSD "$pkgdir/usr/share/licenses/openipmi/COPYING.BSD"
+'''

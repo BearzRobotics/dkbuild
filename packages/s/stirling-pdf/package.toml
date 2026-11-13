@@ -1,0 +1,60 @@
+# Stirling PDF: a self-hosted web application for PDF work (merge, split,
+# convert, OCR, sign, compress, edit). Spring Boot on Java 25, built with
+# Gradle from source, its Maven dependencies from the store (gradledeps); the
+# React front end built with vite from its npm packages (npmdeps,
+# frontend/package-lock.json) and copied into the jar's static resources, as
+# the build's copyFrontendAssets task does (without go-task).
+# The "core" flavour (STIRLING_FLAVOR=core): the MIT-licensed code only. The
+# default "proprietary" flavour adds app/proprietary (login, teams, SSO...),
+# under Stirling's own commercial licence - not built (a licence decision for
+# the user). Spotless (formatting at compile time) is off (-PnoSpotless).
+# Installed inert (docs/requests.md): the dinit service shipped, not enabled,
+# listening on 127.0.0.1; analytics off; no settings written.
+# Setup: /usr/share/doc/stirling-pdf/README.FenrirOS.
+name = "stirling-pdf"
+version = "3.3.0"
+release = 1
+summary = "Web-based PDF manipulation toolkit"
+license = "MIT"
+homepage = "https://www.stirlingpdf.com"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["openjdk25", "unzip", "nodejs"]
+rundeps = ["openjdk25", "qpdf", "ghostscript", "tesseract"]
+options = ["!check", "!strip", "gradledeps", "npmdeps"]
+
+source = [
+    { url = "https://github.com/Stirling-Tools/Stirling-PDF/archive/refs/tags/v3.3.0.tar.gz", sha256 = "2f9a01f88c568a2f8cb63dde02a3c3b71640ba77c0fc6c09b3f77f46eb7ca285" },
+    { url = "https://services.gradle.org/distributions/gradle-9.7.1-bin.zip", sha256 = "acd53f1edaf02f1a8ff99879f8a34b302661a057d9b063ae9e35b552f804d20a", unpack = false },
+]
+
+environment = '''
+export JAVA_HOME=/usr/lib/jvm/java-25-openjdk
+export GRADLE_OPTS="-Dorg.gradle.java.installations.paths=/usr/lib/jvm/java-25-openjdk -Dorg.gradle.java.installations.auto-download=false -Dorg.gradle.java.installations.auto-detect=false"
+export STIRLING_FLAVOR=core
+export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
+    npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+'''
+setup = '''
+cd frontend
+node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
+npm ci --ignore-scripts
+'''
+build = '''
+# the front end: what `task frontend:build:core` runs (.taskfiles/frontend.yml)
+( cd frontend && npx tsx scripts/setup-env.mts --core && node scripts/generate-og-metadata.mjs \
+    && VITE_API_BASE_URL=/ VITE_INCLUDE_PORTAL=false npx vite build --mode core )
+# into the static resources, as copyFrontendAssets (app/core/build.gradle)
+( cd frontend/dist && find . -type f ! -name robots.txt ! -name favicon.ico ! -path './fonts/*.ttf' \
+    -exec install -Dm644 {} ../../app/core/src/main/resources/static/{} \; )
+gradle :stirling-pdf:bootJar -PnoSpotless -PbuildWithFrontend=false
+'''
+install = '''
+j=$(ls app/core/build/libs/*.jar | grep -v -- '-plain' | head -n1)
+install -Dm644 "$j" "$pkgdir/usr/lib/stirling-pdf/stirling-pdf.jar"
+install -Dm755 $pkgfiles/run "$pkgdir/usr/lib/stirling-pdf/run"
+install -Dm644 $pkgfiles/stirling-pdf "$pkgdir/etc/dinit.d/stirling-pdf"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/stirling-pdf.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/stirling-pdf.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/stirling-pdf/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/stirling-pdf/LICENSE"
+'''

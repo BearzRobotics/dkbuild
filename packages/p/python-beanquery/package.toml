@@ -1,0 +1,21 @@
+# beanquery: Beancount's query language and the bean-query shell. Needed by
+# Fava.
+name = "python-beanquery"
+version = "0.2.0"
+release = 1
+summary = "SQL-like query language for Beancount (bean-query)"
+license = "GPL-2.0-only"
+homepage = "https://github.com/beancount/beanquery"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-beancount", "python-click", "python-dateutil", "python-tatsu-lts"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/7c/90/801eec23a07072dcf8df061cb6f27be6045e08c12a90b287e872ce0a12d3/beanquery-0.2.0.tar.gz", sha256 = "2d72b50a39003435c7fed183666572b8ea878b9860499d0f196b38469384cd2c" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-beanquery/LICENSE"
+'''

@@ -1,0 +1,8 @@
+# Docker daemon (dockerd), on the system containerd.
+# Not enabled by default: `dinitctl enable docker` (README.FenrirOS).
+type = process
+command = /usr/bin/dockerd
+logfile = /var/log/docker.log
+depends-on: rcboot
+depends-on: containerd
+options: signal-process-only

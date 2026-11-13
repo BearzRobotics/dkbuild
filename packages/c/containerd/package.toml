@@ -1,0 +1,51 @@
+# containerd: the industry-standard container runtime (image transfer and
+# storage, container execution through runc and its shim). Docker (moby)
+# runs on it. The daemon, ctr, containerd-stress and the runc v2 shim
+# (pure Go and static, as upstream builds it), with the btrfs snapshotter
+# (btrfs-progs headers). The Go dependencies are in the tarball's vendor/.
+# Based on Chimera Linux cports (BSD-2-Clause): main/containerd. Not used
+# from it: its patches (no-static-shim: upstream's static shim is kept;
+# no-reb-man: the man pages are simply made again at install), and the
+# containerd-rootless script (nerdctl's, a separate download; rootless Docker
+# uses moby's dockerd-rootless instead).
+# Installed inert: the dinit service is shipped, not enabled; no config in
+# /etc (it runs on built-in defaults; an example config is in
+# /usr/share/doc/containerd).
+name = "containerd"
+version = "2.4.2"
+release = 1
+summary = "Industry-standard container runtime"
+license = "Apache-2.0"
+homepage = "https://containerd.io"
+hostdeps = ["go", "go-md2man", "make", "pkgconf"]
+builddeps = ["btrfs-progs-devel", "libseccomp-devel", "linux-headers"]
+rundeps = ["runc", "cni-plugins"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/containerd/containerd/archive/refs/tags/v2.4.2.tar.gz", sha256 = "02cbbecd0ef78a521d124afa791b843ba5458ef206e1f7f017999ff45c80c0b4" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOPROXY=off GOFLAGS=-mod=vendor GOCACHE=/tmp/go-cache GOPATH=/tmp/go
+# VERSION/REVISION: the Makefile asks git otherwise (REVISION: the v2.4.2 tag's commit)
+export VERSION=v2.4.2 REVISION=b7a25261e029d68978bbf290df0a62fc819b3c51
+'''
+build = '''
+# -j1: every target runs the go tool, which parallelizes on its own
+make -j1 all man
+'''
+install = '''
+make install install-man DESTDIR="$pkgdir" PREFIX=/usr BINDIR=/usr/bin MANDIR=/usr/share/man
+install -Dm644 $pkgfiles/containerd "$pkgdir/etc/dinit.d/containerd"
+install -Dm644 $pkgfiles/config.toml.example "$pkgdir/usr/share/doc/containerd/config.toml.example"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/containerd/LICENSE"
+'''
+
+[subpackages.ctr]
+summary = "Debug and admin client for containerd"
+paths   = ["/usr/bin/ctr", "/usr/share/man/man8/ctr.8.gz"]
+
+[subpackages.stress]
+summary = "containerd benchmarking utility"
+paths   = ["/usr/bin/containerd-stress"]

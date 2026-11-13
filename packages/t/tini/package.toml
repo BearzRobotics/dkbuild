@@ -1,0 +1,26 @@
+# tini: a minimal init for containers (reaps zombies, forwards signals).
+# Docker runs it as `docker-init` for `docker run --init`; moby links
+# /usr/bin/docker-init to tini-static. Both builds are installed: tini and
+# the static tini-static (it runs inside arbitrary container images).
+# Based on Chimera Linux cports (BSD-2-Clause): user/tini.
+name = "tini"
+version = "0.19.0"
+release = 1
+summary = "Tiny init for containers"
+license = "MIT"
+homepage = "https://github.com/krallin/tini"
+hostdeps = ["cmake", "ninja"]
+
+source = [
+    { url = "https://github.com/krallin/tini/archive/refs/tags/v0.19.0.tar.gz", sha256 = "0fd35a7030052acd9f58948d1d900fe1e432ee37103c5561554408bdac6bbf0d" },
+]
+
+build = '''
+# CMakeLists.txt asks for cmake_minimum_required 2.8, which CMake 4 refuses
+%cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/tini/LICENSE"
+'''

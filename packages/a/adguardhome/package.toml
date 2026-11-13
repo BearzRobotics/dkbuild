@@ -1,0 +1,49 @@
+# AdGuard Home: a network-wide DNS server that blocks ads and trackers, with
+# DoH/DoT/DoQ, DNS rewrites, a DHCP server and a web interface. Go, its
+# modules from the store (godeps); the web interface (client/, React with
+# webpack) built from source with its npm packages from the store (npmdeps;
+# client_v2, upstream's unfinished next interface, is not built) and
+# embedded in the binary as upstream does. Release channel; self-update off.
+# Installed inert (docs/requests.md): the dinit service is shipped, not
+# enabled; no configuration, no account (the setup wizard makes them; see
+# the README about its port 3000). Setup: /usr/share/doc/adguardhome/README.FenrirOS.
+name = "adguardhome"
+version = "0.107.80"
+release = 1
+summary = "Network-wide DNS ad and tracker blocker"
+license = "GPL-3.0-only"
+homepage = "https://adguard.com/adguard-home/overview.html"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["go", "nodejs"]
+options = ["!check", "!strip", "godeps", "npmdeps"]
+
+source = [
+    { url = "https://github.com/AdguardTeam/AdGuardHome/archive/refs/tags/v0.107.80.tar.gz", sha256 = "c67cf289f1d4b05c78994f4d1d169962540814a212244eb191cd599795d90278" },
+]
+
+environment = '''
+export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
+    npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+export CGO_ENABLED=0
+'''
+setup = '''
+cd client
+node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
+npm ci --ignore-scripts
+'''
+build = '''
+( cd client && npm run build-prod )
+test -d build/static
+# what scripts/make/go-build.sh does, without its git calls (version info
+# given directly; the commit time is left out)
+go build -trimpath -o AdGuardHome \
+    -ldflags "-X github.com/AdguardTeam/AdGuardHome/internal/version.version=v$version -X github.com/AdguardTeam/AdGuardHome/internal/version.channel=release" .
+'''
+install = '''
+install -Dm755 AdGuardHome "$pkgdir/usr/bin/AdGuardHome"
+install -Dm644 $pkgfiles/adguardhome "$pkgdir/etc/dinit.d/adguardhome"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/adguardhome.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/adguardhome.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/adguardhome/README.FenrirOS"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/adguardhome/LICENSE.txt"
+'''

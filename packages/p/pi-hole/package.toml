@@ -1,0 +1,76 @@
+# Pi-hole: a network-wide DNS sinkhole that blocks ads and trackers. Three
+# upstream releases in one package, laid out as upstream's installer would,
+# which is NOT used (nor shipped):
+# - FTL 6.9 (C): the daemon, with Pi-hole's dnsmasq fork, SQLite, Lua and
+#   civetweb bundled in its source; built with DNSSEC (nettle, gmp), IDN
+#   (libidn2), TLS (mbedtls), conntrack (libnetfilter_conntrack), nftset
+#   (libnftables), DBus and readline (ncurses as its termcap);
+# - web 6.6.1: the web interface (Lua pages FTL serves; its third-party
+#   JavaScript in vendor/ as upstream ships it);
+# - core 6.6: the `pihole` command and its scripts (patches/
+#   fenrir-package-layout.patch: package paths, self-update off).
+# Installed inert (docs/requests.md): the dinit service shipped, not enabled;
+# no configuration, no gravity database, no password (the README says to set
+# one before enabling), no cron job (an example in /usr/share/doc/pi-hole).
+# Setup: /usr/share/doc/pi-hole/README.FenrirOS.
+name = "pi-hole"
+version = "6.6"
+release = 1
+summary = "Network-wide DNS ad blocker (FTL, web interface, scripts)"
+license = "EUPL-1.2"
+homepage = "https://pi-hole.net"
+patches = ["fenrir-package-layout.patch"]
+hostdeps = ["cmake", "ninja", "vim-xxd"]
+builddeps = ["nettle-devel", "gmp-devel", "libidn2-devel", "libunistring-devel", "mbedtls-devel",
+             "libnetfilter-conntrack-devel", "nftables-devel", "dbus-devel", "readline-devel", "ncurses-devel", "linux-headers"]
+rundeps = ["bash", "curl", "jq", "sqlite", "iproute2", "procps", "util-linux", "bind", "libcap"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/pi-hole/pi-hole/archive/refs/tags/v6.6.tar.gz", sha256 = "0d2b8eafd888a59a16f08f9cef7b3ab6e55a7a5adc4878fd12126f7c61602c4a" },
+    { url = "https://github.com/pi-hole/FTL/archive/refs/tags/v6.9.tar.gz", sha256 = "e7733980cbb5659e0a66046eb3e6832a639f60c639025b837d104a4931eb3bc2" },
+    { url = "https://github.com/pi-hole/web/archive/refs/tags/v6.6.1.tar.gz", sha256 = "34d82b58a0b601803769e66c0f3e1d8bd06513449625e38e07afa007399284d9" },
+]
+
+environment = '''
+# FTL's version stamp (src/gen_version.cmake asks git otherwise): the v6.9 tag
+export GIT_BRANCH=master GIT_TAG=v6.9 GIT_VERSION=v6.9 GIT_HASH=2a0fcb74 GIT_DATE="2026-11-11 18:30:30 +0000"
+'''
+build = '''
+cd ../FTL-6.9
+# readline needs a termcap library: ncurses' (FTL looks for libtermcap only)
+%cmake -DLIBTERMCAP=/usr/lib/libncursesw.so
+%cmake_build
+'''
+install = '''
+# FTL. Not stripped: the build appends the binary's own sha256 to it, which
+# `pihole-FTL verify` checks (stripping would break it). No setcap: the
+# dinit service gives the capabilities.
+install -Dm755 ../FTL-6.9/build/pihole-FTL "$pkgdir/usr/bin/pihole-FTL"
+# core: as basic-install.sh's installScripts, with upstream's /etc/.pihole as
+# /usr/share/pihole/core (the patch)
+o="$pkgdir/opt/pihole"
+install -d "$o"
+install -m755 gravity.sh advanced/Scripts/*.sh advanced/Scripts/COL_TABLE "$o/"
+install -Dm755 pihole "$pkgdir/usr/bin/pihole"
+c="$pkgdir/usr/share/pihole/core"
+install -d "$c"
+cp -a advanced "$c/advanced"
+printf 'v6.6\nf7c0220e63e753c664a1ec08d42d6b647b86005d\n' > "$c/.fenrir-version"
+install -Dm644 manpages/pihole.8 "$pkgdir/usr/share/man/man8/pihole.8"
+install -Dm644 advanced/bash-completion/pihole.bash "$pkgdir/usr/share/bash-completion/completions/pihole"
+install -Dm644 advanced/bash-completion/pihole-ftl.bash "$pkgdir/usr/share/bash-completion/completions/pihole-FTL"
+# web interface, where FTL serves it from by default (webserver.paths)
+w="$pkgdir/var/www/html/admin"
+install -d "$w"
+( cd ../web-6.6.1 && cp -a *.lp img scripts style vendor "$w/" )
+printf 'v6.6.1\nfb699c4e3fd6965d1c9a5253250d8a9b3c6f7a0e\n' > "$w/.fenrir-version"
+install -Dm644 $pkgfiles/pihole-FTL "$pkgdir/etc/dinit.d/pihole-FTL"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/pi-hole.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/pi-hole.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/pi-hole/README.FenrirOS"
+install -Dm644 advanced/Templates/pihole.cron "$pkgdir/usr/share/doc/pi-hole/pihole.cron"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/pi-hole/LICENSE"
+install -Dm644 ../FTL-6.9/LICENSE "$pkgdir/usr/share/licenses/pi-hole/LICENSE.FTL"
+install -Dm644 ../web-6.6.1/LICENSE "$pkgdir/usr/share/licenses/pi-hole/LICENSE.web"
+'''

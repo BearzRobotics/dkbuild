@@ -1,0 +1,18 @@
+Vikunja on FenrirOS
+===================
+
+Installed inert: the service is not enabled, there is no configuration, no
+database and no account.
+
+1. cp /usr/share/doc/vikunja/config.yml.example /etc/vikunja/config.yml
+   and set service.secret (openssl rand -hex 32), service.publicurl and the
+   database (SQLite in /var/lib/vikunja by default; PostgreSQL or MariaDB
+   work too).
+2. dinitctl enable vikunja   (listens where service.interface says)
+3. Create the first user from the command line, then keep registration off:
+       su -s /bin/sh vikunja -c 'cd /var/lib/vikunja && vikunja user create -u <name> -e <email>'
+4. A reverse proxy: /usr/share/doc/vikunja/nginx-vikunja.conf.
+
+Outbound connections: none on its own. Vikunja 2.x has paid features (admin
+panel, time tracking, audit logs, user invites) unlocked by a license key;
+only when license.key is set does it contact vikunja.io to check it.

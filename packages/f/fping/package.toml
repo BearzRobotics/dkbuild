@@ -1,0 +1,25 @@
+# fping: ping many hosts at once (IPv4 and IPv6). Zabbix's server and proxy
+# use it for their ICMP checks (FpingLocation=/usr/sbin/fping). Installed
+# setuid root, as file capabilities cannot be shipped (fping drops root
+# right after opening its raw sockets), like iputils' ping.
+name = "fping"
+version = "5.5"
+release = 1
+summary = "Ping multiple hosts in parallel"
+license = "BSD-4.3TAHOE"
+homepage = "https://fping.org"
+hostdeps = ["make"]
+
+source = [
+    { url = "https://github.com/schweikert/fping/releases/download/v5.5/fping-5.5.tar.gz", sha256 = "15c4e32b6c55ff105bafe03e8c91c7ca1b2eda31bf9a7127326bb87887ee18fe" },
+]
+
+build = '''
+%configure --enable-ipv4 --enable-ipv6
+%make
+'''
+install = '''
+%make_install
+chmod 4755 "$pkgdir/usr/sbin/fping"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/fping/COPYING"
+'''

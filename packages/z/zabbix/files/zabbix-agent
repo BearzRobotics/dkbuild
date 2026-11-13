@@ -1,0 +1,6 @@
+# Zabbix agent (C). Not enabled by default (README.FenrirOS): needs
+# /etc/zabbix/zabbix_agentd.conf.
+type = process
+command = /usr/sbin/zabbix_agentd -f -c /etc/zabbix/zabbix_agentd.conf
+run-as = zabbix
+depends-on: rcboot

@@ -1,0 +1,8 @@
+# Uptime Kuma: the monitoring server, on 127.0.0.1:3001 (put a reverse proxy
+# in front, README.FenrirOS). Not enabled by default.
+type = process
+command = /usr/bin/node /usr/lib/uptime-kuma/server/server.js --data-dir=/var/lib/uptime-kuma/ --host=127.0.0.1 --port=3001
+working-dir = /usr/lib/uptime-kuma
+run-as = uptime-kuma
+logfile = /var/log/uptime-kuma.log
+depends-on: rcboot

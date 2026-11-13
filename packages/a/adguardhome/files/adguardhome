@@ -1,0 +1,10 @@
+# AdGuard Home: network-wide DNS ad blocker. Not enabled by default
+# (README.FenrirOS). Until it is set up, its setup wizard listens on port 3000
+# of every interface: enable it only on a trusted network, or set it up at once.
+type = process
+command = /usr/bin/AdGuardHome --no-check-update -w /var/lib/adguardhome -c /var/lib/adguardhome/AdGuardHome.yaml --pidfile /run/adguardhome/AdGuardHome.pid
+run-as = adguardhome
+working-dir = /var/lib/adguardhome
+logfile = /var/log/adguardhome.log
+capabilities = ^cap_net_bind_service,^cap_net_raw
+depends-on: rcboot

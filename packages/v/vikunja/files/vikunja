@@ -1,0 +1,9 @@
+# Vikunja: to-do lists and project management (API and web interface on
+# :3456; set service.interface in /etc/vikunja/config.yml). Not enabled by
+# default (README.FenrirOS).
+type = process
+command = /usr/bin/vikunja
+run-as = vikunja
+working-dir = /var/lib/vikunja
+logfile = /var/log/vikunja.log
+depends-on: rcboot

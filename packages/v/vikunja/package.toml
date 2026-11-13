@@ -1,0 +1,52 @@
+# Vikunja: a self-hosted to-do list and project management app (lists,
+# kanban, gantt, tables; CalDAV). Go API server with the web interface
+# (Vue, built with vite) embedded in the binary as upstream builds it (its
+# magefile's `build`, done directly: no mage, no git). Go modules from the
+# store (godeps); the front end's pnpm packages from the store (npmdeps,
+# pnpm-lock.yaml through dkbuild's local registry). The Electron desktop app
+# (desktop/) is not built.
+# Installed inert (docs/requests.md): the dinit service shipped, not enabled;
+# no config (an example, registration off, in /usr/share/doc/vikunja), no
+# database, no account; no web server site (an nginx example).
+# Setup: /usr/share/doc/vikunja/README.FenrirOS.
+name = "vikunja"
+version = "2.8.0"
+release = 1
+summary = "Self-hosted to-do list and project management"
+license = "AGPL-3.0-or-later"
+homepage = "https://vikunja.io"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["go", "nodejs", "pnpm"]
+options = ["!check", "!strip", "godeps", "npmdeps"]
+
+source = [
+    { url = "https://github.com/go-vikunja/vikunja/archive/refs/tags/v2.8.0.tar.gz", sha256 = "c7bfb1c4d4f577b3cbad62e2e77abb85802709fdeff7f1d366b90badc5fc7f94" },
+]
+
+environment = '''
+export HOME=/tmp/home CGO_ENABLED=1
+# package.json asks for pnpm 12 (packageManager); the system pnpm must not
+# try to download that version
+export npm_config_manage_package_manager_versions=false npm_config_package_manager_strict=false
+'''
+setup = '''
+cd frontend
+pnpm install --frozen-lockfile
+'''
+build = '''
+( cd frontend && pnpm run build )
+test -f frontend/dist/index.html
+# as magefile.go's Build.Build: tag osusergo, version in pkg/version
+go build -trimpath -tags osusergo -o vikunja \
+    -ldflags "-X code.vikunja.io/api/pkg/version.Version=v$version -X main.Tags=osusergo"
+'''
+install = '''
+install -Dm755 vikunja "$pkgdir/usr/bin/vikunja"
+install -Dm644 $pkgfiles/vikunja "$pkgdir/etc/dinit.d/vikunja"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/vikunja.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/vikunja.conf"
+install -Dm644 $pkgfiles/config.yml.example "$pkgdir/usr/share/doc/vikunja/config.yml.example"
+install -Dm644 $pkgfiles/nginx-vikunja.conf "$pkgdir/usr/share/doc/vikunja/nginx-vikunja.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/vikunja/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/vikunja/LICENSE"
+'''

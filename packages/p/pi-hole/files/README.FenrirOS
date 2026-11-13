@@ -1,0 +1,37 @@
+Pi-hole on FenrirOS
+===================
+
+Pi-hole's installer (basic-install.sh) is not used and not shipped. The
+pieces are installed inert, in upstream's places:
+  /usr/bin/pihole-FTL        the FTL daemon (DNS/DHCP, API, web server)
+  /usr/bin/pihole            the command; its scripts in /opt/pihole
+  /var/www/html/admin        the web interface (served by FTL itself)
+  /usr/share/pihole/core     the core scripts' data (upstream's /etc/.pihole)
+Nothing runs, no configuration, gravity database or password exists yet.
+`pihole -up`, `repair`, `uninstall` and `checkout` are disabled: apk
+manages Pi-hole.
+
+Setup
+  1. Free port 53: nothing else may serve DNS on this host (dnsmasq, unbound,
+     a local resolver).
+  2. Start FTL once so that it writes /etc/pihole/pihole.toml, or write it
+     with `pihole-FTL --config <key> <value>`, e.g.
+         pihole-FTL --config dns.upstreams '["9.9.9.9"]'
+         pihole-FTL --config dns.interface eth0
+  3. SET A PASSWORD before anything else can reach the web interface or the
+     API: with no password Pi-hole asks for none.
+         pihole setpassword
+  4. dinitctl enable pihole-FTL
+  5. Add block lists (web interface: Lists) and build the gravity database:
+         pihole -g
+  The web interface is at http://<host>/admin (FTL's own web server, ports
+  80 and 443; webserver.port in pihole.toml).
+
+Periodic jobs
+  Upstream runs `pihole updateGravity` weekly and `pihole updatechecker`
+  daily from cron (updatechecker asks GitHub for new versions). An example
+  is /usr/share/doc/pi-hole/pihole.cron (crond: cronie); copy it to
+  /etc/cron.d/pihole if you want them.
+
+Telemetry: Pi-hole has none. `pihole -d` (debug log) only uploads when you
+answer yes to its question.

@@ -1,0 +1,6 @@
+# Zabbix agent 2 (Go, with plugins). Not enabled by default
+# (README.FenrirOS): needs /etc/zabbix/zabbix_agent2.conf.
+type = process
+command = /usr/sbin/zabbix_agent2 -f -c /etc/zabbix/zabbix_agent2.conf
+run-as = zabbix
+depends-on: rcboot

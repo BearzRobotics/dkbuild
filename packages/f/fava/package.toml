@@ -1,0 +1,46 @@
+# Fava: a web interface for Beancount ledgers (reports, charts, queries,
+# editor, importers through beangulp). Built from the source release: the
+# front end (Svelte, TypeScript, bundled with esbuild) from its npm packages
+# in the store (npmdeps, frontend/package-lock.json), then the Python
+# package with hatchling (its build hook finds the front end built and
+# compiles the translations). esbuild's platform binary comes from its npm
+# package, as for every esbuild build in this tree.
+# Not a service: a user runs it on a ledger (README; an example dinit user
+# service in /usr/share/doc/fava).
+name = "fava"
+version = "1.31"
+release = 1
+summary = "Web interface for the Beancount double-entry accounting tool"
+license = "MIT"
+homepage = "https://beancount.github.io/fava/"
+hostdeps = ["python", "python-hatchling", "python-hatch-vcs", "python-babel", "nodejs"]
+rundeps = ["python", "python-babel", "python-beancount", "python-beangulp", "python-beanquery", "python-cheroot",
+           "python-click", "python-flask-babel", "python-flask", "python-jinja2", "python-markdown-it-py",
+           "python-msgspec", "python-watchfiles", "python-werkzeug"]
+options = ["!check", "npmdeps"]
+
+source = [
+    { url = "https://github.com/beancount/fava/archive/refs/tags/v1.31.tar.gz", sha256 = "45eaf0d39c30c44a0e703e53ad8c170a9fb33fd3e77d2a63fa03b72d72c9a5de" },
+]
+
+environment = '''
+export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
+    npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+setup = '''
+cd frontend
+node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
+npm ci --ignore-scripts
+'''
+build = '''
+( cd frontend && npm run build )
+test -f src/fava/static/app.js
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/fava/README.FenrirOS"
+install -Dm644 $pkgfiles/fava.user "$pkgdir/usr/share/doc/fava/fava.user"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/fava/LICENSE"
+'''

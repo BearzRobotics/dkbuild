@@ -1,0 +1,7 @@
+# Stirling PDF: web PDF toolkit on 127.0.0.1:8080. Not enabled by default
+# (README.FenrirOS).
+type = process
+command = /usr/lib/stirling-pdf/run
+run-as = stirling-pdf
+logfile = /var/log/stirling-pdf.log
+depends-on: rcboot

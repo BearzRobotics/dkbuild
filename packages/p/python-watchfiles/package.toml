@@ -1,0 +1,31 @@
+# watchfiles: file watching and code reload for Python, on the Rust notify
+# crate. Fava uses it to reload ledgers when they change. Crates vendored on
+# the host (cargodeps); `maturin build` makes the wheel offline and pip
+# installs it. Linked dynamically against musl (-crt-static off) so Python
+# can load it.
+name = "python-watchfiles"
+version = "1.3.0"
+release = 1
+summary = "Simple, modern and fast file watching and code reload"
+license = "MIT"
+homepage = "https://github.com/samuelcolvin/watchfiles"
+hostdeps = ["python", "rust", "maturin"]
+builddeps = ["python-devel"]
+rundeps = ["python", "python-anyio"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/b3/68/e6aa0b77d217b31f8f486ec0cdfe5e00e6e38dc0be657e7d85819b9faf0a/watchfiles-1.3.0.tar.gz", sha256 = "99aee4a07847c06820765fd7b1b49ceac4f3f711ccb7d104655a33231de1c207" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export RUSTFLAGS="-C target-feature=-crt-static"
+'''
+build = '''
+maturin build --release --frozen --offline -i python3 --compatibility linux --out dist -j $jobs
+'''
+install = '''
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr dist/*.whl
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-watchfiles/LICENSE"
+'''

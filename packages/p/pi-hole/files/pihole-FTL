@@ -1,0 +1,10 @@
+# Pi-hole FTL: DNS/DHCP server (its own dnsmasq), query database, API and web
+# interface. Not enabled by default (README.FenrirOS): set an admin password
+# and move any other DNS server off port 53 first.
+type = process
+command = /usr/bin/pihole-FTL -f
+run-as = pihole
+working-dir = /etc/pihole
+capabilities = ^cap_net_bind_service,^cap_net_raw,^cap_net_admin,^cap_sys_nice,^cap_chown,^cap_sys_time
+smooth-recovery = true
+depends-on: rcboot

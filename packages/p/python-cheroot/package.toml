@@ -1,0 +1,23 @@
+# cheroot: CherryPy's HTTP/WSGI server. Fava serves itself with it.
+name = "python-cheroot"
+version = "11.1.2"
+release = 1
+summary = "High-performance pure-Python HTTP server (CherryPy's)"
+license = "BSD-3-Clause"
+homepage = "https://cheroot.cherrypy.dev"
+hostdeps = ["python", "python-setuptools", "python-setuptools-scm"]
+rundeps = ["python", "python-more-itertools", "python-jaraco-functools"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/68/e4/5c2020b60a55aca8d79ed55b62ad1cd7fc47ea44ad6b584e83f5f1bf58b0/cheroot-11.1.2.tar.gz", sha256 = "bfb70c49663f63b0440f2b54dbc6b0d1650e56dfe4e2641f59b2c6f727b44aca" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/python-cheroot/LICENSE.md"
+'''

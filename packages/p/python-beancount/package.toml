@@ -1,0 +1,26 @@
+# Beancount 3: a double-entry bookkeeping language and its tools (bean-check,
+# bean-format, bean-doctor, ...), the core of plain-text accounting; Fava is
+# its web interface. A C extension (its parser, from flex and bison) built
+# with meson-python. The pyproject's flex-bin/bison-bin build requirements
+# are PyPI repackagings of flex and bison: the system's are used.
+# (Importers moved to beangulp, bean-query to beanquery: separate packages.)
+name = "python-beancount"
+version = "3.2.3"
+release = 1
+summary = "Double-entry bookkeeping language (plain-text accounting)"
+license = "GPL-2.0-only"
+homepage = "https://beancount.github.io"
+hostdeps = ["python", "python-meson-python", "meson", "ninja", "pkgconf", "bison", "flex"]
+builddeps = ["python-devel"]
+rundeps = ["python", "python-click", "python-dateutil", "python-regex"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/eb/21/ed48e671a5e474c620762a7ea9c6b7f402f847d74dd2b73ceb5d2dec79a3/beancount-3.2.3.tar.gz", sha256 = "f52c4d237bcb092cbf02a29373d3e59d95349c2828a91491818ae437ee220f74" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/python-beancount/COPYING"
+'''

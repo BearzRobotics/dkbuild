@@ -1,0 +1,6 @@
+# Zabbix web service (scheduled PDF reports through a headless Chromium).
+# Not enabled by default: needs /etc/zabbix/zabbix_web_service.conf.
+type = process
+command = /usr/sbin/zabbix_web_service -c /etc/zabbix/zabbix_web_service.conf
+run-as = zabbix
+depends-on: rcboot

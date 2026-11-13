@@ -1,0 +1,19 @@
+AdGuard Home on FenrirOS
+========================
+
+Installed inert: the service is not enabled, there is no configuration and
+no account.
+
+    dinitctl enable adguardhome
+
+On first start (no /var/lib/adguardhome/AdGuardHome.yaml) it serves its setup
+wizard on http://<host>:3000 on every interface; whoever opens it first
+chooses the admin account, the web and DNS ports. Do this at once, on a
+trusted network. It runs as the adguardhome user with the capabilities to
+bind ports below 1024 (DNS on 53) and to use raw sockets (its DHCP server).
+Anything else listening on port 53 (dnsmasq, unbound, a local resolver) must
+be moved or stopped first.
+
+Self-update is turned off (--no-check-update in /etc/dinit.d/adguardhome):
+updates come from the package. It downloads the filter lists you choose
+from their publishers; "Send anonymous statistics" does not exist in it.

@@ -1,0 +1,9 @@
+#!/bin/sh
+# Stirling PDF server (core flavour), on 127.0.0.1:8080. Working directory
+# (configs/, customFiles/, logs/) is /var/lib/stirling-pdf.
+# Analytics (PostHog, Scarf) are switched off here; settings in
+# /var/lib/stirling-pdf/configs/settings.yml (made on first start).
+export SYSTEM_ENABLEANALYTICS=false SYSTEM_ENABLEPOSTHOG=false SYSTEM_ENABLESCARF=false
+export SERVER_ADDRESS="${SERVER_ADDRESS:-127.0.0.1}" SERVER_PORT="${SERVER_PORT:-8080}"
+cd /var/lib/stirling-pdf || exit 1
+exec /usr/lib/jvm/java-25-openjdk/bin/java -jar /usr/lib/stirling-pdf/stirling-pdf.jar "$@"

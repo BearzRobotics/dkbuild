@@ -1,0 +1,33 @@
+Docker on FenrirOS
+==================
+
+The packages are installed inert: nothing is enabled or started, and no user
+is added to the `docker` group.
+
+Rootful Docker
+--------------
+    dinitctl enable containerd
+    dinitctl enable docker
+
+The socket is /run/docker.sock, owned by root:docker. Membership in the
+`docker` group gives root-equivalent access to the host; add a user only if
+that is what you want:
+
+    usermod -aG docker <user>
+
+Optional settings go in /etc/docker/daemon.json (none is shipped; see
+dockerd(8)). Docker uses iptables (or nftables with
+"firewall-backend": "nftables") for container networking.
+
+Rootless Docker
+---------------
+Needs /etc/subuid and /etc/subgid ranges for the user (rootlesskit,
+slirp4netns or pasta). As that user:
+
+    dockerd-rootless-setuptool.sh check
+    dinitctl --user enable docker
+
+and set DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock.
+
+Plugins: docker-buildx (`docker buildx`, BuildKit) and docker-compose
+(`docker compose`) are separate packages.
