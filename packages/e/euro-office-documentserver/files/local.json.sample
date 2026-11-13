@@ -1,0 +1,33 @@
+{
+  "services": {
+    "CoAuthoring": {
+      "sql": {
+        "type": "postgres",
+        "dbHost": "localhost",
+        "dbPort": 5432,
+        "dbName": "euro-office",
+        "dbUser": "euro-office",
+        "dbPass": "CHANGE-ME"
+      },
+      "token": {
+        "enable": {
+          "request": { "inbox": true, "outbox": true },
+          "browser": true
+        }
+      },
+      "secret": {
+        "inbox":   { "string": "CHANGE-ME (openssl rand -hex 32)" },
+        "outbox":  { "string": "CHANGE-ME (the same as inbox)" },
+        "session": { "string": "CHANGE-ME (openssl rand -hex 32)" }
+      }
+    }
+  },
+  "rabbitmq": {
+    "url": "amqp://USER:PASSWORD@localhost:5672"
+  },
+  "storage": {
+    "fs": {
+      "secretString": "CHANGE-ME (openssl rand -hex 32)"
+    }
+  }
+}

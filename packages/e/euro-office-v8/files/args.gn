@@ -1,0 +1,47 @@
+# V8 8.9 for Euro-Office's doctrenderer: Euro-Office's Linux arguments
+# (core: Common/3dParty/v8/nc-build.py, get_gn_args_file_content), with the
+# system clang (clang_base_path=/usr) as there.
+target_os="linux"
+is_debug=false
+is_component_build=false
+is_official_build=false
+
+is_clang=true
+clang_base_path="/usr"
+clang_use_chrome_plugins=false
+
+use_sysroot=false
+use_custom_libcxx=false
+
+symbol_level=0
+strip_debug_info=true
+treat_warnings_as_errors=false
+
+v8_monolithic=true
+v8_use_external_startup_data=false
+v8_enable_i18n_support=false
+v8_enable_webassembly=false
+v8_enable_pointer_compression=true
+v8_enable_sandbox=false
+
+cppgc_enable_caged_heap=false
+v8_enable_conservative_stack_scanning=false
+cppgc_is_standalone=false
+
+v8_enable_test_features=false
+v8_enable_verify_heap=false
+v8_enable_verify_predictable=false
+build_with_chromium=false
+
+v8_enable_backtrace=false
+v8_enable_disassembler=false
+v8_enable_object_print=false
+
+v8_use_snapshot=true
+v8_enable_lazy_source_positions=false
+v8_enable_gdbjit=false
+v8_enable_vtunejit=false
+v8_enable_handle_zapping=false
+
+use_gold=false
+use_lld=true

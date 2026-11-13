@@ -1,0 +1,113 @@
+# Euro-Office core: the native document engine of the Euro-Office Document
+# Server (the AGPL ONLYOFFICE fork): x2t (the converter between OOXML, ODF,
+# the legacy binary formats, PDF, EPUB, FB2, HTML, DjVu, XPS, HWP, OFD, ...),
+# its libraries (kernel, graphics, PdfFile, DocxRenderer, doctrenderer with
+# V8, ...), docbuilder, and the tools allfontsgen, allthemesgen,
+# pluginsmanager and x2ttester. Release 9.3.7-1 (the latest stable
+# Document Server release; Euro-Office tags all its repositories with it).
+#
+# Source: snapshot:git of Euro-Office's DocumentServer repository at the tag,
+# with its submodules at the commits the tag records (core, sdkjs, web-apps,
+# server, fonts, ...): euro-office-documentserver builds the rest from the
+# same tarball.
+#
+# Third-party code: upstream's Common/3dParty/build_3rdparty.py clones and
+# builds it at configure time; here it is skipped (THIRD_PARTY_PREPARED) and
+#   - ICU, Boost, OpenSSL are the system's (patches/system-libraries.patch),
+#   - V8 is euro-office-v8 (8.9.45, built as Euro-Office builds it),
+#   - the sources core compiles in (harfbuzz, brotli, gumbo, katana, md4c,
+#     socket.io-client-cpp with asio, websocketpp and rapidjson) are further
+#     sources here, at the commits build_3rdparty.py pins, laid out and patched
+#     in setup exactly as its nc-build.py scripts do (with core's own patches).
+# Core also carries copies of freetype, zlib/minizip, libpng, libjpeg,
+# openjpeg, jasper, libxml2, cryptopp, agg and others in its tree; its CMake
+# files compile them in by file list, and they stay bundled for now
+# (wip/euro-office/NOTES.md).
+# Not built here: the desktop pieces (BUILD_DESKTOP: CEF, Qt) and the
+# WebAssembly builds sdkjs uses (emscripten; sdkjs's checked-in ones are used,
+# see euro-office-documentserver); the unit tests (EO_BUILD_TESTS: GoogleTest
+# from vcpkg).
+#
+# Installed in the Document Server's layout, as upstream's packages do
+# (/var/www/euro-office/documentserver/server/FileConverter/bin and
+# server/tools): its configuration files name these paths. The libraries
+# there are private (found through $ORIGIN).
+# Not built yet.
+name = "euro-office-core"
+version = "9.3.7.1"
+release = 1
+summary = "Euro-Office document conversion engine (x2t) and tools"
+license = "AGPL-3.0-only"
+homepage = "https://github.com/Euro-Office/core"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja", "python", "pkgconf"]
+builddeps = ["euro-office-v8", "boost-devel", "icu-devel", "openssl-devel", "zlib-ng-compat-devel"]
+options = ["!check", "jobs:12"]
+patches = ["system-libraries.patch"]
+
+source = [
+    { url = "snapshot:git https://github.com/Euro-Office/DocumentServer v9.3.7-1", sha256 = "69ccd4b42599b4a493faada2c83a76146511ce69e973171d00ef1f82c12a678b" },
+    { url = "https://github.com/harfbuzz/harfbuzz/archive/894a1f72ee93a1fd8dc1d9218cb3fd8f048be29a.tar.gz", sha256 = "17eda8a9861d347a6e95cd2b3112301ce90dcc649b0e96623cc89c6ca4180e66" },
+    { url = "https://github.com/google/brotli/archive/db24a98aed38a16de78cc05ca15cdd8dc2a0d92d.tar.gz", sha256 = "113b9685dfc14dd2f3360d077283266eec2fbdfb0fe3e5600f11be151da0d68e" },
+    { url = "https://github.com/google/gumbo-parser/archive/aa91b27b02c0c80c482e24348a457ed7c3c088e0.tar.gz", sha256 = "f2d899ad9f96da1461710148dc1dc84c8519d9ec342d70bdb7a2c1f61dba3678" },
+    { url = "https://github.com/jasenhuang/katana-parser/archive/be6df458d4540eee375c513958dcb862a391cdd1.tar.gz", sha256 = "3522aa95456f2faa7f43052c5f38c4d5cff8320f9a69fe6aac33eb1dda7b91b5" },
+    { url = "https://github.com/mity/md4c/archive/481fbfbdf72daab2912380d62bb5f2187d438408.tar.gz", sha256 = "07252052c3e3c23efeab44b6d52d093817102b2b500353889d72c241a1b76a79" },
+    { url = "https://github.com/socketio/socket.io-client-cpp/archive/da779141a7379cc30c870d48295033bc16a23c66.tar.gz", sha256 = "db27c280f375a5983eed8185485e823262a328f95bc549f70667fccbbeab49b4" },
+    { url = "https://github.com/chriskohlhoff/asio/archive/230c0d2ae035c5ce1292233fcab03cea0d341264.tar.gz", sha256 = "09566f5296692d042358bee4211d126cef3d5062a8fa86829d2962ac0e538a34" },
+    { url = "https://github.com/zaphoyd/websocketpp/archive/56123c87598f8b1dd471be83ca841ceae07f95ba.tar.gz", sha256 = "56a040dd99e7e58e0513204030e5af5e94750a3d80b176b16bf8e3a837b40f0a" },
+    { url = "https://github.com/Tencent/rapidjson/archive/a36110e11874bcf35af854940e0ce910c19a8b49.tar.gz", sha256 = "3c9995d06ec49fa0d47d31e2abaf6aadc08395c98ab08b844e837a22ffc493fd" },
+]
+
+setup = '''
+# The install directory build_3rdparty.py would fill (each nc-build.py checks
+# out into it and patches there; work and install directories are the same
+# for these), from the further sources, with the same patches.
+t=$PWD/third_party/install
+p=$PWD/core/Common/3dParty
+mkdir -p $t/html
+cp -a ../harfbuzz-894a1f72ee93a1fd8dc1d9218cb3fd8f048be29a $t/harfbuzz
+cp -a ../brotli-db24a98aed38a16de78cc05ca15cdd8dc2a0d92d $t/brotli
+cp -a ../gumbo-parser-aa91b27b02c0c80c482e24348a457ed7c3c088e0 $t/html/gumbo-parser
+cp -a ../katana-parser-be6df458d4540eee375c513958dcb862a391cdd1 $t/html/katana-parser
+cp -a ../md4c-481fbfbdf72daab2912380d62bb5f2187d438408 $t/md
+cp -a ../socket.io-client-cpp-da779141a7379cc30c870d48295033bc16a23c66 $t/socketio
+rmdir $t/socketio/lib/asio $t/socketio/lib/websocketpp $t/socketio/lib/rapidjson 2>/dev/null || true
+cp -a ../asio-230c0d2ae035c5ce1292233fcab03cea0d341264 $t/socketio/lib/asio
+cp -a ../websocketpp-56123c87598f8b1dd471be83ca841ceae07f95ba $t/socketio/lib/websocketpp
+cp -a ../rapidjson-a36110e11874bcf35af854940e0ce910c19a8b49 $t/socketio/lib/rapidjson
+# core's own patches to them, as harfbuzz/, html/ and socketio/nc-build.py
+# apply them (each patch file in core says what it changes)
+patch -d $t/harfbuzz -p1 < $p/harfbuzz/patch/harfbuzz.patch
+patch -d $t/html/katana-parser -p1 < $p/html/katana.patch
+patch -d $t/html/gumbo-parser -p1 < $p/html/gumbo.patch
+s=$p/socketio/patches/proper_patches
+patch -d $t/socketio/lib/websocketpp -p1 < $s/websocketpp.patch
+for f in sio_client_impl_fail sio_client_impl_open sio_client_impl_close_timeout; do
+    patch -d $t/socketio -p1 < $s/$f.patch
+done
+patch -d $t/socketio/lib/asio -p1 < $s/asio-fix-for-openssl3.patch
+# socketio/nc-build.py: a second copy of the client without TLS, made by
+# no_tls.patch
+cp -a $t/socketio/src $t/socketio/src_no_tls
+patch -d $t/socketio -p1 < $s/no_tls.patch
+'''
+build = '''
+%cmake -S core \
+    -DTHIRD_PARTY_PREPARED=ON \
+    -DEO_CORE_3RD_PARTY_DIR=$PWD/third_party \
+    -DEO_CORE_3RD_PARTY_INSTALL_DIR=$PWD/third_party/install \
+    -DPYTHON_BIN=/usr/bin/python3 \
+    -DEO_CORE_OUTPUT_DIR=$PWD/out/bin \
+    -DEO_CORE_TOOLS_DIR=$PWD/out/tools
+%cmake_build
+test -x out/bin/x2t
+'''
+install = '''
+d="$pkgdir/var/www/euro-office/documentserver/server"
+mkdir -p "$d/FileConverter/bin" "$d/tools"
+cp -a out/bin/. "$d/FileConverter/bin/"
+cp -a out/tools/. "$d/tools/"
+install -Dm644 core/LICENSE.txt "$pkgdir/usr/share/licenses/euro-office-core/LICENSE.txt"
+install -Dm644 core/3DPARTY.md "$pkgdir/usr/share/licenses/euro-office-core/3DPARTY.md"
+cp -a core/LICENSES "$pkgdir/usr/share/licenses/euro-office-core/LICENSES"
+'''

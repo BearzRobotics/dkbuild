@@ -1,0 +1,17 @@
+# Copyright 2020 the V8 project authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Disabled to avoid ARM64 toolchain issues
+
+import("//build/config/sanitizers/sanitizers.gni")
+import("../../gni/v8.gni")
+
+group("cppgc_base") {
+  visibility = [ ":*" ]
+}
+
+group("cppgc_base_for_testing") {
+  testonly = true
+  visibility = [ ":*" ]
+}

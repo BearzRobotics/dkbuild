@@ -1,0 +1,109 @@
+# V8 8.9.45, built the way Euro-Office builds it for its document engine (the
+# doctrenderer library of euro-office-core, which links it statically and also
+# includes V8's private headers): a v8_monolith static library, no ICU (i18n
+# off), no WebAssembly, pointer compression on, the snapshot embedded (no
+# external startup data). Euro-Office 9.3.x pins this V8 (core:
+# Common/3dParty/v8/nc-build.py); their main branch has moved to V8 14.6 for
+# the next release (wip/euro-office/NOTES.md).
+#
+# A build-only package: a private static library and headers in
+# /usr/lib/euro-office-v8 (the layout core's common.cmake expects), not a
+# system V8. Nothing at run time depends on it.
+#
+# Source: snapshot:euro-office (src/snapshot-euro-office.sh) is V8 at the tag
+# with the repositories its DEPS pins that a monolith build reads (build,
+# buildtools, base/trace_event/common, googletest, icu, jinja2, markupsafe,
+# zlib, tools/clang), shallow, without gclient, CIPD packages or hooks (those
+# download a clang, a sysroot and binutils: the system's are used), and GN at
+# the commit Euro-Office builds V8 8.9 with (a current GN no longer reads V8
+# 8.9's build files). GN is built here first, as nc-build.py does.
+#
+# Euro-Office's own source changes, as nc-build.py makes them: its two patches
+# (patches/, each says what it does), its two stub BUILD.gn files (files/:
+# gmock and cppgc are not part of the monolith and their real BUILD files do
+# not resolve without the test infrastructure), and its narrowing of four enum
+# bitfields that clang >= 20 rejects (in setup, each commented).
+#
+# Clang: Euro-Office builds with clang 13 on Linux (and Apple's newer clang on
+# macOS, which is what its bitfield fixes are for); here it is the system LLVM.
+# Not built yet: the first build may need further fixes for current clang and
+# libc++ (Euro-Office's main branch avoids them by moving to V8 14.6).
+name = "euro-office-v8"
+version = "8.9.45"
+release = 1
+summary = "V8 JavaScript engine as a static library for Euro-Office's document engine"
+license = "BSD-3-Clause"
+homepage = "https://v8.dev"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["python", "ninja", "llvm"]
+options = ["!check", "jobs:12"]
+patches = ["0001-build-include-cstdint.patch", "0002-jinja2-collections-abc.patch"]
+
+source = [
+    { url = "snapshot:euro-office v8 8.9.45 281ba2c91861b10fec7407c4b6172ec3d4661243", sha256 = "df0bc6aebcd3d7c427facd36b62c8a6191982b9e8328a55b7f5577cd63a3ed31" },
+]
+
+environment = '''
+case "$arch" in
+    x86_64)  cpu=x64 ;;
+    aarch64) cpu=arm64 ;;
+esac
+# V8 8.9's build scripts and GN's exec_script() call a bare "python"
+mkdir -p /tmp/pybin
+ln -sf /usr/bin/python3 /tmp/pybin/python
+export PATH="/tmp/pybin:$PATH"
+'''
+setup = '''
+# Euro-Office's stub BUILD files (nc-build.py: disable_gmock, disable_cppgc):
+# the monolith needs neither gmock nor the separate cppgc library.
+cp $pkgfiles/gmock-BUILD.gn v8/testing/gmock/BUILD.gn
+cp $pkgfiles/cppgc-BUILD.gn v8/src/heap/cppgc/BUILD.gn
+# Euro-Office's bitfield fixes (nc-build.py: fix_location_operand_bitfield_ub,
+# fix_oversized_enum_bitfields): a BitField wider than its enum's range makes
+# kMax an invalid enum value, which clang >= 20 rejects in a constant
+# expression (V8 fixed the same upstream in 2022, d15d49b). Each sed narrows
+# one field to the bits its enum needs; the field's shift stays.
+# LocationKind has 2 values (1 bit, declared 2):
+sed -i 's/using LocationKindField = base::BitField64<LocationKind, 3, 2>;/using LocationKindField = base::BitField64<LocationKind, 3, 1>;/' \
+    v8/src/compiler/backend/instruction.h
+# WasmCode::Kind has 4 values (2 bits, declared 3):
+sed -i 's/using KindField = base::BitField8<Kind, 0, 3>;/using KindField = base::BitField8<Kind, 0, 2>;/' \
+    v8/src/wasm/wasm-code-manager.h
+# LogEventsAndTags has 23 values (5 bits, declared 8):
+sed -i 's/using TagField = base::BitField<CodeEventListener::LogEventsAndTags, 0, 8>;/using TagField = base::BitField<CodeEventListener::LogEventsAndTags, 0, 5>;/' \
+    v8/src/profiler/profile-generator.h
+# AddressingMode on arm64 has 13 values (4 bits, declared 5); on x64 it has
+# 20, which need all 5, so only for arm64:
+if [ "$cpu" = arm64 ]; then
+    sed -i 's/using AddressingModeField = base::BitField<AddressingMode, 9, 5>;/using AddressingModeField = base::BitField<AddressingMode, 9, 4>;/' \
+        v8/src/compiler/backend/instruction-codes.h
+fi
+'''
+build = '''
+# GN, as nc-build.py builds it (build_gn): no git, so a fixed commit position
+(
+    cd gn
+    CC=clang CXX=clang++ python3 build/gen.py --no-last-commit-position
+    mkdir -p out
+    printf '#pragma once\n#define LAST_COMMIT_POSITION_NUM 0\n#define LAST_COMMIT_POSITION "0 (unknown)"\n' \
+        > out/last_commit_position.h
+    ninja -C out -j $jobs gn
+)
+cd v8
+mkdir -p out/release
+{ cat $pkgfiles/args.gn
+  printf 'target_cpu="%s"\nv8_target_cpu="%s"\n' $cpu $cpu; } > out/release/args.gn
+../gn/out/gn gen out/release
+CC=clang CXX=clang++ ninja -C out/release -j $jobs v8_monolith
+test -f out/release/obj/libv8_monolith.a
+'''
+install = '''
+# the layout of nc-build.py's install directory (core's common.cmake reads
+# libv8_monolith.a there, and v8/include and v8/src for the headers)
+d="$pkgdir/usr/lib/euro-office-v8"
+install -Dm644 v8/out/release/obj/libv8_monolith.a "$d/libv8_monolith.a"
+mkdir -p "$d/v8"
+cp -r v8/include "$d/v8/include"
+(cd v8/src && find . -name '*.h' -exec install -Dm644 {} "$d/v8/src/{}" \;)
+install -Dm644 v8/LICENSE "$pkgdir/usr/share/licenses/euro-office-v8/LICENSE"
+'''

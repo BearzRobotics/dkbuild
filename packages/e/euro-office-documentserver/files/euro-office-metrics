@@ -1,0 +1,9 @@
+# Euro-Office Document Server: StatsD metrics collector (optional). Not
+# enabled by default.
+type = process
+command = /usr/bin/env NODE_DISABLE_COLORS=1 /usr/bin/node /var/www/euro-office/documentserver/server/Metrics/sources/server.js ./config/config.js
+working-dir = /var/www/euro-office/documentserver/server/Metrics
+run-as = ds
+logfile = /var/log/euro-office/documentserver/metrics/out.log
+restart = true
+depends-on: rcboot

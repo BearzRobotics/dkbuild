@@ -1,0 +1,311 @@
+# Libera Suite 0.7.0 (Abilian): a desktop office suite (Libera Words, Tables,
+# Slides, Diagrams, and a PDF editor) that runs Euro-Office's editors in a
+# GTK + WebKitGTK window through pywebview, with Euro-Office's x2t for
+# conversions: no CEF, no Qt. FenrirOS's Euro-Office desktop app, in place of
+# Euro-Office's CEF-based Desktop Editors (wip/euro-office/NOTES.md).
+#
+# Two halves, as upstream ships them:
+#   - the host (Python, Apache-2.0): the libera sdist from PyPI, installed
+#     with pip on the system Python; its GTK window through python-pywebview,
+#     python-gobject and webkitgtk (WebKit2 4.1, GTK 3).
+#   - the payload 0.7.1 (AGPL-3.0): upstream publishes it as the libera-core
+#     wheels (prebuilt x2t, glibc) and the libera-web wheel (prebuilt
+#     editors). Built here from source instead, as Libera's own build does it
+#     (build/engine/build.sh, payload.sh, dist.sh in the libera_core sdist):
+#     Euro-Office core, sdkjs and web-apps at the commits Libera pins
+#     (build/upstream/pins.toml: Euro-Office Desktop Editors 9.3.5-2), with
+#     Libera's patch queue (build/upstream/patches: 112 for core, 5 sdkjs,
+#     13 web-apps, 2 libxml2; each patch's message says what it changes and
+#     why), and libxml2 2.9.14 in place of core's own copy (Libera's 0172).
+#
+# Why not euro-office-core / -documentserver: Libera pins other revisions
+# (9.3.5-2, not 9.3.7-1), needs its patches (the host relies on 0034, the V8
+# code cache in a folder it names, and 0190, libera-sign; the rest fix ODF,
+# PDF, signatures and hostile documents), and needs the editors built for the
+# desktop platform (SDK_PLATFORM=desktop), where the Document Server's are
+# built for the server. So it builds its own core and editors, and shares
+# what is the same: euro-office-v8 (core 5a33ce6 pins the same V8 8.9.45 and
+# GN), the system ICU/Boost/OpenSSL (files/fenriros-system-libraries.patch,
+# as euro-office-core), and core's third-party sources at the same commits
+# as euro-office-core (brotli is a47d747 at this core).
+#
+# Left out or changed from upstream's payload:
+#   - the "libera" web-apps theme (its artwork is not in Libera's public
+#     sources): the editors use Euro-Office's theme; the host's windows,
+#     menus and icon are Libera's.
+#   - sdkjs's checked-in WebAssembly modules are used, as in
+#     euro-office-documentserver.
+#   - the update check (once a day, a request to Abilian's CDN, which would
+#     tell the user to update with pip or the install script) is off unless
+#     config.toml says check_updates = true (a sed in setup).
+#   - the host's per-user desktop entry writer is not needed: the desktop
+#     entry and icon are installed system-wide here.
+# The payload sits in /usr/lib/libera-suite/payload; /usr/bin/libera sets
+# LIBERA_PAYLOAD to it (files/libera), the host's own setting for a payload in
+# a folder. Fonts: Libera's core set (build/payload/fonts-core.txt) of
+# Euro-Office's core-fonts; the host indexes them, and the system's fonts,
+# per user at first start (its payload/fonts.py).
+# Not built yet.
+name = "libera-suite"
+version = "0.7.0"
+release = 1
+summary = "Desktop office suite built on Euro-Office's editors (GTK, WebKitGTK)"
+license = "Apache-2.0 AND AGPL-3.0-only AND CC-BY-SA-4.0"
+homepage = "https://docs.liberasuite.eu"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["python", "python-hatchling", "cmake", "ninja", "pkgconf", "nodejs", "git"]
+builddeps = ["euro-office-v8", "boost-devel", "icu-devel", "openssl-devel", "zlib-ng-compat-devel"]
+rundeps = ["python", "python-pywebview", "python-gobject", "python-typing-extensions", "webkitgtk", "gtk+3"]
+options = ["!check", "npmdeps", "jobs:12"]
+
+source = [
+    # the host, and the payload's build files (pins, patch queues, scripts)
+    { url = "https://files.pythonhosted.org/packages/a1/bb/be8d119f1a403a57bc4ec8157d571b3901aefae345aa49d279f4ee328925/libera-0.7.0.tar.gz", sha256 = "48dc881892d14c0c2ff2ef81f39020c951333ce30321a8e66a9de3011c1d1712" },
+    { url = "https://files.pythonhosted.org/packages/7b/ff/981c44bb425849c9461bb2e5b9f2c698f0e32edf37d5dc35f76dcb36b7b3/libera_core-0.7.1.tar.gz", sha256 = "a50a561e0d1adeb0f78cecf945cb9c78156dee4655a4a82a76339230b0d311a6" },
+    # Euro-Office at Libera's pins (build/upstream/pins.toml)
+    { url = "https://github.com/Euro-Office/core/archive/5a33ce6c4a63387e8576c7e763b70cd971988b24.tar.gz", sha256 = "f5c117b91139e3d6702bf680a100dff2eb6b30d10c1adbc3cdbe7cb2c97dbd36" },
+    { url = "https://github.com/Euro-Office/sdkjs/archive/0cde84e8dbfb299b53098532c8af142712830cc6.tar.gz", sha256 = "fe69cd205cde46d9c79796f3c560869b536b2c1d1b769aa0a209d01855bda032" },
+    { url = "https://github.com/Euro-Office/web-apps/archive/51c706eb619612c2d133ef76e2807cdffd799f96.tar.gz", sha256 = "8bda60e8cf00bf2b35d88c90e40ac36c61ccd9819bc191ab19870901bb5ceb4e" },
+    { url = "https://github.com/Euro-Office/core-fonts/archive/2de90688e07e2442a5fffc434fdf0a3d212c1f42.tar.gz", sha256 = "a0382296a4304b62e1a3e8c5b6ceeec3047ba7fb6c78b1912213523cbe03294b" },
+    { url = "https://github.com/Euro-Office/document-templates/archive/554851735b1fb1890a02ba1d57fed3e6c8b21425.tar.gz", sha256 = "1c77c3c566252e3b89f99acdcd869af6f6c8e6143f67d351508033adcfe85484" },
+    { url = "https://github.com/Euro-Office/dictionaries/archive/08d46f8631b82af00f83b28657c54ed1aaf9e3fc.tar.gz", sha256 = "f78a0b508b8ee17d50656b8a2c1bbb9683ca472023f54f59dcdb0a4099bb6ea0" },
+    { url = "https://github.com/GNOME/libxml2/archive/7846b0a677f8d3ce72486125fa281e92ac9970e8.tar.gz", sha256 = "1d17739bcee21f3c698d463c078e3985d2a782a7954a4517ae79b4d4e723a468" },
+    # core's third-party sources, at the commits this core's nc-build.py pins
+    { url = "https://github.com/harfbuzz/harfbuzz/archive/894a1f72ee93a1fd8dc1d9218cb3fd8f048be29a.tar.gz", sha256 = "17eda8a9861d347a6e95cd2b3112301ce90dcc649b0e96623cc89c6ca4180e66" },
+    { url = "https://github.com/google/brotli/archive/a47d7475063eb223c87632eed806c0070e70da29.tar.gz", sha256 = "49b657a4321cb00e388863dec8d0558b94ec47100d619b837d570a58bba71379" },
+    { url = "https://github.com/google/gumbo-parser/archive/aa91b27b02c0c80c482e24348a457ed7c3c088e0.tar.gz", sha256 = "f2d899ad9f96da1461710148dc1dc84c8519d9ec342d70bdb7a2c1f61dba3678" },
+    { url = "https://github.com/jasenhuang/katana-parser/archive/be6df458d4540eee375c513958dcb862a391cdd1.tar.gz", sha256 = "3522aa95456f2faa7f43052c5f38c4d5cff8320f9a69fe6aac33eb1dda7b91b5" },
+    { url = "https://github.com/mity/md4c/archive/481fbfbdf72daab2912380d62bb5f2187d438408.tar.gz", sha256 = "07252052c3e3c23efeab44b6d52d093817102b2b500353889d72c241a1b76a79" },
+    { url = "https://github.com/socketio/socket.io-client-cpp/archive/da779141a7379cc30c870d48295033bc16a23c66.tar.gz", sha256 = "db27c280f375a5983eed8185485e823262a328f95bc549f70667fccbbeab49b4" },
+    { url = "https://github.com/chriskohlhoff/asio/archive/230c0d2ae035c5ce1292233fcab03cea0d341264.tar.gz", sha256 = "09566f5296692d042358bee4211d126cef3d5062a8fa86829d2962ac0e538a34" },
+    { url = "https://github.com/zaphoyd/websocketpp/archive/56123c87598f8b1dd471be83ca841ceae07f95ba.tar.gz", sha256 = "56a040dd99e7e58e0513204030e5af5e94750a3d80b176b16bf8e3a837b40f0a" },
+    { url = "https://github.com/Tencent/rapidjson/archive/a36110e11874bcf35af854940e0ce910c19a8b49.tar.gz", sha256 = "3c9995d06ec49fa0d47d31e2abaf6aadc08395c98ab08b844e837a22ffc493fd" },
+]
+
+environment = '''
+export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
+    npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+# the source directories, by the commits they are at (pins.toml)
+core=/build/core-5a33ce6c4a63387e8576c7e763b70cd971988b24
+sdkjs=/build/sdkjs-0cde84e8dbfb299b53098532c8af142712830cc6
+webapps=/build/web-apps-51c706eb619612c2d133ef76e2807cdffd799f96
+fonts=/build/core-fonts-2de90688e07e2442a5fffc434fdf0a3d212c1f42
+templates=/build/document-templates-554851735b1fb1890a02ba1d57fed3e6c8b21425
+dicts=/build/dictionaries-08d46f8631b82af00f83b28657c54ed1aaf9e3fc
+libxml2=/build/libxml2-7846b0a677f8d3ce72486125fa281e92ac9970e8
+queue=/build/libera_core-0.7.1/build/upstream/patches
+# the payload being made, and Libera's values for it (payload.sh)
+P=$PWD/payload
+export PRODUCT_VERSION=9.2.1 BUILD_NUMBER=0 COMPANY_NAME="Libera Suite" \
+    PUBLISHER_URL=https://abilian.com/ \
+    APP_COPYRIGHT="Copyright (C) Abilian SAS 2026. All rights reserved"
+'''
+setup = '''
+# Libera's patch queue, each repository's series in order (build.sh applies
+# it with `git am --keep-cr`; git apply takes the same patches, binary ones
+# included, without fuzz; no repository here, so nothing is committed)
+for r in core:$core sdkjs:$sdkjs web-apps:$webapps libxml2:$libxml2; do
+    (cd ${r#*:} && for p in $queue/${r%%:*}/*.patch; do git apply "$p"; done)
+done
+# FenrirOS's system libraries for core (the file's header says what it does)
+patch -d $core -p1 < $pkgfiles/fenriros-system-libraries.patch
+# core's third-party sources laid out as build_3rdparty.py's install
+# directory, patched as its nc-build.py scripts patch them (as in
+# euro-office-core)
+t=$core/third_party/install
+p=$core/Common/3dParty
+mkdir -p $t/html
+cp -a /build/harfbuzz-894a1f72ee93a1fd8dc1d9218cb3fd8f048be29a $t/harfbuzz
+cp -a /build/brotli-a47d7475063eb223c87632eed806c0070e70da29 $t/brotli
+cp -a /build/gumbo-parser-aa91b27b02c0c80c482e24348a457ed7c3c088e0 $t/html/gumbo-parser
+cp -a /build/katana-parser-be6df458d4540eee375c513958dcb862a391cdd1 $t/html/katana-parser
+cp -a /build/md4c-481fbfbdf72daab2912380d62bb5f2187d438408 $t/md
+cp -a /build/socket.io-client-cpp-da779141a7379cc30c870d48295033bc16a23c66 $t/socketio
+rmdir $t/socketio/lib/asio $t/socketio/lib/websocketpp $t/socketio/lib/rapidjson 2>/dev/null || true
+cp -a /build/asio-230c0d2ae035c5ce1292233fcab03cea0d341264 $t/socketio/lib/asio
+cp -a /build/websocketpp-56123c87598f8b1dd471be83ca841ceae07f95ba $t/socketio/lib/websocketpp
+cp -a /build/rapidjson-a36110e11874bcf35af854940e0ce910c19a8b49 $t/socketio/lib/rapidjson
+patch -d $t/harfbuzz -p1 < $p/harfbuzz/patch/harfbuzz.patch
+patch -d $t/html/katana-parser -p1 < $p/html/katana.patch
+patch -d $t/html/gumbo-parser -p1 < $p/html/gumbo.patch
+s=$p/socketio/patches/proper_patches
+patch -d $t/socketio/lib/websocketpp -p1 < $s/websocketpp.patch
+for f in sio_client_impl_fail sio_client_impl_open sio_client_impl_close_timeout; do
+    patch -d $t/socketio -p1 < $s/$f.patch
+done
+patch -d $t/socketio/lib/asio -p1 < $s/asio-fix-for-openssl3.patch
+cp -a $t/socketio/src $t/socketio/src_no_tls
+patch -d $t/socketio -p1 < $s/no_tls.patch
+# web-apps' build reads sdkjs at ../sdkjs (deploy-resources.js), as in
+# Libera's source tree, where the repositories sit side by side by name
+ln -sfn $sdkjs /build/sdkjs
+ln -sfn $webapps /build/web-apps
+# the editors' npm packages, offline (sdkjs's npm-shrinkwrap.json is
+# files/sdkjs.package-lock.json for npmdeps; web-apps has a package-lock.json)
+node /dkbuild/npm-offline.js /tmp/npm-cache $sdkjs/build/npm-shrinkwrap.json $webapps/build/package-lock.json
+(cd $sdkjs/build && npm ci --ignore-scripts)
+(cd $webapps/build && npm ci --ignore-scripts)
+# The update check asks Abilian's CDN once a day unless config.toml says
+# check_updates = false, and would say to update with pip or curl | sh: off
+# unless check_updates = true (this inverts the default of the one test).
+sed -i 's/return locate.read_config_bool("check_updates") is not False/return locate.read_config_bool("check_updates") is True/' \
+    src/libera/host/updates.py
+grep -q 'read_config_bool("check_updates") is True' src/libera/host/updates.py
+'''
+build = '''
+# the converter (build.sh configure/build), with the system libraries
+cmake -S $core -B build-core -G Ninja -DCMAKE_BUILD_TYPE=Release \
+    -DTHIRD_PARTY_PREPARED=ON \
+    -DEO_CORE_3RD_PARTY_DIR=$core/third_party \
+    -DEO_CORE_3RD_PARTY_INSTALL_DIR=$core/third_party/install \
+    -DPYTHON_BIN=/usr/bin/python3 \
+    -DEO_CORE_OPENSSL_DIR=/usr \
+    -DEO_CORE_LIBXML2_DIR=$libxml2 \
+    -DEO_CORE_OUTPUT_DIR=$PWD/build-core/bin \
+    -DEO_CORE_TOOLS_DIR=$PWD/build-core/tools
+cmake --build build-core --parallel $jobs
+bin=$PWD/build-core/bin
+mkdir -p $bin/tools
+cp build-core/tools/allfontsgen $bin/tools/
+test -x $bin/x2t && test -x $bin/libera-sign
+# the editors (payload.sh): sdkjs and web-apps for the desktop platform
+(cd $sdkjs/build && BUILD_ROOT=$P SDK_PLATFORM=desktop node scripts/build-pipeline.cjs)
+(cd $webapps/build && BUILD_ROOT=$P THEME=euro-office node scripts/build-pipeline.js)
+# payload.sh: English for the strings a translation lacks
+python3 -I - $P/web-apps/apps/*/main/locale <<'FILL'
+import json, pathlib, sys
+for folder in map(pathlib.Path, sys.argv[1:]):
+    english = json.loads((folder / "en.json").read_text(encoding="utf-8"))
+    for path in folder.glob("*.json"):
+        strings = json.loads(path.read_text(encoding="utf-8"))
+        if english.keys() - strings.keys():
+            path.write_text(json.dumps({**english, **strings}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+FILL
+# the blank documents, en-US and every locale (payload.sh)
+mkdir -p $P/empty
+cp $templates/new/en-US/new.* $P/empty/
+for d in $templates/new/*-*/; do
+    l=$(basename $d)
+    mkdir -p $P/empty/$l
+    cp $d/new.* $P/empty/$l/
+done
+# Libera's core font set (build/payload/fonts-core.txt), the fonts the host
+# indexes with allfontsgen at first start
+mkdir -p $P/fonts-src
+for f in ASC.ttf liberation crosextra caladea opensans openoffice asana; do
+    cp -R $fonts/$f $P/fonts-src/
+done
+# the slide themes (payload.sh): each themes/src/*.pptx through x2t, with a
+# font selection made by allfontsgen from those fonts (not shipped: the host
+# makes its own per user)
+mkdir -p /tmp/fonts-index
+LD_LIBRARY_PATH=$bin $bin/tools/allfontsgen --input=$P/fonts-src \
+    --allfonts-web=/tmp/fonts-index/AllFonts.web.js --allfonts=/tmp/fonts-index/AllFonts.js \
+    --images=/tmp/fonts-index/Images --selection=/tmp/fonts-index/font_selection.bin \
+    --output-web=/tmp/fonts-index/web
+th=$P/sdkjs/slide/themes
+if [ -d $th/src ]; then
+    rm -rf $th/theme[0-9]* $th/themes.js
+    n=0 names=""
+    for src in $th/src/*.pptx; do
+        n=$((n + 1))
+        mkdir -p $th/theme$n
+        LD_LIBRARY_PATH=$bin $bin/x2t "$src" $th/theme$n/theme.bin /tmp/fonts-index/font_selection.bin
+        test -s $th/theme$n/theme.bin
+        label=$(basename "$src" .pptx | sed 's/^[0-9]*_//')
+        label="$(printf '%s' "$label" | cut -c1 | tr '[:lower:]' '[:upper:]')$(printf '%s' "$label" | cut -c2-)"
+        names="$names\"$label\","
+    done
+    printf 'window["AscCommon"] = window["AscCommon"] || {};\nwindow["AscCommon"]["g_defaultThemes"] = [%s];\n' \
+        "$(printf '%s' "$names" | sed 's/,$//')" > $th/themes.js
+fi
+# the spell checker's dictionaries: Libera's languages
+# (build/payload/dictionaries.txt), .aff and .dic and their licences
+cp $sdkjs/common/spell/spell.js $P/sdkjs/common/spell/spell.js
+for lang in en_US en_GB fr_FR de_DE es_ES it_IT nl_NL; do
+    mkdir -p $P/dictionaries/$lang
+    cp $dicts/$lang/$lang.aff $dicts/$lang/$lang.dic $P/dictionaries/$lang/
+    for f in $dicts/$lang/*; do
+        case "$(basename "$f")" in
+            *.aff|*.dic|*.json|*hyph*|*thes*|th_*) ;;
+            *) cp "$f" $P/dictionaries/$lang/ ;;
+        esac
+    done
+done
+'''
+install = '''
+# the host
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm755 $pkgfiles/libera "$pkgdir/usr/bin/libera"
+install -Dm644 src/libera/launcher.desktop "$pkgdir/usr/share/applications/eu.liberasuite.Libera.desktop"
+install -Dm644 src/libera/icon.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/eu.liberasuite.Libera.svg"
+# the payload, as dist.sh stages it: the converter (without docbuilder,
+# cmap.bin and the ICU libraries it never links), the editors without their
+# mobile, forms, embed and help parts, macOS/IE files, Monaco (macros are
+# off) and the slide themes' sources
+d="$pkgdir/usr/lib/libera-suite/payload"
+mkdir -p "$d/bin" "$d/web-apps/apps" "$d/sdkjs"
+cp -a build-core/bin/. "$d/bin/"
+rm -f "$d/bin/cmap.bin" "$d/bin/docbuilder"
+cp -a $P/web-apps/vendor "$d/web-apps/"
+for a in api common documenteditor spreadsheeteditor presentationeditor visioeditor pdfeditor; do
+    cp -a $P/web-apps/apps/$a "$d/web-apps/apps/"
+done
+for a in documenteditor spreadsheeteditor presentationeditor visioeditor pdfeditor; do
+    rm -rf "$d/web-apps/apps/$a/mobile" "$d/web-apps/apps/$a/forms" \
+        "$d/web-apps/apps/$a/embed" "$d/web-apps/apps/$a/main/resources/help"
+done
+for a in common word cell slide visio pdf vendor; do
+    cp -a $P/sdkjs/$a "$d/sdkjs/"
+done
+find "$d/sdkjs" -name '*_ie.js' -delete
+find "$d/sdkjs" -name '*.cache' -delete
+rm -rf "$d/web-apps/vendor/monaco" "$d/sdkjs/slide/themes/src"
+rm -f "$d/sdkjs/common/AllFonts.js" "$d/sdkjs/common/font_selection.bin"
+rm -rf "$d"/sdkjs/common/Images/fonts_thumbnail*
+cp -a $P/empty $P/dictionaries $P/fonts-src "$d/"
+for f in $fonts/LICENSE* $fonts/README*; do
+    if [ -f "$f" ]; then cp "$f" "$d/fonts-src/"; fi
+done
+# DoctRenderer.config beside x2t, with the relative paths the host's
+# payload/generate.py writes (x2t resolves them against the file's folder)
+cat > "$d/bin/DoctRenderer.config" <<'CONF'
+<Settings>
+<file>../sdkjs/common/Native/native.js</file>
+<file>../sdkjs/common/Native/jquery_native.js</file>
+<file>../web-apps/vendor/xregexp/xregexp-all-min.js</file>
+<sdkjs>./../sdkjs</sdkjs>
+</Settings>
+CONF
+# what `libera --payload-status` reports: the payload version and the
+# corresponding source (pins.toml)
+cat > "$d/payload.json" <<JSON
+{
+  "payload_version": "0.7.1",
+  "platform": "linux-$( [ "$arch" = aarch64 ] && echo arm64 || echo x86_64 )",
+  "font_set": "core",
+  "built": "FenrirOS libera-suite $version-r$release",
+  "source": {
+    "repositories": ["https://pypi.org/project/libera-core/0.7.1/"],
+    "libera_commit": "libera_core-0.7.1 sdist",
+    "upstream": "https://github.com/Euro-Office",
+    "pins": {
+      "core": "5a33ce6c4a63387e8576c7e763b70cd971988b24",
+      "sdkjs": "0cde84e8dbfb299b53098532c8af142712830cc6",
+      "web-apps": "51c706eb619612c2d133ef76e2807cdffd799f96",
+      "core-fonts": "2de90688e07e2442a5fffc434fdf0a3d212c1f42",
+      "document-templates": "554851735b1fb1890a02ba1d57fed3e6c8b21425",
+      "dictionaries": "08d46f8631b82af00f83b28657c54ed1aaf9e3fc",
+      "libxml2": "7846b0a677f8d3ce72486125fa281e92ac9970e8"
+    }
+  }
+}
+JSON
+l="$pkgdir/usr/share/licenses/libera-suite"
+install -Dm644 LICENSE "$l/LICENSE"
+install -Dm644 $core/LICENSE.txt "$l/euro-office-core-LICENSE.txt"
+install -Dm644 $sdkjs/LICENSE.txt "$l/euro-office-sdkjs-LICENSE.txt"
+install -Dm644 $webapps/LICENSE.txt "$l/euro-office-web-apps-LICENSE.txt"
+cp -a /build/libera_core-0.7.1/build/upstream "$l/payload-source"
+'''

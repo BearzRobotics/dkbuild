@@ -1,0 +1,187 @@
+# Euro-Office Document Server 9.3.7-1: the online editors for text documents,
+# spreadsheets, presentations, PDFs and forms (the AGPL fork of ONLYOFFICE
+# Docs), for a storage platform such as Nextcloud. This recipe builds the
+# JavaScript parts and assembles the server as upstream's packages lay it out
+# (/var/www/euro-office/documentserver); the native converter (x2t) and tools
+# are euro-office-core, built from the same source tarball.
+#
+# Built here from the DocumentServer snapshot (all submodules at the tag):
+#   - sdkjs (the editors' engine) with the sdkjs-forms addon: webpack/terser,
+#     npm packages from upstream's npm-shrinkwrap.json. sdkjs's checked-in
+#     WebAssembly modules (drawingfile, fonts, zlib, hash, spell: upstream's
+#     builds of core with emscripten, which its Docker build replaces with
+#     fresh ones) are used as they are (wip/euro-office/NOTES.md).
+#   - web-apps (the editors' interface): webpack, less, svgo; upstream's
+#     package-lock.json. Its image optimisation uses sharp, whose npm
+#     packages are prebuilt (the musl one with its libvips), as the esbuild and
+#     rollup packages of other web builds in this tree.
+#   - server: DocService, FileConverter, Metrics and the AdminPanel (server and
+#     its React client). Upstream compiles them into single binaries with
+#     @yao-pkg/pkg, which downloads prebuilt glibc Node.js builds; here they
+#     run on the system Node.js, from their sources and node_modules. Upstream
+#     pins their packages with npm-shrinkwrap.json/package-lock.json files of
+#     lockfile version 1; files/*.package-lock.json are those same versions as
+#     version 3 lockfiles (npm 9.2 install --package-lock-only --ignore-scripts
+#     on copies of package.json and the upstream lockfile, 2026-11-12: every
+#     version unchanged, every entry with an integrity hash), vendored by
+#     npmdeps; files/sdkjs.package-lock.json is sdkjs's npm-shrinkwrap.json
+#     (npmdeps reads files named package-lock.json only).
+#     Native modules: sharp (DocService's image conversion) built from source
+#     against the system libvips; node-oracledb's prebuilt glibc binaries
+#     (thick mode) removed, its thin mode needs none.
+#   - AllFonts.js and the font thumbnails, generated with euro-office-core's
+#     allfontsgen from the bundled core-fonts (upstream does it at install
+#     time; documentserver-generate-allfonts.sh redoes it with system fonts).
+# Plus core-fonts, dictionaries, document-templates, document-formats as they
+# are, upstream's configuration (server/Common/config) in
+# /etc/euro-office/documentserver, the database schemas, and from
+# document-server-package the nginx examples and the font script (its m4
+# templates, rendered here with upstream's values for Linux).
+# Not included: SpellChecker (nodehun, a native module from a Git URL, not in
+# upstream's builds either), the example app (document-server-integration),
+# the plugins (sdkjs-plugins stays empty, as in upstream's image).
+#
+# Installed inert (docs/requests.md): dinit services shipped, not enabled;
+# no database, broker or account set up; upstream's default.json (which
+# carries placeholder secrets: JWT is off by default, and README.FenrirOS says
+# to set secrets in local.json) as the read-only defaults, a local.json sample
+# in /usr/share/doc; nginx configuration only as examples in /usr/share/doc.
+# Needs PostgreSQL (or MySQL) and RabbitMQ, which FenrirOS does not package
+# yet: no rundeps on them. Setup: /usr/share/doc/euro-office-documentserver/
+# README.FenrirOS.
+# Not built yet.
+name = "euro-office-documentserver"
+version = "9.3.7.1"
+release = 1
+summary = "Euro-Office Document Server: online office editors"
+license = "AGPL-3.0-only AND CC-BY-SA-4.0"
+homepage = "https://github.com/Euro-Office/DocumentServer"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["nodejs", "python", "make", "pkgconf", "m4", "euro-office-core"]
+builddeps = ["libvips-devel"]
+rundeps = ["nodejs", "euro-office-core"]
+options = ["!check", "!strip", "npmdeps"]
+
+source = [
+    { url = "snapshot:git https://github.com/Euro-Office/DocumentServer v9.3.7-1", sha256 = "69ccd4b42599b4a493faada2c83a76146511ce69e973171d00ef1f82c12a678b" },
+]
+
+environment = '''
+export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
+    npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+# native modules: node-gyp against the system Node.js headers, never a download
+export npm_config_nodedir=/usr
+# upstream's version stamp (9.3.7 build 1) and output directory
+export PRODUCT_VERSION=9.3.7 BUILD_NUMBER=1 BUILD_ROOT=$PWD/deploy
+'''
+setup = '''
+# the version 3 lockfiles in place of upstream's version 1 ones (same versions)
+cp $pkgfiles/common.package-lock.json server/Common/npm-shrinkwrap.json
+cp $pkgfiles/docservice.package-lock.json server/DocService/npm-shrinkwrap.json
+cp $pkgfiles/fileconverter.package-lock.json server/FileConverter/npm-shrinkwrap.json
+cp $pkgfiles/metrics.package-lock.json server/Metrics/npm-shrinkwrap.json
+cp $pkgfiles/adminpanel-server.package-lock.json server/AdminPanel/server/package-lock.json
+cp $pkgfiles/adminpanel-client.package-lock.json server/AdminPanel/client/package-lock.json
+node /dkbuild/npm-offline.js /tmp/npm-cache sdkjs/build/npm-shrinkwrap.json \
+    web-apps/build/package-lock.json server/Common/npm-shrinkwrap.json \
+    server/DocService/npm-shrinkwrap.json server/FileConverter/npm-shrinkwrap.json \
+    server/Metrics/npm-shrinkwrap.json server/AdminPanel/server/package-lock.json \
+    server/AdminPanel/client/package-lock.json
+(cd sdkjs/build && npm ci --ignore-scripts)
+(cd web-apps/build && npm ci --ignore-scripts)
+for d in Common DocService FileConverter Metrics AdminPanel/server; do
+    (cd server/$d && npm ci --omit=dev --ignore-scripts)
+done
+(cd server/AdminPanel/client && npm ci --ignore-scripts)
+# sharp 0.32 for DocService, from source against the system libvips (its
+# install script would download a prebuilt libvips)
+(cd server/DocService && npm_config_build_from_source=true npm rebuild sharp)
+'''
+build = '''
+# sdkjs with the forms addon, as sdkjs.bake.Dockerfile
+(cd sdkjs/build && SDK_ADDONS=$PWD/../../sdkjs-forms npm run build)
+test -f deploy/sdkjs/word/sdk-all.js
+# web-apps, as web-apps.bake.Dockerfile (merge_and_check.py fills missing
+# translations from the English ones)
+(cd web-apps/translation && python3 merge_and_check.py)
+(cd web-apps/build && THEME=euro-office node scripts/build-pipeline.js)
+test -d deploy/web-apps/apps
+# the admin panel's client, as server.bake.Dockerfile
+(cd server/AdminPanel/client && APP_NAME=Euro-Office npm run build)
+# the build version in the server's common definitions, as
+# server.bake.Dockerfile's sed does
+sed -i "s|\(const buildVersion = \).*|\1'$PRODUCT_VERSION';|" server/Common/sources/commondefines.js
+# document-server-package's templates, with the values its Makefile uses on
+# Linux
+m4p="-D M4_COMPANY_NAME=Euro-Office -D M4_PRODUCT_VERSION=$PRODUCT_VERSION \
+    -D M4_DS_PREFIX=euro-office/documentserver \
+    -D M4_DS_ROOT=/var/www/euro-office/documentserver \
+    -D M4_DS_FILES=/var/lib/euro-office/documentserver \
+    -D M4_NGINX_CONF=/etc/nginx/includes \
+    -D M4_NGINX_LOG=/var/log/euro-office/documentserver -D M4_DEV_NULL=/dev/null"
+mkdir -p out/nginx/includes out/bin
+c=document-server-package/common/documentserver
+for f in $c/nginx/*.m4; do m4 $m4p $f > out/nginx/$(basename $f .m4); done
+for f in $c/nginx/includes/*.m4; do m4 $m4p $f > out/nginx/includes/$(basename $f .m4); done
+m4 $m4p $c/bin/documentserver-generate-allfonts.sh.m4 > out/bin/documentserver-generate-allfonts.sh
+'''
+install = '''
+ds="$pkgdir/var/www/euro-office/documentserver"
+mkdir -p "$ds/server" "$ds/fonts" "$ds/sdkjs-plugins" "$ds/document-formats"
+cp -a deploy/sdkjs deploy/web-apps "$ds/"
+cp -a core-fonts dictionaries document-templates "$ds/"
+rm -rf "$ds"/core-fonts/.git* "$ds"/dictionaries/.git* "$ds"/document-templates/.git*
+cp document-formats/onlyoffice-docs-formats.json "$ds/document-formats/"
+for d in Common DocService FileConverter Metrics; do
+    mkdir -p "$ds/server/$d"
+    cp -a server/$d/sources server/$d/node_modules server/$d/package.json "$ds/server/$d/"
+done
+cp -a server/DocService/public "$ds/server/DocService/"
+cp -a server/Metrics/config "$ds/server/Metrics/"
+mkdir -p "$ds/server/AdminPanel/server" "$ds/server/AdminPanel/client"
+cp -a server/AdminPanel/server/sources server/AdminPanel/server/node_modules \
+    server/AdminPanel/server/package.json "$ds/server/AdminPanel/server/"
+cp -a server/AdminPanel/client/build "$ds/server/AdminPanel/client/"
+cp -a server/schema server/license server/LICENSE.txt server/3rd-Party.txt "$ds/server/"
+# node-oracledb's prebuilt binaries (thick mode, glibc builds)
+rm -rf "$ds"/server/*/node_modules/oracledb/build
+test -f "$ds"/server/DocService/node_modules/sharp/build/Release/sharp-*.node
+# x2t's renderer configuration, as bundle.bake.Dockerfile
+install -Dm644 build/configs/core/DoctRenderer.config \
+    "$ds/server/FileConverter/bin/DoctRenderer.config"
+# fonts: AllFonts.js for the editors and x2t, font thumbnails, web fonts, from
+# the bundled core-fonts (upstream's postinstall does this with
+# documentserver-generate-allfonts.sh)
+core=/var/www/euro-office/documentserver/server
+LD_LIBRARY_PATH=$core/FileConverter/bin $core/tools/allfontsgen \
+    --input="$ds/core-fonts" \
+    --allfonts-web="$ds/sdkjs/common/AllFonts.js" \
+    --allfonts="$ds/server/FileConverter/bin/AllFonts.js" \
+    --images="$ds/sdkjs/common/Images" \
+    --selection="$ds/server/FileConverter/bin/font_selection.bin" \
+    --output-web="$ds/fonts" \
+    --use-system="false" --use-system-user-fonts="false"
+test -f "$ds/sdkjs/common/AllFonts.js"
+# configuration: upstream's defaults (local.json overrides them)
+e="$pkgdir/etc/euro-office/documentserver"
+mkdir -p "$e"
+cp -a server/Common/config/default.json server/Common/config/production-linux.json \
+    server/Common/config/log4js "$e/"
+install -Dm755 out/bin/documentserver-generate-allfonts.sh "$pkgdir/usr/bin/documentserver-generate-allfonts.sh"
+for s in docservice converter metrics adminpanel; do
+    install -Dm644 $pkgfiles/euro-office-$s "$pkgdir/etc/dinit.d/euro-office-$s"
+done
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/euro-office-documentserver.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/euro-office-documentserver.conf"
+doc="$pkgdir/usr/share/doc/euro-office-documentserver"
+mkdir -p "$doc"
+cp -a out/nginx "$doc/nginx"
+install -Dm644 $pkgfiles/local.json.sample "$doc/local.json.sample"
+install -Dm644 $pkgfiles/README.FenrirOS "$doc/README.FenrirOS"
+install -Dm644 README.md "$doc/README.md"
+l="$pkgdir/usr/share/licenses/euro-office-documentserver"
+install -Dm644 LICENSE "$l/LICENSE"
+install -Dm644 sdkjs/3DPARTY.md "$l/sdkjs-3DPARTY.md"
+install -Dm644 web-apps/3DPARTY.md "$l/web-apps-3DPARTY.md"
+install -Dm644 server/3DPARTY.md "$l/server-3DPARTY.md"
+'''

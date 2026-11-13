@@ -1,0 +1,65 @@
+Euro-Office Document Server on FenrirOS
+=======================================
+
+The package is installed inert: no service is enabled, no database, message
+broker or web server site is set up, and no secret is set. The Document Server
+is not a standalone application: it needs a platform that stores the files
+(Nextcloud with its Euro-Office/ONLYOFFICE connector, ownCloud, Seafile, ...).
+
+Layout (as upstream's own packages):
+  /var/www/euro-office/documentserver   program files (sdkjs, web-apps,
+                                        server, core-fonts, dictionaries, ...)
+  /etc/euro-office/documentserver       configuration (default.json and
+                                        production-linux.json are upstream's
+                                        defaults: do not edit them, put your
+                                        settings in local.json)
+  /var/lib/euro-office/documentserver   document cache
+  /var/www/euro-office/Data             runtime.json, signing key store
+  /var/log/euro-office/documentserver   logs
+The services run as the system user "ds".
+
+1. What it needs
+   - PostgreSQL (or MySQL/MariaDB): a database and user for it, and the schema:
+       psql -U euro-office -d euro-office \
+         -f /var/www/euro-office/documentserver/server/schema/postgresql/createdb.sql
+   - RabbitMQ (the default broker; ActiveMQ via AMQP 1.0 also works, see
+     "queue" in default.json). FenrirOS has no RabbitMQ package yet.
+   - nginx in front of the services.
+
+2. Configuration
+   Copy /usr/share/doc/euro-office-documentserver/local.json.sample to
+   /etc/euro-office/documentserver/local.json, readable by ds only
+   (chown root:ds, chmod 640), and fill in:
+   - the database connection,
+   - the JWT secrets (services.CoAuthoring.secret: inbox, outbox, session):
+     the same inbox/outbox secret goes into the storage platform's connector.
+     Upstream's default.json ships placeholder secrets; never run with them.
+   - storage.fs.secretString, which must equal $secure_link_secret in the
+     nginx configuration (step 3),
+   - the RabbitMQ URL.
+
+3. nginx
+   Examples, from upstream's packaging, are in
+   /usr/share/doc/euro-office-documentserver/nginx/: ds.conf (the server
+   block, listening on port 80; ds-ssl.conf for TLS) and includes/. Copy the
+   includes to /etc/nginx/includes/, the server block to your nginx
+   configuration, and set $secure_link_secret to your storage.fs.secretString.
+
+4. Fonts
+   AllFonts.js was generated at build time from the bundled core-fonts. To add
+   system or custom fonts (/var/www/euro-office/Data/custom-fonts), or to
+   generate the presentation theme previews and the JavaScript caches, run
+       documentserver-generate-allfonts.sh true
+   (as root; "true" keeps it from trying to restart services through
+   systemd/supervisor) and restart the services.
+
+5. Services (dinit)
+       dinitctl enable euro-office-docservice
+       dinitctl enable euro-office-converter
+   Optional: euro-office-metrics (StatsD), euro-office-adminpanel (admin
+   panel on 127.0.0.1:9000).
+
+Not included: the spell checker service (SpellChecker, a native module from
+a Git URL; the editors' spell checking runs in the browser), the example
+integration app (document-server-integration), the plugins collection
+(sdkjs-plugins is empty), and the desktop editors.

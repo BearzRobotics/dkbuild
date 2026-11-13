@@ -1,0 +1,9 @@
+# Euro-Office Document Server: the file converter (runs x2t for the document
+# service). Not enabled by default.
+type = process
+command = /usr/bin/env NODE_ENV=production-linux NODE_CONFIG_DIR=/etc/euro-office/documentserver NODE_DISABLE_COLORS=1 APPLICATION_NAME=Euro-Office LD_LIBRARY_PATH=/var/www/euro-office/documentserver/server/FileConverter/bin /usr/bin/node /var/www/euro-office/documentserver/server/FileConverter/sources/convertermaster.js
+working-dir = /var/www/euro-office/documentserver/server/FileConverter
+run-as = ds
+logfile = /var/log/euro-office/documentserver/converter/out.log
+restart = true
+depends-on: rcboot

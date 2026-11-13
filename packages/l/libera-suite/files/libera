@@ -1,0 +1,8 @@
+#!/bin/sh
+# Libera Suite with the editors and converter this package built
+# (/usr/lib/libera-suite/payload), where upstream's own install looks for its
+# libera-core and libera-web wheels. LIBERA_PAYLOAD is the host's own setting
+# for a payload in a folder (libera/payload/locate.py); one already set wins.
+: "${LIBERA_PAYLOAD:=/usr/lib/libera-suite/payload}"
+export LIBERA_PAYLOAD
+exec /usr/bin/python3 -m libera "$@"

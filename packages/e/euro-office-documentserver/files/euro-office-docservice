@@ -1,0 +1,9 @@
+# Euro-Office Document Server: the document service (editors' back end, on
+# 127.0.0.1:8000; nginx in front, README.FenrirOS). Not enabled by default.
+type = process
+command = /usr/bin/env NODE_ENV=production-linux NODE_CONFIG_DIR=/etc/euro-office/documentserver NODE_DISABLE_COLORS=1 APPLICATION_NAME=Euro-Office /usr/bin/node /var/www/euro-office/documentserver/server/DocService/sources/server.js
+working-dir = /var/www/euro-office/documentserver/server/DocService
+run-as = ds
+logfile = /var/log/euro-office/documentserver/docservice/out.log
+restart = true
+depends-on: rcboot

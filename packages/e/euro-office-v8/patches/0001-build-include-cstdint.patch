@@ -1,0 +1,23 @@
+Euro-Office's own V8 change (core: Common/3dParty/v8/tools/8.9/
+x64-linux-dynamic/buildgn.patch, applied there by nc-build.py), with the
+paths made relative to the snapshot's top directory. V8 8.9 (2021) uses
+uint8_t and friends in headers that relied on other standard headers pulling
+<cstdint> in; current C++ libraries no longer do, so every V8 source gets
+-include cstdint. -Wno-enum-constexpr-conversion silences what clang < 20
+only warned about (later clang makes it a hard error that the flag no longer
+turns off: those spots are fixed in the recipe's setup, as Euro-Office does).
+
+diff --git a/v8/BUILD.gn b/v8/BUILD.gn
+index a8618452794..4ab368a4149 100644
+--- a/v8/BUILD.gn
++++ b/v8/BUILD.gn
+@@ -689,6 +689,9 @@ config("toolchain") {
+ 
+   defines = []
+   cflags = []
++  if (!is_win) {
++    cflags += ["-include", "cstdint", "-Wno-enum-constexpr-conversion"]
++  }
+   ldflags = []
+ 
+   if (v8_current_cpu == "arm") {

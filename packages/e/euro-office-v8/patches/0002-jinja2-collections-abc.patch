@@ -1,0 +1,22 @@
+Euro-Office's own change (core: Common/3dParty/v8/tools/8.9/
+x64-linux-dynamic/jinja2.patch), paths relative to the snapshot's top
+directory. The jinja2 V8 8.9's DEPS pins (2019) imports Mapping from
+collections, which Python 3.10 removed (it lives in collections.abc); V8's
+build runs jinja2 to generate code.
+
+diff --git a/v8/third_party/jinja2/tests.py b/v8/third_party/jinja2/tests.py
+index 0adc3d4..56ed431 100644
+--- a/v8/third_party/jinja2/tests.py
++++ b/v8/third_party/jinja2/tests.py
+@@ -10,7 +10,10 @@
+ """
+ import operator
+ import re
+-from collections import Mapping
++try:
++    from collections.abc import Mapping
++except ImportError:
++    from collections import Mapping
+ from jinja2.runtime import Undefined
+ from jinja2._compat import text_type, string_types, integer_types
+ import decimal
