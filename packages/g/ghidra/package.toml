@@ -3,10 +3,11 @@
 # its fetchDependencies.gradle would download (FunctionID databases, the
 # Ghidra Server's YAJSW, BSim's PostgreSQL, the Python wheels its debugger and
 # PyGhidra ship) are sources here, laid into dependencies/ as that script does.
+# Gradle 9.1 (Ghidra 12.2's build.gradle: "Requires at least Gradle 9.1"; 8.14.6 stopped it).
 # The Windows debugger parts and the Eclipse (GhidraDev) plugin are left out.
 name = "ghidra"
 version = "12.2"
-release = 1
+release = 2
 summary = "Software reverse engineering suite (disassembler, decompiler)"
 license = "Apache-2.0"
 homepage = "https://ghidra-sre.org"
@@ -17,7 +18,7 @@ options = ["!check", "!strip", "gradledeps", "jobs:12"]
 
 source = [
     { url = "https://github.com/NationalSecurityAgency/ghidra/archive/refs/tags/Ghidra_12.2_build.tar.gz", sha256 = "ade4fd6e277a10c82db4e75ff5acaeedb3113ef0c7d126ea2c8b38c37128f3c3" },
-    { url = "https://services.gradle.org/distributions/gradle-8.14.6-bin.zip", sha256 = "7988ed071b2a07900e2ec715fca15c6ab72bce6db433af301fa7fa7e9407bd24", unpack = false },
+    { url = "https://services.gradle.org/distributions/gradle-9.1.0-bin.zip", sha256 = "a17ddd85a26b6a7f5ddb71ff8b05fc5104c0202c6e64782429790c933686c806", unpack = false },
     { url = "https://github.com/NationalSecurityAgency/ghidra-data/raw/Ghidra_12.2/lib/java-sarif-2.1-modified.jar", sha256 = "7f736566494756d271aa5e4b1af6c89dc50d074ab1c6374a47df822264226b01", unpack = false, name = "java-sarif-2.1-modified.jar" },
     { url = "https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/android4me/AXMLPrinter2.jar", sha256 = "00ed038eb6abaf6ddec8d202a3ed7a81b521458f4cd459948115cfd02ff59d6d", unpack = false, name = "AXMLPrinter2.jar" },
     { url = "https://sourceforge.net/projects/yajsw/files/yajsw/yajsw-stable-13.18/yajsw-stable-13.18.zip", sha256 = "50b34e9817c54b2970fa511ff4584f6556c179f69833aa8b9b1ff6485b61684f", unpack = false, name = "yajsw-stable-13.18.zip" },
