@@ -106,3 +106,16 @@ Survey checkouts: work/ndk/aosp.
   epson escpr2 (source RPM), MatterControl (Windows-only).
 - The old dotnet snapshot (10.0.114 seed) in cache/snapshots can be deleted.
 - Nothing pushed.
+
+## 2026-11-13, after the user's answers (requests.md "Answers")
+
+Done and committed: noscan + musl-alpine-compat + metasploit r2, stalwart r2
+(no SEL code), syncthing r2, git-annex r2, pydeps + python-lock, yarn-lock
+(yarn 2+ via the npm store; tested on Joplin's lock).
+Four helper agents stopped part-way (login error); the user said to skip
+them for now. Their unfinished work is in `git stash list` ("unfinished
+agent work 2026-11-13"): Brave keys/Leo licence, Euro-Office unbundling +
+fonts, legacy OVMF, ifupdown2/FRR/libyang/rtrlib + pvenetcommit, PBS client,
+erlang/elixir/rabbitmq-server, grpc + Zabbix APM. None of it checked yet.
+Next with the new stores: Paperless-ngx, Mayan EDMS, Taiga, ERPNext (pydeps),
+Twenty, Joplin (yarn-lock).
