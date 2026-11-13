@@ -1,0 +1,13 @@
+# FenrirOS container root: the smallest useful userland as a root tarball, for
+# `podman import` / `docker import`, systemd-nspawn, or a FROM-scratch base.
+# apk works inside (so a container adds what it needs); no kernel, bootloader,
+# init, device manager, services or users. Docs and development files are left
+# out, as in the other images. Regenerate and version it with each repository
+# release; the tarball is only as good as the repo it was made from.
+name     = "container"
+arch     = "x86_64"
+hostname = "fenriros"
+packages = ["musl", "base-files", "apk-tools", "ca-certificates", "tzdb", "coreutils", "dash", "bash",
+            "sed", "grep", "gawk", "findutils", "diffutils", "which", "less", "tar", "gzip", "xz", "zstd"]
+exclude  = ["*-devel", "*-doc", "*-static"]
+output   = ["tar"]

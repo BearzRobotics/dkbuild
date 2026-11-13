@@ -1,0 +1,12 @@
+# FenrirOS container build root: container.toml plus a toolchain, headers and
+# static libraries, as a root tarball for containerised or isolated builds
+# (CI, a build without a dkbuild machine). Manuals stay out. Regenerate and
+# version it with each repository release.
+name     = "container-build"
+arch     = "x86_64"
+hostname = "fenriros"
+packages = ["musl", "musl-devel", "base-files", "apk-tools", "ca-certificates", "tzdb", "coreutils", "dash", "bash",
+            "sed", "grep", "gawk", "findutils", "diffutils", "which", "less", "tar", "gzip", "xz", "zstd",
+            "llvm", "llvm-clang", "llvm-lld", "make", "pkgconf", "patch", "git"]
+exclude  = ["*-doc"]
+output   = ["tar"]
