@@ -6,10 +6,14 @@
 # -Djogamp.gluegen.UseTempJarCache=false). The jars go to /usr/share/java.
 # JOGL's build finds GlueGen at ../gluegen (the second source, linked there).
 # Java 11 byte code (JogAmp's default, 8, is deprecated in JDK 25).
+# GlueGen's preprocessor, jcpp, is a git submodule of gluegen that the source
+# archive leaves as an empty directory (the build stopped: srcdir
+# gluegen/jcpp/src/main/java does not exist): the commit v2.6.0 pins
+# (7bf095d6426c) is the third source, linked in as gluegen/jcpp.
 # Archives: jogamp.org drops long downloads; a fetch may need retrying.
 name = "jogamp"
 version = "2.6.0"
-release = 2
+release = 3
 summary = "Java bindings for OpenGL (JOGL) and their native glue (GlueGen)"
 license = "BSD-2-Clause AND BSD-3-Clause"
 homepage = "https://jogamp.org"
@@ -22,6 +26,7 @@ options = ["!check"]
 source = [
     { url = "https://jogamp.org/deployment/v2.6.0/archive/Sources/jogl-v2.6.0.tar.xz", sha256 = "248c5b8fefe94dc115f4d8b0a1a919cf1f2485de0ab71f94b7aea62fd9ca43a1" },
     { url = "https://jogamp.org/deployment/v2.6.0/archive/Sources/gluegen-v2.6.0.tar.xz", sha256 = "2d4d58094bc34e32fa7d414cda87665ac1ee00623f988ef7829d957b04792526" },
+    { url = "https://github.com/JogAmp/jcpp/archive/7bf095d6426ce9b88f901a70bf8237b04009a0ff.tar.gz", sha256 = "d908530291117fa1469af29bb0ad432fcea94f428e1d688aa0322c736581ed42" },
 ]
 
 environment = '''
@@ -32,6 +37,8 @@ antflags="-Dgcc.compat.compiler=clang -Dtarget.sourcelevel=11 -Dtarget.targetlev
 '''
 setup = '''
 ln -sfn gluegen-v2.6.0 ../gluegen
+rmdir ../gluegen-v2.6.0/jcpp
+ln -sfn ../jcpp-7bf095d6426ce9b88f901a70bf8237b04009a0ff ../gluegen-v2.6.0/jcpp
 # GlueGen runs ANTLR through Ant's optional <antlr> task, which the system's
 # Ant lacks (apache-ant is built without optional tasks: "failed to create
 # task or type antlr"): patches/gluegen-antlr-java.patch runs antlr.Tool
