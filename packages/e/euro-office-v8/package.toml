@@ -30,7 +30,7 @@
 # libc++ (Euro-Office's main branch avoids them by moving to V8 14.6).
 name = "euro-office-v8"
 version = "8.9.45"
-release = 1
+release = 2
 summary = "V8 JavaScript engine as a static library for Euro-Office's document engine"
 license = "BSD-3-Clause"
 homepage = "https://v8.dev"
@@ -83,7 +83,10 @@ build = '''
 # GN, as nc-build.py builds it (build_gn): no git, so a fixed commit position
 (
     cd gn
-    CC=clang CXX=clang++ python3 build/gen.py --no-last-commit-position
+    # GN's base/files/file.h uses struct stat64 and fstat64, which musl declares
+    # only with _LARGEFILE64_SOURCE (otherwise: "incomplete type 'struct stat64'");
+    # gen.py takes CFLAGS from the environment.
+    CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE" CC=clang CXX=clang++ python3 build/gen.py --no-last-commit-position
     mkdir -p out
     printf '#pragma once\n#define LAST_COMMIT_POSITION_NUM 0\n#define LAST_COMMIT_POSITION "0 (unknown)"\n' \
         > out/last_commit_position.h
