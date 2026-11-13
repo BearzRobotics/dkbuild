@@ -1,0 +1,40 @@
+# AVS3 (IEEE 1857.10) video decoder; FFmpeg's --enable-libuavs3d. CMake builds
+# one library type per tree (BUILD_SHARED_LIBS), so the static library comes
+# from a second build.
+# Source edits, in setup:
+# - version.sh counts git commits for the build number (VER_BUILD, and the
+#   third part of the version in uavs3d.pc); a tarball has no git, so the
+#   version would read "1.2." and FFmpeg's "uavs3d >= 1.1.41" check is fragile
+#   against that. VER_L is pinned to 0: version "1.2.0" (the tag is 1.2).
+# - CMake 4 refuses cmake_minimum_required(3.1): CMAKE_POLICY_VERSION_MINIMUM.
+# The default 8-bit build (COMPILE_10BIT=OFF) is what FFmpeg's wrapper expects.
+# Not imported from cports (Chimera has no uavs3d).
+# needed by: ffmpeg (libuavs3d).
+name = "uavs3d"
+version = "1.2"
+release = 1
+summary = "AVS3 video decoder"
+license = "BSD-3-Clause"
+homepage = "https://github.com/uavs3/uavs3d"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/uavs3/uavs3d/archive/refs/tags/1.2.tar.gz", sha256 = "faa1f1f82badc0603d9944bb5af7b961dd42236e2c3a7aa8fcfc080bbeb5b157" },
+]
+
+setup = '''
+sed -i 's/^VER_L=.*/VER_L=0/' version.sh
+opts="-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+%cmake $opts -DBUILD_SHARED_LIBS=ON
+cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release $opts -DBUILD_SHARED_LIBS=OFF
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+install = '''
+DESTDIR="$pkgdir" cmake --install build-static --strip
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/uavs3d/COPYING"
+'''
