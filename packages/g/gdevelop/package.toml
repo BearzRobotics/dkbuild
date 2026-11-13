@@ -18,7 +18,7 @@
 # DRAFT, not built: needs electron and emscripten.
 name = "gdevelop"
 version = "5.6.287"
-release = 2
+release = 3
 summary = "Open-source game engine and editor, no-code and with JavaScript"
 license = "MIT"
 homepage = "https://gdevelop.io"
@@ -82,7 +82,11 @@ done
 build = '''
 # 1. libGD.js: GDCore and GDJS compiled to WebAssembly (grunt: emcmake cmake,
 #    emmake make, then a copy into newIDE)
-(cd GDevelop.js && sed -i "s/'-j 8'/'-j $jobs'/" Gruntfile.js && npx grunt build)
+# The build environment's CFLAGS/CXXFLAGS (-march=x86-64 ...) are for the host
+# compiler; cmake picks them up from the environment and clang rejects
+# -march= for wasm32-unknown-emscripten ("unsupported option '-march='"), so the
+# WebAssembly build runs without them (Emscripten sets its own flags).
+(cd GDevelop.js && sed -i "s/'-j 8'/'-j $jobs'/" Gruntfile.js && env -u CFLAGS -u CXXFLAGS -u CPPFLAGS -u LDFLAGS npx grunt build)
 test -f Binaries/embuild/GDevelop.js/libGD.js
 # 2. the IDE: import-resources without the downloads (the editors are in
 #    place: their checksum check skips the download), then the React build
