@@ -1,0 +1,50 @@
+# Webmin: web-based system administration (users, services, packages,
+# file systems, firewall, web/mail/DNS servers, cron, logs ...) through its
+# own Perl web server (miniserv). Upstream's release archive (pure Perl; its
+# bundled Perl modules in vendor_perl/).
+# Built: the scripts' #!/usr/local/bin/perl lines become #!/usr/bin/perl
+# (upstream's perlpath.pl, which setup.sh would otherwise run on the
+# installed tree), and the archive's prebuilt FreeBSD and macOS helpers in
+# mount/ (i386 ELF and Mach-O programs, unused on Linux) are left out.
+# Installed inert (docs/requests.md): the tree is in /usr/share/webmin and
+# nothing is configured. Upstream's setup.sh (run by the user, as the README
+# says) writes /etc/webmin and asks for the login and password: no account
+# or password is made by the package. files/setup-pre.sh, which setup.sh
+# reads, presets the directories and the Perl path and turns off its boot
+# script, start and uninstall script; a dinit service, webmin, is shipped
+# but not enabled.
+# Setup: /usr/share/doc/webmin/README.FenrirOS.
+name = "webmin"
+version = "2.670"
+release = 1
+summary = "Web-based system administration"
+license = "BSD-3-Clause"
+homepage = "https://webmin.com"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["perl"]
+rundeps = ["perl", "perl-net-ssleay", "perl-io-socket-ssl", "openssl"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/webmin/webmin/releases/download/2.670/webmin-2.670.tar.gz", sha256 = "617af07a890bea18a83dca5c9d7168de1ad4d5f3076d8a1df3475f123748dc21" },
+]
+
+build = '''
+# what setup.sh does on the installed tree: every script's perl line points
+# at /usr/bin/perl (upstream's perlpath.pl rewrites the first line only)
+(find . -name '*.cgi' -print; find . -name '*.pl' -print) | perl ./perlpath.pl /usr/bin/perl -
+# prebuilt helpers for FreeBSD and macOS, unused on Linux
+rm -f mount/freebsd-mounts-* mount/openbsd-mounts-* mount/macos-mounts*
+'''
+install = '''
+d="$pkgdir/usr/share/webmin"
+mkdir -p "$d"
+cp -a . "$d/"
+# Windows' installer
+rm -f "$d/setup.bat"
+install -Dm644 $pkgfiles/setup-pre.sh "$d/setup-pre.sh"
+install -Dm644 $pkgfiles/webmin "$pkgdir/etc/dinit.d/webmin"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/webmin/README.FenrirOS"
+install -Dm644 README.md "$pkgdir/usr/share/doc/webmin/README.md"
+install -Dm644 LICENCE "$pkgdir/usr/share/licenses/webmin/LICENCE"
+'''

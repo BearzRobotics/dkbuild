@@ -1,0 +1,3 @@
+# Nextcloud's background jobs, every 5 minutes (choose "Cron" under
+# Administration settings > Basic settings > Background jobs)
+*/5 * * * * _php /usr/bin/php -d memory_limit=512M -f /usr/share/nextcloud/cron.php

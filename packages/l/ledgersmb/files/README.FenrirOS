@@ -1,0 +1,24 @@
+LedgerSMB on FenrirOS
+=====================
+
+Code in /usr/share/ledgersmb, its CPAN libraries in /usr/lib/ledgersmb/perl5,
+configuration in /etc/ledgersmb. The dinit service ledgersmb runs it under
+Starman on localhost:5762 as the ledgersmb user; nginx serves the UI and
+proxies the rest. `ledgersmb-admin` is its command-line administration.
+PDF/PostScript output through LaTeX is not available (no TeX in FenrirOS);
+HTML, CSV, ODS and XLS(X) output are.
+
+1. PostgreSQL: install and start postgresql, then create the role LedgerSMB
+   administers its company databases with (it needs CREATEDB and CREATEROLE):
+     su -s /bin/sh postgres -c "createuser -S -d -r -l -P lsmb_dbadmin"
+   (asks for its password).
+2. cp /etc/ledgersmb/ledgersmb.yaml.sample /etc/ledgersmb/ledgersmb.yaml
+   and review it (mail transport, printers, proxy_ip). Optionally
+   ledgersmb.log.conf.sample as ledgersmb.log.conf.
+3. dinitctl enable ledgersmb; nginx: /usr/share/doc/ledgersmb/nginx-ledgersmb.conf,
+   dinitctl enable nginx.
+4. Open https://<host>/setup.pl, log in as lsmb_dbadmin, create a company
+   database and its first user; then use https://<host>/login.pl.
+   (Or with ledgersmb-admin: ledgersmb-admin create, ledgersmb-admin user create.)
+5. After an update of this package: open setup.pl for each company
+   database to upgrade it, then dinitctl restart ledgersmb.

@@ -1,0 +1,8 @@
+# LedgerSMB (PSGI) under Starman on localhost:5762; nginx proxies to it
+# (/usr/share/doc/ledgersmb/nginx-ledgersmb.conf)
+type = process
+command = /usr/lib/ledgersmb/ledgersmb-server
+run-as = ledgersmb
+working-dir = /usr/share/ledgersmb
+smooth-recovery = true
+depends-on: rcboot

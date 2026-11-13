@@ -1,0 +1,2 @@
+# InvoiceShelf's scheduler (recurring invoices, reminders, backups), every minute
+* * * * * _php /usr/bin/php /usr/share/invoiceshelf/artisan schedule:run >> /var/lib/invoiceshelf/storage/logs/cron.log 2>&1

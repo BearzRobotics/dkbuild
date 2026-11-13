@@ -1,0 +1,24 @@
+Dolibarr on FenrirOS
+====================
+
+Code in /usr/share/dolibarr/htdocs (the web root). htdocs/conf is
+/etc/dolibarr (conf.php lives there), documents in /var/lib/dolibarr/documents.
+PHP runs as _php.
+
+1. Create a MariaDB (or PostgreSQL) database and user for Dolibarr:
+     CREATE DATABASE dolibarr CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+     CREATE USER 'dolibarr'@'localhost' IDENTIFIED BY '<password>';
+     GRANT ALL ON dolibarr.* TO 'dolibarr'@'localhost';
+2. Let the installer write the configuration:
+     install -m 0660 -o root -g _php /dev/null /etc/dolibarr/conf.php
+3. nginx: /usr/share/doc/dolibarr/nginx-dolibarr.conf (and, optionally, the
+   php-fpm pool php-fpm-dolibarr.conf); enable php-fpm and nginx
+   (dinitctl enable php-fpm nginx), then open https://<host>/install/ and
+   follow the installer (the data directory is preset to
+   /var/lib/dolibarr/documents; it creates the administrator account).
+4. Afterwards make the configuration read-only and lock the installer:
+     chmod 0440 /etc/dolibarr/conf.php
+     install -m 0440 -o root -g _php /dev/null /var/lib/dolibarr/documents/install.lock
+5. Scheduled jobs: enable the "Scheduled jobs" module, copy
+   /usr/share/doc/dolibarr/dolibarr.cron to /etc/cron.d/dolibarr, put in the
+   cron key and the login, and dinitctl enable crond.

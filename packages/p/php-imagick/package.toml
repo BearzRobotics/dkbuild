@@ -1,0 +1,39 @@
+# PHP's imagick extension (PECL): ImageMagick (MagickWand) from PHP. Nextcloud
+# uses it for previews (SVG, HEIC through ImageMagick's delegates) and
+# avatars; other web apps for thumbnails and PDF images.
+name = "php-imagick"
+version = "3.8.1"
+release = 1
+summary = "PHP wrapper around ImageMagick"
+license = "PHP-3.01"
+homepage = "https://pecl.php.net/package/imagick"
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf", "php"]
+builddeps = ["php-devel", "imagemagick-devel"]
+rundeps = ["php"]
+
+source = [
+    { url = "https://pecl.php.net/get/imagick-3.8.1.tgz", sha256 = "3a3587c0a524c17d0dad9673a160b90cd776e836838474e173b549ed864352ee" },
+]
+
+setup = '''
+# the PECL archive has package.xml beside its directory
+cd imagick-$version
+phpize
+%configure --with-php-config=/usr/bin/php-config --with-imagick=/usr
+'''
+build = '''
+cd imagick-$version
+%make
+'''
+check = '''
+cd imagick-$version
+%make test NO_INTERACTION=1
+'''
+install = '''
+cd imagick-$version
+%make INSTALL_ROOT="$pkgdir" install
+install -Dm644 /dev/stdin "$pkgdir/etc/php/conf.d/imagick.ini" <<EOF2
+extension=imagick.so
+EOF2
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/php-imagick/LICENSE"
+'''

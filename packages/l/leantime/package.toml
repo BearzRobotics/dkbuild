@@ -1,0 +1,56 @@
+# Leantime: project management for non-project-managers (projects, to-dos,
+# kanban, milestones, timesheets, goals, ideas, docs, retrospectives).
+# Laravel-based PHP with MariaDB or MySQL, served by nginx and php-fpm.
+# Upstream's release archive: its PHP libraries in vendor/ (as PHP source)
+# and its front end built in public/dist. The archive has no licence file:
+# LICENSE is taken from the release tag.
+# Layout: code in /usr/share/leantime; config/ (.env, or the legacy
+# configuration.php) is /etc/leantime; userfiles, public/userfiles, storage/,
+# bootstrap/cache and the database backups in /var/lib/leantime. Plugins are
+# the packaged ones (app/Plugins is read-only; the marketplace cannot install
+# into it). The scheduler runs from an example cron job (installed by the user).
+# Setup: /usr/share/doc/leantime/README.FenrirOS.
+# Installed inert (docs/requests.md): no service enabled, no site, no cron
+# job, no credentials; the README says how to set it up.
+name = "leantime"
+version = "3.14.0"
+release = 1
+summary = "Project management for non-project-managers"
+license = "AGPL-3.0-only"
+homepage = "https://leantime.io"
+archs = ["x86_64", "aarch64"]
+rundeps = ["php", "php-fpm", "nginx"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/Leantime/leantime/releases/download/v3.14.0/Leantime-v3.14.0.tar.gz", sha256 = "ed210abfac0eb37fd6eaeb946b2a2eb71aa8265b1e1bf4e96f9c96ae9c0ad4e7" },
+    { url = "https://raw.githubusercontent.com/Leantime/leantime/v3.14.0/LICENSE", sha256 = "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0" },
+]
+
+install = '''
+# the archive has no top directory: it is unpacked straight into /build
+d="$pkgdir/usr/share/leantime"
+mkdir -p "$d" "$pkgdir/etc"
+cp -a /build/app /build/bin /build/bootstrap /build/config /build/public /build/storage /build/userfiles /build/vendor "$d/"
+# config/ is /etc/leantime (the samples go with it)
+mv "$d/config" "$pkgdir/etc/leantime"
+ln -s /etc/leantime "$d/config"
+# the writable directories: skeletons copied to /var/lib/leantime when missing
+mv "$d/storage" "$d/storage.dist"
+mv "$d/userfiles" "$d/userfiles.dist"
+mv "$d/public/userfiles" "$d/public-userfiles.dist"
+rm -rf "$d/bootstrap/cache"
+ln -s /var/lib/leantime/storage "$d/storage"
+ln -s /var/lib/leantime/userfiles "$d/userfiles"
+ln -s /var/lib/leantime/public-userfiles "$d/public/userfiles"
+ln -s /var/lib/leantime/bootstrap-cache "$d/bootstrap/cache"
+ln -s /var/lib/leantime/backupdb "$d/backupdb"
+# a manual test page for the editor, not part of the application
+rm -f "$d/public/tiptap-test.html"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/leantime.conf"
+install -Dm644 $pkgfiles/leantime.cron "$pkgdir/usr/share/doc/leantime/leantime.cron"
+install -Dm644 $pkgfiles/nginx-leantime.conf "$pkgdir/usr/share/doc/leantime/nginx-leantime.conf"
+install -Dm644 $pkgfiles/php-fpm-leantime.conf "$pkgdir/usr/share/doc/leantime/php-fpm-leantime.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/leantime/README.FenrirOS"
+install -Dm644 /build/sources/LICENSE "$pkgdir/usr/share/licenses/leantime/LICENSE"
+'''

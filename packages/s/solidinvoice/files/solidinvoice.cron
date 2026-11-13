@@ -1,0 +1,3 @@
+# SolidInvoice's background worker (emails, webhooks, recurring invoices,
+# reminders, overdue checks): a short run every minute, as upstream documents
+* * * * * _php /usr/bin/php /usr/share/solidinvoice/bin/console messenger:consume --all --limit=10 --time-limit=55 --memory-limit=128M >> /var/lib/solidinvoice/var/log/worker.log 2>&1

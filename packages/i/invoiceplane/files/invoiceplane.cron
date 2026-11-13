@@ -1,0 +1,3 @@
+# InvoicePlane's recurring invoices, once a day. Replace <cron key> with the
+# key from Settings > General > Cron key, and the host with your site's.
+0 6 * * * _php /usr/bin/curl -fsS https://invoices.example.org/index.php/invoices/cron/recur/<cron key> >> /var/log/invoiceplane/cron.log 2>&1

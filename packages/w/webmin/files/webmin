@@ -1,0 +1,6 @@
+# Webmin's web server (miniserv), after `/usr/share/webmin/setup.sh` has
+# written /etc/webmin (/usr/share/doc/webmin/README.FenrirOS)
+type = process
+command = /usr/bin/env PERLLIB=/usr/share/webmin /usr/share/webmin/miniserv.pl --nofork /etc/webmin/miniserv.conf
+smooth-recovery = true
+depends-on: rcboot

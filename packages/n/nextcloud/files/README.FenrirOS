@@ -1,0 +1,33 @@
+Nextcloud on FenrirOS
+=====================
+
+Code in /usr/share/nextcloud (the web root). Its config/ directory is
+/etc/nextcloud; fenriros.config.php there sets the data directory
+(/var/lib/nextcloud/data) and a writable app directory for the app store
+(/var/lib/nextcloud/apps, reached as /usr/share/nextcloud/apps-extra) and
+turns off the web updater (the package updates Nextcloud). PHP runs as _php;
+`occ` runs Nextcloud's console as _php.
+
+1. Create a MariaDB (or PostgreSQL) database and user for Nextcloud:
+     CREATE DATABASE nextcloud CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+     CREATE USER 'nextcloud'@'localhost' IDENTIFIED BY '<password>';
+     GRANT ALL ON nextcloud.* TO 'nextcloud'@'localhost';
+2. PHP: the php-fpm pool /usr/share/doc/nextcloud/php-fpm-nextcloud.conf
+   has the settings Nextcloud asks for (memory, upload size, PATH); copy it
+   to /etc/php/php-fpm.d/nextcloud.conf. Recommended extensions (install
+   them for the admin overview to stop warning):
+     php-apcu    memory cache ('memcache.local' => '\OC\Memcache\APCu')
+     php-imagick previews of images and SVG
+     php-redis   file locking with valkey ('memcache.locking' => '\OC\Memcache\Redis')
+3. nginx: /usr/share/doc/nextcloud/nginx-nextcloud.conf; enable php-fpm and
+   nginx (dinitctl enable php-fpm nginx), then open https://<host>/ and
+   create the administrator, or install from the command line:
+     occ maintenance:install --database mysql --database-name nextcloud \
+       --database-user nextcloud --database-pass '<password>' \
+       --admin-user <admin> --admin-pass '<password>' \
+       --data-dir /var/lib/nextcloud/data
+   then add your host name: occ config:system:set trusted_domains 1 --value=<host>
+4. Background jobs: cp /usr/share/doc/nextcloud/nextcloud.cron
+   /etc/cron.d/nextcloud, dinitctl enable crond, and occ background:cron.
+5. After an update of this package: occ upgrade, then
+   occ db:add-missing-indices.

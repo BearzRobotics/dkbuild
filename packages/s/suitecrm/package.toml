@@ -1,0 +1,47 @@
+# SuiteCRM 8: customer relationship management (accounts, contacts, leads,
+# opportunities, cases, campaigns, quotes, workflows, reports). An Angular
+# front end and a Symfony API around the SuiteCRM 7 application (in
+# public/legacy), PHP with MariaDB or MySQL, served by nginx and php-fpm.
+# Upstream's release archive (SuiteCRM-<v>.zip): its PHP libraries in vendor/
+# and public/legacy/vendor (as PHP source) and the Angular front end built
+# (public/dist).
+# SuiteCRM writes into its own tree (the installer's config files, cache,
+# custom/, Studio's module changes, upload/), and upstream expects the whole
+# installation owned by the web server user. So, like znuny, it lives in
+# /opt/suitecrm, and tmpfiles hands the tree to _php. The scheduler
+# (workflows, campaign emails, inbound mail) from an example cron job
+# (installed by the user). Inbound email (IMAP) needs PHP's imap extension,
+# which the php package does not build (no c-client library in the tree).
+# Setup: /usr/share/doc/suitecrm/README.FenrirOS.
+# Installed inert (docs/requests.md): no service enabled, no site, no cron
+# job, no credentials; the README says how to set it up.
+name = "suitecrm"
+version = "8.10.2"
+release = 1
+summary = "Customer relationship management"
+license = "AGPL-3.0-only"
+homepage = "https://suitecrm.com"
+archs = ["x86_64", "aarch64"]
+rundeps = ["php", "php-fpm", "nginx"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/salesagility/SuiteCRM-Core/releases/download/v8.10.2/SuiteCRM-8.10.2.zip", sha256 = "ac4693d10ea2d6cd20b3256098781d134599d88878fb24e8dc127038d624f5a8" },
+]
+
+install = '''
+# the archive has no top directory: it is unpacked straight into /build
+cd /build
+d="$pkgdir/opt/suitecrm"
+mkdir -p "$d"
+cp -a bin cache config core extensions logs public tmp vendor \
+    .env composer.json composer.lock symfony.lock VERSION files.md5 "$d/"
+chmod 755 "$d/bin/console"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/suitecrm.conf"
+install -Dm644 $pkgfiles/suitecrm.cron "$pkgdir/usr/share/doc/suitecrm/suitecrm.cron"
+install -Dm644 $pkgfiles/nginx-suitecrm.conf "$pkgdir/usr/share/doc/suitecrm/nginx-suitecrm.conf"
+install -Dm644 $pkgfiles/php-fpm-suitecrm.conf "$pkgdir/usr/share/doc/suitecrm/php-fpm-suitecrm.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/suitecrm/README.FenrirOS"
+install -Dm644 README.md "$pkgdir/usr/share/doc/suitecrm/README.md"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/suitecrm/LICENSE.txt"
+'''

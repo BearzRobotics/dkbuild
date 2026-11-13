@@ -1,0 +1,24 @@
+Kimai on FenrirOS
+=================
+
+Code in /usr/share/kimai (web root: public/). Its .env is /etc/kimai/env;
+var/ (cache, logs, invoices, plugins) is /var/lib/kimai. PHP runs as _php.
+Run its console as _php:
+  su -s /bin/sh _php -c '/usr/share/kimai/bin/console <command>'
+
+1. Create a MariaDB database and user for Kimai:
+     CREATE DATABASE kimai CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+     CREATE USER 'kimai'@'localhost' IDENTIFIED BY '<password>';
+     GRANT ALL ON kimai.* TO 'kimai'@'localhost';
+2. cp /usr/share/kimai/.env.dist /etc/kimai/env, chgrp _php it (mode 0640),
+   and set DATABASE_URL (with serverVersion of your MariaDB), APP_SECRET
+   (a long random string, e.g. `openssl rand -hex 32`), DEFAULT_URI and
+   MAILER_FROM/MAILER_URL.
+3. Install the database and create the first administrator:
+     bin/console kimai:install -n
+     bin/console kimai:user:create <name> <email> ROLE_SUPER_ADMIN
+   (as _php, as above; the second asks for the password).
+4. nginx: /usr/share/doc/kimai/nginx-kimai.conf (and, optionally, the
+   php-fpm pool php-fpm-kimai.conf); enable php-fpm and nginx
+   (dinitctl enable php-fpm nginx).
+5. After an update of this package: bin/console kimai:update -n

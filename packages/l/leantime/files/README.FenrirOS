@@ -1,0 +1,24 @@
+Leantime on FenrirOS
+====================
+
+Code in /usr/share/leantime (web root: public/). Its config/ directory is
+/etc/leantime (the samples are there); uploaded files, storage/ (logs,
+sessions, caches), bootstrap/cache and database backups live in
+/var/lib/leantime. PHP runs as _php.
+
+1. Create a MariaDB database and user for Leantime:
+     CREATE DATABASE leantime CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+     CREATE USER 'leantime'@'localhost' IDENTIFIED BY '<password>';
+     GRANT ALL ON leantime.* TO 'leantime'@'localhost';
+2. cp /etc/leantime/sample.env /etc/leantime/.env, chgrp _php it (mode
+   0640) and set LEAN_APP_URL, the LEAN_DB_* settings and, importantly,
+   LEAN_SESSION_PASSWORD (the sample's value is public; use e.g.
+   `openssl rand -hex 32`). The sample has LEAN_ALLOW_TELEMETRY = true
+   (a daily anonymous summary to telemetry.leantime.io); set it to false
+   to turn that off. Logs: LEAN_LOG_PATH='/var/lib/leantime/storage/logs/leantime.log'.
+3. nginx: /usr/share/doc/leantime/nginx-leantime.conf (and, optionally, the
+   php-fpm pool php-fpm-leantime.conf); enable php-fpm and nginx
+   (dinitctl enable php-fpm nginx), then open https://<host>/install and
+   create the first account.
+4. Scheduler: cp /usr/share/doc/leantime/leantime.cron /etc/cron.d/leantime
+   and dinitctl enable crond.

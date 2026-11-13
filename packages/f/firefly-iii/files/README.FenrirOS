@@ -1,0 +1,26 @@
+Firefly III on FenrirOS
+=======================
+
+Code in /usr/share/firefly-iii (web root: public/). Its .env is
+/etc/firefly-iii/env; storage/ and bootstrap/cache live in
+/var/lib/firefly-iii. PHP runs as _php. Firefly III needs PHP 8.5 or newer.
+Run artisan as _php:
+  su -s /bin/sh _php -c 'php /usr/share/firefly-iii/artisan <command>'
+
+1. Create a MariaDB (or PostgreSQL) database and user for Firefly III:
+     CREATE DATABASE firefly CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+     CREATE USER 'firefly'@'localhost' IDENTIFIED BY '<password>';
+     GRANT ALL ON firefly.* TO 'firefly'@'localhost';
+2. cp /usr/share/firefly-iii/.env.example /etc/firefly-iii/env
+   chown _php:_php /etc/firefly-iii/env; chmod 0640 /etc/firefly-iii/env
+   set SITE_OWNER, APP_URL, TZ, the DB_* settings (DB_HOST=localhost and
+   a password of your own; the example's are placeholders) and APP_KEY
+   (exactly 32 characters, e.g. `head -c 24 /dev/urandom | base64`).
+3. As _php: artisan firefly-iii:upgrade-database
+   (creates the tables; run it again after every update of this package).
+4. nginx: /usr/share/doc/firefly-iii/nginx-firefly-iii.conf (and,
+   optionally, the php-fpm pool php-fpm-firefly-iii.conf); enable php-fpm
+   and nginx (dinitctl enable php-fpm nginx), then open https://<host>/ and
+   register the first (administrator) user.
+5. Daily jobs: cp /usr/share/doc/firefly-iii/firefly-iii.cron
+   /etc/cron.d/firefly-iii and dinitctl enable crond.

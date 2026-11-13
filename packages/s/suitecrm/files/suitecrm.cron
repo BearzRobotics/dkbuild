@@ -1,0 +1,2 @@
+# SuiteCRM's scheduler (workflows, campaign emails, inbound mail, reminders), every minute
+* * * * * _php cd /opt/suitecrm/public/legacy && /usr/bin/php -f cron.php > /dev/null 2>&1

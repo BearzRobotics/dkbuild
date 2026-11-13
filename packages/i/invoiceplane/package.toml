@@ -1,0 +1,48 @@
+# InvoicePlane: self-hosted invoicing (clients, quotes, invoices, recurring
+# invoices, payments, PDF invoices through mPDF, online payments through
+# Stripe/PayPal). CodeIgniter 3 on PHP with MariaDB, served by nginx and
+# php-fpm. Upstream's release archive: its PHP libraries in vendor/ (as PHP
+# source) and its built CSS/JS in assets/ (the archive's assets are what
+# `grunt build` produces; nothing else is precompiled).
+# Layout: code in /usr/share/invoiceplane; ipconfig.php (which the web setup
+# writes) is /etc/invoiceplane/ipconfig.php; uploads/, storage/ and the cache
+# in /var/lib/invoiceplane, logs in /var/log/invoiceplane. Recurring invoices
+# from an example cron job (installed by the user).
+# Setup: /usr/share/doc/invoiceplane/README.FenrirOS.
+# Installed inert (docs/requests.md): no service enabled, no site, no cron
+# job, no credentials; the README says how to set it up.
+name = "invoiceplane"
+version = "1.7.2"
+release = 1
+summary = "Self-hosted invoicing for small businesses"
+license = "MIT"
+homepage = "https://invoiceplane.com"
+archs = ["x86_64", "aarch64"]
+rundeps = ["php", "php-fpm", "nginx"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/InvoicePlane/InvoicePlane/releases/download/v1.7.2/v1.7.2.zip", sha256 = "5d70ca0c437e9a35bdadddb4bb98dc89f5cc19527d1dad214579db7d6292f2b8" },
+]
+
+install = '''
+d="$pkgdir/usr/share/invoiceplane"
+mkdir -p "$d"
+cp -a application assets index.php favicon.ico robots.txt storage uploads vendor \
+    ipconfig.php.example composer.json composer.lock "$d/"
+# the writable directories: skeletons copied to /var/lib/invoiceplane when missing
+mv "$d/uploads" "$d/uploads.dist"
+mv "$d/storage" "$d/storage.dist"
+ln -s /var/lib/invoiceplane/uploads "$d/uploads"
+ln -s /var/lib/invoiceplane/storage "$d/storage"
+rm -rf "$d/application/cache" "$d/application/logs"
+ln -s /var/lib/invoiceplane/cache "$d/application/cache"
+ln -s /var/log/invoiceplane "$d/application/logs"
+ln -s /etc/invoiceplane/ipconfig.php "$d/ipconfig.php"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/invoiceplane.conf"
+install -Dm644 $pkgfiles/invoiceplane.cron "$pkgdir/usr/share/doc/invoiceplane/invoiceplane.cron"
+install -Dm644 $pkgfiles/nginx-invoiceplane.conf "$pkgdir/usr/share/doc/invoiceplane/nginx-invoiceplane.conf"
+install -Dm644 $pkgfiles/php-fpm-invoiceplane.conf "$pkgdir/usr/share/doc/invoiceplane/php-fpm-invoiceplane.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/invoiceplane/README.FenrirOS"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/invoiceplane/LICENSE.txt"
+'''

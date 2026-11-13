@@ -1,0 +1,4 @@
+# Dolibarr's scheduled jobs (module Cron), every 5 minutes. Replace <cron key>
+# with the key from Setup > Modules > Scheduled jobs and <login> with the
+# Dolibarr user the jobs run as.
+*/5 * * * * _php /usr/bin/php /usr/share/dolibarr/scripts/cron/cron_run_jobs.php <cron key> <login> >> /var/log/dolibarr/cron.log 2>&1

@@ -1,0 +1,30 @@
+SolidInvoice on FenrirOS
+========================
+
+Code in /usr/share/solidinvoice (web root: public/). config/env, where
+SolidInvoice keeps its encrypted settings and their keys, is
+/etc/solidinvoice; optional environment overrides go in
+/etc/solidinvoice/local.env (read as .env.local); var/ (cache, logs) is
+/var/lib/solidinvoice/var. PHP runs as _php. SolidInvoice needs PHP 8.4.27
+or newer.
+
+1. Database: create a MariaDB (or PostgreSQL) database and user, or use
+   SQLite (the wizard's default puts it in /etc/solidinvoice/db; to keep it in
+   /var/lib instead put
+     SOLIDINVOICE_DATABASE_URL=sqlite:////var/lib/solidinvoice/solidinvoice.db
+   in /etc/solidinvoice/local.env).
+2. nginx: /usr/share/doc/solidinvoice/nginx-solidinvoice.conf (and,
+   optionally, the php-fpm pool php-fpm-solidinvoice.conf); enable php-fpm
+   and nginx (dinitctl enable php-fpm nginx), then open https://<host>/ and
+   follow the first-run wizard (database, administrator, company). It
+   writes the settings and generates this installation's keys in
+   /etc/solidinvoice.
+3. Background worker (mail, recurring invoices, reminders):
+     cp /usr/share/doc/solidinvoice/solidinvoice.cron /etc/cron.d/solidinvoice
+     dinitctl enable crond
+4. Telemetry is off unless SOLIDINVOICE_ENABLE_TELEMETRY=1. The Cloud
+   affiliate prompt can be hidden with SOLIDINVOICE_AFFILIATE_PROGRAM_ENABLED=0
+   in local.env.
+5. After an update of this package, as _php:
+     /usr/share/solidinvoice/bin/console cache:clear
+     /usr/share/solidinvoice/bin/console doctrine:migrations:migrate --no-interaction

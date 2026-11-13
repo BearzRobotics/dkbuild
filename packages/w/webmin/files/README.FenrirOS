@@ -1,0 +1,20 @@
+Webmin on FenrirOS
+==================
+
+Webmin is installed in /usr/share/webmin and is not configured: there is no
+/etc/webmin, no account and no password until you run its setup.
+
+1. As root:  /usr/share/webmin/setup.sh
+   The directories (/etc/webmin, /var/webmin) and the Perl path are preset
+   (/usr/share/webmin/setup-pre.sh); it asks for the port (default 10000),
+   the administrator's login and password, and whether to use SSL (say yes;
+   it makes a certificate with openssl). It does not start Webmin or add a
+   boot script.
+   FenrirOS is not in Webmin's list of systems, so it is detected as
+   "Generic Linux"; module defaults (init system, package manager) may need
+   adjusting under Webmin Configuration > Operating System.
+2. Start it with dinit:  dinitctl enable webmin
+   and open https://<host>:10000/. Webmin can change the whole system:
+   keep it on a trusted network or behind a firewall.
+3. Webmin's own updater (Webmin Configuration > Upgrade Webmin) would
+   change the packaged files; update through the package manager instead.

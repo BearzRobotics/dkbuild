@@ -1,0 +1,48 @@
+# Firefly III: personal finance manager (accounts, transactions, budgets,
+# categories, bills, piggy banks, rules, reports, a JSON API). Laravel on PHP
+# with MariaDB, PostgreSQL or SQLite, served by nginx and php-fpm. Upstream's
+# release archive: its PHP libraries in vendor/ (as PHP source) and both
+# front ends built (public/build, public/v1).
+# Needs PHP 8.5 or newer (vendor/composer/platform_check.php); see the report.
+# Layout: code in /usr/share/firefly-iii; .env is /etc/firefly-iii/env;
+# storage/ and bootstrap/cache in /var/lib/firefly-iii. Recurring
+# transactions and bills from an example cron job (installed by the user).
+# The data importer is a separate application, not part of this package.
+# Setup: /usr/share/doc/firefly-iii/README.FenrirOS.
+# Installed inert (docs/requests.md): no service enabled, no site, no cron
+# job, no credentials; the README says how to set it up.
+name = "firefly-iii"
+version = "6.7.9"
+release = 1
+summary = "Personal finance manager"
+license = "AGPL-3.0-or-later"
+homepage = "https://www.firefly-iii.org"
+archs = ["x86_64", "aarch64"]
+rundeps = ["php", "php-fpm", "nginx"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/firefly-iii/firefly-iii/releases/download/v6.7.9/FireflyIII-v6.7.9.tar.gz", sha256 = "f905729c3be6e66d5333c22992281224ef1dc7e21cea13f4ef09af643d09b825" },
+]
+
+install = '''
+# the archive has no top directory: it is unpacked straight into /build
+cd /build
+d="$pkgdir/usr/share/firefly-iii"
+mkdir -p "$d"
+cp -a app artisan bootstrap config database public resources routes server.php storage vendor \
+    composer.json composer.lock .env.example "$d/"
+# the writable directories: skeletons copied to /var/lib/firefly-iii when missing
+mv "$d/storage" "$d/storage.dist"
+mv "$d/bootstrap/cache" "$d/bootstrap/cache.dist"
+ln -s /var/lib/firefly-iii/storage "$d/storage"
+ln -s /var/lib/firefly-iii/bootstrap-cache "$d/bootstrap/cache"
+ln -s /etc/firefly-iii/env "$d/.env"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/firefly-iii.conf"
+install -Dm644 $pkgfiles/firefly-iii.cron "$pkgdir/usr/share/doc/firefly-iii/firefly-iii.cron"
+install -Dm644 $pkgfiles/nginx-firefly-iii.conf "$pkgdir/usr/share/doc/firefly-iii/nginx-firefly-iii.conf"
+install -Dm644 $pkgfiles/php-fpm-firefly-iii.conf "$pkgdir/usr/share/doc/firefly-iii/php-fpm-firefly-iii.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/firefly-iii/README.FenrirOS"
+install -Dm644 changelog.md "$pkgdir/usr/share/doc/firefly-iii/changelog.md"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/firefly-iii/LICENSE"
+'''

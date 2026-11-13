@@ -1,0 +1,2 @@
+# BookStack's scheduled tasks (clearing old activity, the recycle bin), every minute
+* * * * * _php /usr/bin/php /usr/share/bookstack/artisan schedule:run >> /var/lib/bookstack/storage/logs/cron.log 2>&1

@@ -1,0 +1,40 @@
+# PHP's APCu extension (PECL): an in-memory key-value cache for PHP
+# processes (APC's user cache). Nextcloud and other web apps use it as their
+# local memory cache. Enabled through /etc/php/conf.d/apcu.ini (for php-fpm;
+# apc.enable_cli stays off, as upstream ships it).
+name = "php-apcu"
+version = "5.1.28"
+release = 1
+summary = "APC User Cache for PHP"
+license = "PHP-3.01"
+homepage = "https://pecl.php.net/package/APCu"
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf", "php"]
+builddeps = ["php-devel"]
+rundeps = ["php"]
+
+source = [
+    { url = "https://pecl.php.net/get/apcu-5.1.28.tgz", sha256 = "ca9c1820810a168786f8048a4c3f8c9e3fd941407ad1553259fb2e30b5f057bf" },
+]
+
+setup = '''
+# the PECL archive has package.xml beside its directory
+cd apcu-$version
+phpize
+%configure --with-php-config=/usr/bin/php-config
+'''
+build = '''
+cd apcu-$version
+%make
+'''
+check = '''
+cd apcu-$version
+%make test NO_INTERACTION=1
+'''
+install = '''
+cd apcu-$version
+%make INSTALL_ROOT="$pkgdir" install
+install -Dm644 /dev/stdin "$pkgdir/etc/php/conf.d/apcu.ini" <<EOF2
+extension=apcu.so
+EOF2
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/php-apcu/LICENSE"
+'''

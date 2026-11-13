@@ -1,0 +1,53 @@
+# SolidInvoice: invoicing for small businesses and freelancers (clients,
+# quotes, invoices, recurring invoices, payments through Payum, taxes, a REST
+# API). Symfony on PHP with MariaDB, MySQL, PostgreSQL or SQLite, served by
+# nginx and php-fpm. Upstream's distribution archive (SolidInvoice-<v>.tar.gz):
+# its PHP libraries in vendor/ (as PHP source) and its front end built by
+# webpack (public/static, public/bundles). Upstream's own packages carry a
+# FrankenPHP single binary instead; this is the archive they document for an
+# existing PHP web server.
+# Needs PHP 8.4.27 or newer (composer.lock's platform); see the report.
+# Left out of the archive's contents: var/cache (upstream's compiled
+# container, made for its own paths; it is rebuilt on the first request) and
+# config/env (upstream's secrets vault, including its decryption key, the
+# same for every download): config/env is /etc/solidinvoice, empty, where the
+# setup wizard makes the installation's own keys and settings.
+# Layout: code in /usr/share/solidinvoice; .env.local is
+# /etc/solidinvoice/local.env; var/ in /var/lib/solidinvoice. The background
+# worker (mail, recurring invoices, reminders) from an example cron job
+# (installed by the user). Setup: /usr/share/doc/solidinvoice/README.FenrirOS.
+# Installed inert (docs/requests.md): no service enabled, no site, no cron
+# job, no credentials; the README says how to set it up.
+name = "solidinvoice"
+version = "3.1.3"
+release = 1
+summary = "Simple invoicing for small businesses and freelancers"
+license = "MIT"
+homepage = "https://solidinvoice.co"
+archs = ["x86_64", "aarch64"]
+rundeps = ["php", "php-fpm", "nginx"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/SolidInvoice/SolidInvoice/releases/download/3.1.3/SolidInvoice-3.1.3.tar.gz", sha256 = "aae3a82e9f8282e12006b3f78286128098c314741dd51b137b6294281672ab6a" },
+]
+
+install = '''
+# the archive has no top directory: it is unpacked straight into /build
+cd /build
+d="$pkgdir/usr/share/solidinvoice"
+mkdir -p "$d"
+cp -a bin config migrations public src templates translations vendor \
+    composer.json composer.lock symfony.lock .env "$d/"
+rm -rf "$d/config/env"
+ln -s /etc/solidinvoice "$d/config/env"
+ln -s /etc/solidinvoice/local.env "$d/.env.local"
+ln -s /var/lib/solidinvoice/var "$d/var"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/solidinvoice.conf"
+install -Dm644 $pkgfiles/solidinvoice.cron "$pkgdir/usr/share/doc/solidinvoice/solidinvoice.cron"
+install -Dm644 $pkgfiles/nginx-solidinvoice.conf "$pkgdir/usr/share/doc/solidinvoice/nginx-solidinvoice.conf"
+install -Dm644 $pkgfiles/php-fpm-solidinvoice.conf "$pkgdir/usr/share/doc/solidinvoice/php-fpm-solidinvoice.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/solidinvoice/README.FenrirOS"
+install -Dm644 CHANGELOG.md "$pkgdir/usr/share/doc/solidinvoice/CHANGELOG.md"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/solidinvoice/LICENSE"
+'''

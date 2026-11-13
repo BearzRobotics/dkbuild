@@ -1,0 +1,30 @@
+BookStack on FenrirOS
+=====================
+
+Code in /usr/share/bookstack (web root: public/). Its .env is
+/etc/bookstack/env; storage/, bootstrap/cache, public/uploads and themes/
+live in /var/lib/bookstack (links from the code directory). PHP runs as _php.
+Run artisan as _php:
+  su -s /bin/sh _php -c 'php /usr/share/bookstack/artisan <command>'
+
+1. Create a MariaDB database and user for BookStack:
+     CREATE DATABASE bookstack CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+     CREATE USER 'bookstack'@'localhost' IDENTIFIED BY '<password>';
+     GRANT ALL ON bookstack.* TO 'bookstack'@'localhost';
+2. cp /usr/share/bookstack/.env.example /etc/bookstack/env
+   chown _php:_php /etc/bookstack/env; chmod 0640 /etc/bookstack/env
+   set APP_URL, the DB_* settings and mail, then (as _php):
+     artisan key:generate --force
+     artisan migrate --force
+   (all options: /usr/share/bookstack/.env.example.complete)
+3. nginx: /usr/share/doc/bookstack/nginx-bookstack.conf (and, optionally,
+   the php-fpm pool php-fpm-bookstack.conf); enable php-fpm and nginx
+   (dinitctl enable php-fpm nginx).
+4. Log in with the account the migration creates (admin@admin.com /
+   password) and change its e-mail address and password at once; or create
+   your own administrator first (artisan bookstack:create-admin) and delete
+   that one.
+5. Scheduled tasks: cp /usr/share/doc/bookstack/bookstack.cron
+   /etc/cron.d/bookstack and dinitctl enable crond.
+6. After an update of this package: artisan migrate --force, then
+   artisan cache:clear and artisan view:clear.

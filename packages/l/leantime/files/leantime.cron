@@ -1,0 +1,2 @@
+# Leantime's scheduler (email notifications, reminders, reports), every 5 minutes
+*/5 * * * * _php /usr/bin/php /usr/share/leantime/bin/leantime schedule:run >> /var/lib/leantime/storage/logs/cron.log 2>&1

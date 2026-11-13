@@ -1,0 +1,51 @@
+# Nextcloud: self-hosted file sync and share (files, sharing, calendars and
+# contacts through the bundled apps, WebDAV/CalDAV/CardDAV), with an app
+# store for more. PHP with MariaDB, PostgreSQL or SQLite, served by nginx and
+# php-fpm. Upstream's release archive: its PHP libraries in 3rdparty/ (as PHP
+# source) and the built front ends (dist/, each app's js/); upstream signs
+# the files of that archive and checks them, so nothing in it is changed.
+# Layout: code in /usr/share/nextcloud; config/ is /etc/nextcloud (with
+# files/fenriros.config.php, merged by Nextcloud: data in
+# /var/lib/nextcloud/data, apps from the app store in /var/lib/nextcloud/apps
+# through the apps-extra link, the web updater and update notifications off
+# as the package is what updates it). `occ` (/usr/bin/occ) runs Nextcloud's
+# console as _php. Background jobs from an example cron job (installed by
+# the user). Optional PHP extensions upstream recommends: php-apcu (memory
+# cache), php-imagick (previews), php-redis (file locking); see the README.
+# Setup: /usr/share/doc/nextcloud/README.FenrirOS.
+# Installed inert (docs/requests.md): no service enabled, no site, no cron
+# job, no credentials; the README says how to set it up.
+name = "nextcloud"
+version = "35.0.3"
+release = 1
+summary = "Self-hosted file sync and share server"
+license = "AGPL-3.0-or-later"
+homepage = "https://nextcloud.com"
+archs = ["x86_64", "aarch64"]
+rundeps = ["php", "php-fpm", "nginx"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://download.nextcloud.com/server/releases/nextcloud-35.0.3.tar.bz2", sha256 = "58401440ce81b7f8d445a8c2a8027572b616ef83592f96b121fd15ec8a1aed35" },
+]
+
+install = '''
+d="$pkgdir/usr/share/nextcloud"
+mkdir -p "$d" "$pkgdir/etc"
+cp -a . "$d/"
+# config/ (config.sample.php, CAN_INSTALL, and the config.php the installer
+# writes) is /etc/nextcloud; the integrity check leaves config/ out
+mv "$d/config" "$pkgdir/etc/nextcloud"
+ln -s /etc/nextcloud "$d/config"
+install -Dm640 $pkgfiles/fenriros.config.php "$pkgdir/etc/nextcloud/fenriros.config.php"
+# the writable app directory (apps_paths in fenriros.config.php), left out of
+# the integrity check as an app directory
+ln -s /var/lib/nextcloud/apps "$d/apps-extra"
+install -Dm755 $pkgfiles/occ.sh "$pkgdir/usr/bin/occ"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/nextcloud.conf"
+install -Dm644 $pkgfiles/nextcloud.cron "$pkgdir/usr/share/doc/nextcloud/nextcloud.cron"
+install -Dm644 $pkgfiles/nginx-nextcloud.conf "$pkgdir/usr/share/doc/nextcloud/nginx-nextcloud.conf"
+install -Dm644 $pkgfiles/php-fpm-nextcloud.conf "$pkgdir/usr/share/doc/nextcloud/php-fpm-nextcloud.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/nextcloud/README.FenrirOS"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/nextcloud/COPYING"
+'''

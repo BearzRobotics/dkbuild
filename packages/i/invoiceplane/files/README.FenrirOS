@@ -1,0 +1,24 @@
+InvoicePlane on FenrirOS
+========================
+
+Code in /usr/share/invoiceplane (the web root). Its configuration file,
+ipconfig.php, is /etc/invoiceplane/ipconfig.php; uploads/, storage/ and the
+cache are in /var/lib/invoiceplane, logs in /var/log/invoiceplane. PHP runs
+as _php.
+
+1. Create a MariaDB database and user for InvoicePlane:
+     CREATE DATABASE invoiceplane CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+     CREATE USER 'invoiceplane'@'localhost' IDENTIFIED BY '<password>';
+     GRANT ALL ON invoiceplane.* TO 'invoiceplane'@'localhost';
+2. cp /usr/share/invoiceplane/ipconfig.php.example /etc/invoiceplane/ipconfig.php
+   chown _php:_php /etc/invoiceplane/ipconfig.php
+   and set IP_URL (the site's URL, no trailing slash).
+3. nginx: /usr/share/doc/invoiceplane/nginx-invoiceplane.conf (and,
+   optionally, the php-fpm pool php-fpm-invoiceplane.conf); enable php-fpm
+   and nginx (dinitctl enable php-fpm nginx), then open
+   https://<host>/index.php/setup and follow the web setup (it writes the
+   database settings into ipconfig.php and creates the first user).
+4. After the setup set DISABLE_SETUP=true in /etc/invoiceplane/ipconfig.php.
+5. Recurring invoices: copy /usr/share/doc/invoiceplane/invoiceplane.cron to
+   /etc/cron.d/invoiceplane, put in the cron key from Settings > General and
+   the site's URL, and enable crond (dinitctl enable crond).

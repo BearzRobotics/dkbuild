@@ -1,0 +1,206 @@
+# Kimai: time tracking for freelancers and teams (timesheets, customers,
+# projects, activities, invoices, exports, reports, a JSON API, SAML/LDAP).
+# Symfony on PHP with MariaDB (or MySQL), served by nginx and php-fpm.
+# Built from source: the 143 Composer packages composer.lock pins are the
+# recipe's sources (GitHub archives of the locked commits), and composer.lock
+# is pointed at them (files/composer-local.py), so composer installs offline.
+# The web front end's compiled CSS/JS is in the release tag (public/build).
+# Layout: code in /usr/share/kimai; .env is /etc/kimai/env (until it exists
+# Kimai reads the shipped .env.dist); var/ (cache, logs, data, plugins) is
+# /var/lib/kimai. Setup: /usr/share/doc/kimai/README.FenrirOS.
+# To update: regenerate the sources from the new composer.lock (each
+# dist.reference archive's sha256).
+# Installed inert (docs/requests.md): no service enabled, no site, no cron
+# job, no credentials; the README says how to set it up.
+name = "kimai"
+version = "2.71.0"
+release = 1
+summary = "Time tracking for freelancers and teams"
+license = "AGPL-3.0-or-later"
+homepage = "https://www.kimai.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["php", "composer", "unzip", "python"]
+rundeps = ["php", "php-fpm", "nginx"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/kimai/kimai/archive/refs/tags/2.71.0.tar.gz", sha256 = "5115f39efb61980ceaac55dac47d45ad0568efafab11ea33ce62fd6d5580d113" },
+    { url = "https://codeload.github.com/azuyalabs/yasumi/legacy.zip/24727701cd50b1177e39b3e20ed764fb0943bfb3", sha256 = "22e94674d23ea5eae917dee0ff589dabc9f35820b339d133cabca69e86611774", unpack = false },  # azuyalabs/yasumi
+    { url = "https://codeload.github.com/Bacon/BaconQrCode/legacy.zip/8674e51bb65af933a5ffaf1c308a660387c35c22", sha256 = "f4d93c999911344e83ca5ca29d9f1c6b4fe1a9b1d88f1a0587eff35caae16041", unpack = false },  # bacon/bacon-qr-code
+    { url = "https://codeload.github.com/composer/pcre/legacy.zip/d5a341b3fb61f3001970940afb1d332968a183ed", sha256 = "dc9cbb5032338c0efd6a1e50d0a263f1d5aa162452259f56f031f7e16b327135", unpack = false },  # composer/pcre
+    { url = "https://codeload.github.com/composer/semver/legacy.zip/9dfce66f1e97360ea5e6d3e38ab14277e4cc591e", sha256 = "e7839eed74c07f538e744c907b816c25cfe02cbe4c81f0a4dd316c8802d17f7f", unpack = false },  # composer/semver
+    { url = "https://codeload.github.com/DASPRiD/Enum/legacy.zip/b5874fa9ed0043116c72162ec7f4fb50e02e7cce", sha256 = "1d2c1b552a83dce5a25392fae3afcf6ab81ce1481fa0f117714117464e32d4ac", unpack = false },  # dasprid/enum
+    { url = "https://codeload.github.com/doctrine/cache/legacy.zip/1ca8f21980e770095a31456042471a57bc4c68fb", sha256 = "5a8799a67c97aab8a40b91eaa5a7af2db2e7c2b301a34ef60ae7e33a5e5211dd", unpack = false },  # doctrine/cache
+    { url = "https://codeload.github.com/doctrine/collections/legacy.zip/7713da39d8e237f28411d6a616a3dce5e20d5de2", sha256 = "f7e2e1058237f989e02e98a30123ed0fd9f6b40b0bae7761a04d07300aa001bd", unpack = false },  # doctrine/collections
+    { url = "https://codeload.github.com/doctrine/common/legacy.zip/d9ea4a54ca2586db781f0265d36bea731ac66ec5", sha256 = "a0366ee1b23516f9d325b067179cb0cacb1421c53059cca5b1db60dd586eac92", unpack = false },  # doctrine/common
+    { url = "https://codeload.github.com/doctrine/dbal/legacy.zip/c95589d775a0b2e543467d40f8c3ecccf586f2b4", sha256 = "e731fcde6b3a233a9cbc177972c5cd9ec51ff633ed12c85e9d0ae79d280b9095", unpack = false },  # doctrine/dbal
+    { url = "https://codeload.github.com/doctrine/deprecations/legacy.zip/d4fe3e6fd9bb9e72557a19674f44d8ac7db4c6ca", sha256 = "a14915085dc61e181aa11b277ce2f268e62bdb72e579aab307e7cfa95860e0d7", unpack = false },  # doctrine/deprecations
+    { url = "https://codeload.github.com/doctrine/DoctrineBundle/legacy.zip/72b53688c30451a7c65addd50b2167d31459724a", sha256 = "affe30f2556b412334e06f24785a7beb9dfb257f3733c66104f2db9453398113", unpack = false },  # doctrine/doctrine-bundle
+    { url = "https://codeload.github.com/doctrine/DoctrineMigrationsBundle/legacy.zip/00056695242a3e88369fe7a6e10669d8f6d7496a", sha256 = "3f9fc591fb337829c54164c3d84799c904ca04ee1d4b64469115092e4c47e9ae", unpack = false },  # doctrine/doctrine-migrations-bundle
+    { url = "https://codeload.github.com/doctrine/event-manager/legacy.zip/dda33921b198841ca8dbad2eaa5d4d34769d18cf", sha256 = "52515e6ed80cdd7ae4d951323479544b4fb22b34f8c59a0c7b70996f041473fe", unpack = false },  # doctrine/event-manager
+    { url = "https://codeload.github.com/doctrine/inflector/legacy.zip/6d6c96277ea252fc1304627204c3d5e6e15faa3b", sha256 = "2d57b5eb9b4a7e6c2820cd8dbfd0cfefcde194eb199327f69e890af050a16887", unpack = false },  # doctrine/inflector
+    { url = "https://codeload.github.com/doctrine/instantiator/legacy.zip/c6222283fa3f4ac679f8b9ced9a4e23f163e80d0", sha256 = "966dccf8ebce17e2883e59d65c4172a3c4008d2c0039421523a2823f0e872a15", unpack = false },  # doctrine/instantiator
+    { url = "https://codeload.github.com/doctrine/lexer/legacy.zip/71d305eaa6480d3d3460c7d053d1da7749fa9cca", sha256 = "d93e23fc64e4d2e41d4f9efd442202219368e8a8769ad8136b8801710e861fde", unpack = false },  # doctrine/lexer
+    { url = "https://codeload.github.com/doctrine/migrations/legacy.zip/eb0b9ce3f999d720fa73037bbd06977ea34b76a0", sha256 = "dc88b1cfacb9bbba8812461e93b6fc4805d023f169b78958a685f3a58030005a", unpack = false },  # doctrine/migrations
+    { url = "https://codeload.github.com/doctrine/orm/legacy.zip/f525f32e11efc60a34f5eecd88093f476c90f90e", sha256 = "b8dedf0003d96869dd8e652cfd592d7304f309cdacd9c63b48d5cd19712c3bb0", unpack = false },  # doctrine/orm
+    { url = "https://codeload.github.com/doctrine/persistence/legacy.zip/703a29d8597336fb75f42eeabcdf3f2863156ca8", sha256 = "df9bf23c5716ce9b895c774384fe1e1542737530ea90b84122d5f249bc5a00fc", unpack = false },  # doctrine/persistence
+    { url = "https://codeload.github.com/doctrine/sql-formatter/legacy.zip/9563949f5cd3bd12a17d12fb980528bc141c5806", sha256 = "f905ff7d35f9c59e685b751ae4aedb9ec93cdf51ba7831079fe6a79a00735207", unpack = false },  # doctrine/sql-formatter
+    { url = "https://codeload.github.com/egulias/EmailValidator/legacy.zip/d42c8731f0624ad6bdc8d3e5e9a4524f68801cfa", sha256 = "76ab413a7b2a4331245bbc2a9bc447a3712ebdea969e6f7cd8dce4eff5c63f02", unpack = false },  # egulias/email-validator
+    { url = "https://codeload.github.com/endroid/qr-code/legacy.zip/0db25b506a8411a5e1644ebaa67123a6eb7b6a77", sha256 = "6f7839647cf85a872d0b379d599420d93d3edf083b99cec057c6ab6fa045b0f7", unpack = false },  # endroid/qr-code
+    { url = "https://codeload.github.com/erusev/parsedown/legacy.zip/96baaad00f71ba04d76e45b4620f54d3beabd6f7", sha256 = "49002fbdf4c60cf62adc0dad644e56f8b9f7fb728a1f5e35e94c4dac41fc9ba9", unpack = false },  # erusev/parsedown
+    { url = "https://codeload.github.com/FriendsOfSymfony/FOSRestBundle/legacy.zip/0a0d597a79734a8bd3a90cf6fa58de82940fc873", sha256 = "3433642ac1b2189dbd87ce9326d66e783ad10244d6d1be350954ded356a30caa", unpack = false },  # friendsofsymfony/rest-bundle
+    { url = "https://codeload.github.com/doctrine-extensions/DoctrineExtensions/legacy.zip/486719169b3042dd4cdb801f70651f30723aab9e", sha256 = "5a4631a8756a64593d625b8f0065e952bda98cf9377f8905d939ddc0d4236f3b", unpack = false },  # gedmo/doctrine-extensions
+    { url = "https://codeload.github.com/goetas-webservices/xsd2php-runtime/legacy.zip/1215ce8504f2726b1a0c5025478da86a2791a0ba", sha256 = "eb304e2d9d359af913779c1e290b7cfb11ea397b4eccda106a11f24a3a011f91", unpack = false },  # goetas-webservices/xsd2php-runtime
+    { url = "https://codeload.github.com/horstoeko/mimedb/legacy.zip/2d50f2b6bf63f14741514682869b53fc97232308", sha256 = "59431b64f5041fcbc06c0ea84edad12f02ea006ff5fb60be6d865a10d2e941a3", unpack = false },  # horstoeko/mimedb
+    { url = "https://codeload.github.com/horstoeko/stringmanagement/legacy.zip/d304a094e34c39d35f275bccf4944176dd8f1722", sha256 = "7206f1f895bd052c07a0e158923ad75f3bf6c84029714b0a1b9a4f68d4634186", unpack = false },  # horstoeko/stringmanagement
+    { url = "https://codeload.github.com/horstoeko/zugferd/legacy.zip/7ae81641e2ca1992b5b0afbce00309ed4d989e4c", sha256 = "e8c2721a01e95675757244e224c33a37660ca1cd0c4cf205642242c5732276c7", unpack = false },  # horstoeko/zugferd
+    { url = "https://codeload.github.com/horstoeko/zugferdublbridge/legacy.zip/96f721c239e57789eb41b647bffec7f08cdf2953", sha256 = "562a1bbe0a7574661f596a6649162fd1b780bb77715fa9fe926ffe38b3c166e2", unpack = false },  # horstoeko/zugferdublbridge
+    { url = "https://codeload.github.com/schmittjoh/metadata/legacy.zip/554319d2e5f0c5d8ccaeffe755eac924e14da330", sha256 = "f2a2ef7b29e5cf8b960a7d44c382205f6b1de4966c516a8c04add95141870515", unpack = false },  # jms/metadata
+    { url = "https://codeload.github.com/schmittjoh/serializer/legacy.zip/25cf987fa31d5f412feaae29745a5421cb803773", sha256 = "d66ce5f3cf5d18ecf36c94dd85a6fa5674676e8e0498f10301a9ee2b8e76211e", unpack = false },  # jms/serializer
+    { url = "https://codeload.github.com/schmittjoh/JMSSerializerBundle/legacy.zip/34d01be85521e99ca29079438002672af35ff9b0", sha256 = "c3b5465fe6979d5159ff1d1c6b21375c012f3ddc882ea874e37d79cca5601b11", unpack = false },  # jms/serializer-bundle
+    { url = "https://codeload.github.com/kevinpapst/TablerBundle/legacy.zip/f1b9b89bac2a471eea484f413d354fb84d96e65f", sha256 = "ce00f854ae7da1ed31e52d4ce003ec3d0ee3222cef38f4d3819885f527ca1bd9", unpack = false },  # kevinpapst/tabler-bundle
+    { url = "https://codeload.github.com/thephpleague/csv/legacy.zip/6582ace29ae09ba5b07049d40ea13eb19c8b5073", sha256 = "2f7f6b1aa914b0e552e68f6d1f70fa71571f0ad9225ffe6f9413c829271cfc8c", unpack = false },  # league/csv
+    { url = "https://codeload.github.com/lorenzo/pinky/legacy.zip/e1b1bdb2c132b8a7ba32bca64d2443f646ddbd17", sha256 = "fa3d0192a6f9672733ab8251bbe9bc785c1359b0b4d80b9f13bffcf803f8ebc1", unpack = false },  # lorenzo/pinky
+    { url = "https://codeload.github.com/maennchen/ZipStream-PHP/legacy.zip/aeadcf5c412332eb426c0f9b4485f6accba2a99f", sha256 = "dd50898b4261a04401481f1385dbfca991cc0ca9fdffca3f0f759a649eab3584", unpack = false },  # maennchen/zipstream-php
+    { url = "https://codeload.github.com/MarkBaker/PHPComplex/legacy.zip/95c56caa1cf5c766ad6d65b6344b807c1e8405b9", sha256 = "d2cb46f939380a43a8c29a68dad5c17378d31032dc5891dba84967b635a83420", unpack = false },  # markbaker/complex
+    { url = "https://codeload.github.com/MarkBaker/PHPMatrix/legacy.zip/728434227fe21be27ff6d86621a1b13107a2562c", sha256 = "e3a644daf6832baf51607b2c4b555e4361f8b77b3003f23eb6550199d6ee9c21", unpack = false },  # markbaker/matrix
+    { url = "https://codeload.github.com/Seldaek/monolog/legacy.zip/d7059e4c691d05ea1222b5124bed0f961be46e15", sha256 = "a8ea5681c77cdf47c1412da8c9278be5927adc123710d382ec654342b23729a9", unpack = false },  # monolog/monolog
+    { url = "https://codeload.github.com/mpdf/mpdf/legacy.zip/2a454ec334109911fdb323a284c19dbf3f049810", sha256 = "be0f36dfef80e72f6f6183159381d70f846a8aa6dd9d4e9c9e34ccb404b95c71", unpack = false },  # mpdf/mpdf
+    { url = "https://codeload.github.com/mpdf/psr-http-message-shim/legacy.zip/f25a0153d645e234f9db42e5433b16d9b113920f", sha256 = "a501662823ee59d72be780fc5d530cf7e3977ff523c58cb22b4cd1993c8fc89e", unpack = false },  # mpdf/psr-http-message-shim
+    { url = "https://codeload.github.com/mpdf/psr-log-aware-trait/legacy.zip/a633da6065e946cc491e1c962850344bb0bf3e78", sha256 = "eb85fb4090e77f3d7e342e1fe048292bbcdde0b75441e23362c645dbb8fbb2e1", unpack = false },  # mpdf/psr-log-aware-trait
+    { url = "https://codeload.github.com/myclabs/DeepCopy/legacy.zip/8680aa248f8e07bc8fb43f56f0f5fc77a0c96aae", sha256 = "56bd5cff0d8ac15818301fcc26712dfeffef322d2120bb4f4d67dca8089e6380", unpack = false },  # myclabs/deep-copy
+    { url = "https://codeload.github.com/nelmio/NelmioApiDocBundle/legacy.zip/06cec4887bce89dd184a7d2d7f0f82f829afa76c", sha256 = "d24343744d42fad05b2a310481b95baedf6ae65c6b825e0fcd837e8b4cfade0c", unpack = false },  # nelmio/api-doc-bundle
+    { url = "https://codeload.github.com/nelmio/NelmioCorsBundle/legacy.zip/3d80dbcd5d1eb5f8b20ed5199e1778d44c2e4d1c", sha256 = "a50bea1f09ed9c1783d7a849128625f329e3abf05458acab49b85a19ee7c79ca", unpack = false },  # nelmio/cors-bundle
+    { url = "https://codeload.github.com/nikic/PHP-Parser/legacy.zip/9e33da9553fe7786f0962b35f4e4ecf01be89def", sha256 = "c307260c466a105f12460f1866dc3600938ef4f7f8665e86f0d743a544848846", unpack = false },  # nikic/php-parser
+    { url = "https://codeload.github.com/SAML-Toolkits/php-saml/legacy.zip/26b3a47349415e5b7aa300ba4ab7fc316c65f19e", sha256 = "be6c2aa729ed69b670477b5a9bbd7f7d71489070373a4df8760707bff9caa34d", unpack = false },  # onelogin/php-saml
+    { url = "https://codeload.github.com/openspout/openspout/legacy.zip/ab05a09fe6fce57c90338f83280648a9786ce36b", sha256 = "fdd21522bbf7c0a653433dd4b84967a10c11d6740c406332edc7648df4116e83", unpack = false },  # openspout/openspout
+    { url = "https://codeload.github.com/BabDev/Pagerfanta/legacy.zip/f6502280a6211d1ad2d10313585b9b46adfc868e", sha256 = "4d192596ef9b499a418911f7e1e29ad0ac1290d4f462f409421a9bfde9d4769a", unpack = false },  # pagerfanta/pagerfanta
+    { url = "https://codeload.github.com/paragonie/constant_time_encoding/legacy.zip/e30811f7bc69e4b5b6d5783e712c06c8eabf0226", sha256 = "25f4c99241957349f2b5a1698d2099fc0be348cd3f2670b9cd3cb60004b52cdd", unpack = false },  # paragonie/constant_time_encoding
+    { url = "https://codeload.github.com/paragonie/random_compat/legacy.zip/996434e5492cb4c3edcb9168db6fbb1359ef965a", sha256 = "ddcfc73490d9c864de6a52185058fb1f516cd2ba63869c4c7230b654a8a2c74f", unpack = false },  # paragonie/random_compat
+    { url = "https://codeload.github.com/phpDocumentor/ReflectionCommon/legacy.zip/ee15a5a2022c8383906b225055e9496a6a5e6e3b", sha256 = "431638da208676f0c59ba8d47f9b856f93302441eecad4e008f52da6785c521a", unpack = false },  # phpdocumentor/reflection-common
+    { url = "https://codeload.github.com/phpDocumentor/ReflectionDocBlock/legacy.zip/31a105931bc8ffa3a123383829772e832fd8d903", sha256 = "f71d05d5cb402168a8053c2b80f68d77023af9ab0ab9855d35547a9b0438f9fc", unpack = false },  # phpdocumentor/reflection-docblock
+    { url = "https://codeload.github.com/phpDocumentor/TypeResolver/legacy.zip/92a98ada2b93d9b201a613cb5a33584dde25f195", sha256 = "8b4de68f4ccbe2b557597cf1d62958818486514affb4f1ea470537813b9f2f33", unpack = false },  # phpdocumentor/type-resolver
+    { url = "https://codeload.github.com/PHPOffice/Math/legacy.zip/fc31c8f57a7a81f962cbf389fd89f4d9d06fc99a", sha256 = "eb936c188367b84e4a4e206c41d003d3e5c87daebbae7129be7d5006a189d2c5", unpack = false },  # phpoffice/math
+    { url = "https://codeload.github.com/PHPOffice/PhpSpreadsheet/legacy.zip/badf4f22c54332046af37687c3384c6a0ed14ae1", sha256 = "a75350a4a7f16a3aed97ce7d822a93cc4fd607a70f47e05275f77a3407c7b717", unpack = false },  # phpoffice/phpspreadsheet
+    { url = "https://codeload.github.com/PHPOffice/PHPWord/legacy.zip/6d75328229bc93790b37e93741adf70646cea958", sha256 = "4d93d09ad259d82cb58886cdf582f6ed8d10fdcc757a1b4cbd344beaa52fec9e", unpack = false },  # phpoffice/phpword
+    { url = "https://codeload.github.com/phpstan/phpdoc-parser/legacy.zip/1427af4647235b4a73b13940b1f1258d3584f36e", sha256 = "e86550aaec4067a0a93ed994aa88cab66858bba808023ee5a0ea72db29f94cd7", unpack = false },  # phpstan/phpdoc-parser
+    { url = "https://codeload.github.com/php-fig/cache/legacy.zip/aa5030cfa5405eccfdcb1083ce040c2cb8d253bf", sha256 = "88d63083b654a7ca847e926fcf8e3c35b0a7dd1bde960d8674ba10b2b8f4361f", unpack = false },  # psr/cache
+    { url = "https://codeload.github.com/php-fig/clock/legacy.zip/e41a24703d4560fd0acb709162f73b8adfc3aa0d", sha256 = "72a2682083efc51108e5d7d0e880d45d85236100692c86d093c3f6f9205ae573", unpack = false },  # psr/clock
+    { url = "https://codeload.github.com/php-fig/container/legacy.zip/c71ecc56dfe541dbd90c5360474fbc405f8d5963", sha256 = "3111f5b69d3a0f690f5f92d7aeacfb247f5ebd3c175088cce4b098e5d1b06ad7", unpack = false },  # psr/container
+    { url = "https://codeload.github.com/php-fig/event-dispatcher/legacy.zip/dbefd12671e8a14ec7f180cab83036ed26714bb0", sha256 = "4d6a674cfd89a9957ead82e31ee4df785b2b1d215693add73184729a9a66d116", unpack = false },  # psr/event-dispatcher
+    { url = "https://codeload.github.com/php-fig/http-message/legacy.zip/402d35bcb92c70c026d1a6a9883f06b2ead23d71", sha256 = "d561d2c36e2e3c0ee8b54e0e9652b3bfa13cd763e5e6f93400969001f3a7968d", unpack = false },  # psr/http-message
+    { url = "https://codeload.github.com/php-fig/log/legacy.zip/f16e1d5863e37f8d8c2a01719f5b34baa2b714d3", sha256 = "1e8dcf2df933fc3440b29146c5ca4e93ece51c5c7a9ac9653d926ec971c90892", unpack = false },  # psr/log
+    { url = "https://codeload.github.com/php-fig/simple-cache/legacy.zip/764e0b3939f5ca87cb904f570ef9be2d78a07865", sha256 = "e899e363a85c26b3f1a621182b6eed2a37a71d823410ac949a1cbfd4b655ec41", unpack = false },  # psr/simple-cache
+    { url = "https://codeload.github.com/DerManoMann/type-info-extras/legacy.zip/1e71149dee7bf45f5cf208eb3c6c74d45a13d395", sha256 = "a6ed52f3206f059c8aaef1f4ea3dc8f565fb7d319f7852ac372804d0c1aadf48", unpack = false },  # radebatz/type-info-extras
+    { url = "https://codeload.github.com/robrichards/xmlseclibs/legacy.zip/03062be78178cbb5e8f605cd255dc32a14981f92", sha256 = "1caac7b3d6339f5865125f0c2c164e8c8e687014c5599289d70cd1a6e465ede5", unpack = false },  # robrichards/xmlseclibs
+    { url = "https://codeload.github.com/scheb/2fa-backup-code/legacy.zip/6dceeb5be0f6339d76f8e380ee09631c8bbebc7e", sha256 = "b3a50bab224596b4426d5cbd0ffe0b2b31d90034c3605365d15f1b3936aeb0bb", unpack = false },  # scheb/2fa-backup-code
+    { url = "https://codeload.github.com/scheb/2fa-bundle/legacy.zip/8eadd57ebc2078ef273dca72b1ac4bd283812346", sha256 = "fd051927b8dce121eb7cd99ff82ca93aba29b804cb66f7b9a44647aa5cc9d55f", unpack = false },  # scheb/2fa-bundle
+    { url = "https://codeload.github.com/scheb/2fa-totp/legacy.zip/e72879c8e0aca5d21fdcfdecdaa98a1d1cad8612", sha256 = "3f60cb3ff333f8b5aeacf9c93f0cc20ffd3207c0cb77b9e75d2899cb011d8fda", unpack = false },  # scheb/2fa-totp
+    { url = "https://codeload.github.com/Setasign/FPDF/legacy.zip/051b70e4c57dedc88df41b1eff1c62894e5f9ed0", sha256 = "aa01921322891eece25f0c194ded5a9874234d8f40682eefeb76e8a5e56e50d7", unpack = false },  # setasign/fpdf
+    { url = "https://codeload.github.com/Setasign/FPDI/legacy.zip/d97ade6368aa0b51b6316d5dc16a567e2bf60167", sha256 = "c48d724b573848aebe9f4cd6a1d7bccc60db78d4ff7bd69507f3ffddcf3645fe", unpack = false },  # setasign/fpdi
+    { url = "https://codeload.github.com/smalot/pdfparser/legacy.zip/a71c6dd38e60a995fdb4d36e4433b8b3557c65dc", sha256 = "3b08be1574e0853689cbddf8cad7cde7165b5098e8f39f49a1e98bbd917cb468", unpack = false },  # smalot/pdfparser
+    { url = "https://codeload.github.com/Spomky-Labs/otphp/legacy.zip/877683d6352b80cdc7020fd43a725629c2524435", sha256 = "54ad5d4c533a10316fa03892e75f39574b8e57a4feb981097ba6dab8bc3b142b", unpack = false },  # spomky-labs/otphp
+    { url = "https://codeload.github.com/symfony/asset/legacy.zip/1bd59aa278691b6310ca56b996cf6e2619a6a347", sha256 = "78c47677a4e63ad1c6e0ae9c7667fdf9321ad20e1e2be23caaaec32cd3e86c02", unpack = false },  # symfony/asset
+    { url = "https://codeload.github.com/symfony/cache/legacy.zip/7ce0de35c828d29a5602134cdcf82b9c301b198f", sha256 = "6bf72b2172590a2f0fb617683cb118999ef0e803f91f256416bb652ebe12b8ce", unpack = false },  # symfony/cache
+    { url = "https://codeload.github.com/symfony/cache-contracts/legacy.zip/9789738bc19af1106dc54d6afba9a0b467516cf2", sha256 = "b93563da140c0e5ccc2b95efd49e6d29e36f24bd12e44309eccbdc27265f82d5", unpack = false },  # symfony/cache-contracts
+    { url = "https://codeload.github.com/symfony/clock/legacy.zip/907397721c27e69c93220bab59ee3261f6714391", sha256 = "d1af933d3b1eb4a709463fc40a9187185bcb3b5c0d80399e1b94730bf1c95e2e", unpack = false },  # symfony/clock
+    { url = "https://codeload.github.com/symfony/config/legacy.zip/6a5abf67fd5b138df96984fe6f8fd736fb7d6b29", sha256 = "c8b0d2756b0ada899038ee453537dcf9077873462e8c3573abaa47879aef3ed1", unpack = false },  # symfony/config
+    { url = "https://codeload.github.com/symfony/console/legacy.zip/c9c4cf6745e8b25db27466f59cf126ac8d3db3a4", sha256 = "5099f0e59df783117e36ba5f2e12cd142567e0f9daecdec6bf7f3f62099834ae", unpack = false },  # symfony/console
+    { url = "https://codeload.github.com/symfony/css-selector/legacy.zip/5484e316cd8125f5215bbf829151e2211aa6d101", sha256 = "8c19fde7144b80ea25832f10594c21582bd077564f07eee148b9b14ea13208e2", unpack = false },  # symfony/css-selector
+    { url = "https://codeload.github.com/symfony/dependency-injection/legacy.zip/3d340875612e33d1969437eb0e88a499426b2343", sha256 = "360609a66944a407d2b2bd098416a10bbfe1e790acca37040cfddbcc06989511", unpack = false },  # symfony/dependency-injection
+    { url = "https://codeload.github.com/symfony/deprecation-contracts/legacy.zip/f3202fa1b5097b0af062dc978b32ecf63404e31d", sha256 = "3d91410609aa4f579406a4908e2960155fc3efd6c643884869f875aa73f9687d", unpack = false },  # symfony/deprecation-contracts
+    { url = "https://codeload.github.com/symfony/doctrine-bridge/legacy.zip/1fa8f2328ad79314c036bc61754d2f86112e7360", sha256 = "1236aba92bc616e5339fee5602d40d8ccb2fddfd382d066bde75f4d1037fd6aa", unpack = false },  # symfony/doctrine-bridge
+    { url = "https://codeload.github.com/symfony/dotenv/legacy.zip/9b827002b54f89a5ac605c21c349a42161996afb", sha256 = "926c907103bd80c66bb5f62ba656e3d1b4c09125b931c7f334e50fcbf1d1b03c", unpack = false },  # symfony/dotenv
+    { url = "https://codeload.github.com/symfony/error-handler/legacy.zip/0b7be4e3f15ad53b46941bed1e59863245de8647", sha256 = "770269164f629d437adb448e7dee2c80b37e1363d61679d1712275fc6281fedf", unpack = false },  # symfony/error-handler
+    { url = "https://codeload.github.com/symfony/event-dispatcher/legacy.zip/d7110a878e7e7cbd8aaebe9f55da8af885b8c0af", sha256 = "3746212fd2a4a4828c8ccb689dc35d992722d4f16ed1c338916ab65e5d980a60", unpack = false },  # symfony/event-dispatcher
+    { url = "https://codeload.github.com/symfony/event-dispatcher-contracts/legacy.zip/c7de7a00ffb67842132da02ea92988a39ccd9f4e", sha256 = "cd447f381c65803dbd3fdc94146b2f4c88f921e783ad3a12feb14417d54b7b6d", unpack = false },  # symfony/event-dispatcher-contracts
+    { url = "https://codeload.github.com/symfony/expression-language/legacy.zip/4a38ae0e9352b1b6de25dbb428db93f94a3976bb", sha256 = "3392c9a2ede8ddf9aa477e02fcf37c7c0294b2543e35972e60c54dded232bf5a", unpack = false },  # symfony/expression-language
+    { url = "https://codeload.github.com/symfony/filesystem/legacy.zip/e3ff48b19ac71ee79f89021122211710b892ae0b", sha256 = "00e5448e61450ad1d55a00334f08a2c476c2d266b63a8c70aebc1f7ad8f6207e", unpack = false },  # symfony/filesystem
+    { url = "https://codeload.github.com/symfony/finder/legacy.zip/c8d1b2a09bb820175d1f2f9a3cf30303200b10a7", sha256 = "66c8ecc667cdae33c4ee515c273bc274c5148b99b8ff5939d036a01a8096d223", unpack = false },  # symfony/finder
+    { url = "https://codeload.github.com/symfony/flex/legacy.zip/4a6d98eea3ebc7f68d82810cb682eedca2649e99", sha256 = "290ba916a6367e361bb64748b05f5f378c250e4fecbc8cf37aaf0d632105dace", unpack = false },  # symfony/flex
+    { url = "https://codeload.github.com/symfony/form/legacy.zip/16c818e6e1fcd4a35fbc7be919b77298aaf28684", sha256 = "26ed78736a94057074bfaba256b5bbde0e6926fe1aab1c1c5008a48cb6539e43", unpack = false },  # symfony/form
+    { url = "https://codeload.github.com/symfony/framework-bundle/legacy.zip/53c3853a101acdec6fae4fa8bec2afd9d3b17e1f", sha256 = "6fa12d26b2e50a95498982245b201067e7c2f391bd0e10aaff4d1ceef11788b5", unpack = false },  # symfony/framework-bundle
+    { url = "https://codeload.github.com/symfony/http-client/legacy.zip/8d00de4cfe747c706296426314ce3417ae5a8169", sha256 = "adc06bf99c417334a995f1a134cfd91427138fb01274ff33ba41fcbccc58309a", unpack = false },  # symfony/http-client
+    { url = "https://codeload.github.com/symfony/http-client-contracts/legacy.zip/35be0019e2c2c9fba80f9dc033290a5240f7b44f", sha256 = "b4dfff9e4943c9eed95917af5062fd7ee474549172a03dd0d6af8ea5414492d9", unpack = false },  # symfony/http-client-contracts
+    { url = "https://codeload.github.com/symfony/http-foundation/legacy.zip/b1721caa556f32d150d9a14bb0a3fc4b86dfda33", sha256 = "45b2082b9f2c774c3c9dfbe9a036953868d2ca27e146742c41b62fbf7684ed5d", unpack = false },  # symfony/http-foundation
+    { url = "https://codeload.github.com/symfony/http-kernel/legacy.zip/2eff8dba4978c294d994607441c06ebd5d867086", sha256 = "ef6c1e114255293807383db0a0a0e845ec9cc1fc4f968615a5dea3ab0c9b9aab", unpack = false },  # symfony/http-kernel
+    { url = "https://codeload.github.com/symfony/intl/legacy.zip/d79905d256652f1353b26e1a59d89f835b2d31cf", sha256 = "84f91a614a816486ce9fe4e3dfd58978ebd2167e33496557a495ea858aec26a2", unpack = false },  # symfony/intl
+    { url = "https://codeload.github.com/symfony/mailer/legacy.zip/21cc391f6f6a20b8765125cabee0c6195b5b8f10", sha256 = "c4e1f3fbc8c42a5d221d8c5451084b11a21dd8a1e705a65229642762c74e2f8d", unpack = false },  # symfony/mailer
+    { url = "https://codeload.github.com/symfony/mime/legacy.zip/e700a9819829e1395ae95b508c6355053b5644fe", sha256 = "92db1b5585f4abe09e791436c33d604ec7f0f5e38b9841c14cae8e4ce8321764", unpack = false },  # symfony/mime
+    { url = "https://codeload.github.com/symfony/monolog-bridge/legacy.zip/d3f5dd9133dc5723c7ee77e37b3db07e6934576d", sha256 = "6f18404aa7b8b10835db6f7a7919813d8527bc6f8869d788a9962c98d0ba6a82", unpack = false },  # symfony/monolog-bridge
+    { url = "https://codeload.github.com/symfony/monolog-bundle/legacy.zip/d87468010570b2ec766152184918ee8d267c7411", sha256 = "0931d8fdde8901c7976a37ce107b0b779d46ba678334cd8425a5e5e2992c67e3", unpack = false },  # symfony/monolog-bundle
+    { url = "https://codeload.github.com/symfony/options-resolver/legacy.zip/eeaa8cabe54c7b3516938c72a4a161c0cc80a34f", sha256 = "94a683d5a7b397268822a8a1ea2f537b34c3e3b1e710dd3627b67b1d0f71295a", unpack = false },  # symfony/options-resolver
+    { url = "https://codeload.github.com/symfony/password-hasher/legacy.zip/fbdfa5a2ca218ec8bb9029517426df2d780bdba9", sha256 = "50cef830ca2b485cee5cc7cf848d1fe9d866f154165a74ed39c2c6817b36ebb9", unpack = false },  # symfony/password-hasher
+    { url = "https://codeload.github.com/symfony/polyfill-php83/legacy.zip/80ccff923a8d61f73ebe9da0aa94e25232f004ce", sha256 = "7f08cc82e653dde20a6f4f8c79931e228968c704f1578a22ce1e0922f214214f", unpack = false },  # symfony/polyfill-php83
+    { url = "https://codeload.github.com/symfony/polyfill-php84/legacy.zip/22c6548499cbe5c5bb072fc0c42312dff062a015", sha256 = "58d40920f17c547ae016928216ed33432598074521f3646ab6835cb4f5a85152", unpack = false },  # symfony/polyfill-php84
+    { url = "https://codeload.github.com/symfony/process/legacy.zip/2a0cb83994a4b8a5f92fc91b8b4527e6e227c6f5", sha256 = "f3e228b8a66091b7877950e08f2246eab8bbab3913de5064b6d540562971f1ca", unpack = false },  # symfony/process
+    { url = "https://codeload.github.com/symfony/property-access/legacy.zip/57793e8d1e3ede2d4a65604e8f213a3cfa8d1721", sha256 = "ac47ac21152d71e3b4ca3b9c979fdde065718c0df16fd654dfa797c42bb901ea", unpack = false },  # symfony/property-access
+    { url = "https://codeload.github.com/symfony/property-info/legacy.zip/4789c9a2650f9285da6db0363ef40e5a21b42ce9", sha256 = "d7b53acac902ececceb11cbf27c6bf4d44c796f35e81ef9aa1aae6875cf816e3", unpack = false },  # symfony/property-info
+    { url = "https://codeload.github.com/symfony/rate-limiter/legacy.zip/882bf9609269600c1333c1e7e7c8aebab045fe8b", sha256 = "ab05c194f76e271d98949f59e3644cc47ff795569ffe22bf4613fbb1ec8cc475", unpack = false },  # symfony/rate-limiter
+    { url = "https://codeload.github.com/symfony/routing/legacy.zip/641a94df9ad73671abd86bc4303aa301ca555b2b", sha256 = "c4f67f9c7a2d561792c760594a616a1a58480bbea037de07fd6dff0f837233fc", unpack = false },  # symfony/routing
+    { url = "https://codeload.github.com/symfony/runtime/legacy.zip/4a354e15532ed4f99c6d0fdc5618bfbd3ea05a8a", sha256 = "930582c560bc06adf853537aa71a89d0c12e93aa0e41a58f02525567d8de12f4", unpack = false },  # symfony/runtime
+    { url = "https://codeload.github.com/symfony/security-bundle/legacy.zip/6f8b750516002633751d1e7d219504bce2546b02", sha256 = "ee729766633cf168c6ee78c2c01e175b5ab222b16f13d28433f5a1c86c8f8f48", unpack = false },  # symfony/security-bundle
+    { url = "https://codeload.github.com/symfony/security-core/legacy.zip/52df430fa99ad42143fdc47f759e26f5c8ad78a7", sha256 = "ad5b0233f14089139d75c4af65d88c03c5840844b639d2116dae60fff95adf02", unpack = false },  # symfony/security-core
+    { url = "https://codeload.github.com/symfony/security-csrf/legacy.zip/52f62836fcb19cd351ef3a2aa9cf61a489e8990f", sha256 = "02dcf4ac745b5e2cad88238d774f3dbdbeafc833d1c5cc6d80d61fb43be90ed2", unpack = false },  # symfony/security-csrf
+    { url = "https://codeload.github.com/symfony/security-http/legacy.zip/47b573c7a7bb47178647a6c534dc2eb9c3b6775b", sha256 = "6156a5f5bd4e7074a16c9c9427cace345f9dd2d9eaa6e82e36e6367ad939384e", unpack = false },  # symfony/security-http
+    { url = "https://codeload.github.com/symfony/serializer/legacy.zip/67e177a3fe8cae15decfb004563f9b4988296be3", sha256 = "7d88e05e96ae9ff43c5471a63548f9dc4d27cb630091d48acc3a1ed97bec220c", unpack = false },  # symfony/serializer
+    { url = "https://codeload.github.com/symfony/service-contracts/legacy.zip/15e6a07ec2a2c75ceb1b21dd98105ee8456d2257", sha256 = "ec305155895d781bc8bec81011a35dea55c88f849b2a6a2e0b689195f4b0f66d", unpack = false },  # symfony/service-contracts
+    { url = "https://codeload.github.com/symfony/stopwatch/legacy.zip/b67e94e06a05d9572c2fa354483b3e13e3cb1898", sha256 = "f4f4de23118e3b4f0ecd5782810e60415add28b1eda6f76e0a8f99df2394dd21", unpack = false },  # symfony/stopwatch
+    { url = "https://codeload.github.com/symfony/string/legacy.zip/9459a27a00b1f0fec1954e9eb362d00aedcfe048", sha256 = "17a7005c5cde405ea18e884e1e628075e9ae076f2d32edccaebb4112fb6784e8", unpack = false },  # symfony/string
+    { url = "https://codeload.github.com/symfony/translation/legacy.zip/fa2235501e2cf6b1d38ab42954b248a5e93c8e89", sha256 = "051997972f7544b72ef3525ef4d81ef739b0da4996467b4a595fc60be5e4b629", unpack = false },  # symfony/translation
+    { url = "https://codeload.github.com/symfony/translation-contracts/legacy.zip/ccb206b98faccc511ebae8e5fad50f2dc0b30621", sha256 = "a56c767440ea61bf22d16b2bc8102b1cf07c635da7a47bc809b4d4699a741820", unpack = false },  # symfony/translation-contracts
+    { url = "https://codeload.github.com/symfony/twig-bridge/legacy.zip/5b38d19f327f32507f96c9316aef90e7ad4962ac", sha256 = "be5b2f3a1b610f0455d3018c60b15f1670e071dc11e40a832dcd3f99de4f430b", unpack = false },  # symfony/twig-bridge
+    { url = "https://codeload.github.com/symfony/twig-bundle/legacy.zip/031fe1000fd630bc3c1fd055f9599c748ec47f63", sha256 = "349bc2e87a8f9b04998f638e8f6b08b369bf3513e10efff2fb74070606538257", unpack = false },  # symfony/twig-bundle
+    { url = "https://codeload.github.com/symfony/type-info/legacy.zip/bbaaf3366400f5c85f66800b955c77b46e8abad2", sha256 = "4b86924905c67de40d2c9113438e13eb397081857dbc4d9df1c8ba1a6db6cc15", unpack = false },  # symfony/type-info
+    { url = "https://codeload.github.com/symfony/validator/legacy.zip/01eea7f7cfbb3547f761a6e0d2f0fd72fb7bfad1", sha256 = "f4118c6196ee69f17b541dd79e1c3198463c51594501e1c9d8dd2dd7d31744c9", unpack = false },  # symfony/validator
+    { url = "https://codeload.github.com/symfony/var-dumper/legacy.zip/7db9224bcf74d1306d2062cb8b124fbe0efeb714", sha256 = "cd1911e781d5a3425a5ca5c444e0bcb11e73164f554338ed4227268b21e1fd9b", unpack = false },  # symfony/var-dumper
+    { url = "https://codeload.github.com/symfony/var-exporter/legacy.zip/a4e458999ee554a667cd19227f0b97a751bd61e6", sha256 = "47e57f2070de054fb073ffd85b9ac5a16429dbe6e4c6068b326e99c8d6ab5aa7", unpack = false },  # symfony/var-exporter
+    { url = "https://codeload.github.com/symfony/webpack-encore-bundle/legacy.zip/0cbc3485f127cd9f85e395f8177607ef00535634", sha256 = "bf789fa57d3b460ef7c4e76e9ff7697a3d4b811b139e96826e28c57050285bcd", unpack = false },  # symfony/webpack-encore-bundle
+    { url = "https://codeload.github.com/symfony/yaml/legacy.zip/91288fddb497a598b564343ea663ea272370a7dc", sha256 = "03fb1f809ca4c46a843630025eebb0b682b85797bf947f516e00f4f29ca63699", unpack = false },  # symfony/yaml
+    { url = "https://codeload.github.com/tijsverkoyen/CssToInlineStyles/legacy.zip/f0292ccf0ec75843d65027214426b6b163b48b41", sha256 = "714bf4832c54e936a503e3853b0a5c52626b044783a52ee49d7a4040c5c9dcab", unpack = false },  # tijsverkoyen/css-to-inline-styles
+    { url = "https://codeload.github.com/twigphp/cssinliner-extra/legacy.zip/1b0dc906bbad7226c967bd325e99cccb1a850c4b", sha256 = "d8980adee6f15b253bea044f967e9372f5a0485ebbcdd0e68805938ca271d435", unpack = false },  # twig/cssinliner-extra
+    { url = "https://codeload.github.com/twigphp/twig-extra-bundle/legacy.zip/aaa2993e19293a99240c4c61aa461d743b0dd569", sha256 = "17158b700b05c9b800e1b91f6d42f40fceecf19ce1f273e93dd833eeaf917398", unpack = false },  # twig/extra-bundle
+    { url = "https://codeload.github.com/twigphp/inky-extra/legacy.zip/0a8b24f0d0247bf6dc5e2af0c0ab09c0c4e5343e", sha256 = "fdc91a4700155bb204e835190699febfa0c983faabb8889ba0218795fbfff2c0", unpack = false },  # twig/inky-extra
+    { url = "https://codeload.github.com/twigphp/intl-extra/legacy.zip/211c603b3f7d5a8f6c6543a02fe9f82c09b18025", sha256 = "d7387ae3b64b7c434a9434b4230c02591f833eb882b7be7fdd533a21765bd898", unpack = false },  # twig/intl-extra
+    { url = "https://codeload.github.com/twigphp/string-extra/legacy.zip/6ec8f2e8ca9b2193221a02cb599dc92c36384368", sha256 = "a935079c4082680bb255a595d65cc52e3240b2df7b86049b4fa5c5423ca33d00", unpack = false },  # twig/string-extra
+    { url = "https://codeload.github.com/twigphp/Twig/legacy.zip/8c737079b726af72ff8ef3c595be9f6a810ea1ef", sha256 = "434262aafe5b84ebf528a1527d1d698de6d0c0ae566db3088e874e6c52776226", unpack = false },  # twig/twig
+    { url = "https://codeload.github.com/webmozarts/assert/legacy.zip/8a163706bbcac613733dba03f51e13b5eb1bb819", sha256 = "cb596ab088651d7d5a00663e17302aaaf43d7487dbce63fc34ce9eba81c9e6a7", unpack = false },  # webmozart/assert
+    { url = "https://codeload.github.com/willdurand/JsonpCallbackValidator/legacy.zip/738c36e91d4d7e0ff0cac145f77057e0fb88526e", sha256 = "51e527769d8307864c5f314dbe786b74871c5a306b99a7278cb96da8a6e8d90e", unpack = false },  # willdurand/jsonp-callback-validator
+    { url = "https://codeload.github.com/willdurand/Negotiation/legacy.zip/68e9ea0553ef6e2ee8db5c1d98829f111e623ec2", sha256 = "624d3d28cc3dca8fb14276378b9415bc465ca4eb2ef786b5906e8d3df995a80d", unpack = false },  # willdurand/negotiation
+    { url = "https://codeload.github.com/zircote/swagger-php/legacy.zip/c93b7430193dc461602a2a3f4f6a0791a3a0608a", sha256 = "872932076ec33c9dd505e3568d943022e7233414f35ca609fdb480c028ab7747", unpack = false },  # zircote/swagger-php
+]
+
+environment = '''
+export COMPOSER_HOME=/tmp/composer COMPOSER_CACHE_DIR=/tmp/composer-cache COMPOSER_DISABLE_NETWORK=1 \
+    COMPOSER_NO_INTERACTION=1 COMPOSER_ALLOW_SUPERUSER=1
+'''
+build = '''
+python3 $pkgfiles/composer-local.py composer.lock /build/sources
+# symfony/flex only installs Symfony recipes for new packages, from the
+# network; turned off (symfony/runtime, which writes vendor/autoload_runtime.php,
+# stays on). Changes composer.json's allow-plugins.
+composer config --no-plugins allow-plugins.symfony/flex false
+# extensions are checked at run time (they are part of the php package)
+composer install --no-dev --no-scripts --prefer-dist --optimize-autoloader --classmap-authoritative --ignore-platform-reqs
+test -f vendor/autoload_runtime.php
+# what composer's skipped auto-scripts would do: the bundles' public files
+# (the API documentation's Swagger UI) into public/bundles
+APP_ENV=prod APP_SECRET=build php bin/console assets:install public --no-debug
+rm -rf var/cache/* var/log/*
+'''
+install = '''
+d="$pkgdir/usr/share/kimai"
+mkdir -p "$d"
+cp -a bin config migrations public src templates translations vendor var \
+    composer.json composer.lock symfony.lock .env.dist "$d/"
+# var/ (cache, logs, data, plugins): a skeleton copied to /var/lib/kimai when missing
+mv "$d/var" "$d/var.dist"
+ln -s /var/lib/kimai "$d/var"
+ln -s /etc/kimai/env "$d/.env"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/kimai.conf"
+install -Dm644 $pkgfiles/nginx-kimai.conf "$pkgdir/usr/share/doc/kimai/nginx-kimai.conf"
+install -Dm644 $pkgfiles/php-fpm-kimai.conf "$pkgdir/usr/share/doc/kimai/php-fpm-kimai.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/kimai/README.FenrirOS"
+install -Dm644 CHANGELOG.md "$pkgdir/usr/share/doc/kimai/CHANGELOG.md"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/kimai/LICENSE"
+'''

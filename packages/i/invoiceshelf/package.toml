@@ -1,0 +1,48 @@
+# InvoiceShelf: self-hosted invoicing and expense tracking (customers,
+# estimates, invoices, recurring invoices, payments, expenses, reports,
+# PDF through dompdf; a fork of Crater). Laravel on PHP with SQLite, MariaDB
+# or PostgreSQL, served by nginx and php-fpm. Upstream's release archive
+# (InvoiceShelf.zip): its PHP libraries in vendor/ (as PHP source) and its
+# Vue front end built by Vite in public/build.
+# Needs PHP 8.4.1 or newer (vendor/composer/platform_check.php); see the report.
+# Layout: code in /usr/share/invoiceshelf; .env is /etc/invoiceshelf/env;
+# storage/ and bootstrap/cache in /var/lib/invoiceshelf (links from the code
+# directory). Laravel's scheduler (recurring invoices, backups) from an
+# example cron job the user installs.
+# Setup: /usr/share/doc/invoiceshelf/README.FenrirOS.
+# Installed inert (docs/requests.md): no service enabled, no site, no cron
+# job, no credentials; the README says how to set it up.
+name = "invoiceshelf"
+version = "2.4.7"
+release = 1
+summary = "Self-hosted invoicing and expense tracking"
+license = "AGPL-3.0-only"
+homepage = "https://invoiceshelf.com"
+archs = ["x86_64", "aarch64"]
+rundeps = ["php", "php-fpm", "nginx"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/InvoiceShelf/InvoiceShelf/releases/download/2.4.7/InvoiceShelf.zip", sha256 = "047ddcedc556c634c9cc3029560fa3f3cb81099e3f6cb1ee2147a8fc7c098ca9" },
+]
+
+install = '''
+d="$pkgdir/usr/share/invoiceshelf"
+mkdir -p "$d"
+cp -a app artisan bootstrap config database lang public resources routes server.php storage vendor \
+    composer.json composer.lock version.md .env.example "$d/"
+# the writable directories: skeletons copied to /var/lib/invoiceshelf when missing
+mv "$d/storage" "$d/storage.dist"
+mv "$d/bootstrap/cache" "$d/bootstrap/cache.dist"
+ln -s /var/lib/invoiceshelf/storage "$d/storage"
+ln -s /var/lib/invoiceshelf/bootstrap-cache "$d/bootstrap/cache"
+# what `artisan storage:link` makes: public uploads (logos, avatars) served from storage
+ln -s /var/lib/invoiceshelf/storage/app/public "$d/public/storage"
+ln -s /etc/invoiceshelf/env "$d/.env"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/invoiceshelf.conf"
+install -Dm644 $pkgfiles/invoiceshelf.cron "$pkgdir/usr/share/doc/invoiceshelf/invoiceshelf.cron"
+install -Dm644 $pkgfiles/nginx-invoiceshelf.conf "$pkgdir/usr/share/doc/invoiceshelf/nginx-invoiceshelf.conf"
+install -Dm644 $pkgfiles/php-fpm-invoiceshelf.conf "$pkgdir/usr/share/doc/invoiceshelf/php-fpm-invoiceshelf.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/invoiceshelf/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/invoiceshelf/LICENSE"
+'''

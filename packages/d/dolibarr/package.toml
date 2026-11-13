@@ -1,0 +1,46 @@
+# Dolibarr ERP & CRM: modular ERP and CRM for small businesses (third
+# parties, proposals, orders, invoices, stock, projects, HR, accounting,
+# point of sale, web site builder). PHP with MariaDB or PostgreSQL, served by
+# nginx and php-fpm. Upstream's tagged source: the PHP libraries it uses
+# (TCPDF, PhpSpreadsheet, Sabre, Stripe, jQuery, ...) are kept in
+# htdocs/includes as source, and it has no build step.
+# Layout as Debian's dolibarr package: code in /usr/share/dolibarr/htdocs,
+# htdocs/conf is /etc/dolibarr (conf.php, which the web installer writes),
+# documents (the data directory) in /var/lib/dolibarr/documents;
+# files/install.forced.php only presets that data directory and the
+# "FenrirOS" distribution name in the installer (no credentials).
+# Scheduled jobs from an example cron job (installed by the user).
+# Setup: /usr/share/doc/dolibarr/README.FenrirOS.
+# Installed inert (docs/requests.md): no service enabled, no site, no cron
+# job, no credentials; the README says how to set it up.
+name = "dolibarr"
+version = "24.0.3"
+release = 1
+summary = "Modular ERP and CRM for small and medium businesses"
+license = "GPL-3.0-or-later"
+homepage = "https://www.dolibarr.org"
+archs = ["x86_64", "aarch64"]
+rundeps = ["php", "php-fpm", "nginx"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/Dolibarr/dolibarr/archive/refs/tags/24.0.3.tar.gz", sha256 = "dee8e8283cf87cf2be39900d909b65f61a947f397841af4146f384a6ae89e548" },
+]
+
+install = '''
+d="$pkgdir/usr/share/dolibarr"
+mkdir -p "$d" "$pkgdir/etc"
+cp -a htdocs scripts "$d/"
+# htdocs/conf is /etc/dolibarr, as Debian's package has it
+mv "$d/htdocs/conf" "$pkgdir/etc/dolibarr"
+ln -s /etc/dolibarr "$d/htdocs/conf"
+install -Dm644 $pkgfiles/install.forced.php "$d/htdocs/install/install.forced.php"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/dolibarr.conf"
+install -Dm644 $pkgfiles/dolibarr.cron "$pkgdir/usr/share/doc/dolibarr/dolibarr.cron"
+install -Dm644 $pkgfiles/nginx-dolibarr.conf "$pkgdir/usr/share/doc/dolibarr/nginx-dolibarr.conf"
+install -Dm644 $pkgfiles/php-fpm-dolibarr.conf "$pkgdir/usr/share/doc/dolibarr/php-fpm-dolibarr.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/dolibarr/README.FenrirOS"
+install -Dm644 ChangeLog "$pkgdir/usr/share/doc/dolibarr/ChangeLog"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/dolibarr/COPYING"
+install -Dm644 COPYRIGHT "$pkgdir/usr/share/licenses/dolibarr/COPYRIGHT"
+'''

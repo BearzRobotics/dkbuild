@@ -1,0 +1,21 @@
+InvoiceShelf on FenrirOS
+========================
+
+Code in /usr/share/invoiceshelf (web root: public/). Its .env is
+/etc/invoiceshelf/env; storage/ and bootstrap/cache live in
+/var/lib/invoiceshelf (links from the code directory). PHP runs as _php.
+InvoiceShelf needs PHP 8.4.1 or newer.
+
+1. Database: SQLite needs nothing more (keep the file under
+   /var/lib/invoiceshelf, e.g. DB_DATABASE=/var/lib/invoiceshelf/storage/database.sqlite);
+   for MariaDB or PostgreSQL create a database and a user for it.
+2. cp /usr/share/invoiceshelf/.env.example /etc/invoiceshelf/env
+   chown _php:_php /etc/invoiceshelf/env
+   set APP_URL and SANCTUM_STATEFUL_DOMAIN (the site's host name), then
+     su -s /bin/sh _php -c 'php /usr/share/invoiceshelf/artisan key:generate --force'
+3. nginx: /usr/share/doc/invoiceshelf/nginx-invoiceshelf.conf (and,
+   optionally, the php-fpm pool php-fpm-invoiceshelf.conf); enable php-fpm
+   and nginx (dinitctl enable php-fpm nginx), then open https://<host>/ and
+   follow the installation wizard (database, the first company and user).
+4. Scheduler: cp /usr/share/doc/invoiceshelf/invoiceshelf.cron
+   /etc/cron.d/invoiceshelf and dinitctl enable crond.

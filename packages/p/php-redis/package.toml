@@ -1,0 +1,44 @@
+# PHP's redis extension (PECL, phpredis): a client for Redis and Valkey
+# (the tree's valkey), and a session handler. Nextcloud uses it for file
+# locking and distributed caching; SolidInvoice and Laravel apps for queues
+# and caches. Built with sessions, the JSON serializer, and LZF (bundled),
+# Zstandard and LZ4 (the tree's libraries) compression. Not built: the
+# igbinary and msgpack serializers, which are separate PECL extensions this
+# one would then require to be loaded first; nothing here asks for them.
+name = "php-redis"
+version = "6.3.0"
+release = 1
+summary = "PHP client for Redis and Valkey"
+license = "PHP-3.01"
+homepage = "https://pecl.php.net/package/redis"
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf", "php"]
+builddeps = ["php-devel", "zstd-devel", "lz4-devel"]
+rundeps = ["php"]
+# its tests need a running Redis server
+options = ["!check"]
+
+source = [
+    { url = "https://pecl.php.net/get/redis-6.3.0.tgz", sha256 = "0d5141f634bd1db6c1ddcda053d25ecf2c4fc1c395430d534fd3f8d51dd7f0b5" },
+]
+
+setup = '''
+# the PECL archive has package.xml beside its directory
+cd redis-$version
+phpize
+%configure --with-php-config=/usr/bin/php-config \
+    --enable-redis --enable-redis-session --enable-redis-json \
+    --enable-redis-lzf --enable-redis-zstd --with-libzstd \
+    --enable-redis-lz4 --with-liblz4
+'''
+build = '''
+cd redis-$version
+%make
+'''
+install = '''
+cd redis-$version
+%make INSTALL_ROOT="$pkgdir" install
+install -Dm644 /dev/stdin "$pkgdir/etc/php/conf.d/redis.ini" <<EOF2
+extension=redis.so
+EOF2
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/php-redis/LICENSE"
+'''

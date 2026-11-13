@@ -1,0 +1,25 @@
+SuiteCRM on FenrirOS
+====================
+
+SuiteCRM 8 lives in /opt/suitecrm (web root: public/; the SuiteCRM 7
+application is public/legacy). It writes into its own tree, so the tree is
+owned by _php (tmpfiles). PHP runs as _php. Inbound email (IMAP) needs PHP's
+imap extension, which FenrirOS's php does not include.
+
+1. Create a MariaDB database and user for SuiteCRM:
+     CREATE DATABASE suitecrm CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+     CREATE USER 'suitecrm'@'localhost' IDENTIFIED BY '<password>';
+     GRANT ALL ON suitecrm.* TO 'suitecrm'@'localhost';
+2. nginx: /usr/share/doc/suitecrm/nginx-suitecrm.conf (and, optionally, the
+   php-fpm pool php-fpm-suitecrm.conf); enable php-fpm and nginx
+   (dinitctl enable php-fpm nginx), then open https://<host>/install.php and
+   follow the installer (it creates the administrator you name), or install
+   from the command line, as _php:
+     su -s /bin/sh _php -c 'cd /opt/suitecrm && bin/console suitecrm:app:install --help'
+   (it takes the administrator, the database and the site URL as options).
+3. Scheduler: cp /usr/share/doc/suitecrm/suitecrm.cron /etc/cron.d/suitecrm
+   and dinitctl enable crond.
+4. Updates of this package replace SuiteCRM's own files; your configuration
+   (.env.local, public/legacy/config*.php) and custom/ are kept. After an
+   update, as _php: cd /opt/suitecrm && bin/console suitecrm:app:upgrade-finalize
+   (see https://docs.suitecrm.com for the upgrade notes of each release).
