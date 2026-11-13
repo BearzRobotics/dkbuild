@@ -1,0 +1,29 @@
+name = "libaribcaption"
+version = "1.1.2"
+release = 1
+summary = "Portable ARIB STD-B24 caption decoder and renderer"
+license = "MIT"
+homepage = "https://github.com/xqq/libaribcaption"
+# ffmpeg: --enable-libaribcaption
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["fontconfig-devel", "freetype-devel"]
+
+source = [
+    { url = "https://github.com/xqq/libaribcaption/archive/v1.1.2/libaribcaption-1.1.2.tar.gz", sha256 = "649b50bde99272b97c66af2a8400163e2f84eae072d252daa26baaaf0866a1c2" },
+]
+
+# Shared and static libraries both: the static one is a second build, installed first so the shared build's cmake/pkg-config files win. The policy minimum lets CMake 4 configure.
+setup = '''
+opts="-DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DARIBCC_BUILD_TESTS=OFF"
+%cmake $opts -DBUILD_SHARED_LIBS=ON -DARIBCC_SHARED_LIBRARY=ON
+cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release $opts -DBUILD_SHARED_LIBS=OFF -DARIBCC_SHARED_LIBRARY=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+install = '''
+DESTDIR="$pkgdir" cmake --install build-static
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libaribcaption/LICENSE"
+'''
