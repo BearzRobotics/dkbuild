@@ -1,0 +1,23 @@
+# needed by: python-pywebview (libera-suite).
+# Bottle, a one-file WSGI micro web framework. Built from the sdist offline
+# with pip (--no-build-isolation): the build backend (setuptools) comes from
+# hostdeps.
+name = "python-bottle"
+version = "0.13.4"
+release = 1
+summary = "Fast and simple WSGI micro web framework for Python"
+license = "MIT"
+homepage = "https://bottlepy.org"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/7a/71/cca6167c06d00c81375fd668719df245864076d284f7cb46a694cbeb5454/bottle-0.13.4.tar.gz", sha256 = "787e78327e12b227938de02248333d788cfe45987edca735f8f88e03472c3f47" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-bottle/LICENSE"
+'''

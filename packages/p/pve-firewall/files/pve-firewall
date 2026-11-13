@@ -1,0 +1,7 @@
+# pve-firewall: Proxmox VE firewall (iptables-legacy, ebtables, ipset rules from /etc/pve/firewall)
+type = bgprocess
+command = /usr/sbin/pve-firewall start
+stop-command = /usr/sbin/pve-firewall stop
+pid-file = /run/pve-firewall.pid
+depends-on: pve-cluster
+waits-for: pvefw-logger

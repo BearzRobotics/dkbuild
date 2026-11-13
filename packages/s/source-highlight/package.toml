@@ -1,0 +1,38 @@
+# Imported from Chimera Linux cports: main/source-highlight/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# GNU Source-highlight: syntax highlighting for documents; asciidoc's source
+# filter uses it (pve-docs builds Proxmox VE's documentation with it).
+# The library ships shared and static (%configure).
+name = "source-highlight"
+version = "3.1.9"
+release = 1
+summary = "Convert source code to syntax highlighted document"
+license = "GPL-3.0-or-later"
+homepage = "http://www.gnu.org/software/src-highlite"
+patches = ["tests.patch"]
+hostdeps = ["pkgconf", "automake", "libtool"]
+builddeps = ["boost-devel"]
+options = ["!cross"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/src-highlite/source-highlight-3.1.9.tar.gz", sha256 = "3a7fd28378cb5416f8de2c9e77196ec915145d44e30ff4e0ee8beb3fe6211c91" },
+]
+
+environment = '''
+export CXXFLAGS="${CXXFLAGS} -Wno-dynamic-exception-spec -Wno-register"
+'''
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-bash-completion=/usr/share/bash-completion/completions
+'''
+build = '''
+%make
+'''
+check = '''
+%make check -j1
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/source-highlight/COPYING"
+'''

@@ -1,0 +1,62 @@
+#!/usr/bin/perl
+# FenrirOS stand-in for proxmox-mini-journalreader (a systemd journal reader
+# in C): the node's "System Log" in the Proxmox VE web UI reads it through
+# GET /nodes/<node>/journal. FenrirOS has no journal; this reads the syslog
+# daemon's file (/var/log/messages, sysklogd) and prints the reader's plain
+# JSON format: {"data":["<cursor>","line",...,"<cursor>"],"success":1}. A
+# cursor is a line number ("L<n>"). Structured output (-J) is answered in the
+# plain format too, which the web UI accepts. Filters by priority, unit and
+# kernel are not available in a plain log and are ignored; -i matches the
+# syslog tag.
+use strict;
+use warnings;
+use Getopt::Std;
+use JSON::PP;
+
+my %o;
+getopts('b:e:d:n:f:t:p:i:u:jJIUkh', \%o) or exit 1;
+if ($o{h}) {
+    print STDERR "usage: $0 [-b begin] [-e end] [-n lines] [-f startcursor] [-t endcursor] [-i tag] [-j|-J]\n";
+    exit 0;
+}
+
+my $logfile = '/var/log/messages';
+my @lines;
+if (open(my $fh, '<', $logfile)) {
+    @lines = <$fh>;
+    close($fh);
+    chomp @lines;
+}
+
+my $tag = $o{i};
+my @idx = grep {
+    !defined($tag) || $lines[$_] =~ m/\s\Q$tag\E(\[\d+\])?:/
+} 0 .. $#lines;
+
+my $cur = sub { my $c = shift // ''; return $c =~ m/^L(\d+)$/ ? $1 : undef };
+my $start = $cur->($o{f});
+my $end = $cur->($o{t});
+
+my @sel;
+if (defined($o{n})) {
+    my @pool = defined($end) ? grep { $_ < $end } @idx : @idx;
+    my $n = int($o{n});
+    @sel = @pool > $n ? @pool[-$n .. -1] : @pool;
+} elsif (defined($start)) {
+    @sel = grep { $_ > $start } @idx;
+    @sel = grep { $_ < $end } @sel if defined($end);
+} else {
+    @sel = @idx;
+    @sel = grep { $_ < $end } @sel if defined($end);
+}
+
+my @data;
+if (@sel) {
+    push @data, "L$sel[0]", (map { $lines[$_] } @sel), "L$sel[-1]";
+} elsif (defined($o{f}) || defined($o{t})) {
+    my $anchor = $o{f} // $o{t};
+    push @data, $anchor, $anchor;
+}
+
+binmode(STDOUT, ':raw');
+print JSON::PP->new->utf8(0)->encode({ data => \@data, success => 1 });

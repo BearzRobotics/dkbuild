@@ -1,0 +1,30 @@
+# Translations of the Proxmox web UIs. Only Proxmox VE's (Debian: pve-i18n,
+# /usr/share/pve-i18n/pve-lang-<lang>.js) are built: the other products' (PMG,
+# PBS, PDM and the Yew UIs) are not packaged for FenrirOS. The .po files are
+# turned into JavaScript catalogues with upstream's po2js.pl.
+# Pinned to the "bump version to 3.11.0" commit (no tags). The snapshot
+# includes the repository's submodules (the UIs' sources, used upstream only
+# to refresh the .po templates).
+name = "proxmox-i18n"
+version = "3.11.0"
+release = 1
+summary = "Translations of the Proxmox VE web UI"
+license = "AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=proxmox-i18n.git"
+hostdeps = ["perl", "make", "perl-json", "perl-locale-po"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/proxmox-i18n.git d317c54994c3e29232ac1b41bfe50cc81692cee3", sha256 = "b8f2b35352df3fb3d3e6b38257eeb5995e111103774ddd1143d905b2325b9832" },
+]
+
+build = '''
+for l in $(cat LINGUAS); do
+    perl ./po2js.pl -t pve -v "$version" -o pve-lang-$l.js $l.po
+done
+'''
+install = '''
+install -d "$pkgdir/usr/share/pve-i18n"
+install -m644 pve-lang-*.js "$pkgdir/usr/share/pve-i18n/"
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/proxmox-i18n/copyright"
+'''

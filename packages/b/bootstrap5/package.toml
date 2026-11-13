@@ -1,0 +1,21 @@
+# Bootstrap 5 CSS/JS (Debian: libjs-bootstrap5), the prebuilt dist/ files of
+# the release tag. Installed where Debian's package puts them for Proxmox:
+# /usr/share/bootstrap-html/{css,js}; pve-http-server serves it as
+# /bootstrap5/ for its HTML API browser.
+name = "bootstrap5"
+version = "5.3.9"
+release = 1
+summary = "Bootstrap 5 HTML, CSS and JavaScript framework (dist files)"
+license = "MIT"
+homepage = "https://getbootstrap.com"
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/twbs/bootstrap/archive/refs/tags/v5.3.9.tar.gz", sha256 = "f651274e5ea286b0164e8426a115e3049dc06a3f767cac72692f4476d77428e5" },
+]
+
+install = '''
+install -d "$pkgdir/usr/share/bootstrap-html"
+cp -r dist/css dist/js "$pkgdir/usr/share/bootstrap-html/"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/bootstrap5/LICENSE"
+'''

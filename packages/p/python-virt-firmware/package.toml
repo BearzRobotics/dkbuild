@@ -1,0 +1,32 @@
+# virt-firmware (Gerd Hoffmann): tools for virtual machine firmware images,
+# above all virt-fw-vars, which reads and edits OVMF/AAVMF variable stores
+# (enrolls Secure Boot keys). Proxmox VE's qemu-server runs it when it creates
+# or updates a VM's EFI disk, and pve-edk2-firmware uses it at build time to
+# make the *.ms.fd variable stores with the Microsoft keys.
+# Left out: the crypt_r dependency (Python >= 3.13), which only the
+# virt-cloud-boot test helper (virt/qemutest/cloudinit.py) imports; the
+# systemd kernel-install plugin and unit in systemd/ (FenrirOS has no systemd).
+# The optional crc32c extra is not packaged; virt-firmware falls back to its
+# own CRC code without it.
+name = "python-virt-firmware"
+version = "26.10"
+release = 1
+summary = "Tools for virtual machine firmware volumes (virt-fw-vars)"
+license = "GPL-2.0-only"
+homepage = "https://gitlab.com/kraxel/virt-firmware"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-cryptography", "python-pefile", "python-pyyaml", "python-requests"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/a9/60/483319a70dd87397ac82e8660bdb099cbce6a8e4e846f9c21344f09555af/virt_firmware-26.10.tar.gz", sha256 = "be0554fb20b9046b8c5b24397e722cf67ce6ccd6cee44bf8689ded462b053908" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+for m in man/*.1; do
+    install -Dm644 "$m" "$pkgdir/usr/share/man/man1/$(basename "$m")"
+done
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-virt-firmware/LICENSE"
+'''

@@ -1,0 +1,7 @@
+# pve-container-debug@<vmid>: a Proxmox VE LXC container with LXC's debug log
+type = process
+command = /usr/bin/lxc-start -F -n $1 -o /dev/stderr -l DEBUG
+stop-command = /usr/share/lxc/pve-container-stop-wrapper $1
+logfile = /run/pve/ct-$1.stderr
+stop-timeout = 120
+depends-on: early-filesystems

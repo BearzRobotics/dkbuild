@@ -1,0 +1,16 @@
+Build with crates from crates.io (vendored by dkbuild's cargodeps) instead of
+Debian's packaged-crate registry (/usr/share/cargo/registry): drop the source
+replacement from .cargo/config.toml, keep the release profile.
+Written for FenrirOS.
+
+--- a/.cargo/config.toml
++++ b/.cargo/config.toml
+@@ -1,8 +1,2 @@
+-[source]
+-[source.debian-packages]
+-directory = "/usr/share/cargo/registry"
+-[source.crates-io]
+-replace-with = "debian-packages"
+-
+ [profile.release]
+ debug = true

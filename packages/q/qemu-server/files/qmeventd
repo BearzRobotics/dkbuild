@@ -1,0 +1,4 @@
+# qmeventd: Proxmox VE QEMU event daemon (cleans up after VMs exit)
+type = process
+command = /usr/sbin/qmeventd -f /var/run/qmeventd.sock
+depends-on: early-filesystems

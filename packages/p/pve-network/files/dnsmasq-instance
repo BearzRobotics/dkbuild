@@ -1,0 +1,14 @@
+#!/bin/sh
+# Run one dnsmasq instance for Proxmox VE's SDN DHCP, as Debian's
+# dnsmasq@.service does: its settings are in /etc/default/dnsmasq.<instance>
+# (CONFIG_DIR, DNSMASQ_OPTS, written by PVE::Network::SDN::Dhcp::Dnsmasq).
+set -eu
+inst=$1
+case $inst in *[!A-Za-z0-9_-]*|'') echo "invalid instance '$inst'" >&2; exit 1 ;; esac
+CONFIG_DIR=/etc/dnsmasq.d/$inst
+DNSMASQ_OPTS=
+[ -r "/etc/default/dnsmasq.$inst" ] && . "/etc/default/dnsmasq.$inst"
+mkdir -p /run/dnsmasq
+# shellcheck disable=SC2086
+exec /usr/bin/dnsmasq -k -u _dnsmasq -g _dnsmasq --conf-dir="$CONFIG_DIR" \
+    -x "/run/dnsmasq/dnsmasq.$inst.pid" $DNSMASQ_OPTS

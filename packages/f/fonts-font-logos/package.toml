@@ -1,0 +1,22 @@
+# font-logos (Lukas-W/font-logos): an icon font of Linux distribution logos,
+# as Proxmox packages it (Debian: fonts-font-logos) for pve-manager's container
+# OS icons: /usr/share/fonts-font-logos/{fonts,css}. Pinned to the "bump
+# version to 1.0.1-3" commit of Proxmox's packaging repository (no tags).
+name = "fonts-font-logos"
+version = "1.0.1"
+release = 1
+summary = "Icon font of Linux distribution logos"
+license = "Unlicense"
+homepage = "https://github.com/Lukas-W/font-logos"
+options = ["!check", "!strip"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/fonts-font-logos.git 063091d1a7ea70eba36c5684d20428ba215cb769", sha256 = "5ed32fd5c7bfac0ce59c3fb04ea4c0a09e0e1b29e6f5e653e8336bfb255bf046" },
+]
+
+install = '''
+install -d "$pkgdir/usr/share/fonts-font-logos/fonts" "$pkgdir/usr/share/fonts-font-logos/css"
+cp -r src/font-logos/assets/. "$pkgdir/usr/share/fonts-font-logos/fonts/"
+install -m644 src/font-logos.css "$pkgdir/usr/share/fonts-font-logos/css/"
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/fonts-font-logos/copyright"
+'''

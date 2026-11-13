@@ -1,0 +1,66 @@
+# Proxmox VE cluster file system and tools: pmxcfs (the database-backed FUSE
+# file system on /etc/pve, replicated over corosync), its Perl bindings
+# (PVE::IPCC, PVE::Cluster, PVE::Corosync, PVE::RRD, PVE::Notify) and pvecm.
+# Debian splits this into pve-cluster, libpve-cluster-perl,
+# libpve-cluster-api-perl and libpve-notify-perl; here it is one package.
+# Pinned to the "bump version to 9.1.9" commit (Proxmox repositories have no tags).
+# FenrirOS: the dinit service pve-cluster (shipped, not enabled), the www-data
+# user pmxcfs and pveproxy need, systemctl calls pointed at pve-common's
+# stand-in. Installed inert: no cluster, no corosync.conf, no keys; pmxcfs
+# creates its empty database on its first start. Setup: pve-manager's
+# /usr/share/doc/pve-manager/README.FenrirOS. The sysctl settings Debian's
+# package applies (bridge netfilter off, aio-max-nr) are a sample in
+# /usr/share/doc/pve-cluster/10-pve.conf.
+# Left out: the pvecm and pmxcfs man pages and the shell completions (they
+# need pve-docs' generator and the whole PVE stack loaded at build time, which
+# build-depends on this package), see wip/proxmox/NOTES.md.
+name = "pve-cluster"
+version = "9.1.9"
+release = 1
+summary = "Proxmox VE cluster file system (pmxcfs) and tools"
+license = "AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=pve-cluster.git"
+hostdeps = ["perl", "make", "pkgconf", "gawk"]
+builddeps = ["perl", "fuse2-devel", "glib-devel", "libqb-devel", "corosync-devel", "sqlite-devel",
+             "rrdtool-devel"]
+rundeps = ["perl", "pve-common", "pve-access-control", "pve-apiclient", "pve-rs", "pve-rs-common",
+           "perl-digest-hmac", "perl-uuid", "rrdtool-perl", "rrdtool", "corosync", "fuse", "sqlite",
+           "libfaketime", "openssl", "openssh", "rsync", "gzip"]
+options = ["!check"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/pve-cluster.git f79e17b6e0ba21c3da937c7ed1272f27f3946d5e", sha256 = "f8de3ccaada840839f891251ffe1effe60ff795e78829dfbc3ae1e39e8d9a5b1" },
+]
+
+setup = '''
+# clang warns where GCC does not; upstream builds with -Werror
+sed -i 's/ -Werror / /' src/pmxcfs/Makefile src/PVE/Makefile
+# FenrirOS: no systemctl; point every call at pve-common's dinit stand-in
+grep -rlE "systemctl" src/PVE | xargs -r sed -i -E \
+    -e "s#(['\"])(/usr)?(/bin/)?systemctl(['\" ])#\1/usr/libexec/pve-fenrir/systemctl\4#g"
+'''
+build = '''
+make -C src/pmxcfs CC="$CC" pmxcfs create_pmxcfs_db
+make -C src/PVE CC="$CC" IPCC.so
+make -C src/PVE/Cluster IPCConst.pm
+'''
+install = '''
+vendorlib=$(perl -MConfig -e 'print $Config{vendorlib}')
+vendorarch=$(perl -MConfig -e 'print $Config{vendorarch}')
+install -Dm755 src/pmxcfs/pmxcfs "$pkgdir/usr/bin/pmxcfs"
+install -Dm755 src/pmxcfs/create_pmxcfs_db "$pkgdir/usr/bin/create_pmxcfs_db"
+install -Dm755 src/PVE/pvecm "$pkgdir/usr/bin/pvecm"
+install -d "$pkgdir$vendorlib/PVE"
+for f in IPCC.pm Cluster.pm Corosync.pm RRD.pm DataCenterConfig.pm Notify.pm SSHInfo.pm; do
+    install -m644 src/PVE/$f "$pkgdir$vendorlib/PVE/$f"
+done
+install -Dm755 src/PVE/IPCC.so "$pkgdir$vendorarch/auto/PVE/IPCC/IPCC.so"
+for d in Cluster CLI API2; do
+    make -C src/PVE/$d install PVEDIR="$pkgdir$vendorlib/PVE"
+done
+install -Dm644 $pkgfiles/pve-cluster "$pkgdir/etc/dinit.d/pve-cluster"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/pve-cluster.conf"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/pve-cluster.conf"
+install -Dm644 debian/sysctl.d/10-pve.conf "$pkgdir/usr/share/doc/pve-cluster/10-pve.conf"
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/pve-cluster/copyright"
+'''

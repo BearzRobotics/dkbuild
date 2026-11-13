@@ -1,0 +1,49 @@
+# open-iscsi: the iSCSI initiator (iscsiadm, iscsid, iscsistart, iscsiuio,
+# iscsi-iname) and libopeniscsiusr (shared and static; static via a patch, as
+# upstream builds only the shared one). Proxmox VE's iSCSI storage uses iscsiadm.
+# With iSNS discovery (open-isns), no systemd (-Dno_systemd=true).
+# Inert: iscsid and iscsid-initiatorname dinit services shipped, not enabled; no
+# initiator name is generated at build time (meson writes one into the build
+# tree; it is removed): iscsid-initiatorname writes a unique one at the first
+# start. iscsid.conf is upstream's (node.startup = manual, no credentials).
+# The udev rule for iBFT firmware login (50-iscsi-firmware-login.rules) goes
+# to /usr/lib/udev/rules.d.
+# Alpine's patches are not needed: its Makefile ones are for the old make build,
+# and musl's missing GLOB_ONLYDIR is handled upstream. The helper scripts
+# (iscsi-gen-initiatorname, iscsi_discovery, iscsi_offload, iscsi_fw_login) are
+# bash scripts, hence bash in rundeps.
+name = "open-iscsi"
+version = "2.1.13"
+release = 1
+summary = "iSCSI initiator: iscsiadm, iscsid and libopeniscsiusr"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://www.open-iscsi.com/"
+patches = ["static-libopeniscsiusr.patch"]
+hostdeps = ["meson", "ninja", "pkgconf", "perl", "bash"]
+builddeps = ["kmod-devel", "openssl-devel", "util-linux-devel", "open-isns-devel", "linux-headers"]
+rundeps = ["bash"]
+
+source = [
+    { url = "https://github.com/open-iscsi/open-iscsi/archive/refs/tags/2.1.13.tar.gz", sha256 = "1c3a8ad7d86e57d247a08c013f5055ef695b3a07ed760d1aea7d90b9f9011602" },
+]
+
+setup = '''
+%meson -Dno_systemd=true -Disns=enabled -Drulesdir=/usr/lib/udev/rules.d
+'''
+build = '''
+%meson_build
+'''
+check = '''
+meson test -C build --print-errorlogs
+'''
+install = '''
+%meson_install
+# made at build time from the build machine's iscsi-iname: never ship one
+rm -f "$pkgdir/etc/iscsi/initiatorname.iscsi"
+install -Dm644 $pkgfiles/iscsid "$pkgdir/etc/dinit.d/iscsid"
+install -Dm644 $pkgfiles/iscsid-initiatorname "$pkgdir/etc/dinit.d/iscsid-initiatorname"
+install -Dm755 $pkgfiles/initiatorname-once "$pkgdir/usr/lib/open-iscsi/initiatorname-once"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/open-iscsi.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/open-iscsi/README.FenrirOS"
+install -Dm644 etc/iface.example "$pkgdir/usr/share/doc/open-iscsi/iface.example"
+'''

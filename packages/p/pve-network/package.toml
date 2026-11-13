@@ -1,0 +1,45 @@
+# Proxmox VE's SDN (software-defined network) stack and its API (Debian:
+# libpve-network-perl and libpve-network-api-perl, one package here): zones,
+# VNets, subnets, IPAM, DHCP (dnsmasq), EVPN/BGP/OpenFabric/OSPF (FRR),
+# WireGuard fabrics. Pinned to the "bump version to 1.6.9" commit (no tags).
+# FenrirOS: systemctl calls go to pve-common's dinit stand-in; SDN DHCP
+# instances are the dinit template dnsmasq@ (shipped, not enabled; the SDN
+# stack starts them) running files/dnsmasq-instance; dnsmasq is
+# /usr/bin/dnsmasq here.
+# The SDN stack writes ifupdown2 configuration (/etc/network/interfaces.d/sdn,
+# applied with ifreload); ifupdown2 and FRR are not packaged yet, so SDN
+# configuration cannot be applied (see wip/proxmox/NOTES.md).
+name = "pve-network"
+version = "1.6.9"
+release = 1
+summary = "Proxmox VE SDN (software-defined network) stack"
+license = "AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=pve-network.git"
+hostdeps = ["perl", "make"]
+rundeps = ["perl", "pve-common", "pve-cluster", "pve-access-control", "pve-rs", "perl-io-socket-ssl",
+           "perl-net-subnet", "perl-net-ip", "perl-netaddr-ip", "perl-uuid", "perl-net-dns", "dnsmasq"]
+options = ["!check"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/pve-network.git edc67af32ddae108baa1ddf746d8d850fc1c5a61", sha256 = "31968e79b613c8346a6fc9ff36cd9cd0ed1ad5704200eacd50ec9441be8ed325" },
+]
+
+setup = '''
+# FenrirOS: no systemctl; point every call at pve-common's dinit stand-in
+grep -rlE "systemctl" src/PVE | xargs -r sed -i -E \
+    -e "s#(['\"])(/usr)?(/bin/)?systemctl(['\" ])#\1/usr/libexec/pve-fenrir/systemctl\4#g"
+# FenrirOS's iproute2 installs ip, bridge and tc in /usr/bin (no /sbin copies)
+grep -rlE "/sbin/(ip|bridge|tc)['\" ]" src/PVE | xargs -r sed -i -E \
+    -e "s#/sbin/(ip|bridge|tc)(['\" ])#/usr/bin/\1\2#g"
+# FenrirOS's dnsmasq is /usr/bin/dnsmasq
+sed -i 's#"/usr/sbin/dnsmasq"#"/usr/bin/dnsmasq"#' src/PVE/Network/SDN/Dhcp/Dnsmasq.pm
+grep -q '"/usr/bin/dnsmasq"' src/PVE/Network/SDN/Dhcp/Dnsmasq.pm
+'''
+install = '''
+vendorlib=$(perl -MConfig -e 'print $Config{vendorlib}')
+make -C src/PVE install PERL5DIR="$pkgdir$vendorlib"
+install -Dm644 $pkgfiles/dnsmasq@ "$pkgdir/etc/dinit.d/dnsmasq@"
+install -Dm755 $pkgfiles/dnsmasq-instance "$pkgdir/usr/libexec/pve-fenrir/dnsmasq-instance"
+install -d "$pkgdir/var/lib/misc"
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/pve-network/copyright"
+'''

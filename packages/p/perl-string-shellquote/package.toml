@@ -1,0 +1,25 @@
+# String-ShellQuote 1.04 from CPAN: quote strings for passing through the shell.
+# Packaged for Proxmox VE (pve-common). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-string-shellquote"
+version = "1.04"
+release = 1
+summary = "quote strings for passing through the shell"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/String-ShellQuote"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/R/RO/ROSCH/String-ShellQuote-1.04.tar.gz", sha256 = "e606365038ce20d646d255c805effdd32f86475f18d43ca75455b00e4d86dd35" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

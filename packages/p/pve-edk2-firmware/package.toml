@@ -1,0 +1,138 @@
+# EDK2 firmware for Proxmox VE's qemu-server, built as Proxmox's
+# pve-edk2-firmware 4.2026.08-1 (git.proxmox.com/git/pve-edk2-firmware.git,
+# commit f37039e5, "bump version to 4.2026.08-1") builds it, into the paths
+# qemu-server's PVE/QemuServer/OVMF.pm uses (/usr/share/pve-edk2-firmware):
+#   OVMF_CODE_4M.fd, OVMF_VARS_4M.fd    x86_64, Secure Boot capable, no SMM
+#   OVMF_CODE_4M.secboot.fd             the same with SMM required (Secure Boot)
+#   OVMF_VARS_4M.ms.fd                  Debian's PK/KEK, Microsoft's KEK and db,
+#                                       Microsoft's dbx, Secure Boot on
+#   OVMF_SEV_{CODE,VARS}_4M.fd, OVMF_SEV_4M.fd (and the OVMF_CVM_* links)
+#                                       AMD SEV guests (OvmfPkgX64)
+#   OVMF_TDX_4M.ms.fd                   Intel TDX guests, keys enrolled
+#   MICROVM_4M.fd                       the microvm machine type
+#   AAVMF_CODE{,.secboot}.fd, AAVMF_VARS{,.ms}.fd   aarch64 guests
+#   RISCV_VIRT_{CODE,VARS}.fd           riscv64 guests
+# all with HTTP boot, IPv6, TLS, PVSCSI, TPM 2.0 and Proxmox's flags.
+#
+# Why not links to edk2-ovmf: the tree's edk2-ovmf is one X64 build (Secure
+# Boot capable, no SMM, no keys enrolled); qemu-server needs the SMM build for
+# Secure Boot, a pre-enrolled VARS image, SEV, TDX and the aarch64 images,
+# which only a build of their own gives. The EDK2 source is the same
+# snapshot as edk2-ovmf's (edk2-stable202608 is the commit Proxmox's edk2
+# submodule records), so it is downloaded once.
+#
+# Differences from Proxmox's build:
+# - Toolchain CLANGDWARF (clang + lld, as edk2-ovmf) instead of GCC: so the
+#   aarch64 and riscv64 images need no cross GCC. Proxmox's patches for GCC
+#   only (x64-baseline-abi.patch: GCC's -march) and for their stripped
+#   tarball (brotlicompress-disable.diff: BrotliCompress is kept here) do not
+#   apply and are left out; the other two are applied (patches/).
+# - PcdFirmwareVendor says FenrirOS, not "Proxmox distribution of EDK II";
+#   EDK2's own boot logo instead of Proxmox's Logo.bmp (their trademark).
+# - Not shipped: the snakeoil test key pair and the VARS images enrolled with
+#   it (a published private key, for testing only), and Proxmox's legacy 2 MB
+#   images (OVMF_CODE.fd, OVMF_VARS.fd, OVMF_CODE.secboot.fd, OVMF_VARS.ms.fd):
+#   EDK2 no longer builds 2 MB Secure Boot images, Proxmox ships prebuilt
+#   binaries of edk2-stable202302 for them (debian/legacy-2M-builds); only
+#   VMs whose EFI disk was made before Proxmox VE 7 use them. Whether to
+#   ship those prebuilt files is the user's decision.
+# The pre-enrolled VARS use Debian's PkKek-1 certificate as PK and first KEK,
+# as Proxmox does (files/PkKek-1-Debian.pem, from their debian/), and the
+# Microsoft dbx updates Proxmox ships (sources 2 and 3, from their git).
+name = "pve-edk2-firmware"
+version = "4.2026.08"
+release = 1
+summary = "UEFI firmware for Proxmox VE virtual machines (OVMF, AAVMF, RISC-V)"
+license = "BSD-2-Clause-Patent"
+homepage = "https://git.proxmox.com/?p=pve-edk2-firmware.git"
+patches = ["OvmfPkg-X64-add-opt-org.tianocore-UninstallMemAttrPr.patch", "Enable_SCSI_IntelTdx_DXEFV.patch"]
+hostdeps = ["acpica", "nasm", "python", "python-virt-firmware", "llvm-clang", "llvm-lld", "llvm", "util-linux-devel", "make", "bash", "coreutils"]
+options = ["!check"]
+
+source = [
+    { url = "snapshot:git https://github.com/tianocore/edk2.git edk2-stable202608", sha256 = "adf33522c1a4d990c760bcebecebd1ec49d12ed3e6023d38117443e4b59bd43e" },
+    { url = "https://git.proxmox.com/?p=pve-edk2-firmware.git;a=blob_plain;f=debian/DBXUpdate-2025-10-16.amd64.bin;hb=f37039e52d228a7844a90aa2aaf1e161ebd04fcd", sha256 = "74df077175dca7ff8bcd27ce8285656e38097803f803e2d124467273699e4b17", name = "DBXUpdate-2025-10-16.amd64.bin" },
+    { url = "https://git.proxmox.com/?p=pve-edk2-firmware.git;a=blob_plain;f=debian/DBXUpdate-2025-02-24.arm64.bin;hb=f37039e52d228a7844a90aa2aaf1e161ebd04fcd", sha256 = "ec68522271e9ac6c936c8731ce0d74417f8ed39296e85ab0e5801af195459214", name = "DBXUpdate-2025-02-24.arm64.bin" },
+]
+
+environment = '''
+export PYTHON_COMMAND=python3 PYTHON3_ENABLE=TRUE
+'''
+setup = '''
+# clang 23's -Wattribute-alias (CryptoPkg's memcpy alias has an unsigned int
+# size) under edk2's -Werror: off with its other clang warning overrides
+# (the file has CRLF line ends: the flag goes before the \r); as edk2-ovmf
+sed -i 's/^\(DEFINE CLANGDWARF_WARNING_OVERRIDES   = [^\r]*\)/\1 -Wno-attribute-alias/' BaseTools/Conf/tools_def.template
+grep -q '^DEFINE CLANGDWARF_WARNING_OVERRIDES .*-Wno-attribute-alias' BaseTools/Conf/tools_def.template
+# clang 23's -Wunused-but-set-global, under BaseTools' -Werror (Elf32Convert.c)
+make -C BaseTools CC=clang CXX=clang++ EXTRA_OPTFLAGS=-Wno-unused-but-set-global -j$jobs
+'''
+build = '''
+export WORKSPACE=$PWD
+. ./edksetup.sh
+# Proxmox's flags (debian/rules), the vendor string FenrirOS's
+common="-DNETWORK_HTTP_BOOT_ENABLE=TRUE -DNETWORK_IP6_ENABLE=TRUE -DNETWORK_TLS_ENABLE -DSECURE_BOOT_ENABLE=TRUE -DPVSCSI_ENABLE=TRUE"
+nomemattr="--pcd PcdUninstallMemAttrProtocol=TRUE"
+ovmf4m="$common -DTPM2_ENABLE=TRUE $nomemattr -DFD_SIZE_4MB"
+aavmf="$common -DTPM2_ENABLE=TRUE -DTPM2_CONFIG_ENABLE=TRUE -DCAVIUM_ERRATUM_27456=TRUE $nomemattr --pcd PcdDxeNxMemoryProtectionPolicy=0xC000000000007FD1"
+# (an unquoted L... value is a UCS-2 string to edk2's build, as Debian passes it)
+B() {
+    build -t CLANGDWARF -b RELEASE -n $jobs "$@" \
+        --pcd "PcdFirmwareVendor=LFenrirOS distribution of EDK II\\0" \
+        --pcd "PcdFirmwareVersionString=L$version-r$release\\0"
+}
+out=$PWD/fw; mkdir -p "$out"
+
+# OVMF (IA32 PEI, X64 DXE), without and with SMM
+B -a IA32 -a X64 -p OvmfPkg/OvmfPkgIa32X64.dsc $ovmf4m
+fv=Build/Ovmf3264/RELEASE_CLANGDWARF/FV
+cp $fv/OVMF_CODE.fd "$out/OVMF_CODE_4M.fd"; cp $fv/OVMF_VARS.fd "$out/OVMF_VARS_4M.fd"
+rm -rf Build/Ovmf3264
+B -a IA32 -a X64 -p OvmfPkg/OvmfPkgIa32X64.dsc $ovmf4m -DSMM_REQUIRE=TRUE
+cp $fv/OVMF_CODE.fd "$out/OVMF_CODE_4M.secboot.fd"
+# SEV
+B -a X64 -p OvmfPkg/OvmfPkgX64.dsc $ovmf4m
+fv=Build/OvmfX64/RELEASE_CLANGDWARF/FV
+cp $fv/OVMF_CODE.fd "$out/OVMF_SEV_CODE_4M.fd"; cp $fv/OVMF_VARS.fd "$out/OVMF_SEV_VARS_4M.fd"; cp $fv/OVMF.fd "$out/OVMF_SEV_4M.fd"
+# TDX
+B -a X64 -p OvmfPkg/IntelTdx/IntelTdxX64.dsc $ovmf4m
+cp Build/IntelTdx/RELEASE_CLANGDWARF/FV/OVMF.fd "$out/OVMF_TDX_4M.fd"
+# microvm (neither SMM nor TPM)
+B -a X64 -p OvmfPkg/Microvm/MicrovmX64.dsc $common $nomemattr -DFD_SIZE_4MB
+cp Build/MicrovmX64/RELEASE_CLANGDWARF/FV/MICROVM.fd "$out/MICROVM_4M.fd"
+# AAVMF: QEMU wants 64 MiB flash images on aarch64
+fv=Build/ArmVirtQemu-AArch64/RELEASE_CLANGDWARF/FV
+B -a AARCH64 -p ArmVirtPkg/ArmVirtQemu.dsc $aavmf
+truncate -s 64M $fv/QEMU_EFI.fd $fv/QEMU_VARS.fd
+cp $fv/QEMU_EFI.fd "$out/AAVMF_CODE.fd"; cp $fv/QEMU_VARS.fd "$out/AAVMF_VARS.fd"
+rm -rf Build/ArmVirtQemu-AArch64
+B -a AARCH64 -p ArmVirtPkg/ArmVirtQemu.dsc $aavmf -DBUILD_SHELL=FALSE -DSECURE_BOOT_ENABLE=TRUE
+truncate -s 64M $fv/QEMU_EFI.fd
+cp $fv/QEMU_EFI.fd "$out/AAVMF_CODE.secboot.fd"
+# RISC-V: 32 MiB images
+B -a RISCV64 -p OvmfPkg/RiscVVirt/RiscVVirtQemu.dsc $common
+fv=Build/RiscVVirtQemu/RELEASE_CLANGDWARF/FV
+truncate -s 32M $fv/RISCV_VIRT_CODE.fd $fv/RISCV_VIRT_VARS.fd
+cp $fv/RISCV_VIRT_CODE.fd $fv/RISCV_VIRT_VARS.fd "$out/"
+
+# the pre-enrolled variable stores (Debian's PK, Microsoft's keys and dbx)
+enroll() { virt-fw-vars --input "$1" --output "$2" --enroll-cert /dkbuild/files/PkKek-1-Debian.pem --set-dbx "$3"; }
+enroll "$out/OVMF_VARS_4M.fd" "$out/OVMF_VARS_4M.ms.fd" /build/sources/DBXUpdate-2025-10-16.amd64.bin
+enroll "$out/OVMF_TDX_4M.fd" "$out/OVMF_TDX_4M.ms.fd" /build/sources/DBXUpdate-2025-10-16.amd64.bin
+enroll "$out/AAVMF_VARS.fd" "$out/AAVMF_VARS.ms.fd" /build/sources/DBXUpdate-2025-02-24.arm64.bin
+'''
+install = '''
+d="$pkgdir/usr/share/pve-edk2-firmware"
+mkdir -p "$d"
+cd fw
+install -m644 OVMF_CODE_4M.fd OVMF_CODE_4M.secboot.fd OVMF_VARS_4M.fd OVMF_VARS_4M.ms.fd \
+    OVMF_SEV_CODE_4M.fd OVMF_SEV_VARS_4M.fd OVMF_SEV_4M.fd OVMF_TDX_4M.ms.fd MICROVM_4M.fd \
+    AAVMF_CODE.fd AAVMF_CODE.secboot.fd AAVMF_VARS.fd AAVMF_VARS.ms.fd \
+    RISCV_VIRT_CODE.fd RISCV_VIRT_VARS.fd "$d/"
+# Proxmox's older names for the SEV images (debian/pve-edk2-firmware-ovmf.links)
+ln -s OVMF_SEV_CODE_4M.fd "$d/OVMF_CVM_CODE_4M.fd"
+ln -s OVMF_SEV_VARS_4M.fd "$d/OVMF_CVM_VARS_4M.fd"
+ln -s OVMF_SEV_4M.fd "$d/OVMF_CVM_4M.fd"
+cd ..
+install -Dm644 License.txt "$pkgdir/usr/share/licenses/pve-edk2-firmware/License.txt"
+'''

@@ -1,0 +1,15 @@
+open-isns on FenrirOS
+=====================
+
+The package holds libisns (used by open-iscsi's iscsid and iscsiadm for iSNS
+discovery), the client tools isnsadm and isnsdd, and the iSNS server isnsd.
+Nothing runs by default: the dinit service /etc/dinit.d/isnsd is not enabled.
+
+Server:
+1. Review /etc/isns/isnsd.conf (database in /var/lib/isns).
+2. For authentication (Security = 1), create the server's DSA key pair and
+   client keys with isnssetup (see isnsd(8), isnsadm(8)); none are shipped.
+3. dinitctl start isnsd (and dinitctl enable isnsd to start it at boot).
+
+Built without SLP (Service Location Protocol) registration: OpenSLP is not
+packaged (unmaintained since 2012). SLPRegister in isnsd.conf has no effect.

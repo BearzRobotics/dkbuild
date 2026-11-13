@@ -1,0 +1,26 @@
+# Locale-PO 0.27 from CPAN: Perl module for manipulating .po entries from GNU gettext.
+# Packaged for Proxmox VE (proxmox-i18n's build). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-locale-po"
+version = "0.27"
+release = 1
+summary = "Perl module for manipulating .po entries from GNU gettext"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/Locale-PO"
+hostdeps = ["perl"]
+builddeps = ["perl", "perl-file-slurp"]
+rundeps = ["perl-file-slurp"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/C/CO/COSIMO/Locale-PO-0.27.tar.gz", sha256 = "3c994a4b63e6e4e836c6f79a93f51921cab77c90c9753fe0f8b5429220d516b9" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

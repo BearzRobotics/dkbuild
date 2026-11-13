@@ -1,0 +1,33 @@
+FenrirOS has no libsystemd: notify readiness (--system) with the sd_notify
+datagram protocol in Rust (to $NOTIFY_SOCKET when it is set) instead of
+linking libsystemd's sd_notify(). Under dinit the variable is unset and
+nothing is sent. Written for FenrirOS.
+
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -139,16 +139,14 @@
+     }
+ }
+ 
+-#[link(name = "systemd")]
+-unsafe extern "C" {
+-    fn sd_notify(unset_environment: libc::c_int, state: *const libc::c_char) -> libc::c_int;
+-}
+-
++// FenrirOS: no libsystemd. The sd_notify protocol is one datagram to the
++// socket named by $NOTIFY_SOCKET; without it (dinit), there is nothing to do.
+ fn notify_systemd() -> StdIo::Result<()> {
+-    let err = unsafe { sd_notify(0, c_str!("READY=1\n").as_ptr()) };
+-    if err >= 0 {
+-        Ok(())
+-    } else {
+-        Err(StdIo::Error::from_raw_os_error(-err))
+-    }
++    let path = match std::env::var_os("NOTIFY_SOCKET") {
++        Some(path) => path,
++        None => return Ok(()),
++    };
++    let sock = std::os::unix::net::UnixDatagram::unbound()?;
++    sock.send_to(b"READY=1\n", std::path::Path::new(&path))?;
++    Ok(())
+ }

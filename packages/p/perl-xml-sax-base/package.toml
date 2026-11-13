@@ -1,0 +1,25 @@
+# XML-SAX-Base 1.09 from CPAN: Base class for SAX Drivers and Filters.
+# Packaged for Proxmox VE (a dependency of Proxmox VE's Perl stack). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-xml-sax-base"
+version = "1.09"
+release = 1
+summary = "Base class for SAX Drivers and Filters"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/XML-SAX-Base"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/G/GR/GRANTM/XML-SAX-Base-1.09.tar.gz", sha256 = "66cb355ba4ef47c10ca738bd35999723644386ac853abbeb5132841f5e8a2ad0" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

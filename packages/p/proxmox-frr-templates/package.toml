@@ -1,0 +1,23 @@
+# Jinja templates for the FRR configuration Proxmox VE's SDN generates
+# (Debian: proxmox-frr-templates), from the proxmox-ve-rs repository, in
+# /usr/share/proxmox-frr/templates. pve-rs's proxmox-frr crate compiles them
+# in (include_str! of these absolute paths), so it is needed to build pve-rs.
+# Pinned to the proxmox-ve-rs commit "ve-config: bump version to 0.12.0"
+# (2026-11-11), the one pve-rs 0.16.1 is built against (no tags).
+name = "proxmox-frr-templates"
+version = "0.1.2"
+release = 1
+summary = "FRR configuration templates for the Proxmox VE SDN stack"
+license = "AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=proxmox-ve-rs.git"
+options = ["!check", "!strip"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/proxmox-ve-rs.git 7a086eb1259f9be4cc94037150d379ff7be190ab", sha256 = "3398a462de8e098ba4b8cc56e134a9b626df818729f08f66724c2b065584fd71" },
+]
+
+install = '''
+install -d "$pkgdir/usr/share/proxmox-frr/templates"
+cp -r proxmox-frr-templates/templates/. "$pkgdir/usr/share/proxmox-frr/templates/"
+install -Dm644 proxmox-frr-templates/debian/copyright "$pkgdir/usr/share/licenses/proxmox-frr-templates/copyright"
+'''

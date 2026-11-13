@@ -1,0 +1,32 @@
+# libfaketime: makes programs see a different date and time (an LD_PRELOAD
+# library and the `faketime` wrapper). Proxmox VE's pve-cluster runs openssl
+# under faketime to give certificates a backdated start.
+# The preload libraries (libfaketime.so.1, libfaketimeMT.so.1) live in
+# /usr/lib/faketime, where the wrapper looks for them. No static library: a
+# preload shim only works as a shared object, and upstream builds none.
+# The time64 variant is glibc-only (musl's time_t is always 64-bit).
+name = "libfaketime"
+version = "0.9.13"
+release = 1
+summary = "Report a faked system time to programs (faketime)"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/wolfcw/libfaketime"
+patches = ["no-werror.patch"]
+checkdeps = ["bash"]
+# The CLOCK_REALTIME/MONOTONIC tests hang on some systems
+# (https://github.com/wolfcw/libfaketime/issues/259); Alpine skips them too.
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/wolfcw/libfaketime/archive/refs/tags/v0.9.13.tar.gz", sha256 = "8e56deeb805682b025107e095f1d94a6ea677472f05824cd475f5c5e6e1a5ddf" },
+]
+
+build = '''
+%make PREFIX=/usr
+'''
+check = '''
+make -j1 PREFIX=/usr test
+'''
+install = '''
+%make_install PREFIX=/usr
+'''

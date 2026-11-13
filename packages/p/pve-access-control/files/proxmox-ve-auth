@@ -1,0 +1,6 @@
+#%PAM-1.0
+# Proxmox VE's PAM realm ("Linux PAM standard authentication"): system users
+# such as root@pam logging in to the web UI and API. Debian has no file for
+# this service and falls back to "other"; FenrirOS names it explicitly.
+auth      include   system-auth
+account   include   system-auth

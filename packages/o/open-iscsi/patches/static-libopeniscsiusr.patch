@@ -1,0 +1,16 @@
+Build libopeniscsiusr with library() instead of shared_library(), so that
+meson's default_library=both (the %meson macro) also makes the static
+libopeniscsiusr.a for the -static package. The programs still link the shared
+library. Written for FenrirOS.
+
+--- a/meson.build
++++ b/meson.build
+@@ -143,7 +143,7 @@
+ install_man(libiscsi_usr_docs)
+ 
+ # build the shared library
+-libiscsi_usr = shared_library('openiscsiusr',
++libiscsi_usr = library('openiscsiusr',
+   libiscsi_usr_srcs,
+   include_directories: [libiscsi_usr_private_includes, libiscsi_usr_public_includes],
+   dependencies: kmod_dep,

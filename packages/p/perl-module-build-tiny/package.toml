@@ -1,0 +1,26 @@
+# Module-Build-Tiny 0.053 from CPAN: A tiny replacement for Module::Build.
+# Packaged for Proxmox VE (a dependency of Proxmox VE's Perl stack). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-module-build-tiny"
+version = "0.053"
+release = 1
+summary = "A tiny replacement for Module::Build"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/Module-Build-Tiny"
+hostdeps = ["perl", "perl-module-build-tiny"]
+builddeps = ["perl", "perl-extutils-config", "perl-extutils-helpers", "perl-extutils-installpaths"]
+rundeps = ["perl-extutils-config", "perl-extutils-helpers", "perl-extutils-installpaths"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/L/LE/LEONT/Module-Build-Tiny-0.053.tar.gz", sha256 = "3726d622da6f655e88fdf89e4fd597709c44970b47de65082003e8d86b5e193a" },
+]
+
+build = '''
+perl Build.PL --installdirs=vendor
+./Build
+'''
+install = '''
+./Build install --destdir="$pkgdir"
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

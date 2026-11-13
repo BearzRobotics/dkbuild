@@ -1,0 +1,5 @@
+#!/bin/sh
+# Called by the iscsid-initiatorname dinit service: write a unique
+# /etc/iscsi/initiatorname.iscsi unless one is already there.
+grep -qs '^InitiatorName=' /etc/iscsi/initiatorname.iscsi && exit 0
+exec /usr/sbin/iscsi-gen-initiatorname

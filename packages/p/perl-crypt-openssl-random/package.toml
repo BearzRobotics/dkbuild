@@ -1,0 +1,25 @@
+# Crypt-OpenSSL-Random 0.17 from CPAN: OpenSSL/LibreSSL pseudo-random number generator access.
+# Packaged for Proxmox VE (pve-common). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-crypt-openssl-random"
+version = "0.17"
+release = 1
+summary = "OpenSSL/LibreSSL pseudo-random number generator access"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/Crypt-OpenSSL-Random"
+hostdeps = ["perl", "perl-crypt-openssl-guess"]
+builddeps = ["perl", "openssl-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/R/RU/RURBAN/Crypt-OpenSSL-Random-0.17.tar.gz", sha256 = "a571b24181baaa76c96704e92acffc6934ff593e380dade274db4e43c140ad51" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

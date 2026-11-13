@@ -1,0 +1,50 @@
+# proxmox-backup-qemu: the Proxmox Backup Server client library for QEMU
+# (libproxmox_backup_qemu.so.0 and proxmox-backup-qemu.h; Debian's
+# libproxmox-backup-qemu0 and -dev), which pve-qemu's backup patches link
+# for backups to and restores from a Proxmox Backup Server (and pbs-restore).
+# Source: git.proxmox.com/git/proxmox-backup-qemu.git at "bump version to
+# 2.0.4" (f792b08d; Proxmox's repositories have no tags), a git snapshot with
+# its proxmox-backup submodule (78f77d53, 4.2.8-1), whose pbs-client,
+# pbs-datastore, pbs-key-config and pbs-tools crates it builds.
+# Proxmox builds it from Debian-packaged crates; here the Proxmox crates come
+# from their git repositories and proxmox-systemd from a copy without
+# libsystemd (patches/proxmox-crates-from-git.patch says which commits and
+# what changes); the upstream source has no Cargo.lock, so files/Cargo.lock
+# (generated from the patched configuration) pins every crate.
+# Shipped also as a static library (libproxmox_backup_qemu.a, Cargo's
+# staticlib output, in -static), which upstream builds but Debian does not
+# package.
+name = "proxmox-backup-qemu"
+version = "2.0.4"
+release = 1
+summary = "Proxmox Backup Server client library for QEMU"
+license = "AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=proxmox-backup-qemu.git"
+patches = ["proxmox-crates-from-git.patch"]
+hostdeps = ["rust", "pkgconf"]
+builddeps = ["openssl-devel", "acl-devel"]
+options = ["!check", "cargodeps", "cargolock=."]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/proxmox-backup-qemu.git f792b08dfc1311452dbef090ddb3128432b2c780", sha256 = "ba6fa7cca471dd25f704c98d557e1ad5d234d94ee11c763fe64ff495ada72bc8" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+# Rust's musl target links statically by default; a cdylib needs the C
+# runtime dynamically, as the other Rust libraries here
+export RUSTFLAGS="-C target-feature=-crt-static"
+# the version strings the build scripts take from git (no .git in a snapshot)
+export GITVERSION=f792b08dfc1311452dbef090ddb3128432b2c780
+export REPOID=78f77d53718b351bebacfa4f56f85134616e0b02
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs
+'''
+install = '''
+install -Dm755 target/release/libproxmox_backup_qemu.so "$pkgdir/usr/lib/libproxmox_backup_qemu.so.0"
+ln -s libproxmox_backup_qemu.so.0 "$pkgdir/usr/lib/libproxmox_backup_qemu.so"
+install -Dm644 target/release/libproxmox_backup_qemu.a "$pkgdir/usr/lib/libproxmox_backup_qemu.a"
+install -Dm644 proxmox-backup-qemu.h "$pkgdir/usr/include/proxmox-backup-qemu.h"
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/proxmox-backup-qemu/copyright"
+'''

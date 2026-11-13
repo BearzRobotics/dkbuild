@@ -1,0 +1,10 @@
+# rrdcached: RRD caching daemon. Shipped, not enabled.
+# Options as Debian's rrdcached (and so Proxmox VE's pmxcfs/pvestatd) expect:
+# databases under /var/lib/rrdcached/db (-b, restricted to it with -B), the
+# journal in /var/lib/rrdcached/journal (-j), the local socket
+# /var/run/rrdcached.sock with mode 0660 (-m before the -l it applies to),
+# everything flushed at shutdown (-F), writes delayed 1800 s with up to
+# 1800 s of jitter (-w, -z), in the foreground (-g).
+type = process
+command = /usr/bin/rrdcached -g -B -F -b /var/lib/rrdcached/db -j /var/lib/rrdcached/journal -w 1800 -z 1800 -p /run/rrdcached.pid -m 660 -l unix:/var/run/rrdcached.sock
+depends-on: rcboot

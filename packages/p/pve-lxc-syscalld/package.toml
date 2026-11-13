@@ -1,0 +1,31 @@
+# Proxmox VE's LXC syscall daemon (Debian: pve-lxc-syscalld): containers'
+# seccomp notifications (mknod/mknodat, quotactl, ...) are handled here on the
+# host, so unprivileged containers can do them safely. Rust; crates.io only.
+# Pinned to the "bump version to 2.0.2" commit (no tags); upstream ships no
+# Cargo.lock (Debian builds against its packaged crates): files/Cargo.lock
+# pins the crates, patch 0001 drops the Debian registry. dinit service
+# pve-lxc-syscalld (shipped, not enabled). Patch 0002: sd_notify without
+# libsystemd.
+name = "pve-lxc-syscalld"
+version = "2.0.2"
+release = 1
+summary = "Proxmox VE LXC syscall daemon"
+license = "AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=pve-lxc-syscalld.git"
+patches = ["0001-crates-io.patch", "0002-no-libsystemd.patch"]
+hostdeps = ["rust"]
+options = ["!check", "cargodeps", "cargolock=."]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/pve-lxc-syscalld.git f08ac519ff9a9043bca56969ad24d341ffd94dd0", sha256 = "bbd194629f8cf916acae9c3f3fa5863257ea6a50c61fce1dfe0b7543b07549b2" },
+]
+
+build = '''
+cargo build --release --offline
+'''
+install = '''
+install -Dm755 target/release/pve-lxc-syscalld "$pkgdir/usr/libexec/pve-lxc-syscalld/pve-lxc-syscalld"
+install -Dm644 $pkgfiles/pve-lxc-syscalld "$pkgdir/etc/dinit.d/pve-lxc-syscalld"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/pve-lxc-syscalld.conf"
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/pve-lxc-syscalld/copyright"
+'''

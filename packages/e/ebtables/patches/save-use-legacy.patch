@@ -1,0 +1,16 @@
+ebtables-legacy-save runs "@sbindir@/ebtables" to list the rules; on this tree
+that name is iptables' ebtables-nft (nftables backend), so the legacy save
+script would dump the nft rule set instead of the legacy one. Run
+ebtables-legacy, as the script's own name says. Written for FenrirOS.
+
+--- a/ebtables-save.in
++++ b/ebtables-save.in
+@@ -8,7 +8,7 @@
+ 
+ use strict;
+ my $table;
+-my $ebtables = "@sbindir@/ebtables";
++my $ebtables = "@sbindir@/ebtables-legacy";
+ my $cnt = "";
+ my $version = "1.0";
+ my $table_name;

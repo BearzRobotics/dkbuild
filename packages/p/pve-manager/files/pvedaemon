@@ -1,0 +1,7 @@
+# pvedaemon: Proxmox VE API daemon (privileged worker of the REST API)
+type = bgprocess
+command = /usr/bin/pvedaemon start
+stop-command = /usr/bin/pvedaemon stop
+pid-file = /run/pvedaemon.pid
+depends-on: pve-cluster
+waits-for: corosync

@@ -1,0 +1,6 @@
+# spiceproxy: Proxmox VE SPICE proxy (remote viewer access, port 3128)
+type = bgprocess
+command = /usr/bin/spiceproxy start
+stop-command = /usr/bin/spiceproxy stop
+pid-file = /run/pveproxy/spiceproxy.pid
+depends-on: pveproxy

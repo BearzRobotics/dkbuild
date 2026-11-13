@@ -1,0 +1,62 @@
+FenrirOS has no systemd journal and no dpkg:
+- dump_journal() (the node's syslog view) reads /var/log/messages (sysklogd)
+  instead of running journalctl; --since/--until are ignored.
+- get_host_dpkg_arch() maps the uname machine to the Debian architecture name
+  instead of running dpkg --print-architecture.
+- SysFSTools reads pci.ids from /usr/share/hwdata (FenrirOS's hwdata package)
+  instead of Debian's /usr/share/misc.
+Written for FenrirOS.
+
+--- a/src/PVE/Tools.pm
++++ b/src/PVE/Tools.pm
+@@ -840,12 +840,18 @@
+         $limit--;
+     };
+ 
+-    my $cmd = ['journalctl', '-o', 'short', '--no-pager'];
+-
+-    push @$cmd, '--unit', $service if $service;
+-    push @$cmd, '--since', $since if $since;
+-    push @$cmd, '--until', $until if $until;
+-    run_command($cmd, outfunc => $parser);
++    # FenrirOS: no journal; read the syslog daemon's file (sysklogd's
++    # /var/log/messages), oldest first, matching the service's tag if given.
++    # --since/--until are not supported there and are ignored.
++    my $logfile = '/var/log/messages';
++    if (open(my $fh, '<', $logfile)) {
++        while (defined(my $line = <$fh>)) {
++            chomp $line;
++            next if $service && $line !~ m/\s\Q$service\E(\[\d+\])?:/;
++            $parser->($line);
++        }
++        close($fh);
++    }
+ 
+     # HACK: ExtJS store.guaranteeRange() does not like empty array
+     # so we add a line
+@@ -1315,10 +1321,10 @@
+     if (!defined($host_dpkg_arch)) {
+         # an absolute path and a known-good PATH, so that this also works under taint mode
+         local $ENV{PATH} = '/usr/sbin:/usr/bin:/sbin:/bin';
+-        run_command(
+-            ['/usr/bin/dpkg', '--print-architecture'],
+-            outfunc => sub { $host_dpkg_arch = shift },
+-        );
++        # FenrirOS: no dpkg; the Debian name of the uname machine
++        my $machine = (POSIX::uname())[4];
++        my $map = { x86_64 => 'amd64', aarch64 => 'arm64', riscv64 => 'riscv64', i686 => 'i386' };
++        $host_dpkg_arch = $map->{$machine} // $machine;
+         die "failed to determine the host's Debian architecture\n" if !defined($host_dpkg_arch);
+     }
+     return $host_dpkg_arch;
+--- a/src/PVE/SysFSTools.pm
++++ b/src/PVE/SysFSTools.pm
+@@ -14,7 +14,7 @@
+ my $parse_pci_ids = sub {
+     my $ids = {};
+ 
+-    open(my $fh, '<', "/usr/share/misc/pci.ids")
++    open(my $fh, '<', "/usr/share/hwdata/pci.ids")
+         or return $ids;
+ 
+     my $curvendor;

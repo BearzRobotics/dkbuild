@@ -1,0 +1,26 @@
+# Linux-Inotify2 2.3 from CPAN: scalable directory/file change notification.
+# Packaged for Proxmox VE (pve-common). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-linux-inotify2"
+version = "2.3"
+release = 1
+summary = "scalable directory/file change notification"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/Linux-Inotify2"
+hostdeps = ["perl"]
+builddeps = ["perl", "perl-common-sense"]
+rundeps = ["perl-common-sense"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/M/ML/MLEHMANN/Linux-Inotify2-2.3.tar.gz", sha256 = "cb99150f9ffa51dbc3be5ee98d8e91c98cdfeae22eb88e718f2cf367bf270d17" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

@@ -1,0 +1,40 @@
+# Based on Chimera Linux cports user/thin-provisioning-tools (BSD-2-Clause,
+# Copyright (c) Chimera Linux contributors). Its patches are not needed here:
+# they move the tools to /usr/bin (Chimera merges sbin; this tree keeps
+# /usr/sbin, where LVM looks for thin_check) and adapt txt2man to BSD date.
+# thin-provisioning-tools: check, dump, repair and restore the metadata of
+# device-mapper thin, cache and era targets (thin_check, cache_check, ...: one
+# pdata_tools binary with links). LVM thin pools need thin_check; Proxmox VE's
+# LVM-thin storage uses them. Default features; the devtools (thin_explore, a
+# TUI for developers) and the io_uring feature (opt-in upstream) are not built.
+# Crates vendored on the host.
+name = "thin-provisioning-tools"
+version = "1.3.4"
+release = 1
+summary = "Tools for the metadata of device-mapper thin, cache and era targets"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/jthornber/thin-provisioning-tools"
+hostdeps = ["rust", "pkgconf", "llvm-clang", "gawk"]
+builddeps = ["lvm2-devel", "eudev-devel", "linux-headers"]
+# The test suite runs for a very long time (Chimera skips it too).
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/jthornber/thin-provisioning-tools/archive/v1.3.4.tar.gz", sha256 = "e09caa006ee6ff1e0b32dea934e6cb5d96412cd31163d82bd7ccdc1ac06304d5" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+# devicemapper-sys makes its bindings from libdevmapper.h with bindgen (libclang)
+export LIBCLANG_PATH=/usr/lib
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs
+'''
+check = '''
+cargo test --release --frozen --offline -j $jobs
+'''
+install = '''
+# the binary is already built (the Makefile's target exists); dkbuild strips it
+make DESTDIR="$pkgdir" STRIP=true install
+'''

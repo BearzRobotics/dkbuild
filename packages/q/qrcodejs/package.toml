@@ -1,0 +1,26 @@
+# qrcode.js (davidshimjs/qrcodejs), as Proxmox packages it (Debian:
+# libjs-qrcodejs): QR codes for TOTP enrollment in Proxmox's web UIs, served
+# from /usr/share/javascript/qrcodejs. Pinned to the "bump version to
+# 1.20230525-pve1" commit of Proxmox's packaging repository (no tags).
+# Minified with esbuild instead of upstream's uglifyjs (not packaged here);
+# the output is equivalent JavaScript.
+name = "qrcodejs"
+version = "1.20230525"
+release = 1
+summary = "Cross-browser QR code generator for JavaScript"
+license = "MIT"
+homepage = "https://github.com/davidshimjs/qrcodejs"
+hostdeps = ["esbuild"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/libjs-qrcodejs.git 4a28dec7f15ac06e0505a4c2c4fb899a1f45845e", sha256 = "ed62114a81e2be8b260ad809f253b3ebd53aa1b503298d9d335bbcd251fe878f" },
+]
+
+build = '''
+esbuild --minify src/qrcode.js --outfile=src/qrcode.min.js
+'''
+install = '''
+install -Dm644 src/qrcode.min.js "$pkgdir/usr/share/javascript/qrcodejs/qrcode.min.js"
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/qrcodejs/copyright"
+'''

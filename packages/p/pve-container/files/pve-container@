@@ -1,0 +1,8 @@
+# pve-container@<vmid>: a Proxmox VE LXC container (started by pct/pvedaemon,
+# not at boot); lxc-start in the foreground, its output in /run/pve
+type = process
+command = /usr/bin/lxc-start -F -n $1
+stop-command = /usr/share/lxc/pve-container-stop-wrapper $1
+logfile = /run/pve/ct-$1.stderr
+stop-timeout = 120
+depends-on: early-filesystems

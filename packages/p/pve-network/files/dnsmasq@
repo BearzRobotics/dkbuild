@@ -1,0 +1,5 @@
+# dnsmasq@<zone>: a Proxmox VE SDN DHCP server instance (managed by the SDN
+# stack, which writes /etc/default/dnsmasq.<zone> and /etc/dnsmasq.d/<zone>)
+type = process
+command = /usr/libexec/pve-fenrir/dnsmasq-instance $1
+depends-on: dbus

@@ -1,0 +1,5 @@
+# pve-dbus-vmstate@<vmid>: D-Bus VM state helper for a VM's live migration
+# (started by qemu-server, not at boot)
+type = process
+command = /usr/libexec/qemu-server/dbus-vmstate $1
+depends-on: dbus

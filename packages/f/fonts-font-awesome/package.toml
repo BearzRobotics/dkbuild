@@ -1,0 +1,23 @@
+# Font Awesome 4.7 (Debian: fonts-font-awesome), the icon font Proxmox's web
+# UIs use (/usr/share/fonts-font-awesome/{css,fonts}). 4.7.0 is the last 4.x
+# release; Proxmox has not moved to 5+ (different class names).
+name = "fonts-font-awesome"
+version = "4.7.0"
+release = 1
+summary = "Font Awesome 4 icon font with its CSS"
+license = "OFL-1.1 AND MIT"
+homepage = "https://fontawesome.com/v4/"
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/FortAwesome/Font-Awesome/archive/refs/tags/v4.7.0.tar.gz", sha256 = "de512ba0e1dead382bbfce372cde74b3f18971d876fffb635ee9333f0db05d43" },
+]
+
+install = '''
+d="$pkgdir/usr/share/fonts-font-awesome"
+install -d "$d"
+cp -r css fonts less scss "$d/"
+install -d "$pkgdir/usr/share/fonts/fontawesome"
+ln -s ../../fonts-font-awesome/fonts/fontawesome-webfont.ttf "$pkgdir/usr/share/fonts/fontawesome/FontAwesome.ttf"
+install -Dm644 README.md "$pkgdir/usr/share/doc/fonts-font-awesome/README.md"
+'''

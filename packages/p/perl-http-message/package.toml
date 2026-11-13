@@ -1,0 +1,26 @@
+# HTTP-Message 7.04 from CPAN: HTTP style message (base class).
+# Packaged for Proxmox VE (pve-common, pve-http-server). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-http-message"
+version = "7.04"
+release = 1
+summary = "HTTP style message (base class)"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/HTTP-Message"
+hostdeps = ["perl"]
+builddeps = ["perl", "perl-clone", "perl-encode-locale", "perl-http-date", "perl-io-html", "perl-lwp-mediatypes", "perl-uri"]
+rundeps = ["perl-clone", "perl-encode-locale", "perl-http-date", "perl-io-html", "perl-lwp-mediatypes", "perl-uri"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/HTTP-Message-7.04.tar.gz", sha256 = "699f3350dbb7bd8fdc9f3b013b0c91b7c059783708443e39bc395fa33352f006" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

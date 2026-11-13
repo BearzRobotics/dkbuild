@@ -1,0 +1,30 @@
+# cstream: a dd-like stream tool with a bandwidth limit (-t), which Proxmox VE's
+# vzdump and pve-storage use to throttle backups and migrations. With TCP
+# socket, resolver and OSS sound (linux/soundcard.h) support.
+# Without JACK: configure links libjack when it finds it, and that would put
+# PipeWire (the tree's libjack) on every server that only wants a rate-limited
+# pipe; JACK output from cstream is not what it is used for here.
+name = "cstream"
+version = "4.0.0"
+release = 1
+summary = "General-purpose stream tool with bandwidth limiting"
+license = "MIT"
+homepage = "https://www.cons.org/cracauer/cstream.html"
+builddeps = ["linux-headers"]
+# no test target (the test script is not wired into make check)
+options = ["!check"]
+
+source = [
+    { url = "https://www.cons.org/cracauer/download/cstream-4.0.0.tar.gz", sha256 = "6bc06d7c4386fb98d3a91713434c315d9e6d425c91c886281beaa254c0e096e3" },
+]
+
+setup = '''
+%configure ac_cv_lib_jack_jack_client_open=no
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYRIGHT "$pkgdir/usr/share/licenses/cstream/COPYRIGHT"
+'''

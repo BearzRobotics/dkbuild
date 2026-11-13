@@ -1,0 +1,25 @@
+# Proxmox's asynchronous HTTP/REST server (Debian: libpve-http-server-perl),
+# the base of pveproxy, pvedaemon and spiceproxy (AnyEvent, TLS, websockets,
+# the HTML API browser on Bootstrap 5 from /usr/share/bootstrap-html).
+# Pinned to the "bump version to 6.0.7" commit (Proxmox repositories have no tags).
+name = "pve-http-server"
+version = "6.0.7"
+release = 1
+summary = "Proxmox asynchronous HTTP server implementation"
+license = "AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=pve-http-server.git"
+hostdeps = ["perl", "make"]
+rundeps = ["perl", "pve-common", "perl-anyevent", "perl-anyevent-http", "perl-html-parser", "perl-http-date",
+           "perl-http-message", "perl-io-socket-ssl", "perl-json", "perl-net-ip", "perl-uri", "perl-net-ssleay",
+           "bootstrap5"]
+options = ["!check"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/pve-http-server.git 3d0d58d940d42bce4e5a5020e1f1b776cc437ec5", sha256 = "ea0a9c1fa2a027dbd89a1459b37fa3c36899558af87557713b8fad604b104949" },
+]
+
+install = '''
+vendorlib=$(perl -MConfig -e 'print $Config{vendorlib}')
+make -C src install PERL5DIR="$pkgdir$vendorlib"
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/pve-http-server/copyright"
+'''

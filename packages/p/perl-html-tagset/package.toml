@@ -1,0 +1,25 @@
+# HTML-Tagset 3.24 from CPAN: Data tables useful in parsing HTML.
+# Packaged for Proxmox VE (a dependency of Proxmox VE's Perl stack). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-html-tagset"
+version = "3.24"
+release = 1
+summary = "Data tables useful in parsing HTML"
+license = "Artistic-2.0"
+homepage = "https://metacpan.org/dist/HTML-Tagset"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/P/PE/PETDANCE/HTML-Tagset-3.24.tar.gz", sha256 = "eb89e145a608ed1f8f141a57472ee5f69e67592a432dcd2e8b1dbb445f2b230b" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

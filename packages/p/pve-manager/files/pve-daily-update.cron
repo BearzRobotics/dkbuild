@@ -1,0 +1,4 @@
+# Proxmox VE daily update (Debian's pve-daily-update.timer): refresh the
+# package list and the subscription and certificate status. Example only; to
+# use it: cp /usr/share/doc/pve-manager/pve-daily-update.cron /etc/cron.d/pve-daily-update
+0 1 * * * root /usr/bin/pveupdate

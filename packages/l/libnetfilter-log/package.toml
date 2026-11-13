@@ -1,0 +1,32 @@
+# libnetfilter_log: userspace access to packets the kernel logs through
+# nfnetlink_log (the NFLOG target). Proxmox VE's pve-firewall logger
+# (pvefw-logger) links it. Shared and static libraries (upstream builds only
+# shared by default; %configure asks for both), with the libipulog compatibility
+# library and the libnetfilter_conntrack integration; man pages with doxygen.
+name = "libnetfilter-log"
+version = "1.0.2"
+release = 1
+summary = "Library for packets logged by the kernel packet filter (NFLOG)"
+license = "GPL-2.0-only"
+homepage = "https://www.netfilter.org/projects/libnetfilter_log/"
+patches = ["nostartfiles.patch"]
+hostdeps = ["pkgconf", "doxygen"]
+builddeps = ["libnfnetlink-devel", "libmnl-devel", "libnetfilter-conntrack-devel", "linux-headers"]
+
+source = [
+    { url = "https://www.netfilter.org/projects/libnetfilter_log/files/libnetfilter_log-1.0.2.tar.bz2", sha256 = "e3f408575614d849e4726b45e90c7ebb0e6744b04859555a9ce6ec40744ffeea" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+find "$pkgdir" -name '*.la' -delete
+'''

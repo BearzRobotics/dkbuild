@@ -1,0 +1,25 @@
+# LWP-MediaTypes 6.05 from CPAN: guess media type for a file or a URL.
+# Packaged for Proxmox VE (a dependency of Proxmox VE's Perl stack). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-lwp-mediatypes"
+version = "6.05"
+release = 1
+summary = "guess media type for a file or a URL"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/LWP-MediaTypes"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/LWP-MediaTypes-6.05.tar.gz", sha256 = "abb2dcfbf069317fe65b098e3b2ad58c5eb33e9a839b9190cce6d371f8966cc1" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

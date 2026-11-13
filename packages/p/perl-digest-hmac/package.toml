@@ -1,0 +1,25 @@
+# Digest-HMAC 1.05 from CPAN: Keyed-Hashing for Message Authentication.
+# Packaged for Proxmox VE (pve-cluster, Net::DNS). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-digest-hmac"
+version = "1.05"
+release = 1
+summary = "Keyed-Hashing for Message Authentication"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/Digest-HMAC"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/A/AR/ARODLAND/Digest-HMAC-1.05.tar.gz", sha256 = "215cb59cba610745cfb2d4b3f8ef756d590e57e3ad7986a992e87c4969fcdc7a" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

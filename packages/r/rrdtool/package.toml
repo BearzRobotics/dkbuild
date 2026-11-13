@@ -1,0 +1,104 @@
+# Based on Chimera Linux cports main/rrdtool (BSD-2-Clause, Copyright (c)
+# Chimera Linux contributors); its patches, each with a header saying why.
+# The 64-bit time_t patch is upstream since 1.10; bsd-date.patch (BSD date(1))
+# and no-useless-docs.patch (no troff) are not needed here: GNU coreutils and
+# groff are in the tree.
+#
+# rrdtool: round-robin databases and graphs. librrd (shared and static, with
+# rrd_client for rrdcached, which Proxmox VE's pmxcfs links), rrdtool, rrdcached,
+# rrdcgi, rrdupdate. Graphs (cairo/pango), XML restore (libxml2), libdbi fetch,
+# man and HTML documentation.
+# Bindings, each in its own subpackage: Perl (RRDs, Debian's librrds-perl, and
+# RRDp) in rrdtool-perl, in perl's vendor_perl; Python in rrdtool-python; Lua
+# in rrdtool-lua; Tcl in rrdtool-tcl.
+# Left out:
+#  - librados (Ceph's RADOS as an RRD store): no Ceph in the tree.
+#  - libwrap (TCP wrappers for rrdcached's network listener): no tcp_wrappers in
+#    the tree; the project is unmaintained.
+#  - the Ruby binding: its extconf.rb links with an rpath into $(EPREFIX)/lib
+#    and installs into a site directory set on make's command line; not done
+#    without someone who needs it (an open question for the user).
+# rrdcached ships with a dinit service, not enabled (README.FenrirOS).
+name = "rrdtool"
+version = "1.11.0"
+release = 1
+summary = "Round Robin Database tool: time-series storage and graphing"
+license = "GPL-2.0-or-later AND custom:FLOSS-License-Exception"
+homepage = "https://oss.oetiker.ch/rrdtool/"
+patches = [
+    "0001-fix-autoconf.patch",
+    "0002-dont-order-a-cd.patch",
+    "0003-fix-usage-ub.patch",
+    "0004-fix-test-run-cached.patch",
+    "no-rpn1.patch",
+]
+hostdeps = ["autoconf", "automake", "libtool", "gettext", "pkgconf", "groff", "perl", "python", "python-setuptools", "lua", "bash"]
+builddeps = [
+    "glib-devel", "cairo-devel", "pango-devel", "libpng-devel", "freetype-devel", "libxml2-devel",
+    "libdbi-devel", "zlib-ng-compat-devel", "python-devel", "lua-devel", "tcl-devel",
+]
+checkdeps = ["bash"]
+
+source = [
+    { url = "https://github.com/oetiker/rrdtool-1.x/releases/download/v1.11.0/rrdtool-1.11.0.tar.gz", sha256 = "24c345b5c077c1b2b2fcbc1a364f1da051650fb6743ad5213096adc04c862ed4" },
+]
+
+setup = '''
+autoreconf -fi
+%configure \
+    --disable-rpath \
+    --enable-perl --with-perl-options="INSTALLDIRS=vendor" \
+    --enable-python --enable-lua --enable-tcl \
+    --disable-ruby --disable-librados --disable-libwrap
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+find "$pkgdir" -name '*.la' -delete
+# the Makefile installs the Python wheel into $libdir/python3/site-packages;
+# move it to the interpreter's own site-packages
+py=$(python3 -c 'import sysconfig; print(sysconfig.get_path("platlib"))')
+mkdir -p "$pkgdir$(dirname $py)"
+mv "$pkgdir/usr/lib/python3/site-packages" "$pkgdir$py"
+rmdir "$pkgdir/usr/lib/python3"
+# MakeMaker's install bookkeeping
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+# every binding must have been built (configure drops one silently when its
+# language is missing)
+test -f "$pkgdir/usr/lib/perl5/5.40/vendor_perl/RRDs.pm"
+test -f "$pkgdir/usr/lib/perl5/5.40/vendor_perl/RRDp.pm"
+ls "$pkgdir$py"/rrdtool*.so
+ls "$pkgdir"/usr/lib/lua/*/rrd.so
+ls "$pkgdir"/usr/lib/tclrrd*.so
+# rrdcached: dinit service (not enabled), state directories, notes
+install -Dm644 $pkgfiles/rrdcached "$pkgdir/etc/dinit.d/rrdcached"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/rrdcached.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/rrdtool/README.FenrirOS"
+install -Dm644 COPYRIGHT "$pkgdir/usr/share/licenses/rrdtool/COPYRIGHT"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/rrdtool/LICENSE"
+'''
+
+[subpackages.perl]
+summary = "Perl bindings for rrdtool (RRDs, RRDp)"
+paths = ["/usr/lib/perl5"]
+depends = ["perl"]
+
+[subpackages.python]
+summary = "Python bindings for rrdtool"
+paths = ["/usr/lib/python3*"]
+depends = ["python"]
+
+[subpackages.lua]
+summary = "Lua bindings for rrdtool"
+paths = ["/usr/lib/lua"]
+depends = ["lua"]
+
+[subpackages.tcl]
+summary = "Tcl bindings for rrdtool"
+paths = ["/usr/lib/tclrrd*"]
+depends = ["tcl"]

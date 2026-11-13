@@ -1,0 +1,23 @@
+# Perl client for the Proxmox VE REST API (Debian: libpve-apiclient-perl),
+# used by pve-cluster (joining a cluster) and qemu-server (remote migration).
+# Pinned to the "bump version to 3.4.3" commit (Proxmox repositories have no tags).
+name = "pve-apiclient"
+version = "3.4.3"
+release = 1
+summary = "Proxmox VE API client Perl library"
+license = "AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=pve-apiclient.git"
+hostdeps = ["perl", "make"]
+rundeps = ["perl", "perl-io-socket-ssl", "perl-json", "perl-libwww", "perl-lwp-protocol-https", "perl-http-message",
+           "perl-uri", "perl-net-ssleay"]
+options = ["!check"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/pve-apiclient.git c202fe1b9dcdd68b7f1701118d1294f8db69c010", sha256 = "977a8e68c337dd5984be47d100f56110481920a9e1781bf9c208629b19faf3b5" },
+]
+
+install = '''
+vendorlib=$(perl -MConfig -e 'print $Config{vendorlib}')
+make -C src install DESTDIR="$pkgdir" PERL5DIR="$pkgdir$vendorlib" DOCDIR="$pkgdir/usr/share/doc/pve-apiclient"
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/pve-apiclient/copyright"
+'''

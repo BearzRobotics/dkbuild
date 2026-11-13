@@ -1,0 +1,27 @@
+# Imported from Chimera Linux cports main/dtach (BSD-2-Clause, Copyright (c)
+# Chimera Linux contributors).
+# dtach: detach a program from its terminal and reattach later (the detach part
+# of screen). Proxmox VE's pve-container uses it for container consoles.
+name = "dtach"
+version = "0.9"
+release = 1
+summary = "Emulates the detach feature of screen"
+license = "GPL-2.0-or-later"
+homepage = "https://dtach.sourceforge.net"
+# Makefile has no check target
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/dtach/dtach/0.9/dtach-0.9.tar.gz", sha256 = "32e9fd6923c553c443fab4ec9c1f95d83fa47b771e6e1dafb018c567291492f3" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+install -Dm755 dtach "$pkgdir/usr/bin/dtach"
+install -Dm644 dtach.1 "$pkgdir/usr/share/man/man1/dtach.1"
+'''

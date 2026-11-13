@@ -1,0 +1,26 @@
+# Alien-Build-Plugin-Download-GitLab 0.01 from CPAN: Alien::Build plugin to download from GitLab.
+# Packaged for Proxmox VE (a dependency of Proxmox VE's Perl stack). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-alien-build-plugin-download-gitlab"
+version = "0.01"
+release = 1
+summary = "Alien::Build plugin to download from GitLab"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/Alien-Build-Plugin-Download-GitLab"
+hostdeps = ["perl"]
+builddeps = ["perl", "perl-alien-build", "perl-path-tiny", "perl-uri"]
+rundeps = ["perl-alien-build", "perl-path-tiny", "perl-uri"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/Alien-Build-Plugin-Download-GitLab-0.01.tar.gz", sha256 = "c1f089c8ea152a789909d48a83dbfcf2626f773daf30431c8622582b26aba902" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

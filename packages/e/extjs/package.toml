@@ -1,0 +1,35 @@
+# Sencha Ext JS 7.0.0 GPL edition, as Proxmox packages it (Debian:
+# libjs-extjs): the JavaScript framework of the Proxmox web UIs, served from
+# /usr/share/javascript/extjs. Upstream's prebuilt build/ files (ext-all.js,
+# the crisp theme, charts, locales) are shipped as they are; Proxmox adds a
+# Georgian and a Mongolian locale and a French fix (its debian/patches, applied
+# in setup). Pinned to the "bump version to 7.0.0-9" commit (no tags).
+name = "extjs"
+version = "7.0.0.9"
+release = 1
+summary = "Sencha Ext JS JavaScript framework (GPL edition)"
+license = "GPL-3.0-only"
+homepage = "https://git.proxmox.com/?p=extjs.git"
+options = ["!check", "!strip"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/extjs.git 5dee2e81b7b2275a9cf69131142fd46160d38c5b", sha256 = "07a5a777c9222722de9477c8d48497ea68ef194b65b5b7ed6152d10eab75fd26" },
+]
+
+setup = '''
+# Proxmox's own changes to the locale files (debian/patches, quilt series)
+while read -r p; do
+    case $p in ''|'#'*) continue ;; esac
+    patch -p1 < "debian/patches/$p"
+done < debian/patches/series
+'''
+install = '''
+d="$pkgdir/usr/share/javascript/extjs"
+install -d "$d"
+b=extjs/build
+cp -r $b/classic/locale $b/classic/theme-crisp "$d/"
+install -m644 $b/ext-all-debug.js $b/ext-all.js "$d/"
+install -m644 $b/packages/charts/classic/charts-debug.js $b/packages/charts/classic/charts.js "$d/"
+cp -r $b/packages/charts/classic/crisp "$d/"
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/extjs/copyright"
+'''

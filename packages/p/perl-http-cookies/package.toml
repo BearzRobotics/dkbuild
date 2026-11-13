@@ -1,0 +1,26 @@
+# HTTP-Cookies 6.12 from CPAN: HTTP cookie jars.
+# Packaged for Proxmox VE (a dependency of Proxmox VE's Perl stack). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-http-cookies"
+version = "6.12"
+release = 1
+summary = "HTTP cookie jars"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/HTTP-Cookies"
+hostdeps = ["perl"]
+builddeps = ["perl", "perl-http-date", "perl-http-message"]
+rundeps = ["perl-http-date", "perl-http-message"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/HTTP-Cookies-6.12.tar.gz", sha256 = "4e460c4bae76285bfc726f641349402fc9038fcd9ca0f33346bec036d73876b8" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

@@ -1,0 +1,42 @@
+# Based on Chimera Linux cports main/virtiofsd (BSD-2-Clause, Copyright (c)
+# Chimera Linux contributors), and its patch.
+# virtiofsd: the vhost-user daemon behind QEMU's virtio-fs (sharing a host
+# directory with a VM); Proxmox VE's qemu-server starts it for virtiofs mounts.
+# With seccomp (libseccomp) and capability handling (libcap-ng). Not built: the
+# xen feature (it turns QEMU/KVM support off).
+# The daemon is /usr/lib/virtiofsd (this tree has no /usr/libexec), linked as
+# /usr/lib/qemu/virtiofsd (where QEMU packages used to put it); the vhost-user
+# description goes to /usr/share/qemu/vhost-user, where QEMU and libvirt look.
+# Crates vendored on the host.
+name = "virtiofsd"
+version = "1.14.0"
+release = 1
+summary = "vhost-user virtio-fs device daemon for QEMU"
+license = "Apache-2.0 AND BSD-3-Clause"
+homepage = "https://gitlab.com/virtio-fs/virtiofsd"
+patches = ["libexec.patch"]
+hostdeps = ["rust", "pkgconf"]
+builddeps = ["libcap-ng-devel", "libseccomp-devel", "linux-headers"]
+options = ["cargodeps"]
+
+source = [
+    { url = "https://gitlab.com/virtio-fs/virtiofsd/-/archive/v1.14.0/virtiofsd-v1.14.0.tar.gz", sha256 = "52b66e449ca583b4f050a2bff327ff812211a2c349b4130279fcfc6a64540f04" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs
+'''
+check = '''
+cargo test --release --frozen --offline -j $jobs
+'''
+install = '''
+install -Dm755 target/release/virtiofsd "$pkgdir/usr/lib/virtiofsd"
+install -d "$pkgdir/usr/lib/qemu"
+ln -s ../virtiofsd "$pkgdir/usr/lib/qemu/virtiofsd"
+install -Dm644 50-virtiofsd.json "$pkgdir/usr/share/qemu/vhost-user/50-virtiofsd.json"
+install -Dm644 LICENSE-BSD-3-Clause "$pkgdir/usr/share/licenses/virtiofsd/LICENSE-BSD-3-Clause"
+install -Dm644 LICENSE-APACHE "$pkgdir/usr/share/licenses/virtiofsd/LICENSE-APACHE"
+'''

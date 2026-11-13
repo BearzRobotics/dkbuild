@@ -1,0 +1,25 @@
+# AnyEvent 7.17 from CPAN: simpler/faster/newer/cooler AnyEvent API.
+# Packaged for Proxmox VE (pve-common, pve-http-server). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-anyevent"
+version = "7.17"
+release = 1
+summary = "simpler/faster/newer/cooler AnyEvent API"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/AnyEvent"
+hostdeps = ["perl", "perl-canary-stability"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/M/ML/MLEHMANN/AnyEvent-7.17.tar.gz", sha256 = "50beea689c098fe4aaeb83806c40b9fe7f946d5769acf99f849f099091a4b985" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

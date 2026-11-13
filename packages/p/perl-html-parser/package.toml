@@ -1,0 +1,26 @@
+# HTML-Parser 3.86 from CPAN: HTML parser class.
+# Packaged for Proxmox VE (libwww-perl). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-html-parser"
+version = "3.86"
+release = 1
+summary = "HTML parser class"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/HTML-Parser"
+hostdeps = ["perl"]
+builddeps = ["perl", "perl-html-tagset", "perl-http-message", "perl-uri"]
+rundeps = ["perl-html-tagset", "perl-http-message", "perl-uri"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/HTML-Parser-3.86.tar.gz", sha256 = "5305e1d5faa70ee0aa282d85a5c9aa93911e8c7afa590ad1ced5703a544e20f6" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

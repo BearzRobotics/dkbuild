@@ -1,0 +1,25 @@
+# TimeDate 2.35 from CPAN: Date and time formatting subroutines.
+# Packaged for Proxmox VE (pve-common). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-timedate"
+version = "2.35"
+release = 1
+summary = "Date and time formatting subroutines"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/TimeDate"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/A/AT/ATOOMIC/TimeDate-2.35.tar.gz", sha256 = "baddd0306ae2e86e9ec28d3de5439e514643e80b3735e43bd0fbb426d73304de" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

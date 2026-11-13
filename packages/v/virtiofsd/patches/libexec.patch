@@ -1,0 +1,15 @@
+The vhost-user description names the daemon's path: this tree installs it as
+/usr/lib/virtiofsd (no /usr/libexec), so point the description there.
+From Chimera Linux's main/virtiofsd (cports, BSD-2-Clause), rebased onto 1.14.0.
+
+--- a/50-virtiofsd.json
++++ b/50-virtiofsd.json
+@@ -1,7 +1,7 @@
+ {
+   "description": "virtiofsd vhost-user-fs",
+   "type": "fs",
+-  "binary": "/usr/libexec/virtiofsd",
++  "binary": "/usr/lib/virtiofsd",
+   "features": [
+       "migrate-precopy",
+       "posix-acl-negotiation-mode",

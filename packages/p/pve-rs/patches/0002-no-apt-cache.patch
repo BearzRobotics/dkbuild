@@ -1,0 +1,84 @@
+FenrirOS has no APT: build proxmox-apt without its "cache" feature, which
+links Debian's libapt-pkg (apt-pkg-native) for the package cache, and leave
+out the three Proxmox::RS::APT::Repositories functions that need it
+(list_available_apt_update, update_database, get_package_versions).
+pve-manager's updates API is an apk implementation on FenrirOS and does not
+call them; the repository functions (list/add/change, changelog) stay.
+Written for FenrirOS.
+
+--- a/pve-rs/Cargo.toml
++++ b/pve-rs/Cargo.toml
+@@ -30,7 +30,7 @@
+ 
+ perlmod = { version = "0.14", features = ["exporter"] }
+ 
+-proxmox-apt = { version = "1.0.1", features = ["cache"] }
++proxmox-apt = { version = "1.0.1" }
+ proxmox-apt-api-types = "3"
+ proxmox-base64 = "1"
+ proxmox-config-digest = "1"
+--- a/common/src/bindings/apt_repositories.rs
++++ b/common/src/bindings/apt_repositories.rs
+@@ -8,7 +8,7 @@
+ 
+     use proxmox_apt_api_types::{
+         APTChangeRepositoryOptions, APTGetChangelogOptions, APTRepositoriesResult,
+-        APTRepositoryHandle, APTUpdateInfo, APTUpdateOptions, HostProduct,
++        APTRepositoryHandle, HostProduct,
+     };
+     use proxmox_config_digest::ConfigDigest;
+ 
+@@ -70,49 +70,8 @@
+         proxmox_apt::get_changelog(&options)
+     }
+ 
+-    /// List available APT updates
+-    ///
+-    /// Automatically updates an expired package cache.
+-    ///
+-    /// See [`proxmox_apt::list_available_apt_update`].
+-    #[export]
+-    pub fn list_available_apt_update(apt_state_file: &str) -> Result<Vec<APTUpdateInfo>, Error> {
+-        proxmox_apt::list_available_apt_update(apt_state_file)
+-    }
+-
+-    /// Update the APT database
+-    ///
+-    /// You should update the APT proxy configuration before running this.
+-    ///
+-    /// See [`proxmox_apt::update_database`].
+-    #[export]
+-    pub fn update_database(apt_state_file: &str, options: APTUpdateOptions) -> Result<(), Error> {
+-        proxmox_apt::update_database(
+-            apt_state_file,
+-            &options,
+-            |updates: &[&APTUpdateInfo]| -> Result<(), Error> {
+-                // fixme: howto send notifgications?
+-                crate::send_updates_available(updates)?;
+-                Ok(())
+-            },
+-        )
+-    }
+-
+-    /// Get package information for a list of important product packages.
+-    ///
+-    /// See [`proxmox_apt::get_package_versions`].
+-    #[export]
+-    pub fn get_package_versions(
+-        product_virtual_package: &str,
+-        api_server_package: &str,
+-        running_api_server_version: &str,
+-        package_list: Vec<&str>,
+-    ) -> Result<Vec<APTUpdateInfo>, Error> {
+-        proxmox_apt::get_package_versions(
+-            product_virtual_package,
+-            api_server_package,
+-            running_api_server_version,
+-            &package_list,
+-        )
+-    }
++    // FenrirOS: list_available_apt_update, update_database and
++    // get_package_versions need APT's package cache (libapt-pkg through
++    // proxmox-apt's "cache" feature), which FenrirOS does not have; they are
++    // left out. pve-manager's updates API uses apk there instead.
+ }

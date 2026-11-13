@@ -1,0 +1,21 @@
+# needed by: python-pywebview (libera-suite).
+# Built from the sdist offline with pip (--no-build-isolation): the build
+# backend (setuptools) comes from hostdeps.
+name = "python-proxy-tools"
+version = "0.1.0"
+release = 1
+summary = "Proxy (delegate) objects for Python"
+license = "MIT"
+homepage = "https://github.com/jtushman/proxy_tools"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/f2/cf/77d3e19b7fabd03895caca7857ef51e4c409e0ca6b37ee6e9f7daa50b642/proxy_tools-0.1.0.tar.gz", sha256 = "ccb3751f529c047e2d8a58440d86b205303cf0fe8146f784d1cbcd94f0a28010" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

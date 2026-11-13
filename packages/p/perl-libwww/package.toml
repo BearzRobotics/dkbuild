@@ -1,0 +1,26 @@
+# libwww-perl 6.83 from CPAN: The World-Wide Web library for Perl.
+# Packaged for Proxmox VE (pve-common: downloads). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-libwww"
+version = "6.83"
+release = 1
+summary = "The World-Wide Web library for Perl"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/libwww-perl"
+hostdeps = ["perl"]
+builddeps = ["perl", "perl-encode-locale", "perl-file-listing", "perl-html-parser", "perl-http-cookies", "perl-http-date", "perl-http-message", "perl-http-negotiate", "perl-lwp-mediatypes", "perl-net-http", "perl-try-tiny", "perl-uri", "perl-www-robotrules"]
+rundeps = ["perl-encode-locale", "perl-file-listing", "perl-html-parser", "perl-http-cookies", "perl-http-date", "perl-http-message", "perl-http-negotiate", "perl-lwp-mediatypes", "perl-net-http", "perl-try-tiny", "perl-uri", "perl-www-robotrules"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/libwww-perl-6.83.tar.gz", sha256 = "e75f0fa9d3c6f0daf5a5a72fa9f8b1c9c0d23e3a84a8522ccb4f835232b95505" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

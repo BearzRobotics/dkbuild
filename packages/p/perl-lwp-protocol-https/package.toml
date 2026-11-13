@@ -1,0 +1,26 @@
+# LWP-Protocol-https 6.17 from CPAN: Provide https support for LWP::UserAgent.
+# Packaged for Proxmox VE (pve-common: HTTPS downloads). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-lwp-protocol-https"
+version = "6.17"
+release = 1
+summary = "Provide https support for LWP::UserAgent"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/LWP-Protocol-https"
+hostdeps = ["perl"]
+builddeps = ["perl", "perl-io-socket-ssl", "perl-libwww", "perl-net-http"]
+rundeps = ["perl-io-socket-ssl", "perl-libwww", "perl-net-http"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/LWP-Protocol-https-6.17.tar.gz", sha256 = "361c7c1eee8cf66812958f975f26ef2e2272a0c6221d2043477cb9c22b8d1c23" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

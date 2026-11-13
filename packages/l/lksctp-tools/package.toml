@@ -1,0 +1,31 @@
+# lksctp-tools: the userspace side of the kernel's SCTP (libsctp, the
+# <netinet/sctp.h> header, checksctp/sctp_darn/sctp_test/withsctp). Written for
+# kronosnet's SCTP transport. Shared and static libsctp.
+# The GitHub archive has no configure script: autoreconf (as Alpine does).
+name = "lksctp-tools"
+version = "1.0.21"
+release = 1
+summary = "Userspace library and tools for Linux kernel SCTP"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://github.com/sctp/lksctp-tools"
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf"]
+builddeps = ["linux-headers"]
+# The functional tests open SCTP sockets: they need the sctp kernel module,
+# which a build sandbox does not have.
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/sctp/lksctp-tools/archive/v1.0.21.tar.gz", sha256 = "8738bf17ecffbbe2440a6e2ffaf1cbcebb633fc99d63d88761af35c02a571893" },
+]
+
+setup = '''
+autoreconf -fi
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+find "$pkgdir" -name '*.la' -delete
+'''

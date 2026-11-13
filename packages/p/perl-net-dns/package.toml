@@ -1,0 +1,26 @@
+# Net-DNS 1.57 from CPAN: Perl Interface to the Domain Name System.
+# Packaged for Proxmox VE (pve-manager, pve-network). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-net-dns"
+version = "1.57"
+release = 1
+summary = "Perl Interface to the Domain Name System"
+license = "MIT"
+homepage = "https://metacpan.org/dist/Net-DNS"
+hostdeps = ["perl"]
+builddeps = ["perl", "perl-digest-hmac"]
+rundeps = ["perl-digest-hmac"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/N/NL/NLNETLABS/Net-DNS-1.57.tar.gz", sha256 = "7c98de329cb5d6a99abbb03aaad2866cb041092ed9936a7246908e170005b058" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

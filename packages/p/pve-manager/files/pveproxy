@@ -1,0 +1,8 @@
+# pveproxy: Proxmox VE API proxy and web UI (https on port 8006)
+type = bgprocess
+command = /usr/libexec/pve-fenrir/pveproxy-start
+stop-command = /usr/bin/pveproxy stop
+pid-file = /run/pveproxy/pveproxy.pid
+depends-on: pve-cluster
+depends-on: pvedaemon
+waits-for: sshd

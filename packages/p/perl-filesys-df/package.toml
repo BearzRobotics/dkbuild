@@ -1,0 +1,25 @@
+# Filesys-Df 0.92 from CPAN: Perl extension for filesystem disk space information..
+# Packaged for Proxmox VE (pve-common). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-filesys-df"
+version = "0.92"
+release = 1
+summary = "Perl extension for filesystem disk space information."
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/Filesys-Df"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/I/IG/IGUTHRIE/Filesys-Df-0.92.tar.gz", sha256 = "fe89cbb427e0e05f1cd97c2dd6d3866ac6b21bc7a85734ede159bdc35479552a" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

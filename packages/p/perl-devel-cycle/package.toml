@@ -1,0 +1,25 @@
+# Devel-Cycle 1.12 from CPAN: Find memory cycles in objects.
+# Packaged for Proxmox VE (pve-common). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-devel-cycle"
+version = "1.12"
+release = 1
+summary = "Find memory cycles in objects"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/Devel-Cycle"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/L/LD/LDS/Devel-Cycle-1.12.tar.gz", sha256 = "fd3365c4d898b2b2bddbb78a46d507a18cca8490a290199547dab7f1e7390bc2" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

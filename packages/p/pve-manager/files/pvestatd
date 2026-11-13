@@ -1,0 +1,7 @@
+# pvestatd: Proxmox VE status daemon (node, guest and storage statistics, RRD)
+type = bgprocess
+command = /usr/bin/pvestatd start
+stop-command = /usr/bin/pvestatd stop
+pid-file = /run/pvestatd.pid
+depends-on: pve-cluster
+waits-for: rrdcached

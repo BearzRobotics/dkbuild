@@ -1,0 +1,26 @@
+# Alien-Build 2.88 from CPAN: Build external dependencies for use in CPAN.
+# Packaged for Proxmox VE (a dependency of Proxmox VE's Perl stack). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-alien-build"
+version = "2.88"
+release = 1
+summary = "Build external dependencies for use in CPAN"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/Alien-Build"
+hostdeps = ["perl"]
+builddeps = ["perl", "perl-capture-tiny", "perl-ffi-checklib", "perl-file-chdir", "perl-file-which", "perl-path-tiny"]
+rundeps = ["perl-capture-tiny", "perl-ffi-checklib", "perl-file-chdir", "perl-file-which", "perl-path-tiny"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/Alien-Build-2.88.tar.gz", sha256 = "c14346bace2b50cae62f1ee70a907f4c7383fabf90b034272ee52a5b1345fbba" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

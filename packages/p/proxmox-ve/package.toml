@@ -1,0 +1,15 @@
+# Proxmox VE: the whole single-node and cluster stack in one install (as
+# Debian's proxmox-ve meta package): pve-manager with its API, daemons and
+# web UI, qemu-server with Proxmox's QEMU, pve-container with LXC, storage,
+# firewall, SDN, HA, cluster file system and corosync, ZFS and LVM tools.
+# Installed inert; setup: /usr/share/doc/pve-manager/README.FenrirOS.
+name = "proxmox-ve"
+version = "9.2"
+release = 1
+summary = "Proxmox Virtual Environment (meta package)"
+license = "AGPL-3.0-or-later"
+homepage = "https://www.proxmox.com/en/proxmox-virtual-environment"
+options = ["meta"]
+rundeps = ["pve-manager", "qemu-server", "pve-container", "pve-ha-manager", "pve-firewall", "pve-network",
+           "pve-storage", "pve-cluster", "corosync", "pve-qemu", "pve-edk2-firmware", "lxc", "lxcfs",
+           "pve-lxc-syscalld", "zfs", "lvm2", "thin-provisioning-tools", "open-iscsi", "rrdtool"]

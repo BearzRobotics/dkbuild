@@ -1,0 +1,30 @@
+# needed by: libera-suite.
+# pywebview: a native window around a web view, for Python; on Linux its GTK
+# backend (python-gobject, WebKitGTK through GObject introspection; the Qt
+# backend is optional and not pulled in). Built from the sdist offline with
+# pip (--no-build-isolation): setuptools and setuptools-scm from hostdeps
+# (the version comes from the sdist's PKG-INFO).
+# The sdist carries prebuilt Windows and Android binaries (webview/lib:
+# WebView2 DLLs, WebBrowserInterop, pywebview-android.jar), used only on
+# those platforms: removed from the package.
+name = "python-pywebview"
+version = "6.2.1"
+release = 1
+summary = "Build GUI for your Python program with JavaScript, HTML, and CSS"
+license = "BSD-3-Clause"
+homepage = "https://pywebview.flowrl.com"
+hostdeps = ["python", "python-setuptools", "python-setuptools-scm"]
+rundeps = ["python", "python-proxy-tools", "python-bottle", "python-typing-extensions", "python-gobject", "webkitgtk"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/59/4a/05307135dafba67778669d194bd1a3822a7685ec9ee8a6d7e70856c1a551/pywebview-6.2.1.tar.gz", sha256 = "71b7136752e40824655304d938efb62014218d1a90bd8e87e1cbdb1ce9c466af" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+# Windows and Android binaries (see the header)
+rm -rf "$pkgdir"/usr/lib/python3*/site-packages/webview/lib
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pywebview/LICENSE"
+'''

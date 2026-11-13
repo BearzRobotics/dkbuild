@@ -1,0 +1,37 @@
+# libbsd: BSD functions musl does not have (strtonum, arc4random_buf,
+# getpeereid, reallocarray, the <bsd/...> headers), for sndio. Ported from
+# Chimera Linux cports (user/libbsd; BSD-2-Clause, Copyright (c) Chimera
+# Linux contributors): no LTO (cports: LTO drops symbols the <nlist.h>
+# tests need); its gsed wrapper is not needed, FenrirOS's sed is GNU sed.
+name = "libbsd"
+version = "0.12.2"
+release = 1
+summary = "Commonly used BSD functions not implemented by all libcs"
+license = "BSD-3-Clause"
+homepage = "https://libbsd.freedesktop.org"
+hostdeps = ["automake", "autoconf", "libtool", "pkgconf", "make"]
+builddeps = ["libmd-devel", "linux-headers", "musl-bsd-headers"]
+options = ["!lto"]
+
+source = [
+    { url = "https://libbsd.freedesktop.org/releases/libbsd-0.12.2.tar.xz", sha256 = "b88cc9163d0c652aaf39a99991d974ddba1c3a9711db8f1b5838af2a14731014" },
+]
+
+build = '''
+autoreconf -fi
+%configure
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libbsd/COPYING"
+'''
+
+# libbsd-overlay.pc and libbsd.pc require libmd
+[subpackages.devel]
+summary = "Headers and development files"
+paths = ["/usr/include", "/usr/lib/*.so", "/usr/lib/pkgconfig"]
+depends = ["libmd-devel"]

@@ -1,0 +1,48 @@
+# cifs-utils: mount.cifs / mount.smb3 and the helpers for the kernel's SMB
+# client (Proxmox VE's CIFS storage). Everything upstream offers is built:
+# cifs.upcall (Kerberos via Heimdal's krb5/GSSAPI, keyutils), cifs.idmap and the
+# idmapwb plugin (Samba's libwbclient), get/setcifsacl, cifscreds and its PAM
+# module, smbinfo and smb2-quota (Python), man pages (rst2man), libcap-ng.
+# Left out: systemd-specific behaviour (systemd-ask-password); not on FenrirOS.
+# The kernel's request-key callouts for cifs.upcall and cifs.idmap are in
+# /etc/request-key.d (as Debian/Alpine); /etc/cifs-utils/idmap-plugin points at
+# the winbind plugin (Debian sets the same link through alternatives).
+# mount.cifs is not setuid (Alpine makes it so for user mounts from fstab);
+# mounting is root's.
+# musl patches from Alpine's main/cifs-utils, each with a header.
+name = "cifs-utils"
+version = "7.9"
+release = 1
+summary = "Tools for mounting and managing SMB/CIFS shares"
+license = "GPL-3.0-or-later"
+homepage = "https://wiki.samba.org/index.php/LinuxCIFS_utils"
+patches = ["musl-fix-includes.patch", "musl-fix-u_char.patch", "musl-fix-timeval.patch"]
+hostdeps = ["pkgconf", "python-docutils", "python"]
+builddeps = ["heimdal-devel", "keyutils-devel", "talloc-devel", "samba-devel", "libcap-ng-devel", "linux-pam-devel", "linux-headers"]
+rundeps = ["python"]
+
+source = [
+    { url = "https://download.samba.org/pub/linux-cifs/cifs-utils/cifs-utils-7.9.tar.bz2", sha256 = "9f3750f402520b15c2c8eb52fd485df6ea77e5e66fe5e39ce8ac4386c32c0296" },
+]
+
+setup = '''
+ROOTSBINDIR=/usr/sbin %configure \
+    --enable-cifsupcall --enable-cifscreds --enable-cifsidmap --enable-cifsacl \
+    --enable-smbinfo --enable-pythontools --enable-pam --enable-man \
+    --disable-systemd --with-libcap-ng=yes --with-pamdir=/usr/lib/security
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 $pkgfiles/cifs.upcall.conf "$pkgdir/etc/request-key.d/cifs.upcall.conf"
+install -Dm644 $pkgfiles/cifs.idmap.conf "$pkgdir/etc/request-key.d/cifs.idmap.conf"
+install -d "$pkgdir/etc/cifs-utils"
+ln -s /usr/lib/cifs-utils/idmapwb.so "$pkgdir/etc/cifs-utils/idmap-plugin"
+test -f "$pkgdir/usr/lib/cifs-utils/idmapwb.so"
+test -x "$pkgdir/usr/sbin/cifs.upcall"
+'''

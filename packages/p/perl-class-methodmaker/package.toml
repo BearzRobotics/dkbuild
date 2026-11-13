@@ -1,0 +1,25 @@
+# Class-MethodMaker 2.25 from CPAN: a module for creating generic methods.
+# Packaged for Proxmox VE (qemu-server). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-class-methodmaker"
+version = "2.25"
+release = 1
+summary = "a module for creating generic methods"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/Class-MethodMaker"
+hostdeps = ["perl", "perl-module-build-tiny"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/S/SC/SCHWIGON/class-methodmaker/Class-MethodMaker-2.25.tar.gz", sha256 = "70bd3a6595cc40e54a9521eae3247e7d69166e6783ea5faebd59b84537e1b588" },
+]
+
+build = '''
+perl Build.PL --installdirs=vendor
+./Build
+'''
+install = '''
+./Build install --destdir="$pkgdir"
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

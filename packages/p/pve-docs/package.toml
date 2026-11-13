@@ -1,0 +1,53 @@
+# Proxmox VE documentation (Debian: pve-docs and pve-doc-generator, one
+# package here): the admin guide and every chapter and manual page as HTML
+# (/usr/share/pve-docs, served by pveproxy at /pve-docs/ for the web UI's help
+# buttons), the API viewer, the manual pages of all PVE commands and files
+# (/usr/share/man; Debian installs them from each component, which needs the
+# whole stack loaded at build time, while the committed generated/ synopses
+# here need nothing), and the doc generator (asciidoc-pve, link-refs, the
+# makefile fragment) that pve-manager's build uses for OnlineHelpInfo.js.
+# Pinned to the "bump version to 9.2.14" commit (no tags).
+# Left out: the PDF and EPUB editions of the admin guide (they need dblatex
+# and TeX Live, not packaged here; index.html links them, the links are dead),
+# and the MediaWiki importer (it needs MediaWiki::API and a wiki).
+name = "pve-docs"
+version = "9.2.14"
+release = 1
+summary = "Proxmox VE documentation"
+license = "GFDL-1.3-or-later AND AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=pve-docs.git"
+hostdeps = ["perl", "make", "perl-json", "perl-template-toolkit", "asciidoc", "source-highlight", "xmlto",
+            "libxslt", "docbook-xsl", "docbook-xml", "graphviz", "imagemagick", "librsvg", "proxmox-widget-toolkit-dev"]
+rundeps = ["perl", "perl-json", "asciidoc", "source-highlight", "xmlto", "extjs"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/pve-docs.git 74965817a4065492a2c38c67c9c0b9e73c730acd", sha256 = "db124fa1e1c311fb35f0a635e6a3efa1d8fd7247846f27c4dbce905bec30294b" },
+]
+
+environment = '''
+export SOURCE_DATE_EPOCH=1794009600
+MK="DEB_SOURCE=pve-docs DEB_VERSION=$version DEB_VERSION_UPSTREAM=$version GITVERSION=74965817a4065492a2c38c67c9c0b9e73c730acd"
+'''
+setup = '''
+# no dpkg: the version variables are passed to make instead (see environment)
+sed -i 's#^include /usr/share/dpkg/pkg-info.mk#-include /usr/share/dpkg/pkg-info.mk#' Makefile
+# no dblatex/TeX Live: index.html is built without the PDF and EPUB editions
+sed -i -e '/^\tpve-admin-guide\.pdf\s*\\$/d' -e '/^\tpve-admin-guide\.epub\s*\\$/d' Makefile
+if grep -q 'pve-admin-guide\.\(pdf\|epub\)\s*\\$' Makefile; then exit 1; fi
+'''
+build = '''
+make $MK link-refs.json pve-doc-generator.mk asciidoc-pve
+make $MK index.html
+mans=$(printf 'print-man-pages:\n\t@echo $(MANUAL_PAGES)\n' | make $MK -s -f Makefile -f - print-man-pages)
+make $MK $mans
+echo "$mans" > .man-pages
+'''
+install = '''
+make $MK gen-install doc-install DESTDIR="$pkgdir"
+for m in $(cat .man-pages); do
+    s=${m##*.}
+    install -Dm644 "$m" "$pkgdir/usr/share/man/man$s/$m"
+done
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/pve-docs/copyright"
+'''

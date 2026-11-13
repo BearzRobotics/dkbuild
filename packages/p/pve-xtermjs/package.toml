@@ -1,0 +1,28 @@
+# xterm.js as Proxmox VE's web UI uses it (Debian: pve-xtermjs): upstream's
+# prebuilt xterm.js 6.0.0 with the fit and WebGL addons (the npm release files
+# Proxmox commits) and Proxmox's page and glue code, in /usr/share/pve-xtermjs
+# for the shell and console windows. Pinned to the "xterm.js: bump version to
+# 6.0.0-3" commit (no tags).
+name = "pve-xtermjs"
+version = "6.0.0"
+release = 1
+summary = "xterm.js terminal for the Proxmox VE web UI"
+license = "MIT AND AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=pve-xtermjs.git"
+options = ["!check", "!strip"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/pve-xtermjs.git 83a17e9c32aa2e6a795b26f5412ca7256e115e1c", sha256 = "2c43d270f008c8996f9ad5922f60cf326f75795f3abecc679744f2ad5380a824" },
+]
+
+build = '''
+cd xterm.js/src
+sed -e "s/@VERSION@/$version-3/" index.html.tpl.in > index.html.tpl
+sed -e "s/@VERSION@/$version-3/" index.html.hbs.in > index.html.hbs
+rm index.html.tpl.in index.html.hbs.in
+'''
+install = '''
+install -d "$pkgdir/usr/share/pve-xtermjs"
+cp -r xterm.js/src/. "$pkgdir/usr/share/pve-xtermjs/"
+install -Dm644 xterm.js/debian/copyright "$pkgdir/usr/share/licenses/pve-xtermjs/copyright"
+'''

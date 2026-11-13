@@ -1,0 +1,58 @@
+# corosync: the cluster engine (membership, quorum, messaging) under Proxmox VE's
+# pve-cluster, over kronosnet links. Shared and static libraries (libcpg,
+# libcmap, libquorum, libvotequorum, libcfg, libsam, libcorosync_common).
+# Enabled: dbus, monitoring (libstatgrab), watchdog, augeas lens, snmp
+# (corosync-notifyd traps, net-snmp), xmlconf, vqsim (readline), nozzle,
+# PIE/RELRO (secure-build); the distribution's CFLAGS (user-flags); HTML
+# manuals (groff).
+# Left out:
+#  - systemd (no systemd: no sd_notify, no units); dinit services instead.
+#  - --enable-unencrypted / --enable-udpu: corosync 3.2 compiles out unencrypted
+#    links and the legacy udp/udpu transports by default, to keep crafted packets
+#    from unauthenticated hosts away from the parser. Kept that way.
+#  - the Rust bindings: crates for crates.io; nothing installs them.
+# Inert: no corosync.conf and no authkey (the example is in /usr/share/doc), the
+# dinit services in /etc/dinit.d are not enabled; README.FenrirOS says how.
+name = "corosync"
+version = "3.2.0"
+release = 1
+summary = "Cluster engine: membership, messaging and quorum"
+license = "BSD-3-Clause"
+homepage = "https://corosync.github.io/corosync/"
+hostdeps = ["pkgconf", "net-snmp", "groff"]
+builddeps = [
+    "libqb-devel", "kronosnet-devel", "zlib-ng-compat-devel", "dbus-devel",
+    "libstatgrab-devel", "net-snmp-devel", "readline-devel", "linux-headers",
+]
+# The test suite starts corosync with real network sockets.
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/corosync/corosync/releases/download/v3.2.0/corosync-3.2.0.tar.gz", sha256 = "be92a882ec738b17528777d344f54c6784245fb7b9dec20fcd9022adaac12bfe" },
+]
+
+setup = '''
+%configure \
+    --enable-dbus --enable-monitoring --enable-watchdog --enable-augeas \
+    --enable-snmp --enable-xmlconf --enable-vqsim --enable-nozzle \
+    --enable-secure-build --enable-user-flags \
+    --with-initconfigdir=/etc/default --with-logdir=/var/log/cluster
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+find "$pkgdir" -name '*.la' -delete
+# sysvinit scripts (dinit services below instead)
+rm -rf "$pkgdir/etc/init.d"
+# the configuration example is documentation, not a config file
+install -d "$pkgdir/usr/share/doc/corosync"
+mv "$pkgdir/etc/corosync/corosync.conf.example" "$pkgdir/usr/share/doc/corosync/"
+install -Dm644 tools/corosync-notifyd.sysconfig.example "$pkgdir/usr/share/doc/corosync/corosync-notifyd.options.example"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/corosync/README.FenrirOS"
+install -Dm644 $pkgfiles/corosync "$pkgdir/etc/dinit.d/corosync"
+install -Dm644 $pkgfiles/corosync-notifyd "$pkgdir/etc/dinit.d/corosync-notifyd"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/corosync.conf"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/corosync/LICENSE"
+'''

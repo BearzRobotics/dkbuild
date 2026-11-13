@@ -1,0 +1,58 @@
+From Proxmox VE's pve-edk2-firmware (debian/patches, commit f37039e5,
+"bump version to 4.2026.08-1"), unchanged: the SCSI drivers in the TDX
+firmware's measured volume, so TD guests see Proxmox VE's disk controllers.
+
+Description: OvmfPkg/IntelTdx: move the SCSI stack into the CC firmware volume
+ IntelTdxX64.fdf splits the DXE modules into DXEFV, which is measured and
+ used by TD guests, and NCCFV, which is only reachable for non-confidential
+ guests. Upstream keeps the SCSI drivers in NCCFV, which leaves TD guests
+ without any of Proxmox VE's default disk controllers.
+Author: Philipp Giersfeld <philipp.giersfeld@canarybit.eu>
+Author: Anton Iacobaeus <anton.iacobaeus@canarybit.eu>
+Forwarded: no
+Last-Update: 2026-08-26
+
+diff --git a/OvmfPkg/IntelTdx/IntelTdxX64.fdf b/OvmfPkg/IntelTdx/IntelTdxX64.fdf
+index 53f2b51f62..d896cbdb62 100644
+--- a/OvmfPkg/IntelTdx/IntelTdxX64.fdf
++++ b/OvmfPkg/IntelTdx/IntelTdxX64.fdf
+@@ -209,6 +209,9 @@ INF  PcAtChipsetPkg/PcatRealTimeClockRuntimeDxe/PcatRealTimeClockRuntimeDxe.inf
+ INF  OvmfPkg/VirtioPciDeviceDxe/VirtioPciDeviceDxe.inf
+ INF  OvmfPkg/Virtio10Dxe/Virtio10.inf
+ INF  OvmfPkg/VirtioBlkDxe/VirtioBlk.inf
++INF  OvmfPkg/VirtioScsiDxe/VirtioScsi.inf
++
++!include OvmfPkg/Include/Fdf/OvmfOptHw.fdf.inc
+ 
+ !if $(SECURE_BOOT_ENABLE) == TRUE
+   INF  SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
+@@ -226,6 +229,8 @@ INF  MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
+ INF  MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf
+ INF  MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
+ INF  MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
++INF  MdeModulePkg/Bus/Scsi/ScsiBusDxe/ScsiBusDxe.inf
++INF  MdeModulePkg/Bus/Scsi/ScsiDiskDxe/ScsiDiskDxe.inf
+ INF  MdeModulePkg/Bus/Pci/SataControllerDxe/SataControllerDxe.inf
+ INF  MdeModulePkg/Bus/Ata/AtaAtapiPassThru/AtaAtapiPassThru.inf
+ INF  MdeModulePkg/Bus/Ata/AtaBusDxe/AtaBusDxe.inf
+@@ -297,12 +302,9 @@ READ_LOCK_STATUS   = TRUE
+ # DXE Phase modules
+ #
+ INF  MdeModulePkg/Universal/EbcDxe/EbcDxe.inf
+-INF  OvmfPkg/VirtioScsiDxe/VirtioScsi.inf
+ INF  MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf
+ INF  MdeModulePkg/Universal/DriverHealthManagerDxe/DriverHealthManagerDxe.inf
+ INF  MdeModulePkg/Universal/Disk/RamDiskDxe/RamDiskDxe.inf
+-INF  MdeModulePkg/Bus/Scsi/ScsiBusDxe/ScsiBusDxe.inf
+-INF  MdeModulePkg/Bus/Scsi/ScsiDiskDxe/ScsiDiskDxe.inf
+ INF  MdeModulePkg/Bus/Isa/Ps2KeyboardDxe/Ps2KeyboardDxe.inf
+ INF  MdeModulePkg/Universal/Acpi/S3SaveStateDxe/S3SaveStateDxe.inf
+ INF  MdeModulePkg/Universal/Acpi/BootScriptExecutorDxe/BootScriptExecutorDxe.inf
+@@ -331,7 +333,6 @@ INF  OvmfPkg/VirtioGpuDxe/VirtioGpu.inf
+ 
+ !include OvmfPkg/Include/Fdf/ShellDxe.fdf.inc
+ !include OvmfPkg/Include/Fdf/OvmfRngDxe.fdf.inc
+-!include OvmfPkg/Include/Fdf/OvmfOptHw.fdf.inc
+ 
+ ################################################################################
+ 

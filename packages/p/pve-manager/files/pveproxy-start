@@ -1,0 +1,7 @@
+#!/bin/sh
+# Start pveproxy as Debian's unit does: make or refresh the node's
+# certificates first (pvecm updatecerts; on the first start this creates the
+# node's self-signed certificate and keys in /etc/pve), then the daemon.
+/usr/bin/pvecm updatecerts --silent || true
+[ -e /var/log/pveam.log ] || /usr/bin/pveupdate || true
+exec /usr/bin/pveproxy start

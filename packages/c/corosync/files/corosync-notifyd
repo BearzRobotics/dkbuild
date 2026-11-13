@@ -1,0 +1,6 @@
+# corosync-notifyd: sends corosync events as D-Bus signals (upstream's default
+# options, -d). For SNMP traps add "-s -m <manager address>" (and -l to log
+# events to syslog). Shipped, not enabled.
+type = process
+command = /usr/sbin/corosync-notifyd -f -d
+depends-on: corosync

@@ -1,0 +1,68 @@
+# Proxmox VE container manager (Debian: pve-container): pct, the PVE::LXC
+# Perl modules and API, LXC hooks and configuration for Proxmox containers,
+# vzdump's LXC plugin. Runs containers with the tree's LXC.
+# Pinned to the "bump version to 6.1.20" commit (Proxmox repositories have no tags).
+# FenrirOS: the systemd template units become dinit templates
+# pve-container@ and pve-container-debug@ (shipped, not enabled; pct starts
+# pve-container@<vmid> through pve-common's systemctl stand-in). The sysctl
+# limits Debian applies (inotify, keys, neighbour tables) and the AppArmor
+# profile for mount hotplug are samples in /usr/share/doc/pve-container
+# (FenrirOS's LXC is built without AppArmor).
+# Proxmox builds containers on its fork lxc-pve; this uses upstream LXC, see
+# wip/proxmox/NOTES.md for what that may lack.
+# Left out: man pages and shell completions (pve-docs' generator and the PVE
+# stack at build time). Not packaged yet: proxmox-termproxy (the xterm.js
+# console), proxmox-backup-client (PBS backups); see NOTES.md.
+name = "pve-container"
+version = "6.1.20"
+release = 1
+summary = "Proxmox VE container manager"
+license = "AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=pve-container.git"
+hostdeps = ["perl", "make"]
+builddeps = ["lxc"]
+rundeps = ["perl", "pve-common", "pve-cluster", "pve-access-control", "pve-guest-common", "pve-network",
+           "pve-rs", "pve-storage", "pve-firewall", "pve-ha-manager", "pve-lxc-syscalld", "lxc", "lxcfs",
+           "dtach", "binutils", "file", "xz", "dhcpcd"]
+options = ["!check"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/pve-container.git 15eb5c70bb55bade872f4e794ab3c68ed86b404a", sha256 = "77a098f357678696f170403702e01066351a233ce2f73513c2e5be83eee8a8b0" },
+]
+
+setup = '''
+# FenrirOS: no systemctl; point every call at pve-common's dinit stand-in
+# (the stop wrapper execs it by name: exec {'systemctl'} 'systemctl', ...)
+grep -rlE "systemctl" src/PVE src/pve-container-stop-wrapper | xargs -r sed -i -E \
+    -e "s#(['\"])(/usr)?(/bin/)?systemctl(['\" ])#\1/usr/libexec/pve-fenrir/systemctl\4#g" \
+    -e "s#\{'systemctl'\}#{'/usr/libexec/pve-fenrir/systemctl'}#g"
+# FenrirOS's iproute2 installs ip, bridge and tc in /usr/bin (no /sbin copies)
+grep -rlE "/sbin/(ip|bridge|tc)['\" ]" src | xargs -r sed -i -E \
+    -e "s#/sbin/(ip|bridge|tc)(['\" ])#/usr/bin/\1\2#g"
+'''
+build = '''
+# the seccomp policy for unprivileged containers: LXC's, plus keyctl -> ENOSYS
+cp /usr/share/lxc/config/common.seccomp src/pve-userns.seccomp
+echo 'keyctl errno 38' >> src/pve-userns.seccomp
+'''
+install = '''
+vendorlib=$(perl -MConfig -e 'print $Config{vendorlib}')
+cd src
+make -C PVE install PERLDIR="$pkgdir$vendorlib"
+install -Dm755 pct "$pkgdir/usr/sbin/pct"
+l="$pkgdir/usr/share/lxc"
+install -Dm755 lxcnetaddbr "$l/lxcnetaddbr"
+install -Dm755 pve-container-stop-wrapper "$l/pve-container-stop-wrapper"
+for h in lxc-pve-prestart-hook lxc-pve-autodev-hook lxc-pve-poststop-hook; do
+    install -Dm755 $h "$l/hooks/$h"
+done
+install -Dm644 pve-userns.seccomp "$l/config/pve-userns.seccomp"
+install -Dm644 lxc-pve.conf "$l/config/common.conf.d/01-pve.conf"
+install -Dm644 lxc-pve-userns.conf "$l/config/userns.conf.d/01-pve.conf"
+install -Dm644 10-pve-ct-inotify-limits.conf "$pkgdir/usr/share/doc/pve-container/10-pve-ct-inotify-limits.conf"
+install -Dm644 pve-container-mounthotplug "$pkgdir/usr/share/doc/pve-container/apparmor/pve-container-mounthotplug"
+cd ..
+install -Dm644 $pkgfiles/pve-container@ "$pkgdir/etc/dinit.d/pve-container@"
+install -Dm644 $pkgfiles/pve-container-debug@ "$pkgdir/etc/dinit.d/pve-container-debug@"
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/pve-container/copyright"
+'''

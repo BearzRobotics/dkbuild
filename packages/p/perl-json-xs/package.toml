@@ -1,0 +1,26 @@
+# JSON-XS 4.04 from CPAN: JSON serialising/deserialising, done correctly and fast.
+# Packaged for Proxmox VE (pve-common (fast JSON)). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-json-xs"
+version = "4.04"
+release = 1
+summary = "JSON serialising/deserialising, done correctly and fast"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/JSON-XS"
+hostdeps = ["perl", "perl-canary-stability"]
+builddeps = ["perl", "perl-common-sense", "perl-types-serialiser"]
+rundeps = ["perl-common-sense", "perl-types-serialiser"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/M/ML/MLEHMANN/JSON-XS-4.04.tar.gz", sha256 = "8eff1e9f304c5625b59ab7b42258415f6d3e3681c1ddab6b725518a018a7f5e0" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

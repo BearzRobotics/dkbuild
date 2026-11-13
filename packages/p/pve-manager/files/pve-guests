@@ -1,0 +1,10 @@
+# pve-guests: start the guests marked "start at boot", stop all guests at shutdown
+type = scripted
+command = /usr/libexec/pve-fenrir/pve-guests start
+stop-command = /usr/libexec/pve-fenrir/pve-guests stop
+depends-on: pveproxy
+depends-on: pvestatd
+waits-for: spiceproxy
+waits-for: pve-firewall
+waits-for: pve-ha-lrm
+waits-for: pve-ha-crm

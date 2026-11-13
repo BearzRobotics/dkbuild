@@ -1,0 +1,9 @@
+# pve-ha-crm: Proxmox VE cluster HA resource manager
+type = bgprocess
+command = /usr/sbin/pve-ha-crm start
+stop-command = /usr/sbin/pve-ha-crm stop
+pid-file = /run/pve-ha-crm.pid
+depends-on: pve-cluster
+depends-on: watchdog-mux
+waits-for: corosync
+waits-for: pvedaemon

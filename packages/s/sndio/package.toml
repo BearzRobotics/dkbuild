@@ -1,0 +1,34 @@
+# sndio: OpenBSD's audio and MIDI framework (libsndio, the sndiod server,
+# aucat, midicat, sndioctl), with its ALSA backend. QEMU's sndio audio driver
+# (pve-qemu, as Proxmox VE enables it) links libsndio. No cports template;
+# written for FenrirOS. The sndiod service is shipped but not enabled; sndiod
+# drops privileges to the "sndiod" user (made by sysusers.d).
+# libbsd: sndio's Linux build uses it for strtonum, arc4random_buf,
+# getpeereid and reallocarray, which musl does not have.
+name = "sndio"
+version = "1.11.0"
+release = 1
+summary = "Small audio and MIDI framework from OpenBSD"
+license = "ISC"
+homepage = "https://sndio.org"
+hostdeps = ["pkgconf", "make"]
+builddeps = ["alsa-lib-devel", "libbsd-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://sndio.org/sndio-1.11.0.tar.gz", sha256 = "3e274b5968aa863090d6c6857d7df4f432cd0bafbe4d27312bdca34726eff1e8" },
+]
+
+build = '''
+# not autoconf: its own script, which takes only these options
+./configure --prefix=/usr --mandir=/usr/share/man --enable-alsa \
+    --enable-dynamic --enable-static --privsep-user=sndiod \
+    CC="$CC" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" AR=llvm-ar
+%make
+'''
+install = '''
+%make_install
+install -Dm644 $pkgfiles/sndiod "$pkgdir/etc/dinit.d/sndiod"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/sndio.conf"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/sndio/LICENSE"
+'''

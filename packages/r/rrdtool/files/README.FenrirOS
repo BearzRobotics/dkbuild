@@ -1,0 +1,20 @@
+rrdcached on FenrirOS
+=====================
+
+rrdtool ships rrdcached with a dinit service, /etc/dinit.d/rrdcached, that
+is not enabled. It uses Debian's layout, which Proxmox VE (pmxcfs,
+pvestatd) expects:
+
+  databases  /var/lib/rrdcached/db       (created by tmpfiles.d)
+  journal    /var/lib/rrdcached/journal  (created by tmpfiles.d)
+  socket     /var/run/rrdcached.sock     (mode 0660, owner root)
+
+It runs as root and listens only on the local socket (no network
+listener). Start it, and enable it at boot if wanted:
+
+  dinitctl start rrdcached
+  dinitctl enable rrdcached
+
+To change the options (write delay -w, jitter -z, a network listener -L,
+another user), edit the command line in /etc/dinit.d/rrdcached; see
+rrdcached(1).

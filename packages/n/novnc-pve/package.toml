@@ -1,0 +1,47 @@
+# noVNC as Proxmox VE's web UI uses it (Debian: novnc-pve): the noVNC
+# submodule with Proxmox's patches (debian/patches: PVE integration, styling,
+# commands), bundled with esbuild into app.js, installed in
+# /usr/share/novnc-pve for pveproxy's VNC console.
+# Pinned to the "bump version to 1.7.0-2" commit (no tags).
+name = "novnc-pve"
+version = "1.7.0"
+release = 1
+summary = "noVNC HTML5 VNC client, as integrated in Proxmox VE"
+license = "MPL-2.0 AND BSD-2-Clause AND OFL-1.1 AND MIT"
+homepage = "https://git.proxmox.com/?p=novnc-pve.git"
+hostdeps = ["esbuild"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/novnc-pve.git 10ddb6126aa4991e55d1ad7652b2b011254f5a36", sha256 = "e4c30e56791d4cac0f08f6b28a1b68b8a4670d3c943628ec24facb71cc2ea47f" },
+]
+
+setup = '''
+# Proxmox's changes to noVNC (debian/patches, quilt series), as its build applies them
+cd novnc
+while read -r p; do
+    case $p in ''|'#'*) continue ;; esac
+    patch -p1 < "../debian/patches/$p"
+done < ../debian/patches/series
+'''
+build = '''
+cd novnc
+esbuild --bundle --format=esm app/ui.js > app.js
+# the page templates pveproxy fills in (as debian/rules makes them)
+cp vnc.html index.html.tpl
+sed -i -re "s/\.(css|js)/\.\1?ver=$version-2/g" index.html.tpl
+cp index.html.tpl index.html.hbs
+sed -i -re 's/\[% nodename %\]/{{ NodeName }}/g' index.html.hbs
+sed -i -re 's/\[% username %\]/{{ UserName }}/g' index.html.hbs
+sed -i -re 's/\[% token %\]/{{ CSRFPreventionToken }}/g' index.html.hbs
+echo "{ \"version\": \"$version-2\" }" > package.json
+'''
+install = '''
+d="$pkgdir/usr/share/novnc-pve"
+install -d "$d/app"
+cd novnc
+cp -r app/images app/locale app/sounds app/styles app/error-handler.js "$d/app/"
+cp -r app.js package.json docs index.html.tpl index.html.hbs "$d/"
+cd ..
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/novnc-pve/copyright"
+'''

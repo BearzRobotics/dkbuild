@@ -1,0 +1,25 @@
+# Convert-ASN1 0.36 from CPAN: Convert between perl data structures and ASN.1 encoded packets.
+# Packaged for Proxmox VE (a dependency of Proxmox VE's Perl stack). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-convert-asn1"
+version = "0.36"
+release = 1
+summary = "Convert between perl data structures and ASN.1 encoded packets"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/Convert-ASN1"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/T/TI/TIMLEGGE/Convert-ASN1-0.36.tar.gz", sha256 = "50439aedff4b403f24c9373eefd3c25770e33a9190d93a331e7a744f8b4e7cd3" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

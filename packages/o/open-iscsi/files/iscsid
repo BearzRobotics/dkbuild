@@ -1,0 +1,6 @@
+# iscsid: the open-iscsi initiator daemon. Shipped, not enabled
+# (see /usr/share/doc/open-iscsi/README.FenrirOS).
+type = process
+command = /usr/sbin/iscsid -f
+depends-on: iscsid-initiatorname
+depends-on: rcboot

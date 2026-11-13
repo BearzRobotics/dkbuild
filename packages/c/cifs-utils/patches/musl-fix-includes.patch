@@ -1,0 +1,15 @@
+mount.h uses _PATH_MOUNTED without including <paths.h>; glibc pulls it in
+through other headers, musl does not. From Alpine's main/cifs-utils
+(musl-fix-includes.patch).
+
+--- cifs-utils-6.2.orig/mount.h
++++ cifs-utils-6.2/mount.h
+@@ -20,6 +20,8 @@
+ #ifndef _MOUNT_H_
+ #define _MOUNT_H_
+ 
++#include <paths.h>
++
+ /* exit status - bits below are ORed */
+ #define EX_USAGE	1	/* incorrect invocation or permission */
+ #define EX_SYSERR	2	/* out of memory, cannot fork, ... */

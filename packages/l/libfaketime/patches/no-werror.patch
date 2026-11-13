@@ -1,0 +1,15 @@
+Build without -Werror: the Makefile turns every warning into an error, so a
+warning a newer clang (or musl's headers) adds would stop the build. The
+warnings stay on. Same change as Alpine's no-werror.patch (community/libfaketime).
+
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -136,7 +136,7 @@
+ endif
+ export COMPILER
+ 
+-CFLAGS += -std=gnu99 -Wall -Wextra -Werror -DFAKE_PTHREAD -DFAKE_STAT -DFAKE_UTIME -DFAKE_SLEEP -DFAKE_TIMERS -DFAKE_INTERNAL_CALLS -fPIC -DPREFIX='"'$(PREFIX)'"' -DLIBDIRNAME='"'$(LIBDIRNAME)'"' $(FAKETIME_COMPILE_CFLAGS)
++CFLAGS += -std=gnu99 -Wall -Wextra -DFAKE_PTHREAD -DFAKE_STAT -DFAKE_UTIME -DFAKE_SLEEP -DFAKE_TIMERS -DFAKE_INTERNAL_CALLS -fPIC -DPREFIX='"'$(PREFIX)'"' -DLIBDIRNAME='"'$(LIBDIRNAME)'"' $(FAKETIME_COMPILE_CFLAGS)
+ 
+ ifeq ($(COMPILER),clang)
+ CFLAGS += -Wno-tautological-pointer-compare

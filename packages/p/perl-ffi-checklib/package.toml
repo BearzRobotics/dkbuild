@@ -1,0 +1,26 @@
+# FFI-CheckLib 0.31 from CPAN: Check that a library is available for FFI.
+# Packaged for Proxmox VE (a dependency of Proxmox VE's Perl stack). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-ffi-checklib"
+version = "0.31"
+release = 1
+summary = "Check that a library is available for FFI"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/FFI-CheckLib"
+hostdeps = ["perl"]
+builddeps = ["perl", "perl-file-which"]
+rundeps = ["perl-file-which"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/FFI-CheckLib-0.31.tar.gz", sha256 = "04d885fc377d44896e5ea1c4ec310f979bb04f2f18658a7e7a4d509f7e80bb80" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

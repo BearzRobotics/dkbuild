@@ -1,0 +1,115 @@
+# Proxmox VE manager (Debian: pve-manager): the REST API (PVE::API2), the
+# daemons pvedaemon, pveproxy (web UI on https port 8006), pvestatd,
+# spiceproxy and pvescheduler, the ExtJS web UI (pvemanagerlib.js), vzdump,
+# pvesh, pveam, pvesr, pvenode, pveceph and the notification templates.
+# Pinned to the "bump version to 9.2.27" commit (Proxmox repositories have no tags).
+# FenrirOS changes:
+# - updates through apk: PVE::API2::APT is replaced by files/APT.pm (apk list
+#   --upgradable, apk update, apk versions); patch 0001 drops the APT
+#   "Repositories" panel and status and makes pveupgrade run apk upgrade;
+#   pve8to9 (a Debian release upgrade checker) is not installed;
+# - the node's System Log reads /var/log/messages through
+#   files/mini-journalreader (no systemd journal);
+# - dinit services for the daemons, pve-guests (start/stop guests at boot and
+#   shutdown), pvebanner, pve-firewall-commit and pve-sdn-commit (shipped,
+#   none enabled); pveproxy's start runs pvecm updatecerts first, as Debian's
+#   unit does; systemctl calls go to pve-common's stand-in;
+# - vzdump's plugin path is Perl's vendor directory.
+# Installed inert: no service enabled, no cluster, no certificates or keys
+# (pveproxy's first start creates them), no root@pam password; the daily
+# update (Debian's timer) is an example cron file, vzdump.conf, the log
+# rotation, the module blacklist and the VF-pinning udev rules are samples in
+# /usr/share/doc/pve-manager. Setup: /usr/share/doc/pve-manager/README.FenrirOS.
+# Left out: Debian-only files (APT sources, initramfs-tools and
+# systemd-networkd configuration, ifupdown hooks: no ifupdown2 here), the
+# Yew mobile UI (not packaged), man pages and shell completions (pve-docs
+# ships the man pages; completions need the stack at build time). The
+# appliance index's signing keys are merged with gpg instead of sq (Sequoia,
+# not packaged): the same keys in one binary keyring.
+name = "pve-manager"
+version = "9.2.27"
+release = 1
+summary = "Proxmox VE manager: API, daemons and web UI"
+license = "AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=pve-manager.git"
+patches = ["0001-fenrir-apk-updates.patch"]
+hostdeps = ["perl", "make", "pve-docs", "proxmox-widget-toolkit", "gnupg"]
+rundeps = ["perl", "pve-common", "pve-cluster", "pve-access-control", "pve-storage", "pve-guest-common",
+           "pve-http-server", "pve-network", "pve-firewall", "pve-ha-manager", "qemu-server", "pve-container",
+           "pve-rs", "pve-rs-common", "proxmox-acme", "proxmox-acme-plugins", "proxmox-widget-toolkit",
+           "proxmox-i18n", "pve-docs", "extjs", "qrcodejs", "fonts-font-awesome", "fonts-font-logos",
+           "novnc-pve", "pve-xtermjs", "proxmox-termproxy",
+           "perl-crypt-openssl-bignum", "perl-file-readbackwards", "perl-net-dns", "perl-pod-parser",
+           "perl-template-toolkit", "perl-io-multiplex", "perl-libwww", "perl-term-readline-gnu",
+           "rrdtool-perl", "cdrkit", "gnupg", "corosync", "libfaketime", "openssh", "openssl", "iproute2",
+           "sqlite", "wget", "cstream", "lvm2", "lxc", "rsync", "zstd", "pigz", "util-linux", "apk-tools",
+           "tzdb", "dinit"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/pve-manager.git 9583db5e450078e707c48f518eb85f8409433e40", sha256 = "143dcad8f21653f4923c2a70fbce2a53a78084f5c87d2861b64ea73d9db3b481" },
+]
+
+environment = '''
+MK="VERSION=$version-1 PVERELEASE=9.2 PACKAGE=pve-manager REPOID=9583db5e45007 GITVERSION=9583db5e45007"
+'''
+setup = '''
+vendorlib=$(perl -MConfig -e 'print $Config{vendorlib}')
+# FenrirOS: no systemctl; point every call at pve-common's dinit stand-in
+grep -rlE "systemctl" PVE bin | xargs -r sed -i -E \
+    -e "s#(['\"])(/usr)?(/bin/)?systemctl(['\" ])#\1/usr/libexec/pve-fenrir/systemctl\4#g"
+# FenrirOS's iproute2 installs ip, bridge and tc in /usr/bin (no /sbin copies)
+grep -rlE "/sbin/(ip|bridge|tc)['\" ]" PVE bin | xargs -r sed -i -E \
+    -e "s#/sbin/(ip|bridge|tc)(['\" ])#/usr/bin/\1\2#g"
+# vzdump's plugins live in Perl's vendor directory here
+sed -i "s#\"/usr/share/perl5/\$plug.pm\"#\"$vendorlib/\$plug.pm\"#" PVE/VZDump.pm
+grep -qF "$vendorlib/\$plug.pm" PVE/VZDump.pm
+# no man pages or shell completions here: drop their install lines
+sed -i '/^\tinstall -d $(MAN1DIR)$/,+9d' bin/Makefile
+if grep -qF -e 'CLI_MANS) $(MAN1DIR)' -e 'bash-completion $(BASHCOMPLDIR)' bin/Makefile; then exit 1; fi
+# pve8to9 checks a Debian release upgrade: not installed
+sed -i '/^\tpve8to9 \\$/d' bin/Makefile
+# no biome here: drop the lint stamp pvemanagerlib.js depends on
+sed -i 's/^pvemanagerlib.js: .lint-incremental /pvemanagerlib.js: /' www/manager6/Makefile
+grep -q '^pvemanagerlib.js: OnlineHelpInfo.js' www/manager6/Makefile
+'''
+build = '''
+make -C PVE $MK pvecfg.pm
+make -C www/manager6 $MK pvemanagerlib.js
+# the appliance index's trusted keys as one binary keyring (sq in upstream)
+cd aplinfo
+for k in proxmox-release-bookworm.gpg proxmox-release-trixie.gpg release@turnkeylinux.com.pubkey; do
+    if grep -q -- '-----BEGIN PGP' "$k"; then gpg --dearmor < "$k"; else cat "$k"; fi
+done > trustedkeys.gpg
+'''
+install = '''
+vendorlib=$(perl -MConfig -e 'print $Config{vendorlib}')
+d=/usr/share/doc/pve-manager
+make -C PVE install $MK DESTDIR="$pkgdir" PERLLIBDIR="$pkgdir$vendorlib"
+make -C bin install $MK DESTDIR="$pkgdir" PERLLIBDIR="$pkgdir$vendorlib" \
+    CLI_MANS= SERVICE_MANS= BASH_COMPLETIONS= ZSH_COMPLETIONS=
+make -C www install $MK DESTDIR="$pkgdir"
+make -C templates install DESTDIR="$pkgdir"
+install -Dm644 aplinfo/aplinfo.dat "$pkgdir$d/aplinfo.dat"
+install -Dm644 aplinfo/trustedkeys.gpg "$pkgdir$d/trustedkeys.gpg"
+# FenrirOS: the apk updates API and the syslog reader
+install -Dm644 $pkgfiles/APT.pm "$pkgdir$vendorlib/PVE/API2/APT.pm"
+install -Dm755 $pkgfiles/mini-journalreader "$pkgdir/usr/bin/mini-journalreader"
+for s in pvedaemon pveproxy pvestatd spiceproxy pvescheduler pve-guests pvebanner \
+         pve-firewall-commit pve-sdn-commit; do
+    install -Dm644 "$pkgfiles/$s" "$pkgdir/etc/dinit.d/$s"
+done
+install -Dm755 $pkgfiles/pveproxy-start "$pkgdir/usr/libexec/pve-fenrir/pveproxy-start"
+install -Dm755 $pkgfiles/pve-guests.sh "$pkgdir/usr/libexec/pve-fenrir/pve-guests"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/pve-manager.conf"
+# samples (Debian installs these active)
+install -Dm644 $pkgfiles/pve-daily-update.cron "$pkgdir$d/pve-daily-update.cron"
+for f in vzdump.conf pve.logrotate pve-blacklist.conf virtual-function-pinning.rules \
+         virtual-function-pinning-helper; do
+    install -Dm644 configs/$f "$pkgdir$d/$f"
+done
+install -m644 vzdump-hook-script.pl spice-example-sh "$pkgdir$d/"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir$d/README.FenrirOS"
+install -d "$pkgdir/var/lib/vz/images" "$pkgdir/var/lib/vz/template/cache" "$pkgdir/var/lib/vz/template/iso"
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/pve-manager/copyright"
+'''

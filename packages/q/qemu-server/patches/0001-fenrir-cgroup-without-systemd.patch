@@ -1,0 +1,75 @@
+FenrirOS has no systemd: a running VM's CPU limit and weight are changed by
+writing its scope's cgroup (qemu.slice/<vmid>.scope, created by pve-common's
+FenrirOS PVE::Systemd::enter_systemd_scope) through PVE::CGroup's own
+change_cpu_quota/change_cpu_shares, instead of systemd's SetUnitProperties
+over D-Bus. The quota keeps systemd's CPUQuota meaning (percent of one CPU),
+written as cpu.max per 100 ms period. Written for FenrirOS.
+
+--- a/src/PVE/QemuServer/CGroup.pm
++++ b/src/PVE/QemuServer/CGroup.pm
+@@ -3,9 +3,7 @@
+ use strict;
+ use warnings;
+ 
+-use Net::DBus qw(dbus_uint64 dbus_boolean);
+-
+-use PVE::Systemd;
++use PVE::CGroup;
+ use base('PVE::CGroup');
+ 
+ sub get_subdir {
+@@ -19,45 +17,27 @@
+     return $self->{vmid} . '.scope';
+ }
+ 
+-my sub set_unit_properties : prototype($$) {
+-    my ($self, $properties) = @_;
+-
+-    PVE::Systemd::systemd_call(sub {
+-        my ($if, $reactor, $finish_cb) = @_;
+-        $if->SetUnitProperties($self->scope(), dbus_boolean(1), $properties);
+-        return 1;
+-    });
+-}
++# FenrirOS: no systemd to own the scope; its cgroup (made by
++# PVE::Systemd::enter_systemd_scope) is written directly.
+ 
+ # Update the 'cpulimit' of VM.
+-# Note that this is now the systemd API and we expect a value for `CPUQuota` as
+-# set on VM startup, rather than cgroup values.
++# Like systemd's CPUQuota, $quota is a percentage of one CPU (100 = 1 CPU),
++# undef for no limit: written as cpu.max per 100ms period.
+ sub change_cpu_quota {
+     my ($self, $quota, $period) = @_;
+ 
+     die "period is not controlled for VMs\n" if defined($period);
+ 
+-    $quota = dbus_uint64(defined($quota) ? ($quota * 10_000) : -1);
+-    set_unit_properties($self, [[CPUQuotaPerSecUSec => $quota]]);
+-
+-    return;
++    return $self->SUPER::change_cpu_quota(
++        defined($quota) ? int($quota * 1000) : undef, 100_000,
++    );
+ }
+ 
+-# Update the 'cpuunits' of a VM.
+-# Note that this is now the systemd API and we expect a value for `CPUQuota` as
+-# set on VM startup, rather than cgroup values.
++# Update the 'cpuunits' of a VM: cpu.weight (cgroup v2) or cpu.shares (v1).
+ sub change_cpu_shares {
+     my ($self, $shares) = @_;
+ 
+-    $shares //= -1;
+-
+-    if (PVE::CGroup::cgroup_mode() == 2) {
+-        set_unit_properties($self, [[CPUWeight => dbus_uint64($shares)]]);
+-    } else {
+-        set_unit_properties($self, [[CPUShares => dbus_uint64($shares)]]);
+-    }
+-
+-    return;
++    return $self->SUPER::change_cpu_shares($shares);
+ }
+ 
+ 1;

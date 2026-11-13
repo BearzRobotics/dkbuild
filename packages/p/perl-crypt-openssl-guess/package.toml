@@ -1,0 +1,25 @@
+# Crypt-OpenSSL-Guess 0.15 from CPAN: Guess OpenSSL include path.
+# Packaged for Proxmox VE (a dependency of Proxmox VE's Perl stack). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-crypt-openssl-guess"
+version = "0.15"
+release = 1
+summary = "Guess OpenSSL include path"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/Crypt-OpenSSL-Guess"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/A/AK/AKIYM/Crypt-OpenSSL-Guess-0.15.tar.gz", sha256 = "1c5033381819fdb4c9087dd291b90ec70e7810d31d57eade9b388eccfd70386d" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

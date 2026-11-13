@@ -1,0 +1,7 @@
+# sndiod: the sndio audio and MIDI server. Not enabled by default; programs
+# using libsndio play through ALSA directly when no server runs.
+# Enable with: dinitctl enable sndiod
+type = process
+command = /usr/bin/sndiod -d
+logfile = /var/log/sndiod.log
+depends-on: rcboot

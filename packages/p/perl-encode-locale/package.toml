@@ -1,0 +1,25 @@
+# Encode-Locale 1.05 from CPAN: Determine the locale encoding.
+# Packaged for Proxmox VE (pve-common, HTTP::Message). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-encode-locale"
+version = "1.05"
+release = 1
+summary = "Determine the locale encoding"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/Encode-Locale"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/G/GA/GAAS/Encode-Locale-1.05.tar.gz", sha256 = "176fa02771f542a4efb1dbc2a4c928e8f4391bf4078473bd6040d8f11adb0ec1" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

@@ -1,0 +1,25 @@
+# Net-IP 1.26 from CPAN: Perl extension for manipulating IPv4/IPv6 addresses.
+# Packaged for Proxmox VE (pve-common, pve-firewall). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-net-ip"
+version = "1.26"
+release = 1
+summary = "Perl extension for manipulating IPv4/IPv6 addresses"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/Net-IP"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/M/MA/MANU/Net-IP-1.26.tar.gz", sha256 = "040f16f3066647d761b724a3b70754d28cbd1e6fe5ea01c63ed1cd857117d639" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

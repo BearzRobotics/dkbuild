@@ -1,0 +1,26 @@
+# HTTP-Daemon 6.17 from CPAN: A simple http server class.
+# Packaged for Proxmox VE (pve-http-server). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-http-daemon"
+version = "6.17"
+release = 1
+summary = "A simple http server class"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/HTTP-Daemon"
+hostdeps = ["perl", "perl-module-build-tiny"]
+builddeps = ["perl", "perl-http-date", "perl-http-message", "perl-lwp-mediatypes"]
+rundeps = ["perl-http-date", "perl-http-message", "perl-lwp-mediatypes"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/HTTP-Daemon-6.17.tar.gz", sha256 = "16281580c40e23108d028434698b5d7d53637bf904c9df822481e253cbec920c" },
+]
+
+build = '''
+perl Build.PL --installdirs=vendor
+./Build
+'''
+install = '''
+./Build install --destdir="$pkgdir"
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

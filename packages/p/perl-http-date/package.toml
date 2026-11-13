@@ -1,0 +1,26 @@
+# HTTP-Date 6.08 from CPAN: HTTP::Date - date conversion routines.
+# Packaged for Proxmox VE (pve-http-server). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-http-date"
+version = "6.08"
+release = 1
+summary = "HTTP::Date - date conversion routines"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/HTTP-Date"
+hostdeps = ["perl"]
+builddeps = ["perl", "perl-timedate"]
+rundeps = ["perl-timedate"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/HTTP-Date-6.08.tar.gz", sha256 = "b57d80ca6d821c6949ca48b27467d45aba7a9c77346562306facca781a003e44" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

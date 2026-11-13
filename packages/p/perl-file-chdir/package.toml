@@ -1,0 +1,25 @@
+# File-chdir 0.1011 from CPAN: a more sensible way to change directories.
+# Packaged for Proxmox VE (pve-storage). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-file-chdir"
+version = "0.1011"
+release = 1
+summary = "a more sensible way to change directories"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/File-chdir"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN/File-chdir-0.1011.tar.gz", sha256 = "31ebf912df48d5d681def74b9880d78b1f3aca4351a0ed1fe3570b8e03af6c79" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

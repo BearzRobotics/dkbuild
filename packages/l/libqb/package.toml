@@ -1,0 +1,36 @@
+# libqb: ClusterLabs' library for logging, tracing, IPC and polling, used by
+# corosync and kronosnet (Proxmox VE's cluster stack). Shared and static
+# libraries; man pages made with doxygen and libqb's own doxygen2man, which is
+# installed too (kronosnet and corosync use it for their man pages).
+# Not used: the systemd journal (no systemd; logs go to syslog).
+# IPC sockets in /run (the default is /var/run).
+name = "libqb"
+version = "2.0.10"
+release = 1
+summary = "Library for high-performance logging, tracing, IPC and polling"
+license = "LGPL-2.1-or-later"
+homepage = "https://clusterlabs.github.io/libqb/"
+hostdeps = ["pkgconf", "doxygen"]
+builddeps = ["libxml2-devel", "linux-headers"]
+checkdeps = ["check-devel", "glib-devel"]
+# The test suite exercises shared-memory IPC and runs for a long time with
+# timeouts that a loaded build machine misses.
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/ClusterLabs/libqb/releases/download/v2.0.10/libqb-2.0.10.tar.xz", sha256 = "326a69fb5b2ee4479f0db4f98d10d670ad0798b5ded8c4cfd585b765fd8941e8" },
+]
+
+setup = '''
+%configure --with-socket-dir=/run
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+rm -f "$pkgdir"/usr/lib/*.la
+'''

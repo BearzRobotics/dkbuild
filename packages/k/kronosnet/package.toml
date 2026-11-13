@@ -1,0 +1,46 @@
+# kronosnet: libknet, the network abstraction layer corosync 3 uses for its
+# cluster links, and libnozzle (tun/tap management). Shared and static libraries.
+# Everything upstream offers is built (as its NOTES_TO_PACKAGE_MAINTAINERS asks):
+# the SCTP transport (lksctp-tools), the crypto plugins (nss, openssl) and the
+# compression plugins (zlib, lz4, lzo2, lzma, bzip2, zstd). libknet dlopens the
+# plugins from /usr/lib/kronosnet; they all ship in this package.
+# Left out: the Wireshark dissector (opt-in upstream, --enable-wireshark-dissector):
+# it would make the cluster stack's build depend on Wireshark and its Qt.
+# Man pages: doxygen and libqb's doxygen2man.
+name = "kronosnet"
+version = "1.36"
+release = 1
+summary = "Network abstraction layer for high-availability clusters (libknet, libnozzle)"
+license = "LGPL-2.1-or-later AND GPL-2.0-or-later"
+homepage = "https://kronosnet.org/"
+hostdeps = ["pkgconf", "doxygen", "libqb"]
+builddeps = [
+    "libqb-devel", "libxml2-devel", "libnl-devel", "lksctp-tools-devel", "linux-headers",
+    "nss-devel", "nspr-devel", "openssl-devel",
+    "zlib-ng-compat-devel", "lz4-devel", "lzo-devel", "xz-devel", "bzip2-devel", "zstd-devel",
+]
+# The functional tests open real sockets between knet nodes and need SCTP in the
+# kernel; the API tests take a long time.
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/kronosnet/kronosnet/releases/download/v1.36/kronosnet-1.36.tar.xz", sha256 = "3753dfa903fd179eb431ba7e3b2f114149bf346f9012340ea3b8e7bc5595b141" },
+]
+
+setup = '''
+# configure adds -Werror to every compile (DEFAULT_CFLAGS); a new clang warning
+# must not stop the build, so keep -Wall -Wextra and drop only -Werror.
+sed -i 's/^DEFAULT_CFLAGS="-Werror -Wall -Wextra"/DEFAULT_CFLAGS="-Wall -Wextra"/' configure
+grep -q '^DEFAULT_CFLAGS="-Wall -Wextra"' configure
+%configure --enable-libnozzle --enable-libknet-sctp --disable-functional-tests
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+find "$pkgdir" -name '*.la' -delete
+'''

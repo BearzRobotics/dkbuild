@@ -1,0 +1,25 @@
+# UUID 0.40 from CPAN: Universally Unique Identifier library for Perl.
+# Packaged for Proxmox VE (pve-cluster, qemu-server). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-uuid"
+version = "0.40"
+release = 1
+summary = "Universally Unique Identifier library for Perl"
+license = "Artistic-2.0"
+homepage = "https://metacpan.org/dist/UUID"
+hostdeps = ["perl", "perl-devel-checklib"]
+builddeps = ["perl", "util-linux-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/J/JR/JRM/UUID-0.40.tar.gz", sha256 = "acb3a6042f30afd4a96b06654c392514a75f9a1e65636ca7550c697abc7d2fbd" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

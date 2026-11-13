@@ -1,0 +1,25 @@
+# Crypt-OpenSSL-Bignum 0.09 from CPAN: OpenSSL's multiprecision integer arithmetic.
+# Packaged for Proxmox VE (pve-manager, Crypt::OpenSSL::RSA). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-crypt-openssl-bignum"
+version = "0.09"
+release = 1
+summary = "OpenSSL's multiprecision integer arithmetic"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/Crypt-OpenSSL-Bignum"
+hostdeps = ["perl"]
+builddeps = ["perl", "openssl-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/K/KM/KMX/Crypt-OpenSSL-Bignum-0.09.tar.gz", sha256 = "234e72fb8396d45527e6fd45e43759c5c3f3a208cf8f29e6a22161a996fd42dc" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

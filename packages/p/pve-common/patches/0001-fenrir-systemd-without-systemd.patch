@@ -1,0 +1,361 @@
+FenrirOS has no systemd: PVE::Systemd's D-Bus calls are replaced.
+- enter_systemd_scope() creates the cgroup v2 directory <Slice>/<unit>.scope
+  itself (where systemd would, so PVE::CGroup still finds qemu.slice/<vmid>.scope),
+  enables the controllers, sets cpu.weight / cpu.max from CPUWeight, CPUShares
+  and CPUQuota, and moves the calling process in. KillMode, SendSIGKILL,
+  TimeoutStopUSec, After and Before are ignored (no manager owns the scope).
+- wait_for_unit_removed() waits until the scope's cgroup is empty and removes it.
+- is_unit_active() checks a scope's cgroup, or asks the systemctl stand-in
+  (/usr/libexec/pve-fenrir/systemctl, files/fenrir-systemctl) about a dinit service.
+- systemd_call() dies (no D-Bus API); Net::DBus is no longer loaded here.
+- get_timezone/set_timezone/list_timezones use /etc/localtime, /etc/timezone and
+  tzdata.zi instead of timedatectl.
+notify() is kept (it is a no-op without NOTIFY_SOCKET).
+Written for FenrirOS.
+
+--- a/src/PVE/Systemd.pm
++++ b/src/PVE/Systemd.pm
+@@ -4,17 +4,21 @@
+ use warnings;
+ 
+ use IO::Socket::UNIX;
+-use Net::DBus qw(dbus_uint32 dbus_uint64 dbus_boolean);
+-use Net::DBus::Callback;
+-use Net::DBus::Reactor;
+-use POSIX qw(EINTR);
++use POSIX qw(EINTR EEXIST);
+ use Socket qw(SOCK_DGRAM);
++use Time::HiRes qw(usleep);
+ 
+ use PVE::Cmd qw(run);
+ use PVE::Exception qw(raise_param_exc);
+ use PVE::File qw(file_set_contents file_get_contents);
+ use PVE::Tools qw(trim);
+ 
++# FenrirOS: there is no systemd. Its D-Bus API (transient scope units, unit
++# state, timedatectl) is replaced by the cgroup v2 file system and plain files:
++# a "scope" here is a cgroup directory below a "slice" directory, exactly where
++# systemd would put it (qemu.slice/<vmid>.scope), so PVE::CGroup finds it.
++my $CGROUP_ROOT = '/sys/fs/cgroup';
++
+ sub escape_unit {
+     my ($val, $is_path) = @_;
+ 
+@@ -47,175 +51,113 @@
+ # In order to even start waiting on the reactor, $code needs to return undef, if it returns a
+ # defined value instead, it is assumed that this is the result already and we can stop.
+ # NOTE: This calls the dbus main loop and must not be used when another dbus
+-# main loop is being used as we need to wait signals.
++
++# FenrirOS: no systemd D-Bus API to call.
+ sub systemd_call($;$) {
+     my ($code, $timeout) = @_;
++    die "systemd D-Bus API not available on FenrirOS\n";
++}
+ 
+-    my $bus = Net::DBus->system();
+-    my $reactor = Net::DBus::Reactor->main();
+-
+-    my $service = $bus->get_service('org.freedesktop.systemd1');
+-    my $if = $service->get_object('/org/freedesktop/systemd1', 'org.freedesktop.systemd1.Manager');
+-
+-    my ($finished, $current_result, $timer, $signal_info);
+-    my $finish_callback = sub {
+-        my ($result) = @_;
+-
+-        $current_result = $result;
+-
+-        $finished = 1;
+-
+-        if (defined($timer)) {
+-            $reactor->remove_timeout($timer);
+-            $timer = undef;
+-        }
+-
+-        if (defined($signal_info)) {
+-            $if->disconnect_from_signal($signal_info->{name}, $signal_info->{handle});
+-            $signal_info = undef;
+-        }
+-
+-        if (defined($reactor)) {
+-            $reactor->shutdown();
+-            $reactor = undef;
+-        }
+-    };
+-
+-    (my $result, $signal_info) = $code->($if, $reactor, $finish_callback);
+-    # Are we done immediately?
+-    return $result if defined $result;
+-
+-    # Alterantively $finish_callback may have been called already?
+-    return $current_result if $finished;
+-
+-    # Otherwise wait:
+-    my $on_timeout = sub {
+-        $finish_callback->(undef);
+-        die "timeout waiting on systemd\n";
+-    };
+-    $timer = $reactor->add_timeout($timeout * 1000, Net::DBus::Callback->new(method => $on_timeout))
+-        if defined($timeout);
+-
+-    $reactor->run();
+-    $reactor->shutdown() if defined($reactor); # $finish_callback clears it
++my sub scope_dir {
++    my ($unit) = @_;
++    # look in the slices systemd would have used
++    for my $dir (glob("$CGROUP_ROOT/*.slice/$unit"), "$CGROUP_ROOT/$unit") {
++        return $dir if -d $dir;
++    }
++    return undef;
++}
+ 
+-    return $current_result;
++my sub enable_controllers {
++    my ($dir) = @_;
++    # delegate what the kernel offers, one by one (some may be unavailable)
++    my $avail = eval { file_get_contents("$dir/cgroup.controllers") } // '';
++    for my $c (split(/\s+/, $avail)) {
++        next if $c !~ m/^(cpu|cpuset|io|memory|pids|hugetlb|rdma|misc)$/;
++        eval { file_set_contents("$dir/cgroup.subtree_control", "+$c\n") };
++    }
+ }
+ 
+-# Polling the job status instead doesn't work because this doesn't give us the
+-# distinction between success and failure.
+-#
+-# Note that the description is mandatory for security reasons.
++# Move the calling process into a new cgroup <Slice>/<unit>.scope, with the
++# CPU weight and quota systemd would have set. KillMode, SendSIGKILL,
++# TimeoutStopUSec, After and Before have no meaning without a service manager
++# owning the scope and are ignored.
+ sub enter_systemd_scope {
+     my ($unit, $description, %extra) = @_;
+     die "missing description\n" if !defined($description);
+ 
+-    my $timeout = delete $extra{timeout};
+-
++    delete $extra{timeout};
+     $unit .= '.scope';
+-    my $properties = [[PIDs => [dbus_uint32($$)]]];
++    my $slice = delete($extra{Slice}) // 'system.slice';
++    die "invalid slice '$slice'\n" if $slice !~ m/^([A-Za-z0-9_.@-]+\.slice)$/;
++    $slice = $1;
++    die "invalid unit '$unit'\n" if $unit !~ m/^([A-Za-z0-9_.@-]+)$/;
++    $unit = $1;
++
++    my $slice_dir = "$CGROUP_ROOT/$slice";
++    mkdir($slice_dir) or $! == EEXIST or die "failed to create cgroup $slice_dir - $!\n";
++    enable_controllers($CGROUP_ROOT);
++    enable_controllers($slice_dir);
++
++    my $dir = "$slice_dir/$unit";
++    mkdir($dir) or $! == EEXIST or die "failed to create cgroup $dir - $!\n";
+ 
+     foreach my $key (keys %extra) {
+-        if ($key eq 'Slice' || $key eq 'KillMode' || $key eq 'After' || $key eq 'Before') {
+-            push @{$properties}, [$key, $extra{$key}];
+-        } elsif ($key eq 'SendSIGKILL') {
+-            push @{$properties}, [$key, dbus_boolean($extra{$key})];
+-        } elsif ($key eq 'CPUShares' || $key eq 'CPUWeight' || $key eq 'TimeoutStopUSec') {
+-            push @{$properties}, [$key, dbus_uint64($extra{$key})];
++        my $value = $extra{$key};
++        if ($key eq 'CPUWeight') {
++            file_set_contents("$dir/cpu.weight", int($value) . "\n");
++        } elsif ($key eq 'CPUShares') {
++            # cgroup v1 shares to a v2 weight, as systemd converts them
++            my $weight = 1 + int(((int($value) - 2) * 9999) / 262142);
++            $weight = 1 if $weight < 1;
++            $weight = 10000 if $weight > 10000;
++            file_set_contents("$dir/cpu.weight", "$weight\n");
+         } elsif ($key eq 'CPUQuota') {
+-            push @{$properties}, ['CPUQuotaPerSecUSec', dbus_uint64($extra{$key} * 10_000)];
++            # percent of one CPU per second, as a quota per 100ms period
++            file_set_contents("$dir/cpu.max", int($value * 1000) . " 100000\n");
++        } elsif ($key =~ m/^(KillMode|SendSIGKILL|TimeoutStopUSec|After|Before)$/) {
++            # no service manager owns the scope
+         } else {
+             die "Don't know how to encode $key for systemd scope\n";
+         }
+     }
+ 
+-    systemd_call(
+-        sub {
+-            my ($if, $reactor, $finish_cb) = @_;
+-
+-            my $job;
+-
+-            my $signal_name = 'JobRemoved';
+-            my $signal_handle = $if->connect_to_signal(
+-                $signal_name,
+-                sub {
+-                    my ($id, $removed_job, $signaled_unit, $result) = @_;
+-                    return if $signaled_unit ne $unit || $removed_job ne $job;
+-                    if ($result ne 'done') {
+-                        # I seem to remember $reactor->run() catching die() at some point?
+-                        # so better call finish to be sure...:
+-                        $finish_cb->(0);
+-                        die "systemd job failed\n";
+-                    } else {
+-                        $finish_cb->(1);
+-                    }
+-                },
+-            );
+-
+-            $job = $if->StartTransientUnit($unit, 'fail', $properties, []);
+-
+-            my $signal_info = {
+-                name => $signal_name,
+-                handle => $signal_handle,
+-            };
+-
+-            return (undef, $signal_info);
+-        },
+-        $timeout,
+-    );
++    file_set_contents("$dir/cgroup.procs", "$$\n");
++    return 1;
+ }
+ 
++# Wait until the scope's cgroup has no processes left, then remove it.
+ sub wait_for_unit_removed($;$) {
+     my ($unit, $timeout) = @_;
+ 
+-    systemd_call(
+-        sub {
+-            my ($if, $reactor, $finish_cb) = @_;
+-
+-            my $unit_obj = eval { $if->GetUnit($unit) };
+-            return 1 if !$unit_obj;
+-
+-            my $signal_name = 'UnitRemoved';
+-            my $signal_handle = $if->connect_to_signal(
+-                $signal_name,
+-                sub {
+-                    my ($id, $removed_unit) = @_;
+-                    $finish_cb->(1) if $removed_unit eq $unit_obj;
+-                },
+-            );
+-
+-            my $signal_info = {
+-                name => $signal_name,
+-                handle => $signal_handle,
+-            };
+-
+-            # Deal with what we lost between GetUnit() and connecting to UnitRemoved:
+-            my $unit_obj_new = eval { $if->GetUnit($unit) };
+-            if (!$unit_obj_new) {
+-                return (1, $signal_info);
+-            }
+-
+-            return (undef, $signal_info);
+-        },
+-        $timeout,
+-    );
++    my $dir = scope_dir($unit) // return 1;
++    my $end = defined($timeout) ? time() + $timeout : undef;
++    while (1) {
++        my $events = eval { file_get_contents("$dir/cgroup.events") } // '';
++        if ($events !~ m/^populated 1$/m) {
++            rmdir($dir); # may already be gone
++            return 1;
++        }
++        die "timeout waiting on systemd\n" if defined($end) && time() > $end;
++        usleep(100_000);
++    }
+ }
+ 
++# A ".scope" is active while its cgroup has processes; anything else is a
++# dinit service, asked through the systemctl stand-in.
+ sub is_unit_active($;$) {
+     my ($unit) = @_;
+ 
+-    my $bus = Net::DBus->system();
+-    my $reactor = Net::DBus::Reactor->main();
+-
+-    my $service = $bus->get_service('org.freedesktop.systemd1');
+-    my $if = $service->get_object('/org/freedesktop/systemd1', 'org.freedesktop.systemd1.Manager');
+-
+-    my $unit_path = eval { $if->GetUnit($unit) }
+-        or return 0;
+-    $if = $service->get_object($unit_path, 'org.freedesktop.systemd1.Unit')
+-        or return 0;
+-    my $state = $if->ActiveState;
+-    return defined($state) && $state eq 'active';
++    if ($unit =~ m/\.scope$/) {
++        my $dir = scope_dir($unit) // return 0;
++        my $events = eval { file_get_contents("$dir/cgroup.events") } // '';
++        return $events =~ m/^populated 1$/m ? 1 : 0;
++    }
++    my $active = 0;
++    eval {
++        run(['/usr/libexec/pve-fenrir/systemctl', 'is-active', $unit],
++            outfunc => sub { $active = 1 if $_[0] eq 'active' }, noerr => 1, quiet => 1);
++    };
++    return $active;
+ }
+ 
+ sub read_ini {
+@@ -288,16 +230,17 @@
+     file_set_contents($filename, $content);
+ }
+ 
+-# Use systemds timedatectl for managing timezone settings
+-sub get_timezone {
+-    my $timezone;
+ 
+-    run(
+-        ['timedatectl', 'show', '--property=Timezone', '--value'],
+-        outfunc => sub { $timezone //= shift },
+-    );
+-
+-    return $timezone;
++# FenrirOS: no timedatectl; the zone is the /etc/localtime link (and
++# /etc/timezone, kept beside it for tools that read it).
++sub get_timezone {
++    my $link = readlink('/etc/localtime');
++    if (defined($link) && $link =~ m!zoneinfo/(.+)$!) {
++        return $1;
++    }
++    my $tz = eval { trim(file_get_contents('/etc/timezone')) };
++    return $tz if $tz;
++    return 'UTC';
+ }
+ 
+ sub set_timezone {
+@@ -306,17 +249,28 @@
+     raise_param_exc({ 'timezone' => "No such timezone" })
+         if (!grep { $_ eq $timezone } list_timezones());
+ 
+-    run(['timedatectl', 'set-timezone', $timezone]);
++    ($timezone) = $timezone =~ m/^([A-Za-z0-9_+\/-]+)$/
++        or raise_param_exc({ 'timezone' => "No such timezone" });
++    unlink('/etc/localtime.tmp');
++    symlink("/usr/share/zoneinfo/$timezone", '/etc/localtime.tmp')
++        or die "failed to link timezone - $!\n";
++    rename('/etc/localtime.tmp', '/etc/localtime') or die "failed to set timezone - $!\n";
++    file_set_contents('/etc/timezone', "$timezone\n");
+ }
+ 
++# the zones tzdata lists in tzdata.zi (zone and link names), like timedatectl
+ sub list_timezones {
+-    my @timezones = ();
+-
+-    run(
+-        ['timedatectl', 'list-timezones'], outfunc => sub { push(@timezones, shift); },
+-    );
+-
+-    return @timezones;
++    my %zones;
++    my $zi = '/usr/share/zoneinfo/tzdata.zi';
++    if (open(my $fh, '<', $zi)) {
++        while (my $line = <$fh>) {
++            $zones{$1} = 1 if $line =~ m/^Z\s+(\S+)/;
++            $zones{$1} = 1 if $line =~ m/^L\s+\S+\s+(\S+)/;
++        }
++        close($fh);
++    }
++    $zones{UTC} = 1;
++    return sort keys %zones;
+ }
+ 
+ =head3 notify()

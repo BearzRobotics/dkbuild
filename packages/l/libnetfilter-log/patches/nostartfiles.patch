@@ -1,0 +1,25 @@
+Link the libraries without -Wc,-nostartfiles. Upstream's flag leaves the
+compiler's startup files (crti.o/crtn.o, crtbegin/crtend) out of the shared
+objects, which the clang + musl toolchain does not expect; Chimera Linux drops
+it the same way for libnetfilter_conntrack (its nostartfiles.patch, also used
+by this tree's libnetfilter-conntrack). Only Makefile.in is changed, so automake
+does not run again.
+
+--- a/src/Makefile.in
++++ b/src/Makefile.in
+@@ -383,13 +383,13 @@
+ IPULOG_LIBVERSION = 1:0:0
+ lib_LTLIBRARIES = libnetfilter_log.la $(am__append_1)
+ libnetfilter_log_la_CPPFLAGS = ${AM_CPPFLAGS} ${LIBNFNETLINK_CFLAGS} ${LIBMNL_CFLAGS}
+-libnetfilter_log_la_LDFLAGS = -Wc,-nostartfiles \
++libnetfilter_log_la_LDFLAGS = \
+ 			       -version-info $(LIBVERSION)
+ 
+ libnetfilter_log_la_SOURCES = libnetfilter_log.c nlmsg.c
+ libnetfilter_log_la_LIBADD = ${LIBNFNETLINK_LIBS} ${LIBMNL_LIBS}
+ @BUILD_IPULOG_TRUE@libnetfilter_log_libipulog_la_CPPFLAGS = ${AM_CPPFLAGS} ${LIBNFNETLINK_CFLAGS}
+-@BUILD_IPULOG_TRUE@libnetfilter_log_libipulog_la_LDFLAGS = -Wc,-nostartfiles \
++@BUILD_IPULOG_TRUE@libnetfilter_log_libipulog_la_LDFLAGS = \
+ @BUILD_IPULOG_TRUE@					 -version-info $(IPULOG_LIBVERSION)
+ 
+ @BUILD_IPULOG_TRUE@libnetfilter_log_libipulog_la_LIBADD = libnetfilter_log.la ${LIBNFNETLINK_LIBS}

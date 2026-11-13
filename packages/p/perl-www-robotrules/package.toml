@@ -1,0 +1,26 @@
+# WWW-RobotRules 6.03 from CPAN: database of robots.txt-derived permissions.
+# Packaged for Proxmox VE (a dependency of Proxmox VE's Perl stack). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-www-robotrules"
+version = "6.03"
+release = 1
+summary = "database of robots.txt-derived permissions"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/WWW-RobotRules"
+hostdeps = ["perl"]
+builddeps = ["perl", "perl-uri"]
+rundeps = ["perl-uri"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/O/OA/OALDERS/WWW-RobotRules-6.03.tar.gz", sha256 = "8522b532935a11bfa688c2e113bac66729df4851be50c2c26d4b06f45fade472" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

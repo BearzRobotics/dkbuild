@@ -1,0 +1,26 @@
+# Net-DBus 1.2.0 from CPAN: Extension for the DBus bindings.
+# Packaged for Proxmox VE (pve-common: D-Bus (systemd scopes on Debian)). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-net-dbus"
+version = "1.2.0"
+release = 1
+summary = "Extension for the DBus bindings"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/Net-DBus"
+hostdeps = ["perl", "pkgconf"]
+builddeps = ["perl", "dbus-devel", "perl-xml-twig"]
+rundeps = ["perl-xml-twig"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/D/DA/DANBERR/Net-DBus-1.2.0.tar.gz", sha256 = "e7a1ac9ef4a1235b3fdbd5888f86c347182306467bd79abc9b0756a64b441cbc" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

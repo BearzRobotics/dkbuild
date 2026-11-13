@@ -1,0 +1,5 @@
+# pvefw-logger: Proxmox VE firewall logger (NFLOG to /var/log/pve-firewall.log)
+type = bgprocess
+command = /usr/sbin/pvefw-logger
+pid-file = /run/pvefw-logger.pid
+depends-on: early-filesystems

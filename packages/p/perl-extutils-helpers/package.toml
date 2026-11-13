@@ -1,0 +1,25 @@
+# ExtUtils-Helpers 0.028 from CPAN: Various portability utilities for module builders.
+# Packaged for Proxmox VE (a dependency of Proxmox VE's Perl stack). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-extutils-helpers"
+version = "0.028"
+release = 1
+summary = "Various portability utilities for module builders"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/ExtUtils-Helpers"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/L/LE/LEONT/ExtUtils-Helpers-0.028.tar.gz", sha256 = "c8574875cce073e7dc5345a7b06d502e52044d68894f9160203fcaab379514fe" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

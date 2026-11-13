@@ -1,0 +1,4 @@
+# pvebanner: write the web UI address into /etc/issue at boot
+type = scripted
+command = /usr/bin/pvebanner
+depends-on: early-filesystems

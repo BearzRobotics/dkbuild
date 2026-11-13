@@ -1,0 +1,42 @@
+# Proxmox's ExtJS widget toolkit (Debian: proxmox-widget-toolkit and -dev):
+# proxmoxlib.js (core widgets of all Proxmox web UIs, with marked bundled),
+# its CSS, images and the dark theme (Sass), under
+# /usr/share/javascript/proxmox-widget-toolkit; the -dev files (Toolkit.js,
+# APIViewer.js for pve-docs' API viewer) under ...-toolkit-dev.
+# Pinned to the "bump version to 5.2.13" commit (no tags).
+# Upstream minifies with uglifyjs and lints with biome (neither packaged
+# here): the minified file is made with esbuild instead, and the lint step
+# (it checks style, it does not produce anything) is skipped.
+name = "proxmox-widget-toolkit"
+version = "5.2.13"
+release = 1
+summary = "Core widgets and ExtJS helper classes for Proxmox web UIs"
+license = "AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=proxmox-widget-toolkit.git"
+hostdeps = ["make", "sassc", "esbuild", "marked"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/proxmox-widget-toolkit.git 1bc05a882ebc870f7f141e64ba1e871227586796", sha256 = "39513e6ea62ec89639ba6a138dca0854fb1e542121b7d3a18f19dcc248ca78d8" },
+]
+
+setup = '''
+# no biome here: drop the lint stamp proxmoxlib.js depends on
+sed -i 's/^proxmoxlib.js: .lint-incremental /proxmoxlib.js: /' src/Makefile
+# minify with esbuild instead of uglifyjs (not packaged)
+sed -i 's#^\tuglifyjs $< -c -m -o $@.tmp#\tesbuild --minify $< --outfile=$@.tmp#' src/Makefile
+grep -q 'esbuild --minify' src/Makefile
+'''
+build = '''
+make -C src DEB_VERSION=$version-1 BUILD_TIME=0
+'''
+install = '''
+make -C src install DESTDIR="$pkgdir" DEB_VERSION=$version-1 BUILD_TIME=0
+install -Dm644 src/Toolkit.js "$pkgdir/usr/share/javascript/proxmox-widget-toolkit-dev/Toolkit.js"
+install -Dm644 src/api-viewer/APIViewer.js "$pkgdir/usr/share/javascript/proxmox-widget-toolkit-dev/APIViewer.js"
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/proxmox-widget-toolkit/copyright"
+'''
+
+[subpackages.dev]
+summary = "Proxmox widget toolkit sources for development (API viewer)"
+paths = ["/usr/share/javascript/proxmox-widget-toolkit-dev"]

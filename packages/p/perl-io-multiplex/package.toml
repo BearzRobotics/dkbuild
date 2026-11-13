@@ -1,0 +1,25 @@
+# IO-Multiplex 1.16 from CPAN: Manage IO on many file handles.
+# Packaged for Proxmox VE (qemu-server, pve-manager). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-io-multiplex"
+version = "1.16"
+release = 1
+summary = "Manage IO on many file handles"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/IO-Multiplex"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/B/BB/BBB/IO-Multiplex-1.16.tar.gz", sha256 = "74d22c44b5ad2e7190e2786e8a17d74bbf4cef89b4d1157ba33598b5a2720dad" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

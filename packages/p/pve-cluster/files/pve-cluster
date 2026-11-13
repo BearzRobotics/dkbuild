@@ -1,0 +1,7 @@
+# pve-cluster: pmxcfs, the Proxmox cluster file system on /etc/pve
+type = bgprocess
+command = /usr/bin/pmxcfs
+pid-file = /run/pve-cluster.pid
+smooth-recovery = true
+depends-on: early-filesystems
+waits-for: rrdcached

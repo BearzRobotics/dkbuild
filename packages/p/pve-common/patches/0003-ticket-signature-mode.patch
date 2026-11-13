@@ -1,0 +1,43 @@
+Select the RSA signature mode of PVE tickets explicitly (SHA-1, PKCS#1 v1.5).
+Proxmox's Debian Crypt::OpenSSL::RSA (0.35 with patches) keeps SHA-1 and
+PKCS#1 v1.5 as defaults; CPAN's 0.41 (perl-crypt-openssl-rsa here) signs with
+SHA-256/PSS by default, which would make tickets incompatible with stock
+Proxmox nodes and with what pve-access-control expects.
+From proxmox-nixos (github.com/SaumonNet/proxmox-nixos), pkgs/pve-common/
+0004-select-ticket-signature-mode.patch, rebased onto src/.
+
+--- a/src/PVE/Ticket.pm
++++ b/src/PVE/Ticket.pm
+@@ -16,6 +16,14 @@
+ 
+ use constant HTTP_UNAUTHORIZED => 401;
+ 
++my sub select_rsa_ticket_signature_mode {
++    my ($rsa) = @_;
++
++    # Ticket signatures are a wire format, so do not rely on module defaults.
++    $rsa->use_sha1_hash();
++    $rsa->use_pkcs1_padding();
++}
++
+ sub assemble_csrf_prevention_token {
+     my ($secret, $username) = @_;
+ 
+@@ -66,6 +74,8 @@
+ 
+     my $full = defined($secret_data) ? "$plain:$secret_data" : $plain;
+ 
++    select_rsa_ticket_signature_mode($rsa_priv);
++
+     my $ticket = $plain . "::" . encode_base64($rsa_priv->sign($full), '');
+ 
+     return $ticket;
+@@ -78,6 +88,8 @@
+         my $plain = $1;
+         my $sig = $2;
+ 
++        select_rsa_ticket_signature_mode($rsa_pub);
++
+         my $full = defined($secret_data) ? "$plain:$secret_data" : $plain;
+ 
+         if ($rsa_pub->verify($full, decode_base64($sig))) {

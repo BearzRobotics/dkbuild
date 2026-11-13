@@ -1,0 +1,36 @@
+# Proxmox's ACME client library (Debian: libproxmox-acme-perl), used by
+# pve-manager to get certificates from Let's Encrypt and other ACME CAs, and
+# its DNS-challenge plugins (Debian: libproxmox-acme-plugins): acme.sh's
+# dnsapi scripts (a submodule, mirror_acme.sh) run through a small wrapper.
+# Pinned to the "bump version to 1.7.2" commit (Proxmox repositories have no
+# tags), not 1.7.3 (2026-11-09): 1.7.3 moves the acme.sh submodule to
+# upstream 3.1.6 (commit 807da649), which is not on Proxmox's mirror_acme.sh,
+# so its snapshot cannot be made. 1.7.3 also fixes some plugin wrapper
+# functions (_url_replace, _mktemp, _url_encode upper-hex); move to it once
+# the mirror has the commit. JWS signing already selects PKCS#1 v1.5/SHA-256
+# explicitly, so the CPAN Crypt::OpenSSL::RSA (PSS by default) works unchanged.
+name = "proxmox-acme"
+version = "1.7.2"
+release = 1
+summary = "Proxmox ACME integration Perl library"
+license = "AGPL-3.0-or-later AND GPL-3.0-only"
+homepage = "https://git.proxmox.com/?p=proxmox-acme.git"
+hostdeps = ["perl", "make"]
+rundeps = ["perl", "perl-crypt-openssl-rsa", "perl-crypt-openssl-bignum", "perl-json", "perl-libwww",
+           "perl-lwp-protocol-https", "perl-http-message", "pve-common"]
+options = ["!check"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/proxmox-acme.git 2fdd0fcce3d11bf9cf623e48a651c375478aedbc", sha256 = "c1a79d3bf575d9c2ada5fd54fbcdeb339f6d3371048c7752015a87d7da21b4fe" },
+]
+
+install = '''
+vendorlib=$(perl -MConfig -e 'print $Config{vendorlib}')
+make -C src install DESTDIR="$pkgdir" PERLDIR="$vendorlib"
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/proxmox-acme/copyright"
+'''
+
+[subpackages.plugins]
+summary = "Proxmox acme.sh wrapper and DNS API plugins"
+paths = ["/usr/share/proxmox-acme"]
+depends = ["curl", "coreutils", "sed"]

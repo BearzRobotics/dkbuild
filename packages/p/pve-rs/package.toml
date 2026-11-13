@@ -1,0 +1,61 @@
+# Proxmox VE's Rust parts for Perl (Debian: libpve-rs-perl, and from the same
+# repository libproxmox-rs-perl as the subpackage pve-rs-common): a cdylib
+# (libpve_rs.so) bound to Perl with perlmod: TFA (TOTP, WebAuthn, recovery
+# keys), OpenID, notifications, resource scheduling, SDN fabrics/route maps,
+# firewall SDN, OCI images, NVML (vGPU), APT repository files.
+# Pinned to the "pve-rs: bump version to 0.16.1" commit (no tags).
+# The Proxmox crates are not on crates.io (Debian packages them itself):
+# patch 0001 points them at their git repositories at the commits current
+# for this release, and files/Cargo.lock pins the graph (made with cargo
+# generate-lockfile on the patched sources). Patch 0002 builds proxmox-apt
+# without libapt-pkg (no APT here). perlmod's genpackage.pl (Debian:
+# perlmod-bin) is used from a second source, the perlmod repository at the
+# same commit as the perlmod crate. The proxmox-frr crate compiles in the
+# templates at /usr/share/proxmox-frr/templates (proxmox-frr-templates).
+name = "pve-rs"
+version = "0.16.1"
+release = 1
+summary = "Proxmox VE Rust components for Perl"
+license = "AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=proxmox-perl-rs.git"
+patches = ["0001-proxmox-crates-from-git.patch", "0002-no-apt-cache.patch", "0003-proxmox-systemd-without-libsystemd.patch"]
+hostdeps = ["rust", "perl", "make", "pkgconf", "clang"]
+builddeps = ["perl", "openssl-devel", "util-linux-devel", "acl-devel", "nettle-devel", "proxmox-frr-templates"]
+rundeps = ["perl", "pve-rs-common"]
+options = ["!check", "cargodeps", "cargolock=pve-rs"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/proxmox-perl-rs.git 1021ded9d0898b98d50b9a3bbcb36bf2a3982883", sha256 = "be93807212dcfb4d2336bfac3ffe9768cab80f5828d6758812c0e5c39cb0f33f" },
+    { url = "snapshot:git https://git.proxmox.com/git/perlmod.git 16e273973b2d1800075b087acac16228ec09e023", sha256 = "827417f63fd1d1b2a8126e0fce475a4dc82bf2cc90dd576e13e3334d74998eec" },
+]
+
+environment = '''
+# a shared library loaded by perl: link it dynamically against musl
+export RUSTFLAGS="-C target-feature=-crt-static"
+'''
+setup = '''
+genpkg=$(cd .. && ls -d "$PWD"/perlmod-*/perlmod-bin/genpackage.pl | head -n1)
+[ -f "$genpkg" ]
+# no dpkg: drop the Debian makefile fragments and architecture query (only
+# used for .deb names), and use genpackage.pl from the perlmod source
+for m in pve-rs/Makefile common/pkg/Makefile; do
+    sed -i -e '/^include \/usr\/share\/dpkg\//d' \
+        -e 's/^ARCH:=$(shell dpkg-architecture -qDEB_BUILD_ARCH)/ARCH:=unused/' \
+        -e "s#/usr/lib/perlmod/genpackage.pl#perl $genpkg#" $m
+done
+grep -qF "perl $genpkg" pve-rs/Makefile
+'''
+build = '''
+make -C pve-rs BUILD_MODE=release CARGO_BUILD_ARGS="--release --offline" GITVERSION=1021ded9d0898b98d50b9a3bbcb36bf2a3982883
+make -C common/pkg Proxmox/RS GITVERSION=1021ded9d0898b98d50b9a3bbcb36bf2a3982883
+'''
+install = '''
+make -C pve-rs install BUILD_MODE=release DESTDIR="$pkgdir"
+make -C common/pkg install DESTDIR="$pkgdir" GITVERSION=1021ded9d0898b98d50b9a3bbcb36bf2a3982883
+install -Dm644 pve-rs/debian/copyright "$pkgdir/usr/share/licenses/pve-rs/copyright"
+'''
+
+[subpackages.common]
+summary = "Proxmox Rust Perl bindings shared by Proxmox products"
+paths = ["/usr/lib/perl5/*/vendor_perl/Proxmox/RS", "/usr/lib/perl5/*/vendor_perl/Proxmox/Lib/Common.pm",
+         "/usr/lib/perl5/*/vendor_perl/Proxmox/Lib/SslProbe.pm", "/usr/lib/perl5/*/vendor_perl/PVE/RS/CalendarEvent.pm"]

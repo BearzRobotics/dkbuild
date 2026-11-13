@@ -1,0 +1,210 @@
+#!/bin/sh
+# FenrirOS stand-in for the `systemctl` calls Proxmox VE makes (installed as
+# /usr/libexec/pve-fenrir/systemctl; the PVE packages are edited to call it).
+# Services are dinit services of the same name (".service" dropped, templates
+# as name@instance); "*.scope" units are cgroup v2 directories made by
+# PVE::Systemd::enter_systemd_scope (qemu.slice/<vmid>.scope).
+#
+# Verbs: start stop restart reload reload-or-restart try-restart
+# try-reload-or-restart enable [--now] disable is-active is-enabled is-failed
+# show [--property P] kill [--signal S] reset-failed daemon-reload list-jobs.
+# Reload sends SIGHUP (what the PVE daemons' ExecReload does).
+
+set -u
+cgroot=/sys/fs/cgroup
+
+now=0 signal=TERM props= value=0 quiet=0
+verb=
+units=
+while [ $# -gt 0 ]; do
+    case $1 in
+        --now) now=1 ;;
+        --signal=*) signal=${1#--signal=} ;;
+        -s|--signal) shift; signal=$1 ;;
+        --property=*) props="$props ${1#--property=}" ;;
+        -p|--property) shift; props="$props $1" ;;
+        --value) value=1 ;;
+        -q|--quiet) quiet=1 ;;
+        --kill-whom=*|--full|--no-pager|--runtime|--no-block|--system|-l|--no-legend) ;;
+        -*) echo "systemctl (FenrirOS): ignoring option $1" >&2 ;;
+        *) if [ -z "$verb" ]; then verb=$1; else units="$units $1"; fi ;;
+    esac
+    shift
+done
+signal=${signal#SIG}
+
+# unit name -> dinit service name
+svc() {
+    s=${1%.service}
+    case $s in
+        ssh) s=sshd ;;
+        cron) s=crond ;;
+        syslog|rsyslog) s=syslogd ;;
+        chrony) s=chronyd ;;
+        postfix@-) s=postfix ;;
+    esac
+    printf '%s\n' "$s"
+}
+
+scope_dir() {
+    for d in "$cgroot"/*.slice/"$1" "$cgroot/$1"; do
+        [ -d "$d" ] && { printf '%s\n' "$d"; return 0; }
+    done
+    return 1
+}
+
+scope_populated() {
+    grep -qx 'populated 1' "$1/cgroup.events" 2>/dev/null
+}
+
+scope_kill() { # dir signal
+    while read -r pid; do
+        kill -s "$2" "$pid" 2>/dev/null
+    done < "$1/cgroup.procs"
+}
+
+scope_stop() {
+    d=$(scope_dir "$1") || return 0
+    scope_kill "$d" TERM
+    i=0
+    while scope_populated "$d" && [ $i -lt 100 ]; do sleep 0.1; i=$((i + 1)); done
+    scope_populated "$d" && scope_kill "$d" KILL
+    i=0
+    while scope_populated "$d" && [ $i -lt 50 ]; do sleep 0.1; i=$((i + 1)); done
+    rmdir "$d" 2>/dev/null
+    return 0
+}
+
+started() { dinitctl --quiet is-started "$1" >/dev/null 2>&1; }
+known() { [ -f "/etc/dinit.d/$1" ] || [ -f "/etc/dinit.d/${1%%@*}@" ] || [ -f "/usr/lib/dinit.d/$1" ]; }
+enabled() { [ -e "/etc/dinit.d/boot.d/$1" ]; }
+
+# Reload is SIGHUP for the services whose systemd units reload that way (the
+# PVE daemons' "restart" sends HUP to the running daemon; sshd re-reads its
+# configuration); any other service is restarted, as systemd does for units
+# without ExecReload in reload-or-restart.
+reload() {
+    started "$1" || return 1
+    case $1 in
+        pvedaemon|pveproxy|pvestatd|spiceproxy|pvescheduler|pve-firewall|sshd)
+            dinitctl signal HUP "$1" ;;
+        *) dinitctl restart "$1" ;;
+    esac
+}
+
+show() {
+    u=$1 s=$(svc "$1")
+    case $u in
+        *.scope)
+            if d=$(scope_dir "$u") && scope_populated "$d"; then
+                active=active sub=running
+            else
+                active=inactive sub=dead
+            fi
+            load=loaded file=static desc="Scope $u" pid=0 ;;
+        *)
+            if known "$s"; then load=loaded; else load=not-found; fi
+            st=$(dinitctl status "$s" 2>/dev/null)
+            pid=$(printf '%s\n' "$st" | sed -n 's/^ *Process ID: *\([0-9]*\).*/\1/p')
+            case $(printf '%s\n' "$st" | sed -n 's/^ *State: *//p') in
+                STARTED*) active=active sub=running ;;
+                STARTING*) active=activating sub=start ;;
+                STOPPING*) active=deactivating sub=stop ;;
+                *fail*|*FAIL*) active=failed sub=failed ;;
+                *) active=inactive sub=dead ;;
+            esac
+            if enabled "$s"; then file=enabled; else file=disabled; fi
+            desc=
+            f=/etc/dinit.d/$s
+            [ -f "$f" ] || f=/etc/dinit.d/${s%%@*}@
+            [ -f "$f" ] && desc=$(sed -n '1s/^# *//p' "$f" | sed 's/:.*//')
+            [ -n "$desc" ] || desc=$s ;;
+    esac
+    [ "$load" = not-found ] && desc=
+    out() {
+        if [ -n "$props" ]; then
+            case " $props " in *" $1 "*) ;; *) return ;; esac
+        fi
+        if [ $value = 1 ]; then printf '%s\n' "$2"; else printf '%s=%s\n' "$1" "$2"; fi
+    }
+    out Id "$u"
+    out Names "$u"
+    out LoadState "$load"
+    out ActiveState "$active"
+    out SubState "$sub"
+    out UnitFileState "$file"
+    out MainPID "${pid:-0}"
+    out Type simple
+    [ -n "$desc" ] && out Description "$desc"
+    return 0
+}
+
+rc=0
+case $verb in
+    daemon-reload) exit 0 ;;
+    list-jobs) echo "No jobs running."; exit 0 ;;
+esac
+[ -n "$units" ] || { echo "systemctl (FenrirOS): $verb: no unit given" >&2; exit 1; }
+
+# "name@*" (stop/disable every instance) and "name@" (disable: every enabled
+# instance): expand to the loaded or enabled instances
+expanded=
+for u in $units; do
+    case $u in
+        *@\*|*@\*.service|*@|*@.service)
+            base=${u%%@*}
+            for s in $(dinitctl list 2>/dev/null | sed -n "s/.*[]}] *\($base@[^ ]*\).*/\1/p") \
+                     $(cd /etc/dinit.d/boot.d 2>/dev/null && ls -d "$base"@?* 2>/dev/null); do
+                case " $expanded " in *" $s "*) ;; *) expanded="$expanded $s" ;; esac
+            done ;;
+        *) expanded="$expanded $u" ;;
+    esac
+done
+units=$expanded
+
+for u in $units; do
+    s=$(svc "$u")
+    case $u in
+        *.mount|*.automount|*.target|*.timer|*.socket)
+            echo "systemctl (FenrirOS): $u: systemd $(printf '%s' "${u##*.}") units do not exist here (dinit)" >&2
+            rc=1; continue ;;
+    esac
+    case $u:$verb in
+        *.scope:stop) scope_stop "$u" ;;
+        *.scope:kill) d=$(scope_dir "$u") && scope_kill "$d" "$signal" ;;
+        *.scope:reset-failed|*:reset-failed) ;;
+        *.scope:is-active)
+            if d=$(scope_dir "$u") && scope_populated "$d"; then
+                [ $quiet = 1 ] || echo active
+            else
+                [ $quiet = 1 ] || echo inactive; rc=3
+            fi ;;
+        *:show) show "$u" ;;
+        *:start) dinitctl start "$s" || rc=1 ;;
+        *:stop) if started "$s"; then dinitctl stop "$s" || rc=1; fi ;;
+        *:restart) if started "$s"; then dinitctl restart "$s" || rc=1; else dinitctl start "$s" || rc=1; fi ;;
+        *:try-restart) if started "$s"; then dinitctl restart "$s" || rc=1; fi ;;
+        *:reload) reload "$s" || rc=1 ;;
+        *:reload-or-restart) reload "$s" || dinitctl start "$s" || rc=1 ;;
+        *:try-reload-or-restart) if started "$s"; then reload "$s" || rc=1; fi ;;
+        *:kill) if started "$s"; then dinitctl signal "$signal" "$s" || rc=1; fi ;;
+        *:enable)
+            # dinitctl enable starts the service too; without --now, only mark it
+            if [ $now = 1 ]; then
+                dinitctl enable "$s" || rc=1
+            else
+                mkdir -p /etc/dinit.d/boot.d && ln -sf "../$s" "/etc/dinit.d/boot.d/$s" || rc=1
+            fi ;;
+        *:disable)
+            if [ $now = 1 ]; then dinitctl disable "$s" || rc=1; else rm -f "/etc/dinit.d/boot.d/$s"; fi ;;
+        *:is-active)
+            if started "$s"; then [ $quiet = 1 ] || echo active; else [ $quiet = 1 ] || echo inactive; rc=3; fi ;;
+        *:is-failed)
+            if dinitctl --quiet is-failed "$s" >/dev/null 2>&1; then [ $quiet = 1 ] || echo failed; else [ $quiet = 1 ] || echo active; rc=1; fi ;;
+        *:is-enabled)
+            if enabled "$s"; then [ $quiet = 1 ] || echo enabled; else [ $quiet = 1 ] || echo disabled; rc=1; fi ;;
+        *)
+            echo "systemctl (FenrirOS): unsupported: $verb $u" >&2; rc=1 ;;
+    esac
+done
+exit $rc

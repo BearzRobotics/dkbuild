@@ -1,0 +1,80 @@
+# Proxmox VE's virtual machine manager (Debian: qemu-server): the qm tool,
+# the PVE::QemuServer Perl modules and API, live migration, vzdump's QEMU
+# plugin, qmeventd and helpers. Runs Proxmox's QEMU (pve-qemu: /usr/bin/kvm,
+# /usr/share/kvm) and its UEFI firmware (pve-edk2-firmware).
+# Pinned to the "bump version to 9.2.15" commit (Proxmox repositories have no tags).
+# FenrirOS changes: patch 0001 sets a running VM's CPU limit/weight on its
+# cgroup directly (no systemd D-Bus); systemctl calls go to pve-common's dinit
+# stand-in; VirGL's libGL/libEGL check looks in /usr/lib; dinit services
+# qmeventd, pve-query-machine-capabilities and the template pve-dbus-vmstate@
+# (shipped, not enabled; qemu-server starts pve-dbus-vmstate@<vmid> itself).
+# The kernel modules Debian loads at boot (vhost_net, msr) are a sample in
+# /usr/share/doc/qemu-server/modules-load.conf.
+# Left out: man pages and shell completions (pve-docs' generator and the whole
+# PVE stack at build time; see wip/proxmox/NOTES.md).
+# Not packaged yet: proxmox-termproxy (the web UI's xterm.js console),
+# proxmox-websocket-tunnel (remote migration); see NOTES.md.
+name = "qemu-server"
+version = "9.2.15"
+release = 1
+summary = "Proxmox VE virtual machine manager"
+license = "AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=qemu-server.git"
+patches = ["0001-fenrir-cgroup-without-systemd.patch"]
+hostdeps = ["perl", "make", "pkgconf"]
+builddeps = ["glib-devel", "json-c-devel"]
+rundeps = ["perl", "pve-common", "pve-cluster", "pve-access-control", "pve-apiclient", "pve-guest-common",
+           "pve-storage", "pve-firewall", "pve-network", "pve-rs", "pve-ha-manager", "pve-qemu",
+           "pve-edk2-firmware", "python-virt-firmware", "perl-class-methodmaker", "perl-io-multiplex",
+           "perl-json", "perl-json-xs", "perl-net-dbus", "perl-net-ssleay", "perl-term-readline-gnu",
+           "perl-uri", "perl-uuid", "conntrack-tools", "dbus", "cdrkit", "socat", "swtpm", "virtiofsd"]
+options = ["!check"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/qemu-server.git 710476c7583fafa0f72f6e39f7a521da5ca723c9", sha256 = "257d742472072b89f4cba56f8496e3e98b43851fc8d14833cf0bfbbc6f850930" },
+]
+
+setup = '''
+# FenrirOS: no systemctl; point every call at pve-common's dinit stand-in
+grep -rlE "systemctl" src/PVE src/usr | xargs -r sed -i -E \
+    -e "s#(['\"])(/usr)?(/bin/)?systemctl(['\" ])#\1/usr/libexec/pve-fenrir/systemctl\4#g"
+# FenrirOS's iproute2 installs ip, bridge and tc in /usr/bin (no /sbin copies)
+grep -rlE "/sbin/(ip|bridge|tc)['\" ]" src/PVE src/usr | xargs -r sed -i -E \
+    -e "s#/sbin/(ip|bridge|tc)(['\" ])#/usr/bin/\1\2#g"
+# FenrirOS's libraries are in /usr/lib, not Debian's multiarch directory
+sed -i 's#my $base = "/usr/lib/${host_arch}-linux-gnu/lib";#my $base = "/usr/lib/lib";#' src/PVE/QemuServer.pm
+grep -qF 'my $base = "/usr/lib/lib";' src/PVE/QemuServer.pm
+# FenrirOS's virtiofsd is /usr/lib/virtiofsd (Debian: /usr/libexec/virtiofsd)
+sed -i "s#'/usr/libexec/virtiofsd'#'/usr/lib/virtiofsd'#" src/PVE/QemuServer/Virtiofs.pm
+grep -qF "'/usr/lib/virtiofsd'" src/PVE/QemuServer/Virtiofs.pm
+# clang warns where GCC does not and has no -fanalyzer; upstream builds with -Werror
+sed -i -e 's/ -Werror / /' -e 's/ -fanalyzer / /' src/qmeventd/Makefile src/query-machine-capabilities/Makefile
+'''
+build = '''
+make -C src/qmeventd CC="$CC" qmeventd
+make -C src/query-machine-capabilities CC="$CC" query-machine-capabilities
+'''
+install = '''
+vendorlib=$(perl -MConfig -e 'print $Config{vendorlib}')
+make -C src/PVE install DESTDIR="$pkgdir" PERLDIR="$vendorlib"
+install -Dm755 src/bin/qm "$pkgdir/usr/sbin/qm"
+install -Dm755 src/bin/qmrestore "$pkgdir/usr/sbin/qmrestore"
+install -Dm755 src/bin/qmextract "$pkgdir/usr/lib/qemu-server/qmextract"
+install -Dm755 src/qmeventd/qmeventd "$pkgdir/usr/sbin/qmeventd"
+install -Dm755 src/query-machine-capabilities/query-machine-capabilities \
+    "$pkgdir/usr/libexec/qemu-server/query-machine-capabilities"
+cd src/usr
+install -d "$pkgdir/usr/share/qemu-server"
+install -m644 pve-usb.cfg pve-q35.cfg pve-q35-4.0.cfg bootsplash.jpg "$pkgdir/usr/share/qemu-server/"
+for f in pve-bridge pve-bridge-hotplug pve-bridgedown dbus-vmstate; do
+    install -Dm755 $f "$pkgdir/usr/libexec/qemu-server/$f"
+done
+install -Dm644 org.qemu.VMState1.conf "$pkgdir/usr/share/dbus-1/system.d/org.qemu.VMState1.conf"
+install -Dm644 modules-load.conf "$pkgdir/usr/share/doc/qemu-server/modules-load.conf"
+cd ../..
+for s in qmeventd pve-query-machine-capabilities pve-dbus-vmstate@; do
+    install -Dm644 "$pkgfiles/$s" "$pkgdir/etc/dinit.d/$s"
+done
+install -d "$pkgdir/var/lib/qemu-server"
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/qemu-server/copyright"
+'''

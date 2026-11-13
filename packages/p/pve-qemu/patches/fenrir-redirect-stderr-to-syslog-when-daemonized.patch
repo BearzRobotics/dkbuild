@@ -1,0 +1,96 @@
+FenrirOS replacement for Proxmox VE's patch
+pve/0030-PVE-redirect-stderr-to-journal-when-daemonized.patch, which the
+recipe skips: that one links libsystemd and sends a daemonized QEMU's stderr
+to systemd's journal with sd_journal_stream_fd(). FenrirOS has neither, so
+this sends it to syslog instead, through logger(1) (util-linux) reading a
+pipe, tagged "QEMU" with priority daemon.err (LOG_ERR, as Proxmox's).
+Upstream QEMU sends it to /dev/null, which is still the fallback if the pipe
+or the child cannot be made; with -D (a log file) stderr is left alone, as
+in both. The child closes every other descriptor before exec, so it holds no
+disk image, socket or lock of the VM. Written for FenrirOS; applied in the
+series at 0030's place.
+
+--- a/os-posix.c
++++ b/os-posix.c
+@@ -29,6 +29,7 @@
+ #include <pwd.h>
+ #include <grp.h>
+ #include <libgen.h>
++#include <sys/syscall.h>
+ 
+ #include "qemu/error-report.h"
+ #include "qemu/log.h"
+@@ -282,6 +283,56 @@
+     }
+ }
+ 
++/*
++ * FenrirOS: where a daemonized QEMU's stderr goes. Proxmox VE sends it to
++ * systemd's journal (sd_journal_stream_fd); FenrirOS has no journal, so it
++ * goes to syslog through logger(1): a pipe read by a child that runs
++ * "logger -t QEMU -p daemon.err" with nothing else open. -1 if that cannot be
++ * set up; the caller then keeps upstream's /dev/null.
++ */
++static int stderr_to_syslog(void)
++{
++    int pipefd[2];
++    pid_t pid;
++
++    if (pipe2(pipefd, O_CLOEXEC) < 0) {
++        return -1;
++    }
++    pid = fork();
++    if (pid < 0) {
++        close(pipefd[0]);
++        close(pipefd[1]);
++        return -1;
++    }
++    if (pid == 0) {
++        /* only async-signal-safe calls until exec: QEMU has threads */
++        int nullfd = open("/dev/null", O_RDWR);
++        long i, n;
++
++        dup2(pipefd[0], 0);
++        if (nullfd >= 0) {
++            dup2(nullfd, 1);
++            dup2(nullfd, 2);
++        }
++#ifdef SYS_close_range
++        if (syscall(SYS_close_range, 3U, ~0U, 0U) == 0) {
++            n = 0;
++        } else
++#endif
++        {
++            n = sysconf(_SC_OPEN_MAX);
++        }
++        for (i = 3; i < n; i++) {
++            close(i);
++        }
++        execl("/usr/bin/logger", "logger", "-t", "QEMU", "-p", "daemon.err",
++              (char *)NULL);
++        _exit(127);
++    }
++    close(pipefd[0]);
++    return pipefd[1];
++}
++
+ void os_setup_post(void)
+ {
+     int fd = 0;
+@@ -306,9 +357,14 @@
+ 
+         dup2(fd, 0);
+         dup2(fd, 1);
+-        /* In case -D is given do not redirect stderr to /dev/null */
++        /* In case -D is given do not redirect stderr to syslog */
+         if (!qemu_log_enabled()) {
+-            dup2(fd, 2);
++            int log_fd = stderr_to_syslog();
++
++            dup2(log_fd >= 0 ? log_fd : fd, 2);
++            if (log_fd >= 0) {
++                close(log_fd);
++            }
+         }
+ 
+         close(fd);

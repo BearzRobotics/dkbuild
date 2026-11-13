@@ -1,0 +1,26 @@
+# HTTP-Negotiate 6.01 from CPAN: choose a variant to serve.
+# Packaged for Proxmox VE (a dependency of Proxmox VE's Perl stack). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-http-negotiate"
+version = "6.01"
+release = 1
+summary = "choose a variant to serve"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/HTTP-Negotiate"
+hostdeps = ["perl"]
+builddeps = ["perl", "perl-http-message"]
+rundeps = ["perl-http-message"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/G/GA/GAAS/HTTP-Negotiate-6.01.tar.gz", sha256 = "1c729c1ea63100e878405cda7d66f9adfd3ed4f1d6cacaca0ee9152df728e016" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

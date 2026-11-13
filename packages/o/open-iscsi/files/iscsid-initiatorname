@@ -1,0 +1,6 @@
+# Writes /etc/iscsi/initiatorname.iscsi the first time iscsid starts on this
+# machine (a unique iSCSI initiator name; from the kernel command line or iBFT
+# when present). An existing file is kept. Nothing is generated at build time.
+type = scripted
+command = /usr/lib/open-iscsi/initiatorname-once
+depends-on: rcboot

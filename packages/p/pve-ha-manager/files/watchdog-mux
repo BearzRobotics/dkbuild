@@ -1,0 +1,4 @@
+# watchdog-mux: Proxmox VE watchdog multiplexer (fences the node when HA loses quorum)
+type = process
+command = /usr/sbin/watchdog-mux
+depends-on: early-filesystems

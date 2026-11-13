@@ -1,0 +1,41 @@
+# fuse2: libfuse 2.9.9, the FUSE 2 API (pkg-config "fuse"), beside the tree's
+# fuse (3.x). Proxmox VE's pmxcfs (pve-cluster) is written against it.
+# Shared and static libfuse and libulockmgr; headers in /usr/include/fuse plus
+# /usr/include/fuse.h and ulockmgr.h (fuse 3 uses /usr/include/fuse3, so nothing
+# conflicts). As Alpine's fuse 2 (community/fuse), without its patch, which is
+# for fusermount.
+# Only the library (--disable-util): fusermount, mount.fuse, ulockmgr_server,
+# the udev rule and the init script would clash with fuse 3's files (fuse ships
+# /usr/bin/fusermount and /usr/bin/mount.fuse as links to fusermount3 and
+# mount.fuse3). libfuse 2 runs /usr/bin/fusermount for mounts by non-root
+# users, and fusermount3 speaks the same protocol, hence fuse in rundeps.
+# No examples (--disable-example).
+# The old-ABI .symver aliases (empty version, fuse < 2.2) were checked to link
+# with lld (exported unversioned, as with GNU ld).
+name = "fuse2"
+version = "2.9.9"
+release = 1
+summary = "Filesystem in USErspace, FUSE 2 library (libfuse 2.9)"
+license = "LGPL-2.1-only AND GPL-2.0-only"
+homepage = "https://github.com/libfuse/libfuse"
+builddeps = ["linux-headers"]
+rundeps = ["fuse"]
+# no test suite
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/libfuse/libfuse/releases/download/fuse-2.9.9/fuse-2.9.9.tar.gz", sha256 = "d0e69d5d608cc22ff4843791ad097f554dd32540ddc9bed7638cc6fea7c1b4b5" },
+]
+
+setup = '''
+%configure --enable-lib --disable-util --disable-example
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+find "$pkgdir" -name '*.la' -delete
+# manuals of the utilities not built here (fuse 3 has fusermount.1, mount.fuse.8)
+rm -rf "$pkgdir/usr/share/man"
+'''

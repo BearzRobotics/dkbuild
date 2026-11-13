@@ -1,0 +1,47 @@
+# Proxmox VE high availability manager (Debian: pve-ha-manager): the cluster
+# resource manager pve-ha-crm, the local resource manager pve-ha-lrm,
+# ha-manager and watchdog-mux (the softdog/hardware watchdog multiplexer).
+# Pinned to the "bump version to 5.2.5" commit (Proxmox repositories have no tags).
+# FenrirOS: dinit services watchdog-mux, pve-ha-crm and pve-ha-lrm (shipped,
+# not enabled); systemctl calls go to pve-common's stand-in. The LRM asks
+# systemd's job list whether the node is shutting down or rebooting; the
+# stand-in has no jobs, so a node shutdown is not told apart from a failure
+# (see wip/proxmox/NOTES.md). The watchdog module choice is a sample in
+# /usr/share/doc/pve-ha-manager/pve-ha-manager.default.
+# Left out: pve-ha-simulator (needs Perl Gtk3 bindings), man pages and shell
+# completions (pve-docs ships the man pages).
+name = "pve-ha-manager"
+version = "5.2.5"
+release = 1
+summary = "Proxmox VE high availability manager"
+license = "AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=pve-ha-manager.git"
+hostdeps = ["perl", "make"]
+rundeps = ["perl", "pve-common", "pve-cluster", "pve-rs", "perl-json", "qemu-server", "pve-container"]
+options = ["!check"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/pve-ha-manager.git c73364c19d5317e6df5bb1c1b727d080a5e897ef", sha256 = "46e19aff6ddb411d6828f8ad38cfdc8c38072728fdb19537c84ebe5f82f90889" },
+]
+
+setup = '''
+# FenrirOS: no systemctl; point every call at pve-common's dinit stand-in
+grep -rlE "systemctl" src/PVE | xargs -r sed -i -E \
+    -e "s#(['\"])(/usr)?(/bin/)?systemctl(['\" ])#\1/usr/libexec/pve-fenrir/systemctl\4#g"
+'''
+build = '''
+cd src
+$CC $CFLAGS -Wall watchdog-mux.c -o watchdog-mux $LDFLAGS
+'''
+install = '''
+vendorlib=$(perl -MConfig -e 'print $Config{vendorlib}')
+make -C src/PVE install DESTDIR="$pkgdir" PERLDIR="$vendorlib"
+for b in pve-ha-crm pve-ha-lrm ha-manager watchdog-mux; do
+    install -Dm755 src/$b "$pkgdir/usr/sbin/$b"
+done
+for s in watchdog-mux pve-ha-crm pve-ha-lrm; do
+    install -Dm644 "$pkgfiles/$s" "$pkgdir/etc/dinit.d/$s"
+done
+install -Dm644 debian/pve-ha-manager.default "$pkgdir/usr/share/doc/pve-ha-manager/pve-ha-manager.default"
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/pve-ha-manager/copyright"
+'''

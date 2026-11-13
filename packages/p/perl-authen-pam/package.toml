@@ -1,0 +1,25 @@
+# Authen-PAM 0.16 from CPAN: Frequently-Asked Questions about Authen::PAM..
+# Packaged for Proxmox VE (pve-access-control: PAM realm). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-authen-pam"
+version = "0.16"
+release = 1
+summary = "Frequently-Asked Questions about Authen::PAM."
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/Authen-PAM"
+hostdeps = ["perl"]
+builddeps = ["perl", "linux-pam-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/N/NI/NIKIP/Authen-PAM-0.16.tar.gz", sha256 = "0e949bd9a2a9df0f829971030fe9169cbaf6cec78b92faf22f547ff6c6155c9b" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

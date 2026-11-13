@@ -1,0 +1,6 @@
+# corosync: the cluster engine. Shipped, not enabled; it needs
+# /etc/corosync/corosync.conf and /etc/corosync/authkey first
+# (see /usr/share/doc/corosync/README.FenrirOS).
+type = process
+command = /usr/sbin/corosync -f
+depends-on: rcboot

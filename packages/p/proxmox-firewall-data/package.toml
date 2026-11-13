@@ -1,0 +1,24 @@
+# Name databases (services, protocols, ethertypes as JSON) for Proxmox VE's
+# firewalls (Debian: proxmox-firewall-data), from the proxmox-firewall
+# repository (/usr/share/proxmox-firewall/data). The JSON files are generated
+# by upstream from Debian's netbase and committed; they are installed as they
+# are. Pinned to the proxmox-firewall "bump version to 1.2.5" commit (no tags);
+# the data's own Debian version is 0.1. The Rust nftables firewall
+# (proxmox-firewall) from the same repository is not packaged yet.
+name = "proxmox-firewall-data"
+version = "0.1"
+release = 1
+summary = "Name databases for the Proxmox VE firewalls"
+license = "AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=proxmox-firewall.git"
+options = ["!check", "!strip"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/proxmox-firewall.git da0468c96dc9e463ef25a02c256dbe3723335edd", sha256 = "24223b344497061b42b7bbe7bf1a25a82c230cd2ad6c442fc1c3fb59f8959bd2" },
+]
+
+install = '''
+install -d "$pkgdir/usr/share/proxmox-firewall/data"
+install -m644 proxmox-firewall-data/data/*.json "$pkgdir/usr/share/proxmox-firewall/data/"
+install -Dm644 proxmox-firewall-data/debian/copyright "$pkgdir/usr/share/licenses/proxmox-firewall-data/copyright"
+'''

@@ -1,0 +1,53 @@
+# Proxmox VE storage library (Debian: libpve-storage-perl) and pvesm: the
+# storage plugins (directory, LVM, LVM-thin, ZFS, NFS, CIFS, iSCSI, BTRFS,
+# Proxmox Backup Server, ESXi import, RBD/CephFS), disk management and
+# guest import. Pinned to the "bump version to 9.1.16" commit (no tags).
+# FenrirOS: installed in Perl's vendor directory, so the third-party plugin
+# directory is <vendorlib>/PVE/Storage/Custom; systemctl calls go to
+# pve-common's dinit stand-in. Ceph is not packaged: files/RADOS.pm is a
+# stand-in for librados2-perl's PVE::RADOS that fails every call, so the
+# RBD/CephFS plugins load but cannot be used. The disk API's "create
+# directory storage" and ZFS pool import write systemd .mount / zfs-import@
+# units, which do nothing here (see wip/proxmox/NOTES.md).
+# Not packaged yet (optional tools the plugins call): proxmox-backup-client
+# (PBS storage), skopeo (OCI images), targetcli/ietadm (ZFS over iSCSI),
+# smbclient comes from samba.
+# Left out: the pvesm man page and shell completions (pve-docs' generator and
+# the PVE stack at build time; see wip/proxmox/NOTES.md).
+name = "pve-storage"
+version = "9.1.16"
+release = 1
+summary = "Proxmox VE storage management library"
+license = "AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=pve-storage.git"
+hostdeps = ["perl", "make"]
+rundeps = ["perl", "pve-common", "pve-cluster", "pve-access-control", "pve-apiclient", "perl-file-chdir",
+           "perl-posix-strptime", "perl-xml-libxml", "lvm2", "thin-provisioning-tools", "cstream", "lzop",
+           "zstd", "bzip2", "nfs-utils", "cifs-utils", "smartmontools", "qemu", "gptfdisk", "util-linux",
+           "file", "e2fsprogs", "open-iscsi", "libiscsi"]
+options = ["!check"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/pve-storage.git 50bbabb4d6cec50d5b049f0b7a49f1a87dbdc30e", sha256 = "7289a1ea27588b50ecdb6ca62e0138f29bd2f07749dd1947d929f5e209092a4b" },
+]
+
+setup = '''
+vendorlib=$(perl -MConfig -e 'print $Config{vendorlib}')
+# FenrirOS: no systemctl; point every call at pve-common's dinit stand-in
+grep -rlE "systemctl" src/PVE | xargs -r sed -i -E \
+    -e "s#(['\"])(/usr)?(/bin/)?systemctl(['\" ])#\1/usr/libexec/pve-fenrir/systemctl\4#g"
+# third-party storage plugins live under Perl's vendor directory here
+sed -i "s#/usr/share/perl5/PVE/Storage/Custom#$vendorlib/PVE/Storage/Custom#g" src/PVE/Storage.pm
+# FenrirOS's open-iscsi installs iscsiadm in /usr/sbin (Debian: /usr/bin)
+sed -i "s#'/usr/bin/iscsiadm'#'/usr/sbin/iscsiadm'#" src/PVE/Storage/ISCSIPlugin.pm
+grep -qF "'/usr/sbin/iscsiadm'" src/PVE/Storage/ISCSIPlugin.pm
+'''
+install = '''
+vendorlib=$(perl -MConfig -e 'print $Config{vendorlib}')
+make -C src/PVE install DESTDIR="$pkgdir" PERLDIR="$vendorlib"
+make -C src/udev-rbd install DESTDIR="$pkgdir"
+install -Dm755 src/bin/pvesm "$pkgdir/usr/sbin/pvesm"
+install -Dm644 $pkgfiles/RADOS.pm "$pkgdir$vendorlib/PVE/RADOS.pm"
+install -d "$pkgdir$vendorlib/PVE/Storage/Custom"
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/pve-storage/copyright"
+'''

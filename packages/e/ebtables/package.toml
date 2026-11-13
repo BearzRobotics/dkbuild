@@ -1,0 +1,44 @@
+# ebtables: the legacy (x_tables, not nftables) Ethernet bridge firewall tool.
+# The tree's iptables already ships the nftables-backed ebtables (ebtables,
+# ebtables-nft, -save, -restore); this package adds only the legacy commands,
+# which Proxmox VE's pve-firewall uses (Debian points its ebtables alternative
+# at the legacy backend):
+#   /usr/sbin/ebtables-legacy, ebtables-legacy-save, ebtables-legacy-restore,
+#   ebtablesd, ebtablesu (the pipe daemon and its client), and libebtc.
+# None of these names collide with iptables' files. /etc/ethertypes, which
+# ebtables-legacy reads for protocol names, comes from iptables (the same file,
+# installed by iptables when built with nftables), so ebtables' copy is left out
+# and iptables is a run dependency. ebtables-legacy-save is a Perl script.
+# Shared and static libebtc (no headers are installed upstream).
+name = "ebtables"
+version = "2.0.11"
+release = 1
+summary = "Ethernet bridge frame table administration (legacy x_tables backend)"
+license = "GPL-2.0-or-later"
+homepage = "https://ebtables.netfilter.org/"
+patches = ["save-use-legacy.patch"]
+hostdeps = ["perl"]
+builddeps = ["linux-headers"]
+rundeps = ["iptables", "perl"]
+# no test suite
+options = ["!check"]
+
+source = [
+    { url = "https://www.netfilter.org/pub/ebtables/ebtables-2.0.11.tar.gz", sha256 = "b71f654784a726329f88b412ef7b96b4e5d786ed2bd28193ed7b4c0d677dfd2a" },
+]
+
+setup = '''
+%configure LOCKFILE=/run/ebtables.lock
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+find "$pkgdir" -name '*.la' -delete
+# /etc/ethertypes is iptables' (same content)
+rm -f "$pkgdir/etc/ethertypes"
+for c in ebtables-legacy ebtables-legacy-save ebtables-legacy-restore ebtablesd ebtablesu; do
+    test -x "$pkgdir/usr/sbin/$c"
+done
+'''

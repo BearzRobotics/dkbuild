@@ -1,0 +1,25 @@
+# NetAddr-IP 4.079 from CPAN: Manages IPv4 and IPv6 addresses and subnets.
+# Packaged for Proxmox VE (pve-common, pve-network). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-netaddr-ip"
+version = "4.079"
+release = 1
+summary = "Manages IPv4 and IPv6 addresses and subnets"
+license = "GPL-2.0-or-later OR Artistic-1.0-Perl"
+homepage = "https://metacpan.org/dist/NetAddr-IP"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/M/MI/MIKER/NetAddr-IP-4.079.tar.gz", sha256 = "ec5a82dfb7028bcd28bb3d569f95d87dd4166cc19867f2184ed3a59f6d6ca0e7" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

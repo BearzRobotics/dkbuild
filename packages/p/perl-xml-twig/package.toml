@@ -1,0 +1,26 @@
+# XML-Twig 3.55 from CPAN: XML, The Perl Way.
+# Packaged for Proxmox VE (a dependency of Proxmox VE's Perl stack). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-xml-twig"
+version = "3.55"
+release = 1
+summary = "XML, The Perl Way"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/XML-Twig"
+hostdeps = ["perl"]
+builddeps = ["perl", "perl-xml-parser"]
+rundeps = ["perl-xml-parser"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/M/MI/MIROD/XML-Twig-3.55.tar.gz", sha256 = "69326e5edc05c759ccc78fbe05ca63759a035fe7a5337b8ddba6c3dd42f64f6c" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

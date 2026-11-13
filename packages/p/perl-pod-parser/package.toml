@@ -1,0 +1,25 @@
+# Pod-Parser 1.67 from CPAN: Modules for parsing/translating POD format documents.
+# Packaged for Proxmox VE (pve-common: CLI help). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-pod-parser"
+version = "1.67"
+release = 1
+summary = "Modules for parsing/translating POD format documents"
+license = "Artistic-1.0-Perl"
+homepage = "https://metacpan.org/dist/Pod-Parser"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/M/MA/MAREKR/Pod-Parser-1.67.tar.gz", sha256 = "5deccbf55d750ce65588cd211c1a03fa1ef3aaa15d1ac2b8d85383a42c1427ea" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

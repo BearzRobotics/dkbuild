@@ -1,0 +1,35 @@
+Corosync on FenrirOS
+====================
+
+The package installs corosync inert: no /etc/corosync/corosync.conf, no
+/etc/corosync/authkey, and its dinit services are not enabled.
+
+Built-in features: dbus, monitoring (libstatgrab), watchdog, augeas lens,
+snmp, xmlconf, vqsim, nozzle. Encryption is enforced (corosync 3.2's
+default): crypto_cipher/crypto_hash "none" and the legacy udp/udpu
+transports are not compiled in, so every cluster link is knet with
+encryption.
+
+On a Proxmox VE node, pve-cluster (pvecm create / pvecm add) writes the
+configuration and the key; nothing below is needed by hand.
+
+Standalone setup:
+
+1. Configuration: start from the example
+     cp /usr/share/doc/corosync/corosync.conf.example /etc/corosync/corosync.conf
+   and set totem.cluster_name, the nodelist (one ring0_addr per node), and
+   crypto_cipher/crypto_hash (e.g. aes256 / sha256).
+2. Key, the same file on every node (mode 0400, owner root):
+     corosync-keygen
+   then copy /etc/corosync/authkey to the other nodes.
+3. Start it, and enable it at boot if wanted:
+     dinitctl start corosync
+     dinitctl enable corosync
+   corosync-notifyd (D-Bus signals; SNMP traps with -s -m <manager>, see
+   /etc/dinit.d/corosync-notifyd) is a separate service:
+     dinitctl start corosync-notifyd
+4. Check: corosync-cfgtool -s, corosync-quorumtool -s.
+
+Logs go to syslog and, if configured, /var/log/cluster/. A logrotate
+snippet is in /etc/logrotate.d/corosync (used only when logrotate is
+installed).

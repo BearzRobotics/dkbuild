@@ -1,0 +1,11 @@
+# pve-ha-lrm: Proxmox VE local HA resource manager
+type = bgprocess
+command = /usr/sbin/pve-ha-lrm start
+stop-command = /usr/sbin/pve-ha-lrm stop
+pid-file = /run/pve-ha-lrm.pid
+depends-on: pve-cluster
+depends-on: watchdog-mux
+waits-for: pve-ha-crm
+waits-for: corosync
+waits-for: pvedaemon
+waits-for: pveproxy

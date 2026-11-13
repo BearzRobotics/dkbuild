@@ -1,0 +1,7 @@
+# pvescheduler: Proxmox VE scheduler (backup jobs, replication)
+type = bgprocess
+command = /usr/bin/pvescheduler start
+stop-command = /usr/bin/pvescheduler stop
+pid-file = /run/pvescheduler.pid
+depends-on: pve-cluster
+waits-for: pve-guests

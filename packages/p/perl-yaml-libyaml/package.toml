@@ -1,0 +1,25 @@
+# YAML-LibYAML 0.910.0 from CPAN: Perl YAML Serialization using XS and libyaml.
+# Packaged for Proxmox VE (pve-common). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-yaml-libyaml"
+version = "0.910.0"
+release = 1
+summary = "Perl YAML Serialization using XS and libyaml"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/YAML-LibYAML"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/T/TI/TINITA/YAML-LibYAML-v0.910.0.tar.gz", sha256 = "04310e9840b918383a5b9ae9ca4b3bde1b2771ec786c758bd2fffd79d409332b" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

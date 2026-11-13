@@ -1,0 +1,93 @@
+FenrirOS updates come from apk, not APT (pve-manager's PVE::API2::APT is
+replaced by an apk version, files/APT.pm):
+- the node's "Repositories" panel and the summary's repository status are
+  removed: they manage Debian/Proxmox APT repository files
+  (/etc/apk/repositories is not edited from the web UI);
+- pveupgrade (the web UI's "Upgrade" console) runs "apk upgrade" instead of
+  "apt-get dist-upgrade"; its "database out of date" check looks at the
+  package list pveupdate writes (/var/lib/pve-manager/pkgupdates).
+The "Updates" panel stays (it lists apk's upgradable packages).
+Based on proxmox-nixos's pkgs/pve-manager/0001-no-apt-update.patch and
+0002-no-repo-status.patch (which remove both panels); written for FenrirOS.
+
+--- a/www/manager6/node/Config.js
+--- a/www/manager6/node/Config.js
++++ b/www/manager6/node/Config.js
+@@ -276,15 +276,6 @@
+                     nodename: nodename,
+                 });
+ 
+-                me.items.push({
+-                    xtype: 'proxmoxNodeAPTRepositories',
+-                    title: gettext('Repositories'),
+-                    iconCls: 'fa fa-files-o',
+-                    itemId: 'aptrepositories',
+-                    nodename: nodename,
+-                    onlineHelp: 'sysadmin_package_repositories',
+-                    groups: ['apt'],
+-                });
+             }
+         }
+ 
+--- a/www/manager6/node/StatusView.js
++++ b/www/manager6/node/StatusView.js
+@@ -149,21 +149,6 @@
+     initComponent: function () {
+         let me = this;
+ 
+-        let stateProvider = Ext.state.Manager.getProvider();
+-        let repoLink = stateProvider.encodeHToken({
+-            view: 'server',
+-            rid: `node/${me.pveSelNode.data.node}`,
+-            ltab: 'tasks',
+-            nodetab: 'aptrepositories',
+-        });
+-
+-        me.items.push({
+-            xtype: 'pmxNodeInfoRepoStatus',
+-            itemId: 'repositoryStatus',
+-            product: 'Proxmox VE',
+-            repoLink: `#${repoLink}`,
+-        });
+-
+         me.callParent();
+     },
+ });
+--- a/www/manager6/node/Summary.js
++++ b/www/manager6/node/Summary.js
+@@ -312,8 +312,6 @@
+             },
+         });
+ 
+-        me.updateRepositoryStatus();
+-
+         me.callParent();
+ 
+         let sp = Ext.state.Manager.getProvider();
+--- a/bin/pveupgrade
++++ b/bin/pveupgrade
+@@ -35,20 +35,20 @@
+     exit(-1);
+ }
+ 
+-my $st = File::stat::stat("/var/cache/apt/pkgcache.bin");
++my $st = File::stat::stat("/var/lib/pve-manager/pkgupdates"); # written by pveupdate (apk update)
+ if (!$st || (time() - $st->mtime) > (3 * 24 * 3600)) {
+ 
+     print "\nYour package database is out of date. Please update that first.\n\n";
+ 
+ } else {
+ 
+-    my $cmdstr = 'apt-get dist-upgrade';
++    my $cmdstr = 'apk upgrade';
+ 
+-    print "Starting system upgrade: apt-get dist-upgrade\n";
++    print "Starting system upgrade: apk upgrade\n";
+ 
+     my $oldlist = PVE::API2::APT->list_updates({ node => $nodename });
+ 
+-    system('apt-get', 'dist-upgrade');
++    system('apk', 'upgrade');
+ 
+     my $pkglist = PVE::API2::APT->list_updates({ node => $nodename });
+ 

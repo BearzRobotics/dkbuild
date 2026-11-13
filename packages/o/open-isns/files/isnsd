@@ -1,0 +1,5 @@
+# isnsd: iSNS server (iSCSI target/initiator discovery). Shipped, not enabled;
+# configuration in /etc/isns/isnsd.conf (see /usr/share/doc/open-isns/README.FenrirOS).
+type = process
+command = /usr/sbin/isnsd -f
+depends-on: rcboot

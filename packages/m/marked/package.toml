@@ -1,0 +1,20 @@
+# marked, a Markdown parser for JavaScript (Debian: libjs-marked): its
+# prebuilt browser build (lib/marked.umd.js from the npm package) installed as
+# /usr/share/javascript/marked/marked.js, where proxmox-widget-toolkit bundles
+# it from (notes and descriptions in the Proxmox web UIs are Markdown).
+name = "marked"
+version = "18.2.0"
+release = 1
+summary = "Markdown parser and compiler for JavaScript (browser build)"
+license = "MIT"
+homepage = "https://marked.js.org"
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://registry.npmjs.org/marked/-/marked-18.2.0.tgz", sha256 = "f8f191f70f642128653254bf4b511e7fd7d77962b4c2a186d5f192e47f93d800" },
+]
+
+install = '''
+install -Dm644 lib/marked.umd.js "$pkgdir/usr/share/javascript/marked/marked.js"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/marked/LICENSE"
+'''

@@ -1,0 +1,25 @@
+# XML-NamespaceSupport 1.12 from CPAN: A simple generic namespace processor.
+# Packaged for Proxmox VE (a dependency of Proxmox VE's Perl stack). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-xml-namespacesupport"
+version = "1.12"
+release = 1
+summary = "A simple generic namespace processor"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/XML-NamespaceSupport"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/P/PE/PERIGRIN/XML-NamespaceSupport-1.12.tar.gz", sha256 = "47e995859f8dd0413aa3f22d350c4a62da652e854267aa0586ae544ae2bae5ef" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

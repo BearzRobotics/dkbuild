@@ -1,0 +1,4 @@
+# pve-lxc-syscalld: handles syscalls of Proxmox VE containers forwarded by seccomp (mknod, ...)
+type = process
+command = /usr/libexec/pve-lxc-syscalld/pve-lxc-syscalld --system /run/pve-lxc-syscalld/socket
+depends-on: early-filesystems

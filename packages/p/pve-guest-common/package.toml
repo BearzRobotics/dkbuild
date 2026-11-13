@@ -1,0 +1,30 @@
+# Proxmox VE guest-related Perl modules (Debian: libpve-guest-common-perl):
+# the abstract guest config and migration code, replication, vzdump plugin
+# base, resource mappings, websocket tunnels; shared by qemu-server and
+# pve-container. Pinned to the "bump version to 6.0.8" commit (no tags).
+# proxmox-websocket-tunnel (Debian dependency, remote migration only) is not
+# packaged yet; see wip/proxmox/NOTES.md.
+name = "pve-guest-common"
+version = "6.0.8"
+release = 1
+summary = "Proxmox VE guest-related Perl modules"
+license = "AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=pve-guest-common.git"
+hostdeps = ["perl", "make"]
+rundeps = ["perl", "pve-common", "pve-cluster", "pve-access-control", "pve-storage"]
+options = ["!check"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/pve-guest-common.git 3d32b926e7664f095611d7192944926ebdd5ca14", sha256 = "7a5e2dd1b0b394a65d9f1d2e6270cb6146b66a37026c56c3b45e5a86edb154fa" },
+]
+
+setup = '''
+# FenrirOS: no systemctl; point every call at pve-common's dinit stand-in
+grep -rlE "systemctl" src/PVE | xargs -r sed -i -E \
+    -e "s#(['\"])(/usr)?(/bin/)?systemctl(['\" ])#\1/usr/libexec/pve-fenrir/systemctl\4#g"
+'''
+install = '''
+vendorlib=$(perl -MConfig -e 'print $Config{vendorlib}')
+make -C src install PERL5DIR="$pkgdir$vendorlib" DOCDIR="$pkgdir/usr/share/doc/pve-guest-common"
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/pve-guest-common/copyright"
+'''

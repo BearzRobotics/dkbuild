@@ -1,0 +1,25 @@
+open-iscsi on FenrirOS
+======================
+
+iscsiadm, iscsid, iscsistart, iscsiuio and iscsi-iname. Nothing runs by
+default: the dinit services /etc/dinit.d/iscsid (and iscsid-initiatorname,
+which it needs) are not enabled, and no initiator name is shipped.
+
+1. Initiator name: the first start of iscsid writes a unique one to
+   /etc/iscsi/initiatorname.iscsi (iscsi-gen-initiatorname; taken from the
+   kernel command line, rd.initiatorname=, or iBFT when present). To choose
+   your own, write it before the first start:
+     echo "InitiatorName=iqn.2026-01.org.example:host1" > /etc/iscsi/initiatorname.iscsi
+2. Kernel module: modprobe iscsi_tcp (or list it in /etc/modules-load.d/).
+3. Start iscsid, and enable it at boot if wanted:
+     dinitctl start iscsid
+     dinitctl enable iscsid
+   Or let the tools start it when needed: in /etc/iscsi/iscsid.conf set
+     iscsid.startup = /usr/sbin/dinitctl start iscsid
+4. Discover and log in:
+     iscsiadm -m discovery -t sendtargets -p <portal>
+     iscsiadm -m node --login
+   CHAP credentials, if the target needs them, go in /etc/iscsi/iscsid.conf
+   (node.session.auth.*) or per node with iscsiadm -m node -o update.
+
+The node database is /var/lib/iscsi (created by tmpfiles.d).

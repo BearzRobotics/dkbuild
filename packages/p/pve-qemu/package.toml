@@ -1,0 +1,186 @@
+# Proxmox VE's QEMU (Debian's pve-qemu-kvm 11.1.3-2): QEMU 11.1.3 with Proxmox's
+# patch series, for qemu-server (Proxmox VE's VM manager). Source: the
+# pve-qemu git repository at "bump version to 11.1.3-2" (2dc0af52; Proxmox's
+# repositories have no tags) with its qemu submodule (QEMU v11.1.3, 005c61c0).
+# Proxmox's patches add the QMP commands qemu-server uses (backup and
+# backup-access-setup, query-proxmox-support, savevm-start and the other
+# savevm-async commands, query-pbs-bitmap-info, ...), the VMA archive format
+# and the `vma` tool, Proxmox Backup Server support (`pbs-restore`, the pbs
+# block driver, through libproxmox_backup_qemu from proxmox-backup-qemu), the
+# zeroinit and alloc-track block drivers, qemu-img dd extensions and
+# Proxmox's machine versions.
+# Built as debian/rules does: targets x86_64-softmmu and aarch64-softmmu, data in
+# /usr/share/kvm (--with-suffix=kvm), helpers and modules in /usr/lib/kvm,
+# /usr/bin/kvm a link to the native qemu-system-*, /etc/kvm/kvm-ifup and
+# kvm-ifdown, and the files qemu-server reads made from the built QEMU:
+# /usr/share/kvm/recognized-CPUID-flags-x86_64, machine-versions-{x86_64,aarch64}.json,
+# cpu-models-{x86_64,aarch64}.json (checked against Proxmox's copies, as Debian
+# does). Proxmox's preparation of the tree (their Makefile) is repeated: the
+# firmware for other architectures and the device trees removed.
+# Enabled as Proxmox enables it: ALSA (default), PulseAudio and sndio audio,
+# curl, docs, FUSE exports, GnuTLS, libiscsi, libusb, Linux AIO, io_uring,
+# NUMA, OpenGL (epoxy, GBM), PNG, seccomp, slirp, SPICE, usbredir,
+# virglrenderer, virtfs, xkbcommon, zstd; and what Proxmox gets implicitly
+# from its build dependencies (VNC with JPEG, libcap-ng, libudev, ACLs/xattrs,
+# PCI). Proxmox's own choices kept: no capstone, GTK, SDL, smartcard, libnfs,
+# libssh, Xen or guest agent (a headless VM host; the tree's qemu package
+# has those).
+# Differences from Proxmox's build:
+# - Ceph's RBD driver is off (--disable-rbd): Ceph is not packaged.
+# - No libsystemd: Proxmox's "redirect stderr to journal when daemonized"
+#   patch (pve/0030) is replaced by one that sends a daemonized QEMU's stderr
+#   to syslog through logger(1) (patches/fenrir-redirect-stderr-...).
+# - musl/clang fixes from the tree's qemu recipe (patches/, after the series),
+#   and the system's meson and Sphinx instead of QEMU's Python venv.
+# - Not shipped: Proxmox's prebuilt OVMF_CODE/VARS-pure-efi.fd (only
+#   qemu-server's tests name them; pve-edk2-firmware has the firmware).
+# The firmware blobs QEMU ships in pc-bios/ (SeaBIOS, iPXE ROMs, VGA BIOS, the
+# edk2 images, ...) are installed as Proxmox (and the tree's qemu) do.
+#
+# qemu-server runs /usr/bin/kvm, /usr/bin/qemu-system-*, /usr/bin/qemu-img,
+# /usr/bin/vma and /usr/bin/pbs-restore by absolute path, so this package
+# owns those names: it replaces the tree's qemu (whose qemu-system-*, qemu-img,
+# qemu-nbd, ... and man pages it takes over; installing qemu afterwards is
+# refused by apk), as Debian's pve-qemu-kvm conflicts with Debian's qemu.
+name = "pve-qemu"
+version = "11.1.3"
+release = 1
+summary = "QEMU with Proxmox VE's patches (pve-qemu-kvm)"
+license = "GPL-2.0-only AND LGPL-2.1-only"
+homepage = "https://git.proxmox.com/?p=pve-qemu.git"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["bash", "bison", "flex", "bzip2", "diffutils", "gettext", "meson", "ninja", "perl", "perl-json", "pkgconf", "python", "python-sphinx", "python-sphinx-rtd-theme"]
+builddeps = ["acl-devel", "alsa-lib-devel", "attr-devel", "curl-devel", "dtc-devel", "eudev-devel", "fuse-devel", "glib-devel", "gnutls-devel", "libaio-devel", "libcap-ng-devel", "libdrm-devel", "libepoxy-devel", "libiscsi-devel", "libjpeg-turbo-devel", "libpng-devel", "libpulse-devel", "libseccomp-devel", "libslirp-devel", "liburing-devel", "libusb-devel", "libxkbcommon-devel", "linux-headers", "mesa-devel", "numactl-devel", "pciutils-devel", "pixman-devel", "proxmox-backup-qemu-devel", "sndio-devel", "spice-devel", "spice-protocol-devel", "usbredir-devel", "util-linux-devel", "virglrenderer-devel", "xfsprogs-devel", "zlib-ng-compat-devel", "zstd-devel"]
+rundeps = ["fuse", "iproute2", "util-linux"]
+replaces = ["qemu", "qemu-doc"]
+options = ["!cross", "!check"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/pve-qemu.git 2dc0af52b07630e974b4656706c90ca7eac4f4a5", sha256 = "0000000000000000000000000000000000000000000000000000000000000000" },
+    # the meson subproject QEMU's UI needs (keymaps), at the commit its wrap names
+    { url = "https://gitlab.com/qemu-project/keycodemapdb/-/archive/f5772a62ec52591ff6870b7e8ef32482371f22c6/keycodemapdb-f5772a62ec52591ff6870b7e8ef32482371f22c6.tar.gz", sha256 = "d014b53382dbb17b8196ad12f50de7f20d0ef1b9f7d54b0be51a6cbb14209195" },
+]
+
+setup = '''
+cd qemu
+# Proxmox VE's series (debian/patches/series, quilt order), except
+# pve/0030 (stderr to systemd's journal, needs libsystemd), whose place
+# patches/fenrir-redirect-stderr-to-syslog-when-daemonized.patch takes
+while read -r p; do
+    case "$p" in
+        ''|'#'*) continue ;;
+        pve/0030-PVE-redirect-stderr-to-journal-when-daemonized.patch)
+            patch -p1 -N < /dkbuild/patches/fenrir-redirect-stderr-to-syslog-when-daemonized.patch ;;
+        *) patch -p1 -N < ../debian/patches/"$p" ;;
+    esac
+done < ../debian/patches/series
+# musl/clang fixes from the tree's qemu recipe (each patch says why)
+for p in CVE-2021-20255 MAP_SYNC-fix int128-overflow no-venv notest tcg-overflow xattr_size_max; do
+    patch -p1 -N < /dkbuild/patches/$p.patch
+done
+
+# Proxmox's tree preparation (their Makefile, $(BUILDDIR)): no device trees
+# and no firmware for architectures it does not build; the same files out of
+# pc-bios/meson.build
+rm -rf pc-bios/dtb
+sed -i "/subdir('dtb')/d" pc-bios/meson.build
+for f in hppa-firmware.img hppa-firmware64.img openbios-ppc openbios-sparc32 openbios-sparc64 \
+         palcode-clipper s390-ccw.img s390-netboot.img u-boot.e500 qemu_vga.ndrv slof.bin \
+         'opensbi-riscv.*-generic-fw_dynamic.bin'; do
+    find pc-bios -maxdepth 1 -type f | grep -e "$f" | xargs -r rm -f
+    # its entry in the list of blobs to install
+    sed -i "/$f/d" pc-bios/meson.build
+done
+
+# keycodemapdb where meson looks for the subproject (the wrap would clone it)
+rm -rf subprojects/keycodemapdb
+cp -a ../../keycodemapdb-f5772a62ec52591ff6870b7e8ef32482371f22c6 subprojects/keycodemapdb
+
+# configure as debian/rules does; qemu links many big programs at once: at
+# most four links at a time (as the tree's qemu)
+%configure \
+    -Dbackend_max_links=4 \
+    --disable-download \
+    --docdir=/usr/share/doc/pve-qemu \
+    --target-list=x86_64-softmmu,aarch64-softmmu \
+    --with-suffix=kvm \
+    --with-pkgversion="pve-qemu-kvm_11.1.3-2" \
+    --audio-drv-list=alsa \
+    --datadir=/usr/share \
+    --libexecdir=/usr/lib/kvm \
+    --disable-capstone \
+    --disable-gtk \
+    --disable-guest-agent \
+    --disable-guest-agent-msi \
+    --disable-libnfs \
+    --disable-libssh \
+    --disable-sdl \
+    --disable-smartcard \
+    --disable-xen \
+    --disable-rbd \
+    --disable-werror \
+    --enable-curl \
+    --enable-docs \
+    --enable-fuse \
+    --enable-gnutls \
+    --enable-libiscsi \
+    --enable-libusb \
+    --enable-linux-aio \
+    --enable-linux-io-uring \
+    --enable-numa \
+    --enable-opengl \
+    --enable-pa \
+    --enable-png \
+    --enable-seccomp \
+    --enable-slirp \
+    --enable-sndio \
+    --enable-spice \
+    --enable-usb-redir \
+    --enable-virglrenderer \
+    --enable-virtfs \
+    --enable-xkbcommon \
+    --enable-zstd
+'''
+build = '''
+cd qemu
+%make
+'''
+install = '''
+cd qemu
+%make_install
+# as debian/rules: no headers (a kvm-dev package), no bridge helper and no
+# virtfs proxy helper
+rm -rf "$pkgdir/usr/include"
+rm -f "$pkgdir/usr/lib/kvm/qemu-bridge-helper" "$pkgdir/usr/lib/kvm/virtfs-proxy-helper"
+
+# what qemu-server reads, made from this QEMU as debian/rules does (TCG is
+# enough; the modules from the install root)
+export QEMU_MODULE_DIR="$pkgdir/usr/lib/kvm"
+kvm="$pkgdir/usr/share/kvm"
+../debian/parse-cpu-flags.pl "$pkgdir/usr/bin/qemu-system-x86_64" max-x86_64-cpu > "$kvm/recognized-CPUID-flags-x86_64"
+diff -u "$kvm/recognized-CPUID-flags-x86_64" ../debian/recognized-CPUID-flags-x86_64
+for a in x86_64 aarch64; do
+    "$pkgdir/usr/bin/qemu-system-$a" -machine help | ../debian/parse-machines.pl > "$kvm/machine-versions-$a.json"
+    "$pkgdir/usr/bin/qemu-system-$a" -cpu help | ../debian/parse-cpu-models.pl > "$kvm/cpu-models-$a.json"
+    # Proxmox's check that the CPU models are the ones qemu-server expects
+    diff -u "$kvm/cpu-models-$a.json" ../debian/cpu-models-$a.json
+done
+
+# debian/pve-qemu-kvm.install and .links
+install -Dm755 ../debian/kvm-ifup "$pkgdir/etc/kvm/kvm-ifup"
+install -Dm755 ../debian/kvm-ifdown "$pkgdir/etc/kvm/kvm-ifdown"
+ln -s qemu-system-aarch64 "$pkgdir/usr/bin/qemu-system-arm"
+ln -s qemu-system-x86_64 "$pkgdir/usr/bin/qemu-system-i386"
+ln -s qemu-system-$arch "$pkgdir/usr/bin/kvm"
+for m in kvm qemu-system-aarch64 qemu-system-arm qemu-system-i386 qemu-system-x86_64; do
+    ln -s qemu.1 "$pkgdir/usr/share/man/man1/$m.1"
+done
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/pve-qemu/COPYING"
+install -Dm644 COPYING.LIB "$pkgdir/usr/share/licenses/pve-qemu/COPYING.LIB"
+'''
+
+# The manual pages stay in the main package, which replaces qemu-doc's
+# (a subpackage cannot declare replaces); the HTML manual is in -doc.
+[subpackages.doc]
+summary = "QEMU's HTML documentation"
+paths = ["/usr/share/doc"]

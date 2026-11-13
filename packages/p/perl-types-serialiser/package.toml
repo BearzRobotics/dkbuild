@@ -1,0 +1,26 @@
+# Types-Serialiser 1.01 from CPAN: simple data types for common serialisation formats.
+# Packaged for Proxmox VE (a dependency of Proxmox VE's Perl stack). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-types-serialiser"
+version = "1.01"
+release = 1
+summary = "simple data types for common serialisation formats"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/Types-Serialiser"
+hostdeps = ["perl"]
+builddeps = ["perl", "perl-common-sense"]
+rundeps = ["perl-common-sense"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/M/ML/MLEHMANN/Types-Serialiser-1.01.tar.gz", sha256 = "f8c7173b0914d0e3d957282077b366f0c8c70256715eaef3298ff32b92388a80" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

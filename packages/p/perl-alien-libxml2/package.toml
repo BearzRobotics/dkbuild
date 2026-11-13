@@ -1,0 +1,29 @@
+# Alien-Libxml2 0.20 from CPAN: Install the C libxml2 library on your system.
+# Packaged for Proxmox VE (a dependency of Proxmox VE's Perl stack). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-alien-libxml2"
+version = "0.20"
+release = 1
+summary = "Install the C libxml2 library on your system"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/Alien-Libxml2"
+hostdeps = ["perl", "pkgconf", "perl-alien-build-plugin-download-gitlab"]
+builddeps = ["perl", "libxml2-devel", "perl-alien-build"]
+rundeps = ["perl-alien-build"]
+options = ["!check"]
+environment = '''
+export ALIEN_INSTALL_TYPE=system
+'''
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/Alien-Libxml2-0.20.tar.gz", sha256 = "56aae7b339bbeb02f77c5801f57a821be5791b51f43bf7f9062bb3bfa444c328" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

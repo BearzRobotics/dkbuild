@@ -1,0 +1,81 @@
+Proxmox VE on FenrirOS
+======================
+
+Proxmox VE (the API, web UI, VMs with Proxmox's QEMU, LXC containers,
+storage, firewall, clustering) ported to FenrirOS: musl, dinit, apk. The
+packages are installed inert: no service is enabled, no cluster exists, no
+certificate or key is made and no password is set until you do the steps
+below. The meta package `proxmox-ve` installs the whole stack.
+
+Differences from Proxmox VE on Debian
+-------------------------------------
+- Services are dinit services (/etc/dinit.d) of the same names as Debian's
+  units. Proxmox's own calls to systemctl go to a small stand-in,
+  /usr/libexec/pve-fenrir/systemctl, which maps them to dinitctl; a VM's
+  "scope" is the cgroup /sys/fs/cgroup/qemu.slice/<vmid>.scope, created
+  directly (no systemd). cgroup v2 must be mounted on /sys/fs/cgroup.
+- Updates come from apk: the node's "Updates" panel lists apk's upgradable
+  packages, "Refresh" runs apk update, "Upgrade" opens a console running
+  apk upgrade. Repositories are /etc/apk/repositories (not edited from the
+  web UI). pveversion -v lists the installed FenrirOS packages.
+- The node's "System Log" shows /var/log/messages (sysklogd), not a journal.
+- The firewall uses the legacy iptables/ebtables backends by name.
+- Ceph is not packaged: Ceph storage and the Ceph panels report it missing.
+- ifupdown2 is not packaged: the "Network" panel edits
+  /etc/network/interfaces, but nothing applies it. Create the bridges
+  (vmbr0, ...) yourself (see below).
+
+Setup of a single node
+----------------------
+1. Host name: the node's name must resolve to its own IP address (not
+   127.0.0.1), e.g. in /etc/hosts:
+       192.0.2.10   pve1.example.org pve1
+2. Kernel: KVM (kvm_intel or kvm_amd), vhost_net and, for containers,
+   the usual LXC features; /usr/share/doc/qemu-server/modules-load.conf
+   lists the modules Debian loads at boot. Optional sysctl settings Debian
+   applies are in /usr/share/doc/pve-cluster/10-pve.conf,
+   /usr/share/doc/pve-container/10-pve-ct-inotify-limits.conf and
+   /usr/share/doc/pve-firewall/pve-firewall-sysctl.conf.
+3. Bridge for guests, e.g. with iproute2 (make it permanent with your own
+   dinit scripted service):
+       ip link add vmbr0 type bridge
+       ip link set eth0 master vmbr0
+       ip link set vmbr0 up        (and move the host's address to vmbr0)
+4. Users and state: the www-data user and the state directories come from
+   sysusers.d/tmpfiles.d at installation.
+5. Start the services (dinitctl enable starts them and starts them at boot):
+       dinitctl enable rrdcached
+       dinitctl enable pve-cluster
+       dinitctl enable pvedaemon
+       dinitctl enable pveproxy          (first start: makes the node's
+                                          self-signed certificate in /etc/pve)
+       dinitctl enable pvestatd
+       dinitctl enable spiceproxy
+       dinitctl enable pvescheduler
+       dinitctl enable qmeventd
+       dinitctl enable pve-query-machine-capabilities
+       dinitctl enable pve-lxc-syscalld
+       dinitctl enable lxcfs
+       dinitctl enable pvefw-logger
+       dinitctl enable pve-firewall
+       dinitctl enable pve-guests        (starts guests marked "start at boot")
+   Optional: pvebanner (web UI address in /etc/issue), pve-firewall-commit,
+   pve-sdn-commit.
+6. Log in: https://<node>:8006 as root, realm "Linux PAM", with root's
+   system password (set it with passwd if it has none). Add other users and
+   realms in Datacenter > Permissions.
+7. Daily refresh of the update list and certificates (optional):
+       cp /usr/share/doc/pve-manager/pve-daily-update.cron /etc/cron.d/pve-daily-update
+   and enable crond. vzdump defaults: /usr/share/doc/pve-manager/vzdump.conf
+   (copy to /etc/vzdump.conf to change them).
+
+Clusters and HA
+---------------
+corosync and pve-ha-manager are packaged. pvecm create <name> (first node)
+and pvecm add <first node> (others) write corosync.conf and its key; then
+dinitctl enable corosync on every node, and pve-ha-lrm / pve-ha-crm for HA.
+
+Not packaged yet
+----------------
+See the build tree's wip/proxmox/NOTES.md: Ceph, ifupdown2/FRR (SDN), the
+Proxmox Backup client, the Yew mobile UI, the PDF/EPUB admin guide.

@@ -1,0 +1,26 @@
+# lzop: the LZO file compressor (Proxmox VE's vzdump writes .vma.lzo /
+# .tar.lzo backups with it), against the tree's lzo library.
+name = "lzop"
+version = "1.04"
+release = 1
+summary = "Fast file compressor using the LZO library"
+license = "GPL-2.0-or-later"
+homepage = "https://www.lzop.org/"
+builddeps = ["lzo-devel"]
+
+source = [
+    { url = "https://www.lzop.org/download/lzop-1.04.tar.gz", sha256 = "7e72b62a8a60aff5200a047eea0773a8fb205caf7acbe1774d95147f305a2f41" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

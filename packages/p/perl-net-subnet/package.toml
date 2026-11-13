@@ -1,0 +1,26 @@
+# Net-Subnet 1.03 from CPAN: Fast IP-in-subnet matcher for IPv4 and IPv6, CIDR or mask..
+# Packaged for Proxmox VE (pve-network). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-net-subnet"
+version = "1.03"
+release = 1
+summary = "Fast IP-in-subnet matcher for IPv4 and IPv6, CIDR or mask."
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/Net-Subnet"
+hostdeps = ["perl"]
+builddeps = ["perl", "perl-socket6"]
+rundeps = ["perl-socket6"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/J/JU/JUERD/Net-Subnet-1.03.tar.gz", sha256 = "125e6db64c98026439f9b585115f94f42315a31d8f16ca63d0c939ab66019afa" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

@@ -1,0 +1,34 @@
+# Imported from Chimera Linux cports user/ipset (BSD-2-Clause, Copyright (c)
+# Chimera Linux contributors).
+# ipset: manage the kernel's IP sets (used by Proxmox VE's pve-firewall), and
+# libipset (shared and static). The kernel modules are the kernel's own
+# (--with-kmod=no). Bash completion installed.
+name = "ipset"
+version = "7.24"
+release = 1
+summary = "Manage Linux IP sets"
+license = "GPL-2.0-only"
+homepage = "https://ipset.netfilter.org/"
+hostdeps = ["pkgconf"]
+builddeps = ["libmnl-devel", "linux-headers"]
+checkdeps = ["bash", "iptables"]
+# The tests create and change real IP sets in the kernel.
+options = ["!check"]
+
+source = [
+    { url = "https://ipset.netfilter.org/ipset-7.24.tar.bz2", sha256 = "fbe3424dff222c1cb5e5c34d38b64524b2217ce80226c14fdcbb13b29ea36112" },
+]
+
+setup = '''
+%configure --with-kmod=no --enable-bashcompl bashcompdir=/usr/share/bash-completion/completions
+'''
+build = '''
+%make
+'''
+check = '''
+make tests
+'''
+install = '''
+%make_install
+find "$pkgdir" -name '*.la' -delete
+'''

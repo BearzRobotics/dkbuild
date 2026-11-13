@@ -1,0 +1,25 @@
+# ExtUtils-Config 0.010 from CPAN: A wrapper for perl's configuration.
+# Packaged for Proxmox VE (a dependency of Proxmox VE's Perl stack). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-extutils-config"
+version = "0.010"
+release = 1
+summary = "A wrapper for perl's configuration"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/ExtUtils-Config"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/L/LE/LEONT/ExtUtils-Config-0.010.tar.gz", sha256 = "82e7e4e90cbe380e152f5de6e3e403746982d502dd30197a123652e46610c66d" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

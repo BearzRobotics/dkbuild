@@ -1,0 +1,56 @@
+# Proxmox VE's common Perl library (Debian: libpve-common-perl): API schema,
+# REST handler, daemons, tools, cgroup and network helpers used by every PVE
+# component. Pinned to the commit that bumped it to this version (Proxmox's
+# repositories have no tags; each Debian release is a "bump version" commit).
+# FenrirOS changes (no systemd, no journal, no dpkg; dinit): patches 0001/0002
+# and the systemctl stand-in files/fenrir-systemctl, installed as
+# /usr/libexec/pve-fenrir/systemctl and used by all PVE packages in place of
+# systemctl. Installed into Perl's vendor directory (Debian: /usr/share/perl5).
+# syscall.ph (PVE::Syscall) is generated here with h2ph from musl's headers;
+# FenrirOS's perl does not ship the h2ph output.
+name = "pve-common"
+version = "9.2.9"
+release = 1
+summary = "Proxmox VE base Perl library"
+license = "AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=pve-common.git"
+patches = [
+    "0001-fenrir-systemd-without-systemd.patch",
+    "0002-fenrir-no-journal-no-dpkg.patch",
+    "0003-ticket-signature-mode.patch",
+]
+hostdeps = ["perl", "make"]
+builddeps = ["perl"]
+rundeps = ["perl", "perl-anyevent", "perl-clone", "perl-crypt-openssl-random", "perl-crypt-openssl-rsa",
+           "perl-devel-cycle", "perl-filesys-df", "perl-http-daemon", "perl-http-message", "perl-io-stringy",
+           "perl-json", "perl-json-xs", "perl-linux-inotify2", "perl-mime-base32", "perl-net-dbus", "perl-net-ip",
+           "perl-ldap", "perl-net-ssleay", "perl-netaddr-ip", "perl-string-shellquote", "perl-timedate",
+           "perl-uri", "perl-libwww", "perl-lwp-protocol-https", "perl-yaml-libyaml", "perl-term-readline-gnu",
+           "perl-pod-parser", "proxmox-acme", "pve-rs-common", "iproute2", "hwdata", "tzdb", "dinit"]
+options = ["!check"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/pve-common.git 7193a0019937de6da53a3078e67f524fabcbf91a", sha256 = "4f00d57103fcd18b103d1a2b770ba256401e181fecbc2cb2d18255ad0427c136" },
+]
+
+setup = '''
+# FenrirOS: no systemctl; point every call at the dinit stand-in that this
+# package installs (/usr/libexec/pve-fenrir/systemctl, files/fenrir-systemctl)
+grep -rlE "systemctl" src/PVE | xargs -r sed -i -E \
+    -e "s#(['\"])(/usr)?(/bin/)?systemctl(['\" ])#\1/usr/libexec/pve-fenrir/systemctl\4#g"
+# FenrirOS's iproute2 installs ip, bridge and tc in /usr/bin (no /sbin copies)
+grep -rlE "/sbin/(ip|bridge|tc)['\" ]" src/PVE | xargs -r sed -i -E \
+    -e "s#/sbin/(ip|bridge|tc)(['\" ])#/usr/bin/\1\2#g"
+'''
+install = '''
+vendorlib=$(perl -MConfig -e 'print $Config{vendorlib}')
+make -C src install DESTDIR="$pkgdir" PERLDIR="$vendorlib"
+# syscall.ph for PVE::Syscall, from musl's headers (Debian's perl ships it);
+# PVE::Syscall needs SYS_openat2, SYS_mount_setattr, ... at load time
+mkdir -p "$PWD/h2ph"
+(cd /usr/include && h2ph -d "$OLDPWD/h2ph" syscall.h sys/syscall.h bits/syscall.h)
+cp -r h2ph/. "$pkgdir$vendorlib/"
+perl -I"$pkgdir$vendorlib" -e 'require "syscall.ph"; defined(&SYS_openat2) && defined(&SYS_mount_setattr) or die "syscall.ph lacks syscalls\n"'
+install -Dm755 $pkgfiles/fenrir-systemctl "$pkgdir/usr/libexec/pve-fenrir/systemctl"
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/pve-common/copyright"
+'''

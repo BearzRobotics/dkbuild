@@ -1,0 +1,5 @@
+# pve-query-machine-capabilities: record the host CPU's confidential-computing
+# capabilities (SEV, TDX) in /run/qemu-server for qemu-server
+type = scripted
+command = /usr/libexec/qemu-server/query-machine-capabilities
+depends-on: early-filesystems

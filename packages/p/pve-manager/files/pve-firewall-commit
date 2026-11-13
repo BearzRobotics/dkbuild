@@ -1,0 +1,5 @@
+# pve-firewall-commit: apply pending firewall configuration changes at boot
+type = scripted
+command = /usr/share/pve-manager/helpers/pve-firewall-commit
+depends-on: pve-cluster
+waits-for: corosync

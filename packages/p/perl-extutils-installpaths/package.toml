@@ -1,0 +1,26 @@
+# ExtUtils-InstallPaths 0.015 from CPAN: Build.PL install path logic made easy.
+# Packaged for Proxmox VE (a dependency of Proxmox VE's Perl stack). Its tests are not run (!check): several need
+# test-only CPAN modules or the network.
+name = "perl-extutils-installpaths"
+version = "0.015"
+release = 1
+summary = "Build.PL install path logic made easy"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://metacpan.org/dist/ExtUtils-InstallPaths"
+hostdeps = ["perl"]
+builddeps = ["perl", "perl-extutils-config"]
+rundeps = ["perl-extutils-config"]
+options = ["!check"]
+
+source = [
+    { url = "https://cpan.metacpan.org/authors/id/L/LE/LEONT/ExtUtils-InstallPaths-0.015.tar.gz", sha256 = "7d64eb2dfa87ead010cdf55c8a1bdfde50b7b5852d7cb8cf2304f55bea2eb007" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''

@@ -1,0 +1,5 @@
+# pve-sdn-commit: apply pending SDN configuration changes at boot
+type = scripted
+command = /usr/share/pve-manager/helpers/pve-sdn-commit
+depends-on: pve-cluster
+waits-for: corosync

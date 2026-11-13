@@ -1,0 +1,63 @@
+# Proxmox VE firewall (Debian: pve-firewall): the cluster-wide, host and
+# guest firewall daemon generating iptables/ip6tables/ebtables/ipset rules from
+# /etc/pve/firewall, and pvefw-logger (NFLOG to /var/log/pve-firewall.log).
+# Pinned to the "bump version to 6.0.7" commit (Proxmox repositories have no tags).
+# FenrirOS: Debian's unit switches the iptables/ebtables alternatives to the
+# legacy backends; FenrirOS's iptables has no plain iptables names, so the rule
+# loaders call iptables-legacy-{save,restore}, ip6tables-legacy-{save,restore}
+# and ebtables-legacy-{save,restore} directly. dinit services pve-firewall and
+# pvefw-logger (shipped, not enabled); systemctl calls go to pve-common's
+# stand-in. The sysctl setting (rp_filter = 2) and the log rotation are
+# samples in /usr/share/doc/pve-firewall.
+# Left out: the man page and shell completions (pve-docs' generator and the
+# PVE stack at build time; see wip/proxmox/NOTES.md).
+name = "pve-firewall"
+version = "6.0.7"
+release = 1
+summary = "Proxmox VE firewall"
+license = "AGPL-3.0-or-later"
+homepage = "https://git.proxmox.com/?p=pve-firewall.git"
+hostdeps = ["perl", "make", "pkgconf"]
+builddeps = ["glib-devel", "libnetfilter-log-devel", "libnetfilter-conntrack-devel"]
+rundeps = ["perl", "pve-common", "pve-cluster", "pve-access-control", "pve-network", "pve-rs",
+           "proxmox-firewall-data", "iptables", "ebtables", "ipset", "conntrack-tools", "perl-anyevent"]
+options = ["!check"]
+
+source = [
+    { url = "snapshot:git https://git.proxmox.com/git/pve-firewall.git 2ff9e4fdf4d054d0580d4ac1d832182601017f4d", sha256 = "29a63b090f1ee0ab3d32edda66217290036d828cc1430cee9fbc11c4afc630e0" },
+]
+
+setup = '''
+# FenrirOS: no systemctl; point every call at pve-common's dinit stand-in
+grep -rlE "systemctl" src/PVE | xargs -r sed -i -E \
+    -e "s#(['\"])(/usr)?(/bin/)?systemctl(['\" ])#\1/usr/libexec/pve-fenrir/systemctl\4#g" \
+    -e "s#qw\(systemctl #qw(/usr/libexec/pve-fenrir/systemctl #g"
+# the legacy iptables/ebtables backends by name (Debian selects them through
+# update-alternatives in its unit; FenrirOS has no plain iptables commands)
+sed -i -E \
+    -e "s#\['(ip6?tables)-restore'#['\1-legacy-restore'#g" \
+    -e 's#\["\$iptablescmd-save"\]#["$iptablescmd-legacy-save"]#' \
+    -e "s#\['ebtables-(save|restore)'#['ebtables-legacy-\1'#g" \
+    src/PVE/Firewall.pm
+for c in "'iptables-legacy-restore'" "'ip6tables-legacy-restore'" '$iptablescmd-legacy-save' \
+         "'ebtables-legacy-save'" "'ebtables-legacy-restore'"; do
+    grep -qF -- "$c" src/PVE/Firewall.pm || { echo "pve-firewall: $c not patched in" >&2; exit 1; }
+done
+'''
+build = '''
+cd src
+$CC $CFLAGS -Wall -std=gnu99 pvefw-logger.c -o pvefw-logger \
+    $(pkg-config libnetfilter_log libnetfilter_conntrack glib-2.0 --libs --cflags) $LDFLAGS
+'''
+install = '''
+vendorlib=$(perl -MConfig -e 'print $Config{vendorlib}')
+make -C src/PVE install PERLDIR="$pkgdir$vendorlib"
+install -Dm755 src/pve-firewall "$pkgdir/usr/sbin/pve-firewall"
+install -Dm755 src/pvefw-logger "$pkgdir/usr/sbin/pvefw-logger"
+install -Dm644 $pkgfiles/pve-firewall "$pkgdir/etc/dinit.d/pve-firewall"
+install -Dm644 $pkgfiles/pvefw-logger "$pkgdir/etc/dinit.d/pvefw-logger"
+install -d "$pkgdir/var/lib/pve-firewall"
+install -Dm644 src/pve-firewall-sysctl.conf "$pkgdir/usr/share/doc/pve-firewall/pve-firewall-sysctl.conf"
+install -Dm644 debian/pve-firewall.logrotate "$pkgdir/usr/share/doc/pve-firewall/pve-firewall.logrotate"
+install -Dm644 debian/copyright "$pkgdir/usr/share/licenses/pve-firewall/copyright"
+'''
