@@ -1,0 +1,33 @@
+# Intel oneVPL dispatcher (FFmpeg --enable-libvpl). It only loads a runtime
+# implementation (libmfx-gen / libvpl-* from the GPU driver) at run time; there
+# is no GPU code in this package. The dispatcher has no library dependencies.
+# CMake builds one library type per tree, so the static library comes from a
+# second build. Example sources are not installed (INSTALL_EXAMPLES=OFF); the
+# examples are not built. BUILD_EXPERIMENTAL stays on (its default: the
+# experimental API is in the headers FFmpeg's libvpl code is built against).
+name = "libvpl"
+version = "2.17.0"
+release = 1
+summary = "Intel oneVPL video processing library dispatcher"
+license = "MIT"
+homepage = "https://github.com/intel/libvpl"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+
+source = [
+    { url = "https://github.com/intel/libvpl/archive/refs/tags/v2.17.0.tar.gz", sha256 = "4de3e2faf1e8307fb282e4a43f443191810f6a6b0a484fffa7995ba1c814c6ec" },
+]
+
+setup = '''
+opts="-DBUILD_TESTS=OFF -DBUILD_EXAMPLES=OFF -DINSTALL_EXAMPLES=OFF -DBUILD_EXPERIMENTAL=ON"
+%cmake $opts -DBUILD_SHARED_LIBS=ON
+cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release $opts -DBUILD_SHARED_LIBS=OFF
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+install = '''
+DESTDIR="$pkgdir" cmake --install build-static
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libvpl/LICENSE"
+'''
