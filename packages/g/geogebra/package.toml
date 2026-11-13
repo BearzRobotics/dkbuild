@@ -10,10 +10,12 @@
 # Licence: GeoGebra's code is GPL-3.0-or-later with exceptions; its
 # translations and some resources are CC BY-NC-SA 3.0 (non-commercial use),
 # and the name and logo are trademarks (geogebra.org/license).
+# patches/pin-open-ranges.patch: two open version ranges of the SVG stack are pinned (offline, no
+# version listings in the store).
 # DRAFT, not built.
 name = "geogebra"
 version = "5.4_git20261111"
-release = 1
+release = 2
 summary = "GeoGebra Classic 5: dynamic mathematics for graphing, geometry, algebra and 3D"
 license = "GPL-3.0-or-later AND CC-BY-NC-SA-3.0"
 homepage = "https://www.geogebra.org"
@@ -21,6 +23,7 @@ archs = ["x86_64"]
 hostdeps = ["openjdk17", "openjdk21", "unzip"]
 rundeps = ["openjdk21", "jogamp", "javagiac", "jna"]
 options = ["!check", "gradledeps"]
+patches = ["pin-open-ranges.patch"]
 
 source = [
     { url = "https://github.com/geogebra/geogebra/archive/e73c77cb505964e5cb2b9bc52486847d88a3b43e.tar.gz", sha256 = "81606fdb0252d5b7096049c467820e74504cc213203cfcf4bae39ec035f5de2c" },

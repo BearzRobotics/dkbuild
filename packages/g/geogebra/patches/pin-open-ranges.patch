@@ -1,0 +1,20 @@
+--- a/source/desktop/desktop/build.gradle.kts
++++ b/source/desktop/desktop/build.gradle.kts
+@@ -12,6 +12,17 @@
+ 
+ description = "Parts of GeoGebra related to desktop platforms"
+ 
++// FenrirOS: xml-dtd and css4j (through echosvg) ask for open version ranges
++// ("carte-util [3.4.0,)", "jclf-linear3 [1.0.0,)"), which need a repository
++// version listing (maven-metadata.xml); the offline Maven store has none.
++// Pinned to the versions the range resolved to (the ones in the store).
++configurations.all {
++    resolutionStrategy.eachDependency {
++        if (requested.group == "io.sf.carte" && requested.name == "carte-util") useVersion("3.6.0")
++        if (requested.group == "io.sf.jclf" && requested.name == "jclf-linear3") useVersion("1.0.0")
++    }
++}
++
+ val e2eTest: SourceSet by sourceSets.creating {
+     compileClasspath += sourceSets.main.get().output
+     runtimeClasspath += sourceSets.main.get().output
