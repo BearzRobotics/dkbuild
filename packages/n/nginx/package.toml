@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "nginx"
 version = "1.30.6"
-release = 2
+release = 4
 summary = "Advanced load balancer, web server, and reverse proxy"
 license = "BSD-2-Clause"
 homepage = "https://nginx.org"

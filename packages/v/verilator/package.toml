@@ -2,7 +2,7 @@
 # Alpine's community/verilator.
 name = "verilator"
 version = "5.050"
-release = 1
+release = 2
 summary = "Verilog/SystemVerilog to C++ simulator"
 license = "LGPL-3.0-only OR Artistic-2.0"
 homepage = "https://verilator.org"

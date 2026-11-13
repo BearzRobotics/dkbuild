@@ -6,7 +6,7 @@
 #     the same libc with the stock allocator, for those who want it.
 name      = "musl"
 version   = "1.2.6"
-release   = 3
+release   = 4
 summary   = "The C standard library"
 license   = "MIT"
 homepage  = "https://musl.libc.org/"

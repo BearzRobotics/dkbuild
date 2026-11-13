@@ -41,7 +41,7 @@
 # Microsoft dbx updates Proxmox ships (sources 2 and 3, from their git).
 name = "pve-edk2-firmware"
 version = "4.2026.08"
-release = 1
+release = 2
 summary = "UEFI firmware for Proxmox VE virtual machines (OVMF, AAVMF, RISC-V)"
 license = "BSD-2-Clause-Patent"
 homepage = "https://git.proxmox.com/?p=pve-edk2-firmware.git"

@@ -7,7 +7,7 @@
 # setuid unix_chkpwd).
 name = "linux-pam"
 version = "1.7.2"
-release = 2
+release = 3
 summary = "Pluggable Authentication Modules for Linux"
 license = "BSD-3-Clause"
 homepage = "https://github.com/linux-pam/linux-pam"

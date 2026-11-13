@@ -5,7 +5,7 @@
 # yet; sox_ng's own copies of libgsm and LPC-10 are used.
 name = "sox-ng"
 version = "14.8.1"
-release = 1
+release = 2
 summary = "Sound processing tool (SoX)"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://codeberg.org/sox_ng/sox_ng"

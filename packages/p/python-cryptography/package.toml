@@ -1,7 +1,7 @@
 # Cryptographic recipes and primitives (Rust and OpenSSL; crates vendored on the host). needed by: python-pdfminer-six.
 name = "python-cryptography"
 version = "50.0.2"
-release = 3
+release = 4
 summary = "cryptography for Python"
 license = "Apache-2.0 OR BSD-3-Clause"
 homepage = "https://pypi.org/project/cryptography"

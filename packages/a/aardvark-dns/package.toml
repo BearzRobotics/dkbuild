@@ -2,7 +2,7 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "aardvark-dns"
 version = "2.1.0"
-release = 4
+release = 5
 summary = "Authoritative DNS server for A/AAAA container records"
 license = "Apache-2.0"
 homepage = "https://github.com/containers/aardvark-dns"

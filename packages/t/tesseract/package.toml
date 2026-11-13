@@ -6,7 +6,7 @@
 # pages: they need asciidoc, which is not in the tree yet.
 name = "tesseract"
 version = "5.5.2"
-release = 1
+release = 2
 summary = "OCR engine"
 license = "Apache-2.0"
 homepage = "https://tesseract-ocr.github.io"

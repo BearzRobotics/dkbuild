@@ -4,7 +4,7 @@
 # r2: static libraries too (in libgpg-error-static), for fully static programs on musl.
 name = "libgpg-error"
 version = "1.61"
-release = 4
+release = 5
 summary = "Library for error values used by GnuPG components"
 license = "LGPL-2.1-or-later"
 homepage = "https://www.gnupg.org"

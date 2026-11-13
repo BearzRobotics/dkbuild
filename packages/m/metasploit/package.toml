@@ -10,7 +10,7 @@
 # package need glibc and foreign libraries and so not installable.
 name = "metasploit"
 version = "6.5.9"
-release = 2
+release = 3
 summary = "Penetration testing framework"
 license = "BSD-3-Clause"
 homepage = "https://www.metasploit.com"

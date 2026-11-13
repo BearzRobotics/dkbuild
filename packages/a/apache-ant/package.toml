@@ -5,7 +5,7 @@
 # tasks that need nothing extra are built. ANT_HOME is /usr/share/java/apache-ant.
 name = "apache-ant"
 version = "1.10.18"
-release = 1
+release = 2
 summary = "Java-based build tool"
 license = "Apache-2.0"
 homepage = "https://ant.apache.org"

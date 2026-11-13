@@ -4,7 +4,7 @@
 # apc.enable_cli stays off, as upstream ships it).
 name = "php-apcu"
 version = "5.1.28"
-release = 1
+release = 2
 summary = "APC User Cache for PHP"
 license = "PHP-3.01"
 homepage = "https://pecl.php.net/package/APCu"

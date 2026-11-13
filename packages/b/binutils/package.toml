@@ -4,7 +4,7 @@
 # (clang -fuse-ld=bfd), and what anything wanting GNU's tools can call.
 name = "binutils"
 version = "2.45.1"
-release = 1
+release = 2
 summary = "GNU binutils (as g<tool>, and ld.bfd)"
 license = "GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/binutils"

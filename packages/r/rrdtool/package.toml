@@ -21,7 +21,7 @@
 # rrdcached ships with a dinit service, not enabled (README.FenrirOS).
 name = "rrdtool"
 version = "1.11.0"
-release = 1
+release = 2
 summary = "Round Robin Database tool: time-series storage and graphing"
 license = "GPL-2.0-or-later AND custom:FLOSS-License-Exception"
 homepage = "https://oss.oetiker.ch/rrdtool/"

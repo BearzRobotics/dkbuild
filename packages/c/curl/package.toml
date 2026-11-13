@@ -11,7 +11,7 @@
 # FenrirOS's Kerberos is Heimdal (Chimera's curl has no GSSAPI either).
 name = "curl"
 version = "8.23.0"
-release = 6
+release = 7
 summary = "Command line tool for transferring data with URL syntax"
 license = "curl"
 homepage = "https://curl.se"

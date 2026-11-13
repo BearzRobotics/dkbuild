@@ -2,7 +2,7 @@
 # Part of the riscv64-unknown-elf cross suite (binutils, gcc, C library), as Arch packages them.
 name = "binutils-riscv64-unknown-elf"
 version = "2.45.1"
-release = 1
+release = 2
 summary = "GNU binutils for RISC-V bare metal"
 license = "GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/binutils"

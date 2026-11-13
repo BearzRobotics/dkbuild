@@ -11,7 +11,7 @@
 # Chimera's fix-clobbered-registers and fix-curl patches are upstream in 8.4.
 name = "php"
 version = "8.4.27"
-release = 1
+release = 2
 summary = "HTML-embedded scripting language"
 license = "PHP-3.01"
 homepage = "https://www.php.net"

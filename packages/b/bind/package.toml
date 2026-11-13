@@ -2,7 +2,7 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "bind"
 version = "9.20.30"
-release = 2
+release = 3
 summary = "ISC DNS server"
 license = "MPL-2.0"
 homepage = "https://www.isc.org/bind"

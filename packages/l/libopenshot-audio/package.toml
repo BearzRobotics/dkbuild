@@ -1,7 +1,7 @@
 # OpenShot's audio library (JUCE-based audio engine). needed by: libopenshot.
 name = "libopenshot-audio"
 version = "1.0.2"
-release = 2
+release = 3
 summary = "Audio library for OpenShot"
 license = "GPL-3.0-or-later"
 homepage = "https://github.com/OpenShot/libopenshot-audio"

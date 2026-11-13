@@ -9,7 +9,7 @@
 # Built without self-update (it comes from the repository).
 name = "rustup"
 version = "1.29.3"
-release = 1
+release = 2
 summary = "Rust toolchain installer"
 license = "MIT OR Apache-2.0"
 homepage = "https://rustup.rs"

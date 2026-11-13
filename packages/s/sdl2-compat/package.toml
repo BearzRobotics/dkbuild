@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "sdl2-compat"
 version = "2.32.74"
-release = 6
+release = 7
 summary = "Compatibility layer for SDL 2"
 license = "Zlib"
 homepage = "https://github.com/libsdl-org/sdl2-compat"

@@ -11,7 +11,7 @@
 # /usr/src/linux-<release>, linked from /usr/lib/modules/<release>/build.
 name = "linux"
 version = "6.19"
-release = 10
+release = 12
 summary = "The Linux kernel and its modules"
 license = "GPL-2.0-only WITH Linux-syscall-note"
 homepage = "https://kernel.org"

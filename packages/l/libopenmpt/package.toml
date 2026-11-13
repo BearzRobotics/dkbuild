@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "libopenmpt"
 version = "0.8.9"
-release = 1
+release = 2
 summary = "Library for rendering tracker music to PCM"
 license = "BSD-3-Clause"
 homepage = "https://lib.openmpt.org/libopenmpt"

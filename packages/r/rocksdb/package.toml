@@ -11,7 +11,7 @@
 # JNI (no Java bindings packaged), NUMA (no libnuma recipe).
 name = "rocksdb"
 version = "11.13.2"
-release = 1
+release = 2
 summary = "Embeddable persistent key-value store"
 license = "Apache-2.0 OR GPL-2.0-only"
 homepage = "https://rocksdb.org"

@@ -3,7 +3,7 @@
 # 2026-11-11: elogind (session tracking is set to it).
 name = "networkmanager"
 version = "1.58.1"
-release = 2
+release = 3
 summary = "Network management daemon"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://gitlab.freedesktop.org/NetworkManager/NetworkManager"

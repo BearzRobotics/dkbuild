@@ -9,7 +9,7 @@
 # tests are not run; testarg only touches the test makefile rule.
 name = "php8.5"
 version = "8.5.12"
-release = 1
+release = 2
 summary = "HTML-embedded scripting language (PHP 8.5, beside php)"
 license = "PHP-3.01"
 homepage = "https://www.php.net"
