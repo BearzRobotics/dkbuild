@@ -1,0 +1,74 @@
+Build on musl: libc's msghdr (and cmsghdr) differ from glibc's.
+
+On musl the libc crate's msghdr has private padding fields (__pad1, __pad2):
+it cannot be written as a struct literal ("cannot construct `msghdr` with
+struct literal syntax due to private fields"), and msg_iovlen is i32,
+msg_controllen and cmsghdr.cmsg_len are u32 (glibc: usize). The msghdr is
+now zeroed and its fields set with casts to the platform's types, and
+cmsg_len is converted to usize.
+Written for FenrirOS.
+
+--- a/src/io/cmsg.rs	1969-12-31 19:00:00.000000000 -0500
++++ b/src/io/cmsg.rs	2026-11-13 15:20:53.969334385 -0500
+@@ -46,8 +46,8 @@
+         #[allow(clippy::cast_ptr_alignment)]
+         let hdr: cmsghdr = unsafe { std::ptr::read_unaligned(buf.as_ptr() as *const cmsghdr) };
+         let data_off = mem::size_of::<cmsghdr>();
+-        let data_end = hdr.cmsg_len;
+-        let next_hdr = align(hdr.cmsg_len);
++        let data_end = hdr.cmsg_len as usize;
++        let next_hdr = align(hdr.cmsg_len as usize);
+         let data = &buf[data_off..data_end];
+         let item = ControlMessageRef {
+             cmsg_level: hdr.cmsg_level,
+--- a/src/io/seq_packet.rs	1969-12-31 19:00:00.000000000 -0500
++++ b/src/io/seq_packet.rs	2026-11-13 15:20:53.968984720 -0500
+@@ -87,14 +87,12 @@
+     }
+ 
+     pub async fn sendmsg_vectored(&self, iov: &[IoSlice<'_>]) -> io::Result<usize> {
+-        let msg = AssertSendSync(libc::msghdr {
+-            msg_name: ptr::null_mut(),
+-            msg_namelen: 0,
+-            msg_iov: iov.as_ptr() as _,
+-            msg_iovlen: iov.len(),
+-            msg_control: ptr::null_mut(),
+-            msg_controllen: 0,
+-            msg_flags: 0,
++        let msg = AssertSendSync({
++            // musl's msghdr has private padding fields: no struct literal
++            let mut msg: libc::msghdr = unsafe { std::mem::zeroed() };
++            msg.msg_iov = iov.as_ptr() as _;
++            msg.msg_iovlen = iov.len() as _;
++            msg
+         });
+ 
+         self.sendmsg(&msg).await
+@@ -115,18 +113,18 @@
+         iov: &mut [IoSliceMut<'_>],
+         cmsg_buf: &mut [u8],
+     ) -> io::Result<(usize, usize)> {
+-        let mut msg = AssertSendSync(libc::msghdr {
+-            msg_name: ptr::null_mut(),
+-            msg_namelen: 0,
+-            msg_iov: iov.as_mut_ptr() as _,
+-            msg_iovlen: iov.len(),
+-            msg_control: cmsg_buf.as_mut_ptr() as *mut std::ffi::c_void,
+-            msg_controllen: cmsg_buf.len(),
+-            msg_flags: libc::MSG_CMSG_CLOEXEC,
++        let mut msg = AssertSendSync({
++            let mut msg: libc::msghdr = unsafe { std::mem::zeroed() };
++            msg.msg_iov = iov.as_mut_ptr() as _;
++            msg.msg_iovlen = iov.len() as _;
++            msg.msg_control = cmsg_buf.as_mut_ptr() as *mut std::ffi::c_void;
++            msg.msg_controllen = cmsg_buf.len() as _;
++            msg.msg_flags = libc::MSG_CMSG_CLOEXEC;
++            msg
+         });
+ 
+         let data_size = self.recvmsg(&mut msg).await?;
+-        Ok((data_size, msg.0.msg_controllen))
++        Ok((data_size, msg.0.msg_controllen as usize))
+     }
+ 
+     #[inline]

@@ -5,14 +5,14 @@
 # Cargo.lock (Debian builds against its packaged crates): files/Cargo.lock
 # pins the crates, patch 0001 drops the Debian registry. dinit service
 # pve-lxc-syscalld (shipped, not enabled). Patch 0002: sd_notify without
-# libsystemd.
+# libsystemd. Patch 0003: the socket code on musl's msghdr/cmsghdr types.
 name = "pve-lxc-syscalld"
 version = "2.0.2"
-release = 1
+release = 2
 summary = "Proxmox VE LXC syscall daemon"
 license = "AGPL-3.0-or-later"
 homepage = "https://git.proxmox.com/?p=pve-lxc-syscalld.git"
-patches = ["0001-crates-io.patch", "0002-no-libsystemd.patch"]
+patches = ["0001-crates-io.patch", "0002-no-libsystemd.patch", "0003-musl-msghdr.patch"]
 hostdeps = ["rust"]
 options = ["!check", "cargodeps", "cargolock=."]
 
