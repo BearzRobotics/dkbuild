@@ -70,6 +70,16 @@ pass have fixes committed but untested (list in git log since 88b01af).
   questions 20-23 in docs/requests.md. User policies: memory
   feedback-app-policies.
 
+## 2026-11-13: everything requested is written (nothing built)
+
+Brave, Euro-Office + Libera Suite, Proxmox VE, GHC/ShellCheck, the Haskell
+programs on the new hackagedeps store, bashrs, brush, xmessage: all
+committed (git log). zig-out has every dkbuild change (hackagedeps,
+upstream, image --verbose, scan fixes, unique snapshot temp files);
+`zig build test` passes; the whole tree checks (2254 recipes).
+Questions 24-38 in docs/requests.md. pve-qemu's snapshot sha256: see git log
+(filled in after its fetch).
+
 ## Android NDK from source (Claude's own task)
 
 Plan and survey: wip/android-ndk/NOTES.md. Next steps:

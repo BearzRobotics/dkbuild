@@ -156,8 +156,8 @@ Servers and parts ("everything needed to run a mail server"):
 | fastfetch | written |
 | GCC (all languages that do not shadow LLVM/Go) | written |
 | Chromium (standalone) | written (157.0.8103.38, Chimera's port; with typescript-go, rustc-dev, xdg-utils) |
-| Brave, Euro-Office | planned (after Chromium) |
-| Proxmox VE | planned (after Brave and Euro-Office) |
+| Brave, Euro-Office | written (2026-11-13): Brave 1.99.57; Euro-Office Document Server 9.3.7-1; Libera Suite 0.7 as the desktop app |
+| Proxmox VE | written (2026-11-13): 9.2, single node + HA + web UI, ~130 recipes; gaps in wip/proxmox/NOTES.md |
 
 ## System monitors and GNOME accounts (2026-11-12)
 
@@ -244,3 +244,44 @@ Servers and parts ("everything needed to run a mail server"):
     tree) and turn it on?
 23. **AppSignal agent** (OpenProject's optional monitoring): a closed binary
     from a commercial service; left out. Pin it as a source instead?
+
+## Also 2026-11-12/13
+
+| Package | Status |
+|---|---|
+| bashrs, brush | written |
+| ShellCheck | written, with GHC 9.14.1 (seeded from Alpine) |
+| cabal-install, pandoc, xmonad (+contrib), hledger (+ui, web), git-annex | written (hackagedeps store) |
+| xmobar | blocked: no release (nor gtk2hs) builds with GHC 9.14 yet |
+| xmessage (+ libXaw) | written (xmonad's error display) |
+
+## Questions from the 2026-11-13 batches
+
+Haskell:
+24. git-annex's licence line: AGPL-3.0-or-later (as Alpine) or the fuller
+    expression from its COPYRIGHT (GPL-3+, BSD-2/3, a GPL-2 file, jQuery, Bootstrap)?
+25. pandoc's http feature and xmobar wait for GHC 9.14 releases of
+    serialise/cborg and gtk2hs. Wait, or try allow-newer patches?
+26. The GHC seed's URL is on Alpine edge and will disappear when Alpine
+    rebuilds it (the cached copy stays, like the dart seed). OK?
+Proxmox (details: wip/proxmox/NOTES.md):
+27. Ship Proxmox's legacy 2 MB OVMF images (prebuilt edk2 2023.02) for VMs
+    with old EFI disks?
+28. pve-edk2-firmware enrolls Debian's PkKek-1 certificate (as Proxmox):
+    keep, or a FenrirOS Secure Boot key?
+29. corosync 3.2 drops unencrypted links and udp/udpu: OK?
+30. Next parts: Ceph, ifupdown2 + FRR (Network panel, SDN), PBS client,
+    vncterm. Which first?
+31. extjs is the GPL-3.0 edition with upstream's prebuilt build/; licence
+    lines of the 71 generated perl-* recipes need a look.
+Brave:
+32. Ship as "Brave" (trademark) or rebrand? Leo's licence unchecked.
+33. Accept user-supplied Brave service keys (files/), so News, Sync, Leo,
+    component updates work?
+Euro-Office (details: wip/euro-office/NOTES.md):
+34. V8 8.9.45 (2021) may need fixes for LLVM 23; build 9.3.7-1 now, or wait
+    for the release on V8 14.6?
+35. Document Server needs RabbitMQ: add Erlang, Elixir and rabbitmq-server?
+36. Unbundle core's own zlib/freetype/libpng/libjpeg/openjpeg/libxml2/cryptopp?
+37. Libera's own theme (ask Abilian for the artwork) or Euro-Office's?
+38. core-fonts: ~10 font folders without a licence file; Symbola's licence.
