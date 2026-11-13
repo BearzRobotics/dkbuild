@@ -1,0 +1,7 @@
+# OpenProject: collaborative editing of documents (Hocuspocus) on port 1234
+type = process
+command = /usr/lib/openproject/hocuspocus
+run-as = openproject
+working-dir = /opt/openproject/extensions/op-blocknote-hocuspocus
+smooth-recovery = true
+depends-on: rcboot

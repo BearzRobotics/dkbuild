@@ -1,0 +1,138 @@
+# OpenProject: web-based project management (work packages, Gantt charts,
+# boards, backlogs, time and cost tracking, wikis, meetings, documents with
+# collaborative editing). Ruby on Rails on Ruby 4.0 (the ruby4.0 package:
+# OpenProject 17.9 pins 4.0.9) with PostgreSQL; memcached optional. Served by
+# nginx in front of Puma, with a GoodJob worker and the optional Hocuspocus
+# server for collaborative editing (three dinit services).
+# Built as upstream's packages are (docker/prod/setup): its gems from the gem
+# store (`gemdeps`, GitHub-sourced gems included), its Angular front end's npm
+# packages from the npm store (`npmdeps`), the assets precompiled with the
+# null database adapter.
+# Two of its gems are Rust extensions (rb_sys): commonmarker and
+# prometheus-client-mmap. Their crates come from the crate store
+# (`cargodeps`) through their own release trees, the first and third
+# sources: cargodeps vendors the first source and any further source with a
+# Cargo.lock at its top, so commonmarker's tree is the first source ($srcdir;
+# the steps work in ../openproject-$version). Both trees' Cargo.lock are the
+# ones in the gems (checked). The setup step gives cargo one directory
+# source with the crates of both, through $CARGO_HOME/config.toml.
+# The appsignal gem's extension (a client for the AppSignal monitoring
+# service) is not built: its extconf downloads AppSignal's prebuilt agent,
+# which an offline build cannot; the gem then installs without it, as
+# upstream's does when the download fails, and AppSignal reporting is off.
+# Left out: the BIM edition's converters (IfcConvert, COLLADA2GLTF,
+# xeokit-metadata), which upstream downloads as prebuilt glibc binaries; the
+# default edition does not use them.
+# Installed inert (docs/requests.md): services not enabled, no site, no
+# database, no secret, no accounts. Home: /opt/openproject. Setup:
+# /usr/share/doc/openproject/README.FenrirOS.
+name = "openproject"
+version = "17.9.7"
+release = 1
+summary = "Web-based project management system"
+license = "GPL-3.0-only"
+homepage = "https://www.openproject.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["ruby4.0", "nodejs", "rust", "llvm-clang", "pkgconf", "make", "git"]
+builddeps = ["ruby4.0-devel", "postgresql-devel", "libyaml-devel", "openssl-devel", "libffi-devel",
+             "zlib-ng-compat-devel", "libxml2-devel", "libxslt-devel", "linux-headers"]
+rundeps = ["ruby4.0", "nodejs", "nginx", "imagemagick", "libvips"]
+options = ["!check", "!strip", "gemdeps", "npmdeps", "cargodeps", "jobs:8"]
+
+source = [
+    { url = "https://github.com/gjtorikian/commonmarker/archive/refs/tags/v2.8.3.tar.gz", sha256 = "8a4ad7bb99ac71b7e41e284ce58700bc45ee592ba89cb65ce52b3df80c73d68a" },
+    { url = "https://github.com/opf/openproject/archive/refs/tags/v17.9.7.tar.gz", sha256 = "898cbe78b4708b24e473d6d81753f91d54dc0d431cd5e8ebd268ae934b8dc41a" },
+    { url = "https://gitlab.com/gitlab-org/ruby/gems/prometheus-client-mmap/-/archive/1.6.0/prometheus-client-mmap-1.6.0.tar.gz", sha256 = "8175915b6c5ce433bf95162c8c70e4388b5cf85e7aa463b7e808e3c9534a4abe" },
+]
+
+environment = '''
+# Ruby 4.0 as ruby, bundle, gem (rb_sys and the Rails binstubs run `ruby`)
+export PATH="/usr/lib/ruby4.0/bin:$PATH"
+export NOKOGIRI_USE_SYSTEM_LIBRARIES=1 BUNDLE_BUILD__NOKOGIRI=--use-system-libraries
+export TAR_OPTIONS=--no-same-owner
+export CFLAGS="$CFLAGS -Wno-default-const-init-field-unsafe"
+export RAILS_ENV=production
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true LIBCLANG_PATH=/usr/lib
+export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
+    npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+# no Angular CLI analytics; CI: no persistent build cache (lmdb's prebuilt is glibc's)
+export NG_CLI_ANALYTICS=false CI=true
+'''
+setup = '''
+op=/build/openproject-$version
+# gemdeps lays vendor/cache in $srcdir (commonmarker's tree): OpenProject's
+rm -rf "$op/vendor/cache"
+mv vendor/cache "$op/vendor/cache"
+# the crates of both Rust gems in one directory source (each entry is a link
+# into the crate store, named by its store key, so a crate both use is there once)
+mkdir -p /tmp/gem-crates "$CARGO_HOME"
+for l in vendor/* ../prometheus-client-mmap-*/vendor/*; do
+    t=$(readlink "$l")
+    ln -sfn "$t" "/tmp/gem-crates/${t##*/}"
+done
+cat > "$CARGO_HOME/config.toml" <<EOF2
+[source.crates-io]
+replace-with = "dkbuild-crates"
+
+[source.dkbuild-crates]
+directory = "/tmp/gem-crates"
+
+[net]
+offline = true
+EOF2
+cd "$op"
+# the database configuration upstream's packages use: everything from the
+# environment (DATABASE_URL), no credentials in the file
+cp config/database.production.yml config/database.yml
+# deployment (frozen) only after the install: Gemfile.lock has commonmarker
+# only as prebuilt platform gems, so Bundler adds its source-gem entry
+# (from vendor/cache) to the lockfile, which a frozen install refuses
+bundle config set --local path vendor/bundle
+bundle config set --local without 'development test'
+bundle config set --local force_ruby_platform true
+bundle install --local --jobs $jobs
+bundle config set --local deployment true
+node /dkbuild/npm-offline.js /tmp/npm-cache frontend/package-lock.json extensions/op-blocknote-hocuspocus/package-lock.json
+# the front end's postinstall is patch-package (frontend/patches), run here
+# after an install without scripts
+(cd frontend && npm ci --ignore-scripts && ./node_modules/.bin/patch-package)
+(cd extensions/op-blocknote-hocuspocus && npm ci --omit=dev --ignore-scripts)
+'''
+build = '''
+cd /build/openproject-$version
+# the assets need no database (the null adapter) and a secret that is not kept
+SECRET_KEY_BASE=$(od -An -N64 -tx1 /dev/urandom | tr -d ' \n') DATABASE_URL=nulldb://db \
+    bundle exec rails openproject:plugins:register_frontend assets:precompile
+'''
+install = '''
+cd /build/openproject-$version
+d="$pkgdir/opt/openproject"
+mkdir -p "$d"
+cp -a . "$d/"
+# what upstream's images leave out too (docker/prod/setup/prune-slim-runtime.sh),
+# and the build's own leftovers
+rm -rf "$d/node_modules" "$d/frontend/node_modules" "$d/frontend/.angular" "$d/vendor/cache" \
+    "$d"/vendor/bundle/ruby/*/cache "$d/tmp"/* "$d/log"/* "$d/spec" "$d/screenshots" "$d/lookbook" \
+    "$d/public/assets/lookbook" "$d/docker" "$d/nix" "$d/.github"
+find "$d/public/assets" -type f -name '*.map' -delete
+find "$d/modules" -mindepth 2 -maxdepth 2 -type d \( -name spec -o -name test -o -name tests \) -prune -exec rm -rf '{}' +
+rm -rf "$d"/vendor/bundle/ruby/*/bundler/gems/*/.git
+test -f "$d/config/frontend_assets.manifest.json"
+install -Dm755 $pkgfiles/run "$pkgdir/usr/lib/openproject/run"
+install -Dm755 $pkgfiles/hocuspocus "$pkgdir/usr/lib/openproject/hocuspocus"
+for s in web worker hocuspocus; do install -Dm644 $pkgfiles/openproject-$s "$pkgdir/etc/dinit.d/openproject-$s"; done
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/openproject.conf"
+install -Dm644 /dev/stdin "$pkgdir/usr/lib/tmpfiles.d/openproject.conf" <<EOF2
+d /etc/openproject 0750 root openproject -
+d /var/lib/openproject 0750 openproject openproject -
+d /var/lib/openproject/files 0750 openproject openproject -
+Z /opt/openproject/tmp 0750 openproject openproject -
+Z /opt/openproject/log 0750 openproject openproject -
+Z /opt/openproject/public/assets 0755 openproject openproject -
+EOF2
+install -Dm644 $pkgfiles/env.example "$pkgdir/usr/share/doc/openproject/env.example"
+install -Dm644 $pkgfiles/nginx-openproject.conf "$pkgdir/usr/share/doc/openproject/nginx-openproject.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/openproject/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/openproject/LICENSE"
+install -Dm644 COPYRIGHT "$pkgdir/usr/share/licenses/openproject/COPYRIGHT"
+'''

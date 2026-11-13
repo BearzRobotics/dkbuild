@@ -1,0 +1,7 @@
+# OpenProject: the background worker (GoodJob: mail, notifications, cleanup)
+type = process
+command = /usr/lib/openproject/run bundle exec good_job start
+run-as = openproject
+working-dir = /opt/openproject
+smooth-recovery = true
+depends-on: rcboot

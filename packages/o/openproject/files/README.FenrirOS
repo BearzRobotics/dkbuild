@@ -1,0 +1,40 @@
+OpenProject on FenrirOS
+=======================
+
+OpenProject lives in /opt/openproject (as upstream's packages), with its gems
+in vendor/bundle; it runs on Ruby 4.0 (the ruby4.0 package, beside the system
+ruby 3.4). Commands run through /usr/lib/openproject/run, which puts Ruby 4.0
+first in PATH and loads /etc/openproject/env. Three dinit services, none
+enabled: openproject-web (Puma, localhost:8080), openproject-worker (GoodJob)
+and openproject-hocuspocus (collaborative editing, port 1234, optional).
+Nothing is set up for you: no database, no site, no secret.
+
+Needs PostgreSQL (13 or newer). memcached is optional (a cache; without it
+the cache is files under /opt/openproject/tmp). Optional tools OpenProject
+uses when present: pdftotext (poppler), tesseract (text of attachments, for
+search), git/subversion (repositories).
+
+1. PostgreSQL: a role and a database:
+     createuser -P openproject; createdb -O openproject openproject
+2. cp /usr/share/doc/openproject/env.example /etc/openproject/env
+   (chown root:openproject, chmod 0640) and fill in DATABASE_URL,
+   SECRET_KEY_BASE (openssl rand -hex 64), OPENPROJECT_HOST__NAME and
+   OPENPROJECT_HTTPS; memcached and Hocuspocus settings if wanted.
+3. As openproject: /usr/lib/openproject/run bundle exec rake db:migrate db:seed
+   The seed creates OpenProject's own first administrator, login "admin",
+   password "admin", which it makes you change at the first login (set
+   OPENPROJECT_SEED__ADMIN__USER__PASSWORD in the env file before seeding
+   for another one).
+4. nginx: /usr/share/doc/openproject/nginx-openproject.conf (an example);
+   enable nginx, openproject-web and openproject-worker
+   (dinitctl enable openproject-web ...), and openproject-hocuspocus with
+   SECRET (and the same secret in OPENPROJECT_COLLABORATIVE__EDITING__HOCUSPOCUS__SECRET)
+   if you want collaborative editing.
+
+Attachments are kept in /var/lib/openproject/files
+(OPENPROJECT_ATTACHMENTS__STORAGE__PATH). After an upgrade of the package,
+run step 3's db:migrate again before restarting the services.
+
+Not included: the BIM edition's model converters (IfcConvert,
+COLLADA2GLTF, xeokit-metadata), which upstream downloads as prebuilt
+binaries; the default ("standard") edition does not use them.

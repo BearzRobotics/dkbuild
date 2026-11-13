@@ -1,0 +1,10 @@
+#!/bin/sh
+# Runs an OpenProject command with its environment: Ruby 4.0 first in PATH
+# (ruby, bundle, ... are ruby4.0's), then /etc/openproject/env, if present
+cd /opt/openproject
+export PATH="/usr/lib/ruby4.0/bin:$PATH"
+export RAILS_ENV=production RAILS_LOG_TO_STDOUT=true \
+    BUNDLE_DEPLOYMENT=true BUNDLE_FORCE_RUBY_PLATFORM=true BUNDLE_PATH=/opt/openproject/vendor/bundle \
+    OPENPROJECT_ATTACHMENTS__STORAGE__PATH=/var/lib/openproject/files
+[ -f /etc/openproject/env ] && . /etc/openproject/env
+exec "$@"

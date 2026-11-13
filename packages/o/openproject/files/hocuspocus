@@ -1,0 +1,7 @@
+#!/bin/sh
+# OpenProject's collaborative editing server (Hocuspocus, port 1234); needs
+# SECRET (the same as OpenProject's Hocuspocus secret) in /etc/openproject/env
+cd /opt/openproject/extensions/op-blocknote-hocuspocus
+[ -f /etc/openproject/env ] && . /etc/openproject/env
+export SECRET
+exec node_modules/.bin/tsx src/index.ts

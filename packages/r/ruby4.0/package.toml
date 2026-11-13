@@ -1,0 +1,79 @@
+# Ruby 4.0, versioned, installed beside the `ruby` package (3.4, which Zammad
+# pins): for applications that need 4.0 (OpenProject pins 4.0.9).
+# The recipe is packages/r/ruby's (a port of Chimera Linux's main/ruby; cports
+# is BSD-2-Clause, Copyright (c) Chimera Linux contributors) with its patches,
+# less align-builtin-binaries-ibf_header.patch (upstream since 3.4.3).
+# Nothing overlaps the ruby package:
+#   --program-suffix=4.0   every program and man page is suffixed: ruby4.0,
+#                          gem4.0, bundle4.0, irb4.0, erb4.0, rake4.0, ...
+#                          (RubyGems installs the bundled gems' programs with
+#                          the same suffix)
+#   --with-soname=ruby4.0  libruby4.0.so.4.0 / libruby4.0-static.a; without it
+#                          the library would be libruby.so like 3.4's
+#   ruby version "full"    (configure's default) the version directories are
+#                          4.0.0: /usr/lib/ruby/4.0.0, /usr/lib/ruby/gems/4.0.0,
+#                          site_ruby/4.0.0, vendor_ruby/4.0.0,
+#                          /usr/include/ruby-4.0.0, ruby-4.0.pc
+# /usr/lib/ruby4.0/bin holds the unsuffixed names (ruby, gem, bundle, ...) as
+# links to the suffixed programs: an application that runs `ruby`/`bundle`
+# (Rails binstubs with #!/usr/bin/env ruby, rb_sys) puts it first in PATH.
+# libruby4.0-static.a is installed too (configure leaves it out when shared;
+# it goes to ruby4.0-static).
+# YJIT and ZJIT on x86_64 and aarch64 (upstream's default when rustc is
+# there; in release mode they are built by rustc alone, no crates); Chimera
+# builds YJIT the same way. The tree's ruby 3.4 recipe does not (yet).
+name = "ruby4.0"
+version = "4.0.9"
+release = 1
+summary = "Ruby scripting language 4.0.x"
+license = "Ruby OR BSD-2-Clause"
+homepage = "https://www.ruby-lang.org/en"
+patches = ["fix-riscv64-build.patch", "musl-fix-get_main_stack.patch", "ppc-no-setjmp.patch", "rubygems-avoid-platform-specific-gems.patch", "test_insns-lower-recursion-depth.patch"]
+hostdeps = ["automake", "bison", "flex", "mandoc", "pkgconf", "rust"]
+builddeps = ["libedit-devel", "libffi-devel", "libyaml-devel", "openssl-devel", "zlib-ng-compat-devel"]
+options = ["!cross", "!check"]
+
+source = [
+    { url = "https://cache.ruby-lang.org/pub/ruby/4.0/ruby-4.0.9.tar.xz", sha256 = "a8057adb39f51ad6dc3106237504c93dd792bb515837b4fe7817ae21ed7e51f4" },
+]
+
+setup = '''
+case "$arch" in
+    x86_64|aarch64) jit="--enable-yjit --enable-zjit" ;;
+    *) jit="--disable-yjit --disable-zjit" ;;  # no JIT backend for other CPUs
+esac
+autoreconf -if -W none
+%configure \
+    --enable-shared \
+    --enable-install-static-library \
+    --disable-rpath \
+    --disable-install-doc \
+    --program-suffix=4.0 \
+    --with-soname=ruby4.0 \
+    $jit \
+    ac_cv_func_isnan=yes \
+    ac_cv_func_isinf=yes
+'''
+build = '''
+%make \
+    all \
+    capi
+'''
+install = '''
+%make_install
+# nothing unsuffixed may reach /usr/bin or the man pages (it would be the ruby package's)
+for f in "$pkgdir"/usr/bin/* "$pkgdir"/usr/share/man/man1/*; do
+    [ -e "$f" ] || continue
+    case "${f##*/}" in
+        *4.0|*4.0.1) ;;
+        *) echo "unsuffixed file: $f"; exit 1 ;;
+    esac
+done
+test -e "$pkgdir/usr/lib/libruby4.0.so" && ! test -e "$pkgdir/usr/lib/libruby.so"
+mkdir -p "$pkgdir/usr/lib/ruby4.0/bin"
+for f in "$pkgdir"/usr/bin/*4.0; do
+    b=${f##*/}
+    ln -s "../../../bin/$b" "$pkgdir/usr/lib/ruby4.0/bin/${b%4.0}"
+done
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/ruby4.0/COPYING"
+'''
