@@ -16,7 +16,7 @@
 # package.
 name = "proxmox-backup-qemu"
 version = "2.0.4"
-release = 2
+release = 3
 summary = "Proxmox Backup Server client library for QEMU"
 license = "AGPL-3.0-or-later"
 homepage = "https://git.proxmox.com/?p=proxmox-backup-qemu.git"
@@ -37,6 +37,19 @@ export RUSTFLAGS="-C target-feature=-crt-static"
 # the version strings the build scripts take from git (no .git in a snapshot)
 export GITVERSION=f792b08dfc1311452dbef090ddb3128432b2c780
 export REPOID=78f77d53718b351bebacfa4f56f85134616e0b02
+'''
+setup = '''
+# proxmox-sys (fs/mod.rs) stores statfs's f_type in an i64 field: musl's f_type is
+# unsigned (u64), glibc's signed ("expected `i64`, found `u64`"). The vendored crate is a link
+# into the read-only crate store: patch a copy, and empty its file checksums so cargo
+# accepts the changed file.
+src=$(readlink -f vendor/proxmox-sys)
+rm vendor/proxmox-sys
+cp -r "$src" vendor/proxmox-sys
+chmod -R u+w vendor/proxmox-sys
+sed -i 's/fs_type: stat\.f_type,/fs_type: stat.f_type as i64,/' vendor/proxmox-sys/src/fs/mod.rs
+grep -q 'stat.f_type as i64' vendor/proxmox-sys/src/fs/mod.rs
+sed -i 's/"files":{[^}]*}/"files":{}/' vendor/proxmox-sys/.cargo-checksum.json
 '''
 build = '''
 cargo build --release --frozen --offline -j $jobs
