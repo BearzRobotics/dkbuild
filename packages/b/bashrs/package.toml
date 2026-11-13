@@ -1,0 +1,33 @@
+# bashrs (Rash): shell safety and purification tool: lints bash/sh scripts
+# (ShellCheck-style rules plus determinism and idempotency checks), rewrites
+# bash into POSIX sh, transpiles a Rust subset to shell, and checks Makefiles
+# and Dockerfiles. The `bashrs` binary with upstream's "full" feature set
+# (adds the language server, pattern matching, loops). The ML "oracle" feature
+# is left out: it is a separate, unpublished workspace crate. The release
+# tarball carries a stray libcuda_block.rlib (9 KB) and a shellcheck-v0.10.0
+# directory (licence and README only): neither is used by the build.
+# rust-toolchain.toml asks for Rust 1.93.0; without rustup it is ignored and
+# the tree's rust builds it. Crates vendored on the host.
+name = "bashrs"
+version = "7.4.3"
+release = 1
+summary = "Shell safety and purification tool: linter, bash to POSIX sh, Rust to shell"
+license = "MIT"
+homepage = "https://github.com/paiml/bashrs"
+hostdeps = ["rust"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/paiml/bashrs/archive/refs/tags/v7.4.3.tar.gz", sha256 = "d7575f7137950190ec830ea647d6964f963c16f1b541bc4cf977405c6a56a2d8" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline -p bashrs --features full -j $jobs
+'''
+install = '''
+install -Dm755 target/release/bashrs "$pkgdir/usr/bin/bashrs"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/bashrs/LICENSE"
+'''
