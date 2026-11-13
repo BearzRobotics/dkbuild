@@ -1,0 +1,28 @@
+# libshine, fixed-point MP3 encoder (FFmpeg --enable-libshine). The release
+# tarball (a git archive) has no configure, so autoreconf generates it; the
+# m4 directory configure.ac names must exist. The program shineenc (a WAV to
+# MP3 encoder) is built and installed too.
+name = "shine"
+version = "3.1.1"
+release = 1
+summary = "Fixed-point MP3 encoder library"
+license = "LGPL-2.0-or-later"
+homepage = "https://github.com/toots/shine"
+hostdeps = ["automake", "libtool", "pkgconf"]
+
+source = [
+    { url = "https://github.com/toots/shine/archive/refs/tags/3.1.1.tar.gz", sha256 = "565b87867d6f8e6616a236445d194e36f4daa9b4e7af823fcf5010af7610c49e" },
+]
+
+setup = '''
+mkdir -p m4
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/shine/COPYING"
+'''
