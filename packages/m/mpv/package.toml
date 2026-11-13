@@ -8,7 +8,7 @@ license = "GPL-2.0-or-later"
 homepage = "https://mpv.io"
 patches = ["caca.patch"]
 hostdeps = ["meson", "pkgconf", "python-docutils", "wayland"]
-builddeps = ["ffmpeg-devel", "harfbuzz-devel", "lcms2-devel", "libarchive-devel", "libass-devel", "libbluray-devel", "libcaca-devel", "libcdio-paranoia-devel", "libdisplay-info-devel", "libdrm-devel", "libdvdnav-devel", "libglvnd-devel", "libplacebo-devel", "libsixel-devel", "libva-devel", "libvdpau-devel", "libx11-devel", "libxfixes-devel", "libxinerama-devel", "libxkbcommon-devel", "libxpresent-devel", "libxrandr-devel", "libxscrnsaver-devel", "libxv-devel", "linux-headers", "lua5.1-devel", "mesa-devel", "pipewire-devel", "rubberband-devel", "uchardet-devel", "util-linux-devel", "vapoursynth-devel", "vulkan-headers", "vulkan-loader-devel", "wayland-devel", "wayland-protocols", "zimg-devel"]
+builddeps = ["alsa-lib-devel", "ffmpeg-devel", "harfbuzz-devel", "lcms2-devel", "libarchive-devel", "libass-devel", "libbluray-devel", "libcaca-devel", "libcdio-paranoia-devel", "libdisplay-info-devel", "libdrm-devel", "libdvdnav-devel", "libglvnd-devel", "libplacebo-devel", "libpulse-devel", "libsixel-devel", "libva-devel", "libvdpau-devel", "libx11-devel", "libxcb-devel", "libxfixes-devel", "libxinerama-devel", "libxkbcommon-devel", "libxpresent-devel", "libxrandr-devel", "libxscrnsaver-devel", "libxv-devel", "linux-headers", "lua5.1-devel", "mesa-devel", "nv-codec-headers", "openal-soft-devel", "pipewire-devel", "rubberband-devel", "sdl2-compat-devel", "sndio-devel", "uchardet-devel", "util-linux-devel", "vapoursynth-devel", "vulkan-headers", "vulkan-loader-devel", "wayland-devel", "wayland-protocols", "zimg-devel"]
 rundeps = ["hicolor-icon-theme"]
 
 source = [
@@ -19,6 +19,8 @@ environment = '''
 export LDFLAGS="${LDFLAGS} -Wl,-z,stack-size=0x100000"
 '''
 setup = '''
+# Still disabled: oss-audio (needs <sys/soundcard.h>, which musl lacks) and opensles
+# (Android only). Everything else mpv can use is on.
 %meson \
     -Dlibmpv=true \
     -Dbuild-date=false \
@@ -50,15 +52,18 @@ setup = '''
     -Dzimg=enabled \
     -Dzlib=enabled \
     -Djavascript=disabled \
-    -Dalsa=disabled \
-    -Dopenal=disabled \
+    -Dalsa=enabled \
+    -Dopenal=enabled \
     -Dopensles=disabled \
     -Doss-audio=disabled \
-    -Dpulse=disabled \
-    -Dsdl2-audio=disabled \
-    -Dsdl2-gamepad=disabled \
-    -Dsdl2-video=disabled \
-    -Dx11-clipboard=disabled \
+    -Dpulse=enabled \
+    -Dsdl2-audio=enabled \
+    -Dsdl2-gamepad=enabled \
+    -Dsdl2-video=enabled \
+    -Dx11-clipboard=enabled \
+    -Dsndio=enabled \
+    -Dcuda-hwaccel=enabled \
+    -Dcuda-interop=enabled \
     -Dlua=lua5.1
 '''
 build = '''

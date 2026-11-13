@@ -10,7 +10,7 @@ license = "GPL-3.0-or-later"
 homepage = "https://ffmpeg.org"
 patches = ["add-av_stream_get_first_dts-for-chromium.patch", "clang-ppc4xx.patch", "fp.patch", "posix-ioctl.patch", "vapoursynth-script.patch", "zoneslice-muloverflow.patch"]
 hostdeps = ["nasm", "perl", "pkgconf"]
-builddeps = ["bzip2-devel", "dav1d-devel", "fontconfig-devel", "freetype-devel", "fribidi-devel", "harfbuzz-devel", "ladspa-sdk", "lame-devel", "lcms2-devel", "libaom-devel", "libass-devel", "libbluray-devel", "libbs2b-devel", "libcdio-devel", "libcdio-paranoia-devel", "libdrm-devel", "libdvdnav-devel", "libdvdread-devel", "libjxl-devel", "libmodplug-devel", "libopenmpt-devel", "libplacebo-devel", "libpulse-devel", "librsvg-devel", "libtheora-devel", "libva-devel", "libvdpau-devel", "libvidstab-devel", "libvorbis-devel", "libvpx-devel", "libwebp-devel", "libxcb-devel", "libxext-devel", "libxfixes-devel", "libxml2-devel", "libxvmc-devel", "lilv-devel", "ocl-icd-devel", "openjpeg-devel", "openssl-devel", "opus-devel", "pipewire-devel", "rav1e-devel", "rtmpdump-devel", "rubberband-devel", "sdl2-compat-devel", "shaderc-devel", "soxr-devel", "svt-av1-devel", "v4l-utils-devel", "vapoursynth-devel", "vulkan-headers", "vulkan-loader-devel", "x264-devel", "x265-devel", "xvidcore-devel", "zimg-devel", "zlib-ng-compat-devel"]
+builddeps = ["alsa-lib-devel", "bzip2-devel", "dav1d-devel", "fontconfig-devel", "freetype-devel", "fribidi-devel", "glslang-devel", "gmp-devel", "gsm-devel", "harfbuzz-devel", "ladspa-sdk", "lame-devel", "lcms2-devel", "libaom-devel", "libass-devel", "libbluray-devel", "libbs2b-devel", "libcdio-devel", "libcdio-paranoia-devel", "libdrm-devel", "libdvdnav-devel", "libdvdread-devel", "libgme-devel", "libjxl-devel", "liblc3-devel", "libmodplug-devel", "libmysofa-devel", "libopenmpt-devel", "libplacebo-devel", "libpulse-devel", "librist-devel", "librsvg-devel", "libssh-devel", "libtheora-devel", "libva-devel", "libvdpau-devel", "libvidstab-devel", "libvorbis-devel", "libvpx-devel", "libwebp-devel", "libxcb-devel", "libxext-devel", "libxfixes-devel", "libxml2-devel", "libxvmc-devel", "lilv-devel", "nv-codec-headers", "ocl-icd-devel", "opencolorio-devel", "openh264-devel", "openjpeg-devel", "openssl-devel", "opus-devel", "pipewire-devel", "qrencode-devel", "rav1e-devel", "rtmpdump-devel", "rubberband-devel", "samba-devel", "sdl2-compat-devel", "shaderc-devel", "snappy-devel", "sndio-devel", "soxr-devel", "speex-devel", "srt-devel", "svt-av1-devel", "tesseract-devel", "twolame-devel", "v4l-utils-devel", "vapoursynth-devel", "vulkan-headers", "vulkan-loader-devel", "x264-devel", "x265-devel", "xvidcore-devel", "zimg-devel", "zlib-ng-compat-devel", "zvbi-devel"]
 options = ["!check"]
 
 source = [
@@ -22,6 +22,9 @@ export CFLAGS="${CFLAGS} -D_GNU_SOURCE"
 export LDFLAGS="${LDFLAGS} -Wl,-z,stack-size=0x200000"
 '''
 setup = '''
+# Not enabled, with reasons: chromaprint and opencv are built on FFmpeg (a dependency
+# cycle); OSS (indev/outdev) needs <sys/soundcard.h>, which musl does not have and
+# nothing here uses; celt is superseded by Opus and has no package.
 # The toolchain is the environment's ($CC and friends).
 ./configure --cc="$CC" --cxx="$CXX" --ld="$CC" --ar="${AR:-llvm-ar}" --nm="${NM:-llvm-nm}" --host-cc="$CC" --host-ld="$CC" \
     --prefix=/usr \
@@ -31,14 +34,14 @@ setup = '''
     --enable-version3 \
     --disable-debug \
     --disable-stripping \
-    --disable-alsa \
+    --enable-alsa \
     --disable-indev=oss \
     --disable-libcelt \
     --disable-libopencore_amrnb \
     --disable-libopencore_amrwb \
-    --disable-libspeex \
+    --enable-libspeex \
     --disable-outdev=oss \
-    --disable-sndio \
+    --enable-sndio \
     --enable-ladspa \
     --enable-lcms2 \
     --enable-libaom \
@@ -89,7 +92,25 @@ setup = '''
     --enable-vaapi \
     --enable-vdpau \
     --enable-vapoursynth \
-    --enable-vulkan
+    --enable-vulkan \
+    --enable-libgme \
+    --enable-libgsm \
+    --enable-libopenh264 \
+    --enable-libsrt \
+    --enable-librist \
+    --enable-libssh \
+    --enable-libsnappy \
+    --enable-libmysofa \
+    --enable-libzvbi \
+    --enable-libtesseract \
+    --enable-liblc3 \
+    --enable-libqrencode \
+    --enable-ffnvcodec \
+    --enable-libsmbclient \
+    --enable-libglslang \
+    --enable-libopencolorio \
+    --enable-libtwolame \
+    --enable-gmp
 '''
 build = '''
 %make
