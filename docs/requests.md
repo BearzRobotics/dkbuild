@@ -176,6 +176,7 @@ Servers and parts ("everything needed to run a mail server"):
    add MIT krb5 (it installs libgssapi_krb5/libkrb5 and krb5-config, which
    collide with Heimdal's: one or the other per system, or MIT in its own
    prefix just for curl); or switch the tree from Heimdal to MIT.
-2. **Android NDK** stays blocked: Google ships it for glibc only.
+2. **Android NDK**: answered 2026-11-12: build it from source (Google's release is
+   assembled from prebuilts, all open source). Plan in wip/android-ndk/NOTES.md.
 3. **ast-grep** (written as a general tool while surveying Brave, which turned
    out not to need it at build time): keep it or drop it?
