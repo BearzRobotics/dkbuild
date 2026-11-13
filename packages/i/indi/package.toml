@@ -1,7 +1,7 @@
 # needed by: kstars (Ekos drives telescopes, cameras and focusers through INDI).
 name = "indi"
 version = "2.2.5"
-release = 1
+release = 2
 summary = "Instrument Neutral Distributed Interface (telescope and camera control)"
 license = "LGPL-2.1-or-later"
 homepage = "https://indilib.org"
@@ -37,6 +37,10 @@ add 'errno.h|cerrno' '\berrno\b' "--include=*.cpp --include=*.c --include=*.h"
 add 'string.h|cstring' '\b(memcpy|memset|memcmp|strlen|strcmp|strncmp|strcpy|strerror)\b' "--include=*.cpp --include=*.c --include=*.h"
 add 'stdlib.h|cstdlib' '\b(getenv|malloc|free|atoi|strtol|exit|abs)\b' "--include=*.cpp --include=*.c --include=*.h"
 add algorithm 'std::(copy|fill|min|max|sort|find|find_if|transform|remove_if|for_each)\b' "--include=*.cpp --include=*.hpp"
+# pthread types (myfocuserpro2.h's pthread_mutex_t, ...) come from <pthread.h>,
+# which libc++ 23's headers no longer pull in
+add pthread.h '\bpthread_(mutex_t|mutex_lock|mutex_unlock|mutex_init|t|create|join|cond_t)\b' "--include=*.cpp --include=*.c --include=*.h"
+grep -q '^#include <pthread.h>' drivers/focuser/myfocuserpro2.h
 grep -q '^#include <errno.h>' indiserver/LocalDvrInfo.cpp
 %cmake \
     -DINDI_BUILD_UNITTESTS=OFF \
