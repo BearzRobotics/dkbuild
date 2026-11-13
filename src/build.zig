@@ -236,7 +236,12 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
     try s.appendSlice(arena, "export pkgfiles=/dkbuild/files\n");
     if (r.patches.len > 0) {
         try s.appendSlice(arena, "echo '==> patch'\ncd \"$srcdir\"\n");
-        for (r.patches) |pt| try w.add(arena, &s, "patch -Np1 -i '/dkbuild/patches/{s}'\n", .{pt});
+        // A patch that touches .cargo/config.toml finds the laid config (the
+        // patched one plus the vendored sources, see `lay`) already patched:
+        // `patch -N` skips that hunk and exits 1. Accept it when every hunk of the
+        // patch is present (it reverses cleanly, --dry-run); a hunk that really
+        // failed does not, and stops the build as before.
+        for (r.patches) |pt| try w.add(arena, &s, "patch -Np1 -i '/dkbuild/patches/{s}' || patch -Rp1 -s --dry-run -i '/dkbuild/patches/{s}'\n", .{ pt, pt });
     }
     const steps = [_]struct { name: []const u8, body: ?[]const u8 }{
         .{ .name = "setup", .body = r.setup },
