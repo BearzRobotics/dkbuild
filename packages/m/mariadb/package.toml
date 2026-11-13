@@ -2,7 +2,7 @@
 # database with `mariadb-install-db --user=_mysql`, then enable the service.
 name = "mariadb"
 version = "13.0.2"
-release = 1
+release = 2
 summary = "MariaDB database server and client"
 license = "GPL-2.0-only"
 homepage = "https://mariadb.org"
@@ -35,6 +35,10 @@ sed -i 's/^\tERA,$/\tERA_,/' $d/src/include/duckdb/common/enums/date_part_specif
 grep -rlw 'DatePartSpecifier::ERA' $d/src $d/extension --include='*.cpp' --include='*.hpp' | grep -v /third_party/ | xargs -r sed -i 's/DatePartSpecifier::ERA\b/DatePartSpecifier::ERA_/g'
 grep -qw 'ERA_,' $d/src/include/duckdb/common/enums/date_part_specifier.hpp
 ! grep -rqw 'DatePartSpecifier::ERA' $d/src $d/extension --include='*.cpp' --include='*.hpp'
+# The RPM layout puts libraries (and plugins, PAM module) in lib64 on 64-bit;
+# libraries go in /usr/lib here: the layout's lib64 becomes lib.
+sed -i 's|SET(INSTALL_LIBDIR_RPM                "lib64")|SET(INSTALL_LIBDIR_RPM                "lib")|' cmake/install_layout.cmake
+! grep -q 'INSTALL_LIBDIR_RPM *"lib64"' cmake/install_layout.cmake
 # Heimdal's krb5-config gives only -lgssapi; the GSSAPI plugin calls krb5 too.
 # Position-independent code throughout: the embedded server (libmariadbd.so)
 # links the static tpool and server libraries.
