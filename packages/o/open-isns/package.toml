@@ -9,7 +9,7 @@
 # (isnssetup makes them), no systemd units. README.FenrirOS says how to set it up.
 name = "open-isns"
 version = "0.103"
-release = 1
+release = 2
 summary = "iSNS server, client tools and library"
 license = "LGPL-2.1-or-later"
 homepage = "https://github.com/open-iscsi/open-isns"
@@ -25,7 +25,8 @@ source = [
 ]
 
 setup = '''
-%meson -Dsecurity=enabled -Dslp=disabled -Drundir=/run
+# meson's default libdir here is lib64: libraries go in /usr/lib
+%meson --libdir=lib -Dsecurity=enabled -Dslp=disabled -Drundir=/run
 '''
 build = '''
 %meson_build
