@@ -1,0 +1,66 @@
+# SQLCipher: SQLite with transparent AES-256 database encryption (OpenSSL),
+# installed beside SQLite without conflicts: libsqlcipher, sqlcipher.pc,
+# headers in /usr/include/sqlcipher, the "sqlcipher" shell (patched names).
+# Needed by Skrooge (its documents are SQLCipher databases) and KMyMoney
+# (encrypted SQLite storage). Based on Chimera's user/sqlcipher (same
+# compile-time options as its SQLite: FTS3/4/5, column metadata, dbstat,
+# STAT4, unlock notify, secure delete...), shell line editing with libedit.
+# Shared and static library.
+name = "sqlcipher"
+version = "4.20.0"
+release = 1
+summary = "SQLite fork with encryption support"
+license = "BSD-3-Clause"
+homepage = "https://www.zetetic.net/sqlcipher/"
+patches = ["ppc.patch", "rename-to-sqlcipher.patch"]
+hostdeps = ["pkgconf", "tcl"]
+builddeps = ["libedit-devel", "openssl-devel", "zlib-ng-compat-devel"]
+checkdeps = ["tcl-devel"]
+# The SQLCipher test suite (testfixture) needs the Tcl extension and a long
+# run; Chimera runs test/sqlcipher.test only. Left for later.
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/sqlcipher/sqlcipher/archive/v4.20.0.tar.gz", sha256 = "38705f51b61ac0636a5fd064f9a77fafabc7227b2aa2513f1b14c8bb1102affc" },
+]
+
+environment = '''
+export CFLAGS="$CFLAGS -DSQLITE_HAS_CODEC -DHAVE_FDATASYNC \
+    -DSQLITE_EXTRA_INIT=sqlcipher_extra_init -DSQLITE_EXTRA_SHUTDOWN=sqlcipher_extra_shutdown \
+    -DSQLITE_ENABLE_BATCH_ATOMIC_WRITE=1 -DSQLITE_ENABLE_COLUMN_METADATA -DSQLITE_ENABLE_DBSTAT_VTAB \
+    -DSQLITE_ENABLE_DESERIALIZE -DSQLITE_ENABLE_FTS3_PARENTHESIS -DSQLITE_ENABLE_FTS3_TOKENIZER=1 \
+    -DSQLITE_ENABLE_STAT4=1 -DSQLITE_ENABLE_UNLOCK_NOTIFY -DSQLITE_MAX_EXPR_DEPTH=5000 \
+    -DSQLITE_MAX_VARIABLE_NUMBER=250000 -DSQLITE_SECURE_DELETE \
+    -DSHA3_BYTEORDER=1234 -DSQLITE_BYTEORDER=1234"
+export LDFLAGS="$LDFLAGS -lssl -lcrypto"
+'''
+setup = '''
+# SQLite's autosetup configure (not autoconf), as Chimera calls it.
+./configure \
+    --prefix=/usr \
+    --enable-fts3 \
+    --enable-fts4 \
+    --enable-fts5 \
+    --enable-shared \
+    --enable-static \
+    --enable-threadsafe \
+    --with-tempstore=yes \
+    --editline \
+    --dll-basename=libsqlcipher \
+    --soname=legacy
+'''
+build = '''
+%make libsqlcipher.so lib
+# The shell gets .recover (DBPAGE vtab); security-sensitive, so it is kept
+# out of the library (Chimera).
+%make sqlite3 CFLAGS="$CFLAGS -DSQLITE_ENABLE_DBPAGE_VTAB"
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/sqlcipher/LICENSE.txt"
+# Names the rename patch does not reach.
+mv "$pkgdir/usr/bin/sqlite3" "$pkgdir/usr/bin/sqlcipher"
+mv "$pkgdir/usr/share/man/man1/sqlite3.1" "$pkgdir/usr/share/man/man1/sqlcipher.1"
+mv "$pkgdir/usr/lib/libsqlite3.a" "$pkgdir/usr/lib/libsqlcipher.a"
+rm -rf "$pkgdir"/usr/lib/tcl*
+'''

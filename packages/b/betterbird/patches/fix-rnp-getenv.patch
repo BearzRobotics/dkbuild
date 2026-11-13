@@ -1,0 +1,17 @@
+Betterbird: RNP (OpenPGP): include <stdlib.h> for getenv on all platforms, not only MSVC.
+From Chimera's main/thunderbird (as packages/t/thunderbird); applies
+unchanged to Thunderbird 153 ESR.
+
+--- a/comm/third_party/rnp/src/common/file-utils.cpp
++++ b/comm/third_party/rnp/src/common/file-utils.cpp
+@@ -29,9 +29,9 @@
+ 
+ #include "file-utils.h"
+ #include "config.h"
+-#ifdef _MSC_VER
+ #include <stdlib.h>
+ #include <stdio.h>
++#ifdef _MSC_VER
+ #include "uniwin.h"
+ #include <errno.h>
+ #else

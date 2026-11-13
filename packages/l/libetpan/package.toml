@@ -1,0 +1,42 @@
+# libEtPan!: mail protocol library (IMAP, SMTP, POP3, NNTP, MIME, mailbox
+# formats), used by Claws Mail for IMAP and NNTP. TLS through OpenSSL,
+# SASL through Cyrus libsasl, its on-disk message cache in LMDB (it otherwise
+# wants Berkeley DB, which is not in the tree), libcurl and expat (for its
+# helper code that fetches over HTTP), zlib (COMPRESS=DEFLATE), iconv,
+# threads and IPv6. Release tarballs are GitHub tag archives without a
+# generated configure, so autoreconf runs first.
+name = "libetpan"
+version = "1.10.1"
+release = 1
+summary = "Mail protocols and formats library"
+license = "BSD-3-Clause"
+homepage = "https://www.etpan.org/libetpan.html"
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf"]
+builddeps = ["curl-devel", "libexpat-devel", "libsasl-devel", "lmdb-devel", "openssl-devel", "zlib-ng-compat-devel"]
+# The tests (tests/, unittest/) are not wired to "make check".
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/dinhvh/libetpan/archive/refs/tags/1.10.1.tar.gz", sha256 = "87bacdc62661a2a7aa5fe9f1f28d2f7c7a53256633ac5129903916c59f80c4c2" },
+]
+
+setup = '''
+autoreconf -if
+%configure \
+    --with-openssl \
+    --without-gnutls \
+    --with-sasl \
+    --enable-lmdb \
+    --with-curl \
+    --with-expat \
+    --with-zlib \
+    --enable-ipv6 \
+    --enable-threads
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYRIGHT "$pkgdir/usr/share/licenses/libetpan/COPYRIGHT"
+'''

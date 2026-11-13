@@ -1,0 +1,42 @@
+# Skrooge: KDE personal finance manager (Qt 6 / KF6). Its documents are
+# SQLCipher databases. Enabled: the Qt WebEngine dashboard and reports, D-Bus,
+# OFX import (libofx) next to the built-in importers (QIF, CSV, GnuCash,
+# KMyMoney, HomeBank, Grisbi, MT940, ...), the monthly report templates
+# (KTextTemplate), the KRunner "add operation" plugin, the system tray item
+# (KStatusNotifierItem), activities, KWallet, the handbook. Not built: the Qt
+# Designer plugin (for developers) and the test suite (SKG_BUILD_TEST; it
+# needs a display and sample files fetched separately).
+name = "skrooge"
+version = "26.8.0"
+release = 1
+summary = "Personal finance manager for KDE"
+license = "GPL-3.0-or-later"
+homepage = "https://skrooge.org"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "kdoctools", "ninja", "pkgconf", "shared-mime-info"]
+builddeps = ["karchive-devel", "kcodecs-devel", "kcolorscheme-devel", "kcompletion-devel", "kconfig-devel",
+             "kconfigwidgets-devel", "kcoreaddons-devel", "kdbusaddons-devel", "kdoctools-devel",
+             "kguiaddons-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kitemviews-devel",
+             "knewstuff-devel", "knotifications-devel", "knotifyconfig-devel", "kparts-devel", "krunner-devel",
+             "kstatusnotifieritem-devel", "ktexttemplate-devel", "kwallet-devel", "kwidgetsaddons-devel",
+             "kxmlgui-devel", "libofx-devel", "plasma-activities-devel", "qt6-qt5compat-devel",
+             "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "qt6-qtwebengine-devel",
+             "sqlcipher-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/skrooge/skrooge-26.8.0.tar.xz", sha256 = "2332234f8b67dd95e63ed7caf21042a4d2792729a9a7f1f5cd52c1040550b353" },
+]
+
+setup = '''
+%cmake \
+    -DSKG_WEBENGINE=ON \
+    -DSKG_DBUS=ON \
+    -DSKG_DESIGNER=OFF \
+    -DSKG_BUILD_TEST=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

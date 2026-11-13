@@ -1,0 +1,58 @@
+# Evolution: GNOME mail, calendar, address book, task and memo suite
+# (GTK 3, WebKitGTK mail view). Based on Chimera's main/evolution, with every
+# optional part whose library is in the tree: GNOME desktop thumbnails
+# (gnome-desktop), archived attachments (gnome-autoar), Canberra sounds,
+# libnotify, gspell spell checking, weather calendars (libgweather,
+# geocode-glib), TNEF/winmail.dat (ytnef), Outlook PST import (libpst),
+# Markdown composing (cmark), source highlighting (the highlight program,
+# hence the rundep), S/MIME certificates (NSS), LDAP (OpenLDAP), the user
+# help (itstool).
+# Left out: contact maps (ENABLE_CONTACT_MAPS, off upstream by default:
+# libchamplain and clutter-gtk are unmaintained and not in the tree), the
+# Glade catalog (for UI designers), the Unity launcher integration.
+name = "evolution"
+version = "3.62.1"
+release = 1
+summary = "Mail, calendar and address book suite"
+license = "LGPL-2.1-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/evolution"
+hostdeps = ["cmake", "gettext", "glib-devel", "gtk+3", "highlight", "intltool", "itstool", "ninja", "pkgconf"]
+builddeps = ["at-spi2-core-devel", "cairo-devel", "cmark-devel", "enchant-devel", "evolution-data-server-devel",
+             "gdk-pixbuf-devel", "geocode-glib-devel", "glib-devel", "gnome-autoar-devel", "gnome-desktop-devel",
+             "gsettings-desktop-schemas-devel", "gspell-devel", "gtk+3-devel", "iso-codes", "libcanberra-devel",
+             "libgweather-devel", "libical-devel", "libnotify-devel", "libpst-devel", "libsecret-devel",
+             "libsoup-devel", "libxml2-devel", "nspr-devel", "nss-devel", "openldap-devel", "shared-mime-info",
+             "sqlite-devel", "webkitgtk-devel", "xorgproto", "ytnef-devel"]
+rundeps = ["highlight"]
+# The tests need a display.
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/evolution/3.62/evolution-3.62.1.tar.xz", sha256 = "b974cdd0392c167ea9fc2f9f2f8fab8ab7782c3c839db9a281ae9b635dc1a53c" },
+]
+
+setup = '''
+%cmake \
+    -DLIBEXEC_INSTALL_DIR=/usr/lib \
+    -DSYSCONF_INSTALL_DIR=/etc \
+    -DENABLE_GNOME_DESKTOP=ON \
+    -DENABLE_AUTOAR=ON \
+    -DENABLE_CANBERRA=ON \
+    -DENABLE_LIBNOTIFY=ON \
+    -DENABLE_GSPELL=ON \
+    -DENABLE_WEATHER=ON \
+    -DENABLE_YTNEF=ON \
+    -DENABLE_PST_IMPORT=ON \
+    -DENABLE_MARKDOWN=ON \
+    -DENABLE_TEXT_HIGHLIGHT=ON \
+    -DENABLE_CONTACT_MAPS=OFF \
+    -DWITH_OPENLDAP=ON \
+    -DWITH_HELP=ON \
+    -DWITH_GLADE_CATALOG=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

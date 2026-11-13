@@ -1,0 +1,33 @@
+# gnome-autoar: GLib/GTK archive extraction and compression on libarchive,
+# used by Evolution (and Nautilus) for archived attachments. Based on
+# Chimera's main/gnome-autoar: introspection, Vala bindings, tests. No API
+# reference.
+name = "gnome-autoar"
+version = "0.5.2"
+release = 1
+summary = "Archiving functions and widgets for GNOME"
+license = "LGPL-2.1-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/gnome-autoar"
+hostdeps = ["gettext", "glib-devel", "gobject-introspection", "meson", "pkgconf", "vala"]
+builddeps = ["glib-devel", "gtk+3-devel", "libarchive-devel"]
+
+source = [
+    { url = "https://download.gnome.org/sources/gnome-autoar/0.5/gnome-autoar-0.5.2.tar.xz", sha256 = "6c20bd16c87aba15869e56444424481f632ac302989a203e8ce4dcc73dea33a5" },
+]
+
+setup = '''
+%meson \
+    -Dintrospection=enabled \
+    -Dvapi=true \
+    -Dtests=true \
+    -Ddocs=false
+'''
+build = '''
+%meson_build
+'''
+check = '''
+meson test -C build --print-errorlogs
+'''
+install = '''
+%meson_install
+'''

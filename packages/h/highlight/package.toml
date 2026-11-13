@@ -1,0 +1,28 @@
+# highlight: source-code syntax highlighter (HTML, RTF, LaTeX, ANSI, SVG...
+# output; Lua-scriptable language definitions and plugins). Evolution's
+# text-highlight module runs it. As Chimera's main/highlight: the command
+# line program through upstream's makefile. Left out: the Qt GUI (highlight-
+# gui; can be added as a subpackage later) and the shared libhighlight
+# (lib-shared target; nothing in the tree links it).
+name = "highlight"
+version = "4.22"
+release = 1
+summary = "Syntax highlighter program"
+license = "GPL-3.0-or-later"
+homepage = "http://andre-simon.de/doku/highlight/en/highlight.php"
+hostdeps = ["pkgconf"]
+builddeps = ["boost-devel", "lua-devel"]
+# No test suite.
+options = ["!check"]
+
+source = [
+    { url = "http://www.andre-simon.de/zip/highlight-4.22.tar.bz2", sha256 = "61051b0f9824ac27fc30d54377c238537962b26e06942b88be88dc63ff16f05e" },
+]
+
+build = '''
+# The src makefile compiles C++ with $(CFLAGS); give it the C++ flags.
+%make CFLAGS="$CXXFLAGS" PREFIX=/usr
+'''
+install = '''
+%make_install PREFIX=/usr
+'''

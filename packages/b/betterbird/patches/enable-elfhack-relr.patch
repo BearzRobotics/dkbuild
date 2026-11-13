@@ -1,0 +1,15 @@
+Betterbird: Use packed relative relocations (RELR) with elfhack: musl supports them, but mozbuild only enables them where it found arc4random (glibc/Android).
+From Chimera's main/thunderbird (as packages/t/thunderbird); applies
+unchanged to Thunderbird 153 ESR.
+
+--- a/toolkit/moz.configure
++++ b/toolkit/moz.configure
+@@ -1517,7 +1517,7 @@ with only_when("--enable-compile-environ
+             return False
+         if android_version:
+             return android_version >= 30
+-        return have_arc4random
++        return have_arc4random or True
+ 
+     @depends(
+         c_compiler,

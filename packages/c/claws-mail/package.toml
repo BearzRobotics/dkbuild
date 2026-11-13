@@ -1,0 +1,94 @@
+# Claws Mail: GTK 3 email and news client. Built with GnuTLS (and nettle),
+# libetpan (IMAP, NNTP), OAuth2, LDAP address book (OpenLDAP), GPGME,
+# Enchant spell checking, startup notification, D-Bus, session management
+# (libSM), NetworkManager (libnm), SVG (librsvg), IPv6, and these plugins:
+# acpi_notifier, address_keeper, archive (libarchive), att_remover,
+# attachwarner, bogofilter, bsfilter, clamd, dillo, fancy (WebKitGTK),
+# fetchinfo, keyword_warner, libravatar, litehtml_viewer (gumbo-parser;
+# litehtml itself is bundled in the plugin), mailmbox, managesieve, newmail,
+# notification (libnotify, libcanberra, Ayatana AppIndicator), pdf_viewer
+# (poppler; PostScript through ghostscript), perl, python (PyGObject),
+# pgpcore/pgpmime/pgpinline, rssyl (expat, curl), smime, spamassassin,
+# spam_report, tnef_parse (ytnef), vcalendar (libical).
+# The bogofilter, bsfilter, clamd, dillo and spamassassin plugins call
+# external programs that are not in the tree; they are built (they need no
+# library) and work once those are installed.
+# Left out: X-Face support (libcompface: no maintained upstream release
+# source), JPilot address books (pilot-link is not in the tree, and Palm
+# devices are long gone), the user manual (needs docbook-utils, not in the
+# tree; the manual is online), Unity messaging menu (Ubuntu-only).
+name = "claws-mail"
+version = "4.4.0"
+release = 1
+summary = "GTK email client"
+license = "GPL-3.0-or-later"
+homepage = "https://www.claws-mail.org"
+hostdeps = ["bison", "flex", "gettext", "perl", "pkgconf", "python"]
+builddeps = ["cairo-devel", "curl-devel", "enchant-devel", "fontconfig-devel", "gdk-pixbuf-devel", "glib-devel",
+             "gnutls-devel", "gpgme-devel", "gtk+3-devel", "gumbo-parser-devel", "libarchive-devel",
+             "libayatana-appindicator-devel", "libcanberra-devel", "libetpan-devel", "libexpat-devel",
+             "libical-devel", "libnotify-devel", "librsvg-devel", "libsm-devel", "nettle-devel",
+             "networkmanager-devel", "openldap-devel", "perl", "poppler-devel", "python-devel",
+             "python-gobject-devel", "startup-notification-devel", "webkitgtk-devel", "ytnef-devel"]
+rundeps = ["ghostscript", "python-gobject"]
+
+source = [
+    { url = "https://www.claws-mail.org/releases/claws-mail-4.4.0.tar.xz", sha256 = "03e0549d5f0fcd7a59804186524105d05ebb5e534d42a4b86a9a90f729ca255b" },
+]
+
+setup = '''
+%configure \
+    --enable-gnutls \
+    --enable-oauth2 \
+    --enable-enchant \
+    --enable-ipv6 \
+    --enable-libsm \
+    --enable-startup-notification \
+    --enable-dbus \
+    --enable-ldap \
+    --enable-networkmanager \
+    --enable-libetpan \
+    --enable-svg \
+    --disable-compface \
+    --disable-jpilot \
+    --disable-manual \
+    --enable-acpi_notifier-plugin \
+    --enable-address_keeper-plugin \
+    --enable-archive-plugin \
+    --enable-att_remover-plugin \
+    --enable-attachwarner-plugin \
+    --enable-bogofilter-plugin \
+    --enable-bsfilter-plugin \
+    --enable-clamd-plugin \
+    --enable-dillo-plugin \
+    --enable-fancy-plugin \
+    --enable-fetchinfo-plugin \
+    --enable-keyword_warner-plugin \
+    --enable-libravatar-plugin \
+    --enable-litehtml_viewer-plugin \
+    --enable-mailmbox-plugin \
+    --enable-managesieve-plugin \
+    --enable-newmail-plugin \
+    --enable-notification-plugin \
+    --enable-pdf_viewer-plugin \
+    --enable-perl-plugin \
+    --enable-python-plugin \
+    --enable-pgpcore-plugin \
+    --enable-pgpmime-plugin \
+    --enable-pgpinline-plugin \
+    --enable-rssyl-plugin \
+    --enable-smime-plugin \
+    --enable-spamassassin-plugin \
+    --enable-spam_report-plugin \
+    --enable-tnef_parse-plugin \
+    --enable-vcalendar-plugin
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

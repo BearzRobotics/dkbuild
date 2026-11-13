@@ -1,0 +1,27 @@
+# gweather-locations: the GNOME Weather locations database (world cities,
+# weather stations, time zones), split out of libgweather in 2025. Data
+# only. Based on Chimera's main/gweather-locations.
+name = "gweather-locations"
+version = "2026.2"
+release = 1
+summary = "GNOME Weather locations database"
+license = "GPL-2.0-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/gweather-locations"
+hostdeps = ["gettext", "meson", "pkgconf", "python", "python-gobject"]
+
+source = [
+    { url = "https://download.gnome.org/sources/gweather-locations/2026/gweather-locations-2026.2.tar.xz", sha256 = "e7570a3661e0a752a06387b2032585cf588fc56770b1f9f39f1a55d17b2835fe" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+check = '''
+meson test -C build --print-errorlogs
+'''
+install = '''
+%meson_install
+'''

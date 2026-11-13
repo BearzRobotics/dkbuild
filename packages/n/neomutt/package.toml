@@ -1,0 +1,52 @@
+# NeoMutt: terminal mail reader (Mutt fork). Based on Chimera's user/neomutt,
+# with more of its optional features, as their libraries are in the tree:
+# OpenSSL, GnuPG/S-MIME through gpgme, Autocrypt (SQLite), notmuch, IDN
+# (libidn2), PCRE2, SASL (Cyrus libsasl), GSSAPI (Heimdal), Lua scripting,
+# header cache in LMDB and TDB, header-cache compression with LZ4, zlib and
+# zstd. Left out: the Kyoto/Tokyo Cabinet, QDBM, GDBM, Berkeley DB and
+# RocksDB header-cache backends (LMDB and TDB cover it; none of those
+# libraries are in the tree). Docs: man pages and the HTML manual.
+name = "neomutt"
+version = "20260616"
+release = 1
+summary = "Command-line mail reader"
+license = "GPL-2.0-or-later"
+homepage = "https://neomutt.org"
+hostdeps = ["docbook-xsl-nons", "gettext", "libxml2", "libxslt", "perl", "pkgconf", "tcl"]
+builddeps = ["gettext-devel", "gpgme-devel", "heimdal-devel", "libidn2-devel", "libsasl-devel", "lmdb-devel",
+             "lua-devel", "lz4-devel", "ncurses-devel", "notmuch-devel", "openssl-devel", "pcre2-devel",
+             "sqlite-devel", "tdb-devel", "zlib-ng-compat-devel", "zstd-devel"]
+# Chimera: no tests are defined for a release tarball (the test suite is a
+# separate repository).
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/neomutt/neomutt/archive/refs/tags/20260616.tar.gz", sha256 = "2c34fdd2166d5765e6bfdc21d1248bc4e92ddc0a33537b9418c17cd90e2dda80" },
+]
+
+environment = '''
+export autosetup_tclsh=tclsh
+'''
+setup = '''
+%configure \
+    --autocrypt \
+    --gpgme \
+    --gss \
+    --lmdb \
+    --lua \
+    --lz4 \
+    --notmuch \
+    --pcre2 \
+    --sasl \
+    --sqlite \
+    --ssl \
+    --tdb \
+    --zlib \
+    --zstd
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

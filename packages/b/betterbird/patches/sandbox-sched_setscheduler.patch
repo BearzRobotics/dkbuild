@@ -1,0 +1,39 @@
+Sandbox: allow sched_setscheduler for content and media processes: musl
+implements pthread_setschedparam and friends through it with a non-zero
+pid, which the seccomp filter otherwise traps and fails
+(https://bugzilla.mozilla.org/show_bug.cgi?id=1657849). From Chimera's
+main/thunderbird, rebased onto Thunderbird 153 ESR.
+
+--- a/security/sandbox/linux/SandboxFilter.cpp	2026-11-10 13:34:39.000000000 -0500
++++ b/security/sandbox/linux/SandboxFilter.cpp	2026-11-12 20:01:11.968714095 -0500
+@@ -1903,10 +1903,10 @@
+         return Allow();
+       case __NR_sched_get_priority_min:
+       case __NR_sched_get_priority_max:
++      case __NR_sched_setscheduler:
+         return Allow();
+       case __NR_sched_getparam:
+-      case __NR_sched_getscheduler:
+-      case __NR_sched_setscheduler: {
++      case __NR_sched_getscheduler: {
+         Arg<pid_t> pid(0);
+         return If(pid == 0, Allow()).Else(Trap(SchedTrap, nullptr));
+       }
+@@ -2125,13 +2125,16 @@
+       case __NR_sched_getparam:
+       case __NR_sched_setparam:
+       case __NR_sched_getscheduler:
+-      case __NR_sched_setscheduler:
+       case __NR_sched_getattr:
+       case __NR_sched_setattr: {
+         Arg<pid_t> pid(0);
+         return If(pid == 0, Allow()).Else(Trap(SchedTrap, nullptr));
+       }
+ 
++      // sched_setscheduler gets special treatment here (bug 1657849):
++      case __NR_sched_setscheduler:
++        return Allow();
++
+         // The priority bounds are also used, sometimes (bug 1838675):
+       case __NR_sched_get_priority_min:
+       case __NR_sched_get_priority_max:

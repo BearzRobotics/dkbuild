@@ -1,0 +1,72 @@
+# Syncthing: continuous peer-to-peer file synchronization (Go). Based on
+# Chimera's user/syncthing: built with the "noupgrade" tag (updates come
+# from apk, not Syncthing's self-upgrader); also the relay server
+# (strelaysrv) and discovery server (stdiscosrv) in their own subpackages.
+# A dinit user service is shipped in /usr/lib/dinit.d/user/syncthing but not
+# enabled (`dinitctl enable syncthing` as the user); the web GUI listens on
+# 127.0.0.1:8384 only once a user starts it. No system-wide service, no
+# default configuration: each user's configuration is made on first start.
+# The relay/discovery servers ship no services (run by hand or packaged
+# services later).
+name = "syncthing"
+version = "2.1.7"
+release = 1
+summary = "Continuous file synchronization program"
+license = "MPL-2.0"
+homepage = "https://syncthing.net"
+hostdeps = ["go"]
+options = ["godeps"]
+
+source = [
+    { url = "https://github.com/syncthing/syncthing/archive/v2.1.7.tar.gz", sha256 = "e9794cab0adf5b0a59d9b631e994dce055c57cb805228555bdfa68118be4bd0a" },
+]
+
+setup = '''
+# lib/connections' tests fail with Go 1.26 inside quic-go (Chimera removes
+# the file too); tests only.
+rm -f lib/connections/connections_test.go
+# Generates the embedded web GUI assets (Go code, no network).
+go generate github.com/syncthing/syncthing/lib/api/auto
+'''
+build = '''
+mkdir -p build
+for cmd in syncthing stdiscosrv strelaysrv; do
+    go build -trimpath -buildmode=pie -tags noupgrade \
+        -ldflags "-X github.com/syncthing/syncthing/lib/build.Version=v$version" \
+        -o build/$cmd ./cmd/$cmd
+done
+'''
+check = '''
+go test -tags noupgrade ./lib/... ./cmd/stdiscosrv ./cmd/strelaysrv ./cmd/syncthing
+'''
+install = '''
+for cmd in syncthing stdiscosrv strelaysrv; do
+    install -Dm755 build/$cmd "$pkgdir/usr/bin/$cmd"
+done
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/syncthing/LICENSE"
+install -Dm644 cmd/strelaysrv/LICENSE "$pkgdir/usr/share/licenses/syncthing-relaysrv/LICENSE"
+install -Dm644 etc/firewall-ufw/syncthing "$pkgdir/usr/lib/ufw/applications.d/syncthing"
+install -Dm644 cmd/stdiscosrv/etc/firewall-ufw/stdiscosrv "$pkgdir/usr/lib/ufw/applications.d/stdiscosrv"
+install -Dm644 cmd/strelaysrv/etc/firewall-ufw/strelaysrv "$pkgdir/usr/lib/ufw/applications.d/strelaysrv"
+for f in etc/linux-desktop/*.desktop; do
+    install -Dm644 "$f" "$pkgdir/usr/share/applications/${f##*/}"
+done
+install -Dm644 etc/linux-sysctl/30-syncthing.conf "$pkgdir/usr/lib/sysctl.d/30-syncthing.conf"
+for f in man/*.[157]; do
+    s=${f##*.}
+    install -Dm644 "$f" "$pkgdir/usr/share/man/man$s/${f##*/}"
+done
+for s in 32 64 128 256 512; do
+    install -Dm644 assets/logo-$s.png "$pkgdir/usr/share/icons/hicolor/${s}x${s}/apps/syncthing.png"
+done
+install -Dm644 assets/logo-only.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/syncthing.svg"
+install -Dm644 $pkgfiles/syncthing.user "$pkgdir/usr/lib/dinit.d/user/syncthing"
+'''
+
+[subpackages.relaysrv]
+summary = "Syncthing relay server"
+paths = ["/usr/bin/strelaysrv", "/usr/lib/ufw/applications.d/strelaysrv", "/usr/share/licenses/syncthing-relaysrv"]
+
+[subpackages.discosrv]
+summary = "Syncthing discovery server"
+paths = ["/usr/bin/stdiscosrv", "/usr/lib/ufw/applications.d/stdiscosrv"]

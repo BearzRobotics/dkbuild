@@ -1,0 +1,31 @@
+# aerc: terminal email client (Go). Based on Chimera's user/aerc: built with
+# notmuch support (cgo against libnotmuch); filters installed in
+# /usr/lib/aerc/filters (patched paths); man pages through scdoc.
+name = "aerc"
+version = "0.22.0"
+release = 1
+summary = "Terminal email client"
+license = "MIT"
+homepage = "https://aerc-mail.org"
+patches = ["libexec.patch"]
+hostdeps = ["go", "pkgconf", "scdoc"]
+builddeps = ["notmuch-devel"]
+# The tests need gnupg and gpgme at run time and write keyrings; Chimera
+# runs them, but they can be turned on later with checkdeps.
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://git.sr.ht/~rjarry/aerc/archive/0.22.0.tar.gz", sha256 = "f1cd5e358fd836051d4d88c189ecaa025a108b729281985525b45b13bc49e70f" },
+]
+
+environment = '''
+export GOFLAGS="$GOFLAGS -tags=notmuch -buildmode=pie -trimpath"
+export CGO_ENABLED=1
+'''
+build = '''
+%make PREFIX=/usr LIBEXECDIR=/usr/lib/aerc
+'''
+install = '''
+%make_install PREFIX=/usr LIBEXECDIR=/usr/lib/aerc
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/aerc/LICENSE"
+'''

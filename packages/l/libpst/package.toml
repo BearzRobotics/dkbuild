@@ -1,0 +1,35 @@
+# libpst: library and tools (readpst, lspst) for Microsoft Outlook .pst
+# files; Evolution's pst-import plugin uses the library. Based on Chimera's
+# main/libpst: shared library (and the static one), libgsf for the
+# attachment/OLE handling. Left out: the Python binding (Boost.Python, not
+# built in the tree's Boost; Chimera leaves it out too) and pst2dii (an
+# e-discovery load-file exporter that needs ImageMagick 6's "convert" at
+# build time).
+name = "libpst"
+version = "0.6.76"
+release = 1
+summary = "Library and tools for Outlook PST files"
+license = "GPL-2.0-or-later"
+homepage = "https://www.five-ten-sg.com/libpst"
+hostdeps = ["automake", "gettext-devel", "libtool", "pkgconf"]
+builddeps = ["libgsf-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://www.five-ten-sg.com/libpst/packages/libpst-0.6.76.tar.gz", sha256 = "3d291beebbdb48d2b934608bc06195b641da63d2a8f5e0d386f2e9d6d05a0b42" },
+]
+
+setup = '''
+%configure \
+    --enable-libpst-shared \
+    --disable-python \
+    --disable-dii
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

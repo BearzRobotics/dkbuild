@@ -1,0 +1,43 @@
+# Alkimia (libalkimia6): KDE financial library: money/price types on GMP,
+# online stock and currency quotes (Qt WebEngine for pages that need a
+# browser), the online-quotes editor and KNewStuff sources; used by KMyMoney
+# and Skrooge. Built for Qt 6 / KF6 with the tools (onlinequoteseditor6),
+# the Plasma applet (libplasma) and Finance::Quote support (that source
+# runs the Perl module Finance::Quote, which is not in the tree; it is
+# simply unavailable until installed).
+# Shared library only: like the tree's other KDE libraries, its CMake build
+# makes one kind, and its QML plugin and Plasma applet link the shared one.
+name = "alkimia"
+version = "8.2.1"
+release = 1
+summary = "Library for common financial functionality"
+license = "LGPL-2.1-or-later"
+homepage = "https://invent.kde.org/office/alkimia"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["gmp-devel", "kcodecs-devel", "kcompletion-devel", "kconfig-devel", "kcoreaddons-devel",
+             "ki18n-devel", "kiconthemes-devel", "knewstuff-devel", "kpackage-devel", "ktextwidgets-devel",
+             "kwidgetsaddons-devel", "kxmlgui-devel", "libplasma-devel", "qt6-qtbase-devel",
+             "qt6-qtdeclarative-devel", "qt6-qtwebengine-devel"]
+rundeps = ["perl"]
+# The online-quote tests download from the quote providers.
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/alkimia/8.2.1/alkimia-8.2.1.tar.xz", sha256 = "f921410e180e0a5811e1ee2926954920c6576a72b3b65f53791faa6c85fcb689" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_WITH_QT6=ON \
+    -DBUILD_TOOLS=ON \
+    -DBUILD_APPLETS=ON \
+    -DBUILD_WITH_WEBENGINE=ON \
+    -DENABLE_FINANCEQUOTE=ON \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

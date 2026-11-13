@@ -1,0 +1,28 @@
+# gumbo-parser: HTML5 parsing library in C99 (the maintained Codeberg
+# continuation of Google's Gumbo). Needed by Claws Mail's litehtml_viewer
+# plugin. Based on Chimera's main/gumbo-parser; tests with GoogleTest.
+name = "gumbo-parser"
+version = "0.14.1"
+release = 1
+summary = "HTML5 parsing library in pure C99"
+license = "Apache-2.0"
+homepage = "https://codeberg.org/gumbo-parser/gumbo-parser"
+hostdeps = ["meson", "pkgconf"]
+builddeps = ["gtest-devel"]
+
+source = [
+    { url = "https://codeberg.org/gumbo-parser/gumbo-parser/archive/0.14.1.tar.gz", sha256 = "ba5d13b9b508ec693613b3b61518163aced38f8e885f7e28dc047348a4e61365" },
+]
+
+setup = '''
+%meson -Dtests=true
+'''
+build = '''
+%meson_build
+'''
+check = '''
+meson test -C build --print-errorlogs
+'''
+install = '''
+%meson_install
+'''

@@ -1,0 +1,36 @@
+# GMime 3: C library for creating and parsing MIME messages (used by notmuch,
+# and through it NeoMutt and aerc). Based on Chimera's main/gmime: with
+# GnuPG/S-MIME through gpgme and IDN through libidn2; also GObject
+# introspection and Vala bindings (Chimera leaves those out; we build them as
+# gobject-introspection and vala are in the tree). Static library kept
+# (Chimera disables it). No gtk-doc API reference (documentation only).
+name = "gmime"
+version = "3.2.15"
+release = 1
+summary = "C/C++ MIME creation and parser library"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/jstedfast/gmime"
+patches = ["no-non-utf8-check.patch"]
+hostdeps = ["automake", "gobject-introspection", "gtk-doc-tools", "libtool", "pkgconf", "vala"]
+builddeps = ["glib-devel", "gpgme-devel", "libidn2-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://github.com/jstedfast/gmime/releases/download/3.2.15/gmime-3.2.15.tar.xz", sha256 = "84cd2a481a27970ec39b5c95f72db026722904a2ccf3fdbd57b280cf2d02b5c4" },
+]
+
+setup = '''
+%configure \
+    --disable-gtk-doc \
+    --enable-introspection \
+    --enable-vala \
+    --enable-crypto
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

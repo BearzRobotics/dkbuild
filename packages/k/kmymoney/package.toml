@@ -1,0 +1,55 @@
+# KMyMoney: KDE personal finance manager, built for Qt 6 / KF6 (5.2 is its
+# first Qt 6 release). Enabled: GPG-encrypted files (QGpgME), SQL storage
+# with SQLCipher-encrypted SQLite databases, OFX import/export and Direct
+# Connect (libofx), reports and charts (KChart from kdiagram), forecast,
+# budget and online-job views, iCalendar export (libical), the KDE PIM
+# address book and identity (Akonadi, KIdentityManagement), holidays
+# (KHolidays), activities (PlasmaActivities), Qt Keychain, Alkimia online
+# quotes, the Woob plugin (Python; the woob module itself is not in the
+# tree), the handbook (KDocTools).
+# Not yet: the KBanking plugin (HBCI/FinTS, EBICS): it needs Gwenhywfar's
+# C++ and Qt 6 GUI libraries (gwengui-cpp, gwengui-qt6), and the tree's
+# gwenhywfar is built with the GTK 3 GUI only; KMyMoney's CMake turns the
+# plugin off by itself until those exist.
+name = "kmymoney"
+version = "5.2.2"
+release = 1
+summary = "Personal finance manager"
+license = "GPL-2.0-or-later"
+homepage = "https://kmymoney.org"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "kdoctools", "ninja", "perl", "pkgconf", "python"]
+builddeps = ["akonadi-devel", "alkimia-devel", "aqbanking-devel", "boost-devel", "gmp-devel", "gpgmepp-devel",
+             "gwenhywfar-devel", "karchive-devel", "kcmutils-devel", "kcompletion-devel", "kconfig-devel",
+             "kconfigwidgets-devel", "kcontacts-devel", "kcoreaddons-devel", "kcrash-devel", "kdiagram-devel",
+             "kdoctools-devel", "kholidays-devel", "ki18n-devel", "kidentitymanagement-devel", "kio-devel",
+             "kitemmodels-devel", "kitemviews-devel", "knotifications-devel", "kservice-devel",
+             "ktextwidgets-devel", "kxmlgui-devel", "libical-devel", "libofx-devel", "plasma-activities-devel",
+             "python-devel", "qgpgme-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel",
+             "qt6-qttools-devel", "qtkeychain-devel", "sqlcipher-devel"]
+# Many tests need a display or a D-Bus session.
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/kmymoney/5.2.2/kmymoney-5.2.2.tar.xz", sha256 = "40b6639e6a216100d20248ed74fa154202f9ccdfbc335227cedc1bef8ea5d377" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_WITH_QT6=ON \
+    -DENABLE_GPG=ON \
+    -DENABLE_SQLSTORAGE=ON \
+    -DENABLE_SQLCIPHER=ON \
+    -DENABLE_LIBOFX=ON \
+    -DENABLE_ADDRESSBOOK=ON \
+    -DENABLE_HOLIDAYS=ON \
+    -DENABLE_ACTIVITIES=ON \
+    -DENABLE_LIBICAL=ON \
+    -DENABLE_WOOB=ON \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

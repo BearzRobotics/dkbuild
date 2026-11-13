@@ -1,0 +1,32 @@
+Take the Rust target triple from $RUST_TARGET (set in the recipe) instead of
+mozbuild guessing it from the C triple, which it cannot map for
+x86_64-fenriros-linux-musl. From Chimera's main/thunderbird, rebased onto
+Thunderbird 153 ESR (detect_rustc_target has more parameters there).
+
+--- a/build/moz.configure/rust.configure	2026-11-10 13:34:29.000000000 -0500
++++ b/build/moz.configure/rust.configure	2026-11-12 20:01:11.547463078 -0500
+@@ -278,6 +278,9 @@
+     return data
+ 
+ 
++@imports('os')
++@imports(_from='mozbuild.util', _import='ensure_unicode')
++@imports(_from='mozbuild.util', _import='system_encoding')
+ def detect_rustc_target(
+     host_or_target, compiler_info, arm_target, rust_supported_targets
+ ):
+@@ -438,12 +441,12 @@
+ 
+         return None
+ 
+-    rustc_target = find_candidate(candidates)
++    rustc_target = os.environ['RUST_TARGET']
+ 
+     if rustc_target is None:
+         die("Don't know how to translate {} for rustc".format(host_or_target.alias))
+ 
+-    return rustc_target
++    return ensure_unicode(rustc_target, system_encoding)
+ 
+ 
+ @imports("os")

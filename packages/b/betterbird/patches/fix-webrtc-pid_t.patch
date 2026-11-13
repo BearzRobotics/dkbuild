@@ -1,0 +1,14 @@
+Betterbird: WebRTC desktop capture: include <sys/types.h> for pid_t, which musl's other headers do not pull in.
+From Chimera's main/thunderbird (as packages/t/thunderbird); applies
+unchanged to Thunderbird 153 ESR.
+
+--- a/third_party/libwebrtc/modules/desktop_capture/desktop_capturer.h
++++ b/third_party/libwebrtc/modules/desktop_capture/desktop_capturer.h
+@@ -11,6 +11,7 @@
+ #ifndef MODULES_DESKTOP_CAPTURE_DESKTOP_CAPTURER_H_
+ #define MODULES_DESKTOP_CAPTURE_DESKTOP_CAPTURER_H_
+ 
++#include <sys/types.h>
+ #include <cstddef>
+ #include <cstdint>
+ #include <memory>

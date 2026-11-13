@@ -1,0 +1,72 @@
+# evolution-data-server: GNOME's address book, calendar and mail store
+# backends (Camel) and their D-Bus services, used by Evolution, GNOME
+# Calendar/Contacts and others. Based on Chimera's main/evolution-data-server,
+# with more enabled as the libraries are in the tree: GTK 3 and GTK 4
+# helpers, GNOME Online Accounts, OAuth2 sign-in through WebKitGTK (GTK 3),
+# Kerberos/GSSAPI through Heimdal (patched), LDAP address books (OpenLDAP;
+# Chimera turns it off), phone-number matching (libphonenumber), weather
+# calendars (libgweather), Canberra alarm sounds, introspection and Vala
+# bindings. Google/Outlook/Yahoo OAuth use upstream's built-in client ids.
+# Left out:
+# - the GTK 4 WebKitGTK OAuth2 dialog (ENABLE_OAUTH2_WEBKITGTK4): it needs a
+#   second, GTK 4 WebKitGTK build (webkitgtk-6.0), not in the tree; the GTK 3
+#   dialog covers Evolution, and GOA covers GNOME apps.
+# - Berkeley DB (WITH_LIBDB): only used to import address books from
+#   Evolution 2.x; no Berkeley DB in the tree.
+# - systemd user units (no systemd); the services are D-Bus activated.
+# - Static libraries: the CMake build makes only shared libraries (its
+#   backends and modules are loaded at run time).
+name = "evolution-data-server"
+version = "3.62.1"
+release = 1
+summary = "Centralized access to appointments and contacts"
+license = "LGPL-2.0-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/evolution-data-server"
+patches = ["heimdal.patch", "gir.patch", "failing-test.patch", "test-gnu-source.patch"]
+hostdeps = ["cmake", "flex", "gettext", "glib-devel", "gobject-introspection", "gperf", "ninja", "perl", "pkgconf",
+            "vala"]
+builddeps = ["glib-devel", "gnome-online-accounts-devel", "gtk+3-devel", "gtk4-devel", "heimdal-devel",
+             "icu-devel", "json-glib-devel", "libcanberra-devel", "libgweather-devel", "libical-devel",
+             "libphonenumber-devel", "libsecret-devel", "libsoup-devel", "libxml2-devel", "nspr-devel", "nss-devel",
+             "openldap-devel", "sqlite-devel", "util-linux-devel", "vala-devel", "webkitgtk-devel",
+             "zlib-ng-compat-devel"]
+checkdeps = ["dbus"]
+options = ["!cross"]
+
+source = [
+    { url = "https://download.gnome.org/sources/evolution-data-server/3.62/evolution-data-server-3.62.1.tar.xz", sha256 = "b75c823445d7d30bca797eee929809e8d389abbb8d471f68ae2af60972779f26" },
+]
+
+setup = '''
+%cmake \
+    -DLIBEXEC_INSTALL_DIR=/usr/lib \
+    -DSYSCONF_INSTALL_DIR=/etc \
+    -DWITH_SYSTEMDUSERUNITDIR=no \
+    -DWITH_LIBDB=OFF \
+    -DWITH_OPENLDAP=ON \
+    -DWITH_KRB5=ON \
+    -DWITH_PHONENUMBER=ON \
+    -DENABLE_GTK=ON \
+    -DENABLE_GTK4=ON \
+    -DENABLE_OAUTH2_WEBKITGTK=ON \
+    -DENABLE_OAUTH2_WEBKITGTK4=OFF \
+    -DENABLE_GOA=ON \
+    -DENABLE_WEATHER=ON \
+    -DENABLE_CANBERRA=ON \
+    -DENABLE_INTROSPECTION=ON \
+    -DENABLE_VALA_BINDINGS=ON \
+    -DENABLE_GTK_DOC=OFF \
+    -DENABLE_EXAMPLES=OFF \
+    -DENABLE_INSTALLED_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+check = '''
+# test-camel-hostname fails intermittently (Chimera), and the D-Bus tests
+# must run one at a time.
+ctest --test-dir build -j1 -E test-camel-hostname --output-on-failure
+'''
+install = '''
+%cmake_install
+'''

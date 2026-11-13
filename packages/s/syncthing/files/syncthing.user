@@ -1,0 +1,6 @@
+# Syncthing for one user, as a dinit user service. Not enabled: a user turns
+# it on with `dinitctl enable syncthing` in their session.
+type = process
+command = /usr/bin/syncthing serve --no-browser
+log-type = buffer
+before: login.target

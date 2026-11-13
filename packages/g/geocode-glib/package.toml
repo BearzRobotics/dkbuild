@@ -1,0 +1,34 @@
+# geocode-glib: GLib library for geocoding and reverse geocoding (Nominatim),
+# used by libgweather and Evolution's weather calendars. libsoup 3 API
+# (geocode-glib-2.0); GObject introspection. Based on Chimera's
+# main/geocode-glib. No gtk-doc reference, no installed tests.
+name = "geocode-glib"
+version = "3.26.4"
+release = 1
+summary = "GLib library for geocoding and reverse geocoding"
+license = "LGPL-2.1-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/geocode-glib"
+patches = ["tests.patch"]
+hostdeps = ["gettext", "glib-devel", "gobject-introspection", "meson", "pkgconf"]
+builddeps = ["glib-devel", "json-glib-devel", "libsoup-devel"]
+
+source = [
+    { url = "https://download.gnome.org/sources/geocode-glib/3.26/geocode-glib-3.26.4.tar.xz", sha256 = "2d9a6826d158470449a173871221596da0f83ebdcff98b90c7049089056a37aa" },
+]
+
+setup = '''
+%meson \
+    -Denable-gtk-doc=false \
+    -Denable-installed-tests=false \
+    -Denable-introspection=true \
+    -Dsoup2=false
+'''
+build = '''
+%meson_build
+'''
+check = '''
+meson test -C build --print-errorlogs
+'''
+install = '''
+%meson_install
+'''

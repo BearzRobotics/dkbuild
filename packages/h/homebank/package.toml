@@ -1,0 +1,27 @@
+# HomeBank: personal accounting (GTK 3). Built with OFX/QFX import (libofx)
+# and libsoup 3 (online currency rates).
+name = "homebank"
+version = "5.10.4"
+release = 1
+summary = "Personal finance manager"
+license = "GPL-2.0-or-later"
+homepage = "https://www.gethomebank.org"
+hostdeps = ["gettext", "intltool", "perl", "pkgconf"]
+builddeps = ["glib-devel", "gtk+3-devel", "libofx-devel", "libsoup-devel"]
+
+source = [
+    { url = "https://www.gethomebank.org/public/sources/homebank-5.10.4.tar.gz", sha256 = "f8072131328e7c1d6ca336f809e265e483c6d6d21f3654bc520700d27deae2d8" },
+]
+
+setup = '''
+%configure --with-ofx
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+'''

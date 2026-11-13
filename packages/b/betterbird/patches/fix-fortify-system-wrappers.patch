@@ -1,0 +1,17 @@
+Betterbird: Do not wrap features.h in the system-header wrappers: system headers pull it in and break with the wrapper (fortify builds).
+From Chimera's main/thunderbird (as packages/t/thunderbird); applies
+unchanged to Thunderbird 153 ESR.
+
+The wrapper features.h gets pulled in by system headers causing thigns to
+break. We work around it by simply not wrap features.h
+
+--- a/config/system-headers.mozbuild
++++ b/config/system-headers.mozbuild
+@@ -225,7 +225,6 @@
+     "exe386.h",
+     "extras.h",
+     "fcntl.h",
+-    "features.h",
+     "fenv.h",
+     "ffi.h",
+     "fibdef.h",

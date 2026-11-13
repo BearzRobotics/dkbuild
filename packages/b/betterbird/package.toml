@@ -1,0 +1,113 @@
+# Betterbird: a fine-tuned Thunderbird (ESR) with many bug fixes and extra
+# features (multi-line message list, system tray, ...). Built as
+# packages/t/thunderbird is (same toolchain flags and Chimera's musl/clang
+# patches, applied by dkbuild first), from the Thunderbird ESR release
+# tarball Betterbird names for this release (its metadata/*.appdata.xml),
+# plus Betterbird's patch queue from github.com/Betterbird/thunderbird-patches
+# at the release tag, applied in setup in the order of its series files
+# (series-moz for the mozilla tree, series for comm/) with `git apply`, as
+# upstream's build-one-off.sh does: the branding patches carry binary images.
+# Of thunderbird's patches, fix-rust-target and sandbox-sched_setscheduler
+# are rebased onto 153 ESR; riscv64-no-llama-simd and wasm2c-various-archs
+# are left out: the code they change (llama.cpp's RISC-V vector paths, the
+# wasm2c SIMD_FORCE_READ cases for ppc64/riscv64/loongarch64) is not in 153.
+# This release's series files name no external (hg.mozilla.org) patches; the
+# setup step fails if a later one does, as those would need pinned sources.
+# Mozconfig as Betterbird's mozconfig-Linux: Betterbird branding, no crash
+# reporter, no telemetry, WM_CLASS eu.betterbird.Betterbird, unsigned add-on
+# scopes app/system. Betterbird's own update check (it only notifies) is
+# turned off by a policies.json: apk updates it.
+name = "betterbird"
+version = "153.7.0"
+release = 1
+summary = "Fine-tuned version of Mozilla Thunderbird"
+license = "GPL-3.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND MPL-2.0"
+homepage = "https://www.betterbird.eu"
+patches = ["atoi.patch", "clang-ias.patch", "clang-memory-throw-gcc.patch", "depflags.patch", "enable-elfhack-relr.patch", "fix-fortify-system-wrappers.patch", "fix-rnp-getenv.patch", "fix-rust-target.patch", "fix-webrtc-pid_t.patch", "google-sucks.patch", "lfs64.patch", "libcxx18.patch", "loong0001-Enable-WebRTC-for-loongarch64.patch", "loong0003-Define-HWCAP_LOONGARCH_LSX_and_LASX.patch", "loong0004-Fix-ycbcr-chromium_types-warning.patch", "musl-libresolv.patch", "musl-prctl.patch", "no-ccache-stats.patch", "ppc64-webrtc.patch", "riscv64-reduce-debug.patch", "sandbox-sched_setscheduler.patch", "sqlite-ppc.patch", "wasip1.patch", "x11lol.patch", "xptcall-integrated-as.patch"]
+hostdeps = ["automake", "rust", "cbindgen", "git", "llvm-devel", "llvm-clang", "llvm-lld", "dbus", "gettext", "tar", "libtool", "nasm", "nodejs", "pkgconf", "python", "zip", "unzip"]
+builddeps = ["alsa-lib-devel", "dbus-devel", "ffmpeg-devel", "freetype-devel", "glib-devel", "gtk+3-devel", "icu-devel", "libevent-devel", "libffi-devel", "libjpeg-turbo-devel", "libnotify-devel", "libogg-devel", "libpng-devel", "libpulse-devel", "libtheora-devel", "libvorbis-devel", "libvpx-devel", "libwebp-devel", "libxcomposite-devel", "libxscrnsaver-devel", "libxt-devel", "mesa-devel", "nspr-devel", "nss-devel", "pipewire-devel", "pixman-devel", "zlib-ng-compat-devel"]
+options = ["jobs:12", "!cross", "!check"]
+
+source = [
+    { url = "https://archive.mozilla.org/pub/thunderbird/releases/153.7.0esr/source/thunderbird-153.7.0esr.source.tar.xz", sha256 = "8b1e79724ec0da6f489d11ad9b6b7bb09d3ef368bcb88f52c8c945c1fa4e6c8b" },
+    { url = "https://github.com/Betterbird/thunderbird-patches/archive/refs/tags/153.7.0esr-bb13.tar.gz", sha256 = "22341013c6aa7f170ce055a51b8b9f8feaad50aeddbd28e8611c693fa8bce084" },
+]
+environment = '''
+export MOZBUILD_STATE_PATH="$PWD/.mozbuild" MOZ_MAKE_FLAGS="-j$jobs" AS="$CC"
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export RUST_TARGET=x86_64-unknown-linux-musl RUSTFLAGS="-C target-feature=-crt-static"
+export MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE=system MOZ_NOSPAM=1
+# From Betterbird's mozconfig-Linux.
+export MOZILLA_OFFICIAL=1 MOZ_TELEMETRY_REPORTING= MOZ_REQUIRE_SIGNING=
+export MOZ_APP_REMOTINGNAME=eu.betterbird.Betterbird
+# MOZ_APP_NAME stays "thunderbird" (Betterbird keeps it for compatibility);
+# the package name gives /usr/lib/betterbird and /usr/bin/betterbird (with
+# Betterbird's 05-branding-moz patch), so it can sit beside thunderbird.
+# MOZ_NO_PIE_COMPAT (Betterbird's non-PIE launcher for file managers that
+# take PIE programs for libraries) is not set, as for thunderbird.
+export MOZ_PKG_APPNAME=betterbird
+'''
+setup = '''
+bb=/build/thunderbird-patches-153.7.0esr-bb13
+q=$bb/153
+# Betterbird's patch queue: each series line is a patch path relative to the
+# version directory, then an optional "#" comment; "-moz" patches go to the
+# mozilla tree, the others to comm/. A "name # URL" line is an external patch
+# to download: none in this release, and none may be fetched here.
+bbapply() {
+    while IFS= read -r line || [ -n "$line" ]; do
+        p=${line%%#*}
+        p=$(printf '%s' "$p" | sed 's/[[:space:]]*$//')
+        [ -n "$p" ] || continue
+        if [ ! -f "$q/$p" ]; then
+            echo "Betterbird patch $p is not in the patch repository (external?)" >&2
+            exit 1
+        fi
+        echo "Applying Betterbird patch $p"
+        git apply --whitespace=nowarn "$q/$p"
+    done < "$1"
+}
+bbapply $q/series-moz
+(cd comm && bbapply $q/series)
+cp $pkgfiles/stab.h toolkit/crashreporter/google-breakpad/src/
+# As firefox and thunderbird: no WASI toolchain yet (no wasm-sandboxed
+# libraries), no JACK.
+./mach configure --enable-application=comm/mail --prefix=/usr --libdir=/usr/lib \
+    --host=$target --target=$target \
+    --disable-bootstrap \
+    --disable-install-strip --disable-strip \
+    --enable-linker=lld --enable-optimize --enable-release \
+    --disable-hardening \
+    --with-system-ffi --with-system-icu --with-system-jpeg --with-system-libevent \
+    --with-system-libvpx --with-system-nspr --with-system-nss --with-system-pixman \
+    --with-system-webp --with-system-zlib --without-system-png \
+    --enable-audio-backends=pulseaudio --enable-pulseaudio --disable-alsa --disable-jack \
+    --enable-dbus --enable-default-toolkit=cairo-gtk3-wayland --enable-necko-wifi \
+    --disable-jemalloc --disable-profiling --disable-tests --disable-updater \
+    --without-wasm-sandboxed-libraries \
+    --allow-addon-sideload --with-unsigned-addon-scopes=app,system \
+    --enable-official-branding --with-branding=comm/mail/branding/betterbird \
+    --disable-crashreporter \
+    --with-distribution-id=org.fenriros
+'''
+build = '''
+./mach build --priority normal
+'''
+install = '''
+DESTDIR="$pkgdir" ./mach install
+bb=/build/thunderbird-patches-153.7.0esr-bb13
+app=/usr/lib/betterbird
+test -x "$pkgdir$app/betterbird"
+install -Dm644 $pkgfiles/vendor.js "$pkgdir$app/defaults/preferences/vendor.js"
+install -Dm644 $pkgfiles/distribution.ini "$pkgdir$app/distribution/distribution.ini"
+install -Dm644 $pkgfiles/policies.json "$pkgdir$app/distribution/policies.json"
+install -Dm644 $bb/metadata/eu.betterbird.Betterbird.desktop "$pkgdir/usr/share/applications/eu.betterbird.Betterbird.desktop"
+install -Dm644 $bb/metadata/eu.betterbird.Betterbird.153.appdata.xml "$pkgdir/usr/share/metainfo/eu.betterbird.Betterbird.appdata.xml"
+for sz in 16 22 24 32 48 64 128 256; do
+    install -Dm644 $bb/metadata/icons/betterbird$sz.png "$pkgdir/usr/share/icons/hicolor/${sz}x$sz/apps/eu.betterbird.Betterbird.png"
+done
+install -Dm644 $bb/metadata/icons/betterbird.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/eu.betterbird.Betterbird.svg"
+# Without MOZ_NO_PIE_COMPAT the program is only "betterbird"; Betterbird's
+# own scripts look for "betterbird-bin".
+ln -s betterbird "$pkgdir$app/betterbird-bin"
+'''

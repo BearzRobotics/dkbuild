@@ -1,0 +1,33 @@
+# Ported from Chimera Linux cports main/ytnef (BSD-2-Clause, Copyright (c)
+# Chimera Linux contributors).
+# ytnef: Yerase's TNEF stream reader: libytnef decodes Outlook's
+# winmail.dat (TNEF) attachments (SOGo links it to show them), and the
+# ytnef and ytnefprint tools. The ytnefprocess mail filter script needs Perl's
+# MIME-tools and MailTools, which are not packaged here yet.
+name = "ytnef"
+version = "2.1.2"
+release = 1
+summary = "Yerase's TNEF stream reader"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/Yeraze/ytnef"
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf"]
+
+source = [
+    { url = "https://github.com/Yeraze/ytnef/archive/refs/tags/v2.1.2.tar.gz", sha256 = "340f03f495884611209e9c0bc943fad06ce920e8c79655aa228d5ca7418dc360" },
+]
+
+setup = '''
+mkdir -p m4
+autoreconf -fi
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/ytnef/COPYING"
+'''
