@@ -2,12 +2,12 @@
 # Alpine's testing/libofx. The static library is a second build.
 name = "libofx"
 version = "0.10.9"
-release = 1
+release = 2
 summary = "Library for the Open Financial Exchange (OFX) format"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/libofx/libofx"
 hostdeps = ["cmake", "ninja", "gengetopt", "pkgconf"]
-builddeps = ["curl-devel", "opensp-devel", "libxml2-devel"]
+builddeps = ["curl-devel", "opensp-devel", "libxml2-devel", "libxml++2-devel"]
 
 source = [
     { url = "https://github.com/libofx/libofx/releases/download/0.10.9/libofx-0.10.9.tar.gz", sha256 = "1ca89ff7d681c9edad312172ac464231a8de686e653213612f9417492cef0d37" },

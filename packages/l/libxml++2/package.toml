@@ -1,0 +1,28 @@
+# libxml++ 2.x (pkg-config module libxml++-2.6): C++ wrapper for libxml2.
+# libofx needs the libxml++-2.6 module; 2.42 is the glibmm-2.4 (not 2.68)
+# generation, so it builds against glibmm2.4. %meson builds shared and static.
+name = "libxml++2"
+version = "2.42.3"
+release = 1
+summary = "C++ wrapper for libxml2, API version 2.6"
+license = "LGPL-2.1-or-later"
+homepage = "https://libxmlplusplus.github.io/libxmlplusplus"
+hostdeps = ["pkgconf"]
+builddeps = ["glibmm2.4-devel", "libxml2-devel"]
+
+source = [
+    { url = "https://download.gnome.org/sources/libxml++/2.42/libxml++-2.42.3.tar.xz", sha256 = "74b95302e24dbebc56e97048e86ad0a4121fc82a43e58d381fbe1d380e8eba04" },
+]
+
+setup = '''
+%meson \
+    -Dbuild-examples=false \
+    -Dbuild-documentation=false \
+    -Dbuild-tests=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''
