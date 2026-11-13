@@ -13,7 +13,8 @@
 # opensmtpd and exim all own /usr/sbin/sendmail, so only one of them can be
 # installed.
 name = "opensmtpd"
-version = "7.9.0p0"
+# apk versions spell the portable "p" suffix _p ("7.9.0p0" is an invalid package version; the tarball keeps upstream's name)
+version = "7.9.0_p0"
 release = 1
 summary = "Secure, simple SMTP server from OpenBSD"
 license = "ISC AND BSD-2-Clause AND BSD-3-Clause"
