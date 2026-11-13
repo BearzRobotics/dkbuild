@@ -285,3 +285,39 @@ Euro-Office (details: wip/euro-office/NOTES.md):
 36. Unbundle core's own zlib/freetype/libpng/libjpeg/openjpeg/libxml2/cryptopp?
 37. Libera's own theme (ask Abilian for the artwork) or Euro-Office's?
 38. core-fonts: ~10 font folders without a licence file; Symbola's licence.
+
+## Answers (2026-11-13)
+
+The user accepted Claude's suggestion for every open question:
+
+1. curl: no GSSAPI for now (as Chimera); revisit only for a tree-wide move to MIT.
+3. ast-grep: keep.
+6. PHP imap: skip; SuiteCRM works without inbound mail.
+10. Upstream services contacted by default: fine (as upstream ships them).
+12. Python lockfile store and yarn in npmdeps: build both.
+13. Gwenhywfar Qt 6 / KBanking: later.
+14. Mail users: the tree's `_postfix`/`_dovecot` convention.
+15. InvoicePlane: ship under its name.
+16. Setuid ping/fping: OK.
+17. Syncthing's sysctl file: an example in /usr/share/doc, not active.
+18. Metasploit: a recipe option in dkbuild to leave files out of the dependency scan.
+19. musl's Alpine soname: a small separate package (symlink), not musl itself.
+20. Zabbix Java gateway's Maven jars: OK.
+21. Stalwart: patch the SEL code out.
+22. Zabbix APM collector: port grpc and turn it on.
+23. AppSignal agent: left out.
+24. git-annex: the full licence expression from COPYRIGHT.
+25. pandoc http / xmobar: wait for GHC 9.14 releases.
+26. GHC seed on Alpine edge: OK (cached).
+27. Proxmox legacy 2 MB OVMF images: ship them.
+28. Debian's PkKek-1 in pve-edk2-firmware: keep for now.
+29. corosync 3.2: OK.
+30. Proxmox next: ifupdown2 + FRR, then the PBS client, then Ceph.
+31. extjs prebuilt build: OK; Claude checks the perl-* licence lines.
+32. Brave: keep the name; Claude checks Leo's licence.
+33. Brave service keys supplied by the user: yes.
+34. Euro-Office: build 9.3.7-1 on V8 8.9 now.
+35. RabbitMQ: add Erlang, Elixir, rabbitmq-server.
+36. Euro-Office core: use the system libraries where it builds.
+37. Libera Suite: Euro-Office's theme for now.
+38. core-fonts: drop the folders without a clear licence.
