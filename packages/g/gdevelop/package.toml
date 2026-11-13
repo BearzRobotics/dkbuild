@@ -18,7 +18,7 @@
 # DRAFT, not built: needs electron and emscripten.
 name = "gdevelop"
 version = "5.6.287"
-release = 1
+release = 2
 summary = "Open-source game engine and editor, no-code and with JavaScript"
 license = "MIT"
 homepage = "https://gdevelop.io"
@@ -54,6 +54,16 @@ python3 $pkgfiles/local-git-deps.py GDevelop.js/package.json webidl-tools=file:$
 python3 $pkgfiles/local-git-deps.py newIDE/app/package.json @lingui/react=file:$lr
 locks=$(find . -name package-lock.json -not -path '*/node_modules/*')
 node /dkbuild/npm-offline.js /tmp/npm-cache $locks
+# GDevelop.js/update-bindings.js looks for Emscripten's WebIDL binder in an
+# emsdk checkout ($EMSDK/upstream/emscripten/tools/) and runs it with a bare
+# "python". The system Emscripten is /usr/lib/emscripten (the binder is in its
+# tools/), and python is python3; without this the grunt build stops with
+# "EMSDK env. variable is not set / Can't find undefined/upstream/...".
+sed -i -e "s|process.env.EMSDK + '/upstream/emscripten/tools/webidl_binder.py'|'/usr/lib/emscripten/tools/webidl_binder.py'|" \
+    -e "s|'python \"' + webIdlBinderPath|'python3 \"' + webIdlBinderPath|" \
+    -e "s|^if (!process.env.EMSDK) {|if (false) {|" GDevelop.js/update-bindings.js
+grep -q "/usr/lib/emscripten/tools/webidl_binder.py" GDevelop.js/update-bindings.js
+grep -q "python3 " GDevelop.js/update-bindings.js
 # GDJS, the game engine runtime (TypeScript, built by the IDE's import step)
 (cd GDJS && npm ci --ignore-scripts)
 (cd GDevelop.js && npm install --offline --ignore-scripts --install-links)
