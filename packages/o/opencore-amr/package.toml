@@ -1,0 +1,26 @@
+name = "opencore-amr"
+version = "0.1.6"
+release = 1
+summary = "OpenCORE Adaptive Multi Rate (AMR-NB/AMR-WB) speech codec libraries"
+license = "Apache-2.0"
+homepage = "https://opencore-amr.sourceforge.io"
+# ffmpeg: --enable-libopencore-amrnb --enable-libopencore-amrwb (needs --enable-version3)
+hostdeps = ["pkgconf"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/opencore-amr/opencore-amr-0.1.6.tar.gz", sha256 = "483eb4061088e2b34b358e47540b5d495a96cd468e361050fae615b1809dc4a1" },
+]
+
+setup = '''
+%configure --enable-amrnb-encoder --enable-amrnb-decoder
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/opencore-amr/LICENSE"
+'''
