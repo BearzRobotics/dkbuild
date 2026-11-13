@@ -6,7 +6,7 @@
 # (GeoGebra) find /usr/lib/libjnidispatch.so instead. Jars: /usr/share/java.
 name = "jna"
 version = "5.18.1"
-release = 1
+release = 2
 summary = "Java Native Access: Java access to native shared libraries"
 license = "Apache-2.0 OR LGPL-2.1-or-later"
 homepage = "https://github.com/java-native-access/jna"
@@ -28,6 +28,11 @@ export PATH="$JAVA_HOME/bin:$PATH" ANT_HOME=/usr/share/java/apache-ant
 setup = '''
 # no Java AWT support (it needs X libraries at build time)
 sed -i -E "s/^(CDEFINES=.*)$/\1 -DNO_JAWT/g" native/Makefile
+# native/Makefile hardcodes CC=gcc (there is no GCC here: "gcc: not found"); the
+# system compiler is clang. (The Makefile's `ifeq ($(CC),gcc)` branches only add
+# -m64/-m32 and gcc-only warnings, which the default 64-bit build does not need.)
+sed -i 's/^CC=gcc$/CC=clang/' native/Makefile
+grep -q '^CC=clang$' native/Makefile
 # no prebuilt jars (dist/: the release's natives); the archive has no
 # bundled libffi any more, so the build takes the system's (dynlink.native)
 rm -r dist
