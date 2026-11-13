@@ -1,0 +1,36 @@
+# Intel/OpenVisualCloud SVT-JPEG-XS (JPEG XS encoder/decoder); FFmpeg's
+# --enable-libsvtjpegxs. Modelled on packages/s/svt-av1 (cports svt-av1).
+# CMake builds one library type per tree (BUILD_SHARED_LIBS), so the static
+# library comes from a second build. Its x86 assembly needs nasm (the build
+# looks for nasm, then yasm); cpuinfo is bundled in third_party/. Tests are
+# off (BUILD_TESTING defaults to off; googletest is bundled but not wanted).
+# JPEGXS_LTO=OFF: plain objects, so the static library links with any linker.
+# needed by: ffmpeg (libsvtjpegxs).
+name = "svt-jpeg-xs"
+version = "0.10.0"
+release = 1
+summary = "SVT JPEG XS encoder and decoder"
+license = "BSD-2-Clause-Patent"
+homepage = "https://github.com/OpenVisualCloud/SVT-JPEG-XS"
+hostdeps = ["cmake", "nasm", "ninja", "pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/OpenVisualCloud/SVT-JPEG-XS/archive/refs/tags/v0.10.0.tar.gz", sha256 = "ae04de9afe2c086a15da85ff7473ec1db127c380081c11c8860f958e8454f0ff" },
+]
+
+setup = '''
+opts="-DJPEGXS_LTO=OFF -DBUILD_TESTING=OFF -DBUILD_APPS=ON"
+%cmake $opts -DBUILD_SHARED_LIBS=ON
+cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release $opts -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+install = '''
+# static first, then shared, so the shared build's SvtJpegxs.pc and the programs win
+DESTDIR="$pkgdir" cmake --install build-static --strip
+%cmake_install
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/svt-jpeg-xs/LICENSE.md"
+'''
