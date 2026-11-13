@@ -14,7 +14,7 @@
 # templates at /usr/share/proxmox-frr/templates (proxmox-frr-templates).
 name = "pve-rs"
 version = "0.16.1"
-release = 2
+release = 3
 summary = "Proxmox VE Rust components for Perl"
 license = "AGPL-3.0-or-later"
 homepage = "https://git.proxmox.com/?p=proxmox-perl-rs.git"
@@ -44,6 +44,17 @@ for m in pve-rs/Makefile common/pkg/Makefile; do
         -e "s#/usr/lib/perlmod/genpackage.pl#perl $genpkg#" $m
 done
 grep -qF "perl $genpkg" pve-rs/Makefile
+# proxmox-sys (fs/mod.rs) stores statfs's f_type in an i64 field: musl's f_type is
+# unsigned (u64), glibc's signed ("expected `i64`, found `u64`"). The vendored crate is a link
+# into the read-only crate store: patch a copy, and empty its file checksums so cargo
+# accepts the changed file.
+src=$(readlink -f pve-rs/vendor/proxmox-sys)
+rm pve-rs/vendor/proxmox-sys
+cp -r "$src" pve-rs/vendor/proxmox-sys
+chmod -R u+w pve-rs/vendor/proxmox-sys
+sed -i 's/fs_type: stat\.f_type,/fs_type: stat.f_type as i64,/' pve-rs/vendor/proxmox-sys/src/fs/mod.rs
+grep -q 'stat.f_type as i64' pve-rs/vendor/proxmox-sys/src/fs/mod.rs
+sed -i 's/"files":{[^}]*}/"files":{}/' pve-rs/vendor/proxmox-sys/.cargo-checksum.json
 '''
 build = '''
 make -C pve-rs BUILD_MODE=release CARGO_BUILD_ARGS="--release --offline" GITVERSION=1021ded9d0898b98d50b9a3bbcb36bf2a3982883
