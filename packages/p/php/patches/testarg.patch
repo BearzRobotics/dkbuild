@@ -1,3 +1,5 @@
+php: let `make test` take extra run-tests.php arguments (PHP_RUN_TESTS_ARGS),
+so the check step can pass options. Build files only. From Chimera's main/php8.3.
 --- a/build/Makefile.global
 +++ b/build/Makefile.global
 @@ -104,7 +104,7 @@

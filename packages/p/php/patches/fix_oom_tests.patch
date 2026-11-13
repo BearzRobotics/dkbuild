@@ -1,3 +1,6 @@
+php: the out-of-memory filter tests start a child php; load the filter
+extension in it explicitly, because every extension here is built shared.
+Test files only. From Chimera's main/php8.3.
 diff --git a/ext/filter/tests/oom_filter_default_encoded.phpt b/ext/filter/tests/oom_filter_default_encoded.phpt
 index 4e813266..099a939c 100644
 --- a/ext/filter/tests/oom_filter_default_encoded.phpt

@@ -1,3 +1,6 @@
+php: when installing PEAR, load the freshly built shared xml and phar
+extensions (the build uses --disable-all with every extension shared, so the
+PEAR installer would otherwise find neither). From Chimera's main/php8.3.
 --- ./pear/Makefile.frag.orig	2013-04-12 07:02:27.041602514 +0000
 +++ ./pear/Makefile.frag	2013-04-12 07:04:09.065836822 +0000
 @@ -1,7 +1,10 @@

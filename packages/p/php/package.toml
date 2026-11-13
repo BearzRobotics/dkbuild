@@ -5,13 +5,17 @@
 # in /etc/php/conf.d (remove an .ini to turn one off). r2: MySQL/MariaDB
 # (mysqli, pdo_mysql; mysqlnd built in, so no .ini load order matters) and
 # PostgreSQL (pgsql, pdo_pgsql), for Passbolt and other web apps.
+# 8.4 (2026-11-12): InvoiceShelf and SolidInvoice need it; every web app in
+# the tree runs on it (GLPI 12 stops before 8.5, Dolibarr warns on 8.5).
+# Firefly III needs 8.5: that is the versioned php8.5 package beside this one.
+# Chimera's fix-clobbered-registers and fix-curl patches are upstream in 8.4.
 name = "php"
-version = "8.3.36"
-release = 2
+version = "8.4.27"
+release = 1
 summary = "HTML-embedded scripting language"
 license = "PHP-3.01"
 homepage = "https://www.php.net"
-patches = ["fix-clobbered-registers.patch", "fix-curl.patch", "fix-pear-shebang.patch", "fix_oom_tests.patch", "install-pear.patch", "testarg.patch"]
+patches = ["fix-pear-shebang.patch", "fix_oom_tests.patch", "install-pear.patch", "testarg.patch"]
 hostdeps = ["automake", "bison", "libtool", "pkgconf"]
 builddeps = ["argon2-devel", "curl-devel", "freetype-devel", "gettext-devel", "gmp-devel", "icu-devel", "libedit-devel", "libffi-devel", "libgd-devel", "libjpeg-turbo-devel", "libsodium-devel", "libxml2-devel", "libxslt-devel", "libzip-devel", "oniguruma-devel", "openldap-devel", "openssl-devel", "pcre2-devel", "postgresql-devel", "sqlite-devel", "unixodbc-devel", "zlib-ng-compat-devel"]
 checkdeps = ["procps"]
@@ -19,7 +23,7 @@ rundeps = []
 options = ["!check"]
 
 source = [
-    { url = "https://www.php.net/distributions/php-8.3.36.tar.gz", sha256 = "c93f3441f87f6ab156bef4432db215d7e61ca2c0183bb3a2aa28d9886ab59f53" },
+    { url = "https://www.php.net/distributions/php-8.4.27.tar.gz", sha256 = "5bafed9994c1a49796b25b5f61c22c9183bfe046b6acc7b363842d03c77f972f" },
 ]
 
 setup = '''
@@ -113,7 +117,7 @@ rm -f "$pkgdir"/etc/php/php-fpm.d/*.default
 install -Dm644 php.ini-production "$pkgdir/etc/php/php.ini"
 # every shared extension enabled through its own .ini
 mkdir -p "$pkgdir/etc/php/conf.d"
-for f in "$pkgdir"/usr/lib/php/20230831/*.so; do
+for f in "$pkgdir"/usr/lib/php/20240924/*.so; do
     e=$(basename "$f" .so)
     if [ "$e" = opcache ]; then echo "zend_extension=$e.so"; else echo "extension=$e.so"; fi > "$pkgdir/etc/php/conf.d/$e.ini"
 done

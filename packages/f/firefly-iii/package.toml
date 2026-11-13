@@ -3,7 +3,8 @@
 # with MariaDB, PostgreSQL or SQLite, served by nginx and php-fpm. Upstream's
 # release archive: its PHP libraries in vendor/ (as PHP source) and both
 # front ends built (public/build, public/v1).
-# Needs PHP 8.5 or newer (vendor/composer/platform_check.php); see the report.
+# Needs PHP 8.5 or newer (vendor/composer/platform_check.php): runs on the
+# versioned php8.5 (php8.5, php-fpm8.5 on /run/php-fpm8.5.sock).
 # Layout: code in /usr/share/firefly-iii; .env is /etc/firefly-iii/env;
 # storage/ and bootstrap/cache in /var/lib/firefly-iii. Recurring
 # transactions and bills from an example cron job (installed by the user).
@@ -18,7 +19,7 @@ summary = "Personal finance manager"
 license = "AGPL-3.0-or-later"
 homepage = "https://www.firefly-iii.org"
 archs = ["x86_64", "aarch64"]
-rundeps = ["php", "php-fpm", "nginx"]
+rundeps = ["php8.5", "php8.5-fpm", "nginx"]
 options = ["!check", "!strip"]
 
 source = [

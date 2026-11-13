@@ -1,0 +1,132 @@
+# PHP 8.5 beside the tree's php (8.4), for applications that need 8.5
+# (Firefly III). Every name carries the version, so both install together:
+# /usr/bin/php8.5, php-fpm8.5, php-cgi8.5, phpize8.5, php-config8.5,
+# /etc/php8.5 (php.ini, conf.d, php-fpm.conf, php-fpm.d), /usr/lib/php8.5,
+# /usr/include/php8.5, /usr/share/php8.5. php-fpm8.5 listens on
+# /run/php-fpm8.5.sock and runs as the same _php user. The same extensions as
+# php, all shared and enabled in /etc/php8.5/conf.d. No PEAR (it stays with
+# php). Chimera's PEAR and test patches are not needed: PEAR is off and the
+# tests are not run; testarg only touches the test makefile rule.
+name = "php8.5"
+version = "8.5.12"
+release = 1
+summary = "HTML-embedded scripting language (PHP 8.5, beside php)"
+license = "PHP-3.01"
+homepage = "https://www.php.net"
+patches = ["testarg.patch"]
+hostdeps = ["automake", "bison", "libtool", "pkgconf"]
+builddeps = ["argon2-devel", "curl-devel", "freetype-devel", "gettext-devel", "gmp-devel", "icu-devel", "libedit-devel", "libffi-devel", "libgd-devel", "libjpeg-turbo-devel", "libsodium-devel", "libxml2-devel", "libxslt-devel", "libzip-devel", "oniguruma-devel", "openldap-devel", "openssl-devel", "pcre2-devel", "postgresql-devel", "sqlite-devel", "unixodbc-devel", "zlib-ng-compat-devel"]
+checkdeps = ["procps"]
+rundeps = []
+options = ["!check"]
+
+source = [
+    { url = "https://www.php.net/distributions/php-8.5.12.tar.gz", sha256 = "81a0f450349e84b08eb43faa85f8a4c835684f3cc1c50471775d1317a046c525" },
+]
+
+setup = '''
+%configure \
+    --datadir=/usr/share/php8.5 \
+    --datarootdir=/usr/share/php8.5 \
+    --includedir=/usr/include/php8.5 \
+    --libdir=/usr/lib/php8.5 \
+    --sysconfdir=/etc/php8.5 \
+    --with-config-file-path=/etc/php8.5 \
+    --with-config-file-scan-dir=/etc/php8.5/conf.d \
+    --program-prefix= \
+    --program-suffix=8.5 \
+    --with-layout=GNU \
+    --enable-fpm \
+    --with-fpm-group=_php \
+    --with-fpm-user=_php \
+    --disable-all \
+    --enable-bcmath=shared \
+    --enable-calendar=shared \
+    --enable-ctype=shared \
+    --enable-dom=shared \
+    --enable-exif=shared \
+    --enable-fileinfo=shared \
+    --enable-filter=shared \
+    --enable-ftp=shared \
+    --enable-gd=shared \
+    --enable-intl=shared \
+    --enable-mbstring=shared \
+    --enable-opcache=shared \
+    --enable-pcntl=shared \
+    --enable-pdo=shared \
+    --enable-phar=shared \
+    --enable-posix=shared \
+    --enable-session=shared \
+    --enable-shmop=shared \
+    --enable-simplexml=shared \
+    --enable-soap=shared \
+    --enable-sockets=shared \
+    --enable-sysvmsg=shared \
+    --enable-sysvsem=shared \
+    --enable-sysvshm=shared \
+    --enable-tokenizer=shared \
+    --enable-xml=shared \
+    --enable-xmlreader=shared \
+    --enable-xmlwriter=shared \
+    --with-bz2=shared \
+    --with-curl=shared \
+    --with-external-gd \
+    --with-external-pcre \
+    --with-ffi=shared \
+    --with-gettext=shared \
+    --with-gmp=shared \
+    --with-iconv=shared \
+    --with-ldap-sasl \
+    --with-ldap=shared \
+    --with-libedit=shared \
+    --with-libxml \
+    --with-mhash \
+    --with-openssl=shared \
+    --with-password-argon2 \
+    --enable-mysqlnd \
+    --with-mysqli=shared \
+    --with-pdo-mysql=shared \
+    --with-pdo-pgsql=shared \
+    --with-pgsql=shared \
+    --with-pdo-sqlite=shared \
+    --without-pear \
+    --with-sodium=shared \
+    --with-sqlite3=shared \
+    --with-unixODBC=shared \
+    --with-xsl=shared \
+    --with-zip=shared \
+    --with-zlib=shared
+'''
+build = '''
+%make \
+    LIBTOOL=/usr/bin/libtool
+'''
+install = '''
+%make_install INSTALL_ROOT="$pkgdir" LIBTOOL=/usr/bin/libtool
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/php8.5/LICENSE"
+install -Dm644 $pkgfiles/php-fpm8.5 "$pkgdir/etc/dinit.d/php-fpm8.5"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/php8.5.conf"
+mv "$pkgdir/etc/php8.5/php-fpm.conf.default" "$pkgdir/etc/php8.5/php-fpm.conf"
+install -Dm644 $pkgfiles/www.conf "$pkgdir/etc/php8.5/php-fpm.d/www.conf"
+rm -f "$pkgdir"/etc/php8.5/php-fpm.d/*.default
+install -Dm644 php.ini-production "$pkgdir/etc/php8.5/php.ini"
+# every shared extension enabled through its own .ini
+mkdir -p "$pkgdir/etc/php8.5/conf.d"
+for f in "$pkgdir"/usr/lib/php8.5/20250925/*.so; do
+    e=$(basename "$f" .so)
+    if [ "$e" = opcache ]; then echo "zend_extension=$e.so"; else echo "extension=$e.so"; fi > "$pkgdir/etc/php8.5/conf.d/$e.ini"
+done
+ls "$pkgdir"/etc/php8.5/conf.d/*.ini >/dev/null
+# nothing outside the versioned names (the fpm user file is php8.5.conf)
+if ls "$pkgdir"/usr/bin | grep -vE '8\.5(\.phar)?$'; then echo "unversioned name in /usr/bin" >&2; exit 1; fi
+'''
+
+[subpackages.fpm]
+summary = "FastCGI process manager (PHP 8.5)"
+depends = ["php8.5"]
+paths   = ["/usr/bin/php-fpm8.5", "/usr/share/man/man8/php-fpm8.5.8", "/etc/php8.5/php-fpm.conf", "/etc/php8.5/php-fpm.d", "/etc/dinit.d/php-fpm8.5", "/usr/lib/sysusers.d/php8.5.conf", "/usr/share/php8.5/fpm"]
+
+[subpackages.cgi]
+summary = "CGI binary (PHP 8.5)"
+depends = ["php8.5"]
+paths   = ["/usr/bin/php-cgi8.5", "/usr/share/man/man1/php-cgi8.5.1"]
