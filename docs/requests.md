@@ -188,27 +188,33 @@ Servers and parts ("everything needed to run a mail server"):
 4. **FileZilla**: upstream source links expire, and 3.71 needs libfzssh-client
    (AGPL-3.0+ "with attribution"). Accept the licence, and use Debian's orig
    tarballs (one release behind) as the source?
+   *Answered 2026-11-12: package it ("an old classic that everyone ships"); written from Arch's mirror, fzssh's attribution terms met.*
 5. **PHP 8.4/8.5**: InvoiceShelf (8.4.1), SolidInvoice (8.4.27) and Firefly III
    (8.5) do not run on the tree's php 8.3.36. Upgrade php, or add php8.5 beside it?
+   *Answered: upgrade if needed, else version it. php is 8.4.27 (all apps run on it); php8.5 beside it for Firefly III.*
 6. **PHP imap** (SuiteCRM inbound mail): write PECL imap + c-client (uw-imap,
    unmaintained)?
 7. **Default credentials created by the apps themselves** (not by the
    packages): BookStack's migration creates admin@admin.com/password, Zabbix's
    data.sql creates Admin/zabbix, Stalwart prints a temporary admin password at
    first start. The READMEs say to change them at once. Acceptable?
+   *Answered: fine; users read the docs of the software they run. The packages themselves never set credentials.*
 8. **Commercial/proprietary parts left out**: Stalwart Enterprise, Stirling PDF's
    proprietary flavour (login/teams), Netdata's NCUL1 dashboard, Zabbix's Java
    gateway (prebuilt jars). SOGo ActiveSync is shipped as a subpackage, but
    upstream says production use needs a Microsoft licence: keep it?
+   *Answered: include commercial add-ons unless there is a compelling reason (e.g. the licence forbids redistribution); being reviewed per add-on.*
 9. **Prebuilt pieces kept**: Roundcube's "complete" tarball, SnappyMail's
    vendors/, SOGo's committed UI, npm platform binaries (esbuild, rollup, SWC,
    lightningcss) in several web UIs. Webmin's FreeBSD/macOS helper binaries
    are dropped. OK?
+   *Answered: yes, prebuilt web UIs may be kept.*
 10. **Upstream services contacted by default**: Syncthing's discovery/relay
     servers, EDS's Google/Outlook/Yahoo OAuth ids, Betterbird branding,
     Stalwart's spam-rule/GeoIP downloads, Vikunja's licence check (only with a
     key). OK?
 11. **Ruby 4.0** for OpenProject (beside 3.4, which Zammad pins)?
+   *Answered: yes, if OpenProject needs it (ruby4.0 beside ruby 3.4, in progress).*
 12. **A Python lockfile store** in dkbuild (uv.lock / hashed requirements) for
     Paperless-ngx, Mayan EDMS, Taiga, ERPNext; and **yarn support** in npmdeps
     for Twenty and Joplin. Worth building?

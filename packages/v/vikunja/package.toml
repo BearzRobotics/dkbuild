@@ -5,6 +5,10 @@
 # store (godeps); the front end's pnpm packages from the store (npmdeps,
 # pnpm-lock.yaml through dkbuild's local registry). The Electron desktop app
 # (desktop/) is not built.
+# Paid features (admin panel, time tracking, audit logs, user invites) are
+# AGPL code in the same tree (pkg/license) and are built in, inactive until
+# the administrator sets license.key; without a key Vikunja runs in community
+# mode and never contacts vikunja.io (README.FenrirOS).
 # Installed inert (docs/requests.md): the dinit service shipped, not enabled;
 # no config (an example, registration off, in /usr/share/doc/vikunja), no
 # database, no account; no web server site (an nginx example).

@@ -28,9 +28,14 @@ all-commented example, and the SOGo Installation Guide).
    you want to /etc/cron.d/sogo (user _sogo, programs in /usr/bin) and
    dinitctl enable crond. Log rotation example: /usr/share/doc/sogo/logrotate.
 7. Two-factor authentication: SOGoTOTPEnabled = YES; in sogo.conf.
-8. ActiveSync (phones) is the separate package sogo-activesync; upstream
-   says production use needs a licence from Microsoft
-   (/usr/share/doc/sogo/README.ActiveSync).
+8. ActiveSync (phones) is the separate package sogo-activesync. Upstream's
+   remark (/usr/share/doc/sogo/README.ActiveSync): "In order to use this
+   software in production environments, you need to get a proper usage
+   license from Microsoft. Please contact them directly to negotiate the
+   fees associated to your user base." (http://www.microsoft.com/en-us/legal/
+   intellectualproperty/, iplicreq@microsoft.com). The package is free
+   software (GPL); the licence concerns Microsoft's intellectual property in
+   the ActiveSync protocol and is your responsibility for production use.
 
 sogo-tool (in /usr/bin) manages users, backups and restores; run it as
 _sogo: su -s /bin/sh _sogo -c 'sogo-tool ...'.

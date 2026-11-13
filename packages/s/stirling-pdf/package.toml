@@ -4,10 +4,17 @@
 # React front end built with vite from its npm packages (npmdeps,
 # frontend/package-lock.json) and copied into the jar's static resources, as
 # the build's copyFrontendAssets task does (without go-task).
-# The "core" flavour (STIRLING_FLAVOR=core): the MIT-licensed code only. The
-# default "proprietary" flavour adds app/proprietary (login, teams, SSO...),
-# under Stirling's own commercial licence - not built (a licence decision for
-# the user). Spotless (formatting at compile time) is off (-PnoSpotless).
+# The "core" flavour (STIRLING_FLAVOR=core): the MIT-licensed code only
+# (vite --mode core leaves out frontend/src/editor/proprietary, desktop,
+# saas, cloud and frontend/src/processor). The default "proprietary" flavour
+# adds app/proprietary (login, teams, SSO, audit...) and its front end, under
+# the "Stirling PDF User License" (app/proprietary/LICENSE; the same text
+# covers engine/, frontend/src/processor and the other non-MIT directories
+# named in LICENSE), which forbids distributing it: "Prohibited Actions ...
+# you may not: ... Copy, merge, distribute, sublicense, or sell the
+# Software", and builds of it "May not be distributed or sublicensed". Left
+# out for that reason (not merely because it needs a paid licence).
+# Spotless (formatting at compile time) is off (-PnoSpotless).
 # Installed inert (docs/requests.md): the dinit service shipped, not enabled,
 # listening on 127.0.0.1; analytics off; no settings written.
 # Setup: /usr/share/doc/stirling-pdf/README.FenrirOS.
