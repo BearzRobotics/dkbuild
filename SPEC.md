@@ -757,6 +757,18 @@ serves the store to pnpm as a registry on 127.0.0.1 (`pnpm-registry.js`;
 the sandbox's loopback interface is up), so `pnpm install --frozen-lockfile`
 works offline.
 
+yarn: a yarn 1 lockfile has URLs and integrity hashes, a yarn 2+ (berry)
+one has neither (its checksums are of yarn's own zips). `dkbuild yarn-lock
+<yarn.lock> -o files/yarn.package-lock.json` writes a package-lock.json
+shaped list for either: yarn 1's entries copied, berry's `npm:`
+resolutions with the tarball URL and integrity from the npm registry's
+metadata (read once, there; workspace/link/patch entries skipped, git and
+URL resolutions refused). The fetch fills the npm store from it like any
+recipe lockfile; in the build the store is served on 127.0.0.1 as for pnpm,
+and the `YARN_*` environment points yarn 2+ at it (private cache, no
+telemetry, zip checksums not compared since the tarballs were checked at
+fetch), so `yarn install --immutable` works offline.
+
 Haskell (`hackagedeps`): Haskell projects keep no lockfile with checksums,
 and Hackage lets authors revise a released package's `.cabal`, so the recipe
 keeps the pinned list itself: `files/hackage.lock`, one line per package,
@@ -1088,6 +1100,7 @@ inside a namespace the installed root runs `apk --version`, `sh`, `ls` and
 | `dkbuild doctor` | Checks the host (programs, namespaces, overlayfs, disk, key) and prints the fixes (3.1) |
 | `dkbuild hackage-lock <freeze> [-o FILE]` | Writes a `hackagedeps` lock from a cabal freeze file (7.4) |
 | `dkbuild python-lock <uv.lock\|pylock.toml\|requirements> [-o FILE]` | Writes a `pydeps` lock (7.4) |
+| `dkbuild yarn-lock <yarn.lock> [-o FILE]` | Pins a yarn lockfile's packages for `npmdeps` (7.4) |
 | `dkbuild upstream [--all] [--refresh] [--notify] [<name>...]` | Reports recipes with a newer upstream release, from each recipe's first source: `git ls-remote` tags for git hosts (GitHub, GitLab, Codeberg, kernel.org, ...), GNOME's cache.json, PyPI, crates.io, npm, MetaCPAN, SourceForge's RSS, and otherwise the HTTP directory listing (and versioned directories above it: KDE, X.org, GNU, ...). Pre-releases are skipped. `upstream.toml` at the tree root pins a series, gives another URL or regex, ignores versions, or skips a package, without touching recipes. Results are cached 12 hours in `work/upstream/`; `--all` lists what could not be checked; `--notify` sends a desktop notification (contrib/systemd has a daily user timer). Changes nothing |
 | `dkbuild image [--verbose] <file>` | Builds an image (8); `--verbose` (`-v`) lists the packages asked for and shows the run as it happens (apk's `Installing <package>` lines, services, users, outputs); without it the run's output is only in `out/<name>/image.log` |
 | `dkbuild bootstrap-root [--force] [--dest DIR] <image>` | Unpacks the stage 0 build machine and checks it (9.2) |

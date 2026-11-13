@@ -47,6 +47,9 @@ const usage =
     \\  python-lock <uv.lock|pylock.toml|requirements> [-o files/python.lock]
     \\                             write a pydeps lock (pinned PyPI files: pure-Python wheels,
     \\                             else source distributions)
+    \\  yarn-lock <yarn.lock> [-o files/yarn.package-lock.json]
+    \\                             pin a yarn lockfile's packages for npmdeps (yarn 2+: tarball
+    \\                             URLs and integrity from the npm registry)
     \\  upstream [--all] [--refresh] [--notify] [name]...
     \\                             which recipes have a newer upstream release (GitHub, GitLab,
     \\                             SourceForge, GNOME, KDE, PyPI, crates.io, CPAN, directory
@@ -573,17 +576,20 @@ pub fn main(init: std.process.Init) !void {
             error.OutOfMemory => return err,
             else => std.process.exit(1),
         };
-    } else if (std.mem.eql(u8, cmd, "hackage-lock") or std.mem.eql(u8, cmd, "python-lock")) {
+    } else if (std.mem.eql(u8, cmd, "hackage-lock") or std.mem.eql(u8, cmd, "python-lock") or std.mem.eql(u8, cmd, "yarn-lock")) {
         // src/hackage-lock.py, src/python-lock.py (embedded): download into
         // cache/hackage/ or cache/python/ and write the lock.
         if (rest.len == 0) return die(usage);
-        const hackage = std.mem.eql(u8, cmd, "hackage-lock");
-        const dir = try std.fs.path.join(arena, &.{ root, "work", if (hackage) "hackage" else "python" });
+        const kind = cmd[0 .. cmd.len - "-lock".len];
+        const data = if (std.mem.eql(u8, kind, "hackage")) @embedFile("hackage-lock.py") else if (std.mem.eql(u8, kind, "python")) @embedFile("python-lock.py") else @embedFile("yarn-lock.py");
+        const dir = try std.fs.path.join(arena, &.{ root, "work", kind });
         try std.Io.Dir.cwd().createDirPath(init.io, dir);
-        const script = try std.fs.path.join(arena, &.{ dir, if (hackage) "hackage-lock.py" else "python-lock.py" });
-        try std.Io.Dir.cwd().writeFile(init.io, .{ .sub_path = script, .data = if (hackage) @embedFile("hackage-lock.py") else @embedFile("python-lock.py") });
+        const script = try std.fs.path.join(arena, &.{ dir, try std.fmt.allocPrint(arena, "{s}.py", .{cmd}) });
+        try std.Io.Dir.cwd().writeFile(init.io, .{ .sub_path = script, .data = data });
         var argv: std.ArrayList([]const u8) = .empty;
-        try argv.appendSlice(arena, &.{ "python3", "-I", script, try std.fs.path.join(arena, &.{ root, "cache" }) });
+        try argv.appendSlice(arena, &.{ "python3", "-I", script });
+        // the store writers take the cache directory first
+        if (!std.mem.eql(u8, kind, "yarn")) try argv.append(arena, try std.fs.path.join(arena, &.{ root, "cache" }));
         try argv.appendSlice(arena, rest);
         var child = std.process.spawn(init.io, .{ .argv = argv.items }) catch |err| {
             std.debug.print("{s}: cannot run python3: {s}\n", .{ cmd, @errorName(err) });

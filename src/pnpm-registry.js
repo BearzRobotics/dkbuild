@@ -7,7 +7,12 @@
 // against the lockfile again. Metadata requests get 404: a frozen lockfile
 // needs none.
 //
-//   node pnpm-registry.js <port> <ready-file> pnpm-lock.yaml...
+// yarn 2+ installs the same way from a recipe's yarn.package-lock.json
+// (written by `dkbuild yarn-lock`): a .json lock's entries map the path of
+// their registry tarball URL (/<name>/-/<file>.tgz, the path yarn derives
+// from a locked npm: resolution) to the store file.
+//
+//   node pnpm-registry.js <port> <ready-file> pnpm-lock.yaml|yarn.package-lock.json...
 "use strict";
 const fs = require("fs");
 const http = require("http");
@@ -28,6 +33,15 @@ function storeFile(integrity) {
 // their `resolution: {integrity: ...}`.
 const files = new Map();
 for (const lock of locks) {
+  if (lock.endsWith(".json")) {
+    const pk = JSON.parse(fs.readFileSync(lock, "utf8")).packages || {};
+    for (const e of Object.values(pk)) {
+      if (!e.resolved || !e.integrity) continue;
+      const f = storeFile(e.integrity);
+      if (f) files.set(decodeURIComponent(new URL(e.resolved).pathname).replace(/%2f/gi, "/"), f);
+    }
+    continue;
+  }
   let inPackages = false, key = null;
   for (const raw of fs.readFileSync(lock, "utf8").split("\n")) {
     const line = raw.replace(/\r$/, "");

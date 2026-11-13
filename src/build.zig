@@ -177,6 +177,10 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
             \\export npm_config_cache=/tmp/npm-cache npm_config_offline=true npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
             \\# pnpm (pnpm-lock.yaml): the store served as a registry on 127.0.0.1
             \\pnpm_locks=$(find /build -path /build/sources -prune -o -name pnpm-lock.yaml -not -path '*/node_modules/*' -print)
+            \\# yarn 2+ (the recipe's files/yarn.package-lock.json, from dkbuild yarn-lock):
+            \\# the same registry
+            \\yarn_locks=$(ls /dkbuild/files/*yarn.package-lock.json 2>/dev/null || true)
+            \\pnpm_locks="$pnpm_locks $yarn_locks"; pnpm_locks=${pnpm_locks# }; pnpm_locks=${pnpm_locks% }
             \\if [ -n "$pnpm_locks" ] && [ ! -f /tmp/pnpm-registry.ready ]; then
             \\    node /dkbuild/pnpm-registry.js 4873 /tmp/pnpm-registry.ready $pnpm_locks > /tmp/pnpm-registry.log 2>&1 &
             \\    for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do [ -f /tmp/pnpm-registry.ready ] && break; sleep 0.5; done
@@ -185,6 +189,14 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
             \\if [ -n "$pnpm_locks" ]; then
             \\    export npm_config_registry=http://127.0.0.1:4873/ npm_config_store_dir=/tmp/pnpm-store PNPM_HOME=/tmp/pnpm-home
             \\    unset npm_config_offline
+            \\fi
+            \\if [ -n "$yarn_locks" ]; then
+            \\    # yarn 2+: that registry only, a private cache, the lockfile's zip
+            \\    # checksums not compared (the tarballs were checked at fetch time;
+            \\    # yarn's zips differ between its versions); no telemetry
+            \\    export YARN_NPM_REGISTRY_SERVER=http://127.0.0.1:4873 YARN_UNSAFE_HTTP_WHITELIST=127.0.0.1 \\
+            \\        YARN_ENABLE_GLOBAL_CACHE=false YARN_CACHE_FOLDER=/tmp/yarn-cache YARN_CHECKSUM_BEHAVIOR=ignore \\
+            \\        YARN_ENABLE_TELEMETRY=false YARN_ENABLE_INLINE_BUILDS=true YARN_ENABLE_HARDENED_MODE=false
             \\fi
             \\
         );
