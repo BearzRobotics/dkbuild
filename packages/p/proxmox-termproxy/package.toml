@@ -7,7 +7,7 @@
 # git.proxmox.com (patch 0001) and is pinned by files/Cargo.lock.
 name = "proxmox-termproxy"
 version = "2.1.0"
-release = 1
+release = 2
 summary = "Terminal proxy for the Proxmox web consoles"
 license = "AGPL-3.0-or-later"
 homepage = "https://git.proxmox.com/?p=pve-xtermjs.git"
