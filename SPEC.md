@@ -226,7 +226,15 @@ source = [
   the submodules out. `dart` (Dart tag, depot_tools commit) is the Dart SDK's gclient checkout, as
   Alpine's dart snapshot. `scratch-media` (an @scratch/scratch-gui version) downloads the
   media library that version lists, each asset checked against the MD5 it
-  is named by, for Scratch Desktop.
+  is named by, for Scratch Desktop. `brave` (Brave tag, pnpm version) is
+  brave-core with its Linux DEPS repositories (DEPS read as data) and its
+  pnpm packages; Chromium itself is Google's release tarball, a plain source.
+  `euro-office` (V8 tag, GN commit) is V8 with only the DEPS entries a
+  monolith build needs, for Euro-Office's x2t. `git` checks that every
+  submodule is checked out with files in it before it marks a checkout done
+  (a dropped connection used to leave empty ones). While a snapshot is made
+  its file is `<sha256>.<url hash>.part`, so two new snapshots whose recipes
+  both carry the placeholder checksum do not share one.
 - The first tarball is unpacked into the build directory, and the build
   steps start inside its top directory. Further tarballs are unpacked next to
   it (`/build/<their top directory>`): a vendored dependency's source, such as

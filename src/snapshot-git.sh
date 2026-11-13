@@ -25,6 +25,18 @@ if [ ! -f src/.done ]; then
     git -C src checkout -q FETCH_HEAD
     log "submodules"
     git -C src submodule update -q --init --recursive --depth 1 || git -C src submodule update -q --init --recursive
+    # A dropped connection can leave a submodule registered but not checked
+    # out: check every one has its commit checked out and files in it.
+    if git -C src submodule status --recursive | grep -q '^[-+U]'; then
+        log "submodules not checked out; retrying"
+        git -C src submodule update -q --init --recursive --force
+    fi
+    if git -C src submodule status --recursive | grep -q '^[-+U]'; then
+        log "a submodule is not checked out at its commit"; exit 1
+    fi
+    if ! git -C src submodule foreach -q --recursive 'test -n "$(ls -A)" || { echo "empty: $sm_path" >&2; exit 1; }'; then
+        log "a submodule is empty"; exit 1
+    fi
     touch src/.done
 fi
 

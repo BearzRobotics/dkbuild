@@ -69,7 +69,11 @@ pub fn fetchOne(arena: Allocator, io: std.Io, cache: []const u8, src: recipe.Sou
                 message.* = try std.fmt.allocPrint(arena, "cannot create {s}: {s}", .{ dir, @errorName(err) });
                 return error.DownloadFailed;
             };
-            const tmp = try std.fmt.allocPrint(arena, "{s}.part", .{final});
+            // Named after the URL too: two new snapshots whose recipes both
+            // carry the placeholder checksum (zeros) must not share one file.
+            var url_hash: [32]u8 = undefined;
+            std.crypto.hash.sha2.Sha256.hash(t.url, &url_hash, .{});
+            const tmp = try std.fmt.allocPrint(arena, "{s}.{x}.part", .{ final, url_hash[0..8] });
             if (std.mem.startsWith(u8, t.url, "snapshot:")) {
                 try makeSnapshot(arena, io, cache, t.url["snapshot:".len..], tmp, message);
             } else {
@@ -117,6 +121,8 @@ const snapshot_scripts = [_][2][]const u8{
     .{ "git", @embedFile("snapshot-git.sh") },
     .{ "scratch-media", @embedFile("snapshot-scratch-media.sh") },
     .{ "dart", @embedFile("snapshot-dart.sh") },
+    .{ "brave", @embedFile("snapshot-brave.sh") },
+    .{ "euro-office", @embedFile("snapshot-euro-office.sh") },
 };
 
 /// Make the tarball of a `snapshot:` source into `tmp`. The script's output
