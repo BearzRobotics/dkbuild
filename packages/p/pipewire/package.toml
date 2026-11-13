@@ -13,9 +13,10 @@
 # pw-cat (sndfile), the PulseAudio tunnel, LV2 filters, X11 bell, its
 # GStreamer plugin and its JACK library; LDAC and WebRTC echo cancelling
 # (r7, r8). r9: spatial audio (libmysofa), cameras (libcamera), network audio (ROC).
+# r10: PipeWire's libjack in /usr/lib (-Dlibjack-path, as Chimera), not /usr/lib/pipewire-0.3/jack: programs linked against JACK (ffmpeg, SDL 3, fluidsynth, mpg123) find it, and it provides so:libjack.so.0.
 name = "pipewire"
 version = "1.6.10"
-release = 9
+release = 10
 summary = "Server and user space API to deal with multimedia pipelines"
 license = "MIT"
 homepage = "https://pipewire.org"
@@ -76,6 +77,7 @@ setup = '''
     -Dgstreamer=enabled \
     -Dpipewire-jack=enabled \
     -Djack-devel=true \
+    -Dlibjack-path=/usr/lib \
     -Dpam-defaults-install=true \
     -Dlibv4l2-path=/usr/lib \
     -Dudevrulesdir=/usr/lib/udev/rules.d \

@@ -1118,6 +1118,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         try pkg_list.append(arena, sub);
         out("    {s}-{s}: {d} files\n", .{ r.name, m.name, m.files });
     }
+    try siblingPrivate(arena, pkg_list.items, r.version, r.release);
     try publish(arena, io, r, opts, pub_id, base_root, sb, pkg_list.items, &log);
     out("    built {s}; log: {s}\n", .{ pub_id, logpath });
     return .{ .produced = produced, .release = r.release, .published = true };
@@ -1136,7 +1137,29 @@ const Pkg = struct {
     depends: []const []const u8,
     provides: []const []const u8 = &.{},
     install_if: []const []const u8 = &.{},
+    /// Private libraries it ships (scan.Result.private).
+    private: []const []const u8 = &.{},
 };
+
+/// A package that needs a private library a sibling package of the same
+/// recipe ships (libpulse-libs needs /usr/lib/pulseaudio/libpulsecommon, left
+/// in libpulse by the split) gets an exact dependency on that sibling instead
+/// of a `so:` name nothing provides.
+fn siblingPrivate(arena: Allocator, pkgs: []Pkg, version: []const u8, release: u32) Allocator.Error!void {
+    for (pkgs, 0..) |*pk, i| {
+        var deps: std.ArrayList([]const u8) = .empty;
+        for (pk.depends) |d| {
+            const owner = for (pkgs, 0..) |other, j| {
+                if (j != i and contains(other.private, d)) break other.name;
+            } else null;
+            if (owner) |o| {
+                const dep = try std.fmt.allocPrint(arena, "{s}={s}-r{d}", .{ o, version, release });
+                if (!contains(deps.items, dep)) try deps.append(arena, dep);
+            } else try deps.append(arena, d);
+        }
+        pk.depends = deps.items;
+    }
+}
 
 /// Declared dependencies plus what the scan found, without duplicates.
 fn withScan(arena: Allocator, io: std.Io, files: []const u8, declared: []const []const u8) BuildError!Pkg {
@@ -1147,7 +1170,7 @@ fn withScan(arena: Allocator, io: std.Io, files: []const u8, declared: []const [
     var deps: std.ArrayList([]const u8) = .empty;
     try deps.appendSlice(arena, declared);
     for (res.depends) |d| if (!contains(deps.items, d)) try deps.append(arena, d);
-    return .{ .name = "", .summary = "", .files = files, .depends = deps.items, .provides = res.provides };
+    return .{ .name = "", .summary = "", .files = files, .depends = deps.items, .provides = res.provides, .private = res.private };
 }
 
 fn publish(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options, id: []const u8, base_root: []const u8, sb: SbDirs, pkgs: []const Pkg, log: *std.ArrayList(u8)) BuildError!void {

@@ -1,8 +1,9 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/links/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# r2: rebuilt against this tree's bzip2 (soname libbz2.so.1; r1 linked the stage 0 image's libbz2.so.1.0).
 name = "links"
 version = "2.30"
-release = 1
+release = 2
 summary = "Lynx-like text WWW browser"
 license = "GPL-2.0-or-later"
 homepage = "http://links.twibright.com"

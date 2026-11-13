@@ -309,7 +309,13 @@ After `install`, dkbuild scans `$pkgdir`:
   apk's job. A library in a subdirectory (`/usr/lib/ollama`, perl's `CORE/`)
   is private, found through an rpath: it is not provided to other packages, and
   a need it meets is not a dependency (two packages each carrying a private
-  ggml must not conflict).
+  ggml must not conflict). A sibling package of the same recipe that needs a
+  private library gets an exact dependency on the package that ships it
+  (`libpulse-libs` on `libpulse=<version>-r<release>` for
+  /usr/lib/pulseaudio/libpulsecommon). A library in `/usr/lib` without a
+  soname (tcl's `libtcl8.6.so`) provides its file name. Another recipe that
+  links a private library through an rpath (perl's `CORE/libperl.so`) needs
+  the owning recipe to declare it in `provides`.
 - **pkg-config files:** each `.pc` provides `pc:<name>`, and each
   `Requires:` becomes a dependency.
 - **Commands:** each executable in `/usr/bin` provides `cmd:<name>`.

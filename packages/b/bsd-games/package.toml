@@ -1,8 +1,9 @@
 # NetBSD's games ported to Linux (2.17, with Debian's patches): adventure, robots,
 # hangman, trek, worm, ... (fortune is fortune-mod).
+# r3: rebuilt against this tree's flex, which ships only libfl.a (r2 linked the stage 0 image's libfl.so.2).
 name = "bsd-games"
 version = "2.17"
-release = 2
+release = 3
 summary = "The classic BSD text games (adventure, robots, hangman, ...)"
 license = "BSD-3-Clause"
 homepage = "https://www.polyomino.org.uk/computer/software/bsd-games/"

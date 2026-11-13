@@ -2,13 +2,17 @@
 # Chimera's recipe was not used.
 # r2: rebuilt so its private libperl.so (perl's CORE/) is no longer an external dependency.
 # r3: rebuilt so its libperl.so (no soname, in CORE/) counts as private.
+# r10: provides so:libperl.so for nginx's and postgresql's embedded perl.
 name = "perl"
 version = "5.40.1"
-release = 9
+release = 10
 summary = "Practical Extraction and Report Language"
 license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
 homepage = "https://www.perl.org"
 options = ["bootstrap", "!check"]
+# CORE/libperl.so is private (found through an rpath), but nginx and postgresql link it
+# through that rpath too: provide its name for them.
+provides = ["so:libperl.so"]
 
 source = [
     { url = "https://www.cpan.org/src/5.0/perl-5.40.1.tar.xz", sha256 = "dfa20c2eef2b4af133525610bbb65dd13777ecf998c9c5b1ccf0d308e732ee3f" },

@@ -10,6 +10,10 @@ pub const Result = struct {
     provides: []const []const u8,
     /// What it needs, minus whatever it supplies itself.
     depends: []const []const u8,
+    /// `so:<soname>` of the private libraries it ships (outside /usr/lib),
+    /// which it does not provide. A sibling package of the same recipe that
+    /// needs one depends on this package instead (build.zig).
+    private: []const []const u8 = &.{},
 };
 
 pub const Elf = struct {
@@ -188,6 +192,12 @@ pub fn scanTree(arena: Allocator, io: std.Io, root: []const u8) !Result {
         const public = std.mem.eql(u8, dirname, "usr/lib") or std.mem.eql(u8, dirname, "lib");
         if (info.soname) |so| {
             try addUnique(arena, if (public) &provides else &private, try std.fmt.allocPrint(arena, "so:{s}", .{so}));
+        } else if (public and std.mem.indexOf(u8, e.basename, ".so") != null and
+            !std.mem.eql(u8, e.basename, "libc.so"))
+        {
+            // A library in /usr/lib without a soname (tcl's libtcl8.6.so) is
+            // linked by its file name: provide that name.
+            try addUnique(arena, &provides, try std.fmt.allocPrint(arena, "so:{s}", .{e.basename}));
         } else if (!public and std.mem.indexOf(u8, e.basename, ".so") != null) {
             // A private library without a soname (perl's CORE/libperl.so) is
             // linked, and so needed, by its file name.
@@ -209,7 +219,7 @@ pub fn scanTree(arena: Allocator, io: std.Io, root: []const u8) !Result {
     }
     std.mem.sort([]const u8, deps.items, {}, lessThan);
     std.mem.sort([]const u8, provides.items, {}, lessThan);
-    return .{ .provides = provides.items, .depends = deps.items };
+    return .{ .provides = provides.items, .depends = deps.items, .private = private.items };
 }
 
 fn lessThan(_: void, a: []const u8, b: []const u8) bool {

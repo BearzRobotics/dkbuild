@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
+# r2: rebuilt so tcl-libs provides so:libtcl8.6.so (a library in /usr/lib without a soname now provides its file name).
 name = "tcl"
 version = "8.6.16"
-release = 1
+release = 2
 summary = "TCL scripting language"
 license = "TCL"
 homepage = "http://www.tcl.tk"

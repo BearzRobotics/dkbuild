@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
+# r2: rebuilt so tk-libs provides so:libtk8.6.so (as tcl r2).
 name = "tk"
 version = "8.6.17"
-release = 1
+release = 2
 summary = "TK graphical user interface toolkit for TCL"
 license = "TCL"
 homepage = "http://www.tcl.tk"

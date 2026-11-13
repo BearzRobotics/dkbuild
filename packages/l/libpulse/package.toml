@@ -1,9 +1,10 @@
 # The PulseAudio client library and tools (pactl, paplay, ...), without the
 # sound server: PipeWire is the server (pipewire-pulse speaks its protocol).
 # needed by: sox_ng, and programs that play sound through PulseAudio.
+# r2: rebuilt so libpulse-libs depends on libpulse for its private libpulsecommon (dkbuild's scan of sibling private libraries) instead of an so: name nothing provides.
 name = "libpulse"
 version = "17.0"
-release = 1
+release = 2
 summary = "PulseAudio client library and tools"
 license = "LGPL-2.1-or-later"
 homepage = "https://www.freedesktop.org/wiki/Software/PulseAudio"

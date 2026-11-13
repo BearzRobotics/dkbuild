@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
+# r2: rebuilt so libproxy-libs depends on libproxy for its private libpxbackend (as libpulse r2).
 name = "libproxy"
 version = "0.5.12"
-release = 1
+release = 2
 summary = "Automatic proxy configuration management library"
 license = "LGPL-2.1-or-later"
 homepage = "http://libproxy.github.io/libproxy"
