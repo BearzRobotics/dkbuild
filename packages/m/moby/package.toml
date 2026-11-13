@@ -14,7 +14,7 @@
 # /usr/share/doc/moby/README.FenrirOS. The client is docker-cli.
 name = "moby"
 version = "29.9.3"
-release = 1
+release = 2
 summary = "Docker container engine (dockerd)"
 license = "Apache-2.0"
 homepage = "https://mobyproject.org"
@@ -34,6 +34,13 @@ export VERSION=$version DOCKER_GITCOMMIT=70efc0e31da3a115fc87574d1b786fa2b867c34
 export DOCKER_BUILDTAGS="libnftables libpathrs"
 '''
 build = '''
+# vendored go-pathrs checks the C constants as int64, but libpathrs 0.2.6's
+# pathrs.h declares them 64-bit unsigned (18446744067006164835ull), so cgo
+# rejects them ("overflows"). The Go values they are compared to are
+# ProcBase (uint64): declare the check variables uint64.
+sed -i -E 's/(actualProc(Root|Self|ThreadSelf) +)int64( = C\.PATHRS_PROC_)/\1uint64\3/' \
+    vendor/cyphar.com/go-pathrs/internal/libpathrs/libpathrs_linux.go
+grep -c 'uint64 = C.PATHRS_PROC_' vendor/cyphar.com/go-pathrs/internal/libpathrs/libpathrs_linux.go
 hack/make.sh dynbinary
 make -C man GO_MD2MAN=/usr/bin/go-md2man
 '''
