@@ -7,7 +7,7 @@
 # time). Installs Block.h/Block_private.h (its embedded blocks runtime).
 name = "libobjc2"
 version = "2.3"
-release = 1
+release = 2
 summary = "GNUstep Objective-C runtime"
 license = "MIT"
 homepage = "https://github.com/gnustep/libobjc2"
@@ -19,6 +19,10 @@ source = [
 ]
 
 setup = '''
+# selector_table.cc calls abort() without <stdlib.h> (libc++ 23 no longer brings
+# it in through other headers)
+sed -i '0,/^#include/s//#include <stdlib.h>\n#include/' selector_table.cc
+grep -q '^#include <stdlib.h>$' selector_table.cc
 %cmake \
     -DGNUSTEP_INSTALL_TYPE=NONE \
     -DBUILD_STATIC_LIBOBJC=ON \
