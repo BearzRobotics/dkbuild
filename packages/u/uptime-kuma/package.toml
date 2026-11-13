@@ -13,7 +13,7 @@
 # /usr/share/doc/uptime-kuma). Setup: /usr/share/doc/uptime-kuma/README.FenrirOS.
 name = "uptime-kuma"
 version = "2.5.11"
-release = 1
+release = 2
 summary = "Self-hosted monitoring tool with status pages"
 license = "MIT"
 homepage = "https://uptime.kuma.pet"
@@ -33,6 +33,10 @@ export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
 # native modules: node-gyp against the system Node.js headers, never a download
 export npm_config_nodedir=/usr npm_config_build_from_source=true npm_config_sqlite=/usr
 export NODE_ENV=production
+# the native addons (cpu-features' buildcheck: "Unable to detect compiler
+# type", then node-gyp) look for a compiler named cc/c++ unless CC/CXX say
+# otherwise; the system's compiler is clang
+export CC=clang CXX=clang++
 '''
 setup = '''
 node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
