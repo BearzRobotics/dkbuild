@@ -15,7 +15,7 @@
 # Setup: /usr/share/doc/pi-hole/README.FenrirOS.
 name = "pi-hole"
 version = "6.6"
-release = 2
+release = 3
 summary = "Network-wide DNS ad blocker (FTL, web interface, scripts)"
 license = "EUPL-1.2"
 homepage = "https://pi-hole.net"
@@ -46,6 +46,16 @@ test "$(grep -c -e '-Wno-error \\$' ../FTL-6.9/src/CMakeLists.txt)" = 2
 '''
 build = '''
 cd ../FTL-6.9
+# webserver/x509.c calls the mbedtls 4 forms of mbedtls_x509write_crt_pem and
+# mbedtls_pk_parse_keyfile (no random-number arguments: 4 uses PSA's internally);
+# the mbedtls here is 3.6.4, whose versions take f_rng, p_rng. Pass PSA's
+# generator, mbedtls_psa_get_random with MBEDTLS_PSA_RANDOM_STATE (what 3.6
+# documents for that), and include its header psa_util.h.
+sed -i -e 's|sizeof(ca_buffer))|sizeof(ca_buffer), mbedtls_psa_get_random, MBEDTLS_PSA_RANDOM_STATE)|' \
+    -e 's|sizeof(cert_buffer))|sizeof(cert_buffer), mbedtls_psa_get_random, MBEDTLS_PSA_RANDOM_STATE)|' \
+    -e 's|mbedtls_pk_parse_keyfile(&key, certfile, NULL)|mbedtls_pk_parse_keyfile(\&key, certfile, NULL, mbedtls_psa_get_random, MBEDTLS_PSA_RANDOM_STATE)|' \
+    -e 's|^# include <mbedtls/oid.h>|&\n# include <mbedtls/psa_util.h>|' src/webserver/x509.c
+test "$(grep -c mbedtls_psa_get_random src/webserver/x509.c)" = 3
 # readline needs a termcap library: ncurses' (FTL looks for libtermcap only)
 %cmake -DLIBTERMCAP=/usr/lib/libncursesw.so
 %cmake_build
