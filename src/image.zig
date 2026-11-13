@@ -42,6 +42,10 @@ pub const Image = struct {
     /// A command every user's login shell runs on tty1 (`exec`), such as
     /// `dkde-session`: with autologin, the machine boots to the desktop.
     session: []const u8 = "",
+    /// The text of /etc/issue, which agetty prints before `login:` on each text
+    /// console (`\r` kernel, `\l` tty, `\n` host); empty keeps the package's.
+    /// A live image says there which user to log in as.
+    issue: []const u8 = "",
     /// Any of "rootfs", "tar", "squashfs", "iso".
     output: []const []const u8,
 };
@@ -60,7 +64,7 @@ pub fn parse(arena: Allocator, text: []const u8, diag: *Diagnostic) Error!Image 
 
 fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error!Image {
     const root = try cfg.parse(arena, text, diag);
-    try cfg.onlyKeys(arena, diag, root, &.{ "name", "arch", "packages", "exclude", "services", "users", "hostname", "label", "autologin", "session", "output" }, "");
+    try cfg.onlyKeys(arena, diag, root, &.{ "name", "arch", "packages", "exclude", "services", "users", "hostname", "label", "autologin", "session", "issue", "output" }, "");
     var img: Image = .{
         .name = try cfg.reqString(arena, diag, root, "name"),
         .packages = try cfg.optStrings(arena, diag, root, "packages"),
@@ -72,6 +76,8 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
     if (try cfg.optString(arena, diag, root, "hostname")) |h| img.hostname = h;
     if (try cfg.optString(arena, diag, root, "autologin")) |u| img.autologin = u;
     if (try cfg.optString(arena, diag, root, "session")) |c| img.session = c;
+    if (try cfg.optString(arena, diag, root, "issue")) |t| img.issue = t;
+    if (std.mem.indexOf(u8, img.issue, "DKISSUE_EOF") != null) return cfg.fail(arena, diag, "'issue' may not contain DKISSUE_EOF", .{});
     if (std.mem.indexOfAny(u8, img.session, "'\n") != null) return cfg.fail(arena, diag, "'session' may not contain quotes or newlines", .{});
     if (try cfg.optString(arena, diag, root, "label")) |l| img.label = l else {
         const up = try arena.dupe(u8, img.name);
@@ -181,6 +187,13 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
         }
     }
 
+    if (img.issue.len > 0) try w.add(arena, &s,
+        \\echo '==> issue'
+        \\cat > /target/etc/issue <<'DKISSUE_EOF'
+        \\{s}
+        \\DKISSUE_EOF
+        \\
+    , .{std.mem.trimEnd(u8, img.issue, "\n")});
     if (img.autologin.len > 0) try w.add(arena, &s,
         \\echo '==> autologin'
         \\[ -f /target/etc/dinit.d/tty1 ] || {{ echo "error: no /etc/dinit.d/tty1 to log in on (add dinit-services)" >&2; exit 1; }}
@@ -415,4 +428,15 @@ test "image files parse; bad outputs, excluded packages and odd names are refuse
     try std.testing.expect(std.mem.indexOf(u8, s, "useradd -R /target -m -s '/bin/bash' -G 'wheel,video' 'fenrir'") != null);
     try std.testing.expect(std.mem.indexOf(u8, s, "fenriros.tar.zst") != null);
     try std.testing.expect(std.mem.indexOf(u8, s, "mksquashfs") == null);
+}
+
+test "an image's issue text is written to /etc/issue" {
+    var arena_state = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena_state.deinit();
+    const a = arena_state.allocator();
+    var diag: Diagnostic = .{};
+    const img = try parse(a, "name = \"x\"\npackages = [\"a\"]\noutput = [\"tar\"]\nissue = \"\"\"\nFenrirOS \\\\r (\\\\l)\nLog in as rescue\n\"\"\"\n", &diag);
+    const s = try script(a, img);
+    try std.testing.expect(std.mem.indexOf(u8, s, "cat > /target/etc/issue <<'DKISSUE_EOF'\nFenrirOS \\r (\\l)\nLog in as rescue\nDKISSUE_EOF\n") != null);
+    try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\npackages = [\"a\"]\noutput = [\"tar\"]\nissue = \"DKISSUE_EOF\"\n", &diag));
 }
