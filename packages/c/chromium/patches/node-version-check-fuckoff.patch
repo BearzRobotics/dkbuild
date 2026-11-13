@@ -1,3 +1,5 @@
+chromium: do not insist on the exact Node.js version Chromium pins; the
+build uses the system's node. From Chimera's main/chromium.
 --- a/third_party/node/check_version.py
 +++ b/third_party/node/check_version.py
 @@ -17,11 +17,6 @@ def main(argv):

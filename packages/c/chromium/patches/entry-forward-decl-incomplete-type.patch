@@ -1,3 +1,5 @@
+chromium: ValueCounter's inline is_empty()/distinct_count() need the
+complete Entry type, which libc++ enforces; define them in the .cc instead. From Chimera's main/chromium.
 diff --git a/extensions/common/value_counter.cc b/extensions/common/value_counter.cc
 index 445a738..284ea77 100644
 --- a/extensions/common/value_counter.cc

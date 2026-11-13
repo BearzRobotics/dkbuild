@@ -1,3 +1,5 @@
+chromium: include FFmpeg's headers from the system (libavutil/...) instead
+of third_party/ffmpeg, for the unbundled build against the tree's ffmpeg. From Chimera's main/chromium.
 --- a/media/filters/ffmpeg_demuxer.h
 +++ b/media/filters/ffmpeg_demuxer.h
 @@ -46,7 +46,7 @@

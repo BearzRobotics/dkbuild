@@ -1,3 +1,6 @@
+chromium: drop third-party test targets (ANGLE, flatbuffers, highway, ...)
+from the top-level BUILD.gn; they are not built and some need test data
+the release tarball lacks. From Chimera's main/chromium.
 --- a/BUILD.gn
 +++ b/BUILD.gn
 @@ -111,13 +111,6 @@

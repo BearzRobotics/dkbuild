@@ -1,3 +1,5 @@
+chromium: Tint's terminal code uses fd_set; include <sys/select.h>, which
+glibc pulls in indirectly and musl does not. From Chimera's main/chromium.
 --- a/third_party/dawn/src/tint/utils/system/terminal_posix.cc
 +++ b/third_party/dawn/src/tint/utils/system/terminal_posix.cc
 @@ -37,6 +37,7 @@

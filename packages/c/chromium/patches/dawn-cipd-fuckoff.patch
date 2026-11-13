@@ -1,3 +1,5 @@
+chromium: Dawn's build asks CIPD (Google's prebuilt package service) for its
+architecture name and packages; skip that, nothing is downloaded offline. From Chimera's main/chromium.
 diff --git a/third_party/dawn/tools/python/cipd_deps.py b/third_party/dawn/tools/python/cipd_deps.py
 index 3d0befe..c2961ad 100644
 --- a/third_party/dawn/tools/python/cipd_deps.py

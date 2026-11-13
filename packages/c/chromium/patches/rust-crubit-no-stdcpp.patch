@@ -1,3 +1,5 @@
+chromium: crubit's build linked libstdc++.a; this tree's C++ library is
+libc++, so no extra link argument. From Chimera's main/chromium.
 diff --git a/tools/rust/build_crubit.py b/tools/rust/build_crubit.py
 index d1d2b73..dcc9214 100755
 --- a/tools/rust/build_crubit.py

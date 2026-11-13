@@ -1,3 +1,5 @@
+chromium: GetNextColor needs a char16_t pointer from a u16string iterator;
+with libc++ the iterator's constructor is private, so take the data pointer. From Chimera's main/chromium.
 diff --git a/ui/base/metadata/base_type_conversion.cc b/ui/base/metadata/base_type_conversion.cc
 index 82d9b22..d4553af 100644
 --- a/ui/base/metadata/base_type_conversion.cc

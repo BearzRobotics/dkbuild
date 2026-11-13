@@ -1,3 +1,5 @@
+chromium: tell the bundled libc++ configuration it runs on musl
+(_LIBCPP_HAS_MUSL_LIBC 1), so it uses musl's locale and threading paths. From Chimera's main/chromium.
 --- a/buildtools/third_party/libc++/__config_site
 +++ b/buildtools/third_party/libc++/__config_site
 @@ -29,7 +29,7 @@

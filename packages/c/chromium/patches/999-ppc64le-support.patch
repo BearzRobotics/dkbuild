@@ -1,3 +1,5 @@
+chromium: ppc64le page-size constants for PartitionAlloc (ppc64 uses 64 KiB
+pages). Only affects ppc64le builds; kept from Chimera's port. From Chimera's main/chromium.
 diff --git a/base/allocator/partition_allocator/src/partition_alloc/page_allocator_constants.h b/base/allocator/partition_allocator/src/partition_alloc/page_allocator_constants.h
 index 6516c20..7d32eed 100644
 --- a/base/allocator/partition_allocator/src/partition_alloc/page_allocator_constants.h
