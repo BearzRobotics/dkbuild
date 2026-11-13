@@ -15,7 +15,7 @@
 # Setup: /usr/share/doc/pi-hole/README.FenrirOS.
 name = "pi-hole"
 version = "6.6"
-release = 1
+release = 2
 summary = "Network-wide DNS ad blocker (FTL, web interface, scripts)"
 license = "EUPL-1.2"
 homepage = "https://pi-hole.net"
@@ -35,6 +35,14 @@ source = [
 environment = '''
 # FTL's version stamp (src/gen_version.cmake asks git otherwise): the v6.9 tag
 export GIT_BRANCH=master GIT_TAG=v6.9 GIT_VERSION=v6.9 GIT_HASH=2a0fcb74 GIT_DATE="2026-11-11 18:30:30 +0000"
+'''
+setup = '''
+# FTL builds its own code with -Werror (the warning set of the compilers its
+# developers use); this system's clang is newer and stops on warnings that are
+# not defects ("variable 'process' set but not used [-Werror,-Wunused-but-set-global]"
+# in log.c). -Wno-error in its place: the warnings stay, they no longer fail the build.
+sed -i 's/-Werror \\$/-Wno-error \\/' ../FTL-6.9/src/CMakeLists.txt
+test "$(grep -c -e '-Wno-error \\$' ../FTL-6.9/src/CMakeLists.txt)" = 2
 '''
 build = '''
 cd ../FTL-6.9
