@@ -206,7 +206,7 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
         try s.appendSlice(arena,
             \\mkdir -p /tmp/gradle-dist /tmp/dkbin
             \\unzip -q -o "$(ls /build/sources/gradle-*-bin.zip | head -n1)" -d /tmp/gradle-dist
-            \\printf '#!/bin/sh\nexec %s/bin/gradle --offline --no-daemon -g /tmp/ghome -I /dkbuild/gradle-offline.gradle "$@"\n' "$(ls -d /tmp/gradle-dist/gradle-*)" > /tmp/dkbin/gradle
+            \\printf '#!/bin/sh\nexport JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:+$JAVA_TOOL_OPTIONS }-Dorg.gradle.native=false"\nexec %s/bin/gradle --offline --no-daemon -g /tmp/ghome -I /dkbuild/gradle-offline.gradle "$@"\n' "$(ls -d /tmp/gradle-dist/gradle-*)" > /tmp/dkbin/gradle
             \\chmod 755 /tmp/dkbin/gradle
             \\# Gradle's native helpers (file events, ...) are glibc builds: off
             \\mkdir -p /tmp/ghome && printf 'org.gradle.native=false\norg.gradle.vfs.watch=false\n' > /tmp/ghome/gradle.properties
@@ -955,6 +955,8 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 \\g=$(ls -d /tmp/gradle-dist/gradle-*)/bin/gradle
                 \\# Gradle's native helpers (file events, ...) are glibc builds: off
                 \\mkdir -p /tmp/ghome && printf 'org.gradle.native=false\norg.gradle.vfs.watch=false\n' > /tmp/ghome/gradle.properties
+                \\# the forked daemon takes org.gradle.native from its JVM's system properties
+                \\export JAVA_TOOL_OPTIONS=-Dorg.gradle.native=false
                 \\# on a copy with the recipe's patches applied (the build applies them to
                 \\# its own tree later): what is resolved is what the patched build uses
                 \\rm -rf /tmp/gradle-src && cp -a '{s}' /tmp/gradle-src && cd /tmp/gradle-src
