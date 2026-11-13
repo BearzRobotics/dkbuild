@@ -6,7 +6,7 @@
 # Crates vendored on the host (cargodeps).
 name = "libpathrs"
 version = "0.2.6"
-release = 1
+release = 2
 summary = "Safe path resolution library for Linux (C API)"
 license = "MPL-2.0 OR LGPL-3.0-or-later"
 homepage = "https://github.com/cyphar/libpathrs"
@@ -24,7 +24,11 @@ build = '''
 # `make release`: cargo build --release --features=capi, once as cdylib and
 # once as staticlib (hack/with-crate-type.sh switches Cargo.toml's crate-type
 # for each and restores it)
-make release EXTRA_CARGO_FLAGS="--frozen --offline -j $jobs"
+# r2: Rust's musl target links statically (crt-static) by default and then cannot produce a cdylib
+# ("cannot produce cdylib ... does not support these crate types"); -crt-static, passed through
+# the Makefile's EXTRA_RUSTC_FLAGS (it sets RUSTFLAGS itself, so the environment is ignored), lets
+# the shared library build against the shared musl. The staticlib is unaffected.
+make release EXTRA_RUSTC_FLAGS="-C target-feature=-crt-static" EXTRA_CARGO_FLAGS="--frozen --offline -j $jobs"
 '''
 install = '''
 DESTDIR="$pkgdir" ./install.sh --prefix=/usr --libdir=/usr/lib --enable-static --enable-shared
