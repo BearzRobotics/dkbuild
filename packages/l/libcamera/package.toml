@@ -6,7 +6,7 @@
 # own files and signs the modules, and dkbuild's strip stays off.
 name = "libcamera"
 version = "0.7.2"
-release = 1
+release = 2
 summary = "Open source camera stack and framework"
 license = "LGPL-2.1-or-later AND GPL-2.0-or-later"
 homepage = "https://libcamera.org"
@@ -21,6 +21,10 @@ source = [
 ]
 
 setup = '''
+# internal/process.h uses pid_t without <sys/types.h> (glibc's C++ headers bring
+# it in, musl's do not)
+sed -i 's|^#include <string>$|#include <string>\n#include <sys/types.h>|' include/libcamera/internal/process.h
+grep -q '^#include <sys/types.h>$' include/libcamera/internal/process.h
 %meson -Dtest=false -Dqcam=disabled -Dcam=enabled -Dgstreamer=enabled -Dv4l2=enabled -Dlibdw=enabled
 '''
 build = '''
