@@ -27,12 +27,12 @@
 # /usr/share/doc/listmonk. Setup: /usr/share/doc/listmonk/README.FenrirOS.
 name = "listmonk"
 version = "6.2.0"
-release = 1
+release = 2
 summary = "Self-hosted newsletter and mailing list manager"
 license = "AGPL-3.0-only"
 homepage = "https://listmonk.app"
 archs = ["x86_64", "aarch64"]
-hostdeps = ["go", "nodejs"]
+hostdeps = ["go", "nodejs", "llvm-libunwind"]
 rundeps = ["postgresql"]
 options = ["!check", "!strip", "godeps", "npmdeps"]
 
@@ -45,6 +45,14 @@ export GOTOOLCHAIN=local GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
 export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
     npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
 export VUE_APP_VERSION=v$version
+# SWC's musl binary (@swc/core-linux-x64-musl, loaded by the email builder's
+# vite config: "Failed to load native binding") links libgcc_s.so.1, which this
+# system does not have: LLVM's libunwind has the same _Unwind_* functions
+# (the rust package links its libgcc_s.so.1 to it the same way). A private
+# libgcc_s.so.1 link for this build only.
+mkdir -p /tmp/gccshim
+ln -sf /usr/lib/libunwind.so.1 /tmp/gccshim/libgcc_s.so.1
+export LD_LIBRARY_PATH="/tmp/gccshim${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 '''
 setup = '''
 cp $pkgfiles/frontend.package-lock.json frontend/package-lock.json
