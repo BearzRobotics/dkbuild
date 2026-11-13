@@ -1,0 +1,27 @@
+name = "libvmaf"
+version = "3.2.1"
+release = 1
+summary = "Netflix VMAF video quality metric library"
+license = "BSD-2-Clause-Patent"
+homepage = "https://github.com/Netflix/vmaf"
+# ffmpeg: --enable-libvmaf
+hostdeps = ["meson", "nasm", "pkgconf"]
+
+source = [
+    { url = "https://github.com/Netflix/vmaf/archive/v3.2.1/vmaf-3.2.1.tar.gz", sha256 = "5df7386911bc15fd1ca783132528748d219768ae4fc5f8e0b61184f041648092" },
+]
+
+setup = '''
+cd libvmaf
+%meson -Dbuilt_in_models=true -Denable_float=true -Denable_tests=false -Denable_docs=false
+'''
+build = '''
+cd libvmaf
+%meson_build
+'''
+install = '''
+cd libvmaf
+%meson_install
+cd ..
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libvmaf/LICENSE"
+'''
