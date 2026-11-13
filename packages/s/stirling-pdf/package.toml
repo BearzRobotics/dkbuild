@@ -20,12 +20,12 @@
 # Setup: /usr/share/doc/stirling-pdf/README.FenrirOS.
 name = "stirling-pdf"
 version = "3.3.0"
-release = 1
+release = 2
 summary = "Web-based PDF manipulation toolkit"
 license = "MIT"
 homepage = "https://www.stirlingpdf.com"
 archs = ["x86_64", "aarch64"]
-hostdeps = ["openjdk25", "unzip", "nodejs"]
+hostdeps = ["openjdk25", "unzip", "nodejs", "llvm-libunwind"]
 rundeps = ["openjdk25", "qpdf", "ghostscript", "tesseract"]
 options = ["!check", "!strip", "gradledeps", "npmdeps"]
 
@@ -38,6 +38,13 @@ environment = '''
 export JAVA_HOME=/usr/lib/jvm/java-25-openjdk
 export GRADLE_OPTS="-Dorg.gradle.java.installations.paths=/usr/lib/jvm/java-25-openjdk -Dorg.gradle.java.installations.auto-download=false -Dorg.gradle.java.installations.auto-detect=false"
 export STIRLING_FLAVOR=core
+# vite's config loads SWC's musl binary (@swc/core-linux-x64-musl: "Failed to
+# load native binding"), which links libgcc_s.so.1, absent here: LLVM's
+# libunwind has the same _Unwind_* functions (listmonk does the same). A
+# private libgcc_s.so.1 link for this build only.
+mkdir -p /tmp/gccshim
+ln -sf /usr/lib/libunwind.so.1 /tmp/gccshim/libgcc_s.so.1
+export LD_LIBRARY_PATH="/tmp/gccshim${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
     npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
 '''
