@@ -1,0 +1,41 @@
+# brush: a bash-compatible shell written in Rust (POSIX sh and bash syntax,
+# bash builtins, reedline line editing, bash-completion support). Default
+# features; the experimental ones (bundled coreutils, alternative parser) are
+# left out as upstream does for its releases. Man pages and shell completions
+# are generated with the project's own xtask (clap_mangen/clap_complete), from
+# the same vendored crates. Not added to /etc/shells: like the tree's other
+# shells, the user does that (or chsh) when they want it as a login shell.
+name = "brush"
+version = "0.4.0"
+release = 1
+summary = "Bash-compatible shell written in Rust"
+license = "MIT"
+homepage = "https://github.com/reubeno/brush"
+hostdeps = ["rust"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/reubeno/brush/archive/refs/tags/brush-shell-v0.4.0.tar.gz", sha256 = "0cce607454972c18bc4a30d2f44a2c91fccf02c458475fda7720370a3dc8a4f0" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline -p brush-shell -j $jobs
+x="cargo run --release --frozen --offline -p xtask -j $jobs --"
+mkdir -p gen/man
+$x gen docs man --output-dir gen/man
+$x gen completion bash > gen/brush.bash
+$x gen completion zsh > gen/_brush
+$x gen completion fish > gen/brush.fish
+'''
+install = '''
+install -Dm755 target/release/brush "$pkgdir/usr/bin/brush"
+for m in gen/man/*.1; do install -Dm644 "$m" "$pkgdir/usr/share/man/man1/$(basename "$m")"; done
+ls "$pkgdir"/usr/share/man/man1/*.1 >/dev/null
+install -Dm644 gen/brush.bash "$pkgdir/usr/share/bash-completion/completions/brush"
+install -Dm644 gen/_brush "$pkgdir/usr/share/zsh/site-functions/_brush"
+install -Dm644 gen/brush.fish "$pkgdir/usr/share/fish/vendor_completions.d/brush.fish"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/brush/LICENSE"
+'''
