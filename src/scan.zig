@@ -2,6 +2,7 @@
 //! `DT_SONAME`, pkg-config files, and commands in /usr/bin.
 
 const std = @import("std");
+const split = @import("split.zig");
 const Allocator = std.mem.Allocator;
 const Dir = std.Io.Dir;
 
@@ -157,6 +158,35 @@ fn addUnique(arena: Allocator, list: *std.ArrayList([]const u8), item: []const u
 
 /// Scans one package's file tree (`root` is a host directory path).
 pub fn scanTree(arena: Allocator, io: std.Io, root: []const u8) !Result {
+    return scanTreeExcept(arena, io, root, &.{});
+}
+
+/// Is `path` (relative to the package root) one of the recipe's `noscan`
+/// patterns? A pattern is a glob from the root (a leading '/' is ignored),
+/// or ends in "/**" for everything under a directory.
+pub fn excluded(patterns: []const []const u8, path: []const u8) bool {
+    for (patterns) |raw| {
+        const pat = std.mem.trimStart(u8, raw, "/");
+        if (std.mem.endsWith(u8, pat, "/**")) {
+            // the path's first components (as many as the directory has)
+            // match the directory, and there is more after them
+            const dir = pat[0 .. pat.len - 3];
+            const n = std.mem.count(u8, dir, "/") + 1;
+            var i: usize = 0;
+            var seen: usize = 0;
+            while (i < path.len) : (i += 1) {
+                if (path[i] == '/') {
+                    seen += 1;
+                    if (seen == n) break;
+                }
+            }
+            if (seen == n and split.glob(dir, path[0..i])) return true;
+        } else if (split.glob(pat, path)) return true;
+    }
+    return false;
+}
+
+pub fn scanTreeExcept(arena: Allocator, io: std.Io, root: []const u8, noscan: []const []const u8) !Result {
     var provides: std.ArrayList([]const u8) = .empty;
     var needs: std.ArrayList([]const u8) = .empty;
     // Libraries outside /usr/lib itself (ollama's /usr/lib/ollama, perl's CORE)
@@ -171,11 +201,17 @@ pub fn scanTree(arena: Allocator, io: std.Io, root: []const u8) !Result {
     var w = try d.walk(arena);
     defer w.deinit();
     while (try w.next(io)) |e| {
+        if (noscan.len > 0 and excluded(noscan, e.path)) continue;
         const dirname = std.fs.path.dirname(e.path) orelse "";
         if (e.kind == .sym_link or e.kind == .file) {
             if (std.mem.eql(u8, dirname, "usr/bin") or std.mem.eql(u8, dirname, "usr/sbin") or std.mem.eql(u8, dirname, "bin"))
                 try addUnique(arena, &provides, try std.fmt.allocPrint(arena, "cmd:{s}", .{e.basename}));
         }
+        // Alpine names musl libc.musl-<arch>.so.1, and programs built there
+        // need that name; musl-alpine-compat links it to libc.so.
+        if (e.kind == .sym_link and (std.mem.eql(u8, dirname, "usr/lib") or std.mem.eql(u8, dirname, "lib")) and
+            std.mem.startsWith(u8, e.basename, "libc.musl-") and std.mem.endsWith(u8, e.basename, ".so.1"))
+            try addUnique(arena, &provides, try std.fmt.allocPrint(arena, "so:{s}", .{e.basename}));
         if (e.kind != .file) continue;
 
         if (std.mem.endsWith(u8, e.path, ".pc") and std.mem.indexOf(u8, e.path, "pkgconfig/") != null) {
@@ -294,6 +330,18 @@ test "parseElf ignores files that are not 64-bit little-endian ELF" {
     _ = fixtureElf(&buf);
     buf[4] = 1; // 32-bit
     try std.testing.expect((try parseElf(st.allocator(), SliceSource{ .bytes = &buf })) == null);
+}
+
+test "excluded matches globs and whole trees" {
+    const pats = [_][]const u8{ "/usr/lib/foo/data/**", "usr/share/x/*.so" };
+    try std.testing.expect(excluded(&pats, "usr/lib/foo/data/a/b/c.elf"));
+    try std.testing.expect(!excluded(&pats, "usr/lib/foo/data"));
+    try std.testing.expect(!excluded(&pats, "usr/lib/foo/database/x"));
+    try std.testing.expect(excluded(&pats, "usr/share/x/lib.so"));
+    try std.testing.expect(!excluded(&pats, "usr/share/x/y/lib.so"));
+    const gems = [_][]const u8{"usr/lib/m/ruby/*/gems/payloads-*/**"};
+    try std.testing.expect(excluded(&gems, "usr/lib/m/ruby/3.4.0/gems/payloads-1.0/build/bin/x"));
+    try std.testing.expect(!excluded(&gems, "usr/lib/m/ruby/3.4.0/gems/json-2/x.so"));
 }
 
 test "pcRequires drops versions and variables" {

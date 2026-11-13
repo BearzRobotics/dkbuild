@@ -1098,7 +1098,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     var pkg_list: std.ArrayList(Pkg) = .empty;
     const ver = try std.fmt.allocPrint(arena, "{s}-r{d}", .{ r.version, r.release });
     {
-        var main = try withScan(arena, io, destdir_abs, r.rundeps);
+        var main = try withScan(arena, io, destdir_abs, r.rundeps, r.noscan);
         main.name = r.name;
         main.summary = r.summary;
         if (r.provides.len > 0) {
@@ -1132,7 +1132,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         var declared: std.ArrayList([]const u8) = .empty;
         if (need.len > 0) try declared.append(arena, need);
         for (sp_depends) |dep| try declared.append(arena, try builtDep(arena, dep, root_files));
-        var sub = try withScan(arena, io, try std.fs.path.join(arena, &.{ subs_abs, m.name }), declared.items);
+        var sub = try withScan(arena, io, try std.fs.path.join(arena, &.{ subs_abs, m.name }), declared.items, r.noscan);
         sub.name = try std.fmt.allocPrint(arena, "{s}-{s}", .{ r.name, m.name });
         sub.summary = summary;
         sub.install_if = sp_install_if;
@@ -1183,8 +1183,8 @@ fn siblingPrivate(arena: Allocator, pkgs: []Pkg, version: []const u8, release: u
 }
 
 /// Declared dependencies plus what the scan found, without duplicates.
-fn withScan(arena: Allocator, io: std.Io, files: []const u8, declared: []const []const u8) BuildError!Pkg {
-    const res = scan.scanTree(arena, io, files) catch |err| {
+fn withScan(arena: Allocator, io: std.Io, files: []const u8, declared: []const []const u8, noscan: []const []const u8) BuildError!Pkg {
+    const res = scan.scanTreeExcept(arena, io, files, noscan) catch |err| {
         out("error: scanning {s}: {s}\n", .{ files, @errorName(err) });
         return error.BuildFailed;
     };

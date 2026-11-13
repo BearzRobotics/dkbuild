@@ -51,6 +51,11 @@ pub const Recipe = struct {
     /// Names the main package provides besides what the scan finds
     /// (`so:libgcc_s.so.1` for a link the scanner cannot see through).
     provides: []const []const u8 = &.{},
+    /// Paths the dependency scan skips (globs from the package root, `*`
+    /// inside one component, a trailing `/**` for a whole tree): files built
+    /// for other systems that the package carries as data (metasploit's
+    /// payloads), whose needs are not this system's.
+    noscan: []const []const u8 = &.{},
     /// Packages whose files the main package may take over (apk `replaces`):
     /// for a package that supersedes another.
     replaces: []const []const u8 = &.{},
@@ -79,6 +84,7 @@ const known_keys = [_][]const u8{
     "homepage",  "source",    "patches",     "archs",       "hostdeps",    "builddeps",
     "checkdeps", "rundeps",   "options",     "environment", "restore",     "setup",       "build",
     "check",     "install",   "subpackages", "provides",    "triggers",    "replaces",    "stage0deps",
+    "noscan",
 };
 
 const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap", "zigdeps", "godeps", "cargodeps", "npmdeps", "gradledeps", "nugetdeps", "gemdeps", "pubdeps", "hackagedeps", "meta", "rootlayout", "repo-iso", "selfhost" };
@@ -126,6 +132,7 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
     r.rundeps = try cfg.optStrings(arena, diag, root, "rundeps");
     r.stage0deps = try cfg.optStrings(arena, diag, root, "stage0deps");
     r.provides = try cfg.optStrings(arena, diag, root, "provides");
+    r.noscan = try cfg.optStrings(arena, diag, root, "noscan");
     r.replaces = try cfg.optStrings(arena, diag, root, "replaces");
     r.triggers = try cfg.optStrings(arena, diag, root, "triggers");
     r.options = try cfg.optStrings(arena, diag, root, "options");

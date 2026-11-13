@@ -1,0 +1,21 @@
+# Alpine's name for musl: Alpine links its programs against
+# libc.musl-<arch>.so.1 (a symlink to its ld-musl), and programs built there
+# (claude-code's native binary, the stage-0 bootstrap seeds) need that name.
+# This package only links it to musl's libc.so; it is separate so that musl
+# itself (and so the whole tree) is not rebuilt for it (docs/requests.md
+# question 19). dkbuild's scanner reads the symlink as providing
+# so:libc.musl-<arch>.so.1.
+name = "musl-alpine-compat"
+version = "1"
+release = 1
+summary = "Alpine's library name for musl (libc.musl-<arch>.so.1)"
+license = "MIT"
+homepage = "https://musl.libc.org"
+archs = ["x86_64", "aarch64"]
+rundeps = ["musl"]
+options = ["!check"]
+
+install = '''
+mkdir -p "$pkgdir/usr/lib"
+ln -s libc.so "$pkgdir/usr/lib/libc.musl-$arch.so.1"
+'''

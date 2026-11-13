@@ -4,9 +4,13 @@
 # libraries), so nothing is downloaded. The commands (msfconsole, msfvenom,
 # ...) run through Bundler from /usr/lib/metasploit. msfupdate is left out:
 # apk updates it.
+# Its payloads and exploit binaries (data/, and the mettle gem's builds for
+# a dozen other CPUs) are programs for the target systems, not for this one:
+# `noscan` keeps them out of the dependency scan, which otherwise made the
+# package need glibc and foreign libraries and so not installable.
 name = "metasploit"
 version = "6.5.9"
-release = 1
+release = 2
 summary = "Penetration testing framework"
 license = "BSD-3-Clause"
 homepage = "https://www.metasploit.com"
@@ -15,6 +19,7 @@ builddeps = ["ruby-devel", "libpcap-devel", "postgresql-devel", "sqlite-devel", 
              "zlib-ng-compat-devel", "libffi-devel", "ncurses-devel", "readline-devel", "libyaml-devel", "linux-headers"]
 rundeps = ["ruby", "nmap", "postgresql"]
 options = ["!check", "!strip", "gemdeps", "jobs:8"]
+noscan = ["/usr/lib/metasploit/data/**", "/usr/lib/metasploit/vendor/bundle/ruby/*/gems/metasploit_payloads-*/**"]
 
 source = [
     { url = "https://github.com/rapid7/metasploit-framework/archive/refs/tags/6.5.9.tar.gz", sha256 = "c05eb8ac988ec4481e5a403ea7027d894ce41365222b1570d5a31207f84be995" },

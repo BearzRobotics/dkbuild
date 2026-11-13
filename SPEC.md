@@ -192,6 +192,7 @@ guide to the rest of the syntax.
 | `rundeps` | no | Runtime dependencies that can't be detected (5.6) |
 | `stage0deps` | no | With `selfhost` only: what the build needs instead of its own earlier package while `repo/` has none (the first build) |
 | `provides` | no | Names the main package provides besides what the scan finds (5.6), e.g. `so:libgcc_s.so.1` for a link the scanner cannot see through |
+| `noscan` | no | Paths the dependency scan (5.6) skips: globs from the package root (`*` within one component, a trailing `/**` for a whole tree). For files built for other systems that the package carries as data, e.g. metasploit's payloads |
 | `replaces` | no | Packages whose files the main package may take over (apk `replaces`), for a package that supersedes another |
 | `options` | no | List from 5.4 |
 | `environment` | no | Shell lines run before every step |
@@ -328,6 +329,8 @@ After `install`, dkbuild scans `$pkgdir`:
 - **pkg-config files:** each `.pc` provides `pc:<name>`, and each
   `Requires:` becomes a dependency.
 - **Commands:** each executable in `/usr/bin` provides `cmd:<name>`.
+- **Alpine's musl name:** a symlink `/usr/lib/libc.musl-<arch>.so.1` provides
+  `so:libc.musl-<arch>.so.1` (musl-alpine-compat, for programs built on Alpine).
 
 The scans run per package, after the split (5.7), so a `-devel` package
 provides the `pc:` names and the main package the `so:` ones. A dependency
