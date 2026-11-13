@@ -1,15 +1,17 @@
 # Logisim-evolution: digital logic design and simulation (gates to
 # processors, with FPGA export). Gradle, dependencies from the Maven store
 # (`gradledeps`), on OpenJDK 21. From Alpine's community/logisim-evolution
-# (its desktop-file patch).
+# (its desktop-file patch). checkstyle-lazy.patch: the build resolved the checkstyle
+# configuration while configuring, before dkbuild switches the repositories to the offline
+# Maven store; it is now resolved when the check tasks run.
 name = "logisim-evolution"
 version = "4.0.0"
-release = 1
+release = 2
 summary = "Digital logic design tool and simulator"
 license = "GPL-3.0-or-later"
 homepage = "https://github.com/logisim-evolution/logisim-evolution"
 archs = ["x86_64", "aarch64"]
-patches = ["Desktop-file.patch"]
+patches = ["Desktop-file.patch", "checkstyle-lazy.patch"]
 hostdeps = ["openjdk21", "unzip"]
 rundeps = ["openjdk21", "hicolor-icon-theme"]
 options = ["!check", "gradledeps"]
