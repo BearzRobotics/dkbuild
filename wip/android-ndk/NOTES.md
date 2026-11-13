@@ -28,3 +28,29 @@ external/vulkan-headers, build/soong (ndkstubgen, symbolfile).
 
 Differences from Google's NDK to state in the recipe: newer clang (the tree's,
 not Android's fork), no static bionic until phase 2, no Windows/macOS hosts.
+
+## Survey (2026-11-12): where every sysroot module is, at android-17.0.0_r1
+
+Sparse, blob-less shallow clones (only Android.bp files) took seconds per
+repository; the snapshot script can do the same, then widen each sparse
+checkout to the `from`/`srcs`/`symbol_file` paths of the modules below and
+pack only those. `ndk_headers` modules are simple (`from`, `to`, `srcs`
+globs, `license`), so a small Python generator can install them as Soong does.
+
+| Repository | ndk_headers / ndk_library |
+|---|---|
+| bionic | libc (9 header sets: libc, kernel uapi, per-arch asm), libc + libstdc++ stubs; libdl; libm |
+| frameworks/native | android/*.h (top-level Android.bp), arect, binder_ndk, nativewindow, opengl (EGL, GLES 1-3, KHR: 5 header sets, 4 stubs), vulkan (libvulkan stub) |
+| frameworks/av | camera2ndk, aaudio, mediandk |
+| frameworks/base | amidi (headers + stub), libandroid and libjnigraphics (stubs; their headers are in frameworks/native) |
+| frameworks/wilhelm | OpenSLES, OpenMAXAL |
+| system/logging | liblog |
+| system/core | libsync |
+| system/extras | module_ndk_libs/libnativehelper (jni.h, libnativehelper) |
+| packages/modules/NeuralNetworks | neuralnetworks |
+| external/icu | libicu (headers + stub) |
+| external/zlib | libz (headers + stub; libz.a built from the same source) |
+| external/vulkan-headers | vulkan, vk_video headers |
+| build/soong | cc/ndkstubgen, cc/symbolfile (the stub generator) |
+
+Survey checkouts are in work/ndk/aosp (not in git).
