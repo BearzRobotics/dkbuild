@@ -49,74 +49,76 @@ Invoicing / ERP / accounting:
 
 | Package | Purpose | License | Status |
 |---|---|---|---|
-| InvoicePlane | invoices, estimates, clients, payments | MIT | later |
-| InvoiceShelf | invoices, estimates, expenses, payments | AGPL-3.0 | later |
-| SolidInvoice | invoicing and quotes | MIT | later |
-| Dolibarr | invoices, accounting, CRM, inventory | GPL-3.0+ | later |
-| ERPNext | full ERP, accounting, inventory, HR | GPL-3.0 | later |
+| InvoicePlane | invoices, estimates, clients, payments | MIT | written (2026-11-12) |
+| InvoiceShelf | invoices, estimates, expenses, payments | AGPL-3.0 | written (2026-11-12); needs PHP >= 8.4.1 |
+| SolidInvoice | invoicing and quotes | MIT | written (2026-11-12); needs PHP >= 8.4.27 |
+| Dolibarr | invoices, accounting, CRM, inventory | GPL-3.0+ | written (2026-11-12) |
+| ERPNext | full ERP, accounting, inventory, HR | GPL-3.0 | blocked: ~100 python-* recipes; wants a Python lockfile store in dkbuild |
 | GnuCash | desktop accounting | GPL-2.0+ | written (5.17, with OFX, AqBanking, SQL, Python) |
-| Frappe Books | desktop accounting and invoicing | AGPL-3.0 | later |
-| LedgerSMB | web double-entry accounting | GPL-2.0 | later |
+| Frappe Books | desktop accounting and invoicing | AGPL-3.0 | not planned: archived 2026-10-02 (Electron 22, yarn v1) |
+| LedgerSMB | web double-entry accounting | GPL-2.0 | written (2026-11-12) |
 
 Personal finance:
 
 | Package | License | Status |
 |---|---|---|
-| KMyMoney | GPL-2.0+ | later |
-| HomeBank | GPL-2.0+ | later |
-| Skrooge | GPL-3.0+ | later |
-| Firefly III | AGPL-3.0 | later |
-| Beancount + Fava | GPL-2.0+ / MIT | later |
-| Maybe Finance | check activity and licence first | later |
+| KMyMoney | GPL-2.0+ | written (2026-11-12) (no KBanking: gwenhywfar has no Qt 6 GUI yet) |
+| HomeBank | GPL-2.0+ | written (2026-11-12) |
+| Skrooge | GPL-3.0+ | written (2026-11-12) |
+| Firefly III | AGPL-3.0 | written (2026-11-12); needs PHP >= 8.5 |
+| Beancount + Fava | GPL-2.0+ / MIT | written (2026-11-12) |
+| Maybe Finance | check activity and licence first | not planned: archived July 2025 (a fork, Sure, exists) |
 
 CRM:
 
 | Package | License | Status |
 |---|---|---|
-| Twenty | AGPL-3.0 | later |
-| SuiteCRM | AGPL-3.0 | later |
-| Dolibarr | (above) | later |
+| Twenty | AGPL-3.0 | blocked: yarn berry monorepo (npmdeps has no yarn) |
+| SuiteCRM | AGPL-3.0 | written (2026-11-12) (inbound mail needs php imap) |
+| Dolibarr | (above) | written (2026-11-12) |
 
 ## Project management and time tracking (2026-11-11)
 
 | Package | License | Status |
 |---|---|---|
-| OpenProject | GPL-3.0 | later |
-| Leantime | AGPL-3.0 | later |
-| Taiga | MPL-2.0 | later |
-| Kimai | AGPL-3.0 | later |
-| Vikunja | AGPL-3.0 | later |
+| OpenProject | GPL-3.0 | blocked: needs Ruby 4.0 (the tree has 3.4.12) |
+| Leantime | AGPL-3.0 | written (2026-11-12) |
+| Taiga | MPL-2.0 | blocked: many python-* recipes |
+| Kimai | AGPL-3.0 | written (2026-11-12) |
+| Vikunja | AGPL-3.0 | written (2026-11-12) |
 
 ## Documents and office (2026-11-11)
 
 | Package | Status |
 |---|---|
-| Paperless-ngx | later |
-| Nextcloud (server; the desktop client is written) | later |
+| Paperless-ngx | blocked: ~270 Python packages incl. PyTorch |
+| Nextcloud (server; the desktop client is written) | written (2026-11-12) (35.0.3) |
 | ONLYOFFICE | later (Euro-Office, the fork, is planned) |
 | LibreOffice | written |
-| Stirling PDF | later |
-| Joplin | later |
-| BookStack | later |
-| Mayan EDMS | later |
+| Stirling PDF | written (2026-11-12) (MIT core flavour) |
+| Joplin | blocked: yarn berry monorepo |
+| BookStack | written (2026-11-12) |
+| Mayan EDMS | blocked: many python-* recipes |
 
 ## Administration and network (2026-11-11)
 
 | Package | Status |
 |---|---|
-| Zabbix | later |
-| Netdata | later |
-| Uptime Kuma | later |
+| Zabbix | written (2026-11-12) |
+| Netdata | blocked: Go modules in subdirectories (godeps), proprietary dashboard download |
+| Uptime Kuma | written (2026-11-12) |
 | Cockpit | blocked: needs systemd |
-| Webmin | later |
-| AdGuard Home | later |
-| Pi-hole | later |
+| Webmin | written (2026-11-12) |
+| AdGuard Home | written (2026-11-12) |
+| Pi-hole | written (2026-11-12) |
 | OPNsense | not a package: a FreeBSD-based firewall OS (FenrirOS could have a firewall image/kernel flavour instead) |
 | WireGuard | written (wireguard-tools; the module is in the kernel) |
-| Syncthing | later |
+| Syncthing | written (2026-11-12) |
 
-Also asked for: FileZilla (later), Blender (written), Remmina (written),
-Docker (later; podman, buildah and skopeo are written).
+Also asked for: FileZilla (blocked: expiring download links, and 3.71 needs
+libfzssh-client under AGPL-with-attribution: question 4 below), Blender
+(written), Remmina (written), Docker (written 2026-11-12: moby, docker-cli,
+containerd, runc, buildx, compose, tini).
 
 ## Mail (2026-11-11)
 
@@ -125,26 +127,26 @@ Clients:
 | Package | License | Status |
 |---|---|---|
 | Thunderbird | MPL-2.0 | written |
-| Betterbird | MPL-2.0 | later |
-| Evolution | LGPL-2.1+ | later |
+| Betterbird | MPL-2.0 | written (2026-11-12) |
+| Evolution | LGPL-2.1+ | written (2026-11-12) |
 | KMail | GPL-2.0+ | written (KDE PIM) |
-| Claws Mail | GPL | later |
-| aerc | MIT | later |
-| NeoMutt | GPL-2.0 | later |
+| Claws Mail | GPL | written (2026-11-12) |
+| aerc | MIT | written (2026-11-12) |
+| NeoMutt | GPL-2.0 | written (2026-11-12) |
 
 Servers and parts ("everything needed to run a mail server"):
 
 | Package | Purpose | Status |
 |---|---|---|
-| Stalwart Mail Server | SMTP, IMAP, POP3, JMAP, CalDAV, CardDAV (Rust) — first choice | later |
-| Postfix | SMTP | later |
-| Dovecot | IMAP/POP3 | later |
-| Rspamd | spam filtering | later |
-| Roundcube, SnappyMail | webmail | later |
-| SOGo | groupware | later |
-| OpenSMTPD, Exim | alternative MTAs | later |
-| Mox | integrated mail server | later |
-| listmonk | newsletters and mailing lists | later |
+| Stalwart Mail Server | SMTP, IMAP, POP3, JMAP, CalDAV, CardDAV (Rust) — first choice | written (2026-11-12) (AGPL build) |
+| Postfix | SMTP | written (2026-11-12) |
+| Dovecot | IMAP/POP3 | written (2026-11-12) (+ Pigeonhole) |
+| Rspamd | spam filtering | written (2026-11-12) |
+| Roundcube, SnappyMail | webmail | written (2026-11-12) |
+| SOGo | groupware | written (2026-11-12) (with GNUstep, SOPE) |
+| OpenSMTPD, Exim | alternative MTAs | written (2026-11-12) |
+| Mox | integrated mail server | written (2026-11-12) |
+| listmonk | newsletters and mailing lists | written (2026-11-12) |
 
 ## Also 2026-11-11
 
@@ -180,3 +182,47 @@ Servers and parts ("everything needed to run a mail server"):
    assembled from prebuilts, all open source). Plan in wip/android-ndk/NOTES.md.
 3. **ast-grep** (written as a general tool while surveying Brave, which turned
    out not to need it at build time): keep it or drop it?
+
+## Questions from the 2026-11-12 recipe batches
+
+4. **FileZilla**: upstream source links expire, and 3.71 needs libfzssh-client
+   (AGPL-3.0+ "with attribution"). Accept the licence, and use Debian's orig
+   tarballs (one release behind) as the source?
+5. **PHP 8.4/8.5**: InvoiceShelf (8.4.1), SolidInvoice (8.4.27) and Firefly III
+   (8.5) do not run on the tree's php 8.3.36. Upgrade php, or add php8.5 beside it?
+6. **PHP imap** (SuiteCRM inbound mail): write PECL imap + c-client (uw-imap,
+   unmaintained)?
+7. **Default credentials created by the apps themselves** (not by the
+   packages): BookStack's migration creates admin@admin.com/password, Zabbix's
+   data.sql creates Admin/zabbix, Stalwart prints a temporary admin password at
+   first start. The READMEs say to change them at once. Acceptable?
+8. **Commercial/proprietary parts left out**: Stalwart Enterprise, Stirling PDF's
+   proprietary flavour (login/teams), Netdata's NCUL1 dashboard, Zabbix's Java
+   gateway (prebuilt jars). SOGo ActiveSync is shipped as a subpackage, but
+   upstream says production use needs a Microsoft licence: keep it?
+9. **Prebuilt pieces kept**: Roundcube's "complete" tarball, SnappyMail's
+   vendors/, SOGo's committed UI, npm platform binaries (esbuild, rollup, SWC,
+   lightningcss) in several web UIs. Webmin's FreeBSD/macOS helper binaries
+   are dropped. OK?
+10. **Upstream services contacted by default**: Syncthing's discovery/relay
+    servers, EDS's Google/Outlook/Yahoo OAuth ids, Betterbird branding,
+    Stalwart's spam-rule/GeoIP downloads, Vikunja's licence check (only with a
+    key). OK?
+11. **Ruby 4.0** for OpenProject (beside 3.4, which Zammad pins)?
+12. **A Python lockfile store** in dkbuild (uv.lock / hashed requirements) for
+    Paperless-ngx, Mayan EDMS, Taiga, ERPNext; and **yarn support** in npmdeps
+    for Twenty and Joplin. Worth building?
+13. **Gwenhywfar Qt 6 / C++ GUIs** so KMyMoney gets KBanking?
+14. **Postfix/Dovecot user names**: `_postfix`/`_postdrop`, `_dovecot`/`_dovenull`
+    (the tree's convention) instead of upstream's?
+15. **InvoicePlane's trademark clause** (no redistribution under the name
+    "InvoicePlane" without permission): ship it under that name?
+16. **Setuid** ping and fping (file capabilities cannot be shipped): OK?
+17. **Syncthing's sysctl file** (raises socket buffer limits system-wide): keep?
+18. **Metasploit** ships prebuilt payload binaries for other systems (glibc,
+    aarch64), which the dependency scan reads as needs: it cannot be installed
+    until dkbuild can exclude them from the scan.
+19. **claude-code** and the stage-0 bootstrap packages need
+    `so:libc.musl-x86_64.so.1` (Alpine's name for musl). Adding that alias to
+    musl rebuilds the whole tree; a small separate package (a symlink) does not.
+    Which?

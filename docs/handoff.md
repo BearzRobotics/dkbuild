@@ -1,4 +1,4 @@
-# Handoff (2026-11-12, before a reboot)
+# Handoff (2026-11-12, before a reboot; updated after the agents finished)
 
 Read this first in the next session. It says where everything stands.
 
@@ -34,21 +34,32 @@ pass have fixes committed but untested (list in git log since 88b01af).
 - chromium 157 (fetched, not built), electron 42 snapshot, typescript-go,
   rustc-dev, rust-wasm, xdg-utils, ast-grep (earlier today)
 
-## Recipes being written by helper agents (status at handoff time below)
+## Done after the handoff was first written (all committed, nothing pushed)
 
-Four agents, brief in the old scratchpad (recipe-brief.md; its rules are the
-user's standing rules: build libraries not --disable, -static for every
-library, offline builds, documented patches/seds, inert servers, check/fetch
-only, no commits). Each reports per package; the lead reviews and commits.
-
-| Batch | Packages |
-|---|---|
-| desktop + mail clients | NeoMutt, aerc, Claws Mail, Evolution (+ evolution-data-server), Betterbird, HomeBank, KMyMoney, Skrooge, FileZilla, Syncthing |
-| mail servers | Postfix, Dovecot, Rspamd, OpenSMTPD, Exim, Stalwart, Mox, listmonk, Roundcube, SnappyMail, SOGo |
-| PHP/Perl web apps | InvoicePlane, InvoiceShelf, SolidInvoice, Dolibarr, Kimai, Leantime, BookStack, Firefly III, SuiteCRM, Nextcloud server, LedgerSMB, Webmin |
-| admin, documents, other | Docker (moby, cli, containerd, runc, buildx, compose), Netdata, Zabbix, Uptime Kuma, AdGuard Home, Pi-hole, Vikunja, Beancount + Fava, Paperless-ngx, Mayan EDMS, Taiga, OpenProject, ERPNext/Frappe, Twenty, Stirling PDF, Joplin, Frappe Books, Maybe Finance |
-
-AGENT RESULTS: (filled in below when they finish)
+- **Recipes from four helper agents** (check + fetch pass, NOT built):
+  dcb76ec (mail clients, desktop: 24 recipes), 89444ef (mail servers: 22),
+  3b8404b (PHP/Perl web apps: 15), 30c5317 (Docker, Zabbix, Pi-hole, ...: 31).
+  Blocked and not written: FileZilla, Netdata, Paperless-ngx, Mayan EDMS,
+  Taiga, ERPNext, OpenProject, Twenty, Joplin; not planned: Frappe Books and
+  Maybe Finance (archived). Reasons and 16 new questions for the user (4-19)
+  are in docs/requests.md.
+- **`dkbuild image --verbose`** (9f88da6): lists the packages and shows apk's
+  Installing lines live.
+- **Unmet so: dependencies** (cf18155), found by `image rescue` failing on
+  libpulse-libs -> so:libpulsecommon-17.0.so. Scanner fixes (sibling private
+  libraries, /usr/lib libraries without a soname) and release bumps that need
+  building: libpulse r2, libproxy r2, tcl r2, tk r2, perl r10 (provides
+  so:libperl.so), links r2, bsd-games r3, pipewire r10 (libjack in /usr/lib).
+  Only pipewire's files change, so only what builds against pipewire rebuilds.
+  The rescue image needs at least libpulse built:
+      ./zig-out/bin/dkbuild pkg libpulse libproxy tcl tk perl links bsd-games pipewire
+  (or the next world run). Still unmet: metasploit (prebuilt payloads),
+  so:libc.musl-x86_64.so.1 (claude-code, bootstraps) - questions 18, 19.
+- **`dkbuild prune`** ran: 1222 old packages removed (15 GB -> 11 GB, 3892 left).
+- **`dkbuild upstream`** (967e7b3): reports newer upstream releases; overrides
+  in upstream.toml; first run: 775 updates of 2100, 145 not checkable
+  (`dkbuild upstream --all`). Daily notification: user units in
+  contrib/systemd/ (not installed; the user enables them).
 
 ## Android NDK from source (Claude's own task)
 
