@@ -1,0 +1,38 @@
+# fzssh: the SSH/SFTP client library FileZilla 3.71 uses (libfzssh,
+# libfzssh-crypt, libfzssh-client). AGPL-3.0-or-later with additional terms
+# under its section 7 (README): keep the copyright notices, say in the
+# documentation of a binary distribution that it incorporates fzssh, and show
+# the attribution in an interactive program's About box. FileZilla's About
+# dialog does; this package installs the README with the notice. The server
+# part (with_server) is only available under a proprietary licence and is not
+# in the source. Source: Arch Linux's mirror of the release tarball (upstream's
+# links expire on purpose).
+name = "fzssh"
+version = "1.5.1"
+release = 1
+summary = "SSH/SFTP client library based on libfilezilla"
+license = "AGPL-3.0-or-later"
+homepage = "https://fzssh.filezilla-project.org"
+patches = ["static-libraries.patch"]
+hostdeps = ["meson", "pkgconf"]
+builddeps = ["argon2-devel", "gmp-devel", "libfilezilla-devel", "nettle-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://sources.archlinux.org/other/packages/fzssh/fzssh-1.5.1.tar.xz", sha256 = "b5467eb648f5a5e35a20dcd4b428a51be59d6d0375327f746d153ffe912ac17c" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+check = '''
+meson test -C build --print-errorlogs
+'''
+install = '''
+%meson_install
+install -Dm644 README "$pkgdir/usr/share/doc/fzssh/README"
+install -Dm644 agpl3.txt "$pkgdir/usr/share/licenses/fzssh/agpl3.txt"
+'''

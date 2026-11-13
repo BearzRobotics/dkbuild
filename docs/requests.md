@@ -115,8 +115,8 @@ CRM:
 | WireGuard | written (wireguard-tools; the module is in the kernel) |
 | Syncthing | written (2026-11-12) |
 
-Also asked for: FileZilla (blocked: expiring download links, and 3.71 needs
-libfzssh-client under AGPL-with-attribution: question 4 below), Blender
+Also asked for: FileZilla (written 2026-11-12: 3.71.1 with libfilezilla and
+fzssh, from Arch's mirror of the release tarballs), Blender
 (written), Remmina (written), Docker (written 2026-11-12: moby, docker-cli,
 containerd, runc, buildx, compose, tini).
 

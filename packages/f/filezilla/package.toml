@@ -1,0 +1,42 @@
+# FileZilla: FTP, FTPS and SFTP client (wxWidgets on GTK 3), with the system
+# pugixml, D-Bus (GNOME session API) and libidn. Its own update checks are
+# off (apk updates it). Storj support is off: it needs Storj's libuplink, a Go
+# library not in the tree. SFTP goes through fzssh (AGPL-3.0-or-later with an
+# attribution term, which FileZilla's About dialog meets; the notice is in
+# /usr/share/doc/filezilla/README.FenrirOS too). Source: Arch Linux's mirror of
+# the release tarball; upstream's download links expire on purpose
+# (trac.filezilla-project.org ticket 13186).
+name = "filezilla"
+version = "3.71.1"
+release = 1
+summary = "FTP, FTPS and SFTP client"
+license = "GPL-3.0-or-later"
+homepage = "https://filezilla-project.org"
+hostdeps = ["pkgconf", "gettext"]
+builddeps = ["dbus-devel", "fzssh-devel", "gnutls-devel", "gtk+3-devel", "libfilezilla-devel", "libidn-devel",
+             "nettle-devel", "pugixml-devel", "sqlite-devel", "wxwidgets-devel"]
+rundeps = ["xdg-utils"]
+options = ["!check"]
+
+source = [
+    { url = "https://sources.archlinux.org/other/filezilla/filezilla-3.71.1.tar.xz", sha256 = "3df9b9b3e5b2c37dc6d9ecb883554aba140a02ec47c3d6b52333bf1733af4da4" },
+]
+
+setup = '''
+%configure \
+    --with-pugixml=system \
+    --with-dbus \
+    --disable-manualupdatecheck \
+    --disable-autoupdatecheck
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+mkdir -p "$pkgdir/usr/share/doc/filezilla"
+cat > "$pkgdir/usr/share/doc/filezilla/README.FenrirOS" <<'NOTE'
+This software incorporates components from fzssh, copyright (c) 2025-2026
+Tim Kosse and Business Follows Srl
+NOTE
+'''

@@ -1,0 +1,32 @@
+fzssh: build its three libraries with library() instead of shared_library(),
+so meson's default_library=both (dkbuild's %meson) also makes the static
+archives (FenrirOS ships every library static too). Nothing else changes.
+--- a/meson.build
++++ b/meson.build
+@@ -79,7 +79,7 @@
+ 	fzssh_crypt_sources += crypt_rc
+ endif
+ 
+-fzssh_crypt = shared_library('fzssh-crypt', fzssh_crypt_sources,
++fzssh_crypt = library('fzssh-crypt', fzssh_crypt_sources,
+ 	dependencies: fzssh_crypt_deps,
+ 	install: true,
+ 	gnu_symbol_visibility: 'inlineshidden',
+@@ -142,7 +142,7 @@
+ 	fzssh_sources += rc
+ endif
+ 
+-fzssh = shared_library('fzssh', fzssh_sources,
++fzssh = library('fzssh', fzssh_sources,
+ 	dependencies: fzssh_deps,
+ 	install: true,
+ 	gnu_symbol_visibility: 'inlineshidden',
+@@ -193,7 +193,7 @@
+ 	fzssh_client_sources += client_rc
+ endif
+ 
+-fzssh_client = shared_library('fzssh-client', fzssh_client_sources,
++fzssh_client = library('fzssh-client', fzssh_client_sources,
+ 	dependencies: fzssh_client_deps,
+ 	install: true,
+ 	gnu_symbol_visibility: 'inlineshidden',
