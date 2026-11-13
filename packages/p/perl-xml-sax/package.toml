@@ -3,7 +3,7 @@
 # test-only CPAN modules or the network.
 name = "perl-xml-sax"
 version = "1.02"
-release = 1
+release = 2
 summary = "Simple API for XML"
 license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
 homepage = "https://metacpan.org/dist/XML-SAX"
@@ -20,7 +20,13 @@ build = '''
 perl Makefile.PL INSTALLDIRS=vendor
 make
 '''
+# Makefile.PL's install target also runs `perl -MXML::SAX -e add_parser(...)`, which needs XML::SAX
+# installed in the real perl library; under DESTDIR it is not there yet ("Can't locate XML/SAX.pm").
+# So install with pure_install and register the PurePerl parser (write ParserDetails.ini) ourselves,
+# with PERL5LIB pointing at the staged copy.
 install = '''
-make DESTDIR="$pkgdir" install
+make DESTDIR="$pkgdir" pure_install
+PERL5LIB="$pkgdir/usr/lib/perl5/5.40/vendor_perl" perl -MXML::SAX -e 'XML::SAX->add_parser(q(XML::SAX::PurePerl))->save_parsers()'
+test -f "$pkgdir/usr/lib/perl5/5.40/vendor_perl/XML/SAX/ParserDetails.ini"
 find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
 '''
