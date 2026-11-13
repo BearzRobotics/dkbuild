@@ -1,0 +1,6 @@
+type = process
+command = /usr/bin/listmonk --config /etc/listmonk/config.toml
+working-dir = /var/lib/listmonk
+run-as = _listmonk
+smooth-recovery = true
+depends-on: rcboot

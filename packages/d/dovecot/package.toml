@@ -1,0 +1,162 @@
+# Dovecot: IMAP, POP3, LMTP and submission server, with Pigeonhole (Sieve
+# mail filtering and the ManageSieve server) built against it from the second
+# source as dovecot-pigeonhole (the two are released together).
+# Built with: TLS (OpenSSL), PAM, libcap, ICU, PCRE2, libsodium (argon2
+# password schemes), zlib/bzip2/lz4/zstd compression, and as plugins in their
+# own packages: LDAP (OpenLDAP), SQL with MySQL (MariaDB), PostgreSQL and
+# SQLite, GSSAPI (Heimdal), Lua (5.4), full-text search with Xapian
+# (fts-flatcurve) and Solr, with Snowball stemming and textcat language
+# detection. Pigeonhole with ManageSieve and Sieve LDAP storage.
+# Left out: libunwind (crash backtraces; Dovecot wants the nongnu libunwind,
+# whose libunwind.h/libunwind.so would collide with LLVM's libunwind, the
+# system unwinder here), Cassandra (no cpp-driver in the tree), CDB (no
+# tinycdb), systemd (dinit), AppArmor.
+# Internal users are _dovecot and _dovenull (FenrirOS's convention for system
+# users) instead of upstream's dovecot and dovenull: the compiled-in defaults
+# are changed (sed in setup), so the configuration need not name them.
+# Installed inert (docs/requests.md): no service enabled, no
+# /etc/dovecot/dovecot.conf (upstream's minimal one is dovecot.conf.sample),
+# no certificate; /usr/share/doc/dovecot/README.FenrirOS says how to set it up.
+name = "dovecot"
+version = "2.4.5"
+release = 1
+summary = "IMAP and POP3 server"
+license = "LGPL-2.1-only AND MIT"
+homepage = "https://www.dovecot.org"
+hostdeps = ["pkgconf", "perl"]
+builddeps = ["openssl-devel", "linux-pam-devel", "libcap-devel", "icu-devel", "pcre2-devel", "libsodium-devel",
+             "zlib-ng-compat-devel", "bzip2-devel", "lz4-devel", "zstd-devel",
+             "openldap-devel", "mariadb-devel", "postgresql-devel", "sqlite-devel", "heimdal", "heimdal-devel",
+             "lua-devel", "xapian-core-devel", "snowball-devel", "libexttextcat-devel", "libexpat-devel"]
+rundeps = ["linux-pam-base"]
+
+source = [
+    { url = "https://dovecot.org/releases/2.4/dovecot-2.4.5.tar.gz", sha256 = "868c2686a61b5f8e00a3e4721789b1ab46e6528fd773a5fbed07a6ecba7731e6" },
+    { url = "https://pigeonhole.dovecot.org/releases/2.4/dovecot-pigeonhole-2.4.5.tar.gz", sha256 = "ad7c478cb3aaa76c5f81f86727a3e6843645b0a1253f5684fb8a0beec0d22925" },
+]
+
+setup = '''
+# the compiled-in internal and login users: FenrirOS's _dovecot and _dovenull
+# (all-settings.c is generated from master-settings.c and shipped; both)
+for f in src/master/master-settings.c src/config/all-settings.c; do
+    sed -i -e 's/\.default_internal_user = "dovecot",/.default_internal_user = "_dovecot",/' \
+           -e 's/\.default_internal_group = "dovecot",/.default_internal_group = "_dovecot",/' \
+           -e 's/\.default_login_user = "dovenull",/.default_login_user = "_dovenull",/' "$f"
+    test "$(grep -c '"_dovecot",\|"_dovenull",' "$f")" = 3
+done
+%configure \
+    --with-rundir=/run/dovecot \
+    --with-statedir=/var/lib/dovecot \
+    --with-ssldir=/etc/ssl \
+    --with-pam \
+    --with-libcap \
+    --with-icu \
+    --with-pcre2 \
+    --with-sodium \
+    --with-bzlib \
+    --with-lz4 \
+    --with-zstd \
+    --with-ldap=plugin \
+    --with-sql=plugin \
+    --with-mysql \
+    --with-pgsql \
+    --with-sqlite \
+    --with-gssapi=plugin \
+    --with-lua=plugin \
+    --with-flatcurve \
+    --with-solr \
+    --with-stemmer \
+    --with-textcat \
+    --without-libunwind \
+    --without-cassandra \
+    --without-cdb \
+    --without-systemd
+'''
+build = '''
+%make
+# Pigeonhole, against this build tree's dovecot-config
+top=$(pwd)
+cd ../dovecot-pigeonhole-2.4.5
+%configure \
+    --with-dovecot="$top" \
+    --with-managesieve \
+    --with-ldap=plugin
+%make
+'''
+install = '''
+%make_install
+make -C ../dovecot-pigeonhole-2.4.5 DESTDIR="$pkgdir" install
+# libtool archives
+find "$pkgdir" -name '*.la' -delete
+# loadable modules are not linked statically: their archives go (the
+# libdovecot*.a libraries stay, in dovecot-static)
+find "$pkgdir/usr/lib/dovecot" -mindepth 2 -name '*.a' -delete
+find "$pkgdir/usr/lib/dovecot" -maxdepth 1 -name 'lib[0-9]*.a' -delete
+# upstream's minimal configuration as a sample, not the active one
+mv "$pkgdir/etc/dovecot/dovecot.conf" "$pkgdir/etc/dovecot/dovecot.conf.sample"
+install -Dm644 $pkgfiles/dovecot "$pkgdir/etc/dinit.d/dovecot"
+install -Dm644 $pkgfiles/dovecot.pam "$pkgdir/usr/lib/pam.d/dovecot"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/dovecot.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/dovecot.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/dovecot/README.FenrirOS"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/dovecot/COPYING"
+install -Dm644 COPYING.LGPL "$pkgdir/usr/share/licenses/dovecot/COPYING.LGPL"
+install -Dm644 COPYING.MIT "$pkgdir/usr/share/licenses/dovecot/COPYING.MIT"
+install -Dm644 ../dovecot-pigeonhole-2.4.5/COPYING "$pkgdir/usr/share/licenses/dovecot-pigeonhole/COPYING"
+'''
+
+[subpackages.pigeonhole]
+summary = "Sieve mail filtering and ManageSieve for Dovecot (Pigeonhole)"
+depends = ["dovecot"]
+paths   = ["/usr/lib/dovecot/sieve", "/usr/lib/dovecot/*sieve*", "/usr/lib/dovecot/doveadm/*sieve*",
+           "/usr/lib/dovecot/settings/*sieve*", "/usr/libexec/dovecot/*sieve*", "/usr/bin/sieve*",
+           "/usr/share/man/man1/sieve*", "/usr/share/man/man7/pigeonhole*", "/usr/share/doc/dovecot/sieve",
+           "/usr/share/licenses/dovecot-pigeonhole"]
+
+[subpackages.ldap]
+summary = "LDAP passdb/userdb and dict for Dovecot"
+depends = ["dovecot"]
+paths   = ["/usr/lib/dovecot/*ldap*", "/usr/lib/dovecot/auth/*ldap*", "/usr/lib/dovecot/dict/*ldap*"]
+
+[subpackages.mysql]
+summary = "MySQL/MariaDB SQL driver for Dovecot"
+depends = ["dovecot"]
+paths   = ["/usr/lib/dovecot/sql/*mysql*", "/usr/lib/dovecot/*driver_mysql*"]
+
+[subpackages.pgsql]
+summary = "PostgreSQL SQL driver for Dovecot"
+depends = ["dovecot"]
+paths   = ["/usr/lib/dovecot/sql/*pgsql*", "/usr/lib/dovecot/*driver_pgsql*"]
+
+[subpackages.sqlite]
+summary = "SQLite SQL driver for Dovecot"
+depends = ["dovecot"]
+paths   = ["/usr/lib/dovecot/sql/*sqlite*", "/usr/lib/dovecot/*driver_sqlite*"]
+
+[subpackages.gssapi]
+summary = "GSSAPI (Kerberos) authentication for Dovecot"
+depends = ["dovecot"]
+paths   = ["/usr/lib/dovecot/auth/*gssapi*"]
+
+[subpackages.lua]
+summary = "Lua passdb/userdb and scripting for Dovecot"
+depends = ["dovecot"]
+paths   = ["/usr/lib/dovecot/*lua*", "/usr/lib/dovecot/auth/*lua*"]
+
+[subpackages.fts-flatcurve]
+summary = "Xapian full-text search for Dovecot"
+depends = ["dovecot"]
+paths   = ["/usr/lib/dovecot/*fts_flatcurve*"]
+
+[subpackages.fts-solr]
+summary = "Solr full-text search for Dovecot"
+depends = ["dovecot"]
+paths   = ["/usr/lib/dovecot/*fts_solr*", "/usr/share/doc/dovecot/solr-*"]
+
+[subpackages.static]
+summary = "Static libraries"
+paths   = ["/usr/lib/*.a", "/usr/lib/dovecot/*.a"]
+
+[subpackages.devel]
+summary = "Headers and development files"
+paths   = ["/usr/include", "/usr/lib/*.so", "/usr/lib/pkgconfig", "/usr/share/aclocal", "/usr/lib/dovecot/dovecot-config"]

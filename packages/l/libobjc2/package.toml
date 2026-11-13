@@ -1,0 +1,38 @@
+# libobjc2: the GNUstep Objective-C runtime (the modern ABI clang targets with
+# -fobjc-runtime=gnustep-2.x: ARC, blocks through its embedded blocks runtime,
+# non-fragile ivars, Objective-C++). The runtime GNUstep base and SOGo are
+# built on here (GCC's own libobjc lives in /usr/lib/gcc15 and stays GCC's).
+# Shared and static (BUILD_STATIC_LIBOBJC). The hash map it needs is the
+# system robin-map (otherwise CMake would clone it from GitHub at configure
+# time). Installs Block.h/Block_private.h (its embedded blocks runtime).
+name = "libobjc2"
+version = "2.3"
+release = 1
+summary = "GNUstep Objective-C runtime"
+license = "MIT"
+homepage = "https://github.com/gnustep/libobjc2"
+hostdeps = ["cmake", "ninja"]
+builddeps = ["robin-map"]
+
+source = [
+    { url = "https://github.com/gnustep/libobjc2/archive/refs/tags/v2.3.tar.gz", sha256 = "5ead2276b42a534ac40437ce53b2231320b985539dc325453d93874be8d92869" },
+]
+
+setup = '''
+%cmake \
+    -DGNUSTEP_INSTALL_TYPE=NONE \
+    -DBUILD_STATIC_LIBOBJC=ON \
+    -DTESTS=ON \
+    -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
+    -DCMAKE_OBJC_COMPILER=clang -DCMAKE_OBJCXX_COMPILER=clang++
+'''
+build = '''
+%cmake_build
+'''
+check = '''
+ctest --test-dir build --output-on-failure -j $jobs
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libobjc2/COPYING"
+'''

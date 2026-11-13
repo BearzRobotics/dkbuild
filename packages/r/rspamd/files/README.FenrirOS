@@ -1,0 +1,25 @@
+Rspamd on FenrirOS
+==================
+
+Spam filter, used by an MTA through the milter protocol (Postfix's
+smtpd_milters, OpenSMTPD's filter-rspamd, Exim's spam = ... with
+spamd_address variant=rspamd). Installed inert: the service is not enabled,
+no controller password, no DKIM keys.
+
+Layout: /etc/rspamd holds upstream's default configuration (do not edit it;
+it is replaced on upgrades). Local settings go in /etc/rspamd/local.d
+(merged) and /etc/rspamd/override.d (replacing). State /var/lib/rspamd,
+logs /var/log/rspamd, user _rspamd. Web interface: /usr/share/rspamd/www,
+served by the controller worker on localhost:11334.
+
+1. Redis (valkey) for statistics, greylisting, rate limits and fuzzy
+   storage: install and enable valkey, then in local.d/redis.conf:
+     servers = "127.0.0.1";
+2. Controller password: rspamadm pw, then in local.d/worker-controller.inc:
+     password = "<the hash rspamadm printed>";
+3. DKIM signing: rspamadm dkim_keygen -d example.org -s mail -k
+   /var/lib/rspamd/dkim/example.org.mail.key, publish the TXT record, and
+   configure local.d/dkim_signing.conf.
+4. Postfix: smtpd_milters = inet:localhost:11332,
+   non_smtpd_milters = $smtpd_milters, milter_default_action = accept.
+5. rspamadm configtest, then dinitctl enable rspamd.

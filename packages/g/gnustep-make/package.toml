@@ -1,0 +1,41 @@
+# GNUstep make: the makefile package every GNUstep library and program
+# (gnustep-base, SOPE, SOGo) builds with, and GNUstep's filesystem layout
+# (/etc/GNUstep/GNUstep.conf). Configured for clang and libobjc2: library
+# combo ng-gnu-gnu (the "next generation" runtime ABI, gnustep-2.2), in the
+# FHS system layout (SYSTEM domain in /usr, bundles and web applications in
+# /usr/lib/GNUstep). ARC stays opt-in per project (GS_WITH_ARC), as upstream.
+name = "gnustep-make"
+version = "2.9.3"
+release = 1
+summary = "GNUstep makefile package"
+license = "GPL-3.0-or-later"
+homepage = "https://gnustep.github.io"
+hostdeps = ["make"]
+builddeps = ["libobjc2-devel"]
+rundeps = ["make", "llvm-clang", "libobjc2-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/gnustep/tools-make/releases/download/make-2_9_3/gnustep-make-2.9.3.tar.gz", sha256 = "93ca320b706279ebca53760da89d4c3f2bbc547f4723967140a34346d9f04c24" },
+]
+
+setup = '''
+# FenrirOS keeps programs in /usr/bin: the SYSTEM domain's admin tools (gdomap,
+# sogod's helpers) go there too instead of /usr/sbin
+sed -i 's|^GNUSTEP_SYSTEM_ADMIN_TOOLS=/sbin$|GNUSTEP_SYSTEM_ADMIN_TOOLS=/bin|' FilesystemLayouts/fhs-system
+grep -q '^GNUSTEP_SYSTEM_ADMIN_TOOLS=/bin$' FilesystemLayouts/fhs-system
+CC=clang CXX=clang++ OBJC=clang OBJCXX=clang++ \
+%configure \
+    --with-layout=fhs-system \
+    --with-config-file=/etc/GNUstep/GNUstep.conf \
+    --with-library-combo=ng-gnu-gnu \
+    --with-runtime-abi=gnustep-2.2 \
+    --disable-importing-config-file
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/gnustep-make/COPYING"
+'''

@@ -1,0 +1,7 @@
+type = process
+command = /usr/bin/stalwart --config=/etc/stalwart/config.json
+working-dir = /var/lib/stalwart
+env-file = /etc/stalwart/stalwart.env
+smooth-recovery = true
+stop-timeout = 30.0
+depends-on: rcboot

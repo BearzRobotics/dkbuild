@@ -1,0 +1,42 @@
+# Snowball: the stemming algorithms and the snowball compiler; libstemmer (C)
+# is what Dovecot's full-text search uses. After Chimera's user/snowball
+# (cports, BSD-2-Clause, Copyright (c) Chimera Linux contributors), whose
+# patches are for another release: upstream's GNUmakefile builds only
+# libstemmer.a, so the objects are compiled position-independent (CFLAGS on
+# the make command line) and the shared library is linked from the archive,
+# with the soname Chimera uses (libstemmer.so.<major>) and only the sb_stemmer_
+# API exported (Chimera's symbol map, written in the build step). Both the
+# shared and the static library are shipped.
+name = "snowball"
+version = "3.2.0"
+release = 1
+summary = "Snowball rule-based stemming algorithms (libstemmer)"
+license = "BSD-3-Clause"
+homepage = "https://snowballstem.org"
+hostdeps = ["perl"]
+
+source = [
+    { url = "https://github.com/snowballstem/snowball/archive/refs/tags/v3.2.0.tar.gz", sha256 = "c33aea097734daae5c445efe6e399cb078f66325b40d54791df577ffaa53c2d7" },
+    # test vocabularies, for check (upstream's snowball-data at the time of 3.2.0)
+    { url = "https://github.com/snowballstem/snowball-data/archive/019921c3a41c2b70063ee3feb215a00c8e594597.tar.gz", sha256 = "14d45287b30c304c15c86335ade4fe0ba8414e432ac679922887b68bb0602ec2" },
+]
+
+build = '''
+%make CFLAGS="$CFLAGS -fPIC" snowball libstemmer.a stemwords
+printf 'SB_STEMMER_0 {\n    global:\n        sb_stemmer_*;\n    local:\n        *;\n};\n' > symbol.map
+$CC $LDFLAGS -shared -Wl,-soname,libstemmer.so.3 -Wl,--version-script=symbol.map \
+    -o libstemmer.so.$version -Wl,--whole-archive libstemmer.a -Wl,--no-whole-archive
+'''
+check = '''
+%make CFLAGS="$CFLAGS -fPIC" STEMMING_DATA=/build/snowball-data-019921c3a41c2b70063ee3feb215a00c8e594597 check_utf8
+'''
+install = '''
+install -Dm755 snowball "$pkgdir/usr/bin/snowball"
+install -Dm755 stemwords "$pkgdir/usr/bin/stemwords"
+install -Dm755 libstemmer.so.$version "$pkgdir/usr/lib/libstemmer.so.$version"
+ln -s libstemmer.so.$version "$pkgdir/usr/lib/libstemmer.so.3"
+ln -s libstemmer.so.$version "$pkgdir/usr/lib/libstemmer.so"
+install -Dm644 libstemmer.a "$pkgdir/usr/lib/libstemmer.a"
+install -Dm644 include/libstemmer.h "$pkgdir/usr/include/libstemmer.h"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/snowball/COPYING"
+'''

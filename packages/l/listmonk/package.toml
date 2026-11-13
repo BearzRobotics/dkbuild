@@ -1,0 +1,88 @@
+# listmonk: self-hosted newsletter and mailing-list manager (Go, PostgreSQL),
+# with its Vue admin interface and its React email builder built from source.
+# Go modules through godeps; stuffbin (a Go module listmonk requires) packs the
+# static files, SQL and built interface into the binary, as upstream's release
+# does (so the binary is not stripped by dkbuild: stripping drops the appended
+# archive; Go strips it with -s -w).
+#
+# Upstream locks both JavaScript projects (frontend/, frontend/email-builder/)
+# with yarn (yarn.lock v1); files/frontend.package-lock.json and
+# files/email-builder.package-lock.json were made from them once (npm 9.2
+# install --package-lock-only --legacy-peer-deps --ignore-scripts, on copies of
+# package.json and yarn.lock only, 2026-11-12; every package's version matches
+# the yarn.lock and every entry has an integrity hash) and are vendored by
+# npmdeps. --legacy-peer-deps as yarn v1 ignores peer dependencies. The
+# frontend's package.json pins jackspeak with yarn "resolutions", which npm
+# ignores; the same pin is added as npm "overrides" (as the lockfile was made).
+# npm runs with --ignore-scripts: the frontend's one postinstall step (copying
+# altcha's script into static/) is done here; cypress's (a test runner that
+# downloads a browser) is not needed.
+# The vite builds use npm's prebuilt esbuild, rollup (musl) and, in the email
+# builder, SWC (musl) packages, as incus-ui does. Lint (upstream's "prebuild"
+# eslint) is not run.
+#
+# Installed inert (docs/requests.md): dinit service shipped, not enabled; the
+# sample configuration (its example database password) only in
+# /usr/share/doc/listmonk; no database, no admin user; nginx example in
+# /usr/share/doc/listmonk. Setup: /usr/share/doc/listmonk/README.FenrirOS.
+name = "listmonk"
+version = "6.2.0"
+release = 1
+summary = "Self-hosted newsletter and mailing list manager"
+license = "AGPL-3.0-only"
+homepage = "https://listmonk.app"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["go", "nodejs"]
+rundeps = ["postgresql"]
+options = ["!check", "!strip", "godeps", "npmdeps"]
+
+source = [
+    { url = "https://github.com/knadh/listmonk/archive/refs/tags/v6.2.0.tar.gz", sha256 = "e2dc35b2300b344fbee5581fa73cd066fd901678d8743a38be67d14e152df658" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
+    npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+export VUE_APP_VERSION=v$version
+'''
+setup = '''
+cp $pkgfiles/frontend.package-lock.json frontend/package-lock.json
+cp $pkgfiles/email-builder.package-lock.json frontend/email-builder/package-lock.json
+# frontend/package.json pins jackspeak with yarn's "resolutions", which npm
+# ignores: the same pin as npm "overrides" (the lockfile was made with it).
+# Adds the field.
+(cd frontend && node -e 'const fs=require("fs"),p=JSON.parse(fs.readFileSync("package.json"));p.overrides=p.resolutions;fs.writeFileSync("package.json",JSON.stringify(p,null,2)+"\n")')
+node /dkbuild/npm-offline.js /tmp/npm-cache frontend/package-lock.json frontend/email-builder/package-lock.json
+(cd frontend && npm ci --legacy-peer-deps --ignore-scripts)
+(cd frontend/email-builder && npm ci --legacy-peer-deps --ignore-scripts)
+# the frontend's postinstall script
+cp frontend/node_modules/altcha/dist/altcha.umd.cjs static/public/static/altcha.umd.js
+'''
+build = '''
+# as upstream's Makefile: the email builder first, copied into the frontend's
+# public files, then the frontend
+(cd frontend/email-builder && npx vite build)
+mkdir -p frontend/public/static/email-builder
+cp -r frontend/email-builder/dist/* frontend/public/static/email-builder/
+(cd frontend && npx vite build)
+test -f frontend/dist/index.html
+go build -trimpath -buildvcs=false -o build/stuffbin github.com/knadh/stuffbin/stuffbin
+go build -trimpath -buildvcs=false -o build/listmonk \
+    -ldflags "-s -w -X 'main.buildString=v$version (FenrirOS $version-r$release)' -X 'main.versionString=v$version'" ./cmd
+./build/stuffbin -a stuff -in build/listmonk -out build/listmonk \
+    config.toml.sample schema.sql queries:/queries permissions.json \
+    static/public:/public static/email-templates frontend/dist:/admin i18n:/i18n
+'''
+install = '''
+install -Dm755 build/listmonk "$pkgdir/usr/bin/listmonk"
+install -Dm644 $pkgfiles/listmonk "$pkgdir/etc/dinit.d/listmonk"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/listmonk.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/listmonk.conf"
+d="$pkgdir/usr/share/doc/listmonk"
+install -Dm644 config.toml.sample "$d/config.toml.sample"
+install -Dm644 $pkgfiles/nginx-listmonk.conf "$d/nginx-listmonk.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$d/README.FenrirOS"
+install -Dm644 README.md "$d/README.md"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/listmonk/LICENSE"
+'''

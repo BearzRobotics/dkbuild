@@ -1,0 +1,7 @@
+# OpenSMTPD in the foreground. Not enabled by the package: review
+# /etc/smtpd/smtpd.conf first (README.FenrirOS), then
+# `dinitctl enable opensmtpd`.
+type = process
+command = /usr/sbin/smtpd -d
+smooth-recovery = true
+depends-on: rcboot

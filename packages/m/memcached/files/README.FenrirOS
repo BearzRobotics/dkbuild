@@ -1,0 +1,13 @@
+memcached on FenrirOS
+=====================
+
+Nothing runs by default. The dinit service /etc/dinit.d/memcached starts
+memcached as _memcached on 127.0.0.1:11211 (TCP only, UDP off, 64 MB);
+edit its command line to change that, then:
+
+    dinitctl enable memcached
+
+memcached has no access control by default: keep it on 127.0.0.1 or a
+private network. For SASL authentication add -S to the command line and
+give it a password file (-Y /etc/memcached/auth, lines "user:password",
+readable by _memcached only). TLS: -Z with -o ssl_chain_cert=...,ssl_key=...

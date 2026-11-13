@@ -1,0 +1,65 @@
+# Rspamd: spam filtering system (milter for Postfix/OpenSMTPD/Exim, DKIM/ARC
+# signing, Bayes, fuzzy hashes, greylisting with Redis), with its web
+# interface. After Chimera's user/rspamd (cports, BSD-2-Clause, Copyright (c)
+# Chimera Linux contributors) and its patches (system hiredis and snowball,
+# tests). Built with LuaJIT, Hyperscan (vectorscan), PCRE2, ICU, libsodium,
+# OpenSSL, system xxhash/zstd/fmt (header-only, same version as the bundled
+# copy), jemalloc, and URL includes in configuration (libcurl).
+# x86_64 and aarch64 only: LuaJIT (and vectorscan) are what it is built with
+# there; a riscv64 build would need PUC Lua and no Hyperscan (Chimera's
+# other arm), which a recipe cannot select per architecture.
+# Installed inert (docs/requests.md): no service enabled, no controller
+# password, no keys. /etc/rspamd is upstream's default configuration (local
+# changes go in local.d/override.d); /usr/share/doc/rspamd/README.FenrirOS says
+# how to set it up.
+name = "rspamd"
+version = "4.2.3"
+release = 1
+summary = "Spam filtering system"
+license = "Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND BSL-1.0 AND CC0-1.0 AND LGPL-3.0-only AND MIT AND Zlib"
+homepage = "https://rspamd.com"
+archs = ["x86_64", "aarch64"]
+patches = ["unbundle-hiredis.patch", "unbundle-snowball.patch", "tests.patch"]
+hostdeps = ["cmake", "ninja", "perl", "pkgconf", "ragel"]
+builddeps = ["elfutils-devel", "fmt-devel", "glib-devel", "hiredis-devel", "icu-devel", "libarchive-devel", "libsodium-devel",
+             "linux-headers", "openssl-devel", "pcre2-devel", "snowball-devel", "sqlite-devel", "xxhash-devel", "zstd-devel",
+             "luajit-devel", "vectorscan-devel", "jemalloc-devel", "curl-devel"]
+
+source = [
+    { url = "https://github.com/rspamd/rspamd/archive/refs/tags/4.2.3.tar.gz", sha256 = "9e75cad61e39ba93ebbfb85674ff9862aa5b1873f1bd80e96edc6c823b011702" },
+]
+
+setup = '''
+# this unit test loads itself from /usr/share/rspamd/plugins/arc.lua (Chimera)
+rm test/lua/unit/arc.lua
+# the bundled hiredis is replaced by the system's (unbundle-hiredis.patch);
+# fmt is used header-only: the system's headers (the same 12.1.0) where the
+# bundled copy was
+rm -r contrib/hiredis contrib/fmt
+mkdir -p contrib/fmt/include
+ln -s /usr/include/fmt contrib/fmt/include/fmt
+%cmake \
+    -DCONFDIR=/etc/rspamd \
+    -DRSPAMD_USER=_rspamd \
+    -DRSPAMD_GROUP=_rspamd \
+    -DENABLE_HYPERSCAN=ON \
+    -DENABLE_LUAJIT=ON \
+    -DENABLE_JEMALLOC=ON \
+    -DENABLE_URL_INCLUDE=ON \
+    -DSYSTEM_XXHASH=ON \
+    -DSYSTEM_ZSTD=ON
+'''
+build = '''
+cmake --build build --target all check
+'''
+check = '''
+cmake --build build --target run-test
+'''
+install = '''
+%cmake_install
+install -Dm644 $pkgfiles/rspamd "$pkgdir/etc/dinit.d/rspamd"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/rspamd.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/rspamd.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/rspamd/README.FenrirOS"
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/rspamd/LICENSE.md"
+'''

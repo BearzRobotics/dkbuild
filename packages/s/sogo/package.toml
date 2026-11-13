@@ -1,0 +1,79 @@
+# SOGo: groupware server (webmail, calendars and address books over the web
+# UI, CalDAV, CardDAV and GroupDAV, Exchange ActiveSync), on SOPE, GNUstep
+# base and libobjc2. Users from LDAP or SQL; data in PostgreSQL or
+# MariaDB/MySQL; mail through an IMAP server (Dovecot) and SMTP; sessions
+# in memcached.
+# Built with: OpenSSL, libsodium (Argon2 password schemes), two-factor
+# authentication (--enable-mfa, liboath from oath-toolkit), libzip, libcurl,
+# libmemcached, ytnef (winmail.dat), and ActiveSync (libwbxml; in its own
+# subpackage, sogo-activesync: upstream says production use needs a licence
+# from Microsoft, so it is a separate choice).
+# Left out: SAML2 login (--enable-saml2 needs Lasso, which is not packaged
+# here: Lasso with xmlsec1, a separate piece of work).
+# The web UI's compiled JavaScript and CSS (UI/WebServerResources, built by
+# upstream with Grunt/Sass and committed to the tag) are used as they are, as
+# upstream's packages do; rebuilding them would need an npm tree upstream
+# does not lock.
+# Layout: GNUstep SYSTEM domain (sogod, sogo-tool and the helpers in
+# /usr/bin; bundles, templates and web resources in /usr/lib/GNUstep/SOGo;
+# private libraries in /usr/lib/sogo). Runs as _sogo, home /var/lib/sogo.
+# Installed inert (docs/requests.md): the dinit service /etc/dinit.d/sogo
+# (sogod on 127.0.0.1:20000) is not enabled; /etc/sogo/sogo.conf.sample is
+# upstream's all-commented example; no site, no cron job, no database, no
+# credentials. Setup: /usr/share/doc/sogo/README.FenrirOS.
+name = "sogo"
+version = "5.12.13"
+release = 1
+summary = "Groupware server: webmail, calendars, contacts, CalDAV/CardDAV, ActiveSync"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://www.sogo.nu"
+hostdeps = ["gnustep-make", "make", "pkgconf"]
+builddeps = ["sope-devel", "gnustep-base-devel", "libobjc2-devel", "openssl-devel", "libsodium-devel", "oath-toolkit-devel", "libzip-devel", "curl-devel", "libmemcached-awesome-devel", "ytnef-devel", "libwbxml-devel", "openldap-devel", "zlib-ng-compat-devel"]
+rundeps = ["sope", "memcached", "ca-certificates"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/Alinto/sogo/archive/refs/tags/SOGo-5.12.13.tar.gz", sha256 = "0c6b4cf8992634ab14c9a7860c21189cf48db69cba3d82ee76a556a0b083708b" },
+]
+
+environment = '''
+. /usr/share/GNUstep/Makefiles/GNUstep.sh
+export GNUSTEP_INSTALLATION_DOMAIN=SYSTEM
+'''
+setup = '''
+./configure \
+    --disable-debug \
+    --disable-strip \
+    --with-ssl=ssl \
+    --enable-mfa
+'''
+build = '''
+%make messages=yes
+%make -C ActiveSync messages=yes
+'''
+install = '''
+%make_install messages=yes GNUSTEP_INSTALLATION_DOMAIN=SYSTEM
+%make -C ActiveSync DESTDIR=$pkgdir messages=yes GNUSTEP_INSTALLATION_DOMAIN=SYSTEM install
+test -x "$pkgdir/usr/bin/sogod"
+install -Dm640 Scripts/sogo.conf "$pkgdir/etc/sogo/sogo.conf.sample"
+install -Dm644 $pkgfiles/sogo "$pkgdir/etc/dinit.d/sogo"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/sogo.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/sogo.conf"
+doc="$pkgdir/usr/share/doc/sogo"
+install -Dm644 $pkgfiles/README.FenrirOS "$doc/README.FenrirOS"
+install -Dm644 $pkgfiles/nginx-sogo.conf "$doc/nginx-sogo.conf"
+install -Dm644 Scripts/sogo.cron "$doc/sogo.cron"
+install -Dm644 Scripts/logrotate "$doc/logrotate"
+install -Dm755 Scripts/sogo-backup.sh "$doc/sogo-backup.sh"
+install -Dm644 Scripts/mysql-utf8mb4.sql "$doc/mysql-utf8mb4.sql"
+cp -a Scripts/fail2ban "$doc/fail2ban"
+install -Dm644 Apache/SOGo.conf "$doc/apache-SOGo.conf"
+install -Dm644 ActiveSync/README "$doc/README.ActiveSync"
+install -Dm644 COPYING.GPL "$pkgdir/usr/share/licenses/sogo/COPYING.GPL"
+install -Dm644 COPYING.LGPL "$pkgdir/usr/share/licenses/sogo/COPYING.LGPL"
+'''
+
+[subpackages.activesync]
+summary = "Exchange ActiveSync support for SOGo (needs a Microsoft licence for production use)"
+paths = ["/usr/lib/GNUstep/SOGo/ActiveSync.SOGo", "/usr/share/doc/sogo/README.ActiveSync"]
+depends = ["sogo"]

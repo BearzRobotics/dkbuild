@@ -1,0 +1,7 @@
+# memcached on 127.0.0.1:11211 (TCP only), 64 MB of memory. Edit the command
+# line for other addresses or sizes (memcached -h).
+type = process
+command = /usr/bin/memcached -l 127.0.0.1 -p 11211 -U 0 -m 64 -c 1024
+run-as = _memcached
+smooth-recovery = true
+depends-on: rcboot

@@ -1,0 +1,56 @@
+# SOPE: Alinto's Objective-C application server framework SOGo is built on
+# (sope-xml SAX/DOM, sope-core NGExtensions/NGStreams/EOControl, sope-mime
+# IMAP4/MIME, sope-appserver NGObjWeb, sope-gdl1 database access, sope-ldap,
+# sope-json). On GNUstep base and libobjc2, in the GNUstep SYSTEM domain
+# (libraries in /usr/lib, adaptors/products/SAX drivers as bundles under
+# /usr/lib/GNUstep), configured as upstream's Debian and RPM packaging do
+# (--with-gnustep).
+# Built with: OpenSSL (TLS in NGStreams; CA bundle /etc/ssl/certs/
+# ca-certificates.crt), libxml2 SAX driver, OpenLDAP (sope-ldap),
+# PostgreSQL and MariaDB (MySQL) database adaptors.
+# Left out, with reasons:
+# - the SQLite3 adaptor: upstream's configure turns it off (its check is
+#   commented out) and SOGo supports only PostgreSQL, MySQL/MariaDB and
+#   Oracle; the Oracle adaptor: no Oracle client here.
+# - mod_ngobjweb (an Apache module; SOGo is used behind nginx's proxy).
+# - static libraries: SOPE's configure forces shared:=yes, and its adaptors,
+#   SAX drivers and products are bundles it loads at run time, linked against
+#   the shared SOPE libraries (a static copy would duplicate its classes).
+name = "sope"
+version = "5.12.13"
+release = 1
+summary = "Objective-C application server framework (for SOGo)"
+license = "LGPL-2.0-or-later"
+homepage = "https://github.com/Alinto/sope"
+hostdeps = ["gnustep-make", "make"]
+builddeps = ["gnustep-base-devel", "libobjc2-devel", "libxml2-devel", "openldap-devel", "openssl-devel", "postgresql-devel", "mariadb-devel", "zlib-ng-compat-devel"]
+rundeps = ["ca-certificates"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/Alinto/sope/archive/refs/tags/SOPE-5.12.13.tar.gz", sha256 = "76efdbc86d04842fad0fd447798f6b834703f0bc17e93d9900f8789536696969" },
+]
+
+environment = '''
+. /usr/share/GNUstep/Makefiles/GNUstep.sh
+export GNUSTEP_INSTALLATION_DOMAIN=SYSTEM
+'''
+setup = '''
+./configure \
+    --with-gnustep \
+    --disable-debug \
+    --disable-strip \
+    --with-ssl=ssl \
+    --ca-bundle=/etc/ssl/certs/ca-certificates.crt \
+    --enable-xml \
+    --enable-openldap \
+    --enable-postgresql \
+    --enable-mysql
+'''
+build = '''
+%make messages=yes
+'''
+install = '''
+%make_install messages=yes GNUSTEP_INSTALLATION_DOMAIN=SYSTEM
+install -Dm644 COPYRIGHT "$pkgdir/usr/share/licenses/sope/COPYRIGHT"
+'''

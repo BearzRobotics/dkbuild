@@ -1,0 +1,64 @@
+# OpenSMTPD: OpenBSD's mail transfer agent, portable version. Built with
+# OpenSSL, libevent, PAM authentication of local users, musl-fts (musl has
+# no fts in libc). smtpctl is also sendmail, mailq, newaliases and makemap
+# (links, as other distributions install them).
+# Left out: table-db (needs Berkeley DB, not in the tree); libbsd (only
+# replaces compat functions OpenSMTPD bundles in openbsd-compat/, no
+# feature, and not in the tree). The table and filter add-ons (table-ldap,
+# table-mysql, filter-rspamd, ...) are separate upstream projects, not
+# packaged here.
+# Installed inert (docs/requests.md): no service enabled, no certificates;
+# the shipped smtpd.conf is upstream's (localhost only).
+# /usr/share/doc/opensmtpd/README.FenrirOS says how to set it up. postfix,
+# opensmtpd and exim all own /usr/sbin/sendmail, so only one of them can be
+# installed.
+name = "opensmtpd"
+version = "7.9.0p0"
+release = 1
+summary = "Secure, simple SMTP server from OpenBSD"
+license = "ISC AND BSD-2-Clause AND BSD-3-Clause"
+homepage = "https://www.opensmtpd.org"
+hostdeps = ["bison", "pkgconf"]
+builddeps = ["openssl-devel", "libevent-devel", "linux-pam-devel", "musl-fts-devel", "zlib-ng-compat-devel"]
+rundeps = ["linux-pam-base"]
+
+source = [
+    { url = "https://www.opensmtpd.org/archives/opensmtpd-7.9.0p0.tar.gz", sha256 = "74e640de18a8ea63ef43ba2ddb1a6ad1eb82cce2e600b94e98cb551bb2a724c4" },
+]
+
+setup = '''
+# the sample configuration's aliases table where this package puts it
+sed -i 's|^table aliases file:/etc/mail/aliases$|table aliases file:/etc/smtpd/aliases|' usr.sbin/smtpd/smtpd.conf
+grep -q '^table aliases file:/etc/smtpd/aliases$' usr.sbin/smtpd/smtpd.conf
+%configure \
+    --sysconfdir=/etc/smtpd \
+    --libexecdir=/usr/libexec \
+    --with-auth-pam=smtpd \
+    --with-path-CAfile=/etc/ssl/certs/ca-certificates.crt \
+    --with-path-queue=/var/spool/smtpd \
+    --with-path-empty=/var/empty \
+    --with-user-smtpd=_smtpd \
+    --with-user-queue=_smtpq \
+    --with-group-queue=_smtpq \
+    --without-libbsd
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+# upstream's install makes smtpctl setgid; in the sandbox its group stays
+# root, so it is installed plain and tmpfiles.d sets it to 2555 root:_smtpq
+chmod 0755 "$pkgdir/usr/sbin/smtpctl"
+ln -s smtpctl "$pkgdir/usr/sbin/sendmail"
+ln -s smtpctl "$pkgdir/usr/sbin/makemap"
+ln -s ../sbin/smtpctl "$pkgdir/usr/bin/mailq"
+ln -s ../sbin/smtpctl "$pkgdir/usr/bin/newaliases"
+install -Dm644 etc/aliases "$pkgdir/etc/smtpd/aliases"
+install -Dm644 $pkgfiles/opensmtpd "$pkgdir/etc/dinit.d/opensmtpd"
+install -Dm644 $pkgfiles/smtpd.pam "$pkgdir/usr/lib/pam.d/smtpd"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/opensmtpd.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/opensmtpd.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/opensmtpd/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/opensmtpd/LICENSE"
+'''

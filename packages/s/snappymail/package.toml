@@ -1,0 +1,67 @@
+# SnappyMail: simple, fast webmail (IMAP, SMTP, Sieve, PGP through OpenPGP.js
+# and GnuPG, contacts in MySQL/PostgreSQL/SQLite with CardDAV sync), the
+# maintained fork of RainLoop. PHP, served by nginx and php-fpm.
+# Built from the source tag: its PHP is in the tree (app/libraries, no
+# Composer), and its JavaScript and CSS (dev/, Less) are built here with
+# gulp/rollup/terser/less as upstream's release script (cli/release.php)
+# does, then laid out as its release archive is (snappymail/v/<version>,
+# index.php with the version), without the .gz/.br copies. The third-party
+# browser libraries it ships prebuilt in vendors/ (OpenPGP.js, Squire,
+# Bootstrap's Less, ...) are used as they are.
+# Upstream locks its build tools with yarn (yarn.lock v1); files/package-lock.json
+# was made from it once (npm install --package-lock-only --ignore-scripts
+# --legacy-peer-deps, 2026-11-12; all 556 packages at their yarn.lock versions,
+# each with its integrity hash) and is vendored by npmdeps.
+# Layout as upstream's Arch package: code in /usr/share/snappymail (the
+# served root), data (configuration, logs, caches, domains) in
+# /var/lib/snappymail through include.php, outside the served tree.
+# Installed inert (docs/requests.md): no site, no service, no credentials
+# (SnappyMail makes its admin password on its first request, into the data
+# directory); the README says how to set it up.
+name = "snappymail"
+version = "3.0.1"
+release = 1
+summary = "Simple, modern and fast webmail client"
+license = "AGPL-3.0-only"
+homepage = "https://snappymail.eu"
+hostdeps = ["nodejs"]
+rundeps = ["php", "php-fpm", "nginx"]
+options = ["!check", "!strip", "npmdeps"]
+
+source = [
+    { url = "https://github.com/the-djmaze/snappymail/archive/refs/tags/v3.0.1.tar.gz", sha256 = "e2d61b556b8755b3a176165864baa4aec31ab32426df6ec78111efc63819a632" },
+]
+
+environment = '''
+export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
+    npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+'''
+setup = '''
+cp $pkgfiles/package-lock.json .
+node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
+npm ci --legacy-peer-deps --ignore-scripts
+'''
+build = '''
+# gulp's default task: lint, then the JS bundles (rollup, terser), the CSS
+# (less, clean-css), the icon font and the subresource-integrity hashes
+node_modules/.bin/gulp
+test -f snappymail/v/0.0.0/static/js/min/app.min.js
+'''
+install = '''
+d="$pkgdir/usr/share/snappymail"
+mkdir -p "$d/snappymail/v"
+cp -a snappymail/v/0.0.0 "$d/snappymail/v/$version"
+# the release's index.php names its version directory (cli/release.php does
+# the same replacement)
+sed "s/0\.0\.0/$version/" index.php > "$d/index.php"
+grep -q "'$version'" "$d/index.php"
+install -m644 $pkgfiles/include.php "$d/include.php"
+install -m644 .htaccess "$d/.htaccess"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/snappymail.conf"
+install -Dm644 $pkgfiles/nginx-snappymail.conf "$pkgdir/usr/share/doc/snappymail/nginx-snappymail.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/snappymail/README.FenrirOS"
+install -Dm644 README.md "$pkgdir/usr/share/doc/snappymail/README.md"
+install -Dm644 CHANGELOG.md "$pkgdir/usr/share/doc/snappymail/CHANGELOG.md"
+cp -a fail2ban "$pkgdir/usr/share/doc/snappymail/fail2ban"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/snappymail/LICENSE"
+'''

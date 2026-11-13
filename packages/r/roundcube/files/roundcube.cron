@@ -1,0 +1,4 @@
+# Roundcube housekeeping: purges messages and contacts marked as deleted and
+# expired cache entries. Example only: copy to /etc/cron.d/roundcube and
+# enable crond (dinitctl enable crond).
+17 3 * * * _php /usr/share/roundcube/bin/cleandb.sh >/dev/null

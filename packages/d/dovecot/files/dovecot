@@ -1,0 +1,7 @@
+# Dovecot's master in the foreground. Not enabled by the package: write
+# /etc/dovecot/dovecot.conf first (README.FenrirOS), then
+# `dinitctl enable dovecot`.
+type = process
+command = /usr/sbin/dovecot -F
+smooth-recovery = true
+depends-on: rcboot

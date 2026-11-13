@@ -1,0 +1,32 @@
+Dovecot on FenrirOS
+===================
+
+IMAP, POP3, LMTP and submission server, with Pigeonhole (Sieve filtering
+and ManageSieve) in dovecot-pigeonhole. Installed inert: the service is not
+enabled, there is no /etc/dovecot/dovecot.conf, no certificate, no mail user.
+
+Layout: configuration /etc/dovecot, programs /usr/sbin (dovecot, doveadm)
+and /usr/bin (doveconf), helpers /usr/libexec/dovecot, plugins
+/usr/lib/dovecot, state /var/lib/dovecot, runtime /run/dovecot. Internal
+users _dovecot and _dovenull (sysusers.d; Dovecot's defaults here).
+
+Plugins in their own packages: dovecot-ldap, dovecot-mysql, dovecot-pgsql,
+dovecot-sqlite (passdb/userdb and dict), dovecot-gssapi (Kerberos, Heimdal),
+dovecot-lua, dovecot-fts-flatcurve (Xapian full-text search, with Snowball
+stemming and textcat language detection), dovecot-fts-solr,
+dovecot-pigeonhole.
+
+1. cp /etc/dovecot/dovecot.conf.sample /etc/dovecot/dovecot.conf (upstream's
+   minimal configuration: system users through PAM, /usr/lib/pam.d/dovecot,
+   mail as a "vmail" user that you create, or change mail_uid/mail_gid).
+   Full reference: https://doc.dovecot.org/latest/core/config/quick.html
+2. TLS: point ssl_server { cert_file, key_file } at your certificate and key
+   (for example from lego or certbot).
+3. For Postfix: SASL through Dovecot (service auth { unix_listener
+   /var/spool/postfix/private/auth { user = _postfix  group = _postfix
+   mode = 0660 } }) and delivery over LMTP (protocols { lmtp = yes },
+   Postfix's mailbox_transport or virtual_transport = lmtp:unix:...).
+4. Sieve: install dovecot-pigeonhole and enable it in protocol lmtp
+   { mail_plugins { sieve = yes } }; protocols { sieve = yes } for
+   ManageSieve.
+5. doveconf -n (checks the configuration), then dinitctl enable dovecot.

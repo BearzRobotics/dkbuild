@@ -1,0 +1,44 @@
+# memcached: in-memory key-value cache server. SOGo needs one (its sessions
+# and caches). Built with SASL authentication (Cyrus libsasl, and the
+# plain-text password-file mechanism), TLS (OpenSSL), and external storage
+# (extstore, on by default).
+# Left out, with reasons: the proxy (--enable-proxy, EXPERIMENTAL; it builds
+# a Lua 5.4 and mcmc that vendor/fetch.sh downloads at build time) and the
+# seccomp filter (EXPERIMENTAL upstream; its allow-list is glibc's system
+# calls and can kill the daemon under musl).
+# Installed inert (docs/requests.md): a dinit service (/etc/dinit.d/memcached,
+# run as _memcached, listening on 127.0.0.1:11211 only, UDP off), not
+# enabled. Setup: /usr/share/doc/memcached/README.FenrirOS.
+name = "memcached"
+version = "1.6.45"
+release = 1
+summary = "Distributed in-memory key-value cache"
+license = "BSD-3-Clause"
+homepage = "https://memcached.org"
+builddeps = ["libevent-devel", "libsasl-devel", "openssl-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://memcached.org/files/memcached-1.6.45.tar.gz", sha256 = "d362c64e6d8d5287153501eabf7c85b4a761432fbf53f5d7b085d0bb1653c1dd" },
+]
+
+setup = '''
+%configure \
+    --enable-sasl \
+    --enable-sasl-pwdb \
+    --enable-tls
+'''
+build = '''
+%make
+'''
+check = '''
+%make test
+'''
+install = '''
+%make_install
+install -Dm644 $pkgfiles/memcached "$pkgdir/etc/dinit.d/memcached"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/memcached.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/memcached/README.FenrirOS"
+install -Dm644 doc/protocol.txt "$pkgdir/usr/share/doc/memcached/protocol.txt"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/memcached/COPYING"
+'''

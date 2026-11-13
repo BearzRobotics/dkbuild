@@ -1,0 +1,19 @@
+Stalwart's first start registers its web interface (admin and account
+pages) with a URL to download it from: the latest webui.zip of
+stalwartlabs/webui on GitHub. FenrirOS builds that web interface from
+source in the same package (/usr/share/stalwart/webui.zip); this points the
+default at the local file, so the server needs no download for its own
+interface and runs the version packaged with it. The URL can still be
+changed in the web interface (Applications). Written for FenrirOS.
+
+--- a/crates/common/src/manager/defaults.rs	2026-11-12 19:13:56.654981627 -0500
++++ b/crates/common/src/manager/defaults.rs	2026-11-12 19:13:56.656938483 -0500
+@@ -63,7 +63,7 @@
+                     enable: true,
+                     #[cfg(not(feature = "dev_mode"))]
+                     resource_url:
+-                        "https://github.com/stalwartlabs/webui/releases/download/v2/webui.zip"
++                        "file:///usr/share/stalwart/webui.zip"
+                             .into(),
+                     #[cfg(feature = "dev_mode")]
+                     resource_url: "file://../webui/.ignore/webui.zip".into(),

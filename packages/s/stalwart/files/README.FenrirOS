@@ -1,0 +1,38 @@
+Stalwart on FenrirOS
+====================
+
+Stalwart is a mail and collaboration server in one program: SMTP (in and
+out, with SPF/DKIM/DMARC/ARC, DANE, MTA-STS), IMAP4, JMAP, POP3,
+ManageSieve, CalDAV/CardDAV/WebDAV, a spam filter and a web interface.
+Nothing is configured or running after installation: no configuration, no
+accounts, no keys.
+
+Layout: /usr/bin/stalwart; configuration /etc/stalwart/config.json (written
+by Stalwart at its first start) and /etc/stalwart/stalwart.env (environment
+for the service); data /var/lib/stalwart (choose it as the RocksDB or SQLite
+path during setup); logs /var/log/stalwart. The web interface
+(/usr/share/stalwart/webui.zip, built from source) is served at /admin and
+/account.
+
+Storage backends built in: RocksDB, SQLite, PostgreSQL, MySQL/MariaDB (data
+and directory), S3-compatible and Azure blob storage, Redis/Valkey and Keep
+in-memory stores, NATS and Zenoh for clusters. Not built: FoundationDB, Kafka
+and the Enterprise features (see the recipe).
+
+1. Optionally pin the first administrator's credentials instead of the
+   random temporary password Stalwart prints at its first start: in
+   /etc/stalwart/stalwart.env set STALWART_RECOVERY_ADMIN=admin:<password>.
+2. Start it: dinitctl enable stalwart
+   It starts in bootstrap mode with a web setup on port 8080; the temporary
+   password is in the log: dinitctl status stalwart / the service output.
+3. Open http://<host>:8080/admin, choose the storage (e.g. RocksDB in
+   /var/lib/stalwart/data), the domain and the listeners. Stalwart writes
+   /etc/stalwart/config.json and restarts into normal mode.
+4. Create the DNS records the web interface lists (MX, SPF, DKIM, DMARC).
+
+Stalwart starts as root to bind ports 25/465/587/993/443 and switches to
+_stalwart (RUN_AS_USER in stalwart.env).
+
+The spam filter rules and the IP location tables are downloaded by Stalwart
+at run time from GitHub, as upstream configures them; set their URLs in the
+web interface to local files for an offline server.

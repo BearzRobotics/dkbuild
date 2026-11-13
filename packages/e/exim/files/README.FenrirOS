@@ -1,0 +1,28 @@
+Exim on FenrirOS
+================
+
+Installed inert: the service is not enabled, no certificates, no DKIM keys.
+/usr/sbin/exim is setuid root, as Exim is designed to be.
+
+Layout: configuration /etc/exim/exim.conf (upstream's default: delivers
+local mail, relays for localhost; when the daemon runs it listens on port 25
+on every interface), aliases /etc/exim/aliases, spool /var/spool/exim, logs
+/var/log/exim, user _exim. Lookup modules in /usr/lib/exim/modules:
+ldap, mysql (MariaDB), pgsql and sqlite are the exim-ldap, exim-mysql,
+exim-pgsql and exim-sqlite packages; lmdb, redis, json and psl are in exim.
+Built in: TLS (OpenSSL) with DANE, DKIM, SMTPUTF8/IDN, SRS, content scanning
+(spam = with Rspamd: spamd_address = 127.0.0.1 11333 variant=rspamd, and
+malware scanners), Proxy Protocol, SOCKS, PAM (/usr/lib/pam.d/exim),
+embedded Perl, authenticators: plaintext, CRAM-MD5, SPA, TLS, external,
+Dovecot, Cyrus SASL and Heimdal GSSAPI. Hints databases: TDB.
+Not included: SPF, DMARC and ARC (need libspf2 and libopendmarc, not in the
+tree), RADIUS, GNU SASL, the X11 monitor (eximon).
+
+1. Edit /etc/exim/exim.conf: primary_hostname, domainlist local_domains,
+   local_interfaces (127.0.0.1 : ::1 for a send-only host), and for TLS
+   tls_certificate / tls_privatekey.
+2. /etc/exim/aliases: send root's mail to a real user.
+3. exim -bV (checks the configuration), then dinitctl enable exim.
+
+Only one MTA can be installed: postfix, opensmtpd and exim each own
+/usr/sbin/sendmail, /usr/bin/mailq and /usr/bin/newaliases.

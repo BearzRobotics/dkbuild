@@ -1,0 +1,99 @@
+# Postfix: the mail transfer agent (SMTP server and client, local delivery,
+# queue). Built with TLS (OpenSSL), SMTPUTF8 (ICU), SASL (Dovecot's, built in,
+# and Cyrus libsasl), and the map types whose libraries are in the tree:
+# lmdb (the default database type: there is no Berkeley DB here, so -DNO_DB),
+# pcre (PCRE2), ldap (OpenLDAP, with LDAP SASL binds), mysql (MariaDB's
+# libmariadb), pgsql (libpq) and sqlite. Shared libraries and dynamically
+# loaded maps (dynamicmaps=yes, as Debian and Alpine): ldap, mysql, pgsql and
+# sqlite are subpackages, each registering its map in
+# /etc/postfix/dynamicmaps.cf.d and postfix-files.d.
+# Left out: cdb (needs tinycdb) and mongodb (needs mongo-c-driver), neither
+# in the tree; NIS (musl has none).
+# Users are _postfix and _postdrop (FenrirOS's convention for system users)
+# instead of upstream's postfix and postdrop.
+# Installed inert (docs/requests.md): no service enabled, no aliases database,
+# no certificates; /usr/share/doc/postfix/README.FenrirOS says how to set it
+# up. postfix, opensmtpd and exim all own /usr/sbin/sendmail, so only one of
+# them can be installed.
+name = "postfix"
+version = "3.11.7"
+release = 1
+summary = "Fast, secure and flexible mail transfer agent"
+license = "IPL-1.0 OR EPL-2.0"
+homepage = "https://www.postfix.org"
+hostdeps = ["pkgconf", "m4", "perl"]
+builddeps = ["openssl-devel", "icu-devel", "libsasl-devel", "openldap-devel", "postgresql-devel", "mariadb-devel", "sqlite-devel", "lmdb-devel", "pcre2-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://archive.mgm51.com/mirrors/postfix-source/official/postfix-3.11.7.tar.gz", sha256 = "a2f3242345753448072177fae83c322a403c9263696996406201145dab8e8625" },
+]
+
+setup = '''
+# the compiled-in mail owner and setgid group: FenrirOS's _postfix and _postdrop
+sed -i -e 's/^#define DEF_MAIL_OWNER\t\t"postfix"$/#define DEF_MAIL_OWNER\t\t"_postfix"/' \
+       -e 's/^#define DEF_SGID_GROUP\t\t"postdrop"$/#define DEF_SGID_GROUP\t\t"_postdrop"/' src/global/mail_params.h
+grep -q '"_postfix"' src/global/mail_params.h
+grep -q '"_postdrop"' src/global/mail_params.h
+make makefiles CC="$CC" OPT="$CFLAGS" DEBUG= \
+    shared=yes dynamicmaps=yes pie=yes \
+    shlib_directory=/usr/lib/postfix meta_directory=/etc/postfix \
+    command_directory=/usr/sbin daemon_directory=/usr/libexec/postfix \
+    data_directory=/var/lib/postfix queue_directory=/var/spool/postfix \
+    sendmail_path=/usr/sbin/sendmail newaliases_path=/usr/bin/newaliases mailq_path=/usr/bin/mailq \
+    manpage_directory=/usr/share/man readme_directory=/usr/share/doc/postfix/README_FILES html_directory=no \
+    default_database_type=lmdb default_cache_db_type=lmdb \
+    CCARGS="-DNO_NIS -DNO_DB -DHAS_LMDB -DUSE_TLS -DUSE_SASL_AUTH -DUSE_CYRUS_SASL -I/usr/include/sasl \
+            -DHAS_LDAP -DUSE_LDAP_SASL -DHAS_PGSQL $(pkg-config --cflags libpq) -DHAS_MYSQL -I/usr/include/mysql \
+            -DHAS_SQLITE -DHAS_PCRE=2 $(pkg-config --cflags libpcre2-8)" \
+    AUXLIBS="$LDFLAGS -lssl -lcrypto -lsasl2" \
+    AUXLIBS_LMDB="-llmdb" AUXLIBS_PCRE="$(pkg-config --libs libpcre2-8)" \
+    AUXLIBS_LDAP="-lldap -llber" AUXLIBS_PGSQL="$(pkg-config --libs libpq)" \
+    AUXLIBS_MYSQL="-lmariadb" AUXLIBS_SQLITE="-lsqlite3 -lpthread"
+# SMTPUTF8 needs ICU: makedefs adds -DNO_EAI when it cannot find it
+! grep -q 'NO_EAI' Makefile
+'''
+build = '''
+make
+'''
+install = '''
+make non-interactive-package install_root="$pkgdir"
+# the map plugins of the subpackages register themselves in the .d
+# directories (Postfix reads dynamicmaps.cf.d/* and postfix-files.d/*), so
+# the main package's lists do not name files it does not have
+mkdir -p "$pkgdir/etc/postfix/dynamicmaps.cf.d" "$pkgdir/etc/postfix/postfix-files.d"
+for m in ldap mysql pgsql sqlite; do
+    test -f "$pkgdir/usr/lib/postfix/postfix-$m.so"
+    grep "^$m[[:space:]]" "$pkgdir/etc/postfix/dynamicmaps.cf" > "$pkgdir/etc/postfix/dynamicmaps.cf.d/$m"
+    sed -i "/^$m[[:space:]]/d" "$pkgdir/etc/postfix/dynamicmaps.cf"
+    grep "/postfix-$m.so:" "$pkgdir/etc/postfix/postfix-files" > "$pkgdir/etc/postfix/postfix-files.d/$m"
+    sed -i "\|/postfix-$m.so:|d" "$pkgdir/etc/postfix/postfix-files"
+    test -s "$pkgdir/etc/postfix/dynamicmaps.cf.d/$m"
+done
+install -Dm644 $pkgfiles/postfix "$pkgdir/etc/dinit.d/postfix"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/postfix.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/postfix.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/postfix/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/postfix/LICENSE"
+install -Dm644 TLS_LICENSE "$pkgdir/usr/share/licenses/postfix/TLS_LICENSE"
+'''
+
+[subpackages.ldap]
+summary = "LDAP map support for Postfix"
+depends = ["postfix"]
+paths   = ["/usr/lib/postfix/postfix-ldap.so", "/etc/postfix/dynamicmaps.cf.d/ldap", "/etc/postfix/postfix-files.d/ldap"]
+
+[subpackages.mysql]
+summary = "MySQL/MariaDB map support for Postfix"
+depends = ["postfix"]
+paths   = ["/usr/lib/postfix/postfix-mysql.so", "/etc/postfix/dynamicmaps.cf.d/mysql", "/etc/postfix/postfix-files.d/mysql"]
+
+[subpackages.pgsql]
+summary = "PostgreSQL map support for Postfix"
+depends = ["postfix"]
+paths   = ["/usr/lib/postfix/postfix-pgsql.so", "/etc/postfix/dynamicmaps.cf.d/pgsql", "/etc/postfix/postfix-files.d/pgsql"]
+
+[subpackages.sqlite]
+summary = "SQLite map support for Postfix"
+depends = ["postfix"]
+paths   = ["/usr/lib/postfix/postfix-sqlite.so", "/etc/postfix/dynamicmaps.cf.d/sqlite", "/etc/postfix/postfix-files.d/sqlite"]

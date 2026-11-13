@@ -1,0 +1,26 @@
+mox reads its version from the Go module's build information (the module
+version with `go install mox@vX`, or the VCS revision in a git checkout). A
+build from the release tarball has neither and would report "(devel)". This
+adds a linker-set variable (moxvar.release) that, when set, is the version;
+the recipe sets it to v$version. Written for FenrirOS.
+
+--- a/moxvar/version.go	2026-11-12 19:05:30.684905057 -0500
++++ b/moxvar/version.go	2026-11-12 19:05:30.693556716 -0500
+@@ -12,7 +12,17 @@
+ // VersionBare does not add a "+modifications", goversion or other suffix to the version.
+ var VersionBare string
+ 
++// release is the version a distribution build sets with
++// -ldflags "-X github.com/mjl-/mox/moxvar.release=v<version>": a build from a
++// release tarball has no module version or VCS information to read.
++var release string
++
+ func init() {
++	if release != "" {
++		Version = release + "-" + runtime.Version()
++		VersionBare = release
++		return
++	}
+ 	Version = "(devel)"
+ 	VersionBare = "(devel)"
+ 

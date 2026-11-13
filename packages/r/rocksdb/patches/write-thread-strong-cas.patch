@@ -1,0 +1,21 @@
+Fixes a crash in WriteThread::EnterAsBatchGroupLeader on aarch64 builds
+without LSE atomics: a spurious compare_exchange_weak failure while
+re-linking the writers that could not join the write group walked past the
+end of the writer queue. compare_exchange_strong cannot fail spuriously.
+From Stalwart's RocksDB branch (stalwartlabs/rocksdb, stalwart/11.8.1, the
+one commit it adds to v11.8.1; submitted upstream as facebook/rocksdb#15415,
+not in 11.13.2). Stalwart's bundled RocksDB carries it; this system RocksDB,
+which Stalwart links instead, carries it too.
+
+--- a/db/write_thread.cc	2026-11-12 19:22:32.784807466 -0500
++++ b/db/write_thread.cc	2026-11-12 19:22:32.792807330 -0500
+@@ -559,7 +559,8 @@
+     rb->link_older = we;
+     re->link_newer = nullptr;
+     we->link_newer = rb;
+-    if (!newest_writer_.compare_exchange_weak(w, re)) {
++    // Strong: the walk below assumes a failure means newer writers arrived.
++    if (!newest_writer_.compare_exchange_strong(w, re)) {
+       while (w->link_older != newest_writer) {
+         w = w->link_older;
+       }

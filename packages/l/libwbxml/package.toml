@@ -1,0 +1,34 @@
+# libwbxml: WAP Binary XML encoder/decoder library and tools (wbxml2xml,
+# xml2wbxml). SOGo's ActiveSync support (Exchange ActiveSync for phones)
+# speaks WBXML through it. All of its languages (WML, SyncML, AirSync, ...),
+# with Expat and iconv. Shared and static (BUILD_STATIC_LIBS). Unit tests
+# with the check library.
+name = "libwbxml"
+version = "0.11.10"
+release = 1
+summary = "WAP Binary XML library and tools"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/libwbxml/libwbxml"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["libexpat-devel"]
+checkdeps = ["check-devel"]
+
+source = [
+    { url = "https://github.com/libwbxml/libwbxml/archive/refs/tags/libwbxml-0.11.10.tar.gz", sha256 = "027b77ab7c06458b73cbcf1f06f9cf73b65acdbb2ac170b234c1d736069acae4" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DBUILD_STATIC_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+check = '''
+ctest --test-dir build --output-on-failure
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libwbxml/COPYING"
+'''

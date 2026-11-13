@@ -1,0 +1,6 @@
+# Rspamd in the foreground. Not enabled by the package: configure
+# /etc/rspamd/local.d first (README.FenrirOS), then `dinitctl enable rspamd`.
+type = process
+command = /usr/bin/rspamd -u _rspamd -g _rspamd --no-fork
+smooth-recovery = true
+depends-on: rcboot

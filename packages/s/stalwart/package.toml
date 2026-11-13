@@ -1,0 +1,88 @@
+# Stalwart: mail and collaboration server in Rust (SMTP, IMAP4, JMAP, POP3,
+# ManageSieve, CalDAV/CardDAV/WebDAV, spam filter, web interface). Crates
+# through cargodeps.
+#
+# Built (AGPL-3.0 only, --no-default-features): the storage backends RocksDB
+# (the system librocksdb, packages/r/rocksdb), SQLite (the system libsqlite3),
+# PostgreSQL and MySQL/MariaDB (pure-Rust clients), S3 and Azure blob stores,
+# Redis and Keep in-memory stores, NATS and Zenoh cluster coordination.
+# Left out:
+# - enterprise: Stalwart's Enterprise features are under the proprietary
+#   Stalwart Enterprise License (LicenseRef-SEL), not AGPL; upstream's own
+#   default build includes them. Not built until the licence is decided.
+# - foundationdb: needs FoundationDB's client library (libfdb_c), no recipe.
+# - kafka: rdkafka builds its bundled librdkafka with CMake (the crate's
+#   cmake-build feature is fixed in Stalwart's Cargo.toml); no librdkafka recipe.
+#
+# The web interface (stalwartlabs/webui, React + Vite, npm lockfile through
+# npmdeps) is built from source into /usr/share/stalwart/webui.zip, and
+# patches/webui-from-package.patch makes the server use it instead of
+# downloading the latest one from GitHub at its first start. Its Vite build
+# uses npm's prebuilt rolldown, lightningcss and Tailwind oxide (musl) packages.
+#
+# Installed inert (docs/requests.md): dinit service shipped, not enabled; no
+# configuration (Stalwart writes config.json in its web setup), no accounts or
+# passwords (its first start prints a temporary one); stalwart.env holds only
+# RUN_AS_USER/GROUP and commented examples. The _stalwart user and empty
+# /etc/stalwart, /var/lib/stalwart, /var/log/stalwart.
+# Setup: /usr/share/doc/stalwart/README.FenrirOS.
+name = "stalwart"
+version = "1.1.0"
+release = 1
+summary = "Mail and collaboration server (SMTP, IMAP, JMAP, CalDAV, CardDAV)"
+license = "AGPL-3.0-only"
+homepage = "https://stalw.art"
+archs = ["x86_64", "aarch64"]
+patches = ["webui-from-package.patch"]
+hostdeps = ["rust", "nodejs", "zip", "pkgconf", "cmake", "llvm-clang"]
+builddeps = ["rocksdb-devel", "snappy-devel", "sqlite-devel", "openssl-devel", "zstd-devel", "bzip2-devel", "zlib-ng-compat-devel"]
+options = ["!check", "cargodeps", "npmdeps"]
+
+source = [
+    { url = "https://github.com/stalwartlabs/stalwart/archive/refs/tags/v1.1.0.tar.gz", sha256 = "d3d8e0f92b25fbf9bf91a255cdbaf0e515c438f809c431ad8e61e0b65d17b700" },
+    { url = "https://github.com/stalwartlabs/webui/archive/refs/tags/v2.0.5.tar.gz", sha256 = "bc1be4ac12da514a035964ddcf7d1ee756ca1914845e45566e7736bbe4622435" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+# Rust's musl target links statically by default; Stalwart links the system's
+# RocksDB, SQLite, OpenSSL and compression libraries dynamically
+export RUSTFLAGS="-C target-feature=-crt-static"
+# librocksdb-sys links the system RocksDB (packages/r/rocksdb, with the one
+# fix Stalwart's bundled copy adds) instead of compiling its bundled one, and
+# makes its bindings from the system header (bindgen loads libclang); Snappy
+# is the system one too, and zstd-sys uses the system libzstd
+export ROCKSDB_LIB_DIR=/usr/lib ROCKSDB_INCLUDE_DIR=/usr/include SNAPPY_LIB_DIR=/usr/lib
+export LIBCLANG_PATH=/usr/lib ZSTD_SYS_USE_PKG_CONFIG=1
+# rusqlite asks for its bundled SQLite ("bundled"); this makes libsqlite3-sys
+# link the system SQLite instead
+export LIBSQLITE3_SYS_USE_PKG_CONFIG=1
+export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
+    npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+'''
+setup = '''
+cd ../webui-2.0.5
+node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
+npm ci --ignore-scripts
+'''
+build = '''
+# the web interface, as its build.sh (npm run build, then a zip of dist/)
+(cd ../webui-2.0.5 && npx tsc -b && npx vite build && test -f dist/index.html)
+rm -f build-webui.zip
+(cd ../webui-2.0.5/dist && zip -qr -X "$OLDPWD/build-webui.zip" .)
+cargo build --release --frozen --offline -j $jobs -p stalwart --no-default-features \
+    --features "rocks sqlite postgres mysql s3 azure redis keep nats zenoh"
+'''
+install = '''
+install -Dm755 target/release/stalwart "$pkgdir/usr/bin/stalwart"
+install -Dm644 build-webui.zip "$pkgdir/usr/share/stalwart/webui.zip"
+install -Dm640 $pkgfiles/stalwart.env "$pkgdir/etc/stalwart/stalwart.env"
+install -Dm644 $pkgfiles/stalwart "$pkgdir/etc/dinit.d/stalwart"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/stalwart.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/stalwart.conf"
+d="$pkgdir/usr/share/doc/stalwart"
+install -Dm644 $pkgfiles/README.FenrirOS "$d/README.FenrirOS"
+install -Dm644 README.md "$d/README.md"
+cp -r UPGRADING "$d/UPGRADING"
+install -Dm644 LICENSES/AGPL-3.0-only.txt "$pkgdir/usr/share/licenses/stalwart/AGPL-3.0-only.txt"
+'''

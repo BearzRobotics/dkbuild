@@ -1,0 +1,22 @@
+mox on FenrirOS
+===============
+
+mox is a complete mail server in one program (SMTP, IMAP, webmail, SPF,
+DKIM, DMARC, MTA-STS, DANE, junk filtering, ACME). Nothing is configured or
+running after installation: no configuration, no accounts, no keys.
+
+Layout: the program is /usr/bin/mox; its working directory is /var/lib/mox
+(config/ and data/ below it, made by quickstart). The system user is _mox.
+
+1. As root, in /var/lib/mox, generate the configuration, an account, its
+   password and DKIM keys, passing the user mox should run as:
+       cd /var/lib/mox
+       mox quickstart you@example.org _mox
+   (add -existing-webserver when nginx or another server already has ports
+   80/443). Read quickstart.log: it lists the DNS records to create.
+2. Check the result: mox -config /var/lib/mox/config/mox.conf config test
+3. Start it: dinitctl enable mox
+   (the service runs "mox -config /var/lib/mox/config/mox.conf serve").
+   quickstart's mox.service is for systemd; ignore it.
+4. Admin web interface: http://localhost/admin/ (the password quickstart
+   printed). More: https://www.xmox.nl/

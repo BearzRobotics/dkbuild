@@ -1,0 +1,59 @@
+# GNUstep base: the Foundation library (OpenStep/Cocoa Foundation: strings,
+# collections, run loops, networking, property lists, XML, distributed
+# objects) on libobjc2, and its tools (defaults, plmerge, gdomap, ...).
+# Built with: libffi (NSInvocation), libxml2 and libxslt (NSXMLDocument),
+# GnuTLS (TLS streams), ICU (locale, NSRegularExpression), Avahi
+# (NSNetServices), GMP (NSDecimal), and musl's iconv.
+# Left out, with reasons:
+# - libdispatch and NSURLSession (which needs it): Apple's
+#   swift-corelibs-libdispatch ships its own blocks runtime (Block.h,
+#   libBlocksRuntime), which collides with libobjc2's embedded one; packaging
+#   it to use libobjc2's is a separate piece of work (nothing here needs
+#   NSURLSession: SOGo uses SOPE's HTTP client).
+# - BFD stack traces (--enable-bfd): off by default upstream (GPL libbfd).
+# gdomap (the distributed-objects name server) is installed as a plain
+# program: not setuid, no service.
+# Static library too: a second, shared=no pass over Source/ after the shared
+# build (gnustep-make builds one kind per pass).
+name = "gnustep-base"
+version = "1.31.1"
+release = 1
+summary = "GNUstep Foundation library"
+license = "LGPL-2.1-or-later AND GPL-3.0-or-later"
+homepage = "https://gnustep.github.io"
+hostdeps = ["gnustep-make", "make", "pkgconf"]
+builddeps = ["libobjc2-devel", "libffi-devel", "libxml2-devel", "libxslt-devel", "gnutls-devel", "icu-devel", "avahi-devel", "gmp-devel", "zlib-ng-compat-devel"]
+rundeps = ["gnustep-make"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/gnustep/libs-base/releases/download/base-1_31_1/gnustep-base-1.31.1.tar.gz", sha256 = "e7546f1c978a7c75b676953a360194a61e921cb45a4804497b4f346a460545cd" },
+]
+
+environment = '''
+. /usr/share/GNUstep/Makefiles/GNUstep.sh
+export GNUSTEP_INSTALLATION_DOMAIN=SYSTEM
+'''
+setup = '''
+%configure \
+    --with-config-file=/etc/GNUstep/GNUstep.conf \
+    --with-installation-domain=SYSTEM \
+    --with-zeroconf-api=avahi \
+    --disable-libdispatch \
+    --disable-nsurlsession
+'''
+build = '''
+%make messages=yes
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+# the static library: Source/ again, linked as an archive
+%make -C Source shared=no messages=yes
+%make -C Source shared=no DESTDIR=$pkgdir install
+test -f "$pkgdir/usr/lib/libgnustep-base.a"
+install -Dm644 COPYING.LIB "$pkgdir/usr/share/licenses/gnustep-base/COPYING.LIB"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/gnustep-base/COPYING"
+'''

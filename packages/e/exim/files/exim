@@ -1,0 +1,7 @@
+# The Exim daemon in the foreground, listening as /etc/exim/exim.conf says and
+# running the queue every 15 minutes. Not enabled by the package: set up
+# /etc/exim/exim.conf first (README.FenrirOS), then `dinitctl enable exim`.
+type = process
+command = /usr/sbin/exim -bdf -q15m
+smooth-recovery = true
+depends-on: rcboot

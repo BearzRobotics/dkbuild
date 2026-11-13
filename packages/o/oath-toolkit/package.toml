@@ -1,0 +1,35 @@
+# Ported from Chimera Linux cports main/oath-toolkit (BSD-2-Clause,
+# Copyright (c) Chimera Linux contributors); its one patch (stdlib.h in
+# libpskc/global.c) is upstream since 2.6.12.
+# OATH Toolkit: one-time passwords (HOTP, TOTP): liboath, oathtool, the
+# pam_oath PAM module (Linux-PAM), and libpskc/pskctool (PSKC key containers,
+# with XML signatures through xmlsec1). SOGo's two-factor authentication uses
+# liboath.
+name = "oath-toolkit"
+version = "2.6.15"
+release = 1
+summary = "OATH one-time password toolkit"
+license = "LGPL-2.1-or-later AND GPL-3.0-or-later"
+homepage = "https://www.nongnu.org/oath-toolkit/"
+hostdeps = ["pkgconf"]
+builddeps = ["linux-pam-devel", "libxml2-devel", "xmlsec1-devel"]
+# the failing checks Chimera saw are yet to be investigated
+options = ["!check"]
+
+source = [
+    { url = "https://download.savannah.gnu.org/releases/oath-toolkit/oath-toolkit-2.6.15.tar.gz", sha256 = "8ad24aa9ff13c0edf3efc2573d90e85cf8b5ce7e82c08042574c1591f9d91eaa" },
+]
+
+setup = '''
+%configure --enable-pam --enable-pskc
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/oath-toolkit/COPYING"
+'''

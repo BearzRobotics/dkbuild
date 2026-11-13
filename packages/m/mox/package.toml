@@ -1,0 +1,54 @@
+# mox: a modern, complete, self-hosted mail server in one Go program (SMTP
+# with SPF/DKIM/DMARC/DANE/MTA-STS, IMAP4, webmail, admin and account web
+# interfaces, Bayesian junk filter, ACME). Pure Go (CGO_ENABLED=0, as upstream
+# builds it); its Go dependencies are vendored in the release (vendor/), so the
+# build needs no module store. The web interfaces' JavaScript is rebuilt from
+# the TypeScript sources with the system TypeScript 7 (typescript-go) and
+# esbuild, the versions upstream pins (esbuild 0.28.0 here, upstream 0.28.1),
+# instead of using the generated .js files in the release.
+# The version comes from patches/version-from-ldflags.patch (a tarball build
+# has no module or VCS version).
+# Installed inert (docs/requests.md): a dinit service shipped in
+# /etc/dinit.d, not enabled; no configuration, accounts, passwords or keys
+# (`mox quickstart` makes them); the _mox user and an empty /var/lib/mox.
+# Setup: /usr/share/doc/mox/README.FenrirOS.
+name = "mox"
+version = "0.0.17"
+release = 1
+summary = "Modern full-featured mail server (SMTP, IMAP, webmail)"
+license = "MIT AND MPL-2.0"
+homepage = "https://www.xmox.nl"
+hostdeps = ["go", "typescript-go", "esbuild", "bash"]
+patches = ["version-from-ldflags.patch"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/mjl-/mox/archive/refs/tags/v0.0.17.tar.gz", sha256 = "22f0d7deeaef6e8bae21f98e37ebcff7d18499591638b89eff484eb7fd06ea37" },
+]
+
+environment = '''
+export GOFLAGS="-mod=vendor -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+# the web interfaces from TypeScript: upstream's Makefile runs tsc and esbuild
+# from node_modules/.bin (npm's prebuilt packages); the system ones are put
+# there instead, and the generated .js files removed so make rebuilds them
+mkdir -p node_modules/.bin
+ln -s /usr/lib/typescript-go/tsc node_modules/.bin/tsc
+ln -s /usr/bin/esbuild node_modules/.bin/esbuild
+rm -f webadmin/admin.js webaccount/account.js webmail/webmail.js webmail/msg.js webmail/text.js
+make frontend
+test -s webmail/webmail.js
+go build -ldflags "-s -w -X github.com/mjl-/mox/moxvar.release=v$version" -o build/mox .
+'''
+install = '''
+install -Dm755 build/mox "$pkgdir/usr/bin/mox"
+install -Dm644 $pkgfiles/mox "$pkgdir/etc/dinit.d/mox"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/mox.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/mox.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/mox/README.FenrirOS"
+install -Dm644 README.md "$pkgdir/usr/share/doc/mox/README.md"
+install -Dm644 LICENSE.MIT "$pkgdir/usr/share/licenses/mox/LICENSE.MIT"
+install -Dm644 LICENSE.MPLv2.0 "$pkgdir/usr/share/licenses/mox/LICENSE.MPLv2.0"
+'''

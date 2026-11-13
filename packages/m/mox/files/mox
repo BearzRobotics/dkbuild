@@ -1,0 +1,10 @@
+# mox: shipped, not enabled. Create the configuration first
+# (/usr/share/doc/mox/README.FenrirOS), then: dinitctl enable mox
+# mox starts as root to bind ports 25/443/993... and drops to the user named
+# in mox.conf (_mox).
+type = process
+command = /usr/bin/mox -config /var/lib/mox/config/mox.conf serve
+working-dir = /var/lib/mox
+smooth-recovery = true
+stop-timeout = 30.0
+depends-on: rcboot

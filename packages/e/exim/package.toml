@@ -1,0 +1,178 @@
+# Exim: mail transfer agent. Built with TLS (OpenSSL) with DANE, DKIM,
+# SMTPUTF8 (libidn, libidn2), SRS, content scanning (Rspamd/SpamAssassin and
+# malware scanners), Proxy Protocol and SOCKS, PAM, embedded Perl, maildir/
+# mailstore/MBX delivery and LMTP, and the authenticators plaintext,
+# CRAM-MD5, SPA, TLS, external, Dovecot, Cyrus SASL (libsasl) and Heimdal
+# GSSAPI. Lookups: lsearch family, dbm, cdb, dsearch, dnsdb, passwd built in;
+# ldap (OpenLDAP), mysql (MariaDB), pgsql, sqlite, lmdb, redis (hiredis),
+# json (jansson) and psl (libpsl) as modules in /usr/lib/exim/modules, the
+# first four as subpackages. Hints databases in TDB (no Berkeley DB here).
+# Left out: SPF, DMARC and ARC (need libspf2 and libopendmarc, not in the
+# tree), RADIUS (no client library), GNU SASL (not in the tree), NIS (musl),
+# Oracle and WHOSON, the X11 monitor eximon (Athena widgets; a desktop tool).
+# The user is _exim (FenrirOS's convention), looked up at run time.
+# Installed inert (docs/requests.md): no service enabled, no certificates or
+# keys; /etc/exim/exim.conf is upstream's default configuration (exim, as
+# sendmail, needs one to work at all). /usr/share/doc/exim/README.FenrirOS
+# says how to set it up. postfix, opensmtpd and exim all own
+# /usr/sbin/sendmail, so only one of them can be installed.
+name = "exim"
+version = "4.100.1"
+release = 1
+summary = "Message transfer agent"
+license = "GPL-2.0-or-later"
+homepage = "https://www.exim.org"
+hostdeps = ["pkgconf", "perl"]
+builddeps = ["perl", "openssl-devel", "pcre2-devel", "linux-pam-devel", "libidn-devel", "libidn2-devel", "libsasl-devel",
+             "heimdal-devel", "tdb-devel", "openldap-devel", "mariadb-devel", "postgresql-devel", "sqlite-devel",
+             "lmdb-devel", "hiredis-devel", "jansson-devel", "libpsl-devel"]
+rundeps = ["linux-pam-base"]
+
+source = [
+    { url = "https://downloads.exim.org/exim4/exim-4.100.1.tar.xz", sha256 = "e9fb41f6724a5b136d64c9d19dbc5f26494af879a3e7e3190f91639eaa79fa0d" },
+]
+
+setup = '''
+# Exim is configured by Local/Makefile (src/EDITME documents every setting)
+cat > Local/Makefile <<EOF
+CC=$CC
+CFLAGS=$CFLAGS -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
+CFLAGS_DYNAMIC=-shared -rdynamic -fPIC
+LFLAGS=$LDFLAGS
+EXTRALIBS_EXIM=-rdynamic -lpam
+BIN_DIRECTORY=/usr/sbin
+CONFIGURE_FILE=/etc/exim/exim.conf
+SYSTEM_ALIASES_FILE=/etc/exim/aliases
+EXIM_USER=ref:_exim
+SPOOL_DIRECTORY=/var/spool/exim
+LOG_FILE_PATH=/var/log/exim/%slog
+PID_FILE_PATH=/run/exim.pid
+EXIM_TMPDIR="/tmp"
+LOOKUP_MODULE_DIR=/usr/lib/exim/modules
+USE_OPENSSL=yes
+USE_OPENSSL_PC=openssl
+PCRE2_CONFIG=yes
+SUPPORT_DANE=yes
+USE_TDB=yes
+DBMLIB=-ltdb
+ROUTER_ACCEPT=yes
+ROUTER_DNSLOOKUP=yes
+ROUTER_IPLITERAL=yes
+ROUTER_IPLOOKUP=yes
+ROUTER_MANUALROUTE=yes
+ROUTER_QUERYPROGRAM=yes
+ROUTER_REDIRECT=yes
+TRANSPORT_APPENDFILE=yes
+TRANSPORT_AUTOREPLY=yes
+TRANSPORT_LMTP=yes
+TRANSPORT_PIPE=yes
+TRANSPORT_SMTP=yes
+SUPPORT_MAILDIR=yes
+SUPPORT_MAILSTORE=yes
+SUPPORT_MBX=yes
+LOOKUP_DBM=yes
+LOOKUP_LSEARCH=yes
+LOOKUP_DNSDB=yes
+LOOKUP_CDB=yes
+LOOKUP_DSEARCH=yes
+LOOKUP_PASSWD=yes
+LOOKUP_WILDLSEARCH=yes
+LOOKUP_NWILDLSEARCH=yes
+LOOKUP_LDAP=2
+LDAP_LIB_TYPE=OPENLDAP2
+LOOKUP_LDAP_LIBS=-lldap -llber
+LOOKUP_MYSQL=2
+LOOKUP_MYSQL_PC=libmariadb
+LOOKUP_PGSQL=2
+LOOKUP_PGSQL_PC=libpq
+LOOKUP_SQLITE=2
+LOOKUP_SQLITE_PC=sqlite3
+LOOKUP_LMDB=2
+LOOKUP_LMDB_LIBS=-llmdb
+LOOKUP_REDIS=2
+LOOKUP_REDIS_PC=hiredis
+LOOKUP_JSON=2
+LOOKUP_JSON_PC=jansson
+LOOKUP_PSL=2
+LOOKUP_PSL_PC=libpsl
+WITH_CONTENT_SCAN=yes
+SUPPORT_SRS=yes
+SUPPORT_PAM=yes
+SUPPORT_PROXY=yes
+SUPPORT_SOCKS=yes
+SUPPORT_I18N=yes
+SUPPORT_I18N_PC=libidn
+SUPPORT_I18N_2008=yes
+SUPPORT_I18N_2008_PC=libidn2
+EXIM_PERL=perl.o
+AUTH_CRAM_MD5=yes
+AUTH_CYRUS_SASL=yes
+AUTH_DOVECOT=yes
+AUTH_EXTERNAL=yes
+AUTH_HEIMDAL_GSSAPI=yes
+AUTH_HEIMDAL_GSSAPI_PC=heimdal-gssapi heimdal-krb5
+AUTH_PLAINTEXT=yes
+AUTH_SPA=yes
+AUTH_TLS=yes
+AUTH_LIBS=-lsasl2
+HEADERS_CHARSET="UTF-8"
+FIXED_NEVER_USERS=root
+SYSLOG_LOG_PID=yes
+EXICYCLOG_MAX=10
+COMPRESS_COMMAND=/usr/bin/gzip
+COMPRESS_SUFFIX=gz
+ZCAT_COMMAND=/usr/bin/zcat
+EOF
+'''
+build = '''
+make FULLECHO=
+'''
+install = '''
+make INSTALL_ARG=-no_chown DESTDIR="$pkgdir" install
+# exim_install leaves the setuid bit off with -no_chown; the binary is
+# root-owned in the package, and setuid root as Exim is designed to run
+real=$(readlink "$pkgdir/usr/sbin/exim")
+case "$real" in exim-$version-*) ;; *) echo "unexpected exim link: $real"; exit 1;; esac
+chmod 4755 "$pkgdir/usr/sbin/$real"
+# lookup modules, named as Exim loads them (<name>_lookup.so)
+install -d "$pkgdir/usr/lib/exim/modules"
+for so in build-Linux-*/lookups/*.so; do
+    install -m755 "$so" "$pkgdir/usr/lib/exim/modules/$(basename "$so" .so)_lookup.so"
+done
+for m in ldap mysql pgsql sqlite lmdb redis json psl; do
+    test -f "$pkgdir/usr/lib/exim/modules/${m}_lookup.so"
+done
+# the sendmail interface and its usual names
+ln -s exim "$pkgdir/usr/sbin/sendmail"
+ln -s ../sbin/exim "$pkgdir/usr/bin/mailq"
+ln -s ../sbin/exim "$pkgdir/usr/bin/newaliases"
+ln -s ../sbin/exim "$pkgdir/usr/bin/rmail"
+install -Dm644 doc/exim.8 "$pkgdir/usr/share/man/man8/exim.8"
+install -Dm644 $pkgfiles/exim "$pkgdir/etc/dinit.d/exim"
+install -Dm644 $pkgfiles/exim.pam "$pkgdir/usr/lib/pam.d/exim"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/exim.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/exim.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/exim/README.FenrirOS"
+install -Dm644 LICENCE "$pkgdir/usr/share/licenses/exim/LICENCE"
+install -Dm644 NOTICE "$pkgdir/usr/share/licenses/exim/NOTICE"
+'''
+
+[subpackages.ldap]
+summary = "LDAP lookups for Exim"
+depends = ["exim"]
+paths   = ["/usr/lib/exim/modules/ldap_lookup.so"]
+
+[subpackages.mysql]
+summary = "MySQL/MariaDB lookups for Exim"
+depends = ["exim"]
+paths   = ["/usr/lib/exim/modules/mysql_lookup.so"]
+
+[subpackages.pgsql]
+summary = "PostgreSQL lookups for Exim"
+depends = ["exim"]
+paths   = ["/usr/lib/exim/modules/pgsql_lookup.so"]
+
+[subpackages.sqlite]
+summary = "SQLite lookups for Exim"
+depends = ["exim"]
+paths   = ["/usr/lib/exim/modules/sqlite_lookup.so"]

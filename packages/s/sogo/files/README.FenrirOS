@@ -1,0 +1,36 @@
+SOGo on FenrirOS
+================
+
+Nothing runs and nothing is configured by default. SOGo runs as _sogo
+(home /var/lib/sogo); its configuration is /etc/sogo/sogo.conf (an
+OpenStep property list; start from /etc/sogo/sogo.conf.sample, upstream's
+all-commented example, and the SOGo Installation Guide).
+
+1. memcached: dinitctl enable memcached (it listens on 127.0.0.1:11211;
+   SOGoMemcachedHost = "127.0.0.1";).
+2. Database (PostgreSQL or MariaDB). PostgreSQL:
+     createuser -P sogo ; createdb -O sogo sogo
+   then in sogo.conf (SOGo creates its tables itself):
+     SOGoProfileURL = "postgresql://sogo:<password>@localhost:5432/sogo/sogo_user_profile";
+     OCSFolderInfoURL = "postgresql://sogo:<password>@localhost:5432/sogo/sogo_folder_info";
+     OCSSessionsFolderURL = "postgresql://sogo:<password>@localhost:5432/sogo/sogo_sessions_folder";
+   (MariaDB: mysql://...; see /usr/share/doc/sogo/mysql-utf8mb4.sql.)
+3. Users: SOGoUserSources (LDAP or an SQL view), and mail: SOGoIMAPServer,
+   SOGoSMTPServer, SOGoSieveServer, SOGoMailDomain. Keep the file private:
+     cp /etc/sogo/sogo.conf.sample /etc/sogo/sogo.conf
+     chown root:_sogo /etc/sogo/sogo.conf ; chmod 640 /etc/sogo/sogo.conf
+4. The service's command line (127.0.0.1:20000, 3 workers, log in
+   /var/log/sogo) is /etc/dinit.d/sogo. Then: dinitctl enable sogo
+5. Web server: /usr/share/doc/sogo/nginx-sogo.conf (nginx proxies to
+   sogod and serves the web resources); dinitctl enable nginx.
+6. Scheduled jobs (session expiry, e-mail alarms, vacation messages,
+   backups) are examples in /usr/share/doc/sogo/sogo.cron: copy the lines
+   you want to /etc/cron.d/sogo (user _sogo, programs in /usr/bin) and
+   dinitctl enable crond. Log rotation example: /usr/share/doc/sogo/logrotate.
+7. Two-factor authentication: SOGoTOTPEnabled = YES; in sogo.conf.
+8. ActiveSync (phones) is the separate package sogo-activesync; upstream
+   says production use needs a licence from Microsoft
+   (/usr/share/doc/sogo/README.ActiveSync).
+
+sogo-tool (in /usr/bin) manages users, backups and restores; run it as
+_sogo: su -s /bin/sh _sogo -c 'sogo-tool ...'.

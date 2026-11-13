@@ -1,0 +1,33 @@
+Roundcube Webmail on FenrirOS
+=============================
+
+Code: /usr/share/roundcube (config/ is /etc/roundcube, temp/ is
+/var/lib/roundcube/temp, logs/ is /var/log/roundcube). PHP runs as _php
+(php-fpm). Nothing is configured: Roundcube does not start until
+/etc/roundcube/config.inc.php exists. The web installer is not shipped.
+
+1. Database. MariaDB:
+     CREATE DATABASE roundcubemail CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+     CREATE USER 'roundcube'@'localhost' IDENTIFIED BY '<password>';
+     GRANT ALL ON roundcubemail.* TO 'roundcube'@'localhost';
+   (PostgreSQL works the same way; SQLite needs only a file writable by
+   _php, e.g. sqlite:////var/lib/roundcube/roundcube.db?mode=0640.)
+2. cp /etc/roundcube/config.inc.php.sample /etc/roundcube/config.inc.php,
+   chown root:_php and chmod 640 it, then set:
+     $config['db_dsnw']   = 'mysql://roundcube:<password>@localhost/roundcubemail';
+     $config['imap_host'] = 'ssl://mail.example.org:993';
+     $config['smtp_host'] = 'tls://mail.example.org:587';
+     $config['des_key']   = '<24 random characters>';   # e.g. openssl rand -base64 18
+   The sample's des_key is a placeholder known to everyone; replace it.
+3. Create the tables:
+     su -s /bin/sh _php -c '/usr/share/roundcube/bin/initdb.sh --dir=/usr/share/roundcube/SQL'
+4. Plugins: enable them in $config['plugins']; each one's settings go in
+   /etc/roundcube/<plugin>.inc.php, starting from
+   /usr/share/roundcube/plugins/<plugin>/config.inc.php.dist.
+5. Web server: /usr/share/doc/roundcube/nginx-roundcube.conf; enable
+   php-fpm and nginx (dinitctl enable php-fpm nginx).
+6. Housekeeping (optional): cp /usr/share/doc/roundcube/roundcube.cron
+   /etc/cron.d/roundcube and dinitctl enable crond.
+
+After an upgrade: su -s /bin/sh _php -c '/usr/share/roundcube/bin/updatedb.sh
+--package=roundcube --dir=/usr/share/roundcube/SQL'.

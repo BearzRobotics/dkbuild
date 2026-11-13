@@ -1,0 +1,26 @@
+listmonk on FenrirOS
+====================
+
+listmonk is a newsletter and mailing-list manager: a single program
+(/usr/bin/listmonk, with its web interface and SQL inside) and a PostgreSQL
+database. It sends mail through any SMTP server (set in its web settings).
+Nothing is configured or running after installation: no configuration, no
+database, no admin account.
+
+1. PostgreSQL (13 or newer; install postgresql and start it), as postgres:
+       CREATE USER listmonk WITH PASSWORD '<password>';
+       CREATE DATABASE listmonk OWNER listmonk;
+2. Configuration:
+       cp /usr/share/doc/listmonk/config.toml.sample /etc/listmonk/config.toml
+       chgrp _listmonk /etc/listmonk/config.toml; chmod 640 /etc/listmonk/config.toml
+   and set [db] (user, the password above, database) and [app] address.
+   The sample's password "listmonk" is only an example: change it.
+3. Create the schema and the admin user (the password is yours to choose):
+       cd /var/lib/listmonk
+       su -s /bin/sh _listmonk -c 'LISTMONK_ADMIN_USER=admin LISTMONK_ADMIN_PASSWORD=<password> \
+           listmonk --config /etc/listmonk/config.toml --install --yes'
+   After an upgrade of this package: listmonk --config ... --upgrade --yes
+4. Start it: dinitctl enable listmonk (listens on [app] address, by default
+   localhost:9000). Uploads go to /var/lib/listmonk/uploads (the working
+   directory). To publish it, put nginx in front: an example is
+   /usr/share/doc/listmonk/nginx-listmonk.conf.

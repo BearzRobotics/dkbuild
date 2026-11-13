@@ -1,0 +1,62 @@
+# RocksDB: Meta's embeddable persistent key-value store (LSM tree), as a
+# shared and a static library (librocksdb.so and librocksdb.a, both from one
+# CMake build: ROCKSDB_BUILD_SHARED builds the shared one beside the static),
+# with ldb and sst_dump. Written for Stalwart Mail Server's RocksDB store.
+# Compression: Snappy, LZ4, zlib, Zstandard and bzip2; io_uring (liburing);
+# gflags for the tools. PORTABLE builds for the target's baseline CPU (not the
+# build machine's).
+# Left out: jemalloc (a library should not choose its users' allocator;
+# programs that want it, as Stalwart, link it themselves), the benchmark and
+# trace and stress tools and tests (development tools),
+# JNI (no Java bindings packaged), NUMA (no libnuma recipe).
+name = "rocksdb"
+version = "11.13.2"
+release = 1
+summary = "Embeddable persistent key-value store"
+license = "Apache-2.0 OR GPL-2.0-only"
+homepage = "https://rocksdb.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["snappy-devel", "lz4-devel", "zlib-ng-compat-devel", "zstd-devel", "bzip2-devel", "liburing-devel", "gflags-devel"]
+patches = ["write-thread-strong-cas.patch"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/facebook/rocksdb/archive/refs/tags/v11.13.2.tar.gz", sha256 = "6f12f408c4876175b1de73cfefcdd1baf0001ad8d799c1a09320d96e4fd213b5" },
+]
+
+build = '''
+%cmake \
+    -DPORTABLE=1 \
+    -DFAIL_ON_WARNINGS=OFF \
+    -DROCKSDB_BUILD_SHARED=ON \
+    -DUSE_RTTI=1 \
+    -DWITH_SNAPPY=ON \
+    -DWITH_LZ4=ON \
+    -DWITH_ZLIB=ON \
+    -DWITH_ZSTD=ON \
+    -DWITH_BZ2=ON \
+    -DWITH_LIBURING=ON \
+    -DWITH_GFLAGS=ON \
+    -DWITH_JEMALLOC=OFF \
+    -DWITH_TESTS=OFF \
+    -DWITH_ALL_TESTS=OFF \
+    -DWITH_BENCHMARK_TOOLS=OFF \
+    -DWITH_TRACE_TOOLS=OFF \
+    -DWITH_CORE_TOOLS=ON \
+    -DWITH_TOOLS=OFF \
+    -DWITH_EXAMPLES=OFF
+%cmake_build
+'''
+install = '''
+%cmake_install
+# the core tools (ldb, sst_dump) are built but not installed by CMake
+for t in ldb sst_dump; do
+    f=$(find build -type f -name $t -perm -u+x | head -n1)
+    test -n "$f"
+    install -Dm755 "$f" "$pkgdir/usr/bin/rocksdb-$t"
+done
+install -Dm644 LICENSE.Apache "$pkgdir/usr/share/licenses/rocksdb/LICENSE.Apache"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/rocksdb/COPYING"
+install -Dm644 LICENSE.leveldb "$pkgdir/usr/share/licenses/rocksdb/LICENSE.leveldb"
+'''

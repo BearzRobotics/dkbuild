@@ -1,0 +1,44 @@
+# Vectorscan: the portable fork of Intel's Hyperscan regular-expression
+# library (libhs), for Rspamd. After Chimera's user/vectorscan (cports,
+# BSD-2-Clause, Copyright (c) Chimera Linux contributors), with these
+# differences: shared and static libraries both; on x86_64 the fat runtime
+# (upstream's default there): the SSE4.2/AVX2/AVX-512 code paths are chosen at
+# run time, and the system SIMDe headers give the baseline x86-64 path,
+# because FenrirOS's x86_64 baseline has no SSE4.2 (Chimera builds for one
+# microarchitecture). The fat runtime renames symbols with nm/objcopy: LLVM's.
+name = "vectorscan"
+version = "5.4.14"
+release = 1
+summary = "High-performance regular expression matching library (Hyperscan fork)"
+license = "BSD-3-Clause"
+homepage = "https://www.vectorcamp.gr/vectorscan"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja", "pkgconf", "ragel", "python"]
+builddeps = ["boost-devel", "sqlite-devel", "simde-devel"]
+
+source = [
+    { url = "https://github.com/VectorCamp/vectorscan/archive/refs/tags/vectorscan/5.4.14.tar.gz", sha256 = "8a035e5a7e769f3793d50645a17042bcd601a2f9835b32c535eae7b1a9b9f0e0" },
+]
+
+environment = '''
+export NM=llvm-nm OBJCOPY=llvm-objcopy
+'''
+setup = '''
+%cmake \
+    -DCMAKE_SKIP_INSTALL_RPATH=ON \
+    -DBUILD_SHARED_LIBS=ON \
+    -DBUILD_STATIC_LIBS=ON \
+    -DBUILD_BENCHMARKS=OFF
+'''
+build = '''
+%cmake_build
+'''
+check = '''
+build/bin/unit-hyperscan
+'''
+install = '''
+%cmake_install
+install -Dm755 build/bin/hsbench "$pkgdir/usr/bin/hsbench"
+install -Dm755 build/bin/hscheck "$pkgdir/usr/bin/hscheck"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/vectorscan/LICENSE"
+'''

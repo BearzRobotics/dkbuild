@@ -1,0 +1,25 @@
+OpenSMTPD on FenrirOS
+=====================
+
+OpenBSD's mail transfer agent (portable version). Installed inert: the
+service is not enabled, no certificates, no aliases database.
+
+Layout: configuration /etc/smtpd (smtpd.conf, aliases), queue
+/var/spool/smtpd, delivery helpers /usr/libexec/opensmtpd, users _smtpd and
+_smtpq (sysusers.d). smtpctl is also sendmail, mailq, newaliases and
+makemap. Authentication of local users is through PAM
+(/usr/lib/pam.d/smtpd).
+
+1. /etc/smtpd/smtpd.conf as shipped accepts mail on localhost only and
+   delivers local mail to ~/Maildir; edit it (smtpd.conf(5)) for a real
+   server: listen on <interface> tls pki <name>, with
+   pki <name> cert "/path/fullchain.pem" and key "/path/privkey.pem".
+2. Aliases: edit /etc/smtpd/aliases (root's mail to a real user) and run
+   newaliases if you switch the table to db: (file: tables need nothing).
+3. smtpd -n (checks the configuration), then dinitctl enable opensmtpd.
+
+Not included: table backends beyond file:/static (the opensmtpd table-*
+add-ons) and the table-db backend (Berkeley DB is not in the tree).
+
+Only one MTA can be installed: postfix, opensmtpd and exim each own
+/usr/sbin/sendmail, /usr/bin/mailq and /usr/bin/newaliases.

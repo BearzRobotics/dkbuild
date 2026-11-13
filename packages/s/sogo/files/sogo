@@ -1,0 +1,7 @@
+# SOGo on 127.0.0.1:20000 (behind nginx: /usr/share/doc/sogo/nginx-sogo.conf),
+# 3 worker processes. Needs memcached (SOGoMemcachedHost) and its database.
+type = process
+command = /usr/bin/sogod -WONoDetach YES -WOPort 127.0.0.1:20000 -WOWorkersCount 3 -WOLogFile /var/log/sogo/sogo.log -WOPidFile /run/sogo/sogo.pid
+run-as = _sogo
+smooth-recovery = true
+depends-on: rcboot

@@ -1,0 +1,51 @@
+# Roundcube Webmail: browser-based IMAP client (folders, address books with
+# LDAP/CardDAV-style plugins, Sieve filters through managesieve, PGP through
+# enigma, spell checking, HTML editor). PHP with MariaDB, PostgreSQL or SQLite,
+# served by nginx and php-fpm.
+# Source: upstream's "complete" release archive, as GLPI's: Roundcube's own
+# code (each minified .js next to its .js, each compiled .css next to its
+# .less), the Composer packages of its composer.lock in vendor/ as PHP source
+# (net_ldap3 included, for LDAP address books), and the third-party JS
+# libraries jsdeps.json pins (jQuery, TinyMCE, OpenPGP.js, CodeMirror,
+# Bootstrap): those are upstream's own distributions (minified), which a build
+# from Roundcube's git tree would download as the same files.
+# Layout as Alpine's: code in /usr/share/roundcube (served: public_html/),
+# config in /etc/roundcube (config.inc.php.sample, defaults.inc.php; plugin
+# settings as /etc/roundcube/<plugin>.inc.php), temp in /var/lib/roundcube,
+# logs in /var/log/roundcube. Plugins' config.inc.php.dist stay as samples.
+# The web installer is left out (it writes the config from a browser).
+# Installed inert (docs/requests.md): no config.inc.php (so no des_key and no
+# database), no site, no cron job; the README says how to set it up.
+name = "roundcube"
+version = "1.7.6"
+release = 1
+summary = "Browser-based IMAP webmail client"
+license = "GPL-3.0-or-later"
+homepage = "https://roundcube.net"
+rundeps = ["php", "php-fpm", "nginx"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/roundcube/roundcubemail/releases/download/1.7.6/roundcubemail-1.7.6-complete.tar.gz", sha256 = "0168085bf0bfeeb5d4eca3b9730effbe610dbdb380a68567d292fec51f09db36" },
+]
+
+install = '''
+d="$pkgdir/usr/share/roundcube"
+mkdir -p "$d" "$pkgdir/etc"
+cp -a . "$d/"
+# the web installer (installer/, public_html/installer.php) writes a
+# config.inc.php from a browser and runs while none exists: left out, the
+# README sets Roundcube up by hand (bin/initdb.sh, the sample config)
+rm -rf "$d/temp" "$d/logs" "$d/installer" "$d/public_html/installer.php"
+# config in /etc, temp and logs in /var
+mv "$d/config" "$pkgdir/etc/roundcube"
+ln -s /etc/roundcube "$d/config"
+ln -s /var/lib/roundcube/temp "$d/temp"
+ln -s /var/log/roundcube "$d/logs"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/roundcube.conf"
+install -Dm644 $pkgfiles/roundcube.cron "$pkgdir/usr/share/doc/roundcube/roundcube.cron"
+install -Dm644 $pkgfiles/nginx-roundcube.conf "$pkgdir/usr/share/doc/roundcube/nginx-roundcube.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/roundcube/README.FenrirOS"
+install -Dm644 CHANGELOG.md "$pkgdir/usr/share/doc/roundcube/CHANGELOG.md"
+install -Dm644 docs/LICENSE.md "$pkgdir/usr/share/licenses/roundcube/LICENSE.md"
+'''

@@ -1,0 +1,7 @@
+# Postfix's master in the foreground. Not enabled by the package:
+# set up /etc/postfix first (README.FenrirOS), then `dinitctl enable postfix`.
+type = process
+command = /usr/sbin/postfix start-fg
+stop-command = /usr/sbin/postfix stop
+smooth-recovery = true
+depends-on: rcboot

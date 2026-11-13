@@ -1,0 +1,52 @@
+# libmemcached-awesome: the maintained fork of libmemcached, the C/C++ client
+# library for memcached (libmemcached, libhashkit, libmemcachedutil), and its
+# command-line tools (memcp, memcat, memstat, memaslap, ...). SOGo keeps its
+# sessions and caches in memcached through it.
+# Built with: SASL (Cyrus libsasl), OpenSSL's libcrypto for its AES
+# encryption, the Hsieh, FNV-64 and Murmur hashes, memaslap (libevent).
+# Shared and static libraries: two CMake builds (BUILD_SHARED_LIBS on/off).
+# Manual pages from Sphinx (its man builder; the HTML manual is left out).
+# Tests need a running memcached server (!check).
+name = "libmemcached-awesome"
+version = "1.1.4"
+release = 1
+summary = "C/C++ client library and tools for memcached"
+license = "BSD-3-Clause"
+homepage = "https://github.com/awesomized/libmemcached"
+hostdeps = ["cmake", "ninja", "bison", "flex", "python-sphinx"]
+builddeps = ["libsasl-devel", "openssl-devel", "libevent-devel"]
+options = ["!check", "!cross"]
+
+source = [
+    { url = "https://github.com/awesomized/libmemcached/archive/refs/tags/1.1.4.tar.gz", sha256 = "c477e1f6510e1dc698e84f3717ce690a8f65b94c616ecaa62306cce0f5e3116a" },
+]
+
+setup = '''
+# two builds, shared and static (the project builds one kind per build tree);
+# the manual pages (Sphinx's man builder) come from the shared one
+for kind in shared static; do
+    if [ $kind = shared ]; then shared=ON; docs=ON; else shared=OFF; docs=OFF; fi
+    cmake -S . -B build-$kind -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_SHARED_LIBS=$shared \
+        -DBUILD_TESTING=OFF \
+        -DBUILD_DOCS_MAN=$docs -DBUILD_DOCS_MANGZ=OFF -DBUILD_DOCS_HTML=OFF \
+        -DSPHINX_THEME=alabaster -DSPHINX_THEME_OPTIONS= \
+        -DENABLE_SASL=ON \
+        -DENABLE_OPENSSL_CRYPTO=ON \
+        -DENABLE_HASH_HSIEH=ON \
+        -DENABLE_HASH_FNV64=ON \
+        -DENABLE_HASH_MURMUR=ON \
+        -DENABLE_MEMASLAP=ON
+done
+'''
+build = '''
+cmake --build build-static
+cmake --build build-shared
+'''
+install = '''
+DESTDIR=$pkgdir cmake --install build-static --strip
+# the shared build last: its programs and CMake files are the ones kept
+DESTDIR=$pkgdir cmake --install build-shared --strip
+test -f "$pkgdir/usr/lib/libmemcached.a"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libmemcached-awesome/LICENSE"
+'''

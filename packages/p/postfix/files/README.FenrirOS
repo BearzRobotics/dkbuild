@@ -1,0 +1,37 @@
+Postfix on FenrirOS
+===================
+
+Installed inert: the service is not enabled, nothing listens, no aliases
+database, certificates or SASL secrets are made.
+
+Layout: configuration /etc/postfix (main.cf and master.cf as upstream ships
+them; *.proto are the pristine copies), commands /usr/sbin, daemons
+/usr/libexec/postfix, private libraries and map plugins /usr/lib/postfix,
+queue /var/spool/postfix, data /var/lib/postfix. Mail owner _postfix, setgid
+group _postdrop (both from sysusers.d). Default database type: lmdb (no
+Berkeley DB), so "hash:" maps are "lmdb:" here.
+
+Map types: lmdb, pcre (PCRE2), regexp, texthash, inline, ... in the main
+package; ldap, mysql (MariaDB), pgsql and sqlite are the postfix-ldap,
+postfix-mysql, postfix-pgsql and postfix-sqlite packages. SMTPUTF8 (ICU),
+TLS (OpenSSL), SASL: Dovecot's (smtpd_sasl_type = dovecot) and Cyrus
+libsasl (for the SMTP client and smtpd_sasl_type = cyrus).
+
+1. Set myhostname, mydomain, mydestination, inet_interfaces, mynetworks in
+   /etc/postfix/main.cf (postconf -e name=value). The stock main.cf listens
+   on every interface once started; inet_interfaces = loopback-only for a
+   send-only host.
+2. TLS: put your certificate and key somewhere and set smtpd_tls_chain_files
+   (and smtpd_tls_security_level = may, smtp_tls_security_level = may).
+3. Aliases: edit /etc/postfix/aliases (root's mail to a real user), set
+   alias_maps = lmdb:/etc/postfix/aliases, alias_database likewise, then
+   run newaliases.
+4. Submission/SMTPS with SASL through Dovecot: uncomment the submission and
+   smtps entries of master.cf and set smtpd_sasl_type = dovecot,
+   smtpd_sasl_path = private/auth (Dovecot's auth socket for Postfix).
+5. postfix check; postfix set-permissions (sets owners and modes the
+   package could not, for example after an upgrade); then
+   dinitctl enable postfix.
+
+Only one MTA can be installed: postfix, opensmtpd and exim each own
+/usr/sbin/sendmail, /usr/bin/mailq and /usr/bin/newaliases.

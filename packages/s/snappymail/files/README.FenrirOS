@@ -1,0 +1,21 @@
+SnappyMail on FenrirOS
+======================
+
+Code: /usr/share/snappymail (the web root). Data: /var/lib/snappymail
+(set in /usr/share/snappymail/include.php), owned by _php (php-fpm).
+Nothing is configured and no site is set up.
+
+1. Web server: /usr/share/doc/snappymail/nginx-snappymail.conf; enable
+   php-fpm and nginx (dinitctl enable php-fpm nginx).
+2. Open https://<host>/?admin once. SnappyMail then writes its initial admin
+   password to
+     /var/lib/snappymail/_data_/_default_/admin_password.txt
+   Log in as "admin" with it, change it at once (the file is removed), and
+   turn on two-factor authentication for the admin panel if wanted.
+3. In the admin panel: Domains (your IMAP/SMTP/Sieve servers), Contacts
+   (a database for address books: MariaDB, PostgreSQL or SQLite; create the
+   database and user yourself), and Security.
+4. The admin panel can install plugins and updates from snappymail.eu; on
+   FenrirOS, update through apk instead (the core updater would write into
+   /usr/share/snappymail).
+5. fail2ban filters for login failures: /usr/share/doc/snappymail/fail2ban.
