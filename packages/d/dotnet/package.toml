@@ -20,7 +20,7 @@
 # that replaces the zeros below.
 name = "dotnet"
 version = "10.0.114"
-release = 2
+release = 3
 summary = ".NET SDK, runtime and ASP.NET Core"
 license = "MIT"
 homepage = "https://dotnet.microsoft.com"
@@ -50,6 +50,18 @@ setup = '''
 # NuGet packs only zip-representable dates (1980 on) and the build turns that
 # warning (NU5132) into an error: a fixed later time instead
 find . -exec touch -h -d @946684800 {} +
+# GSSAPI is Heimdal's here (heimdal-devel; there is no MIT krb5): without the
+# HeimdalGssApi option System.Net.Security.Native looks for libgssapi_krb5 and
+# stops ("Cannot find libgssapi_krb5"). The option defaults to OFF in the two
+# configure.cmake files (the shared native libs, and the static apphost), so
+# they default to ON; and the shim that loads the library on demand opens
+# Heimdal's soname, libgssapi.so.3, not MIT's libgssapi_krb5.so.2.
+sed -i 's/^option(HeimdalGssApi "use heimdal implementation of GssApi" OFF)/option(HeimdalGssApi "use heimdal implementation of GssApi" ON)/' \
+    src/runtime/src/native/libs/configure.cmake src/runtime/src/native/corehost/apphost/static/configure.cmake
+grep -q 'GssApi" ON' src/runtime/src/native/libs/configure.cmake
+grep -q 'GssApi" ON' src/runtime/src/native/corehost/apphost/static/configure.cmake
+sed -i 's/"libgssapi_krb5\.so\.2"/"libgssapi.so.3"/' src/runtime/src/native/libs/System.Net.Security.Native/pal_gssapi.c
+grep -q 'libgssapi\.so\.3' src/runtime/src/native/libs/System.Net.Security.Native/pal_gssapi.c
 '''
 build = '''
 ulimit -n 4096 || true
