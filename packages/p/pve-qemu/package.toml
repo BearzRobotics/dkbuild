@@ -56,7 +56,7 @@ replaces = ["qemu", "qemu-doc"]
 options = ["!cross", "!check"]
 
 source = [
-    { url = "snapshot:git https://git.proxmox.com/git/pve-qemu.git 2dc0af52b07630e974b4656706c90ca7eac4f4a5", sha256 = "0000000000000000000000000000000000000000000000000000000000000000" },
+    { url = "snapshot:git https://git.proxmox.com/git/pve-qemu.git 2dc0af52b07630e974b4656706c90ca7eac4f4a5", sha256 = "b8cb47ceae2d078859e5a43faf85a189935709ef4b8f825611f72b2b3b27428f" },
     # the meson subproject QEMU's UI needs (keymaps), at the commit its wrap names
     { url = "https://gitlab.com/qemu-project/keycodemapdb/-/archive/f5772a62ec52591ff6870b7e8ef32482371f22c6/keycodemapdb-f5772a62ec52591ff6870b7e8ef32482371f22c6.tar.gz", sha256 = "d014b53382dbb17b8196ad12f50de7f20d0ef1b9f7d54b0be51a6cbb14209195" },
 ]
