@@ -1,9 +1,16 @@
-FenrirOS: the Gradle toolchain asks for Java 19, which the tree does not have;
-Java 21 (an LTS release) builds it. A patch, not a sed in setup, so that
-dkbuild's Gradle dependency resolution (which sees patches) uses it too.
+FenrirOS: two changes to app/build.gradle.kts, as one patch so that
+dkbuild's Gradle dependency resolution (which sees patches) uses them too.
+1. The toolchain asks for Java 19, which the tree does not have; Java 21
+   (an LTS release) builds it.
+2. The `resources` task opens "app/src/main/resources" relative to the
+   process working directory. dkbuild runs Gradle with
+   org.gradle.native=false (the native helpers are glibc builds), and
+   without them the forked build JVM's working directory is not the project
+   directory: Resources.java (No such file or directory). The paths are now
+   resolved against project.rootDir.
 
---- a/app/build.gradle.kts	2026-11-12 08:26:50.517164924 -0500
-+++ b/app/build.gradle.kts	2026-11-12 08:26:50.520953495 -0500
+--- a/app/build.gradle.kts
++++ b/app/build.gradle.kts
 @@ -46,7 +46,7 @@
  // Apply a specific Java toolchain to ease working on different environments.
  java {
@@ -12,4 +19,42 @@ dkbuild's Gradle dependency resolution (which sees patches) uses it too.
 +        languageVersion.set(JavaLanguageVersion.of(21))
      }
  }
+ 
+@@ -64,15 +64,16 @@
+ abstract class Resources : DefaultTask() {
+     @TaskAction
+     fun action() {
+-        val resources = File("app/src/main/resources")
+-        File("app/src/main/java/resources").mkdir()
++        val base = project.rootDir
++        val resources = File(base, "app/src/main/resources")
++        File(base, "app/src/main/java/resources").mkdir()
+ 
+         var output = """package resources;
+ public class Resources {
+     public static String[] resources = {
+ """
+         for (res_path in resources.walk()) {
+-            var res = res_path.toString().replace("app/src/main/resources" , "")
++            var res = res_path.toString().replace(resources.toString() , "")
+             if(res!= "" && !res_path.isDirectory())
+                 output += "\t\t\"${res}\",\n"
+             //println("\"${res}\",")
+@@ -80,7 +81,7 @@
+         output += "\t};\n" 
+ 
+         for (res_path in resources.walk()) {
+-            var res = res_path.toString().replace("app/src/main/resources" , "")
++            var res = res_path.toString().replace(resources.toString() , "")
+ 
+             if(!(res.endsWith(".css") || res.endsWith(".svg")))
+                 continue;
+@@ -94,7 +95,7 @@
+         
+ 
+         output += "}"
+-        File("app/src/main/java/resources/Resources.java").writeText(output)
++        File(base, "app/src/main/java/resources/Resources.java").writeText(output)
+ 
+     }
  

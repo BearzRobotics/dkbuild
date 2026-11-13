@@ -2,10 +2,10 @@
 # (Kotlin and Java on java-gtk, which calls GTK through the JVM's foreign
 # function API: no native jars). Gradle with its dependencies from the Maven
 # store (`gradledeps`, Maven Central and JitPack). Its toolchain asks for
-# Java 19, not in the tree: built with 21 instead (patches/java-21-toolchain.patch).
+# Java 19, not in the tree: built with 21 instead (patches/java-21-toolchain.patch, which also makes the resources task independent of the working directory).
 name = "coulomb"
 version = "0.6.1"
-release = 1
+release = 2
 summary = "Simple electronic circuit simulator (GTK 4)"
 license = "GPL-3.0-only"
 homepage = "https://github.com/hamza-algohary/Coulomb"
