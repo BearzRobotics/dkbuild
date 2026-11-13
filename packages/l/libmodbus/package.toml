@@ -2,7 +2,7 @@
 # other industrial devices; Zabbix's agent uses it for modbus.get.
 name = "libmodbus"
 version = "3.2.0"
-release = 1
+release = 2
 summary = "Modbus protocol library (RTU and TCP)"
 license = "LGPL-2.1-or-later"
 homepage = "https://libmodbus.org"
@@ -14,6 +14,11 @@ source = [
 ]
 
 build = '''
+# modbus-rtu.c uses the TCGETS2/TCSETS2 ioctls with struct termios2. glibc's
+# <sys/ioctl.h> brings in the kernel's <asm/ioctls.h> (where they are defined);
+# musl's does not, so include it where the code selects termios2.
+sed -i 's|^#include "modbus-rtu.h"$|#include "modbus-rtu.h"\n#if defined(HAVE_STRUCT_TERMIOS2)\n#include <asm/ioctls.h>\n#endif|' src/modbus-rtu.c
+grep -q '^#include <asm/ioctls.h>$' src/modbus-rtu.c
 %configure
 %make
 '''
