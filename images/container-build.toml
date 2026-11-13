@@ -7,6 +7,6 @@ arch     = "x86_64"
 hostname = "fenriros"
 packages = ["musl", "musl-devel", "base-files", "apk-tools", "ca-certificates", "tzdb", "coreutils", "dash", "bash",
             "sed", "grep", "gawk", "findutils", "diffutils", "which", "less", "tar", "gzip", "xz", "zstd",
-            "llvm", "llvm-clang", "llvm-lld", "make", "pkgconf", "patch", "git"]
+            "base-devel"]
 exclude  = ["*-doc"]
 output   = ["tar"]

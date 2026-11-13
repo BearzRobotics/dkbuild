@@ -1,0 +1,27 @@
+# What you need to build software on a FenrirOS system, the way Arch's
+# base-devel and Alpine's build-base do. The system compiler is LLVM (clang,
+# lld, libc++), not GCC; zig and Rust are here too (the kernel's Rust support
+# needs rustc, the standard library source, bindgen and clang). Not in base:
+# a machine that only runs software has no use for them. GCC is a choice (it
+# lives in /usr/lib/gcc15 and does not replace clang), so it is not listed.
+# Not packaged yet, so not listed: ccache, mold, valgrind, pahole (dwarves), yasm.
+name = "base-devel"
+version = "1"
+release = 1
+summary = "FenrirOS build tools: LLVM, zig, Rust, make, cmake, autotools, nasm"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+options = ["meta"]
+rundeps = [
+    # compilers and linker
+    "llvm", "llvm-clang", "llvm-lld", "zig", "rust", "rust-src", "bindgen", "cbindgen",
+    "binutils", "nasm",
+    # headers and C library development files
+    "musl-devel", "linux-headers",
+    # build systems
+    "make", "cmake", "ninja", "meson", "scons", "autoconf", "automake", "libtool", "m4", "pkgconf",
+    # generators and text tools builds expect
+    "bison", "flex", "gperf", "gettext", "texinfo", "gawk", "patch", "bc", "diffutils", "findutils",
+    # source handling, kernel builds, debugging
+    "git", "cpio", "rsync", "elfutils", "openssl", "python", "perl", "gdb", "lldb", "strace",
+]
