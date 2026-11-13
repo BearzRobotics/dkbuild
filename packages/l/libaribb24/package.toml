@@ -1,0 +1,25 @@
+name = "libaribb24"
+version = "1.0.3"
+release = 1
+summary = "ARIB STD-B24 caption decoder library"
+license = "LGPL-3.0-or-later"
+homepage = "https://github.com/nkoriyama/aribb24"
+# ffmpeg: --enable-libaribb24 (needs --enable-version3)
+hostdeps = ["automake", "autoconf", "libtool", "pkgconf"]
+builddeps = ["libpng-devel"]
+
+source = [
+    { url = "https://github.com/nkoriyama/aribb24/archive/v1.0.3/aribb24-1.0.3.tar.gz", sha256 = "f61560738926e57f9173510389634d8c06cabedfa857db4b28fb7704707ff128" },
+]
+
+setup = '''
+autoreconf -if
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libaribb24/COPYING"
+'''
