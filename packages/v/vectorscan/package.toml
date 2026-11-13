@@ -8,7 +8,7 @@
 # microarchitecture). The fat runtime renames symbols with nm/objcopy: LLVM's.
 name = "vectorscan"
 version = "5.4.14"
-release = 1
+release = 2
 summary = "High-performance regular expression matching library (Hyperscan fork)"
 license = "BSD-3-Clause"
 homepage = "https://www.vectorcamp.gr/vectorscan"
@@ -24,6 +24,12 @@ environment = '''
 export NM=llvm-nm OBJCOPY=llvm-objcopy
 '''
 setup = '''
+# The fat runtime renames every symbol of its objects except those in a keep list that includes the
+# C library's exports, read from "libc.so.6" (glibc's name; found with clang --print-file-name).
+# Musl's library is libc.so, so the list came out empty and memcpy, snprintf... were renamed to
+# avx2_memcpy etc. ("undefined symbol: avx2_memcpy" at the link). Point it at libc.so.
+sed -i 's/"libc\.so\.6"/"libc.so"/' cmake/build_wrapper.cmake
+grep -q 'set(LIBC "libc.so")' cmake/build_wrapper.cmake
 %cmake \
     -DCMAKE_SKIP_INSTALL_RPATH=ON \
     -DBUILD_SHARED_LIBS=ON \
