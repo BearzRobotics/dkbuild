@@ -1,0 +1,39 @@
+# AVS2 (AVS2, IEEE 1857.4) video decoder; FFmpeg's --enable-libdavs2 (FFmpeg then
+# becomes GPL). Hand-written configure (x264-style): --enable-shared and
+# --enable-static build both. Not imported from cports (Chimera has no davs2).
+# - AR/RANLIB are exported because the configure only looks for gcc-ar and falls
+#   back to "ar"; it appends " rc " to AR itself.
+# - --enable-pic: the static library is PIC too (usable inside shared objects).
+# - Assembly (nasm) is on; OpenCL stays at the configure default (off: it has no --enable switch).
+# needed by: ffmpeg (libdavs2).
+name = "davs2"
+version = "1.7"
+release = 1
+summary = "AVS2 video decoder"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/pkuvcl/davs2"
+hostdeps = ["bash", "nasm", "pkgconf"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://github.com/pkuvcl/davs2/archive/refs/tags/1.7.tar.gz", sha256 = "b697d0b376a1c7f7eda3a4cc6d29707c8154c4774358303653f0a9727f923cc8" },
+]
+
+setup = '''
+export AR="${AR:-llvm-ar}" RANLIB="${RANLIB:-llvm-ranlib}"
+cd build/linux
+%configure \
+    --enable-shared \
+    --enable-static \
+    --enable-pic
+'''
+build = '''
+cd build/linux
+%make
+'''
+install = '''
+cd build/linux
+%make_install
+cd ../..
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/davs2/COPYING"
+'''
