@@ -1,0 +1,35 @@
+# IIDC/DCAM FireWire (and USB) camera control library;
+# FFmpeg's --enable-libdc1394 (needs libdc1394-2). Not imported from cports.
+# autoreconf -fi: the tarball's libtool and config.sub/config.guess do not
+# know this system's musl triple; regenerating takes the current ones.
+# The Linux backend is the firewire-cdev ("juju") one, over libraw1394; the
+# libusb backend is built too. The example programs are built when their
+# X11/SDL dependencies are present (configure checks).
+# needed by: ffmpeg (libdc1394).
+name = "libdc1394"
+version = "2.2.7"
+release = 1
+summary = "Library for controlling IIDC (DCAM) 1394 cameras"
+license = "LGPL-2.1-or-later"
+homepage = "https://damien.douxchamps.net/ieee1394/libdc1394"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["libraw1394-devel", "libusb-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/libdc1394/libdc1394-2/2.2.7/libdc1394-2.2.7.tar.gz", sha256 = "537ceb78dd3cef271a183f4a176191d1cecf85f025520e6bd3758b0e19e6609f" },
+]
+
+setup = '''
+autoreconf -fi -W none
+%configure \
+    --enable-shared \
+    --enable-static
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libdc1394/COPYING"
+'''
