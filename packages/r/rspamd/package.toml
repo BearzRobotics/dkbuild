@@ -14,11 +14,15 @@
 # how to set it up.
 name = "rspamd"
 version = "4.2.3"
-release = 1
+release = 2
 summary = "Spam filtering system"
 license = "Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND BSL-1.0 AND CC0-1.0 AND LGPL-3.0-only AND MIT AND Zlib"
 homepage = "https://rspamd.com"
 archs = ["x86_64", "aarch64"]
+# !lto: clang++ crashes (Segmentation fault) in the ThinLTO link of
+# contrib/replxx/librspamd-replxx.so (r1 log, -flto=thin -fuse-ld=lld), so
+# the whole build runs without LTO.
+options = ["!lto"]
 patches = ["unbundle-hiredis.patch", "unbundle-snowball.patch", "tests.patch"]
 hostdeps = ["cmake", "ninja", "perl", "pkgconf", "ragel"]
 builddeps = ["elfutils-devel", "fmt-devel", "glib-devel", "hiredis-devel", "icu-devel", "libarchive-devel", "libsodium-devel",
