@@ -1,17 +1,17 @@
 # SoX, the Swiss army knife of audio: sox_ng, the maintained continuation
 # (SoX itself has had no release since 2015). Installed as sox_ng and, with
 # --enable-replace, as sox/soxi/play/rec too.
-# Not built: AMR (opencore-amr), LADSPA, FFTW and SpeexDSP are not in the tree
-# yet; sox_ng's own copies of libgsm and LPC-10 are used.
+# FFmpeg and AMR (opencore-amr, found by configure) are on. Not built: LADSPA, FFTW and SpeexDSP;
+# sox_ng's own copies of libgsm and LPC-10 are used.
 name = "sox-ng"
 version = "14.8.1"
-release = 2
+release = 3
 summary = "Sound processing tool (SoX)"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://codeberg.org/sox_ng/sox_ng"
 provides = ["sox"]
 hostdeps = ["pkgconf"]
-builddeps = ["alsa-lib-devel", "file-devel", "flac-devel", "lame-devel", "libid3tag-devel", "libmad-devel", "libogg-devel", "libpng-devel", "libpulse-devel", "libsndfile-devel", "libvorbis-devel", "opus-devel", "opusfile-devel", "twolame-devel", "wavpack-devel", "zlib-ng-compat-devel"]
+builddeps = ["alsa-lib-devel", "ffmpeg-devel", "file-devel", "opencore-amr-devel", "flac-devel", "lame-devel", "libid3tag-devel", "libmad-devel", "libogg-devel", "libpng-devel", "libpulse-devel", "libsndfile-devel", "libvorbis-devel", "opus-devel", "opusfile-devel", "twolame-devel", "wavpack-devel", "zlib-ng-compat-devel"]
 options = ["!check"]
 
 source = [
@@ -23,7 +23,7 @@ setup = '''
     --enable-replace \
     --with-distro=FenrirOS \
     --without-ladspa \
-    --without-ffmpeg
+    --with-ffmpeg
 '''
 build = '''
 %make

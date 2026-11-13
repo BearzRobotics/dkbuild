@@ -2,13 +2,13 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "mpv"
 version = "0.41.0"
-release = 4
+release = 5
 summary = "Video player based on mplayer2"
 license = "GPL-2.0-or-later"
 homepage = "https://mpv.io"
 patches = ["caca.patch"]
 hostdeps = ["meson", "pkgconf", "python-docutils", "wayland"]
-builddeps = ["alsa-lib-devel", "ffmpeg-devel", "harfbuzz-devel", "lcms2-devel", "libarchive-devel", "libass-devel", "libbluray-devel", "libcaca-devel", "libcdio-paranoia-devel", "libdisplay-info-devel", "libdrm-devel", "libdvdnav-devel", "libglvnd-devel", "libplacebo-devel", "libpulse-devel", "libsixel-devel", "libva-devel", "libvdpau-devel", "libx11-devel", "libxcb-devel", "libxfixes-devel", "libxinerama-devel", "libxkbcommon-devel", "libxpresent-devel", "libxrandr-devel", "libxscrnsaver-devel", "libxv-devel", "linux-headers", "lua5.1-devel", "mesa-devel", "nv-codec-headers", "openal-soft-devel", "pipewire-devel", "rubberband-devel", "sdl2-compat-devel", "sndio-devel", "uchardet-devel", "util-linux-devel", "vapoursynth-devel", "vulkan-headers", "vulkan-loader-devel", "wayland-devel", "wayland-protocols", "zimg-devel"]
+builddeps = ["alsa-lib-devel", "ffmpeg-devel", "harfbuzz-devel", "lcms2-devel", "libarchive-devel", "libass-devel", "libbluray-devel", "libcaca-devel", "libcdio-paranoia-devel", "libdisplay-info-devel", "libdrm-devel", "libdvdnav-devel", "libglvnd-devel", "libplacebo-devel", "libpulse-devel", "libsixel-devel", "libva-devel", "libvdpau-devel", "libx11-devel", "libxcb-devel", "libxfixes-devel", "libxinerama-devel", "libxkbcommon-devel", "libxpresent-devel", "libxrandr-devel", "libxscrnsaver-devel", "libxv-devel", "linux-headers", "lua5.1-devel", "mesa-devel", "mujs-devel", "nv-codec-headers", "openal-soft-devel", "pipewire-devel", "rubberband-devel", "sdl2-compat-devel", "sndio-devel", "uchardet-devel", "util-linux-devel", "vapoursynth-devel", "vulkan-headers", "vulkan-loader-devel", "wayland-devel", "wayland-protocols", "zimg-devel"]
 rundeps = ["hicolor-icon-theme"]
 
 source = [
@@ -51,7 +51,7 @@ setup = '''
     -Dxv=enabled \
     -Dzimg=enabled \
     -Dzlib=enabled \
-    -Djavascript=disabled \
+    -Djavascript=enabled \
     -Dalsa=enabled \
     -Dopenal=enabled \
     -Dopensles=disabled \
