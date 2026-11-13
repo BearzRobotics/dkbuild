@@ -4,7 +4,7 @@
 # is Arch Linux's mirror of the identical release tarball.
 name = "libfilezilla"
 version = "0.58.0"
-release = 1
+release = 2
 summary = "Small C++ library for networking and platform abstraction"
 license = "GPL-2.0-or-later"
 homepage = "https://lib.filezilla-project.org"
@@ -17,6 +17,9 @@ source = [
 ]
 
 setup = '''
+# clang in GNU mode predefines the macro `unix` (as 1), which breaks the
+# `unix` enumerator of address_type in iputils.hpp: undefine it
+export CPPFLAGS="$CPPFLAGS -Uunix"
 %configure
 '''
 build = '''
