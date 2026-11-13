@@ -5,7 +5,7 @@
 # Based on Chimera Linux cports (BSD-2-Clause): user/tini.
 name = "tini"
 version = "0.19.0"
-release = 1
+release = 2
 summary = "Tiny init for containers"
 license = "MIT"
 homepage = "https://github.com/krallin/tini"
@@ -17,6 +17,14 @@ source = [
 
 build = '''
 # CMakeLists.txt asks for cmake_minimum_required 2.8, which CMake 4 refuses
+# tini's CMakeLists builds with -Werror -pedantic-errors, and its source (2020) is not clean for
+# clang 21: "int f()" declarations without prototypes and basename() used without <libgen.h>
+# (an implicit declaration, an error in C99+). Add the missing include, make the prototypes real
+# ones, and drop -Werror from the compile flags.
+sed -i '1i #include <libgen.h>' src/tini.c
+sed -i -E 's/^(int|void) (isolate_child|parse_env|register_subreaper|reaper_check) ?\(\)/\1 \2(void)/' src/tini.c
+sed -i 's/ -Werror//; s/ -pedantic-errors//' CMakeLists.txt
+grep -q 'isolate_child(void)' src/tini.c
 %cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 %cmake_build
 '''
