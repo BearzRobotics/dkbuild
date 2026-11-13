@@ -1,0 +1,26 @@
+# UDF reader for libbluray (ISO/disc images of Blu-ray discs). libbluray's
+# configure uses it by default (--with-external-libudfread, found with pkg-config
+# libudfread >= 1.1.0), so libbluray needs libudfread-devel in its builddeps.
+# Examples (a small test tool) are built but not installed.
+name = "libudfread"
+version = "1.2.0"
+release = 1
+summary = "Library for reading UDF filesystems from block devices and images"
+license = "LGPL-2.1-or-later"
+homepage = "https://code.videolan.org/videolan/libudfread"
+hostdeps = ["meson", "pkgconf"]
+
+source = [
+    { url = "https://download.videolan.org/pub/videolan/libudfread/libudfread-1.2.0.tar.xz", sha256 = "bb477cbd4cfbfc7787d9d05b71ee5e70430f5cfebf1297497f7e83547958050f" },
+]
+
+setup = '''
+%meson -Denable_examples=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libudfread/COPYING"
+'''
