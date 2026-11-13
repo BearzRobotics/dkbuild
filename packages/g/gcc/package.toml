@@ -20,7 +20,7 @@
 # (binutils) do the assembling and linking.
 name = "gcc"
 version = "15.2.0"
-release = 1
+release = 2
 summary = "GNU Compiler Collection (C, C++, Ada, Fortran, D, Go, Objective-C, Modula-2, COBOL, Rust)"
 license = "GPL-3.0-or-later AND GPL-3.0-or-later WITH GCC-exception-3.1"
 homepage = "https://gcc.gnu.org"
@@ -108,7 +108,11 @@ for t in "$pkgdir$p"/bin/gnat*; do
     printf '#!/bin/sh\nPATH=%s/bin:$PATH exec %s/bin/%s "$@"\n' $p $p $n > "$pkgdir/usr/bin/$n"
     chmod 755 "$pkgdir/usr/bin/$n"
 done
-test -x "$pkgdir/usr/bin/gnatmake" && test -e "$pkgdir/usr/bin/gcc-15"
+# r2: -L, not -e: gcc-15 is a link to the absolute /usr/lib/gcc15/bin/gcc, which does not exist in
+# the build root (only under $pkgdir), so `test -e` was false and the script ended here with no
+# message (the log's visible tail, libtool's ldconfig and "the.host.compiler.should.not.be.needed"
+# lines, is only stderr noise from the Ada runtime install and libtool; those are harmless)
+test -x "$pkgdir/usr/bin/gnatmake" && test -L "$pkgdir/usr/bin/gcc-15" && test -x "$pkgdir$p/bin/gcc"
 # libssp_nonshared.a (see environment) where this GCC's driver finds it
 install -m644 /tmp/ssp/libssp_nonshared.a "$pkgdir$p/lib/gcc/x86_64-fenriros-linux-musl/$version/"
 # libtool archives and info pages' directory index
