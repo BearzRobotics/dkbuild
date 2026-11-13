@@ -22,7 +22,7 @@
 # that replaces the zeros below.
 name = "dotnet"
 version = "10.0.114"
-release = 4
+release = 5
 summary = ".NET SDK, runtime and ASP.NET Core"
 license = "MIT"
 homepage = "https://dotnet.microsoft.com"
@@ -78,6 +78,16 @@ if [ -x /usr/lib/dotnet/dotnet ]; then
     seed="--with-sdk /usr/lib/dotnet --with-packages /tmp/previously-source-built"
 else
     seed="--with-sdk $PWD/.dotnet-musl"
+    # Microsoft's seed runtime (libcoreclr.so) dlopens liblttng-ust-tracepoint.so.1 when it
+    # finds one, and registers its tracepoints with it. Since lttng-ust-devel is a builddep (r4)
+    # it finds ours, and the seed's own `dotnet` segfaults at start (version '' and a core dump
+    # in `build-server shutdown`; r3 without lttng-ust ran fine, the library was absent and the
+    # tracepoints just went unregistered). Put an empty library of that name first in the seed's
+    # search path: the dlopen succeeds, finds no symbols and registers nothing, as before.
+    # (Only the seed needs this; the SDK built here is linked against the real lttng-ust.)
+    mkdir -p /tmp/lttng-stub
+    echo 'int lttng_stub;' | clang -shared -x c - -o /tmp/lttng-stub/liblttng-ust-tracepoint.so.1
+    export LD_LIBRARY_PATH=/tmp/lttng-stub${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 fi
 ./build.sh --source-only $seed \
     --source-repository https://github.com/dotnet/dotnet \
