@@ -1,0 +1,19 @@
+# dkbuild upstream: per-package overrides for the release check (src/upstream.py).
+#   series = "8.6."     only versions starting with this (stay on a major series)
+#   url = "..."         check this repository or page instead of the first source
+#   regex = "..."       group 1 is the version, matched against tags or page text
+#   ignore = "..."      versions matching this regex are never reported
+#   skip = "reason"     not checked
+# Adding an entry here never changes a recipe's build hash.
+
+[tcl]
+series = "8.6."     # Tcl 9 is not source-compatible; the tree's users want 8.6
+
+[tk]
+series = "8.6."
+
+["gtk+3"]
+series = "3.24."    # GTK 3's last series; 3.9x was GTK 4's development series
+
+[libmspack]
+regex = "libmspack-([0-9.]+)alpha"   # every release is named "<n>alpha"

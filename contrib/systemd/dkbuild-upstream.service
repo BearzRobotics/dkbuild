@@ -1,0 +1,12 @@
+# Checks the recipes for newer upstream releases and shows a desktop
+# notification when there are some (dkbuild upstream --notify). A user unit:
+#   cp contrib/systemd/dkbuild-upstream.* ~/.config/systemd/user/
+#   systemctl --user daemon-reload && systemctl --user enable --now dkbuild-upstream.timer
+# The report is in work/upstream/report.txt.
+[Unit]
+Description=dkbuild: check recipes for upstream releases
+
+[Service]
+Type=oneshot
+WorkingDirectory=/stuff/git/dkbuild
+ExecStart=/stuff/git/dkbuild/zig-out/bin/dkbuild upstream --notify

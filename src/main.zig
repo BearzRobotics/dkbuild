@@ -36,9 +36,13 @@ const usage =
     \\                             as ISO images in out/<name>/: one image (media usb) or a
     \\                             set for discs (cd, dvd, dvd-dl, bd25, bd50, bd100)
     \\  prune [--dry-run] [--key FILE]
-    \\  outdated [--bump]          recipes changed since their last build without a new release (--bump raises it)
     \\                             remove packages from repo/ that their recipe no longer
     \\                             builds (older versions), and rebuild the index
+    \\  outdated [--bump]          recipes changed since their last build without a new release (--bump raises it)
+    \\  upstream [--all] [--refresh] [--notify] [name]...
+    \\                             which recipes have a newer upstream release (GitHub, GitLab,
+    \\                             SourceForge, GNOME, KDE, PyPI, crates.io, CPAN, directory
+    \\                             listings); overrides in upstream.toml; changes nothing
     \\  graph <name>...            print the build order for packages
     \\  import-cbuild [--out DIR] <template.py|dir>...
     \\                             convert Chimera cbuild templates into draft recipes
@@ -539,6 +543,28 @@ pub fn main(init: std.process.Init) !void {
             error.OutOfMemory => return err,
             else => std.process.exit(1),
         };
+    } else if (std.mem.eql(u8, cmd, "upstream")) {
+        // The checker is Python (src/upstream.py, embedded): it reads the
+        // recipes with tomllib and asks each source's host for its releases.
+        const dir = try std.fs.path.join(arena, &.{ root, "work", "upstream" });
+        try std.Io.Dir.cwd().createDirPath(init.io, dir);
+        const script = try std.fs.path.join(arena, &.{ dir, "upstream.py" });
+        try std.Io.Dir.cwd().writeFile(init.io, .{ .sub_path = script, .data = @embedFile("upstream.py") });
+        var argv: std.ArrayList([]const u8) = .empty;
+        try argv.appendSlice(arena, &.{ "python3", "-I", script, root });
+        for (rest) |a| {
+            if (std.mem.startsWith(u8, a, "-") and !std.mem.eql(u8, a, "--all") and !std.mem.eql(u8, a, "--refresh") and !std.mem.eql(u8, a, "--notify")) return die(usage);
+            try argv.append(arena, a);
+        }
+        var child = std.process.spawn(init.io, .{ .argv = argv.items }) catch |err| {
+            std.debug.print("upstream: cannot run python3: {s}\n", .{@errorName(err)});
+            std.process.exit(1);
+        };
+        const res = child.wait(init.io) catch std.process.exit(1);
+        switch (res) {
+            .exited => |c| if (c != 0) std.process.exit(c),
+            else => std.process.exit(1),
+        }
     } else if (std.mem.eql(u8, cmd, "graph")) {
         if (rest.len == 0) return die(usage);
         const t = try tree.load(arena, init.io, root, &problems);
