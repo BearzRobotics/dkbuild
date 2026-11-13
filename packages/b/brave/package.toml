@@ -1,0 +1,313 @@
+# Brave, the web browser (brave-core 1.99.57, release channel), built from
+# source on Chromium 157.0.8103.79, the version brave-core's package.json pins
+# (packages/c/chromium is 157.0.8103.38; this recipe carries its own copy of
+# that recipe's machinery and patches, for its own Chromium version).
+#
+# Sources:
+#   - Chromium: Google's release tarball (the full one: Brave's patches touch
+#     some test files that the -lite and chromium-linux-tarballs ones leave
+#     out).
+#   - crubit, as packages/c/chromium (its crates vendored at fetch time).
+#   - Brave: a snapshot (SPEC.md 5.3, src/snapshot-brave.sh): brave-core at
+#     the tag, the repositories its DEPS pins for Linux, and its JavaScript
+#     packages (pnpm, --ignore-scripts, musl) installed at fetch time, so the
+#     build is offline. Brave's own checkout (gclient and hooks) is replaced by
+#     this recipe's setup: Brave's patches applied as its build tools do (git
+#     apply, per repository in patches/.repositories.cfg), the files its
+#     hooks and `npm run build` generate or copy (chrome/VERSION, version.gni,
+#     LASTCHANGE, licenses, branding), then Chromium's build as
+#     packages/c/chromium has it.
+#
+# patches/ is packages/c/chromium's (Chimera Linux's main/chromium port: its
+# headers say what each one changes), applied first; Brave's go on top. Where
+# Brave's tools download prebuilt things, the build uses the system's: rust
+# and rust-wasm (Brave's rust overlay is Rust's wasm32 std), nodejs and pnpm
+# (Brave's Node and node_modules), esbuild (the system's package where the
+# installed JavaScript packages have esbuild's prebuilt one). ast-grep and
+# opengrep are developer tools the build never runs. One prebuilt binary
+# from npm is used: rollup 4's musl module (@rollup/rollup-linux-x64-musl),
+# which vite loads when leo's build preprocesses its Svelte components; the
+# snapshot's other per-platform packages (@parcel/watcher, unrs-resolver:
+# file watching and jest) are not run by the build.
+#
+# Everything Brave builds for Linux is built (its defaults, nothing turned
+# off): Rewards and Brave Ads (BAT; Uphold, bitFlyer and ZebPay accounts),
+# Wallet (its Bitcoin, Zcash, Ethereum, Solana, Filecoin and Cardano code),
+# Leo AI, Talk, News, Playlist, Speedreader, Tor windows, containers, Web
+# Discovery, ad blocking (adblock-rust). Brave VPN is not in Brave's Linux
+# builds at all (its build files enable it only for Windows, macOS, Android
+# and iOS). Some features download a binary at run time through Brave's
+# component updater, as Brave's own builds do, and those binaries are glibc
+# builds: the Tor client (for Tor windows) and Google's Widevine CDM
+# (proprietary; DRM video), which Brave fetches when the user allows it.
+# Nothing of them is in the package.
+#
+# Not an official Brave build: Brave's private service keys (brave_services_key
+# and the Leo AI, search and speech-to-text keys) are not public, so they are
+# empty here (Brave's GN files insist on values in an is_official_build; the
+# sed in setup lifts that). Brave's servers check that key on the requests
+# that carry it: see the comment above the sed for what that leaves out.
+# Google's API keys are absent as for packages/c/chromium (Google sign-in/
+# Chrome sync are not in Brave anyway). No self-update: Linux Brave has none
+# (packages update it), and update notifications are off.
+#
+# Not built yet.
+name = "brave"
+version = "1.99.57"
+release = 1
+summary = "Brave web browser"
+license = "MPL-2.0 AND BSD-3-Clause"
+homepage = "https://brave.com"
+archs = ["x86_64"]
+patches = ["004-compiler.patch", "008-fstatat64.patch", "009-gdbinit.patch", "016-musl-sandbox.patch", "017-musl-tid-caching.patch", "019-musl-no-execinfo.patch", "020-musl-no-mallinfo.patch", "021-musl-no-res-ninit.patch", "022-no-sandbox-settls.patch", "023-aarch64-no-memtag.patch", "024-pvalloc.patch", "027-temp-failure-retry.patch", "028-yes-musl.patch", "032-dawn-platform-ppc64.patch", "033-perfetto-get-thread-name.patch", "035-breakpad-no-getcontext.patch", "038-misc-fixes.patch", "041-ffmpeg-opus.patch", "042-disable-mei-preload.patch", "999-ppc64le-support.patch", "chromium-141-cssstylesheet-iwyu.patch", "cr133-ffmpeg-no-noh264parse.patch", "cr140-musl-prctl.patch", "cr143-clang-string_view.patch", "cr143-libpng-testonly.patch", "cr143-libsync-__BEGIN_DECLS.patch", "cr145-iwyu-dev_t.patch", "cr145-musl-unfortify-SkDescriptor.patch", "cr146-sanitize-ignore-for-ubsan-feature.patch", "cr146-swiftshader-unfortify-memset-memcpy.patch", "cr146-unfortify-blink-display_item_list.patch", "cr147-simdutf-8.0-base-char.patch", "cr148-rust-1.95-bytemuck.patch", "cr149-rust-toolchain-var.patch", "cr152-unbundle-minizip-undo-unicode.patch", "cr152-unbundle-opus-devtools.patch", "cr153-typescript-break-definitions.patch", "cr153-unbundle-opus-iamf.patch", "cr155-no-python-vendoring.patch", "cr156-unbundle-icu-remoting.patch", "cr157-crubit-fix-rs_bindings_from_cc-breakages.patch", "cr157-ffmpeg-no-agtm.patch", "cr157-unbundle-brotli-pdfium.patch", "dawn-cipd-fuckoff.patch", "disable-dns_config_service.patch", "entry-forward-decl-incomplete-type.patch", "fort3.patch", "ignore-unknown-flags.patch", "libcxx-abi1.patch", "llvm21-client-cert-fix.patch", "llvm22-permission-request.patch", "musl-conditional-tkill.patch", "no-lifetime-dse.patch", "noclanglibs.patch", "node-version-check-fuckoff.patch", "qt6-6.7.patch", "rust-crubit-no-stdcpp.patch", "rust-tgt.patch", "sanitizer-no-death-callback.patch", "silence-noapikeys.patch", "skcolor-fromstring.patch", "system-ffmpeg-include.patch", "terminal-fdset.patch", "thirdparty-tests-fuckoff.patch", "v8-safe-libcxx.patch"]
+hostdeps = ["bash", "bison", "bindgen", "esbuild", "findutils", "git", "gn", "go", "gperf", "hwdata", "ninja", "nodejs",
+            "perl", "pkgconf", "pnpm", "python", "rust", "rust-src", "rust-wasm", "rustc-dev", "typescript-go"]
+builddeps = ["alsa-lib-devel", "brotli-devel", "bzip2-devel", "cairo-devel", "cups-devel", "curl-devel", "dav1d-devel",
+             "double-conversion-devel", "elfutils-devel", "eudev-devel", "ffmpeg-devel", "flac-devel", "fontconfig-devel",
+             "freetype-devel", "glib-devel", "gtk4-devel", "harfbuzz-devel", "heimdal-devel", "highway-devel", "lcms2-devel",
+             "libaom-devel", "libavif-devel", "libcap-devel", "libdrm-devel", "libevdev-devel", "libevent-devel",
+             "libexif-devel", "libffi-devel", "libgcrypt-devel", "libjpeg-turbo-devel", "libmtp-devel", "libpng-devel",
+             "libpulse-devel", "libsecret-devel", "libucontext-devel", "libusb-devel", "libva-devel", "libwebp-devel",
+             "libxcomposite-devel", "libxcursor-devel", "libxdamage-devel", "libxi-devel", "libxml2-devel",
+             "libxrandr-devel", "libxscrnsaver-devel", "libxshmfence-devel", "libxslt-devel", "linux-headers",
+             "llvm-devel", "mesa-devel", "minizip-devel", "musl-bsd-headers", "nss-devel", "openssl-devel", "opus-devel",
+             "pciutils-devel", "pipewire-devel", "qt6-qtbase-devel", "snappy-devel", "speex-devel", "sqlite-devel",
+             "xcbproto", "zlib-ng-compat-devel", "zstd-devel"]
+rundeps = ["hwdata", "xdg-utils"]
+# jobs:12 as packages/c/chromium: also marks the build heavy, so a world runs
+# it alone (beside Chromium or Electron it would exhaust the host's memory)
+options = ["!check", "jobs:12", "cargodeps", "cargolock=tools/crates/gnrt"]
+
+source = [
+    { url = "https://commondatastorage.googleapis.com/chromium-browser-official/chromium-157.0.8103.79.tar.xz", sha256 = "256b77d82104799a2d3aa0a389cddc1af706ee2037205233566d7d3f1cfbb17b" },
+    { url = "https://github.com/google/crubit/archive/40fbac34597084a0863256d633889eac2c23b91b/crubit-40fbac34597084a0863256d633889eac2c23b91b.tar.gz", sha256 = "07b57fedcffc8c1e8df4875fc314c2290c8cd50ab8d04340b12c945e9c331f5a" },
+    { url = "snapshot:brave v1.99.57 11.25.0", sha256 = "cbc2cca71a3979212cba846f861a73a3117b89708a1fb99d67b04243b53b6010" },
+]
+
+environment = '''
+export RUSTC_BOOTSTRAP=1 CARGO_NET_OFFLINE=true
+# Brave's host tools that GN builds with cargo (brave/tools/crates, vendored:
+# wasm-bindgen, wasm-pack, and wasm-opt with binaryen's C++ through the cc
+# crate): linked dynamically (Rust's musl target links statically by
+# default) and against LLVM's libc++, not libstdc++. Only for the host
+# target: the wasm32 builds keep their own flags.
+export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-Ctarget-feature=-crt-static"
+export CXXSTDLIB=c++
+# packages/c/chromium's (Chimera's): no stack clash protection, less warning
+# noise, no debug information
+export CFLAGS="${CFLAGS/-g/}"
+export CFLAGS="${CFLAGS/-fstack-clash-protection} -Wno-unknown-warning-option -Wno-builtin-macro-redefined -Wno-deprecated-declarations -Wno-sign-compare -Wno-shorten-64-to-32"
+export CXXFLAGS="${CXXFLAGS/-g/}"
+export CXXFLAGS="${CXXFLAGS/-fstack-clash-protection} -Wno-unknown-warning-option -Wno-builtin-macro-redefined -Wno-deprecated-declarations -Wno-sign-compare -Wno-shorten-64-to-32"
+'''
+
+setup = '''
+# Brave's tree (the snapshot, /build/brave-core-v<version>) where its checkout
+# puts it: src/brave
+mv ../brave-core-v$version brave
+
+# Brave's patches, as its build tools apply them (build/commands/lib/
+# gitPatcher.js: `git apply --ignore-space-change --ignore-whitespace`, one
+# repository at a time, the ones patches/.repositories.cfg lists; the patches
+# of a repository are the *.patch files directly in its directory under
+# brave/patches). packages/c/chromium's patches are already applied (dkbuild
+# applies `patches` first); six files have patches from both, and every
+# Brave patch applies on top of them (checked on this tarball). Two are left
+# out: they change only test files that Google's tarball leaves out
+# (chrome/test/data/webui/settings/personalization_options_test.ts and
+# sync_test_util.ts). GIT_CEILING_DIRECTORIES: git apply must not take a git
+# repository above the tree for its own (inside one it would skip, silently,
+# every path outside the directory it runs in).
+export GIT_CEILING_DIRECTORIES="$(dirname "$PWD")"
+grep '^//' brave/patches/.repositories.cfg | while read -r r; do
+    d=${r#//}
+    for p in brave/patches/${d:+$d/}*.patch; do
+        [ -e "$p" ] || continue
+        case "$p" in
+        */chrome-test-data-webui-settings-personalization_options_test.ts.patch) continue ;;
+        */chrome-test-data-webui-settings-sync_test_util.ts.patch) continue ;;
+        esac
+        git apply --ignore-space-change --ignore-whitespace ${d:+--directory=$d} "$p" ||
+            { echo "Brave patch failed: $p"; exit 1; }
+    done
+done
+
+# Brave's version in chrome/VERSION (its build/util/version.py `update`, which
+# reads the unpatched file from git; here the tarball's is the unpatched one),
+# then its //brave/build/version.gni (the brave_version_gni hook)
+cp chrome/VERSION chrome/VERSION.chromium
+cmajor=$(sed -n 's/^MAJOR=//p' chrome/VERSION.chromium)
+IFS=. read -r bmaj bmin bbuild <<EOF2
+$version
+EOF2
+printf 'MAJOR=%s\nMINOR=%s\nBUILD=%s\nPATCH=%s\n' "$cmajor" "$bmaj" "$bmin" "$bbuild" > chrome/VERSION
+python3 brave/build/util/version.py gen chrome/VERSION
+# LASTCHANGE: brave-core's commit (the brave_lastchange hook; the snapshot
+# wrote it)
+cp brave/LASTCHANGE.dkbuild build/util/LASTCHANGE
+cp brave/LASTCHANGE.committime.dkbuild build/util/LASTCHANGE.committime
+# the generate_licenses hook
+(cd brave && python3 script/generate_licenses.py)
+
+# esbuild: the system's npm package (its binary built from source) where the
+# node_modules of brave-core, web-discovery-project and leo have esbuild's
+# (with its prebuilt binary)
+for e in $(find brave/node_modules/.pnpm brave/vendor/web-discovery-project/node_modules/.pnpm \
+               brave/dkbuild-leo/node_modules/.pnpm -maxdepth 4 -type d -path '*/node_modules/esbuild'); do
+    rm -rf "$e"
+    ln -s /usr/lib/node_modules/esbuild "$e"
+done
+
+# @brave/leo (Brave's design system, git-hosted: its `prepare` builds it, which
+# the snapshot's --ignore-scripts install skipped): its source with the
+# packages it builds with (brave/dkbuild-leo, from the snapshot) built here,
+# offline, then in the place of the partial copy pnpm installed (beside it,
+# the links pnpm made for leo's peers, such as react, stay)
+(cd brave/dkbuild-leo && pnpm run build)
+leo=$(readlink -f brave/node_modules/@brave/leo)
+rm -rf "$leo"
+mv brave/dkbuild-leo "$leo"
+
+# Brave's branding, copied into Chromium's tree as `npm run build` does before
+# gn gen: Brave's own build/commands/lib/branding.js (strings, themes, logos,
+# vector icons, installer behaviours and the WebUI files it replaces), run
+# with node for a Linux release-channel build (is_brave_release_build: the
+# release logo)
+printf 'is_brave_release_build=1\n' > brave/.env
+(cd brave && node --input-type=module -e '
+import config from "./build/commands/lib/config.ts"
+import branding from "./build/commands/lib/branding.js"
+config.buildConfig = "Release"
+config.update({ target_os: "linux", target_arch: "x64", channel: "release" })
+branding.update()
+')
+rm brave/.env
+
+# Brave's service keys are private: empty here, and its GN files' checks that
+# an official build has them removed. What the empty key leaves out: Brave's
+# servers take the BraveServiceKey header on component updates (go-updater:
+# ad-block list and other component updates), Brave News, Rewards, Wallet's
+# price and swap backends, sync (sync-v2), Leo AI (service_key_aichat),
+# Brave Search's in-browser API (service_key_search), speech-to-text
+# (service_key_stt), translation and email aliases; those that check it
+# refuse such requests. Endpoints themselves keep Brave's defaults.
+sed -i '/assert(\(brave_services_key\|service_key_aichat\|service_key_search\|service_key_stt\) != "")/d' \
+    brave/components/constants/BUILD.gn brave/components/ai_chat/core/common/buildflags/BUILD.gn \
+    brave/components/brave_search/common/buildflags/BUILD.gn brave/components/speech_to_text/BUILD.gn
+
+# System tools where the build expects its downloaded ones (Chimera's post_patch).
+mkdir -p third_party/node/linux/node-linux-x64/bin third_party/gperf/cipd/bin \
+         third_party/dawn/tools/golang/linux-unknown/bin buildtools/linux64-format
+ln -sf /usr/bin/node third_party/node/linux/node-linux-x64/bin/node
+ln -sf /usr/bin/gperf third_party/gperf/cipd/bin/gperf
+ln -sf /usr/bin/go third_party/dawn/tools/golang/linux-unknown/bin/go
+rm -f buildtools/linux64-format/clang-format
+ln -s /usr/bin/clang-format buildtools/linux64-format/clang-format
+rm -rf third_party/devtools-frontend/src/third_party/esbuild/esbuild third_party/devtools-frontend/src/node_modules/esbuild
+ln -s /usr/bin/esbuild third_party/devtools-frontend/src/third_party/esbuild/esbuild
+ln -s /usr/lib/node_modules/esbuild third_party/devtools-frontend/src/node_modules/esbuild
+
+# TypeScript 7: our typescript-go in the place of Microsoft's package (tsc and
+# the lib files beside it, copied: tsc reads the lib files next to its real
+# path), with Chromium's patch to lib.dom.d.ts (its 3pp/patches).
+ts=third_party/typescript/linux-amd64
+rm -rf $ts/src
+mkdir -p $ts/src/lib
+cp -a /usr/lib/typescript-go/. $ts/src/lib/
+for p in $ts/3pp/patches/*.patch; do patch -d $ts/src -p1 < "$p"; done
+
+# Rust: the system toolchain where Chromium's own is expected (with
+# rust-wasm's wasm32 std in its rustlib: Brave's rust overlay)
+mkdir -p third_party/rust-toolchain/bin third_party/rust-toolchain/lib
+for t in cargo rustc rustfmt; do ln -sf /usr/bin/$t third_party/rust-toolchain/bin/$t; done
+ln -sfn /usr/lib/rustlib third_party/rust-toolchain/lib/rustlib
+rustc -V > third_party/rust-toolchain/VERSION
+cp third_party/rust-toolchain/VERSION third_party/rust-toolchain/INSTALLED_VERSION
+grep -qx x86_64-unknown-linux-musl build/rust/known-target-triples.txt ||
+    echo x86_64-unknown-linux-musl >> build/rust/known-target-triples.txt
+
+# crubit, as packages/c/chromium: the second source where build_crubit.py
+# expects its checkout, with its vendored crates through a CARGO_HOME config
+mv ../crubit-40fbac34597084a0863256d633889eac2c23b91b crubit
+mkdir -p third_party/rust-toolchain-intermediate out/crubit/target/cargo_home
+ln -sfn ../../crubit third_party/rust-toolchain-intermediate/crubit
+sed "s|^directory = \\"vendor\\"|directory = \\"$PWD/crubit/vendor\\"|" crubit/.cargo/config.toml \
+    > out/crubit/target/cargo_home/config.toml
+grep -q "$PWD/crubit/vendor" out/crubit/target/cargo_home/config.toml
+RUSTFLAGS="-Ctarget-feature=-crt-static" LD=clang \
+    python3 tools/rust/build_crubit.py --skip-checkout --out-dir out/crubit
+mkdir -p third_party/rust-toolchain/lib/third_party
+[ -e third_party/rust-toolchain/lib/third_party/crubit ] ||
+    ln -s ../../../../crubit third_party/rust-toolchain/lib/third_party/crubit
+
+# gnrt, then the GN rules for the system Rust's standard library (rust-src)
+(cd tools/crates/gnrt && cargo build --locked --offline --release)
+./tools/crates/gnrt/target/release/gnrt gen --for-std third_party/rust-toolchain/lib/rustlib/src/rust
+
+# System libraries (packages/c/chromium's list): their bundled copies removed
+# (Brave's tree left alone, files/unbundle.sh), GN pointed at the system's.
+cp $pkgfiles/unbundle.sh .
+unbundle="brotli dav1d double-conversion ffmpeg flac fontconfig freetype harfbuzz highway libjpeg libpng libsecret libusb libwebp libxml libxslt opus zlib zstd"
+for l in $unbundle libjpeg_turbo; do sh ./unbundle.sh $l; done
+python3 build/linux/unbundle/replace_gn_files.py --system-libraries $unbundle
+python3 third_party/libaddressinput/chromium/tools/update-strings.py
+
+# packages/c/chromium's arguments with Brave's (build/commands/lib/
+# buildArgs.ts for a Linux release-channel build: its args files, the
+# channel, no signing, no update notifications; Brave's arguments that the
+# imported files set are not repeated)
+gn gen out/Release --args='
+    import("//brave/build/args/brave_defaults.gni")
+    import("//brave/build/args/blink_platform_defaults.gni")
+    import("//brave/build/args/branding_defaults.gni")
+    import("//brave/build/args/desktop_defaults.gni")
+    brave_channel="" skip_signing=true enable_update_notifications=false
+    enable_hangout_services_extension=false use_remoteexec=false
+    brave_services_key="" service_key_aichat="" service_key_search="" service_key_stt=""
+    custom_toolchain="//build/toolchain/linux/unbundle:default"
+    host_toolchain="//build/toolchain/linux/unbundle:default"
+    blink_enable_generated_code_formatting=false chrome_pgo_phase=0
+    clang_base_path="/usr" clang_use_chrome_plugins=false
+    enable_rust=true enable_stripping=false enable_vr=false fatal_linker_warnings=false
+    gtk_version=4 host_pkg_config="/usr/bin/pkg-config"
+    icu_use_data_file=false is_clang=true is_component_ffmpeg=true is_debug=false
+    is_official_build=true link_pulseaudio=true moc_qt6_path="/usr/lib/qt6/libexec"
+    regenerate_x11_protos=true rtc_link_pipewire=true rtc_use_pipewire=true
+    rust_bindgen_root="/usr" rustc_version="0" symbol_level=0 treat_warnings_as_errors=false
+    safe_browsing_use_unrar=false v8_use_metagen=false use_clang_modules=false
+    use_custom_libcxx=false use_dwarf5=true use_lld=true use_pulseaudio=true use_qt5=false use_qt6=true
+    use_sysroot=false use_system_freetype=true use_system_harfbuzz=true use_system_lcms2=true
+    use_system_libffi=true use_system_libjpeg=true use_system_zlib=true
+    target_cpu="x64" use_vaapi=true is_cfi=false use_thin_lto=false
+'
+'''
+build = '''
+CCACHE_SLOPPINESS=include_file_mtime \
+    ninja -C out/Release -j $jobs brave chrome_sandbox chrome_crashpad_handler
+'''
+install = '''
+s=out/Release d="$pkgdir/usr/lib/brave"
+install -Dm755 $s/brave "$d/brave"
+install -m755 $s/chrome_crashpad_handler "$d/"
+install -m4755 $s/chrome_sandbox "$d/chrome-sandbox"
+for f in libEGL.so libGLESv2.so libqt6_shim.so libvulkan.so.1 libvk_swiftshader.so; do install -m755 $s/$f "$d/"; done
+install -m644 $s/vk_swiftshader_icd.json $s/*.bin $s/*.pak "$d/"
+install -Dm644 -t "$d/locales" $s/locales/*.pak
+# Brave's extension resources (brave_extension, web discovery) beside them, as
+# its own Linux packages ship them
+[ -d $s/resources ] && cp -r $s/resources "$d/"
+for z in 24 48 64 128 256; do
+    install -Dm644 brave/app/theme/brave/linux/product_logo_$z.png "$pkgdir/usr/share/icons/hicolor/${z}x$z/apps/brave-browser.png"
+done
+for z in 16 32; do
+    install -Dm644 brave/app/theme/default_100_percent/brave/product_logo_$z.png "$pkgdir/usr/share/icons/hicolor/${z}x$z/apps/brave-browser.png"
+done
+install -m755 $pkgfiles/brave-launcher.sh "$d/"
+install -Dm644 $pkgfiles/brave.conf "$pkgdir/etc/brave/brave.conf"
+mkdir -p "$pkgdir/usr/bin"
+ln -s ../lib/brave/brave-launcher.sh "$pkgdir/usr/bin/brave"
+ln -s brave "$pkgdir/usr/bin/brave-browser"
+install -Dm644 $pkgfiles/brave-browser.desktop "$pkgdir/usr/share/applications/brave-browser.desktop"
+install -Dm644 brave/LICENSE "$pkgdir/usr/share/licenses/brave/LICENSE"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/brave/LICENSE.chromium"
+'''
