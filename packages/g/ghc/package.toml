@@ -36,7 +36,7 @@
 # separate testsuite tarball).
 name = "ghc"
 version = "9.14.1"
-release = 1
+release = 2
 summary = "Glasgow Haskell Compiler"
 license = "BSD-3-Clause"
 homepage = "https://www.haskell.org/ghc/"
@@ -98,7 +98,14 @@ else
     # Alpine's GHC calls its C toolchain cc, c++, ld, ar and ranlib (its
     # settings file): clang and LLVM's tools under those names
     mkdir -p /tmp/cc-bin
-    ln -sf /usr/bin/clang /tmp/cc-bin/cc
+    # cc is a wrapper, not a plain link (r2): configure's ghc-toolchain describes the build-platform
+    # (stage 0) toolchain from the boot GHC's platform, x86_64-alpine-linux, and so gives its C
+    # compiler --target=x86_64-unknown-linux, which clang reads as GNU/glibc: hsc2hs then links
+    # its helper programs (..._hsc_make) with a glibc dynamic loader that does not exist here, and
+    # running one fails with "posix_spawnp: does not exist". The wrapper names this system's
+    # musl triple instead (stage 0 only; the installed GHC's own target is configured as musl).
+    printf '#!/bin/sh\nfor a; do shift; case $a in --target=x86_64-unknown-linux) a=--target=x86_64-pc-linux-musl;; esac; set -- "$@" "$a"; done\nexec /usr/bin/clang "$@"\n' > /tmp/cc-bin/cc
+    chmod 755 /tmp/cc-bin/cc
     ln -sf /usr/bin/clang++ /tmp/cc-bin/c++
     ln -sf /usr/bin/ld.lld /tmp/cc-bin/ld
     for t in ar nm ranlib objdump; do ln -sf /usr/bin/llvm-$t /tmp/cc-bin/$t; done
