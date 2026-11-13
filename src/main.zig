@@ -6,6 +6,7 @@ const npmdeps = @import("npmdeps.zig");
 const gemdeps = @import("gemdeps.zig");
 const pubdeps = @import("pubdeps.zig");
 const hackagedeps = @import("hackagedeps.zig");
+const pydeps = @import("pydeps.zig");
 const build = @import("build.zig");
 const inputs = @import("inputs.zig");
 const term = @import("term.zig");
@@ -43,6 +44,9 @@ const usage =
     \\  hackage-lock <freeze file> [-o files/hackage.lock]
     \\                             write a hackagedeps lock (pinned Hackage tarballs and
     \\                             .cabal revisions) from a cabal freeze file
+    \\  python-lock <uv.lock|pylock.toml|requirements> [-o files/python.lock]
+    \\                             write a pydeps lock (pinned PyPI files: pure-Python wheels,
+    \\                             else source distributions)
     \\  upstream [--all] [--refresh] [--notify] [name]...
     \\                             which recipes have a newer upstream release (GitHub, GitLab,
     \\                             SourceForge, GNOME, KDE, PyPI, crates.io, CPAN, directory
@@ -232,6 +236,17 @@ pub fn main(init: std.process.Init) !void {
                 } else |herr| {
                     failed = true;
                     std.debug.print("{s}: {s}\n", .{ r.name, if (hmsg.len > 0) hmsg else @errorName(herr) });
+                }
+            }
+            // Python: the recipe's files/python.lock
+            if (contains(r.options, "pydeps")) {
+                const pl = try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, root, r.name), "files", pydeps.lock_name });
+                var ymsg: []const u8 = "";
+                if (pydeps.fetchLock(arena, init.io, cache, pl, &ymsg)) |yst| {
+                    std.debug.print("{s}: Python packages {s}\n", .{ r.name, @tagName(yst) });
+                } else |yerr| {
+                    failed = true;
+                    std.debug.print("{s}: {s}\n", .{ r.name, if (ymsg.len > 0) ymsg else @errorName(yerr) });
                 }
             }
             if (contains(r.options, "pubdeps") and !pub_found and !failed) {
@@ -558,19 +573,20 @@ pub fn main(init: std.process.Init) !void {
             error.OutOfMemory => return err,
             else => std.process.exit(1),
         };
-    } else if (std.mem.eql(u8, cmd, "hackage-lock")) {
-        // src/hackage-lock.py (embedded): downloads into cache/hackage/ and
-        // writes the lock, from a freeze file.
+    } else if (std.mem.eql(u8, cmd, "hackage-lock") or std.mem.eql(u8, cmd, "python-lock")) {
+        // src/hackage-lock.py, src/python-lock.py (embedded): download into
+        // cache/hackage/ or cache/python/ and write the lock.
         if (rest.len == 0) return die(usage);
-        const dir = try std.fs.path.join(arena, &.{ root, "work", "hackage" });
+        const hackage = std.mem.eql(u8, cmd, "hackage-lock");
+        const dir = try std.fs.path.join(arena, &.{ root, "work", if (hackage) "hackage" else "python" });
         try std.Io.Dir.cwd().createDirPath(init.io, dir);
-        const script = try std.fs.path.join(arena, &.{ dir, "hackage-lock.py" });
-        try std.Io.Dir.cwd().writeFile(init.io, .{ .sub_path = script, .data = @embedFile("hackage-lock.py") });
+        const script = try std.fs.path.join(arena, &.{ dir, if (hackage) "hackage-lock.py" else "python-lock.py" });
+        try std.Io.Dir.cwd().writeFile(init.io, .{ .sub_path = script, .data = if (hackage) @embedFile("hackage-lock.py") else @embedFile("python-lock.py") });
         var argv: std.ArrayList([]const u8) = .empty;
         try argv.appendSlice(arena, &.{ "python3", "-I", script, try std.fs.path.join(arena, &.{ root, "cache" }) });
         try argv.appendSlice(arena, rest);
         var child = std.process.spawn(init.io, .{ .argv = argv.items }) catch |err| {
-            std.debug.print("hackage-lock: cannot run python3: {s}\n", .{@errorName(err)});
+            std.debug.print("{s}: cannot run python3: {s}\n", .{ cmd, @errorName(err) });
             std.process.exit(1);
         };
         const res = child.wait(init.io) catch std.process.exit(1);
@@ -695,6 +711,7 @@ test {
     _ = @import("gemdeps.zig");
     _ = @import("pubdeps.zig");
     _ = @import("hackagedeps.zig");
+    _ = @import("pydeps.zig");
     _ = @import("build.zig");
     _ = @import("split.zig");
     _ = @import("scan.zig");

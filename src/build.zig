@@ -12,6 +12,7 @@ const npmdeps = @import("npmdeps.zig");
 const gemdeps = @import("gemdeps.zig");
 const pubdeps = @import("pubdeps.zig");
 const hackagedeps = @import("hackagedeps.zig");
+const pydeps = @import("pydeps.zig");
 /// Sets up npm's cache from the npm store in a build (npmdeps).
 const npm_offline_js = @embedFile("npm-offline.js");
 const pnpm_registry_js = @embedFile("pnpm-registry.js");
@@ -208,6 +209,8 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
         try s.appendSlice(arena, "export PUB_CACHE=\"$srcdir/.dkpub\" PUB_ENVIRONMENT=dkbuild DART_SUPPRESS_ANALYTICS=true\n");
     // Haskell (hackagedeps): cabal's only repository is .dkhackage, offline.
     if (contains(r.options, "hackagedeps")) try s.appendSlice(arena, hackagedeps.env);
+    // Python (pydeps): pip and uv install only from .dkpython, offline.
+    if (contains(r.options, "pydeps")) try s.appendSlice(arena, pydeps.env);
     if (contains(r.options, "godeps"))
         try s.appendSlice(arena, "export GOMODCACHE=/dkdeps/go GOPROXY=off GOSUMDB=off GOTOOLCHAIN=local GOFLAGS=-mod=mod\n");
     // NuGet (nugetdeps): a private package folder; the store is the only feed
@@ -569,6 +572,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     var extra_cargo: std.ArrayList([3][]const u8) = .empty;
     var pub_lists: std.ArrayList([]const u8) = .empty;
     var hackage_pkgs: ?[]hackagedeps.Pkg = null;
+    var py_pkgs: ?[]pydeps.Pkg = null;
     {
         for (r.source) |src| {
             const lock = fetchLock(src);
@@ -668,6 +672,19 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
             const data = Dir.cwd().readFileAlloc(io, hl, arena, .limited(1 << 22)) catch return error.PrepareFailed;
             hackage_pkgs = hackagedeps.parse(arena, data, &hmsg) catch {
                 out("error: {s}: {s}\n", .{ r.name, hmsg });
+                return error.PrepareFailed;
+            };
+        }
+        if (contains(r.options, "pydeps")) {
+            const pl = try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, opts.root, r.name), "files", pydeps.lock_name });
+            var pmsg: []const u8 = "";
+            _ = pydeps.fetchLock(arena, io, cache, pl, &pmsg) catch |err| {
+                out("error: {s}: {s}\n", .{ r.name, if (pmsg.len > 0) pmsg else @errorName(err) });
+                return error.PrepareFailed;
+            };
+            const data = Dir.cwd().readFileAlloc(io, pl, arena, .limited(1 << 22)) catch return error.PrepareFailed;
+            py_pkgs = pydeps.parse(arena, data, &pmsg) catch {
+                out("error: {s}: {s}\n", .{ r.name, pmsg });
                 return error.PrepareFailed;
             };
         }
@@ -881,6 +898,8 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         // Haskell packages: .dkhackage, a cabal file+noindex repository of
         // links into the store
         if (hackage_pkgs) |hp| try lay.appendSlice(arena, try hackagedeps.layScript(arena, hp));
+        // Python packages: .dkpython, links into the store
+        if (py_pkgs) |pp| try lay.appendSlice(arena, try pydeps.layScript(arena, pp));
         if (zig_list) |zl| {
             const text = Dir.cwd().readFileAlloc(io, zl, arena, .limited(1 << 22)) catch return error.UnpackFailed;
             try lay.appendSlice(arena, "mkdir -p zig-pkg\n");
@@ -1036,6 +1055,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
             .{ .use = uses_nuget, .sub = "nuget", .dst = "/dkdeps/nuget" },
             .{ .use = gem_lists.items.len > 0, .sub = "gems", .dst = "/dkdeps/gems" },
             .{ .use = hackage_pkgs != null, .sub = "hackage", .dst = "/dkdeps/hackage" },
+            .{ .use = py_pkgs != null, .sub = "python", .dst = "/dkdeps/python" },
         }) |st| {
             if (!st.use) continue;
             const rel = try std.fs.path.join(arena, &.{ cache, st.sub });

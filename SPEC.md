@@ -262,6 +262,7 @@ source = [
 | `cargodeps` | Rust crates vendored on the host (`cargo vendor`, needs `cargo`) into the shared `cache/crates/`, laid in as `vendor/` with a `.cargo/config.toml` pointing at it; build with `--offline` (7.4). The Cargo project is the one at the top of the source, or else the first `Cargo.lock` below it; `vendor/` and `.cargo/` stay at the top either way |
 | `pubdeps` | Dart packages of every `pubspec.lock` in the recipe's unpacked sources, fetched from pub.dev into the shared `cache/pub/` (each checked against the lockfile's sha256); unpacked into a pub cache in the source tree (`$PUB_CACHE`, `.dkpub`) for `dart pub get --offline --enforce-lockfile` |
 | `hackagedeps` | Haskell packages pinned in the recipe's `files/hackage.lock` (tarball and `.cabal` revision sha256s), fetched from Hackage into the shared `cache/hackage/`; in the build, `.dkhackage/` is a cabal `file+noindex` repository and `CABAL_DIR`'s only one, offline (7.4) |
+| `pydeps` | Python packages pinned in the recipe's `files/python.lock` (pure-Python wheels, else source distributions, with sha256s), fetched from PyPI into the shared `cache/python/`; in the build, `.dkpython/` is pip's and uv's only source, offline, without build isolation (7.4) |
 | `meta` | A meta-package: no source and no steps, only `rundeps` (`base`, `desktop-hyprland`) |
 | `rootlayout` | May install outside `/usr /etc /var /opt /boot` (base-files: `/dev`, `/proc`, the usr-merge links) |
 
@@ -773,6 +774,25 @@ tarball's), and `CABAL_DIR=/tmp/cabal` whose config makes it the only
 repository, offline; `$DKBUILD_HACKAGE` names it for builds that unpack the
 tarballs themselves (Setup.hs). Not pruned yet.
 
+Python (`pydeps`): the recipe keeps `files/python.lock`, one line per file,
+`<name> <version> <sha256> <https url>`. `dkbuild python-lock <input> -o
+files/python.lock` writes it from a `uv.lock`, a PEP 751 `pylock.toml`, or
+requirements pinned with `==` (pip-compile, `pip freeze`, poetry export; the
+sha256s then come from PyPI): for each package the pure-Python wheel
+(`py3-none-any`) when there is one, as it holds the same Python files as the
+source, otherwise the source distribution, which the build compiles; a
+package with neither (Windows/macOS-only) is left out, as are lines whose
+markers name another system. Each sdist's line is followed by a comment
+with its `build-system.requires` (read from its pyproject.toml), because
+the build runs without build isolation: those tools must be hostdeps or in
+the lock. The fetch downloads what `cache/python/` lacks (each file under
+its URL's name, checked against the lock; a stored file with a different
+sha256 is an error); `cache/pydeps/<lock sha256>.list` marks it complete.
+The build gets `.dkpython/` (links into `/dkdeps/python`) and an environment
+that makes it pip's and uv's only source, offline, without build isolation
+(`PIP_NO_INDEX`, `PIP_FIND_LINKS`, `UV_OFFLINE`, `UV_FIND_LINKS`, ...);
+`$DKBUILD_PYTHON` names it. Not pruned yet.
+
 Gradle (`gradledeps`) has no lockfile to read, so its dependencies are
 found by letting Gradle resolve them: the first build of a source runs the
 recipe's own Gradle (a `gradle-<version>-bin.zip` source) in its build root,
@@ -1067,6 +1087,7 @@ inside a namespace the installed root runs `apk --version`, `sh`, `ls` and
 | `dkbuild graph <name>` | Prints the dependency order |
 | `dkbuild doctor` | Checks the host (programs, namespaces, overlayfs, disk, key) and prints the fixes (3.1) |
 | `dkbuild hackage-lock <freeze> [-o FILE]` | Writes a `hackagedeps` lock from a cabal freeze file (7.4) |
+| `dkbuild python-lock <uv.lock\|pylock.toml\|requirements> [-o FILE]` | Writes a `pydeps` lock (7.4) |
 | `dkbuild upstream [--all] [--refresh] [--notify] [<name>...]` | Reports recipes with a newer upstream release, from each recipe's first source: `git ls-remote` tags for git hosts (GitHub, GitLab, Codeberg, kernel.org, ...), GNOME's cache.json, PyPI, crates.io, npm, MetaCPAN, SourceForge's RSS, and otherwise the HTTP directory listing (and versioned directories above it: KDE, X.org, GNU, ...). Pre-releases are skipped. `upstream.toml` at the tree root pins a series, gives another URL or regex, ignores versions, or skips a package, without touching recipes. Results are cached 12 hours in `work/upstream/`; `--all` lists what could not be checked; `--notify` sends a desktop notification (contrib/systemd has a daily user timer). Changes nothing |
 | `dkbuild image [--verbose] <file>` | Builds an image (8); `--verbose` (`-v`) lists the packages asked for and shows the run as it happens (apk's `Installing <package>` lines, services, users, outputs); without it the run's output is only in `out/<name>/image.log` |
 | `dkbuild bootstrap-root [--force] [--dest DIR] <image>` | Unpacks the stage 0 build machine and checks it (9.2) |
