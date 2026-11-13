@@ -28,7 +28,7 @@
 # /usr/share/doc/openproject/README.FenrirOS.
 name = "openproject"
 version = "17.9.7"
-release = 1
+release = 2
 summary = "Web-based project management system"
 license = "GPL-3.0-only"
 homepage = "https://www.openproject.org"
@@ -63,6 +63,12 @@ op=/build/openproject-$version
 # gemdeps lays vendor/cache in $srcdir (commonmarker's tree): OpenProject's
 rm -rf "$op/vendor/cache"
 mv vendor/cache "$op/vendor/cache"
+# Bundler looks for a git gem's checkout in vendor/cache as <repository name>-<revision>,
+# the name of the repository (github.com/opf/md-to-pdf), not the gem's (md_to_pdf):
+# gemdeps lays it under the gem's name, and Bundler went to GitHub for it
+# ("Could not resolve host: github.com"). Linked under the repository's name too.
+ln -sfn md_to_pdf-a0c4345367e4 "$op/vendor/cache/md-to-pdf-a0c4345367e4"
+test -e "$op/vendor/cache/md-to-pdf-a0c4345367e4/md_to_pdf.gemspec"
 # the crates of both Rust gems in one directory source (each entry is a link
 # into the crate store, named by its store key, so a crate both use is there once)
 mkdir -p /tmp/gem-crates "$CARGO_HOME"
