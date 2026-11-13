@@ -30,7 +30,7 @@
 # libc++ (Euro-Office's main branch avoids them by moving to V8 14.6).
 name = "euro-office-v8"
 version = "8.9.45"
-release = 2
+release = 3
 summary = "V8 JavaScript engine as a static library for Euro-Office's document engine"
 license = "BSD-3-Clause"
 homepage = "https://v8.dev"
@@ -54,6 +54,16 @@ ln -sf /usr/bin/python3 /tmp/pybin/python
 export PATH="/tmp/pybin:$PATH"
 '''
 setup = '''
+# libc++ 19+ declares std::char_traits only for char types; V8's inspector keeps
+# UTF-16 in std::basic_string<uint16_t> ("implicit instantiation of undefined
+# template 'std::char_traits<unsigned short>'"). files/char-traits-uint16.h
+# specializes it; every inspector source (V8's and the bundled inspector
+# protocol's) that includes <string> gets it included right after.
+grep -rlE '^#include <string>' v8/src/inspector v8/third_party/inspector_protocol | while read -r f; do
+    sed -i '0,/^#include <string>/s||#include <string>\n#include "src/inspector/char-traits-uint16.h"|' "$f"
+done
+cp $pkgfiles/char-traits-uint16.h v8/src/inspector/char-traits-uint16.h
+grep -q char-traits-uint16 v8/src/inspector/string-16.h
 # Euro-Office's stub BUILD files (nc-build.py: disable_gmock, disable_cppgc):
 # the monolith needs neither gmock nor the separate cppgc library.
 cp $pkgfiles/gmock-BUILD.gn v8/testing/gmock/BUILD.gn
