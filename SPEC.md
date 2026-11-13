@@ -252,6 +252,7 @@ source = [
 | `gemdeps` | Ruby gems of every `Gemfile.lock` in the recipe's unpacked sources, fetched into the shared `cache/gems/` (checked against the lockfile's CHECKSUMS, or rubygems.org's sha256), always the ruby-platform gem; laid into `vendor/cache` for `bundle install --local` (7.4) |
 | `cargodeps` | Rust crates vendored on the host (`cargo vendor`, needs `cargo`) into the shared `cache/crates/`, laid in as `vendor/` with a `.cargo/config.toml` pointing at it; build with `--offline` (7.4). The Cargo project is the one at the top of the source, or else the first `Cargo.lock` below it; `vendor/` and `.cargo/` stay at the top either way |
 | `pubdeps` | Dart packages of every `pubspec.lock` in the recipe's unpacked sources, fetched from pub.dev into the shared `cache/pub/` (each checked against the lockfile's sha256); unpacked into a pub cache in the source tree (`$PUB_CACHE`, `.dkpub`) for `dart pub get --offline --enforce-lockfile` |
+| `hackagedeps` | Haskell packages pinned in the recipe's `files/hackage.lock` (tarball and `.cabal` revision sha256s), fetched from Hackage into the shared `cache/hackage/`; in the build, `.dkhackage/` is a cabal `file+noindex` repository and `CABAL_DIR`'s only one, offline (7.4) |
 | `meta` | A meta-package: no source and no steps, only `rundeps` (`base`, `desktop-hyprland`) |
 | `rootlayout` | May install outside `/usr /etc /var /opt /boot` (base-files: `/dev`, `/proc`, the usr-merge links) |
 
@@ -744,6 +745,23 @@ serves the store to pnpm as a registry on 127.0.0.1 (`pnpm-registry.js`;
 the sandbox's loopback interface is up), so `pnpm install --frozen-lockfile`
 works offline.
 
+Haskell (`hackagedeps`): Haskell projects keep no lockfile with checksums,
+and Hackage lets authors revise a released package's `.cabal`, so the recipe
+keeps the pinned list itself: `files/hackage.lock`, one line per package,
+`<name> <version> <tarball sha256> <revision> <revised .cabal sha256 or ->`.
+`dkbuild hackage-lock <freeze file> -o files/hackage.lock` writes it from a
+`cabal freeze` file or Stackage's cabal.config (newest revision of each
+package; GHC's own packages left out). The fetch downloads what
+`cache/hackage/` lacks (`<name>-<version>.tar.gz`,
+`<name>-<version>-r<n>.cabal`) and checks each file against the lock;
+`cache/hackagedeps/<lock sha256>.list` marks it complete. The build gets
+`.dkhackage/` in the source's top directory, a cabal `file+noindex`
+repository of links into the store (`/dkdeps/hackage`) with each revision's
+`.cabal` beside its tarball (cabal-install reads it instead of the
+tarball's), and `CABAL_DIR=/tmp/cabal` whose config makes it the only
+repository, offline; `$DKBUILD_HACKAGE` names it for builds that unpack the
+tarballs themselves (Setup.hs). Not pruned yet.
+
 Gradle (`gradledeps`) has no lockfile to read, so its dependencies are
 found by letting Gradle resolve them: the first build of a source runs the
 recipe's own Gradle (a `gradle-<version>-bin.zip` source) in its build root,
@@ -1037,6 +1055,7 @@ inside a namespace the installed root runs `apk --version`, `sh`, `ls` and
 | `dkbuild check <name>...` | Checks recipes: fields, checksums present, patches exist, no unknown keys |
 | `dkbuild graph <name>` | Prints the dependency order |
 | `dkbuild doctor` | Checks the host (programs, namespaces, overlayfs, disk, key) and prints the fixes (3.1) |
+| `dkbuild hackage-lock <freeze> [-o FILE]` | Writes a `hackagedeps` lock from a cabal freeze file (7.4) |
 | `dkbuild upstream [--all] [--refresh] [--notify] [<name>...]` | Reports recipes with a newer upstream release, from each recipe's first source: `git ls-remote` tags for git hosts (GitHub, GitLab, Codeberg, kernel.org, ...), GNOME's cache.json, PyPI, crates.io, npm, MetaCPAN, SourceForge's RSS, and otherwise the HTTP directory listing (and versioned directories above it: KDE, X.org, GNU, ...). Pre-releases are skipped. `upstream.toml` at the tree root pins a series, gives another URL or regex, ignores versions, or skips a package, without touching recipes. Results are cached 12 hours in `work/upstream/`; `--all` lists what could not be checked; `--notify` sends a desktop notification (contrib/systemd has a daily user timer). Changes nothing |
 | `dkbuild image [--verbose] <file>` | Builds an image (8); `--verbose` (`-v`) lists the packages asked for and shows the run as it happens (apk's `Installing <package>` lines, services, users, outputs); without it the run's output is only in `out/<name>/image.log` |
 | `dkbuild bootstrap-root [--force] [--dest DIR] <image>` | Unpacks the stage 0 build machine and checks it (9.2) |

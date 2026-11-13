@@ -11,6 +11,7 @@ const fetch = @import("fetch.zig");
 const npmdeps = @import("npmdeps.zig");
 const gemdeps = @import("gemdeps.zig");
 const pubdeps = @import("pubdeps.zig");
+const hackagedeps = @import("hackagedeps.zig");
 /// Sets up npm's cache from the npm store in a build (npmdeps).
 const npm_offline_js = @embedFile("npm-offline.js");
 const pnpm_registry_js = @embedFile("pnpm-registry.js");
@@ -205,6 +206,8 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
     // Dart (pubdeps): the pub cache laid out in the source tree before the build.
     if (contains(r.options, "pubdeps"))
         try s.appendSlice(arena, "export PUB_CACHE=\"$srcdir/.dkpub\" PUB_ENVIRONMENT=dkbuild DART_SUPPRESS_ANALYTICS=true\n");
+    // Haskell (hackagedeps): cabal's only repository is .dkhackage, offline.
+    if (contains(r.options, "hackagedeps")) try s.appendSlice(arena, hackagedeps.env);
     if (contains(r.options, "godeps"))
         try s.appendSlice(arena, "export GOMODCACHE=/dkdeps/go GOPROXY=off GOSUMDB=off GOTOOLCHAIN=local GOFLAGS=-mod=mod\n");
     // NuGet (nugetdeps): a private package folder; the store is the only feed
@@ -565,6 +568,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     // further sources' Cargo projects: { archive, list, config }
     var extra_cargo: std.ArrayList([3][]const u8) = .empty;
     var pub_lists: std.ArrayList([]const u8) = .empty;
+    var hackage_pkgs: ?[]hackagedeps.Pkg = null;
     {
         for (r.source) |src| {
             const lock = fetchLock(src);
@@ -653,6 +657,19 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 const data = Dir.cwd().readFileAlloc(io, pl, arena, .limited(1 << 24)) catch return error.PrepareFailed;
                 try pub_lists.append(arena, try pubdeps.listPath(arena, cache, try pubdeps.lockKey(arena, data)));
             } else |_| {}
+        }
+        if (contains(r.options, "hackagedeps")) {
+            const hl = try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, opts.root, r.name), "files", hackagedeps.lock_name });
+            var hmsg: []const u8 = "";
+            _ = hackagedeps.fetchLock(arena, io, cache, hl, &hmsg) catch |err| {
+                out("error: {s}: {s}\n", .{ r.name, if (hmsg.len > 0) hmsg else @errorName(err) });
+                return error.PrepareFailed;
+            };
+            const data = Dir.cwd().readFileAlloc(io, hl, arena, .limited(1 << 22)) catch return error.PrepareFailed;
+            hackage_pkgs = hackagedeps.parse(arena, data, &hmsg) catch {
+                out("error: {s}: {s}\n", .{ r.name, hmsg });
+                return error.PrepareFailed;
+            };
         }
         if (contains(r.options, "pubdeps") and pub_lists.items.len == 0) {
             out("error: {s}: {s} (in none of its sources)\n", .{ r.name, pubdeps.no_lockfile });
@@ -861,6 +878,9 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "mkdir -p '.dkpub/hosted/pub.dev/{0s}-{1s}' && tar -xzf '{3s}/{0s}-{1s}.tar.gz' -C '.dkpub/hosted/pub.dev/{0s}-{1s}' && printf '%s' '{2s}' > '.dkpub/hosted-hashes/pub.dev/{0s}-{1s}.sha256'\n", .{ n, v, h, pub_store }));
             }
         }
+        // Haskell packages: .dkhackage, a cabal file+noindex repository of
+        // links into the store
+        if (hackage_pkgs) |hp| try lay.appendSlice(arena, try hackagedeps.layScript(arena, hp));
         if (zig_list) |zl| {
             const text = Dir.cwd().readFileAlloc(io, zl, arena, .limited(1 << 22)) catch return error.UnpackFailed;
             try lay.appendSlice(arena, "mkdir -p zig-pkg\n");
@@ -1015,6 +1035,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
             .{ .use = uses_gradle, .sub = "maven", .dst = "/dkdeps/maven" },
             .{ .use = uses_nuget, .sub = "nuget", .dst = "/dkdeps/nuget" },
             .{ .use = gem_lists.items.len > 0, .sub = "gems", .dst = "/dkdeps/gems" },
+            .{ .use = hackage_pkgs != null, .sub = "hackage", .dst = "/dkdeps/hackage" },
         }) |st| {
             if (!st.use) continue;
             const rel = try std.fs.path.join(arena, &.{ cache, st.sub });

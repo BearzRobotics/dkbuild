@@ -5,6 +5,7 @@ const fetch = @import("fetch.zig");
 const npmdeps = @import("npmdeps.zig");
 const gemdeps = @import("gemdeps.zig");
 const pubdeps = @import("pubdeps.zig");
+const hackagedeps = @import("hackagedeps.zig");
 const build = @import("build.zig");
 const inputs = @import("inputs.zig");
 const term = @import("term.zig");
@@ -39,6 +40,9 @@ const usage =
     \\                             remove packages from repo/ that their recipe no longer
     \\                             builds (older versions), and rebuild the index
     \\  outdated [--bump]          recipes changed since their last build without a new release (--bump raises it)
+    \\  hackage-lock <freeze file> [-o files/hackage.lock]
+    \\                             write a hackagedeps lock (pinned Hackage tarballs and
+    \\                             .cabal revisions) from a cabal freeze file
     \\  upstream [--all] [--refresh] [--notify] [name]...
     \\                             which recipes have a newer upstream release (GitHub, GitLab,
     \\                             SourceForge, GNOME, KDE, PyPI, crates.io, CPAN, directory
@@ -218,6 +222,17 @@ pub fn main(init: std.process.Init) !void {
                         std.debug.print("{s}: {s}\n", .{ r.name, if (pmsg.len > 0) pmsg else @errorName(perr) });
                     }
                 } else |_| {}
+            }
+            // Haskell: the recipe's files/hackage.lock
+            if (contains(r.options, "hackagedeps")) {
+                const hl = try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, root, r.name), "files", hackagedeps.lock_name });
+                var hmsg: []const u8 = "";
+                if (hackagedeps.fetchLock(arena, init.io, cache, hl, &hmsg)) |hst| {
+                    std.debug.print("{s}: Haskell packages {s}\n", .{ r.name, @tagName(hst) });
+                } else |herr| {
+                    failed = true;
+                    std.debug.print("{s}: {s}\n", .{ r.name, if (hmsg.len > 0) hmsg else @errorName(herr) });
+                }
             }
             if (contains(r.options, "pubdeps") and !pub_found and !failed) {
                 failed = true;
@@ -543,6 +558,26 @@ pub fn main(init: std.process.Init) !void {
             error.OutOfMemory => return err,
             else => std.process.exit(1),
         };
+    } else if (std.mem.eql(u8, cmd, "hackage-lock")) {
+        // src/hackage-lock.py (embedded): downloads into cache/hackage/ and
+        // writes the lock, from a freeze file.
+        if (rest.len == 0) return die(usage);
+        const dir = try std.fs.path.join(arena, &.{ root, "work", "hackage" });
+        try std.Io.Dir.cwd().createDirPath(init.io, dir);
+        const script = try std.fs.path.join(arena, &.{ dir, "hackage-lock.py" });
+        try std.Io.Dir.cwd().writeFile(init.io, .{ .sub_path = script, .data = @embedFile("hackage-lock.py") });
+        var argv: std.ArrayList([]const u8) = .empty;
+        try argv.appendSlice(arena, &.{ "python3", "-I", script, try std.fs.path.join(arena, &.{ root, "cache" }) });
+        try argv.appendSlice(arena, rest);
+        var child = std.process.spawn(init.io, .{ .argv = argv.items }) catch |err| {
+            std.debug.print("hackage-lock: cannot run python3: {s}\n", .{@errorName(err)});
+            std.process.exit(1);
+        };
+        const res = child.wait(init.io) catch std.process.exit(1);
+        switch (res) {
+            .exited => |c| if (c != 0) std.process.exit(c),
+            else => std.process.exit(1),
+        }
     } else if (std.mem.eql(u8, cmd, "upstream")) {
         // The checker is Python (src/upstream.py, embedded): it reads the
         // recipes with tomllib and asks each source's host for its releases.
@@ -659,6 +694,7 @@ test {
     _ = @import("npmdeps.zig");
     _ = @import("gemdeps.zig");
     _ = @import("pubdeps.zig");
+    _ = @import("hackagedeps.zig");
     _ = @import("build.zig");
     _ = @import("split.zig");
     _ = @import("scan.zig");
