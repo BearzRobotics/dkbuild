@@ -15,7 +15,7 @@
 # Setup: /usr/share/doc/vikunja/README.FenrirOS.
 name = "vikunja"
 version = "2.8.0"
-release = 2
+release = 3
 summary = "Self-hosted to-do list and project management"
 license = "AGPL-3.0-or-later"
 homepage = "https://vikunja.io"
@@ -39,6 +39,11 @@ export npm_config_manage_package_manager_versions=false npm_config_package_manag
 '''
 setup = '''
 cd frontend
+# pnpm switches to the version package.json's packageManager field names (12.16.1)
+# and refuses to run offline (signature check); the settings above did not stop
+# that. The field is removed, so the system pnpm runs as it is.
+sed -i '/^  "packageManager": /d' package.json
+! grep -q '"packageManager"' package.json
 echo 'pm-on-fail=ignore' >> .npmrc
 pnpm install --frozen-lockfile
 '''
