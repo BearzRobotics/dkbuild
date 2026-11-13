@@ -1,0 +1,37 @@
+# ZeroMQ (libzmq). Used by FFmpeg (--enable-libzmq: the zmq filter) and others.
+# Autotools: the release tarball ships configure. CURVE security comes from
+# libsodium. Not enabled, with reasons: --enable-drafts/--enable-ws/--with-tls
+# (draft APIs are unstable and not ABI-stable; WebSocket/WSS are draft-only in
+# 4.3.5), --with-libgssapi_krb5 (no Kerberos library in the tree), libunwind
+# (not packaged; configure only uses it when found), --with-pgm/--with-norm
+# (OpenPGM and NORM are not packaged), --with-vmci (VMware only), docs
+# (need asciidoc and the DocBook toolchain).
+name = "zeromq"
+version = "4.3.5"
+release = 1
+summary = "ZeroMQ messaging library"
+license = "MPL-2.0"
+homepage = "https://zeromq.org"
+hostdeps = ["pkgconf"]
+builddeps = ["libsodium-devel", "libbsd-devel"]
+
+source = [
+    { url = "https://github.com/zeromq/libzmq/releases/download/v4.3.5/zeromq-4.3.5.tar.gz", sha256 = "6653ef5910f17954861fe72332e68b03ca6e4d9c7160eb3a8de5a5a913bfab43" },
+]
+
+setup = '''
+%configure \
+    --with-libsodium \
+    --enable-libbsd \
+    --without-docs
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/zeromq/LICENSE"
+'''
