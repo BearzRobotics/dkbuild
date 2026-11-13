@@ -10,7 +10,7 @@
 # Crates vendored on the host.
 name = "thin-provisioning-tools"
 version = "1.3.4"
-release = 1
+release = 2
 summary = "Tools for the metadata of device-mapper thin, cache and era targets"
 license = "GPL-3.0-or-later"
 homepage = "https://github.com/jthornber/thin-provisioning-tools"
@@ -27,6 +27,10 @@ environment = '''
 export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
 # devicemapper-sys makes its bindings from libdevmapper.h with bindgen (libclang)
 export LIBCLANG_PATH=/usr/lib
+# Rust's musl target links statically by default, and a static musl program cannot dlopen:
+# the build script failed with "Unable to find libclang: ... Dynamic loading not supported".
+# -crt-static links against the shared musl (as bindgen's and Stalwart's recipes do).
+export RUSTFLAGS="-C target-feature=-crt-static"
 '''
 build = '''
 cargo build --release --frozen --offline -j $jobs
