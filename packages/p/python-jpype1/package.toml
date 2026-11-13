@@ -1,7 +1,7 @@
 # jpype1 from PyPI.
 name = "python-jpype1"
 version = "1.7.1"
-release = 1
+release = 2
 summary = "A Python to Java bridge"
 license = "Apache-2.0"
 homepage = "https://pypi.org/project/jpype1/"
@@ -24,7 +24,12 @@ export PATH="/tmp/antbin:$PATH"
 export SETUPTOOLS_SCM_PRETEND_VERSION=$version
 '''
 install = '''
+# r2: the CMake project also builds a Java test harness (test/build.xml, JPypeTest.class) through
+# Ant, which files/ant does not emulate (it only knows native/build.xml): the build failed there
+# ("find: jpype_module/src/main/java: No such file"). The harness is only for the test suite
+# (!check, and not installed), so it is switched off (BUILD_TEST_HARNESS=OFF).
 python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --config-settings=cmake.define.BUILD_TEST_HARNESS=OFF \
     --root "$pkgdir" --prefix /usr .
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-jpype1/LICENSE"
 '''
