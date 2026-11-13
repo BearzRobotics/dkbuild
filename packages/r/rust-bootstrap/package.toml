@@ -1,0 +1,32 @@
+# The seed for building Rust from source (`rust`, selfhost): upstream's
+# x86_64-unknown-linux-musl toolchain (rustc, cargo, std), repackaged, as the
+# first `rust` was. It only starts the first build of `rust`; every later one
+# builds on the previous `rust` package. It installs under
+# /usr/lib/rust-bootstrap, so it never conflicts with `rust`, and nothing
+# depends on it at run time: leave it out of images.
+# rustc loads libgcc_s.so.1 for unwinding; here that is a link to LLVM's
+# libunwind (same _Unwind_* functions), placed in the toolchain's own lib/,
+# which rustc finds through its $ORIGIN/../lib run path.
+name = "rust-bootstrap"
+version = "1.99.1"
+release = 1
+summary = "Rust toolchain used to bootstrap the source build of rust"
+license = "MIT OR Apache-2.0"
+homepage = "https://www.rust-lang.org"
+archs = ["x86_64"]
+rundeps = ["llvm-libunwind"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://static.rust-lang.org/dist/rust-1.99.1-x86_64-unknown-linux-musl.tar.xz", sha256 = "da398394254c8ffd29d1e397dfc00941dfb6a631bc7254cf797481fec8df6f5a" },
+]
+
+install = '''
+sh install.sh --prefix=/usr/lib/rust-bootstrap --destdir="$pkgdir" --disable-ldconfig \
+    --components=rustc,cargo,rust-std-x86_64-unknown-linux-musl
+ln -s ../../libunwind.so.1 "$pkgdir/usr/lib/rust-bootstrap/lib/libgcc_s.so.1"
+rm -rf "$pkgdir/usr/lib/rust-bootstrap/share/doc" "$pkgdir/usr/lib/rust-bootstrap/lib/rustlib/uninstall.sh" \
+       "$pkgdir/usr/lib/rust-bootstrap/lib/rustlib/install.log"
+install -Dm644 LICENSE-MIT "$pkgdir/usr/share/licenses/rust-bootstrap/LICENSE-MIT"
+install -Dm644 LICENSE-APACHE "$pkgdir/usr/share/licenses/rust-bootstrap/LICENSE-APACHE"
+'''

@@ -1,46 +1,211 @@
-# needed by: maturin, python-pydantic-core (and every Rust program in the tree).
-# Upstream's x86_64-unknown-linux-musl host toolchain (rustc, cargo, std),
-# repackaged, as zig and go started out: it runs on musl as is. Chimera builds
-# Rust from source against the system LLVM; that is for later. HTML docs are
-# left out. Rust's musl target links statically by default: libraries loaded
-# by other programs (Python extensions) need RUSTFLAGS=-Ctarget-feature=-crt-static.
-# r3: rust-src, the standard library's source, in its own subpackage: the
-# Linux kernel's Rust support builds core and alloc from it (with bindgen).
-# libgcc_s.so too, for linking: proc macros and build scripts link -lgcc_s.
-# It stays in the main package (no -devel), since rust's users only install rust.
-# r2: upstream's binaries load libgcc_s.so.1 for unwinding; here that is a link to
-# LLVM's libunwind, which has the same _Unwind_* functions.
-# r4: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
+# Rust 1.99.1 built from source, against llvm22 (rustc's bootstrap wants LLVM
+# >= 21; the tree's LLVM is 23, which Rust is not tested with, and llvm22 is
+# already here for zig). Adapted from Chimera Linux's main/rust (BSD-2-Clause,
+# Copyright (c) Chimera Linux contributors): 11 of its 16 patches, the ones
+# that do not need Chimera's own targets or cross builds (patches/, each
+# applies in order to the 1.99.1 source).
+#
+# Self-hosted (`selfhost`): the first build runs on rust-bootstrap (upstream's
+# prebuilt toolchain, stage0deps); every later one on the previous `rust`
+# package. Nothing else is downloaded: the source tarball has its crates in
+# vendor/ and the build runs offline (locked-deps, vendor).
+#
+# What changes against the prebuilt rust this replaces:
+#  - the compiler and tools are linked dynamically to musl and libunwind
+#    (crt-static = false for the host), as proc macros require; programs built
+#    with it still default to upstream's static musl (crt-static) as before;
+#  - LLVM (llvm22) is linked into librustc_driver statically, so a new LLVM
+#    in the tree never breaks rustc;
+#  - rust-lld is not built: the system lld links (patch 0012);
+#  - wasm32-unknown-unknown is built here (rust-wasm). The WASI targets need
+#    a wasi-libc package that does not exist yet.
+# rustc-dev (the compiler's rlibs, for rustc_private: Chromium's crubit) is part
+# of this package, as in Chimera; `rustc-dev` is an empty group that depends on
+# it so recipes can keep asking for that name.
 name = "rust"
 version = "1.99.1"
-release = 4
+release = 5
 summary = "Rust programming language: rustc, cargo and the standard library"
 license = "MIT OR Apache-2.0"
 homepage = "https://www.rust-lang.org"
-rundeps = ["llvm-libunwind"]
-# The scanner sees libgcc_s.so.1 only as a link to libunwind.
-provides = ["so:libgcc_s.so.1"]
-options = ["!check", "!strip"]
-
-source = [
-    { url = "https://static.rust-lang.org/dist/rust-1.99.1-x86_64-unknown-linux-musl.tar.xz", sha256 = "da398394254c8ffd29d1e397dfc00941dfb6a631bc7254cf797481fec8df6f5a" },
-    { url = "https://static.rust-lang.org/dist/rust-src-1.99.1.tar.xz", sha256 = "e485a88c45db546b73571df7bebfcb4454ba4fb552c492e25fc5b00eeb5bf22d" },
+hostdeps = ["python", "cmake", "pkgconf", "llvm", "llvm-clang", "llvm-lld", "curl-devel"]
+stage0deps = ["rust-bootstrap"]
+builddeps = ["llvm22", "llvm-libcxx-devel", "llvm-libunwind-devel", "zlib-ng-compat-devel", "zlib-ng-compat-static",
+             "zstd-devel", "zstd-static", "openssl-devel", "curl-devel", "libssh2-devel"]
+rundeps = ["llvm-clang", "llvm-lld", "musl-devel", "llvm-libunwind"]
+options = ["!check", "!strip", "!lto", "selfhost", "jobs:8"]
+patches = [
+    "0002-remove-a-bunch-of-unused-junk.patch",
+    "0003-move-debugger-scripts-to-usr-share-rust.patch",
+    "0004-fix-shebang-on-install-template.sh.patch",
+    "0005-get-rid-of-wrong-linkage.patch",
+    "0006-do-not-install-libunwind-source-removed.patch",
+    "0008-link-stage-2-tools-dynamically-to-libstd.patch",
+    "0010-do-not-export-LD_LIBRARY_PATH.patch",
+    "0012-use-system-lld-for-wasm.patch",
+    "0013-linker-when-emitting-static-executables-explicitly-h.patch",
+    "0014-patch-out-some-broken-code.patch",
+    "0015-work-around-broken-ecosystem-hackery-when-bootstrapp.patch",
 ]
 
+source = [
+    { url = "https://static.rust-lang.org/dist/rustc-1.99.1-src.tar.xz", sha256 = "6451598a99e77f07571960f6b21d577399d3a30f33e80cbd2e3a4aae6535d265" },
+]
+
+environment = '''
+# the native parts take their own flags
+unset CFLAGS CXXFLAGS LDFLAGS CPPFLAGS
+export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt OPENSSL_NO_VENDOR=1 RUST_BACKTRACE=1
+export LIBSSH2_SYS_USE_PKG_CONFIG=1 LIBZ_SYS_STATIC=0
+export CARGO_HOME=$PWD/.cargo
+'''
+setup = '''
+# the compiler to build with: the previous rust in /usr, or (the first build)
+# the bootstrap toolchain
+if [ -x /usr/bin/rustc ]; then
+    boot=/usr
+else
+    boot=/usr/lib/rust-bootstrap
+fi
+test -x "$boot/bin/rustc" && test -x "$boot/bin/cargo"
+# (Chimera clears the checksums of some vendored libc/cc crates because it patches
+# them for its own targets; no vendored crate is patched here)
+cat > bootstrap.toml <<EOF
+change-id = 160100
+
+[llvm]
+ninja = false
+link-shared = false
+static-libstdcpp = false
+use-libcxx = true
+
+[build]
+description = 'FenrirOS'
+build = 'x86_64-unknown-linux-musl'
+host = ['x86_64-unknown-linux-musl']
+target = ['x86_64-unknown-linux-musl', 'wasm32-unknown-unknown']
+cargo = '$boot/bin/cargo'
+rustc = '$boot/bin/rustc'
+docs = false
+python = 'python3'
+locked-deps = true
+vendor = true
+extended = true
+tools = ["cargo", "rustdoc", "clippy", "rustfmt", "src", "rust-analyzer-proc-macro-srv"]
+profiler = true
+local-rebuild = false
+
+[install]
+prefix = '/usr'
+
+[rust]
+optimize = true
+debug = false
+backtrace-on-ice = true
+codegen-units = 1
+codegen-units-std = 1
+debuginfo-level = 0
+debuginfo-level-std = 0
+lto = 'thin-local'
+incremental = false
+channel = 'stable'
+rpath = false
+frame-pointers = true
+deny-warnings = false
+llvm-libunwind = 'system'
+
+[dist]
+vendor = false
+src-tarball = true
+compression-formats = ['gz']
+compression-profile = 'fast'
+
+[target.x86_64-unknown-linux-musl]
+cc = 'clang'
+cxx = 'clang++'
+ar = '/usr/bin/llvm-ar'
+ranlib = '/usr/bin/llvm-ranlib'
+linker = 'clang'
+llvm-config = '/usr/lib/llvm22/bin/llvm-config'
+crt-static = false
+
+[target.wasm32-unknown-unknown]
+sanitizers = false
+profiler = false
+EOF
+'''
+build = '''
+# PKG_CONFIG unset: the target's pkg-config would leak into host build scripts
+env -u PKG_CONFIG python3 x.py dist --jobs $jobs
+'''
 install = '''
-cat components
-sh install.sh --prefix=/usr --destdir="$pkgdir" --disable-ldconfig
-sh /build/rust-src-1.99.1/install.sh --prefix=/usr --destdir="$pkgdir" --disable-ldconfig
-ln -s libunwind.so.1 "$pkgdir/usr/lib/libgcc_s.so.1"
-ln -s libunwind.so.1 "$pkgdir/usr/lib/libgcc_s.so"
-rm -rf "$pkgdir/usr/share/doc/rust/html" "$pkgdir/usr/lib/rustlib/uninstall.sh" "$pkgdir/usr/lib/rustlib/install.log"
+mkdir -p "$pkgdir/usr"
+untar() {
+    tar xf "build/dist/$1.tar.gz" -C "$pkgdir/usr" --strip-components=2 --exclude=manifest.in --no-same-owner
+}
+t=x86_64-unknown-linux-musl
+for c in rustc rust-std rustc-dev cargo clippy rustfmt; do
+    untar "$c-$version-$t"
+done
+untar "rust-std-$version-wasm32-unknown-unknown"
+untar "rust-src-$version"
+# rust-analyzer's proc-macro server, when the build made it
+if [ -f "build/dist/rust-analyzer-proc-macro-srv-$version-$t.tar.gz" ]; then
+    untar "rust-analyzer-proc-macro-srv-$version-$t"
+fi
+# the JSON schema of target specs is not under /usr/etc
+if [ -f "$pkgdir/usr/etc/target-spec-json-schema.json" ]; then
+    install -Dm644 "$pkgdir/usr/etc/target-spec-json-schema.json" "$pkgdir/usr/share/rust/target-spec-json-schema.json"
+    rm -rf "$pkgdir/usr/etc"
+fi
+if [ -e "$pkgdir/usr/libexec/rust-analyzer-proc-macro-srv" ]; then
+    mkdir -p "$pkgdir/usr/lib"
+    mv "$pkgdir/usr/libexec/rust-analyzer-proc-macro-srv" "$pkgdir/usr/lib/"
+    rmdir "$pkgdir/usr/libexec" 2>/dev/null || true
+fi
+# rust's own copies of LLVM tools (gcc-ld wrappers): the system has them
+rm -rf "$pkgdir/usr/lib/rustlib/$t/bin"
+# the installer's bookkeeping
+rm -f "$pkgdir/usr/lib/rustlib/uninstall.sh" "$pkgdir/usr/lib/rustlib/install.log" \
+      "$pkgdir/usr/lib/rustlib/components" "$pkgdir/usr/lib/rustlib/rust-installer-version" \
+      "$pkgdir/usr/lib/rustlib/manifest-"*
+rm -rf "$pkgdir/usr/share/doc/rust"
+# the shared libraries (librustc_driver, libstd) live in rustlib; /usr/lib has links to them
+for f in "$pkgdir"/usr/lib/*.so; do
+    [ -f "$f" ] && [ ! -L "$f" ] || continue
+    r="$pkgdir/usr/lib/rustlib/$t/lib/${f##*/}"
+    rm -f "$r"
+    mv "$f" "$r"
+    ln -s "rustlib/$t/lib/${f##*/}" "$f"
+done
+install -Dm644 COPYRIGHT "$pkgdir/usr/share/licenses/rust/COPYRIGHT"
 install -Dm644 LICENSE-MIT "$pkgdir/usr/share/licenses/rust/LICENSE-MIT"
 install -Dm644 LICENSE-APACHE "$pkgdir/usr/share/licenses/rust/LICENSE-APACHE"
 '''
 
 [subpackages.src]
-summary = "Rust standard library source (for the kernel's Rust support, rust-analyzer, build-std)"
-paths   = ["/usr/lib/rustlib/src"]
+summary = "Rust standard library and compiler source (for the kernel's Rust support, rust-analyzer, build-std)"
+paths   = ["/usr/lib/rustlib/src", "/usr/lib/rustlib/rustc-src"]
+
+[subpackages.wasm]
+summary = "Rust standard library for WebAssembly (wasm32-unknown-unknown)"
+paths   = ["/usr/lib/rustlib/wasm32-*"]
+depends = ["rust"]
+
+[subpackages.clippy]
+summary = "Rust lints"
+paths   = ["/usr/bin/cargo-clippy", "/usr/bin/clippy-driver"]
+depends = ["rust"]
+
+[subpackages.rustfmt]
+summary = "Rust code formatter"
+paths   = ["/usr/bin/rustfmt", "/usr/bin/cargo-fmt"]
+depends = ["rust"]
+
+[subpackages.rustc-dev]
+summary = "Group: the compiler's crates for rustc_private (in the rust package)"
+empty   = true
+depends = ["rust"]
 
 [subpackages.devel]
 summary = "Headers and development files"
