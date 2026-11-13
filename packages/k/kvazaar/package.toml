@@ -1,0 +1,23 @@
+name = "kvazaar"
+version = "2.3.2"
+release = 1
+summary = "HEVC/H.265 video encoder library and program"
+license = "BSD-3-Clause"
+homepage = "https://github.com/ultravideo/kvazaar"
+# ffmpeg: --enable-libkvazaar
+hostdeps = ["automake", "autoconf", "libtool", "pkgconf"]
+
+source = [
+    { url = "https://github.com/ultravideo/kvazaar/releases/download/v2.3.2/kvazaar-2.3.2.tar.xz", sha256 = "35e506a6d2be9ae343f17787eb80fa214492b276e9c88b6e93749050ae380070" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/kvazaar/COPYING"
+'''
