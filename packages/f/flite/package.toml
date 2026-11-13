@@ -1,0 +1,33 @@
+# Festival-Lite speech synthesis (FFmpeg --enable-libflite). The configure
+# script is hand written (not autoconf's usual options): --enable-shared adds
+# the shared libraries (the static ones are always built), --with-audio=alsa
+# is the sound output of the flite program. All languages, lexicons and voices
+# of the release are built (the default set: kal, kal16, awb, rms, slt and the
+# cmu_us_* English voices, with the Indic/US language libraries).
+# Upstream builds with make -j1 only (the parallel build races on generated
+# files), so plain `make` is used, not %make.
+# Only the library, headers and programs are installed by upstream; there is
+# no pkg-config file (FFmpeg's configure links -lflite_* directly).
+name = "flite"
+version = "2.2"
+release = 1
+summary = "Small fast speech synthesis engine"
+license = "BSD-3-Clause"
+homepage = "http://www.festvox.org/flite"
+builddeps = ["alsa-lib-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/festvox/flite/archive/refs/tags/v2.2.tar.gz", sha256 = "ab1555fe5adc3f99f1d4a1a0eb1596d329fd6d74f1464a0097c81f53c0cf9e5c" },
+]
+
+setup = '''
+./configure --prefix=/usr --enable-shared --with-audio=alsa
+'''
+build = '''
+make -j1
+'''
+install = '''
+make -j1 install INSTALLBASED=/usr DESTDIR="$pkgdir"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/flite/COPYING"
+'''
