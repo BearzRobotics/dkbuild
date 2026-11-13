@@ -13,7 +13,7 @@
 # /usr/share/doc/uptime-kuma). Setup: /usr/share/doc/uptime-kuma/README.FenrirOS.
 name = "uptime-kuma"
 version = "2.5.11"
-release = 2
+release = 3
 summary = "Self-hosted monitoring tool with status pages"
 license = "MIT"
 homepage = "https://uptime.kuma.pet"
@@ -37,6 +37,12 @@ export NODE_ENV=production
 # type", then node-gyp) look for a compiler named cc/c++ unless CC/CXX say
 # otherwise; the system's compiler is clang
 export CC=clang CXX=clang++
+# node-addon-api's napi.h (the sqlite3 addon) has
+# `static const napi_typedarray_type unknown_array_type = static_cast<...>(-1)`,
+# a value outside the enum's range, which clang 16+ rejects as a constant
+# expression ("in-class initializer for static data member is not a constant
+# expression"); the flag turns that error back into the accepted old behaviour.
+export CXXFLAGS="${CXXFLAGS:+$CXXFLAGS }-Wno-enum-constexpr-conversion"
 '''
 setup = '''
 node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
