@@ -1,0 +1,33 @@
+# Linux FireWire (IEEE 1394) raw access library over the firewire-cdev
+# ("juju") kernel interface (/dev/fw*); needed by libdc1394, libiec61883 and
+# libavc1394. Not imported from cports (Chimera has no libraw1394).
+# autoreconf -fi: the 2016 tarball's libtool and config.sub/config.guess do
+# not know this system's musl triple; regenerating takes the current ones.
+# needed by: libdc1394, libiec61883, libavc1394.
+name = "libraw1394"
+version = "2.1.2"
+release = 1
+summary = "Library for direct access to the IEEE 1394 (FireWire) bus"
+license = "LGPL-2.1-or-later"
+homepage = "https://ieee1394.docs.kernel.org"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://mirrors.edge.kernel.org/pub/linux/libs/ieee1394/libraw1394-2.1.2.tar.xz", sha256 = "03ccc69761d22c7deb1127fc301010dd13e70e44bb7134b8ff0d07590259a55e" },
+]
+
+setup = '''
+autoreconf -fi -W none
+%configure \
+    --enable-shared \
+    --enable-static
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING.LIB "$pkgdir/usr/share/licenses/libraw1394/COPYING.LIB"
+'''
