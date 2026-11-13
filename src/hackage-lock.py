@@ -13,10 +13,13 @@
 # downloaded. Flags and other freeze settings are not part of the lock; a
 # recipe passes flags to cabal itself.
 import hashlib
+import http.client
 import json
 import os
 import re
 import sys
+import time
+import urllib.error
 import urllib.request
 
 UA = "dkbuild-hackage-lock/1"
@@ -28,9 +31,18 @@ GHC_ONLY = {"base", "ghc", "ghc-prim", "ghc-bignum", "ghc-internal", "ghc-boot",
 
 
 def get(url, accept=None):
+    """Retried: Hackage downloads break off now and then (IncompleteRead, DNS)."""
     req = urllib.request.Request(url, headers={"User-Agent": UA, **({"Accept": accept} if accept else {})})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        return r.read()
+    for attempt in range(5):
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return r.read()
+        except urllib.error.HTTPError:
+            raise
+        except (urllib.error.URLError, http.client.HTTPException, OSError):
+            if attempt == 4:
+                raise
+            time.sleep(3 * (attempt + 1))
 
 
 def pins(text):

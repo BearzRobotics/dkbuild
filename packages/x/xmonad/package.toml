@@ -30,7 +30,7 @@ homepage = "https://xmonad.org"
 archs = ["x86_64"]
 hostdeps = ["ghc", "pkgconf"]
 builddeps = ["gmp-devel", "libffi-devel", "numactl-devel", "libx11-devel", "libxext-devel", "libxrandr-devel", "libxinerama-devel", "libxscrnsaver-devel", "libxft-devel", "libxrender-devel", "xorgproto"]
-rundeps = ["ghc", "libx11-devel", "libxext-devel", "libxrandr-devel", "libxinerama-devel", "libxscrnsaver-devel"]
+rundeps = ["ghc", "libx11-devel", "libxext-devel", "libxrandr-devel", "libxinerama-devel", "libxscrnsaver-devel", "xmessage"]
 options = ["hackagedeps"]
 triggers = ["/usr/lib/ghc-9.14.1/lib/package.conf.d"]
 

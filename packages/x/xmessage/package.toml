@@ -1,0 +1,26 @@
+# xmessage: shows a message or a file in an X window with buttons. xmonad
+# uses it to report errors in the user's xmonad.hs.
+name = "xmessage"
+version = "1.0.7"
+release = 1
+summary = "Display a message or query in an X window"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "pkgconf", "xorg-util-macros"]
+builddeps = ["libxaw-devel", "libxt-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/app/xmessage-1.0.7.tar.xz", sha256 = "703fccb7a0b772d61d7e603c189b9739866aa97ba985c727275420f829a30356" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xmessage/COPYING"
+'''

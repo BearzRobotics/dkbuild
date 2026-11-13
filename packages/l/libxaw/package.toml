@@ -1,0 +1,29 @@
+# libXaw: the X Athena widget set (Xaw7, and the old Xaw6 ABI), for classic X
+# programs such as xmessage (which xmonad uses to show configuration errors).
+name = "libxaw"
+version = "1.0.16"
+release = 1
+summary = "X Athena Widgets library"
+license = "MIT"
+homepage = "https://xorg.freedesktop.org"
+hostdeps = ["automake", "libtool", "pkgconf", "xorg-util-macros"]
+builddeps = ["xorgproto", "libx11-devel", "libxext-devel", "libxmu-devel", "libxpm-devel", "libxt-devel"]
+
+source = [
+    { url = "https://www.x.org/releases/individual/lib/libXaw-1.0.16.tar.xz", sha256 = "731d572b54c708f81e197a6afa8016918e2e06dfd3025e066ca642a5b8c39c8f" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libxaw/COPYING"
+'''
