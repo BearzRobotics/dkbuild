@@ -6,7 +6,7 @@
 # own files and signs the modules, and dkbuild's strip stays off.
 name = "libcamera"
 version = "0.7.2"
-release = 2
+release = 3
 summary = "Open source camera stack and framework"
 license = "LGPL-2.1-or-later AND GPL-2.0-or-later"
 homepage = "https://libcamera.org"
@@ -37,7 +37,10 @@ find "$pkgdir" -type f \( -name '*.so*' -o -perm -u+x \) | while read -r f; do
     head -c4 "$f" | grep -q 'ELF' && llvm-strip --strip-unneeded "$f" 2>/dev/null || true
 done
 for f in "$pkgdir"/usr/lib/libcamera/ipa/ipa*.so "$pkgdir"/usr/lib/libcamera/ipa*.so; do
-    [ -f "$f" ] && src/ipa/ipa-sign.sh build/src/ipa-priv-key.pem "$f" "$f.sign"
+    # a glob that matches nothing stays literal: skip it (an `[ -f ] &&` as the
+    # last command made the whole install step exit 1)
+    [ -f "$f" ] || continue
+    src/ipa/ipa-sign.sh build/src/ipa-priv-key.pem "$f" "$f.sign"
 done
 '''
 

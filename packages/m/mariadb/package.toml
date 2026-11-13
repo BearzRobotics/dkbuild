@@ -2,7 +2,7 @@
 # database with `mariadb-install-db --user=_mysql`, then enable the service.
 name = "mariadb"
 version = "13.0.2"
-release = 2
+release = 3
 summary = "MariaDB database server and client"
 license = "GPL-2.0-only"
 homepage = "https://mariadb.org"
@@ -45,6 +45,7 @@ sed -i 's|SET(INSTALL_LIBDIR_RPM                "lib64")|SET(INSTALL_LIBDIR_RPM 
 %cmake \
     -DBUILD_CONFIG=mysql_release \
     -DINSTALL_LAYOUT=RPM \
+    -DINSTALL_PCDIR=lib/pkgconfig \
     -DINSTALL_SYSCONFDIR=/etc \
     -DINSTALL_SYSCONF2DIR=/etc/my.cnf.d \
     -DINSTALL_UNIX_ADDRDIR=/run/mysqld/mysqld.sock \

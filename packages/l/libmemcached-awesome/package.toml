@@ -9,7 +9,7 @@
 # Tests need a running memcached server (!check).
 name = "libmemcached-awesome"
 version = "1.1.4"
-release = 2
+release = 3
 summary = "C/C++ client library and tools for memcached"
 license = "BSD-3-Clause"
 homepage = "https://github.com/awesomized/libmemcached"
@@ -25,7 +25,7 @@ setup = '''
 # docs/CMakeLists.txt lists the same path (the man/html directory) as the custom command's OUTPUT
 # and as its BYPRODUCTS; CMake's Ninja generator then writes two rules for it ("multiple rules
 # generate docs/man", a ninja error). The OUTPUT alone is right: drop the BYPRODUCTS lines.
-sed -i '/BYPRODUCTS \${SPHINX_\(MAN\|HTML\)_DIR}/d' docs/CMakeLists.txt
+sed -i '/^[[:space:]]*BYPRODUCTS[[:space:]]/d' docs/CMakeLists.txt
 ! grep -q BYPRODUCTS docs/CMakeLists.txt
 # two builds, shared and static (the project builds one kind per build tree);
 # the manual pages (Sphinx's man builder) come from the shared one
