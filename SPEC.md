@@ -1031,7 +1031,7 @@ inside a namespace the installed root runs `apk --version`, `sh`, `ls` and
 | `dkbuild check <name>...` | Checks recipes: fields, checksums present, patches exist, no unknown keys |
 | `dkbuild graph <name>` | Prints the dependency order |
 | `dkbuild doctor` | Checks the host (programs, namespaces, overlayfs, disk, key) and prints the fixes (3.1) |
-| `dkbuild image <file>` | Builds an image (8) |
+| `dkbuild image [--verbose] <file>` | Builds an image (8); `--verbose` (`-v`) lists the packages asked for and shows the run as it happens (apk's `Installing <package>` lines, services, users, outputs); without it the run's output is only in `out/<name>/image.log` |
 | `dkbuild bootstrap-root [--force] [--dest DIR] <image>` | Unpacks the stage 0 build machine and checks it (9.2) |
 | `dkbuild prune [--dry-run]` | Removes packages from `repo/` that their recipe no longer builds (older versions, dropped subpackages), once the recipe's present version is built, and rebuilds the index. Packages no recipe provides are reported, not removed |
 | `dkbuild shell <name>` | Opens a shell in a prepared build root for that recipe |

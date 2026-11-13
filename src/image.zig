@@ -133,6 +133,8 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
     };
     try s.appendSlice(arena,
         \\set -eu
+        \\# One stream, in order (the log, and `dkbuild image --verbose`).
+        \\exec 2>&1
         \\# A root left by an earlier run holds files of other users, which only
         \\# this namespace may remove.
         \\find /target -mindepth 1 -delete
@@ -247,6 +249,9 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
 pub const Options = struct {
     /// Project root (holds repo/, keys/, rootfs/, work/).
     root: []const u8,
+    /// Show the image script's output (apk's "Installing <package>" lines,
+    /// services, users, outputs) while it runs, not only in the log.
+    verbose: bool = false,
 };
 
 pub fn build(arena: Allocator, io: std.Io, img: Image, opts: Options) !void {
@@ -294,6 +299,7 @@ pub fn build(arena: Allocator, io: std.Io, img: Image, opts: Options) !void {
         return error.PrepareFailed;
     }
     std.debug.print("==> image {s} ({d} package(s) asked for)\n", .{ img.name, img.packages.len });
+    if (opts.verbose) for (img.packages) |p| std.debug.print("    {s}\n", .{p});
     var log: std.ArrayList(u8) = .empty;
     const ok = sandbox.run(arena, io, .{
         .lower = abs[4],
@@ -310,6 +316,7 @@ pub fn build(arena: Allocator, io: std.Io, img: Image, opts: Options) !void {
         .env = &.{ "PATH=/usr/bin:/usr/sbin:/bin:/sbin", "HOME=/root" },
         .argv = &.{ "/usr/bin/sh", "/image.sh" },
         .ids = ids,
+        .echo = opts.verbose,
     }, &log) catch false;
     sandbox.makeRemovable(io, sb[1]);
     Dir.cwd().deleteTree(io, work) catch {};

@@ -26,8 +26,11 @@ const usage =
     \\  world [-j N] [-P N] [--key FILE] [--keep-root] [--no-check] [--keep-going] [--force] [--color=auto|always|never]
     \\                             build every recipe in the tree that is out of date
     \\                             (-j: jobs per build; -P: builds at once, default 1)
-    \\  image <file.toml>          make a root filesystem from repo/ (tarball, squashfs or
-    \\                             directory in out/<name>/); see SPEC.md 8
+    \\  image [-v|--verbose] <file.toml>
+    \\                             make a root filesystem from repo/ (tarball, squashfs or
+    \\                             directory in out/<name>/); see SPEC.md 8. --verbose
+    \\                             lists the packages asked for and shows each package
+    \\                             apk installs (and the rest of the run) as it happens
     \\  discs [--media M] <file.toml>
     \\                             the repository (kind = "repo") or the sources ("source")
     \\                             as ISO images in out/<name>/: one image (media usb) or a
@@ -448,20 +451,29 @@ pub fn main(init: std.process.Init) !void {
         }
         if (n == 0) std.debug.print("nothing changed without a release bump\n", .{});
     } else if (std.mem.eql(u8, cmd, "image")) {
-        if (rest.len != 1) return die(usage);
-        const text = std.Io.Dir.cwd().readFileAlloc(init.io, rest[0], arena, .limited(1 << 20)) catch |err| {
-            std.debug.print("{s}: {s}\n", .{ rest[0], @errorName(err) });
+        var verbose = false;
+        var file: ?[]const u8 = null;
+        for (rest) |a| {
+            if (std.mem.eql(u8, a, "-v") or std.mem.eql(u8, a, "--verbose")) {
+                verbose = true;
+            } else if (file == null and !std.mem.startsWith(u8, a, "-")) {
+                file = a;
+            } else return die(usage);
+        }
+        const image_file = file orelse return die(usage);
+        const text = std.Io.Dir.cwd().readFileAlloc(init.io, image_file, arena, .limited(1 << 20)) catch |err| {
+            std.debug.print("{s}: {s}\n", .{ image_file, @errorName(err) });
             std.process.exit(1);
         };
         var diag: imagefile.Diagnostic = .{};
         const img = imagefile.parse(arena, text, &diag) catch |err| switch (err) {
             error.InvalidImage => {
-                std.debug.print("{s}: {s}\n", .{ rest[0], diag.message });
+                std.debug.print("{s}: {s}\n", .{ image_file, diag.message });
                 std.process.exit(1);
             },
             else => return err,
         };
-        imagefile.build(arena, init.io, img, .{ .root = root }) catch |err| switch (err) {
+        imagefile.build(arena, init.io, img, .{ .root = root, .verbose = verbose }) catch |err| switch (err) {
             error.OutOfMemory => return err,
             else => std.process.exit(1),
         };

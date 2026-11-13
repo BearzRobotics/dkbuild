@@ -48,6 +48,11 @@ pub const Spec = struct {
     /// caller's sub-ids (/etc/subuid, /etc/subgid) outside, so files can be
     /// owned by other users (an image's /home/<user>). See `subIds`.
     ids: ?Ids = null,
+    /// Also copy the command's standard output to dkbuild's stderr as it
+    /// arrives (`dkbuild image --verbose`). Its stderr then goes straight to
+    /// the terminal and not into the log: a script that wants both in the log
+    /// sends its stderr to stdout (`exec 2>&1`).
+    echo: bool = false,
 };
 
 /// The caller's sub-id ranges and the setuid helpers that map them.
@@ -144,6 +149,23 @@ pub fn run(arena: Allocator, io: std.Io, spec: Spec, log: *std.ArrayList(u8)) Er
     try argv.append(arena, "--");
     try argv.appendSlice(arena, spec.argv);
 
+    if (spec.echo) {
+        var child = try std.process.spawn(io, .{ .argv = argv.items, .stdin = .ignore, .stdout = .pipe, .stderr = .inherit });
+        defer child.kill(io);
+        const err_out = std.Io.File.stderr();
+        var buf: [4096]u8 = undefined;
+        while (true) {
+            const n = child.stdout.?.readStreaming(io, &.{&buf}) catch break;
+            if (n == 0) continue;
+            try log.appendSlice(arena, buf[0..n]);
+            err_out.writeStreamingAll(io, buf[0..n]) catch {};
+        }
+        const term = child.wait(io) catch return false;
+        return switch (term) {
+            .exited => |c| c == 0,
+            else => false,
+        };
+    }
     const res = try std.process.run(arena, io, .{ .argv = argv.items });
     try log.appendSlice(arena, res.stdout);
     try log.appendSlice(arena, res.stderr);
