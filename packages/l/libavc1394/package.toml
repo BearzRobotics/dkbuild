@@ -1,0 +1,32 @@
+# AV/C (FireWire camcorder/VCR control) and ROM libraries on libraw1394; the
+# libiec61883 stack's companion (Debian ships both together). Not imported
+# from cports (Chimera has none).
+# autoreconf -fi: the 2011 tarball's libtool and config.sub/config.guess do
+# not know this system's musl triple; regenerating takes the current ones.
+name = "libavc1394"
+version = "0.5.4"
+release = 1
+summary = "AV/C and ROM libraries for IEEE 1394 (FireWire) devices"
+license = "LGPL-2.1-or-later"
+homepage = "https://sourceforge.net/projects/libavc1394"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["libraw1394-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/libavc1394/libavc1394/libavc1394-0.5.4.tar.gz", sha256 = "7cb1ff09506ae911ca9860bef4af08c2403f3e131f6c913a2cbd6ddca4215b53" },
+]
+
+setup = '''
+autoreconf -fi -W none
+%configure \
+    --enable-shared \
+    --enable-static
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libavc1394/COPYING"
+'''
