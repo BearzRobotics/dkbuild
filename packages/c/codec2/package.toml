@@ -1,0 +1,28 @@
+name = "codec2"
+version = "1.2.0"
+release = 1
+summary = "Low bitrate speech codec"
+license = "LGPL-2.1-only"
+homepage = "https://github.com/drowe67/codec2"
+# ffmpeg: --enable-libcodec2
+hostdeps = ["cmake", "ninja", "pkgconf"]
+
+source = [
+    { url = "https://github.com/drowe67/codec2/archive/1.2.0/codec2-1.2.0.tar.gz", sha256 = "cbccae52b2c2ecc5d2757e407da567eb681241ff8dadce39d779a7219dbcf449" },
+]
+
+# Shared and static libraries both: the static one is a second build, installed first so the shared build's cmake/pkg-config files win. The policy minimum lets CMake 4 configure.
+setup = '''
+opts="-DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DUNITTEST=OFF"
+%cmake $opts -DBUILD_SHARED_LIBS=ON
+cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release $opts -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+install = '''
+DESTDIR="$pkgdir" cmake --install build-static
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/codec2/COPYING"
+'''
