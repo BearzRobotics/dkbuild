@@ -14,7 +14,7 @@
 # templates at /usr/share/proxmox-frr/templates (proxmox-frr-templates).
 name = "pve-rs"
 version = "0.16.1"
-release = 1
+release = 2
 summary = "Proxmox VE Rust components for Perl"
 license = "AGPL-3.0-or-later"
 homepage = "https://git.proxmox.com/?p=proxmox-perl-rs.git"
