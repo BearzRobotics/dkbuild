@@ -4,18 +4,19 @@
 # the SCTP transport (lksctp-tools), the crypto plugins (nss, openssl) and the
 # compression plugins (zlib, lz4, lzo2, lzma, bzip2, zstd). libknet dlopens the
 # plugins from /usr/lib/kronosnet; they all ship in this package.
-# Left out: the Wireshark dissector (opt-in upstream, --enable-wireshark-dissector):
-# it would make the cluster stack's build depend on Wireshark and its Qt.
+# The Wireshark dissector for the knet protocol is built too (upstream's default,
+# configure requires wireshark >= 4.6 for it); it installs into Wireshark's
+# plugin directory.
 # Man pages: doxygen and libqb's doxygen2man.
 name = "kronosnet"
 version = "1.36"
-release = 1
+release = 2
 summary = "Network abstraction layer for high-availability clusters (libknet, libnozzle)"
 license = "LGPL-2.1-or-later AND GPL-2.0-or-later"
 homepage = "https://kronosnet.org/"
 hostdeps = ["pkgconf", "doxygen", "libqb"]
 builddeps = [
-    "libqb-devel", "libxml2-devel", "libnl-devel", "lksctp-tools-devel", "linux-headers",
+    "libqb-devel", "libxml2-devel", "libnl-devel", "lksctp-tools-devel", "linux-headers", "wireshark-devel",
     "nss-devel", "nspr-devel", "openssl-devel",
     "zlib-ng-compat-devel", "lz4-devel", "lzo-devel", "xz-devel", "bzip2-devel", "zstd-devel",
 ]
