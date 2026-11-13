@@ -9,7 +9,7 @@
 # Archives: jogamp.org drops long downloads; a fetch may need retrying.
 name = "jogamp"
 version = "2.6.0"
-release = 1
+release = 2
 summary = "Java bindings for OpenGL (JOGL) and their native glue (GlueGen)"
 license = "BSD-2-Clause AND BSD-3-Clause"
 homepage = "https://jogamp.org"
@@ -32,6 +32,11 @@ antflags="-Dgcc.compat.compiler=clang -Dtarget.sourcelevel=11 -Dtarget.targetlev
 '''
 setup = '''
 ln -sfn gluegen-v2.6.0 ../gluegen
+# GlueGen runs ANTLR through Ant's optional <antlr> task, which the system's
+# Ant lacks (apache-ant is built without optional tasks: "failed to create
+# task or type antlr"): patches/gluegen-antlr-java.patch runs antlr.Tool
+# (make/lib/antlr.jar, as before) with <java> instead.
+patch -Np1 -d ../gluegen-v2.6.0 -i /dkbuild/patches/gluegen-antlr-java.patch
 '''
 build = '''
 (cd ../gluegen/make && ant $antflags base.compile)

@@ -1,0 +1,40 @@
+Run ANTLR 2 as a plain java command, not through Ant's <antlr> task:
+Ant's optional ANTLR task is not in the system's Ant (apache-ant is built
+without optional tasks, so "failed to create task or type antlr"). The
+arguments are the ones the task would pass: -o <output dir> [-glib <super
+grammar>] <grammar>; the classpath is the same antlr.classpath (make/lib/antlr.jar).
+
+--- a/make/build.xml
++++ b/make/build.xml
+@@ -707,9 +707,12 @@
+     -->
+   <target name="generate.java">
+     <!-- Generate the Java files -->
+-    <antlr target="${output.dir}/${target}" outputdirectory="${output.dir}" debug="no" trace="no">
++    <java classname="antlr.Tool" fork="true" failonerror="true">
+       <classpath refid="antlr.classpath" />
+-    </antlr>
++      <arg value="-o" />
++      <arg value="${output.dir}" />
++      <arg value="${output.dir}/${target}" />
++    </java>
+   </target>
+ 
+   <!--
+@@ -723,9 +726,14 @@
+    -->
+   <target name="generate.java.override">
+     <!-- Generate the Java files -->
+-    <antlr target="${output.dir}/${target}" glib="${output.dir}/${override}" outputdirectory="${output.dir}" debug="no" trace="no">
++    <java classname="antlr.Tool" fork="true" failonerror="true">
+       <classpath refid="antlr.classpath" />
+-    </antlr>
++      <arg value="-o" />
++      <arg value="${output.dir}" />
++      <arg value="-glib" />
++      <arg value="${output.dir}/${override}" />
++      <arg value="${output.dir}/${target}" />
++    </java>
+   </target>
+ 
+   <target name="gluegen.build.javase">
