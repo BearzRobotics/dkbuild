@@ -1,0 +1,28 @@
+# MuJS, the embeddable JavaScript interpreter (mpv -Djavascript=enabled).
+# Plain Makefile: `make release` builds libmujs.a, libmujs.so, mujs and
+# mujs-pp; install-shared and install-static install both libraries.
+# The Makefile defaults prefix to /usr/local, so prefix is passed on the
+# command line. utfdata.h is shipped in the tarball (the Makefile would only
+# regenerate it from UnicodeData.txt it downloads), so nothing is fetched.
+# libmujs.so has no SONAME upstream, so users link it by file name.
+# HAVE_READLINE is the Makefile's default (yes) for the mujs shell.
+name = "mujs"
+version = "1.3.7"
+release = 1
+summary = "Embeddable JavaScript interpreter"
+license = "ISC"
+homepage = "https://mujs.com"
+builddeps = ["readline-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/ccxvii/mujs/archive/refs/tags/1.3.7.tar.gz", sha256 = "fa15735edc4b3d27675d954b5703e36a158f19cfa4f265aa5388cd33aede1c70" },
+]
+
+build = '''
+make release prefix=/usr VERSION=1.3.7
+'''
+install = '''
+make install-shared install-static prefix=/usr VERSION=1.3.7 DESTDIR="$pkgdir"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/mujs/COPYING"
+'''
