@@ -1,0 +1,44 @@
+# GHC's stage 0 seed: Alpine Linux's musl build of GHC 9.14.1 (edge
+# community, ghc-9.14.1-r2: the compiler, its boot libraries and tools; not
+# ghc-dev, whose profiling libraries the bootstrap does not use), unpacked in
+# /usr/lib/ghc-bootstrap. GHC is written in Haskell, so the first build of ghc
+# needs an existing one (its stage0deps); every later one uses the previous
+# ghc package (selfhost), as Alpine's own does. Build use only: off the ISO.
+# Its programs find their Haskell libraries through relative RUNPATHs and its
+# package database uses ${pkgroot}, so only the wrapper scripts in usr/bin
+# need the new place (below). It calls its C toolchain cc, c++, ld, ar and
+# ranlib; ghc's build gives it clang and LLVM's tools under those names.
+# Alpine edge drops a package file when it is rebuilt or updated: a later
+# fetch of this URL can fail, then the newest ghc-9.14.1-r* (or a new seed
+# matching ghc's version) replaces it.
+name = "ghc-bootstrap"
+version = "9.14.1"
+release = 1
+summary = "Prebuilt GHC (Alpine's) to bootstrap ghc once"
+license = "BSD-3-Clause"
+homepage = "https://www.haskell.org/ghc/"
+archs = ["x86_64"]
+options = ["!strip", "!check", "!repo-iso"]
+
+source = [
+    { url = "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/ghc-9.14.1-r2.apk", sha256 = "f4f2d2fa7cea01cdf2bb6785e4a4ccedd752a086575e5ffe7667f639bcd77250", unpack = false },
+]
+
+install = '''
+d="$pkgdir/usr/lib/ghc-bootstrap"
+mkdir -p "$d"
+# an Alpine package is gzipped tar streams one after another
+tar -xzf /build/sources/ghc-9.14.1-r2.apk -C "$d" 2>/dev/null || tar -xzf /build/sources/ghc-9.14.1-r2.apk -C "$d"
+rm -f "$d"/.PKGINFO "$d"/.SIGN.* "$d"/.pre-* "$d"/.post-*
+# the wrapper scripts (ghc, ghc-pkg, hsc2hs, ...) name their programs and
+# libraries by absolute paths under /usr/lib/ghc-9.14.1: point them at the
+# seed's place
+sed -i 's|/usr/lib/ghc-9.14.1|/usr/lib/ghc-bootstrap/usr/lib/ghc-9.14.1|g' "$d"/usr/bin/*-9.14.1
+test -x "$d/usr/lib/ghc-9.14.1/bin/ghc-9.14.1"
+test -f "$d/usr/lib/ghc-9.14.1/lib/package.conf.d/base-4.22.0.0-3875.conf"
+install -Dm644 /dev/stdin "$pkgdir/usr/share/licenses/ghc-bootstrap/README" <<EOF2
+Alpine Linux's ghc 9.14.1-r2 package (edge community), unchanged except the
+paths in its wrapper scripts. GHC is BSD-3-Clause: https://www.haskell.org/ghc/license
+and its sources are https://downloads.haskell.org/~ghc/9.14.1/
+EOF2
+'''

@@ -1,0 +1,144 @@
+# GHC 9.14.1, the Glasgow Haskell Compiler (ghc, ghci, ghc-pkg, runghc,
+# haddock, hsc2hs, hpc, hp2ps), built from its source release with Hadrian
+# (flavour "release": the vanilla static libraries, the shared ones and the
+# profiling ones of every boot library, as upstream's bindists ship them).
+# ShellCheck is built with it. 9.14.1 is the newest stable GHC (10.0 is in
+# alpha) and the one Alpine has a musl build of to start from.
+# Toolchain: GHC's native code generator; clang is its C compiler, assembler
+# and linker driver (linking with lld, clang's default), LLVM's ar, nm and
+# ranlib. The LLVM backend (-fllvm) is not used: GHC 9.14 supports LLVM up to
+# 20, the tree has 23 (configure finds no llc/opt and -fllvm stays
+# unavailable). Haskell packages with C++ code link libc++ through GHC's
+# system-cxx-std-lib package (configure detects it); the boot libraries have
+# none (Hadrian builds text without simdutf, as upstream's bindists).
+# Libraries: system GMP (bignum), system libffi, libnuma (--enable-numa: the
+# RTS's NUMA support). Left out: DWARF stack unwinding (--enable-dwarf-unwind)
+# would link libdw (elfutils) into every program GHC builds; it is off by
+# default upstream and in Alpine, Debian and Arch.
+# Documentation: Haddock for the libraries and the HTML user guide and ghc(1)
+# (Sphinx); no PDFs (no LaTeX in the tree).
+# Static libraries (rule 2): GHC's .a libraries are what it links Haskell
+# programs with by default, so they stay in the main package, in
+# /usr/lib/ghc-9.14.1/lib/... next to the .so ones (not /usr/lib/*.a).
+# Bootstrapping: GHC is written in Haskell. The first build (stage 0) runs on
+# Alpine's GHC 9.14.1 (ghc-bootstrap, stage0deps); every later one on the
+# previous ghc package (selfhost), as Alpine's own does. Either way Hadrian
+# builds stage 1 with the boot compiler and stage 2 (what is installed) with
+# stage 1. Hadrian itself is built with GHC's hadrian/bootstrap/bootstrap.py
+# (Setup.hs builds, no cabal-install) from pinned Hackage sources: the plan
+# (files/plan-bootstrap-9_14_1.json) is the one Alpine generated for a 9.14.1
+# boot compiler (GHC 9.14.1's own source has plans only for 9.10 and 9.12);
+# its packages and .cabal revisions are the sources below, each checked by
+# sha256 here and again by bootstrap.py against the plan. A new boot
+# compiler version (after an upgrade, the previous ghc) needs its own plan.
+# Patches: Alpine's Sphinx 9.1 fix; its other patches are for cross builds
+# and the test suite, which is not run (!check: it takes hours and needs the
+# separate testsuite tarball).
+name = "ghc"
+version = "9.14.1"
+release = 1
+summary = "Glasgow Haskell Compiler"
+license = "BSD-3-Clause"
+homepage = "https://www.haskell.org/ghc/"
+archs = ["x86_64"]
+patches = ["users-guide-sphinx-9.1.patch"]
+hostdeps = ["python", "python-sphinx", "findutils"]
+builddeps = ["gmp-devel", "libffi-devel", "ncurses-devel", "numactl-devel", "llvm-libcxx-devel", "linux-headers"]
+stage0deps = ["ghc-bootstrap"]
+# what ghc runs to compile and link a Haskell program: clang and lld, the C
+# headers, and the development links of the libraries the RTS and the boot
+# libraries link (gmp, libffi, libnuma)
+rundeps = ["llvm-clang", "llvm-lld", "musl-devel", "gmp-devel", "libffi-devel", "numactl-devel"]
+options = ["!check", "!lto", "selfhost", "jobs:12"]
+
+source = [
+    { url = "https://downloads.haskell.org/~ghc/9.14.1/ghc-9.14.1-src.tar.xz", sha256 = "2a83779c9af86554a3289f2787a38d6aa83d00d136aa9f920361dd693c101e77" },
+    # Hadrian's dependencies (files/plan-bootstrap-9_14_1.json)
+    { url = "https://hackage.haskell.org/package/base16-bytestring-1.0.2.0/base16-bytestring-1.0.2.0.tar.gz", sha256 = "1d5a91143ef0e22157536093ec8e59d226a68220ec89378d5dcaeea86472c784", unpack = false },
+    { url = "https://hackage.haskell.org/package/base16-bytestring-1.0.2.0/revision/1.cabal", sha256 = "a694e88f9ec9fc79f0b03f233d3fea592b68f70a34aac2ddb5bcaecb6562e2fd", unpack = false, name = "base16-bytestring.cabal" },
+    { url = "https://hackage.haskell.org/package/clock-0.8.4/clock-0.8.4.tar.gz", sha256 = "6ae9898afe788a5e334cd5fad5d18a3c2e8e59fa09aaf7b957dbb38a4767df2e", unpack = false },
+    { url = "https://hackage.haskell.org/package/clock-0.8.4/revision/0.cabal", sha256 = "b938655b00cf204ce69abfff946021bed111d2609a9f7a9c22e28a1a202e9115", unpack = false, name = "clock.cabal" },
+    { url = "https://hackage.haskell.org/package/cryptohash-sha256-0.11.102.1/cryptohash-sha256-0.11.102.1.tar.gz", sha256 = "73a7dc7163871a80837495039a099967b11f5c4fe70a118277842f7a713c6bf6", unpack = false },
+    { url = "https://hackage.haskell.org/package/cryptohash-sha256-0.11.102.1/revision/6.cabal", sha256 = "0e9de2ccce261e7a5b027e842f6f47f50eb0e6059a0de98a5479f75aa8164107", unpack = false, name = "cryptohash-sha256.cabal" },
+    { url = "https://hackage.haskell.org/package/extra-1.8.1/extra-1.8.1.tar.gz", sha256 = "66a7d6d718646a7bda822d67550dc185c6e25ad1f7fecf06fc132e300098b598", unpack = false },
+    { url = "https://hackage.haskell.org/package/extra-1.8.1/revision/0.cabal", sha256 = "b9c360f2f3fbff5ca04656b7aa0a91b254ac7de7e4b959bae4688a178ffd79d1", unpack = false, name = "extra.cabal" },
+    { url = "https://hackage.haskell.org/package/filepattern-0.1.3/filepattern-0.1.3.tar.gz", sha256 = "cc445d439ea2f65cac7604d3578aa2c3a62e5a91dc989f4ce5b3390db9e59636", unpack = false },
+    { url = "https://hackage.haskell.org/package/filepattern-0.1.3/revision/0.cabal", sha256 = "372c1733d83b90045eb29da9f010fed79bfef8771ce65eb126a1d83ecc54a9a2", unpack = false, name = "filepattern.cabal" },
+    { url = "https://hackage.haskell.org/package/hashable-1.5.1.0/hashable-1.5.1.0.tar.gz", sha256 = "ed0b7c10ce92c9ffe45420dadc38c6d39db486ff3633ff13567cc9f75f79b112", unpack = false },
+    { url = "https://hackage.haskell.org/package/hashable-1.5.1.0/revision/0.cabal", sha256 = "140fc5adad166f7b527567cbd26ff481e8da4a66bdfc84be3ddf28dbeb66f275", unpack = false, name = "hashable.cabal" },
+    { url = "https://hackage.haskell.org/package/heaps-0.4.1/heaps-0.4.1.tar.gz", sha256 = "8763a4663a2d0b3c912400a547d66ae11b46a954403b6747272148e950aa0382", unpack = false },
+    { url = "https://hackage.haskell.org/package/heaps-0.4.1/revision/0.cabal", sha256 = "74ce60a23b8ef247b8bca71eeb38289e82b3b5e83b2383600b2c838a68218068", unpack = false, name = "heaps.cabal" },
+    { url = "https://hackage.haskell.org/package/js-dgtable-0.5.2/js-dgtable-0.5.2.tar.gz", sha256 = "e28dd65bee8083b17210134e22e01c6349dc33c3b7bd17705973cd014e9f20ac", unpack = false },
+    { url = "https://hackage.haskell.org/package/js-dgtable-0.5.2/revision/0.cabal", sha256 = "f75cb4fa53c88c65794becdd48eb0d3b2b8abd89a3d5c19e87af91f5225c15e4", unpack = false, name = "js-dgtable.cabal" },
+    { url = "https://hackage.haskell.org/package/js-flot-0.8.3/js-flot-0.8.3.tar.gz", sha256 = "1ba2f2a6b8d85da76c41f526c98903cbb107f8642e506c072c1e7e3c20fe5e7a", unpack = false },
+    { url = "https://hackage.haskell.org/package/js-flot-0.8.3/revision/0.cabal", sha256 = "4c1c447a9a2fba0adba6d30678302a30c32b9dfde9e7aa9e9156483e1545096d", unpack = false, name = "js-flot.cabal" },
+    { url = "https://hackage.haskell.org/package/js-jquery-3.7.1/js-jquery-3.7.1.tar.gz", sha256 = "a087fa01a1c52f5386d43f5355f64841c5a4b56b53720090d66b5aa00bfeb106", unpack = false },
+    { url = "https://hackage.haskell.org/package/js-jquery-3.7.1/revision/0.cabal", sha256 = "fdbdfd4d413848c678a3737f2b985a5db66b796c6847b1ae08246ea3795c0ba2", unpack = false, name = "js-jquery.cabal" },
+    { url = "https://hackage.haskell.org/package/primitive-0.9.1.0/primitive-0.9.1.0.tar.gz", sha256 = "44b4de41813c7bc5db8a57f87c3612a069b65086946268ba165097252ebd3d76", unpack = false },
+    { url = "https://hackage.haskell.org/package/primitive-0.9.1.0/revision/1.cabal", sha256 = "756b222c715bc6ef5ba81fa69cdbaa20c5c53beb6f16f174b8bacc93a6d239f0", unpack = false, name = "primitive.cabal" },
+    { url = "https://hackage.haskell.org/package/splitmix-0.1.3.2/splitmix-0.1.3.2.tar.gz", sha256 = "a61d4e8b30f5a16526d7d31171b674ae7924d2207f378060d13363bd8794de8c", unpack = false },
+    { url = "https://hackage.haskell.org/package/splitmix-0.1.3.2/revision/0.cabal", sha256 = "a557cff65eed1f70f3a3b468423cd58e7a9a9564c5cc00c76a13de64dec9bcbd", unpack = false, name = "splitmix.cabal" },
+    { url = "https://hackage.haskell.org/package/random-1.3.1/random-1.3.1.tar.gz", sha256 = "d840ac83f265b0cfa2a678f8ec78627eb50cf9be2f067c52c8a4239c29b71a35", unpack = false },
+    { url = "https://hackage.haskell.org/package/random-1.3.1/revision/0.cabal", sha256 = "0b4f649c3e78713b2ccad1535251ee34b148237fb2229d7058c2b1d9ccc324b8", unpack = false, name = "random.cabal" },
+    { url = "https://hackage.haskell.org/package/unordered-containers-0.2.21/unordered-containers-0.2.21.tar.gz", sha256 = "3b2ad1522b546e61960153257d1e5d239eeec5e83da847d5cb4d896a5bb7f9c0", unpack = false },
+    { url = "https://hackage.haskell.org/package/unordered-containers-0.2.21/revision/2.cabal", sha256 = "c5de1fb3377ed3c5f4cd851a771d1acc5c37d2f6bef0a499295c0e8857da5605", unpack = false, name = "unordered-containers.cabal" },
+    { url = "https://hackage.haskell.org/package/utf8-string-1.0.2/utf8-string-1.0.2.tar.gz", sha256 = "ee48deada7600370728c4156cb002441de770d0121ae33a68139a9ed9c19b09a", unpack = false },
+    { url = "https://hackage.haskell.org/package/utf8-string-1.0.2/revision/0.cabal", sha256 = "79416292186feeaf1f60e49ac5a1ffae9bf1b120e040a74bf0e81ca7f1d31d3f", unpack = false, name = "utf8-string.cabal" },
+    { url = "https://hackage.haskell.org/package/shake-0.19.9/shake-0.19.9.tar.gz", sha256 = "4176d6e38c3b7813f019f2377466d9f01db842056eec1cdaa8a23b80ceddcb8a", unpack = false },
+    { url = "https://hackage.haskell.org/package/shake-0.19.9/revision/0.cabal", sha256 = "8704f35f7857f71adef2b74aafb5580f73dfab004a804718d418c16798f4a186", unpack = false, name = "shake.cabal" },
+]
+
+environment = '''
+export HOME=/tmp LANG=C.UTF-8 LC_ALL=C.UTF-8
+# the GHC that builds GHC: the previous package's, or (stage 0) Alpine's
+if [ -x /usr/bin/ghc ] && [ ! -d /usr/lib/ghc-bootstrap ]; then
+    bootghc=/usr/bin/ghc
+else
+    bootghc=/usr/lib/ghc-bootstrap/usr/bin/ghc
+    # Alpine's GHC calls its C toolchain cc, c++, ld, ar and ranlib (its
+    # settings file): clang and LLVM's tools under those names
+    mkdir -p /tmp/cc-bin
+    ln -sf /usr/bin/clang /tmp/cc-bin/cc
+    ln -sf /usr/bin/clang++ /tmp/cc-bin/c++
+    ln -sf /usr/bin/ld.lld /tmp/cc-bin/ld
+    for t in ar nm ranlib objdump; do ln -sf /usr/bin/llvm-$t /tmp/cc-bin/$t; done
+    export PATH="/tmp/cc-bin:$PATH"
+fi
+# GHC takes its C toolchain from these and records it in its settings; the
+# distribution's default flags are not for it (GHC passes its own)
+export CC=clang CXX=clang++ LD=ld.lld AR=llvm-ar NM=llvm-nm RANLIB=llvm-ranlib OBJDUMP=llvm-objdump
+unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+ghc_configure() {
+    ./configure --prefix=/usr --with-system-libffi --enable-numa --disable-ld-override \
+        CC=clang CXX=clang++ LD=ld.lld AR=llvm-ar NM=llvm-nm RANLIB=llvm-ranlib "$@"
+}
+hadrian="hadrian/bootstrap/_build/bin/hadrian -j$jobs --flavour=release --docs=no-sphinx-pdfs"
+'''
+setup = '''
+# bootstrap.py's sources tarball (plan-bootstrap.json, each Hackage tarball
+# and its .cabal revision), put together from the pinned sources
+mkdir -p /tmp/hadrian-src
+cp $pkgfiles/plan-bootstrap-9_14_1.json /tmp/hadrian-src/plan-bootstrap.json
+python3 -I -c '
+import json, shutil, sys
+for d in json.load(open(sys.argv[1]))["dependencies"]:
+    if d["source"] == "hackage":
+        for f in (d["package"] + "-" + d["version"] + ".tar.gz", d["package"] + ".cabal"):
+            shutil.copy("/build/sources/" + f, "/tmp/hadrian-src/" + f)
+' /tmp/hadrian-src/plan-bootstrap.json
+tar -czf /tmp/hadrian-sources.tar.gz -C /tmp/hadrian-src .
+'''
+build = '''
+(cd hadrian/bootstrap && python3 bootstrap.py -w $bootghc -s /tmp/hadrian-sources.tar.gz)
+ghc_configure GHC=$bootghc
+$hadrian
+'''
+install = '''
+# Hadrian's install has no DESTDIR: install the binary distribution it makes
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ghc/LICENSE"
+$hadrian binary-dist-dir
+cd _build/bindist/ghc-$version-*
+ghc_configure
+make DESTDIR="$pkgdir" install
+test -x "$pkgdir/usr/bin/ghc"
+'''
