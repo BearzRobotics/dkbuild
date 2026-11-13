@@ -1,0 +1,37 @@
+# Fraunhofer HHI's VVC (H.266) encoder; FFmpeg's --enable-libvvenc. CMake builds
+# one library type per tree, so the static library comes from a second build.
+# Not imported from cports (Chimera has no vvenc).
+# Options: -DVVENC_ENABLE_WERROR=OFF because a -Werror build breaks on whatever
+# new warnings a newer compiler has (the warnings are not errors that matter);
+# -DVVENC_ENABLE_LINK_TIME_OPT=OFF keeps the objects plain (the static library
+# is then usable by any linker); the bundled simde and nlohmann_json in
+# thirdparty/ are header-only and part of the tarball.
+# needed by: ffmpeg (libvvenc).
+name = "vvenc"
+version = "1.14.0"
+release = 1
+summary = "Fraunhofer Versatile Video Encoder (VVC/H.266)"
+license = "BSD-3-Clause-Clear"
+homepage = "https://github.com/fraunhoferhhi/vvenc"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/fraunhoferhhi/vvenc/archive/refs/tags/v1.14.0.tar.gz", sha256 = "dd43d061d59dbc0d9b9ae5b99cb40672877dd811646228938f065798939ee174" },
+]
+
+setup = '''
+opts="-DVVENC_ENABLE_WERROR=OFF -DVVENC_ENABLE_LINK_TIME_OPT=OFF -DVVENC_INSTALL_FULLFEATURE_APP=ON"
+%cmake $opts -DBUILD_SHARED_LIBS=ON
+cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release $opts -DBUILD_SHARED_LIBS=OFF
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+install = '''
+# static first, then shared, so the shared build's pkg-config and CMake files win
+DESTDIR="$pkgdir" cmake --install build-static --strip
+%cmake_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/vvenc/LICENSE.txt"
+'''
