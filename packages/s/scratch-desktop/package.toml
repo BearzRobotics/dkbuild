@@ -13,12 +13,12 @@
 # DRAFT, not built: needs electron. The media library: 1328 assets.
 name = "scratch-desktop"
 version = "3.32.0"
-release = 1
+release = 2
 summary = "Scratch 3 editor as an offline desktop app"
 license = "AGPL-3.0-only"
 homepage = "https://scratch.mit.edu"
 archs = ["x86_64", "aarch64"]
-hostdeps = ["nodejs"]
+hostdeps = ["nodejs", "electron"]
 rundeps = ["electron"]
 options = ["!check", "!strip", "npmdeps"]
 
@@ -44,6 +44,15 @@ f=webpack.makeConfig.js
 # the system Electron, so the installed /usr/lib/scratch-desktop/static
 sed -i "s|'process.resourcesPath + \"/static\"'|'\"/usr/lib/scratch-desktop/static\"'|" $f
 grep -q '/usr/lib/scratch-desktop/static' $f
+# webpack.makeConfig.js does require('electron') (the npm package, whose
+# postinstall downloads a binary and is not run here: "Electron failed to
+# install correctly") for the path of the binary, and asks it --version for the
+# babel target. The system Electron (a build dependency, /usr/lib/electron) is
+# that binary; its `version` file (v-prefixed as --version prints it) answers.
+sed -i -e "s|^const electronPath = require('electron');|const electronPath = '/usr/lib/electron/electron';|" \
+    -e "s|^const electronVersion = childProcess.execSync.*|const electronVersion = 'v' + fs.readFileSync('/usr/lib/electron/version', 'utf8').trim().replace(/^v/, '');|" $f
+grep -q "^const electronPath = '/usr/lib/electron/electron';" $f
+grep -q "^const electronVersion = 'v' + fs.readFileSync" $f
 mkdir -p static/fetched
 cp -a ../scratch-media-13.7.4-svg/. static/fetched/
 '''
