@@ -2,7 +2,7 @@
 # SDR and MQTT parts are off (libraries not in the tree yet).
 name = "kismet"
 version = "2026.10.R1"
-release = 2
+release = 3
 summary = "Wireless network detector, sniffer and IDS"
 license = "GPL-2.0-or-later"
 homepage = "https://www.kismetwireless.net"
@@ -15,6 +15,11 @@ source = [
 ]
 
 setup = '''
+# randomized_alias.cc compares device_keys with !=, but trackedelement.h only
+# declares < and == (Kismet is built as C++17 here, where != is not rewritten
+# from ==, as C++20 does). Add the missing operator!=.
+sed -i '/^bool operator ==(const device_key& x, const device_key& y);/a inline bool operator !=(const device_key\& x, const device_key\& y) { return !(x == y); }' trackedelement.h
+grep -q 'operator !=(const device_key' trackedelement.h
 # --with-openssl=/usr: m4/ax_check_openssl.m4 tests `test x"$SSL_DIRS" == x""`,
 # which /bin/sh does not know ("test: x: unexpected operator"); the pkg-config
 # branch is then skipped, no OpenSSL flags are set and the link test fails
