@@ -1,0 +1,48 @@
+# alertmanager: the Prometheus alert router (alertmanager and amtool). Go
+# modules from the shared module cache (godeps). The web UI (Elm and React
+# Mantine) is the pre-built UI that upstream publishes with every release
+# (alertmanager-web-ui-<version>.tar.gz, the output of `make assets-tarball`:
+# a dist/ directory for ui/app); building it from source needs the whole
+# elm/npm toolchain, and policy accepts the release's pre-built UI, as for
+# prometheus. ui/web.go embeds app/dist (go:embed), so the tarball is unpacked
+# into ui/app, which is all the Makefile does too. The generated swagger API
+# code and template/email.tmpl are committed upstream. Tags of .promu.yml: netgo.
+# Installed inert: the dinit service is shipped, not enabled; the example
+# configuration is /usr/share/doc/alertmanager/alertmanager.yml with an empty
+# receiver (no integrations, no credentials), and there is no /etc config, so
+# the service fails to start until the administrator writes one.
+name = "alertmanager"
+version = "0.35.0"
+release = 1
+summary = "Prometheus alert router and notification manager"
+license = "Apache-2.0"
+homepage = "https://prometheus.io"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/prometheus/alertmanager/archive/refs/tags/v0.35.0.tar.gz", sha256 = "4c4355655ee6d303991fba6e10ca2357978ca9ca0fb47ce925482d685aa34ff7" },
+    { url = "https://github.com/prometheus/alertmanager/releases/download/v0.35.0/alertmanager-web-ui-0.35.0.tar.gz", sha256 = "c6af197ce7dbd85be0ac62b50e031eb17945385f782d12039d37f71b752b63db", unpack = false, name = "alertmanager-web-ui.tar.gz" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+# the release's pre-built UI: dist/{elm,mantine}, embedded by ui/web.go
+tar -xzf /build/sources/alertmanager-web-ui.tar.gz -C ui/app
+ld="-X github.com/prometheus/common/version.Version=$version -X github.com/prometheus/common/version.Revision=v$version -X github.com/prometheus/common/version.Branch=release -X github.com/prometheus/common/version.BuildUser=dkbuild -X github.com/prometheus/common/version.BuildDate=19700101-00:00:00"
+for b in alertmanager amtool; do
+    go build -tags netgo -ldflags "-s -w $ld" -o $b ./cmd/$b
+done
+'''
+install = '''
+install -Dm755 alertmanager "$pkgdir/usr/bin/alertmanager"
+install -Dm755 amtool "$pkgdir/usr/bin/amtool"
+install -Dm644 $pkgfiles/alertmanager.yml "$pkgdir/usr/share/doc/alertmanager/alertmanager.yml"
+install -Dm644 $pkgfiles/alertmanager "$pkgdir/etc/dinit.d/alertmanager"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/alertmanager.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/alertmanager.conf"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/alertmanager/LICENSE"
+install -Dm644 NOTICE "$pkgdir/usr/share/licenses/alertmanager/NOTICE"
+'''

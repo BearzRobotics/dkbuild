@@ -1,0 +1,15 @@
+# Minimal example. The only receiver is empty: alerts are grouped and then
+# dropped. Add notification integrations (email, webhook, ...) and their
+# credentials under `receivers` yourself.
+route:
+  group_by: ['alertname']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 1h
+  receiver: 'null'
+receivers:
+  - name: 'null'
+inhibit_rules:
+  - source_matchers: [severity="critical"]
+    target_matchers: [severity="warning"]
+    equal: [alertname, instance]

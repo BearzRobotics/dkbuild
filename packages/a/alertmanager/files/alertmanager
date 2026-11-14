@@ -1,0 +1,13 @@
+# Prometheus Alertmanager. Not enabled by default: write
+# /etc/alertmanager/alertmanager.yml (example:
+# /usr/share/doc/alertmanager/alertmanager.yml), then `dinitctl enable alertmanager`.
+# Listens on port 9093 (web UI and API) and 9094 (cluster gossip).
+type = process
+command = /usr/bin/alertmanager --config.file=/etc/alertmanager/alertmanager.yml --storage.path=/var/lib/alertmanager
+run-as = alertmanager
+working-dir = /var/lib/alertmanager
+logfile = /var/log/alertmanager.log
+smooth-recovery = true
+
+depends-on: rcboot
+waits-for: syslogd
