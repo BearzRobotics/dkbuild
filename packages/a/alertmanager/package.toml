@@ -30,7 +30,9 @@ export GOTOOLCHAIN=local GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOCACHE=/t
 '''
 build = '''
 # the release's pre-built UI: dist/{elm,mantine}, embedded by ui/web.go
-tar -xzf /build/sources/alertmanager-web-ui.tar.gz -C ui/app
+# --no-same-owner: the tarball records the CI uid 1001, which the build's user
+# namespace cannot chown to (tar exits 2 otherwise)
+tar --no-same-owner -xzf /build/sources/alertmanager-web-ui.tar.gz -C ui/app
 ld="-X github.com/prometheus/common/version.Version=$version -X github.com/prometheus/common/version.Revision=v$version -X github.com/prometheus/common/version.Branch=release -X github.com/prometheus/common/version.BuildUser=dkbuild -X github.com/prometheus/common/version.BuildDate=19700101-00:00:00"
 for b in alertmanager amtool; do
     go build -tags netgo -ldflags "-s -w $ld" -o $b ./cmd/$b
