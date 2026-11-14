@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: main/kvantum/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Qt6 build only (the Kvantum style and its manager/theme-engine tools); the
+# source also contains a Qt5 variant, not built because Qt5 is not in this tree.
+# Chimera's has 1.1.7; this is the current release (V1.1.9).
+name = "kvantum"
+version = "1.1.9"
+release = 1
+summary = "SVG-based theme engine for Qt"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/tsujan/Kvantum"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qtbase", "qt6-qttools"]
+builddeps = ["kwindowsystem-devel", "libx11-devel", "libxext-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel", "qt6-qttools-devel"]
+rundeps = ["qt6-qtsvg"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/tsujan/Kvantum/releases/download/V1.1.9/Kvantum-1.1.9.tar.xz", sha256 = "a9ca7d108b73e932227c10e435dc6c46b53306d752a8720f91813039770513df" },
+]
+
+setup = '''
+%cmake -S Kvantum
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''
