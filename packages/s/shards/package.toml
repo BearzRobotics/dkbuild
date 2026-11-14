@@ -1,0 +1,37 @@
+# Shards 0.20.0: Crystal's dependency manager (shards install, update, build,
+# init). Built with the tree's crystal. The one dependency, crystal-molinillo
+# (the resolver, v0.2.0, from shard.lock), is a second source laid in lib/ in
+# place of the `shards install` a checkout would run. The manual pages are
+# the prebuilt ones in the release tarball (man/).
+name = "shards"
+version = "0.20.0"
+release = 1
+summary = "Dependency manager for the Crystal language"
+license = "Apache-2.0"
+homepage = "https://github.com/crystal-lang/shards"
+archs = ["x86_64"]
+hostdeps = ["crystal", "make", "git", "llvm-clang", "llvm-lld", "pkgconf"]
+builddeps = ["gc-devel", "libatomic-ops-devel", "pcre2-devel", "libevent-devel", "libyaml-devel", "zlib-ng-compat-devel"]
+rundeps = ["crystal", "git"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://github.com/crystal-lang/shards/archive/refs/tags/v0.20.0.tar.gz", sha256 = "8655b87761016409e4411056e350b24e7fe79eae3f227b3354b181a03f14d5da" },
+    { url = "https://github.com/crystal-lang/crystal-molinillo/archive/refs/tags/v0.2.0.tar.gz", sha256 = "e231cf2411a6a11a1538983c7fb52b19e650acc3338bd3cdf6fdb13d6463861a" },
+]
+
+environment = '''
+export HOME=/tmp
+export CRYSTAL_PATH="lib:/usr/share/crystal/src"
+'''
+setup = '''
+mkdir -p lib
+ln -sfn "$PWD/../crystal-molinillo-0.2.0" lib/molinillo
+'''
+build = '''
+make release=1 PREFIX=/usr SHARDS_CONFIG_BUILD_COMMIT=v0.20.0
+'''
+install = '''
+make install PREFIX=/usr DESTDIR="$pkgdir"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/shards/LICENSE"
+'''
