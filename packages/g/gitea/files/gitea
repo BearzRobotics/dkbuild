@@ -1,0 +1,13 @@
+# Gitea. Not enabled by default (README.FenrirOS): there is no
+# /etc/gitea/app.ini until the administrator writes one (the example is
+# /usr/share/doc/gitea/app.example.ini), and the first visit to the web
+# address shows the install page. Runs as the gitea user.
+type = process
+command = /usr/bin/env HOME=/var/lib/gitea USER=gitea /usr/bin/gitea web --config /etc/gitea/app.ini --work-path /var/lib/gitea
+run-as = gitea
+working-dir = /var/lib/gitea
+logfile = /var/log/gitea.log
+smooth-recovery = true
+
+depends-on: rcboot
+waits-for: syslogd

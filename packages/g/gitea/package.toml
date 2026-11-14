@@ -1,0 +1,62 @@
+# Gitea: a self-hosted Git service (repositories, issues, pull requests,
+# Actions CI, package registry, wiki). Go, built from the release source
+# tarball (gitea-src), which carries the vendored Go modules (vendor/, built
+# with -mod=vendor: no godeps) and the PRE-BUILT web front end in
+# public/assets (the output of upstream's webpack/vite build). Building the
+# front end from source needs the whole npm toolchain; policy accepts the
+# release's pre-built assets, which is what upstream's own binaries embed.
+# The templates, options and public/ files are embedded in the binary
+# (the `bindata` tag; the generator, `go generate`, is upstream's and only
+# uses the standard library). Database drivers: SQLite (CGO, with
+# sqlite_unlock_notify; the bundled amalgamation of the Go driver) plus the
+# pure-Go MySQL/MariaDB and PostgreSQL drivers; PAM authentication (the
+# `pam` tag, linux-pam). Source edits: none.
+#
+# COEXISTENCE WITH FORGEJO (packages/f/forgejo): the two do NOT conflict and
+# can be installed together. Binaries /usr/bin/gitea and /usr/bin/forgejo,
+# configuration /etc/gitea and /etc/forgejo, data /var/lib/gitea and
+# /var/lib/forgejo, service users `gitea` and `forgejo` (each has its own
+# user, no shared `git` user: each needs its own authorized_keys and hooks),
+# services `gitea` and `forgejo`, logs /var/log/gitea.log and
+# /var/log/forgejo.log. They are forks of one code base: never point both at
+# the same repository directory or database. Both default to HTTP port 3000:
+# give one of them another HTTP_PORT in its app.ini.
+# Installed inert (docs/requests.md): the dinit service is shipped, not
+# enabled; no app.ini (an example in /usr/share/doc/gitea), no account: the
+# install page (first visit) creates the administrator. Setup:
+# /usr/share/doc/gitea/README.FenrirOS.
+name = "gitea"
+version = "28.3.0"
+release = 1
+summary = "Self-hosted Git service"
+license = "MIT"
+homepage = "https://about.gitea.com"
+hostdeps = ["go"]
+builddeps = ["linux-pam-devel"]
+rundeps = ["git", "bash", "openssh"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://dl.gitea.com/gitea/28.3.0/gitea-src-28.3.0.tar.gz", sha256 = "a632833d5ae02a18e8f7ed79177763801604de6ef6f6d1c1405029d28de9d3a4" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOPROXY=off GOFLAGS="-mod=vendor -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go HOME=/tmp/home
+export CGO_ENABLED=1 CGO_CFLAGS="-DSQLITE_MAX_VARIABLE_NUMBER=32766"
+'''
+build = '''
+# the Makefile's generate-go (the embedded files), then its build rule,
+# without the git calls the Makefile makes for the version
+CC= CGO_ENABLED=0 go generate -tags bindata ./...
+go build -tags "bindata sqlite sqlite_unlock_notify pam" \
+    -ldflags "-s -w -X main.Version=$version -X \"main.Tags=bindata sqlite sqlite_unlock_notify pam\"" -o gitea
+'''
+install = '''
+install -Dm755 gitea "$pkgdir/usr/bin/gitea"
+install -Dm644 custom/conf/app.example.ini "$pkgdir/usr/share/doc/gitea/app.example.ini"
+install -Dm644 $pkgfiles/gitea "$pkgdir/etc/dinit.d/gitea"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/gitea.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/gitea.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/gitea/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/gitea/LICENSE"
+'''
