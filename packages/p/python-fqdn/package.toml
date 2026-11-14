@@ -1,0 +1,23 @@
+# fqdn from PyPI.
+name = "python-fqdn"
+version = "1.6.0"
+release = 1
+summary = "Validates fully-qualified domain names against RFC 1123, so that they are acceptable to modern browsers"
+license = "MPL-2.0"
+homepage = "https://github.com/ypcrts/fqdn"
+hostdeps = ["python", "python-setuptools", "python-setuptools-scm"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/02/01/248d44fbda9e78fa1a7b5a475194bef4c4a3e285db286419f3bb42f2efdf/fqdn-1.6.0.tar.gz", sha256 = "e39bf62e2a9481aa2cb780554fdfd944dd8ee5f230eb831684d539cbafed8de2" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-fqdn/LICENSE"
+'''
