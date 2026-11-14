@@ -1,0 +1,25 @@
+# pyzmq from PyPI: links the system libzmq (PYZMQ_NO_BUNDLE makes the build fail instead of
+# downloading and building its bundled libzmq/libsodium, which would need the network).
+name = "python-pyzmq"
+version = "27.3.0"
+release = 1
+summary = "Python bindings for 0MQ"
+license = "BSD-3-Clause"
+homepage = "https://pyzmq.readthedocs.org"
+hostdeps = ["python", "python-scikit-build-core", "python-cython", "python-packaging", "python-cffi", "cmake", "ninja", "pkgconf"]
+builddeps = ["python-devel", "zeromq-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/e2/e1/ea46ab0d707219c098065a37d2add5b53d3b124241aa19429bcd0863e5b4/pyzmq-27.3.0.tar.gz", sha256 = "bbedb3d1d99babc625f1dd9d7438acefd442b36b75073fd6bc1ef7c0a4b96d56" },
+]
+
+environment = '''
+export PYZMQ_NO_BUNDLE=1 ZMQ_PREFIX=/usr
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/python-pyzmq/LICENSE.md"
+'''
