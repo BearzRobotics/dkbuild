@@ -1,0 +1,3 @@
+#!/bin/sh
+# Element Desktop on the system Electron.
+exec /usr/bin/electron /usr/lib/element-desktop "$@"

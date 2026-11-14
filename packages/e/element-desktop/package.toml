@@ -1,0 +1,90 @@
+# Element Desktop: the Matrix client (Element Web in an Electron shell), on
+# the system Electron (1.12.13 asks for Electron 40; the tree has 42, as for
+# scratch-desktop).
+# The web application is the release bundle element-web publishes
+# (element-v1.12.13.tar.gz, what element-desktop's own `pnpm run fetch` downloads
+# for a package), not built from source: building it needs the whole
+# element-web monorepo (matrix-js-sdk, the React components, ~2000 npm packages
+# and a webpack build of several GB), and the desktop build itself treats the
+# bundle as the input. Like Element's packaging it gets the desktop's
+# element.io/release/config.json as webapp/config.json.
+# The desktop shell (TypeScript, built with tsc; npm packages from the store,
+# pnpm-lock.yaml) replaces electron-builder, which would download an Electron:
+# its output is laid out by hand as an app directory on /usr/lib/electron:
+# lib/ (compiled main process), webapp/, build/ (icons: the app looks for
+# build/icon.png next to webapp), node_modules/ (runtime dependencies) and
+# package.json with the fields electron-builder's extraMetadata adds. The
+# Electron fuses electron-builder sets (only-load-from-asar, no RunAsNode...)
+# belong to a packaged Electron binary and cannot be set on the system one.
+# The seshat module (full-text search over encrypted rooms) is its own recipe,
+# matrix-seshat, linked into node_modules.
+# No auto-update on Linux (upstream has none); the Sentry reporting is opt-in
+# (it asks, and needs a DSN in the config, which is not set).
+# Licence: AGPL-3.0-only OR GPL-3.0-only OR a commercial licence; the open
+# licence is used.
+name = "element-desktop"
+version = "1.12.13"
+release = 1
+summary = "Matrix chat client (Element) as a desktop application"
+license = "AGPL-3.0-only"
+homepage = "https://element.io"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["nodejs", "pnpm"]
+rundeps = ["electron", "matrix-seshat", "libsecret", "hicolor-icon-theme"]
+options = ["!check", "!strip", "npmdeps"]
+
+source = [
+    { url = "https://github.com/element-hq/element-desktop/archive/refs/tags/v1.12.13.tar.gz", sha256 = "b1332a00955d463d80daf00e713f7f4c78dbd441a22fb8ff1fd9966357dbfb99" },
+    { url = "https://github.com/element-hq/element-web/releases/download/v1.12.13/element-v1.12.13.tar.gz", sha256 = "dc1e964b1212d89b449adfd8cde2be4badcc42566cc1dc3e01540a78af1d5411" },
+]
+
+environment = '''
+export HOME=/tmp/home npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+export ELECTRON_SKIP_BINARY_DOWNLOAD=1 CI=true
+# pnpm must not switch to the version package.json's packageManager names
+# (10.30.3 plus a hash): that needs the network
+export npm_config_manage_package_manager_versions=false npm_config_package_manager_strict=false \
+    npm_config_pm_on_fail=ignore
+'''
+setup = '''
+# the packageManager field makes pnpm fetch that exact pnpm (see vikunja)
+sed -i '/^    "packageManager": /d' package.json
+! grep -q '"packageManager"' package.json
+echo 'pm-on-fail=ignore' >> .npmrc
+# --ignore-scripts: the postinstall (electron-builder install-app-deps) and the
+# npm electron package's binary download are not wanted
+pnpm install --frozen-lockfile --ignore-scripts
+'''
+build = '''
+pnpm run build:ts
+pnpm run build:res
+test -f lib/electron-main.js
+'''
+install = '''
+app="$pkgdir/usr/lib/element-desktop"
+mkdir -p "$app"
+# runtime dependencies only (dependencies in package.json), not the build tools
+pnpm prune --prod --ignore-scripts
+cp -a node_modules "$app/node_modules"
+cp -a lib "$app/lib"
+cp -a ../element-v$version "$app/webapp"
+cp element.io/release/config.json "$app/webapp/config.json"
+mkdir -p "$app/build"
+cp build/icon.png "$app/build/icon.png"
+# what electron-builder's extraMetadata (electron-builder.ts, element.io/release/build.json) adds
+node -e '
+const fs = require("fs");
+const p = JSON.parse(fs.readFileSync("package.json", "utf8"));
+const v = JSON.parse(fs.readFileSync("element.io/release/build.json", "utf8"));
+Object.assign(p, { name: v.name, productName: v.productName, description: v.description,
+                   electron_appId: v.appId, electron_protocol: v.protocols[0] });
+fs.writeFileSync(process.argv[1], JSON.stringify(p, null, 2));
+' "$app/package.json"
+# the native search module (matrix-seshat package)
+rm -rf "$app/node_modules/matrix-seshat"
+ln -s /usr/lib/node_modules/matrix-seshat "$app/node_modules/matrix-seshat"
+install -Dm755 $pkgfiles/element-desktop "$pkgdir/usr/bin/element-desktop"
+install -Dm644 $pkgfiles/element-desktop.desktop "$pkgdir/usr/share/applications/element-desktop.desktop"
+install -Dm644 build/icon.png "$pkgdir/usr/share/icons/hicolor/512x512/apps/element-desktop.png"
+install -Dm644 LICENSE-AGPL-3.0 "$pkgdir/usr/share/licenses/element-desktop/LICENSE-AGPL-3.0"
+'''
