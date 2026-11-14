@@ -1,0 +1,20 @@
+# rfc3987-syntax from PyPI.
+name = "python-rfc3987-syntax"
+version = "1.1.0"
+release = 1
+summary = "Helper functions to syntactically validate strings according to RFC 3987."
+license = "MIT"
+homepage = "https://github.com/willynilly/rfc3987-syntax"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python", "python-lark"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/2c/06/37c1a5557acf449e8e406a830a05bf885ac47d33270aec454ef78675008d/rfc3987_syntax-1.1.0.tar.gz", sha256 = "717a62cbf33cffdd16dfa3a497d81ce48a660ea691b1ddd7be710c22f00b4a0d" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-rfc3987-syntax/LICENSE"
+'''
