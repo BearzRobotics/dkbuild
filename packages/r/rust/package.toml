@@ -68,6 +68,14 @@ else
     boot=/usr/lib/rust-bootstrap
 fi
 test -x "$boot/bin/rustc" && test -x "$boot/bin/cargo"
+# Upstream's prebuilt std (stage0) unwinds through libgcc_s, so linking the
+# bootstrap tool and every host build script and proc macro asks for -lgcc_s.
+# LLVM's libunwind has the same _Unwind_* functions; rust-bootstrap only links
+# it as libgcc_s.so.1 inside its own lib/, which the linker does not search
+# (r6 failed with "ld.lld: unable to find library -lgcc_s"). Only the build
+# root has this link: the rust built here links libunwind itself
+# (llvm-libunwind = 'system'), so nothing in the package needs it.
+[ -e /usr/lib/libgcc_s.so ] || ln -s libunwind.so.1 /usr/lib/libgcc_s.so
 # Patch 0005 edits src/unix/mod.rs in every vendored libc crate. cargo refuses
 # a directory source whose files no longer match .cargo-checksum.json, so (as
 # Chimera does) empty the per-file checksum list of the patched crates; the
