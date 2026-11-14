@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: user/tree-sitter-markdown/template.py (cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors).
+# Parser sources are pre-generated in the release (src/parser.c), so the tree-sitter CLI is not needed.
+# The links in /usr/lib/tree-sitter are the parser directory neovim reads
+# (its runtime/parser is a link to it; see the neovim recipe).
+name = "tree-sitter-markdown"
+version = "0.5.4"
+release = 1
+summary = "Markdown grammars (block and inline) for tree-sitter"
+license = "MIT"
+homepage = "https://github.com/tree-sitter-grammars/tree-sitter-markdown"
+hostdeps = ["pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/tree-sitter-grammars/tree-sitter-markdown/archive/v0.5.4.tar.gz", sha256 = "481ce2c1cce7b1130bc8455c186052bd0fa461f1ff488666994c6a3da7fca2ac" },
+]
+
+build = '''
+# keep make from running the tree-sitter CLI: the generated files must not look older than grammar.js
+for d in tree-sitter-markdown tree-sitter-markdown-inline; do touch $d/src/grammar.json $d/src/parser.c; done
+%make PREFIX=/usr LIBDIR=/usr/lib
+'''
+install = '''
+%make_install PREFIX=/usr LIBDIR=/usr/lib
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/tree-sitter-markdown/LICENSE"
+mkdir -p "$pkgdir/usr/lib/tree-sitter"
+ln -s "../$(basename "$(find "$pkgdir/usr/lib" -maxdepth 1 -name 'libtree-sitter-markdown.so.*' -type l | head -1)")" "$pkgdir/usr/lib/tree-sitter/markdown.so"
+ln -s "../$(basename "$(find "$pkgdir/usr/lib" -maxdepth 1 -name 'libtree-sitter-markdown-inline.so.*' -type l | head -1)")" "$pkgdir/usr/lib/tree-sitter/markdown_inline.so"
+'''
