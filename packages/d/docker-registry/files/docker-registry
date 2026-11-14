@@ -1,0 +1,13 @@
+# Docker/OCI registry. Not enabled by default (README.FenrirOS): it needs
+# /etc/docker-registry/config.yml (example:
+# /usr/share/doc/docker-registry/config-example.yml), then
+# `dinitctl enable docker-registry`.
+type = process
+command = /usr/bin/registry serve /etc/docker-registry/config.yml
+run-as = docker-registry
+working-dir = /var/lib/docker-registry
+logfile = /var/log/docker-registry.log
+smooth-recovery = true
+
+depends-on: rcboot
+waits-for: syslogd

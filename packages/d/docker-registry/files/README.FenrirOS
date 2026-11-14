@@ -1,0 +1,22 @@
+Docker registry (Distribution) on FenrirOS
+==========================================
+
+Installed inert: the service is not enabled and there is no configuration.
+
+    1. cp /usr/share/doc/docker-registry/config-example.yml \
+          /etc/docker-registry/config.yml
+       and edit it. In the example the data directory is /var/lib/registry:
+       change rootdirectory to /var/lib/docker-registry (the service user's
+       directory). It listens on :5000 over plain HTTP with no
+       authentication of its own besides the htpasswd path.
+    2. Create users (no account exists): htpasswd -Bc /etc/docker-registry/htpasswd alice
+       (htpasswd is the Apache tool) and set auth.htpasswd.path to it,
+       or put the registry behind a reverse proxy that authenticates, and
+       terminate TLS there (or set http.tls.certificate and key).
+    3. dinitctl enable docker-registry
+
+Push to it with: docker tag IMG host:5000/IMG; docker push host:5000/IMG
+(a registry without TLS has to be listed in the Docker daemon's
+insecure-registries; prefer TLS). Garbage collection of unreferenced blobs:
+registry garbage-collect /etc/docker-registry/config.yml (stop writes first).
+`registry-digest` prints the sha256 digest of a file.

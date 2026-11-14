@@ -1,0 +1,47 @@
+# docker-registry: the Distribution registry (CNCF Distribution, the
+# reference implementation of the OCI distribution spec and the engine behind
+# Docker's `registry` image), v3. One program, `registry` (serve, garbage-
+# collect, and the schema migration), plus the digest helper. Go, built from
+# the release tarball, which carries vendor/ (-mod=vendor: no godeps).
+# No special build tags exist (the cloud storage drivers are always built).
+# Upstream builds with PIE and `-z now`; PIE is the toolchain default here.
+# Source edits: none. The version information is passed by -ldflags (the
+# Makefile asks git for it).
+# Installed inert: the dinit service is shipped, not enabled, and there is no
+# configuration: no /etc/docker-registry/config.yml, no users, no htpasswd
+# file. The example configuration is /usr/share/doc/docker-registry/
+# config-example.yml (filesystem storage, plain HTTP on :5000, NO
+# authentication in it other than a path to an htpasswd file you create).
+# Setup: /usr/share/doc/docker-registry/README.FenrirOS.
+name = "docker-registry"
+version = "3.1.2"
+release = 1
+summary = "OCI/Docker image registry (CNCF Distribution)"
+license = "Apache-2.0"
+homepage = "https://distribution.github.io/distribution/"
+hostdeps = ["go"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/distribution/distribution/archive/refs/tags/v3.1.2.tar.gz", sha256 = "2f9b6fc00bec854e62e9b720903a9c9b48018505177f7c7a8ce7b74da2b23e4f", name = "distribution-3.1.2.tar.gz" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOPROXY=off GOFLAGS="-mod=vendor -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go HOME=/tmp/home CGO_ENABLED=0
+'''
+build = '''
+pkg=github.com/distribution/distribution/v3
+ld="-s -w -X $pkg/version.version=v$version -X $pkg/version.revision=v$version -X $pkg/version.mainpkg=$pkg"
+go build -buildmode=pie -ldflags "$ld" -o registry ./cmd/registry
+go build -buildmode=pie -ldflags "$ld" -o registry-digest ./cmd/digest
+'''
+install = '''
+install -Dm755 registry "$pkgdir/usr/bin/registry"
+install -Dm755 registry-digest "$pkgdir/usr/bin/registry-digest"
+install -Dm644 cmd/registry/config-example.yml "$pkgdir/usr/share/doc/docker-registry/config-example.yml"
+install -Dm644 $pkgfiles/docker-registry "$pkgdir/etc/dinit.d/docker-registry"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/docker-registry.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/docker-registry.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/docker-registry/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/docker-registry/LICENSE"
+'''
