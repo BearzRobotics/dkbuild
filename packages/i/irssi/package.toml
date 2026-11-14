@@ -1,0 +1,35 @@
+# irssi: terminal IRC client. With everything upstream offers on Linux: the
+# Perl scripting module, irssi-proxy, irssi-bot, true colour, OTR (libotr),
+# utf8proc and GRegex. Capsicum is FreeBSD only; the fuzzer targets and
+# glib's bundled copy (install-glib) are developer features.
+name = "irssi"
+version = "1.4.5"
+release = 1
+summary = "Terminal IRC client"
+license = "GPL-2.0-or-later"
+homepage = "https://irssi.org"
+hostdeps = ["meson", "perl", "pkgconf"]
+builddeps = ["glib-devel", "libgcrypt-devel", "libotr-devel", "ncurses-devel", "openssl-devel", "perl", "utf8proc-devel"]
+rundeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/irssi/irssi/releases/download/1.4.5/irssi-1.4.5.tar.xz", sha256 = "72a951cb0ad622785a8962801f005a3a412736c7e7e3ce152f176287c52fe062" },
+]
+
+setup = '''
+%meson \
+    -Dwith-perl=yes \
+    -Dwith-otr=yes \
+    -Dwith-proxy=yes \
+    -Dwith-bot=yes \
+    -Denable-true-color=yes \
+    -Ddisable-utf8proc=no \
+    -Dwith-capsicum=no
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''
