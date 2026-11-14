@@ -1,0 +1,27 @@
+# Nerd Fonts' "Symbols Only" font (the icon glyphs without a text face), which
+# kitty's build copies in (it looks the font up with fc-list) and other
+# terminals and bars use as a fallback. The release archive has no top
+# directory, so it is copied unpacked and extracted in the install step. The
+# whole Nerd Fonts collection (Chimera's fonts-nerd) is not packaged.
+name = "fonts-nerd-symbols-only"
+version = "3.5.1"
+release = 1
+summary = "Nerd Fonts symbols (icon glyphs) as a stand-alone font"
+license = "MIT"
+homepage = "https://www.nerdfonts.com"
+hostdeps = ["xz"]
+
+source = [
+    { url = "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.1/NerdFontsSymbolsOnly.tar.xz", sha256 = "01172f37db8543edb102e5cb5c64101c9f4686630804d49b419aa07b23a69996", unpack = false },
+]
+
+install = '''
+mkdir -p fonts
+tar -C fonts -xf /build/sources/NerdFontsSymbolsOnly.tar.xz
+install -Dm644 -t "$pkgdir/usr/share/fonts/nerd-symbols-only" fonts/*.ttf
+install -Dm644 fonts/10-nerd-font-symbols.conf "$pkgdir/usr/share/fontconfig/conf.avail/10-nerd-font-symbols.conf"
+for l in LICENSE LICENSE.txt LICENSE.md; do
+    [ -f fonts/$l ] && install -Dm644 fonts/$l "$pkgdir/usr/share/licenses/fonts-nerd-symbols-only/LICENSE" && break
+done
+ls "$pkgdir/usr/share/licenses/fonts-nerd-symbols-only/LICENSE"
+'''
