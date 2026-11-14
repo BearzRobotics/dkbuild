@@ -1,0 +1,53 @@
+# Imported from Chimera Linux cports: user/kitty/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Built with setup.py linux-package (Python extension modules in C plus the
+# Go part, "kitten"); the Go modules come from the godeps store (go.sum
+# checked at fetch). Wayland and X11 both; libcanberra/libsystemd are opened
+# at run time. Not carried over from Chimera: the three patches written for
+# kitty 0.46 (no -O3/_FORTIFY_SOURCE, a __builtin_cpu_supports guard for CPUs
+# without it, skipping the libsystemd probe); the probe is removed below
+# (sed) because systemd does not exist here, so kitty would print "failed to
+# find libsystemd" at start. -Wl,-z,stack-size=2097152: musl's default thread
+# stack is too small for kitty's threads (as Chimera). The kitty-terminfo
+# subpackage holds xterm-kitty, and kitten (the client) is split into
+# kitty-kitten as in Chimera. The Symbols Nerd Font that setup.py copies into the
+# build comes from fc-list, hence the fonts-nerd-symbols-only recipe.
+name = "kitty"
+version = "0.50.0"
+release = 1
+summary = "Accelerated terminal emulator"
+license = "GPL-3.0-only"
+homepage = "https://sw.kovidgoyal.net/kitty"
+hostdeps = ["fontconfig", "fonts-nerd-symbols-only", "go", "pkgconf", "python", "python-setuptools", "wayland-devel", "wayland-protocols"]
+builddeps = ["dbus-devel", "fontconfig-devel", "freetype-devel", "gettext-devel", "harfbuzz-devel", "lcms2-devel", "libcanberra-devel", "libpng-devel", "libxcb-devel", "libxcursor-devel", "libxi-devel", "libxinerama-devel", "libxkbcommon-devel", "libxrandr-devel", "openssl-devel", "python-devel", "simde", "xxhash-devel", "wayland-devel", "zlib-ng-compat-devel"]
+rundeps = ["kitty-kitten", "kitty-terminfo"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/kovidgoyal/kitty/releases/download/v0.50.0/kitty-0.50.0.tar.xz", sha256 = "01f20d0b253af0a7e041394a501adc83483f2eee01faf607a933c028343ab71a" },
+]
+
+environment = '''
+export CFLAGS="$CFLAGS -Wno-error=overflow"
+export LDFLAGS="$LDFLAGS -Wl,-z,stack-size=2097152"
+export CGO_ENABLED=1
+'''
+build = '''
+sed -i '/^ensure_initialized_and_useable(void) {/,/^}/{/^    ensure_initialized();$/d}' kitty/systemd.c
+python3 setup.py linux-package --ignore-compiler-warnings --update-check-interval=0 --verbose
+'''
+install = '''
+# the optimized byte-code caches are pointless in the package
+find linux-package -name '*.opt-*.pyc' -delete
+mkdir -p "$pkgdir/usr"
+cp -a linux-package/. "$pkgdir/usr/"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/kitty/LICENSE"
+'''
+
+[subpackages.terminfo]
+summary = "kitty terminfo data"
+paths = ["/usr/share/terminfo"]
+
+[subpackages.kitten]
+summary = "kitten client"
+paths = ["/usr/bin/kitten", "/usr/share/man/man1/kitten*.1"]
