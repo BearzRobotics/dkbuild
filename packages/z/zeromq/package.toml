@@ -8,19 +8,28 @@
 # (need asciidoc and the DocBook toolchain).
 name = "zeromq"
 version = "4.3.5"
-release = 1
+release = 2
 summary = "ZeroMQ messaging library"
 license = "MPL-2.0"
 homepage = "https://zeromq.org"
-hostdeps = ["pkgconf"]
+hostdeps = ["bash", "pkgconf"]
 builddeps = ["libsodium-devel", "libbsd-devel"]
 
 source = [
     { url = "https://github.com/zeromq/libzmq/releases/download/v4.3.5/zeromq-4.3.5.tar.gz", sha256 = "6653ef5910f17954861fe72332e68b03ca6e4d9c7160eb3a8de5a5a913bfab43" },
 ]
 
+# - configure uses bashisms (CFLAGS+=), which /bin/sh cannot run: it failed with
+#   "CFLAGS+= -std=c11: not found" and dropped its flags. It is run with bash.
+# - polling_util.hpp uses std::nothrow without including <new>; the libc++ here no
+#   longer pulls it in through <vector>, so the include is added by sed.
+# - --disable-Werror: the default -Werror turns clang's -Wmissing-braces on
+#   proxy.cpp's "stats_proxy stats = {0};" into an error (a warning only upstream).
 setup = '''
-%configure \
+sed -i 's|^#include <vector>|#include <new>\n#include <vector>|' src/polling_util.hpp
+export CONFIG_SHELL=/bin/bash
+bash %configure \
+    --disable-Werror \
     --with-libsodium \
     --enable-libbsd \
     --without-docs

@@ -2,11 +2,14 @@
 # underneath Matroska). needed by libmatroska (VLC, mkvtoolnix).
 name = "libebml"
 version = "1.4.7"
-release = 1
+release = 2
 summary = "Extensible Binary Meta Language library"
 license = "LGPL-2.1-or-later"
 homepage = "https://www.matroska.org"
 hostdeps = ["cmake", "ninja"]
+# utfcpp (header-only utf8cpp): CMakeLists falls back to a FetchContent git clone of
+# it when find_package(utf8cpp) fails, which cannot work offline.
+builddeps = ["utfcpp"]
 options = ["!check"]
 
 source = [

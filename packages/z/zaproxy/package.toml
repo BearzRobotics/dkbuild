@@ -6,7 +6,7 @@
 # task finds them with the right hash and downloads nothing (offline).
 name = "zaproxy"
 version = "2.17.0"
-release = 2
+release = 3
 summary = "OWASP ZAP web application security scanner"
 license = "Apache-2.0"
 homepage = "https://www.zaproxy.org"
@@ -73,8 +73,15 @@ environment = '''
 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
 '''
 setup = '''
-mkdir -p zap/build/mainAddOns
-cp /build/sources/*.zap zap/build/mainAddOns/
+# The add-ons laid into zap/build/mainAddOns beforehand did not survive: the
+# downloadMainAddOns task (buildSrc DownloadMainAddOns.java) found nothing there
+# (Gradle clears the output directory of a task with no history) and tried to
+# download, which fails offline. So the task's download step itself is
+# replaced: it copies the add-on from /build/sources (the sources above) and
+# the task still checks the SHA-256 listed in main-add-ons.yml.
+f=buildSrc/src/main/java/org/zaproxy/zap/tasks/DownloadMainAddOns.java
+sed -i 's|downloadAction.execute().get();|java.nio.file.Files.copy(java.nio.file.Paths.get("/build/sources", file.getFileName().toString()), file, java.nio.file.StandardCopyOption.REPLACE_EXISTING);|' $f
+grep -q 'Paths.get("/build/sources"' $f
 '''
 build = '''
 gradle :zap:distLinux

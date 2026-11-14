@@ -7,17 +7,23 @@
 # upstream's `make assets-compress` does (scripts/compress_assets.sh with
 # PREBUILT_ASSETS_STATIC_DIR), then built with the tags of .promu.yml:
 # netgo and builtinassets.
+# Source edit: patches/no-go-work.patch removes go.work. The repository is a Go workspace
+# (root, compliance, documentation/examples/remote_storage, internal/tools, the mantine-ui
+# tools), and workspace mode refuses the -mod=mod that the godeps store uses ("go: -mod may
+# only be set to readonly or vendor when in workspace mode", the r1 fetch failure); the
+# main module (prometheus, promtool) builds the same from its own go.mod.
 # Installed inert: the dinit service is shipped, not enabled; the example
 # configuration is /usr/share/doc/prometheus/prometheus.yml (no /etc config,
 # so the service fails to start until the administrator writes one).
 name = "prometheus"
 version = "3.16.0"
-release = 1
+release = 2
 summary = "Monitoring system and time series database"
 license = "Apache-2.0"
 homepage = "https://prometheus.io"
 hostdeps = ["go", "bash"]
 options = ["!check", "godeps"]
+patches = ["no-go-work.patch"]
 
 source = [
     { url = "https://github.com/prometheus/prometheus/archive/refs/tags/v3.16.0.tar.gz", sha256 = "2709a3bd43f9d15e0cecfc33ab473d011e2a69ab29265b91398cc1b8561403c0" },

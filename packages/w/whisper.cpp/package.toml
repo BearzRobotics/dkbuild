@@ -17,12 +17,15 @@
 # Static libraries: CMake only installs whisper's shared library, so the static
 # ones come from a second configure (no backend modules: they are linked in, at
 # the baseline x86-64 level because one static library has one CPU level).
-# Source edits: none. The upstream cmake/pkgconfig files are replaced (they would
+# Source edits: none, but the examples (built in the shared build) rely on libstdc++
+# transitive includes and failed with libc++ (undeclared exit/atoi in bench.cpp,
+# std::partial_sort in common.cpp), so the shared build force-includes the
+# standard headers they forget, through CXXFLAGS. The upstream cmake/pkgconfig files are replaced (they would
 # point at /usr/lib/libggml.so and /usr/lib/cmake/ggml, which are not there) and the
 # cmake config packages are dropped for the same reason.
 name = "whisper.cpp"
 version = "1.9.5"
-release = 1
+release = 2
 summary = "Whisper speech recognition in C/C++, with Vulkan and BLAS backends"
 license = "MIT"
 homepage = "https://github.com/ggml-org/whisper.cpp"
@@ -55,6 +58,7 @@ build = '''
 mkdir -p static-out
 find build -name '*.a' -exec cp {} static-out/ \;
 rm -rf build
+export CXXFLAGS="$CXXFLAGS -include cstdlib -include algorithm -include cstring -include cstdint -include cmath"
 %cmake \
     -DBUILD_SHARED_LIBS=ON \
     -DGGML_NATIVE=OFF \

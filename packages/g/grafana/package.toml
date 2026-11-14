@@ -22,7 +22,7 @@
 # forced to change at first login) is the application's default.
 name = "grafana"
 version = "13.3.1"
-release = 1
+release = 2
 summary = "Observability and data visualization platform"
 license = "AGPL-3.0-only"
 homepage = "https://grafana.com"
@@ -41,7 +41,9 @@ export GOTOOLCHAIN=local GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOCACHE=/t
 build = '''
 go build -tags oss -ldflags "-X main.version=$version -X main.commit=v$version -X main.buildBranch=release -X main.buildstamp=${SOURCE_DATE_EPOCH:-0}" -o grafana ./pkg/cmd/grafana
 mkdir -p /tmp/gf
-tar -xzf /build/sources/grafana-frontend.tar.gz -C /tmp/gf --strip-components=1 grafana-$version/public
+# --no-same-owner: tar as root keeps the archive owner (uid 1000) and fails to chown it
+# in the build root ("Cannot change ownership ... Invalid argument", non-zero exit)
+tar --no-same-owner -xzf /build/sources/grafana-frontend.tar.gz -C /tmp/gf --strip-components=1 grafana-$version/public
 '''
 install = '''
 install -Dm755 grafana "$pkgdir/usr/bin/grafana"

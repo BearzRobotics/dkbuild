@@ -36,7 +36,7 @@
 # separate testsuite tarball).
 name = "ghc"
 version = "9.14.1"
-release = 4
+release = 5
 summary = "Glasgow Haskell Compiler"
 license = "BSD-3-Clause"
 homepage = "https://www.haskell.org/ghc/"
@@ -111,7 +111,12 @@ else
     # (cc @file, utils/hsc2hs Common.hs rawSystemL), so r2's and r3's argument filters
     # never saw the --target= (--cflag=/--lflag= give one per line): the wrappers also
     # filter the lines of an @file argument (copied to a temporary file, cleaned up after).
-    for w in cc:clang c++:clang++; do
+    # r5: the r4 log shows hsc2hs is run as `hsc2hs --cc=clang --cflag=--target=...`
+    # (Hadrian names the compiler clang, from CC), not cc: none of the cc and c++
+    # wrappers were used and the helper program was still linked as glibc. The same
+    # wrappers are therefore also installed under the names clang and clang++ (in
+    # front of /usr/bin in PATH; they call /usr/bin/clang and /usr/bin/clang++ by path).
+    for w in cc:clang c++:clang++ clang:clang clang++:clang++; do
         cat > /tmp/cc-bin/${w%%:*} <<'WRAP'
 #!/bin/sh
 tmps=

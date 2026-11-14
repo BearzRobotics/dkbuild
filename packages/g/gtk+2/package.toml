@@ -13,7 +13,7 @@
 # warnings here (the same as Alpine's -Wno-error switches).
 name = "gtk+2"
 version = "2.24.33"
-release = 1
+release = 2
 summary = "Gimp Toolkit version 2"
 license = "LGPL-2.1-or-later"
 homepage = "https://gtk.org"
@@ -29,7 +29,11 @@ source = [
 ]
 
 environment = '''
-export CFLAGS="$CFLAGS -Wno-implicit-function-declaration -Wno-int-conversion -Wno-incompatible-pointer-types -Wno-deprecated-declarations"
+# r2: -Wno-implicit-int and -std=gnu17: the tests (gtk/testmenubars.c: `create_menu (depth)`,
+# an old K&R definition) fail with "parameter 'depth' was not declared, defaults to
+# 'int'" (clang makes -Wimplicit-int an error), and C23 would also read such empty
+# parameter lists as (void); GTK 2's C is from before both.
+export CFLAGS="$CFLAGS -std=gnu17 -Wno-implicit-int -Wno-implicit-function-declaration -Wno-int-conversion -Wno-incompatible-pointer-types -Wno-deprecated-declarations"
 '''
 setup = '''
 %configure \

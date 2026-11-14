@@ -1,6 +1,6 @@
 name = "libvmaf"
 version = "3.2.1"
-release = 1
+release = 2
 summary = "Netflix VMAF video quality metric library"
 license = "BSD-2-Clause-Patent"
 homepage = "https://github.com/Netflix/vmaf"
@@ -11,7 +11,12 @@ source = [
     { url = "https://github.com/Netflix/vmaf/archive/v3.2.1/vmaf-3.2.1.tar.gz", sha256 = "5df7386911bc15fd1ca783132528748d219768ae4fc5f8e0b61184f041648092" },
 ]
 
+# The bundled libsvm (src/svm.cpp) defines its own global template swap(T&, T&); with
+# the libc++ in use, libc++'s unqualified swap(svm_node*&, svm_node*&) inside
+# std::vector finds it by ADL next to std::swap and the call is ambiguous. The
+# private template is replaced by "using std::swap;", which has the same effect.
 setup = '''
+sed -i 's|^template <class T> static inline void swap(T& x, T& y).*|using std::swap;|' libvmaf/src/svm.cpp
 cd libvmaf
 %meson -Dbuilt_in_models=true -Denable_float=true -Denable_tests=false -Denable_docs=false
 '''

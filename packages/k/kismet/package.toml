@@ -2,7 +2,7 @@
 # SDR and MQTT parts are off (libraries not in the tree yet).
 name = "kismet"
 version = "2026.10.R1"
-release = 4
+release = 5
 summary = "Wireless network detector, sniffer and IDS"
 license = "GPL-2.0-or-later"
 homepage = "https://www.kismetwireless.net"
@@ -30,6 +30,13 @@ grep -q 'operator !=(const device_key' trackedelement.h
 # force-include it for C. capture_linux_wifi.c includes <linux/if_ether.h>
 # before musl's <netinet/if_ether.h>, and both define struct ethhdr (musl's is
 # unguarded): -D__UAPI_DEF_ETHHDR=0 makes the kernel header skip its copy.
+# capture_userspace_usb_wifi/kcompat/src/skb.c includes <execinfo.h> and prints a
+# backtrace() before abort() in kc_skb_over_panic (a should-never-happen
+# overflow); musl has no execinfo.h. Drop the include and the backtrace (the
+# message above it and abort() stay).
+f=capture_userspace_usb_wifi/kcompat/src/skb.c
+sed -i -e '/^#include <execinfo.h>$/d' -e '/^    void \*bt\[32\];$/d' -e '/backtrace_symbols_fd(bt, backtrace(bt, 32), 2);/d' $f
+! grep -q 'backtrace\|execinfo' $f
 export CFLAGS="$CFLAGS -include stdio.h -D__UAPI_DEF_ETHHDR=0"
 export CXXFLAGS="$CXXFLAGS -D__UAPI_DEF_ETHHDR=0"
 %configure \

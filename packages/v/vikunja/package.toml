@@ -15,7 +15,7 @@
 # Setup: /usr/share/doc/vikunja/README.FenrirOS.
 name = "vikunja"
 version = "2.8.0"
-release = 3
+release = 4
 summary = "Self-hosted to-do list and project management"
 license = "AGPL-3.0-or-later"
 homepage = "https://vikunja.io"
@@ -45,6 +45,14 @@ cd frontend
 sed -i '/^  "packageManager": /d' package.json
 ! grep -q '"packageManager"' package.json
 echo 'pm-on-fail=ignore' >> .npmrc
+# pnpm 11 verifies the lockfile against its supply-chain policies (release age,
+# trust downgrade) by fetching each package's registry metadata; dkbuild's
+# local registry only serves the stored tarballs and answers 404 for the
+# metadata (@akryum/tinypool), so the check failed. The lockfile is already
+# pinned by integrity hashes; the policies are switched off.
+printf '%s\n' 'minimum-release-age=0' 'trust-policy=off' >> .npmrc
+export npm_config_minimum_release_age=0 npm_config_trust_policy=off \
+    pnpm_config_minimum_release_age=0 pnpm_config_trust_policy=off
 pnpm install --frozen-lockfile
 '''
 build = '''

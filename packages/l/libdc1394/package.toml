@@ -8,12 +8,13 @@
 # needed by: ffmpeg (libdc1394).
 name = "libdc1394"
 version = "2.2.7"
-release = 1
+release = 2
 summary = "Library for controlling IIDC (DCAM) 1394 cameras"
 license = "LGPL-2.1-or-later"
 homepage = "https://damien.douxchamps.net/ieee1394/libdc1394"
 hostdeps = ["automake", "libtool", "pkgconf"]
-builddeps = ["libraw1394-devel", "libusb-devel", "linux-headers"]
+# sdl12-compat-devel: provides sdl.m4 (AM_PATH_SDL), which configure.ac calls; without it autoreconf failed with undefined AM_PATH_SDL/AC_DEFINE.
+builddeps = ["libraw1394-devel", "libusb-devel", "linux-headers", "sdl12-compat-devel"]
 options = ["!check"]
 
 source = [

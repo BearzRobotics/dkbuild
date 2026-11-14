@@ -1,6 +1,6 @@
 name = "libilbc"
 version = "3.0.4"
-release = 1
+release = 2
 summary = "Internet Low Bitrate Codec (iLBC) library, from WebRTC"
 license = "BSD-3-Clause"
 homepage = "https://github.com/TimothyGu/libilbc"
@@ -12,9 +12,10 @@ source = [
     { url = "https://github.com/TimothyGu/libilbc/archive/v3.0.4/libilbc-3.0.4.tar.gz", sha256 = "c5ec9e3ec53a0a913f81504e202c7bfefbe9c070b7f5599c5e13a6c75d6af913" },
 ]
 
+# CMAKE_CXX_STANDARD=17: the system abseil headers require C++17 and the project does not set a standard (clang default failed with "C++ versions less than C++17 are not supported").
 # Shared and static libraries both: the static one is a second build, installed first so the shared build's cmake/pkg-config files win. The policy minimum lets CMake 4 configure.
 setup = '''
-opts="-DCMAKE_POLICY_VERSION_MINIMUM=3.5 "
+opts="-DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_CXX_STANDARD=17 "
 %cmake $opts -DBUILD_SHARED_LIBS=ON
 cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release $opts -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON
 '''

@@ -18,7 +18,7 @@
 # /usr/sbin/sendmail, so only one of them can be installed.
 name = "exim"
 version = "4.100.1"
-release = 2
+release = 3
 summary = "Message transfer agent"
 license = "GPL-2.0-or-later"
 homepage = "https://www.exim.org"
@@ -130,7 +130,14 @@ build = '''
 make FULLECHO=
 '''
 install = '''
-make INSTALL_ARG=-no_chown DESTDIR="$pkgdir" install
+# scripts/exim_install learns the version by running the new `./exim -bV`, which
+# looks up the ref:_exim user at startup and fails ("failed to find uid for
+# user name _exim") in the build root, where no such user exists (sysusers
+# creates it on the target). Have the script get the same "Exim version X #N"
+# line from the version we already know instead of running the binary.
+sed -i 's|^\( *\)exim="./exim -bV -C /dev/null"|\1exim="echo Exim version $EXIM_INSTALL_VERSION #0"|' scripts/exim_install
+grep -q 'EXIM_INSTALL_VERSION' scripts/exim_install
+make EXIM_INSTALL_VERSION=$version INSTALL_ARG=-no_chown DESTDIR="$pkgdir" install
 # exim_install leaves the setuid bit off with -no_chown; the binary is
 # root-owned in the package, and setuid root as Exim is designed to run
 real=$(readlink "$pkgdir/usr/sbin/exim")

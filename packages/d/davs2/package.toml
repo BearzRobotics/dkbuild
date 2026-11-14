@@ -8,7 +8,7 @@
 # needed by: ffmpeg (libdavs2).
 name = "davs2"
 version = "1.7"
-release = 1
+release = 2
 summary = "AVS2 video decoder"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/pkuvcl/davs2"
@@ -27,9 +27,12 @@ cd build/linux
     --enable-static \
     --enable-pic
 '''
+# %make passes AR=llvm-ar on the make command line, which overrides the Makefile's
+# AR="llvm-ar rc " (set by configure) and made the archive step run "llvm-arlibdavs2.a ...";
+# the later command-line AR here wins and restores the "rc " operation.
 build = '''
 cd build/linux
-%make
+%make AR="llvm-ar rc "
 '''
 install = '''
 cd build/linux

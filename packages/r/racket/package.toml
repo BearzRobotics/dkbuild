@@ -23,13 +23,17 @@
 # and GUI are not dependencies of the compiler core: left to the user.
 name = "racket"
 version = "9.3"
-release = 1
+release = 2
 summary = "Language-oriented programming language (Racket CS)"
 license = "MIT OR Apache-2.0"
 homepage = "https://racket-lang.org"
 archs = ["x86_64", "aarch64"]
 hostdeps = ["make"]
-builddeps = ["libffi-devel", "lz4-devel", "ncurses-devel", "zlib-ng-compat-devel", "linux-headers"]
+# r2: sqlite (the library) at build time: even with --disable-docs, `raco setup`'s
+# "checking package dependencies" step registers the docs in docindex.sqlite through
+# the db library, which loads libsqlite3 (failure: "sqlite3_open: implementation not
+# found"), so the install stopped
+builddeps = ["libffi-devel", "lz4-devel", "ncurses-devel", "zlib-ng-compat-devel", "linux-headers", "sqlite"]
 rundeps = ["openssl", "sqlite", "ca-certificates"]
 options = ["!check", "!lto", "!strip"]
 

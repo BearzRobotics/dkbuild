@@ -9,7 +9,7 @@
 # user's choice, ocaml or an opam switch).
 name = "opam"
 version = "2.6.1"
-release = 1
+release = 2
 summary = "OCaml package manager"
 license = "LGPL-2.1-only WITH OCaml-LGPL-linking-exception"
 homepage = "https://opam.ocaml.org"
@@ -23,6 +23,14 @@ source = [
     { url = "https://github.com/ocaml/opam/releases/download/2.6.1/opam-full-2.6.1.tar.gz", sha256 = "ebbaffa4192e69d612d2c1a5fc5a15b32730322d7e34bc4456ad4076bb987007" },
 ]
 
+environment = '''
+# r2: the vendored sources (src_ext/*.tar.gz) are unpacked by `tar` as root in the build
+# sandbox, which cannot chown: opam-file-format's archive (uid 1000 in it) ended with
+# "Cannot change ownership ... Invalid argument", tar's failure status stopped make
+# at opam-file-format.stamp, and the libraries after it (patch) were never unpacked
+# ("Library patch not found")
+export TAR_OPTIONS=--no-same-owner
+'''
 setup = '''
 %configure --with-vendored-deps --with-mccs
 '''

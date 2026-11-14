@@ -17,7 +17,7 @@
 # build (gnustep-make builds one kind per pass).
 name = "gnustep-base"
 version = "1.31.1"
-release = 2
+release = 3
 summary = "GNUstep Foundation library"
 license = "LGPL-2.1-or-later AND GPL-3.0-or-later"
 homepage = "https://gnustep.github.io"
@@ -43,6 +43,16 @@ setup = '''
 # to warnings (the library's own code is Objective-C that relies on the same
 # loose pointer conversions).
 export CFLAGS="$CFLAGS -Wno-error=incompatible-pointer-types -Wno-error=incompatible-pointer-types-discards-qualifiers"
+# r3: configure's "iconv support" test runs iconv_open("UTF-8//TRANSLIT","ASCII") and
+# aborts with "Missing support for character conversion functionality" when it fails.
+# musl's iconv (fuzzycmp in src/locale/iconv.c) does not accept a "//TRANSLIT" suffix
+# on a charset name, so it always fails here, though musl converts everything the
+# library needs. The test is changed to ask for plain "UTF-8" (and to compare with
+# (iconv_t)-1, the correct type, not a bare int). Only the library's lossy-conversion
+# mode in Source/Additions/Unicode.m asks for //TRANSLIT at run time; there musl
+# reports the error and the code falls back, as on any system without it.
+sed -i 's|iconv_open("UTF-8//TRANSLIT","ASCII") == -1|iconv_open("UTF-8","ASCII") == (iconv_t)-1|' configure
+! grep -q 'UTF-8//TRANSLIT' configure
 %configure \
     --with-config-file=/etc/GNUstep/GNUstep.conf \
     --with-installation-domain=SYSTEM \

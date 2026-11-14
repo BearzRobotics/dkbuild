@@ -15,7 +15,7 @@
 # DRAFT, not built.
 name = "geogebra"
 version = "5.4_git20261111"
-release = 3
+release = 4
 summary = "GeoGebra Classic 5: dynamic mathematics for graphing, geometry, algebra and 3D"
 license = "GPL-3.0-or-later AND CC-BY-NC-SA-3.0"
 homepage = "https://www.geogebra.org"
@@ -33,6 +33,19 @@ source = [
 environment = '''
 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
 export GRADLE_OPTS="-Dorg.gradle.java.installations.paths=/usr/lib/jvm/java-17-openjdk,/usr/lib/jvm/java-21-openjdk -Dorg.gradle.java.installations.auto-download=false -Dorg.gradle.java.installations.auto-detect=false"
+'''
+setup = '''
+# desktop/build.gradle.kts copies the JOGL and GlueGen natives jars into the
+# directory of the non-native jars, to sit next to them for JOGL's own loader.
+# Here both are in the read-only Maven store, so the copy is a file onto itself
+# ("Read-only file system") and failed the build. The natives (glibc builds)
+# are not wanted anyway (the installed copy deletes them, FenrirOS's jogamp
+# natives are used), so the loops run over nothing.
+f=source/desktop/desktop/build.gradle.kts
+sed -i -e 's/for (gluegenNative in gluegenNatives)/for (gluegenNative in gluegenNatives.filter { false })/' \
+       -e 's/for (joglNative in joglNatives)/for (joglNative in joglNatives.filter { false })/' $f
+grep -q 'gluegenNatives.filter { false }' $f
+grep -q 'joglNatives.filter { false }' $f
 '''
 build = '''
 gradle -p source/desktop :desktop:installDist

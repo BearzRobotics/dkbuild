@@ -5,12 +5,14 @@
 # not know this system's musl triple; regenerating takes the current ones.
 name = "libavc1394"
 version = "0.5.4"
-release = 1
+release = 2
 summary = "AV/C and ROM libraries for IEEE 1394 (FireWire) devices"
 license = "LGPL-2.1-or-later"
 homepage = "https://sourceforge.net/projects/libavc1394"
 hostdeps = ["automake", "libtool", "pkgconf"]
-builddeps = ["libraw1394-devel"]
+# argp-standalone: the panelctl tool uses glibc argp, which musl lacks (link failed
+# with undefined argp_parse/argp_usage); LIBS=-largp below links the standalone one.
+builddeps = ["libraw1394-devel", "argp-standalone"]
 options = ["!check"]
 
 source = [
@@ -19,6 +21,7 @@ source = [
 
 setup = '''
 autoreconf -fi -W none
+export LIBS="-largp $LIBS"
 %configure \
     --enable-shared \
     --enable-static

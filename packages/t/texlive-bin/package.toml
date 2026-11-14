@@ -16,7 +16,7 @@
 # (or any full texmf-dist) is installed. texmf-dist itself is not in this package.
 name = "texlive-bin"
 version = "20260301"
-release = 1
+release = 2
 summary = "TeX Live binaries: TeX engines, dvips, dvipdfmx, bibtex, kpathsea, ..."
 license = "GPL-2.0-or-later"
 homepage = "https://tug.org/texlive"
@@ -46,6 +46,14 @@ sed -i \
     -e 's|^TEXMFSYSCONFIG = .*|TEXMFSYSCONFIG = /etc/texmf|' \
     texk/kpathsea/texmf.cnf
 grep -q '^TEXMFROOT = /usr/share$' texk/kpathsea/texmf.cnf
+# r2: kpathsea's c-ctype.h defines an isblank() macro when none is, which it tests with
+# `#ifndef isblank`; musl's <ctype.h> declares isblank as a function, not a macro, so the
+# macro was defined and broke libc++'s own isblank(_CharT, const locale&) template
+# (<__locale>) in every C++ file that includes kpathsea headers before <fstream>
+# (dvisvgm's FileFinder.cpp: "too many arguments provided to function-like macro").
+# The fallback definition is removed: musl has the function.
+sed -i '/^#define isblank(c) /d' texk/kpathsea/c-ctype.h
+! grep -q '^#define isblank(c) ' texk/kpathsea/c-ctype.h
 mkdir build && cd build
 ../configure \
     --prefix=/usr --sysconfdir=/etc --datarootdir=/usr/share --datadir=/usr/share \

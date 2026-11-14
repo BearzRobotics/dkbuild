@@ -24,7 +24,7 @@
 # licence is used.
 name = "element-desktop"
 version = "1.12.13"
-release = 1
+release = 2
 summary = "Matrix chat client (Element) as a desktop application"
 license = "AGPL-3.0-only"
 homepage = "https://element.io"
@@ -48,7 +48,14 @@ export npm_config_manage_package_manager_versions=false npm_config_package_manag
 '''
 setup = '''
 # the packageManager field makes pnpm fetch that exact pnpm (see vikunja)
-sed -i '/^    "packageManager": /d' package.json
+# (removed with node, not sed: it is the last field, so deleting its line left a
+# trailing comma and pnpm failed to parse package.json)
+node -e '
+const fs = require("fs");
+const p = JSON.parse(fs.readFileSync("package.json", "utf8"));
+delete p.packageManager;
+fs.writeFileSync("package.json", JSON.stringify(p, null, 4) + "\n");
+'
 ! grep -q '"packageManager"' package.json
 echo 'pm-on-fail=ignore' >> .npmrc
 # --ignore-scripts: the postinstall (electron-builder install-app-deps) and the

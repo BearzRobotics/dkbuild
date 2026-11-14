@@ -9,7 +9,7 @@
 # Tests need a running memcached server (!check).
 name = "libmemcached-awesome"
 version = "1.1.4"
-release = 3
+release = 4
 summary = "C/C++ client library and tools for memcached"
 license = "BSD-3-Clause"
 homepage = "https://github.com/awesomized/libmemcached"
@@ -27,6 +27,12 @@ setup = '''
 # generate docs/man", a ninja error). The OUTPUT alone is right: drop the BYPRODUCTS lines.
 sed -i '/^[[:space:]]*BYPRODUCTS[[:space:]]/d' docs/CMakeLists.txt
 ! grep -q BYPRODUCTS docs/CMakeLists.txt
+# r4: that was not enough (r3 log still "multiple rules generate docs/man"): the custom target
+# is itself called `man`, and the Ninja generator gives a target in docs/ a phony alias
+# "docs/man", the same name as the output directory ${SPHINX_MAN_DIR} (docs/man). Rename the
+# target (nothing refers to it by name; it is ALL).
+sed -i 's/add_custom_target(man ALL /add_custom_target(docs-man ALL /' docs/CMakeLists.txt
+grep -q 'add_custom_target(docs-man ALL ' docs/CMakeLists.txt
 # two builds, shared and static (the project builds one kind per build tree);
 # the manual pages (Sphinx's man builder) come from the shared one
 for kind in shared static; do

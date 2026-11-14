@@ -3,7 +3,7 @@
 # Autotools; shared and static libraries both.
 name = "libotr"
 version = "4.1.1"
-release = 1
+release = 2
 summary = "Off-the-Record messaging library"
 license = "LGPL-2.1-or-later"
 homepage = "https://otr.cypherpunks.ca"
@@ -18,6 +18,13 @@ source = [
 # libotr's configure is from 2016 and is old but its configure.ac is plain
 # autoconf; no regeneration needed.
 setup = '''
+# r2: the regression test client built by `make all` (tests/regression/client/client.c)
+# uses socket(), connect(), accept(), socklen_t and PF_UNIX/SOCK_STREAM but includes
+# only <sys/un.h>; glibc's <sys/un.h>/<sys/epoll.h> happen to pull in <sys/socket.h>,
+# musl's do not, so the compile failed with undeclared identifiers. The header is
+# included explicitly.
+sed -i 's|^#include <sys/types.h>|#include <sys/types.h>\n#include <sys/socket.h>|' tests/regression/client/client.c
+grep -q '^#include <sys/socket.h>' tests/regression/client/client.c
 %configure
 '''
 build = '''

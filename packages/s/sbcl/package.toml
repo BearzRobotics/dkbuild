@@ -16,7 +16,7 @@
 # recipe builds 64-bit ones), ppc-musl.patch is for POWER; neither is used.
 name = "sbcl"
 version = "2.6.10"
-release = 1
+release = 2
 summary = "Steel Bank Common Lisp"
 license = "custom:sbcl AND LOOP"
 homepage = "https://www.sbcl.org"
@@ -41,6 +41,12 @@ else
 fi
 export XC_HOST="$xc --no-sysinit --no-userinit --disable-debugger"
 export GNUMAKE=make
+# r2: the build environment's CC is "clang --target=x86_64-fenriros-linux-musl"; the
+# contrib modules' sb-grovel runs $CC through run-program as ONE program name (no
+# word splitting), so sb-bsd-sockets failed with "Couldn't execute clang --target=...:
+# No such file". A plain clang is the same compiler: this system's clang already
+# targets musl by default (the target triple is only spelled out in CC).
+export CC=clang
 '''
 build = '''
 sh make.sh --prefix=/usr --xc-host="$XC_HOST" --fancy --with-sb-thread \

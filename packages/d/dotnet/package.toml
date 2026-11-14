@@ -22,7 +22,7 @@
 # that replaces the zeros below.
 name = "dotnet"
 version = "10.0.114"
-release = 5
+release = 6
 summary = ".NET SDK, runtime and ASP.NET Core"
 license = "MIT"
 homepage = "https://dotnet.microsoft.com"
@@ -64,6 +64,13 @@ grep -q 'GssApi" ON' src/runtime/src/native/libs/configure.cmake
 grep -q 'GssApi" ON' src/runtime/src/native/corehost/apphost/static/configure.cmake
 sed -i 's/"libgssapi_krb5\.so\.2"/"libgssapi.so.3"/' src/runtime/src/native/libs/System.Net.Security.Native/pal_gssapi.c
 grep -q 'libgssapi\.so\.3' src/runtime/src/native/libs/System.Net.Security.Native/pal_gssapi.c
+# r6: the runtime's PAL (src/coreclr/pal/src/CMakeLists.txt) links every Linux target
+# with `gcc_s`, GCC's unwinder library; this system has no libgcc_s (clang here uses
+# compiler-rt and LLVM's libunwind by default), so ilasm, ildasm and clrjit failed to
+# link with "ld.lld: unable to find library -lgcc_s". The runtime brings its own
+# bundled libunwind and compiler-rt provides the builtins, so the entry is dropped.
+sed -i '/^      gcc_s$/d' src/runtime/src/coreclr/pal/src/CMakeLists.txt
+! grep -q '^      gcc_s$' src/runtime/src/coreclr/pal/src/CMakeLists.txt
 '''
 build = '''
 ulimit -n 4096 || true

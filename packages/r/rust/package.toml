@@ -24,7 +24,7 @@
 # it so recipes can keep asking for that name.
 name = "rust"
 version = "1.99.1"
-release = 5
+release = 6
 summary = "Rust programming language: rustc, cargo and the standard library"
 license = "MIT OR Apache-2.0"
 homepage = "https://www.rust-lang.org"
@@ -68,8 +68,13 @@ else
     boot=/usr/lib/rust-bootstrap
 fi
 test -x "$boot/bin/rustc" && test -x "$boot/bin/cargo"
-# (Chimera clears the checksums of some vendored libc/cc crates because it patches
-# them for its own targets; no vendored crate is patched here)
+# Patch 0005 edits src/unix/mod.rs in every vendored libc crate. cargo refuses
+# a directory source whose files no longer match .cargo-checksum.json, so (as
+# Chimera does) empty the per-file checksum list of the patched crates; the
+# "package" checksum stays.
+for d in vendor/libc-*; do
+    sed -i 's/"files":{[^}]*}/"files":{}/' "$d/.cargo-checksum.json"
+done
 cat > bootstrap.toml <<EOF
 change-id = 160100
 

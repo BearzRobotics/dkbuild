@@ -5,7 +5,7 @@
 # whole Nerd Fonts collection (Chimera's fonts-nerd) is not packaged.
 name = "fonts-nerd-symbols-only"
 version = "3.5.1"
-release = 1
+release = 2
 summary = "Nerd Fonts symbols (icon glyphs) as a stand-alone font"
 license = "MIT"
 homepage = "https://www.nerdfonts.com"
@@ -16,8 +16,10 @@ source = [
 ]
 
 install = '''
+# --no-same-owner: tar run as root in the build keeps the archive's owner (uid 1001) and fails
+# to chown it ("Cannot change ownership ... Invalid argument"), exiting non-zero
 mkdir -p fonts
-tar -C fonts -xf /build/sources/NerdFontsSymbolsOnly.tar.xz
+tar --no-same-owner -C fonts -xf /build/sources/NerdFontsSymbolsOnly.tar.xz
 install -Dm644 -t "$pkgdir/usr/share/fonts/nerd-symbols-only" fonts/*.ttf
 install -Dm644 fonts/10-nerd-font-symbols.conf "$pkgdir/usr/share/fontconfig/conf.avail/10-nerd-font-symbols.conf"
 for l in LICENSE LICENSE.txt LICENSE.md; do

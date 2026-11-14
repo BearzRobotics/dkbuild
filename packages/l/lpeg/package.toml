@@ -6,7 +6,7 @@
 # rebuilt against LuaJIT's headers, with the static library added.
 name = "lpeg"
 version = "1.1.0"
-release = 1
+release = 2
 summary = "Pattern-matching library for Lua based on Parsing Expression Grammars"
 license = "MIT"
 homepage = "https://www.inf.puc-rio.br/~roberto/lpeg"
@@ -19,14 +19,18 @@ source = [
 ]
 
 build = '''
+# r2: LPeg 1.1.0 has a sixth source file, lpcset.c (the character-set code: tocharset(),
+# used by lpcode.c and lptree.c); the file list lacked it, so lpeg.so and liblpeg.a were
+# built without tocharset, and loading them failed ("tocharset: symbol not found": it
+# stopped neovim's code generators, which load libnlua0.so linked against liblpeg.a).
 # the makefile's own lpeg.so rule links with -shared; objects first, so the
 # same objects make the static archive
 inc=$(pkg-config --cflags luajit)
-for f in lpcap lpcode lpprint lptree lpvm; do
+for f in lpcap lpcode lpcset lpprint lptree lpvm; do
     $CC $CFLAGS -fPIC -DNDEBUG $inc -c $f.c -o $f.o
 done
-$CC $LDFLAGS -shared -o lpeg.so lpcap.o lpcode.o lpprint.o lptree.o lpvm.o
-ar rcs liblpeg.a lpcap.o lpcode.o lpprint.o lptree.o lpvm.o
+$CC $LDFLAGS -shared -o lpeg.so lpcap.o lpcode.o lpcset.o lpprint.o lptree.o lpvm.o
+ar rcs liblpeg.a lpcap.o lpcode.o lpcset.o lpprint.o lptree.o lpvm.o
 '''
 install = '''
 install -Dm755 lpeg.so "$pkgdir/usr/lib/lua/5.1/lpeg.so"

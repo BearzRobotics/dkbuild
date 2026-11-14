@@ -19,7 +19,7 @@
 # no certificate; /usr/share/doc/dovecot/README.FenrirOS says how to set it up.
 name = "dovecot"
 version = "2.4.5"
-release = 2
+release = 3
 summary = "IMAP and POP3 server"
 license = "LGPL-2.1-only AND MIT"
 homepage = "https://www.dovecot.org"
@@ -71,6 +71,13 @@ done
     --without-cassandra \
     --without-cdb \
     --without-systemd
+# src/lib-sasl's test-sasl-authentication test program (built by `all`, not
+# installed) links gssapi-dummy.c, a stand-in for MIT Kerberos's GSSAPI: it
+# assigns to GSS_C_NT_HOSTBASED_SERVICE and uses KRB5_CALLCONV, which Heimdal's
+# headers define as macros / do not have (errors in gssapi-dummy.c). Take that
+# one program out of the generated Makefile; the GSSAPI plugin itself is built.
+sed -i '/^am__EXEEXT_1 = /{N;s/ \\\n\ttest-sasl-authentication\$(EXEEXT)//}' src/lib-sasl/Makefile
+grep -q '^am__EXEEXT_1 = test-sasl-oauth2$(EXEEXT) test-sasl-client$(EXEEXT)$' src/lib-sasl/Makefile
 '''
 build = '''
 # src/lib-json/test-json-generator.c (a test helper, built in `all`) sends

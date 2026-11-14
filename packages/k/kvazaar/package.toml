@@ -1,6 +1,6 @@
 name = "kvazaar"
 version = "2.3.2"
-release = 1
+release = 2
 summary = "HEVC/H.265 video encoder library and program"
 license = "BSD-3-Clause"
 homepage = "https://github.com/ultravideo/kvazaar"
@@ -17,7 +17,8 @@ setup = '''
 build = '''
 %make
 '''
+# Upstream ships LICENSE, not COPYING (install failed with "cannot stat COPYING").
 install = '''
 %make_install
-install -Dm644 COPYING "$pkgdir/usr/share/licenses/kvazaar/COPYING"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/kvazaar/LICENSE"
 '''

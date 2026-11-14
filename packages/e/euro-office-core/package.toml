@@ -35,7 +35,7 @@
 # Not built yet.
 name = "euro-office-core"
 version = "9.3.7.1"
-release = 2
+release = 3
 summary = "Euro-Office document conversion engine (x2t) and tools"
 license = "AGPL-3.0-only"
 homepage = "https://github.com/Euro-Office/core"
@@ -110,6 +110,14 @@ cp -a $t/socketio/src $t/socketio/src_no_tls
 patch -d $t/socketio -p1 < $s/no_tls.patch
 '''
 build = '''
+# core's sources use malloc/free/realloc/mkdtemp without including <stdlib.h>
+# (glibc's and libstdc++'s headers pull it in; musl with libc++ does not), so
+# it is force-included for every file
+export CXXFLAGS="$CXXFLAGS -include stdlib.h"
+export CFLAGS="$CFLAGS -include stdlib.h"
+# DesktopEditor/graphics/BaseThread.cpp resets a pthread_t with NULL; musl's
+# pthread_t is an integer (unsigned long) and NULL is nullptr here, so use 0
+sed -i 's/m_thread = NULL;/m_thread = 0;/' core/DesktopEditor/graphics/BaseThread.cpp
 %cmake -S core \
     -DTHIRD_PARTY_PREPARED=ON \
     -DEO_CORE_3RD_PARTY_DIR=$PWD/third_party \

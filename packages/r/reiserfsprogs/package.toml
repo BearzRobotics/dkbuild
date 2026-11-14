@@ -5,7 +5,7 @@
 # (glibc declares it by default). Nothing else is changed.
 name = "reiserfsprogs"
 version = "3.6.27"
-release = 1
+release = 2
 summary = "ReiserFS (version 3) filesystem utilities"
 license = "GPL-2.0-only"
 homepage = "https://www.kernel.org/pub/linux/kernel/people/jeffm/reiserfsprogs/"
@@ -19,6 +19,21 @@ source = [
 
 environment = '''
 export CFLAGS="${CFLAGS} -D_LARGEFILE64_SOURCE"
+# r2: the code uses two glibc-only types, loff_t (io.c, include/reiserfs_lib.h: "use of
+# undeclared identifier 'loff_t'") and comparison_fn_t (misc.c: "unknown type name"; glibc's
+# <stdlib.h> typedef for a qsort/bsearch comparison function). musl has neither on
+# its default feature set. A compat header, force-included, declares them: loff_t is
+# off_t (what glibc and musl's own sys/types.h under _GNU_SOURCE make of it), and
+# comparison_fn_t the plain comparison function pointer type. Identical typedef
+# redefinitions are legal C11, so nothing breaks if a header does define them.
+mkdir -p /tmp/dkcompat
+cat > /tmp/dkcompat/reiserfs-compat.h <<'EOF2'
+#include <sys/types.h>
+#include <stdlib.h>
+typedef off_t loff_t;
+typedef int (*comparison_fn_t)(const void *, const void *);
+EOF2
+export CFLAGS="${CFLAGS} -include /tmp/dkcompat/reiserfs-compat.h"
 '''
 setup = '''
 %configure

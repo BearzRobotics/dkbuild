@@ -1,20 +1,23 @@
-# cloudpickle from PyPI.
+# cloudpickle from PyPI. Installed from its pure-Python wheel: the sdist's pyproject.toml uses
+# the [tool.flit.metadata] table, which flit_core 4 (the tree's) no longer reads, and flit_core 3
+# is not packaged. The sdist is still the first source (unpacked) for the licence file.
 name = "python-cloudpickle"
 version = "3.1.2"
-release = 1
+release = 2
 summary = "Pickler class to extend the standard pickle.Pickler functionality"
 license = "BSD-3-Clause"
 homepage = "https://github.com/cloudpipe/cloudpickle"
-hostdeps = ["python", "python-flit-core"]
+hostdeps = ["python"]
 rundeps = ["python"]
 options = ["!check"]
 
 source = [
     { url = "https://files.pythonhosted.org/packages/27/fb/576f067976d320f5f0114a8d9fa1215425441bb35627b1993e5afd8111e5/cloudpickle-3.1.2.tar.gz", sha256 = "7fda9eb655c9c230dab534f1983763de5835249750e85fbcef43aaa30a9a2414" },
+    { url = "https://files.pythonhosted.org/packages/88/39/799be3f2f0f38cc727ee3b4f1445fe6d5e4133064ec2e4115069418a5bb6/cloudpickle-3.1.2-py3-none-any.whl", sha256 = "9acb47f6afd73f60dc1df93bb801b472f05ff42fa6c84167d25cb206be1fbf4a", unpack = false },
 ]
 
 install = '''
-python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
-    --root "$pkgdir" --prefix /usr .
+python3 -m pip install --no-deps --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr /build/sources/cloudpickle-3.1.2-py3-none-any.whl
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-cloudpickle/LICENSE"
 '''

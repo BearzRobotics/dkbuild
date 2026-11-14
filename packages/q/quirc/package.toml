@@ -8,7 +8,7 @@
 # that need the upstream test images (not in the tarball).
 name = "quirc"
 version = "1.2"
-release = 1
+release = 2
 summary = "QR code decoder library"
 license = "ISC"
 homepage = "https://github.com/dlbeer/quirc"
@@ -20,8 +20,12 @@ source = [
     { url = "https://github.com/dlbeer/quirc/archive/refs/tags/v1.2.tar.gz", sha256 = "73c12ea33d337ec38fb81218c7674f57dba7ec0570bddd5c7f7a977c0deb64c5" },
 ]
 
+# SDL_CFLAGS is "$(shell pkg-config --cflags sdl 2>&1)" in the Makefile: with no SDL 1.2
+# installed, pkg-config's error text lands inside every compile command and broke
+# the shell ("EOF in backquote substitution"). The library and quirc-scanner do not
+# use SDL (the SDL demos are not built), so the variables are emptied on the command line.
 build = '''
-make libquirc.a libquirc.so quirc-scanner CFLAGS="$CFLAGS -fPIC"
+make libquirc.a libquirc.so quirc-scanner CFLAGS="$CFLAGS -fPIC" SDL_CFLAGS= SDL_LIBS= OPENCV_CFLAGS=
 '''
 install = '''
 install -Dm644 lib/quirc.h "$pkgdir/usr/include/quirc.h"
