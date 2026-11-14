@@ -1,0 +1,68 @@
+# NetSurf: lightweight web browser with its own engine, GTK 3 front end
+# (TARGET=gtk3), with every optional feature its Makefile.defaults has and
+# the tree can provide: libcurl, OpenSSL, JPEG, PNG, GIF (libnsgif), BMP/ICO
+# (libnsbmp), WebP, JPEG XL, SVG (librsvg and libsvgtiny), JavaScript (the
+# Duktape copy in NetSurf's own source tree plus nsgenbind-generated bindings),
+# PDF export and GTK printing (libharu), public suffix list (libnspsl),
+# filtered logging (libnslog), utf8proc.
+# Left out: video (NETSURF_USE_VIDEO needs gstreamer 0.10, which is long gone).
+# Makefile.config is written here because the build is configured through it,
+# not through the command line (Makefile.defaults says so): every option below
+# is YES (not AUTO) so a missing library fails the build instead of silently
+# dropping a feature.
+# Not netsurf-all (the bundle with the libraries): they are separate packages.
+# The front end installs its binary as netsurf-gtk3; netsurf-gtk (the name its
+# .desktop file and man page use) is a link to it.
+name = "netsurf"
+version = "3.11"
+release = 1
+summary = "Lightweight web browser with its own rendering engine"
+license = "GPL-2.0-only"
+homepage = "https://www.netsurf-browser.org"
+hostdeps = ["bison", "flex", "gperf", "netsurf-buildsystem", "nsgenbind", "perl", "pkgconf"]
+builddeps = ["curl-devel", "gtk+3-devel", "libcss-devel", "libdom-devel", "libharu-devel", "libhubbub-devel", "libjpeg-turbo-devel",
+             "libjxl-devel", "libnsbmp-devel", "libnsgif-devel", "libnslog-devel", "libnspsl-devel", "libnsutils-devel",
+             "libparserutils-devel", "libpng-devel", "librsvg-devel", "libsvgtiny-devel", "libwapcaplet-devel",
+             "libwebp-devel", "openssl-devel", "utf8proc-devel", "libexpat-devel", "libxml2-devel"]
+rundeps = ["ca-certificates"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.netsurf-browser.org/netsurf/releases/source/netsurf-3.11-src.tar.gz", sha256 = "c28a626aefee428d053b13f88b5c440922245976522d12eaf137cfd32d201cb2" },
+]
+
+setup = '''
+cat > Makefile.config <<'CFG'
+override NETSURF_USE_CURL := YES
+override NETSURF_USE_OPENSSL := YES
+override NETSURF_USE_BMP := YES
+override NETSURF_USE_GIF := YES
+override NETSURF_USE_JPEG := YES
+override NETSURF_USE_JPEGXL := YES
+override NETSURF_USE_PNG := YES
+override NETSURF_USE_WEBP := YES
+override NETSURF_USE_VIDEO := NO
+override NETSURF_USE_DUKTAPE := YES
+override NETSURF_USE_HARU_PDF := YES
+override NETSURF_USE_NSPSL := YES
+override NETSURF_USE_NSLOG := YES
+override NETSURF_USE_UTF8PROC := YES
+override NETSURF_USE_RSVG := YES
+override NETSURF_USE_NSSVG := YES
+override NETSURF_USE_ROSPRITE := NO
+CFG
+'''
+# NETSURF_USE_ROSPRITE is RISC OS sprites (librosprite, not packaged: no use
+# outside RISC OS).
+build = '''
+%make TARGET=gtk3 PREFIX=/usr
+'''
+install = '''
+make TARGET=gtk3 PREFIX=/usr DESTDIR="$pkgdir" install
+b=$(ls "$pkgdir"/usr/bin/netsurf-gtk* | head -n1)
+[ "$(basename "$b")" = netsurf-gtk ] || ln -s "$(basename "$b")" "$pkgdir/usr/bin/netsurf-gtk"
+install -Dm644 frontends/gtk/res/netsurf-gtk.desktop "$pkgdir/usr/share/applications/netsurf-gtk.desktop"
+install -Dm644 frontends/gtk/res/netsurf.png "$pkgdir/usr/share/pixmaps/netsurf.png"
+install -Dm644 docs/netsurf-gtk.1 "$pkgdir/usr/share/man/man1/netsurf-gtk.1"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/netsurf/COPYING"
+'''
