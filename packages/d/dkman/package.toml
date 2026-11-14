@@ -2,8 +2,8 @@
 # Zig dependencies (md-zig, gtroff-zig) are fetched on the host (option `zigdeps`).
 # r2: the system's `man` (a link), with its own page as man(1) too.
 # r3 (0.5.0): dkman also stands in for man-db's whatis, apropos, manpath and mandb (it acts
-# as the one it is started under): all five names are links to dkman, which upstream's
-# -Dinstall-as-man would install as copies. The page is made by the build now (man(7)
+# as the one it is started under): built with upstream's -Dinstall-as-man, which installs
+# man, whatis, apropos, manpath and mandb. The page is made by the build now (man(7)
 # from the Markdown source), with bash, zsh and fish completions.
 name = "dkman"
 version = "0.5.0"
@@ -19,8 +19,7 @@ source = [
 ]
 
 install = '''
-%zig_build
-for n in man whatis apropos manpath mandb; do ln -s dkman "$pkgdir/usr/bin/$n"; done
+%zig_build -Dinstall-as-man
 # the page upstream's build installs as dkman(1) is man(1) too
 ln -s dkman.1 "$pkgdir/usr/share/man/man1/man.1"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/dkman/LICENSE"
