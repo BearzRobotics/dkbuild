@@ -8,8 +8,8 @@
 # test databases, and !check; man pages are generated. The UnRAR code (libclamunrar,
 # ENABLE_UNRAR, in the tarball, under the UnRAR licence) is built so RAR archives
 # are scanned. External libmspack from the tree (ENABLE_EXTERNAL_MSPACK).
-# Not built: clamav-milter (needs libmilter, which no package in the tree
-# provides yet), systemd units, the doxygen HTML API docs.
+# clamav-milter is built now (libmilter is a package). Not built: systemd units, the
+# doxygen HTML API docs.
 # Installed inert: no databases (freshclam downloads them), only the
 # *.conf.sample examples in /etc/clamav (no clamd.conf or freshclam.conf, so
 # neither daemon runs), and dinit services for clamd and freshclam, not enabled.
@@ -20,7 +20,7 @@ summary = "Antivirus engine and scanner"
 license = "GPL-2.0-only AND custom:unrar AND BSD-3-Clause AND Apache-2.0 AND MIT"
 homepage = "https://www.clamav.net"
 hostdeps = ["cmake", "ninja", "pkgconf", "rust", "llvm-clang"]
-builddeps = ["openssl-devel", "libxml2-devel", "pcre2-devel", "json-c-devel", "zlib-ng-compat-devel", "bzip2-devel", "curl-devel", "ncurses-devel", "libmspack-devel", "linux-headers"]
+builddeps = ["libmilter-devel", "openssl-devel", "libxml2-devel", "pcre2-devel", "json-c-devel", "zlib-ng-compat-devel", "bzip2-devel", "curl-devel", "ncurses-devel", "libmspack-devel", "linux-headers"]
 options = ["!check"]
 
 source = [
@@ -37,7 +37,7 @@ setup = '''
     -DDATABASE_DIRECTORY=/var/lib/clamav \
     -DENABLE_APP=ON \
     -DENABLE_CLAMONACC=ON \
-    -DENABLE_MILTER=OFF \
+    -DENABLE_MILTER=ON \
     -DENABLE_UNRAR=ON \
     -DENABLE_EXTERNAL_MSPACK=ON \
     -DENABLE_SHARED_LIB=ON \
