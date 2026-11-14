@@ -1,0 +1,31 @@
+# Adapted from Chimera Linux cports: user/janet/template.py.
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Janet 1.43.0, a dynamic Lisp dialect and bytecode VM. Shared library
+# (libjanet.so) and static one (-static), the headers (janet.h) in -devel.
+# Everything optional is on (epoll event loop, networking, FFI with the JIT, ...: the
+# defaults of meson_options.txt; `-Depoll=true` as Chimera). jpm (the package manager) is a
+# separate project and is not part of this package.
+name = "janet"
+version = "1.43.0"
+release = 1
+summary = "Dynamic Lisp dialect and bytecode VM"
+license = "MIT"
+homepage = "https://janet-lang.org"
+hostdeps = ["meson", "ninja", "pkgconf"]
+options = ["!lto"]
+
+source = [
+    { url = "https://github.com/janet-lang/janet/archive/refs/tags/v1.43.0.tar.gz", sha256 = "9e01a7df04ef9b36c103238ac687e57ceeb5645fb7cc8782325a2844f6bb6a79" },
+]
+
+build = '''
+%meson -Depoll=true
+%meson_build
+'''
+check = '''
+meson test -C build --print-errorlogs
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/janet/LICENSE"
+'''
