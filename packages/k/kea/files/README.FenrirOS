@@ -1,0 +1,21 @@
+Kea on FenrirOS
+===============
+
+Installed inert: no service is enabled, /etc/kea is empty and no lease
+database exists. The example configurations (with example subnets and
+interfaces) are in /usr/share/doc/kea/examples.
+
+1. Write /etc/kea/kea-dhcp4.conf (and kea-dhcp6.conf, kea-dhcp-ddns.conf,
+   kea-ctrl-agent.conf as needed) from the examples; group kea must be able to
+   read them (root:kea 0640).
+2. Lease storage: the default is a memfile under /var/lib/kea. For MariaDB or
+   PostgreSQL create the database and user yourself, then initialise it with
+   kea-admin db-init mysql|pgsql -u USER -p PASSWORD -n DATABASE.
+3. dinitctl enable kea-dhcp4   (kea-dhcp6, kea-dhcp-ddns, kea-ctrl-agent)
+
+The daemons run as the kea user with CAP_NET_RAW and CAP_NET_BIND_SERVICE
+(DHCP sockets on port 67/547). Only one DHCP server may answer on a network:
+stop any other (dnsmasq, dhcpcd's server mode, ...) first. The control agent
+has no authentication in its sample: restrict it to localhost or configure
+basic authentication before exposing it. Hook libraries are in
+/usr/lib/kea/hooks. Built without kea-netconf (needs sysrepo/libyang).

@@ -1,0 +1,11 @@
+# Kea DHCP-DDNS (dynamic DNS updates). Not enabled by default (README.FenrirOS): write
+# /etc/kea/kea-dhcp-ddns.conf (samples: /usr/share/doc/kea/examples) first.
+type = process
+command = /usr/sbin/kea-dhcp-ddns -c /etc/kea/kea-dhcp-ddns.conf
+run-as = kea
+working-dir = /var/lib/kea
+logfile = /var/log/kea-dhcp-ddns-service.log
+capabilities = ^cap_net_bind_service
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

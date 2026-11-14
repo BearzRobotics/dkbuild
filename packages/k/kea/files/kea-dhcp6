@@ -1,0 +1,11 @@
+# Kea DHCPv6. Not enabled by default (README.FenrirOS): write
+# /etc/kea/kea-dhcp6.conf (samples: /usr/share/doc/kea/examples) first.
+type = process
+command = /usr/sbin/kea-dhcp6 -c /etc/kea/kea-dhcp6.conf
+run-as = kea
+working-dir = /var/lib/kea
+logfile = /var/log/kea-dhcp6-service.log
+capabilities = ^cap_net_bind_service,^cap_net_raw
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

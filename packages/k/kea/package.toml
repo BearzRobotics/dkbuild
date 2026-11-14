@@ -1,0 +1,58 @@
+# Kea: ISC's DHCP server suite (kea-dhcp4, kea-dhcp6, kea-dhcp-ddns,
+# kea-ctrl-agent, the kea-admin / kea-lfc / kea-shell tools, and every hook
+# library in the open source tree: HA, lease commands, host cache, flex-id,
+# RADIUS, ...). C++ with Meson; Boost, log4cplus (new package in this tree),
+# OpenSSL as the crypto back end (Botan is the alternative).
+# Optional features, all built where the tree allows: MySQL/MariaDB backends
+# (mariadb), PostgreSQL backends (postgresql), GSS-TSIG (krb5=enabled, against
+# Heimdal's krb5-gssapi.pc: the one untested point, the build fails there if
+# the pc file is missing). NOT built: kea-netconf (needs sysrepo, libyang and
+# their C++ bindings: not packaged), the unit tests and the fuzzers.
+# Paths: /etc, /var and /run (runstatedir is a path Kea concatenates itself),
+# libraries in /usr/lib, hooks in /usr/lib/kea/hooks.
+# Installed inert: Kea installs its example configuration files into /etc/kea
+# with real interfaces and subnets; they are moved to
+# /usr/share/doc/kea/examples (an unconfigured server must not start with
+# someone else's subnets). Four dinit services (dhcp4, dhcp6, ddns, ctrl-agent)
+# are shipped, none enabled; the kea user and /var/lib/kea, /var/log/kea,
+# /run/kea come from sysusers/tmpfiles. No lease database, no passwords (the
+# ctrl-agent sample has none either).
+name = "kea"
+version = "3.2.1"
+release = 1
+summary = "ISC Kea DHCPv4/DHCPv6 server suite"
+license = "MPL-2.0"
+homepage = "https://www.isc.org/kea/"
+hostdeps = ["meson", "ninja", "pkgconf", "python"]
+builddeps = ["boost-devel", "log4cplus-devel", "openssl-devel", "mariadb-devel", "postgresql-devel", "heimdal-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.isc.org/isc/kea/3.2.1/kea-3.2.1.tar.xz", sha256 = "3478220be62b3aa361a2c7f97d5d2989b934f7864e82d4bd17056e1e208b9735" },
+]
+
+setup = '''
+%meson --libdir=lib --sysconfdir=/etc --localstatedir=/var \
+    -Drunstatedir=/run -Dcrypto=openssl -Dkrb5=enabled -Dmysql=enabled -Dpostgresql=enabled \
+    -Dnetconf=disabled -Dtests=disabled -Dfuzz=disabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+# example configuration instead of live /etc/kea
+if [ -d "$pkgdir/etc/kea" ]; then
+    mkdir -p "$pkgdir/usr/share/doc/kea/examples"
+    mv "$pkgdir"/etc/kea/* "$pkgdir/usr/share/doc/kea/examples/"
+    rmdir "$pkgdir/etc/kea"
+fi
+for s in kea-dhcp4 kea-dhcp6 kea-dhcp-ddns kea-ctrl-agent; do
+    install -Dm644 $pkgfiles/$s "$pkgdir/etc/dinit.d/$s"
+done
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/kea.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/kea.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/kea/README.FenrirOS"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/kea/COPYING"
+'''

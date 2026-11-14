@@ -1,0 +1,11 @@
+# Kea control agent (REST API for the other daemons). Not enabled by default (README.FenrirOS): write
+# /etc/kea/kea-ctrl-agent.conf (samples: /usr/share/doc/kea/examples) first.
+type = process
+command = /usr/sbin/kea-ctrl-agent -c /etc/kea/kea-ctrl-agent.conf
+run-as = kea
+working-dir = /var/lib/kea
+logfile = /var/log/kea-ctrl-agent-service.log
+capabilities = ^cap_net_bind_service
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

@@ -1,0 +1,11 @@
+# Kea DHCPv4. Not enabled by default (README.FenrirOS): write
+# /etc/kea/kea-dhcp4.conf (samples: /usr/share/doc/kea/examples) first.
+type = process
+command = /usr/sbin/kea-dhcp4 -c /etc/kea/kea-dhcp4.conf
+run-as = kea
+working-dir = /var/lib/kea
+logfile = /var/log/kea-dhcp4-service.log
+capabilities = ^cap_net_bind_service,^cap_net_raw
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd
