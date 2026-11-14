@@ -1,0 +1,42 @@
+# RawTherapee: raw photo processor (GTK 3 / gtkmm). Uses the system fmt and
+# LibRaw. The bundled KLT (Kanade-Lucas-Tomasi tracker, no package) stays.
+# SVG backend is librsvg (LunaSVG, the alternative, is experimental upstream and
+# not packaged). OpenMP, libcanberra and JPEG XL are on. Generic processor target
+# (PROC_TARGET_NUMBER 0: the profile's CFLAGS decide, never -march=native).
+# BUILD_SHARED stays off: RawTherapee's own engine libraries are only used by its
+# executables.
+name = "rawtherapee"
+version = "5.13"
+release = 1
+summary = "Raw photo processing program"
+license = "GPL-3.0-or-later"
+homepage = "https://rawtherapee.com"
+hostdeps = ["cmake", "ninja", "pkgconf", "gettext"]
+builddeps = ["fmt-devel", "fftw-devel", "glibmm2.4-devel", "gtkmm3.0-devel", "lcms2-devel", "lensfun-devel", "libcanberra-devel", "libexpat-devel", "libiptcdata-devel", "libjpeg-turbo-devel", "libjxl-devel", "libpng-devel", "libraw-devel", "librsvg-devel", "libsigc++2-devel", "libtiff-devel", "openmp-devel", "zlib-ng-compat-devel", "exiv2-devel"]
+rundeps = ["hicolor-icon-theme", "adwaita-icon-theme"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/RawTherapee/RawTherapee/releases/download/5.13/rawtherapee-5.13.tar.xz", sha256 = "23bdff4b1817e1274c11a94b11d21cac59e9c1b1d209795d3194710ee73e77bf" },
+]
+
+setup = '''
+%cmake \
+    -DWITH_SYSTEM_FMT=ON \
+    -DWITH_SYSTEM_LIBRAW=ON \
+    -DOPTION_OMP=ON \
+    -DUSE_LIBCANBERRA=ON \
+    -DWITH_JXL=ON \
+    -DSVG_BACKEND=librsvg \
+    -DPROC_TARGET_NUMBER=0 \
+    -DCACHE_NAME_SUFFIX= \
+    -DBUILD_BUNDLE=OFF \
+    -DCMAKE_INSTALL_DOCDIR=/usr/share/doc/rawtherapee
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/rawtherapee/LICENSE"
+'''
