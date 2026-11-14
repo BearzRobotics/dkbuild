@@ -1,0 +1,20 @@
+# opentelemetry-api from PyPI.
+name = "python-opentelemetry-api"
+version = "1.45.2"
+release = 1
+summary = "OpenTelemetry Python API"
+license = "Apache-2.0"
+homepage = "https://opentelemetry.io"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python", "python-typing-extensions"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/19/14/cf3a6b6448849656e1e5f4e2101f3988dc6789724050096aba1bc5ccf592/opentelemetry_api-1.45.2.tar.gz", sha256 = "d7b0008e21e5fd61cbe7a7f34ca3b6905a78ab677d9bc395e299359c75cda6b4" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-opentelemetry-api/LICENSE"
+'''
