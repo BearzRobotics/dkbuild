@@ -1,0 +1,42 @@
+# Gambit 4.9.8 (v4.9.8 tag), the Gambit Scheme system: gsi (interpreter), gsc
+# (compiler to C), libgambit shared and static (libgambit.so, libgambit.a), headers.
+# Bootstrap: the git tag archive already holds the C translation of the compiler
+# and runtime (lib/_gambit.c, gsc/_gsc.c, ...; gsc-boot.unix is the dummy that leaves
+# them alone), so only a C compiler is needed.
+# Options (the usual distribution set): --enable-single-host (the runtime compiled as
+# one C unit: faster), --enable-shared, --enable-openssl (TLS, OpenSSL), --enable-poll
+# (poll as the select method), --enable-high-res-timing. Not enabled, with reason: --enable-smp
+# and --enable-multiple-vms (experimental upstream, change the runtime's performance
+# profile), --enable-guide (the Gambit IDE, off upstream by default; not tried, to keep the first build simple), the
+# debugging/profiling build flavours, --enable-cplusplus. The test suite (`make check`)
+# compiles every test through gsc several times and takes hours: not run.
+name = "gambit"
+version = "4.9.8"
+release = 1
+summary = "Gambit Scheme, Scheme to C compiler and interpreter"
+license = "Apache-2.0 OR LGPL-2.1-only"
+homepage = "https://gambitscheme.org"
+hostdeps = ["make"]
+builddeps = ["openssl-devel"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://github.com/gambit/gambit/archive/refs/tags/v4.9.8.tar.gz", sha256 = "0ec19b755dbda6c540e9e60b7235d801f26f40c2f211ddfb729b756218bcc873" },
+]
+
+setup = '''
+%configure \
+    --enable-single-host \
+    --enable-shared \
+    --enable-openssl \
+    --enable-poll \
+    --enable-high-res-timing
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE-2.0.txt "$pkgdir/usr/share/licenses/gambit/LICENSE-2.0.txt"
+install -Dm644 LGPL.txt "$pkgdir/usr/share/licenses/gambit/LGPL.txt"
+'''
