@@ -1,0 +1,33 @@
+# gdk-pixbuf loader for WebP (still and animated), plus a thumbnailer entry.
+# dkde's recommended software. gdk-pixbuf only sees the loader once its
+# loaders.cache is rebuilt: scripts/post-install and scripts/trigger run
+# gdk-pixbuf-query-loaders --update-cache (the trigger watches the loaders
+# directory, so it also runs when another loader package changes).
+name = "webp-pixbuf-loader"
+version = "0.2.7"
+release = 1
+summary = "WebP image loader for gdk-pixbuf"
+license = "LGPL-2.0-or-later"
+homepage = "https://github.com/aruiz/webp-pixbuf-loader"
+hostdeps = ["meson", "pkgconf"]
+builddeps = ["gdk-pixbuf-devel", "glib-devel", "libwebp-devel"]
+rundeps = ["gdk-pixbuf"]
+triggers = ["/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/aruiz/webp-pixbuf-loader/archive/refs/tags/0.2.7.tar.gz", sha256 = "61ce5e8e036043f9d0e78c1596a621788e879c52aedf72ab5e78a8c44849411a" },
+]
+
+setup = '''
+# update_cache off: the cache is rebuilt in the target root by the apk scripts, not at DESTDIR install.
+%meson \
+    -Dupdate_cache=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE.LGPL-2 "$pkgdir/usr/share/licenses/webp-pixbuf-loader/LICENSE.LGPL-2"
+'''
