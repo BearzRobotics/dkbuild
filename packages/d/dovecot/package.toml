@@ -78,6 +78,12 @@ done
 # one program out of the generated Makefile; the GSSAPI plugin itself is built.
 sed -i '/^am__EXEEXT_1 = /{N;s/ \\\n\ttest-sasl-authentication\$(EXEEXT)//}' src/lib-sasl/Makefile
 grep -q '^am__EXEEXT_1 = test-sasl-oauth2$(EXEEXT) test-sasl-client$(EXEEXT)$' src/lib-sasl/Makefile
+# src/lib-sasl/sasl-server-mech-gssapi.c uses krb5_context, krb5_principal and
+# krb5_kuserok but includes only the GSSAPI headers: MIT's gssapi_krb5.h pulls in
+# <krb5.h>, Heimdal's does not ("use of undeclared identifier 'krb5_context'", r3).
+sed -i '/^#include "auth-gssapi.h"$/a\
+#include <krb5.h>' src/lib-sasl/sasl-server-mech-gssapi.c
+grep -Fxq '#include <krb5.h>' src/lib-sasl/sasl-server-mech-gssapi.c
 '''
 build = '''
 # src/lib-json/test-json-generator.c (a test helper, built in `all`) sends
