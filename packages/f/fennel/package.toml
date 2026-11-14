@@ -1,0 +1,31 @@
+# Adapted from Chimera Linux cports: main/fennel/template.py.
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Fennel 1.6.1, a Lisp that compiles to Lua. The compiler is itself written in
+# Fennel and bootstrapped by the precompiled Lua in the release (bootstrap/aot.lua),
+# so the build needs only a Lua; the man pages are shipped prebuilt (no pandoc).
+# It runs on the system Lua (the `lua` package, 5.4); the modules are installed
+# to /usr/share/lua/5.4. The static fennel-bin (needs a Lua git submodule) is not built.
+# The test suite is run (needs only Lua).
+name = "fennel"
+version = "1.6.1"
+release = 1
+summary = "Lisp that compiles to Lua"
+license = "MIT"
+homepage = "https://fennel-lang.org"
+hostdeps = ["lua", "make"]
+rundeps = ["lua"]
+
+source = [
+    { url = "https://git.sr.ht/~technomancy/fennel/archive/1.6.1.tar.gz", sha256 = "f0f188e9a4424851d9263ab69302b6b2ffc5c6efb67a25fffc52187a29c94024" },
+]
+
+build = '''
+make fennel fennel.lua
+'''
+check = '''
+make test
+'''
+install = '''
+make install PREFIX=/usr DESTDIR="$pkgdir"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/fennel/LICENSE"
+'''
