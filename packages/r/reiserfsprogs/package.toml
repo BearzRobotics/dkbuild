@@ -1,6 +1,8 @@
 # Written for this tree (cports has no reiserfsprogs). Untested.
 # Needed by dkde-parted: mkfs.reiserfs, reiserfsck, resize_reiserfs, reiserfstune.
 # The tarball ships a generated configure, so no autoreconf.
+# release 1 environment: -D_LARGEFILE64_SOURCE, because debugreiserfs/recover.c calls lseek64, which musl declares only with it
+# (glibc declares it by default). Nothing else is changed.
 name = "reiserfsprogs"
 version = "3.6.27"
 release = 1
@@ -15,6 +17,9 @@ source = [
     { url = "https://www.kernel.org/pub/linux/kernel/people/jeffm/reiserfsprogs/v3.6.27/reiserfsprogs-3.6.27.tar.xz", sha256 = "0e95b67fa7746a3c2d59145e9b9c2feb4a6be52853e83b497b182eae508e62e3" },
 ]
 
+environment = '''
+export CFLAGS="${CFLAGS} -D_LARGEFILE64_SOURCE"
+'''
 setup = '''
 %configure
 '''
