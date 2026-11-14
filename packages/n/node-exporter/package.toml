@@ -1,0 +1,36 @@
+# node-exporter (binary node_exporter): the Prometheus exporter for host metrics (CPU, memory, disks,
+# network, ...). Go modules from the shared module cache (godeps). CGO is off,
+# as in upstream's default .promu.yml; every default-enabled collector is built
+# (no tags beyond netgo, which promu's builds use too). Static Go binary.
+# Installed inert: the dinit service is shipped, not enabled; the textfile
+# collector directory /var/lib/node_exporter/textfile_collector comes from
+# tmpfiles and is owned by root (only the administrator drops .prom files).
+name = "node-exporter"
+version = "1.12.1"
+release = 1
+summary = "Prometheus exporter for host and kernel metrics"
+license = "Apache-2.0"
+homepage = "https://prometheus.io"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/prometheus/node_exporter/archive/refs/tags/v1.12.1.tar.gz", sha256 = "a90f1df0fde58d216d4a7d342e64831d2e3257db8084deadbe69754d34b15142" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+ld="-X github.com/prometheus/common/version.Version=$version -X github.com/prometheus/common/version.Revision=v$version -X github.com/prometheus/common/version.Branch=release -X github.com/prometheus/common/version.BuildUser=dkbuild -X github.com/prometheus/common/version.BuildDate=19700101-00:00:00"
+go build -tags netgo -ldflags "-s -w $ld" -o node_exporter .
+'''
+install = '''
+install -Dm755 node_exporter "$pkgdir/usr/bin/node_exporter"
+install -Dm644 example-rules.yml "$pkgdir/usr/share/doc/node-exporter/example-rules.yml"
+install -Dm644 $pkgfiles/node_exporter "$pkgdir/etc/dinit.d/node_exporter"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/node_exporter.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/node_exporter.conf"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/node-exporter/LICENSE"
+install -Dm644 NOTICE "$pkgdir/usr/share/licenses/node-exporter/NOTICE"
+'''

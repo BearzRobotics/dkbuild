@@ -1,0 +1,12 @@
+# Prometheus node exporter. Not enabled by default: `dinitctl enable node_exporter`.
+# Listens on port 9100 (all interfaces; add --web.listen-address=127.0.0.1:9100
+# to the command to restrict it). The textfile collector reads *.prom files from
+# /var/lib/node_exporter/textfile_collector.
+type = process
+command = /usr/bin/node_exporter --collector.textfile.directory=/var/lib/node_exporter/textfile_collector
+run-as = node_exporter
+logfile = /var/log/node_exporter.log
+smooth-recovery = true
+
+depends-on: rcboot
+waits-for: syslogd
