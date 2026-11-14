@@ -1,0 +1,87 @@
+# TeX Live 2026 binaries, built from the texlive-source tarball (the engines pdfTeX,
+# XeTeX, LuaTeX, LuaJITTeX, pTeX/upTeX, e-TeX, METAFONT/MetaPost, BibTeX and
+# bibtex8/bibtexu, dvips, dvipdfmx, dvipng, dvisvgm, xdvi, makeindex, SyncTeX,
+# kpathsea and friends, psutils, t1utils, chktex, lcdf-typetools, ...). This is
+# the BINARY half: the macro/font tree (texmf-dist) is the separate package
+# texlive-basic; the two together are the "texlive" meta-package.
+# System libraries are used where the tree has them (freetype, harfbuzz with ICU,
+# graphite2, ICU, cairo, pixman, GD, libpng, zlib, potrace, GMP, MPFR, libpaper,
+# fontconfig, ncurses). Bundled, because no separate package exists: LuaJIT
+# (patched fork), Lua 5.3, TECkit, zziplib, MPFI, pplib, xpdf (pdfTeX/LuaTeX
+# read PDF with their own copies).
+# Off, with the reason: xindy (needs CLISP/CLisp, not packaged).
+# Layout: texmf.cnf (edited below) keeps the tree in /usr/share/texmf-dist, the
+# generated files in /var/lib/texmf and the site config in /etc/texmf; scripts
+# installed in /usr/bin are symlinks into texmf-dist and resolve once texlive-basic
+# (or any full texmf-dist) is installed.
+name = "texlive-bin"
+version = "20260301"
+release = 1
+summary = "TeX Live binaries: TeX engines, dvips, dvipdfmx, bibtex, kpathsea, ..."
+license = "GPL-2.0-or-later"
+homepage = "https://tug.org/texlive"
+hostdeps = ["pkgconf", "perl"]
+builddeps = ["cairo-devel", "fontconfig-devel", "freetype-devel", "graphite2-devel", "harfbuzz-devel", "icu-devel", "libgd-devel", "libpaper-devel", "libpng-devel", "libx11-devel", "libxaw-devel", "libxi-devel", "libxmu-devel", "libxpm-devel", "libxt-devel", "gmp-devel", "mpfr-devel", "ncurses-devel", "pixman-devel", "potrace-devel", "zlib-ng-compat-devel"]
+rundeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://mirrors.ctan.org/systems/texlive/Source/texlive-20260301-source.tar.xz", sha256 = "32ea827edd3fb80a682ffbdf95d7ba6139ff074516e660c8923260fc82f5e0f0" },
+]
+
+environment = '''
+export CFLAGS="$CFLAGS -Wno-implicit-function-declaration -Wno-int-conversion -Wno-incompatible-function-pointer-types -Wno-deprecated-non-prototype"
+export CXXFLAGS="$CXXFLAGS -Wno-deprecated-declarations"
+'''
+setup = '''
+# Tree layout: TEXMFROOT=/usr/share (so TEXMFDIST=/usr/share/texmf-dist), generated
+# formats/maps in /var/lib/texmf, local configuration in /etc/texmf; the per-site
+# TEXMFLOCAL is /usr/local/share/texmf (a lookup path only, nothing is installed there).
+# The default would derive everything from the binary's directory (/usr), which has
+# no texmf-dist.
+sed -i \
+    -e 's|^TEXMFROOT = .*|TEXMFROOT = /usr/share|' \
+    -e 's|^TEXMFLOCAL = .*|TEXMFLOCAL = /usr/local/share/texmf|' \
+    -e 's|^TEXMFSYSVAR = .*|TEXMFSYSVAR = /var/lib/texmf|' \
+    -e 's|^TEXMFSYSCONFIG = .*|TEXMFSYSCONFIG = /etc/texmf|' \
+    texk/kpathsea/texmf.cnf
+grep -q '^TEXMFROOT = /usr/share$' texk/kpathsea/texmf.cnf
+mkdir build && cd build
+../configure \
+    --prefix=/usr --sysconfdir=/etc --datarootdir=/usr/share --datadir=/usr/share \
+    --mandir=/usr/share/man --infodir=/usr/share/info \
+    --disable-native-texlive-build \
+    --disable-multiplatform \
+    --with-banner-add=/dkbuild \
+    --enable-shared --enable-static \
+    --enable-luatex --enable-luajittex --enable-xetex --enable-uptex --enable-mf --enable-mflua --enable-mfluajit \
+    --enable-web-progs --enable-synctex \
+    --enable-psutils --enable-t1utils --enable-bibtexu --enable-xdvik --enable-dvisvgm --enable-dvipng \
+    --disable-xindy \
+    --with-system-zlib \
+    --with-system-libpng \
+    --with-system-freetype2 \
+    --with-system-harfbuzz \
+    --with-system-graphite2 \
+    --with-system-icu \
+    --with-system-cairo \
+    --with-system-pixman \
+    --with-system-gd \
+    --with-system-gmp \
+    --with-system-mpfr \
+    --with-system-potrace \
+    --with-system-libpaper \
+    --with-xdvi-x-toolkit=xaw
+'''
+build = '''
+cd build
+make -j$jobs CC="$CC" CXX="$CXX"
+'''
+install = '''
+cd build
+make DESTDIR="$pkgdir" install
+# TeX Live is a collection under many licenses (GPL-2.0-or-later for most programs,
+# LGPL for kpathsea); the license text shipped in the source is the LGPL one
+install -Dm644 ../texk/kpathsea/COPYING.LESSERv2 "$pkgdir/usr/share/licenses/texlive-bin/COPYING.LESSERv2"
+mkdir -p "$pkgdir/var/lib/texmf" "$pkgdir/etc/texmf"
+'''
