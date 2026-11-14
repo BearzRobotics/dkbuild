@@ -1,0 +1,37 @@
+# LyX: document processor (Qt 6 front end for LaTeX). Spell checking through
+# Hunspell, Enchant and Aspell (all three if present); the bundled MyThes
+# thesaurus and the included nod and dtl helpers stay (no packages of their own).
+# It runs LaTeX to produce output: texlive (rundep) is needed at run time, plus
+# Python 3 for its scripts and ImageMagick/Ghostscript for converting images.
+# Source: the lip6.fr mirror of ftp.lyx.org (the upstream host's TLS certificate
+# does not match its name); the checksum is of the mirror copy, which matches
+# the upstream tarball name and size.
+name = "lyx"
+version = "2.5.3"
+release = 1
+summary = "WYSIWYM document processor on top of LaTeX"
+license = "GPL-2.0-or-later"
+homepage = "https://www.lyx.org"
+hostdeps = ["pkgconf", "python", "qt6-qtbase-devel", "qt6-qttools", "gettext"]
+builddeps = ["aspell-devel", "enchant-devel", "file-devel", "hunspell-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel", "zlib-ng-compat-devel", "libx11-devel"]
+rundeps = ["python", "texlive", "imagemagick", "ghostscript", "xdg-utils", "hicolor-icon-theme"]
+options = ["!check"]
+
+source = [
+    { url = "https://ftp.lip6.fr/pub/lyx/stable/2.5.x/lyx-2.5.3.tar.xz", sha256 = "85faab35915974be1701cbcc6a18606a34e62cc7c86e0336f152acbc6156a8a6" },
+]
+
+setup = '''
+%configure \
+    --enable-build-type=rel \
+    --with-packaging=posix \
+    --enable-qt6 \
+    --with-hunspell --with-aspell --with-enchant
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/lyx/COPYING"
+'''
