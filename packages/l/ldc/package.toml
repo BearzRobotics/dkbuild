@@ -1,0 +1,70 @@
+# LDC 1.43.0, the LLVM D compiler (ldc2, the DMD-compatible driver ldmd2, the
+# tools ldc-build-runtime, ldc-profdata, ldc-profgen, ldc-prune-cache,
+# ddemangle, timetrace2txt), with the D runtime (druntime) and the standard
+# library (Phobos), each as a shared and a static library (BUILD_SHARED_LIBS=BOTH).
+# LLVM: LDC 1.43 supports LLVM 18 to 22, not the tree's 23.1, so it builds
+# against llvm22 (the static libraries in /usr/lib/llvm22 that Zig and Rust use)
+# and links them statically: ldc2 needs no libLLVM at run time. llvm22 is built
+# with libc++, so the C++ half is built with clang (and libc++), never GCC.
+# Bootstrapping: the front end is written in D. The first build (stage 0) runs
+# on the LDC project's own prebuilt Alpine release (ldc-bootstrap, stage0deps;
+# ldmd2 is the host D compiler); every later one on the previous ldc package
+# (selfhost). The same version's druntime and Phobos are then built by the new
+# ldc2 itself. (GCC 15's gdc could do it only through the gdmd wrapper, which
+# GCC does not ship.)
+# Not enabled, with a reason: the embedded LLD (LDC_WITH_LLD: the programs are
+# linked by clang and the system lld/ld, as everywhere in the tree; the static
+# lld libraries of llvm22 are untested with LDC), MLIR, the ThinLTO plugin.
+# Not here: dub (a separate project), rdmd, dustmite and reggae (the seed's
+# own tools are not installed), the test suites.
+# Install layout: LDC finds ldc2.conf in /etc/ldc; the imports are in
+# /usr/include/dlang/ldc (the conf's paths are relative to the install).
+# Programs link druntime/Phobos shared by default (as LDC's prebuilt
+# releases) and need clang to link; Phobos' std.net.curl loads libcurl at
+# run time (rundeps).
+name = "ldc"
+version = "1.43.0"
+release = 1
+summary = "The LLVM-based D compiler"
+license = "BSD-3-Clause"
+homepage = "https://github.com/ldc-developers/ldc"
+archs = ["x86_64"]
+hostdeps = ["cmake", "ninja", "llvm22", "llvm-clang", "llvm-lld", "llvm-libcxx-devel", "llvm-libunwind-devel"]
+builddeps = ["llvm22", "llvm-libcxx-devel", "llvm-libunwind-devel", "zlib-ng-compat-devel", "zlib-ng-compat-static",
+             "zstd-devel", "zstd-static", "linux-headers"]
+stage0deps = ["ldc-bootstrap"]
+rundeps = ["llvm-clang", "llvm-lld", "curl-libs"]
+options = ["!check", "!lto", "selfhost", "jobs:8"]
+
+source = [
+    { url = "https://github.com/ldc-developers/ldc/releases/download/v1.43.0/ldc-1.43.0-src.tar.gz", sha256 = "d655aad0daf0ce9a17b2ffffb947bb79ec6968bc7fb88bc918316dbe78c616e7" },
+]
+
+environment = '''
+export HOME=/tmp
+# the D compiler that builds this one: the previous package's, or (stage 0) the seed's
+if [ -x /usr/bin/ldmd2 ] && [ ! -d /usr/lib/ldc-bootstrap ]; then
+    export DC=/usr/bin/ldmd2
+else
+    export DC=/usr/lib/ldc-bootstrap/bin/ldmd2
+fi
+'''
+setup = '''
+%cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
+    -DD_COMPILER="$DC" \
+    -DLLVM_CONFIG=/usr/lib/llvm22/bin/llvm-config \
+    -DBUILD_SHARED_LIBS=BOTH \
+    -DLDC_WITH_LLD=OFF \
+    -DCONF_INST_DIR=/etc/ldc \
+    -DINCLUDE_INSTALL_DIR=/usr/include/dlang/ldc \
+    -DLDC_INSTALL_LTOPLUGIN=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ldc/LICENSE"
+test -x "$pkgdir/usr/bin/ldc2" && test -x "$pkgdir/usr/bin/ldmd2"
+test -e "$pkgdir/etc/ldc/ldc2.conf"
+'''
