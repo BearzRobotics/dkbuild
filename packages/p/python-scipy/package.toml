@@ -1,0 +1,29 @@
+# scipy from PyPI. Fortran: LLVM flang (FC=flang; scipy's meson.build supports 'llvm-flang'),
+# its runtime is flang-rt. BLAS/LAPACK from OpenBLAS. Pythran is a build dependency (xsimd
+# is bundled in it). Qhull comes from the system; the other bundled subprojects (HiGHS, Boost.Math,
+# ...) are in the sdist and are used as they are.
+name = "python-scipy"
+version = "1.18.1"
+release = 1
+summary = "Fundamental algorithms for scientific computing in Python"
+license = "BSD-3-Clause"
+homepage = "https://pypi.org/project/scipy"
+hostdeps = ["python", "python-meson-python", "python-cython", "python-pybind11", "python-pythran", "python-numpy", "meson", "ninja", "pkgconf", "flang"]
+builddeps = ["python-devel", "python-numpy", "openblas-devel", "qhull-devel", "flang-rt-devel"]
+rundeps = ["python", "python-numpy", "flang-rt"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/7e/74/66de6258867beb2ef08f35f9f2ac017a52cacd5081714d239ff1a442d458/scipy-1.18.1.tar.gz", sha256 = "52c4b7422442aba924d03ad4019852b08a92e64ea187b933135687bfe2747307" },
+]
+
+environment = '''
+export FC=flang
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr \
+    -Csetup-args=-Dblas=openblas -Csetup-args=-Dlapack=openblas -Csetup-args=-Duse-system-libraries=qhull .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-scipy/LICENSE.txt"
+install -Dm644 LICENSES_bundled.txt "$pkgdir/usr/share/licenses/python-scipy/LICENSES_bundled.txt"
+'''
