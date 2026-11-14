@@ -1,0 +1,45 @@
+# Imported from Chimera Linux cports: user/neovim/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Built against the tree's packages, nothing from neovim's own cmake.deps
+# (which would download): LuaJIT (the nvim executable embeds it), luv (built
+# for LuaJIT, linked statically as luv_a), lpeg (liblpeg.a linked in; lpeg.so
+# for the LuaJIT that runs the build-time code generators), libuv, tree-sitter,
+# unibilium, utf8proc and libintl (gettext). libvterm and the MessagePack
+# code are vendored in neovim's own source tree. The tree-sitter parsers it
+# bundles upstream (C, Lua, Vim script, vimdoc, query, Markdown) are
+# separate packages, found through runtime/parser -> /usr/lib/tree-sitter
+# (as Chimera does), and are runtime dependencies. Translations on.
+# Not enabled: ENABLE_WASMTIME (loading WebAssembly parsers; wasmtime's C
+# API is not packaged, and neovim needs exactly wasmtime 36).
+name = "neovim"
+version = "0.12.6"
+release = 1
+summary = "Fork of Vim aiming to improve user experience, plugins and GUIs"
+license = "Apache-2.0 AND Vim"
+homepage = "https://neovim.io"
+hostdeps = ["cmake", "ninja", "gettext", "gperf", "luajit", "lpeg", "pkgconf"]
+builddeps = ["gettext-devel", "libuv-devel", "luajit-devel", "luv-devel", "luv-static", "lpeg-static", "tree-sitter-devel", "unibilium-devel", "utf8proc-devel"]
+rundeps = ["tree-sitter-c", "tree-sitter-lua", "tree-sitter-markdown", "tree-sitter-query", "tree-sitter-vim", "tree-sitter-vimdoc"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/neovim/neovim/archive/v0.12.6.tar.gz", sha256 = "8629fdc5eb951daf89a76f68cad12f2f1e03fab0d539150ba3fe6d177d254b7f" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    -DPREFER_LUA=OFF \
+    -DENABLE_TRANSLATIONS=ON \
+    -DENABLE_WASMTIME=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/neovim/LICENSE.txt"
+# the bundled parsers: nvim looks for parser/<lang>.so in its runtime
+rm -rf "$pkgdir/usr/share/nvim/runtime/parser"
+ln -s ../../../lib/tree-sitter "$pkgdir/usr/share/nvim/runtime/parser"
+'''
