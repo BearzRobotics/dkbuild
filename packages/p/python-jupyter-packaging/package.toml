@@ -1,0 +1,20 @@
+# jupyter-packaging from PyPI.
+name = "python-jupyter-packaging"
+version = "0.12.3"
+release = 1
+summary = "Jupyter Packaging Utilities."
+license = "BSD-3-Clause"
+homepage = "http://jupyter.org"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python", "python-deprecation", "python-packaging", "python-tomlkit", "python-wheel", "python-setuptools"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/25/c5/b0e154e6403c6790bb1e66acddf9787296a8196f5b14f4bb9e4c92b6734e/jupyter_packaging-0.12.3.tar.gz", sha256 = "9d9b2b63b97ffd67a8bc5391c32a421bc415b264a32c99e4d8d8dd31daae9cf4" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-jupyter-packaging/LICENSE"
+'''
