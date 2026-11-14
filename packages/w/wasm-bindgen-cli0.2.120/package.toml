@@ -1,0 +1,40 @@
+# wasm-bindgen-cli 0.2.120: the command line (wasm-bindgen, wasm2es6js,
+# wasm-bindgen-test-runner) that post-processes a Rust wasm32 build into
+# JavaScript bindings. Its version must equal the wasm-bindgen crate the
+# project was compiled with, so it is packaged per version (like php8.5):
+# 0.2.120 is the version lldap 0.6.3's Cargo.lock pins (the newest release is
+# 0.2.130, to be packaged beside this one when something needs it). Built from
+# the workspace's source tag with the crates in the store (cargodeps), default
+# features. The repository ships no Cargo.lock, so files/Cargo.lock is one made
+# with `cargo generate-lockfile` on this tag (cargolock=.).
+name = "wasm-bindgen-cli0.2.120"
+version = "0.2.120"
+release = 1
+summary = "wasm-bindgen command line, pinned to version 0.2.120"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/wasm-bindgen/wasm-bindgen"
+hostdeps = ["rust"]
+options = ["!check", "cargodeps", "cargolock=."]
+
+source = [
+    { url = "https://github.com/wasm-bindgen/wasm-bindgen/archive/refs/tags/0.2.120.tar.gz", sha256 = "59a416c9b4f47bac5c1a72e5461bf09bcfadbf8fcefd31968c6349713bbd12f8" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline -p wasm-bindgen-cli -j $jobs
+'''
+install = '''
+for b in wasm-bindgen wasm2es6js wasm-bindgen-test-runner; do
+    install -Dm755 target/release/$b "$pkgdir/usr/lib/wasm-bindgen-0.2.120/bin/$b"
+done
+# versioned names in /usr/bin so several versions can coexist
+for b in wasm-bindgen wasm2es6js wasm-bindgen-test-runner; do
+    install -d "$pkgdir/usr/bin"
+    ln -s ../lib/wasm-bindgen-0.2.120/bin/$b "$pkgdir/usr/bin/$b-0.2.120"
+done
+install -Dm644 LICENSE-MIT "$pkgdir/usr/share/licenses/wasm-bindgen-cli0.2.120/LICENSE-MIT"
+install -Dm644 LICENSE-APACHE "$pkgdir/usr/share/licenses/wasm-bindgen-cli0.2.120/LICENSE-APACHE"
+'''
