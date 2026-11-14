@@ -36,7 +36,7 @@
 # separate testsuite tarball).
 name = "ghc"
 version = "9.14.1"
-release = 3
+release = 4
 summary = "Glasgow Haskell Compiler"
 license = "BSD-3-Clause"
 homepage = "https://www.haskell.org/ghc/"
@@ -107,12 +107,36 @@ else
     # exist" (r2 mapped only the first triple to a musl one and still failed). This
     # system's clang already targets musl by default, so the wrappers drop every
     # --target= argument (stage 0 only; the installed GHC's own target is configured as musl).
+    # r4: hsc2hs does not pass its flags on the command line but in a response file
+    # (cc @file, utils/hsc2hs Common.hs rawSystemL), so r2's and r3's argument filters
+    # never saw the --target= (--cflag=/--lflag= give one per line): the wrappers also
+    # filter the lines of an @file argument (copied to a temporary file, cleaned up after).
     for w in cc:clang c++:clang++; do
-        cat > /tmp/cc-bin/${w%%:*} <<WRAP
+        cat > /tmp/cc-bin/${w%%:*} <<'WRAP'
 #!/bin/sh
-for a; do shift; case \$a in --target=*) ;; *) set -- "\$@" "\$a";; esac; done
-exec /usr/bin/${w##*:} "\$@"
+tmps=
+for a; do
+    shift
+    case $a in
+    --target=*) ;;
+    @*) f=${a#@}
+        if grep -q '^--target=' "$f" 2>/dev/null; then
+            t=$(mktemp /tmp/ccrsp.XXXXXX)
+            grep -v '^--target=' "$f" > "$t"
+            tmps="$tmps $t"
+            set -- "$@" "@$t"
+        else
+            set -- "$@" "$a"
+        fi ;;
+    *) set -- "$@" "$a" ;;
+    esac
+done
+/usr/bin/@CLANG@ "$@"
+r=$?
+[ -z "$tmps" ] || rm -f $tmps
+exit $r
 WRAP
+        sed -i "s|@CLANG@|${w##*:}|" /tmp/cc-bin/${w%%:*}
         chmod 755 /tmp/cc-bin/${w%%:*}
     done
     ln -sf /usr/bin/ld.lld /tmp/cc-bin/ld
