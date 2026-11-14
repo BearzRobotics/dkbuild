@@ -1,0 +1,85 @@
+# LLDAP: a lightweight LDAP server for authentication (users, groups, custom
+# attributes; GraphQL API; a web administration interface; SQLite, MariaDB
+# or PostgreSQL storage; LDAPS with rustls). Rust, crates from the store
+# (cargodeps; yew_form is a git dependency, vendored with the rest). Server,
+# lldap_set_password and lldap_migration_tool are built as the Dockerfile does.
+# Web frontend: BUILT FROM SOURCE as Rust/WASM, as upstream's app/build.sh
+# does but without the wasm-pack tool (which downloads wasm-bindgen and
+# binaryen at run time): `cargo build --target wasm32-unknown-unknown
+# -p lldap_app` (rust-wasm), then wasm-bindgen --target web (the CLI at
+# exactly the 0.2.120 the Cargo.lock pins: package wasm-bindgen-cli0.2.120),
+# then binaryen's wasm-opt -O --enable-bulk-memory (the flags wasm-pack uses
+# from app/Cargo.toml's metadata), then gzip -9 -k as build.sh. The JS/CSS
+# libraries and fonts the Docker image downloads from CDNs (app/static/
+# libraries.txt and fonts.txt) are sources here (checked against the sha384
+# hashes in app/index_local.html: they matched), laid out as the Dockerfile
+# does; font-awesome 4.7's font files are not fetched by upstream either.
+# Installed inert: the dinit service is shipped, not enabled; no config and
+# no credentials: the sample /usr/share/doc/lldap/lldap_config.toml.example
+# is upstream's config.toml, whose placeholder ldap_user_pass ("password"),
+# jwt_secret and key_seed the administrator must change; the first-run admin
+# login is the application's own (README.FenrirOS).
+name = "lldap"
+version = "0.6.3"
+release = 1
+summary = "Lightweight LDAP server with a web administration interface"
+license = "GPL-3.0-only"
+homepage = "https://github.com/lldap/lldap"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["rust", "rust-wasm", "wasm-bindgen-cli0.2.120", "binaryen", "gzip"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/lldap/lldap/archive/refs/tags/v0.6.3.tar.gz", sha256 = "2beb7840063bedd67d7afe891428ee7327eca162eee561ce75693af287d7ddf1" },
+    { url = "https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1.1.3/dist/css/bootstrap-nightshade.min.css", sha256 = "a38fcabce31baa46a74088442911b98f5d5a146607a607c1f19cbc9889c4cd25" },
+    { url = "https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1.1.3/dist/js/darkmode.min.js", sha256 = "4c91420d424894795d019a0e6a1506c66a2d731251895d99c0bdb3b70ff4b196" },
+    { url = "https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js", sha256 = "e5a12b84f9543d5ba3231837c2f2467563405aa66a582b6fc400985f85df49ad" },
+    { url = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css", sha256 = "3c325075337b768950583012228055ae392e384688d77ec5235e6ca88dcec6ef" },
+    { url = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css", sha256 = "799aeb25cc0373fdee0e1b1db7ad6c2f6a0e058dfadaa3379689f583213190bd" },
+    { url = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff2", sha256 = "76506e128f2b47b7179f5037bd885a1674455ffeb6b5093cdb4c7eefbf436ce8" },
+    { url = "https://fonts.gstatic.com/s/bebasneue/v2/JTUSjIg69CK48gW7PXoo9Wdhyzbi.woff2", sha256 = "58bdaf33480d00d8c7eec1b0ee32e9f93f26ecfb05def7551044bc8f5cd0e2f3" },
+    { url = "https://fonts.gstatic.com/s/bebasneue/v2/JTUSjIg69CK48gW7PXoo9Wlhyw.woff2", sha256 = "dab7290ebc90b7ed3068b2921bf51e026225ad48e7b398b12321d036d340a458" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+# server and tools (default features, as the Dockerfile)
+cargo build --release --frozen --offline -j $jobs -p lldap -p lldap_migration_tool -p lldap_set_password
+
+# frontend
+cargo build --release --frozen --offline -j $jobs --target wasm32-unknown-unknown -p lldap_app --lib
+mkdir -p app/pkg
+wasm-bindgen-0.2.120 --target web --no-typescript --out-dir app/pkg --out-name lldap_app \
+    target/wasm32-unknown-unknown/release/lldap_app.wasm
+wasm-opt -O --enable-bulk-memory -o app/pkg/lldap_app_bg.opt.wasm app/pkg/lldap_app_bg.wasm
+mv app/pkg/lldap_app_bg.opt.wasm app/pkg/lldap_app_bg.wasm
+gzip -9 -k -f app/pkg/lldap_app_bg.wasm
+test -f app/pkg/lldap_app.js -a -f app/pkg/lldap_app_bg.wasm.gz
+# the libraries and fonts the Dockerfile downloads into app/static
+for f in bootstrap-nightshade.min.css darkmode.min.js bootstrap.bundle.min.js bootstrap-icons.css font-awesome.min.css; do
+    cp /build/sources/$f app/static/$f
+done
+mkdir -p app/static/fonts
+cp /build/sources/bootstrap-icons.woff2 /build/sources/JTUSjIg69CK48gW7PXoo9Wdhyzbi.woff2 /build/sources/JTUSjIg69CK48gW7PXoo9Wlhyw.woff2 app/static/fonts/
+'''
+install = '''
+for b in lldap lldap_migration_tool lldap_set_password; do
+    install -Dm755 target/release/$b "$pkgdir/usr/bin/$b"
+done
+# web assets: the Dockerfile's /app/app (index_local.html becomes index.html)
+install -d "$pkgdir/usr/share/lldap/app"
+cp -r app/static app/pkg "$pkgdir/usr/share/lldap/app/"
+install -Dm644 app/index_local.html "$pkgdir/usr/share/lldap/app/index.html"
+rm -f "$pkgdir/usr/share/lldap/app/pkg/.gitignore" "$pkgdir/usr/share/lldap/app/pkg/package.json"
+install -Dm644 config.toml "$pkgdir/usr/share/doc/lldap/lldap_config.toml.example"
+install -Dm644 lldap_config.docker_template.toml "$pkgdir/usr/share/doc/lldap/lldap_config.docker_template.toml"
+cp -r example_configs "$pkgdir/usr/share/doc/lldap/example_configs"
+install -Dm644 schema.graphql "$pkgdir/usr/share/doc/lldap/schema.graphql"
+install -Dm644 $pkgfiles/lldap "$pkgdir/etc/dinit.d/lldap"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/lldap.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/lldap.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/lldap/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/lldap/LICENSE"
+'''

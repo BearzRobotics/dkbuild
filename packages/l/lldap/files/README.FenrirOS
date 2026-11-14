@@ -1,0 +1,20 @@
+LLDAP on FenrirOS
+=================
+
+Installed inert: the service is not enabled, there is no configuration and no
+account.
+
+1. Copy /usr/share/doc/lldap/lldap_config.toml.example to
+   /etc/lldap/lldap_config.toml (root:lldap, mode 0640) and edit it. Upstream's
+   sample carries placeholders you MUST replace before enabling: ldap_user_pass
+   (the initial admin password, default "password"), jwt_secret and key_seed.
+   Set database_url to sqlite:///var/lib/lldap/users.db?mode=rwc (or a
+   MariaDB/PostgreSQL URL). The admin account is created by LLDAP itself the
+   first time it starts (user "admin", the ldap_user_pass above).
+2. dinitctl enable lldap
+
+Ports (sample): LDAP 3890, web interface 17170. The service may bind ports
+below 1024 if you change them (e.g. 389/636). Web assets: /usr/share/lldap/app.
+Other tools: lldap_set_password (reset a password), lldap_migration_tool
+(import from OpenLDAP). Example configurations for client applications are in
+/usr/share/doc/lldap/example_configs.

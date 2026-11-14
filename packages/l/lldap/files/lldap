@@ -1,0 +1,11 @@
+# LLDAP server. Not enabled by default (README.FenrirOS): it needs
+# /etc/lldap/lldap_config.toml (sample: /usr/share/doc/lldap/lldap_config.toml.example).
+type = process
+command = /usr/bin/env LLDAP_ASSETS_PATH=/usr/share/lldap/app /usr/bin/lldap run --config-file /etc/lldap/lldap_config.toml
+run-as = lldap
+working-dir = /var/lib/lldap
+logfile = /var/log/lldap.log
+capabilities = ^cap_net_bind_service
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd
