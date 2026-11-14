@@ -13,7 +13,7 @@
 # Layout: texmf.cnf (edited below) keeps the tree in /usr/share/texmf-dist, the
 # generated files in /var/lib/texmf and the site config in /etc/texmf; scripts
 # installed in /usr/bin are symlinks into texmf-dist and resolve once texlive-basic
-# (or any full texmf-dist) is installed.
+# (or any full texmf-dist) is installed. texmf-dist itself is not in this package.
 name = "texlive-bin"
 version = "20260301"
 release = 1
@@ -83,5 +83,9 @@ make DESTDIR="$pkgdir" install
 # TeX Live is a collection under many licenses (GPL-2.0-or-later for most programs,
 # LGPL for kpathsea); the license text shipped in the source is the LGPL one
 install -Dm644 ../texk/kpathsea/COPYING.LESSERv2 "$pkgdir/usr/share/licenses/texlive-bin/COPYING.LESSERv2"
-mkdir -p "$pkgdir/var/lib/texmf" "$pkgdir/etc/texmf"
+# The tree's own files (web2c/texmf.cnf, the mktex* scripts, dvipdfmx.cfg, ...) come in
+# the TeX Live packages of texlive-basic, which are the source of truth for texmf-dist,
+# so this package leaves out what `make install` puts there (they would conflict). The
+# same edit of texmf.cnf is made by texlive-basic (see its install step).
+rm -rf "$pkgdir/usr/share/texmf-dist"
 '''
