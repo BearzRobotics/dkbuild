@@ -1,0 +1,52 @@
+# Woodpecker CI: a container-based continuous integration engine (a fork of
+# Drone). Three programs from one source: woodpecker-server (the web UI, API
+# and scheduler; CGO for SQLite), woodpecker-agent (runs the workflows,
+# docker/kubernetes/local backends) and woodpecker-cli. Go, built from the
+# release source tarball (woodpecker-src), which carries the vendored modules
+# (vendor/, built with -mod=vendor: no godeps), the generated OpenAPI file
+# and the PRE-BUILT Vue web UI (web/dist, the output of upstream's pnpm/vite
+# build, embedded into the server by go:embed). Building the UI from source
+# would need its whole pnpm tree; policy accepts the release's pre-built UI.
+# Tags as upstream's release build: netgo osusergo grpcnotrace (-s -w).
+# Source edits: none.
+# Installed inert: the dinit services woodpecker-server and woodpecker-agent
+# are shipped, not enabled; /etc/woodpecker/{server,agent}.env are created
+# empty (no secret, no forge, no agent secret); examples and setup:
+# /usr/share/doc/woodpecker/README.FenrirOS. The agent runs as its own user
+# (woodpecker-agent), which is NOT in the docker group.
+name = "woodpecker"
+version = "3.20.1"
+release = 1
+summary = "Container-based CI engine (server, agent and cli)"
+license = "Apache-2.0"
+homepage = "https://woodpecker-ci.org"
+hostdeps = ["go"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/woodpecker-ci/woodpecker/releases/download/v3.20.1/woodpecker-src.tar.gz", sha256 = "ba26448df1fbf131b0aa15edccdbbffac5cbcf9d201c1ef1e4fd630d4ba98327", name = "woodpecker-src.tar.gz" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOPROXY=off GOFLAGS="-mod=vendor -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go HOME=/tmp/home
+'''
+build = '''
+test -f web/dist/index.html
+ld="-s -w -X go.woodpecker-ci.org/woodpecker/v3/version.Version=$version"
+CGO_ENABLED=1 go build -tags "netgo osusergo grpcnotrace" -ldflags "$ld" -o woodpecker-server ./cmd/server
+CGO_ENABLED=0 go build -tags "netgo osusergo grpcnotrace" -ldflags "$ld" -o woodpecker-agent ./cmd/agent
+CGO_ENABLED=0 go build -ldflags "$ld" -o woodpecker-cli ./cmd/cli
+'''
+install = '''
+for b in server agent cli; do
+    install -Dm755 woodpecker-$b "$pkgdir/usr/bin/woodpecker-$b"
+done
+for s in server agent; do
+    install -Dm644 $pkgfiles/woodpecker-$s "$pkgdir/etc/dinit.d/woodpecker-$s"
+    install -Dm644 $pkgfiles/$s.env.example "$pkgdir/usr/share/doc/woodpecker/$s.env.example"
+done
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/woodpecker.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/woodpecker.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/woodpecker/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/woodpecker/LICENSE"
+'''

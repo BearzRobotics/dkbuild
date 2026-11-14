@@ -1,0 +1,24 @@
+Woodpecker CI on FenrirOS
+=========================
+
+Installed inert: neither service is enabled, and the settings files
+(/etc/woodpecker/server.env, agent.env) are empty.
+
+    1. Register an OAuth application in your forge (Gitea or Forgejo:
+       Settings, Applications) with the redirect URI
+       https://<ci host>/authorize.
+    2. Fill /etc/woodpecker/server.env from
+       /usr/share/doc/woodpecker/server.env.example (host, a fresh agent
+       secret, the forge and its client id and secret, WOODPECKER_ADMIN).
+    3. dinitctl enable woodpecker-server
+       The server listens on 127.0.0.1:8000 (HTTP, put a reverse proxy with
+       TLS in front) and on :9000 for the agents (gRPC; firewall it or bind
+       it to a private address with WOODPECKER_GRPC_ADDR).
+    4. Fill /etc/woodpecker/agent.env (same agent secret) and
+       dinitctl enable woodpecker-agent. For the docker backend add the
+       woodpecker-agent user to the docker group (moby package): doing so
+       lets CI jobs control the host's containers, so run agents on a
+       machine you accept that for.
+
+woodpecker-cli is the command line client (WOODPECKER_SERVER and
+WOODPECKER_TOKEN from your user page).

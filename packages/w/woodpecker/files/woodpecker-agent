@@ -1,0 +1,14 @@
+# Woodpecker CI agent. Not enabled by default (README.FenrirOS): it needs the
+# settings in /etc/woodpecker/agent.env (empty after install; example in
+# /usr/share/doc/woodpecker/agent.env.example), then
+# `dinitctl enable woodpecker-agent`.
+type = process
+command = /usr/bin/woodpecker-agent
+run-as = woodpecker-agent
+working-dir = /var/lib/woodpecker-agent
+env-file = /etc/woodpecker/agent.env
+logfile = /var/log/woodpecker-agent.log
+smooth-recovery = true
+
+depends-on: rcboot
+waits-for: syslogd

@@ -1,0 +1,14 @@
+# Woodpecker CI server. Not enabled by default (README.FenrirOS): it needs the
+# settings in /etc/woodpecker/server.env (empty after install; example in
+# /usr/share/doc/woodpecker/server.env.example), then
+# `dinitctl enable woodpecker-server`.
+type = process
+command = /usr/bin/woodpecker-server
+run-as = woodpecker
+working-dir = /var/lib/woodpecker
+env-file = /etc/woodpecker/server.env
+logfile = /var/log/woodpecker-server.log
+smooth-recovery = true
+
+depends-on: rcboot
+waits-for: syslogd
