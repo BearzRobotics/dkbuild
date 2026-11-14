@@ -1,0 +1,20 @@
+# cycler from PyPI.
+name = "python-cycler"
+version = "0.12.1"
+release = 1
+summary = "Composable style cycles"
+license = "BSD-3-Clause"
+homepage = "https://pypi.org/project/cycler"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/a9/95/a3dbbb5028f35eafb79008e7522a75244477d2838f38cbb722248dabc2a8/cycler-0.12.1.tar.gz", sha256 = "88bb128f02ba341da8ef447245a9e138fae777f6a23943da4540077d3601eb1c" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-cycler/LICENSE"
+'''
