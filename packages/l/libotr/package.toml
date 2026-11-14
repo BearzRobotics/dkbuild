@@ -1,0 +1,28 @@
+# libotr: Off-the-Record messaging library (4.x). Optional dependency of irssi
+# (OTR module) and of Pidgin through the separate pidgin-otr plugin.
+# Autotools; shared and static libraries both.
+name = "libotr"
+version = "4.1.1"
+release = 1
+summary = "Off-the-Record messaging library"
+license = "LGPL-2.1-or-later"
+homepage = "https://otr.cypherpunks.ca"
+hostdeps = ["pkgconf"]
+builddeps = ["libgcrypt-devel", "libgpg-error-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://otr.cypherpunks.ca/libotr-4.1.1.tar.gz", sha256 = "8b3b182424251067a952fb4e6c7b95a21e644fbb27fbd5f8af2b2ed87ca419f5" },
+]
+
+# libotr's configure is from 2016 and is old but its configure.ac is plain
+# autoconf; no regeneration needed.
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''
