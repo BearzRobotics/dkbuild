@@ -1,0 +1,29 @@
+# libebml: Extensible Binary Meta Language library (the container format
+# underneath Matroska). needed by libmatroska (VLC, mkvtoolnix).
+name = "libebml"
+version = "1.4.7"
+release = 1
+summary = "Extensible Binary Meta Language library"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.matroska.org"
+hostdeps = ["cmake", "ninja"]
+options = ["!check"]
+
+source = [
+    { url = "https://dl.matroska.org/downloads/libebml/libebml-1.4.7.tar.xz", sha256 = "5b08214f929ee54c6187c370f84235fc9d0f2a2258c4d320d68eae6e2bdfd3f7" },
+]
+
+setup = '''
+# CMake builds one kind per run: shared first, then static into build-static
+%cmake -DBUILD_SHARED_LIBS=ON
+cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+install = '''
+%cmake_install
+DESTDIR=$pkgdir cmake --install build-static
+install -Dm644 LICENSE.LGPL "$pkgdir/usr/share/licenses/libebml/LICENSE.LGPL"
+'''
