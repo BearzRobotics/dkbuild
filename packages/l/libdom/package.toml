@@ -1,0 +1,33 @@
+# libdom: part of the NetSurf project's libraries (needed by netsurf, elinks).
+# The NetSurf build system installs a shared and a static library from two
+# passes (COMPONENT_TYPE=lib-shared, lib-static); both are installed.
+# WARNFLAGS=-w: the libraries build with -Werror, which a newer clang than the
+# ones upstream tests turns into failures on harmless warnings.
+# The Expat XML binding and the Hubbub HTML binding (upstream's defaults); the
+# libxml2 binding is an alternative to the Expat one (both define the same
+# parser symbols), so it is not built.
+name = "libdom"
+version = "0.4.2"
+release = 1
+summary = "W3C DOM implementation"
+license = "MIT"
+homepage = "https://www.netsurf-browser.org/projects/dom/"
+hostdeps = ["netsurf-buildsystem", "perl", "pkgconf"]
+builddeps = ["libexpat-devel", "libhubbub-devel", "libparserutils-devel", "libwapcaplet-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.netsurf-browser.org/libs/releases/libdom-0.4.2-src.tar.gz", sha256 = "d05e45af16547014c2b0a3aecf3670fa13d419f505b3f5fc7ac8a1491fc30f3c" },
+]
+
+build = '''
+for t in lib-shared lib-static; do
+    %make PREFIX=/usr WARNFLAGS=-w COMPONENT_TYPE=$t
+done
+'''
+install = '''
+for t in lib-shared lib-static; do
+    make DESTDIR="$pkgdir" PREFIX=/usr WARNFLAGS=-w COMPONENT_TYPE=$t install
+done
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libdom/COPYING"
+'''
