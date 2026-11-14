@@ -1,0 +1,54 @@
+# Crystal's stage 0 seed: Alpine Linux's musl build of Crystal 1.22.2 (edge
+# community, crystal-1.22.2-r0: the compiler binary and the standard library
+# source), unpacked in /usr/lib/crystal-bootstrap. Crystal is written in
+# Crystal, so the first build of crystal needs an existing compiler (its
+# stage0deps); every later one uses the previous crystal package (selfhost),
+# as Alpine's own does. Crystal 1.22.3 builds with any release from 1.13 on.
+# The seed links the tree's shared libLLVM (23.1, the same as Alpine's), libgc,
+# libpcre2, libffi and GCC's libgcc_s.so.1: the last from
+# dotnet-bootstrap-gcc-runtime (kept private; crystal-seed, the wrapper in
+# /usr/lib/crystal-bootstrap, puts it on the library path). Build use only:
+# off the ISO, and its dependencies are listed here rather than scanned
+# (noscan), because libgcc_s.so.1 is not in /usr/lib.
+# Alpine edge drops a package file when it is rebuilt or updated: a later fetch
+# of this URL can fail, then the newest crystal-1.22.x-r* replaces it.
+name = "crystal-bootstrap"
+version = "1.22.2"
+release = 1
+summary = "Prebuilt Crystal (Alpine's) to bootstrap crystal once"
+license = "Apache-2.0"
+homepage = "https://crystal-lang.org"
+archs = ["x86_64"]
+rundeps = ["dotnet-bootstrap-gcc-runtime", "llvm-libs", "gc", "pcre2", "libffi", "libevent", "gmp", "libatomic-ops", "llvm-clang"]
+noscan = ["/usr/lib/crystal-bootstrap/**"]
+options = ["!strip", "!check", "!repo-iso"]
+
+source = [
+    { url = "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/crystal-1.22.2-r0.apk", sha256 = "e6447fc2a367ab7f3a24b274c492d7899fa97cd80c5f0bb0a2ba61af97be0099", unpack = false },
+]
+
+install = '''
+d="$pkgdir/usr/lib/crystal-bootstrap"
+mkdir -p "$d"
+# an Alpine package is gzipped tar streams one after another
+tar -xzf /build/sources/crystal-1.22.2-r0.apk -C "$d" 2>/dev/null || tar -xzf /build/sources/crystal-1.22.2-r0.apk -C "$d"
+rm -f "$d"/.PKGINFO "$d"/.SIGN.* "$d"/.pre-* "$d"/.post-*
+test -x "$d/usr/bin/crystal"
+test -f "$d/usr/lib/crystal/core/array.cr"
+# Alpine's compiler looks for its standard library in /usr/lib/crystal/core
+# (CRYSTAL_PATH, compiled in): the wrapper points it at this copy unless the
+# caller (crystal's own bin/crystal) sets one, and adds the private libgcc_s
+cat > "$d/crystal-seed" <<EOF2
+#!/bin/sh
+export LD_LIBRARY_PATH=/usr/lib/dotnet-bootstrap-gcc\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}
+: \${CRYSTAL_PATH:=lib:/usr/lib/crystal-bootstrap/usr/lib/crystal/shards:/usr/lib/crystal-bootstrap/usr/lib/crystal/core}
+export CRYSTAL_PATH
+exec /usr/lib/crystal-bootstrap/usr/bin/crystal "\$@"
+EOF2
+chmod 755 "$d/crystal-seed"
+install -Dm644 /dev/stdin "$pkgdir/usr/share/licenses/crystal-bootstrap/README" <<EOF2
+Alpine Linux's crystal 1.22.2-r0 package (edge community) plus the crystal-seed
+wrapper. Crystal is Apache-2.0: https://crystal-lang.org/ and its sources are
+https://github.com/crystal-lang/crystal/releases/tag/1.22.2
+EOF2
+'''
