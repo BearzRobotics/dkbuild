@@ -1,0 +1,52 @@
+# Adapted from Chimera Linux cports: main/gnuplot. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# gnuplot with every terminal in one build: Qt 6 (the gnuplot_qt helper), wxWidgets
+# (wxt), X11, cairo (pngcairo, pdfcairo, svg, ...), GD (png, jpeg, gif), Lua/TikZ,
+# caca, LaTeX/TikZ/PSTricks support files and the gpic/metafont/metapost/tgif/
+# regis/bitmap terminals. cports splits Qt and wx into separate builds; one
+# build gives one binary with all of them, as upstream does.
+# Not enabled: libamos/openspecfun (--with-amos: no package) and AquaTerm (macOS).
+# LaTeX support files go to /usr/share/texmf/tex/latex/gnuplot (a TeX tree that
+# TeX Live's texmf.cnf includes: --with-texdir stops configure from asking kpsewhich).
+# Parallel make breaks since gnuplot 6.0.2 (cports): -j1 in the build step.
+name = "gnuplot"
+version = "6.0.6"
+release = 1
+summary = "Command-line-driven graphing utility"
+license = "gnuplot"
+homepage = "http://www.gnuplot.info"
+hostdeps = ["lua5.1", "pkgconf", "qt6-qtbase-devel", "qt6-qttools"]
+builddeps = ["cairo-devel", "libcaca-devel", "libcerf-devel", "libgd-devel", "libx11-devel", "libxt-devel", "lua5.1-devel", "pango-devel", "qt6-qt5compat-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel", "qt6-qttools-devel", "readline-devel", "wxwidgets-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/gnuplot/gnuplot/6.0.6/gnuplot-6.0.6.tar.gz", sha256 = "9d39d8499c9533550144092375aac45ba8bf0c18c9cee50897fe411b6d93004e" },
+]
+
+environment = '''
+export CXXFLAGS="$CXXFLAGS -fPIC"
+'''
+setup = '''
+%configure \
+    --with-readline=gnu \
+    --with-x \
+    --with-qt=qt6 \
+    --with-wx \
+    --with-cairo \
+    --with-gd \
+    --with-lua \
+    --with-caca \
+    --with-gpic \
+    --with-metapost \
+    --with-metafont \
+    --with-tgif \
+    --with-regis \
+    --with-bitmap-terminals \
+    --with-texdir=/usr/share/texmf/tex/latex/gnuplot
+'''
+build = '''
+make -j1 CC="$CC" CXX="$CXX"
+'''
+install = '''
+%make_install
+install -Dm644 Copyright "$pkgdir/usr/share/licenses/gnuplot/Copyright"
+'''
