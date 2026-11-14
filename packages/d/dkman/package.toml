@@ -1,9 +1,13 @@
 # Man page tool: finds, searches and renders man pages and Markdown docs.
 # Zig dependencies (md-zig, gtroff-zig) are fetched on the host (option `zigdeps`).
 # r2: the system's `man` (a link), with its own page as man(1) too.
+# r3 (0.5.0): dkman also stands in for man-db's whatis, apropos, manpath and mandb (it acts
+# as the one it is started under): all five names are links to dkman, which upstream's
+# -Dinstall-as-man would install as copies. The page is made by the build now (man(7)
+# from the Markdown source), with bash, zsh and fish completions.
 name = "dkman"
-version = "0.3.0"
-release = 2
+version = "0.5.0"
+release = 3
 summary = "Man page tool: finds, searches and renders man pages and Markdown docs"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkman"
@@ -11,18 +15,18 @@ hostdeps = ["zig"]
 options = ["zigdeps", "!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/dkman/releases/download/v0.3.0/dkman-0.3.0.tar.gz", sha256 = "e4f4d2a1dd2c1492eb5d3009d9b43244e75a464622c4f3cebd42e1aed6cbe3ef" },
+    { url = "https://github.com/BearzRobotics/dkman/releases/download/v0.5.0/dkman-0.5.0.tar.gz", sha256 = "6e0839c722a821b409495855941d7d129730cadbf63ee7d7c7d7b5f7c1a55660" },
 ]
 
 install = '''
 %zig_build
-ln -s dkman "$pkgdir/usr/bin/man"
-install -Dm644 docs/manpages/dkman.1.md "$pkgdir/usr/share/man/man1/dkman.1.md"
-ln -s dkman.1.md "$pkgdir/usr/share/man/man1/man.1.md"
+for n in man whatis apropos manpath mandb; do ln -s dkman "$pkgdir/usr/bin/$n"; done
+# the page upstream's build installs as dkman(1) is man(1) too
+ln -s dkman.1 "$pkgdir/usr/share/man/man1/man.1"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/dkman/LICENSE"
 '''
 
-# dkman.1.md is what `man dkman` shows, not documentation to split off.
+# the page is what `man dkman` shows, not documentation to split off.
 [subpackages.doc]
 summary = "Documentation"
 paths   = ["/usr/share/doc"]
