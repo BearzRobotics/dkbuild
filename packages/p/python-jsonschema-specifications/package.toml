@@ -1,0 +1,23 @@
+# jsonschema-specifications from PyPI.
+name = "python-jsonschema-specifications"
+version = "2025.9.1"
+release = 1
+summary = "The JSON Schema meta-schemas and vocabularies, exposed as a Registry"
+license = "MIT"
+homepage = "https://github.com/python-jsonschema/jsonschema-specifications"
+hostdeps = ["python", "python-hatchling", "python-hatch-vcs"]
+rundeps = ["python", "python-referencing"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/19/74/a633ee74eb36c44aa6d1095e7cc5569bebf04342ee146178e2d36600708b/jsonschema_specifications-2025.9.1.tar.gz", sha256 = "b540987f239e745613c7a9176f3edb72b832a4ac465cf02712288397832b5e8d" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/python-jsonschema-specifications/COPYING"
+'''
