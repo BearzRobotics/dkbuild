@@ -1,0 +1,73 @@
+# Authelia: an open source authentication and authorization server and portal
+# (single sign-on, two-factor with TOTP/WebAuthn/Duo, OpenID Connect 1.0
+# provider, forward-auth for reverse proxies). Go, its modules from the store
+# (godeps), built as upstream's authelia-scripts `build` does: cgo on (SQLite
+# through go-sqlite3), -buildmode=pie, linkmode external, hardening flags,
+# the build metadata through the same -X flags (fixed values: no git, a
+# reproducible date).
+# Web portal: BUILT FROM SOURCE (web/, React 19 + vite 8, with the
+# pnpm packages from the store: npmdeps reads web/pnpm-lock.yaml and the
+# build serves them to pnpm offline; --ignore-scripts as upstream's
+# buildFrontend). No pre-built portal is published with the release.
+# Swagger UI 5.33.0 (upstream's buildSwagger downloads it at build time) is
+# a second source, unpacked into the API docs directory exactly as
+# upstream's tar command does (its two --exclude patterns use a brace
+# expression that tar never expands, so they exclude nothing; copied as is).
+# Source edit: package.json's packageManager field (pnpm 12) is removed so the
+# system pnpm runs as it is instead of trying to download that version
+# (same as vikunja).
+# Installed inert: the dinit service is shipped, not enabled; no
+# configuration (config.template.yml is only a sample in /usr/share/doc), no
+# secrets, no users database; the service fails to start until the
+# administrator writes /etc/authelia/configuration.yml.
+name = "authelia"
+version = "4.39.28"
+release = 1
+summary = "Authentication and authorization server and portal (SSO, 2FA, OIDC)"
+license = "Apache-2.0"
+homepage = "https://www.authelia.com"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["go", "nodejs", "pnpm"]
+options = ["!check", "godeps", "npmdeps"]
+
+source = [
+    { url = "https://github.com/authelia/authelia/archive/refs/tags/v4.39.28.tar.gz", sha256 = "2bdc11ef2462d1565dd444d1baab3034bfc2dc486e95349a2ba669a890a414a6" },
+    { url = "https://github.com/swagger-api/swagger-ui/archive/v5.33.0.tar.gz", sha256 = "2252f83101738dc27c0513dc850ceed8cffcf17d2e104a77311fc9a73b97d119", unpack = false, name = "swagger-ui-5.33.0.tar.gz" },
+]
+
+environment = '''
+export HOME=/tmp/home
+export npm_config_manage_package_manager_versions=false npm_config_package_manager_strict=false \
+    npm_config_pm_on_fail=ignore
+export GOTOOLCHAIN=local GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=1
+'''
+setup = '''
+cd web
+sed -i '/^  "packageManager": /d' package.json
+if grep -q '"packageManager"' package.json; then exit 1; fi
+echo 'pm-on-fail=ignore' >> .npmrc
+pnpm install --frozen-lockfile --ignore-scripts
+'''
+build = '''
+( cd web && pnpm build )
+test -f internal/server/public_html/index.html
+# upstream's buildSwagger
+cp -r api internal/server/public_html
+tar -C internal/server/public_html/api --exclude=index.html --exclude='*.map' --exclude='*-es-*' \
+    '--exclude=swagger-{ui,initializer}.js' --strip-components=2 \
+    -xf /build/sources/swagger-ui-5.33.0.tar.gz swagger-ui-5.33.0/dist
+x="github.com/authelia/authelia/v4/internal/utils"
+CGO_CPPFLAGS="-D_FORTIFY_SOURCE=2 -fstack-protector-strong" CGO_LDFLAGS="-Wl,-z,relro,-z,now" \
+go build -buildmode=pie -o authelia \
+    -ldflags "-linkmode=external -s -w -X '$x.BuildBranch=master' -X '$x.BuildTag=v$version' -X '$x.BuildCommit=v$version' -X '$x.BuildDate=Thu, 01 Jan 1970 00:00:00 +0000' -X '$x.BuildState=tagged clean' -X '$x.BuildExtra=dkbuild' -X '$x.BuildNumber=0'" \
+    ./cmd/authelia/
+'''
+install = '''
+install -Dm755 authelia "$pkgdir/usr/bin/authelia"
+install -Dm644 $pkgfiles/authelia "$pkgdir/etc/dinit.d/authelia"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/authelia.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/authelia.conf"
+install -Dm644 config.template.yml "$pkgdir/usr/share/doc/authelia/config.template.yml"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/authelia/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/authelia/LICENSE"
+'''

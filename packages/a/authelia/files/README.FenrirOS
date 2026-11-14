@@ -1,0 +1,20 @@
+Authelia on FenrirOS
+====================
+
+Installed inert: the service is not enabled, there is no configuration, no
+secret and no user database.
+
+1. Write /etc/authelia/configuration.yml from
+   /usr/share/doc/authelia/config.template.yml (root:authelia, mode 0640).
+   Generate your own secrets (`authelia crypto rand --length 64 --charset
+   alphanumeric`) for the session, storage encryption key and identity
+   validation JWT; point storage at /var/lib/authelia (SQLite) or a database
+   server; choose a notifier (SMTP, or the filesystem notifier for testing).
+2. Create a users file (file authentication backend) with
+   `authelia crypto hash generate argon2` for the password hashes, or use an
+   LDAP backend.
+3. dinitctl enable authelia
+
+Authelia listens on the address given in the configuration (the sample uses
+tcp://:9091); it is meant to sit behind a reverse proxy (forward auth). The
+web portal in this package is built from source.

@@ -1,0 +1,11 @@
+# Authelia authentication server. Not enabled by default (README.FenrirOS):
+# it needs /etc/authelia/configuration.yml (sample:
+# /usr/share/doc/authelia/config.template.yml) with its secrets.
+type = process
+command = /usr/bin/authelia --config /etc/authelia/configuration.yml
+run-as = authelia
+working-dir = /var/lib/authelia
+logfile = /var/log/authelia.log
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd
