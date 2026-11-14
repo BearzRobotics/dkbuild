@@ -1,0 +1,20 @@
+# beniget from PyPI.
+name = "python-beniget"
+version = "0.5.1"
+release = 1
+summary = "Extract semantic information about static Python code"
+license = "BSD-3-Clause"
+homepage = "https://github.com/serge-sans-paille/beniget/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-gast"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/ec/d3/14f987e83301a794f8fd3217942cafe3a9ec1440c8dd2882f9255fec642d/beniget-0.5.1.tar.gz", sha256 = "976d40c6f22650d133b00291e6fe3ab8e9850a83ba121d834ea5c74db7f66c0d" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-beniget/LICENSE"
+'''
