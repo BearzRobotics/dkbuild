@@ -1,0 +1,45 @@
+# PicoLisp 26.9 (the "pil21" LLVM-based implementation). UNTESTED.
+# The interpreter is written in PicoLisp itself and compiled to LLVM IR; the release
+# tarball ships that IR (src/*.ll), so no earlier PicoLisp is needed: the Makefile
+# finds that ../pil does not run yet and `touch`es the .ll files, then builds
+# them with opt, llc and llvm-link (the tree's LLVM) and links with readline and libffi.
+# Also built: the extension libraries (ext.so, ht.so), balance, and the OpenSSL
+# helpers (ssl, httpGate). STRIP is llvm-strip.
+# Installation: PicoLisp has no installer; the "global installation" of INSTALL is a
+# set of links to the unpacked tree, whose scripts expect /usr/lib/picolisp: the tree
+# goes to /usr/lib/picolisp (the build intermediates in src/ are removed), with
+# symbolic links /usr/bin/picolisp, /usr/bin/pil, the man pages, /usr/share/picolisp and
+# the bash completion, as INSTALL lists. No source edits.
+name = "picolisp"
+version = "26.9"
+release = 1
+summary = "PicoLisp: a Lisp with an integrated database, on LLVM"
+license = "MIT"
+homepage = "https://picolisp.com"
+hostdeps = ["make", "llvm", "pkgconf"]
+builddeps = ["libffi-devel", "readline-devel", "openssl-devel"]
+options = ["!check", "!lto", "!strip"]
+
+source = [
+    { url = "https://software-lab.de/picoLisp-26.9.tgz", sha256 = "baf7d7d715a406460f5a8753a7a7e41cfa879d100da8bef6a4054f0264b87eba" },
+]
+
+build = '''
+cd src
+make CC="$CC" STRIP=llvm-strip
+'''
+install = '''
+d="$pkgdir/usr/lib/picolisp"
+rm -f src/*.ll src/*.bc src/*.s
+install -dm755 "$d"
+cp -a . "$d/"
+rm -rf "$d/.git"
+install -dm755 "$pkgdir/usr/bin" "$pkgdir/usr/share/man/man1" "$pkgdir/usr/share/bash-completion/completions"
+ln -s ../lib/picolisp/bin/picolisp "$pkgdir/usr/bin/picolisp"
+ln -s ../lib/picolisp/bin/pil "$pkgdir/usr/bin/pil"
+ln -s ../../../lib/picolisp/man/man1/picolisp.1 "$pkgdir/usr/share/man/man1/picolisp.1"
+ln -s ../../../lib/picolisp/man/man1/pil.1 "$pkgdir/usr/share/man/man1/pil.1"
+ln -s ../lib/picolisp "$pkgdir/usr/share/picolisp"
+ln -s ../../../../lib/picolisp/lib/bash_completion "$pkgdir/usr/share/bash-completion/completions/pil"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/picolisp/COPYING"
+'''
