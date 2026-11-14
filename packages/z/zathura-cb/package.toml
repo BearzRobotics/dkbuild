@@ -1,0 +1,26 @@
+# zathura-cb: comic book (cbz, cbr, cb7, cbt) backend.
+name = "zathura-cb"
+version = "2026.07.18"
+release = 1
+summary = "Comic book support for zathura"
+license = "Zlib"
+homepage = "https://pwmt.org/projects/zathura-cb"
+hostdeps = ["meson", "pkgconf"]
+rundeps = ["zathura"]
+builddeps = ["cairo-devel", "girara-devel", "gtk4-devel", "libarchive-devel", "zathura-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://pwmt.org/projects/zathura-cb/download/zathura-cb-2026.07.18.tar.xz", sha256 = "072660fd32ce56ce512655caf8c190ffbf6c3f36ff09b3f740d65150f99ddc13" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/zathura-cb/LICENSE"
+'''
