@@ -1,0 +1,81 @@
+# Nim 2.4.2 (the stable series): the compiler (nim), the Nimble package
+# manager, nimgrep, nimsuggest (language server), nimpretty, testament and
+# the checksums/nimony helper tools (nifler, nifmake). The standard library
+# and the `compiler` package source are installed too (the compiler's
+# modules are importable as `compiler/ast` and so on).
+# Bootstrap: the release tarball carries the compiler already translated to C
+# (c_code/), as upstream's `build.sh` expects: it builds bin/nim from it with
+# the system C compiler (clang), `koch boot -d:release` rebuilds the compiler
+# from the Nim sources with it, and the tools follow. Nimble, checksums and
+# nimony are bundled in dist/ (no network, no git clones: koch's allowBundled).
+# No prebuilt binary is involved, so there is no -bootstrap recipe.
+# Source edit: build.sh's flags for the C bootstrap contain `-fmax-errors=3`,
+# which only GCC knows (clang: unknown argument): removed. Nim's own default
+# C compiler is gcc: koch gets --cc:clang and the installed config/nim.cfg
+# ends with `cc = clang`, so programs compile with the system compiler
+# (a user can still pass --cc:gcc with the gcc package).
+# Layout: everything Nim needs is in /usr/lib/nim (bin, lib, config), found
+# from the executable's real path; /usr/bin has symlinks. The `compiler`
+# package source goes where install.sh puts it, /opt/nimble/pkgs/nim-2.4.2
+# (config/nim.cfg's nimblepath).
+# Run time: C programs need clang; the standard library loads OpenSSL
+# (std/net, httpclient, -d:ssl; nimble) and SQLite (db_sqlite) at run time
+# (rundeps), git is Nimble's for git dependencies. `re`/`nre` load PCRE 1
+# (libpcre.so), which the tree does not package (it has PCRE2): those modules
+# fail to load until a pcre package exists. Not done: the HTML docs (koch docs:
+# long, upstream's install.sh wants them; this recipe copies files itself),
+# -d:nimHasLibFFI (needs Araq/libffi, not bundled), atlas (not bundled),
+# the test suite.
+name = "nim"
+version = "2.4.2"
+release = 1
+summary = "Nim programming language and its package manager"
+license = "MIT"
+homepage = "https://nim-lang.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["llvm-clang", "llvm-lld", "git"]
+builddeps = ["linux-headers"]
+rundeps = ["llvm-clang", "llvm-lld", "openssl", "sqlite-libs", "git"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://nim-lang.org/download/nim-2.4.2.tar.xz", sha256 = "b28bf4da1fce46dba9d16685c981b3d5e98de8db1b60d66f279b0bd2af2d8211" },
+]
+
+environment = '''
+export HOME=/tmp
+'''
+setup = '''
+sed -i 's| -fmax-errors=3||' build.sh
+! grep -q fmax-errors build.sh
+'''
+build = '''
+# stage 0: the C sources in c_code/ -> bin/nim
+sh build.sh
+# koch, then the compiler from the Nim sources
+bin/nim c --cc:clang --noNimblePath --skipUserCfg --skipParentCfg --hints:off koch
+./koch boot -d:release --cc:clang --skipUserCfg --skipParentCfg --hints:off
+# Nimble (dist/nimble, bundled) and the tools (nimsuggest, nimgrep, nimpretty,
+# testament, nifler, nifmake, nim_dbg)
+./koch nimble --cc:clang --skipUserCfg --skipParentCfg --hints:off
+./koch toolsNoExternal --cc:clang --skipUserCfg --skipParentCfg --hints:off
+'''
+install = '''
+d="$pkgdir/usr/lib/nim"
+mkdir -p "$d/bin" "$pkgdir/usr/bin" "$pkgdir/opt/nimble/pkgs/nim-$version"
+for t in nim nimble nimgrep nimsuggest nimpretty testament nifler nifmake nim_dbg; do
+    test -x "bin/$t" && install -m755 "bin/$t" "$d/bin/$t"
+done
+test -x "$d/bin/nim" && test -x "$d/bin/nimble"
+cp -a lib config "$d/"
+printf '\n# FenrirOS: the system C compiler is clang\ncc = clang\n' >> "$d/config/nim.cfg"
+# the compiler's own modules, as `import compiler/ast`
+cp -a compiler "$pkgdir/opt/nimble/pkgs/nim-$version/compiler"
+for t in nim nimble nimgrep nimsuggest nimpretty testament; do
+    ln -s /usr/lib/nim/bin/$t "$pkgdir/usr/bin/$t"
+done
+install -Dm644 copying.txt "$pkgdir/usr/share/licenses/nim/copying.txt"
+install -Dm755 tools/debug/nim-gdb.py "$pkgdir/usr/share/nim/nim-gdb.py" 2>/dev/null || true
+[ -f dist/nimble/nimble.bash-completion ] && install -Dm644 dist/nimble/nimble.bash-completion "$pkgdir/usr/share/bash-completion/completions/nimble"
+[ -f dist/nimble/nimble.zsh-completion ] && install -Dm644 dist/nimble/nimble.zsh-completion "$pkgdir/usr/share/zsh/site-functions/_nimble"
+'''
