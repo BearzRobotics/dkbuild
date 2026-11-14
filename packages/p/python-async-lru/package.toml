@@ -1,0 +1,20 @@
+# async-lru from PyPI.
+name = "python-async-lru"
+version = "2.4.0"
+release = 1
+summary = "Simple LRU cache for asyncio"
+license = "MIT"
+homepage = "https://github.com/aio-libs/async-lru"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/8f/43/9d22679e8dd0ed965182cca990d32c68b150730cce8046ad61b3179b5b7a/async_lru-2.4.0.tar.gz", sha256 = "b0b0077d9b7596615b3c12d0aad4f6aeccaaa0ac75ceae472608ede89e764c08" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-async-lru/LICENSE"
+'''
