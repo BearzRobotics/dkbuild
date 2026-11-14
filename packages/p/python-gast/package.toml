@@ -1,0 +1,20 @@
+# gast from PyPI.
+name = "python-gast"
+version = "0.7.0"
+release = 1
+summary = "Python AST that abstracts the underlying Python version"
+license = "BSD-3-Clause"
+homepage = "https://github.com/serge-sans-paille/gast/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/91/f6/e73969782a2ecec280f8a176f2476149dd9dba69d5f8779ec6108a7721e6/gast-0.7.0.tar.gz", sha256 = "0bb14cd1b806722e91ddbab6fb86bba148c22b40e7ff11e248974e04c8adfdae" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-gast/LICENSE"
+'''
