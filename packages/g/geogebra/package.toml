@@ -10,12 +10,12 @@
 # Licence: GeoGebra's code is GPL-3.0-or-later with exceptions; its
 # translations and some resources are CC BY-NC-SA 3.0 (non-commercial use),
 # and the name and logo are trademarks (geogebra.org/license).
-# patches/pin-open-ranges.patch: two open version ranges of the SVG stack are pinned (offline, no
+# patches/pin-open-ranges.patch (carte-util 3.7, jclf-linear3 1.0.0): two open version ranges of the SVG stack are pinned (offline, no
 # version listings in the store).
 # DRAFT, not built.
 name = "geogebra"
 version = "5.4_git20261111"
-release = 2
+release = 3
 summary = "GeoGebra Classic 5: dynamic mathematics for graphing, geometry, algebra and 3D"
 license = "GPL-3.0-or-later AND CC-BY-NC-SA-3.0"
 homepage = "https://www.geogebra.org"
