@@ -1,0 +1,57 @@
+# Adapted from Chimera Linux cports: main/darktable. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# darktable: raw photo workflow and developer. Optional features on: OpenCL
+# (with the kernels test-compiled), OpenMP, Lua scripting, colord, camera
+# tethering (libgphoto2), the map view (osm-gps-map), GraphicsMagick import,
+# libsecret, the print module (CUPS), JPEG XL/AVIF/HEIF/WebP/OpenEXR/OpenJPEG,
+# PortMidi, SDL2 (game controllers), ICU. LibRaw and Lua are the system's, not
+# the bundled copies.
+# Off, with the reason: G'MIC (no package, a large chain of its own), AI masks/
+# denoise (USE_AI needs ONNX Runtime, not packaged). RAWSPEED_ENABLE_WERROR
+# off because newer clang warns in rawspeed's code.
+# BINARY_PACKAGE_BUILD: generic march (the CPU baseline comes from CFLAGS).
+name = "darktable"
+version = "5.6.2"
+release = 1
+summary = "Open source photography workflow application and raw developer"
+license = "GPL-3.0-or-later"
+homepage = "https://www.darktable.org"
+hostdeps = ["bash", "cmake", "ninja", "intltool", "gettext", "perl-xml-parser", "iso-codes", "libxslt", "libxml2", "pkgconf", "llvm", "perl"]
+builddeps = ["colord-devel", "colord-gtk-devel", "cups-devel", "curl-devel", "exiv2-devel", "graphicsmagick-devel", "gtk+3-devel", "icu-devel", "imath-devel", "json-glib-devel", "lcms2-devel", "lensfun-devel", "libavif-devel", "libgphoto2-devel", "libheif-devel", "libjxl-devel", "libpng-devel", "libraw-devel", "librsvg-devel", "libsecret-devel", "libtiff-devel", "libwebp-devel", "lua-devel", "ncurses-devel", "ocl-icd-devel", "opencl-headers", "openexr-devel", "openjpeg-devel", "openmp-devel", "osm-gps-map-devel", "portmidi-devel", "pugixml-devel", "sdl2-compat-devel", "sqlite-devel", "zlib-ng-compat-devel"]
+rundeps = ["hicolor-icon-theme", "adwaita-icon-theme"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/darktable-org/darktable/releases/download/release-5.6.2/darktable-5.6.2.tar.xz", sha256 = "d2da92c670401d350b576431f21e58bee40348e1f5078201a8a1b8c270585834" },
+]
+
+setup = '''
+%cmake \
+    -DBINARY_PACKAGE_BUILD=ON \
+    -DDONT_USE_INTERNAL_LIBRAW=ON \
+    -DDONT_USE_INTERNAL_LUA=ON \
+    -DRAWSPEED_ENABLE_WERROR=OFF \
+    -DTESTBUILD_OPENCL_PROGRAMS=ON \
+    -DUSE_OPENCL=ON \
+    -DUSE_OPENMP=ON \
+    -DUSE_LUA=ON \
+    -DUSE_COLORD=ON \
+    -DUSE_CAMERA_SUPPORT=ON \
+    -DUSE_MAP=ON \
+    -DUSE_KWALLET=OFF \
+    -DUSE_LIBSECRET=ON \
+    -DUSE_GRAPHICSMAGICK=ON \
+    -DUSE_GMIC=OFF \
+    -DUSE_AI=OFF \
+    -DUSE_ICU=ON \
+    -DUSE_JXL=ON -DUSE_AVIF=ON -DUSE_HEIF=ON -DUSE_WEBP=ON -DUSE_OPENEXR=ON -DUSE_OPENJPEG=ON \
+    -DUSE_PORTMIDI=ON \
+    -DUSE_SDL2=ON \
+    -DBUILD_PRINT=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/darktable/LICENSE"
+'''
