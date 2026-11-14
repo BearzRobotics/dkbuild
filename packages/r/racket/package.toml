@@ -1,0 +1,57 @@
+# Adapted from Chimera Linux cports: user/racket/template.py and Alpine's
+# community/racket. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Racket 9.3 CS (Racket on Chez Scheme), from the "src-builtpkgs" release: the
+# source of the runtime plus the main distribution's packages already
+# compiled (DrRacket, the docs' sources, Typed Racket, the web server, ...),
+# so installing them needs no network (the plain "src" tarball would fetch
+# the packages at build time).
+# Bootstrapping: the Chez Scheme in the tarball (src/ChezScheme, Racket's own
+# fork, which the runtime needs) is built from the portable-bytecode boot
+# files in the tarball (boot/pb), then rebuilds itself natively (machine
+# ta6le); no system Chez Scheme, as the tree has none (Chimera builds against
+# its own chez-scheme with --enable-scheme; not possible here).
+# Libraries: system libffi (the bundled copy is a BC-only part), zlib
+# (--enable-libz) and lz4 (--enable-liblz4) for compressed code and
+# boot files, ncurses (Chez's REPL). The BC (old) runtime is not built
+# (--enable-csonly). Racket CS cannot be built as a shared library
+# (upstream), so there is no -devel library; the headers go to /usr/include/racket.
+# Not done: the HTML documentation (--disable-docs; it takes hours and needs
+# the network for cross references; `raco docs` is a user's choice).
+# The ppc and BC-only patches of Chimera are not needed on x86_64/aarch64.
+# Runtime libraries Racket loads on demand: OpenSSL (openssl), SQLite
+# (db library), certificates (ca-certificates), cairo and pango for racket/draw
+# and GUI are not dependencies of the compiler core: left to the user.
+name = "racket"
+version = "9.3"
+release = 1
+summary = "Language-oriented programming language (Racket CS)"
+license = "MIT OR Apache-2.0"
+homepage = "https://racket-lang.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["make"]
+builddeps = ["libffi-devel", "lz4-devel", "ncurses-devel", "zlib-ng-compat-devel", "linux-headers"]
+rundeps = ["openssl", "sqlite", "ca-certificates"]
+options = ["!check", "!lto", "!strip"]
+
+source = [
+    { url = "https://download.racket-lang.org/installers/9.3/racket-9.3-src-builtpkgs.tgz", sha256 = "a962b38893662fde4bfc07d859dcd7278017d485f89467729e32dfa5c9904d23" },
+]
+
+setup = '''
+cd src
+# the bundled libffi (BC runtime only) is not used: the system one is
+rm -rf bc/foreign/libffi
+./configure --prefix=/usr --sysconfdir=/etc --disable-strip --enable-csonly --enable-csdefault \
+    --enable-libz --enable-liblz4 --disable-docs
+'''
+build = '''
+cd src
+make -j$jobs
+'''
+install = '''
+cd src
+make install DESTDIR="$pkgdir"
+cd ..
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/racket/LICENSE.txt"
+rmdir "$pkgdir"/usr/share/applications 2>/dev/null || true
+'''
