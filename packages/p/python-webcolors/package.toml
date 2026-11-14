@@ -1,0 +1,20 @@
+# webcolors from PyPI.
+name = "python-webcolors"
+version = "25.10.0"
+release = 1
+summary = "A library for working with the color formats defined by HTML and CSS."
+license = "BSD-3-Clause"
+homepage = "https://github.com/ubernostrum/webcolors"
+hostdeps = ["python", "python-pdm-backend"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/1d/7a/eb316761ec35664ea5174709a68bbd3389de60d4a1ebab8808bfc264ed67/webcolors-25.10.0.tar.gz", sha256 = "62abae86504f66d0f6364c2a8520de4a0c47b80c03fc3a5f1815fedbef7c19bf" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-webcolors/LICENSE"
+'''
