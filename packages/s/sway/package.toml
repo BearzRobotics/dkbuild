@@ -1,0 +1,47 @@
+# Imported from Chimera Linux cports: main/sway/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# wlroots 0.20 (sway 1.12 needs exactly the 0.20 series: wlroots0.20-devel).
+# Tray support goes through libelogind's sd-bus (the tree has no systemd).
+# Not carried over from Chimera: the cap_sys_nice file capability on
+# /usr/bin/sway (dkbuild packages carry no xattrs yet; without it sway just
+# does not raise its realtime priority, or the admin runs setcap). The
+# sway-backgrounds subpackage (the wallpaper) installs with sway.
+# /etc/sway/config is upstream's default config, installed as is: it is
+# inert until a session runs sway. sway-portals.conf (from Chimera) prefers
+# the wlr portal for screen casting and screenshots.
+name = "sway"
+version = "1.12"
+release = 1
+summary = "Wayland compositor compatible with i3"
+license = "MIT"
+homepage = "https://swaywm.org"
+hostdeps = ["meson", "pkgconf", "scdoc", "wayland-protocols"]
+builddeps = ["cairo-devel", "elogind-devel", "gdk-pixbuf-devel", "json-c-devel", "pango-devel", "pcre2-devel", "wayland-devel", "wayland-protocols", "wlroots0.20-devel"]
+rundeps = ["xwayland"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/swaywm/sway/releases/download/1.12/sway-1.12.tar.gz", sha256 = "a7b1becc217433c11c6284d36bcea0687b87b77b0ed26a384565292ec321f2b1" },
+]
+
+setup = '''
+%meson \
+    -Dtray=enabled \
+    -Dgdk-pixbuf=enabled \
+    -Dman-pages=enabled \
+    -Dsd-bus-provider=libelogind \
+    -Ddefault-wallpaper=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/sway/LICENSE"
+install -Dm644 $pkgfiles/sway-portals.conf "$pkgdir/usr/share/xdg-desktop-portal/sway-portals.conf"
+'''
+
+[subpackages.backgrounds]
+summary = "Sway wallpapers"
+paths = ["/usr/share/backgrounds"]
+install_if = ["sway"]
