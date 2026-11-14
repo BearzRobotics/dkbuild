@@ -1,0 +1,16 @@
+Gatus on FenrirOS
+=================
+
+Installed inert: the service is not enabled and there is no configuration.
+
+    cp /usr/share/doc/gatus/config.yaml.example /etc/gatus/config.yaml
+    $EDITOR /etc/gatus/config.yaml    # replace the example endpoints with yours
+    dinitctl enable gatus
+
+The configuration is read from /etc/gatus/config.yaml (GATUS_CONFIG_PATH in
+/etc/gatus/environment, an empty file owned by root:gatus, changes it; it
+is also the place for secrets used as ${VARIABLES} in the YAML). The page
+listens on port 8080. The default storage is in memory; for history set
+`storage: {type: sqlite, path: /var/lib/gatus/data.db}`. ICMP checks work
+because the service keeps cap_net_raw. The upstream documentation
+(alerting providers, conditions) is in /usr/share/doc/gatus.

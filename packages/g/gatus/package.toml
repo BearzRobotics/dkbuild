@@ -1,0 +1,43 @@
+# gatus: a developer-oriented health dashboard and status page (HTTP, TCP,
+# ICMP, DNS, SSH, ... checks with conditions and alerting). Go, modules from
+# the store (godeps), pure Go (CGO off, SQLite via modernc), as upstream's
+# Dockerfile builds it.
+# FRONTEND: the status page's Vue app (web/app) is committed upstream in
+# built form (web/static, embedded by web/static.go) and the Dockerfile uses
+# it as is; that pre-built UI from the release source is what is embedded
+# (rebuilding it needs the Vue CLI toolchain; the policy accepts pre-built
+# UI assets).
+# Installed inert (docs/requests.md): the dinit service is shipped, not
+# enabled, and there is NO active configuration: only example files in
+# /usr/share/doc/gatus (upstream's config.yaml points at third-party sites,
+# so it is not installed as /etc/gatus/config.yaml). Setup: README.FenrirOS.
+name = "gatus"
+version = "5.38.0"
+release = 1
+summary = "Developer-oriented health dashboard and status page"
+license = "Apache-2.0"
+homepage = "https://gatus.io"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/TwiN/gatus/archive/refs/tags/v5.38.0.tar.gz", sha256 = "31f14f397188e3d1ffcc8917f0d249572ae5fffb99fe7121d122a90adfb65931" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+test -f web/static/index.html
+go build -ldflags "-s -w" -o gatus .
+'''
+install = '''
+install -Dm755 gatus "$pkgdir/usr/bin/gatus"
+install -Dm644 config.yaml "$pkgdir/usr/share/doc/gatus/config.yaml.example"
+cp -r docs/. "$pkgdir/usr/share/doc/gatus/"
+install -Dm644 $pkgfiles/gatus "$pkgdir/etc/dinit.d/gatus"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/gatus.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/gatus.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/gatus/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/gatus/LICENSE"
+'''

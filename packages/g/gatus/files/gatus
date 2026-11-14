@@ -1,0 +1,12 @@
+# Gatus health dashboard. Not enabled by default (README.FenrirOS): it needs
+# /etc/gatus/config.yaml (example: /usr/share/doc/gatus/config.yaml.example).
+type = process
+command = /usr/bin/gatus
+env-file = /etc/gatus/environment
+run-as = gatus
+working-dir = /var/lib/gatus
+logfile = /var/log/gatus.log
+smooth-recovery = true
+capabilities = ^cap_net_raw
+depends-on: rcboot
+waits-for: syslogd
