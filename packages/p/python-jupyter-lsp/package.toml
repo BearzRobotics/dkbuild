@@ -1,0 +1,20 @@
+# jupyter-lsp from PyPI.
+name = "python-jupyter-lsp"
+version = "2.3.1"
+release = 1
+summary = "Multi-Language Server WebSocket proxy for Jupyter Notebook/Lab server"
+license = "BSD-3-Clause"
+homepage = "https://github.com/jupyter-lsp/jupyterlab-lsp"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-jupyter-server"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/36/ff/1e4a61f5170a9a1d978f3ac3872449de6c01fc71eaf89657824c878b1549/jupyter_lsp-2.3.1.tar.gz", sha256 = "fdf8a4aa7d85813976d6e29e95e6a2c8f752701f926f2715305249a3829805a6" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-jupyter-lsp/LICENSE"
+'''
