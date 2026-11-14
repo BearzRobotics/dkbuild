@@ -1,0 +1,29 @@
+# Imported from Chimera Linux cports: user/unibilium/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Terminfo library neovim links (ENABLE_UNIBILIUM). Autotools bootstrap with
+# autoreconf: the release ships configure.ac and Makefile.in only; libtool
+# builds the shared and the static library.
+name = "unibilium"
+version = "2.1.4"
+release = 1
+summary = "Simple, self-contained terminfo library"
+license = "LGPL-3.0-or-later"
+homepage = "https://github.com/neovim/unibilium"
+hostdeps = ["automake", "libtool", "perl", "pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/neovim/unibilium/archive/v2.1.4.tar.gz", sha256 = "7360907bcf79ba49f6fc4a504767ff86e93ab9018477026fcc70d5ab77e1f2c1" },
+]
+
+setup = '''
+autoreconf -if
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LGPLv3 "$pkgdir/usr/share/licenses/unibilium/LGPLv3"
+'''
