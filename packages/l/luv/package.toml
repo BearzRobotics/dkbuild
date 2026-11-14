@@ -1,0 +1,38 @@
+# luv (libuv bindings for Lua), as the library libluv built against LuaJIT,
+# which is what neovim embeds (one Lua VM in the process; Chimera's
+# lua5.1-libluv links PUC Lua 5.1 instead). Shared (libluv.so, with the
+# headers in /usr/include/luv) and static (libluv_a.a: the name neovim's
+# FindLuv looks for first, so nvim has luv linked in). The loadable module
+# (luv.so for require "luv" in a stand-alone luajit) is not built:
+# BUILD_MODULE=OFF, a module and the library cannot both be made from one
+# configure.
+name = "luv"
+version = "1.53.0.1"
+release = 1
+summary = "Bare libuv bindings for LuaJIT"
+license = "Apache-2.0"
+homepage = "https://github.com/luvit/luv"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["libuv-devel", "luajit-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/luvit/luv/releases/download/1.53.0-1/luv-1.53.0-1.tar.gz", sha256 = "569b488d5d31609ea466a6c70e008a42661ec773ea1584d3d766d46280ab7cf4" },
+]
+
+setup = '''
+%cmake \
+    -DLUA_BUILD_TYPE=System \
+    -DWITH_LUA_ENGINE=LuaJIT \
+    -DWITH_SHARED_LIBUV=ON \
+    -DBUILD_MODULE=OFF \
+    -DBUILD_SHARED_LIBS=ON \
+    -DBUILD_STATIC_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/luv/LICENSE.txt"
+'''
