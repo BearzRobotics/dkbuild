@@ -1,0 +1,20 @@
+# mistune from PyPI.
+name = "python-mistune"
+version = "3.4.0"
+release = 1
+summary = "A sane and fast Markdown parser with useful plugins and renderers"
+license = "BSD-3-Clause"
+homepage = "https://github.com/lepture/mistune"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/96/eb/749a4e69bf7396e751ae37444abe997eff2254e695a8095b84d1c89c1181/mistune-3.4.0.tar.gz", sha256 = "2eaf7952af928ca8d33b779762effc1da517b62c6ad85ec8ca957e3b07b9782a" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-mistune/LICENSE"
+'''
