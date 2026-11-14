@@ -11,7 +11,9 @@ name     = "dkde"
 arch     = "x86_64"
 hostname = "fenriros"
 label    = "FENRIROS_DKDE"
-packages = ["base", "base-net", "linux", "live-initramfs", "dkinstaller", "firmware-linux-meta", "desktop-dkde"]
+# not base-net: it depends on dhcpcd, and NetworkManager does the DHCP here (two DHCP clients
+# fight); its other parts (OpenSSH, curl) are listed instead
+packages = ["base", "openssh", "openssh-server", "curl", "linux", "live-initramfs", "dkinstaller", "firmware-linux-meta", "desktop-dkde"]
 exclude  = ["*-devel", "*-doc", "*-static"]
 services = ["udevd", "udev-trigger", "udev-settle", "modules", "syslogd", "seatd", "dbus", "networkmanager", "greetd"]
 output   = ["iso"]
