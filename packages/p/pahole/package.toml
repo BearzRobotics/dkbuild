@@ -1,0 +1,50 @@
+# Imported from Chimera Linux cports: main/pahole/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# pahole and the rest of the dwarves project (pfunct, pdwtags, pglobal, codiff,
+# ...): DWARF/BTF utilities. The Linux kernel's BTF build (CONFIG_DEBUG_INFO_BTF)
+# runs `pahole -J`. The source package is named dwarves; the package is pahole.
+# libdwarves, libdwarves_emit and libdwarves_reorganize ship shared (pahole-libs)
+# and static (pahole-static); upstream's CMake builds only one kind per
+# configure, so the static ones come from a second configure of the same tree.
+# The libbpf of the tree is used (LIBBPF_EMBEDDED=OFF): the tarball's lib/bpf
+# submodule is incomplete and an embedded copy would be a second libbpf.
+name = "pahole"
+version = "1.32"
+release = 1
+summary = "DWARF and BTF utilities (pahole, pfunct, pdwtags, ...)"
+license = "GPL-2.0-only"
+homepage = "https://git.kernel.org/pub/scm/devel/pahole/pahole.git"
+hostdeps = ["cmake", "ninja", "pkgconf", "python"]
+builddeps = ["argp-standalone", "elfutils-devel", "libbpf-devel", "linux-headers", "musl-obstack-devel", "zlib-ng-compat-devel", "zstd-devel"]
+rundeps = ["bash"]
+options = ["!check"]
+
+source = [
+    { url = "https://fedorapeople.org/~acme/dwarves/dwarves-1.32.tar.xz", sha256 = "319cbf319e9fc92065a5407ce47eb868d73566f3d4840a56832734e4579df947" },
+]
+
+environment = '''
+# libbpf's "latest" bpf headers (see the libbpf recipe) live in a private dir
+export CFLAGS="$CFLAGS -I/usr/include/bpf/uapi"
+'''
+setup = '''
+# -D__LIB=lib: upstream installs into ${CMAKE_INSTALL_PREFIX}/${__LIB} (lib64 by default)
+%cmake -D__LIB=lib -DLIBBPF_EMBEDDED=OFF -DBUILD_SHARED_LIBS=ON
+# the same tree again, static, only for the three libraries
+cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+    -D__LIB=lib -DLIBBPF_EMBEDDED=OFF -DBUILD_SHARED_LIBS=OFF
+'''
+build = '''
+%cmake_build
+cmake --build build-static --target dwarves dwarves_emit dwarves_reorganize
+'''
+install = '''
+%cmake_install
+install -Dm644 build-static/libdwarves.a build-static/libdwarves_emit.a build-static/libdwarves_reorganize.a -t "$pkgdir/usr/lib"
+'''
+
+# ostra-cg is a Python 3 script (callgraphs from ctracer traces)
+[subpackages.ostra]
+summary = "ostra-cg, the dwarves callgraph tool"
+paths   = ["/usr/bin/ostra-cg", "/usr/share/dwarves/runtime/python"]
+depends = ["python"]
