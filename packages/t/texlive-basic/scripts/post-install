@@ -1,0 +1,11 @@
+#!/bin/sh
+# Index the tree, set up the engine/format links and build the formats and font
+# maps (pdflatex.fmt and friends go to /var/lib/texmf). Slow (a minute or two);
+# failures are not fatal: run `fmtutil-sys --all` by hand to repeat it.
+export PATH=/usr/bin:/bin
+command -v mktexlsr >/dev/null 2>&1 || exit 0
+mktexlsr /usr/share/texmf-dist >/dev/null 2>&1 || :
+texlinks --silent >/dev/null 2>&1 || :
+updmap-sys --quiet >/dev/null 2>&1 || :
+fmtutil-sys --all >/dev/null 2>&1 || :
+exit 0

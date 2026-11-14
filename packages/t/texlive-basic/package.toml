@@ -1,0 +1,295 @@
+# TeX Live macro, font and configuration tree (texmf-dist) for the texlive-bin engines:
+# the packages of TeX Live's scheme-basic (plain TeX, LaTeX base and required
+# packages, Computer Modern, Latin Modern, hyphenation, hyperref, ...) plus
+# collection-latexrecommended (graphicx/geometry/amsmath/babel/... recommended
+# LaTeX packages) and collection-fontsrecommended (the standard PostScript font
+# metrics, Times/Helvetica/Courier clones, ...). 218 CTAN/tlnet packages, ~110 MB.
+#
+# WHY THIS APPROACH. The full TeX Live tree cannot be fetched at build time, and
+# TeX Live publishes no frozen tarball of it. Each tlnet package is a small
+# archive (tlnet/archive/<name>.tar.xz) whose sha512 is in texlive.tlpdb; the 218
+# below are pinned here by sha256 (checked against the tlpdb's sha512 when this
+# recipe was made). Their relevant file names: R_<pkg> means a "relocated"
+# container (paths relative to texmf-dist), N_<pkg> one with texmf-dist/ and
+# tlpkg/ in it. Documentation and source containers are NOT taken (a package's
+# <name>.doc.tar.xz and .source.tar.xz): the tree has the run-time files only.
+# RISK: tlnet is rolling. CTAN replaces a package's archive when it is updated, so
+# a fetch long after this recipe was made fails the checksum for those packages
+# (the checksum is the guard: nothing wrong is ever installed); `dkbuild fetch`
+# updates the cache, a refresh of this list is `tlpdb`-driven and mechanical.
+# WHAT IT COVERS: everything TeX Live scheme-basic ships, plus the two collections
+# above. It does NOT cover: LaTeX extra packages (collection-latexextra: tikz/
+# pgf, beamer, fontspec for XeTeX/LuaTeX in collection-xetex/-luatex, biblatex,
+# math/science, languages beyond English, and most fonts). Larger sets are the
+# same recipe with more names; the full TeX Live is ~7 GB.
+# WHAT HAPPENS AT BUILD: the packages are unpacked into /usr/share/texmf-dist and
+# /usr/share/tlpkg, and files/gen-config.pl writes fmtutil.cnf, updmap.cfg and
+# language.dat/.def/.lua from the packages' tlpobj `execute` lines, with TeX
+# Live's own Perl module (TeXLive::TLUtils), as tlmgr would. AT INSTALL
+# (scripts/post-install): mktexlsr, texlinks, updmap-sys and fmtutil-sys --all
+# make ls-R, the latex/pdflatex/... links in /usr/bin and the formats in
+# /var/lib/texmf. This takes a minute or two and is not fatal if it fails.
+# Not shipped: tlmgr (it manages tlnet, which this tree is not).
+name = "texlive-basic"
+version = "20260301"
+release = 1
+summary = "TeX Live macro/font tree: scheme-basic, recommended LaTeX packages and fonts"
+license = "LPPL-1.3c AND GPL-2.0-or-later AND LicenseRef-TeX-Live"
+homepage = "https://tug.org/texlive"
+hostdeps = ["perl"]
+rundeps = ["texlive-bin", "perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/ae.tar.xz", sha256 = "8afa5c20210007d2fd289c067c50f1b6fd4a4ee4d4afc465990cfd083c7e7a65", unpack = false, name = "R_ae.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/amscls.tar.xz", sha256 = "6bc23a08e43f0837581486d9ceb2624598fb28f56d88333848327dbc2cf48c2d", unpack = false, name = "R_amscls.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/amsfonts.tar.xz", sha256 = "8fa7a956504020982f0eeace49c2dc65ba7d19f178403030474d85c5709582b1", unpack = false, name = "R_amsfonts.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/amsmath.tar.xz", sha256 = "26ef2fb3ffd9e21cccda1e59f35afe8fb1cdf0c4259c04f3c8dad2400792634b", unpack = false, name = "R_amsmath.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/anysize.tar.xz", sha256 = "64dba6c2eb17dd92d445d2909cf026fdd3f9b1ce829115288556f5208e80179f", unpack = false, name = "R_anysize.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/atbegshi.tar.xz", sha256 = "e357b2e5a67fc8c289aa5a0314b2025686c40880f87832cc65dfbe87900a6bef", unpack = false, name = "R_atbegshi.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/attachfile2.tar.xz", sha256 = "dd8dc0b7f6e753587402510e875f80c85b22e06d7546bbcbcfc4ab6a2c204c83", unpack = false, name = "N_attachfile2.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/atveryend.tar.xz", sha256 = "4acc21386007b9f2ef3045b2116ceb8f8afa3e1c646a1a1d89dd3f2ec75a7611", unpack = false, name = "R_atveryend.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/auxhook.tar.xz", sha256 = "0e70d2e05e35bccfa19bd94e3e7e8ef9967e766040d8864871ba85f3f79bfd23", unpack = false, name = "R_auxhook.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/avantgar.tar.xz", sha256 = "4200ef68e6a3564eb6dd3bbad9f760e70c10a81d7ad3a81b93988800dbd50141", unpack = false, name = "R_avantgar.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/babel.tar.xz", sha256 = "6f1a8628a826e1ba5f668c5d779e274485e01c4ff54e2d5487880f2247d7486f", unpack = false, name = "R_babel.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/babel-english.tar.xz", sha256 = "615f7373205ae2bd19390a0aa2859d4e7617c0a28e780ccfdcbe9053e1b8d448", unpack = false, name = "R_babel-english.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/babelbib.tar.xz", sha256 = "3206b675dc96137d3245fba8e0bb79da24c26075394ffae7b7db44ba93513ab7", unpack = false, name = "R_babelbib.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/backref.tar.xz", sha256 = "a7cd8e0728adc2924e104fad80d58e35cdce96502e68291743eb41bff350e5c0", unpack = false, name = "R_backref.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/beamer.tar.xz", sha256 = "a46dedb272225d226bc4ba085351ad38634889d0de6c52e30960dec83bb34168", unpack = false, name = "R_beamer.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/bibtex.tar.xz", sha256 = "e6dfa9326ac3e153e8b07ccd02c7b092e00b3d9e0316ba61225a6deee119421b", unpack = false, name = "N_bibtex.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/bigintcalc.tar.xz", sha256 = "80e6439ee7904e32e5545b34d6fc764ede0ddf0d297ff52433f4cdd76f570404", unpack = false, name = "R_bigintcalc.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/bitset.tar.xz", sha256 = "26cd2b6e29f211d94c2782e0799ca4462a8b64e394b67ab611d6cc2a9c7e26a4", unpack = false, name = "R_bitset.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/bookman.tar.xz", sha256 = "ec4736522d6749513268a83502febc4dcb73346f8e0b70dafaa76a74ae8998ca", unpack = false, name = "R_bookman.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/bookmark.tar.xz", sha256 = "f88aa5fd44fa74297bb4b6cdf01b327e7788f51ba06d310afb43871475569a18", unpack = false, name = "R_bookmark.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/booktabs.tar.xz", sha256 = "a5a9ed5c865f6aad4cd197f189f796f87b272bf9e0ebd2851debca2eef5fb613", unpack = false, name = "R_booktabs.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/breqn.tar.xz", sha256 = "fdcfc008dde2c5b5d6cf2f769199f5f8bade1a6a9be9b1308d66c287832be12c", unpack = false, name = "R_breqn.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/caption.tar.xz", sha256 = "ef4ae6ef70f095847d55bc407f8d55517856d33c2bcf2010e79988ac80b11acc", unpack = false, name = "R_caption.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/carlisle.tar.xz", sha256 = "aeed9bc1174ff60f28662cb4057e78457085e186361f0c335a74aed669412629", unpack = false, name = "R_carlisle.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/charter.tar.xz", sha256 = "34a08f3370093966207b4a3fed029c215882c89658925624362a877f927c9bd0", unpack = false, name = "R_charter.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/cite.tar.xz", sha256 = "75cbdc62a5db4489fc16a83cbfcfa12c5bfd055674eb7a3037e0f5b7f4af49a9", unpack = false, name = "R_cite.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/cm.tar.xz", sha256 = "ebedd3dc7ece433d366d848ea8bd9cd2642a0f49c000c46a2ed1dde5b1cebc1c", unpack = false, name = "R_cm.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/cm-super.tar.xz", sha256 = "70867904e38451ab1a11ba4677dd5891914f128170b53fac26d3e9dca9d326e4", unpack = false, name = "R_cm-super.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/cmap.tar.xz", sha256 = "cd6661b64d1859851b451b0d2461da77a8b3839056ba6210d4b1a35da4209edb", unpack = false, name = "R_cmap.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/cmextra.tar.xz", sha256 = "b07224532bb16bba4e0720a7f762acbab6a822f0c7cd463d85f3b36fc2ac3f8c", unpack = false, name = "R_cmextra.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/colorprofiles.tar.xz", sha256 = "4451bd870e03212ea3c531156371d6cdab3a2b81e80aea7c40f8c076824740a0", unpack = false, name = "R_colorprofiles.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/colortbl.tar.xz", sha256 = "54ef7afdf801ef4b0053433168d652b0ca56110a35bade909df0006bae662a84", unpack = false, name = "R_colortbl.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/courier.tar.xz", sha256 = "eaecb5bcd119e6409ac549fdffbe73a6bf7087daef43085104a1ba03787ec989", unpack = false, name = "R_courier.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/crop.tar.xz", sha256 = "9da1055ba06b778fe2b33e4cf5164f002e9cbb0237804f24e3f7247e843b4922", unpack = false, name = "R_crop.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/ctable.tar.xz", sha256 = "fdb6b5ed86dbfde569099e238a37746de99552fdf549de7aab9e12bca2099209", unpack = false, name = "R_ctable.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/dehyph.tar.xz", sha256 = "a727949e6fde73fecdf5c493faf381338850821ed2f6f7085dbd088ac5ef16a5", unpack = false, name = "R_dehyph.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/dvipdfmx.tar.xz", sha256 = "c4b2b8776e0405a15823106fb7cd4b79d86e511e8d76b60b0eb4205008b6745d", unpack = false, name = "N_dvipdfmx.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/dvips.tar.xz", sha256 = "4cd5c2da6ad97ee6e621bcd158072f89699877374242395f2cef59b80dab587d", unpack = false, name = "N_dvips.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/ec.tar.xz", sha256 = "bb85425c214b1056b5f0b8f3bf1478b81e89bd7d290d61c7c73289b534786897", unpack = false, name = "R_ec.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/enctex.tar.xz", sha256 = "c069cae12bb8bf51b31044a981d93d8cb47dc06627175f1320515d2c187d28c5", unpack = false, name = "R_enctex.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/epstopdf.tar.xz", sha256 = "b386bbb2b430c89d9a2d87f6eaa88a66897d1eb358559e50801500d8cd33da1a", unpack = false, name = "N_epstopdf.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/epstopdf-pkg.tar.xz", sha256 = "63a643ef70d86823d3814ab94462c10a8cf842775f3416c623362342a666031c", unpack = false, name = "R_epstopdf-pkg.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/eso-pic.tar.xz", sha256 = "3a257e260e6f7ee5ec7fbe07cd09a80d559e7fa4073956804498cc60eb670df2", unpack = false, name = "R_eso-pic.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/etex.tar.xz", sha256 = "f4792b640008ccc637a4d0cbaab2d90b58cfc96f7f73c3d9b02f2f4481cc59e3", unpack = false, name = "R_etex.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/etex-pkg.tar.xz", sha256 = "6d0323de249a462a8386bc8aa4a1a2b36dc18def339e460ef9e743a28d671875", unpack = false, name = "R_etex-pkg.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/etexcmds.tar.xz", sha256 = "e58347b35b0da2b10841f98069537ad95d6dad0679532463525bdc565318a2cc", unpack = false, name = "R_etexcmds.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/etoolbox.tar.xz", sha256 = "ffb21fc7073f9cb89dbc0bd999a98b1e9b7285fc1a46056254d4a167707f0658", unpack = false, name = "R_etoolbox.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/euenc.tar.xz", sha256 = "a9083d0184dea873338881fbcccb29cd7e9b2bb3ad7befea563a8acf7eae5c66", unpack = false, name = "R_euenc.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/euler.tar.xz", sha256 = "6b938863479cfdd7a3dcd18acd3b062a83d0d77c970aebcaab7a58a1fdaf01f5", unpack = false, name = "R_euler.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/euro.tar.xz", sha256 = "1691845b9afd95a5eb70e07ae17ebe2d70c2dfdaaa0408fcd84c78f56d7d05e5", unpack = false, name = "R_euro.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/euro-ce.tar.xz", sha256 = "0756c928792e4678b0533e650074426c2709fb28fb8d7fb26fc962a815180a6b", unpack = false, name = "R_euro-ce.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/eurosym.tar.xz", sha256 = "db2f7325383f6fa4ed2dc805c432da40fa1ecc742026928001b0cded9b3de07f", unpack = false, name = "R_eurosym.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/everysel.tar.xz", sha256 = "35c04613080faab79bf9776d60f0e996ff7de6e70c9ec588d6df8c0013534297", unpack = false, name = "R_everysel.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/everyshi.tar.xz", sha256 = "3c9b382d0f1bd277218d5744c743d79d07e9c82f1b151127b0a2dfec0a8d205e", unpack = false, name = "R_everyshi.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/extractbb.tar.xz", sha256 = "e7b65e8814ebd3cd0642e81b63e8278c709f1e1713a264c70a642c8c63bba1a4", unpack = false, name = "N_extractbb.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/extsizes.tar.xz", sha256 = "36cc90e00c8c44028da8bbd03fac3b5dac3ddb47e03af8031a7c4d939896cdda", unpack = false, name = "R_extsizes.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/fancybox.tar.xz", sha256 = "663954cd8269ebdeffaa867a1e709caa43860f6856befc60865ab4475a9c201e", unpack = false, name = "R_fancybox.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/fancyhdr.tar.xz", sha256 = "08acefe6dd7d96f18d6b5f28af58f22c16801f6a031a64441f29ee0656444124", unpack = false, name = "R_fancyhdr.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/fancyref.tar.xz", sha256 = "6cd43aedc1c85a4c897056d73967471ee6b93d23c3ffdcded4ab3ef226bda31d", unpack = false, name = "R_fancyref.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/fancyvrb.tar.xz", sha256 = "1ea299797a36191f35223d79c37439c58a02ff34a5fa073949f2a0d5e3dfeaf9", unpack = false, name = "R_fancyvrb.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/filehook.tar.xz", sha256 = "7c8d8798cc7eb5c1515db86592187f14a4d5406dffdbb819de77cfed446e63bb", unpack = false, name = "R_filehook.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/firstaid.tar.xz", sha256 = "1ccb418d173027a13e4a07e0c623939a03846b09fc4b0bf7c2c11f9e8474ca63", unpack = false, name = "R_firstaid.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/fix2col.tar.xz", sha256 = "93f52c4685192a324f2510d23bb9ebd6ba449cded3baf39846737cb3e03dfeed", unpack = false, name = "R_fix2col.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/float.tar.xz", sha256 = "e45a8b31c32854de378096bb76ba06b63e37ed3db6f1ce5cd42a0bb0be4a512d", unpack = false, name = "R_float.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/fontspec.tar.xz", sha256 = "78fa48bd8417ff609e30a5d2e473177903f4e7604c353dd559dacb0c8d6de25d", unpack = false, name = "R_fontspec.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/footnotehyper.tar.xz", sha256 = "38beef4d8483b8cad34894b128d789e9467f7611f9be77973baeb75c4848c451", unpack = false, name = "R_footnotehyper.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/fp.tar.xz", sha256 = "e8be42ec2063cb5595ee87a28c72d23acd044b8f599dcc998aeba2d20abb2dc3", unpack = false, name = "R_fp.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/fpl.tar.xz", sha256 = "98ea140d101e0802ff266614d57f486495f1a6d063561d1474e68ac764fbc4aa", unpack = false, name = "R_fpl.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/geometry.tar.xz", sha256 = "bdb2648c523a5cc329dad25c2a45b7022c85b4b0f5c715d3958c6bbb80d69d98", unpack = false, name = "R_geometry.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/gettitlestring.tar.xz", sha256 = "00e7545b6093893a21a636201d3e7e52a78b0773e988a5ad709c9b4d63f4a927", unpack = false, name = "R_gettitlestring.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/glyphlist.tar.xz", sha256 = "93a3f9cda5939cd74f3eab8fc3dbaeee675f80c27730d931600b4622e2a3f041", unpack = false, name = "R_glyphlist.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/graphics.tar.xz", sha256 = "062da36ab417feedb4e10ceb84144694eccd107cfb50a08dc5150da81f5b2373", unpack = false, name = "R_graphics.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/graphics-cfg.tar.xz", sha256 = "f49fd69ee7b03442e3ce16837e846d1e108e8a71db098fe8eb707c0e3d8e2c6c", unpack = false, name = "R_graphics-cfg.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/graphics-def.tar.xz", sha256 = "711fa92c9559c7563fd2e359cb39a988e843d2499953742f95a29439e09e6b87", unpack = false, name = "R_graphics-def.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/grfext.tar.xz", sha256 = "9003dbc16de5af5c365d3c3867457c83c75a062271bc6c9529f79134c7e53633", unpack = false, name = "R_grfext.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/grffile.tar.xz", sha256 = "f22d1863bb0848a3a52469ff836364586f7d54b0bda1beae9425bc500af8adb6", unpack = false, name = "R_grffile.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/helvetic.tar.xz", sha256 = "155b23ee6096e32fe7a481500a75269027042abebc3955e7966327c1d1f41db4", unpack = false, name = "R_helvetic.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/hologo.tar.xz", sha256 = "3894bbe458f8fbee8e2278d9c73afa9d8321cc5febaf9de53df9c9747f084e97", unpack = false, name = "R_hologo.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/hopatch.tar.xz", sha256 = "8101131535a8500e70e8a74aa260c93511a9bd5cdf3e4bd0cdb549e2177e9f3d", unpack = false, name = "R_hopatch.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/hycolor.tar.xz", sha256 = "f8728b375fb9e92a7a904d1bab9876b2f230e8cc070447c24ff11781b856c7a8", unpack = false, name = "R_hycolor.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/hypcap.tar.xz", sha256 = "e34f3031f763e3c663ccd1c80248c9967c3157e26450575d47ce3d0f2d193560", unpack = false, name = "R_hypcap.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/hyperref.tar.xz", sha256 = "d511450f6aea2e389307ec633aa85f7e41978463a4145d861ac7472b9b3d3c30", unpack = false, name = "R_hyperref.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/hyph-utf8.tar.xz", sha256 = "bb7ddfa4129050cd5d446ecad5bf033c9be3ee2a5614e0035c344a0323f6d344", unpack = false, name = "R_hyph-utf8.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/hyphen-base.tar.xz", sha256 = "fe8136043cf4f3a9b2750066e031fee12e0a2d15724aa484abd0b4ca1fbf6f8b", unpack = false, name = "R_hyphen-base.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/hyphen-english.tar.xz", sha256 = "cb22c0c51786d47aff5cef7dc6d0a47ab291d6da88c21ac6a9929f4409a456ab", unpack = false, name = "R_hyphen-english.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/hyphenex.tar.xz", sha256 = "1a4925b47f9d8bd6b7fe8696cb52543a181aa89dca4a4bc8bdd6650ed50c6076", unpack = false, name = "R_hyphenex.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/ifplatform.tar.xz", sha256 = "604c0057aa73e47bbfddea397e1b77cb8a1a60f40ffdc547cbeb0adbbc40552e", unpack = false, name = "R_ifplatform.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/iftex.tar.xz", sha256 = "39a2c498d55f19448ed7ac26c2143943669a0e4d99e8b804ba975889c3d86ec8", unpack = false, name = "R_iftex.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/index.tar.xz", sha256 = "96e49a5ccd06f077ada65213e766b6b90667b765d10fd626859cb5be70d97f88", unpack = false, name = "R_index.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/infwarerr.tar.xz", sha256 = "24a0de759e69cbf91889aced0445ce47b74e45cd4883fe41f5deffe197761f8c", unpack = false, name = "R_infwarerr.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/intcalc.tar.xz", sha256 = "29a49088da98bf618b66dd9fa904e35a48f779eb420ba2211b79a4cb8a6bb1c2", unpack = false, name = "R_intcalc.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/jknapltx.tar.xz", sha256 = "9ff08cdfbe1a0c0132048788716f3236b0de1cc8069a3f436d906085ad4010b6", unpack = false, name = "R_jknapltx.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/knuth-lib.tar.xz", sha256 = "47f476f35cb04419e7d12667ac6e1a656f5bb2a9496821030490fc132ad85f5b", unpack = false, name = "R_knuth-lib.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/knuth-local.tar.xz", sha256 = "5fac7dbcc4f8aae032705f1b63f95abbfc646267e384d4e594cd8b4b9b3b0781", unpack = false, name = "R_knuth-local.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/koma-script.tar.xz", sha256 = "8e4661515a87495c6240cee0610a03dbb1cd75604f9496c29a6252784dc10434", unpack = false, name = "R_koma-script.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/kpathsea.tar.xz", sha256 = "ad64a7d2e42f402780d8ddecd1d6fe152493d73a2b5357670f91ba14a2a85e24", unpack = false, name = "N_kpathsea.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/kvdefinekeys.tar.xz", sha256 = "93323551220521c2a5b38ef95dc165fda4ec329931790c5a1c5d43f5246488f9", unpack = false, name = "R_kvdefinekeys.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/kvoptions.tar.xz", sha256 = "c93bd87cfee682ef3ecfaa76b40978174db1ba352fcf58323cf2b8cbf668697a", unpack = false, name = "R_kvoptions.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/kvsetkeys.tar.xz", sha256 = "96016d63dd7498047794adbee9bb849a1e0d9d55f3551780a764c1983c2b1b6d", unpack = false, name = "R_kvsetkeys.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/l3experimental.tar.xz", sha256 = "778d7eac7c19cb8f1886ef0afba0e99a9b89646a930fceb6a444e7ee2c8b1cee", unpack = false, name = "R_l3experimental.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/l3kernel.tar.xz", sha256 = "1b08f269dee6863b2ae03292f53509e7c7ef373d4d88b85fdeceffd373337fec", unpack = false, name = "R_l3kernel.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/l3packages.tar.xz", sha256 = "dbf8a6c910e8886960d735626bfc5249e08bef7eb611733b054184fe8c321091", unpack = false, name = "R_l3packages.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/latex.tar.xz", sha256 = "1ae770eab0866a96186fe4156b7f5d61c17c784be40efd8d971508f5afc08d15", unpack = false, name = "R_latex.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/latex-bin.tar.xz", sha256 = "7ceac2d71d7f1bb738cbbc78c26f9075262b4bc6932d4bf486f0a91bfd7940d4", unpack = false, name = "N_latex-bin.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/latex-fonts.tar.xz", sha256 = "6ceef2f25c8787eb9d39a6bdaeed94b0e4712e24c53052660e0d96eae938a867", unpack = false, name = "R_latex-fonts.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/latex-lab.tar.xz", sha256 = "2952c1aa2ec64bf7d19d4b1405ad4862eac56cbf8baacc096a5611badbb4994f", unpack = false, name = "R_latex-lab.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/latexbug.tar.xz", sha256 = "daac7b3da2e7472378151d19663f20f70949200fb2dba14cf586ca00181d5ee8", unpack = false, name = "R_latexbug.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/latexconfig.tar.xz", sha256 = "731e9bbf4829b62b0331de8bec8efd22278e478ec246a5a42125db5196e9bdfc", unpack = false, name = "R_latexconfig.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/letltxmacro.tar.xz", sha256 = "3b2c3bf8e526ea1d7c44a0adfa475a3d8413a5c874a26e80c519e3fa5304d5df", unpack = false, name = "R_letltxmacro.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/lineno.tar.xz", sha256 = "1693bb2e9dcb7d84c93596d939ba48914b9217b84354a43124c51320c2c6b837", unpack = false, name = "R_lineno.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/listings.tar.xz", sha256 = "ba1a9cdb71d04dfbacf5ce3db3769d84849956595ab092e5cfd23082787b57c2", unpack = false, name = "R_listings.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/lm.tar.xz", sha256 = "6ecafd1f066d189a0688c10572a01d45c231fa236d6ec1cca726ca4eef41e57c", unpack = false, name = "R_lm.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/lm-math.tar.xz", sha256 = "876211c73c151423bb4d1fc17064847e09436ffbfd183d7f0078a1fa8ba9c387", unpack = false, name = "R_lm-math.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/ltx-talk.tar.xz", sha256 = "b3080c14040763ee491245776450156134a1e079e782c0604309d1d0e0f04728", unpack = false, name = "R_ltx-talk.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/ltxcmds.tar.xz", sha256 = "55893c6da822111bc6a189bc7809aa8ed7e66e53cd919a2ccd2ed90ba1426aaf", unpack = false, name = "R_ltxcmds.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/ltxmisc.tar.xz", sha256 = "1f3b7b3791527ad16dbb56dc1f4984896c3aa162b99dc80b3ed8b0d80c130945", unpack = false, name = "R_ltxmisc.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/lua-alt-getopt.tar.xz", sha256 = "122ca4e9e646f137c076ab7e07fe9d53464e97d370cbc47424fc1b361ba2926c", unpack = false, name = "R_lua-alt-getopt.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/lua-uni-algos.tar.xz", sha256 = "a7f9a14f2cb5dedd3d67997d9db3de9cfdef7003a797b33892fa8728578dfb95", unpack = false, name = "R_lua-uni-algos.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/lua-unicode-math.tar.xz", sha256 = "c46f1549fef975c82576285118333bfcbf9f66d746a21889ddf23be465bc42d7", unpack = false, name = "R_lua-unicode-math.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/luahbtex.tar.xz", sha256 = "3414bef02792b8d30a5ddb7fb37f05144bcf9a02a704a540e90542ff37a910c7", unpack = false, name = "N_luahbtex.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/lualatex-math.tar.xz", sha256 = "244c0a4256ddcfdf3475f798eb98afb7e175c5c7232b4a83b302b8d9bafbcf63", unpack = false, name = "R_lualatex-math.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/lualibs.tar.xz", sha256 = "578bc9507b0d3e2e039296d87a5f419cef9461c1baedd83277f8fa43af5fb364", unpack = false, name = "R_lualibs.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/luamml.tar.xz", sha256 = "7f45a2f0f0e7bc6773b680d34013674248e59c639b8061c8557873c30e6e1b2c", unpack = false, name = "R_luamml.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/luaotfload.tar.xz", sha256 = "90cee617e8cdb170c64c9acf340ad125fb1d10ab296991086e77f5efde236a9c", unpack = false, name = "N_luaotfload.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/luatex.tar.xz", sha256 = "f9b235e63171ac88fdab80e4e61465ca4ac140721cba9cff9709f06302f8c4a1", unpack = false, name = "N_luatex.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/lwarp.tar.xz", sha256 = "13ba60606a5ace7050462a5b48d801efbdfbac1a6d9868e8c12341014d26f462", unpack = false, name = "N_lwarp.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/makecmds.tar.xz", sha256 = "99cab134b534458d305433ee94fa9ac331d84e2ae647d84ff70fafab4c7323d9", unpack = false, name = "R_makecmds.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/makeindex.tar.xz", sha256 = "8d30090f6d40141341fdaafcd41412f8108db962c98e3268fe10f688e79736d2", unpack = false, name = "N_makeindex.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/manfnt-font.tar.xz", sha256 = "f1bbb929781f5a5f524ec7f1a4871a58259c2b22eb637872f71264a5dcdc26d4", unpack = false, name = "R_manfnt-font.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/marvosym.tar.xz", sha256 = "d8b1740e2c639f3acc6827fd040d14c55d9c3a62c3e8874fa15aed4e1f0c8cf7", unpack = false, name = "R_marvosym.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/mathpazo.tar.xz", sha256 = "b42822082e609bc2c707bb2657ff5bf6f491718ab391d2c884f7dfed0d51ec15", unpack = false, name = "R_mathpazo.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/mathspec.tar.xz", sha256 = "a4e6fea1fac6ae350d37044ef960fea5a8b49765c7325456c3c1dfd5c0e7898f", unpack = false, name = "R_mathspec.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/mathtools.tar.xz", sha256 = "36f506864454e08e255a69c24811f9a5f7567198d4371a5ddd54c33e6b881a85", unpack = false, name = "R_mathtools.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/mdwtools.tar.xz", sha256 = "7ec924de85dae1e7c61791268863ff0137825e1c74805d6faee2e06f92a0cab5", unpack = false, name = "R_mdwtools.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/memoir.tar.xz", sha256 = "96446e06d32fcc209332dcaa7932d6c845981270c0f7342749f9c9102a9872f0", unpack = false, name = "R_memoir.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/metafont.tar.xz", sha256 = "b18f81068b8411fe92080db0bcdb4c1920bceea6a337a836e0ed9c76d4e84c83", unpack = false, name = "N_metafont.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/metalogo.tar.xz", sha256 = "d12b889fc60c7dd969ca9fdc9c64f2eab5edbf86bf4a38f861e4b0354aa91b10", unpack = false, name = "R_metalogo.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/mflogo.tar.xz", sha256 = "28aadb217a5180d16e65efcedf6000052b2a3b9cc64411569de63a3702931d26", unpack = false, name = "R_mflogo.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/mflogo-font.tar.xz", sha256 = "872232b0651640e772d8d2366e2074b7c8e5dabd53617280c587ed210a2b0d42", unpack = false, name = "R_mflogo-font.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/mfnfss.tar.xz", sha256 = "32e3dbace6b10a28a0d7c83bc26b24be1904069dfbca133f7bdd6e5f91673e35", unpack = false, name = "R_mfnfss.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/mfware.tar.xz", sha256 = "e22706ab74f60c0b42a7f74bf0ea41a4d39744b2f74143f50354b659bbcb3f1c", unpack = false, name = "N_mfware.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/microtype.tar.xz", sha256 = "19611cfc7ae6e929aaf1f3945da1a14be774d9d138f48e40257886874e1e8885", unpack = false, name = "R_microtype.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/modes.tar.xz", sha256 = "29e84a4395b61f9dc1a96b334cc1e58524173c8f9139c9b43b9a61a23df74205", unpack = false, name = "R_modes.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/mptopdf.tar.xz", sha256 = "6cd307a4726459927b63b38313406a54f0a6c20a7d53216f398fefd5834cb32b", unpack = false, name = "N_mptopdf.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/nameref.tar.xz", sha256 = "f0c51d6b6b92433ed4144873e9de278b6cc441978edf68cb33496ad123547df0", unpack = false, name = "R_nameref.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/natbib.tar.xz", sha256 = "212c77a30dab80de50ffb64a497ab491ed1ff3439e76811993c19428faa1927a", unpack = false, name = "R_natbib.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/ncntrsbk.tar.xz", sha256 = "4976f1859fb159505e60f1a21274b6b63c5af88f2e03cd0ea6a7e3c84512f4b7", unpack = false, name = "R_ncntrsbk.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/newfloat.tar.xz", sha256 = "a7081874b81036c7d236d3f42cc66a40d42a82c65cb169bf12816cc0a552aea6", unpack = false, name = "R_newfloat.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/ntgclass.tar.xz", sha256 = "d0091902c12b8441fc5fcd9b6c8cd6a1d28d88db67c2838013b7bb46853f6322", unpack = false, name = "R_ntgclass.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/oberdiek.tar.xz", sha256 = "e3d3626d429bd553624999b79bbd331082defd833bb2187cf4cd836cb399523f", unpack = false, name = "R_oberdiek.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/pagesel.tar.xz", sha256 = "998bed2487880000253481df15f313499ade11cf2d9e67d51d8f03d814eb1342", unpack = false, name = "R_pagesel.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/palatino.tar.xz", sha256 = "a5950b7ce364231aace8830cdedbe6ab511bfe663a2f1ba0bd270e618463b6f1", unpack = false, name = "R_palatino.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/parskip.tar.xz", sha256 = "4dfce424501202b2ce95bd254dfccebb5dd78bb3924155996c670945a090c725", unpack = false, name = "R_parskip.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/pdfcolfoot.tar.xz", sha256 = "764504ba71c4827eef5a18c8489d40937fa95a55c83ae7522afaab8ce91d998d", unpack = false, name = "R_pdfcolfoot.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/pdfescape.tar.xz", sha256 = "ffec9fd71668dd2cf7c9043205823cf134e45a77f827c47a641fb42f4b382a39", unpack = false, name = "R_pdfescape.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/pdflscape.tar.xz", sha256 = "1688a7f0340b560add98ea2e36e376046d91d664e544797190698c11c65fa896", unpack = false, name = "R_pdflscape.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/pdfmanagement.tar.xz", sha256 = "a6ba276d8cc73874f4ba582ea85d1632e6752fbd67413225f461059cac344e71", unpack = false, name = "R_pdfmanagement.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/pdfpages.tar.xz", sha256 = "8a22406374e8ed2e971efc4b2d8526212af46237cef4c827eb7776a7a43bbc44", unpack = false, name = "R_pdfpages.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/pdftex.tar.xz", sha256 = "c40b19fcbceef8a2927de40790256b62390cdada330a68685fb5bbe6c36161e5", unpack = false, name = "N_pdftex.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/pdftexcmds.tar.xz", sha256 = "2c0e5863bd7fea46802a2183e53f3cbeb318fe52bfacce0cd7d1378b907ad615", unpack = false, name = "R_pdftexcmds.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/pgf.tar.xz", sha256 = "901912098c641860184ec2e1ad53f4bfedfc6a7fbd802d14947bef3d7afa65ee", unpack = false, name = "R_pgf.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/plain.tar.xz", sha256 = "7fb50b0fe6f5fb9e63e5147804fa27853dc1d9f2319921404730447b201cde9f", unpack = false, name = "R_plain.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/polyglossia.tar.xz", sha256 = "69022dd99105ad75862dc33b3d6b10c13a9f456f39b58c9aa67384124e25bee5", unpack = false, name = "R_polyglossia.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/psfrag.tar.xz", sha256 = "1f75c7b2da2638abab284c26e1864aff74b26e3ae65fbbd569329feb2560d3fe", unpack = false, name = "R_psfrag.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/pslatex.tar.xz", sha256 = "9aaf7bf37a8811319154955c68b0a1bb38ecae230141a2f322d444e09aea7606", unpack = false, name = "R_pslatex.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/psnfss.tar.xz", sha256 = "6757c5cb0b2dd1a2fb90e7ffa07994996c4e013797c5cbfe1d6a310aaa6ae067", unpack = false, name = "R_psnfss.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/pspicture.tar.xz", sha256 = "35cbf289734c9b647f2d8b17df23cbc077e224c6b897763072f6c0c774a1af6f", unpack = false, name = "R_pspicture.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/pxfonts.tar.xz", sha256 = "bdddf89946b2a237a75d8d9ee9f2bc6597c868ba2eb73c0a4925a1e631aecd60", unpack = false, name = "R_pxfonts.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/ragged2e.tar.xz", sha256 = "2f34511fd759595069795aeb11f9cc9d917072fead6b031975cc5898200b4762", unpack = false, name = "R_ragged2e.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/rcs.tar.xz", sha256 = "1971c0f157538299f1abae3473f0f25ad4530303ff16da9b4d2145db30a68fbb", unpack = false, name = "R_rcs.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/refcount.tar.xz", sha256 = "cb936ff6207421f1c50646966288f9cbd509e6b852b69c285f87f1090e51d603", unpack = false, name = "R_refcount.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/rerunfilecheck.tar.xz", sha256 = "c0209268cb38faf35bf4223fb6c92036142b6f67613e1a394ea94d6ba2fa9bfb", unpack = false, name = "R_rerunfilecheck.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/rsfs.tar.xz", sha256 = "1afec0c5e9711f652675e38b7cd7e88101c44aa0d0ff317ad6ac06f1d2cc7043", unpack = false, name = "R_rsfs.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/sansmath.tar.xz", sha256 = "6831ecdfe1c6c3bbc40887f21c25b882cd939e58c30e1b2cd1ab97542bffdca6", unpack = false, name = "R_sansmath.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/section.tar.xz", sha256 = "7510c98ce653d07e6723207aebfdb7e68c737901cca292af8f7964f058f309bf", unpack = false, name = "R_section.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/seminar.tar.xz", sha256 = "141736ccf595e39fac37e68c4fd269fcaec561bcf8ab647478335e9592b59c41", unpack = false, name = "R_seminar.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/sepnum.tar.xz", sha256 = "1d0056a39ac24f7f529ed3e09f87e2a9e049f10db50d859f85356a2d2774729c", unpack = false, name = "R_sepnum.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/setspace.tar.xz", sha256 = "92f124451fb6de7d0a0cd535cebffdcbd646c5f02699e0e717dba60496378046", unpack = false, name = "R_setspace.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/stringenc.tar.xz", sha256 = "a6ed4eecf001045e4da96612e04207ac2273f2693d76f246ddc6ae7e85b515b5", unpack = false, name = "R_stringenc.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/subfig.tar.xz", sha256 = "cf7b066c5b63056977fa4f0553ad27b623df0f1893f8ae20b9d336d81915f99d", unpack = false, name = "R_subfig.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/symbol.tar.xz", sha256 = "c6b615bf830b8260a18f26a2aedd406c0e3aa9a24831cc1b2bc73be1774a669b", unpack = false, name = "R_symbol.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/tagpdf.tar.xz", sha256 = "34e322835a3f071579869fa762fb2fd5f461e0465df880f671126e9590e327d6", unpack = false, name = "R_tagpdf.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/tex.tar.xz", sha256 = "81d8b16970dc8542859be5b1fb1df79a27400bb75f92f5c1770a916bf78e0b49", unpack = false, name = "N_tex.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/tex-gyre.tar.xz", sha256 = "dfb4f55c4b02993003777a48663987bd102a3c5a2913172571e05fe2eb18407d", unpack = false, name = "R_tex-gyre.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/tex-gyre-math.tar.xz", sha256 = "8972d19fec5a701499fb6edc86f3ac4266343d42140cf6ae27edd44c2e916da3", unpack = false, name = "R_tex-gyre-math.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/tex-ini-files.tar.xz", sha256 = "d42eae30f6636140f32330c773f89cc16a6fd28607fe747be629ce71706b99f5", unpack = false, name = "R_tex-ini-files.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/texlive-common.tar.xz", sha256 = "9dc41d802143929512025b00cac760dfd47943474b8f4a174e94b092cf9f7a60", unpack = false, name = "R_texlive-common.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/texlive-msg-translations.tar.xz", sha256 = "b739344a28b923fcb959639a24d86d7a40ec4c6c970b299d133fc5add99e441e", unpack = false, name = "N_texlive-msg-translations.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/texlive-scripts.tar.xz", sha256 = "489659e655a521ca20332ae82470a18c0d0750b5219d69d189df29228a90c762", unpack = false, name = "N_texlive-scripts.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/texlive-scripts-extra.tar.xz", sha256 = "39c7395da7b219c7f80c6982558a95cc311c14822a5bf1707f8ce15c48d8a431", unpack = false, name = "N_texlive-scripts-extra.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/texlive.infra.tar.xz", sha256 = "464573c6c60797ec671a29a6bf31aeebaa0ecc9c824aba0dd79ec060ee8b2f71", unpack = false, name = "N_texlive.infra.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/textcase.tar.xz", sha256 = "c36d4fea9dc6deaebb7a477b17b0304f0d9dec2491268f9b0ae9c96286ef6d08", unpack = false, name = "R_textcase.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/thumbpdf.tar.xz", sha256 = "b519d203337feac5eeab2db676fd2ff9528a213dccded0b2be0d3eccef58c045", unpack = false, name = "N_thumbpdf.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/times.tar.xz", sha256 = "55f6097b5685a22a3ec1db61ae372ffe00b25d622ed4ee3d010cd8a037e48a00", unpack = false, name = "R_times.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/tipa.tar.xz", sha256 = "09c8c8cd3c660445dd59f611c08d943c227ebadb40f479fe3dc5236496409943", unpack = false, name = "R_tipa.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/tools.tar.xz", sha256 = "9c2b38f957eeb55275592700faffeb34b9e6f9e120b5874da5fde262e9fb531c", unpack = false, name = "R_tools.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/translator.tar.xz", sha256 = "012cbe2665ec07486d83ed68c830f3ad7215023370b0f6903ef092622cabbf50", unpack = false, name = "R_translator.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/txfonts.tar.xz", sha256 = "03189f5a8b40535a5ca705aabb80aa9e9c9b9c993ba5885f891a3cdfc80afb1d", unpack = false, name = "R_txfonts.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/typehtml.tar.xz", sha256 = "3c946908886ea81680f0e183973f3cc501bed22b4d5220b77c09dd629f8ec557", unpack = false, name = "R_typehtml.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/ucharcat.tar.xz", sha256 = "962aa0ae08a6118f5f1f3e3e222d834a5023272340b84f808bf44eecf752919f", unpack = false, name = "R_ucharcat.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/underscore.tar.xz", sha256 = "82c53ac96c4d1dd73c3a566fe66e0348469c97e5f51bd3a73190066904891718", unpack = false, name = "R_underscore.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/unicode-data.tar.xz", sha256 = "7d5f6b792998a88341751fc7641a17a78f84aa393130586fb51a852c627b58f7", unpack = false, name = "R_unicode-data.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/unicode-math.tar.xz", sha256 = "b942cda7caec4a597f839890af02553aaad319a873579a41e19344a95747633d", unpack = false, name = "R_unicode-math.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/uniquecounter.tar.xz", sha256 = "060cccb2d8ef1f6edd692cf7c21ab1d46a6028f09bfaf48a9d969fa9d2003376", unpack = false, name = "R_uniquecounter.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/url.tar.xz", sha256 = "947284b030f06cfcbc7abb831bb5dff2b19312cf778161ee477348c2dd88fc09", unpack = false, name = "R_url.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/utopia.tar.xz", sha256 = "d8148e06274d9f3eca68d90586ee4f5797068ce8bb9ff93a7cb24872f520a643", unpack = false, name = "R_utopia.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/wasy.tar.xz", sha256 = "9fc877454fef9746c8c85e5282caf349d7e67ed44ba2ee18202d76862e054d13", unpack = false, name = "R_wasy.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/wasy-type1.tar.xz", sha256 = "1bd86eff809059e4a7c009d8fbe2dd756e568de1d91d6489d82766a1b6f60129", unpack = false, name = "R_wasy-type1.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/wasysym.tar.xz", sha256 = "6f574fd99a7304f0759aacc62a60747f4c8ef7922f53be6aa5ab168d78c45ef3", unpack = false, name = "R_wasysym.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/xcolor.tar.xz", sha256 = "081d28d119901fca408b82a4c12862ed829e45f14a8678034ef02f8ecfd5da54", unpack = false, name = "R_xcolor.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/xdvi.tar.xz", sha256 = "bdb1fc80183cf31c57c9d7c95667b852c92fd3b0a9ac6268f613e523310b7d31", unpack = false, name = "N_xdvi.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/xfrac.tar.xz", sha256 = "a663f461d834bcccd7ad525e8cfdf14b3c175e3ecfa3fe7d12839f7c054b688b", unpack = false, name = "R_xfrac.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/xkeyval.tar.xz", sha256 = "b9ff864c4f6e029b20c4f15f26a378bc9c089016225d4e19949af939259e0161", unpack = false, name = "R_xkeyval.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/xltxtra.tar.xz", sha256 = "9a42c28340a004d9cc35b0ca94eb21f09491617a7b4d308760d76d4ede6a99e8", unpack = false, name = "R_xltxtra.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/xpatch.tar.xz", sha256 = "4ad016952188a1e822871242ebbb6fb4ea1eb0041a7fd7e50fe87d9d001bb7c3", unpack = false, name = "R_xpatch.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/xunicode.tar.xz", sha256 = "e0ab404031563884e3769dda49113ddb363c01172b0008a2efdbc0560420b4db", unpack = false, name = "R_xunicode.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/zapfchan.tar.xz", sha256 = "b1af3ec046fc3bdc9c1f35586a523cfd1393d02fd28e146b3efd2260d3311214", unpack = false, name = "R_zapfchan.tar.xz" },
+    { url = "https://mirrors.ctan.org/systems/texlive/tlnet/archive/zapfding.tar.xz", sha256 = "7c95b0011067228c4395aef990d92e190a66f825f6f3fb5bf09a738893b47ece", unpack = false, name = "R_zapfding.tar.xz" },
+]
+
+install = '''
+root="$pkgdir/usr/share"
+mkdir -p "$root/texmf-dist" "$root/tlpkg"
+for t in /build/sources/*.tar.xz; do
+    case "$(basename "$t")" in
+    R_*)
+        # relocated: everything but tlpkg/ is relative to texmf-dist
+        tar -xf "$t" -C "$root/texmf-dist" --exclude=tlpkg
+        tar -xf "$t" -C "$root" tlpkg
+        ;;
+    N_*)
+        # texmf-dist/ and tlpkg/ at the top; the licence, release notes and installer script are not installed there
+        tar -xf "$t" -C "$root" --exclude='LICENSE.*' --exclude=release-texlive.txt --exclude='install-tl*'
+        ;;
+    esac
+done
+# The tree's texmf.cnf derives every path from the binary's directory (/usr): point it at
+# this layout instead (the same edit as in texlive-bin's setup: TEXMFROOT=/usr/share,
+# generated files in /var/lib/texmf, site configuration in /etc/texmf; TEXMFLOCAL is
+# a lookup path only, nothing is installed there).
+sed -i \
+    -e 's|^TEXMFROOT = .*|TEXMFROOT = /usr/share|' \
+    -e 's|^TEXMFLOCAL = .*|TEXMFLOCAL = /usr/local/share/texmf|' \
+    -e 's|^TEXMFSYSVAR = .*|TEXMFSYSVAR = /var/lib/texmf|' \
+    -e 's|^TEXMFSYSCONFIG = .*|TEXMFSYSCONFIG = /etc/texmf|' \
+    "$root/texmf-dist/web2c/texmf.cnf"
+grep -q '^TEXMFROOT = /usr/share$' "$root/texmf-dist/web2c/texmf.cnf"
+perl "$pkgfiles/gen-config.pl" "$root"
+test -s "$root/texmf-dist/web2c/fmtutil.cnf"
+install -Dm644 "$pkgfiles/LICENSE.CTAN" "$pkgdir/usr/share/licenses/texlive-basic/LICENSE.CTAN"
+install -Dm644 "$pkgfiles/LICENSE.TL" "$pkgdir/usr/share/licenses/texlive-basic/LICENSE.TL"
+'''
