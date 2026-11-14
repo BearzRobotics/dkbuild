@@ -1,0 +1,77 @@
+# Julia 1.13.4 from the "full" source release (julia-1.13.4-full.tar.gz),
+# which carries the source of every dependency Julia builds itself (deps/srccache:
+# LLVM, libuv, OpenBLAS, LAPACK, SuiteSparse, libgit2, mbedtls, libunwind, ...) and
+# the standard libraries' sources, so the build needs no network
+# (USE_BINARYBUILDER=0: the JLL binary packages are not used).
+# LLVM: Julia's own fork, LLVM 20.1.8 (branch julia-20.1.8-3), is built from the
+# tarball and statically linked into libjulia-codegen. The tree's llvm (23) and
+# llvm22 are NOT usable: Julia needs the fork's patches (the LLVM versions
+# are not API compatible either; Julia supports exactly one LLVM release per
+# Julia release, and "make USE_SYSTEM_LLVM=1" works only against that
+# release with Julia's patch set applied: LLVM_APPLY_JULIA_PATCHES needs the
+# network). Shipping a second LLVM inside Julia is what every distribution does.
+# System libraries (the tree's, shared): GMP, MPFR, PCRE2, zlib, curl, libssh2,
+# nghttp2, utf8proc. Bundled (Julia needs its own fork or build options): libuv,
+# libgit2, mbedtls, libunwind, OpenBLAS with 64-bit integers and the _64_ symbol
+# suffix (Julia's LinearAlgebra calls that interface; the tree's OpenBLAS is the
+# 32-bit one), LAPACK, SuiteSparse, dSFMT, openlibm, p7zip, libwhich.
+# Fortran: the bundled OpenBLAS builds LAPACK from Fortran: gfortran-15 from the gcc
+# package; libgfortran is found at run time through the rpath
+# /usr/lib/gcc15/lib (Julia's own libdir has rpath $ORIGIN).
+# musl: Julia supports musl (Alpine) as a partial platform: the full test suite
+# has failures (the REPL's terminal tests, some libc-specific ones) and
+# upstream's binary releases are glibc only. Not tested here at all.
+# CPU target: Julia's generic multi-versioned system image (x86_64) so the package is
+# not tied to the build machine's CPU.
+name = "julia"
+version = "1.13.4"
+release = 1
+summary = "High-level, high-performance dynamic language for technical computing"
+license = "MIT"
+homepage = "https://julialang.org"
+archs = ["x86_64"]
+hostdeps = ["gcc", "cmake", "ninja", "python", "perl", "m4", "make", "patchelf", "pkgconf", "which", "curl", "git"]
+builddeps = ["gmp-devel", "mpfr-devel", "pcre2-devel", "zlib-ng-compat-devel", "curl-devel", "libssh2-devel", "nghttp2-devel",
+             "utf8proc-devel", "linux-headers", "llvm-libcxx-devel"]
+rundeps = ["gcc", "gmp", "mpfr", "pcre2", "curl", "libssh2", "nghttp2", "utf8proc"]
+options = ["!check", "!lto", "!strip", "jobs:12"]
+
+source = [
+    { url = "https://github.com/JuliaLang/julia/releases/download/v1.13.4/julia-1.13.4-full.tar.gz", sha256 = "55bb4442c887a3e99f287b53c467fdd5e78e376344ea2a84865742d13a27d71c" },
+]
+
+environment = '''
+export HOME=/tmp LANG=C.UTF-8 LC_ALL=C.UTF-8
+export FC=gfortran-15 FFLAGS=-O2
+unset CFLAGS CXXFLAGS LDFLAGS CPPFLAGS
+'''
+setup = '''
+cat > Make.user <<EOF2
+prefix=/usr
+USE_BINARYBUILDER=0
+USE_SYSTEM_GMP=1
+USE_SYSTEM_MPFR=1
+USE_SYSTEM_PCRE=1
+USE_SYSTEM_ZLIB=1
+USE_SYSTEM_CURL=1
+USE_SYSTEM_LIBSSH2=1
+USE_SYSTEM_NGHTTP2=1
+USE_SYSTEM_UTF8PROC=1
+USE_SYSTEM_PATCHELF=1
+# the generic multi-versioned system image
+JULIA_CPU_TARGET=generic;sandybridge,-xsaveopt,clone_all;haswell,-rdrnd,base(1)
+MARCH=x86-64
+# Fortran runtime for the bundled OpenBLAS/LAPACK (gfortran-15's libgfortran)
+LDFLAGS=-Wl,-rpath,/usr/lib/gcc15/lib
+VERBOSE=1
+EOF2
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make install DESTDIR="$pkgdir" prefix=/usr
+# Julia's own licence (the bundled libraries' licences are installed by Julia itself)
+
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/julia/LICENSE.md"
+'''
