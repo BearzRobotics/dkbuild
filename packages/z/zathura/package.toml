@@ -1,0 +1,28 @@
+# zathura: document viewer (GTK 4). It needs a backend plugin to open anything: zathura-pdf-mupdf, zathura-pdf-poppler, zathura-djvu, zathura-ps, zathura-cb.
+# SyncTeX integration is off: libsynctex comes bundled with TeX Live and there is no
+# standalone package (zathura would need texlive-devel to build).
+name = "zathura"
+version = "2026.10.23"
+release = 1
+summary = "Highly customizable document viewer"
+license = "Zlib"
+homepage = "https://pwmt.org/projects/zathura"
+hostdeps = ["meson", "pkgconf", "gettext", "python-sphinx", "librsvg", "desktop-file-utils"]
+builddeps = ["cairo-devel", "file-devel", "girara-devel", "glib-devel", "gtk4-devel", "json-glib-devel", "libseccomp-devel", "sqlite-devel", "xxhash-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://pwmt.org/projects/zathura/download/zathura-2026.10.23.tar.xz", sha256 = "29a0931527f63c832f50eeef169d885a5db52a3a9e13b12a3a7beca9aaf63d2d" },
+]
+
+setup = '''
+%meson \
+    -Dsynctex=disabled -Dseccomp=enabled -Dlandlock=auto -Dmanpages=enabled -Dshell-completions=enabled -Dconvert-icon=enabled -Dtests-x11=disabled -Dtests-wayland=disabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/zathura/LICENSE"
+'''
