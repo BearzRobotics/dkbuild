@@ -1,0 +1,28 @@
+# TRE: POSIX-compliant regular expression library with approximate (fuzzy)
+# matching and wide-character support; needed by elinks (search).
+# Shared and static libraries (%configure); wide characters, approximate
+# matching and the agrep tool are on by default upstream.
+name = "tre"
+version = "0.9.0"
+release = 1
+summary = "POSIX regex library with approximate matching"
+license = "BSD-2-Clause"
+homepage = "https://laurikari.net/tre/"
+hostdeps = ["gettext", "pkgconf"]
+builddeps = ["gettext-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/laurikari/tre/releases/download/v0.9.0/tre-0.9.0.tar.gz", sha256 = "f57f5698cafdfe516d11fb0b71705916fe1162f14b08cf69d7cf86923b5a2477" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/tre/LICENSE"
+'''
