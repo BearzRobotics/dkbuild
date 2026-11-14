@@ -1,0 +1,34 @@
+# kalker: command-line calculator with user-defined functions, variables and units.
+# Built against the system GMP, MPFR and MPC (the use-system-libs feature) instead of
+# letting gmp-mpfr-sys compile its own copies. Crates vendored on the host.
+# files/Cargo.lock is upstream's with only the two workspace members bumped
+# (kalk 3.2.2 -> 3.2.3, kalker 2.2.2 -> 2.2.3): the v2.2.3 tag shipped a stale
+# lock, so --locked failed.
+name = "kalker"
+version = "2.2.3"
+release = 1
+summary = "Scientific command-line calculator with user-defined functions and units"
+license = "MIT"
+homepage = "https://kalker.strct.net"
+hostdeps = ["rust"]
+builddeps = ["gmp-devel", "mpfr-devel", "mpc-devel"]
+options = ["!check", "cargodeps", "cargolock=."]
+
+source = [
+    { url = "https://github.com/PaddiM8/kalker/archive/refs/tags/v2.2.3.tar.gz", sha256 = "91749c767e345094a2c2057cfcf722d9aed24583381c175bdbd838a5ec00d1ec" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+setup = '''
+# upstream's stale lock -> the corrected one the crates were vendored from
+cp $pkgfiles/Cargo.lock Cargo.lock
+'''
+build = '''
+cargo build --release --frozen --offline --locked -j $jobs -p kalker --features use-system-libs
+'''
+install = '''
+install -Dm755 target/release/kalker "$pkgdir/usr/bin/kalker"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/kalker/LICENSE"
+'''
