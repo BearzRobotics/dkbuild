@@ -1,0 +1,38 @@
+# SBCL's stage 0 seed: Alpine Linux's musl build of SBCL 2.6.9 (edge
+# community, sbcl-2.6.9-r0: the runtime and sbcl.core), unpacked in
+# /usr/lib/sbcl-bootstrap. SBCL is written in Common Lisp, so the first build
+# of sbcl needs an existing Lisp (its stage0deps); every later one uses the
+# previous sbcl package (selfhost). Alpine itself builds each SBCL from its own
+# previous one the same way (its sbcl-bootstrap). Build use only: off the ISO.
+# cports builds SBCL with ECL instead; the tree has no ECL, and a prebuilt SBCL
+# is the faster, more faithful seed.
+# Alpine edge drops a package file when it is rebuilt or updated: a later fetch
+# of this URL can fail, then the newest sbcl-2.6.x-r* replaces it (any SBCL
+# from 2.0 on can build the current one).
+name = "sbcl-bootstrap"
+version = "2.6.9"
+release = 1
+summary = "Prebuilt SBCL (Alpine's) to bootstrap sbcl once"
+license = "custom"
+homepage = "https://www.sbcl.org"
+archs = ["x86_64"]
+options = ["!strip", "!check", "!repo-iso"]
+
+source = [
+    { url = "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/sbcl-2.6.9-r0.apk", sha256 = "52fda8dfd2a67c6baa640f3588570c06791e58d00c798fe5c2f73084ad2738b3", unpack = false },
+]
+
+install = '''
+d="$pkgdir/usr/lib/sbcl-bootstrap"
+mkdir -p "$d"
+# an Alpine package is gzipped tar streams one after another
+tar -xzf /build/sources/sbcl-2.6.9-r0.apk -C "$d" 2>/dev/null || tar -xzf /build/sources/sbcl-2.6.9-r0.apk -C "$d"
+rm -f "$d"/.PKGINFO "$d"/.SIGN.* "$d"/.pre-* "$d"/.post-*
+test -x "$d/usr/bin/sbcl"
+test -f "$d/usr/lib/sbcl/sbcl.core"
+install -Dm644 /dev/stdin "$pkgdir/usr/share/licenses/sbcl-bootstrap/README" <<EOF2
+Alpine Linux's sbcl 2.6.9-r0 package (edge community), unchanged. SBCL is in
+the public domain and BSD-style licensed: https://www.sbcl.org/ and its
+sources are https://downloads.sourceforge.net/project/sbcl/sbcl/2.6.9/
+EOF2
+'''
