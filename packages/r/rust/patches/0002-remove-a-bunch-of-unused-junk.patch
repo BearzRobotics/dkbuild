@@ -3,6 +3,10 @@ From: q66 <q66@chimera-linux.org>
 Date: Fri, 30 May 2025 12:33:02 +0200
 Subject: [PATCH 02/16] remove a bunch of unused junk
 
+FenrirOS: the crt_objects.rs hunk (removing pre_musl_self_contained and post_musl_self_contained) is
+dropped: it belongs with Chimera patches that stop base/linux_musl.rs using them, which this series does
+not carry, so rustc_target failed with "cannot find function pre_musl_self_contained" (rust r6).
+
 ---
  compiler/rustc_target/src/spec/crt_objects.rs |  22 ----
  src/bootstrap/configure.py                    | 100 ------------------
@@ -17,39 +21,6 @@ Subject: [PATCH 02/16] remove a bunch of unused junk
  src/bootstrap/src/utils/cc_detect.rs          |  24 -----
  11 files changed, 1 insertion(+), 269 deletions(-)
 
-diff --git a/compiler/rustc_target/src/spec/crt_objects.rs b/compiler/rustc_target/src/spec/crt_objects.rs
-index 2d84e78f2..0e6cb0f42 100644
---- a/compiler/rustc_target/src/spec/crt_objects.rs
-+++ b/compiler/rustc_target/src/spec/crt_objects.rs
-@@ -62,28 +62,6 @@ pub(super) fn all(obj: &'static str) -> CrtObjects {
-     ])
- }
- 
--pub(super) fn pre_musl_self_contained() -> CrtObjects {
--    new(&[
--        (LinkOutputKind::DynamicNoPicExe, &["crt1.o", "crti.o", "crtbegin.o"]),
--        (LinkOutputKind::DynamicPicExe, &["Scrt1.o", "crti.o", "crtbeginS.o"]),
--        (LinkOutputKind::StaticNoPicExe, &["crt1.o", "crti.o", "crtbegin.o"]),
--        (LinkOutputKind::StaticPicExe, &["rcrt1.o", "crti.o", "crtbeginS.o"]),
--        (LinkOutputKind::DynamicDylib, &["crti.o", "crtbeginS.o"]),
--        (LinkOutputKind::StaticDylib, &["crti.o", "crtbeginS.o"]),
--    ])
--}
--
--pub(super) fn post_musl_self_contained() -> CrtObjects {
--    new(&[
--        (LinkOutputKind::DynamicNoPicExe, &["crtend.o", "crtn.o"]),
--        (LinkOutputKind::DynamicPicExe, &["crtendS.o", "crtn.o"]),
--        (LinkOutputKind::StaticNoPicExe, &["crtend.o", "crtn.o"]),
--        (LinkOutputKind::StaticPicExe, &["crtendS.o", "crtn.o"]),
--        (LinkOutputKind::DynamicDylib, &["crtendS.o", "crtn.o"]),
--        (LinkOutputKind::StaticDylib, &["crtendS.o", "crtn.o"]),
--    ])
--}
--
- pub(super) fn pre_mingw_self_contained() -> CrtObjects {
-     new(&[
-         (LinkOutputKind::DynamicNoPicExe, &["crt2.o"]),
 diff --git a/src/bootstrap/configure.py b/src/bootstrap/configure.py
 index a707a22af..75b7c0c62 100755
 --- a/src/bootstrap/configure.py
