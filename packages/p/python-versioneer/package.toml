@@ -1,0 +1,20 @@
+# versioneer from PyPI.
+name = "python-versioneer"
+version = "0.29"
+release = 1
+summary = "Easy VCS-based management of project version strings"
+license = "Unlicense"
+homepage = "https://github.com/python-versioneer/python-versioneer"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/32/d7/854e45d2b03e1a8ee2aa6429dd396d002ce71e5d88b77551b2fb249cb382/versioneer-0.29.tar.gz", sha256 = "5ab283b9857211d61b53318b7c792cf68e798e765ee17c27ade9f6c924235731" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-versioneer/LICENSE"
+'''
