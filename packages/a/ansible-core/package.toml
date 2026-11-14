@@ -1,0 +1,29 @@
+# ansible-core: the Ansible engine (ansible, ansible-playbook, ansible-galaxy,
+# ansible-vault, ...) and its built-in modules. Pure Python, from the PyPI
+# sdist, installed with pip offline (its run-time dependencies are packages of
+# their own). Adapted from Chimera Linux cports (main/ansible-core, BSD-2-Clause,
+# Copyright (c) Chimera Linux contributors). The unit tests (ansible-test) need
+# a git checkout and more test-only packages: !check.
+# 2.22.0 is the newest stable core; the `ansible` community package 14.6.0
+# declares ansible-core~=2.21.6, which is not enforced here (pip --no-deps).
+name = "ansible-core"
+version = "2.22.0"
+release = 1
+summary = "Configuration management and multinode orchestration framework"
+license = "GPL-3.0-or-later"
+homepage = "https://ansible.com"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-jinja2", "python-pyyaml", "python-cryptography", "python-packaging", "python-resolvelib", "python-bcrypt", "openssh"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/9d/9c/320090b2f1542122259cd759d5148678fd98945913837ee05718920f73ea/ansible_core-2.22.0.tar.gz", sha256 = "bf50b4a0cfa985e30585c7ba301897ea7050d224ca49d2816cab10e33a160e1c" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/ansible-core/COPYING"
+install -d "$pkgdir/usr/share/licenses/ansible-core"
+cp licenses/*.txt "$pkgdir/usr/share/licenses/ansible-core/"
+'''
