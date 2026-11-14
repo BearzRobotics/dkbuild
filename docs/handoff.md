@@ -119,3 +119,52 @@ fonts, legacy OVMF, ifupdown2/FRR/libyang/rtrlib + pvenetcommit, PBS client,
 erlang/elixir/rabbitmq-server, grpc + Zabbix APM. None of it checked yet.
 Next with the new stores: Paperless-ngx, Mayan EDMS, Taiga, ERPNext (pydeps),
 Twenty, Joplin (yarn-lock).
+
+## 2026-11-14: world runs 1-3, fixes, new packages (nothing pushed; master = new-build-machine)
+
+**World runs.** Run 1: 45 failed / 660 skipped. Run 2: 28 failed (libcamera blocked
+654 skipped). Run 3 (started 16:14, `--color=never`; later runs use
+`--color=always`, read with `less -R`) was still going: its 596-package skip was one
+failure, libvisual-plugins (po/Makefile top_builddir; gst-plugins-base needs it), fixed
+in r3. Run 4 has NOT been started: the user starts it. Every fix below is untested until
+run 4. A hung compile (dovecot's test-json-generator.c, clang -O2) was killed by hand;
+dovecot r2 builds that file at -O0 first (not confirmed to avoid the hang).
+
+**Fixed (committed, untested):** libcamera r3 (install loop exit status), btop, kronosnet,
+libfilezilla r4, libobjc2, opensp, libmodbus, indi, imhex, open-isns, mariadb r3 (PCDIR),
+gcc r2, ruby4.0, perl-authen-pam/xml-sax, opensmtpd, libmemcached-awesome r3, vectorscan,
+thin-provisioning-tools, tini, ghc r4 (hsc2hs response file `--target=`), python-jpype1,
+libpathrs, stalwart r3, the Gradle ones (dkbuild sets -Dorg.gradle.native=false; ghidra
+flat repo patch, geogebra pin, logisim checkstyle, coulomb, zaproxy add-ons, stirling),
+dart, dotnet r5 (stub liblttng-ust-tracepoint for the seed SDK), euro-office-v8,
+euro-office-core r2 (third-party sources), gdevelop r4, jogamp r4, listmonk, vikunja,
+uptime-kuma, scratch-desktop, pi-hole, kismet r4, libofx r3 (libxml++2 new, auto_ptr shim),
+moby, rspamd (!lto, unconfirmed), exim, gnustep-base, the Proxmox Rust ones.
+
+**New recipes:** base-devel (LLVM, zig, Rust, nasm, yasm, cmake, autotools, ...), yasm,
+rust-bootstrap + `rust` built from source against llvm22 (selfhost; rust-wasm and
+rustc-dev are now part of it; WASI targets need a wasi-libc package that does not exist),
+24 FFmpeg libraries (opencore-amr, vo-amrwbenc, libilbc, codec2, kvazaar, libvmaf,
+libaribcaption, libaribb24, zeromq, libvpl, libudfread, mujs, flite, shine, quirc,
+rabbitmq-c, vvenc, xavs2, davs2, uavs3d, svt-jpeg-xs, oapv, libdc1394, libraw1394,
+libiec61883, libavc1394), whisper.cpp (private ggml under /usr/lib/whisper.cpp), ffmpeg r8
+and mpv r5 with everything on (left off: chromaprint and opencv, which depend on ffmpeg;
+OSS; celt), sox-ng r3 (ffmpeg, AMR), dkman 0.5.0 (-Dinstall-as-man), dkconsole 0.2.0,
+dkde 0.2.0, greetd 0.10.3, and dkde's optional dependencies (brightnessctl, qt6ct, kvantum,
+swaylock, tmux, webp-pixbuf-loader, papirus-icon-theme, gnome-online-accounts-gtk,
+f2fs-tools, jfsutils, reiserfsprogs, nilfs-utils, udftools, fatresize). Not packaged:
+qt5ct (no Qt5), hfsprogs (no portable source), waylock, gtklock.
+desktop-dkde r4 pulls them all in (policy: optional deps are runtime deps). gvfs r2 has
+the GOA/OneDrive/Google backends on; dkde depends on gvfs, gnome-online-accounts and
+NetworkManager.
+
+**Image tool (src/image.zig, SPEC section 8):** `issue` (writes /etc/issue), `console`
+("agetty"|"dkconsole": tty1-5 on dkconsole, tty6 and serial stay agetty; the autologin VT
+stays agetty), `login` ("console"|"greetd": greetd initial_session for autologin; nullok
+PAM file only when a user has an empty password), `unwanted` (apk `!name`). images/dkde.toml
+boots through greetd on VT 7 with NetworkManager, no base-net, unwanted dhcpcd.
+
+**Open / watch:** the Rust source build and the FFmpeg libraries are the biggest untested
+chains; xavs2/davs2/libdc1394 may not build; VT 7 for greetd and dkde-session as an
+initial_session are unconfirmed; `dkbuild upstream` for brush now follows brush-shell tags.
+Uncommitted on purpose: images/rescue.toml.save (the user's editor backup).
