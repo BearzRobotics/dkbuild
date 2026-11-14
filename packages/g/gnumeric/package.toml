@@ -1,0 +1,35 @@
+# gnumeric: GNOME spreadsheet. Both plugin loaders are on (Perl and Python via
+# PyGObject), so are the Gnumeric formats that have a package.
+# Off, with the reason: Psiconv (Psion files) and Paradox (pxlib) import
+# plugins and the libgda database plugin: their libraries are not packaged;
+# documentation in PDF (needs a TeX toolchain).
+name = "gnumeric"
+version = "1.12.62"
+release = 1
+summary = "GNOME spreadsheet"
+license = "GPL-2.0-only OR GPL-3.0-only"
+homepage = "https://www.gnumeric.org"
+hostdeps = ["pkgconf", "gettext", "gobject-introspection", "intltool", "perl", "perl-xml-parser", "python", "itstool"]
+builddeps = ["glib-devel", "goffice-devel", "gtk+3-devel", "libgsf-devel", "libxml2-devel", "perl", "python", "python-gobject", "zlib-ng-compat-devel", "cairo-devel", "pango-devel"]
+rundeps = ["python-gobject", "perl", "adwaita-icon-theme"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/gnumeric/1.12/gnumeric-1.12.62.tar.xz", sha256 = "89331121321b9bad72d37af5a6d13a0a636f0fbb0880f0ea1f2cf8b7ab9ae631" },
+]
+
+setup = '''
+%configure \
+    --enable-shared --enable-static \
+    --enable-introspection=yes \
+    --disable-schemas-compile \
+    --without-psiconv \
+    --without-paradox
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/gnumeric/COPYING"
+'''
