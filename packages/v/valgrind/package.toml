@@ -1,0 +1,48 @@
+# Imported from Chimera Linux cports: main/valgrind/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# musl: upstream supports it (configure detects "musl" in the compiler's
+# target triple and loads musl.supp). Known limits on musl: valgrind cannot
+# replace malloc in a *statically* linked program, and memcheck on musl
+# reports a few "still reachable" blocks from libc itself (the supplied
+# musl.supp hides the usual ones). x86_64 only here (the recipe's other
+# architectures were ppc and loongarch).
+# rtlib.patch (Chimera's): the tools link the compiler runtime reported by
+# `$CC -print-libgcc-file-name` (compiler-rt's builtins with clang) instead
+# of a hard-coded -lgcc; it changes configure.ac and Makefile.tool.am, so
+# autogen.sh regenerates the build system. Chimera's other patches (ppc64 ELFv2,
+# ppc "scv") are not for x86_64 and are left out.
+# CFLAGS -U_FORTIFY_SOURCE -fPIC as Chimera. !strip: valgrind's tools (static
+# ELF files in /usr/lib/valgrind) and the vgpreload_*.so libraries must keep
+# their symbols; stripping them breaks the tools (Debian and Alpine also
+# exclude /usr/lib/valgrind from stripping).
+name = "valgrind"
+version = "3.28.0"
+release = 1
+summary = "Instrumentation framework for building dynamic analysis tools"
+license = "GPL-2.0-or-later"
+homepage = "https://valgrind.org"
+archs = ["x86_64"]
+patches = ["rtlib.patch"]
+hostdeps = ["autoconf", "automake", "libtool", "perl", "pkgconf"]
+builddeps = ["linux-headers"]
+rundeps = ["perl", "python"]
+options = ["!check", "!strip", "!lto"]
+
+source = [
+    { url = "https://sourceware.org/pub/valgrind/valgrind-3.28.0.tar.bz2", sha256 = "9f7a18d128f05d3a80fea53e6953f34aad7200a425ceaee46099a8a798a7dd9c" },
+]
+
+environment = '''
+export CFLAGS="$CFLAGS -U_FORTIFY_SOURCE -fPIC"
+'''
+setup = '''
+./autogen.sh
+%configure \
+    --without-mpicc
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''
