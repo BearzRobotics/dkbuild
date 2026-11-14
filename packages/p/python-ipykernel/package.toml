@@ -1,0 +1,20 @@
+# ipykernel from PyPI.
+name = "python-ipykernel"
+version = "7.4.0"
+release = 1
+summary = "IPython Kernel for Jupyter"
+license = "BSD-3-Clause"
+homepage = "https://ipython.org"
+hostdeps = ["python", "python-hatchling", "python-jupyter-client"]
+rundeps = ["python", "python-comm", "python-debugpy", "python-ipython", "python-jupyter-client", "python-jupyter-core", "python-matplotlib-inline", "python-nest-asyncio2", "python-packaging", "python-pyzmq", "python-tornado", "python-traitlets"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/7a/05/e5499c8b762387d83926bf0389e8fff888c9bf6e7af30566a8527bc12f4a/ipykernel-7.4.0.tar.gz", sha256 = "4330114d22b9b33575b2c7c68753fc8faabbbcfbc60b0cdff9f14dd4ce63742f" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-ipykernel/LICENSE"
+'''
