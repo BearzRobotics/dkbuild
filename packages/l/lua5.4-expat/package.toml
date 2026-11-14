@@ -1,0 +1,24 @@
+# LuaExpat for Lua 5.4: a SAX XML parser (Expat) for Lua (needed by Prosody).
+# A Lua C module: no library for other programs to link, so no -static.
+name = "lua5.4-expat"
+version = "1.5.2"
+release = 1
+summary = "SAX XML parser for Lua 5.4 based on Expat"
+license = "MIT"
+homepage = "https://github.com/lunarmodules/luaexpat"
+hostdeps = ["pkgconf"]
+builddeps = ["lua-devel", "libexpat-devel"]
+rundeps = ["lua"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/lunarmodules/luaexpat/archive/refs/tags/1.5.2.tar.gz", sha256 = "89d83f2141edec31be576425637216928221918fe95dc3854d1b7fd4c627213f" },
+]
+
+build = '''
+make LUA_V=5.4 LUA_INC=-I/usr/include EXPAT_INC=-I/usr/include
+'''
+install = '''
+make install LUA_V=5.4 DESTDIR="$pkgdir"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/lua5.4-expat/LICENSE"
+'''
