@@ -1,0 +1,59 @@
+# PowerShell's help (what `Get-Help` shows), built offline from Microsoft's PowerShell-Docs
+# (the Markdown that Update-Help's content is generated from) with platyPS, so `Get-Help`
+# works with no `Update-Help` and no network. The cmdlet help is MAML XML in
+# $PSHOME/en-US (the modules' own en-US for PSReadLine, Archive, ThreadJob and PSDiagnostics);
+# the about_ topics are plain-text .help.txt files, converted from the Markdown. English only.
+# Sources: PowerShell-Docs at a pinned commit (reference/7.6 is built: the powershell
+# package's series), and platyPS (Microsoft.PowerShell.PlatyPS 1.0.3, MIT; the module's
+# managed assemblies come as published on the PowerShell Gallery, as the Kotlin and Scala
+# jars do). The build needs a working `pwsh`: powershell needs dotnet, which has not built
+# yet, so this recipe is UNTESTED: platyPS's output layout (<module>/<external help file>) is
+# found by `find`, not assumed, but the Markdown schema (2.0.0) and the commands are as
+# platyPS 1.0 documents them.
+# Licences: the documentation text is CC-BY-4.0 (LICENSE.md in the docs repository; the
+# attribution is "Microsoft", PowerShell-Docs), its code MIT (LICENSE-CODE.md); platyPS is MIT.
+name = "powershell-help"
+version = "7.6_git20261113"
+release = 1
+summary = "PowerShell help files for Get-Help, built offline from PowerShell-Docs"
+license = "CC-BY-4.0 AND MIT"
+homepage = "https://github.com/MicrosoftDocs/PowerShell-Docs"
+archs = ["x86_64"]
+hostdeps = ["powershell", "unzip", "findutils"]
+rundeps = ["powershell"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/MicrosoftDocs/PowerShell-Docs/archive/ebaa235784a688ec72ab642186c4c17460fb438b.tar.gz", sha256 = "edd6a9e27c8a912f5ef9e09afd487e09b96a01d12a0e325dad1b20fbff66f8ca" },
+    { url = "https://www.powershellgallery.com/api/v2/package/Microsoft.PowerShell.PlatyPS/1.0.3", name = "Microsoft.PowerShell.PlatyPS-1.0.3.nupkg", sha256 = "df43751aa3e03e6fcac3374949f6161d6a412a349e7c3362c33c3ce34d2eb562", unpack = false },
+]
+
+environment = '''
+export HOME=/tmp/home POWERSHELL_TELEMETRY_OPTOUT=1 DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
+mkdir -p "$HOME"
+'''
+build = '''
+mkdir -p /tmp/platyps
+unzip -qo /build/sources/Microsoft.PowerShell.PlatyPS-1.0.3.nupkg -d /tmp/platyps/Microsoft.PowerShell.PlatyPS
+mkdir -p /tmp/help
+pwsh -NoProfile -File $pkgfiles/gen-help.ps1 reference/7.6 /tmp/platyps/Microsoft.PowerShell.PlatyPS /tmp/help
+# something must have come out: the cmdlet help and the about_ topics
+test "$(find /tmp/help -name '*-Help.xml' | wc -l)" -ge 5
+test "$(find /tmp/help/about -name '*.help.txt' | wc -l)" -ge 50
+'''
+install = '''
+ph="$pkgdir/usr/lib/powershell"
+mkdir -p "$ph/en-US"
+find /tmp/help -name '*-Help.xml' | while read -r f; do
+    # platyPS may put the XML in <module>/<locale>/: the module is the directory under /tmp/help
+    m=$(echo "${f#/tmp/help/}" | cut -d/ -f1)
+    case "$m" in
+        PSReadLine|Microsoft.PowerShell.Archive|Microsoft.PowerShell.ThreadJob|PSDiagnostics)
+            install -Dm644 "$f" "$ph/Modules/$m/en-US/$(basename "$f")" ;;
+        *)  install -Dm644 "$f" "$ph/en-US/$(basename "$f")" ;;
+    esac
+done
+for f in /tmp/help/about/*.help.txt; do install -Dm644 "$f" "$ph/en-US/$(basename "$f")"; done
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/powershell-help/LICENSE.md"
+install -Dm644 LICENSE-CODE.md "$pkgdir/usr/share/licenses/powershell-help/LICENSE-CODE.md"
+'''
