@@ -1,0 +1,49 @@
+# Vim script grammar, one of the parsers neovim bundles (src/parser.c and the
+# external scanner come pre-generated in the release; the tree-sitter CLI is
+# not needed). The release has no Makefile and no C binding header, so the
+# shared and static libraries are built here directly: libtree-sitter-vim.so.15
+# (15 = the tree-sitter language ABI of parser.c) and libtree-sitter-vim.a,
+# plus a pkg-config file. /usr/lib/tree-sitter/vim.so is the link neovim
+# reads, as for the other parsers.
+name = "tree-sitter-vim"
+version = "0.8.1"
+release = 1
+summary = "Vim script grammar for tree-sitter"
+license = "MIT"
+homepage = "https://github.com/tree-sitter-grammars/tree-sitter-vim"
+hostdeps = ["pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/tree-sitter-grammars/tree-sitter-vim/archive/v0.8.1.tar.gz", sha256 = "93cafb9a0269420362454ace725a118ff1c3e08dcdfdc228aa86334b54d53c2a" },
+]
+
+build = '''
+abi=$(sed -n 's/^#define LANGUAGE_VERSION //p' src/parser.c)
+echo $abi > abi
+for f in src/parser.c src/scanner.c; do
+    $CC $CFLAGS -fPIC -std=c11 -Isrc -c $f -o ${f%.c}.o
+done
+$CC $LDFLAGS -shared -Wl,-soname,libtree-sitter-vim.so.$abi -o libtree-sitter-vim.so.$abi src/parser.o src/scanner.o
+ar rcs libtree-sitter-vim.a src/parser.o src/scanner.o
+cat > tree-sitter-vim.pc <<EOP
+prefix=/usr
+libdir=\${prefix}/lib
+
+Name: tree-sitter-vim
+Description: Vim script grammar for tree-sitter
+URL: https://github.com/tree-sitter-grammars/tree-sitter-vim
+Version: $version
+Libs: -L\${libdir} -ltree-sitter-vim
+EOP
+'''
+install = '''
+abi=$(cat abi)
+install -Dm755 libtree-sitter-vim.so.$abi "$pkgdir/usr/lib/libtree-sitter-vim.so.$abi"
+ln -s libtree-sitter-vim.so.$abi "$pkgdir/usr/lib/libtree-sitter-vim.so"
+install -Dm644 libtree-sitter-vim.a "$pkgdir/usr/lib/libtree-sitter-vim.a"
+install -Dm644 tree-sitter-vim.pc "$pkgdir/usr/lib/pkgconfig/tree-sitter-vim.pc"
+mkdir -p "$pkgdir/usr/lib/tree-sitter"
+ln -s ../libtree-sitter-vim.so.$abi "$pkgdir/usr/lib/tree-sitter/vim.so"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/tree-sitter-vim/LICENSE"
+'''
