@@ -1,0 +1,20 @@
+# nbformat from PyPI.
+name = "python-nbformat"
+version = "5.11.1"
+release = 1
+summary = "The Jupyter Notebook format"
+license = "BSD-3-Clause"
+homepage = "https://jupyter.org"
+hostdeps = ["python", "python-hatchling", "python-hatch-nodejs-version"]
+rundeps = ["python", "python-fastjsonschema", "python-jsonschema", "python-jupyter-core", "python-traitlets"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/31/72/b3446efab8756e7df4b8ec587f8e611cb5a7249e4323db480802f1d3be04/nbformat-5.11.1.tar.gz", sha256 = "32d4521c68c6e7d5b29c76defaeed9f42ea733142b9b19f88277ce10390b9c4d" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-nbformat/LICENSE"
+'''
