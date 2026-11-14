@@ -189,6 +189,9 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
             \\fi
             \\if [ -n "$pnpm_locks" ]; then
             \\    export npm_config_registry=http://127.0.0.1:4873/ npm_config_store_dir=/tmp/pnpm-store PNPM_HOME=/tmp/pnpm-home
+            \\    # pnpm 11 reads only pnpm_config_* (not npm_config_*): without these it asks the
+            \\    # real registry, finds no network and retries each package for hours
+            \\    export pnpm_config_registry=http://127.0.0.1:4873/ pnpm_config_store_dir=/tmp/pnpm-store
             \\    unset npm_config_offline
             \\fi
             \\if [ -n "$yarn_locks" ]; then
@@ -413,6 +416,11 @@ fn inTreeFiles(arena: Allocator, io: std.Io, opts: Options, r: recipe.Recipe, re
         }
     }
     const direct = work.items.len;
+    // checkdeps (SPEC 5.2): what the `check` step needs. They come after `direct`, so one
+    // that is not built yet is just left out (the check then fails on its own, loudly)
+    // instead of stopping the build; none are installed when the check does not run.
+    if (!opts.no_check and !contains(r.options, "!check") and r.check != null)
+        try work.appendSlice(arena, r.checkdeps);
     var k: usize = 0;
     while (k < work.items.len) : (k += 1) {
         const d = work.items[k];

@@ -213,7 +213,7 @@ guide to the rest of the syntax.
 | `archs` | no | Architectures this builds for; default all. `!riscv64` excludes one. **Inert:** the values are validated and nothing reads them; every recipe is built for the one architecture dkbuild is run for |
 | `hostdeps` | no | Packages run during the build (compilers, meson, perl): installed for the **build machine's** architecture |
 | `builddeps` | no | Libraries and headers linked against: installed for the **target** architecture |
-| `checkdeps` | no | Extra packages needed only by `check`. **Inert:** accepted and documentation only: the build root never installs them and they need not exist in the tree |
+| `checkdeps` | no | Extra packages needed only by `check`. Installed in the build root when the check runs (not with `--no-check`, not with `!check`), if they are built; one that is not is left out, and the check fails on its own. They are not build-order dependencies |
 | `rundeps` | no | Runtime dependencies that can't be detected (5.6) |
 | `stage0deps` | no | With `selfhost` only: what the build needs instead of its own earlier package while `repo/` has none (the first build) |
 | `provides` | no | Names the main package provides besides what the scan finds (5.6), e.g. `so:libgcc_s.so.1` for a link the scanner cannot see through |
@@ -291,7 +291,7 @@ release, or a `snapshot:git` source (below), which is a checksummed tarball.
 | `!check` | Don't run `check` (tests that need hardware or network) |
 | `!cross` | Can't be cross-compiled; built only natively (6.3). **Inert:** accepted, never read: there are no cross builds yet (6.2) |
 | `!strip` | Don't strip binaries |
-| `!lto` | Turn off link-time optimization (when it's on by default). **Inert:** accepted, never read: no build turns LTO on, so there is nothing to turn off (about 50 recipes carry it); `lto` itself is accepted and also does nothing |
+| `!lto` | Turn off link-time optimization (when it's on by default). **Reserved, no effect yet:** accepted and never read, because no build turns LTO on (about 50 recipes already carry it, marking where LTO breaks). It is kept on purpose: LTO and other optimization and hardening flags (CFI, stack protection, `_FORTIFY_SOURCE`, PIE, RELRO) are planned as profile-level defaults that `!lto` and similar `!`-options opt a recipe out of; `lto` itself is accepted the same way |
 | `static` | Link programs statically (rescue-critical tools): adds `-static` to `LDFLAGS`. Never on a recipe that ships a shared library: `-shared -static` links without a warning and gives a library that crashes its users (zstd 1.5.7-r1 crashed lld that way) |
 | `bootstrap` | Part of the bootstrap set (9); built in stage 0. **Inert:** accepted, never read (about 24 recipes carry it); stage 1 builds whatever the tree asks for (7.3) |
 | `selfhost` | A compiler built with itself (dotnet): the build root also gets the newest package of this recipe in `repo/`, of any version, with that build's declared subpackages (all of them, or the build does not count). With none, the first build uses `stage0deps` (a seed such as a vendor binary and what it needs). Not part of the build-root hash, so a new build does not trigger another |
