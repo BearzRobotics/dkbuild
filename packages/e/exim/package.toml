@@ -152,6 +152,8 @@ for m in ldap mysql pgsql sqlite lmdb redis json psl; do
     test -f "$pkgdir/usr/lib/exim/modules/${m}_lookup.so"
 done
 # the sendmail interface and its usual names
+# make install creates only usr/sbin; the compatibility links below go in usr/bin
+install -d "$pkgdir/usr/bin"
 ln -s exim "$pkgdir/usr/sbin/sendmail"
 ln -s ../sbin/exim "$pkgdir/usr/bin/mailq"
 ln -s ../sbin/exim "$pkgdir/usr/bin/newaliases"
