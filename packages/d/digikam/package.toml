@@ -1,0 +1,39 @@
+# Adapted from Chimera Linux cports: main/digikam. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# digiKam 9: photo management (Qt 6, KDE Frameworks 6). Built with BUILD_TESTING
+# off: the tests need the external digikam-test-data repository (cports needs a
+# patch to stop CMake from git-cloning it; with testing off it never tries).
+# Not packaged, left off: libpgf (PGF format; digiKam falls back to its bundled
+# copy, which is what the build uses), Marble maps (digiKam's geolocation editor
+# uses Marble: ENABLE_MARBLE not set; marble is not packaged here), Akonadi
+# contacts are on (akonadi-devel).
+name = "digikam"
+version = "9.1.0"
+release = 1
+summary = "Digital photo management application"
+license = "LGPL-2.1-or-later AND GPL-2.0-or-later"
+homepage = "https://www.digikam.org"
+hostdeps = ["bison", "cmake", "extra-cmake-modules", "flex", "gettext", "ninja", "pkgconf"]
+builddeps = ["akonadi-devel", "boost-devel", "eigen", "exiv2-devel", "ffmpeg-devel", "glib-devel", "imagemagick-devel", "jasper-devel", "kcalendarcore-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "knotifications-devel", "knotifyconfig-devel", "kservice-devel", "kwindowsystem-devel", "lcms2-devel", "lensfun-devel", "libexpat-devel", "libgphoto2-devel", "libheif-devel", "libjxl-devel", "libksane-devel", "libpng-devel", "libtiff-devel", "libxml2-devel", "libxslt-devel", "opencv-devel", "openmp-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtmultimedia-devel", "qt6-qtnetworkauth-devel", "qt6-qtscxml-devel", "qt6-qtsvg-devel", "qt6-qtwebengine-devel", "solid-devel", "sonnet-devel", "threadweaver-devel", "x265-devel"]
+rundeps = ["perl-image-exiftool"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/digikam/9.1.0/digiKam-9.1.0.tar.xz", sha256 = "a7309191e9a4787853cb3ac4136e4f8d7c044b40338dc42c7e422c37625b72e1" },
+]
+
+environment = '''
+export CFLAGS="$CFLAGS -D_GNU_SOURCE"
+export CXXFLAGS="$CXXFLAGS -D_GNU_SOURCE"
+'''
+setup = '''
+%cmake \
+    -DBUILD_TESTING=OFF \
+    -DBUILD_WITH_QT6=ON \
+    -DQT_VERSION_MAJOR=6
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''
