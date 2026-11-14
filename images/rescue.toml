@@ -15,6 +15,7 @@ FenrirOS Rescue \\r (\\l)
 
 Log in as: rescue   (no password; sudo works)
 """
+# console  = "dkconsole"   # experimental text console on tty1-5 (tty6 and serial keep agetty)
 output   = ["iso"]
 autologin = "rescue"
 session   = "dkde-session"

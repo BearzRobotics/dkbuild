@@ -863,6 +863,16 @@ groups   = ["wheel", "video", "render"]
 password = "locked"
 ```
 
+Optional keys: `autologin = "user"` (that user logs in on tty1 at boot),
+`session = "dkde-session"` (the command tty1 runs), `issue = """..."""` (the
+text of `/etc/issue`, which agetty and dkconsole print before `login:`), and
+`console = "agetty"` (default) or `"dkconsole"`. With `dkconsole` (experimental)
+the image gets the package and tty1-tty5 run `dkconsole --vt N`; tty6 and the
+serial console stay on agetty, so there is always a login if it fails (dkconsole
+also hands a VT to agetty by itself when it cannot start or crashes three times).
+The autologin VT stays on agetty: dkconsole's `login-program` is a path, not a
+command that can log a user in.
+
 `dkbuild image images/fenriros.toml` (src/image.zig), in the sandbox on the
 build machine, as uid 0 of a user namespace, writing only `out/<name>/`:
 

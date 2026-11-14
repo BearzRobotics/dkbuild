@@ -46,6 +46,13 @@ pub const Image = struct {
     /// console (`\r` kernel, `\l` tty, `\n` host); empty keeps the package's.
     /// A live image says there which user to log in as.
     issue: []const u8 = "",
+    /// The login program on the text consoles: "agetty" (the default) or
+    /// "dkconsole" (experimental). With dkconsole the image gets the package, and
+    /// tty1-tty5 run `dkconsole --vt N`; tty6 and the serial console stay on
+    /// agetty as the way in if it fails (dkconsole also hands a VT to agetty by
+    /// itself when it cannot start). The autologin VT (tty1) stays on agetty:
+    /// dkconsole's login-program is only a path, with no way to log a user in.
+    console: []const u8 = "agetty",
     /// Any of "rootfs", "tar", "squashfs", "iso".
     output: []const []const u8,
 };
@@ -64,7 +71,7 @@ pub fn parse(arena: Allocator, text: []const u8, diag: *Diagnostic) Error!Image 
 
 fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error!Image {
     const root = try cfg.parse(arena, text, diag);
-    try cfg.onlyKeys(arena, diag, root, &.{ "name", "arch", "packages", "exclude", "services", "users", "hostname", "label", "autologin", "session", "issue", "output" }, "");
+    try cfg.onlyKeys(arena, diag, root, &.{ "name", "arch", "packages", "exclude", "services", "users", "hostname", "label", "autologin", "session", "issue", "console", "output" }, "");
     var img: Image = .{
         .name = try cfg.reqString(arena, diag, root, "name"),
         .packages = try cfg.optStrings(arena, diag, root, "packages"),
@@ -76,6 +83,9 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
     if (try cfg.optString(arena, diag, root, "hostname")) |h| img.hostname = h;
     if (try cfg.optString(arena, diag, root, "autologin")) |u| img.autologin = u;
     if (try cfg.optString(arena, diag, root, "session")) |c| img.session = c;
+    if (try cfg.optString(arena, diag, root, "console")) |c| img.console = c;
+    if (!std.mem.eql(u8, img.console, "agetty") and !std.mem.eql(u8, img.console, "dkconsole"))
+        return cfg.fail(arena, diag, "'console' must be \"agetty\" or \"dkconsole\"", .{});
     if (try cfg.optString(arena, diag, root, "issue")) |t| img.issue = t;
     if (std.mem.indexOf(u8, img.issue, "DKISSUE_EOF") != null) return cfg.fail(arena, diag, "'issue' may not contain DKISSUE_EOF", .{});
     if (std.mem.indexOfAny(u8, img.session, "'\n") != null) return cfg.fail(arena, diag, "'session' may not contain quotes or newlines", .{});
@@ -151,6 +161,7 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
     );
     try w.add(arena, &s, "apk add --root /target --initdb --arch {s} --keys-dir /target/etc/apk/keys --repository /dkrepo/Packages.adb --no-network --no-cache", .{img.arch});
     for (img.packages) |p| try w.add(arena, &s, " {s}", .{p});
+    if (std.mem.eql(u8, img.console, "dkconsole") and !contains(img.packages, "dkconsole")) try s.appendSlice(arena, " dkconsole");
     try s.appendSlice(arena, "\n");
     try w.add(arena, &s, "echo '{s}' > /target/etc/hostname\n", .{img.hostname});
 
@@ -187,6 +198,17 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
         }
     }
 
+    if (std.mem.eql(u8, img.console, "dkconsole")) {
+        // tty1-tty5 run dkconsole (tty1 stays agetty when it logs a user in at boot);
+        // tty6 and ttyS0 keep agetty as the independent way in
+        try s.appendSlice(arena, "echo '==> console (dkconsole)'\n[ -x /target/usr/bin/dkconsole ] || { echo \"error: no /usr/bin/dkconsole (the package did not install it)\" >&2; exit 1; }\n");
+        var n: u8 = if (img.autologin.len > 0) 2 else 1;
+        while (n <= 5) : (n += 1) try w.add(arena, &s,
+            \\[ -f /target/etc/dinit.d/tty{0d} ] || {{ echo "error: no /etc/dinit.d/tty{0d} to run dkconsole on (add dinit-services)" >&2; exit 1; }}
+            \\sed -i 's|^command = .*|command = /usr/bin/dkconsole --vt {0d}|' /target/etc/dinit.d/tty{0d}
+            \\
+        , .{n});
+    }
     if (img.issue.len > 0) try w.add(arena, &s,
         \\echo '==> issue'
         \\cat > /target/etc/issue <<'DKISSUE_EOF'
@@ -439,4 +461,21 @@ test "an image's issue text is written to /etc/issue" {
     const s = try script(a, img);
     try std.testing.expect(std.mem.indexOf(u8, s, "cat > /target/etc/issue <<'DKISSUE_EOF'\nFenrirOS \\r (\\l)\nLog in as rescue\nDKISSUE_EOF\n") != null);
     try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\npackages = [\"a\"]\noutput = [\"tar\"]\nissue = \"DKISSUE_EOF\"\n", &diag));
+}
+
+test "console = dkconsole adds the package and moves tty1-tty5 off agetty, keeping tty6" {
+    var arena_state = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena_state.deinit();
+    const a = arena_state.allocator();
+    var diag: Diagnostic = .{};
+    const img = try parse(a, "name = \"x\"\npackages = [\"a\"]\noutput = [\"tar\"]\nconsole = \"dkconsole\"\n", &diag);
+    const s = try script(a, img);
+    try std.testing.expect(std.mem.indexOf(u8, s, " dkconsole") != null);
+    try std.testing.expect(std.mem.indexOf(u8, s, "dkconsole --vt 1|' /target/etc/dinit.d/tty1") != null);
+    try std.testing.expect(std.mem.indexOf(u8, s, "dkconsole --vt 5|' /target/etc/dinit.d/tty5") != null);
+    try std.testing.expect(std.mem.indexOf(u8, s, "dinit.d/tty6") == null);
+    const auto = try parse(a, "name = \"x\"\npackages = [\"a\"]\noutput = [\"tar\"]\nconsole = \"dkconsole\"\nautologin = \"u\"\n[[users]]\nname = \"u\"\n", &diag);
+    const s2 = try script(a, auto);
+    try std.testing.expect(std.mem.indexOf(u8, s2, "dkconsole --vt 1|' /target/etc/dinit.d/tty1") == null);
+    try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\npackages = [\"a\"]\noutput = [\"tar\"]\nconsole = \"mingetty\"\n", &diag));
 }
