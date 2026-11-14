@@ -1,0 +1,20 @@
+# jupyter-server from PyPI.
+name = "python-jupyter-server"
+version = "2.21.1"
+release = 1
+summary = "The backend—i.e. core services, APIs, and REST endpoints—to Jupyter web applications."
+license = "BSD-3-Clause"
+homepage = "https://jupyter-server.readthedocs.io"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python", "python-anyio", "python-argon2-cffi", "python-jinja2", "python-jupyter-client", "python-jupyter-core", "python-jupyter-events", "python-jupyter-server-terminals", "python-nbconvert", "python-nbformat", "python-packaging", "python-prometheus-client", "python-pyzmq", "python-send2trash", "python-terminado", "python-tornado", "python-traitlets", "python-websocket-client"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/65/3d/3c9f8bce5d5448107bd285cd80185e76c9c871d076b580dfd90997e52904/jupyter_server-2.21.1.tar.gz", sha256 = "a8960aa29263f6041283e97d4756b099fb49b767baab6371891ecb1bd40a63df" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-jupyter-server/LICENSE"
+'''
