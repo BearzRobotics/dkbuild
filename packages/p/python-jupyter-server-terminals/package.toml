@@ -1,0 +1,20 @@
+# jupyter-server-terminals from PyPI.
+name = "python-jupyter-server-terminals"
+version = "0.5.4"
+release = 1
+summary = "A Jupyter Server Extension Providing Terminals."
+license = "BSD-3-Clause"
+homepage = "https://jupyter.org"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python", "python-terminado"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/f4/a7/bcd0a9b0cbba88986fe944aaaf91bfda603e5a50bda8ed15123f381a3b2f/jupyter_server_terminals-0.5.4.tar.gz", sha256 = "bbda128ed41d0be9020349f9f1f2a4ab9952a73ed5f5ac9f1419794761fb87f5" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-jupyter-server-terminals/LICENSE"
+'''
