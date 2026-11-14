@@ -1,0 +1,39 @@
+# Gforth 0.7.3, the GNU Forth (the last release; the newer 0.7.9 are snapshots
+# of the project's development tree, not releases). UNTESTED and RISKY: the
+# 2014 sources predate clang 15+ and PIE defaults; the tarball carries the generated C
+# (engine/prim.i, ...) and the prebuilt kernel images (kernl*.fi), so only a C compiler
+# is needed, and the freshly built gforth then builds its own images.
+# Source edits: none. Compile flags (from distribution packaging of 0.7.x, not verified
+# here): no PIE (-fno-pie, -no-pie: the engine's code layout and relocations misbehave
+# under PIE), -fno-strict-aliasing and -fno-delete-null-pointer-checks (its configure adds
+# them only for GCC), -std=gnu99 (old-style C).
+# Not built: gforth-prof (--enable-prof, an optional profiling engine: built, as the policy
+# asks) and the libffcall based FFI (libffcall is not in the tree; the libcc C interface
+# uses the C compiler and libtool at run time instead, so libtool is a run dependency).
+# Serial build: its makefile is not parallel-safe.
+name = "gforth"
+version = "0.7.3"
+release = 1
+summary = "GNU implementation of the Forth language"
+license = "GPL-3.0-or-later"
+homepage = "https://gforth.org"
+hostdeps = ["make"]
+rundeps = ["libtool", "llvm"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/gforth/gforth-0.7.3.tar.gz", sha256 = "2f62f2233bf022c23d01c920b1556aa13eab168e3236b13352ac5e9f18542bb0" },
+]
+
+setup = '''
+export CFLAGS="$CFLAGS -std=gnu99 -fno-pie -fno-strict-aliasing -fno-delete-null-pointer-checks -Wno-error"
+export LDFLAGS="$LDFLAGS -no-pie"
+%configure --enable-prof
+'''
+build = '''
+make
+'''
+install = '''
+make install DESTDIR="$pkgdir"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/gforth/COPYING"
+'''
