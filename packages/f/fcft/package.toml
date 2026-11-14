@@ -1,0 +1,35 @@
+# Imported from Chimera Linux cports: main/fcft/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Shared and static (-Ddefault_library=both from %meson). Text-run and
+# grapheme shaping on (harfbuzz, utf8proc); SVG glyphs through the nanosvg
+# bundled in the source. The sha256 differs from Chimera's: Codeberg's archive
+# of the tag is not the one it checksummed.
+name = "fcft"
+version = "3.3.3"
+release = 1
+summary = "Simple library for font loading and glyph rasterization"
+license = "MIT"
+homepage = "https://codeberg.org/dnkl/fcft"
+hostdeps = ["meson", "pkgconf", "scdoc"]
+builddeps = ["fontconfig-devel", "freetype-devel", "harfbuzz-devel", "pixman-devel", "tllist", "utf8proc-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://codeberg.org/dnkl/fcft/archive/3.3.3.tar.gz", sha256 = "b0c0f4a599f43723736c8565b8b84337c4195077f07f1bb8bb3252bb13a2306a" },
+]
+
+setup = '''
+%meson \
+    -Dgrapheme-shaping=enabled \
+    -Drun-shaping=enabled \
+    -Dsvg-backend=nanosvg \
+    -Ddocs=enabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+mkdir -p "$pkgdir/usr/share/licenses/fcft"
+mv "$pkgdir/usr/share/doc/fcft/LICENSE" "$pkgdir/usr/share/licenses/fcft/LICENSE"
+'''
