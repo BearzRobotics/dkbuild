@@ -1,0 +1,20 @@
+# hatch-jupyter-builder from PyPI.
+name = "python-hatch-jupyter-builder"
+version = "0.10.0"
+release = 1
+summary = "A hatch plugin to help build Jupyter packages"
+license = "BSD-3-Clause"
+homepage = "https://github.com/jupyterlab/hatch-jupyter-builder"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python", "python-hatchling"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/fa/71/8fde9a971de1bfdb52c9cc10be561909241ddb4a4e34d580353a76c82f35/hatch_jupyter_builder-0.10.0.tar.gz", sha256 = "144f6a7afd7f837071eca81141313d736643be4f6734b45f30661bcb922bd80a" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-hatch-jupyter-builder/LICENSE.txt"
+'''
