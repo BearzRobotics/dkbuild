@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=MuPDF
+GenericName=Document Viewer
+Comment=Lightweight PDF, XPS and EPUB viewer
+Exec=mupdf-gl %f
+Icon=application-pdf
+Terminal=false
+Categories=Office;Viewer;
+MimeType=application/pdf;application/epub+zip;application/vnd.ms-xpsdocument;application/x-cbz;application/oxps;

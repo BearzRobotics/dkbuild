@@ -1,0 +1,48 @@
+# MuPDF: the library (libmupdf, shared and static) and its viewers (mupdf-gl,
+# mupdf-x11, mupdf-x11-curl) and tools (mutool, muraster). Built with the
+# system copies of the libraries it can use (freetype, harfbuzz, gumbo,
+# jbig2dec, libjpeg, openjpeg, zlib, brotli, mujs, freeglut, curl, leptonica,
+# tesseract, zxing-cpp). The bundled copies stay for what has no package or
+# an incompatible API: lcms2 (MuPDF uses the "lcms2mt" fork), cmark-gfm,
+# extract, and libpkcs7 (own code).
+# Optional features on: tesseract OCR, barcodes (zxing-cpp), archives
+# (libarchive), the X11 and GL viewers.
+# MuPDF has no pkg-config file and no build system for the library beyond the
+# Makefile. mupdf.pc comes from files/ (what zathura-pdf-mupdf and others look
+# for); libmupdf-third.a is installed for the same reason (static builds,
+# zathura-pdf-mupdf's fallback lookup).
+# The Makefile makes a shared build (build/shared-release) and a static one
+# (build/release) in separate trees; both are built and installed: shared
+# first, then static libs only.
+name = "mupdf"
+version = "1.28.6"
+release = 1
+summary = "Lightweight PDF, XPS and EPUB viewer and library"
+license = "AGPL-3.0-or-later"
+homepage = "https://mupdf.com"
+hostdeps = ["pkgconf"]
+builddeps = ["brotli-devel", "curl-devel", "freeglut-devel", "freetype-devel", "gumbo-parser-devel", "harfbuzz-devel", "jbig2dec-devel", "leptonica-devel", "libarchive-devel", "libglvnd-devel", "libjpeg-turbo-devel", "libx11-devel", "libxext-devel", "libxrandr-devel", "mesa-devel", "mujs-devel", "openjpeg-devel", "openssl-devel", "tesseract-devel", "zlib-ng-compat-devel", "zxing-cpp-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://mupdf.com/downloads/archive/mupdf-1.28.6-source.tar.gz", sha256 = "dc85000640a45d90ca9b77b061f6ca67cce0c4d4fbecf8819647baf573eef101" },
+]
+
+environment = '''
+export MUOPTS="build=release USE_SYSTEM_LIBS=yes USE_SYSTEM_MUJS=yes tesseract=yes barcode=yes archive=yes prefix=/usr libdir=/usr/lib"
+export XCFLAGS="$CFLAGS"
+'''
+build = '''
+make -j$jobs $MUOPTS shared=yes CC="$CC" CXX="$CXX" AR="${AR:-llvm-ar}" extra-apps
+# static pass: its own build tree, libraries only
+make -j$jobs $MUOPTS shared=no CC="$CC" CXX="$CXX" AR="${AR:-llvm-ar}" libs
+'''
+install = '''
+make $MUOPTS shared=yes DESTDIR="$pkgdir" install-extra-apps install-docs install-headers
+make $MUOPTS shared=yes DESTDIR="$pkgdir" install-libs
+make $MUOPTS shared=no DESTDIR="$pkgdir" install-libs
+ls "$pkgdir"/usr/lib/libmupdf.so "$pkgdir"/usr/lib/libmupdf.a "$pkgdir"/usr/lib/libmupdf-third.a >/dev/null
+sed "s/@VERSION@/$version/" $pkgfiles/mupdf.pc.in | install -Dm644 /dev/stdin "$pkgdir/usr/lib/pkgconfig/mupdf.pc"
+install -Dm644 $pkgfiles/mupdf.desktop "$pkgdir/usr/share/applications/mupdf.desktop"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/mupdf/COPYING"
+'''

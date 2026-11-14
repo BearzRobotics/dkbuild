@@ -1,0 +1,11 @@
+prefix=/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: mupdf
+Description: Lightweight PDF, XPS and EPUB library
+Version: @VERSION@
+Libs: -L${libdir} -lmupdf
+Libs.private: -lmupdf-third -lm
+Requires.private: freetype2 harfbuzz libopenjp2 libjpeg zlib libbrotlidec libbrotlienc gumbo mujs lept tesseract libarchive zxing libcurl
+Cflags: -I${includedir}
