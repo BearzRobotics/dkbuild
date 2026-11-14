@@ -2,8 +2,11 @@
 
 > **Name.** `dkbuild` is the final name.
 
-Status: **Draft v0.1**. Anything marked **OPEN** is an undecided question.
-Resolve it here before writing code that depends on it.
+Status: **Living document, last audited 2026-11-13** against the code in
+`src/`, the recipe tree and the tests. Anything marked **OPEN** is an undecided
+question: resolve it here before writing code that depends on it. Anything
+marked **Planned, not implemented** is a design that has no code yet; the text
+next to it says what exists instead.
 
 ---
 
@@ -42,17 +45,18 @@ Three things make it trustworthy, and this spec exists to enforce them:
   sandbox.
 - Produce apk v3 packages and signed repository indexes with apk-tools.
 - **Several architectures:** `x86_64` first, then `aarch64` and `riscv64`,
-  by cross-compiling with LLVM from an `x86_64` host (6).
+  by cross-compiling with LLVM from an `x86_64` host (6). **Planned, not
+  implemented:** today everything is built and tested for `x86_64` only; the
+  `aarch64` and `riscv64` profiles exist and nothing more (6).
 - Build FenrirOS's whole system from recipes, including the LLVM toolchain,
-  dinit and its services, dkde and the desktop stack, and dklilo once it
-  exists.
+  dinit and its services, dkde and the desktop stack, and dklilo.
 - Assemble a root filesystem from packages, and from it the live ISO (8).
 - Run on an 8 GB laptop: job limits per build and per recipe.
 
 ### Non-goals (v1)
 
 - A package manager of our own. apk-tools is the package manager.
-- Building with GCC by default. The toolchain is LLVM/Clang, as everywhere in FenrirOS; GCC is an explicit opt-in per recipe (`options = ["gcc"]`, section 3).
+- Building with GCC by default. The toolchain is LLVM/Clang, as everywhere in FenrirOS; GCC is an explicit opt-in per recipe (`options = ["gcc"]`, section 3). GCC itself is also a package (`gcc` 15, installed in `/usr/lib/gcc15`, with GCC cross suites for bare-metal targets), so users can install it.
 - Building directly from other distributions' recipe formats. They are
   **converted** to our TOML first (5.9); the build only ever sees TOML.
 - A binary cache server. Repositories are plain directories, served by any
@@ -75,8 +79,9 @@ particular:
 - **Offline builds:** the network is available only in the fetch step,
   never during a build: the sandbox has no network at all. Fetching downloads
   every source, and vendors what a language's package manager would download
-  (Zig, Go and Rust dependencies, on the host: 5.4 `zigdeps`, `godeps`,
-  `cargodeps`), into `cache/`, named by checksum. Anything an upstream build
+  (Zig, Go, Rust, npm, Gradle, NuGet, Ruby, Dart, Haskell and Python
+  dependencies, on the host: the `*deps` options of 5.4, stores in 7.4), into
+  `cache/`, named by checksum. Anything an upstream build
   would download for itself (CMake FetchContent, git submodules, prebuilt web
   bundles, toolchains) becomes a pinned, checksummed source of the recipe
   instead (ollama's llama.cpp, Hyprland's glaze). With `cache/` and the stage 0
@@ -86,7 +91,10 @@ particular:
   `armv8-a`, `rv64gc`), set by the target profile (6.1), never
   `-march=native`.
 - **Static where it matters:** recipes can ask for static linking (5.4), and
-  FenrirOS's critical early-boot and recovery packages do.
+  FenrirOS's critical early-boot and recovery programs do (today `bash`,
+  `dash` and `which` carry the `static` option, and `dinit` links with
+  `-static` in its own recipe). Every library also ships its `-static` archives
+  in a `-static` subpackage (5.7).
 
 ### 3.1 Host requirements
 
@@ -95,17 +103,18 @@ Everything below is checked by `dkbuild doctor`, which prints the missing
 pieces and the fix. Nothing in a build needs root.
 
 ```sh
-sudo apt install ca-certificates curl git tar xz-utils xorriso squashfs-tools util-linux openssl
+sudo apt install ca-certificates curl git tar unzip xz-utils xorriso squashfs-tools util-linux uidmap openssl
 ```
 
 | Need | Why |
 |---|---|
 | `curl`, `ca-certificates` | downloading sources (the only step with network) |
-| `tar`, `xz-utils` | source tarballs and root tarballs |
+| `tar`, `xz-utils`, `unzip` | source tarballs, root tarballs and `.zip` sources |
 | `xorriso`, `squashfs-tools` | `bootstrap-root` reads the DKRescue ISO's `rootfs.sfs` |
 | `util-linux` (`unshare`) | `bootstrap-root` and `doctor` test user namespaces |
-| `openssl` | creating the repository signing key |
-| `git` | recipes whose source is a git repository |
+| `uidmap` (`newuidmap`; optional) | `dkbuild image` with users: the sub-ids in `/etc/subuid` and `/etc/subgid` are mapped so files keep their owners (7.1) |
+| `openssl` (optional) | creating the repository signing key |
+| `git` (optional) | `snapshot:git` and similar sources; recipes with `{ git }` sources are not supported (5.3) |
 | Zig 0.17.1 | building dkbuild itself (`zig build`); not on apt, see the README |
 | a Linux kernel 5.11 or newer with user namespaces and overlayfs | the sandbox (7.1) |
 | about 20 GB free, 8 GB of RAM | the unpacked image is 4.2 GB; LLVM needs the RAM |
@@ -122,7 +131,7 @@ echo 'kernel.apparmor_restrict_unprivileged_userns = 0' | sudo tee /etc/sysctl.d
 
 | Layer | Choice | Notes |
 |---|---|---|
-| Language | **Zig 0.17.0** | Pinned in `build.zig.zon`, as in dkde and dklilo. |
+| Language | **Zig 0.17.1** | Pinned in `build.zig.zon` (`minimum_zig_version`), as in dkde and dklilo. |
 | Recipe format | **TOML** (5.1) | `toml-zig` (TOML 1.1, `std.Io`), a path dependency until it is pinned by hash. YAML survives only as an import format (5.9). |
 | Packages | **apk-tools v3** (`apk mkpkg`, `apk mkndx`, `apk add`) | The same tool and package format as Chimera. Pinned to an exact version. |
 | Sandbox | **Linux namespaces** (user, mount, PID, network, UTS, IPC) and an overlay root | `src/sandbox.zig`, through the system calls directly. No bubblewrap, no util-linux. |
@@ -139,9 +148,21 @@ installed systems use.
 ### 5.1 Format
 
 One directory per package, in the recipe tree, under a directory named by the
-package's first letter (`packages/z/zstd/`). `dkbuild check` rejects a recipe
-in the wrong place. `patches/` holds every patch the recipe applies and sits
-next to `package.toml`:
+package's first character, a letter or a digit (`packages/z/zstd/`,
+`packages/0/0ad/`). `dkbuild check` rejects a recipe in the wrong place.
+Next to `package.toml` a recipe may have three directories:
+
+- `patches/` holds every patch the recipe applies (`patches`, 5.2).
+- `files/` is whatever else the recipe ships or reads: configuration, service
+  files, lock files (`python.lock`, `hackage.lock`, `Cargo.lock`). In a build
+  it is `/dkbuild/files`, and `$pkgfiles` names it (5.5). The files
+  of a recipe without `source` are its whole content (base-files).
+- `scripts/` holds the apk install scripts, named after their type
+  (`pre-install`, `post-install`, `pre-upgrade`, `post-upgrade`,
+  `pre-deinstall`, `post-deinstall`, `trigger`); each is attached to the main
+  package (9.4 item 4). `triggers` (5.2) names what runs `trigger`.
+
+All three are inputs of the rebuild decision (7.2).
 
 ```
 packages/
@@ -187,20 +208,22 @@ guide to the rest of the syntax.
 | `description` | no | Longer text |
 | `license` | yes | SPDX expression |
 | `homepage` | no | URL |
-| `source` | no | Array of inline tables, `{ url, sha256 }` or `{ git, tag \| commit }` (5.3). Left out, the recipe's own `files/` are everything (base-files); a `meta` package has none |
-| `patches` | no | Files in `patches/`, applied in order with `patch -p1` |
-| `archs` | no | Architectures this builds for; default all. `!riscv64` excludes one |
+| `source` | no | Array of inline tables, `{ url, sha256 }` (with the optional `unpack`, `name`) or `{ git, tag \| commit }` (5.3: git entries parse but cannot be fetched yet). Left out, the recipe's own `files/` are everything (base-files); a `meta` package has none |
+| `patches` | no | Files in `patches/`, applied in order with `patch -Np1` (a patch already applied, as when it touches a file dkbuild laid, is accepted if it reverses cleanly) |
+| `archs` | no | Architectures this builds for; default all. `!riscv64` excludes one. **Inert:** the values are validated and nothing reads them; every recipe is built for the one architecture dkbuild is run for |
 | `hostdeps` | no | Packages run during the build (compilers, meson, perl): installed for the **build machine's** architecture |
 | `builddeps` | no | Libraries and headers linked against: installed for the **target** architecture |
-| `checkdeps` | no | Extra packages needed only by `check` |
+| `checkdeps` | no | Extra packages needed only by `check`. **Inert:** accepted and documentation only: the build root never installs them and they need not exist in the tree |
 | `rundeps` | no | Runtime dependencies that can't be detected (5.6) |
 | `stage0deps` | no | With `selfhost` only: what the build needs instead of its own earlier package while `repo/` has none (the first build) |
 | `provides` | no | Names the main package provides besides what the scan finds (5.6), e.g. `so:libgcc_s.so.1` for a link the scanner cannot see through |
+| `triggers` | no | Directories whose changes run the main package's `scripts/trigger` (apk triggers; sd-tools applies `/usr/lib/sysusers.d` and `tmpfiles.d` this way). Each is passed to `apk mkpkg --trigger` |
 | `noscan` | no | Paths the dependency scan (5.6) skips: globs from the package root (`*` within one component, a trailing `/**` for a whole tree). For files built for other systems that the package carries as data, e.g. metasploit's payloads |
 | `replaces` | no | Packages whose files the main package may take over (apk `replaces`), for a package that supersedes another |
 | `options` | no | List from 5.4 |
-| `environment` | no | Shell lines run before every step |
-| `setup`, `build`, `check`, `install` | `install` yes (not for `meta`) | Shell steps, with macros (5.5) |
+| `environment` | no | Shell lines, macro-expanded, run once before the steps, after the exports the options make (5.5) |
+| `restore` | no | With `nugetdeps` only: the `dotnet restore` commands that fill the NuGet store; run once per source, with the network (7, 7.4) |
+| `setup`, `build`, `check`, `install` | `install` yes (not for `meta`) | Shell steps, with macros (5.5). Order: `patch`, `setup`, `build`, `check`, `install`, then the strip (5.5) |
 | `subpackages` | no | 5.7 |
 
 ### 5.3 Sources
@@ -208,16 +231,28 @@ guide to the rest of the syntax.
 ```toml
 source = [
     { url = "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz", sha256 = "0123…cdef" },
+    { url = "https://example.org/data.txt", sha256 = "0123…cdef", unpack = false },
     { git = "https://github.com/BearzRobotics/dkde.git", tag = "v0.0.3" },
 ]
 ```
 
+The `git` entry above is the design (**Planned, not implemented**): the recipe
+parser accepts it, `dkbuild fetch` refuses it ("git sources are not
+supported yet") and no recipe uses one. What exists instead is a tarball of the
+release, or a `snapshot:git` source (below), which is a checksummed tarball.
+
 - A tarball entry is `{ url, sha256 }`. The file is downloaded once into the
   source cache, named by its checksum, and the build fails if the checksum
   doesn't match.
-- A `{ git, tag }` or `{ git, commit }` entry clones at that tag or commit. A tag is resolved to its commit
-  on first fetch and recorded in `package.lock` next to the recipe, so later
-  builds use exactly that commit.
+- A `{ git, tag }` or `{ git, commit }` entry would clone at that tag or
+  commit, resolve a tag to its commit on first fetch and record it in a
+  `package.lock` next to the recipe, so later builds use exactly that commit.
+  **Planned, not implemented:** there is no `package.lock` and no clone code.
+- Two optional keys on a `{ url, sha256 }` entry: `unpack = false` copies the
+  file as it is to `/build/sources/<name>` instead of unpacking it (39 recipes:
+  jars, wheels, binaries), and `name = "<file>"` sets that file name (a plain
+  name, for URLs that all end in `/download`, as crates.io's do). Any source
+  that is not a tar archive or a `.zip` is copied the same way.
 - A `{ url = "snapshot:<kind> <args>", sha256 }` entry is made, not
   downloaded: at fetch time an embedded script (`src/snapshot-<kind>.sh`)
   builds a reproducible tarball on the host from pinned upstream checkouts,
@@ -235,7 +270,9 @@ source = [
   brave-core with its Linux DEPS repositories (DEPS read as data) and its
   pnpm packages; Chromium itself is Google's release tarball, a plain source.
   `euro-office` (V8 tag, GN commit) is V8 with only the DEPS entries a
-  monolith build needs, for Euro-Office's x2t. `git` checks that every
+  monolith build needs, for Euro-Office's x2t. `dotnet` (VMR tag, musl SDK
+  version) is .NET's source with everything its offline source-only build
+  needs, started from Microsoft's linux-musl SDK as the seed. `git` checks that every
   submodule is checked out with files in it before it marks a checkout done
   (a dropped connection used to leave empty ones). While a snapshot is made
   its file is `<sha256>.<url hash>.part`, so two new snapshots whose recipes
@@ -243,18 +280,20 @@ source = [
 - The first tarball is unpacked into the build directory, and the build
   steps start inside its top directory. Further tarballs are unpacked next to
   it (`/build/<their top directory>`): a vendored dependency's source, such as
-  the llama.cpp that ollama builds.
+  the llama.cpp that ollama builds. `.zip` sources are unpacked the same way
+  with the host's `unzip`. Sources with `unpack = false` or a `name`, and
+  files that are not archives, are copied to `/build/sources/<name>`.
 
 ### 5.4 Options
 
 | Option | Effect |
 |---|---|
 | `!check` | Don't run `check` (tests that need hardware or network) |
-| `!cross` | Can't be cross-compiled; built only natively (6.3) |
+| `!cross` | Can't be cross-compiled; built only natively (6.3). **Inert:** accepted, never read: there are no cross builds yet (6.2) |
 | `!strip` | Don't strip binaries |
-| `!lto` | Turn off link-time optimization (when it's on by default) |
+| `!lto` | Turn off link-time optimization (when it's on by default). **Inert:** accepted, never read: no build turns LTO on, so there is nothing to turn off (about 50 recipes carry it); `lto` itself is accepted and also does nothing |
 | `static` | Link programs statically (rescue-critical tools): adds `-static` to `LDFLAGS`. Never on a recipe that ships a shared library: `-shared -static` links without a warning and gives a library that crashes its users (zstd 1.5.7-r1 crashed lld that way) |
-| `bootstrap` | Part of the bootstrap set (9); built in stage 0 |
+| `bootstrap` | Part of the bootstrap set (9); built in stage 0. **Inert:** accepted, never read (about 24 recipes carry it); stage 1 builds whatever the tree asks for (7.3) |
 | `selfhost` | A compiler built with itself (dotnet): the build root also gets the newest package of this recipe in `repo/`, of any version, with that build's declared subpackages (all of them, or the build does not count). With none, the first build uses `stage0deps` (a seed such as a vendor binary and what it needs). Not part of the build-root hash, so a new build does not trigger another |
 | `gcc` | Build with GCC 15 and GNU binutils instead of clang (GRUB 2, GHDL): `gcc` and `binutils` join the hostdeps, and the environment gets GCC's compilers and flags, GNU tools on PATH and an rpath to `/usr/lib/gcc15/lib` (3). The recipe's `environment` can override any of it |
 | `jobs:N` | At most N parallel jobs for this recipe (LLVM: `jobs:10`). Also marks it heavy: with `-P`, it builds alone (10) |
@@ -269,24 +308,66 @@ source = [
 | `hackagedeps` | Haskell packages pinned in the recipe's `files/hackage.lock` (tarball and `.cabal` revision sha256s), fetched from Hackage into the shared `cache/hackage/`; in the build, `.dkhackage/` is a cabal `file+noindex` repository and `CABAL_DIR`'s only one, offline (7.4) |
 | `pydeps` | Python packages pinned in the recipe's `files/python.lock` (pure-Python wheels, else source distributions, with sha256s), fetched from PyPI into the shared `cache/python/`; in the build, `.dkpython/` is pip's and uv's only source, offline, without build isolation (7.4) |
 | `meta` | A meta-package: no source and no steps, only `rundeps` (`base`, `desktop-hyprland`) |
-| `rootlayout` | May install outside `/usr /etc /var /opt /boot` (base-files: `/dev`, `/proc`, the usr-merge links) |
+| `rootlayout` | May install outside `/usr /etc /var /opt /boot` (base-files: `/dev`, `/proc`, the usr-merge links); waives the top-level directory check of the policy checks (below) |
+| `!repo-iso` | Keep the package off the repository discs of `dkbuild discs` (8): for packages whose licence or size forbids shipping them. A package on the disc may not depend on one left out |
+| `cargolock=<dir>` | With `cargodeps`: the Rust project at `<dir>` of the source ships no `Cargo.lock`, so the recipe keeps one in `files/Cargo.lock` and the fetch vendors with it (a directory and `cargodeps` are required) |
+
+Options may be written with a `!` in front, and dkbuild strips it before
+looking the name up, for any option; the `!` is a convention for a switch that
+turns a default off. Only `!check` and `!strip` change what a build does, and
+`!repo-iso` what a disc holds; the build never reads `!cross` or `!lto`. An
+option that is not in this table, and not `jobs:N` or `cargolock=<dir>`, is an
+error. What a build actually reads is `!check`, `!strip`, `static`, `gcc`,
+`selfhost`, `jobs:N`, `meta`, `rootlayout` and the `*deps` options.
+
+**Policy checks.** After `install` and before packaging, a build fails if
+`$pkgdir` has a top-level directory outside `/usr /etc /var /opt /boot` (unless
+`rootlayout`), anything in `/usr/lib64` (musl's loader only searches
+`/usr/lib`; `%cmake` sets the libdir for this), anything in `/usr/local`, or
+files in `/run` or `/var/run` (a tmpfs made at boot: empty directories there
+are dropped with a note, and `tmpfiles.d` makes them at boot).
 
 ### 5.5 Macros
 
 Macros expand to the commands every recipe would otherwise repeat. They
 hold the toolchain decisions in one place, per target (6.1).
 
+A macro expands only where `%name` starts a word: at the start of a step or
+after white space. `%%` is a literal `%`. A `%` anywhere else, and a `%name`
+that is not a macro, is left as it is (printf formats such as `%s`, shell
+suffix removal such as `${f%pcap}`); an unknown macro is therefore not an
+error, and a misspelled one fails in the build as "command not found".
+
 | Macro | Expands to |
 |---|---|
-| `%configure` | `./configure` with `--prefix=/usr`, `--sysconfdir=/etc`, `--localstatedir=/var`, `--build`/`--host` for cross. Shared and static libraries both; the static ones go to `<name>-static` (5.7) |
+| `%configure` | `./configure` with `--prefix=/usr`, `--sysconfdir=/etc`, `--localstatedir=/var`, `--build`/`--host` when cross-compiling (never, today: 6.2). Shared and static libraries both; the static ones go to `<name>-static` (5.7) |
 | `%make` | `make -j$jobs` with `CC`, `CXX`, `AR`, `NM`, `RANLIB` set to the LLVM tools |
 | `%make_install` | `make DESTDIR=$pkgdir install` |
 | `%meson` | `meson setup build --prefix=/usr --buildtype=release --wrap-mode=nodownload -Dwerror=false -Ddefault_library=both`, plus the target's cross file when cross-compiling. Shared and static libraries both, as `%configure` |
 | `%meson_build`, `%meson_install` | `ninja -C build`, `DESTDIR=$pkgdir ninja -C build install` |
-| `%cmake` | `cmake -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release`, plus the target's toolchain file. Without the libdir, GNUInstallDirs picks `/usr/lib64` on x86_64, which musl's loader never searches; a package that installs there fails the policy check |
+| `%cmake` | `cmake -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release`, plus the target's toolchain file when cross-compiling. Without the libdir, GNUInstallDirs picks `/usr/lib64` on x86_64, which musl's loader never searches; a package that installs there fails the policy check |
 | `%cmake_build`, `%cmake_install` | `cmake --build build`, `DESTDIR=$pkgdir cmake --install build --strip` |
-| `%zig_build` | `zig build --release=safe --prefix /usr -Dtarget=$zig_target -Dcpu=$zig_cpu` with `--system` for vendored dependencies, `-j$jobs`, and `DESTDIR=$pkgdir` |
+| `%zig_build` | `DESTDIR=$pkgdir zig build --release=safe --prefix /usr -Dcpu=$zig_cpu --system zig-pkg -j$jobs`. A native build leaves out `-Dtarget` (with an explicit target Zig treats the build as a cross build and does not ask pkg-config for system libraries); a cross build would add `-Dtarget=$zig_target`. `--system zig-pkg` always: the dependencies are the ones `zigdeps` laid there (7.4) |
 | `%kernel_make` | `make LLVM=1 ARCH=$kernel_arch` |
+
+A step runs in this order: `patch` (the recipe's `patches`, in `$srcdir`),
+`setup`, `build`, `check` (skipped by `!check`, and by `--no-check` on `pkg` and
+`world`), `install`, then the strip (5.7). Each starts in `$srcdir`. A recipe
+with `nugetdeps` also has `restore`, which runs earlier, once per source,
+with the network (7).
+
+Before the first step the script exports, in this order: the variables below
+and the default flags; for `gcc`, GCC's environment (3); what each `*deps`
+option needs; then the recipe's `environment`; then `$pkgfiles`. The per-option
+exports are `GOMODCACHE`, `GOPROXY=off`, `GOFLAGS=-mod=mod` for `godeps`;
+for `npmdeps` an offline npm cache and, for pnpm and yarn 2+ lockfiles, a
+loopback registry on `127.0.0.1:4873` served from the store (the sandbox's `lo`
+is up) with the `YARN_*` and `pnpm` settings; `PATH` with an always-offline
+`gradle` wrapper (native integration off) for `gradledeps`; `NUGET_PACKAGES`,
+`DKBUILD_NUGET`, `HOME=/tmp` and the .NET telemetry switches for `nugetdeps`;
+`BUNDLE_*` and `GEM_HOME` for `gemdeps`; `PUB_CACHE` for `pubdeps`; cabal's and
+`$DKBUILD_HACKAGE` for `hackagedeps`; pip's, uv's and `$DKBUILD_PYTHON` for
+`pydeps` (7.4).
 
 Progress lines are colored by what they report (built green, failures red,
 skips yellow, ...) on a terminal; `--color=always` keeps the colors through a
@@ -306,14 +387,20 @@ that are not heavy (no `jobs:N`), and only while that file system has 30 GB
 free, so a small fast disk is never filled.
 
 Variables available in every step: `$name`, `$version`, `$release` (the
-recipe's), `$pkgdir` (the install root), `$srcdir`,
-`$jobs`, `$target` (the LLVM triple), `$arch`, `$zig_target`, `$CC`,
-`$CXX`, `$CFLAGS`, `$CXXFLAGS`, `$LDFLAGS`.
+recipe's), `$pkgdir` (the install root, `/destdir`), `$srcdir`,
+`$jobs` (`-j`, capped by a recipe's `jobs:N`), `$target` (the LLVM triple),
+`$arch`, `$zig_target`, `$zig_cpu`, `$pkgfiles` (the recipe's `files/`,
+`/dkbuild/files`), `$CC`, `$CXX`, `$CFLAGS`, `$CXXFLAGS`, `$LDFLAGS`. The
+profile's kernel `ARCH` is not a variable: `%kernel_make` carries it.
 
-Default flags for every target include `-O2`, the target's baseline CPU,
-and `-Wl,--undefined-version`, because lld rejects version scripts that
+Default flags for every target: `CC` and `CXX` are `clang`/`clang++
+--target=<triple>`; `CFLAGS` and `CXXFLAGS` are `-O2 -march=<baseline CPU>`;
+`LDFLAGS` is `-fuse-ld=lld -Wl,--undefined-version` (plus `-static` with the
+`static` option), because lld rejects version scripts that
 name undefined symbols and many packages ship such scripts (zlib and
-LVM2 in the DKRescue build).
+LVM2 in the DKRescue build). `FORCE_UNSAFE_CONFIGURE=1` is exported too, so
+autotools packages that refuse to configure as root (tar, cpio) do, as every
+build runs as root of its user namespace.
 
 ### 5.6 Dependencies found automatically
 
@@ -334,9 +421,10 @@ After `install`, dkbuild scans `$pkgdir`:
   the owning recipe to declare it in `provides`.
 - **pkg-config files:** each `.pc` provides `pc:<name>`, and each
   `Requires:` becomes a dependency.
-- **Commands:** each executable in `/usr/bin` provides `cmd:<name>`.
+- **Commands:** each executable in `/usr/bin`, `/usr/sbin` or `/bin` provides `cmd:<name>`.
 - **Alpine's musl name:** a symlink `/usr/lib/libc.musl-<arch>.so.1` provides
-  `so:libc.musl-<arch>.so.1` (musl-alpine-compat, for programs built on Alpine).
+  `so:libc.musl-<arch>.so.1` (musl-alpine-compat, for programs built on Alpine);
+  musl itself also provides `so:libc.so`.
 
 The scans run per package, after the split (5.7), so a `-devel` package
 provides the `pc:` names and the main package the `so:` ones. A dependency
@@ -387,14 +475,16 @@ and a recipe turns static ones off only for a stated reason (spirv-tools: its
 CMake config would point every user at a `.a` in a package they don't
 install). CMake projects mostly build one kind or the other; their recipes
 choose.
-`<name>-devel` depends on `<name>` at the same version, and `<name>-static`
+`<name>-devel` depends on `<name>-libs` when the package has one and on
+`<name>` otherwise, at the same version, and `<name>-static`
 depends on `<name>-devel`, so installing the static library brings the
 headers it is used with. Keeping headers, static libraries and manuals in
 their own packages lets an image leave them out (8).
 
 **Stripping.** After `install`, unless `!strip`, ELF files are stripped
 (`llvm-strip --strip-unneeded`) and static archives lose their debug
-information (`--strip-debug`).
+information (`--strip-debug`). Object files (`*.o`, musl's `crt1.o`) are left
+alone, and a file is an ELF file only if it starts with the ELF magic.
 
 ### 5.8 Example recipes
 
@@ -514,9 +604,15 @@ It is a typing aid, not a compiler: a draft with TODOs is not expected to
 build.
 
 **Solus `package.yml`** files, read with `yaml-zig`, are the secondary path
-(**planned**).
+(**Planned, not implemented:** there is no YAML code in `src/`.)
 
 ## 6. Architectures
+
+Only `x86_64` is built, imaged and tested today. The `aarch64` and `riscv64`
+profiles exist and the cross files below are generated from them (unit-tested),
+but nothing selects a profile other than `x86_64` (the `pkg` and `world`
+commands have no `--arch`) and `repo/` holds `x86_64` only. 6.2 to 6.4 are the
+design for the other architectures: **Planned, not implemented.**
 
 ### 6.1 Target profiles
 
@@ -529,7 +625,9 @@ architecture-specific so recipes don't have to:
 | Baseline CPU | `x86-64` | `armv8-a` | `rv64gc` |
 | Zig target and CPU | `x86_64-linux-musl`, `baseline` | `aarch64-linux-musl`, `baseline` | `riscv64-linux-musl`, `baseline_rv64` |
 | Kernel `ARCH` | `x86` | `arm64` | `riscv` |
-| Boot | **OPEN** (dklilo, when it exists) | **OPEN** (UEFI) | **OPEN** (UEFI or OpenSBI) |
+
+A profile has no boot field (`dkbuild check` rejects one): the bootloader is
+chosen by the image and the packages (below).
 
 The vendor field is `fenriros`. Nothing depends on it: DKRescue's clang builds
 and runs programs with any vendor (tested, 9.2), and the target's runtime is
@@ -538,7 +636,11 @@ own `chimera` vendor, because Chimera's compiler looks for its runtime under
 `<arch>-chimera-linux-musl`.)
 
 From a profile, dkbuild generates the Meson cross file, the CMake
-toolchain file and the `configure` `--host` value for a cross build.
+toolchain file and the `configure` `--host` value for a cross build. The
+files are produced by `src/profile.zig` (and unit-tested) but no build writes
+them into a build root yet, and the macros refer to them only when the target
+differs from the build machine, which never happens: every build today has the
+same profile as host and as target.
 
 **Decided for installed UEFI systems: systemd-boot.** It is built from
 systemd's source with only the boot manager and `bootctl` (as Chimera does),
@@ -546,10 +648,20 @@ so it needs no systemd as init. The EFI system partition is mounted at `/boot`
 and holds the kernels; `gen-systemd-boot` writes Boot Loader Specification
 entries (normal and recovery) for every `/boot/vmlinuz-*`, and the `linux`
 package runs it after each install or upgrade (docs/install.md).
-**Still OPEN:** the live ISO (dklilo, x86-only in its own spec) and BIOS
-machines.
+**Live ISOs:** dklilo (packaged, 0.0.3) is the bootloader of the live ISOs, a
+hybrid image that boots on BIOS and on UEFI (8). GRUB is also packaged (built
+with GNU binutils through the `gcc` option). **Still OPEN:** installed BIOS
+machines (docs/install.md covers UEFI only) and the bootloader of `aarch64`
+and `riscv64`.
 
 ### 6.2 Cross-compiling
+
+**Planned, not implemented.** What exists: the profiles and generated cross
+files (6.1), the `isCross` switch in the macros and in the environment
+(`--sysroot`), and nothing that turns it on. Every build is made in one root:
+`hostdeps` and `builddeps` are installed (stage 1: laid over the DKRescue root,
+7.3) into the same root, for the one architecture, and there is no `/sysroot`.
+The design:
 
 LLVM is a cross compiler already: one Clang targets every architecture.
 A cross build has two roots:
@@ -565,12 +677,17 @@ libunwind, libc++) and musl are ordinary packages, built for each target
 and installed into the sysroot like any other dependency.
 
 **Zig 0.17's libc detection** asks `cc -print-file-name=crtbeginS.o` and
-expects GCC's file names (Codeberg ziglang/zig#36919). The compiler-rt
-package provides `crtbegin.o`, `crtbeginS.o`, `crtend.o` and `crtendS.o`
-as links to its `clang_rt.*` objects, as the DKRescue toolchain build did,
-until Zig fixes this.
+expects GCC's file names (Codeberg ziglang/zig#36919). The plan is for the
+compiler-rt package to provide `crtbegin.o`, `crtbeginS.o`, `crtend.o` and
+`crtendS.o` as links to its `clang_rt.*` objects, as the DKRescue toolchain
+build did, until Zig fixes this. (Not checked in the tree: no recipe provides
+these names yet; the freebasic recipe links them for its own use.)
 
 ### 6.3 Native builds for what won't cross
+
+**Planned, not implemented.** `!cross` is accepted and never read (5.4), and
+no recipe or recipe tree has a `qemu-user` or `binfmt_misc` setup in dkbuild
+(`qemu` and `qemu-server` exist as ordinary packages). The design:
 
 Some packages can't be cross-compiled (their build runs programs it just
 built). They're marked `!cross` and built **natively** in a build root of
@@ -581,6 +698,8 @@ the target architecture, run through `qemu-user` registered with
 `binfmt_misc` registration is set up on the build machine.
 
 ### 6.4 Bootstrapping a new architecture
+
+**Planned, not implemented** (the `bootstrap` option is inert, 5.4):
 
 1. Cross-build the base set (`bootstrap` option) from `x86_64`: musl,
    compiler-rt, libunwind, libc++, LLVM, and enough tools to build the rest.
@@ -593,25 +712,38 @@ the target architecture, run through `qemu-user` registered with
 
 For each recipe, in dependency order:
 
-1. **Fetch** (network allowed, the only step that is): download missing
-   sources into the cache and check their checksums, and vendor the Zig, Go
-   or Rust dependencies of recipes that ask for it (`zigdeps`, `godeps`,
-   `cargodeps`), on the host, into the shared stores of 7.4.
-2. **Prepare the build root:** a new directory, with apk-tools installing
-   `hostdeps`, the toolchain and the base build set into it, plus the
-   sysroot for cross builds (6.2). Nothing from previous builds is reused
-   except through packages.
-3. **Enter the sandbox** (7.1) and run `setup`, `build`, `check` (unless
-   `!check`) and `install`.
-4. **Finish:** strip (unless `!strip`), split subpackages (5.7), scan
-   dependencies (5.6), and check that `$pkgdir` holds no files outside
-   `/usr`, `/etc`, `/var`, `/opt` and `/boot`, and nothing in `/usr/local`.
-5. **Package:** `apk mkpkg` for each package, into
+1. **Fetch** (network allowed): download missing sources into the cache and
+   check their checksums, make `snapshot:` sources (5.3), and vendor the
+   dependencies of recipes that ask for it (`zigdeps`, `godeps`, `cargodeps`,
+   `npmdeps`, `gemdeps`, `pubdeps`, `hackagedeps`, `pydeps`), on the host, into
+   the shared stores of 7.4. `dkbuild fetch` does only this step.
+2. **Prepare the build root:** a new directory in `work/`. Stage 1, the only
+   path implemented: the DKRescue root (`rootfs/dkrescue`) is the lower layer
+   of an overlay and the in-tree packages the recipe needs are laid over it
+   with `apk extract` (7.3); the sources are unpacked into `/build` and the
+   recipe's `patches/` and `files/` copied to `/dkbuild` (5.3). **Planned, not
+   implemented:** apk-tools installing `hostdeps`, the toolchain and the base
+   build set into it, plus the sysroot for cross builds (6.2). Nothing from
+   previous builds is reused except through packages.
+3. **Restore** (`nugetdeps` and `gradledeps` only; the only other step with
+   network): once per source, in the build root with the network, the recipe's
+   `restore` commands (NuGet) or Gradle's own resolution run and fill the
+   store (7.4); then the network is off again.
+4. **Enter the sandbox** (7.1) and run `patch`, `setup`, `build`, `check`
+   (unless `!check` or `--no-check`) and `install` (5.5).
+5. **Finish:** strip (unless `!strip`), split subpackages (5.7), scan
+   dependencies (5.6), and apply the policy checks of 5.4: no files outside
+   `/usr`, `/etc`, `/var`, `/opt` and `/boot`, nothing in `/usr/lib64` or
+   `/usr/local`, no files in `/run`.
+6. **Package:** `apk mkpkg` for each package, into
    `repo/<arch>/`; then `apk mkndx` updates and signs that architecture's
    index.
-6. **Remove the build root** (kept with `--keep-root`, for debugging).
+7. **Remove the build root** (kept with `--keep-root`, for debugging).
 
 The log of every step goes to `logs/<arch>/<name>-<version>-r<release>.log`.
+Packages whose recipe sets `selfhost` (a compiler built with itself) also get
+their own newest package from `repo/` in the build root; the first build uses
+`stage0deps` instead (5.4).
 
 ### 7.1 Sandbox
 
@@ -621,7 +753,10 @@ system calls directly:
 
 - **Unprivileged:** a user namespace maps the building user to root inside
   (`setgroups` denied, one uid and one gid mapped), so dkbuild needs no root
-  on the build machine.
+  on the build machine. `dkbuild image` with users is the exception: it also
+  maps the user's sub-id range (`/etc/subuid`, `/etc/subgid`, through
+  `newuidmap` and `newgidmap`), so the files of other users in the image keep
+  their owners.
 - **The root is an overlay.** The base image (stage 0, 9.2) is the read-only
   lower layer; the build writes to a throwaway upper layer. The unpacked image
   is never modified and is shared by every build. The directories the build
@@ -708,7 +843,10 @@ package files stay in `repo/` until `dkbuild prune`.
 
 ### 7.3 Build roots, stage 0 and `repo/`
 
-Two kinds of build root exist, matching the stages of 9.2:
+Two kinds of build root exist in the design, matching the stages of 9.2. Only
+stage 1 is implemented: `src/build.zig` requires `rootfs/dkrescue`, and
+nothing populates a build root with `apk add`. Every build today is a stage 1
+build, and 7 step 2 describes it.
 
 - **Stage 1 (bootstrap):** the build machine is the **DKRescue image** (9.2),
   not a root assembled by apk. Its root filesystem is the read-only lower
@@ -726,7 +864,8 @@ Two kinds of build root exist, matching the stages of 9.2:
   A versioned provide makes a package the only owner of that name, and an
   unversioned one still conflicts with a package that provides it versioned
   (apk-package(5)), so installing our own `pkgconf` over the image's failed.
-- **Stage 2 and everything after:** the root is populated by apk from
+- **Stage 2 and everything after (Planned, not implemented):** the root is
+  populated by apk from
   `repo/` only: the base build set (`base-devel`) plus the recipe's declared
   dependencies and nothing else. This is where "a forgotten dependency fails
   the build" (section 1) is enforced.
@@ -736,8 +875,24 @@ source of packages.
 
 ### 7.4 Dependency stores
 
-Go modules, Rust crates and Zig packages are shared between packages: each is
-downloaded once and kept once, however many packages use it.
+Go modules, Rust crates, Zig packages and the other languages' packages are
+shared between packages: each is downloaded once and kept once, however many
+packages use it. Every store is a directory in `cache/`, bound read-only into
+the build under `/dkdeps/`:
+
+| Store | Option | Bound as |
+|---|---|---|
+| `cache/crates/` | `cargodeps` | `/dkdeps/crates` |
+| `cache/zigpkg/` | `zigdeps` | `/dkdeps/zig` |
+| `cache/gomod/` | `godeps` | `/dkdeps/go` |
+| `cache/npm/` | `npmdeps` | `/dkdeps/npm` |
+| `cache/maven/` | `gradledeps` | `/dkdeps/maven` |
+| `cache/nuget/` | `nugetdeps` | `/dkdeps/nuget` |
+| `cache/gems/` | `gemdeps` | `/dkdeps/gems` |
+| `cache/hackage/` | `hackagedeps` | `/dkdeps/hackage` |
+| `cache/python/` | `pydeps` | `/dkdeps/python` |
+| `cache/pub/` | `pubdeps` | not bound: unpacked into `.dkpub` in the source tree |
+| `cache/snapshots/` | `snapshot:` sources | work directories and logs of fetch (5.3), not used in a build |
 
 | Where | What |
 |---|---|
@@ -829,10 +984,11 @@ PATH as a wrapper that always runs `--offline` with `gradle-offline.gradle`,
 which replaces every repository of the build and its plugins with the
 read-only store. Tested outside dkbuild with Gradle 9.9.0 (a project with
 Maven Central and plugin-portal dependencies built offline from the
-store); not yet with a recipe, as no JDK is built here yet.
+store. `openjdk` 17, 21 and 25 are packaged, and a Gradle recipe
+(geogebra) is written; it has not been built in this option yet.
 
-The build binds the stores read-only into the sandbox (`/dkdeps/crates`,
-`/dkdeps/zig`, `/dkdeps/go`, `/dkdeps/npm`, `/dkdeps/maven`) and lays `vendor/` and `zig-pkg/` into the source
+The build binds the stores read-only into the sandbox (the table above) and lays `vendor/`
+(for Rust, and `vendor/cache` for gems), `zig-pkg/`, `.dkpub`, `.dkhackage` and `.dkpython` into the source
 tree as symbolic links to the entries its list names, so nothing is copied and
 no build can change a store. Go reads its module cache directly. Cargo checks
 every crate against its `.cargo-checksum.json` as it builds. Which entries a
@@ -840,8 +996,9 @@ package uses doesn't feed the rebuild hashes: they follow from the source
 tarball (its lock files), whose checksum does.
 
 `dkbuild prune` removes the lists of source tarballs no recipe uses any more
-and then every crate and Zig package no remaining list names (Go's module
-cache is not pruned yet; `go clean -modcache` empties it). It must not run
+and then every crate, Zig package and gem no remaining list names. Go's module
+cache is not pruned (`go clean -modcache` empties it), and neither are the npm,
+Maven, NuGet, Dart, Haskell and Python stores. It must not run
 while a fetch does. A dependency tarball made by an older dkbuild
 (`<sha256>.tar`) is moved into the stores at the next fetch, offline.
 
@@ -851,22 +1008,43 @@ while a fetch does. A dependency tarball made by an older dkbuild
 # images/fenriros.toml
 name     = "fenriros"
 arch     = "x86_64"
+hostname = "fenriros"
 packages = [
-    "base",
-    "linux",
+    "base", "base-net", "linux",
     "systemd-boot", # UEFI installs (6.1)
-    "core-utils",
-    "dkde",
+    "firmware-linux-amdgpu", "firmware-linux-amd-ucode",
+    "desktop-dkde", "desktop-hyprland",
+    # ... and the applications the machine's owner uses
 ]
-exclude  = ["*-devel", "*-doc"]
-services = ["udevd", "dhcpcd", "syslogd", "seatd"]
-output   = ["rootfs", "squashfs", "tar"]
+exclude  = ["*-devel", "*-doc", "*-static"]
+services = ["udevd", "udev-trigger", "udev-settle", "modules", "dhcpcd", "syslogd", "seatd", "dbus"]
+output   = ["tar"]
 
 [[users]]
-name     = "fenrir"
-groups   = ["wheel", "video", "render"]
+name     = "dakota"
+groups   = ["wheel", "video", "render", "audio", "input"]
 password = "locked"
 ```
+
+Keys: `name`, `arch`, `packages`, `output` (the rest are optional): `exclude`,
+`unwanted`, `services`, `[[users]]` (`name`, `groups`, `password`, `shell`,
+default `/bin/bash`), `hostname` (default `fenriros`), `label`, `autologin`,
+`session`, `issue`, `console`, `login`. Any other key is an error. Names are
+checked to be plain words, `autologin` must name one of the `[[users]]`, and
+`login = "greetd"` with `autologin` needs a `session`.
+
+The images in `images/` today:
+
+| File | Makes |
+|---|---|
+| `fenriros.toml` | the build machine's own system, as a root tarball (`tar`); the example above |
+| `base.toml` | `iso`: a command-line live system for any x86_64 PC, BIOS or UEFI, every firmware group included |
+| `dkde.toml` | `iso`: a live system that boots to the DKDE desktop through greetd (`login = "greetd"`) |
+| `rescue.toml` | `iso`: FenrirOS Rescue, DKRescue's successor, for repairing, imaging and recovering disks |
+| `container.toml`, `container-build.toml` | a root tarball for `podman import`, `docker import` or nspawn; the second with a toolchain |
+| `repo.toml`, `source.toml` | not images: sets for `dkbuild discs` (below) |
+
+(`rescue.toml.save` in the directory is a stray editor copy.)
 
 `unwanted = ["dhcpcd"]` keeps packages out of the image even as dependencies: each is
 passed to `apk add` as `!name`, so if something in the image requires one, apk stops with a
@@ -907,31 +1085,48 @@ build machine, as uid 0 of a user namespace, writing only `out/<name>/`:
    `password` is `"locked"` (the default: set it when installing), `"empty"`,
    or a crypt(3) hash.
 3. Produces what `output` asks for: `rootfs` (the directory), `tar`
-   (`<name>.tar.zst`, root-owned: the way onto a disk, docs/install.md) and
-   `squashfs` (`<name>.sfs`). The archives are made inside the sandbox so they
-   record root ownership; on the host the files belong to the calling user.
+   (`<name>.tar.zst`, root-owned: the way onto a disk, docs/install.md),
+   `squashfs` (`<name>.sfs`) and `iso` (below). The archives are made inside
+   the sandbox so they record root ownership; on the host the files belong to
+   the calling user.
 
-**Not yet:** the `iso` output (initramfs, the live-boot bootloader, `xorriso`),
-which waits on the live-ISO bootloader (6.1). The same image list can later
-feed an installer.
+**The `iso` output** (implemented) is a hybrid BIOS and UEFI live image
+booted by dklilo, made with `xorriso`: the kernel and an initramfs in the
+ISO 9660 part, the root as a squashfs (`live/rootfs.sfs`, with `rootfs.size`
+for the installer) that the live init mounts under a RAM overlay. It needs
+`live-initramfs` (the live init's initramfs) in `packages`, and a kernel;
+`label` (default: the name in capitals, at most 32 characters) is the volume
+label the live init looks for on the kernel command line. The live images
+carry `dkinstaller` (the installer). `tests/qemu-iso.sh` boots a built ISO in
+QEMU on BIOS and on UEFI.
 
-**Planned: package and source ISOs.** With no repository server, packages
-travel on discs. `iso_repo` will put packages on an ISO, as `apks/<arch>/`
-with the signed `Packages.adb` and the public key, the way Alpine's install
-media carry theirs: a list of packages, so the install ISO works offline, or
-`"all"` for a **repository ISO** of every package. A machine mounts it and
+**Package and source discs.** With no repository server, packages travel on
+discs. `dkbuild discs [--media M] <file.toml>` (src/discs.zig) writes the set
+described by a file with `kind`, `name`, `arch`, `media` and `label` into
+`out/<name>/`: `kind = "repo"` (`images/repo.toml`) is a **repository
+ISO** of every current package, as `apks/<arch>/` with the signed
+`Packages.adb` and the public key, the way Alpine's install media carry
+theirs; `kind = "source"` (`images/source.toml`) is a **source ISO**:
+every source tarball and vendored dependency store (`cache/`), the dkbuild tree
+as a git bundle of what is committed, and the stage 0 image
+(`dkrescue.iso`): enough to rebuild the whole distribution offline, even after
+upstream downloads disappear. `media` is `usb` (one image, for a stick or
+Ventoy) or `cd`, `dvd`, `dvd-dl`, `bd25`, `bd50`, `bd100` (a numbered set of
+discs of that size); `--media` overrides it. A recipe with the option
+`!repo-iso` (5.4) is left out of a repository set, and a package that
+depends on a left-out one is an error. A machine mounts a repository disc and
 adds `<mount>/apks/<arch>/Packages.adb` to `/etc/apk/repositories` (tagged,
 `@cdrom ...`, to use it only on request); a newer disc and `apk upgrade`
 update it, and rebuilt packages are seen because rebuilds bump the release
-(7.2). It also restores any installed system. A **source ISO** carries
-`cache/` (every source tarball and vendored dependency), the git tree at that
-point and the stage 0 build image: enough to rebuild the whole distribution
-offline, even after upstream downloads disappear. **The private signing key is
-on neither**; it is backed up separately, encrypted and offline.
+(7.2). It also restores any installed system. **The private signing key is on
+neither**; it is backed up separately, encrypted and offline. There is no
+`iso_repo` image key: a list of packages on the install ISO itself is not
+implemented (**OPEN**: the live images carry no repository).
 
 Meta-packages (`options = ["meta"]`) keep image lists short: `base` (boots to
-a login prompt with apk working), `base-net` (dhcpcd, OpenSSH, curl) and
-`desktop-hyprland`.
+a login prompt with apk working), `base-net` (dhcpcd, OpenSSH and its server,
+curl, ca-certificates), `base-devel` (the build tools), `desktop-dkde`,
+`desktop-hyprland`, `desktop-xfce`, `desktop-plasma` and `rescue-tools`.
 
 ## 9. Bootstrap and the base system
 
@@ -946,18 +1141,19 @@ documentation. Three meta-packages describe the sets:
 | Meta-package | Holds | Why separate |
 |---|---|---|
 | `base` | what runs the system (below) | An image installs this and nothing else. |
-| `base-devel` | the toolchain and every build tool | A build root is `base-devel` plus a recipe's own dependencies. |
-| `base-net` | dhcpcd, OpenSSH | Networking is a choice, not a need (DKRescue's CONSTRAINTS: every service earns its place). |
+| `base-devel` | the toolchain and every build tool | A build root is `base-devel` plus a recipe's own dependencies (stage 2, **planned**: 7.3; today `base-devel` is an installable set, and stage 1 builds on the DKRescue root). |
+| `base-net` | dhcpcd, OpenSSH and its server, curl, ca-certificates | Networking is a choice, not a need (DKRescue's CONSTRAINTS: every service earns its place). The `dkde` image leaves it out: it pulls dhcpcd, and NetworkManager does the DHCP there. |
 
-`base` contains:
+`base` is a meta-package (`packages/b/base/package.toml`); its `rundeps` are
+the list below. The libraries the programs link come in as their dependencies
+and are not listed. `base` contains:
 
-- **Kernel and headers:** `linux`, `linux-headers`.
-- **C library and runtime:** musl, libatomic-chimera, and compiler-rt's
-  runtime pieces that programs need at run time.
-- **Libraries the base programs link:** zlib, xz, zstd, bzip2, lz4, ncurses,
-  readline, libcap, attr, acl, expat, OpenSSL, and libelf with the musl
-  compatibility libraries (argp-standalone, musl-fts, musl-obstack) where
-  something needs them.
+- **No kernel:** the image chooses it (`linux`, with `linux-headers` only in
+  `base-devel`), so a container or a different kernel flavor need not carry
+  one.
+- **C library:** `musl`; the libraries the base programs link (zlib, xz,
+  zstd, bzip2, lz4, ncurses, readline, libcap, attr, acl, expat, OpenSSL,
+  libelf and the musl compatibility libraries) arrive by the scans (5.6).
 - **Shells:** dash is `/bin/sh` (scripts, and the fallback); bash is every
   user's login shell, root's too (`/etc/default/useradd`, `dkbuild image`),
   with bash-completion. dksh (experimental) is a separate package, `dksh`, not
@@ -970,35 +1166,45 @@ documentation. Three meta-packages describe the sets:
   interactive shell, read by dash through `$ENV` and by bash through
   `~/.bashrc`. `/etc/skel` has `.profile` (`~/.local/bin` first on PATH),
   `.shrc`, `.bashrc`, `.bash_profile` and `~/.local/bin`.
-- **Programs to repair a broken system, built static** (`options: [static]`):
-  coreutils, findutils, grep, sed, diffutils, tar, gzip, less, which, bash,
-  dash, dinit. This is DKRescue's rule: on musl it is cheap and safe, and a damaged
-  `/usr/lib` can't take the repair tools with it.
-- **System tools:** util-linux, e2fsprogs, kmod, eudev, shadow, kbd,
-  procps-ng, psmisc, iproute2, sysklogd.
-- **Init:** dinit and its service files (the lfs-dinit collection), and
-  `base-files` (the directory layout, `/etc/passwd`, `group`, `os-release`,
-  `fstab`, `services` and `protocols` from iana-etc).
+- **GNU userland:** coreutils, findutils, grep, sed, gawk, diffutils, tar,
+  gzip, xz, less, file, which, with the compression tools. DKRescue built
+  its repair programs static, as on musl that is cheap and safe: of these,
+  `bash`, `dash` and `which` carry the `static` option, and `dinit` links
+  static in its own recipe, so a damaged `/usr/lib` cannot take the shell, `/bin/sh`
+  and init with it. The other programs are dynamic: they ship their `-static`
+  libraries like every package (5.7), nothing more.
+- **System tools:** util-linux, e2fsprogs, dosfstools, kmod, eudev, shadow,
+  sudo, kbd, procps, psmisc, iproute2, sysklogd, sd-tools (sysusers and
+  tmpfiles, which the triggers of 5.2 run), tzdb, ca-certificates.
+- **Documentation:** dkman (`man`), man-pages and man-pages-posix.
+- **Init:** dinit, `dinit-services` (the service files: a getty per
+  console, dbus, dhcpcd, seatd, syslogd, `rcboot`, ...) and `base-files`
+  (the directory layout, `/etc/passwd`, `group`, `os-release`, `fstab`,
+  `services` and `protocols` from iana-etc). Both were taken over from the
+  DKRescue image.
 - **Package management:** apk-tools.
-- **Our own programs:** `dkde-console` (the login console that replaces
-  agetty; built alone with `zig build console -Dgui=false`, so it needs only
-  libghostty-vt from dkde's Zig dependencies), and dklilo. dkinstaller belongs
-  to the live image (8), not to `base`.
+- **Not in `base`:** dklilo (the live ISOs and installs add it), dksh
+  (experimental), dkinstaller (the live image, 8) and `dkconsole`, the login
+  console that replaces agetty (0.2.0; an image selects it with
+  `console = "dkconsole"`, 8).
 
-`base-devel` contains: LLVM (clang, lld, the LLVM binutils, compiler-rt,
-libunwind, libc++abi, libc++), `zig` (a build-time system Zig, see below),
-CMake, Ninja, Meson, Python, Perl, GNU make, m4, gawk, patch, file, pkgconf,
-gettext, Bison, Flex, bc, gperf, Autoconf, Automake, Libtool, scdoc and
-setuptools. Python and Perl are build tools, not part of `base`.
+`base-devel` contains: LLVM (`llvm`, `llvm-clang`, `llvm-lld`), `zig` (a
+build-time system Zig, see below), `rust` and `rust-src`, `bindgen` and
+`cbindgen`, GNU `binutils`, `nasm` and `yasm`, `musl-devel` and
+`linux-headers`, CMake, Ninja, Meson, SCons, Autoconf, Automake, Libtool, m4,
+pkgconf, GNU make, Bison, Flex, gperf, gettext, texinfo, gawk, patch, bc,
+diffutils, findutils, git, cpio, rsync, elfutils, OpenSSL, Python, Perl, gdb,
+lldb and strace. Python and Perl are build tools, not part of `base`. `gcc` is
+a separate package, not in `base-devel` (3).
 
 **The `zig` package** is there to build the repository's Zig programs, as
 Debian ships a Rust only to build its own packages. It is not a recommendation
 for writing Zig: the language still changes between releases, so users are
 pointed to zvm, anyzig and similar tools, and the package's README says so.
 Its version follows what the Zig packages need (dklilo 0.0.3 requires 0.17.1,
-so the image's 0.17.0 is too old). Today the recipe repackages the official
-x86_64 binary (`/usr/lib/zig`, `/usr/bin/zig` symlink). **OPEN:** build it
-from source once `llvm` exists in the tree (wave 1); the name stays `zig`.
+so the image's 0.17.0 is too old). The recipe builds Zig 0.17.1 from source
+with CMake against `llvm22` (an earlier revision repackaged the official
+binary; this replaced it). The name stays `zig`.
 
 Every package has a reason to exist, stated in its recipe (a `# needed by:`
 comment): nothing joins the tree because DKRescue had it.
@@ -1010,8 +1216,10 @@ dkbuild needs a build machine with a toolchain and apk. That machine is
 DKRescue posts (`dkrescue.iso`, sha256 `b3929359…ea72`, the build that boots to a desktop on real hardware). Its `/live/rootfs.sfs` already has
 LLVM 23 and compiler-rt, musl, Zig, Python, Perl, GNU make, CMake, Ninja,
 Meson, bash, dinit, git, scdoc, `unshare`, `pivot_root` and apk-tools, which
-is the list in the "build host" post. No hand-built stage 0 is left to do, and
-no other distribution's packages are needed.
+is the list in the "build host" post (its `/usr/lib/clang/23` is that LLVM
+23; the tree's own `llvm` is also 23, `llvm22` is what builds `zig`). No
+hand-built stage 0 is left to do, and no other distribution's packages are
+needed.
 
 `dkbuild bootstrap-root <image>` (**implemented**) unpacks the image's root
 filesystem into `rootfs/dkrescue/`, without privileges. It accepts the ISO
@@ -1029,19 +1237,22 @@ and that the root runs its own `apk` and `clang` from inside a user namespace
 (`unshare --user --map-root-user chroot`). The private signing key never comes from the image: the
 ISO is built without `home/builder` and `srv/dkbuild`.
 
-1. **Stage 1:** build `base` and `base-devel` inside stage 0, as 7.3
-   describes: DKRescue's root is the lower layer, `repo/` supplies the
-   in-tree packages built so far.
-2. **Stage 2:** build both again with build roots populated from **`repo/`
+1. **Stage 1** (implemented): build `base` and `base-devel` inside stage 0, as
+   7.3 describes: DKRescue's root is the lower layer, `repo/` supplies the
+   in-tree packages built so far. The `selfhost` option and `stage0deps` (5.4)
+   cover a compiler that needs an earlier build of itself.
+2. **Stage 2** (**Planned, not implemented**; there is no stage 2 or
+   comparison code in `src/`): build both again with build roots populated from **`repo/`
    only**, and the base build set is `base-devel`. The stage 0 root still
    supplies the `apk` binary that populates the roots; it never supplies a
    package.
-3. **Compare** the stage 1 and stage 2 packages: file lists, sizes, and the
+3. **Compare** (**Planned, not implemented**) the stage 1 and stage 2 packages: file lists, sizes, and the
    scans' `depends` and `provides`. Differences point to a package that
    depends on its build machine in a way it shouldn't. Byte-identical output
    is not required in v1.
 
-After stage 2, nothing in the tree depends on DKRescue.
+After stage 2, nothing in the tree depends on DKRescue. Until then it does:
+every build runs on `rootfs/dkrescue`.
 
 **The vendor field.** The profiles' triples say `fenriros` from the start.
 DKRescue's LLVM installs its runtime in the plain layout
@@ -1062,9 +1273,9 @@ Each wave needs only the ones before it.
 | 1 | `musl`, `libatomic-chimera`, `llvm` (one build: clang, lld, compiler-rt, libunwind, libc++abi, libc++, shared `libLLVM`), `zig` | `llvm` is the longest build; it uses `jobs:` and `LLVM_PARALLEL_LINK_JOBS` for 8 GB machines. Its pieces become subpackages (5.7). |
 | 2 | zlib, bzip2, xz, lz4, zstd, pkgconf, ncurses, readline, libffi, expat, OpenSSL, attr, acl, libcap, elfutils' libelf, argp-standalone, musl-fts, musl-obstack | The libraries everything else links. |
 | 3 | m4, make, patch, file, gawk, bc, gperf, Flex, Bison, gettext, Perl, Python, CMake, Ninja, setuptools, Meson, Autoconf, Automake, Libtool, scdoc | Together with wave 1: `base-devel`. |
-| 4 | coreutils, findutils, grep, sed, diffutils, tar, gzip, less, which, bash, dash, dksh | Static where 9.1 says so. |
-| 5 | util-linux, e2fsprogs, kmod, eudev, shadow, kbd, procps-ng, psmisc, iproute2, sysklogd, dinit, dinit services, `base-files`, `linux` | `linux` takes its configuration from the recipe's `files/`. |
-| 6 | apk-tools, dklilo, `dkde-console` | The Zig programs need `zig` (wave 1) and, for `dkde-console`, the Zig dependency fetch (9.4). |
+| 4 | coreutils, findutils, grep, sed, diffutils, tar, gzip, less, which, bash, dash, dksh | Static where 9.1 says so (`bash`, `dash`, `which`). `dksh` is not in `base`. |
+| 5 | util-linux, e2fsprogs, kmod, eudev, shadow, kbd, procps, psmisc, iproute2, sysklogd, dinit, dinit services, `base-files`, `linux` | `linux` takes its configuration from the recipe's `files/`; the image, not `base`, picks the kernel. |
+| 6 | apk-tools, dklilo, `dkconsole` | The Zig programs need `zig` (wave 1) and the Zig dependency fetch (`zigdeps`, 9.4). `dkconsole` is not in `base`. |
 | meta | `base`, `base-devel`, `base-net` | Metapackages: no files, only dependencies. |
 
 The order inside a wave is dkbuild's dependency order, not this table's.
@@ -1073,20 +1284,21 @@ The order inside a wave is dkbuild's dependency order, not this table's.
 
 Found by reading the DKRescue posts against what exists:
 
-1. **Stage 2 build roots.** Stage 1 is implemented: the DKRescue root is the
+1. **Stage 2 build roots (not implemented).** Stage 1 is implemented: the DKRescue root is the
    lower layer of an overlay mounted inside the user namespace (7.1, 7.3; it
    works unprivileged on Linux 5.11 and newer, and `dkbuild doctor` checks
    it). Stage 2 must populate the root from `base-devel` and `repo/` only, with
-   `/etc/apk/repositories` listing `repo/` alone.
+   `/etc/apk/repositories` listing `repo/` alone. Until it exists the
+   forgotten-dependency test (12) is skipped.
 2. **Names across stages:** the recipes now say `sed`, the name in both
    DKRescue and FenrirOS (Chimera's was `gsed`, because its `sed` is BSD), and
    the `gsed` workarounds in `linux-headers` and `lvm2` are gone. If a build
    tool ever has different names in stage 1 and stage 2, a recipe needs a
    `provides` key or a per-stage name map. **OPEN**, but no recipe needs it.
-3. **Zig dependency fetch** for `dkde-console`: `dkbuild fetch` runs
-   `zig fetch` while the network is allowed, and the build uses `--system`
-   offline (the `zig_build` macro already passes it). Scoped to libghostty-vt
-   and what it needs, not the full dkde tree.
+3. ~~**Zig dependency fetch.**~~ **Implemented** as the generic option
+   `zigdeps` (5.4, 7.4): `dkbuild fetch` runs `zig fetch` while the network is
+   allowed, and the build uses `--system zig-pkg` offline (the `%zig_build`
+   macro passes it). `dkconsole` and `dkde` use it.
 4. ~~**Install scripts.**~~ **Implemented:** a file named after an apk script
    type (`pre-install`, `post-install`, `pre-upgrade`, `post-upgrade`,
    `pre-deinstall`, `post-deinstall`, `trigger`) in the recipe's `scripts/`
@@ -1112,7 +1324,11 @@ Found by reading the DKRescue posts against what exists:
    build, many subpackages, `zig`) before anything depends on it.
 2. Waves 2 and 3: the libraries and build tools. `base-devel` exists.
 3. Waves 4 to 6: the programs. `base` exists.
-4. Stage 2, and the comparison.
+4. Stage 2, and the comparison (**Planned, not implemented**).
+
+Status at the audit: steps 1 to 3 are done in stage 1 (the repository holds
+the toolchain, `base`, `base-net` and the desktops); `base-devel` is written
+and not built yet; step 4 has no code.
 
 **B2 is done when:** stage 1 and stage 2 of `base` and `base-devel` build on
 x86_64; `apk add base` into an empty directory works from `repo/` alone; and
@@ -1123,12 +1339,14 @@ inside a namespace the installed root runs `apk --version`, `sh`, `ls` and
 
 | Command | Does |
 |---|---|
-| `dkbuild pkg <name>...` | Builds packages and their missing dependencies |
-| `dkbuild pkg --arch aarch64 <name>` | The same, for another architecture |
+| `dkbuild pkg <name>...` | Builds packages and their missing dependencies. There is no `--arch`: it builds for `x86_64` (6) |
 | `dkbuild world` | Builds every recipe that's out of date |
-| `dkbuild fetch [<name>...]` | Only downloads and checks sources |
-| `dkbuild check <name>...` | Checks recipes: fields, checksums present, patches exist, no unknown keys |
-| `dkbuild graph <name>` | Prints the dependency order |
+| `dkbuild fetch [<name>...]` | Only downloads and checks sources, vendors the dependency stores (7.4) and makes the snapshots (5.3) |
+| `dkbuild check [<name>\|<file.toml>...]` | Checks recipes (all of them with no argument): fields, checksums present, patches exist, no unknown keys |
+| `dkbuild graph <name>...` | Prints the build order for the packages |
+| `dkbuild outdated [--bump]` | Lists recipes whose own inputs changed since their last build without a new `release`; `--bump` raises it (7.2) |
+| `dkbuild discs [--media M] <file.toml>` | Writes a repository or source set as ISO images in `out/<name>/` (8) |
+| `dkbuild import-cbuild [--out DIR] <template.py\|dir>...` | Converts Chimera cbuild templates into draft recipes (5.9) |
 | `dkbuild doctor` | Checks the host (programs, namespaces, overlayfs, disk, key) and prints the fixes (3.1) |
 | `dkbuild hackage-lock <freeze> [-o FILE]` | Writes a `hackagedeps` lock from a cabal freeze file (7.4) |
 | `dkbuild python-lock <uv.lock\|pylock.toml\|requirements> [-o FILE]` | Writes a `pydeps` lock (7.4) |
@@ -1136,11 +1354,19 @@ inside a namespace the installed root runs `apk --version`, `sh`, `ls` and
 | `dkbuild upstream [--all] [--refresh] [--notify] [<name>...]` | Reports recipes with a newer upstream release, from each recipe's first source: `git ls-remote` tags for git hosts (GitHub, GitLab, Codeberg, kernel.org, ...), GNOME's cache.json, PyPI, crates.io, npm, MetaCPAN, SourceForge's RSS, and otherwise the HTTP directory listing (and versioned directories above it: KDE, X.org, GNU, ...). Pre-releases are skipped. `upstream.toml` at the tree root pins a series, gives another URL or regex, ignores versions, or skips a package, without touching recipes. Results are cached 12 hours in `work/upstream/`; `--all` lists what could not be checked; `--notify` sends a desktop notification (contrib/systemd has a daily user timer). Changes nothing |
 | `dkbuild image [--verbose] <file>` | Builds an image (8); `--verbose` (`-v`) lists the packages asked for and shows the run as it happens (apk's `Installing <package>` lines, services, users, outputs); without it the run's output is only in `out/<name>/image.log` |
 | `dkbuild bootstrap-root [--force] [--dest DIR] <image>` | Unpacks the stage 0 build machine and checks it (9.2) |
-| `dkbuild prune [--dry-run]` | Removes packages from `repo/` that their recipe no longer builds (older versions, dropped subpackages), once the recipe's present version is built, and rebuilds the index. Packages no recipe provides are reported, not removed |
-| `dkbuild shell <name>` | Opens a shell in a prepared build root for that recipe |
+| `dkbuild prune [--dry-run] [--key FILE]` | Removes packages from `repo/` that their recipe no longer builds (older versions, dropped subpackages), once the recipe's present version is built, and rebuilds the index (signed with the key); also prunes the dependency stores (7.4). Packages no recipe provides are reported, not removed |
+| `--tree DIR` | Before the command: use the recipe tree at `DIR` instead of the current directory |
 | `-j N` | Parallel jobs per build (default: the number of CPUs) |
 | `-P N` | Builds at once (default 1) |
+| `--key FILE` | `pkg`, `world`, `prune`: the private signing key (default `~/.config/dkbuild/signing.rsa`) |
 | `--keep-root` | Keeps the build root after the build |
+| `--no-check` | Skips every recipe's `check` step |
+| `--keep-going` | A failure does not stop the run: what depends on it is skipped, the rest builds, and a recipe changed without a `release` bump is listed instead of stopping it (5.5) |
+| `--force` | Builds a recipe whose own inputs changed without a `release` bump (7.2) |
+| `--color=auto\|always\|never` | Colors in the progress lines (5.5) |
+
+`dkbuild shell <name>` (a shell in a prepared build root) is not implemented;
+`--keep-root` keeps the root for a look afterwards.
 
 One package builds at a time unless `-P N` asks for more; one at a time
 suits an 8 GB machine better than several builds side by side. With `-P N`
@@ -1154,103 +1380,160 @@ budget instead of "heavy builds run alone".
 
 ## 11. Repository layout
 
-The tool and the recipes live in separate repositories, so the tool can
-build other distributions too.
-
-**The tool:**
+One repository (`BearzRobotics/dkbuild`) holds the tool and the recipes. The
+tool reads a tree (`--tree DIR`, default the current directory), so it can
+build other trees too, but they are not kept in a separate repository.
 
 ```
 build.zig
 build.zig.zon
-SPEC.md
-src/
-  main.zig
-  recipe.zig   recipe model, validation (reads TOML with toml-zig)
-  macro/       macro expansion, per-target variables
-  profile/     target profiles, cross files, toolchain files
-  fetch/
-  sandbox/     namespaces, mounts, the minimal /dev
-  build/       the steps of 7
-  scan/        ELF and pkg-config scans (5.6)
-  apk/         running apk mkpkg, mkndx, add
-  image/
-```
-
-**The recipe tree** (FenrirOS's):
-
-```
-packages/<letter>/<name>/package.toml, patches/, files/
+SPEC.md  README.md  LICENSE
+src/              the tool: flat, one file per concern, no subdirectories
+packages/<character>/<name>/package.toml, patches/, files/, scripts/
 profiles/x86_64.toml, aarch64.toml, riscv64.toml
-images/fenriros.toml
+images/           image files (8): fenriros, base, dkde, rescue, container,
+                  container-build; repo and source for `dkbuild discs`
 keys/             public signing keys (private keys never in the repository)
+upstream.toml     overrides for `dkbuild upstream` (10)
+tests/            end-to-end scripts, helper scripts and test trees (12)
+docs/             roadmap.md, install.md, setup-ubuntu.md, handoff.md,
+                  requests.md, decisions/ (design records), manpages/
+contrib/systemd/  the user units that run `dkbuild upstream --notify` daily
+ai/AGENTS.md      notes for coding agents
 ```
+
+`packages/` has one directory per first character of a package name: letters
+`a` to `z` and the digits `0` and `7`. `src/` holds:
+
+| Files | Does |
+|---|---|
+| `main.zig` | the commands (10) |
+| `recipe.zig`, `tree.zig`, `macro.zig`, `profile.zig`, `cfg.zig` | recipe model and validation (reads TOML with `toml-zig` through the `cfg.zig` wrapper, which images and discs use too), the tree and its dependency graph, macros (5.5), target profiles and cross files (6.1) |
+| `fetch.zig`, `inputs.zig`, `npmdeps.zig`, `pydeps.zig`, `hackagedeps.zig`, `gemdeps.zig`, `pubdeps.zig` | the fetch step and the dependency stores (7.4); the rebuild records and hashes (7.2) |
+| `build.zig`, `sandbox.zig`, `scan.zig`, `split.zig`, `sched.zig` | the steps of 7, the sandbox (7.1), the scans (5.6), subpackage splitting (5.7), the scheduler (`-P`) |
+| `image.zig`, `discs.zig`, `bootstrap.zig`, `doctor.zig`, `cbuild.zig`, `term.zig` | images (8) and discs, `bootstrap-root` (9.2), `doctor` (3.1), the Chimera importer (5.9), terminal colors |
+| scripts embedded in the binary | `npm-offline.js`, `pnpm-registry.js`, `gradle-*.gradle`, `gradle-store.sh`, `nuget-store.sh`, `snapshot-*.sh` (5.3), `python-lock.py`, `hackage-lock.py`, `yarn-lock.py`, `upstream.py`, `discs-import.sh` |
+
+apk is not wrapped in a module: `apk mkpkg`, `mkndx` and `add` are run as
+programs.
+
+Not in git (working directories): `cache/` (sources and dependency stores),
+`repo/` (the packages and the index; there is one repository, `repo/<arch>/`),
+`rootfs/` (the stage 0 root), `logs/`, `out/` (images and discs), `work/`
+(build roots), `zig-pkg/`, `imported/` (the default output of
+`import-cbuild`), and the author's `drafts/`, `wip/`, `dknotes/` and
+`dkrescue.iso`.
 
 ## 12. Testing
 
-- **Unit tests:** recipe and profile validation (wrong types, unknown keys,
-  bad checksums), macro expansion for each target,
-  the generated cross and toolchain files, subpackage splitting, and the
-  ELF and pkg-config scans against fixture files.
-- **End-to-end:** `tests/run-all.sh` runs the end-to-end scripts. `forgotten-dep` is skipped: stage 1 cannot catch a forgotten
-  dependency (7.3), so that test comes back with stage 2.
+- **Unit tests:** `zig build test` (84 `test` blocks): recipe and profile validation
+  (wrong types, unknown keys, bad checksums), macro expansion for each target,
+  the generated cross and toolchain files, subpackage splitting, the ELF and
+  pkg-config scans against fixture files, and also image and disc parsing, the
+  rebuild records and interfaces (`inputs.zig`), the scheduler, the lockfile
+  readers (npm, Python, Haskell, gems, Dart), the Chimera importer, the tree,
+  the terminal colors, `doctor` and `bootstrap-root`.
+- **End-to-end:** `tests/run-all.sh` runs the unit tests, builds, runs
+  `dkbuild check` on the whole tree and then these scripts, in this order:
+  `forgotten-dep`, `sandbox`, `chain`, `rebuild`, `scripts`, `repo-install`,
+  `musl`, `import`, `parallel`. They need `rootfs/dkrescue` (run
+  `dkbuild bootstrap-root` first) and the signing key. `chain`, `rebuild`,
+  `parallel`, `sandbox` and `scripts` have their own small trees in
+  `tests/trees/`; `rebuild` covers 7.2 (early cutoff, release bumps), `parallel`
+  `-P`, `scripts` the install scripts (9.4), `repo-install` an offline `apk add`
+  from `repo/`, `import` 5.9. `tests/lib.sh` and `tests/sandbox-probe.sh` are
+  helpers.
 - **Sandbox tests:** a build can't reach the network, can't see the build
   machine's processes or `/home`, and leaves no mount or process behind.
   (`tests/sandbox.sh`: a probe runs as a build step and checks the sandbox
   from the inside; the same probe must flag the host, or it proves nothing.)
-- **End-to-end tests** (`tests/run-all.sh`) use `dkdemo`, a tiny library built
+- **End-to-end tests** use `dkdemo`, a tiny library built
   from a generated tarball through a `file://` source, so they need no
   download and no package from any repository can stand in for it.
-- **A forgotten dependency fails:** a test recipe that uses zlib without
-  declaring it must fail to build.
-- **The FenrirOS tree:** `dkbuild world` for `x86_64`, then
-  `dkbuild image images/fenriros.toml`, then the ISO boots in QEMU with
-  SeaBIOS and OVMF, as in the DKRescue ISO build.
-- **Cross:** the base set for `aarch64` builds, and its image boots in
-  `qemu-system-aarch64` with UEFI firmware.
+- **A forgotten dependency fails** (`tests/forgotten-dep.sh`): a test recipe
+  that uses zlib without declaring it must fail to build. **Skipped** (the
+  script prints "skipped" and exits 0): stage 1 builds on the DKRescue root,
+  which has zlib whether declared or not, so only stage 2 (7.3, **Planned,
+  not implemented**) can fail it.
+- **Booting an image:** `tests/qemu-iso.sh` boots a built live ISO in QEMU,
+  on BIOS (SeaBIOS) and UEFI (OVMF), and waits for the login. It is not part
+  of `run-all.sh`.
+- **The FenrirOS tree:** there is no automated script for `dkbuild world`,
+  then `dkbuild image`, then the boot test; they are run by hand, and the live ISOs `base`, `rescue` and
+  `dkde` have booted in QEMU.
+- **Cross (Planned, not implemented):** the base set for `aarch64` builds, and
+  its image boots in `qemu-system-aarch64` with UEFI firmware.
 
 ## 13. Milestones
 
+Status as of 2026-11-13: about 2300 recipes are written and about 4400
+distinct packages built for `x86_64` (a world run is still fixing the last few
+dozen failures); three live ISOs (`base`, `rescue`, `dkde`) have been built
+and booted in QEMU on BIOS and UEFI.
+
 ### B0 — Recipes
+
+**Done.**
 
 - Recipe reader, validation, macros, profiles, `dkbuild check` and
   `dkbuild graph`.
 - **Done when:** every recipe in a test tree validates or fails with a
   clear message, and the generated cross files are correct for all three
-  targets.
+  targets. Every recipe in `packages/` passes `dkbuild check`; the cross
+  files are unit-tested.
 
 ### B1 — Building natively
+
+**Partly done:** native builds work and are the whole of what dkbuild does;
+the forgotten-dependency half is not met.
 
 - Fetch, sandbox, build steps, subpackages, scans, `apk mkpkg` and
   `apk mkndx`.
 - **Done when:** zstd, lvm2 (with its patch) and seatd build into
-  installable apk packages on x86_64, and the forgotten-dependency test
-  fails as it should.
-- **Deferred:** dkde. It needs the `zig` toolchain as a package, its Zig
-  dependencies fetched during `dkbuild fetch` (network allowed) and used
-  offline with `--system`, and the GTK 4, poppler and Wayland stack, which
-  is hundreds of packages in the build root. That belongs with the desktop
-  work after the base system builds, not in B1.
+  installable apk packages on x86_64 (**done**), and the forgotten-dependency
+  test fails as it should (**not met:** the test is skipped until stage 2,
+  12).
+- ~~**Deferred:** dkde.~~ **Done:** `zig` is a package, the Zig dependencies are
+  fetched during `dkbuild fetch` and used offline (`zigdeps`), and dkde,
+  dkconsole and the GTK 4, Wayland and poppler stack all build.
 
 ### B2 — Bootstrap and the base system
+
+**Partly done:** stage 1 only.
 
 - Section 9: `base`, `base-devel` and `base-net`, built in two stages.
 - **Done when:** stage 1 and stage 2 of `base` and `base-devel` build on
   x86_64, and `apk add base` into an empty root works from `repo/` alone
-  (9.5). The desktop is a later milestone.
+  (9.5). The desktop is a later milestone. Met so far: `base` and `base-net`
+  build in stage 1, and the live ISOs install `base` from `repo/` with `apk
+  add`. Not met: stage 2 and the stage comparison (not implemented), and
+  `base-devel` is written but not built.
 
 ### B3 — Images
 
+**Partly done.**
+
 - Section 8.
 - **Done when:** `dkbuild image images/fenriros.toml` produces an ISO that
-  boots in QEMU on BIOS and UEFI, and passes CONSTRAINTS.md's checks.
+  boots in QEMU on BIOS and UEFI, and passes CONSTRAINTS.md's checks. Met in
+  part: the `iso` output exists and `base.toml`, `rescue.toml` and `dkde.toml`
+  make ISOs that boot on both; `fenriros.toml` itself makes a root tarball
+  (`output = ["tar"]`), and CONSTRAINTS.md's checks are not automated (the
+  file is not in the repository).
 
 ### B4 — Cross
+
+**Planned, not implemented** (6.2 to 6.4), aarch64 first. The profile and a
+`zig cc` experiment exist; no `aarch64` package, base set or image has been
+built.
 
 - Sections 6.2 to 6.4, aarch64 first.
 - **Done when:** the aarch64 base set and an aarch64 image build on an
   x86_64 machine, and the image boots in `qemu-system-aarch64`.
 
 ### B5 — riscv64
+
+**Planned, not implemented.**
 
 - **Done when:** as B4, for riscv64.
 
@@ -1260,16 +1543,23 @@ keys/             public signing keys (private keys never in the repository)
 2. ~~Recipe format.~~ **Decided:** TOML, read with `toml-zig` (decision
    record `docs/decisions/0001-toml-recipes.md`). Earlier it was a YAML subset
    read by our own `src/yaml.zig` (zig-yaml had been tried and dropped: it
-   needed patches for Zig 0.17.0 and had no `|` block scalars). YAML remains
-   only as an import format (5.9). Semantic errors (unknown key, wrong type)
+   needed patches for Zig 0.17.0 and had no `|` block scalars; the file no
+   longer exists). YAML remains
+   only as an import format (5.9, planned). Semantic errors (unknown key, wrong type)
    name the key but not the line, because `toml-zig` does not record key
-   positions; syntax errors keep line and column.
-3. The apk-tools v3 version to pin, and how signing keys are kept and used
-   (undecided).
-4. Bootloader for all architectures, pending dklilo (6.1). Until then B3 needs a
-   stand-in on x86_64.
+   positions; syntax errors keep line and column. (The decision record's
+   own status line still says "proposed"; it was implemented.)
+3. ~~The apk-tools v3 version to pin, and how signing keys are kept and used.~~
+   **Decided:** apk-tools 3.0.8 (`packages/a/apk-tools`); the public key is
+   `keys/dkbuild-signing.rsa.pub`, the private key stays outside the
+   repository (`~/.config/dkbuild/signing.rsa`, backed up encrypted and
+   offline: docs/setup-ubuntu.md) and is on neither of the discs (8).
+4. Bootloader for all architectures. **Answered for x86_64:** dklilo for the
+   live ISOs (BIOS and UEFI), systemd-boot for installed UEFI systems (6.1).
+   **Still OPEN:** installed BIOS machines, `aarch64` and `riscv64`.
 5. qemu-user and `binfmt_misc` for native builds of other architectures
-   (6.3).
+   (6.3). **OPEN:** nothing implemented; `qemu` is packaged as an ordinary
+   package without a user-mode setup.
 6. ~~DKRescue's posts.~~ **Decided:** DKRescue was a one-off. FenrirOS has its
    own documentation; the DKRescue posts stay as history. The DKRescue
    *image* is not history: it is stage 0 (9.2).
@@ -1278,8 +1568,10 @@ keys/             public signing keys (private keys never in the repository)
    packaged and installable but not the default. GNU userland, as in DKRescue
    (static where 9.1 says). The compiler is **not** in `base`; it is in
    `base-devel`, which build roots and a later "everything included" image
-   install. Still open: how a recipe names a build tool that has different
-   names in stage 1 and stage 2 (9.4, item 2).
+   install. The last sub-question, how a recipe names a build tool that has
+   different names in stage 1 and stage 2 (9.4, item 2), is moot until stage 2
+   exists; no recipe needs it, and `selfhost` with `stage0deps` (5.4) covers
+   the first-build case.
 8. ~~Stage 1 lower layer (7.3, 9.4 item 1).~~ **Decided:** an overlay in the
    user namespace. Stage 1 cannot catch a forgotten dependency; stage 2 does.
 9. ~~Triple vendor (6.1, 9.2).~~ **Decided:** `fenriros`; DKRescue's LLVM
