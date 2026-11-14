@@ -1,0 +1,20 @@
+# jupyter-client from PyPI.
+name = "python-jupyter-client"
+version = "8.10.0"
+release = 1
+summary = "Jupyter protocol implementation and client libraries"
+license = "BSD-3-Clause"
+homepage = "https://jupyter.org"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python", "python-jupyter-core", "python-dateutil", "python-pyzmq", "python-tornado", "python-traitlets", "python-typing-extensions"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/c5/2a/906772148a06e48885039e0250c340b770a55bbf37b08d6ee0449df369c3/jupyter_client-8.10.0.tar.gz", sha256 = "9f7116294dca55f1785be880057d44544db9b1567718d92cb33c58886afb9497" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-jupyter-client/LICENSE"
+'''
