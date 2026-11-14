@@ -1,0 +1,30 @@
+# libhubbub: part of the NetSurf project's libraries (needed by netsurf, elinks).
+# The NetSurf build system installs a shared and a static library from two
+# passes (COMPONENT_TYPE=lib-shared, lib-static); both are installed.
+# WARNFLAGS=-w: the libraries build with -Werror, which a newer clang than the
+# ones upstream tests turns into failures on harmless warnings.
+name = "libhubbub"
+version = "0.3.8"
+release = 1
+summary = "HTML5 parser library"
+license = "MIT"
+homepage = "https://www.netsurf-browser.org/projects/hubbub/"
+hostdeps = ["netsurf-buildsystem", "perl", "pkgconf"]
+builddeps = ["libparserutils-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.netsurf-browser.org/libs/releases/libhubbub-0.3.8-src.tar.gz", sha256 = "8ac1e6f5f3d48c05141d59391719534290c59cd029efc249eb4fdbac102cd5a5" },
+]
+
+build = '''
+for t in lib-shared lib-static; do
+    %make PREFIX=/usr WARNFLAGS=-w COMPONENT_TYPE=$t
+done
+'''
+install = '''
+for t in lib-shared lib-static; do
+    make DESTDIR="$pkgdir" PREFIX=/usr WARNFLAGS=-w COMPONENT_TYPE=$t install
+done
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libhubbub/COPYING"
+'''
