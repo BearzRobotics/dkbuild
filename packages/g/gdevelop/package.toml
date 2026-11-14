@@ -18,7 +18,7 @@
 # DRAFT, not built: needs electron and emscripten.
 name = "gdevelop"
 version = "5.6.287"
-release = 3
+release = 4
 summary = "Open-source game engine and editor, no-code and with JavaScript"
 license = "MIT"
 homepage = "https://gdevelop.io"
@@ -64,6 +64,21 @@ sed -i -e "s|process.env.EMSDK + '/upstream/emscripten/tools/webidl_binder.py'|'
     -e "s|^if (!process.env.EMSDK) {|if (false) {|" GDevelop.js/update-bindings.js
 grep -q "/usr/lib/emscripten/tools/webidl_binder.py" GDevelop.js/update-bindings.js
 grep -q "python3 " GDevelop.js/update-bindings.js
+# Two more Emscripten 6.0.3 differences (r3 build):
+# - the WebIDL binder (webidl_binder.py) now declares a returned string's static
+#   as "static thread_local char temp;" where 3.1.21 wrote "static char* temp;",
+#   the form patchGlueCppFile() in update-bindings.js looks for to make it a
+#   gd::String; unpatched, the glue got "static thread_local char temp.c_str();"
+#   (expected ';' errors in glue.cpp). A branch for the new form is added.
+# - the CMake targets GDCore and GDJS are static libraries given the suffix
+#   ".bc" (libGDCore.bc), which emcc 6 now takes for an LLVM bitcode file and
+#   compiles instead of linking an archive ("libGDCore.bc:1:2: error: expected
+#   integer, !<arch>"); the extension libraries get the suffix from
+#   Extensions/CMakeUtils.txt. They are ar archives, so they get ".a".
+sed -i "s|if (line.indexOf('static char\\*') !== -1) {|if (line.indexOf('static thread_local char temp;') !== -1) {\\n            line = line.replace('static thread_local char temp;', 'static thread_local gd::String temp;');\\n          } else if (line.indexOf('static char*') !== -1) {|" GDevelop.js/update-bindings.js
+grep -q "static thread_local gd::String temp" GDevelop.js/update-bindings.js
+sed -i 's|SUFFIX "\.bc"|SUFFIX ".a"|' Core/CMakeLists.txt GDJS/CMakeLists.txt Extensions/CMakeUtils.txt
+! grep -rq 'SUFFIX "\.bc"' Core/CMakeLists.txt GDJS/CMakeLists.txt Extensions/CMakeUtils.txt
 # GDJS, the game engine runtime (TypeScript, built by the IDE's import step)
 (cd GDJS && npm ci --ignore-scripts)
 (cd GDevelop.js && npm install --offline --ignore-scripts --install-links)
