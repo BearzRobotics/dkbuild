@@ -1,0 +1,35 @@
+# Ported from Chimera Linux cports: user/gleam/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Gleam: a friendly, type-safe functional language that compiles to Erlang
+# (BEAM) and JavaScript. Written in Rust; the compiler, formatter, language
+# server and build tool are the one `gleam` binary. Programs it builds run on
+# the tree's Erlang/OTP (rundeps; escripts and `gleam run` call erlc/erl);
+# the JavaScript target needs Node.js, Deno or Bun, which the user installs.
+# Crates are vendored on the host (cargodeps). Chimera clears the checksums of
+# the vendored aws-lc-sys (it patches the crate); this recipe does not patch
+# it, so it builds with the crate as published (cc/cmake build of aws-lc).
+# Tests are not run: several need the network (hex.pm) or a git checkout.
+name = "gleam"
+version = "1.19.2"
+release = 1
+summary = "Friendly language for building scalable type-safe systems"
+license = "Apache-2.0"
+homepage = "https://gleam.run"
+hostdeps = ["rust", "cmake", "ninja", "git"]
+rundeps = ["erlang"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/gleam-lang/gleam/archive/refs/tags/v1.19.2.tar.gz", sha256 = "d8796325dad02802dccc91568a90a00e43247cad1d87ddbd9779a99d3c435d61" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs
+'''
+install = '''
+install -Dm755 target/release/gleam "$pkgdir/usr/bin/gleam"
+install -Dm644 LICENCE "$pkgdir/usr/share/licenses/gleam/LICENCE"
+'''
