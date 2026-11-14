@@ -1,0 +1,20 @@
+# jsonpointer from PyPI.
+name = "python-jsonpointer"
+version = "3.12"
+release = 1
+summary = " Identify specific nodes in a JSON document (RFC 6901) "
+license = "BSD-3-Clause"
+homepage = "https://github.com/stefankoegl/python-json-pointer"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/46/cb/2c3112a061a718d93866c2555dad1e9d53865e4703d0f3be550d252b277b/jsonpointer-3.12.tar.gz", sha256 = "7a3dcc11b64053eaa9c549e85e413f8d40a075215f793a331bed9182a14251ae" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-jsonpointer/LICENSE.txt"
+'''
