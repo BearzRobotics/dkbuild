@@ -1,0 +1,11 @@
+# ClamAV scanning daemon. Not enabled by default, and it does not start until
+# /etc/clamav/clamd.conf exists (copy /etc/clamav/clamd.conf.sample, remove its
+# "Example" line, set LocalSocket) and a signature database is in
+# /var/lib/clamav (run freshclam; none is shipped): `dinitctl enable clamd`.
+type = process
+command = /usr/sbin/clamd --foreground --config-file=/etc/clamav/clamd.conf
+run-as = clamav
+logfile = /var/log/clamd.log
+smooth-recovery = true
+
+depends-on: rcboot

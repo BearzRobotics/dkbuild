@@ -1,0 +1,61 @@
+# clamav: the ClamAV antivirus: libclamav (shared and static), libfreshclam,
+# clamd, clamscan, clamdscan, clamdtop, clamonacc (on-access scanning through
+# fanotify), freshclam, sigtool, clambc and clamconf. The release tarball ships
+# its Rust crates (.cargo/vendor with a .cargo/config.toml, for the onenote and
+# signature libraries in libclamav_rust), so cargodeps is not needed: cargo
+# runs offline against them. bindgen/cbindgen need libclang (llvm-clang).
+# Unit tests (ENABLE_TESTS) are not built: they need check, pytest and the
+# test databases, and !check; man pages are generated. The UnRAR code (libclamunrar,
+# ENABLE_UNRAR, in the tarball, under the UnRAR licence) is built so RAR archives
+# are scanned. External libmspack from the tree (ENABLE_EXTERNAL_MSPACK).
+# Not built: clamav-milter (needs libmilter, which no package in the tree
+# provides yet), systemd units, the doxygen HTML API docs.
+# Installed inert: no databases (freshclam downloads them), only the
+# *.conf.sample examples in /etc/clamav (no clamd.conf or freshclam.conf, so
+# neither daemon runs), and dinit services for clamd and freshclam, not enabled.
+name = "clamav"
+version = "1.5.4"
+release = 1
+summary = "Antivirus engine and scanner"
+license = "GPL-2.0-only AND custom:unrar AND BSD-3-Clause AND Apache-2.0 AND MIT"
+homepage = "https://www.clamav.net"
+hostdeps = ["cmake", "ninja", "pkgconf", "rust", "llvm-clang"]
+builddeps = ["openssl-devel", "libxml2-devel", "pcre2-devel", "json-c-devel", "zlib-ng-compat-devel", "bzip2-devel", "curl-devel", "ncurses-devel", "libmspack-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/Cisco-Talos/clamav/releases/download/clamav-1.5.4/clamav-1.5.4.tar.gz", sha256 = "1af1117a228f1b5bc7fa91a0dabc37848a99e7d25188e9be8043332ce721dfd3" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true LIBCLANG_PATH=/usr/lib
+'''
+setup = '''
+%cmake \
+    -DCMAKE_INSTALL_SYSCONFDIR=/etc \
+    -DAPP_CONFIG_DIRECTORY=/etc/clamav \
+    -DDATABASE_DIRECTORY=/var/lib/clamav \
+    -DENABLE_APP=ON \
+    -DENABLE_CLAMONACC=ON \
+    -DENABLE_MILTER=OFF \
+    -DENABLE_UNRAR=ON \
+    -DENABLE_EXTERNAL_MSPACK=ON \
+    -DENABLE_SHARED_LIB=ON \
+    -DENABLE_STATIC_LIB=ON \
+    -DENABLE_MAN_PAGES=ON \
+    -DENABLE_SYSTEMD=OFF \
+    -DENABLE_TESTS=OFF \
+    -DENABLE_EXAMPLES=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 $pkgfiles/clamd "$pkgdir/etc/dinit.d/clamd"
+install -Dm644 $pkgfiles/freshclam "$pkgdir/etc/dinit.d/freshclam"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/clamav.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/clamav.conf"
+install -Dm644 COPYING.txt "$pkgdir/usr/share/licenses/clamav/COPYING.txt"
+for f in COPYING/*; do install -Dm644 "$f" "$pkgdir/usr/share/licenses/clamav/${f#COPYING/}"; done
+'''

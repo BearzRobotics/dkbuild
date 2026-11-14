@@ -1,0 +1,12 @@
+# ClamAV signature database updater, as a daemon checking for updates. Not
+# enabled by default, and it does not start until /etc/clamav/freshclam.conf
+# exists (copy /etc/clamav/freshclam.conf.sample and remove its "Example"
+# line): `dinitctl enable freshclam`. It downloads the databases into
+# /var/lib/clamav.
+type = process
+command = /usr/bin/freshclam --daemon --foreground --config-file=/etc/clamav/freshclam.conf
+run-as = clamav
+logfile = /var/log/freshclam.log
+smooth-recovery = true
+
+depends-on: rcboot
