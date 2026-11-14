@@ -1,0 +1,71 @@
+# Eclipse Mosquitto: an MQTT 3.1/3.1.1/5 broker, the libmosquitto and
+# libmosquittopp client libraries (shared and static) and the clients
+# (mosquitto_pub, mosquitto_sub, mosquitto_rr in the mosquitto-clients
+# subpackage), mosquitto_passwd, mosquitto_ctrl (with its interactive shell,
+# libedit) and mosquitto_signal. Features built: TLS and TLS-PSK (OpenSSL),
+# WebSockets through the system libwebsockets (WITH_WEBSOCKETS_BUILTIN=OFF:
+# upstream also has a built-in implementation, the libwebsockets one was
+# requested), SRV lookup through c-ares, cJSON (dynamic security), the HTTP
+# API and bridge support, UNIX sockets, SOCKS5, threading, $SYS and $CONTROL,
+# persistence and every plugin (acl-file, dynamic-security, password-file,
+# persist-sqlite, sparkplug-aware, examples). Not built: DLT, tcp-wrappers,
+# the legacy keepalive, systemd notification (no systemd), the tests (CUnit),
+# and the web dashboard sources in dashboard/ (an unfinished upstream UI;
+# the CMake build does not touch it).
+# Source edits: none. LTO is off (WITH_LTO=OFF): it breaks the static
+# archives with clang here. WITH_DOCS=OFF because upstream's docs target needs
+# xsltproc with the DocBook stylesheets to regenerate man pages that the
+# tarball already contains pre-generated (man/*.1 ... *.8); those are
+# installed by hand below, so the pages are the same.
+# Installed inert (docs/requests.md): the dinit service is shipped, not
+# enabled, there is no /etc/mosquitto/mosquitto.conf (only the .example files
+# upstream installs), no password file and no ACLs. Without a configuration
+# Mosquitto 2 listens on the loopback address only, with anonymous clients
+# refused for remote use. Setup: README.FenrirOS.
+name = "mosquitto"
+version = "2.1.2"
+release = 1
+summary = "Eclipse Mosquitto MQTT broker and client libraries"
+license = "EPL-2.0 OR BSD-3-Clause"
+homepage = "https://mosquitto.org"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["openssl-devel", "libwebsockets-devel", "c-ares-devel", "cjson-devel", "sqlite-devel", "libmicrohttpd-devel", "libedit-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://mosquitto.org/files/source/mosquitto-2.1.2.tar.gz", sha256 = "fd905380691ac65ea5a93779e8214941829e3d6e038d5edff9eac5fd74cbed02" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DWITH_TLS=ON -DWITH_TLS_PSK=ON -DWITH_WEBSOCKETS=ON -DWITH_WEBSOCKETS_BUILTIN=OFF \
+    -DWITH_SRV=ON -DWITH_SOCKS=ON -DWITH_UNIX_SOCKETS=ON -DWITH_THREADING=ON \
+    -DWITH_STATIC_LIBRARIES=ON -DWITH_PIC=ON -DWITH_LIB_CPP=ON \
+    -DWITH_CTRL_SHELL=ON -DWITH_HTTP_API=ON -DINC_BRIDGE_SUPPORT=ON \
+    -DWITH_BUNDLED_DEPS=ON -DWITH_PLUGINS=ON \
+    -DWITH_LTO=OFF -DWITH_TESTS=OFF -DWITH_DOCS=OFF -DWITH_SYSTEMD=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# man pages pre-generated in the tarball (see the header: WITH_DOCS=OFF)
+for p in man/*.[1-8]; do
+    s=${p##*.}
+    install -Dm644 "$p" "$pkgdir/usr/share/man/man$s/$(basename "$p")"
+done
+# the dinit service and its account
+install -Dm644 $pkgfiles/mosquitto "$pkgdir/etc/dinit.d/mosquitto"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/mosquitto.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/mosquitto.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/mosquitto/README.FenrirOS"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/mosquitto/LICENSE.txt"
+install -Dm644 edl-v10 "$pkgdir/usr/share/licenses/mosquitto/edl-v10"
+install -Dm644 epl-v20 "$pkgdir/usr/share/licenses/mosquitto/epl-v20"
+'''
+
+[subpackages.clients]
+summary = "Mosquitto MQTT command-line clients"
+paths = ["/usr/bin/mosquitto_pub", "/usr/bin/mosquitto_sub", "/usr/bin/mosquitto_rr"]

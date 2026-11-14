@@ -1,0 +1,10 @@
+# Mosquitto MQTT broker. Not enabled by default (README.FenrirOS): it needs
+# /etc/mosquitto/mosquitto.conf (example: /etc/mosquitto/mosquitto.conf.example).
+type = process
+command = /usr/bin/mosquitto -c /etc/mosquitto/mosquitto.conf
+run-as = mosquitto
+working-dir = /var/lib/mosquitto
+logfile = /var/log/mosquitto.log
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

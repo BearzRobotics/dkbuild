@@ -1,0 +1,26 @@
+Mosquitto on FenrirOS
+=====================
+
+Installed inert: the service is not enabled, there is no mosquitto.conf, no
+password file and no ACL. Examples are installed next to where they belong:
+/etc/mosquitto/mosquitto.conf.example, aclfile.example, pwfile.example,
+pskfile.example.
+
+    cp /etc/mosquitto/mosquitto.conf.example /etc/mosquitto/mosquitto.conf
+    $EDITOR /etc/mosquitto/mosquitto.conf
+    dinitctl enable mosquitto
+
+Mosquitto 2 only listens on localhost until a listener is configured, and
+requires `allow_anonymous true` or a password_file/plugin for any listener
+that is not local. A minimal network setup:
+
+    listener 1883
+    password_file /etc/mosquitto/passwd
+    persistence true
+    persistence_location /var/lib/mosquitto/
+
+Make the password file with `mosquitto_passwd -c /etc/mosquitto/passwd user`
+(chown it to mosquitto). WebSockets listeners (`protocol websockets`) use the
+system libwebsockets; the dynamic-security, persist-sqlite and other plugins
+are in /usr/lib/mosquitto_*.so. The command-line clients (mosquitto_pub,
+mosquitto_sub, mosquitto_rr) are in the mosquitto-clients package.
