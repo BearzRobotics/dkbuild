@@ -1,0 +1,20 @@
+# sparklines from PyPI.
+name = "python-sparklines"
+version = "1.0.0"
+release = 1
+summary = "Generate sparklines in Unicode text"
+license = "MIT"
+homepage = "https://github.com/deeplook/sparklines"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python", "python-termcolor"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/be/52/3e3c437c665397047e2c9364e27f53f85024c57fe990f422a30593fd8c98/sparklines-1.0.0.tar.gz", sha256 = "eee3ed5ac6dc954096ab092ce336941050eca790e2f33f85de65a4ea0a43cf74" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-sparklines/LICENSE.txt"
+'''
