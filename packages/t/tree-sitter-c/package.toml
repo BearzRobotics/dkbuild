@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: user/tree-sitter-c/template.py (cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors).
+# Parser sources are pre-generated in the release (src/parser.c), so the tree-sitter CLI is not needed.
+# The links in /usr/lib/tree-sitter are the parser directory neovim reads
+# (its runtime/parser is a link to it; see the neovim recipe).
+name = "tree-sitter-c"
+version = "0.24.2"
+release = 1
+summary = "C grammar for tree-sitter"
+license = "MIT"
+homepage = "https://github.com/tree-sitter/tree-sitter-c"
+hostdeps = ["pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/tree-sitter/tree-sitter-c/archive/v0.24.2.tar.gz", sha256 = "2eeb4db31f8fa0865e45488503d13403923bcb485a1bdb637abff8c42dd97364" },
+]
+
+build = '''
+# keep make from running the tree-sitter CLI: the generated files must not look older than grammar.js
+touch src/grammar.json src/parser.c 2>/dev/null || true
+%make PREFIX=/usr LIBDIR=/usr/lib
+'''
+install = '''
+%make_install PREFIX=/usr LIBDIR=/usr/lib
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/tree-sitter-c/LICENSE"
+mkdir -p "$pkgdir/usr/lib/tree-sitter"
+ln -s "../$(basename "$(find "$pkgdir/usr/lib" -maxdepth 1 -name 'libtree-sitter-c.so.*' -type l | head -1)")" "$pkgdir/usr/lib/tree-sitter/c.so"
+'''
