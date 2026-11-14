@@ -1,0 +1,20 @@
+# hatch-nodejs-version from PyPI.
+name = "python-hatch-nodejs-version"
+version = "0.4.0"
+release = 1
+summary = "Hatch plugin for versioning from a package.json file"
+license = "MIT"
+homepage = "https://github.com/agoose77/hatch-nodejs-version"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python", "python-hatchling"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/19/c9/1823a9e45eadd487bece8f2b3b29311edd79ba900d874885b1e9f7973a50/hatch_nodejs_version-0.4.0.tar.gz", sha256 = "2428ea398dd053f019d2b7ac949dd6b690ca8e826b6d433ad13c5b6c475ae91b" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-hatch-nodejs-version/LICENSE.txt"
+'''
