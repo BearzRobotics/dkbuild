@@ -11,9 +11,11 @@
 # r5: a full /etc/skel (.profile, .shrc, .bashrc, .bash_profile, ~/.local/bin) and /etc/shrc,
 #     so aliases (ls --color=auto) and the prompt work in every interactive shell, dash or bash;
 #     /etc/profile reads profile.d and sets EDITOR=msedit; root's shell is bash (dash stays /bin/sh).
+# r+1: group plugdev (46): libmtp's udev rules give phones and cameras (MTP/PTP) to it, libsigrok's
+# rules the logic analysers; the desktop users are in it.
 name = "base-files"
 version = "1"
-release = 5
+release = 6
 summary = "FenrirOS base directory layout and configuration files"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"

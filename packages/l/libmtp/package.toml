@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "libmtp"
 version = "1.1.22"
-release = 1
+release = 2
 summary = "Media Transfer Protocol (MTP) library"
 license = "LGPL-2.1-or-later"
 homepage = "http://libmtp.sourceforge.net"
@@ -29,4 +29,9 @@ check = '''
 '''
 install = '''
 %make_install
+# the udev rules above give MTP/PTP devices to group plugdev (base-files has it; this
+# makes sure, on systems whose /etc/group predates it; sd-tools applies sysusers.d)
+install -Dm644 /dev/stdin "$pkgdir/usr/lib/sysusers.d/libmtp.conf" <<'EOF2'
+g plugdev 46
+EOF2
 '''

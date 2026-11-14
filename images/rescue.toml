@@ -22,5 +22,5 @@ session   = "dkde-session"
 
 [[users]]
 name     = "rescue"
-groups   = ["wheel", "video", "render", "audio", "input", "disk"]
+groups   = ["wheel", "video", "render", "audio", "input", "plugdev", "disk"]
 password = "empty"
