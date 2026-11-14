@@ -1,0 +1,44 @@
+# matrix-seshat: Element Desktop's native module for the message index that
+# makes searching encrypted rooms possible (Rust, a Node-API module through
+# neon, over SQLCipher). Element's own build (hak) installs it from npm and
+# builds it with `yarn build` (cargo-cp-artifact copies the library to
+# index.node), against the system SQLCipher on Linux (its "bundled-sqlcipher"
+# feature is only for other systems): done here with cargo directly and the
+# library copied by hand. The npm package ships Cargo.toml, Cargo.lock, src/
+# and index.js; crates are vendored on the host (`cargodeps`).
+# files/Cargo.lock replaces the npm package's: that one is stale (it pins
+# seshat 4.1.0 while Cargo.toml asks for ^4.3.0, so `cargo --locked` refuses
+# it); this one is `cargo generate-lockfile` on the package as published.
+# musl's Rust defaults to static linking, which cannot make a cdylib:
+# -crt-static (as Alpine does for such crates).
+# Installed as a Node module under /usr/lib/node_modules/matrix-seshat, where
+# element-desktop links it.
+name = "matrix-seshat"
+version = "4.3.0"
+release = 1
+summary = "Matrix message index with full-text search, for Element Desktop"
+license = "Apache-2.0"
+homepage = "https://github.com/matrix-org/seshat"
+hostdeps = ["pkgconf", "rust"]
+builddeps = ["sqlcipher-devel"]
+options = ["!check", "cargodeps", "cargolock=."]
+
+source = [
+    { url = "https://registry.npmjs.org/matrix-seshat/-/matrix-seshat-4.3.0.tgz", sha256 = "a9a90827898c985394ec5bf25afc2df307ec27cc15be54dc8497785e87984fee" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export RUSTFLAGS="-C target-feature=-crt-static"
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs
+test -f target/release/libmatrix_seshat.so
+'''
+install = '''
+d="$pkgdir/usr/lib/node_modules/matrix-seshat"
+install -Dm755 target/release/libmatrix_seshat.so "$d/index.node"
+install -Dm644 index.js "$d/index.js"
+install -Dm644 package.json "$d/package.json"
+install -Dm644 README.md "$d/README.md"
+'''
