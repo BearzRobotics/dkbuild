@@ -1,0 +1,20 @@
+# comm from PyPI.
+name = "python-comm"
+version = "0.2.3"
+release = 1
+summary = "Jupyter Python Comm implementation, for usage in ipykernel, xeus-python etc."
+license = "BSD-3-Clause"
+homepage = "https://github.com/ipython/comm"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/4c/13/7d740c5849255756bc17888787313b61fd38a0a8304fc4f073dfc46122aa/comm-0.2.3.tar.gz", sha256 = "2dc8048c10962d55d7ad693be1e7045d891b7ce8d999c97963a5e3e99c055971" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-comm/LICENSE"
+'''
