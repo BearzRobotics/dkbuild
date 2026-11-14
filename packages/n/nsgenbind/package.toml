@@ -1,0 +1,23 @@
+# nsgenbind: NetSurf's JavaScript binding generator (IDL to C for Duktape);
+# netsurf runs it at build time.
+# WARNFLAGS=-w: built with -Werror upstream, see libdom.
+name = "nsgenbind"
+version = "0.9"
+release = 1
+summary = "NetSurf JavaScript binding generator"
+license = "MIT"
+homepage = "https://www.netsurf-browser.org/projects/nsgenbind/"
+hostdeps = ["bison", "flex", "netsurf-buildsystem", "perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.netsurf-browser.org/libs/releases/nsgenbind-0.9-src.tar.gz", sha256 = "232ce0f66cbc2c3eed6288ae26de2c567bbfbbc01d8b0f6fc6c1c1649d4b385d" },
+]
+
+build = '''
+%make PREFIX=/usr WARNFLAGS=-w
+'''
+install = '''
+make DESTDIR="$pkgdir" PREFIX=/usr WARNFLAGS=-w install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/nsgenbind/COPYING"
+'''
