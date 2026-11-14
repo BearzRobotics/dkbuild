@@ -1,0 +1,56 @@
+# Mono 6.14.1 (the WineHQ-maintained continuation of the Mono project, sources
+# from dl.winehq.org; the last Xamarin/Microsoft release was 6.12.0.206). UNTESTED and
+# RISKY: written from reading the tarball, not built; musl support exists upstream
+# (Alpine builds Mono) but this release has not been tried here.
+# What is built: the runtime (mono, mono-sgen; libmonosgen-2.0.so and .a), the class
+# libraries (net_4_x profile and facades) and the C# compiler `mcs`, with the SGen
+# collector.
+# Bootstrap: Mono is compiled by C# programs, so the tarball carries a seed:
+# mcs/class/lib/monolite-linux/ (mcs.exe, mscorlib.dll, ... : the managed bootstrap
+# compiler and a minimal class library, run by the freshly built mono). That is the
+# project's own bootstrap seed, taken as shipped; nothing else prebuilt is used.
+# Not built, with the reason:
+#  - Roslyn `csc` (--with-csc=roslyn): the release tarball does not carry
+#    external/roslyn-binaries (a submodule of prebuilt .NET binaries), so `mcs` is the
+#    compiler (--with-csc=mcs). Microsoft's csc comes with the tree's dotnet instead.
+#  - BTLS (--disable-btls): needs the BoringSSL submodule (external/boringssl),
+#    absent from the tarball; System.Net uses the managed TLS provider.
+#  - the Boehm collector (--disable-boehm): external/bdwgc is not in the tarball;
+#    SGen is the default collector anyway.
+#  - the LLVM back-end: needs Mono's own LLVM fork (a submodule, absent).
+#  - the mcs documentation (--with-mcs-docs=no): it needs the monodoc/mdoc tools, which are
+#    built by this very package.
+#  - msbuild/xbuild, NuGet and libgdiplus (System.Drawing) are separate projects.
+# Run time: ncurses (Console), certificates (`cert-sync` for the trust store).
+name = "mono"
+version = "6.14.1"
+release = 1
+summary = "Mono runtime and C# compiler (mcs)"
+license = "MIT AND LGPL-2.1-only AND GPL-2.0-only WITH Classpath-exception-2.0"
+homepage = "https://www.mono-project.com"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["make", "python", "pkgconf", "perl"]
+builddeps = ["zlib-ng-compat-devel", "linux-headers"]
+rundeps = ["ncurses", "ca-certificates"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://dl.winehq.org/mono/sources/mono/mono-6.14.1.tar.xz", sha256 = "3024c97c0bc8cbcd611c401d5f994528704108ceb31f31b28dea4783004d0820" },
+]
+
+setup = '''
+%configure \
+    --disable-boehm \
+    --disable-btls \
+    --with-csc=mcs \
+    --with-mcs-docs=no \
+    --with-profile4_x=yes
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/mono/LICENSE"
+install -Dm644 COPYING.LIB "$pkgdir/usr/share/licenses/mono/COPYING.LIB"
+'''
