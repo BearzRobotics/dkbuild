@@ -1,0 +1,63 @@
+# HexChat: graphical IRC client (GTK 2: 2.16.2 is the last release before the
+# GTK 3 port, which is unreleased). Everything upstream builds on Linux: the
+# GTK and text front ends, OpenSSL, D-Bus, libcanberra sounds, plugins (checksum,
+# fishlim, sysinfo with libpci, and the Perl, Python and Lua script plugins,
+# split off into hexchat-perl/-python/-lua so the interpreters stay optional),
+# appdata and plugin metainfo. Left out: the theme manager (needs Mono/.NET and
+# is a separate tool), Windows-only plugins (exec, upd, winamp). Lua uses LuaJIT
+# (upstream's default).
+name = "hexchat"
+version = "2.16.2"
+release = 1
+summary = "Graphical IRC client"
+license = "GPL-2.0-or-later"
+homepage = "https://hexchat.github.io"
+hostdeps = ["gettext-devel", "glib-devel", "meson", "perl", "pkgconf"]
+builddeps = ["dbus-glib-devel", "gtk+2-devel", "libcanberra-devel", "luajit-devel", "openssl-devel", "pciutils-devel",
+             "perl", "python-devel"]
+rundeps = ["adwaita-icon-theme"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/hexchat/hexchat/releases/download/v2.16.2/hexchat-2.16.2.tar.xz", sha256 = "2e88340a8da274b87373ec0740746da78120cc6fbfdd201a4dd6999cac790e4a" },
+]
+
+setup = '''
+%meson \
+    -Dgtk-frontend=true \
+    -Dtext-frontend=true \
+    -Dtheme-manager=false \
+    -Dplugin=true \
+    -Dtls=enabled \
+    -Ddbus=enabled \
+    -Dlibcanberra=enabled \
+    -Dinstall-appdata=true \
+    -Dinstall-plugin-metainfo=true \
+    -Dwith-checksum=true \
+    -Dwith-fishlim=true \
+    -Dwith-sysinfo=true \
+    -Dwith-lua=luajit \
+    -Dwith-perl=perl \
+    -Dwith-python=python3-embed
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''
+
+[subpackages.perl]
+summary = "HexChat Perl scripting plugin"
+paths = ["/usr/lib/hexchat/plugins/perl.so", "/usr/share/metainfo/io.github.Hexchat.Plugin.Perl.metainfo.xml"]
+depends = ["hexchat"]
+
+[subpackages.python]
+summary = "HexChat Python scripting plugin"
+paths = ["/usr/lib/hexchat/plugins/python.so", "/usr/share/metainfo/io.github.Hexchat.Plugin.Python.metainfo.xml"]
+depends = ["hexchat"]
+
+[subpackages.lua]
+summary = "HexChat Lua scripting plugin"
+paths = ["/usr/lib/hexchat/plugins/lua.so", "/usr/share/metainfo/io.github.Hexchat.Plugin.Lua.metainfo.xml"]
+depends = ["hexchat"]
