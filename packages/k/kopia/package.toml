@@ -1,0 +1,36 @@
+# kopia: fast, encrypted, deduplicating backup with a command line and a web UI
+# (Go). Go modules from the shared module cache (godeps). The web UI (HTMLui,
+# a React app) is NOT built here: upstream keeps its build output in a separate
+# Go module, github.com/kopia/htmluibuild, which go.mod pins and which godeps
+# fetches with the other modules; that pre-built UI is what the release itself
+# embeds (policy accepts pre-built UI assets). Flags as the Makefile's
+# KOPIA_BUILD_FLAGS; CGO off. Shell completions come from kopia itself
+# (`kopia --completion-script-*`).
+name = "kopia"
+version = "0.23.1"
+release = 1
+summary = "Fast, secure, encrypted backups with a web UI"
+license = "Apache-2.0"
+homepage = "https://kopia.io"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/kopia/kopia/archive/refs/tags/v0.23.1.tar.gz", sha256 = "0009ca0b2249a7042f779e722e87f8d8c12262117b308db522f7c8d46720a22e" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+go build -ldflags "-s -w -X github.com/kopia/kopia/repo.BuildVersion=$version -X github.com/kopia/kopia/repo.BuildInfo=v$version -X github.com/kopia/kopia/repo.BuildGitHubRepo=kopia/kopia" -o kopia .
+mkdir -p gen
+./kopia --completion-script-bash > gen/kopia.bash
+./kopia --completion-script-zsh > gen/_kopia
+'''
+install = '''
+install -Dm755 kopia "$pkgdir/usr/bin/kopia"
+install -Dm644 gen/kopia.bash "$pkgdir/usr/share/bash-completion/completions/kopia"
+install -Dm644 gen/_kopia "$pkgdir/usr/share/zsh/site-functions/_kopia"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/kopia/LICENSE"
+'''
