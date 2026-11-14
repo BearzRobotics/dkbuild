@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=ArtCraft (native)
+GenericName=AI Image and Video Studio
+Comment=Create AI images and video: the pure-Rust egui desktop app
+Exec=artcraft-native
+TryExec=artcraft-native
+Icon=artcraft-native
+Terminal=false
+StartupNotify=true
+Categories=Graphics;
+Keywords=ai;image;video;art;generate;

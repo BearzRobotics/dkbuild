@@ -1,0 +1,47 @@
+# anicraft: part of the Craft App Suite (storytold), pure Rust on egui/wgpu. Draw and animate 2D vector art on a timeline
+# Crates vendored on the host (cargodeps), git dependencies included (storytold/craft-libs, the
+# storytold forks of egui and winit, winprint.rs which is Windows only but in Cargo.lock).
+# Optional build input included: craft-fonts at the commit upstream's CI uses (CRAFT_FONTS_DIR,
+# embedded in the binary). Both unpack as further sources in /build.
+# Windowing (Wayland, X11, xkbcommon) and the GPU (Vulkan, EGL) are opened at run time, so they
+# are run-time dependencies, as for alacritty.
+# Generated from the wordcraft recipe's pattern; source edits: none. Not built yet when written.
+name = "anicraft"
+version = "0.2.1"
+release = 1
+summary = "Draw and animate 2D vector art on a timeline"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/storytold/anicraft"
+hostdeps = ["rust", "pkgconf"]
+builddeps = ["libxcb-devel", "libxkbcommon-devel", "wayland-devel", "alsa-lib-devel"]
+rundeps = ["libxkbcommon", "mesa", "vulkan-loader", "wayland", "libx11", "libxcb", "shared-mime-info", "hicolor-icon-theme", "alsa-lib"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/storytold/anicraft/archive/refs/tags/v0.2.1.tar.gz", sha256 = "af9a49e30bfae2c2dbdb04472b29a0acd2854eb043936bc7bbc1fbee08ac2f59" },
+    { url = "https://github.com/storytold/craft-fonts/archive/b076417b5880bd4154bd22f00695b1d28c6bea83.tar.gz", sha256 = "35eadfeb7e4217a933f24b73a3d190b90fed81e6c933266f092c161746c0a9eb" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export CRAFT_FONTS_DIR=/build/craft-fonts-b076417b5880bd4154bd22f00695b1d28c6bea83
+'''
+build = '''
+test -d "$CRAFT_FONTS_DIR/fonts"
+cargo build --release --frozen --offline --locked -j $jobs -p anicraft
+'''
+install = '''
+install -Dm755 target/release/anicraft "$pkgdir/usr/bin/anicraft"
+id=ai.storyteller.anicraft
+install -Dm644 packaging/linux/$id.desktop "$pkgdir/usr/share/applications/$id.desktop"
+install -Dm644 packaging/linux/$id.mime.xml "$pkgdir/usr/share/mime/packages/$id.xml"
+mkdir -p "$pkgdir/usr/share/metainfo"
+sed -e "s/@VERSION@/$version/g" -e "s/@DATE@/2026-11-12/g" \
+    packaging/linux/$id.metainfo.xml.in > "$pkgdir/usr/share/metainfo/$id.metainfo.xml"
+mkdir -p "$pkgdir/usr/share/icons"
+cp -R assets/app-icon/hicolor "$pkgdir/usr/share/icons/"
+install -Dm644 LICENSE-MIT "$pkgdir/usr/share/licenses/anicraft/LICENSE-MIT"
+install -Dm644 LICENSE-APACHE "$pkgdir/usr/share/licenses/anicraft/LICENSE-APACHE"
+install -Dm644 NOTICE "$pkgdir/usr/share/licenses/anicraft/NOTICE"
+install -Dm644 ATTRIBUTION.md "$pkgdir/usr/share/doc/anicraft/ATTRIBUTION.md"
+'''

@@ -1,0 +1,51 @@
+# photocraft: part of the Craft App Suite (storytold), pure Rust on egui/wgpu. Edit photos and layered PSD documents
+# Crates vendored on the host (cargodeps), git dependencies included (storytold/craft-libs, the
+# storytold forks of egui and winit, winprint.rs which is Windows only but in Cargo.lock).
+# Optional build inputs, both included: craft-i18n at the commit in craft-i18n.rev (CRAFT_I18N_DIR) and craft-fonts at the commit upstream's CI uses (CRAFT_FONTS_DIR,
+# embedded in the binary). Both unpack as further sources in /build.
+# Windowing (Wayland, X11, xkbcommon) and the GPU (Vulkan, EGL) are opened at run time, so they
+# are run-time dependencies, as for alacritty.
+# Generated from the wordcraft recipe's pattern; source edits: none. Not built yet when written.
+name = "photocraft"
+version = "0.23.1"
+release = 1
+summary = "Edit photos and layered PSD documents"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/storytold/photocraft"
+hostdeps = ["rust", "pkgconf", "cmake", "nasm", "llvm-clang"]
+builddeps = ["libxcb-devel", "libxkbcommon-devel", "wayland-devel", "fontconfig-devel", "pipewire-devel"]
+rundeps = ["libxkbcommon", "mesa", "vulkan-loader", "wayland", "libx11", "libxcb", "shared-mime-info", "hicolor-icon-theme", "fontconfig", "pipewire"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/storytold/photocraft/archive/refs/tags/v0.23.1.tar.gz", sha256 = "66786e5b1e88bff0a1f04ab5073be50faa7e65b3cdebcbd679e1837ff52a82c6" },
+    { url = "https://github.com/storytold/craft-i18n/archive/e02939ef009218e81c44e8ec001fbb7603461de4.tar.gz", sha256 = "0bd1481c0de61d0e31dd2dd9f955135e573f8ebdbb04a87f4567125674b350bd" },
+    { url = "https://github.com/storytold/craft-fonts/archive/b076417b5880bd4154bd22f00695b1d28c6bea83.tar.gz", sha256 = "35eadfeb7e4217a933f24b73a3d190b90fed81e6c933266f092c161746c0a9eb" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export CRAFT_I18N_DIR=/build/craft-i18n-e02939ef009218e81c44e8ec001fbb7603461de4
+export CRAFT_FONTS_DIR=/build/craft-fonts-b076417b5880bd4154bd22f00695b1d28c6bea83
+'''
+build = '''
+test -d "$CRAFT_I18N_DIR/language-data"
+test -d "$CRAFT_FONTS_DIR/fonts"
+cargo build --release --frozen --offline --locked -j $jobs -p photocraft -p photocraft-cli
+'''
+install = '''
+install -Dm755 target/release/photocraft "$pkgdir/usr/bin/photocraft"
+install -Dm755 target/release/photocraft-cli "$pkgdir/usr/bin/photocraft-cli"
+id=ai.storyteller.photocraft
+install -Dm644 packaging/linux/$id.desktop "$pkgdir/usr/share/applications/$id.desktop"
+install -Dm644 packaging/linux/$id.mime.xml "$pkgdir/usr/share/mime/packages/$id.xml"
+mkdir -p "$pkgdir/usr/share/metainfo"
+sed -e "s/@VERSION@/$version/g" -e "s/@DATE@/2026-11-12/g" \
+    packaging/linux/$id.metainfo.xml.in > "$pkgdir/usr/share/metainfo/$id.metainfo.xml"
+mkdir -p "$pkgdir/usr/share/icons"
+cp -R assets/app-icon/hicolor "$pkgdir/usr/share/icons/"
+install -Dm644 LICENSE-MIT "$pkgdir/usr/share/licenses/photocraft/LICENSE-MIT"
+install -Dm644 LICENSE-APACHE "$pkgdir/usr/share/licenses/photocraft/LICENSE-APACHE"
+install -Dm644 NOTICE "$pkgdir/usr/share/licenses/photocraft/NOTICE"
+install -Dm644 ATTRIBUTION.md "$pkgdir/usr/share/doc/photocraft/ATTRIBUTION.md"
+'''

@@ -1,0 +1,52 @@
+# pdfcraft: part of the Craft App Suite (storytold), pure Rust on egui/wgpu. Read, organize, combine, split and secure PDFs
+# Crates vendored on the host (cargodeps), git dependencies included (storytold/craft-libs, the
+# storytold forks of egui and winit, winprint.rs which is Windows only but in Cargo.lock).
+# Optional build inputs, both included: craft-i18n at the commit in craft-i18n.rev (CRAFT_I18N_DIR) and craft-fonts at the commit upstream's CI uses (CRAFT_FONTS_DIR,
+# embedded in the binary). Both unpack as further sources in /build.
+# Windowing (Wayland, X11, xkbcommon) and the GPU (Vulkan, EGL) are opened at run time, so they
+# are run-time dependencies, as for alacritty.
+# Generated from the wordcraft recipe's pattern; source edits: none. Not built yet when written.
+name = "pdfcraft"
+version = "0.21.1"
+release = 1
+summary = "Read, organize, combine, split and secure PDFs"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/storytold/pdfcraft"
+hostdeps = ["rust", "pkgconf", "cmake"]
+builddeps = ["libxcb-devel", "libxkbcommon-devel", "wayland-devel"]
+rundeps = ["libxkbcommon", "mesa", "vulkan-loader", "wayland", "libx11", "libxcb", "shared-mime-info", "hicolor-icon-theme"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/storytold/pdfcraft/archive/refs/tags/v0.21.1.tar.gz", sha256 = "d6cb5a437aa531fe3ae91250e2b6aa52cf4208cc521c17fc30aeccc917c0e9f5" },
+    { url = "https://github.com/storytold/craft-i18n/archive/575cfdef63227b14daf173b8cc87928bfdfa325e.tar.gz", sha256 = "e20d52955038a2e5d8296dce0a0162b1daf1d5c7a03653da40527d5755830d76" },
+    { url = "https://github.com/storytold/craft-fonts/archive/b076417b5880bd4154bd22f00695b1d28c6bea83.tar.gz", sha256 = "35eadfeb7e4217a933f24b73a3d190b90fed81e6c933266f092c161746c0a9eb" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export CRAFT_I18N_DIR=/build/craft-i18n-575cfdef63227b14daf173b8cc87928bfdfa325e
+export CRAFT_FONTS_DIR=/build/craft-fonts-b076417b5880bd4154bd22f00695b1d28c6bea83
+'''
+build = '''
+test -d "$CRAFT_I18N_DIR/language-data"
+test -d "$CRAFT_FONTS_DIR/fonts"
+cargo build --release --frozen --offline --locked -j $jobs -p pdfcraft -p pdfcraft-cli -p pdfcraft-ocr-worker
+'''
+install = '''
+install -Dm755 target/release/pdfcraft "$pkgdir/usr/bin/pdfcraft"
+install -Dm755 target/release/pdfcraft-cli "$pkgdir/usr/bin/pdfcraft-cli"
+install -Dm755 target/release/pdfcraft-ocr-worker "$pkgdir/usr/bin/pdfcraft-ocr-worker"
+id=ai.storyteller.pdfcraft
+install -Dm644 packaging/linux/$id.desktop "$pkgdir/usr/share/applications/$id.desktop"
+install -Dm644 packaging/linux/$id.mime.xml "$pkgdir/usr/share/mime/packages/$id.xml"
+mkdir -p "$pkgdir/usr/share/metainfo"
+sed -e "s/@VERSION@/$version/g" -e "s/@DATE@/2026-11-12/g" \
+    packaging/linux/$id.metainfo.xml.in > "$pkgdir/usr/share/metainfo/$id.metainfo.xml"
+mkdir -p "$pkgdir/usr/share/icons"
+cp -R assets/app-icon/hicolor "$pkgdir/usr/share/icons/"
+install -Dm644 LICENSE-MIT "$pkgdir/usr/share/licenses/pdfcraft/LICENSE-MIT"
+install -Dm644 LICENSE-APACHE "$pkgdir/usr/share/licenses/pdfcraft/LICENSE-APACHE"
+install -Dm644 NOTICE "$pkgdir/usr/share/licenses/pdfcraft/NOTICE"
+install -Dm644 ATTRIBUTION.md "$pkgdir/usr/share/doc/pdfcraft/ATTRIBUTION.md"
+'''

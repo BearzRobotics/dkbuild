@@ -1,0 +1,46 @@
+# artcraft-native: ArtCraft's pure-Rust desktop app (egui over the ArtCraft API client; no Tauri,
+# no webview, no Node frontend), from the artcraft repository (storytold/artcraft). ArtCraft
+# Studio itself, the released app, is a Tauri program (WebKitGTK, a React frontend built with
+# nx); that one is not packaged here yet. The native app's crate is version 0.1.0 and is built
+# from the release tag artcraft-v0.41.1 of the whole workspace; the recipe's version is the tag's.
+# Crates vendored on the host (cargodeps) from the workspace Cargo.lock, which also lists the
+# Tauri crates (they are vendored, not built). No git dependencies.
+# Windowing (Wayland, X11, xkbcommon) and the GPU are opened at run time: run-time dependencies.
+# The desktop entry is ours (files/): upstream only ships the Tauri app's metainfo. Icons come
+# from the Tauri app's icon set (crates/desktop/artcraft/icons).
+# Source edits: none. Not built yet when written: the native dependencies (OpenSSL, zlib, ALSA)
+# are a first guess from the lockfile.
+name = "artcraft-native"
+version = "0.41.1"
+release = 1
+summary = "ArtCraft: AI image and video studio (pure-Rust desktop app)"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/storytold/artcraft"
+hostdeps = ["rust", "pkgconf", "cmake"]
+builddeps = ["libxcb-devel", "libxkbcommon-devel", "wayland-devel", "openssl-devel", "zlib-ng-compat-devel", "alsa-lib-devel"]
+rundeps = ["libxkbcommon", "mesa", "vulkan-loader", "wayland", "libx11", "libxcb", "alsa-lib", "hicolor-icon-theme"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/storytold/artcraft/archive/refs/tags/artcraft-v0.41.1.tar.gz", sha256 = "cefc7b5acd71d668cccd5dca3b719f724e432a51042dd0277d552cd7deffbce4" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline --locked -j $jobs -p artcraft_native
+'''
+install = '''
+install -Dm755 target/release/artcraft-native "$pkgdir/usr/bin/artcraft-native"
+install -Dm644 $pkgfiles/artcraft-native.desktop "$pkgdir/usr/share/applications/artcraft-native.desktop"
+i=crates/desktop/artcraft/icons
+install -Dm644 $i/32x32.png "$pkgdir/usr/share/icons/hicolor/32x32/apps/artcraft-native.png"
+install -Dm644 $i/64x64.png "$pkgdir/usr/share/icons/hicolor/64x64/apps/artcraft-native.png"
+install -Dm644 $i/128x128.png "$pkgdir/usr/share/icons/hicolor/128x128/apps/artcraft-native.png"
+install -Dm644 $i/128x128@2x.png "$pkgdir/usr/share/icons/hicolor/256x256/apps/artcraft-native.png"
+install -Dm644 $i/icon.png "$pkgdir/usr/share/icons/hicolor/512x512/apps/artcraft-native.png"
+install -Dm644 LICENSE-MIT "$pkgdir/usr/share/licenses/artcraft-native/LICENSE-MIT"
+install -Dm644 LICENSE-APACHE "$pkgdir/usr/share/licenses/artcraft-native/LICENSE-APACHE"
+install -Dm644 NOTICE "$pkgdir/usr/share/licenses/artcraft-native/NOTICE"
+'''

@@ -1,0 +1,48 @@
+# materialcraft: part of the Craft App Suite (storytold), pure Rust on egui/wgpu. Design procedural PBR materials with node graphs
+# Crates vendored on the host (cargodeps), git dependencies included (storytold/craft-libs, the
+# storytold forks of egui and winit, winprint.rs which is Windows only but in Cargo.lock).
+# Optional build input included: craft-fonts at the commit upstream's CI uses (CRAFT_FONTS_DIR,
+# embedded in the binary). Both unpack as further sources in /build.
+# Windowing (Wayland, X11, xkbcommon) and the GPU (Vulkan, EGL) are opened at run time, so they
+# are run-time dependencies, as for alacritty.
+# Generated from the wordcraft recipe's pattern; source edits: none. Not built yet when written.
+name = "materialcraft"
+version = "0.4.1"
+release = 1
+summary = "Design procedural PBR materials with node graphs"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/storytold/materialcraft"
+hostdeps = ["rust", "pkgconf"]
+builddeps = ["libxcb-devel", "libxkbcommon-devel", "wayland-devel"]
+rundeps = ["libxkbcommon", "mesa", "vulkan-loader", "wayland", "libx11", "libxcb", "shared-mime-info", "hicolor-icon-theme"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/storytold/materialcraft/archive/refs/tags/v0.4.1.tar.gz", sha256 = "854f2e3b57a7d19ce62345a3d667b15d88308848cbd6f4e8912eff4e744b2e78" },
+    { url = "https://github.com/storytold/craft-fonts/archive/3d9ab3a132ed0eff457e424226a435a901da30d3.tar.gz", sha256 = "bb8c4d2c32148760d2d47d77e8b222bc2b22fda1e85fcd72290fe7bfbb4689ee" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export CRAFT_FONTS_DIR=/build/craft-fonts-3d9ab3a132ed0eff457e424226a435a901da30d3
+'''
+build = '''
+test -d "$CRAFT_FONTS_DIR/fonts"
+cargo build --release --frozen --offline --locked -j $jobs -p materialcraft -p materialcraft-cli
+'''
+install = '''
+install -Dm755 target/release/materialcraft "$pkgdir/usr/bin/materialcraft"
+install -Dm755 target/release/materialcraft-cli "$pkgdir/usr/bin/materialcraft-cli"
+id=ai.storyteller.materialcraft
+install -Dm644 packaging/linux/$id.desktop "$pkgdir/usr/share/applications/$id.desktop"
+install -Dm644 packaging/linux/$id.mime.xml "$pkgdir/usr/share/mime/packages/$id.xml"
+mkdir -p "$pkgdir/usr/share/metainfo"
+sed -e "s/@VERSION@/$version/g" -e "s/@DATE@/2026-11-12/g" \
+    packaging/linux/$id.metainfo.xml.in > "$pkgdir/usr/share/metainfo/$id.metainfo.xml"
+mkdir -p "$pkgdir/usr/share/icons"
+cp -R assets/app-icon/hicolor "$pkgdir/usr/share/icons/"
+install -Dm644 LICENSE-MIT "$pkgdir/usr/share/licenses/materialcraft/LICENSE-MIT"
+install -Dm644 LICENSE-APACHE "$pkgdir/usr/share/licenses/materialcraft/LICENSE-APACHE"
+install -Dm644 NOTICE "$pkgdir/usr/share/licenses/materialcraft/NOTICE"
+install -Dm644 ATTRIBUTION.md "$pkgdir/usr/share/doc/materialcraft/ATTRIBUTION.md"
+'''
