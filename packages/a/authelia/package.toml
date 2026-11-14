@@ -28,7 +28,7 @@ summary = "Authentication and authorization server and portal (SSO, 2FA, OIDC)"
 license = "Apache-2.0"
 homepage = "https://www.authelia.com"
 archs = ["x86_64", "aarch64"]
-hostdeps = ["go", "nodejs", "pnpm"]
+hostdeps = ["go", "nodejs", "pnpm", "llvm-libunwind"]
 options = ["!check", "godeps", "npmdeps"]
 
 source = [
@@ -41,6 +41,14 @@ export HOME=/tmp/home
 export npm_config_manage_package_manager_versions=false npm_config_package_manager_strict=false \
     npm_config_pm_on_fail=ignore
 export GOTOOLCHAIN=local GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=1
+# The musl builds of the Rust-based npm addons the frontend build loads (lightningcss, rolldown,
+# tailwind's oxide, rollup...) link libgcc_s.so.1, which this system does not have: LLVM's
+# libunwind has the same _Unwind_* functions. node's loader hides the dlopen error behind
+# "Cannot find module '../lightningcss.linux-x64-musl.node'" (authelia r1). A private link for
+# this build only, as in listmonk.
+mkdir -p /tmp/gccshim
+ln -sf /usr/lib/libunwind.so.1 /tmp/gccshim/libgcc_s.so.1
+export LD_LIBRARY_PATH="/tmp/gccshim${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 '''
 setup = '''
 cd web
