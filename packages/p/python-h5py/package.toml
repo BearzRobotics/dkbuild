@@ -1,0 +1,25 @@
+# h5py from PyPI, against the system HDF5 (no MPI: that needs an MPI-enabled hdf5, which the
+# tree does not build). HDF5_DIR points setup_configure.py at /usr (no h5cc in the tree).
+name = "python-h5py"
+version = "3.16.0"
+release = 1
+summary = "Read and write HDF5 files from Python"
+license = "BSD-3-Clause"
+homepage = "https://www.h5py.org/"
+hostdeps = ["python", "python-setuptools", "python-cython", "python-numpy", "python-packaging", "python-pkgconfig", "pkgconf"]
+builddeps = ["python-devel", "python-numpy", "hdf5-devel"]
+rundeps = ["python", "python-numpy"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/db/33/acd0ce6863b6c0d7735007df01815403f5589a21ff8c2e1ee2587a38f548/h5py-3.16.0.tar.gz", sha256 = "a0dbaad796840ccaa67a4c144a0d0c8080073c34c76d5a6941d6818678ef2738" },
+]
+
+environment = '''
+export HDF5_DIR=/usr
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-h5py/LICENSE"
+'''
