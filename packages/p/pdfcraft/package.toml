@@ -5,7 +5,9 @@
 # embedded in the binary). Both unpack as further sources in /build.
 # Windowing (Wayland, X11, xkbcommon) and the GPU (Vulkan, EGL) are opened at run time, so they
 # are run-time dependencies, as for alacritty.
-# Generated from the wordcraft recipe's pattern; source edits: none. Not built yet when written.
+# Generated from the wordcraft recipe's pattern. Source edit: unify-winprint.patch (crates/print and
+# Cargo.lock): Cargo.lock had winprint 0.2.1 from two git revisions, which `cargo vendor` cannot
+# vendor; pdfcraft-print now uses the revision craft-libs uses (winprint is Windows-only). Not built yet.
 name = "pdfcraft"
 version = "0.21.1"
 release = 1
@@ -16,6 +18,7 @@ hostdeps = ["rust", "pkgconf", "cmake"]
 builddeps = ["libxcb-devel", "libxkbcommon-devel", "wayland-devel"]
 rundeps = ["libxkbcommon", "mesa", "vulkan-loader", "wayland", "libx11", "libxcb", "shared-mime-info", "hicolor-icon-theme"]
 options = ["!check", "cargodeps"]
+patches = ["unify-winprint.patch"]
 
 source = [
     { url = "https://github.com/storytold/pdfcraft/archive/refs/tags/v0.21.1.tar.gz", sha256 = "d6cb5a437aa531fe3ae91250e2b6aa52cf4208cc521c17fc30aeccc917c0e9f5" },

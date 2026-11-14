@@ -1,0 +1,65 @@
+Point pdfcraft-print at the same winprint.rs revision as craft-libs (craft-print), and merge the two
+Cargo.lock entries into one. The lock had winprint 0.2.1 from two git revisions (5f80b9ba from
+crates/print/Cargo.toml, bc06a7c4 from craft-libs), which `cargo vendor` cannot vendor
+("found duplicate version of package winprint v0.2.1 vendored from two sources"). winprint is
+Windows-only printing code, not compiled on Linux.
+
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -1250,7 +1250,7 @@
+  "miniz_oxide 0.9.1",
+  "roxmltree 0.21.2",
+  "tempfile",
+- "winprint 0.2.1 (git+https://github.com/storytold/winprint.rs?rev=bc06a7c48b768eb27a828c7986f6d2868b245ee0)",
++ "winprint",
+  "winsafe",
+ ]
+ 
+@@ -4672,7 +4672,7 @@
+  "pdfcraft-render",
+  "skrifa 0.44.0",
+  "thiserror 2.0.21",
+- "winprint 0.2.1 (git+https://github.com/storytold/winprint.rs?rev=5f80b9baf6b58937c401656634e42d33f00ddf49)",
++ "winprint",
+ ]
+ 
+ [[package]]
+@@ -8323,27 +8323,6 @@
+ ]
+ 
+ [[package]]
+-name = "winprint"
+-version = "0.2.1"
+-source = "git+https://github.com/storytold/winprint.rs?rev=5f80b9baf6b58937c401656634e42d33f00ddf49#5f80b9baf6b58937c401656634e42d33f00ddf49"
+-dependencies = [
+- "flate2",
+- "fmt-derive",
+- "reqwest",
+- "scopeguard",
+- "sigstore-trust-root",
+- "sigstore-types",
+- "sigstore-verify",
+- "strum",
+- "tar",
+- "thiserror 2.0.21",
+- "windows",
+- "windows-core",
+- "windows-implement",
+- "xml",
+-]
+-
+-[[package]]
+ name = "winprint"
+ version = "0.2.1"
+ source = "git+https://github.com/storytold/winprint.rs?rev=bc06a7c48b768eb27a828c7986f6d2868b245ee0#bc06a7c48b768eb27a828c7986f6d2868b245ee0"
+--- a/crates/print/Cargo.toml
++++ b/crates/print/Cargo.toml
+@@ -17,7 +17,7 @@
+ thiserror = { workspace = true }
+ 
+ [target.'cfg(windows)'.dependencies]
+-winprint = { version = "0.2.1", git = "https://github.com/storytold/winprint.rs", rev = "5f80b9baf6b58937c401656634e42d33f00ddf49", default-features = false }
++winprint = { version = "0.2.1", git = "https://github.com/storytold/winprint.rs", rev = "bc06a7c48b768eb27a828c7986f6d2868b245ee0", default-features = false }
+ 
+ [dev-dependencies]
+ pdfcraft-render = { workspace = true }
