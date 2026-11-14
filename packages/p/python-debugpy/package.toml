@@ -1,0 +1,22 @@
+# debugpy from PyPI (Debug Adapter Protocol for Python; used by ipykernel). The sdist builds
+# pydevd's optional Cython speedups with setup.py.
+name = "python-debugpy"
+version = "1.8.22"
+release = 1
+summary = "An implementation of the Debug Adapter Protocol for Python"
+license = "MIT"
+homepage = "https://aka.ms/debugpy"
+hostdeps = ["python", "python-setuptools", "python-cython"]
+builddeps = ["python-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/44/9d/3cb6693342acf96802dba89934a5b8da43c201d764ebd1f2c0514a3d42bd/debugpy-1.8.22.tar.gz", sha256 = "e489c7268e1c7b41e13b438d9c533d2a7af73fb59bf8cd30fead8286c1c39c4e" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-debugpy/LICENSE"
+'''
