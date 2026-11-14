@@ -1,0 +1,20 @@
+# ipywidgets from PyPI.
+name = "python-ipywidgets"
+version = "8.1.9"
+release = 1
+summary = "Jupyter interactive widgets"
+license = "BSD-3-Clause"
+homepage = "http://jupyter.org"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-comm", "python-ipython", "python-traitlets", "python-widgetsnbextension", "python-jupyterlab-widgets"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/c9/7c/6db60eddf38547353b06d57941f5eee22a990640ce30479fd71a810507f2/ipywidgets-8.1.9.tar.gz", sha256 = "bcccba38a6ec3253f7a39c943cea5b9ad01999ce071396171adbc51c6a6a8613" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-ipywidgets/LICENSE"
+'''
