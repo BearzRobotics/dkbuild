@@ -1,0 +1,29 @@
+# libmatroska: Matroska (MKV/WebM) container library, on libebml. needed by VLC.
+name = "libmatroska"
+version = "1.7.2"
+release = 1
+summary = "Matroska container library"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.matroska.org"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["libebml-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://dl.matroska.org/downloads/libmatroska/libmatroska-1.7.2.tar.xz", sha256 = "f3e4d406daf7f1399962c43940e4a87de089474d5bcfbf2e6ca516e98bb87cfc" },
+]
+
+setup = '''
+# CMake builds one kind per run: shared first, then static into build-static
+%cmake -DBUILD_SHARED_LIBS=ON
+cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+install = '''
+%cmake_install
+DESTDIR=$pkgdir cmake --install build-static
+install -Dm644 LICENSE.LGPL "$pkgdir/usr/share/licenses/libmatroska/LICENSE.LGPL"
+'''
