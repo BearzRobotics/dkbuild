@@ -1,0 +1,56 @@
+# Steel Bank Common Lisp 2.6.10 (sbcl, sbcl.core, the contrib modules: asdf,
+# sb-posix, sb-bsd-sockets, sb-gmp, sb-mpfr, ...). Inspired by Chimera's
+# user/sbcl and Alpine's community/sbcl.
+# Features (as Alpine's x86_64/aarch64 builds): --fancy (threads, core
+# compression, sb-futex and the other optional features), --with-sb-thread,
+# --with-sb-core-compression (zstd), --with-sb-linkable-runtime (the runtime
+# is also installed as a linkable object, so a program can embed it).
+# sb-gmp and sb-mpfr contribs are built against the system GMP and MPFR.
+# Bootstrapping: SBCL's own cross-compiler needs a running Common Lisp. The
+# first build (stage 0) runs on Alpine's SBCL (sbcl-bootstrap, stage0deps);
+# every later one on the previous sbcl package (selfhost). Not done: the
+# manual (needs texinfo/TeX and emacs for the html; the man page is
+# installed); the test suite (unreliable, as Chimera and Alpine).
+# After the build the core is saved again with --disable-debugger (Alpine).
+# Patches: Alpine's musl-time64 is for 32-bit architectures only (this
+# recipe builds 64-bit ones), ppc-musl.patch is for POWER; neither is used.
+name = "sbcl"
+version = "2.6.10"
+release = 1
+summary = "Steel Bank Common Lisp"
+license = "custom:sbcl AND LOOP"
+homepage = "https://www.sbcl.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["make"]
+stage0deps = ["sbcl-bootstrap"]
+builddeps = ["gmp-devel", "mpfr-devel", "zstd-devel", "linux-headers"]
+rundeps = ["zstd-devel", "gmp-devel", "mpfr-devel"]
+options = ["!check", "!lto", "selfhost"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/sbcl/sbcl/2.6.10/sbcl-2.6.10-source.tar.bz2", sha256 = "c23eac1d0aa9ae0add7eb741f3c91b816f5ce216147f37b99da1578e5261b17c" },
+]
+
+environment = '''
+export HOME=/tmp LANG=C.UTF-8 LC_ALL=C.UTF-8
+# the Lisp that builds SBCL: the previous package's, or (stage 0) Alpine's
+if [ -x /usr/bin/sbcl ] && [ ! -d /usr/lib/sbcl-bootstrap ]; then
+    xc="/usr/bin/sbcl --core /usr/lib/sbcl/sbcl.core"
+else
+    xc="/usr/lib/sbcl-bootstrap/usr/bin/sbcl --core /usr/lib/sbcl-bootstrap/usr/lib/sbcl/sbcl.core"
+fi
+export XC_HOST="$xc --no-sysinit --no-userinit --disable-debugger"
+export GNUMAKE=make
+'''
+build = '''
+sh make.sh --prefix=/usr --xc-host="$XC_HOST" --fancy --with-sb-thread \
+    --with-sb-core-compression --with-sb-linkable-runtime
+# save the core again without the debugger (Alpine)
+src/runtime/sbcl --core output/sbcl.core --no-sysinit --no-userinit --disable-debugger \
+    --eval '(sb-ext:save-lisp-and-die "output/sbcl.core")'
+'''
+install = '''
+INSTALL_ROOT="$pkgdir/usr" LIB_DIR=/usr/lib DOC_DIR="$pkgdir/usr/share/doc/sbcl" sh install.sh
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/sbcl/COPYING"
+rmdir "$pkgdir"/usr/share/doc/sbcl/html "$pkgdir"/usr/share/info 2>/dev/null || true
+'''
