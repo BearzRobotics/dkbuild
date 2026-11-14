@@ -1,5 +1,7 @@
 # Handoff (2026-11-12, before a reboot; updated after the agents finished)
 
+The project roadmap is docs/roadmap.md (rewritten 2026-11-13 to match reality).
+
 Read this first in the next session. It says where everything stands.
 
 ## Before/after the reboot
@@ -17,8 +19,9 @@ Read this first in the next session. It says where everything stands.
 
 ## World
 
-Not running. Claude Code killed it (low memory) at 261 packages built this
-pass, while on openocd, openrc-settingsd, openshot. All 16 failures of that
+Run 3 was started 2026-11-13 16:14 (`--color=never`, log work/world3.log) and was
+still running at 20:24; run 4 has not been started. Older note: Claude Code killed
+an earlier pass (low memory) at 261 packages built, while on openocd, openrc-settingsd, openshot. All 16 failures of that
 pass have fixes committed but untested (list in git log since 88b01af).
 `zig-out` is current (Gradle fixes) and `zig build test` passes;
 `outdated --bump` was clean. Restart only when the user asks:
@@ -120,7 +123,7 @@ erlang/elixir/rabbitmq-server, grpc + Zabbix APM. None of it checked yet.
 Next with the new stores: Paperless-ngx, Mayan EDMS, Taiga, ERPNext (pydeps),
 Twenty, Joplin (yarn-lock).
 
-## 2026-11-14: world runs 1-3, fixes, new packages (nothing pushed; master = new-build-machine)
+## 2026-11-13: world runs 1-3, fixes, new packages (nothing pushed; master = new-build-machine)
 
 **World runs.** Run 1: 45 failed / 660 skipped. Run 2: 28 failed (libcamera blocked
 654 skipped). Run 3 (started 16:14, `--color=never`; later runs use
