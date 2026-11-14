@@ -1,0 +1,36 @@
+# LPeg for LuaJIT (the Lua neovim embeds): the C module as lpeg.so under
+# /usr/lib/lua/5.1 (what a luajit program, and neovim's build-time code
+# generators, load with require "lpeg") and re.lua. neovim links lpeg into the
+# nvim binary itself, so the static archive is installed as /usr/lib/liblpeg.a
+# (neovim's FindLpeg takes it before the module). Chimera's lua5.1-lpeg,
+# rebuilt against LuaJIT's headers, with the static library added.
+name = "lpeg"
+version = "1.1.0"
+release = 1
+summary = "Pattern-matching library for Lua based on Parsing Expression Grammars"
+license = "MIT"
+homepage = "https://www.inf.puc-rio.br/~roberto/lpeg"
+hostdeps = ["luajit", "pkgconf"]
+builddeps = ["luajit-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.inf.puc-rio.br/~roberto/lpeg/lpeg-1.1.0.tar.gz", sha256 = "4b155d67d2246c1ffa7ad7bc466c1ea899bbc40fef0257cc9c03cecbaed4352a" },
+]
+
+build = '''
+# the makefile's own lpeg.so rule links with -shared; objects first, so the
+# same objects make the static archive
+inc=$(pkg-config --cflags luajit)
+for f in lpcap lpcode lpprint lptree lpvm; do
+    $CC $CFLAGS -fPIC -DNDEBUG $inc -c $f.c -o $f.o
+done
+$CC $LDFLAGS -shared -o lpeg.so lpcap.o lpcode.o lpprint.o lptree.o lpvm.o
+ar rcs liblpeg.a lpcap.o lpcode.o lpprint.o lptree.o lpvm.o
+'''
+install = '''
+install -Dm755 lpeg.so "$pkgdir/usr/lib/lua/5.1/lpeg.so"
+install -Dm644 liblpeg.a "$pkgdir/usr/lib/liblpeg.a"
+install -Dm644 re.lua "$pkgdir/usr/share/lua/5.1/re.lua"
+install -Dm644 lpeg.html "$pkgdir/usr/share/licenses/lpeg/lpeg.html"
+'''
