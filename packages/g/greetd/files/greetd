@@ -1,0 +1,13 @@
+# The login manager: runs the greeter (dkde-greeter-session) as _greetd and
+# starts the user's session after a login. It takes the virtual terminal in
+# /etc/greetd/config.toml (vt = 7), which no getty uses.
+# Not enabled by the package: an image or `dinitctl enable greetd` does that.
+type            = process
+command         = /usr/bin/greetd
+restart         = true
+smooth-recovery = true
+# The login screen and the session need a seat (seatd), and D-Bus is the
+# system bus for NetworkManager, polkit and the session.
+depends-on: seatd
+depends-on: loginready
+waits-for: dbus

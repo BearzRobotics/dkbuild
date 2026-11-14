@@ -1,0 +1,21 @@
+# greetd authenticates through the PAM service named "greetd". Written out
+# rather than including system-auth, so that an empty password is refused:
+# no nullok on the auth line (an image for a live system adds it, SPEC.md 8).
+auth     required pam_unix.so try_first_pass
+auth     optional pam_permit.so
+auth     required pam_env.so
+
+account  required pam_nologin.so
+account  required pam_unix.so
+account  optional pam_permit.so
+
+password required pam_unix.so try_first_pass sha512 shadow
+password optional pam_permit.so
+
+session  optional pam_loginuid.so
+session  optional pam_keyinit.so force revoke
+session  optional pam_umask.so usergroups
+session  required pam_limits.so
+session  required pam_unix.so
+session  required pam_env.so
+session  optional pam_permit.so

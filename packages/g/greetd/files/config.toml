@@ -1,0 +1,11 @@
+# /etc/greetd/config.toml for the DKDE desktop. greetd runs the greeter as an
+# unprivileged user (_greetd, created by the package's sysusers.d file).
+[terminal]
+# The virtual terminal for the login screen and the sessions. dinit runs
+# agetty on tty1 to tty6 (dinit-services), so greetd takes tty7 and the text
+# consoles stay available (Ctrl+Alt+F1 to F6).
+vt = 7
+
+[default_session]
+command = "dkde-greeter-session"
+user = "_greetd"

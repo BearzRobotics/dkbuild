@@ -1,0 +1,47 @@
+# greetd: a minimal, agnostic login manager daemon (it runs a greeter as an
+# unprivileged user, authenticates through PAM and starts the session), with
+# agreety, a text greeter. FenrirOS's graphical login is greetd with the DKDE
+# greeter (dkde-greeter-session, from dkde).
+# Layout for this tree: the PAM service file is in /usr/lib/pam.d (greetd looks
+# there after /etc/pam.d, like the other packages), written without nullok and
+# without an include of system-auth (which has nullok); the dinit service
+# depends on seatd, loginready and dbus; vt 7 so the tty1-tty6 gettys coexist.
+# The _greetd user (video group) is created by sd-tools from sysusers.d.
+# Not edited: the source (pam-sys links the system libpam; its bindings are
+# pre-generated, no libclang needed).
+name = "greetd"
+version = "0.10.3"
+release = 1
+summary = "Minimal login manager daemon, with the agreety text greeter"
+license = "GPL-3.0-only"
+homepage = "https://git.sr.ht/~kennylevinsen/greetd"
+hostdeps = ["rust", "scdoc"]
+builddeps = ["linux-pam-devel"]
+rundeps = ["linux-pam", "seatd", "dkde", "dinit-services"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/kennylevinsen/greetd/archive/refs/tags/0.10.3.tar.gz", sha256 = "ee5cb70e0add4ca9c9fe57e47581ab0002d44c07743fb5492469f3b570db640b" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs
+make -C man
+'''
+install = '''
+install -Dm755 target/release/greetd "$pkgdir/usr/bin/greetd"
+install -Dm755 target/release/agreety "$pkgdir/usr/bin/agreety"
+# /usr/sbin is where administrators look for it
+mkdir -p "$pkgdir/usr/sbin"
+ln -s ../bin/greetd "$pkgdir/usr/sbin/greetd"
+make -C man install DESTDIR="$pkgdir" PREFIX=/usr
+install -Dm644 $pkgfiles/config.toml "$pkgdir/etc/greetd/config.toml"
+install -Dm644 $pkgfiles/greetd.pam "$pkgdir/usr/lib/pam.d/greetd"
+install -Dm644 $pkgfiles/greetd "$pkgdir/etc/dinit.d/greetd"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/greetd.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/greetd.conf"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/greetd/LICENSE"
+'''
