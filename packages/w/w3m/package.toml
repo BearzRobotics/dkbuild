@@ -1,0 +1,41 @@
+# Imported from Chimera Linux cports: user/w3m/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# w3m: terminal web browser and pager (the maintained fork at sr.ht/~rkta/w3m,
+# as Chimera uses). With the optional features upstream has: inline images
+# (Imlib2: X11 and framebuffer), OpenSSL with certificate verification, the
+# Boehm GC, Unicode, colour, mouse, cookies, NNTP, Gopher. Not built: migemo
+# (the Japanese incremental search command, cmigemo, is not in the tree).
+name = "w3m"
+version = "0.5.6"
+release = 1
+summary = "Terminal web browser and pager"
+license = "MIT"
+homepage = "https://git.sr.ht/~rkta/w3m"
+hostdeps = ["gettext", "perl", "pkgconf"]
+builddeps = ["gc-devel", "gettext-devel", "imlib2-devel", "libx11-devel", "linux-headers", "ncurses-devel", "openssl-devel"]
+rundeps = ["ca-certificates"]
+# Chimera: the t/ check suite is run by hand ("sh run"); it needs a built tree
+# and network-free fixtures; skipped here.
+options = ["!check"]
+
+source = [
+    { url = "https://git.sr.ht/~rkta/w3m/archive/v0.5.6.tar.gz", sha256 = "8dd652cd3f31817d68c7263c34eeffb50118c80be19e1159bf8cbf763037095e" },
+]
+
+# Chimera: configure_gen = []: the shipped configure is used, not regenerated.
+setup = '''
+%configure \
+    --with-ssl \
+    --with-cafile=/etc/ssl/certs/ca-certificates.crt \
+    --with-gc \
+    --enable-image=x11,fb \
+    --with-imagelib=imlib2 \
+    --with-x
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/w3m/COPYING"
+'''
