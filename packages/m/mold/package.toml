@@ -1,0 +1,32 @@
+# mold 3.0: the linker, rewritten in Rust upstream (3.0.0 has no CMake build any
+# more; the C++ 2.x line ended at 2.42.1, so the mimalloc and oneTBB options of
+# 2.x do not exist: mold 3 does its own threading and allocation). Crates are
+# vendored on the host (cargodeps). Needs Rust 1.95 or newer.
+# Installed with upstream's install-mold.sh (PREFIX=/usr, MOLD_LIBDIR=/usr/lib):
+#   /usr/bin/mold, /usr/bin/ld.mold (symlink to mold),
+#   /usr/lib/mold/mold-wrapper.so (the helper for `mold -run`),
+#   /usr/libexec/mold/ld (symlink to /usr/bin/mold, found by gcc -fuse-ld=mold).
+# /usr/bin/ld is NOT touched: the system linker is lld.
+name = "mold"
+version = "3.0.0"
+release = 1
+summary = "Modern high-speed linker (mold, ld.mold, mold -run)"
+license = "MIT"
+homepage = "https://github.com/rui314/mold"
+hostdeps = ["rust"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/rui314/mold/archive/refs/tags/v3.0.0.tar.gz", sha256 = "1dee837e227b0c3f2661def602ef8ddc0b889ae5b1d28c1ddec5f29e08e5ceb5" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline --locked -j $jobs
+'''
+install = '''
+PREFIX=/usr MOLD_LIBDIR=/usr/lib DESTDIR="$pkgdir" sh ./install-mold.sh
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/mold/LICENSE"
+'''
