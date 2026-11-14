@@ -1,0 +1,25 @@
+# Automat: finite-state machines (needed by twisted).
+# Built from the sdist offline with pip (--no-build-isolation): the build
+# backend comes from hostdeps.
+name = "python-automat"
+version = "25.4.16"
+release = 1
+summary = "Finite-state machines"
+license = "MIT"
+homepage = "https://pypi.org/project/Automat/"
+hostdeps = ["python", "python-setuptools-scm", "python-wheel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/e3/0f/d40bbe294bbf004d436a8bcbcfaadca8b5140d39ad0ad3d73d1a8ba15f14/automat-25.4.16.tar.gz", sha256 = "0017591a5477066e90d26b0e696ddc143baafd87b588cfac8100bc6be9634de0" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+for f in LICENSE LICENSE.txt LICENSE.md LICENSE.rst COPYING LICENSES/*; do
+    [ -f "$f" ] && install -Dm644 "$f" "$pkgdir/usr/share/licenses/python-automat/${f##*/}"
+done
+true
+'''
