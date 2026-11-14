@@ -1,0 +1,56 @@
+RabbitMQ on FenrirOS
+====================
+
+The package is installed inert: the service is not enabled, there is no
+configuration file, no plugin is enabled and the package creates no broker
+user.
+
+Layout (as upstream's Debian/RPM packages):
+  /usr/lib/rabbitmq                    the broker, its plugins and tools
+  /usr/bin/rabbitmqctl, ...            the tools (run as user rabbitmq when
+                                       root calls them)
+  /etc/rabbitmq                        rabbitmq.conf, advanced.config,
+                                       rabbitmq-env.conf, enabled_plugins
+  /var/lib/rabbitmq                    data (mnesia/khepri, queues), and the
+                                       rabbitmq user's home: .erlang.cookie
+  /var/log/rabbitmq                    logs
+The broker runs as the system user "rabbitmq".
+
+1. Configuration (optional)
+   RabbitMQ runs with built-in defaults when /etc/rabbitmq/rabbitmq.conf does
+   not exist. Examples: /usr/share/doc/rabbitmq-server/rabbitmq.conf.example
+   and advanced.config.example. The defaults listen on all interfaces:
+   AMQP on 5672 (and 5671 with TLS once configured), the Erlang distribution
+   port 25672 and epmd on 4369 (for clustering and the CLI tools). For a broker
+   used only on this machine, for example:
+       listeners.tcp.default = 127.0.0.1:5672
+   and RABBITMQ_NODE_IP_ADDRESS / ERL_EPMD_ADDRESS=127.0.0.1 in
+   /etc/rabbitmq/rabbitmq-env.conf. Firewall the rest.
+
+2. Start it
+       dinitctl enable rabbitmq-server
+
+3. Users
+   On its first start RabbitMQ creates the user guest (password guest) with
+   full rights on the vhost "/". guest can only connect from localhost
+   (loopback_users), but it is a well-known password: create your own users
+   and delete guest:
+       rabbitmqctl add_user myapp            (asks for the password)
+       rabbitmqctl add_vhost myapp
+       rabbitmqctl set_permissions -p myapp myapp '.*' '.*' '.*'
+       rabbitmqctl delete_user guest
+
+4. Plugins (optional)
+       rabbitmq-plugins enable rabbitmq_management
+   gives the web management UI and HTTP API on port 15672 (all interfaces;
+   management.tcp.ip = 127.0.0.1 in rabbitmq.conf to keep it local). A user
+   needs the "administrator" (or "management") tag to log in:
+       rabbitmqctl set_user_tags myadmin administrator
+   rabbitmq-plugins list shows the others (MQTT, STOMP, streams, shovel,
+   federation, Prometheus, LDAP/OAuth 2 authentication, ...).
+
+5. The tools
+   rabbitmqctl, rabbitmq-diagnostics, ... authenticate to the broker with the
+   Erlang cookie in /var/lib/rabbitmq/.erlang.cookie (made at first start).
+   Run as root they switch to the rabbitmq user; another user needs a copy of
+   the cookie in ~/.erlang.cookie (mode 600).

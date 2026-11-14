@@ -1,0 +1,12 @@
+#!/bin/sh
+# FenrirOS: runs the RabbitMQ tool this link is named after. The tools talk to
+# the broker with the Erlang cookie in the rabbitmq user's home, so when root
+# runs one it runs as rabbitmq (as Debian's rabbitmq-script-wrapper does);
+# other users run it as themselves (they need a copy of
+# /var/lib/rabbitmq/.erlang.cookie in their home).
+tool=/usr/lib/rabbitmq/bin/${0##*/}
+if [ "$(id -u)" = 0 ]; then
+    # su (shadow) hands the arguments after the user name to the shell
+    exec su -s /bin/sh -c 'exec "$0" "$@"' rabbitmq "$tool" "$@"
+fi
+exec "$tool" "$@"

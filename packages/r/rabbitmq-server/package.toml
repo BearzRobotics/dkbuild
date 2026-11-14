@@ -1,0 +1,67 @@
+# RabbitMQ: the AMQP 0-9-1/AMQP 1.0/MQTT/STOMP message broker, with its
+# command-line tools (rabbitmqctl, rabbitmq-plugins, rabbitmq-diagnostics, ...)
+# and every plugin of the release (management UI and API, federation, shovel,
+# MQTT, STOMP, streams, Prometheus, LDAP/OAuth 2/HTTP auth backends, peer
+# discovery, ...; none enabled). Needed by: euro-office-documentserver.
+# Built from upstream's source release, which carries every Erlang and Elixir
+# dependency in deps/ (no Hex or Git fetch), on the system Erlang/OTP 29 and
+# Elixir: erlang.mk compiles the server and plugins, and the CLI tools are
+# escripts that embed the Elixir runtime (7z makes their zip part, as
+# upstream's erlang.mk expects). The management UI's JavaScript libraries
+# (jQuery, EJS, Sammy, Flot, ...) are upstream's prebuilt files.
+# Layout as upstream's Debian/RPM packages: /usr/lib/rabbitmq (bin/ and
+# lib/rabbitmq_server-<version>/), config in /etc/rabbitmq, data in
+# /var/lib/rabbitmq (also the rabbitmq user's home, with its Erlang cookie),
+# logs in /var/log/rabbitmq. /usr/bin/rabbitmqctl & co. are a small wrapper
+# (files/rabbitmq-script-wrapper) that runs the tool as rabbitmq when root
+# calls it, so it uses the broker's cookie (as Debian's wrapper does).
+# Installed inert (docs/requests.md): the dinit service is shipped, not
+# enabled; no configuration file (examples in /usr/share/doc/rabbitmq-server);
+# no plugins enabled; no users. RabbitMQ itself creates the user guest/guest
+# on its first start, which can only log in from localhost; README.FenrirOS
+# says to remove it.
+# Setup: /usr/share/doc/rabbitmq-server/README.FenrirOS.
+# No tests (they need a running broker cluster and Docker).
+name = "rabbitmq-server"
+version = "4.4.0"
+release = 1
+summary = "RabbitMQ message broker"
+license = "MPL-2.0 AND Apache-2.0 AND MIT AND ISC AND BSD-3-Clause AND BSD-2-Clause"
+homepage = "https://www.rabbitmq.com"
+hostdeps = ["erlang", "elixir", "make", "7zip"]
+rundeps = ["erlang", "shadow"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/rabbitmq/rabbitmq-server/releases/download/v4.4.0/rabbitmq-server-4.4.0.tar.xz", sha256 = "e6fb6eb6b0d26d96efe7e726f694d19a9c1cd89bbe9344a8bfd4c020095a6278" },
+]
+
+environment = '''
+export HOME=/tmp/home LANG=C.UTF-8 LC_ALL=C.UTF-8 RABBITMQ_VERSION=4.4.0
+rmq_dirs="PREFIX=/usr RMQ_ROOTDIR=/usr/lib/rabbitmq MANDIR=/usr/share/man"
+'''
+build = '''
+mkdir -p "$HOME"
+make dist $rmq_dirs
+'''
+install = '''
+make install install-bin install-man DESTDIR="$pkgdir" $rmq_dirs
+# the CLI tools on PATH, through the wrapper (header comment)
+install -Dm755 $pkgfiles/rabbitmq-script-wrapper "$pkgdir/usr/lib/rabbitmq/script-wrapper"
+install -d "$pkgdir/usr/bin"
+for s in rabbitmq-server rabbitmqctl rabbitmq-plugins rabbitmq-diagnostics rabbitmq-queues rabbitmq-upgrade \
+         rabbitmq-streams vmware-rabbitmq; do
+    test -e "$pkgdir/usr/lib/rabbitmq/bin/$s"
+    ln -s ../lib/rabbitmq/script-wrapper "$pkgdir/usr/bin/$s"
+done
+# the licence files are in the application directory too; the main ones here
+install -d "$pkgdir/usr/share/licenses/rabbitmq-server"
+cp -a LICENSE* "$pkgdir/usr/share/licenses/rabbitmq-server/"
+doc="$pkgdir/usr/share/doc/rabbitmq-server"
+install -Dm644 deps/rabbit/docs/rabbitmq.conf.example "$doc/rabbitmq.conf.example"
+install -Dm644 deps/rabbit/docs/advanced.config.example "$doc/advanced.config.example"
+install -Dm644 $pkgfiles/README.FenrirOS "$doc/README.FenrirOS"
+install -Dm644 $pkgfiles/rabbitmq-server "$pkgdir/etc/dinit.d/rabbitmq-server"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/rabbitmq-server.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/rabbitmq-server.conf"
+'''

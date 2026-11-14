@@ -1,0 +1,10 @@
+# RabbitMQ broker (AMQP on port 5672, on all interfaces unless
+# /etc/rabbitmq/rabbitmq.conf says otherwise). Not enabled by default;
+# /usr/share/doc/rabbitmq-server/README.FenrirOS.
+type = process
+command = /usr/bin/env HOME=/var/lib/rabbitmq /usr/lib/rabbitmq/bin/rabbitmq-server
+working-dir = /var/lib/rabbitmq
+run-as = rabbitmq
+logfile = /var/log/rabbitmq/dinit.log
+restart = true
+depends-on: rcboot
