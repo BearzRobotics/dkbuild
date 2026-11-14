@@ -87,7 +87,7 @@ const known_keys = [_][]const u8{
     "noscan",
 };
 
-const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap", "zigdeps", "godeps", "cargodeps", "npmdeps", "gradledeps", "nugetdeps", "gemdeps", "pubdeps", "hackagedeps", "pydeps", "meta", "rootlayout", "repo-iso", "selfhost" };
+const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap", "zigdeps", "godeps", "cargodeps", "npmdeps", "gradledeps", "nugetdeps", "gemdeps", "pubdeps", "hackagedeps", "pydeps", "meta", "rootlayout", "repo-iso", "selfhost", "gcc" };
 const known_archs = [_][]const u8{ "x86_64", "aarch64", "riscv64" };
 
 /// Parse and validate `text`. All returned memory lives in `arena`.
@@ -155,6 +155,15 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
         if (std.mem.eql(u8, key, "jobs") and
             (std.fmt.parseInt(u32, bare["jobs:".len..], 10) catch 0) == 0)
             return cfg.fail(arena, diag, "option '{s}': jobs:N needs a positive number", .{o});
+    }
+
+    // options = ["gcc"] (SPEC 3): the build uses GCC (profile.gccEnv), so the recipe
+    // needs the compiler and GNU binutils in its build root whether it lists them or not.
+    if (contains(r.options, "gcc")) {
+        var extra: std.ArrayList([]const u8) = .empty;
+        try extra.appendSlice(arena, r.hostdeps);
+        for ([_][]const u8{ "gcc", "binutils" }) |d| if (!contains(r.hostdeps, d)) try extra.append(arena, d);
+        r.hostdeps = try extra.toOwnedSlice(arena);
     }
 
     // A meta-package (`meta`) only depends on others: no source, no steps.

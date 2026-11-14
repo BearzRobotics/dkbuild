@@ -100,6 +100,28 @@ pub const Profile = struct {
     }
 };
 
+/// The prefix GCC is installed under (packages/g/gcc).
+pub const gcc_prefix = "/usr/lib/gcc15";
+
+/// The `export` lines for a recipe with `options = ["gcc"]`, after `buildEnv`
+/// (SPEC 3): GCC from its own prefix instead of clang, and GNU binutils under
+/// their plain names in a directory first on PATH (they install as gas, gar, ...
+/// so as not to shadow LLVM's; ld is ld.bfd). The flags are GCC's: clang's
+/// `--target` and `-fuse-ld=lld` do not exist in it. Programs built this way may
+/// need GCC's runtime, so they find it through an rpath. A recipe's own
+/// `environment` runs after this and can change any of it.
+pub fn gccEnv(p: Profile, arena: Allocator) Allocator.Error![]const u8 {
+    return std.fmt.allocPrint(arena,
+        \\mkdir -p /tmp/gnu-bin
+        \\for t in as ar nm ranlib objcopy objdump strip readelf; do if [ -e /usr/bin/g$t ]; then ln -sf /usr/bin/g$t /tmp/gnu-bin/$t; fi; done
+        \\if [ -e /usr/bin/ld.bfd ]; then ln -sf /usr/bin/ld.bfd /tmp/gnu-bin/ld; fi
+        \\export PATH="/tmp/gnu-bin:{[g]s}/bin:$PATH"
+        \\export CC={[g]s}/bin/gcc CXX={[g]s}/bin/g++ CPP={[g]s}/bin/cpp AR=ar RANLIB=ranlib NM=nm
+        \\export CFLAGS="-O2 -march={[c]s}" CXXFLAGS="-O2 -march={[c]s}" LDFLAGS="-Wl,-rpath,{[g]s}/lib"
+        \\
+    , .{ .g = gcc_prefix, .c = p.cpu });
+}
+
 pub fn parse(arena: Allocator, text: []const u8, diag: *Diagnostic) (error{InvalidProfile} || Allocator.Error)!Profile {
     return parseChecked(arena, text, diag) catch |err| switch (err) {
         error.Invalid => error.InvalidProfile,
@@ -191,4 +213,16 @@ test "shipped profiles generate correct files for all three targets" {
         try std.testing.expect(std.mem.indexOf(u8, cmake, try std.fmt.allocPrint(a, "CMAKE_SYSTEM_PROCESSOR {s}", .{c.arch})) != null);
         try std.testing.expect(std.mem.indexOf(u8, cmake, try std.fmt.allocPrint(a, "CMAKE_C_COMPILER_TARGET {s}", .{c.triple})) != null);
     }
+}
+
+test "gccEnv uses GCC's compilers and flags, not clang's" {
+    var arena_state = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena_state.deinit();
+    const a = arena_state.allocator();
+    const p: Profile = .{ .arch = "x86_64", .triple = "x86_64-fenriros-linux-musl", .cpu = "x86-64", .zig_target = "x86_64-linux-musl", .zig_cpu = "baseline", .kernel_arch = "x86" };
+    const e = try gccEnv(p, a);
+    try std.testing.expect(std.mem.indexOf(u8, e, "export CC=/usr/lib/gcc15/bin/gcc ") != null);
+    try std.testing.expect(std.mem.indexOf(u8, e, "-march=x86-64") != null);
+    try std.testing.expect(std.mem.indexOf(u8, e, "--target") == null);
+    try std.testing.expect(std.mem.indexOf(u8, e, "fuse-ld=lld") == null);
 }

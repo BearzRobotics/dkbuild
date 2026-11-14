@@ -166,6 +166,7 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
     // The variables SPEC 5.5 lists besides jobs/srcdir/pkgdir/CC/CFLAGS.
     try w.add(arena, &s, "export target='{s}'\nexport arch='{s}'\nexport zig_target='{s}'\nexport zig_cpu='{s}'\n", .{ ctx.target.triple, ctx.target.arch, ctx.target.zig_target, ctx.target.zig_cpu });
     try s.appendSlice(arena, try ctx.target.buildEnv(arena, ctx.target.isCross(ctx.host), ctx.static));
+    if (contains(r.options, "gcc")) try s.appendSlice(arena, try profile.gccEnv(ctx.target, arena));
     // Go builds offline from the shared module cache (fetch.zig), checked
     // against go.sum when it was filled.
     // npm installs offline from the shared store (npmdeps.zig): npm-offline.js

@@ -2,7 +2,7 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "grub"
 version = "2.12"
-release = 3
+release = 4
 summary = "GRand Unified Bootloader version 2"
 license = "GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/grub"
@@ -10,14 +10,15 @@ patches = ["0001-disable-floppies.patch", "0002-mkconfig-loopback.patch", "0003-
 hostdeps = ["autoconf-archive", "automake", "binutils", "llvm", "bison", "flex", "font-unifont-bdf", "gawk", "gettext", "help2man", "libtool", "pkgconf", "python"]
 builddeps = ["freetype-devel", "fuse-devel", "gettext-devel", "lvm2-devel", "ncurses-devel", "xz-devel"]
 rundeps = ["os-prober", "util-linux"]
+options = ["gcc"]
 
 source = [
     { url = "https://ftp.gnu.org/gnu/grub/grub-2.12.tar.xz", sha256 = "f3c97391f7c4eaa677a78e090c7e97e6dc47b16f655f04683ebd37bef7fe0faa" },
 ]
 
 environment = '''
-# configure's checks; GRUB's images are linked with GNU ld (binutils' ld.bfd)
-export CC="clang --start-no-unused-arguments -fuse-ld=bfd --end-no-unused-arguments"
+# options = ["gcc"]: GRUB is built with GCC and GNU binutils (ld.bfd links its images).
+# Clang built it before (r3); GRUB needs GCC.
 export TARGET_CC="$CC"
 '''
 setup = '''
@@ -30,7 +31,7 @@ for p in i386:pc i386:efi x86_64:efi; do
     a=${p%:*}; f=${p#*:}
     mkdir -p build_${a}_$f
     (cd build_${a}_$f && CFLAGS="-fno-stack-protector" LDFLAGS="-fuse-ld=bfd" BUILD_CFLAGS="-fno-stack-protector" \
-        TARGET_OBJCOPY=llvm-objcopy TARGET_RANLIB=llvm-ranlib TARGET_STRIP=llvm-strip TARGET_NM=llvm-nm MAKE=make \
+        TARGET_OBJCOPY=objcopy TARGET_RANLIB=ranlib TARGET_STRIP=strip TARGET_NM=nm MAKE=make \
         ../configure --host=$target --target=$a --with-platform=$f --disable-efiemu $common)
 done
 '''
