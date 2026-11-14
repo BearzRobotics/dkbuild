@@ -1,0 +1,67 @@
+# libmilter: the Sendmail mail filter library (Milter API), built from the
+# sendmail source tarball with its own Build/m4 system. Only libmilter is built:
+# no sendmail daemon, no other sendmail tools. Installs libmilter.so.1.0.2 (soname
+# libmilter.so.1.0), libmilter.so, libmilter.a, libmilter/mfapi.h, libmilter/mfdef.h
+# and a libmilter.pc. Filters link with -lmilter -lpthread.
+# Used by clamav-milter, rspamd's milter users, opendkim, opendmarc, spamass-milter...
+# For clamav: configure with -DENABLE_MILTER=ON (clamav's CMake flag; it finds
+# libmilter by find_library/find_path), add libmilter-devel to clamav's builddeps.
+# Licence: the Sendmail License (LICENSE in the tarball; Proofpoint, an
+# open-source/freeware licence with conditions on redistribution): SPDX
+# "Sendmail-8.23".
+# libmilter's own Makefile.m4 only builds a static library (library.m4), so the
+# shared library is linked by hand from libmilter.a, which is compiled with -fPIC.
+name = "libmilter"
+version = "8.18.2"
+release = 1
+summary = "Sendmail mail filter (milter) library"
+license = "Sendmail-8.23"
+homepage = "https://www.proofpoint.com/us/products/email-protection/open-source-email-solution"
+options = ["!check"]
+
+source = [
+    { url = "https://ftp.sendmail.org/sendmail.8.18.2.tar.gz", sha256 = "1a085faa8ace52cffde2f5e9bc611bdb5f81481caaabf46f0437b719ca089d2f" },
+]
+
+setup = '''
+# musl has no <sys/cdefs.h>: sendmail's own include/sm/cdefs.h supplies the
+# __P, __BEGIN_DECLS etc. macros when SM_CONF_SYS_CDEFS_H is 0 (Linux sets 1).
+sed -i 's/^#define SM_CONF_SYS_CDEFS_H\t1/#define SM_CONF_SYS_CDEFS_H\t0/' include/sm/os/sm_os_linux.h
+grep -q 'SM_CONF_SYS_CDEFS_H.0' include/sm/os/sm_os_linux.h
+# build configuration (read by the Build script): our compiler and flags, and
+# -fPIC so libmilter.a can also make the shared library
+cat > devtools/Site/site.config.m4 <<EOT
+define(\`confCC', \`$CC')
+define(\`confOPTIMIZE', \`$CFLAGS -fPIC')
+define(\`confLIBDIR', \`/usr/lib')
+define(\`confINCLUDEDIR', \`/usr/include')
+EOT
+'''
+build = '''
+cd libmilter
+sh Build -c
+a=$(ls obj.*/libmilter.a)
+cd "$(dirname "$a")"
+$CC $CFLAGS $LDFLAGS -shared -Wl,-soname,libmilter.so.1.0 -o libmilter.so.1.0.2 \
+    -Wl,--whole-archive libmilter.a -Wl,--no-whole-archive -lpthread
+'''
+install = '''
+d=$(dirname $(ls libmilter/obj.*/libmilter.a))
+install -Dm755 $d/libmilter.so.1.0.2 "$pkgdir/usr/lib/libmilter.so.1.0.2"
+ln -s libmilter.so.1.0.2 "$pkgdir/usr/lib/libmilter.so.1.0"
+ln -s libmilter.so.1.0.2 "$pkgdir/usr/lib/libmilter.so"
+install -Dm644 $d/libmilter.a "$pkgdir/usr/lib/libmilter.a"
+install -Dm644 include/libmilter/mfapi.h include/libmilter/mfdef.h -t "$pkgdir/usr/include/libmilter"
+install -Dm644 /dev/stdin "$pkgdir/usr/lib/pkgconfig/libmilter.pc" <<EOT
+prefix=/usr
+libdir=\${prefix}/lib
+includedir=\${prefix}/include
+
+Name: libmilter
+Description: Sendmail mail filter library
+Version: 8.18.2
+Libs: -L\${libdir} -lmilter -lpthread
+Cflags: -I\${includedir}
+EOT
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libmilter/LICENSE"
+'''
