@@ -24,6 +24,8 @@ cmake --build build-static
 '''
 install = '''
 %cmake_install
-DESTDIR=$pkgdir cmake --install build-static
+# the static run's CMake config would replace the shared one: take only its libraries
+DESTDIR=/tmp/static-stage cmake --install build-static
+cp -a /tmp/static-stage/usr/lib/*.a "$pkgdir/usr/lib/"
 install -Dm644 LICENSE.LGPL "$pkgdir/usr/share/licenses/libmatroska/LICENSE.LGPL"
 '''
