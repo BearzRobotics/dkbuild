@@ -1,0 +1,27 @@
+# Adapted from Chimera Linux cports: main/libgxps. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# libgxps: GObject library for rendering XPS documents (evince's XPS backend).
+name = "libgxps"
+version = "0.3.2"
+release = 1
+summary = "GObject library for XPS documents"
+license = "LGPL-2.1-or-later"
+homepage = "https://wiki.gnome.org/Projects/libgxps"
+hostdeps = ["meson", "pkgconf", "gobject-introspection"]
+builddeps = ["cairo-devel", "freetype-devel", "glib-devel", "lcms2-devel", "libarchive-devel", "libjpeg-turbo-devel", "libpng-devel", "libtiff-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/libgxps/0.3/libgxps-0.3.2.tar.xz", sha256 = "6d27867256a35ccf9b69253eb2a88a32baca3b97d5f4ef7f82e3667fa435251c" },
+]
+
+setup = '''
+%meson \
+    -Denable-test=false \
+    -Ddisable-introspection=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''
