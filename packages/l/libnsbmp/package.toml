@@ -1,0 +1,30 @@
+# libnsbmp: part of the NetSurf project's libraries (needed by netsurf, elinks).
+# The NetSurf build system installs a shared and a static library from two
+# passes (COMPONENT_TYPE=lib-shared, lib-static); both are installed.
+# WARNFLAGS=-w: the libraries build with -Werror, which a newer clang than the
+# ones upstream tests turns into failures on harmless warnings.
+name = "libnsbmp"
+version = "0.1.7"
+release = 1
+summary = "BMP and ICO decoding library"
+license = "MIT"
+homepage = "https://www.netsurf-browser.org/projects/nsbmp/"
+hostdeps = ["netsurf-buildsystem", "perl", "pkgconf"]
+builddeps = []
+options = ["!check"]
+
+source = [
+    { url = "https://download.netsurf-browser.org/libs/releases/libnsbmp-0.1.7-src.tar.gz", sha256 = "5407a7682a122baaaa5a15b505290e2d37df54c13c5edef4b09d12c862d82293" },
+]
+
+build = '''
+for t in lib-shared lib-static; do
+    %make PREFIX=/usr WARNFLAGS=-w COMPONENT_TYPE=$t
+done
+'''
+install = '''
+for t in lib-shared lib-static; do
+    make DESTDIR="$pkgdir" PREFIX=/usr WARNFLAGS=-w COMPONENT_TYPE=$t install
+done
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libnsbmp/COPYING"
+'''
