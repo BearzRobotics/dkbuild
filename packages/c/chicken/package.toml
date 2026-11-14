@@ -1,0 +1,36 @@
+# Adapted from Chimera Linux cports: main/chicken/template.py.
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# CHICKEN Scheme 6.1.0, a Scheme to C compiler. The release tarball ships the
+# C files the compiler itself was translated to (chicken.c, ...), so it builds with
+# only a C compiler: no earlier CHICKEN is needed. Shared libchicken.so, and
+# libchicken.a (-static, as `chicken-static`/`csi-static` are linked to it).
+# The tree's linker flags are passed as LINKER_OPTIONS (Chimera). The test suite
+# is not run (it rebuilds the compiler and takes long; Chimera does not run it either).
+# The documentation goes to /usr/share/doc/chicken (Chimera).
+name = "chicken"
+version = "6.1.0"
+release = 1
+summary = "Practical and portable Scheme system"
+license = "BSD-3-Clause"
+homepage = "https://call-cc.org"
+hostdeps = ["make"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://code.call-cc.org/releases/6.1.0/chicken-6.1.0.tar.gz", sha256 = "c6aee9a5374102ba318e0cfae62ded5e1825346577137952d7fb15b3094d49d8" },
+]
+
+setup = '''
+./configure --prefix=/usr --platform linux
+'''
+build = '''
+make -j$jobs LINKER_OPTIONS="$LDFLAGS"
+'''
+install = '''
+make install DESTDIR="$pkgdir" LINKER_OPTIONS="$LDFLAGS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/chicken/LICENSE"
+mkdir -p "$pkgdir/usr/share/doc"
+if [ -d "$pkgdir/usr/share/chicken/doc" ]; then
+    mv "$pkgdir/usr/share/chicken/doc" "$pkgdir/usr/share/doc/chicken"
+fi
+'''
