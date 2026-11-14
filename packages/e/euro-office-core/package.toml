@@ -35,7 +35,7 @@
 # Not built yet.
 name = "euro-office-core"
 version = "9.3.7.1"
-release = 1
+release = 2
 summary = "Euro-Office document conversion engine (x2t) and tools"
 license = "AGPL-3.0-only"
 homepage = "https://github.com/Euro-Office/core"
@@ -55,6 +55,11 @@ source = [
     { url = "https://github.com/socketio/socket.io-client-cpp/archive/da779141a7379cc30c870d48295033bc16a23c66.tar.gz", sha256 = "db27c280f375a5983eed8185485e823262a328f95bc549f70667fccbbeab49b4" },
     { url = "https://github.com/chriskohlhoff/asio/archive/230c0d2ae035c5ce1292233fcab03cea0d341264.tar.gz", sha256 = "09566f5296692d042358bee4211d126cef3d5062a8fa86829d2962ac0e538a34" },
     { url = "https://github.com/zaphoyd/websocketpp/archive/56123c87598f8b1dd471be83ca841ceae07f95ba.tar.gz", sha256 = "56a040dd99e7e58e0513204030e5af5e94750a3d80b176b16bf8e3a837b40f0a" },
+    { url = "https://github.com/g-truc/glm/archive/33b4a621a697a305bc3a7610d290677b96beb181.tar.gz", sha256 = "fa761b941987933884b0d21d5b86930789061f026ba163d47cebbc5b00be277b" },
+    { url = "https://github.com/kohei-us/mdds/archive/0783158939c6ce4b0b1b89e345ab983ccb0f0ad0.tar.gz", sha256 = "7839df303834f939b249b0eb450a2a2b30b390096569967213f1afe56db7002a" },
+    { url = "https://github.com/Distrotech/librevenge/archive/becd044b519ab83893ad6398e3cbb499a7f0aaf4.tar.gz", sha256 = "5e1d9ec2663990c63127775441f19d48b794a4bf8a50352658976f2d0527bd98" },
+    { url = "https://github.com/Distrotech/libodfgen/archive/8ef8c171ebe3c5daebdce80ee422cf7bb96aa3bc.tar.gz", sha256 = "c6dd47cc88683c7589dbaac5bdc94e492333c53def88a0f40a004d3f1379d063" },
+    { url = "https://github.com/LibreOffice/libetonyek/archive/cb396b4a9453a457469b62a740d8fb933c9442c3.tar.gz", sha256 = "951ebb7e7c9f254f9bfede0574247392d0ccaf7397a4e1b0f3b95db16564e923" },
     { url = "https://github.com/Tencent/rapidjson/archive/a36110e11874bcf35af854940e0ce910c19a8b49.tar.gz", sha256 = "3c9995d06ec49fa0d47d31e2abaf6aadc08395c98ab08b844e837a22ffc493fd" },
 ]
 
@@ -86,6 +91,19 @@ for f in sio_client_impl_fail sio_client_impl_open sio_client_impl_close_timeout
     patch -d $t/socketio -p1 < $s/$f.patch
 done
 patch -d $t/socketio/lib/asio -p1 < $s/asio-fix-for-openssl3.patch
+# apple/nc-build.py: IWorkFile compiles glm, mdds, librevenge, libodfgen and
+# libetonyek from sources in third_party/install/apple (Apple/CMakeLists.txt
+# lists their files), with core's three patches
+a=$t/apple
+mkdir -p $a
+cp -a ../glm-33b4a621a697a305bc3a7610d290677b96beb181 $a/glm
+cp -a ../mdds-0783158939c6ce4b0b1b89e345ab983ccb0f0ad0 $a/mdds
+cp -a ../librevenge-becd044b519ab83893ad6398e3cbb499a7f0aaf4 $a/librevenge
+cp -a ../libodfgen-8ef8c171ebe3c5daebdce80ee422cf7bb96aa3bc $a/libodfgen
+cp -a ../libetonyek-cb396b4a9453a457469b62a740d8fb933c9442c3 $a/libetonyek
+patch -d $a/mdds -p1 < $p/apple/mdds.patch
+patch -d $a/librevenge -p1 < $p/apple/librevenge.patch
+patch -d $a/libetonyek -p1 < $p/apple/libetonyek.patch
 # socketio/nc-build.py: a second copy of the client without TLS, made by
 # no_tls.patch
 cp -a $t/socketio/src $t/socketio/src_no_tls
