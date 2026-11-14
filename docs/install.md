@@ -1,8 +1,14 @@
 # Installing FenrirOS on a UEFI machine
 
-There is no installer yet. This is the manual way: boot the DKRescue live ISO on
-the target machine, partition the disk, unpack the image `dkbuild image` made,
-and install systemd-boot. It takes about ten minutes.
+FenrirOS has live ISOs and an installer, `dkinstaller` (0.0.2, on the base,
+rescue and dkde ISOs; not verified end to end here, so this page does not
+describe it). The live ISOs, made by `dkbuild image images/base.toml`,
+`rescue.toml` and `dkde.toml`, boot on UEFI and BIOS machines (tested in QEMU)
+and are the successor of the DKRescue ISO; they carry a `live-initramfs`. This
+page is the manual way, which still works: boot a live ISO on the target machine,
+partition the disk, unpack the image `dkbuild image` made, and install
+systemd-boot. It takes about ten minutes. Only UEFI installs are documented;
+installing on a BIOS machine is not (GRUB is packaged, but no steps are verified).
 
 **This erases the disk you choose.** Check the device name twice (`lsblk`).
 
@@ -11,7 +17,8 @@ and install systemd-boot. It takes about ten minutes.
 - `out/fenriros/fenriros.tar.zst`, made on the build machine with
   `dkbuild image images/fenriros.toml` (copy it to a USB stick, or fetch it over
   the network from the live system).
-- The DKRescue ISO written to a USB stick, and the machine set to boot it in
+- A live ISO (FenrirOS Rescue, `images/rescue.toml`; the old DKRescue ISO also
+  works) written to a USB stick, and the machine set to boot it in
   **UEFI** mode (not CSM/legacy). Secure Boot off.
 
 ## 1. Partition
@@ -30,7 +37,8 @@ mkfs.ext4 -L fenriros "${DISK}p2"
 ```
 
 The root is ext4 because the kernel has ext4 and NVMe built in, so it boots
-without an initramfs. (btrfs and XFS are modules and would need one; not yet.)
+without an initramfs. (btrfs and XFS are modules and would need one: the
+initramfs exists for the live images only, not for installed systems.)
 
 ## 2. Unpack
 
@@ -74,12 +82,14 @@ reboot
 ```
 
 systemd-boot shows FenrirOS and a recovery entry. Log in on the console, then
-start the desktop with `dkde-session` (the default desktop), or `Hyprland`.
+start the desktop with `dkde-session` (the default desktop), or `Hyprland`. This
+image has no greetd; the dkde live ISO logs in through greetd by itself.
 
 ## Packages after installing
 
-Until there is a repository server, packages come on a **repository ISO** (all
-packages, signed; planned, SPEC.md 8). Mount it, or the USB stick it is on, and
+There is no repository server; packages come on a **repository ISO** set (all
+packages, signed), made with `dkbuild discs images/repo.toml`. Each disc has an
+`import.sh` that copies a set into one directory. Mount it, or the USB stick it is on, and
 add it:
 
 ```sh
