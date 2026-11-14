@@ -1,0 +1,25 @@
+# notebook from PyPI.
+name = "python-notebook"
+version = "7.6.5"
+release = 1
+summary = "Jupyter Notebook - A web-based notebook environment for interactive computing"
+license = "BSD-3-Clause"
+homepage = "https://github.com/jupyter/notebook"
+hostdeps = ["python", "python-hatchling", "python-hatch-jupyter-builder"]
+rundeps = ["python", "python-jupyter-builder", "python-jupyter-server", "python-jupyterlab-server", "python-jupyterlab", "python-notebook-shim", "python-tornado"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/39/88/737faf4a8700326a3ee12802f79041471764699cd40b4770a6c66497738f/notebook-7.6.5.tar.gz", sha256 = "5e3445616fb2c590015434045f5b297566c2e09c636d1837efc62bef85892c9f" },
+]
+
+environment = '''
+# The sdist carries the built web UI (static/ or labextension/); the hatch-jupyter-builder
+# hook would run npm (jlpm) otherwise, which needs the network, so it is skipped.
+export SKIP_JUPYTER_BUILDER=1
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-notebook/LICENSE"
+'''
