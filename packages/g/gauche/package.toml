@@ -1,0 +1,42 @@
+# Gauche 0.9.15, an R7RS Scheme implementation (gosh, libgauche-0.98.so, the
+# extension modules). The release tarball ships the Scheme-generated C sources
+# (pre-package.stamp), so it builds with only a C compiler: no earlier Gauche is needed.
+# Optional features built: TLS (system mbedtls, rfc.tls), zlib (rfc.zlib), IPv6.
+# The libraries are shared and static (libgauche-static-0.98.a, -static).
+# The garbage collector is
+# Gauche's own patched Boehm GC in gc/ (upstream builds it in-tree: there is no
+# configure switch for the system one). Not built: the gdbm/ndbm/odbm modules (there is no
+# gdbm in the tree: fsdbm, which is pure Scheme, remains), the SLIB glue (no slib).
+# The CA bundle for TLS is the tree's /etc/ssl/certs/ca-certificates.crt.
+name = "gauche"
+version = "0.9.15"
+release = 1
+summary = "R7RS Scheme implementation"
+license = "BSD-3-Clause"
+homepage = "https://practical-scheme.net/gauche/"
+hostdeps = ["make", "pkgconf"]
+builddeps = ["mbedtls-devel", "zlib-ng-compat-devel"]
+rundeps = ["ca-certificates"]
+options = ["!lto"]
+
+source = [
+    { url = "https://github.com/shirok/Gauche/releases/download/release0_9_15/Gauche-0.9.15.tgz", sha256 = "3643e27bc7c8822cfd6fb2892db185f658e8e364938bc2ccfcedb239e35af783" },
+]
+
+setup = '''
+%configure \
+    --enable-ipv6 \
+    --with-tls=mbedtls \
+    --with-zlib=/usr \
+    --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/gauche/COPYING"
+'''
