@@ -1,0 +1,88 @@
+# Technitium DNS Server: an authoritative and recursive DNS server with a web
+# console (DoH/DoT/DoQ, DNSSEC, DNS blocking, clustering, DHCP, apps).
+# C# on this tree's .NET (ASP.NET Core 10), framework-dependent: run as
+# `dotnet DnsServerApp.dll <config dir>` (upstream's Docker and systemd do
+# the same), no apphost. UNTESTABLE UNTIL dotnet BUILDS: the tree's dotnet has
+# not been built yet, so none of this has run; the structure follows
+# packages/p/powershell (nugetdeps: `restore` fills the shared NuGet store once
+# with the network, builds restore offline from it).
+# Two sources, as build.md says: DnsServer, and TechnitiumLibrary (tag
+# dns-server-v15.6.2, the library revision this release was built against)
+# which must sit next to it as ../TechnitiumLibrary because DnsServerCore
+# references its DLLs by relative HintPath: the setup links it there. The
+# library's ByteTree, Net and OTP projects are built first (build.md step 5),
+# into TechnitiumLibrary/bin.
+# The "apps" (upstream distributes them as zips from its app store; the
+# QueryLogs*, Advanced Blocking, Split Horizon, geo-routing ... plugins) are
+# built from the same source and shipped as zips in
+# /usr/share/technitium-dns/apps, ready for the web console's Apps > Install
+# (no download from technitium.com needed). Each is `dotnet publish`ed
+# (the shared assemblies are Private=false in the projects) and zipped.
+# NOT included: libmsquic (DNS-over-QUIC / HTTP/3 need it at run time; not
+# packaged; the server runs without it), the Windows tray app/service/setup.
+# Installed inert: the dinit service is shipped, not enabled; no config or
+# data; the server's own first-run state (its web console on port 5380 asks
+# for an admin password at first login, or DNS_SERVER_ADMIN_PASSWORD) is made
+# by the program when the administrator starts it.
+name = "technitium-dns"
+version = "15.6.2"
+release = 1
+summary = "Technitium DNS Server: authoritative and recursive DNS with a web console"
+license = "GPL-3.0-or-later"
+homepage = "https://technitium.com/dns/"
+archs = ["x86_64"]
+hostdeps = ["dotnet", "zip"]
+rundeps = ["dotnet", "icu"]
+options = ["!check", "!strip", "nugetdeps"]
+
+source = [
+    { url = "https://github.com/TechnitiumSoftware/DnsServer/archive/refs/tags/v15.6.2.tar.gz", sha256 = "7fe162a7c1db828ca3ce0d754e9739118e5d666ddac526d2302509b47c3d513b" },
+    { url = "https://github.com/TechnitiumSoftware/TechnitiumLibrary/archive/refs/tags/dns-server-v15.6.2.tar.gz", sha256 = "e7f5add92da555fc3120991fabd802c0605ab9c45cb4b56137dfb0699a006cec" },
+]
+
+restore = '''
+ln -sfn TechnitiumLibrary-dns-server-v15.6.2 ../TechnitiumLibrary
+for p in ../TechnitiumLibrary/TechnitiumLibrary.ByteTree ../TechnitiumLibrary/TechnitiumLibrary.Net ../TechnitiumLibrary/TechnitiumLibrary.Security.OTP DnsServerApp Apps/*/; do
+    p=${p%/}; n=$(basename $p)
+    dotnet restore $p/$n.csproj
+done
+'''
+setup = '''
+# DnsServerCore refers to ..\..\TechnitiumLibrary\bin\*.dll: the library source sits next to this one
+ln -sfn TechnitiumLibrary-dns-server-v15.6.2 ../TechnitiumLibrary
+for p in ../TechnitiumLibrary/TechnitiumLibrary.ByteTree ../TechnitiumLibrary/TechnitiumLibrary.Net ../TechnitiumLibrary/TechnitiumLibrary.Security.OTP DnsServerApp Apps/*/; do
+    p=${p%/}; n=$(basename $p)
+    dotnet restore --source "$DKBUILD_NUGET" $p/$n.csproj
+done
+'''
+build = '''
+for n in ByteTree Net Security.OTP; do
+    dotnet build --no-restore -c Release ../TechnitiumLibrary/TechnitiumLibrary.$n/TechnitiumLibrary.$n.csproj
+done
+test -f ../TechnitiumLibrary/bin/TechnitiumLibrary.Net.dll
+dotnet publish --no-restore -c Release -p:UseAppHost=false -o out/server DnsServerApp/DnsServerApp.csproj
+# the apps, as the zips the app store distributes
+mkdir -p out/apps
+for d in Apps/*/; do
+    n=$(basename $d)
+    [ -f $d/$n.csproj ] || continue
+    dotnet publish --no-restore -c Release -p:UseAppHost=false -o out/app-$n $d/$n.csproj
+    ( cd out/app-$n && zip -qr9 ../apps/$n.zip . )
+done
+'''
+install = '''
+install -d "$pkgdir/usr/lib/technitium-dns" "$pkgdir/usr/bin"
+cp -r out/server/. "$pkgdir/usr/lib/technitium-dns/"
+# only the Linux start scripts are of use; the unit files are for other init systems
+rm -f "$pkgdir"/usr/lib/technitium-dns/{start.bat,systemd.service,openrc.service}
+install -Dm755 $pkgfiles/technitium-dns "$pkgdir/usr/bin/technitium-dns"
+install -d "$pkgdir/usr/share/technitium-dns/apps"
+install -m644 out/apps/*.zip "$pkgdir/usr/share/technitium-dns/apps/"
+install -Dm644 $pkgfiles/dinit-technitium-dns "$pkgdir/etc/dinit.d/technitium-dns"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/technitium-dns.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/technitium-dns.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/technitium-dns/README.FenrirOS"
+install -Dm644 EnvironmentVariables.md "$pkgdir/usr/share/doc/technitium-dns/EnvironmentVariables.md"
+install -Dm644 APIDOCS.md "$pkgdir/usr/share/doc/technitium-dns/APIDOCS.md"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/technitium-dns/LICENSE"
+'''

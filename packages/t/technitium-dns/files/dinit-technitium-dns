@@ -1,0 +1,12 @@
+# Technitium DNS Server. Not enabled by default (README.FenrirOS). Its web
+# console listens on port 5380 and asks for an admin password at first login;
+# DNS on port 53 (anything else on port 53 must be stopped first).
+type = process
+command = /usr/bin/technitium-dns /var/lib/technitium-dns
+run-as = technitium-dns
+working-dir = /var/lib/technitium-dns
+logfile = /var/log/technitium-dns-service.log
+capabilities = ^cap_net_bind_service
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

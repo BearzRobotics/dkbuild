@@ -1,0 +1,5 @@
+#!/bin/sh
+# Technitium DNS Server launcher: the first argument is its configuration and
+# data folder (default /var/lib/technitium-dns).
+export OPENSSL_ENABLE_SHA1_SIGNATURES=1
+exec /usr/bin/dotnet /usr/lib/technitium-dns/DnsServerApp.dll "${1:-/var/lib/technitium-dns}"

@@ -1,0 +1,22 @@
+Technitium DNS Server on FenrirOS
+=================================
+
+Installed inert: the service is not enabled and there is no data or
+configuration.
+
+    dinitctl enable technitium-dns
+
+The server keeps its configuration and zones in /var/lib/technitium-dns. Its
+web console is on http://<host>:5380/ ; on the first visit it asks you to set
+the admin password (or set DNS_SERVER_ADMIN_PASSWORD before the first start).
+Do this at once, on a trusted network. It runs as the technitium-dns user and
+may bind port 53 and other ports below 1024; anything else on port 53
+(dnsmasq, unbound, a resolver) must be stopped first. The built-in DHCP server
+needs the network interface access you give it; DNS-over-QUIC and HTTP/3
+need libmsquic, which is not packaged.
+
+Apps (Advanced Blocking, query logs, Split Horizon, geo routing, ...) are
+built from source and shipped as zip files in /usr/share/technitium-dns/apps:
+install them from the web console (Apps > Install, choose the file). The
+console's own app store downloads from technitium.com instead; use that only
+if you want to.
