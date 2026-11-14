@@ -1,0 +1,20 @@
+# fastapi from PyPI.
+name = "python-fastapi"
+version = "0.162.7"
+release = 1
+summary = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
+license = "MIT"
+homepage = "https://fastapi.tiangolo.com"
+hostdeps = ["python", "python-pdm-backend"]
+rundeps = ["python", "python-starlette", "python-anyio", "python-pydantic", "python-typing-extensions", "python-typing-inspection", "python-annotated-doc", "python-opentelemetry-api"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/ea/82/6b9764e52f89a8aaf68a5005093bcb8fdcadcb6ba30571def786c0d3bfc0/fastapi-0.162.7.tar.gz", sha256 = "b7503029c8ef2d2d5fea9049294cf8d0f2805c6621f4677ede269fce19f01efb" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-fastapi/LICENSE"
+'''
