@@ -1,0 +1,9 @@
+# Fail2Ban. Not enabled by default and no jail is enabled either
+# (README.FenrirOS): enable jails in /etc/fail2ban/jail.local first.
+type = process
+command = /usr/bin/fail2ban-server -xf start
+stop-command = /usr/bin/fail2ban-client stop
+logfile = /var/log/fail2ban-service.log
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

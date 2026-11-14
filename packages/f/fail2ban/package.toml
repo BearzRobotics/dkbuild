@@ -1,0 +1,70 @@
+# Fail2Ban: scans log files for repeated authentication failures and bans the
+# offending addresses with firewall actions (iptables, nftables, ipset, ...).
+# Pure Python (fail2ban-client, fail2ban-server, fail2ban-regex,
+# fail2ban-testcases), installed by hand instead of `setup.py install`
+# (setup.py's custom install classes and absolute data_files paths do not
+# survive a wheel build, and setuptools no longer promises `setup.py install`):
+# the fail2ban package (with its tests and its bundled asyncore/asynchat
+# compat for Python >= 3.12) into site-packages, the scripts into /usr/bin,
+# fail2ban-python as a link to python3 (what setup.py's updatePyExec does),
+# config/ into /etc/fail2ban as upstream's data_files do, man pages and bash
+# completion. The man pages are upstream's pre-generated ones.
+# Optional back ends: pyinotify (backend=pyinotify) is not packaged (it
+# imports asyncore, gone from Python 3.12+), so the default backend falls
+# back to polling; python-systemd is not packaged (no systemd here); dnspython
+# is a runtime dependency (hostname bans).
+# Installed inert: the dinit service is shipped, not enabled; NO JAIL IS
+# ENABLED: config/jail.conf only defines jails (the build checks that none says
+# enabled = true), there is no jail.local; the sample sshd jail is an example
+# in /usr/share/doc/fail2ban. The Debian-style cron/logrotate files are not
+# installed (logrotate example in the docs).
+name = "fail2ban"
+version = "1.1.1"
+release = 1
+summary = "Bans hosts that cause repeated authentication failures"
+license = "GPL-2.0-or-later"
+homepage = "https://www.fail2ban.org"
+hostdeps = ["python"]
+rundeps = ["python", "python-dnspython"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/fail2ban/fail2ban/archive/refs/tags/1.1.1.tar.gz", sha256 = "4be0ea0488e32de260058462a44a040f0542cd26a9fb6fa6d2514f9dd8ec1609" },
+]
+
+build = '''
+# no jail may be enabled by the package
+if grep -Eq '^[[:space:]]*enabled[[:space:]]*=[[:space:]]*true' config/jail.conf; then echo "a jail is enabled in jail.conf"; exit 1; fi
+'''
+install = '''
+pyver=$(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])')
+sp="$pkgdir/usr/lib/python$pyver/site-packages"
+install -d "$sp" "$pkgdir/usr/bin"
+cp -r fail2ban "$sp/fail2ban"
+find "$sp/fail2ban" -name __pycache__ -prune -exec rm -rf {} +
+for b in fail2ban-client fail2ban-server fail2ban-regex fail2ban-testcases; do
+    install -Dm755 bin/$b "$pkgdir/usr/bin/$b"
+done
+ln -s python3 "$pkgdir/usr/bin/fail2ban-python"
+# /etc/fail2ban as setup.py's data_files
+install -d "$pkgdir/etc/fail2ban/fail2ban.d" "$pkgdir/etc/fail2ban/jail.d"
+install -m644 config/*.conf "$pkgdir/etc/fail2ban/"
+for d in filter.d action.d; do
+    install -d "$pkgdir/etc/fail2ban/$d"
+    install -m644 config/$d/*.conf "$pkgdir/etc/fail2ban/$d/"
+done
+install -m644 config/action.d/*.py "$pkgdir/etc/fail2ban/action.d/"
+install -d "$pkgdir/etc/fail2ban/filter.d/ignorecommands"
+for f in config/filter.d/ignorecommands/*; do [ -f "$f" ] && install -m755 "$f" "$pkgdir/etc/fail2ban/filter.d/ignorecommands/"; done
+for m in man/*.1; do install -Dm644 "$m" "$pkgdir/usr/share/man/man1/$(basename $m)"; done
+install -Dm644 man/jail.conf.5 "$pkgdir/usr/share/man/man5/jail.conf.5"
+install -Dm644 files/bash-completion "$pkgdir/usr/share/bash-completion/completions/fail2ban"
+install -Dm644 files/fail2ban-logrotate "$pkgdir/usr/share/doc/fail2ban/examples/fail2ban-logrotate"
+install -Dm644 $pkgfiles/jail.local.example "$pkgdir/usr/share/doc/fail2ban/examples/jail.local.example"
+install -Dm644 README.md "$pkgdir/usr/share/doc/fail2ban/README.md"
+install -Dm644 doc/run-rootless.txt "$pkgdir/usr/share/doc/fail2ban/run-rootless.txt"
+install -Dm644 $pkgfiles/fail2ban "$pkgdir/etc/dinit.d/fail2ban"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/fail2ban.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/fail2ban/README.FenrirOS"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/fail2ban/COPYING"
+'''

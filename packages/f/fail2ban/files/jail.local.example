@@ -1,0 +1,16 @@
+# Example /etc/fail2ban/jail.local: copy it there (and adapt) to enable a jail.
+# Nothing is enabled by the package. The sshd jail reads sshd's log (here
+# /var/log/auth.log; point logpath at wherever your syslog writes it) and bans
+# with nftables.
+[DEFAULT]
+bantime  = 10m
+findtime = 10m
+maxretry = 5
+banaction = nftables-multiport
+banaction_allports = nftables-allports
+backend = auto
+
+[sshd]
+enabled = true
+port = ssh
+logpath = /var/log/auth.log

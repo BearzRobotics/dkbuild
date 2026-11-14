@@ -1,0 +1,21 @@
+Fail2Ban on FenrirOS
+====================
+
+Installed inert: the service is not enabled and no jail is enabled.
+/etc/fail2ban holds upstream's defaults (jail.conf defines jails but enables
+none; filter.d and action.d are the stock filters and actions). Your changes
+belong in /etc/fail2ban/jail.local, jail.d/*.local and fail2ban.local, never
+in the stock files.
+
+1. cp /usr/share/doc/fail2ban/examples/jail.local.example /etc/fail2ban/jail.local
+   and edit it: enable the jails you want, set logpath (your syslog's file) and
+   the banaction your firewall needs (nftables, iptables or ipset must be
+   installed; fail2ban only calls them).
+2. fail2ban-client -t        (tests the configuration)
+3. dinitctl enable fail2ban
+
+Logs go to /var/log/fail2ban.log (fail2ban.conf), the socket to
+/run/fail2ban, the ban database to /var/lib/fail2ban. A logrotate example is
+in /usr/share/doc/fail2ban/examples. The inotify back end (pyinotify) and
+journald (python-systemd) back ends are not available; the default back end
+polls the log files.
