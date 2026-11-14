@@ -1,0 +1,33 @@
+# goffice: GLib/GTK document-centric object and utility library (charts, plot
+# widgets, formula helpers); gnumeric and abiword use it.
+# Without Lasem (MathML/SVG renderer, no package; goffice falls back to not
+# rendering MathML in charts).
+name = "goffice"
+version = "0.10.62"
+release = 1
+summary = "Document-centric objects and utilities for GLib/GTK"
+license = "GPL-2.0-only OR GPL-3.0-only"
+homepage = "https://gitlab.gnome.org/GNOME/goffice"
+hostdeps = ["pkgconf", "gettext", "gobject-introspection", "intltool", "perl-xml-parser"]
+builddeps = ["cairo-devel", "gdk-pixbuf-devel", "glib-devel", "gtk+3-devel", "libgsf-devel", "librsvg-devel", "libspectre-devel", "libxml2-devel", "libxslt-devel", "pango-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/goffice/0.10/goffice-0.10.62.tar.xz", sha256 = "500eaff50628faa75adb3cd560236a4db498d9e7c52c036b78fa9a57f21805b3" },
+]
+
+setup = '''
+%configure \
+    --enable-shared --enable-static \
+    --enable-introspection=yes \
+    --disable-gtk-doc \
+    --with-lasem=no \
+    --with-config-backend=gsettings
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/goffice/COPYING"
+'''
