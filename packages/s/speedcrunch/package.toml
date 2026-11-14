@@ -1,0 +1,25 @@
+name = "speedcrunch"
+version = "1.1.0"
+release = 1
+summary = "High-precision scientific calculator with a quick, keyboard-driven interface"
+license = "GPL-2.0-or-later"
+homepage = "https://heldercorreia.github.io/speedcrunch/"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qttools-devel"]
+rundeps = ["qt6-qtbase"]
+
+source = [
+    { url = "https://github.com/heldercorreia/speedcrunch/archive/refs/tags/v1.1.0.tar.gz", sha256 = "42c39d5c8caf54251c7424880d4a25c77d1ea56a9bd5db668d8ac69ddf3f0d8a" },
+]
+
+# Qt 6 only (find_package(Qt6 6.4 ... Help LinguistTools)); tests are off by default
+# (BUILD_TESTING=OFF), so there is no check phase.
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''
