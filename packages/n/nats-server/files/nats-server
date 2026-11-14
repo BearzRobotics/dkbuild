@@ -1,0 +1,13 @@
+# NATS server. Not enabled by default (README.FenrirOS): it needs
+# /etc/nats-server/nats-server.conf (example:
+# /usr/share/doc/nats-server/nats-server.conf.example), then
+# `dinitctl enable nats-server`.
+type = process
+command = /usr/bin/nats-server -c /etc/nats-server/nats-server.conf
+run-as = nats
+working-dir = /var/lib/nats-server
+logfile = /var/log/nats-server.log
+smooth-recovery = true
+
+depends-on: rcboot
+waits-for: syslogd

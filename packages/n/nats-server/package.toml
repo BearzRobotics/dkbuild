@@ -1,0 +1,38 @@
+# nats-server: the NATS messaging server (core NATS, JetStream persistence,
+# leaf nodes, clustering, MQTT and WebSocket listeners). Go, its modules from
+# the store (godeps). Pure Go, so a static CGO-free binary.
+# Source edits: none; the version is passed with -ldflags as upstream's
+# .goreleaser.yml does (server.serverVersion, server.gitCommit).
+# Installed inert: the dinit service is shipped, not enabled. It starts
+# with /etc/nats-server/nats-server.conf (not shipped: no config, no
+# accounts, no users; an example with JetStream and authentication
+# placeholders is in /usr/share/doc/nats-server). Setup:
+# /usr/share/doc/nats-server/README.FenrirOS.
+name = "nats-server"
+version = "2.15.3"
+release = 1
+summary = "NATS messaging server with JetStream"
+license = "Apache-2.0"
+homepage = "https://nats.io"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/nats-io/nats-server/archive/refs/tags/v2.15.3.tar.gz", sha256 = "034a2a7535d67ae6f28962976a530dad1bd912dd2d9af05a3990f3b7e674008e", name = "nats-server-2.15.3.tar.gz" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go HOME=/tmp/home CGO_ENABLED=0
+'''
+build = '''
+go build -ldflags "-s -w -X github.com/nats-io/nats-server/v2/server.serverVersion=v$version -X github.com/nats-io/nats-server/v2/server.gitCommit=release" -o nats-server .
+'''
+install = '''
+install -Dm755 nats-server "$pkgdir/usr/bin/nats-server"
+install -Dm644 $pkgfiles/nats-server.conf.example "$pkgdir/usr/share/doc/nats-server/nats-server.conf.example"
+install -Dm644 $pkgfiles/nats-server "$pkgdir/etc/dinit.d/nats-server"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/nats-server.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/nats-server.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/nats-server/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/nats-server/LICENSE"
+'''

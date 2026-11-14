@@ -1,0 +1,14 @@
+NATS server on FenrirOS
+=======================
+
+Installed inert: the service is not enabled and there is no configuration,
+user or account.
+
+    1. cp /usr/share/doc/nats-server/nats-server.conf.example \
+          /etc/nats-server/nats-server.conf
+       and edit it (it listens on 127.0.0.1:4222 only, JetStream storage in
+       /var/lib/nats-server/jetstream, no authentication: set an
+       authorization block before exposing it).
+    2. dinitctl enable nats-server
+
+Clients: nats-cli (the `nats` tool) is a separate project.

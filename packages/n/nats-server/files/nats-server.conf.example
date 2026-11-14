@@ -1,0 +1,16 @@
+# /etc/nats-server/nats-server.conf: an example. Edit before use.
+listen: 127.0.0.1:4222
+http: 127.0.0.1:8222        # monitoring (/varz, /jsz ...)
+server_name: nats1
+
+jetstream {
+  store_dir: /var/lib/nats-server/jetstream
+}
+
+# Authentication: none is configured. Uncomment and choose a password
+# (generate a bcrypt hash with `nats server passwd`, from nats-cli) before
+# listening on anything but localhost:
+#authorization {
+#  user: app
+#  password: "<bcrypt hash>"
+#}
