@@ -1,0 +1,45 @@
+# Imported from Chimera Linux cports: user/firejail/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# SETUID: /usr/bin/firejail is
+# installed setuid root, 4755, as upstream installs it (and as this tree's fuse
+# and fping do): the sandbox needs root to set up namespaces, seccomp and
+# network. Nothing is enabled: no profile is applied to any program (firecfg,
+# which would put firejail symlinks in /usr/local/bin, is not run and its
+# links are not created), there is no service, and /etc/firejail/ holds
+# only upstream's default configuration (firejail.config) and the profiles,
+# used when a user runs `firejail <program>` explicitly. An admin who does not
+# want a setuid binary can `chmod u-s /usr/bin/firejail` (it then runs with
+# the reduced user-namespace mode), or rebuild with --disable-suid.
+# Features: everything upstream enables by default (Landlock, D-Bus proxy,
+# chroot, networking, user namespaces, X11 sandboxing, file transfer, output
+# logging) plus --enable-contrib-install (the helper scripts, completions,
+# vim syntax). Not enabled: AppArmor and SELinux (libapparmor/libselinux are
+# not packaged; the kernel has neither LSM configured here) and
+# --enable-x11-legacy (the X Security extension is gone from current X).
+name = "firejail"
+version = "0.9.82.2"
+release = 1
+summary = "SUID sandboxing tool"
+license = "GPL-2.0-only"
+homepage = "https://github.com/netblue30/firejail"
+hostdeps = ["gawk", "pkgconf"]
+builddeps = ["linux-headers"]
+rundeps = ["bash"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/netblue30/firejail/archive/refs/tags/0.9.82.2.tar.gz", sha256 = "72399bffeee3ca3f3b9f89a35daebb31224917f06422a15257ebb94184b146a6" },
+]
+
+setup = '''
+# ./configure is in the release (Chimera does not regenerate it either)
+%configure \
+    --enable-contrib-install
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+chmod 4755 "$pkgdir/usr/bin/firejail"
+'''
