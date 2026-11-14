@@ -1,0 +1,45 @@
+# Scribus: desktop publishing. Qt 6 build (WANT_QT6; 1.6.x still defaults to Qt 5,
+# which the tree does not have). Scripting (Python 3), CUPS, hunspell, Boost,
+# GraphicsMagick, Poppler and the librevenge import plugins (CorelDRAW, Visio,
+# PageMaker, FreeHand, Publisher, QuarkXPress, WPG) are on.
+# Off, with the reason: PoDoFo (WITH_PODOFO: 1.6 needs the legacy 0.9.x API,
+# which is not packaged, for PDF-in-AI import) and libzmf (Zoner Draw import,
+# not packaged).
+name = "scribus"
+version = "1.6.7"
+release = 1
+summary = "Desktop publishing application"
+license = "GPL-2.0-or-later"
+homepage = "https://www.scribus.net"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "gettext"]
+builddeps = ["boost-devel", "cairo-devel", "cups-devel", "fontconfig-devel", "freetype-devel", "graphicsmagick-devel", "harfbuzz-devel", "hunspell-devel", "icu-devel", "lcms2-devel", "lib2geom-devel", "libcdr-devel", "libfreehand-devel", "libjpeg-turbo-devel", "libmspub-devel", "libpagemaker-devel", "libpng-devel", "libqxp-devel", "librevenge-devel", "libtiff-devel", "libvisio-devel", "libwpg-devel", "libxml2-devel", "poppler-devel", "python-devel", "qt6-qt5compat-devel", "qt6-qtbase-devel", "qt6-qttools-devel", "zlib-ng-compat-devel", "openssl-devel"]
+rundeps = ["ghostscript", "hicolor-icon-theme"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/scribus/scribus/1.6.7/scribus-1.6.7.tar.xz", sha256 = "8c0c25b7afe0117d681a1d5e8cdc3652b72682f907cdeb30ded50a9b30bb50bf" },
+]
+
+setup = '''
+%cmake \
+    -DWANT_QT6=ON \
+    -DWITH_PODOFO=OFF \
+    -DWANT_HUNSPELL=ON \
+    -DWITH_BOOST=ON \
+    -DWANT_GRAPHICSMAGICK=ON \
+    -DWANT_DISTROBUILD=ON \
+    -DWANT_VERSIONING=OFF \
+    -DWANT_RELOCATABLE=OFF \
+    -DBUILD_OSG_PLUGIN=OFF \
+    -DWANT_NOOSG=ON \
+    -DWANT_CPP17=ON \
+    -DWANT_PCH=OFF \
+    -DCMAKE_INSTALL_DOCDIR=/usr/share/doc/scribus
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/scribus/COPYING"
+'''
