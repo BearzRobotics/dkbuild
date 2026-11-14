@@ -1,0 +1,20 @@
+# nbclient from PyPI.
+name = "python-nbclient"
+version = "0.11.0"
+release = 1
+summary = "A client library for executing notebooks. Formerly nbconvert's ExecutePreprocessor."
+license = "BSD-3-Clause"
+homepage = "https://jupyter.org"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python", "python-jupyter-client", "python-jupyter-core", "python-nbformat", "python-traitlets"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/28/a5/b3bae4b590c0cbcada2c63a34f7580024e834a8ba213e949a2f906705787/nbclient-0.11.0.tar.gz", sha256 = "04a134a5b087f2c5887f228aca155db50169b8cd9334dee6942c8e927e56081a" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-nbclient/LICENSE"
+'''
