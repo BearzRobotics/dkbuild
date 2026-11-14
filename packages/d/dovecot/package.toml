@@ -19,7 +19,7 @@
 # no certificate; /usr/share/doc/dovecot/README.FenrirOS says how to set it up.
 name = "dovecot"
 version = "2.4.5"
-release = 1
+release = 2
 summary = "IMAP and POP3 server"
 license = "LGPL-2.1-only AND MIT"
 homepage = "https://www.dovecot.org"
@@ -73,6 +73,11 @@ done
     --without-systemd
 '''
 build = '''
+# src/lib-json/test-json-generator.c (a test helper, built in `all`) sends
+# clang's -O2 optimizer into an endless loop at 100% CPU (the 2.4.5 r1 build
+# was killed after 2 hours there): compile just that object at -O0 first; make
+# then finds it up to date. The shipped programs keep -O2.
+make -C src/lib-json test-json-generator.o CFLAGS="$CFLAGS -O0"
 %make
 # Pigeonhole, against this build tree's dovecot-config
 top=$(pwd)
