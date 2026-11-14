@@ -64,6 +64,18 @@ grep -q 'GssApi" ON' src/runtime/src/native/libs/configure.cmake
 grep -q 'GssApi" ON' src/runtime/src/native/corehost/apphost/static/configure.cmake
 sed -i 's/"libgssapi_krb5\.so\.2"/"libgssapi.so.3"/' src/runtime/src/native/libs/System.Net.Security.Native/pal_gssapi.c
 grep -q 'libgssapi\.so\.3' src/runtime/src/native/libs/System.Net.Security.Native/pal_gssapi.c
+# r6: Heimdal's headers name the mechanisms (GSS_KRB5_MECHANISM, GSS_SPNEGO_MECHANISM, ...)
+# as data symbols of libgssapi (__gss_krb5_mechanism_oid_desc, ...), which the shim that
+# loads the library on demand cannot provide: the static singlefilehost failed to link
+# ("undefined symbol: __gss_krb5_mechanism_oid_desc"). On Linux the library is therefore
+# linked too when Heimdal's headers are in use, as on the other targets (extra_libs.cmake:
+# LIBGSS comes from find_library(gssapi)).
+# shellcheck disable=SC2016 # the CMake ${variables} are meant literally
+sed -i '/^    add_definitions(-DGSS_SHIM)$/a\
+    if(HAVE_HEIMDAL_HEADERS)\
+        list(APPEND ${NativeLibsExtra} ${LIBGSS})\
+    endif()' src/runtime/src/native/libs/System.Net.Security.Native/extra_libs.cmake
+grep -Fxq '    if(HAVE_HEIMDAL_HEADERS)' src/runtime/src/native/libs/System.Net.Security.Native/extra_libs.cmake
 # r6: the runtime's PAL (src/coreclr/pal/src/CMakeLists.txt) links every Linux target
 # with `gcc_s`, GCC's unwinder library; this system has no libgcc_s (clang here uses
 # compiler-rt and LLVM's libunwind by default), so ilasm, ildasm and clrjit failed to
