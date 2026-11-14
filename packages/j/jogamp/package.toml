@@ -13,7 +13,7 @@
 # Archives: jogamp.org drops long downloads; a fetch may need retrying.
 name = "jogamp"
 version = "2.6.0"
-release = 3
+release = 4
 summary = "Java bindings for OpenGL (JOGL) and their native glue (GlueGen)"
 license = "BSD-2-Clause AND BSD-3-Clause"
 homepage = "https://jogamp.org"
@@ -44,6 +44,19 @@ ln -sfn ../jcpp-7bf095d6426ce9b88f901a70bf8237b04009a0ff ../gluegen-v2.6.0/jcpp
 # task or type antlr"): patches/gluegen-antlr-java.patch runs antlr.Tool
 # (make/lib/antlr.jar, as before) with <java> instead.
 patch -Np1 -d ../gluegen-v2.6.0 -i /dkbuild/patches/gluegen-antlr-java.patch
+# platform/glibc-compat-symbols.h pins memcpy to GLIBC_2.2.5 and dlopen, dlsym,
+# dlclose, dlerror and dladdr to "no version" with .symver directives, so the
+# libraries load on old glibc systems. musl has no symbol versions: the link
+# stopped with "undefined symbol: dlclose@" and "memcpy@GLIBC_2.2.5" (r3).
+# The header is replaced by one without the directives (the macros stay).
+cat > ../gluegen-v2.6.0/make/stub_includes/platform/glibc-compat-symbols.h <<'EOF2'
+#ifndef __GLIBC_COMPAT_SYMBOLS_H__
+#define __GLIBC_COMPAT_SYMBOLS_H__ 1
+/* dkbuild: musl has no versioned symbols, nothing to pin */
+#define GLIBC_COMPAT_SYMBOL(FFF)
+#define GLIBC_NOVERSION_SYMBOL(FFF)
+#endif /*__GLIBC_COMPAT_SYMBOLS_H__*/
+EOF2
 '''
 build = '''
 (cd ../gluegen/make && ant $antflags base.compile)
