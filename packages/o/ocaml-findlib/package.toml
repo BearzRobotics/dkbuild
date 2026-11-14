@@ -1,0 +1,31 @@
+# Adapted from Chimera Linux cports: user/ocaml-findlib/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# findlib (ocamlfind), the OCaml library manager; opam's and dune's projects
+# find libraries through it. Native-code build (opt).
+name = "ocaml-findlib"
+version = "1.9.8"
+release = 1
+summary = "OCaml library manager"
+license = "MIT"
+homepage = "https://projects.camlcity.org/projects/findlib.html"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["ocaml", "make"]
+builddeps = ["ocaml"]
+rundeps = ["ocaml"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.camlcity.org/download/findlib-1.9.8.tar.gz", sha256 = "662c910f774e9fee3a19c4e057f380581ab2fc4ee52da4761304ac9c31b8869d" },
+]
+
+setup = '''
+./configure -bindir /usr/bin -mandir /usr/share/man -sitelib /usr/lib/ocaml -config /etc/findlib.conf
+'''
+build = '''
+make all
+make opt
+'''
+install = '''
+make install prefix="$pkgdir"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ocaml-findlib/LICENSE"
+'''
