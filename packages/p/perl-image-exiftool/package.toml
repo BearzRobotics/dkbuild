@@ -1,0 +1,28 @@
+# ExifTool: read, write and edit metadata in images, audio and video (the exiftool
+# program and the Image::ExifTool Perl library). digiKam calls it at run time.
+# Source: the GitHub tag (exiftool.org keeps only the newest tarball under a changing name).
+# Pure Perl; the exiftool program is in this package, as in Chimera's -progs
+# split and Debian's libimage-exiftool-perl.
+name = "perl-image-exiftool"
+version = "13.63"
+release = 1
+summary = "Read and write metadata in files (exiftool and Image::ExifTool)"
+license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
+homepage = "https://exiftool.org"
+hostdeps = ["perl"]
+builddeps = ["perl"]
+rundeps = ["perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/exiftool/exiftool/archive/refs/tags/13.63.tar.gz", sha256 = "a306420abf76dbfc5b4ca1a9de7bb2523bc93500a075c4fc9ce543b15f09195f" },
+]
+
+build = '''
+perl Makefile.PL INSTALLDIRS=vendor
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''
