@@ -1,0 +1,33 @@
+# LDC's stage 0 seed: the LDC project's own prebuilt Alpine/musl release,
+# ldc2-1.43.0-alpine-x86_64 (compiler, ldmd2 wrapper, druntime and Phobos
+# libraries and imports, ldc2.conf), unpacked in /usr/lib/ldc-bootstrap. The D
+# compiler's front end is written in D, so the first build of ldc needs an
+# existing D compiler (its stage0deps); every later one uses the previous ldc
+# package (selfhost). The binaries are statically linked (no runtime
+# dependency but a C compiler/linker for D programs). Build use only: off the
+# ISO. The tree's GCC 15 has a D compiler (gdc) too, but LDC's cmake wants
+# the DMD-compatible gdmd wrapper, which GCC does not ship: this seed avoids
+# needing one.
+name = "ldc-bootstrap"
+version = "1.43.0"
+release = 1
+summary = "Prebuilt LDC (upstream's Alpine build) to bootstrap ldc once"
+license = "BSD-3-Clause"
+homepage = "https://github.com/ldc-developers/ldc"
+archs = ["x86_64"]
+rundeps = ["llvm-clang"]
+options = ["!strip", "!check", "!repo-iso"]
+
+source = [
+    { url = "https://github.com/ldc-developers/ldc/releases/download/v1.43.0/ldc2-1.43.0-alpine-x86_64.tar.xz", sha256 = "734f1dbdcc5f6b478efb8c67e5bd7cd73c5c8f0023f45c696adba12618d8e510" },
+]
+
+install = '''
+d="$pkgdir/usr/lib/ldc-bootstrap"
+mkdir -p "$d"
+# the release's top directory is the source's build directory
+cp -a . "$d/"
+rm -f "$d"/bin/dub "$d"/bin/dustmite "$d"/bin/reggae
+test -x "$d/bin/ldc2" && test -x "$d/bin/ldmd2"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ldc-bootstrap/LICENSE"
+'''
