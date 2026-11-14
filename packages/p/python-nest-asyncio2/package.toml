@@ -1,0 +1,23 @@
+# nest-asyncio2 from PyPI.
+name = "python-nest-asyncio2"
+version = "1.7.4"
+release = 1
+summary = "Patch asyncio to allow nested event loops"
+license = "BSD-3-Clause"
+homepage = "https://github.com/Chaoses-Ib/nest-asyncio2"
+hostdeps = ["python", "python-setuptools", "python-setuptools-scm"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/32/2c/70e3b6bb2189cfd260280b7e1042bd622949a258663f95e887fada4ac1e6/nest_asyncio2-1.7.4.tar.gz", sha256 = "995b1409d926ec55e0876ea39a69bffdd8852cf1db3652c177e8c8ffdbcaf3cc" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-nest-asyncio2/LICENSE"
+'''
