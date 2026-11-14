@@ -1,0 +1,49 @@
+# Adapted from Chimera Linux cports: main/deluge/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Deluge: BitTorrent client (daemon, console UI, GTK 3 UI, web UI), split like
+# Chimera into deluge (daemon, console), deluge-gtk and deluge-web. Built from
+# the sdist with pip, offline. The Twisted stack, rencode and libtorrent's
+# Python bindings are recipes of their own. libtorrent-rasterbar 2.1 is new in
+# this tree (Chimera has 2.0): Deluge 2.2.0 should work with it, unconfirmed.
+# Not installed: Chimera's dinit services (this tree starts none by itself;
+# a service file would be an inert example only, and deluged has no OpenRC
+# service here) and its sysusers/tmpfiles files for a `deluge` user.
+# The GTK UI's optional tray icon uses libayatana-appindicator (a runtime
+# dependency of deluge-gtk).
+name = "deluge"
+version = "2.2.0"
+release = 1
+summary = "Portable BitTorrent client"
+license = "GPL-3.0-or-later"
+homepage = "https://deluge-torrent.org"
+hostdeps = ["gettext", "intltool", "python", "python-setuptools", "python-wheel"]
+rundeps = ["libtorrent-rasterbar-python", "python", "python-chardet", "python-mako", "python-openssl", "python-pillow",
+           "python-pyasn1", "python-pyxdg", "python-rencode", "python-setproctitle", "python-setuptools", "python-six",
+           "python-twisted", "python-zope-interface"]
+# Chimera: the tests have unpackaged dependencies.
+options = ["!check"]
+
+source = [
+    { url = "https://ftp.osuosl.org/pub/deluge/source/2.2/deluge-2.2.0.tar.xz", sha256 = "b9ba272b5ba42aaf1c694e6c29628ab816cc1a700a37bac08aacb52571606acd" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 deluge/ui/data/share/metainfo/deluge.metainfo.xml "$pkgdir/usr/share/metainfo/deluge.metainfo.xml"
+install -Dm644 deluge/ui/data/share/applications/deluge.desktop "$pkgdir/usr/share/applications/deluge.desktop"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/deluge/LICENSE"
+'''
+
+[subpackages.gtk]
+summary = "Deluge GTK 3 interface"
+paths = ["/usr/bin/deluge", "/usr/bin/deluge-gtk", "/usr/lib/python3*/site-packages/deluge/ui/gtk3",
+         "/usr/share/applications", "/usr/share/icons", "/usr/share/metainfo", "/usr/share/pixmaps",
+         "/usr/share/man/man1/deluge.1", "/usr/share/man/man1/deluge-gtk.1"]
+depends = ["deluge", "gtk+3", "python-gobject", "libayatana-appindicator", "adwaita-icon-theme"]
+install_if = ["deluge", "gtk+3"]
+
+[subpackages.web]
+summary = "Deluge web interface"
+paths = ["/usr/bin/deluge-web", "/usr/lib/python3*/site-packages/deluge/ui/web", "/usr/share/man/man1/deluge-web.1"]
+depends = ["deluge"]
