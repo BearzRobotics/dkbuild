@@ -18,7 +18,7 @@
 # /usr/sbin/sendmail, so only one of them can be installed.
 name = "exim"
 version = "4.100.1"
-release = 1
+release = 2
 summary = "Message transfer agent"
 license = "GPL-2.0-or-later"
 homepage = "https://www.exim.org"
@@ -36,7 +36,9 @@ setup = '''
 # Exim is configured by Local/Makefile (src/EDITME documents every setting)
 cat > Local/Makefile <<EOF
 CC=$CC
-CFLAGS=$CFLAGS -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
+# NO_EXECINFO: exim.c includes <execinfo.h> (glibc's backtrace(), used only for
+# a stack dump on a crash) unless it is set; musl has no such header
+CFLAGS=$CFLAGS -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DNO_EXECINFO
 CFLAGS_DYNAMIC=-shared -rdynamic -fPIC
 LFLAGS=$LDFLAGS
 EXTRALIBS_EXIM=-rdynamic -lpam
