@@ -1,0 +1,28 @@
+# The small GTK4 app to add and remove GNOME Online Accounts (what dkde's
+# Settings points to). Standalone upstream (XApp project, a continuation of
+# Linux Mint's), NOT part of gnome-online-accounts (3.58 has no UI) and not
+# gnome-control-center. 3.50.x is the current series; it needs goa >= 3.50.
+name = "gnome-online-accounts-gtk"
+version = "3.50.11"
+release = 1
+summary = "GTK frontend for GNOME Online Accounts"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/xapp-project/gnome-online-accounts-gtk"
+hostdeps = ["gettext", "glib-devel", "meson", "pkgconf"]
+builddeps = ["glib-devel", "gnome-online-accounts-devel", "gtk4-devel", "libadwaita-devel"]
+rundeps = ["gnome-online-accounts"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/xapp-project/gnome-online-accounts-gtk/archive/refs/tags/3.50.11.tar.gz", sha256 = "c4c14a9d7b06d3323a32f7835dde7a75070b7d5e62609223ee46b26545cf03ac" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''
