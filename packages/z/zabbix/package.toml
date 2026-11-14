@@ -29,7 +29,7 @@
 # Setup: /usr/share/doc/zabbix/README.FenrirOS.
 name = "zabbix"
 version = "8.0.0"
-release = 1
+release = 2
 summary = "Enterprise-class monitoring solution"
 license = "AGPL-3.0-only AND Apache-2.0 AND BSD-3-Clause AND MIT AND (EPL-1.0 OR LGPL-2.1-only)"
 homepage = "https://www.zabbix.com"
@@ -58,6 +58,12 @@ common="--sysconfdir=/etc/zabbix --enable-ipv6 --with-net-snmp --with-ssh --with
     --with-ares --with-libmodbus"
 '''
 setup = '''
+# configure's libssh detection tests `test "x$accept_ssh_version" == xno` (a bash-ism): the
+# build's /bin/sh (dash) answers "unexpected operator ==", the /usr/include branches are
+# skipped and it stops with "SSH library not found" although libssh is installed. Only
+# the seven `test "x..." ==` lines change; the == in the C test programs stay.
+sed -i 's/\(test "x[^"]*"\) == /\1 = /' configure
+! grep -q 'test "x[^"]*" == ' configure
 # the Java gateway: no prebuilt jars from the archive (header comment)
 rm -f src/zabbix_java/lib/*.jar src/zabbix_java/lib/*.jar.md5
 for j in logback-core-1.5.25 logback-classic-1.5.25 slf4j-api-2.0.16 dnsjava-3.6.4; do
