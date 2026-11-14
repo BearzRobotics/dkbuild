@@ -6,7 +6,7 @@
 # installed; images enable the services (dinit services are not enabled by packages).
 name = "desktop-dkde"
 version = "1"
-release = 3
+release = 4
 summary = "DKDE desktop for FenrirOS (the default)"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"
@@ -15,4 +15,14 @@ rundeps = [
     "dkde", "labwc", "seatd", "dbus", "polkit", "mesa", "vulkan-loader",
     "pipewire", "wireplumber", "fonts-dejavu", "shared-mime-info", "hicolor-icon-theme", "xwayland",
     "greetd", "networkmanager",
+    # dkde's optional dependencies, treated as runtime ones (dkde's README table): sound tools
+    # (pactl, paplay), Bluetooth, brightness, screen lock, printing, Wi-Fi radio switch, the
+    # Qt theme plugins, WebP images, icons and the fonts, clock sync, OCR, and what the
+    # partition manager runs to format and check each file system.
+    "libpulse", "bluez", "brightnessctl", "swaylock", "wlr-randr", "cups", "cups-filters",
+    "qt6ct", "kvantum", "webp-pixbuf-loader", "librsvg", "papirus-icon-theme", "fonts-noto", "fonts-noto-emoji-ttf",
+    "chrony", "sudo", "shadow", "openssh", "ocrmypdf", "gnome-online-accounts-gtk", "udisks", "libmtp",
+    "parted", "e2fsprogs", "dosfstools", "exfatprogs", "xfsprogs", "btrfs-progs", "ntfs-3g",
+    "f2fs-tools", "jfsutils", "reiserfsprogs", "nilfs-utils", "udftools", "fatresize",
+    "tmux", "vim", "htop",
 ]
