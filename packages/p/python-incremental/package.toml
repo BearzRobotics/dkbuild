@@ -1,0 +1,25 @@
+# incremental: version numbers, also a build requirement of twisted.
+# Built from the sdist offline with pip (--no-build-isolation): the build
+# backend comes from hostdeps.
+name = "python-incremental"
+version = "24.11.0"
+release = 1
+summary = "Version numbers for Python packages"
+license = "MIT"
+homepage = "https://pypi.org/project/incremental/"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python", "python-packaging"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/ef/3c/82e84109e02c492f382c711c58a3dd91badda6d746def81a1465f74dc9f5/incremental-24.11.0.tar.gz", sha256 = "87d3480dbb083c1d736222511a8cf380012a8176c2456d01ef483242abbbcf8c" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+for f in LICENSE LICENSE.txt LICENSE.md LICENSE.rst COPYING LICENSES/*; do
+    [ -f "$f" ] && install -Dm644 "$f" "$pkgdir/usr/share/licenses/python-incremental/${f##*/}"
+done
+true
+'''
