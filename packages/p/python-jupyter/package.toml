@@ -1,0 +1,20 @@
+# jupyter from PyPI.
+name = "python-jupyter"
+version = "1.1.1"
+release = 1
+summary = "Jupyter metapackage. Install all the Jupyter components in one go."
+license = "BSD-3-Clause"
+homepage = "https://jupyter.org"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-notebook", "python-jupyter-console", "python-nbconvert", "python-ipykernel", "python-ipywidgets", "python-jupyterlab"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/58/f3/af28ea964ab8bc1e472dba2e82627d36d470c51f5cd38c37502eeffaa25e/jupyter-1.1.1.tar.gz", sha256 = "d55467bceabdea49d7e3624af7e33d59c37fff53ed3a350e1ac957bed731de7a" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-jupyter/LICENSE"
+'''
