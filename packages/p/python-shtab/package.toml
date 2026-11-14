@@ -1,0 +1,23 @@
+# shtab from PyPI.
+name = "python-shtab"
+version = "1.13.0"
+release = 1
+summary = "Automatically generate shell tab completion scripts for Python CLI apps"
+license = "MPL-2.0"
+homepage = "https://github.com/iterative/shtab"
+hostdeps = ["python", "python-setuptools", "python-setuptools-scm"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/ff/dd/e58588cf2d02266d504f4399979740b8b2b61fbd7719a89578afaa6558a3/shtab-1.13.0.tar.gz", sha256 = "0a5be9d7ab2b4549e9a38252abcd5ecf5ec6813ecd80c6b06fa851bff55a5085" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENCE "$pkgdir/usr/share/licenses/python-shtab/LICENCE"
+'''
