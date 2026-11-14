@@ -1,0 +1,30 @@
+# libnsutils: part of the NetSurf project's libraries (needed by netsurf, elinks).
+# The NetSurf build system installs a shared and a static library from two
+# passes (COMPONENT_TYPE=lib-shared, lib-static); both are installed.
+# WARNFLAGS=-w: the libraries build with -Werror, which a newer clang than the
+# ones upstream tests turns into failures on harmless warnings.
+name = "libnsutils"
+version = "0.1.1"
+release = 1
+summary = "NetSurf utility library"
+license = "MIT"
+homepage = "https://www.netsurf-browser.org/projects/nsutils/"
+hostdeps = ["netsurf-buildsystem", "perl", "pkgconf"]
+builddeps = []
+options = ["!check"]
+
+source = [
+    { url = "https://download.netsurf-browser.org/libs/releases/libnsutils-0.1.1-src.tar.gz", sha256 = "5694b4526e458ed000413ce6027589cbe10a257a7ecf065a01421dc7299dea92" },
+]
+
+build = '''
+for t in lib-shared lib-static; do
+    %make PREFIX=/usr WARNFLAGS=-w COMPONENT_TYPE=$t
+done
+'''
+install = '''
+for t in lib-shared lib-static; do
+    make DESTDIR="$pkgdir" PREFIX=/usr WARNFLAGS=-w COMPONENT_TYPE=$t install
+done
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libnsutils/COPYING"
+'''
