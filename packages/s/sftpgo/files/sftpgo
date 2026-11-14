@@ -1,0 +1,17 @@
+# SFTPGo: SFTP/FTP/WebDAV/HTTP file transfer server with a web admin and a
+# web client. Not enabled by default: `dinitctl enable sftpgo`. It starts with
+# its built-in defaults (SFTP on 2022, web admin/client on 8080, WebDAV and FTP
+# off). /etc/sftpgo/sftpgo.json is upstream's default configuration and
+# /etc/sftpgo/sftpgo.env holds SFTPGO_* overrides (the shipped one points the
+# templates and static files at /usr/share/sftpgo). NO default administrator: the first visit
+# to http://<host>:8080/web/admin shows SFTPGo's own first-run setup page.
+type = process
+command = /usr/bin/sftpgo serve --config-dir /var/lib/sftpgo --config-file /etc/sftpgo/sftpgo.json
+run-as = sftpgo
+working-dir = /var/lib/sftpgo
+env-file = /etc/sftpgo/sftpgo.env
+logfile = /var/log/sftpgo.log
+smooth-recovery = true
+
+depends-on: rcboot
+waits-for: syslogd

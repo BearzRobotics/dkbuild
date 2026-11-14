@@ -1,0 +1,55 @@
+# sftpgo: SFTP, FTP/S, WebDAV and HTTP/S file transfer server with a web admin
+# UI and a web client for users (Go). Go modules from the shared module cache
+# (godeps). Built with CGO (the SQLite driver is a C library, which upstream's
+# release builds use) and the `nopgxregisterdefaulttypes` tag that upstream's
+# release builds set; every other feature (all storage backends, ACME, plugins
+# support, metrics, ...) is on. The web admin/client templates, static files
+# (including their vendored JS/CSS, which are in the tree, not built) and the
+# OpenAPI document go in /usr/share/sftpgo. There is no default administrator:
+# the web admin's own first-run setup page creates it.
+# Installed inert: the dinit service is shipped, not enabled; /etc/sftpgo/
+# sftpgo.json is upstream's default configuration (no cron, no sites); data
+# (SQLite db, host keys, certificates, backups) lives in /var/lib/sftpgo, the
+# config dir the service passes, because upstream resolves those relative
+# paths against it.
+name = "sftpgo"
+version = "2.7.6"
+release = 1
+summary = "SFTP, FTP/S, WebDAV and HTTP/S file transfer server"
+license = "AGPL-3.0-only"
+homepage = "https://sftpgo.com"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/drakkan/sftpgo/archive/refs/tags/v2.7.6.tar.gz", sha256 = "c4e023d926ced068284ac83494e2f51bacb430fe260d3cb2d6807d3bede0608d" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=1
+'''
+build = '''
+go build -tags nopgxregisterdefaulttypes -ldflags "-s -w -X github.com/drakkan/sftpgo/v2/internal/version.commit=v$version -X github.com/drakkan/sftpgo/v2/internal/version.date=1970-01-01T00:00:00Z" -o sftpgo
+mkdir -p gen
+./sftpgo gen completion bash > gen/sftpgo.bash
+./sftpgo gen completion zsh > gen/_sftpgo
+./sftpgo gen completion fish > gen/sftpgo.fish
+mkdir -p gen/man
+./sftpgo gen man -d gen/man
+'''
+install = '''
+install -Dm755 sftpgo "$pkgdir/usr/bin/sftpgo"
+mkdir -p "$pkgdir/usr/share/sftpgo"
+cp -r templates static openapi "$pkgdir/usr/share/sftpgo/"
+install -Dm644 sftpgo.json "$pkgdir/etc/sftpgo/sftpgo.json"
+install -Dm644 $pkgfiles/sftpgo.env "$pkgdir/etc/sftpgo/sftpgo.env"
+for m in gen/man/*.1; do install -Dm644 "$m" "$pkgdir/usr/share/man/man1/$(basename "$m")"; done
+install -Dm644 gen/sftpgo.bash "$pkgdir/usr/share/bash-completion/completions/sftpgo"
+install -Dm644 gen/_sftpgo "$pkgdir/usr/share/zsh/site-functions/_sftpgo"
+install -Dm644 gen/sftpgo.fish "$pkgdir/usr/share/fish/vendor_completions.d/sftpgo.fish"
+install -Dm644 $pkgfiles/sftpgo "$pkgdir/etc/dinit.d/sftpgo"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/sftpgo.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/sftpgo.conf"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/sftpgo/LICENSE"
+install -Dm644 NOTICE "$pkgdir/usr/share/licenses/sftpgo/NOTICE"
+'''
