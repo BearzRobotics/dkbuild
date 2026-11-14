@@ -1,0 +1,20 @@
+# isoduration from PyPI.
+name = "python-isoduration"
+version = "20.11.0"
+release = 1
+summary = "Operations with ISO 8601 durations"
+license = "ISC"
+homepage = "https://github.com/bolsote/isoduration"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/7c/1a/3c8edc664e06e6bd06cce40c6b22da5f1429aa4224d0c590f3be21c91ead/isoduration-20.11.0.tar.gz", sha256 = "ac2f9015137935279eac671f94f89eb00584f940f5dc49462a0c4ee692ba1bd9" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-isoduration/LICENSE"
+'''
