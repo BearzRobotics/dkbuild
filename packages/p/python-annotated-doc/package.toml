@@ -1,0 +1,20 @@
+# annotated-doc from PyPI.
+name = "python-annotated-doc"
+version = "0.0.6"
+release = 1
+summary = "Document parameters, class attributes, return types and variables inline, with Annotated"
+license = "MIT"
+homepage = "https://github.com/fastapi/annotated-doc"
+hostdeps = ["python", "python-pdm-backend"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/0f/6e/a61e86e43bb6039b31a33a8f5fba76fe1cdacf3661e7b9756d4ff1b28cdc/annotated_doc-0.0.6.tar.gz", sha256 = "7969bb69912085b2285849c0dcac0b4b374fd180c13cf10a87f284ffcf347bbf" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-annotated-doc/LICENSE"
+'''
