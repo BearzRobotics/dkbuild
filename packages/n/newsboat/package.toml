@@ -1,0 +1,32 @@
+# Newsboat: terminal RSS/Atom feed reader (C++ front end, Rust core library
+# libnewsboat via cxx), and podboat, its podcast downloader. STFL (Newsboat's
+# fork, packaged as stfl) draws the interface. Crates vendored on the host
+# (`cargodeps`); the Makefile runs cargo itself, which finds the vendored
+# sources through the .cargo/config.toml dkbuild lays at the top of the tree,
+# and is kept offline with CARGO_NET_OFFLINE. Man pages and the HTML manual
+# are built with asciidoctor; the translations with msgfmt. The tests are not
+# run: they start http-test-server and need the network stack of a real host.
+name = "newsboat"
+version = "2.45.1"
+release = 1
+summary = "Terminal RSS/Atom feed reader"
+license = "MIT"
+homepage = "https://newsboat.org"
+hostdeps = ["asciidoctor", "gettext", "perl", "pkgconf", "rust"]
+builddeps = ["curl-devel", "gettext-devel", "json-c-devel", "libxml2-devel", "ncurses-devel", "openssl-devel", "sqlite-devel", "stfl-devel"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/newsboat/newsboat/archive/refs/tags/r2.45.1.tar.gz", sha256 = "11b9426ea2de9aff3d3a723ff936125e8ce7e5e298012b4da4f3807bc73b7867" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+%make prefix=/usr
+'''
+install = '''
+make prefix=/usr DESTDIR="$pkgdir" install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/newsboat/LICENSE"
+'''
