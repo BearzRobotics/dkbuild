@@ -1,0 +1,20 @@
+# threadpoolctl from PyPI.
+name = "python-threadpoolctl"
+version = "3.8.0"
+release = 1
+summary = "threadpoolctl"
+license = "BSD-3-Clause"
+homepage = "https://pypi.org/project/threadpoolctl"
+hostdeps = ["python", "python-flit-core"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/56/97/b4748951a683e369513691c8eea33d100298d556308dcb0ab66b132a67f0/threadpoolctl-3.8.0.tar.gz", sha256 = "01080674ad7ac6182429c918a79de92da789bb448acc02fc0b620b1abd6b6137" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-threadpoolctl/LICENSE"
+'''
