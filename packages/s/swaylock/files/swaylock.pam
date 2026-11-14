@@ -1,0 +1,8 @@
+#%PAM-1.0
+# swaylock checks the password through PAM. Upstream's file is "auth include
+# login", but this tree's linux-pam-base has no "login" service: the shadow
+# programs read /etc/shadow directly. system-local-login (pam_unix against
+# /etc/shadow) is what kscreenlocker's file uses too.
+auth include system-local-login
+
+account include system-local-login

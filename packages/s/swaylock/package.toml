@@ -1,0 +1,44 @@
+# Imported from Chimera Linux cports: main/swaylock/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# PAM, not shadow: swaylock can instead (-Dpam=disabled) read /etc/shadow
+# itself through getspnam, but that needs swaylock to be setuid root, which
+# runs a Wayland client with extra privileges. With PAM the password is
+# checked by pam_unix's setuid unix_chkpwd helper instead, as for
+# kscreenlocker; linux-pam is in the tree for that. Upstream installs its PAM
+# service to /etc/pam.d/swaylock as "auth include login"; this tree has no
+# "login" service (linux-pam-base), so the recipe installs its own
+# files/swaylock.pam to /usr/lib/pam.d (where this tree keeps vendor PAM
+# files) including system-local-login, and removes upstream's.
+# Alternatives (waylock, gtklock) are not packaged: dkde runs whichever is installed.
+name = "swaylock"
+version = "1.8.6"
+release = 1
+summary = "Screen locker for Wayland"
+license = "MIT"
+homepage = "https://github.com/swaywm/swaylock"
+hostdeps = ["meson", "pkgconf", "scdoc", "wayland-protocols"]
+builddeps = ["cairo-devel", "gdk-pixbuf-devel", "libxkbcommon-devel", "linux-pam-devel", "wayland-devel", "wayland-protocols"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/swaywm/swaylock/releases/download/v1.8.6/swaylock-1.8.6.tar.gz", sha256 = "a15154348fef852fdb224112d137c393c826478b777f63479beb15e8d3812eaf" },
+]
+
+setup = '''
+%meson \
+    -Dpam=enabled \
+    -Dgdk-pixbuf=enabled \
+    -Dman-pages=enabled \
+    -Dbash-completions=true \
+    -Dfish-completions=true \
+    -Dzsh-completions=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+rm -rf "$pkgdir/etc/pam.d"
+install -Dm644 $pkgfiles/swaylock.pam "$pkgdir/usr/lib/pam.d/swaylock"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/swaylock/LICENSE"
+'''
