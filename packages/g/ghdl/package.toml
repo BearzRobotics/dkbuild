@@ -6,7 +6,7 @@
 # /usr/lib/gcc15/lib (rpath).
 name = "ghdl"
 version = "6.0.0"
-release = 1
+release = 2
 summary = "VHDL simulator and synthesis front end"
 license = "GPL-2.0-or-later"
 homepage = "https://ghdl.github.io/ghdl/"
