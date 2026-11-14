@@ -1,0 +1,20 @@
+# cloudpickle from PyPI.
+name = "python-cloudpickle"
+version = "3.1.2"
+release = 1
+summary = "Pickler class to extend the standard pickle.Pickler functionality"
+license = "BSD-3-Clause"
+homepage = "https://github.com/cloudpipe/cloudpickle"
+hostdeps = ["python", "python-flit-core"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/27/fb/576f067976d320f5f0114a8d9fa1215425441bb35627b1993e5afd8111e5/cloudpickle-3.1.2.tar.gz", sha256 = "7fda9eb655c9c230dab534f1983763de5835249750e85fbcef43aaa30a9a2414" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-cloudpickle/LICENSE"
+'''
