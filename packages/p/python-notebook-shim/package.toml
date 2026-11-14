@@ -1,0 +1,20 @@
+# notebook-shim from PyPI.
+name = "python-notebook-shim"
+version = "0.2.4"
+release = 1
+summary = "A shim layer for notebook traits and config"
+license = "BSD-3-Clause"
+homepage = "https://pypi.org/project/notebook-shim"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python", "python-jupyter-server"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/54/d2/92fa3243712b9a3e8bafaf60aac366da1cada3639ca767ff4b5b3654ec28/notebook_shim-0.2.4.tar.gz", sha256 = "b4b2cfa1b65d98307ca24361f5b30fe785b53c3fd07b7a47e89acb5e6ac638cb" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-notebook-shim/LICENSE"
+'''
