@@ -1,0 +1,31 @@
+# Adapted from Chimera Linux cports: main/libhandy. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# libhandy 1: GTK 3 widgets for adaptive (phone and desktop) applications; evince 48 uses it.
+name = "libhandy"
+version = "1.8.3"
+release = 1
+summary = "GTK+3 building blocks for modern adaptive applications"
+license = "LGPL-2.1-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/libhandy"
+hostdeps = ["meson", "pkgconf", "gettext", "glib-devel", "gobject-introspection", "libxml2", "vala"]
+builddeps = ["glib-devel", "gtk+3-devel", "vala"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/libhandy/1.8/libhandy-1.8.3.tar.xz", sha256 = "05b497229073ff557f10b326e074c5066f8743a302d4820ab97bcb5cd2dab087" },
+]
+
+setup = '''
+%meson \
+    -Dexamples=false \
+    -Dtests=false \
+    -Dgtk_doc=false \
+    -Dvapi=true \
+    -Dglade_catalog=disabled \
+    -Dintrospection=enabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''
