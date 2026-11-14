@@ -9,7 +9,7 @@
 # service in /usr/share/doc/fava).
 name = "fava"
 version = "1.31"
-release = 1
+release = 2
 summary = "Web interface for the Beancount double-entry accounting tool"
 license = "MIT"
 homepage = "https://beancount.github.io/fava/"
