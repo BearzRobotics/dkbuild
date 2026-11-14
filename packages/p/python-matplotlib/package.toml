@@ -1,0 +1,27 @@
+# matplotlib from PyPI. Links the system FreeType, Qhull and libraqm instead of the copies
+# its build would download (offline build, and the tree packages them).
+name = "python-matplotlib"
+version = "3.11.2"
+release = 1
+summary = "Python plotting package"
+license = "PSF-2.0"
+homepage = "https://matplotlib.org"
+hostdeps = ["python", "python-meson-python", "python-pybind11", "python-setuptools-scm", "python-numpy", "meson", "ninja", "pkgconf"]
+builddeps = ["python-devel", "python-numpy", "freetype-devel", "qhull-devel", "libraqm-devel"]
+rundeps = ["python", "python-numpy", "python-contourpy", "python-cycler", "python-fonttools", "python-kiwisolver", "python-packaging", "python-pillow", "python-pyparsing", "python-dateutil"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/e7/c8/9aa712a0afb882649424dd8de8ad9aa6235e796e84c6052e8f6dc1598d0d/matplotlib-3.11.2.tar.gz", sha256 = "cec596316640f2b394b8f0daa0ea61a8eae82d017b620b9f202befb972a59ea4" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr \
+    -Csetup-args=-Dsystem-freetype=true -Csetup-args=-Dsystem-qhull=true -Csetup-args=-Dsystem-libraqm=true .
+install -d "$pkgdir/usr/share/licenses/python-matplotlib"
+install -m644 LICENSE/* "$pkgdir/usr/share/licenses/python-matplotlib/"
+'''
