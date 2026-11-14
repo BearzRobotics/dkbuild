@@ -20,10 +20,11 @@ homepage = "https://github.com/BearzRobotics/dkde"
 archs = ["x86_64"]
 hostdeps = ["zig", "pkgconf"]
 builddeps = ["gtk4-devel", "gtk4-layer-shell-devel", "wayland-devel", "wayland-protocols", "glib-devel", "cairo-devel", "pango-devel", "harfbuzz-devel", "gdk-pixbuf-devel", "graphene-devel", "libarchive-devel", "fontconfig-devel"]
-# Optional, not dependencies: gvfs (Files: phones, cameras and servers), gnome-online-accounts
-# (Settings: Google calendars) and NetworkManager (Settings > Network; without it, wpa_cli and
-# dhcpcd.conf). Install them to turn those features on.
-rundeps = ["labwc", "seatd", "dbus", "polkit"]
+# The desktop treats optional dependencies as runtime ones, so it is fully functional:
+# gvfs (Files: phones, cameras, servers, Google Drive) and gnome-online-accounts (Settings:
+# Online accounts, calendars). NetworkManager is not here: Settings > Network also works
+# through wpa_cli and dhcpcd.conf, which this system uses.
+rundeps = ["labwc", "seatd", "dbus", "polkit", "gvfs", "gnome-online-accounts"]
 options = ["zigdeps", "!check"]
 
 source = [
