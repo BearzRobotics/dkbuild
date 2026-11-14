@@ -1,0 +1,20 @@
+# needed by: ansible-core (its collection dependency resolver). Pure Python.
+name = "python-resolvelib"
+version = "1.2.1"
+release = 1
+summary = "Resolve abstract dependencies into concrete ones"
+license = "ISC"
+homepage = "https://github.com/sarugaku/resolvelib"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/1d/14/4669927e06631070edb968c78fdb6ce8992e27c9ab2cde4b3993e22ac7af/resolvelib-1.2.1.tar.gz", sha256 = "7d08a2022f6e16ce405d60b68c390f054efcfd0477d4b9bd019cc941c28fad1c" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-resolvelib/LICENSE"
+'''
