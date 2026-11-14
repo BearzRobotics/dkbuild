@@ -1,0 +1,43 @@
+# Imported from Chimera Linux cports: main/ccache/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# ccache, the C/C++ compiler cache. Redis storage backend built (hiredis from
+# the tree; hiredis is a dependency here), HTTP backend built with the bundled
+# cpp-httplib. Bundled in src/third_party and kept: blake3, cpp-httplib, fmt,
+# tl-expected (small, header-style libraries nothing else in the tree needs from here).
+# zstd and xxhash are the system ones. With DEPS=AUTO CMake would try to
+# download a missing dependency, but all the downloadable ones (zstd, xxhash,
+# hiredis) are in builddeps, so nothing is fetched at build time.
+# No compiler-name symlinks are installed. To use ccache as a masquerade, make a
+# directory of symlinks and put it first in PATH, for example:
+#     mkdir -p ~/.ccache-bin && for c in cc c++ gcc g++ clang clang++; do ln -s /usr/bin/ccache ~/.ccache-bin/$c; done
+#     export PATH=$HOME/.ccache-bin:$PATH
+# or prefix a compile command with `ccache` (CC="ccache clang").
+# Not built: the tests (they need doctest, and several fail on musl upstream per cports).
+# The man page and HTML manual are built with asciidoctor (hostdep).
+name = "ccache"
+version = "4.14.3"
+release = 1
+summary = "Fast C/C++ compiler cache"
+license = "GPL-3.0-or-later"
+homepage = "https://ccache.dev"
+hostdeps = ["cmake", "ninja", "pkgconf", "asciidoctor"]
+builddeps = ["xxhash-devel", "zstd-devel", "hiredis-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/ccache/ccache/releases/download/v4.14.3/ccache-4.14.3.tar.xz", sha256 = "e1999132cf7dbce48de7d946b767f3e26ea09adcb5daa4a7103a8fa09ee0637d" },
+]
+
+setup = '''
+%cmake \
+    -DENABLE_TESTING=OFF \
+    -DREDIS_STORAGE_BACKEND=ON \
+    -DHTTP_STORAGE_BACKEND=ON \
+    -DDEPS=AUTO
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''
