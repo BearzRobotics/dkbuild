@@ -1,0 +1,20 @@
+# rfc3339-validator from PyPI.
+name = "python-rfc3339-validator"
+version = "0.1.4"
+release = 1
+summary = "A pure python RFC3339 validator"
+license = "MIT"
+homepage = "https://github.com/naimetti/rfc3339-validator"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/28/ea/a9387748e2d111c3c2b275ba970b735e04e15cdb1eb30693b6b5708c4dbd/rfc3339_validator-0.1.4.tar.gz", sha256 = "138a2abdf93304ad60530167e51d2dfb9549521a836871b88d7f4695d0022f6b" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-rfc3339-validator/LICENSE"
+'''
