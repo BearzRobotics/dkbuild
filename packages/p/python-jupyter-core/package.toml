@@ -1,0 +1,20 @@
+# jupyter-core from PyPI.
+name = "python-jupyter-core"
+version = "5.9.1"
+release = 1
+summary = "Jupyter core package. A base package on which Jupyter projects rely."
+license = "BSD-3-Clause"
+homepage = "https://jupyter.org"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python", "python-platformdirs", "python-traitlets"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/02/49/9d1284d0dc65e2c757b74c6687b6d319b02f822ad039e5c512df9194d9dd/jupyter_core-5.9.1.tar.gz", sha256 = "4d09aaff303b9566c3ce657f580bd089ff5c91f5f89cf7d8846c3cdf465b5508" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-jupyter-core/LICENSE"
+'''
