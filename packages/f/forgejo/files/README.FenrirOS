@@ -1,0 +1,35 @@
+Forgejo on FenrirOS
+===================
+
+Installed inert: the service is not enabled, there is no configuration and
+no account.
+
+Setup:
+
+    1. Write /etc/forgejo/app.ini (owner root:forgejo). Start from only:
+
+           [server]
+           HTTP_ADDR = 127.0.0.1
+           HTTP_PORT = 3000
+           [database]
+           DB_TYPE = sqlite3
+           PATH = /var/lib/forgejo/data/forgejo.db
+           [repository]
+           ROOT = /var/lib/forgejo/repositories
+
+       (the service user must be able to write it for the install page to
+       save the settings: chmod g+w, or write the file yourself and set
+       INSTALL_LOCK = true plus the secrets.)
+    2. dinitctl enable forgejo
+    3. Open http://127.0.0.1:3000 and complete the install page (it creates
+       the administrator). Until INSTALL_LOCK = true the install page is open
+       to whoever reaches the port first: bind to localhost, or do this at
+       once, on a trusted network.
+
+The service runs as the forgejo user (home /var/lib/forgejo). For SSH access
+(git clone forgejo@host:...) the SSH server must allow that user, or set
+[server] START_SSH_SERVER = true and SSH_PORT.
+
+Gitea (package gitea) can be installed next to it; they share nothing
+(own binary, user, directories). Do not point both at the same data or
+database, and give them different HTTP_PORT values.

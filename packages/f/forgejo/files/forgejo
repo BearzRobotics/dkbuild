@@ -1,0 +1,12 @@
+# Forgejo. Not enabled by default (README.FenrirOS): there is no
+# /etc/forgejo/app.ini until the administrator writes one, and the first
+# visit to the web address shows the install page. Runs as the forgejo user.
+type = process
+command = /usr/bin/env HOME=/var/lib/forgejo USER=forgejo /usr/bin/forgejo web --config /etc/forgejo/app.ini --work-path /var/lib/forgejo
+run-as = forgejo
+working-dir = /var/lib/forgejo
+logfile = /var/log/forgejo.log
+smooth-recovery = true
+
+depends-on: rcboot
+waits-for: syslogd

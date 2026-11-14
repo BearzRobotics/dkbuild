@@ -1,0 +1,62 @@
+# Forgejo: a self-hosted Git forge (repositories, issues, pull requests,
+# Actions CI, package registry, wiki), the community fork of Gitea. Go, built
+# from the release source tarball (forgejo-src), which carries the vendored Go
+# modules (vendor/, built with -mod=vendor: no godeps), the generated
+# bindata.go files (templates, options, public/ embedded in the binary: the
+# `bindata` tag) and the PRE-BUILT web front end in public/assets (upstream's
+# webpack output; building it from source needs the whole npm toolchain, and
+# policy accepts the release's pre-built assets, which is what upstream's own
+# binaries embed). Database drivers: SQLite (CGO, with sqlite_unlock_notify;
+# the Go driver's bundled amalgamation) plus the pure-Go MySQL/MariaDB and
+# PostgreSQL drivers; PAM authentication (the `pam` tag, linux-pam).
+# Source edits: none. Not built here: the Makefile's git-based version
+# (the tarball's VERSION file is used) and the swagger/lint targets.
+#
+# COEXISTENCE WITH GITEA (packages/g/gitea): the two do NOT conflict and can
+# be installed together. Binaries /usr/bin/forgejo and /usr/bin/gitea,
+# configuration /etc/forgejo and /etc/gitea, data /var/lib/forgejo and
+# /var/lib/gitea, service users `forgejo` and `gitea` (each has its own
+# user, no shared `git` user: each needs its own authorized_keys and hooks),
+# services `forgejo` and `gitea`, logs /var/log/forgejo.log and
+# /var/log/gitea.log. Never point both at the same repository directory or
+# database. Both default to HTTP port 3000: give one of them another
+# HTTP_PORT in its app.ini. (forgejo-runner, the Actions runner, is a
+# separate program and not part of this package.)
+# Installed inert (docs/requests.md): the dinit service is shipped, not
+# enabled; no app.ini, no account: the install page (first visit) creates the
+# administrator. Setup: /usr/share/doc/forgejo/README.FenrirOS.
+name = "forgejo"
+version = "17.0.1"
+release = 1
+summary = "Self-hosted Git forge (Gitea fork)"
+license = "GPL-3.0-or-later"
+homepage = "https://forgejo.org"
+hostdeps = ["go"]
+builddeps = ["linux-pam-devel"]
+rundeps = ["git", "bash", "openssh"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://codeberg.org/forgejo/forgejo/releases/download/v17.0.1/forgejo-src-17.0.1.tar.gz", sha256 = "d6b32ac77e71af0737f30613d985a0dc335b694b8b989d609a0cc88972f2fd4d" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOPROXY=off GOFLAGS="-mod=vendor -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go HOME=/tmp/home
+export CGO_ENABLED=1 CGO_CFLAGS="-DSQLITE_MAX_VARIABLE_NUMBER=32766"
+'''
+build = '''
+# the Makefile's $(EXECUTABLE) rule and LDFLAGS, with the version from the
+# tarball's VERSION file instead of git
+tags="bindata sqlite sqlite_unlock_notify pam"
+test "$(cat VERSION)" = "$version"
+go build -tags "$tags" \
+    -ldflags "-s -w -X main.ReleaseVersion=$version -X main.Version=$version -X main.ForgejoVersion=$version -X \"main.Tags=$tags\"" -o forgejo
+'''
+install = '''
+install -Dm755 forgejo "$pkgdir/usr/bin/forgejo"
+install -Dm644 $pkgfiles/forgejo "$pkgdir/etc/dinit.d/forgejo"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/forgejo.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/forgejo.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/forgejo/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/forgejo/LICENSE"
+'''
