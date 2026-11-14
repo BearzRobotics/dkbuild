@@ -13,7 +13,7 @@
 # /usr/share/doc/uptime-kuma). Setup: /usr/share/doc/uptime-kuma/README.FenrirOS.
 name = "uptime-kuma"
 version = "2.5.11"
-release = 3
+release = 4
 summary = "Self-hosted monitoring tool with status pages"
 license = "MIT"
 homepage = "https://uptime.kuma.pet"
@@ -37,16 +37,21 @@ export NODE_ENV=production
 # type", then node-gyp) look for a compiler named cc/c++ unless CC/CXX say
 # otherwise; the system's compiler is clang
 export CC=clang CXX=clang++
-# node-addon-api's napi.h (the sqlite3 addon) has
-# `static const napi_typedarray_type unknown_array_type = static_cast<...>(-1)`,
-# a value outside the enum's range, which clang 16+ rejects as a constant
-# expression ("in-class initializer for static data member is not a constant
-# expression"); the flag turns that error back into the accepted old behaviour.
-export CXXFLAGS="${CXXFLAGS:+$CXXFLAGS }-Wno-enum-constexpr-conversion"
 '''
 setup = '''
 node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
 npm ci --include=dev --ignore-scripts
+# node-addon-api's napi.h (the sqlite3 addon) has, in class TypedArray,
+# `static const napi_typedarray_type unknown_array_type = static_cast<napi_typedarray_type>(-1);`
+# a value outside the enum's range: clang now rejects that as a constant expression
+# ("in-class initializer for static data member is not a constant expression"; the old
+# -Wno-enum-constexpr-conversion flag no longer exists, r3 tried it: "unknown warning
+# option"). An `inline` static member may be initialised by any expression, so it
+# becomes one; the value is the same.
+for h in $(find node_modules -name napi.h -path '*node-addon-api*'); do
+    sed -i 's/static const napi_typedarray_type unknown_array_type = /static inline const napi_typedarray_type unknown_array_type = /' "$h"
+    ! grep -q 'static const napi_typedarray_type unknown_array_type' "$h"
+done
 npm rebuild @louislam/sqlite3 ssh2 cpu-features esbuild
 '''
 build = '''
