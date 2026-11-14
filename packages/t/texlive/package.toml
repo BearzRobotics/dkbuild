@@ -1,0 +1,13 @@
+# texlive: the TeX Live system as one install: the engines and tools (texlive-bin,
+# built from source) and the macro/font tree (texlive-basic: scheme-basic plus the
+# recommended LaTeX packages and fonts). Larger parts of TeX Live (LaTeX extra,
+# XeTeX/LuaTeX font packages, languages, bibliography, science) are not packaged:
+# see the notes in texlive-basic.
+name = "texlive"
+version = "20260301"
+release = 1
+summary = "TeX Live: TeX engines and a basic macro/font tree"
+license = "GPL-2.0-or-later"
+homepage = "https://tug.org/texlive"
+rundeps = ["texlive-bin", "texlive-basic"]
+options = ["meta"]
