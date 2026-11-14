@@ -1,0 +1,25 @@
+# jupyterlab-pygments from PyPI.
+name = "python-jupyterlab-pygments"
+version = "0.3.0"
+release = 1
+summary = "Pygments theme using JupyterLab CSS variables"
+license = "BSD-3-Clause"
+homepage = "https://github.com/jupyterlab/jupyterlab_pygments"
+hostdeps = ["python", "python-hatchling", "python-hatch-nodejs-version", "python-hatch-jupyter-builder"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/90/51/9187be60d989df97f5f0aba133fa54e7300f17616e065d1ada7d7646b6d6/jupyterlab_pygments-0.3.0.tar.gz", sha256 = "721aca4d9029252b11cfa9d185e5b5af4d54772bb8072f9b7036f4170054d35d" },
+]
+
+environment = '''
+# The sdist carries the built web UI (static/ or labextension/); the hatch-jupyter-builder
+# hook would run npm (jlpm) otherwise, which needs the network, so it is skipped.
+export SKIP_JUPYTER_BUILDER=1
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-jupyterlab-pygments/LICENSE"
+'''
