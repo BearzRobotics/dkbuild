@@ -2,7 +2,7 @@
 # Alpine's testing/libofx. The static library is a second build.
 name = "libofx"
 version = "0.10.9"
-release = 2
+release = 3
 summary = "Library for the Open Financial Exchange (OFX) format"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/libofx/libofx"
@@ -14,6 +14,33 @@ source = [
 ]
 
 setup = '''
+# libxml++-2.6's headers use std::auto_ptr, which libc++ 22 no longer ships in
+# any language mode (only ofxconnect includes them). Provide a minimal
+# compatible std::auto_ptr through a force-included header.
+mkdir -p "$PWD/compat"
+cat > "$PWD/compat/auto_ptr_compat.h" <<'EOF'
+#ifdef __cplusplus
+#include <memory>
+namespace std {
+template <class T> class auto_ptr {
+    T *p_;
+public:
+    typedef T element_type;
+    explicit auto_ptr(T *p = nullptr) noexcept : p_(p) {}
+    auto_ptr(auto_ptr &o) noexcept : p_(o.release()) {}
+    template <class U> auto_ptr(auto_ptr<U> &o) noexcept : p_(o.release()) {}
+    auto_ptr &operator=(auto_ptr &o) noexcept { reset(o.release()); return *this; }
+    ~auto_ptr() { delete p_; }
+    T &operator*() const noexcept { return *p_; }
+    T *operator->() const noexcept { return p_; }
+    T *get() const noexcept { return p_; }
+    T *release() noexcept { T *t = p_; p_ = nullptr; return t; }
+    void reset(T *p = nullptr) noexcept { if (p != p_) { delete p_; p_ = p; } }
+};
+}
+#endif
+EOF
+export CXXFLAGS="$CXXFLAGS -include $PWD/compat/auto_ptr_compat.h"
 %cmake -Wno-dev -DBUILD_SHARED_LIBS=ON
 cmake -B build-static -G Ninja -Wno-dev -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON
