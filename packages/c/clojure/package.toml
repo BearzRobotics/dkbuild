@@ -1,0 +1,69 @@
+# Clojure 1.12.6 and the official command line tools (clojure, clj; tools.deps)
+# 1.12.6.1673. Platform-independent JVM jars as released, like Kotlin and Scala 3
+# (the tools tarball of clojure/brew-install, and clojure.jar with its two
+# dependencies, spec.alpha and core.specs.alpha, from Maven Central, where the
+# release is published; the language is bootstrapped from itself through Maven, which
+# the tree has no way to run offline). Nothing is compiled.
+# What is installed: /usr/lib/clojure (the tools' install directory: deps.edn,
+# example-deps.edn, tools.edn, libexec/*.jar, bin/clojure, bin/clj), links in
+# /usr/bin, the man pages, the three jars as /usr/share/java/clojure*.jar, and a
+# small Maven repository with them (and their poms) in /usr/lib/clojure/m2.
+# Source edits (so the tools work without a network for a program that needs only Clojure):
+#  - the install scripts' PREFIX and BINDIR placeholders are replaced (what the
+#    release's install.sh does with Ruby; sed here), by /usr/lib/clojure and /usr/bin;
+#  - the installed system deps.edn gets a first Maven repository "system"
+#    (file:///usr/lib/clojure/m2) holding clojure 1.12.6, spec.alpha 0.5.238 and
+#    core.specs.alpha 0.4.74 (versions from clojure-1.12.6.pom), so `clojure` resolves
+#    the default dependency from the package; any other dependency still comes from
+#    Maven Central and Clojars as before, at run time (the user's choice).
+# The tools run on the JDK on the PATH; openjdk25 as for the other JVM tools (any 8+).
+# UNTESTED: the file:// repository relies on the resolver finding poms without checksums.
+name = "clojure"
+version = "1.12.6"
+release = 1
+summary = "Clojure language and command line tools"
+license = "EPL-1.0"
+homepage = "https://clojure.org"
+rundeps = ["openjdk25", "bash"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/clojure/brew-install/releases/download/1.12.6.1673/clojure-tools-1.12.6.1673.tar.gz", sha256 = "fe9194858e75d5af13c2e2aff92d710674d5bc5105f2b42f90a7d94d82ec023c" },
+    { url = "https://repo1.maven.org/maven2/org/clojure/clojure/1.12.6/clojure-1.12.6.jar", sha256 = "21b578db389a8e74b286ce79c4a7f86ec641e26d88b12f18d69030916b0e18ca", unpack = false },
+    { url = "https://repo1.maven.org/maven2/org/clojure/clojure/1.12.6/clojure-1.12.6.pom", sha256 = "6b85dea75a09f1eb08c8cc18a1b3120a3fd048a6343757a1b6be979ab6f910cf", unpack = false },
+    { url = "https://repo1.maven.org/maven2/org/clojure/spec.alpha/0.5.238/spec.alpha-0.5.238.jar", sha256 = "94cd99b6ea639641f37af4860a643b6ed399ee5a8be5d717cff0b663c8d75077", unpack = false },
+    { url = "https://repo1.maven.org/maven2/org/clojure/spec.alpha/0.5.238/spec.alpha-0.5.238.pom", sha256 = "3cba7e0dcc085c4ce92dddffea226124ffac178be79bd0379b5b2e30a969cbea", unpack = false },
+    { url = "https://repo1.maven.org/maven2/org/clojure/core.specs.alpha/0.4.74/core.specs.alpha-0.4.74.jar", sha256 = "eb73ac08cf49ba840c88ba67beef11336ca554333d9408808d78946e0feb9ddb", unpack = false },
+    { url = "https://repo1.maven.org/maven2/org/clojure/core.specs.alpha/0.4.74/core.specs.alpha-0.4.74.pom", sha256 = "33410eb8aa73d52d957b3dc6e0a65f3998ac0623cbd813d90c33e6e689c42429", unpack = false },
+    { url = "https://repo1.maven.org/maven2/org/clojure/pom.contrib/1.2.0/pom.contrib-1.2.0.pom", sha256 = "0916d7a41558b9500a427c886fa29827ace5259206be3ad33e64e296fc1a6111", unpack = false },
+]
+
+install = '''
+home=/usr/lib/clojure
+d="$pkgdir$home"
+src=$PWD
+s=/build/sources
+install -dm755 "$d/bin" "$d/libexec" "$pkgdir/usr/bin" "$pkgdir/usr/share/man/man1" "$pkgdir/usr/share/java"
+cp "$src"/*.jar "$d/libexec/"
+cp "$src/example-deps.edn" "$src/tools.edn" "$d/"
+# the placeholders of the release's install.sh
+sed "s|PREFIX|$home|g" "$src/clojure" > "$d/bin/clojure"
+sed "s|BINDIR|/usr/bin|g" "$src/clj" > "$d/bin/clj"
+chmod 755 "$d/bin/clojure" "$d/bin/clj"
+# the system deps.edn: the package's own Maven repository first
+sed 's|:mvn/repos {|:mvn/repos {\n    "system" {:url "file:///usr/lib/clojure/m2"}|' "$src/deps.edn" > "$d/deps.edn"
+grep -q '"system"' "$d/deps.edn"
+for t in clojure clj; do
+    ln -s $home/bin/$t "$pkgdir/usr/bin/$t"
+    install -m644 "$src/$t.1" "$pkgdir/usr/share/man/man1/$t.1"
+done
+# the seed repository and the plain jars
+for e in clojure:1.12.6 spec.alpha:0.5.238 core.specs.alpha:0.4.74; do
+    a=${e%%:*}; v=${e#*:}
+    mkdir -p "$d/m2/org/clojure/$a/$v"
+    cp "$s/$a-$v.jar" "$s/$a-$v.pom" "$d/m2/org/clojure/$a/$v/"
+    ln -s $home/m2/org/clojure/$a/$v/$a-$v.jar "$pkgdir/usr/share/java/$a.jar"
+done
+mkdir -p "$d/m2/org/clojure/pom.contrib/1.2.0"
+cp "$s/pom.contrib-1.2.0.pom" "$d/m2/org/clojure/pom.contrib/1.2.0/"
+'''
