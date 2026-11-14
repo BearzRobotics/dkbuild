@@ -23,6 +23,9 @@ source = [
 # void *(*)(void *) parameter; clang 16+ makes that an error, and the cast is
 # ABI-safe on all supported targets (pointer argument), so the diagnostic is
 # turned back into a warning.
+# Likewise the AVX2 intrinsics code (vec/intrinsic_*_avx2.c) passes int64_t *
+# (long on x86_64 Linux) to intrinsics that take long long *: the same size and
+# representation, and clang 21+ makes the mismatch an error (r2 failed on it).
 setup = '''
 export AR="${AR:-llvm-ar}" RANLIB="${RANLIB:-llvm-ranlib}"
 cd build/linux
@@ -30,7 +33,7 @@ cd build/linux
     --enable-shared \
     --enable-static \
     --enable-pic \
-    --extra-cflags="-Wno-incompatible-function-pointer-types"
+    --extra-cflags="-Wno-incompatible-function-pointer-types -Wno-incompatible-pointer-types"
 '''
 # %make passes AR=llvm-ar on the command line, overriding the Makefile's configure-set
 # AR="llvm-ar rc " (archive step ran "llvm-arlibxavs2.a ..."); the later AR here wins.
