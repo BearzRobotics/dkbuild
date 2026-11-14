@@ -1,0 +1,77 @@
+# ELinks (the rkd77 fork, the maintained one: 0.20): terminal web browser.
+# With the features whose libraries are in the tree: OpenSSL, GSSAPI (Heimdal),
+# libcurl (HTTP, FTP, SFTP through it), libcss and libdom (CSS, and the DOM for
+# JavaScript), mujs JavaScript, brotli/bzip2/lzma/zstd content encodings, IDN2,
+# gpm and terminfo/ncursesw mouse and terminal support, X11 clipboard, 256
+# colours and true colour, kitty and sixel graphics, WebP/AVIF/SVG images,
+# libevent, expat (XBEL bookmarks), TRE regexes, SMB (libsmbclient), BitTorrent,
+# gopher/finger/gemini/NNTP/spartan protocols, local CGI, the Lua, Perl,
+# Python, Ruby and Guile scripting hooks, HTML highlighting, html docs.
+# Left out, with reasons:
+#  - the SpiderMonkey and QuickJS JavaScript engines (neither is in the tree;
+#    mujs provides JavaScript) and FSP (libfsplib is not in the tree)
+#  - GnuTLS (one TLS library is built: OpenSSL), libev (libevent is used; the
+#    two are alternatives) and 88 colours (256 colours is the alternative)
+#  - manual.pdf and the API manual: they need FOP/dblatex and Doxygen output
+#    that no user reads; the man pages and the HTML manual are built.
+name = "elinks"
+version = "0.20.0"
+release = 1
+summary = "Terminal web browser"
+license = "GPL-2.0-only"
+homepage = "https://github.com/rkd77/elinks"
+hostdeps = ["asciidoc", "docbook-xsl-nons", "gettext", "meson", "perl", "pkgconf", "xmlto"]
+builddeps = ["brotli-devel", "bzip2-devel", "curl-devel", "gettext-devel", "gpm-devel", "guile-devel", "heimdal-devel",
+             "libavif-devel", "libcss-devel", "libdom-devel", "libevent-devel", "libexpat-devel", "libidn2-devel",
+             "libsixel-devel", "libx11-devel", "libwebp-devel", "librsvg-devel", "lua-devel", "mujs-devel", "ncurses-devel",
+             "openssl-devel", "perl", "python-devel", "ruby-devel", "samba-devel", "sqlite-devel", "tre-devel", "xz-devel",
+             "zlib-ng-compat-devel", "zstd-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/rkd77/elinks/releases/download/v0.20.0/elinks-0.20.0.tar.xz", sha256 = "75af7ba88af99ff5069ec7b4b7a3241d5920f4089764c7297cff3c8484a9e33f" },
+]
+
+setup = '''
+%meson \
+    -D256-colors=true \
+    -Dapidoc=false \
+    -Dbittorrent=true \
+    -Dbrotli=true \
+    -Dbzlib=true \
+    -Dcgi=true \
+    -Ddgi=true \
+    -Dexmode=true \
+    -Dfinger=true \
+    -Dgemini=true \
+    -Dgopher=true \
+    -Dgssapi=true \
+    -Dguile=true \
+    -Dhtml-highlight=true \
+    -Dkitty=true \
+    -Dlibavif=true \
+    -Dlibevent=true \
+    -Dlibrsvg=true \
+    -Dlibsixel=true \
+    -Dlibwebp=true \
+    -Dluapkg=lua \
+    -Dlzma=true \
+    -Dmujs=true \
+    -Dnntp=true \
+    -Dpdfdoc=false \
+    -Dperl=true \
+    -Dpython=true \
+    -Druby=true \
+    -Dsmb=true \
+    -Dspartan=true \
+    -Dterminfo=true \
+    -Dtrue-color=true \
+    -Dx=true \
+    -Dzstd=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''
