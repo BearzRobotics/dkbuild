@@ -1,0 +1,31 @@
+# Imported from Chimera Linux cports: main/qt6ct/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Patch qt610.patch (from Chimera): Qt 6.10+ renamed a private header and
+# qt6ct needs the private Widgets/Gui modules; see the patch.
+# qt5ct is not packaged: Qt5 is not in this tree.
+name = "qt6ct"
+version = "0.9"
+release = 1
+summary = "Qt6 configuration tool and platform theme plugin"
+license = "BSD-2-Clause"
+homepage = "https://github.com/trialuser02/qt6ct"
+patches = ["qt610.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qtbase", "qt6-qttools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qttools-devel"]
+rundeps = ["qt6-qtsvg"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/trialuser02/qt6ct/archive/refs/tags/0.9.tar.gz", sha256 = "aa49c4fb51a82dd6947cd9c8dee9b3a1fdd4fbbc9f3c8c5c2d33fa1de9e8826e" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/qt6ct/COPYING"
+'''
