@@ -1,0 +1,39 @@
+# Imported from Chimera Linux cports: work/cports/main/jfsutils/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested. Patches are Chimera's: header/format-string/gcc 10/sysmacros fixes for current compilers and musl,
+# and no-hardlinks (mkfs.jfs and fsck.jfs as symlinks, not hard links). Those patch Makefile.am, so autoreconf runs.
+# Needed by dkde-parted: mkfs.jfs, jfs_fsck, jfs_tune.
+name = "jfsutils"
+version = "1.1.15"
+release = 1
+summary = "JFS filesystem utilities"
+license = "GPL-3.0-only"
+homepage = "https://jfs.sourceforge.net"
+patches = [
+    "devices_h-fix.patch",
+    "fsck_message-fix.patch",
+    "fscklog-fix.patch",
+    "fssubs-fix.patch",
+    "jfsutils-1.1.15-format-security-errors.patch",
+    "jfsutils-1.1.15-gcc10.patch",
+    "jfsutils-1.1.15-sysmacros.patch",
+    "no-hardlinks.patch",
+]
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["linux-headers", "util-linux-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://jfs.sourceforge.net/project/pub/jfsutils-1.1.15.tar.gz", sha256 = "244a15f64015ce3ea17e49bdf6e1a0fb4f9af92b82fa9e05aa64cb30b5f07a4d" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''
