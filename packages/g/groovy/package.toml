@@ -1,0 +1,37 @@
+# Apache Groovy 6.0.0, the binary distribution (groovy, groovyc, groovysh,
+# groovyConsole, groovydoc, grape, java2groovy): platform-independent JVM jars as
+# released by Apache, like Kotlin and Scala 3 in this tree (Groovy is built with
+# Gradle from earlier Groovy releases; there is no source build short of a Gradle
+# bootstrap). Nothing is compiled or patched. The `grooid` jars (Android flavour) are
+# omitted: they are for Android applications and have no use on a desktop JDK. The
+# distribution's scripts find GROOVY_HOME by following their own symlinks, so the
+# commands in /usr/bin are links into /usr/lib/groovy. They deduce JAVA_HOME from
+# `javac` on the PATH if it is not set (a JDK is needed: openjdk25).
+# groovyConsole needs a display (the JDK's AWT/Swing).
+name = "groovy"
+version = "6.0.0"
+release = 1
+summary = "Apache Groovy language for the JVM"
+license = "Apache-2.0"
+homepage = "https://groovy-lang.org"
+rundeps = ["openjdk25", "bash"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://archive.apache.org/dist/groovy/6.0.0/distribution/apache-groovy-binary-6.0.0.zip", sha256 = "54ab1a877f01da2ed16ed43c1ed7a8d6c36b122714c6959712700e89e6efde7c" },
+]
+
+install = '''
+home=/usr/lib/groovy
+d="$pkgdir$home"
+rm -f bin/*.bat bin/groovy.ico
+install -dm755 "$d" "$pkgdir/usr/bin"
+cp -r bin conf lib licenses "$d/"
+for t in grape groovy groovyc groovyConsole groovydoc groovysh java2groovy; do
+    chmod 755 "$d/bin/$t"
+    ln -s $home/bin/$t "$pkgdir/usr/bin/$t"
+done
+chmod 755 "$d/bin/startGroovy"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/groovy/LICENSE"
+install -Dm644 NOTICE "$pkgdir/usr/share/licenses/groovy/NOTICE"
+'''
