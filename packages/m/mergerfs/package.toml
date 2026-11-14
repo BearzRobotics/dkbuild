@@ -1,0 +1,37 @@
+# mergerfs: FUSE union filesystem (C++17). Its libfuse is a heavily modified
+# fork of libfuse 2 kept in the tree (vendored/libfuse; upstream's design, the
+# system libfuse cannot replace it), linked statically into mergerfs along
+# with the other vendored headers (fmt, boost unordered, CLI11, ...). Built with
+# xattr support (USE_XATTR=1, the default). Installs mergerfs, fsck.mergerfs,
+# mergerfs.collect-info, mount.mergerfs (so fstab works), mergerfs-fusermount
+# (setuid root, as upstream installs it, a mount helper that does not clash with
+# fuse's fusermount3), the preload library and the man page.
+# Source edit: the GitHub archive has no VERSION/src/version.hpp (upstream's
+# buildtools/update-version makes them from git or VERSION), so `setup`
+# runs that script after writing VERSION. mount.mergerfs goes to /usr/sbin
+# (SBINDIR; the tree's /sbin is a link to it).
+name = "mergerfs"
+version = "2.42.0"
+release = 1
+summary = "FUSE union filesystem"
+license = "ISC"
+homepage = "https://github.com/trapexit/mergerfs"
+builddeps = ["linux-headers"]
+rundeps = ["fuse"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/trapexit/mergerfs/archive/refs/tags/2.42.0.tar.gz", sha256 = "b805ddcb9dbee66f6bdfc3901ef3e1d978b4fd2973d5b2c9907c9aed937ef705" },
+]
+
+setup = '''
+printf '%s' "$version" > VERSION
+./buildtools/update-version
+'''
+build = '''
+%make NDEBUG=1 PREFIX=/usr SBINDIR=/usr/sbin
+'''
+install = '''
+%make_install PREFIX=/usr SBINDIR=/usr/sbin
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/mergerfs/LICENSE"
+'''
