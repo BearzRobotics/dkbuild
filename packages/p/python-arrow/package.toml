@@ -1,0 +1,20 @@
+# arrow from PyPI.
+name = "python-arrow"
+version = "1.4.0"
+release = 1
+summary = "Better dates & times for Python"
+license = ""
+homepage = "https://github.com/arrow-py/arrow"
+hostdeps = ["python", "python-flit-core"]
+rundeps = ["python", "python-dateutil", "python-tzdata"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/b9/33/032cdc44182491aa708d06a68b62434140d8c50820a087fac7af37703357/arrow-1.4.0.tar.gz", sha256 = "ed0cc050e98001b8779e84d461b0098c4ac597e88704a655582b21d116e526d7" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-arrow/LICENSE"
+'''
