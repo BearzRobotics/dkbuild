@@ -1,0 +1,13 @@
+# smallstep step-ca. Not enabled by default (README.FenrirOS): create the CA
+# first (`step ca init` with STEPPATH=/etc/step-ca), write the password file,
+# then `dinitctl enable step-ca`.
+type = process
+command = /usr/bin/step-ca /etc/step-ca/config/ca.json --password-file /etc/step-ca/password.txt
+env-file = /etc/step-ca/env
+run-as = step-ca
+working-dir = /var/lib/step-ca
+logfile = /var/log/step-ca.log
+capabilities = ^cap_net_bind_service
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

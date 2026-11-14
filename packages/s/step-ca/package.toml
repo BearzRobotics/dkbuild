@@ -1,0 +1,40 @@
+# step-ca: smallstep's online certificate authority (X.509 and SSH CA, ACME,
+# SCEP, OIDC/JWK provisioners). Go, its modules from the store (godeps). Built
+# with cgo (upstream's `make build` with GOFLAGS set, "step-ca with cgo
+# support") so the hardware key stores work: YubiKey/PIV through pcsc-lite
+# (piv-go) and PKCS#11 (dlopen of the module the administrator names); the
+# TPM and cloud KMS back ends are pure Go and always in. The matching client
+# is step-cli. Version string and build time as in upstream's goreleaser
+# config (-X main.Version / main.BuildTime; the time is fixed for
+# reproducibility).
+# Installed inert: the dinit service is shipped, not enabled; no CA, key,
+# password or provisioner is created (`step ca init` does that, see the
+# README); /etc/step-ca is made empty by tmpfiles.
+name = "step-ca"
+version = "0.30.2"
+release = 1
+summary = "Smallstep online certificate authority (X.509, SSH, ACME)"
+license = "Apache-2.0"
+homepage = "https://smallstep.com/certificates/"
+hostdeps = ["go", "pkgconf"]
+builddeps = ["pcsc-lite-devel"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/smallstep/certificates/archive/refs/tags/v0.30.2.tar.gz", sha256 = "327391f301b79818f2418302516b4f6b41bdf08e38edc9011cc7f1b351e19452" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=1
+'''
+build = '''
+go build -ldflags "-w -X main.Version=$version -X main.BuildTime=1970-01-01T00:00:00Z" -o step-ca ./cmd/step-ca
+'''
+install = '''
+install -Dm755 step-ca "$pkgdir/usr/bin/step-ca"
+install -Dm644 $pkgfiles/step-ca "$pkgdir/etc/dinit.d/step-ca"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/step-ca.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/step-ca.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/step-ca/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/step-ca/LICENSE"
+'''

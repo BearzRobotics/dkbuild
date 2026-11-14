@@ -1,0 +1,19 @@
+step-ca on FenrirOS
+===================
+
+Installed inert: the service is not enabled and no CA, key, password or
+provisioner exists.
+
+1. Create the CA (needs the step-cli package), as root:
+       export STEPPATH=/etc/step-ca
+       step ca init --name "My CA" --dns ca.example.org --address :443 \
+           --provisioner admin@example.org --password-file /etc/step-ca/password.txt
+   (write the password file first, mode 0640, owner root:step-ca; the
+   database, if you use one, lives under /var/lib/step-ca, see ca.json "db").
+   Make /etc/step-ca/{certs,secrets,config,db} readable by the step-ca group.
+2. Optional /etc/step-ca/env: environment for the service (STEPPATH=/etc/step-ca).
+3. dinitctl enable step-ca
+
+The service may bind ports below 1024 (cap_net_bind_service). Hardware keys
+(YubiKey, PKCS#11 modules, TPM) are supported by this build; the modules
+themselves come from their own packages.
