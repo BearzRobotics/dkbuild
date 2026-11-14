@@ -95,7 +95,9 @@ add it:
 ```sh
 mkdir -p /mnt/repo
 mount -o ro,loop /path/to/fenriros-repo.iso /mnt/repo   # a file; for a disc or stick: mount -o ro /dev/sr0 /mnt/repo
-echo /mnt/repo/apks/x86_64/Packages.adb >> /etc/apk/repositories
+echo /mnt/repo/apks/x86_64/Packages.adb >> /etc/apk/repositories   # or, on an image made by dkbuild image:
+                                                                    # uncomment the #@cdrom line in /etc/apk/repositories
+                                                                    # and mount the disc at /mnt/cdrom
 apk update && apk add <package>
 ```
 

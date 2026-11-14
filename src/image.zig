@@ -33,6 +33,10 @@ pub const Image = struct {
     /// `!name`, so it stops with a conflict when something in the image requires
     /// one, instead of installing it. (`exclude` only checks the names in `packages`.)
     unwanted: []const []const u8 = &.{},
+    /// Repository lines written (active) to /etc/apk/repositories: a path to a
+    /// Packages.adb or a URL, as apk reads them. The file also always carries a
+    /// commented-out entry for a repository disc mounted at /mnt/cdrom.
+    repositories: []const []const u8 = &.{},
     /// dinit services started at boot.
     services: []const []const u8 = &.{},
     users: []const User = &.{},
@@ -84,12 +88,13 @@ pub fn parse(arena: Allocator, text: []const u8, diag: *Diagnostic) Error!Image 
 
 fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error!Image {
     const root = try cfg.parse(arena, text, diag);
-    try cfg.onlyKeys(arena, diag, root, &.{ "name", "arch", "packages", "exclude", "unwanted", "services", "users", "hostname", "label", "autologin", "session", "issue", "console", "login", "output" }, "");
+    try cfg.onlyKeys(arena, diag, root, &.{ "name", "arch", "packages", "exclude", "unwanted", "repositories", "services", "users", "hostname", "label", "autologin", "session", "issue", "console", "login", "output" }, "");
     var img: Image = .{
         .name = try cfg.reqString(arena, diag, root, "name"),
         .packages = try cfg.optStrings(arena, diag, root, "packages"),
         .exclude = try cfg.optStrings(arena, diag, root, "exclude"),
         .unwanted = try cfg.optStrings(arena, diag, root, "unwanted"),
+        .repositories = try cfg.optStrings(arena, diag, root, "repositories"),
         .services = try cfg.optStrings(arena, diag, root, "services"),
         .output = try cfg.optStrings(arena, diag, root, "output"),
     };
@@ -118,6 +123,8 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
     if (contains(img.output, "iso") and !contains(img.packages, "live-initramfs"))
         return cfg.fail(arena, diag, "the iso output needs 'live-initramfs' in packages (the live system's initramfs)", .{});
     if (img.label.len > 32) return cfg.fail(arena, diag, "label '{s}' is longer than an ISO volume label (32)", .{img.label});
+    for (img.repositories) |r| if (r.len == 0 or std.mem.indexOfAny(u8, r, "\n\r") != null or std.mem.indexOf(u8, r, "DKREPO_EOF") != null)
+        return cfg.fail(arena, diag, "repositories: one non-empty line each, no newlines", .{});
     for (img.unwanted) |u| {
         if (!safeWord(u)) return cfg.fail(arena, diag, "unwanted '{s}': only letters, digits, '-', '_', '.', '+'", .{u});
         if (contains(img.packages, u)) return cfg.fail(arena, diag, "package '{s}' is in both 'packages' and 'unwanted'", .{u});
@@ -188,6 +195,26 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
     for (img.unwanted) |u| try w.add(arena, &s, " '!{s}'", .{u});
     try s.appendSlice(arena, "\n");
     try w.add(arena, &s, "echo '{s}' > /target/etc/hostname\n", .{img.hostname});
+    // /etc/apk/repositories: the configured repositories, then the repository disc (commented out)
+    try s.appendSlice(arena, "cat > /target/etc/apk/repositories <<'DKREPO_EOF'\n");
+    for (img.repositories) |r| try w.add(arena, &s, "{s}\n", .{r});
+    try w.add(arena, &s,
+        \\# apk package repositories, one per line: a path to a Packages.adb, or a URL.
+        \\#
+        \\# FenrirOS repository disc (an ISO made by `dkbuild discs`, or its USB image), for
+        \\# installing without a network: mount the disc, uncomment the line below, run
+        \\# `apk update`. For example:
+        \\#
+        \\#     mkdir -p /mnt/cdrom && mount -o ro /dev/sr0 /mnt/cdrom
+        \\#
+        \\# (a one-image USB set keeps it under /mnt/cdrom/data/apks/{0s}/Packages.adb).
+        \\# The @cdrom tag keeps the disc to packages you ask for with `apk add name@cdrom`;
+        \\# remove the tag to make it an ordinary source for every package.
+        \\#
+        \\#@cdrom /mnt/cdrom/apks/{0s}/Packages.adb
+        \\DKREPO_EOF
+        \\
+    , .{img.arch});
 
     try s.appendSlice(arena, "echo '==> services'\nmkdir -p /target/etc/dinit.d/boot.d\n");
     for (img.services) |sv| try w.add(arena, &s,
@@ -563,4 +590,16 @@ test "unwanted packages are passed to apk as !name and may not also be asked for
     const s = try script(a, img);
     try std.testing.expect(std.mem.indexOf(u8, s, " a '!dhcpcd'\n") != null);
     try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\npackages = [\"a\"]\nunwanted = [\"a\"]\noutput = [\"tar\"]\n", &diag));
+}
+
+test "the image writes /etc/apk/repositories with the repository disc commented out" {
+    var arena_state = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena_state.deinit();
+    const a = arena_state.allocator();
+    var diag: Diagnostic = .{};
+    const img = try parse(a, "name = \"x\"\npackages = [\"a\"]\nrepositories = [\"https://example.org/x86_64/Packages.adb\"]\noutput = [\"tar\"]\n", &diag);
+    const s = try script(a, img);
+    try std.testing.expect(std.mem.indexOf(u8, s, "cat > /target/etc/apk/repositories <<'DKREPO_EOF'\nhttps://example.org/x86_64/Packages.adb\n# apk package repositories") != null);
+    try std.testing.expect(std.mem.indexOf(u8, s, "\n#@cdrom /mnt/cdrom/apks/x86_64/Packages.adb\nDKREPO_EOF\n") != null);
+    try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\npackages = [\"a\"]\nrepositories = [\"a\\nb\"]\noutput = [\"tar\"]\n", &diag));
 }

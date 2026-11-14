@@ -1046,6 +1046,12 @@ The images in `images/` today:
 
 (`rescue.toml.save` in the directory is a stray editor copy.)
 
+Every image gets `/etc/apk/repositories`: the lines of its optional `repositories = [...]` key
+(a path to a `Packages.adb` or a URL, active), then a comment block that explains how to use
+a repository disc, ending in a commented-out `#@cdrom /mnt/cdrom/apks/<arch>/Packages.adb`
+(mount the disc at `/mnt/cdrom`, uncomment, `apk update`; the `@cdrom` tag keeps the disc to
+`apk add name@cdrom`, removing it makes the disc an ordinary source).
+
 `unwanted = ["dhcpcd"]` keeps packages out of the image even as dependencies: each is
 passed to `apk add` as `!name`, so if something in the image requires one, apk stops with a
 conflict instead of installing it (`exclude` only checks the names in `packages`). A
