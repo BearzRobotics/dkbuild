@@ -1,0 +1,49 @@
+# GTK 2: the last 2.x release (2.24.33), kept for the programs that never moved
+# to GTK 3: Pidgin 2.14 and HexChat 2.16 in this tree. X11 only (GTK 2 has no
+# Wayland backend). Alpine's gtk+2.0 recipe, with the same fixes for a modern
+# toolchain.
+# Left out, with reasons:
+#  - introspection (--disable-introspection): the Gtk-2.0 typelib clashes with
+#    the Gtk-3.0 one for every consumer, and nothing here uses it.
+#  - gtk-doc: the API manual is not built (needs gtk-doc and a long build).
+# Conflicts avoided: gtk+3 owns /usr/bin/gtk-update-icon-cache (and its man
+# page): the copy GTK 2 installs is removed.
+# Compiler flags: GTK 2 predates clang's errors on implicit function
+# declarations / int conversions in some of its old code; they are demoted to
+# warnings here (the same as Alpine's -Wno-error switches).
+name = "gtk+2"
+version = "2.24.33"
+release = 1
+summary = "Gimp Toolkit version 2"
+license = "LGPL-2.1-or-later"
+homepage = "https://gtk.org"
+hostdeps = ["gettext-devel", "glib-devel", "perl", "pkgconf"]
+builddeps = ["at-spi2-core-devel", "cairo-devel", "cups-devel", "fontconfig-devel", "gdk-pixbuf-devel", "glib-devel",
+             "libx11-devel", "libxcomposite-devel", "libxcursor-devel", "libxdamage-devel", "libxext-devel",
+             "libxfixes-devel", "libxi-devel", "libxinerama-devel", "libxrandr-devel", "libxrender-devel", "pango-devel"]
+rundeps = ["adwaita-icon-theme", "shared-mime-info"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/gtk+/2.24/gtk+-2.24.33.tar.xz", sha256 = "ac2ac757f5942d318a311a54b0c80b5ef295f299c2a73c632f6bfb1ff49cc6da" },
+]
+
+environment = '''
+export CFLAGS="$CFLAGS -Wno-implicit-function-declaration -Wno-int-conversion -Wno-incompatible-pointer-types -Wno-deprecated-declarations"
+'''
+setup = '''
+%configure \
+    --with-xinput=yes \
+    --enable-xkb \
+    --enable-xinerama \
+    --enable-cups=yes \
+    --disable-introspection \
+    --disable-gtk-doc
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+rm -f "$pkgdir/usr/bin/gtk-update-icon-cache" "$pkgdir/usr/share/man/man1/gtk-update-icon-cache.1"
+'''
