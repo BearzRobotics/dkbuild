@@ -1,0 +1,63 @@
+# Free Pascal 3.2.4: the compiler (fpc, ppcx64), the run-time library, every
+# package unit (fcl-*, rtl-*, the database, network, graphics and GUI
+# bindings that need no external library at build time), and the utilities
+# (fpcmake, fpcmkcfg, fpdoc, h2pas, ppudump, ...). Not Lazarus (separate
+# project: needs the LCL widgetsets and fpc-src; not written).
+# Bootstrapping: the first build (stage 0) runs on Alpine's FPC 3.2.2
+# (fpc-bootstrap, stage0deps; its units are found through a ~/.fpc.cfg made
+# with its fpcmkcfg), every later one on the previous fpc package (selfhost,
+# its /etc/fpc.cfg). `make all` builds the compiler once with that compiler,
+# then the compiler again with itself, the RTL and the packages.
+# FPC emits assembler and calls the external `as` and `ld`: binutils is a
+# runtime dependency (GNU as; ld is the system's).
+# Source: the tag release_3_2_4 archive of the project's GitLab (the release
+# tarball on the download server refuses downloads); the archive's checksum is
+# pinned, but GitLab does not promise a stable archive format.
+# The installed /etc/fpc.cfg is made with fpcmkcfg (basepath
+# /usr/lib/fpc/$fpcversion), as `samplecfg` would on the user's machine.
+# Not done: the documentation (needs TeX), the test suite.
+name = "fpc"
+version = "3.2.4"
+release = 1
+summary = "Free Pascal compiler"
+license = "GPL-2.0-or-later WITH Linking-exception"
+homepage = "https://www.freepascal.org"
+archs = ["x86_64"]
+hostdeps = ["make", "binutils"]
+builddeps = ["linux-headers"]
+stage0deps = ["fpc-bootstrap"]
+rundeps = ["binutils"]
+options = ["!check", "!lto", "!strip", "selfhost"]
+
+source = [
+    { url = "https://gitlab.com/freepascal.org/fpc/source/-/archive/release_3_2_4/source-release_3_2_4.tar.gz", sha256 = "d740b5ee5ea8afad263e88f9db27885ab9c228f1f02829695f4c2f9ee866b2b0", name = "fpc-3.2.4.src.tar.gz" },
+]
+
+environment = '''
+export HOME=/tmp
+unset CFLAGS CXXFLAGS LDFLAGS CPPFLAGS
+# the Pascal compiler that builds this one: the previous package's, or (stage 0) Alpine's
+if [ -x /usr/bin/ppcx64 ] && [ ! -d /usr/lib/fpc-bootstrap ]; then
+    export PP=/usr/bin/ppcx64
+else
+    s=/usr/lib/fpc-bootstrap/usr
+    export PP=$s/lib/fpc/3.2.2/ppcx64
+    export FPCDIR=$s/lib/fpc/3.2.2
+    # the seed's configuration: its unit directories
+    $s/bin/fpcmkcfg -d basepath=$FPCDIR -o /tmp/.fpc.cfg
+fi
+'''
+build = '''
+make all PP="$PP" OPT="-O2" -j1
+'''
+install = '''
+make install PP="$PP" PREFIX=/usr INSTALL_PREFIX="$pkgdir/usr"
+v=$version
+ln -sf ../lib/fpc/$v/ppcx64 "$pkgdir/usr/bin/ppcx64"
+# /etc/fpc.cfg: the unit and library paths of this version
+mkdir -p "$pkgdir/etc"
+"$pkgdir/usr/bin/fpcmkcfg" -d basepath='/usr/lib/fpc/$fpcversion' -o "$pkgdir/etc/fpc.cfg"
+test -x "$pkgdir/usr/lib/fpc/$v/ppcx64"
+test -f "$pkgdir/etc/fpc.cfg"
+install -Dm644 compiler/COPYING.txt "$pkgdir/usr/share/licenses/fpc/COPYING.txt"
+'''
