@@ -1,0 +1,9 @@
+# OpenVPN, one instance, configured in /etc/openvpn/openvpn.conf (examples:
+# /usr/share/doc/openvpn/sample/sample-config-files). Not enabled by default,
+# and it does not start until that file exists: `dinitctl enable openvpn`.
+type = process
+command = /usr/bin/openvpn --config /etc/openvpn/openvpn.conf --cd /etc/openvpn
+logfile = /var/log/openvpn.log
+smooth-recovery = true
+
+depends-on: rcboot

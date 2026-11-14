@@ -1,0 +1,48 @@
+# openvpn: the OpenVPN daemon and its plugins (auth-pam, down-root). Built from
+# upstream's release tarball (it has configure and the generated man pages).
+# OpenSSL crypto, LZ4 and LZO compression, PKCS#11 (pkcs11-helper), the
+# data-channel-offload driver (DCO: the kernel's ovpn module, through libnl;
+# --enable-iproute2 would turn DCO off, so interfaces are configured through
+# the built-in netlink code instead) and capability dropping (libcap-ng).
+# Adapted from Chimera Linux cports (main/openvpn, BSD-2-Clause, Copyright (c)
+# Chimera Linux contributors). Not built: systemd support (no systemd), SELinux.
+# --disable-unit-tests: only the tests are left out (they are not run: !check,
+# and need root and a network namespace).
+# Installed inert: a dinit service is shipped, not enabled, and nothing starts
+# without /etc/openvpn/openvpn.conf, which the administrator writes (examples
+# in /usr/share/doc/openvpn/sample). update-resolv-conf is an example script.
+name = "openvpn"
+version = "2.7.9"
+release = 1
+summary = "Open source VPN daemon"
+license = "GPL-2.0-only WITH openvpn-openssl-exception"
+homepage = "https://openvpn.net"
+hostdeps = ["pkgconf"]
+builddeps = ["openssl-devel", "lz4-devel", "lzo-devel", "libcap-ng-devel", "libnl-devel", "linux-pam-devel", "pkcs11-helper-devel", "linux-headers"]
+rundeps = ["iproute2"]
+options = ["!check"]
+
+source = [
+    { url = "https://build.openvpn.net/downloads/releases/openvpn-2.7.9.tar.gz", sha256 = "c42a6ed892ddfe2d6e3317a5040f19bec5827564affb2fe3f2b3904a94daacb1" },
+]
+
+setup = '''
+%configure \
+    --enable-x509-alt-username \
+    --enable-pkcs11 \
+    --with-crypto-library=openssl \
+    --with-openssl-engine \
+    --disable-systemd \
+    --disable-unit-tests
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -d "$pkgdir/etc/openvpn"
+install -Dm644 $pkgfiles/openvpn "$pkgdir/etc/dinit.d/openvpn"
+install -Dm755 $pkgfiles/update-resolv-conf "$pkgdir/usr/share/openvpn/update-resolv-conf"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/openvpn/COPYING"
+install -Dm644 COPYRIGHT.GPL "$pkgdir/usr/share/licenses/openvpn/COPYRIGHT.GPL"
+'''
