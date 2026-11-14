@@ -144,7 +144,24 @@ WRAP
         sed -i "s|@CLANG@|${w##*:}|" /tmp/cc-bin/${w%%:*}
         chmod 755 /tmp/cc-bin/${w%%:*}
     done
-    ln -sf /usr/bin/ld.lld /tmp/cc-bin/ld
+    # r6: the r5 build got as far as stage 1 and died in `ld.lld' failed in phase `Merge
+    # objects' (Exit code: -11): lld was killed by SIGSEGV merging ghc-prim's objects (-r).
+    # The log does not show the command and the small merge test configure runs passed, so
+    # ld and ld.lld are a wrapper that, if lld is killed by a signal, prints the arguments
+    # to the log and runs it once more with --threads=1 (a threading crash would pass).
+    cat > /tmp/cc-bin/ld.lld <<'WRAP'
+#!/bin/sh
+/usr/bin/ld.lld "$@"
+r=$?
+if [ $r -gt 128 ]; then
+    echo "ld.lld killed by signal $((r - 128)); arguments: $*" >&2
+    /usr/bin/ld.lld --threads=1 "$@"
+    r=$?
+fi
+exit $r
+WRAP
+    chmod 755 /tmp/cc-bin/ld.lld
+    ln -sf ld.lld /tmp/cc-bin/ld
     for t in ar nm ranlib objdump; do ln -sf /usr/bin/llvm-$t /tmp/cc-bin/$t; done
     export PATH="/tmp/cc-bin:$PATH"
 fi

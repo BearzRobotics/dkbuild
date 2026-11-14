@@ -18,6 +18,9 @@
 # Chimera deletes libkernel.a, main.o and scheme.h as "assumed unnecessary"; they are
 # the embedding interface (scheme.h, the kernel library), so they are kept, in -devel and
 # -static. Hard links of the install are made symbolic, as Chimera does.
+# no_ub.patch is Chimera's, with hunk 2 regenerated: its 10 leading / 3 trailing context lines
+# made GNU patch anchor the hunk at the end of the file and reject it (world run 5); the
+# edits are unchanged.
 name = "chez-scheme"
 version = "10.4.1"
 release = 1

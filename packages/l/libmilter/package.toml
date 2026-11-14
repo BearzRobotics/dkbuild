@@ -40,13 +40,15 @@ EOT
 build = '''
 cd libmilter
 sh Build -c
-a=$(ls obj.*/libmilter.a)
+# Build makes its objects in obj.<os>.<kernel>.<arch>/libmilter/ at the top of the source
+# tree, not under libmilter/ (the first build looked in the wrong place)
+a=$(ls ../obj.*/libmilter/libmilter.a)
 cd "$(dirname "$a")"
 $CC $CFLAGS $LDFLAGS -shared -Wl,-soname,libmilter.so.1.0 -o libmilter.so.1.0.2 \
     -Wl,--whole-archive libmilter.a -Wl,--no-whole-archive -lpthread
 '''
 install = '''
-d=$(dirname $(ls libmilter/obj.*/libmilter.a))
+d=$(dirname $(ls obj.*/libmilter/libmilter.a))
 install -Dm755 $d/libmilter.so.1.0.2 "$pkgdir/usr/lib/libmilter.so.1.0.2"
 ln -s libmilter.so.1.0.2 "$pkgdir/usr/lib/libmilter.so.1.0"
 ln -s libmilter.so.1.0.2 "$pkgdir/usr/lib/libmilter.so"
