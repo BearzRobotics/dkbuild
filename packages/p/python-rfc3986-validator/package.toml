@@ -1,0 +1,20 @@
+# rfc3986-validator from PyPI.
+name = "python-rfc3986-validator"
+version = "0.1.1"
+release = 1
+summary = "Pure python rfc3986 validator"
+license = "MIT"
+homepage = "https://github.com/naimetti/rfc3986-validator"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/da/88/f270de456dd7d11dcc808abfa291ecdd3f45ff44e3b549ffa01b126464d0/rfc3986_validator-0.1.1.tar.gz", sha256 = "3d44bde7921b3b9ec3ae4e3adca370438eccebc676456449b145d533b240d055" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-rfc3986-validator/LICENSE"
+'''
