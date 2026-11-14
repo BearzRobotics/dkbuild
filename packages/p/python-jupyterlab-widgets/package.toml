@@ -1,0 +1,25 @@
+# jupyterlab-widgets from PyPI.
+name = "python-jupyterlab-widgets"
+version = "3.0.17"
+release = 1
+summary = "Jupyter interactive widgets for JupyterLab"
+license = "BSD-3-Clause"
+homepage = "https://github.com/jupyter-widgets/ipywidgets"
+hostdeps = ["python", "python-hatchling", "python-hatch-jupyter-builder"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/21/8b/e739cf9066ad5037a2d4b0a403f06da374fdccb9748221661c8b492d3dbc/jupyterlab_widgets-3.0.17.tar.gz", sha256 = "6e61fe21ca8a66039180a5cc52a433e07279d2fee79c8be963e00d55193f17a8" },
+]
+
+environment = '''
+# The sdist carries the built web UI (static/ or labextension/); the hatch-jupyter-builder
+# hook would run npm (jlpm) otherwise, which needs the network, so it is skipped.
+export SKIP_JUPYTER_BUILDER=1
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-jupyterlab-widgets/LICENSE"
+'''
