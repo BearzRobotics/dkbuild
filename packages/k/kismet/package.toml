@@ -2,7 +2,7 @@
 # SDR and MQTT parts are off (libraries not in the tree yet).
 name = "kismet"
 version = "2026.10.R1"
-release = 3
+release = 4
 summary = "Wireless network detector, sniffer and IDS"
 license = "GPL-2.0-or-later"
 homepage = "https://www.kismetwireless.net"
@@ -25,6 +25,13 @@ grep -q 'operator !=(const device_key' trackedelement.h
 # branch is then skipped, no OpenSSL flags are set and the link test fails
 # ("Failed to find OpenSSL library"). Given a directory, the macro looks for
 # include/openssl/ssl.h there and uses -lssl -lcrypto.
+# capture_usbwifi.c uses snprintf/fprintf/stderr without <stdio.h> (glibc's
+# headers pulled it in; clang 22 makes implicit declarations an error):
+# force-include it for C. capture_linux_wifi.c includes <linux/if_ether.h>
+# before musl's <netinet/if_ether.h>, and both define struct ethhdr (musl's is
+# unguarded): -D__UAPI_DEF_ETHHDR=0 makes the kernel header skip its copy.
+export CFLAGS="$CFLAGS -include stdio.h -D__UAPI_DEF_ETHHDR=0"
+export CXXFLAGS="$CXXFLAGS -D__UAPI_DEF_ETHHDR=0"
 %configure \
     --with-openssl=/usr \
     --sysconfdir=/etc/kismet \
