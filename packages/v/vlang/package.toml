@@ -1,0 +1,60 @@
+# The V programming language 0.5.2: the compiler (v), its standard library
+# (vlib), the thirdparty C sources vlib builds on (Boehm GC, stb, ...) and the
+# tools V builds itself (v fmt, v doc, v vet, v up, ...).
+# Bootstrapping, as upstream's makefile: V is written in V. Upstream commits the
+# compiler translated to C in its vc repository (v.c, "[v:master] <v commit>"
+# per commit); the vc commit for V 0.5.2 (7eb8c54...) is a second source, so
+# the build is offline and needs no prebuilt compiler. v.c builds v1, v1 builds
+# v2 from cmd/v, v2 builds the final v, which then builds the tools.
+# vc commit 7eb8c54... is "[v:master] 45ae01d... - V 0.5.2"; the release tag
+# (7647ce1...) is one commit later and only adds the changelog.
+# Installed whole in /usr/lib/vlang (V finds vlib, cmd and thirdparty beside
+# its own executable, after resolving symlinks) with /usr/bin/v pointing at it.
+# V compiles through a C compiler at run time, so clang is a dependency; the
+# user's module and object cache goes in ~/.vmodules. The tools are prebuilt
+# here, so the install tree needs no writing. V programs use the Boehm GC,
+# zstd, mbedtls and the other libraries bundled in thirdparty/ unless built with
+# -d dynamic_boehm and the like (the bundled copies are what upstream tests).
+name = "vlang"
+version = "0.5.2"
+release = 1
+summary = "The V programming language"
+license = "MIT"
+homepage = "https://vlang.io"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["make"]
+rundeps = ["llvm-clang", "llvm-lld"]
+options = ["!check", "!lto", "!strip"]
+
+source = [
+    { url = "https://github.com/vlang/v/archive/refs/tags/0.5.2.tar.gz", sha256 = "1a05f646fba9516ec6307979b282d0cc5327075bef268d40c0ca7d0b887e4f52" },
+    { url = "https://github.com/vlang/vc/archive/7eb8c54a3843e5107d5af06d7a8c3e928f322475.tar.gz", sha256 = "255d5e999edf71dd2786c06a0fdcda47ecfd79d9fde3c9cf7548e36996284f45" },
+]
+
+environment = '''
+export HOME=/tmp VCACHE=/tmp/vcache
+export VFLAGS="-cc clang"
+'''
+build = '''
+# stage 1: V's C translation (the vc repository)
+clang -std=gnu11 -w -O2 -o v1 ../vc-7eb8c54a3843e5107d5af06d7a8c3e928f322475/v.c -lm -lpthread
+# stage 2: the compiler from source, then once more with itself, optimized
+# (-gc none: the compiler itself runs without the garbage collector, as
+# upstream's makefile builds it)
+./v1 -no-parallel -gc none -o v2 cmd/v
+./v2 -nocache -gc none -o v cmd/v
+rm -f v1 v2
+# the tools (v fmt, v doc, ...) prebuilt, since the installed tree is not
+# writable by the people who run it
+./v build-tools
+'''
+install = '''
+d="$pkgdir/usr/lib/vlang"
+mkdir -p "$d" "$pkgdir/usr/bin"
+cp -a v v.mod cmd vlib thirdparty "$d/"
+[ -d examples ] && cp -a examples "$d/"
+rm -rf "$d"/cmd/tools/*.tmp 2>/dev/null || true
+ln -s /usr/lib/vlang/v "$pkgdir/usr/bin/v"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/vlang/LICENSE"
+install -Dm644 doc/docs.md "$pkgdir/usr/share/doc/vlang/docs.md"
+'''
