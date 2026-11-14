@@ -873,6 +873,18 @@ also hands a VT to agetty by itself when it cannot start or crashes three times)
 The autologin VT stays on agetty: dkconsole's `login-program` is a path, not a
 command that can log a user in.
 
+`login = "console"` (default) or `"greetd"`. With `greetd` the graphical login
+is the greetd package (the DKDE greeter) rather than tty1: `autologin` and
+`session` no longer touch tty1 or `.profile`; they become greetd's
+`[initial_session]` in `/etc/greetd/config.toml` (that user's first session
+after boot, started without a password, running `session`; `session` is then
+required with `autologin`). After a logout the greeter asks for a login. If any
+user's password is `"empty"` the image writes `/etc/pam.d/greetd` from the
+package's `/usr/lib/pam.d/greetd` with `nullok` on the pam_unix auth line, so
+that user can log in with nothing typed (the package's file has no `nullok`).
+The image still lists the `greetd` service (and `networkmanager`, `dbus`,
+`seatd`) in `services`; greetd uses vt 7, so the tty1-tty6 gettys stay.
+
 `dkbuild image images/fenriros.toml` (src/image.zig), in the sandbox on the
 build machine, as uid 0 of a user namespace, writing only `out/<name>/`:
 

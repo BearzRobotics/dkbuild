@@ -1,14 +1,21 @@
 # FenrirOS with the DKDE desktop: a live ISO that boots straight to the
-# graphical desktop (the live user logs in on tty1 and dkde-session starts).
-# Every firmware group is included.
+# graphical desktop through greetd (the DKDE greeter; dkde-session starts for
+# the live user as greetd's initial_session, with no password typed). After a
+# logout the greeter asks for a login, and the live user's empty password is
+# accepted (the image's /etc/pam.d/greetd has nullok; the package's has none).
+# greetd and NetworkManager come with desktop-dkde; NetworkManager does DHCP,
+# so dhcpcd (base-net) is installed but its service is not enabled. greetd takes
+# vt 7, the text consoles tty1-tty6 keep their gettys. Every firmware group is
+# included.
 name     = "dkde"
 arch     = "x86_64"
 hostname = "fenriros"
 label    = "FENRIROS_DKDE"
 packages = ["base", "base-net", "linux", "live-initramfs", "dkinstaller", "firmware-linux-meta", "desktop-dkde"]
 exclude  = ["*-devel", "*-doc", "*-static"]
-services = ["udevd", "udev-trigger", "udev-settle", "modules", "dhcpcd", "syslogd", "seatd", "dbus"]
+services = ["udevd", "udev-trigger", "udev-settle", "modules", "syslogd", "seatd", "dbus", "networkmanager", "greetd"]
 output   = ["iso"]
+login     = "greetd"
 autologin = "live"
 session   = "dkde-session"
 

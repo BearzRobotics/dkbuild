@@ -53,6 +53,15 @@ pub const Image = struct {
     /// itself when it cannot start). The autologin VT (tty1) stays on agetty:
     /// dkconsole's login-program is only a path, with no way to log a user in.
     console: []const u8 = "agetty",
+    /// How the graphical session is reached: "console" (the default: `autologin`
+    /// and `session` act on tty1, above) or "greetd": the image has greetd
+    /// (the package; enable the service) and `autologin` + `session` become
+    /// greetd's `initial_session` (that user's first session, started without a
+    /// password, running `session`), leaving the gettys alone. After logging out
+    /// the greeter asks for a login; a user whose password is "empty" can log in
+    /// with nothing typed, because the image's /etc/pam.d/greetd then gets
+    /// `nullok` (the package's has none).
+    login: []const u8 = "console",
     /// Any of "rootfs", "tar", "squashfs", "iso".
     output: []const []const u8,
 };
@@ -71,7 +80,7 @@ pub fn parse(arena: Allocator, text: []const u8, diag: *Diagnostic) Error!Image 
 
 fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error!Image {
     const root = try cfg.parse(arena, text, diag);
-    try cfg.onlyKeys(arena, diag, root, &.{ "name", "arch", "packages", "exclude", "services", "users", "hostname", "label", "autologin", "session", "issue", "console", "output" }, "");
+    try cfg.onlyKeys(arena, diag, root, &.{ "name", "arch", "packages", "exclude", "services", "users", "hostname", "label", "autologin", "session", "issue", "console", "login", "output" }, "");
     var img: Image = .{
         .name = try cfg.reqString(arena, diag, root, "name"),
         .packages = try cfg.optStrings(arena, diag, root, "packages"),
@@ -86,6 +95,9 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
     if (try cfg.optString(arena, diag, root, "console")) |c| img.console = c;
     if (!std.mem.eql(u8, img.console, "agetty") and !std.mem.eql(u8, img.console, "dkconsole"))
         return cfg.fail(arena, diag, "'console' must be \"agetty\" or \"dkconsole\"", .{});
+    if (try cfg.optString(arena, diag, root, "login")) |l| img.login = l;
+    if (!std.mem.eql(u8, img.login, "console") and !std.mem.eql(u8, img.login, "greetd"))
+        return cfg.fail(arena, diag, "'login' must be \"console\" or \"greetd\"", .{});
     if (try cfg.optString(arena, diag, root, "issue")) |t| img.issue = t;
     if (std.mem.indexOf(u8, img.issue, "DKISSUE_EOF") != null) return cfg.fail(arena, diag, "'issue' may not contain DKISSUE_EOF", .{});
     if (std.mem.indexOfAny(u8, img.session, "'\n") != null) return cfg.fail(arena, diag, "'session' may not contain quotes or newlines", .{});
@@ -134,6 +146,8 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
             if (std.mem.eql(u8, u.name, img.autologin)) break;
         } else return cfg.fail(arena, diag, "autologin '{s}' is not one of the [[users]]", .{img.autologin});
     }
+    if (std.mem.eql(u8, img.login, "greetd") and img.autologin.len > 0 and img.session.len == 0)
+        return cfg.fail(arena, diag, "login = \"greetd\" with 'autologin' needs 'session' (the command greetd starts for that user)", .{});
     return img;
 }
 
@@ -173,7 +187,8 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
         \\
     , .{sv});
 
-    if (img.session.len > 0) try w.add(arena, &s,
+    const greetd = std.mem.eql(u8, img.login, "greetd");
+    if (img.session.len > 0 and !greetd) try w.add(arena, &s,
         \\mkdir -p /target/etc/skel
         \\cat >> /target/etc/skel/.profile <<'EOF'
         \\# The desktop starts on the first console (dkbuild image: session).
@@ -216,7 +231,34 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
         \\DKISSUE_EOF
         \\
     , .{std.mem.trimEnd(u8, img.issue, "\n")});
-    if (img.autologin.len > 0) try w.add(arena, &s,
+    if (greetd) {
+        try s.appendSlice(arena,
+            \\echo '==> login (greetd)'
+            \\[ -f /target/etc/greetd/config.toml ] || { echo "error: no /etc/greetd/config.toml (add the greetd package)" >&2; exit 1; }
+            \\
+        );
+        // the greeter asks for a password: an empty one (the live user) must be accepted
+        for (img.users) |u| if (std.mem.eql(u8, u.password, "empty")) {
+            try s.appendSlice(arena,
+                \\mkdir -p /target/etc/pam.d
+                \\sed 's/^\(auth[[:space:]].*pam_unix\.so.*\)$/\1 nullok/' /target/usr/lib/pam.d/greetd > /target/etc/pam.d/greetd
+                \\grep -q nullok /target/etc/pam.d/greetd || { echo "error: /usr/lib/pam.d/greetd has no pam_unix auth line to give nullok" >&2; exit 1; }
+                \\
+            );
+            break;
+        };
+        if (img.autologin.len > 0) try w.add(arena, &s,
+            \\cat >> /target/etc/greetd/config.toml <<'EOF'
+            \\
+            \\# The first session after boot starts without a login (dkbuild image: autologin).
+            \\[initial_session]
+            \\command = "{s}"
+            \\user = "{s}"
+            \\EOF
+            \\
+        , .{ img.session, img.autologin });
+    }
+    if (img.autologin.len > 0 and !greetd) try w.add(arena, &s,
         \\echo '==> autologin'
         \\[ -f /target/etc/dinit.d/tty1 ] || {{ echo "error: no /etc/dinit.d/tty1 to log in on (add dinit-services)" >&2; exit 1; }}
         \\sed -i 's|^command = /sbin/agetty |command = /sbin/agetty --autologin {s} |' /target/etc/dinit.d/tty1
@@ -478,4 +520,26 @@ test "console = dkconsole adds the package and moves tty1-tty5 off agetty, keepi
     const s2 = try script(a, auto);
     try std.testing.expect(std.mem.indexOf(u8, s2, "dkconsole --vt 1|' /target/etc/dinit.d/tty1") == null);
     try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\npackages = [\"a\"]\noutput = [\"tar\"]\nconsole = \"mingetty\"\n", &diag));
+}
+
+test "login = greetd writes initial_session and a nullok PAM file instead of the tty1 autologin" {
+    var arena_state = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena_state.deinit();
+    const a = arena_state.allocator();
+    var diag: Diagnostic = .{};
+    const base = "name = \"x\"\npackages = [\"a\"]\noutput = [\"tar\"]\nautologin = \"u\"\nsession = \"dkde-session\"\n";
+    const img = try parse(a, base ++ "login = \"greetd\"\n[[users]]\nname = \"u\"\npassword = \"empty\"\n", &diag);
+    const s = try script(a, img);
+    try std.testing.expect(std.mem.indexOf(u8, s, "[initial_session]\ncommand = \"dkde-session\"\nuser = \"u\"\n") != null);
+    try std.testing.expect(std.mem.indexOf(u8, s, "> /target/etc/pam.d/greetd") != null);
+    try std.testing.expect(std.mem.indexOf(u8, s, "agetty --autologin") == null);
+    try std.testing.expect(std.mem.indexOf(u8, s, ".profile") == null);
+    // a locked user: no nullok file; the console login keeps working as before
+    const locked = try script(a, try parse(a, base ++ "login = \"greetd\"\n[[users]]\nname = \"u\"\n", &diag));
+    try std.testing.expect(std.mem.indexOf(u8, locked, "/target/etc/pam.d/greetd") == null);
+    const con = try script(a, try parse(a, base ++ "[[users]]\nname = \"u\"\n", &diag));
+    try std.testing.expect(std.mem.indexOf(u8, con, "agetty --autologin u") != null);
+    try std.testing.expect(std.mem.indexOf(u8, con, "greetd") == null);
+    try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\npackages = [\"a\"]\noutput = [\"tar\"]\nlogin = \"gdm\"\n", &diag));
+    try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\npackages = [\"a\"]\noutput = [\"tar\"]\nlogin = \"greetd\"\nautologin = \"u\"\n[[users]]\nname = \"u\"\n", &diag));
 }
