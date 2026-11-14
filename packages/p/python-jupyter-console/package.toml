@@ -1,0 +1,20 @@
+# jupyter-console from PyPI.
+name = "python-jupyter-console"
+version = "6.6.3"
+release = 1
+summary = "Jupyter terminal console"
+license = "BSD-3-Clause"
+homepage = "https://jupyter.org"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python", "python-ipykernel", "python-ipython", "python-jupyter-client", "python-jupyter-core", "python-prompt-toolkit", "python-pygments", "python-pyzmq", "python-traitlets"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/bd/2d/e2fd31e2fc41c14e2bcb6c976ab732597e907523f6b2420305f9fc7fdbdb/jupyter_console-6.6.3.tar.gz", sha256 = "566a4bf31c87adbfadf22cdf846e3069b59a71ed5da71d6ba4d8aaad14a53539" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-jupyter-console/LICENSE"
+'''
