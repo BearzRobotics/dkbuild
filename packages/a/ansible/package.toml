@@ -1,0 +1,26 @@
+# ansible: the Ansible community package, the collections (ansible_collections:
+# ansible.posix, community.general, amazon.aws, ...) on top of ansible-core. Pure
+# Python/YAML from the PyPI sdist, installed with pip offline. Adapted from Chimera
+# Linux cports (main/ansible, BSD-2-Clause, Copyright (c) Chimera Linux contributors).
+# Its collections' own tests need modules and a network the build does not have: !check.
+# The Python modules some collections use (paramiko, netaddr) are runtime
+# dependencies; collections needing others say so themselves.
+name = "ansible"
+version = "14.6.0"
+release = 1
+summary = "Configuration management and multinode orchestration framework (community collections)"
+license = "GPL-3.0-or-later"
+homepage = "https://ansible.com"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["ansible-core", "python-paramiko", "python-netaddr"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/86/91/8d1eee9e7c065a60119845c2919d6762dd5b734d784ac8be1180fa5c506a/ansible-14.6.0.tar.gz", sha256 = "47cd013f4b6462f15b65485d09b713ae64697036733078f0623f636a94f5df45" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/ansible/COPYING"
+'''
