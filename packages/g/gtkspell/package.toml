@@ -1,0 +1,35 @@
+# GtkSpell 2: spell-checking for GtkTextView (GTK 2, through Enchant). The
+# last release of the GTK 2 series; needed by Pidgin 2.x (and the series kept
+# as gtkspell, GtkSpell 3 being a different library). Shared and static
+# libraries (%configure); the API manual (gtk-doc) is not built.
+# Source edit: gtkspell 2.0.16 (2009) asks pkg-config for `enchant >= 0.4.0` and
+# links -lenchant; Enchant 2 (the tree has 2.8) is enchant-2.pc / -lenchant-2,
+# its header is found through the pkg-config cflags. The shipped configure is
+# edited directly (no autoreconf): the module name, and the -lenchant that
+# pkg-config's own libs make redundant.
+name = "gtkspell"
+version = "2.0.16"
+release = 1
+summary = "Spell checking for GTK 2 text widgets"
+license = "GPL-2.0-or-later"
+homepage = "https://gtkspell.sourceforge.net"
+hostdeps = ["intltool", "pkgconf"]
+builddeps = ["enchant-devel", "glib-devel", "gtk+2-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gtkspell.sourceforge.net/download/gtkspell-2.0.16.tar.gz", sha256 = "8fc7dc560167b2cb7193e76aca625a152dc19b0ebf49816b78539cbb90d80d02" },
+]
+
+setup = '''
+sed -i -e 's/enchant >= 0\.4\.0/enchant-2 >= 2.0/g' -e 's/^SPELLER_LIB=-lenchant$/SPELLER_LIB=/' configure
+grep -q 'enchant-2 >= 2.0' configure
+%configure \
+    --disable-gtk-doc
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''
