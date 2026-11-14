@@ -1,0 +1,53 @@
+# Ported from Chimera Linux cports: user/erlang/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Erlang/OTP: the BEAM runtime (erts, with the JIT), the compiler and the OTP
+# applications, with their EEP-48 documentation chunks (h/1 in the shell).
+# Needed by: elixir, rabbitmq-server.
+# Enabled: crypto/ssl/ssh (OpenSSL, linked dynamically), odbc (unixODBC), wx
+# and its OpenGL binding (wxWidgets, GLU; erlang-wx: observer, debugger, et
+# use it), jinterface (the Java node library, OtpErlang.jar, javac on
+# OpenJDK 21; erlang-jinterface), SCTP sockets (linked against
+# lksctp-tools' libsctp rather than loaded on demand, so the dependency is
+# seen), the system zlib, ncurses for the shell.
+# Upstream's own zstd copy is used (it only takes a static libzstd from the
+# system). No tests (Chimera runs release_tests; they take hours).
+name = "erlang"
+version = "29.1.2"
+release = 1
+summary = "Erlang/OTP"
+license = "Apache-2.0"
+homepage = "https://www.erlang.org"
+hostdeps = ["perl", "pkgconf", "make", "libxslt", "openjdk21"]
+builddeps = ["glu-devel", "linux-headers", "ncurses-devel", "openssl-devel", "unixodbc-devel", "wxwidgets-devel",
+             "zlib-ng-compat-devel", "lksctp-tools-devel"]
+# some static libraries inside the runtime must not be LTO objects (Chimera)
+options = ["!cross", "!lto", "!check"]
+
+source = [
+    { url = "https://github.com/erlang/otp/archive/OTP-29.1.2.tar.gz", sha256 = "7a4235d19e460ea91798e46a42cf910278d56b56a69af846a058986f703658da" },
+]
+
+environment = '''
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+export PATH="$JAVA_HOME/bin:$PATH"
+'''
+build = '''
+%configure --enable-sctp=lib --disable-builtin-zlib --with-ssl --enable-dynamic-ssl-lib --with-javac \
+    --with-odbc --with-wx --enable-deterministic-build
+%make
+%make DOC_TARGETS=chunks docs
+'''
+install = '''
+%make_install install-docs DOC_TARGETS=chunks
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/erlang/LICENSE.txt"
+'''
+
+[subpackages.wx]
+summary = "Erlang/OTP: wxWidgets binding"
+paths   = ["/usr/lib/erlang/lib/wx-*"]
+depends = ["erlang"]
+
+[subpackages.jinterface]
+summary = "Erlang/OTP: Java interface library"
+paths   = ["/usr/lib/erlang/lib/jinterface-*"]
+depends = ["erlang"]
