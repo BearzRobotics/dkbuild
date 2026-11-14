@@ -1,0 +1,29 @@
+# Written for this tree (cports has no nilfs-utils). Untested.
+# Needed by dkde-parted: mkfs.nilfs2 (dkde names the package nilfs-tools; upstream's name is nilfs-utils).
+# libmount (mount.nilfs2) and blkid are enabled; libselinux is not packaged, so configure leaves it out.
+# usrmerge=sbin: programs go to /usr/sbin like the rest of the tree, not /sbin.
+name = "nilfs-utils"
+version = "2.3.1"
+release = 1
+summary = "NILFS2 filesystem utilities (mkfs, mount, cleanerd, lscp)"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://nilfs.sourceforge.io/"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["linux-headers", "util-linux-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/nilfs-dev/nilfs-utils/archive/refs/tags/v2.3.1.tar.gz", sha256 = "f4488f2978b3054fd97f87d206032cbf376d98479759d2855b57bc24a8d8efb9" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --enable-usrmerge=sbin
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''
