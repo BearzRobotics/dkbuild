@@ -1,0 +1,37 @@
+# Free Pascal's stage 0 seed: Alpine Linux's musl build of FPC 3.2.2 (edge
+# testing, fpc-3.2.2-r4: ppcx64, the units of every package, the utilities),
+# unpacked in /usr/lib/fpc-bootstrap. FPC is written in Pascal, so the first
+# build of fpc needs an existing compiler (its stage0deps); every later one
+# uses the previous fpc package (selfhost), as Alpine's own does. The 3.2.4
+# compiler builds with any 3.2.x. Build use only: off the ISO.
+# Alpine edge drops a package file when it is rebuilt or updated: a later fetch
+# of this URL can fail, then the newest fpc-3.2.2-r* replaces it.
+name = "fpc-bootstrap"
+version = "3.2.2"
+release = 1
+summary = "Prebuilt Free Pascal (Alpine's) to bootstrap fpc once"
+license = "GPL-2.0-or-later WITH Linking-exception"
+homepage = "https://www.freepascal.org"
+archs = ["x86_64"]
+rundeps = ["binutils"]
+options = ["!strip", "!check", "!repo-iso"]
+
+source = [
+    { url = "https://dl-cdn.alpinelinux.org/alpine/edge/testing/x86_64/fpc-3.2.2-r4.apk", sha256 = "020897167c14fc317f1264c11e6ea77026d229c5891006d3cd8f8c789c3ccc5c", unpack = false },
+]
+
+install = '''
+d="$pkgdir/usr/lib/fpc-bootstrap"
+mkdir -p "$d"
+# an Alpine package is gzipped tar streams one after another
+tar -xzf /build/sources/fpc-3.2.2-r4.apk -C "$d" 2>/dev/null || tar -xzf /build/sources/fpc-3.2.2-r4.apk -C "$d"
+rm -f "$d"/.PKGINFO "$d"/.SIGN.* "$d"/.pre-* "$d"/.post-*
+test -x "$d/usr/lib/fpc/3.2.2/ppcx64"
+test -x "$d/usr/bin/fpcmkcfg"
+install -Dm644 /dev/stdin "$pkgdir/usr/share/licenses/fpc-bootstrap/README" <<EOF2
+Alpine Linux's fpc 3.2.2-r4 package (edge testing), unchanged. Free Pascal is
+GPL-2.0+ (the compiler) with the LGPL-with-linking-exception runtime:
+https://www.freepascal.org/ and its sources are
+https://gitlab.com/freepascal.org/fpc/source (tag release_3_2_2)
+EOF2
+'''
