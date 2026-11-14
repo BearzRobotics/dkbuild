@@ -1,0 +1,33 @@
+# Imported from Chimera Linux cports: work/cports/main/f2fs-tools/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Imported draft, untested. Chimera's build_style gnu_configure with make_dir "." (the build system builds in the source tree).
+# Chimera's util-linux-blkid-devel and util-linux-uuid-devel are this tree's util-linux-devel; musl-bsd-headers is the same name.
+# lzo and lz4 are enabled (configure finds them), for the compressed-file support of f2fs-tools; libselinux is not packaged.
+# patches/no-lfs64.patch (from Chimera, upstream commit "convert to lseek() and kill lseek64"): musl has no lseek64 or off64_t
+# unless _LARGEFILE64_SOURCE is defined, so the tools use lseek with _FILE_OFFSET_BITS=64.
+# Needed by dkde-parted: mkfs.f2fs, fsck.f2fs, resize.f2fs.
+name = "f2fs-tools"
+version = "1.16.0"
+release = 1
+summary = "F2FS (Flash-Friendly File System) utilities"
+license = "GPL-2.0-only"
+homepage = "https://git.kernel.org/cgit/linux/kernel/git/jaegeuk/f2fs-tools.git"
+patches = ["no-lfs64.patch"]
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["linux-headers", "lz4-devel", "lzo-devel", "musl-bsd-headers", "util-linux-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://git.kernel.org/pub/scm/linux/kernel/git/jaegeuk/f2fs-tools.git/snapshot/f2fs-tools-1.16.0.tar.gz", sha256 = "208c7a07e95383fbd7b466b5681590789dcb41f41bf197369c41a95383b57c5e" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''
