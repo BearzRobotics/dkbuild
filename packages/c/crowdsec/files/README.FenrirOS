@@ -1,0 +1,24 @@
+CrowdSec on FenrirOS
+====================
+
+Installed inert: the service is not enabled and nothing is configured. This
+package is the engine (crowdsec), its Local API and cscli, plus the
+notification plugins in /usr/lib/crowdsec/plugins. The firewall bouncers
+(that actually block addresses) are separate packages.
+
+1. Copy the examples you want from /usr/share/doc/crowdsec/examples into
+   /etc/crowdsec (config.yaml, acquis.yaml, profiles.yaml, simulation.yaml,
+   console.yaml, patterns/ ...). In acquis.yaml list the logs to watch.
+2. cscli hub update; cscli collections install crowdsecurity/linux (the hub
+   is downloaded from the CrowdSec hub only when you run these commands).
+3. Register the local machine with its own Local API:
+       cscli machines add --auto
+   and, only if you want to share signals and receive the community
+   blocklist, enroll with the Central API yourself: `cscli capi register`
+   (nothing is sent anywhere until you do).
+4. dinitctl enable crowdsec
+
+The Local API listens on 127.0.0.1:8080 and the Prometheus metrics on
+127.0.0.1:6060 in the example configuration. The example daily cron job
+(crowdsec.cron.daily, hub updates) is not installed: copy it to /etc/cron.d
+only if you want it.

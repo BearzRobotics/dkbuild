@@ -1,0 +1,68 @@
+# CrowdSec security engine (crowdsec, the detection and Local API daemon, and
+# cscli, its command line) with its notification plugins (dummy, email, file,
+# http, sentinel, slack, splunk). Go, its modules from the store (godeps),
+# built with upstream's own Makefile (`make build`): cgo with mattn's SQLite
+# and the C++ RE2 regular-expression library (re2_cgo, the Makefile picks it
+# up through pkg-config), every optional component compiled in (all
+# datasources, MySQL and PostgreSQL support). The firewall bouncers and the
+# agent-side hub content are separate things, not in this package. make is
+# run with BUILD_VERSION/BUILD_TAG/BUILD_TIMESTAMP given, which the Makefile
+# would otherwise take from git and the clock.
+# Source edit (config/config.yaml, installed only as an example): daemonize
+# is set to false (dinit supervises the process itself), log_dir /var/log/
+# stays, plugin_dir /usr/local/lib/crowdsec/plugins/ becomes
+# /usr/lib/crowdsec/plugins/ (nothing lives in /usr/local), and the plugin
+# group nogroup becomes nobody's group.
+# Installed inert: the dinit service is shipped, not enabled; no /etc/crowdsec
+# (config examples are in /usr/share/doc/crowdsec/examples), no machine
+# registered with the Local API, no Central API (online) credentials, no
+# bouncer keys. README.FenrirOS says how to set up.
+name = "crowdsec"
+version = "1.8.2"
+release = 1
+summary = "Collaborative behaviour-detection engine and Local API (crowdsec, cscli)"
+license = "MIT"
+homepage = "https://www.crowdsec.net"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["go", "make", "pkgconf"]
+builddeps = ["re2-devel", "abseil-cpp-devel"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/crowdsecurity/crowdsec/archive/refs/tags/v1.8.2.tar.gz", sha256 = "50da980bb6659f667e9b1d6d4948fded2b6c29402e7a88fa89c770e92b7e755c" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOFLAGS="-mod=mod -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=1
+'''
+build = '''
+# re2 must be found, or the Makefile stops (RE2_FAIL)
+pkg-config --exists re2
+sed -i -e 's/^  daemonize: true/  daemonize: false/' \
+    -e 's|/usr/local/lib/crowdsec/plugins/|/usr/lib/crowdsec/plugins/|' \
+    -e 's/group: nogroup/group: nobody/' config/config.yaml
+grep -q 'daemonize: false' config/config.yaml
+make build BUILD_VERSION=v$version BUILD_TAG=dkbuild BUILD_TIMESTAMP=1970-01-01_00:00:00
+test -x crowdsec -a -x cscli
+'''
+install = '''
+install -Dm755 crowdsec "$pkgdir/usr/bin/crowdsec"
+install -Dm755 cscli "$pkgdir/usr/bin/cscli"
+for d in cmd/notification-*; do
+    n=${d#cmd/notification-}
+    install -Dm755 $d/notification-$n "$pkgdir/usr/lib/crowdsec/plugins/notification-$n"
+    for y in $d/*.yaml; do
+        [ -f "$y" ] && install -Dm644 "$y" "$pkgdir/usr/share/doc/crowdsec/examples/notifications/$(basename $y)"
+    done
+done
+for f in config.yaml acquis.yaml profiles.yaml simulation.yaml console.yaml context.yaml user.yaml detect.yaml local_api_credentials.yaml online_api_credentials.yaml; do
+    install -Dm644 config/$f "$pkgdir/usr/share/doc/crowdsec/examples/$f"
+done
+mkdir -p "$pkgdir/usr/share/doc/crowdsec/examples/patterns"
+cp config/patterns/* "$pkgdir/usr/share/doc/crowdsec/examples/patterns/"
+install -Dm644 config/crowdsec.cron.daily "$pkgdir/usr/share/doc/crowdsec/examples/crowdsec.cron.daily"
+install -Dm644 $pkgfiles/crowdsec "$pkgdir/etc/dinit.d/crowdsec"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/crowdsec.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/crowdsec/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/crowdsec/LICENSE"
+'''

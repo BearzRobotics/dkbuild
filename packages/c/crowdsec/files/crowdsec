@@ -1,0 +1,12 @@
+# CrowdSec engine (and Local API). Not enabled by default (README.FenrirOS):
+# it needs /etc/crowdsec/config.yaml and its other files (examples:
+# /usr/share/doc/crowdsec/examples). Runs as root, as upstream's service does,
+# to read the logs it watches; the notification plugins run as the user the
+# configuration names.
+type = process
+command = /usr/bin/crowdsec -c /etc/crowdsec/config.yaml
+working-dir = /var/lib/crowdsec
+logfile = /var/log/crowdsec-service.log
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd
