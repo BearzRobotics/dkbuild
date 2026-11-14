@@ -51,7 +51,11 @@ if grep -q '"packageManager"' package.json; then exit 1; fi
 sed -i 's/^    "pnpm": "12"$/    "pnpm": ">=11"/' package.json
 grep -q '"pnpm": ">=11"' package.json
 echo 'pm-on-fail=ignore' >> .npmrc
-pnpm install --frozen-lockfile --ignore-scripts
+# --config.trustLockfile=true: pnpm 11 re-checks every lockfile entry against its supply-chain
+# policies (minimumReleaseAge, trustPolicy) and for that asks the registry for each package's
+# metadata; the offline registry (npmdeps) serves tarballs only and answers metadata with 404
+# (ERR_PNPM_FETCH_404 on 7zip-bin). The lockfile is the recipe's own pinned input.
+pnpm install --frozen-lockfile --ignore-scripts --config.trustLockfile=true
 '''
 build = '''
 ( cd web && pnpm build )

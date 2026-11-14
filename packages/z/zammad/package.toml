@@ -44,7 +44,11 @@ bundle config set --local without 'development test mysql'
 bundle install --local --jobs $jobs
 # --production=false: with NODE_ENV=production pnpm would leave out the
 # devDependencies, which the asset build (vite) needs
-pnpm install --frozen-lockfile --production=false
+# --config.trustLockfile=true: pnpm 11 re-checks every lockfile entry against its supply-chain
+# policies (minimumReleaseAge, trustPolicy) and for that asks the registry for each package's
+# metadata; the offline registry (npmdeps) serves tarballs only and answers metadata with 404
+# (ERR_PNPM_FETCH_404 on 7zip-bin). The lockfile is the recipe's own pinned input.
+pnpm install --frozen-lockfile --production=false --config.trustLockfile=true
 '''
 build = '''
 # the assets need no database: a placeholder address only
