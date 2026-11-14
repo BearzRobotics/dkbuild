@@ -1470,6 +1470,19 @@ fn pruneDeps(arena: Allocator, io: std.Io, opts: Options, t: tree.Tree, dry_run:
             if (!dry_run) sd.deleteTree(io, n) catch {};
         }
     }
+    // cargo's own copies in its download cache: the extracted crate sources and
+    // the git checkouts, a few hundred thousand small files that cargo makes
+    // again from the .crate archives and git/db when a vendor needs them. The
+    // builds read cache/crates, never these. (Safe here: prune must not run
+    // while a fetch does.)
+    for ([_][]const u8{ "cargo-home/registry/src", "cargo-home/git/checkouts" }) |rel| {
+        const path = try std.fs.path.join(arena, &.{ cache, rel });
+        var cd = Dir.cwd().openDir(io, path, .{}) catch continue;
+        cd.close(io);
+        out("{s} {s}\n", .{ if (dry_run) "would remove" else "removing", rel });
+        removed += 1;
+        if (!dry_run) Dir.cwd().deleteTree(io, path) catch {};
+    }
     out("{d} stale dependency file(s) or store entr(ies){s}\n", .{ removed, if (dry_run) " (dry run: nothing removed)" else "" });
 }
 

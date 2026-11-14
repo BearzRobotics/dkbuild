@@ -996,7 +996,10 @@ package uses doesn't feed the rebuild hashes: they follow from the source
 tarball (its lock files), whose checksum does.
 
 `dkbuild prune` removes the lists of source tarballs no recipe uses any more
-and then every crate, Zig package and gem no remaining list names. Go's module
+and then every crate, Zig package and gem no remaining list names. It also empties
+cargo's regenerable copies in `cache/cargo-home/` (`registry/src`, `git/checkouts`:
+hundreds of thousands of small files that cargo extracts again from the `.crate`
+archives and `git/db` when a vendor needs them). Go's module
 cache is not pruned (`go clean -modcache` empties it), and neither are the npm,
 Maven, NuGet, Dart, Haskell and Python stores. It must not run
 while a fetch does. A dependency tarball made by an older dkbuild
