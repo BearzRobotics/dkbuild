@@ -1,0 +1,66 @@
+# ntfy: simple HTTP-based pub-sub notification service (server and client in
+# the one `ntfy` binary). Go, modules from the store (godeps; CGO on for
+# go-sqlite3, as upstream builds it). The web app (web/, React with vite) is
+# built from source with its npm packages from the store (npmdeps) and
+# embedded in the binary as upstream's `make web-build` does.
+# NOT built: the documentation site (mkdocs-material is not packaged). The
+# server embeds a docs/ directory, so server/docs gets a one-page
+# placeholder; the markdown sources are installed in /usr/share/doc/ntfy.
+# Installed inert (docs/requests.md): the dinit service is shipped, not
+# enabled; no /etc/ntfy/server.yml (the example is in /usr/share/doc/ntfy),
+# no users, no default credentials. Setup: README.FenrirOS.
+name = "ntfy"
+version = "2.37.2"
+release = 1
+summary = "Send push notifications to your phone or desktop with HTTP PUT/POST"
+license = "Apache-2.0 OR GPL-2.0-only"
+homepage = "https://ntfy.sh"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["go", "nodejs"]
+options = ["!check", "!strip", "godeps", "npmdeps"]
+
+source = [
+    { url = "https://github.com/binwiederhier/ntfy/archive/refs/tags/v2.37.2.tar.gz", sha256 = "4a61b0ddc74dacf386ed8f939bd59dfeab1091157d091285731fe3bd595cbcd2" },
+]
+
+environment = '''
+export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
+    npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+export GOTOOLCHAIN=local GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=1
+'''
+setup = '''
+cd web
+node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
+npm ci --ignore-scripts
+'''
+build = '''
+# the web app: upstream's `make web-build` (build/ becomes server/site, the
+# app's index.html is renamed app.html, the dev-only config.js is dropped)
+( cd web && npm run build \
+    && mv build/index.html build/app.html \
+    && rm -rf ../server/site && mv build ../server/site \
+    && rm -f ../server/site/config.js )
+test -f server/site/app.html
+# source edit: the docs site is not built (see the header); the embed needs a
+# non-empty server/docs
+mkdir -p server/docs
+cat > server/docs/index.html <<'EOF'
+<!doctype html><title>ntfy</title><p>The documentation site is not built in this package: see /usr/share/doc/ntfy or https://docs.ntfy.sh.
+EOF
+# upstream's goreleaser flags, minus the static external link (the package is
+# linked normally; sqlite_omit_load_extension, osusergo and netgo as upstream)
+go build -tags sqlite_omit_load_extension,osusergo,netgo \
+    -ldflags "-s -w -X main.version=$version -X main.commit=v$version -X main.date=1970-01-01T00:00:00Z" -o ntfy .
+'''
+install = '''
+install -Dm755 ntfy "$pkgdir/usr/bin/ntfy"
+install -Dm644 server/server.yml "$pkgdir/usr/share/doc/ntfy/server.yml"
+install -Dm644 client/client.yml "$pkgdir/usr/share/doc/ntfy/client.yml"
+cp -r docs "$pkgdir/usr/share/doc/ntfy/docs"
+install -Dm644 $pkgfiles/ntfy "$pkgdir/etc/dinit.d/ntfy"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/ntfy.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/ntfy.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/ntfy/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ntfy/LICENSE"
+install -Dm644 LICENSE.GPLv2 "$pkgdir/usr/share/licenses/ntfy/LICENSE.GPLv2"
+'''

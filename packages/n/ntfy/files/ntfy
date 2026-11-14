@@ -1,0 +1,10 @@
+# ntfy notification server. Not enabled by default (README.FenrirOS): it
+# needs /etc/ntfy/server.yml (example: /usr/share/doc/ntfy/server.yml).
+type = process
+command = /usr/bin/ntfy serve --config /etc/ntfy/server.yml
+run-as = ntfy
+working-dir = /var/lib/ntfy
+logfile = /var/log/ntfy.log
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

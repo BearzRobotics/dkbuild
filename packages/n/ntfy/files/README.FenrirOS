@@ -1,0 +1,18 @@
+ntfy on FenrirOS
+================
+
+Installed inert: the service is not enabled, there is no configuration, no
+user and no password.
+
+    cp /usr/share/doc/ntfy/server.yml /etc/ntfy/server.yml
+    $EDITOR /etc/ntfy/server.yml       # base-url, listen-http, cache-file, ...
+    dinitctl enable ntfy
+
+Without a configuration the server does not start. By default every topic is
+open to anyone who knows its name; to restrict it set `auth-file` and
+`auth-default-access: deny-all` and create users with `ntfy user add`.
+It runs as the ntfy user with its data in /var/lib/ntfy (put cache-file,
+auth-file and attachment-cache-dir there).
+
+The documentation site is not built in this package; the markdown sources are
+in /usr/share/doc/ntfy/docs, the rendered docs at https://docs.ntfy.sh.
