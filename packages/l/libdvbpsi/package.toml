@@ -1,0 +1,24 @@
+# libdvbpsi: MPEG TS / DVB PSI table decoder and generator library (VLC).
+name = "libdvbpsi"
+version = "1.3.3"
+release = 1
+summary = "MPEG TS and DVB PSI tables library"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.videolan.org/developers/libdvbpsi.html"
+hostdeps = ["pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.videolan.org/pub/libdvbpsi/1.3.3/libdvbpsi-1.3.3.tar.bz2", sha256 = "02b5998bcf289cdfbd8757bedd5987e681309b0a25b3ffe6cebae599f7a00112" },
+]
+
+setup = '''
+%configure --enable-shared --enable-static
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libdvbpsi/COPYING"
+'''
