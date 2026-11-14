@@ -1,0 +1,27 @@
+# Written for this tree (cports has no udftools). Untested.
+# Needed by dkde-parted: mkudffs (also udflabel, udfinfo, udffsck, pktsetup, cdrwtool, wrudf).
+# readline is enabled (wrudf's shell) and udev (pktsetup rules) comes from eudev.
+name = "udftools"
+version = "2.3"
+release = 1
+summary = "UDF filesystem tools (mkudffs, udflabel, udffsck, ...)"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/pali/udftools"
+hostdeps = ["automake", "libtool", "pkgconf"]
+builddeps = ["eudev-devel", "linux-headers", "ncurses-devel", "readline-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/pali/udftools/archive/refs/tags/2.3.tar.gz", sha256 = "095e1c8b947849f5f8a1cade23dd3375532bda305a184eb022df96e43c4d6f7e" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''
