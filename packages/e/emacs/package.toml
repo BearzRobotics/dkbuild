@@ -1,0 +1,86 @@
+# Imported from Chimera Linux cports: user/emacs-pgtk/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# One Emacs: the GTK 3 build on pure GTK (--with-pgtk: Wayland native, X11
+# through XWayland) rather than the X11 build, with tree-sitter, GnuTLS,
+# SQLite, librsvg, lcms2, libxml2, harfbuzz, cairo, WebP/JPEG/TIFF/
+# PNG/GIF, D-Bus, ALSA sound, gpm and ACLs. It also runs in a terminal
+# (emacs -nw) and as a daemon.
+# NATIVE COMPILATION: libgccjit comes from this tree's gcc package (GCC 15's
+# jit build, installed in /usr/lib/gcc15/lib with libgccjit.h in
+# /usr/lib/gcc15/include; no pkg-config file). --with-native-compilation=aot
+# compiles all of Emacs's own Lisp ahead of time at build time. libgccjit
+# runs the GCC driver, which here exists only as /usr/lib/gcc15/bin/gcc
+# (the system "gcc" does not exist, cc is clang), so the build puts a "gcc"
+# link on PATH; at run time JIT compilation of packages needs the same:
+# `gcc` on PATH (the gcc package, a runtime dependency) -- not tested.
+# Not enabled, with reasons: --with-imagemagick (upstream deprecates it and
+# it is a security risk), --with-xwidgets (not supported with pgtk),
+# --with-libotf/m17n-flt (HarfBuzz does the complex-script shaping; libotf
+# and m17n-lib are not packaged), --with-libsystemd (no systemd). jansson is
+# not used: Emacs 31 parses JSON natively and has no --with-json any more.
+# Not carried over from Chimera: its three patches (a ppc64le alignment
+# assertion, skipping a git call during dump, test fixes) -- none matters on
+# x86_64 and tests are off; the sysusers/tmpfiles for the games score files
+# (--with-gameuser=:root only so install needs no "games" group; the score
+# directory /var/games is removed, so the games keep no high scores, and
+# update-game-score is made non-setgid), and emacs.service (no systemd).
+name = "emacs"
+version = "31.1"
+release = 1
+summary = "Extensible, customizable, self-documenting, real-time display editor"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/emacs/"
+hostdeps = ["gawk", "pkgconf", "texinfo", "gcc"]
+builddeps = ["acl-devel", "alsa-lib-devel", "cairo-devel", "dbus-devel", "fontconfig-devel", "freetype-devel", "gcc", "giflib-devel", "glib-devel", "gmp-devel", "gnutls-devel", "gpm-devel", "gtk+3-devel", "harfbuzz-devel", "lcms2-devel", "libjpeg-turbo-devel", "libpng-devel", "librsvg-devel", "libtiff-devel", "libwebp-devel", "libxml2-devel", "linux-headers", "ncurses-devel", "pango-devel", "sqlite-devel", "tree-sitter-devel", "zlib-ng-compat-devel"]
+rundeps = ["gcc"]
+options = ["!check"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/emacs/emacs-31.1.tar.xz", sha256 = "1da5790d9580c81932b5bf700633114468da7b3412d69faa767daebf974f4586" },
+]
+
+environment = '''
+# libgccjit and its driver (see the header)
+mkdir -p /tmp/gccbin
+ln -sf /usr/lib/gcc15/bin/gcc /tmp/gccbin/gcc
+export PATH="/tmp/gccbin:$PATH"
+export CFLAGS="$CFLAGS -I/usr/lib/gcc15/include"
+export LDFLAGS="$LDFLAGS -L/usr/lib/gcc15/lib -Wl,-rpath,/usr/lib/gcc15/lib"
+'''
+setup = '''
+%configure \
+    --with-pgtk \
+    --with-x-toolkit=gtk3 \
+    --with-native-compilation=aot \
+    --with-tree-sitter \
+    --with-gnutls \
+    --with-sqlite3 \
+    --with-lcms2 \
+    --with-rsvg \
+    --with-webp \
+    --with-jpeg \
+    --with-tiff \
+    --with-png \
+    --with-gif \
+    --with-harfbuzz \
+    --with-cairo \
+    --with-dbus \
+    --with-sound=alsa \
+    --with-gpm \
+    --with-xml2 \
+    --with-modules \
+    --with-threads \
+    --with-small-ja-dic \
+    --with-gameuser=:root \
+    --without-libsystemd
+'''
+build = '''
+%make NATIVE_FULL_AOT=1
+'''
+install = '''
+%make_install
+# games' score directory and the systemd user unit: not used here (see the header)
+rm -rf "$pkgdir/var/games" "$pkgdir/usr/lib/systemd"
+chmod 755 "$pkgdir"/usr/lib/emacs/$version/*/update-game-score 2>/dev/null || true
+rm -f "$pkgdir/usr/share/info/dir"
+'''
