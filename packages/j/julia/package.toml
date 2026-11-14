@@ -30,10 +30,10 @@ summary = "High-level, high-performance dynamic language for technical computing
 license = "MIT"
 homepage = "https://julialang.org"
 archs = ["x86_64"]
-hostdeps = ["gcc", "cmake", "ninja", "python", "perl", "m4", "make", "patchelf", "pkgconf", "which", "curl", "git"]
+hostdeps = ["gcc", "gcc-fortran", "cmake", "ninja", "python", "perl", "m4", "make", "patchelf", "pkgconf", "which", "curl", "git"]
 builddeps = ["gmp-devel", "mpfr-devel", "pcre2-devel", "zlib-ng-compat-devel", "curl-devel", "libssh2-devel", "nghttp2-devel",
              "utf8proc-devel", "linux-headers", "llvm-libcxx-devel"]
-rundeps = ["gcc", "gmp", "mpfr", "pcre2", "curl", "libssh2", "nghttp2", "utf8proc"]
+rundeps = ["gcc", "gcc-fortran", "gmp", "mpfr", "pcre2", "curl", "libssh2", "nghttp2", "utf8proc"]
 options = ["!check", "!lto", "!strip", "jobs:12"]
 
 source = [

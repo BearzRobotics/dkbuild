@@ -31,11 +31,11 @@ summary = "Language and environment for statistical computing"
 license = "GPL-2.0-only OR GPL-3.0-only"
 homepage = "https://www.r-project.org"
 archs = ["x86_64", "aarch64"]
-hostdeps = ["gcc", "openjdk25", "perl", "make", "pkgconf", "which"]
+hostdeps = ["gcc", "gcc-fortran", "openjdk25", "perl", "make", "pkgconf", "which"]
 builddeps = ["bzip2-devel", "cairo-devel", "curl-devel", "icu-devel", "libdeflate-devel", "libjpeg-turbo-devel", "libpng-devel",
              "libtiff-devel", "libx11-devel", "libxmu-devel", "libxt-devel", "openblas-devel", "pango-devel", "pcre2-devel",
              "readline-devel", "tcl-devel", "tk-devel", "xz-devel", "zlib-ng-compat-devel", "linux-headers"]
-rundeps = ["gcc", "tzdb", "openblas", "openjdk25", "make"]
+rundeps = ["gcc", "gcc-fortran", "tzdb", "openblas", "openjdk25", "make"]
 options = ["!check", "!lto"]
 
 source = [

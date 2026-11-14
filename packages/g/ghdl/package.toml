@@ -11,9 +11,9 @@ summary = "VHDL simulator and synthesis front end"
 license = "GPL-2.0-or-later"
 homepage = "https://ghdl.github.io/ghdl/"
 archs = ["x86_64"]
-hostdeps = ["gcc", "binutils", "make"]
+hostdeps = ["gcc", "gcc-ada", "binutils", "make"]
 builddeps = ["zlib-ng-compat-devel"]
-rundeps = ["gcc"]
+rundeps = ["gcc", "gcc-ada"]
 options = ["!check", "!lto", "gcc"]
 
 source = [

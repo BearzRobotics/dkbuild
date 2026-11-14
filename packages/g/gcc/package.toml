@@ -18,10 +18,16 @@
 # later one on the previous gcc package (selfhost). Either way GCC's own
 # three-stage bootstrap rebuilds the compiler with itself. GNU as and ld.bfd
 # (binutils) do the assembling and linking.
+# r3: split by language. `gcc` is C and C++ (with the driver, cpp, LTO, libgcc, libstdc++,
+# libatomic, libgomp and the sanitizers); gcc-ada (GNAT), gcc-fortran, gcc-d, gcc-go, gcc-objc
+# (Objective-C and Objective-C++), gcc-m2, gcc-cobol, gcc-rust and gcc-jit (libgccjit) each hold
+# one front end with its runtime and depend on gcc; `gcc-all` pulls in every one. One build, as
+# before. A path that matches nothing in a build just leaves the file in `gcc`: check the lists
+# against the first build's file list.
 name = "gcc"
 version = "15.2.0"
-release = 2
-summary = "GNU Compiler Collection (C, C++, Ada, Fortran, D, Go, Objective-C, Modula-2, COBOL, Rust)"
+release = 3
+summary = "GNU Compiler Collection 15 (C and C++; the other languages are gcc-<language> packages)"
 license = "GPL-3.0-or-later AND GPL-3.0-or-later WITH GCC-exception-3.1"
 homepage = "https://gcc.gnu.org"
 archs = ["x86_64"]
@@ -121,3 +127,109 @@ rm -f "$pkgdir$p/share/info/dir"
 install -Dm644 ../COPYING3 "$pkgdir/usr/share/licenses/gcc/COPYING3"
 install -Dm644 ../COPYING.RUNTIME "$pkgdir/usr/share/licenses/gcc/COPYING.RUNTIME"
 '''
+
+[subpackages.ada]
+summary = "GNAT, GCC's Ada compiler and runtime"
+paths   = ["/usr/bin/gnat*",
+         "/usr/lib/gcc15/bin/gnat*",
+         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/gnat1",
+         "/usr/lib/gcc15/lib/gcc/x86_64-fenriros-linux-musl/15.2.0/adainclude",
+         "/usr/lib/gcc15/lib/gcc/x86_64-fenriros-linux-musl/15.2.0/adalib",
+         "/usr/lib/gcc15/lib/gcc/x86_64-fenriros-linux-musl/15.2.0/ada_target_properties",
+         "/usr/lib/gcc15/lib/libgnat*",
+         "/usr/lib/gcc15/lib/libgnarl*",
+         "/usr/lib/gcc15/share/man/man1/gnat*",
+         "/usr/lib/gcc15/share/info/gnat*"]
+depends = ["gcc"]
+
+[subpackages.fortran]
+summary = "GNU Fortran and its runtime (libgfortran)"
+paths   = ["/usr/bin/gfortran-15",
+         "/usr/lib/gcc15/bin/gfortran",
+         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/f951",
+         "/usr/lib/gcc15/lib/gcc/x86_64-fenriros-linux-musl/15.2.0/finclude",
+         "/usr/lib/gcc15/lib/gcc/x86_64-fenriros-linux-musl/15.2.0/include/ISO_Fortran_binding.h",
+         "/usr/lib/gcc15/lib/libgfortran*",
+         "/usr/lib/gcc15/share/man/man1/gfortran.1",
+         "/usr/lib/gcc15/share/info/gfortran.info"]
+depends = ["gcc"]
+
+[subpackages.d]
+summary = "GDC, GCC's D compiler, with druntime and phobos"
+paths   = ["/usr/bin/gdc-15",
+         "/usr/lib/gcc15/bin/gdc",
+         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/d21",
+         "/usr/lib/gcc15/lib/libgphobos*",
+         "/usr/lib/gcc15/lib/libgdruntime*",
+         "/usr/lib/gcc15/include/d",
+         "/usr/lib/gcc15/share/man/man1/gdc.1",
+         "/usr/lib/gcc15/share/info/gdc.info"]
+depends = ["gcc"]
+
+[subpackages.go]
+summary = "gccgo, GCC's Go compiler and runtime"
+paths   = ["/usr/bin/gccgo-15",
+         "/usr/lib/gcc15/bin/gccgo",
+         "/usr/lib/gcc15/bin/go",
+         "/usr/lib/gcc15/bin/gofmt",
+         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/go1",
+         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/cgo",
+         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/buildid",
+         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/test2json",
+         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/vet",
+         "/usr/lib/gcc15/lib/libgo*",
+         "/usr/lib/gcc15/lib/go",
+         "/usr/lib/gcc15/share/man/man1/gccgo.1",
+         "/usr/lib/gcc15/share/man/man1/go.1",
+         "/usr/lib/gcc15/share/man/man1/gofmt.1",
+         "/usr/lib/gcc15/share/info/gccgo.info"]
+depends = ["gcc"]
+
+[subpackages.objc]
+summary = "Objective-C and Objective-C++ compilers and runtime"
+paths   = ["/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/cc1obj",
+         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/cc1objplus",
+         "/usr/lib/gcc15/lib/libobjc*",
+         "/usr/lib/gcc15/lib/gcc/x86_64-fenriros-linux-musl/15.2.0/include/objc"]
+depends = ["gcc"]
+
+[subpackages.m2]
+summary = "GNU Modula-2"
+paths   = ["/usr/bin/gm2-15",
+         "/usr/lib/gcc15/bin/gm2",
+         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/cc1gm2",
+         "/usr/lib/gcc15/lib/libm2*",
+         "/usr/lib/gcc15/lib/gcc/x86_64-fenriros-linux-musl/15.2.0/m2",
+         "/usr/lib/gcc15/share/man/man1/gm2.1",
+         "/usr/lib/gcc15/share/info/gm2.info"]
+depends = ["gcc"]
+
+[subpackages.cobol]
+summary = "GnuCOBOL front end for GCC (gcobol) and its runtime"
+paths   = ["/usr/bin/gcobol-15",
+         "/usr/lib/gcc15/bin/gcobol",
+         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/cobol1",
+         "/usr/lib/gcc15/lib/libgcobol*",
+         "/usr/lib/gcc15/share/man/man1/gcobol.1",
+         "/usr/lib/gcc15/share/info/gcobol.info"]
+depends = ["gcc"]
+
+[subpackages.rust]
+summary = "gccrs, GCC's Rust front end (experimental)"
+paths   = ["/usr/bin/gccrs-15",
+         "/usr/lib/gcc15/bin/gccrs",
+         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/crab1",
+         "/usr/lib/gcc15/share/man/man1/gccrs.1"]
+depends = ["gcc"]
+
+[subpackages.jit]
+summary = "libgccjit, GCC as a library (Emacs native compilation)"
+paths   = ["/usr/lib/gcc15/lib/libgccjit*",
+         "/usr/lib/gcc15/include/libgccjit*.h",
+         "/usr/lib/gcc15/share/info/libgccjit.info"]
+depends = ["gcc"]
+
+[subpackages.all]
+summary = "GCC with every language front end"
+empty   = true
+depends = ["gcc", "gcc-ada", "gcc-fortran", "gcc-d", "gcc-go", "gcc-objc", "gcc-m2", "gcc-cobol", "gcc-rust", "gcc-jit"]
