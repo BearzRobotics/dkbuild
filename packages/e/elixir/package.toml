@@ -1,0 +1,30 @@
+# Elixir: a functional language on the Erlang VM (elixir, elixirc, iex, mix),
+# built from source with the system Erlang/OTP (Elixir 1.20 supports OTP
+# 27-29). Needed by: rabbitmq-server (its CLI tools are Elixir).
+# The HTML documentation (made with ex_doc, a Hex package) is not built; the
+# manual pages are installed, and the modules carry their docs chunks (h/1
+# in iex). No tests (make test runs for a long time and opens sockets).
+name = "elixir"
+version = "1.20.5"
+release = 1
+summary = "Functional, concurrent programming language on the Erlang VM"
+license = "Apache-2.0"
+homepage = "https://elixir-lang.org"
+hostdeps = ["erlang", "make"]
+rundeps = ["erlang"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/elixir-lang/elixir/archive/refs/tags/v1.20.5.tar.gz", sha256 = "3d99f2e129418800817e0e5a3ce4812c34537a32d50e37578189e90c79de7062" },
+]
+
+environment = '''
+export LANG=C.UTF-8 LC_ALL=C.UTF-8
+'''
+build = '''
+make compile Q=
+'''
+install = '''
+make install PREFIX=/usr DESTDIR="$pkgdir" Q=
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/elixir/LICENSE"
+'''
