@@ -7,7 +7,7 @@ unprivileged namespace sandbox on musl and LLVM. Written in Zig. See `SPEC.md` f
 
 ## Quick start on Ubuntu
 
-FenrirOS does not exist yet, so the first host is Ubuntu (24.04 is the reference). One command installs the
+FenrirOS builds on a host Linux for now; Ubuntu 24.04 is the reference. (FenrirOS itself boots as live ISOs, but dkbuild's build machine is the unpacked DKRescue image.) One command installs the
 host tools:
 
 ```sh
@@ -60,12 +60,13 @@ into `cache/`, named by checksum, and from then on everything rebuilds offline.
 Upstream builds that would download things themselves get those as pinned
 sources in their recipes instead.
 
-There is no repository server: packages travel on discs. Planned (SPEC.md 8):
-a **repository ISO** of every package, signed, that any FenrirOS machine mounts
-as an apk repository to install and upgrade from, and that restores a system;
-and a **source ISO** of `cache/`, the git tree and the build image, enough to
-rebuild the whole distribution offline. The private signing key goes on
-neither: keep it encrypted on a drive of its own (docs/setup-ubuntu.md, 8).
+There is no repository server: packages travel on discs. `dkbuild discs` makes a
+**repository ISO** set of every package, signed (`images/repo.toml`), that any
+FenrirOS machine mounts as an apk repository to install and upgrade from, and a
+**source ISO** set of `cache/`, the git tree and the build image
+(`images/source.toml`), enough to rebuild the whole distribution offline. The
+private signing key goes on neither: keep it encrypted on a drive of its own
+(docs/setup-ubuntu.md, 8).
 
 ## Tests
 
@@ -83,17 +84,24 @@ dependency chains; rebuilds; installing from the repository. They run once for e
 | `dkbuild doctor` | checks the host and prints the fixes |
 | `dkbuild bootstrap-root <iso\|sfs\|tar>` | unpacks the build machine into `rootfs/dkrescue` and checks it |
 | `dkbuild check [name]...` | validates recipes |
-| `dkbuild image <file.toml>` | makes a root filesystem (tarball, squashfs or directory) from repo/; see docs/install.md |
+| `dkbuild image [-v] <file.toml>` | makes an image from repo/: tar, squashfs, directory or a live ISO (BIOS and UEFI); `--verbose` shows each package; see docs/install.md |
+| `dkbuild discs [--media M] <file.toml>` | the repository or the sources as ISO images (one for usb, or a set for cd, dvd, bd25, bd50, bd100) |
 | `dkbuild prune [--dry-run]` | removes older versions of packages from repo/ and rebuilds the index |
+| `dkbuild outdated [--bump]` | recipes changed since their last build without a new release |
+| `dkbuild upstream [--all] [--refresh] [name]...` | which recipes have a newer upstream release (changes nothing) |
 | `dkbuild graph <name>...` | prints the build order |
 | `dkbuild fetch [name]...` | downloads sources and checks their checksums |
-| `dkbuild world [--force] [-P N]` | builds every recipe in the tree that is out of date (`-P N`: up to N builds at once) |
+| `dkbuild world [--force] [-P N] [--keep-going] [--no-check]` | builds every recipe that is out of date (`-P N`: N builds at once) |
 | `dkbuild pkg [--force] <name>...` | builds packages and their in-tree dependencies |
 | `dkbuild import-cbuild [--out DIR] <template.py\|dir>...` | converts Chimera cbuild templates into draft recipes (`imported/`) |
+| `dkbuild hackage-lock`, `python-lock`, `yarn-lock` | write dependency lock files for the Haskell, Python and yarn stores |
+
+`--tree DIR` (before the command) uses another tree than the current directory.
 
 ## Status
 
-Stage 1 (building on the DKRescue image) works for the twelve recipes in `packages/`; seven of them were imported from Chimera's cports by `import-cbuild` (`pkgconf`, `attr`, `acl`, `libexpat`, `xz`, `lz4`, `zlib-ng-compat`). Not yet built: the LLVM
-toolchain and the rest of the base system (SPEC 9), stage 2 (roots filled from `repo/` only, which also catches
-forgotten dependencies), images and cross-compiling. The cbuild importer (SPEC 5.9) writes draft recipes with
-`TODO(cbuild)` markers; Solus `package.yml` import is planned.
+About 2300 recipes in `packages/` and about 4850 apks in `repo/x86_64` (approximate, 2026-11-13). LLVM 22, zig, Rust (from
+source), the base system, the kernel, dklilo, dkde and Hyprland are built. `dkbuild image` makes three live ISOs (base, rescue, dkde) that boot in QEMU on UEFI
+and BIOS; `dkinstaller` is on them. Not done: stage 2 (roots filled from `repo/` only, which also catches forgotten
+dependencies), aarch64 and riscv64 (profiles only) and the rest of the world build (see docs/roadmap.md and docs/handoff.md). The cbuild importer (SPEC 5.9) writes draft recipes with
+`TODO(cbuild)` markers; a Solus `package.yml` importer does not exist.
