@@ -1,0 +1,81 @@
+# Adapted from Chimera Linux cports: user/vlc. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# VLC 3.0 media player: libvlc, the plugins and the Qt 6 interface (vlc-qt,
+# installed with vlc). Decoding goes through the tree's ffmpeg (merge-ffmpeg
+# links the libav* libraries into the avcodec plugin).
+# Options left off, with the reason:
+#   libplacebo: VLC 3.0 supports the libplacebo 1.x..4.x API; the tree has 7.x.
+#   freerdp: VLC 3.0 does not build against FreeRDP 3 (the tree has 3).
+#   live555, upnp (libupnp), libsidplay2, libkate, libmpcdec, libshout, lirc,
+#   aribb24 (VLC's own copy of the library), libspatialaudio, libdca/a52dec/
+#   libmpeg2 (ffmpeg decodes those): no package in the tree yet.
+#   Linux fbdev/OSS output (musl has no <sys/soundcard.h>).
+# Source edits: musl.patch makes the v4l2 module's ioctl pointer use musl's
+# ioctl(int, int, ...) prototype. cports' bogus-test.patch (drops a
+# check_POTFILES.sh test) is not used: it edits Makefile.am, which would make the
+# shipped Makefile.in regenerate with automake, and the tests are off here.
+# The shipped configure is used (no ./bootstrap, which regenerates it with the
+# autotools); cports regenerates for slibtool, this tree uses GNU libtool.
+name = "vlc"
+version = "3.0.24"
+release = 1
+summary = "Media player program"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
+homepage = "https://www.videolan.org/vlc"
+patches = ["musl.patch"]
+hostdeps = ["bison", "flex", "gettext", "lua5.1", "pkgconf", "protobuf", "qt6-qtbase-devel", "qt6-qttools", "libtool", "wayland", "wayland-protocols"]
+builddeps = ["alsa-lib-devel", "avahi-devel", "chromaprint-devel", "dav1d-devel", "dbus-devel", "eudev-devel", "faad2-devel", "ffmpeg-devel", "flac-devel", "fluidsynth-devel", "fontconfig-devel", "freetype-devel", "fribidi-devel", "gnutls-devel", "gst-plugins-base-devel", "harfbuzz-devel", "libaom-devel", "libarchive-devel", "libass-devel", "libbluray-devel", "libcddb-devel", "libcdio-devel", "libdc1394-devel", "libdvbpsi-devel", "libdvdnav-devel", "libdvdread-devel", "libebml-devel", "libgcrypt-devel", "libgme-devel", "libmad-devel", "libmatroska-devel", "libmicrodns-devel", "libmodplug-devel", "libmtp-devel", "libnfs-devel", "libnotify-devel", "libogg-devel", "libpulse-devel", "libraw1394-devel", "librist-devel", "librsvg-devel", "libsamplerate-devel", "libsecret-devel", "libssh2-devel", "libtheora-devel", "libva-devel", "libvdpau-devel", "libvncserver-devel", "libvpx-devel", "libx11-devel", "libxcb-devel", "libxinerama-devel", "libxml2-devel", "libxpm-devel", "linux-headers", "lua5.1-devel", "mesa-devel", "minizip-devel", "ncurses-devel", "opus-devel", "pipewire-devel", "protobuf-devel", "qt6-qt5compat-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "samba-devel", "sndio-devel", "soxr-devel", "speex-devel", "speexdsp-devel", "srt-devel", "taglib-devel", "twolame-devel", "v4l-utils-devel", "wayland-devel", "wayland-protocols", "x264-devel", "x265-devel", "xcbproto", "xorgproto", "zlib-ng-compat-devel"]
+rundeps = ["hicolor-icon-theme"]
+triggers = ["/usr/lib/vlc/plugins"]
+options = ["!check"]
+
+source = [
+    { url = "https://get.videolan.org/vlc/3.0.24/vlc-3.0.24.tar.xz", sha256 = "e7cab503d1d7d5849b89d2cf0e1ee60d0ef6d012407791b644b9cfc0cc225fdf" },
+]
+
+environment = '''
+export CFLAGS="$CFLAGS -Wno-macro-redefined -D_GNU_SOURCE"
+export CXXFLAGS="$CXXFLAGS -Wno-macro-redefined"
+export LUAC=/usr/bin/luac5.1
+export LUA_CFLAGS="$(pkg-config --cflags lua5.1)" LUA_LIBS="$(pkg-config --libs lua5.1)"
+# VLC's int-conversion warnings turn into errors with clang 16+ in old C code
+export CFLAGS="$CFLAGS -Wno-error=int-conversion -Wno-error=incompatible-function-pointer-types"
+export BUILDCC="$CC"
+'''
+setup = '''
+%configure \
+    --enable-shared --enable-static \
+    --disable-a52 --disable-dca --disable-libmpeg2 --disable-live555 \
+    --disable-freerdp --disable-libplacebo --disable-upnp \
+    --enable-alsa --enable-aom --enable-archive --enable-bluray \
+    --enable-chromaprint --enable-chromecast --enable-dav1d --enable-dbus \
+    --enable-dvbpsi --enable-dvdnav --enable-dvdread --enable-faad \
+    --enable-flac --enable-fluidsynth --enable-fontconfig --enable-freetype \
+    --enable-fribidi --enable-gme --enable-gnutls --enable-gst-decode \
+    --enable-harfbuzz --enable-jack --enable-libass --enable-libcddb \
+    --enable-libgcrypt --enable-libva --enable-libxml2 --enable-lua \
+    --enable-mad --enable-matroska --enable-merge-ffmpeg --enable-microdns \
+    --enable-mod --enable-mtp --enable-ncurses --enable-nfs --enable-notify \
+    --enable-ogg --enable-opus --enable-pulse --enable-qt --enable-librist \
+    --enable-samplerate --enable-sdl-image --enable-secret --enable-skins2 \
+    --enable-smbclient --enable-sndio --enable-sout --enable-soxr \
+    --enable-speex --enable-srt --enable-ssh2 --enable-svg --enable-taglib \
+    --enable-theora --enable-twolame --enable-udev --enable-v4l2 \
+    --enable-vdpau --enable-vnc --enable-vpx --enable-wayland --enable-x264 \
+    --enable-x265 --enable-dc1394 --enable-dv1394
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+# libcompat.a is an internal helper archive; plugins.dat is made by the
+# package trigger (vlc-cache-gen) on the target
+rm -f "$pkgdir/usr/lib/vlc/libcompat.a" "$pkgdir/usr/lib/vlc/plugins/plugins.dat"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/vlc/COPYING"
+'''
+
+[subpackages.qt]
+summary = "VLC Qt GUI"
+paths = ["/usr/bin/qvlc", "/usr/share/applications", "/usr/share/icons", "/usr/share/metainfo", "/usr/lib/vlc/plugins/gui/libqt*"]
+depends = ["hicolor-icon-theme"]
+install_if = ["vlc"]
