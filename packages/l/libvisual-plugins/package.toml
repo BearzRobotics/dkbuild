@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "libvisual-plugins"
 version = "0.4.2"
-release = 2
+release = 3
 summary = "Plugins for libvisual"
 license = "GPL-2.0-or-later"
 homepage = "http://libvisual.org"
@@ -25,6 +25,13 @@ autoreconf -if -W none
     --enable-gstreamer-plugin \
     --enable-opengl \
     --enable-pulseaudio
+# po/Makefile: autoreconf -i takes gettext's current po/Makefile.in.in, whose rule
+# `Makefile: ... $(top_builddir)/config.status` gets no top_builddir here, so make fails with
+# "No rule to make target '/config.status'" (the first build died there, after every plugin
+# had compiled). The po directory is one level down: set it.
+sed -i '/^top_builddir[[:space:]]*=/d' po/Makefile
+sed -i '1i top_builddir = ..' po/Makefile
+grep -q '^top_builddir = \.\.' po/Makefile
 '''
 build = '''
 %make
