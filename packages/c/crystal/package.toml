@@ -45,10 +45,17 @@ else
 fi
 export LLVM_CONFIG=/usr/bin/llvm-config
 '''
+# target= (empty, on the command line): dkbuild exports target=<triple> to every recipe
+# script, and Crystal's Makefile reads its cross-compilation switch `target` from the
+# environment: with it set the compiler is only cross-compiled to .build/crystal.o and
+# the link command is printed, not run, so .build/crystal never existed (r1 failed in
+# install_compiler: "cannot stat '.build/crystal'"). This is a native build.
 build = '''
 make build PREFIX=/usr CRYSTAL="$CRYSTAL" interpreter=1 docs_sanitizer=1 \
-    CRYSTAL_CONFIG_BUILD_COMMIT=1.22.3 threads=$jobs
+    CRYSTAL_CONFIG_BUILD_COMMIT=1.22.3 threads=$jobs target=
+test -x .build/crystal
 '''
 install = '''
-make install PREFIX=/usr DESTDIR="$pkgdir" CRYSTAL="$CRYSTAL" interpreter=1 docs_sanitizer=1
+make install PREFIX=/usr DESTDIR="$pkgdir" CRYSTAL="$CRYSTAL" interpreter=1 docs_sanitizer=1 \
+    CRYSTAL_CONFIG_BUILD_COMMIT=1.22.3 threads=$jobs target=
 '''

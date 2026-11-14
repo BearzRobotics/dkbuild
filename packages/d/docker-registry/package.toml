@@ -23,7 +23,7 @@ hostdeps = ["go"]
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/distribution/distribution/archive/refs/tags/v3.1.2.tar.gz", sha256 = "2f9b6fc00bec854e62e9b720903a9c9b48018505177f7c7a8ce7b74da2b23e4f", name = "distribution-3.1.2.tar.gz" },
+    { url = "https://github.com/distribution/distribution/archive/refs/tags/v3.1.2.tar.gz", sha256 = "2f9b6fc00bec854e62e9b720903a9c9b48018505177f7c7a8ce7b74da2b23e4f" },
 ]
 
 environment = '''
