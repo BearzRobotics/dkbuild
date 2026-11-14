@@ -1,0 +1,23 @@
+Glances on FenrirOS
+===================
+
+`glances` runs the curses interface straight away. Optional extras:
+
+    cp /usr/share/doc/glances/glances.conf.example /etc/glances/glances.conf
+
+(Glances reads /etc/glances/glances.conf, ~/.config/glances/glances.conf.)
+
+The web interface and REST API are the dinit service glances-web, installed
+inert (not enabled):
+
+    dinitctl enable glances-web
+
+It listens on 127.0.0.1:61208 as the `glances` user, with no password. To
+serve it to the network edit /etc/dinit.d/glances-web (`--bind`) and add
+a password with `glances -w --password` (creates a hashed password file in
+~/.config/glances) or put a reverse proxy with authentication in front of
+it. Run as root instead of glances for the sensors and processes that
+otherwise are hidden.
+
+Not available in this package: the optional PyJWT token authentication for
+the REST API and exporters other than Prometheus/ZeroMQ/CSV/JSON.

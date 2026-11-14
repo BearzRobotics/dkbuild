@@ -1,0 +1,10 @@
+# Glances web UI / REST API. Not enabled by default (README.FenrirOS). Bound
+# to the loopback address only: Glances' own default is every interface with
+# no password. Runs as the unprivileged glances user (some sensors need root).
+type = process
+command = /usr/bin/glances -w --bind 127.0.0.1 --port 61208
+run-as = glances
+logfile = /var/log/glances-web.log
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

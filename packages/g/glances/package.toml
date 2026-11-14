@@ -1,0 +1,41 @@
+# Glances: a cross-platform system monitoring tool (curses UI, web UI and
+# REST API, exporters). Pure Python from PyPI's source distribution
+# (setuptools); the web UI is the pre-built bundle that upstream ships inside
+# the source distribution (glances/outputs/static/public, webpack output;
+# the sources of the UI are in the same directory but not rebuilt: policy
+# accepts the release's pre-built UI).
+# Extras whose libraries are packaged are runtime dependencies: web (fastapi,
+# uvicorn, requests), browser (zeroconf), prometheus export, zeromq export,
+# sparklines and RAID (pymdstat). Not available here and so not built:
+# PyJWT for the REST API's JWT tokens (python-jwt, a different project,
+# already owns the `jwt` module name here; Glances falls back to its other
+# auth without it), and the remaining exporters (docker, influxdb, kafka,
+# elasticsearch, mongodb ...), pysmart, batinfo, wifi, snmp, nvidia, mcp.
+# Installed inert (docs/requests.md): `glances-web` is a dinit service,
+# shipped and NOT enabled; Glances' own default for -w is to listen on all
+# interfaces with no password, so the service runs it bound to 127.0.0.1
+# (see README.FenrirOS). No /etc/glances/glances.conf: example only.
+name = "glances"
+version = "4.5.9"
+release = 1
+summary = "Cross-platform curses and web system monitoring tool"
+license = "LGPL-3.0-only"
+homepage = "https://nicolargo.github.io/glances/"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-defusedxml", "python-packaging", "python-psutil", "python-shtab", "python-jinja2", "python-fastapi", "python-uvicorn", "python-requests", "python-zeroconf", "python-prometheus-client", "python-pyzmq", "python-sparklines", "python-pymdstat", "python-dateutil", "python-six"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/49/5b/55cabe18c354a0418540e8864e36929854cc0eb2101180d9723e8aaa4fe2/glances-4.5.9.tar.gz", sha256 = "c197954341ee5a7f8657e87456884b1f52af4bc966f6ab3f1d4c37cf580f5fa0" },
+]
+
+install = '''
+test -f glances/outputs/static/public/glances.js
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 conf/glances.conf "$pkgdir/usr/share/doc/glances/glances.conf.example"
+install -Dm644 $pkgfiles/glances-web "$pkgdir/etc/dinit.d/glances-web"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/glances.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/glances/README.FenrirOS"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/glances/COPYING"
+'''
