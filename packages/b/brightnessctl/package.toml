@@ -1,0 +1,35 @@
+# Imported from Chimera Linux cports: main/brightnessctl/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Built WITHOUT logind/systemd support (Chimera builds it with elogind), because
+# dkde runs under seatd as well, where there is no logind to set the brightness.
+# Instead upstream's default is used: its udev rule is installed. Permissions:
+#   /usr/lib/udev/rules.d/90-brightnessctl.rules makes every backlight's
+#   "brightness" file group video and group-writable (and every LED's group
+#   input) when the device appears, so members of the video group (and input,
+#   for keyboard LEDs) can run brightnessctl with no setuid and no logind.
+#   Add the desktop user to video: adduser <user> video. Without the group,
+#   brightnessctl fails with a permission error; dkde then falls back to
+#   writing the sysfs file itself, which needs the same group. The rule
+#   runs at device add: rebooting (or udevadm trigger -c add -s backlight)
+#   applies it after installing. The binary is a plain 0755 program.
+name = "brightnessctl"
+version = "0.5.1"
+release = 1
+summary = "Read and control device brightness"
+license = "MIT"
+homepage = "https://github.com/Hummer12007/brightnessctl"
+hostdeps = ["pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/Hummer12007/brightnessctl/archive/refs/tags/0.5.1.tar.gz", sha256 = "a68869e23f56ac4f2e28f1783002810ddbf10f95e1af9b48b2912fb169f46994" },
+]
+
+build = '''
+%make
+'''
+install = '''
+# UDEVDIR: the Makefile's default is /lib/udev/rules.d; the tree keeps rules in /usr/lib.
+%make_install UDEVDIR=/usr/lib/udev/rules.d
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/brightnessctl/LICENSE"
+'''
