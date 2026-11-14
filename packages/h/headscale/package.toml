@@ -1,0 +1,44 @@
+# headscale: an open source, self-hosted implementation of the Tailscale
+# control server (one tailnet; node registration, ACL policy, DERP map, MagicDNS).
+# Go, its modules from the store (godeps), CGO off as upstream's releases
+# (the SQLite driver is pure Go). Both the server and its CLI are the one
+# binary. The web UI is not part of headscale (third-party projects).
+# Source edit: hscontrol/types/version.go reads its version from the Go build
+# info, which is "(devel)" for a build outside a git checkout (upstream's
+# release builds get it from the module version); the sed below sets the
+# release's version as the default so `headscale version` is right.
+# Installed inert: the dinit service is shipped, not enabled; no
+# /etc/headscale/config.yaml is installed (the sample is
+# /usr/share/doc/headscale/config-example.yaml; the service fails to start
+# until the administrator writes one); no user, key or node is created.
+name = "headscale"
+version = "0.29.7"
+release = 1
+summary = "Open source, self-hosted Tailscale control server"
+license = "BSD-3-Clause"
+homepage = "https://headscale.net"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/juanfont/headscale/archive/refs/tags/v0.29.7.tar.gz", sha256 = "625e8f877ddcbacd0936dcd9bb191ea7b8914ef9f653b3e1a3b5fa6c611a36c8" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+sed -i "s|Version:   \"dev\",|Version:   \"v$version\",|" hscontrol/types/version.go
+grep -q "v$version" hscontrol/types/version.go
+go build -ldflags "-s -w" -o headscale ./cmd/headscale
+'''
+install = '''
+install -Dm755 headscale "$pkgdir/usr/bin/headscale"
+install -Dm644 $pkgfiles/headscale "$pkgdir/etc/dinit.d/headscale"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/headscale.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/headscale.conf"
+install -Dm644 config-example.yaml "$pkgdir/usr/share/doc/headscale/config-example.yaml"
+install -Dm644 derp-example.yaml "$pkgdir/usr/share/doc/headscale/derp-example.yaml"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/headscale/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/headscale/LICENSE"
+'''

@@ -1,0 +1,11 @@
+# headscale Tailscale control server. Not enabled by default: write
+# /etc/headscale/config.yaml (sample: /usr/share/doc/headscale/config-example.yaml),
+# then `dinitctl enable headscale`.
+type = process
+command = /usr/bin/headscale serve --config /etc/headscale/config.yaml
+run-as = headscale
+working-dir = /var/lib/headscale
+logfile = /var/log/headscale.log
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

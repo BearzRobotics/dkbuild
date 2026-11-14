@@ -1,0 +1,16 @@
+headscale on FenrirOS
+=====================
+
+Installed inert: the service is not enabled, there is no configuration, no
+user, no pre-auth key and no node.
+
+1. cp /usr/share/doc/headscale/config-example.yaml /etc/headscale/config.yaml
+   and edit it (server_url, listen_addr, prefixes, DNS). The sample listens on
+   127.0.0.1:8080 and keeps its state (SQLite, noise key) in /var/lib/headscale.
+2. dinitctl enable headscale
+3. Administer it with the CLI over the unix socket /run/headscale/headscale.sock
+   (group headscale; add your admin user to it): headscale users create ...,
+   headscale preauthkeys create ..., headscale nodes list.
+
+TLS and a reverse proxy are the administrator's choice; update checks are
+controlled by disable_check_updates in the configuration.
