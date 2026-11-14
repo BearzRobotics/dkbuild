@@ -1,0 +1,90 @@
+# Adapted from Alpine's community/R. R 4.6.1, the language and environment
+# for statistical computing (R, Rscript, libR.so and libR.a, the standalone
+# math library libRmath), with the 15 recommended packages (MASS, lattice,
+# Matrix, nlme, survival, boot, cluster, codetools, foreign, KernSmooth,
+# rpart, class, nnet, spatial, mgcv). The recommended packages are not in the
+# R tarball (R's own tools/rsync-recommended fetches them from CRAN at
+# build time): they are sources here, checked by sha256, and linked as
+# src/library/Recommended/<name>.tgz as that script does, so the build is
+# offline.
+# Libraries: OpenBLAS for BLAS and LAPACK (OpenBLAS here is built without a
+# Fortran compiler, so its LAPACK is the C translation, which R takes as a
+# system LAPACK; untested whether it meets R's minimum LAPACK version), ICU,
+# PCRE2, readline, curl, zlib, bzip2, xz (liblzma), libdeflate, cairo and pango
+# (cairo graphics devices), libjpeg-turbo, libpng, libtiff, Tcl/Tk (tcltk
+# package) and X11 (--with-x), Java (--enable-java, JDK from openjdk25) for the
+# R Java configuration. libR is a shared library (--enable-R-shlib) and also
+# installed static (--enable-R-static-lib).
+# Fortran: R's base code needs a Fortran compiler. The tree's only one is GCC's
+# gfortran-15 (gcc package, /usr/lib/gcc15); libgfortran and libquadmath are
+# found at run time through an rpath to /usr/lib/gcc15/lib. Not enabled:
+# --enable-lto (LTO is off in this tree), the PDF and info manuals (no LaTeX
+# or makeinfo run; the HTML help and the text help are built), NLS
+# (--disable-nls as Alpine, which says R's translations are rarely wanted on
+# musl; a stated reason). OpenMP: not available (no libomp configured).
+# -D__MUSL__ in CXXFLAGS (Alpine): needed by some packages such as Rcpp
+# (https://github.com/RcppCore/Rcpp/issues/448).
+name = "r-base"
+version = "4.6.1"
+release = 1
+summary = "Language and environment for statistical computing"
+license = "GPL-2.0-only OR GPL-3.0-only"
+homepage = "https://www.r-project.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["gcc", "openjdk25", "perl", "make", "pkgconf", "which"]
+builddeps = ["bzip2-devel", "cairo-devel", "curl-devel", "icu-devel", "libdeflate-devel", "libjpeg-turbo-devel", "libpng-devel",
+             "libtiff-devel", "libx11-devel", "libxmu-devel", "libxt-devel", "openblas-devel", "pango-devel", "pcre2-devel",
+             "readline-devel", "tcl-devel", "tk-devel", "xz-devel", "zlib-ng-compat-devel", "linux-headers"]
+rundeps = ["gcc", "tzdb", "openblas", "openjdk25", "make"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://cran.r-project.org/src/base/R-4/R-4.6.1.tar.gz", sha256 = "4da6e61d2c0aac5f14a2e7e432cb5fcc269efe83da4293050ba7f03dff4e2cf4" },
+    { url = "https://cran.r-project.org/src/contrib/4.6.1/Recommended/boot_1.3-32.tar.gz", sha256 = "3a05aced6fea42a5c310c5c6ab7a2019f69f757f5e77c4961183977747136c97", unpack = false },
+    { url = "https://cran.r-project.org/src/contrib/4.6.1/Recommended/class_7.3-23.tar.gz", sha256 = "4d1adb12eae045f15641516d795177dd1d3074c0a86ac633000507c4822891f1", unpack = false },
+    { url = "https://cran.r-project.org/src/contrib/4.6.1/Recommended/cluster_2.1.8.2.tar.gz", sha256 = "4cc898a58baade883bb33aa0ee9be1723f321bd85ad91562cbd1e43dfdb41585", unpack = false },
+    { url = "https://cran.r-project.org/src/contrib/4.6.1/Recommended/codetools_0.2-20.tar.gz", sha256 = "3be6f375ec178723ddfd559d1e8e85bfeee04a5fbaf9f53f2f844e1669fea863", unpack = false },
+    { url = "https://cran.r-project.org/src/contrib/4.6.1/Recommended/foreign_0.8-91.tar.gz", sha256 = "fdf6c2c6077659a7dc069e58528d3c7cd93b6571c708d98994565386afce5298", unpack = false },
+    { url = "https://cran.r-project.org/src/contrib/4.6.1/Recommended/KernSmooth_2.23-26.tar.gz", sha256 = "b465bdac197f7faa787e625412ae03d1b7c2c134b1c924cfeb775faf9c4da73e", unpack = false },
+    { url = "https://cran.r-project.org/src/contrib/4.6.1/Recommended/lattice_0.22-9.tar.gz", sha256 = "b72ad4ed2e5269fa7cf668e46f83a9b5d9d5f8fdcbc5b9886531ca19dffca4ba", unpack = false },
+    { url = "https://cran.r-project.org/src/contrib/4.6.1/Recommended/MASS_7.3-65.tar.gz", sha256 = "b07ef1e3c364ce56269b4a8a7759cc9f87c876554f91293437bb578cfe38172f", unpack = false },
+    { url = "https://cran.r-project.org/src/contrib/4.6.1/Recommended/Matrix_1.7-5.tar.gz", sha256 = "308b0edd7bcb023a8bb50cc5cec98e66b3658c94a5badfb1ce6024e595fa8a83", unpack = false },
+    { url = "https://cran.r-project.org/src/contrib/4.6.1/Recommended/mgcv_1.9-4.tar.gz", sha256 = "a98159698afb269e06a46cac1f945bf2b3427a2dd587c6f2efd67ede90089372", unpack = false },
+    { url = "https://cran.r-project.org/src/contrib/4.6.1/Recommended/nlme_3.1-169.tar.gz", sha256 = "51b92f1b543d2eb5915478965dab05a9094e1675a160138d49963eb3a0e7fdb8", unpack = false },
+    { url = "https://cran.r-project.org/src/contrib/4.6.1/Recommended/nnet_7.3-20.tar.gz", sha256 = "8f33e17e0eb161cfbc1bfee4875baa23c66fcdba8215a64a63402b099db2b555", unpack = false },
+    { url = "https://cran.r-project.org/src/contrib/4.6.1/Recommended/rpart_4.1.27.tar.gz", sha256 = "3183552d74f02749a70e2b989591c561ca0f7c146034f415748acc8480ca4050", unpack = false },
+    { url = "https://cran.r-project.org/src/contrib/4.6.1/Recommended/spatial_7.3-18.tar.gz", sha256 = "cc46693d69745af8ec95b557e7a8ee4e1865df69dc0d25723629fd8e9ea43055", unpack = false },
+    { url = "https://cran.r-project.org/src/contrib/4.6.1/Recommended/survival_3.8-6.tar.gz", sha256 = "9a4c0a35d86c64ec5a6e6cf179ab22dcffb5ce1d313d2880a09f1e53422699d7", unpack = false },
+]
+
+environment = '''
+export JAVA_HOME=/usr/lib/jvm/java-25-openjdk
+export PATH="$JAVA_HOME/bin:$PATH"
+export LANG=C.UTF-8 LC_ALL=C.UTF-8 TZ=UTC
+export F77=gfortran-15 FC=gfortran-15
+export CXXFLAGS="$CXXFLAGS -D__MUSL__"
+export LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/lib/gcc15/lib"
+'''
+setup = '''
+# the recommended packages, linked as tools/rsync-recommended does
+cp /build/sources/*.tar.gz src/library/Recommended/
+(cd src/library/Recommended
+for p in MASS lattice Matrix nlme survival boot cluster codetools foreign KernSmooth rpart class nnet spatial mgcv; do
+    ln -sf ${p}_*.tar.gz $p.tgz
+done)
+./configure --prefix=/usr --sysconfdir=/etc/R --localstatedir=/var --mandir=/usr/share/man --libdir=/usr/lib \
+    rdocdir=/usr/share/doc/R rincludedir=/usr/include/R rsharedir=/usr/share/R \
+    --disable-nls --enable-R-shlib --enable-R-static-lib --enable-java \
+    --with-blas="-lopenblas" --with-lapack --with-cairo --with-ICU --with-jpeglib --with-libpng \
+    --with-libtiff --with-tcltk --with-x --with-readline
+'''
+build = '''
+make -j$jobs
+make -C src/nmath/standalone
+'''
+install = '''
+make install DESTDIR="$pkgdir"
+make -C src/nmath/standalone install DESTDIR="$pkgdir"
+# the licence texts R installs are in /usr/lib/R/share/licenses
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/r-base/COPYING"
+'''
