@@ -1,0 +1,12 @@
+# Miniflux feed reader. Not enabled by default (README.FenrirOS): it needs
+# /etc/miniflux.conf (DATABASE_URL, ...; example in /usr/share/doc/miniflux)
+# and a PostgreSQL database.
+type = process
+command = /usr/bin/miniflux
+env-file = /etc/miniflux.conf
+run-as = miniflux
+working-dir = /var/lib/miniflux
+logfile = /var/log/miniflux.log
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

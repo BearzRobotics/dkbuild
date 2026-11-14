@@ -1,0 +1,39 @@
+# miniflux: a minimalist, opinionated feed reader (Go, PostgreSQL). Modules
+# from the store (godeps); pure Go (CGO off), as upstream's Makefile builds
+# it. The web interface (templates, CSS, JavaScript) is embedded in the
+# binary by the source itself. Also installs the man page and a configuration
+# example.
+# Installed inert (docs/requests.md): the dinit service is shipped, not
+# enabled; no /etc/miniflux.conf (the example is in /usr/share/doc/miniflux),
+# no database, and no administrator: CREATE_ADMIN is not set in the example,
+# the account is made with `miniflux -create-admin` (README.FenrirOS).
+name = "miniflux"
+version = "2.3.5"
+release = 1
+summary = "Minimalist and opinionated feed reader"
+license = "Apache-2.0"
+homepage = "https://miniflux.app"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/miniflux/v2/archive/refs/tags/2.3.5.tar.gz", sha256 = "1cd7bf4b2cf4a366271ee6cfa5994de3337fb13dc934d0eaf02e4b67839828d2" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+# the Makefile's LD_FLAGS (its VERSION comes from git, which the tarball lacks)
+go build -ldflags "-s -w -X 'miniflux.app/v2/internal/version.Version=$version'" -o miniflux .
+'''
+install = '''
+install -Dm755 miniflux "$pkgdir/usr/bin/miniflux"
+install -Dm644 miniflux.1 "$pkgdir/usr/share/man/man1/miniflux.1"
+install -Dm644 packaging/miniflux.conf "$pkgdir/usr/share/doc/miniflux/miniflux.conf.example"
+install -Dm644 $pkgfiles/miniflux "$pkgdir/etc/dinit.d/miniflux"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/miniflux.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/miniflux.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/miniflux/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/miniflux/LICENSE"
+'''

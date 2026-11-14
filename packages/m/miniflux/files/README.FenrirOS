@@ -1,0 +1,22 @@
+Miniflux on FenrirOS
+====================
+
+Installed inert: the service is not enabled, there is no configuration, no
+database and no administrator account.
+
+1. Create a PostgreSQL role and database (the postgresql package), e.g.
+       createuser -P miniflux ; createdb -O miniflux miniflux
+   (Miniflux also needs the hstore extension: `psql miniflux -c 'create
+   extension hstore'` as a PostgreSQL superuser.)
+2. cp /usr/share/doc/miniflux/miniflux.conf.example /etc/miniflux.conf and
+   add DATABASE_URL=postgres://miniflux:PASSWORD@localhost/miniflux?sslmode=disable
+   and, if wanted, LISTEN_ADDR (default 127.0.0.1:8080). The file holds a
+   password: chmod 600 it (dinit reads it as root).
+3. Make the first administrator yourself; nothing is created for you:
+       env $(cat /etc/miniflux.conf) miniflux -create-admin
+   (it asks for a user name and a password), or set CREATE_ADMIN=1,
+   ADMIN_USERNAME and ADMIN_PASSWORD once in the file and remove them after
+   the first start.
+4. dinitctl enable miniflux
+
+The configuration reference is miniflux(1) and https://miniflux.app/docs.
