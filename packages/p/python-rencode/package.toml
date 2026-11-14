@@ -1,0 +1,26 @@
+# rencode: web-safe object encoder (needed by deluge); Cython extension built from the sdist.
+# Built from the sdist offline with pip (--no-build-isolation): the build
+# backend comes from hostdeps.
+name = "python-rencode"
+version = "1.0.9"
+release = 1
+summary = "Web-safe object encoder"
+license = "GPL-3.0-only"
+homepage = "https://pypi.org/project/rencode/"
+hostdeps = ["python", "python-setuptools", "python-cython"]
+builddeps = ["python-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/86/ca/20d83dc89d6b0275b47f42f9756c05ffcf4aa53260ca14f19a60739ade82/rencode-1.0.9.tar.gz", sha256 = "ca3afe8d09d26fb48ac0ad6773e35ec0ae1b92d038d217685c54c5a86577e2f2" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+for f in LICENSE LICENSE.txt LICENSE.md LICENSE.rst COPYING LICENSES/*; do
+    [ -f "$f" ] && install -Dm644 "$f" "$pkgdir/usr/share/licenses/python-rencode/${f##*/}"
+done
+true
+'''
