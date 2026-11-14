@@ -1,0 +1,15 @@
+# pgAdmin 4 (web, server mode) on 127.0.0.1:5050. Not enabled by default
+# (README.FenrirOS): the first start needs the first administrator's e-mail
+# and password, given as PGADMIN_SETUP_EMAIL and PGADMIN_SETUP_PASSWORD in
+# /etc/pgadmin4/pgadmin4.env (remove them after the first start) or by
+# running `pgadmin4` once by hand.
+type = process
+command = /usr/bin/pgadmin4
+run-as = pgadmin4
+working-dir = /var/lib/pgadmin4
+env-file = /etc/pgadmin4/pgadmin4.env
+logfile = /var/log/pgadmin4/dinit.log
+smooth-recovery = true
+
+depends-on: rcboot
+waits-for: syslogd

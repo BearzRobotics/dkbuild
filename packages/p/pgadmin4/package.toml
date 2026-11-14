@@ -1,0 +1,57 @@
+# pgAdmin 4: the administration and development platform for PostgreSQL, in
+# its web (server mode) form, served by its own Flask/Socket.IO server on
+# 127.0.0.1:5050. Packaged from the release WHEEL (pgadmin4-<version>-py3-
+# none-any.whl on PyPI): it holds the Python application together with the
+# built web app (pgadmin/static/bundle/*.js, the output of upstream's
+# yarn/webpack build) and the HTML documentation. Building the front end from
+# the source (a ~2000-package yarn tree, webpack, React) is not tractable
+# offline; policy accepts upstream's pre-built web assets (chosen here:
+# pre-built, from the wheel).
+# Python dependencies: the pinned closure of pgadmin4's requirements (pip's
+# resolution for Python 3.14), files/python.lock (pydeps), installed into the
+# private directory /usr/lib/pgadmin4/site-packages. Left out of the lock
+# because the tree packages them (and they are runtime dependencies):
+# cryptography, bcrypt, cffi (and pycparser), PyNaCl, Pillow, psutil,
+# MarkupSafe, charset-normalizer. Compiled here from their sdists: brotli
+# (for Flask-Compress) and psycopg-c, psycopg's C accelerator linked to the
+# system libpq, instead of the `psycopg-binary` wheel (a manylinux binary,
+# not for musl). Two pure-Python sdists (Flask-Principal, jsonformatter).
+# Source edits: pgadmin4/config_distro.py (the file upstream provides for
+# distributions to override defaults) is replaced: server mode, data in
+# /var/lib/pgadmin4, log in /var/log/pgadmin4, the update check off (updates
+# come from the package). No other file is changed.
+# Installed inert (docs/requests.md): the dinit service is shipped, not
+# enabled; NO default account: pgAdmin asks for the first administrator's
+# e-mail and password at its first start (README.FenrirOS); no web server
+# site. Needs a PostgreSQL client toolset (pg_dump, psql: package postgresql)
+# for Backup/Restore, not required to run.
+# Setup: /usr/share/doc/pgadmin4/README.FenrirOS.
+name = "pgadmin4"
+version = "9.19"
+release = 1
+summary = "PostgreSQL administration and development platform (web)"
+license = "PostgreSQL"
+homepage = "https://www.pgadmin.org"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-pkgconfig", "pkgconf", "postgresql"]
+builddeps = ["python-devel", "postgresql-devel", "linux-headers"]
+rundeps = ["python", "python-cryptography", "python-bcrypt", "python-cffi", "python-pycparser", "python-pynacl",
+           "python-pillow", "python-psutil", "python-markupsafe", "python-charset-normalizer", "postgresql-libs"]
+options = ["!check", "pydeps", "!strip"]
+
+install = '''
+site="$pkgdir/usr/lib/pgadmin4/site-packages"
+awk '!/^#/ && NF { print $1 "==" $2 }' $pkgfiles/python.lock > /tmp/requirements.txt
+python3 -m pip install --no-deps --no-build-isolation --no-compile --no-warn-script-location \
+    --target "$site" -r /tmp/requirements.txt
+# the distribution override file (header comment)
+install -Dm644 $pkgfiles/config_distro.py "$site/pgadmin4/config_distro.py"
+# the command line: pgadmin4 (the server, and its first-run prompt) and pgadmin4-cli
+install -Dm755 $pkgfiles/pgadmin4 "$pkgdir/usr/bin/pgadmin4"
+sed 's/pgAdmin4 import main/setup import main/' $pkgfiles/pgadmin4 > pgadmin4-cli
+install -Dm755 pgadmin4-cli "$pkgdir/usr/bin/pgadmin4-cli"
+install -Dm644 $pkgfiles/pgadmin4.dinit "$pkgdir/etc/dinit.d/pgadmin4"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/pgadmin4.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/pgadmin4.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/pgadmin4/README.FenrirOS"
+install -Dm644 "$site/pgadmin4/LICENSE" "$pkgdir/usr/share/licenses/pgadmin4/LICENSE"
+'''

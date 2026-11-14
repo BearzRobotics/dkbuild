@@ -1,0 +1,28 @@
+pgAdmin 4 on FenrirOS
+=====================
+
+Installed inert: the service is not enabled, there is NO default account and
+no web server site. The data directory is /var/lib/pgadmin4, the log
+/var/log/pgadmin4/pgadmin4.log, the settings /usr/lib/pgadmin4/site-packages/
+pgadmin4/config_distro.py (override with config_local.py in that directory
+or /etc/pgadmin4 as upstream documents; server mode, listening on
+127.0.0.1:5050).
+
+First start (creates the administrator account, by your choice of e-mail
+and password):
+
+    su -s /bin/sh pgadmin4 -c pgadmin4        # prompts, then serves; Ctrl-C
+or put these in /etc/pgadmin4/pgadmin4.env, start the service, then remove
+the two lines:
+
+    PGADMIN_SETUP_EMAIL=you@example.org
+    PGADMIN_SETUP_PASSWORD=choose-a-long-password
+
+Then:
+
+    dinitctl enable pgadmin4
+    open http://127.0.0.1:5050 (put a TLS reverse proxy in front for others)
+
+Backup, Restore and the other tools that run pg_dump/psql need the PostgreSQL
+client programs (package postgresql); set their directory in Preferences,
+Paths, Binary paths (/usr/bin).

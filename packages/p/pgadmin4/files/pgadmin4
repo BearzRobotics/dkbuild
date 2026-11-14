@@ -1,0 +1,4 @@
+#!/bin/sh
+# pgAdmin 4 (its Python packages are in a private directory)
+export PYTHONPATH=/usr/lib/pgadmin4/site-packages${PYTHONPATH:+:$PYTHONPATH}
+exec python3 -c 'import sys; from pgadmin4.pgAdmin4 import main; sys.argv[0] = "pgadmin4"; sys.exit(main())' "$@"
