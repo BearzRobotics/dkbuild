@@ -1,0 +1,49 @@
+# prometheus: the monitoring system and time series database (prometheus and
+# promtool). Go modules from the shared module cache (godeps). The web UI is
+# the pre-built React UI that upstream publishes with every release
+# (prometheus-web-ui-<version>.tar.gz, the output of the npm build); building
+# it from source needs the whole pnpm/Mantine toolchain, and policy accepts
+# the release's pre-built UI. It is compressed and embedded exactly as
+# upstream's `make assets-compress` does (scripts/compress_assets.sh with
+# PREBUILT_ASSETS_STATIC_DIR), then built with the tags of .promu.yml:
+# netgo and builtinassets.
+# Installed inert: the dinit service is shipped, not enabled; the example
+# configuration is /usr/share/doc/prometheus/prometheus.yml (no /etc config,
+# so the service fails to start until the administrator writes one).
+name = "prometheus"
+version = "3.16.0"
+release = 1
+summary = "Monitoring system and time series database"
+license = "Apache-2.0"
+homepage = "https://prometheus.io"
+hostdeps = ["go", "bash"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/prometheus/prometheus/archive/refs/tags/v3.16.0.tar.gz", sha256 = "2709a3bd43f9d15e0cecfc33ab473d011e2a69ab29265b91398cc1b8561403c0" },
+    { url = "https://github.com/prometheus/prometheus/releases/download/v3.16.0/prometheus-web-ui-3.16.0.tar.gz", sha256 = "000a45231f6dd22a5703218aad3ee11da125c8a44d1824a27670416c07531001", unpack = false, name = "prometheus-web-ui.tar.gz" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+# the release's pre-built UI (static/...), gzipped and embedded by upstream's own script
+mkdir -p /tmp/webui
+tar -xzf /build/sources/prometheus-web-ui.tar.gz -C /tmp/webui
+PREBUILT_ASSETS_STATIC_DIR=/tmp/webui/static bash scripts/compress_assets.sh
+ld="-X github.com/prometheus/common/version.Version=$version -X github.com/prometheus/common/version.Revision=v$version -X github.com/prometheus/common/version.Branch=release -X github.com/prometheus/common/version.BuildUser=dkbuild -X github.com/prometheus/common/version.BuildDate=19700101-00:00:00"
+for b in prometheus promtool; do
+    go build -tags netgo,builtinassets -ldflags "-s -w $ld" -o $b ./cmd/$b
+done
+'''
+install = '''
+install -Dm755 prometheus "$pkgdir/usr/bin/prometheus"
+install -Dm755 promtool "$pkgdir/usr/bin/promtool"
+install -Dm644 documentation/examples/prometheus.yml "$pkgdir/usr/share/doc/prometheus/prometheus.yml"
+install -Dm644 $pkgfiles/prometheus "$pkgdir/etc/dinit.d/prometheus"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/prometheus.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/prometheus.conf"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/prometheus/LICENSE"
+install -Dm644 NOTICE "$pkgdir/usr/share/licenses/prometheus/NOTICE"
+'''

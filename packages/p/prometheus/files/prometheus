@@ -1,0 +1,12 @@
+# Prometheus monitoring server. Not enabled by default: write
+# /etc/prometheus/prometheus.yml (example: /usr/share/doc/prometheus/prometheus.yml),
+# then `dinitctl enable prometheus`.
+type = process
+command = /usr/bin/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/var/lib/prometheus
+run-as = prometheus
+working-dir = /var/lib/prometheus
+logfile = /var/log/prometheus.log
+smooth-recovery = true
+
+depends-on: rcboot
+waits-for: syslogd
