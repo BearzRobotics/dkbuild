@@ -1,0 +1,22 @@
+# Imported from Chimera Linux cports: main/papirus-icon-theme/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Icons only (Papirus, Papirus-Dark, Papirus-Light; several hundred MB installed,
+# mostly small SVGs): architecture-independent data, no compiler. The Makefile
+# skips gtk-update-icon-cache when DESTDIR is set (packaging), so no icon cache
+# is shipped; themes work without one (a little slower to load).
+name = "papirus-icon-theme"
+version = "20260801"
+release = 1
+summary = "Pixel perfect icon theme"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/PapirusDevelopmentTeam/papirus-icon-theme"
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/PapirusDevelopmentTeam/papirus-icon-theme/archive/refs/tags/20260801.tar.gz", sha256 = "646f622e9e7e9e65eef9d0ab58999d4920ddb33d98e6a75232627cfe3bd508f9" },
+]
+
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/papirus-icon-theme/LICENSE"
+'''
