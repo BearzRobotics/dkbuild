@@ -1,0 +1,20 @@
+# starlette from PyPI.
+name = "python-starlette"
+version = "1.10.0"
+release = 1
+summary = "The little ASGI library that shines"
+license = "BSD-3-Clause"
+homepage = "https://starlette.dev"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python", "python-anyio"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/48/bb/3d8757f21e9a53d9035c9eb039a777047139a16bfdbedfc7a58241c3d914/starlette-1.10.0.tar.gz", sha256 = "b8399098d4c1e3522734f7235dc79b1fc967f96cf139c81e0fa30479e0685f9b" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/python-starlette/LICENSE.md"
+'''
