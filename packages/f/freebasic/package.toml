@@ -17,18 +17,19 @@
 # to the wide library).
 name = "freebasic"
 version = "1.10.1"
-release = 2
+release = 3
 summary = "BASIC compiler (QuickBASIC-compatible) with graphics library"
-license = "GPL-2.0-or-later AND LGPL-2.1-or-later WITH FreeBASIC-exception"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later WITH FreeBASIC-exception AND GFDL-1.2-only"
 homepage = "https://www.freebasic.net"
 archs = ["x86_64", "aarch64"]
-hostdeps = ["binutils", "make"]
+hostdeps = ["binutils", "make", "unzip"]
 builddeps = ["ncurses-devel", "gpm-devel", "libffi-devel", "libx11-devel", "libxext-devel", "libxpm-devel", "libxrandr-devel", "libxrender-devel", "libglvnd-devel", "mesa-devel", "linux-headers"]
 rundeps = ["binutils", "llvm-clang", "ncurses-devel", "gpm-devel", "libffi-devel", "libx11-devel", "libxext-devel", "libxpm-devel", "libxrandr-devel", "libxrender-devel", "libglvnd-devel"]
 options = ["!check", "!lto"]
 
 source = [
     { url = "https://github.com/freebasic/fbc/releases/download/1.10.1/FreeBASIC-1.10.1-source-bootstrap.tar.xz", sha256 = "2fae2c66b435240d4de11bb534843baa188574508a8a5bdaa5020bf729bf0a3e" },
+    { url = "https://sourceforge.net/projects/fbc/files/FreeBASIC-1.10.1/Documentation/FB-manual-1.10.1-html.zip/download", sha256 = "02a504cec9f7a5f5daeb582dbd91451ae3f904a965e9d856a4829c3343724e4a", name = "FB-manual-1.10.1-html.zip" },
 ]
 
 environment = '''
@@ -105,6 +106,13 @@ for d in "$pkgdir"/usr/lib/freebasic/linux-*; do
 done
 install -Dm755 /dkbuild/files/fbc-as "$pkgdir/usr/bin/fbc-as"
 install -Dm644 doc/fbc.1 "$pkgdir/usr/share/man/man1/fbc.1"
+# the manual: FreeBASIC's wiki as static HTML (the SourceForge Documentation download,
+# FB-manual-1.10.1-html.zip: 1092 flat files, start at 00index.html), in freebasic-doc. A
+# named source is copied, not unpacked, and the zip has no top directory: unzip it here.
+# The manual says it is released under the GFDL (it ships the 1.2 text, LicenseGFDL.html).
+install -d "$pkgdir/usr/share/doc/freebasic/html"
+unzip -q /build/sources/FB-manual-1.10.1-html.zip -d "$pkgdir/usr/share/doc/freebasic/html"
+test -f "$pkgdir/usr/share/doc/freebasic/html/00index.html"
 # the licence terms (compiler GPL-2.0+, libraries LGPL-2.1+ with the static
 # linking exception) are in readme.txt
 install -Dm644 readme.txt "$pkgdir/usr/share/licenses/freebasic/readme.txt"

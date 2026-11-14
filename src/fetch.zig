@@ -397,7 +397,10 @@ pub fn fetchZigDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha
         \\else
         \\
     ++ dep_unpack ++
-        \\    ( cd "$top" && ZIG_GLOBAL_CACHE_DIR="$cache/zig-global" timeout 1800 zig build --fetch=all )
+        \\    # --fetch=all also fetches the lazy dependencies of other platforms and of options the
+        \\    # build does not use (flow's freetype for its GUI), which can be unreachable or stale:
+        \\    # if that fails, fetch what the default build needs (--fetch=needed, zig's default)
+        \\    ( cd "$top" && export ZIG_GLOBAL_CACHE_DIR="$cache/zig-global" && {{ timeout 1800 zig build --fetch=all || {{ echo "zig: --fetch=all failed, fetching what the default build needs" >&2; timeout 1800 zig build --fetch=needed; }}; }} )
         \\fi
         \\store="$cache/zigpkg"; mkdir -p "$store"
         \\: > "$t/list"

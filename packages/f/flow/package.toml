@@ -1,10 +1,14 @@
 # Flow Control: a programmer's text editor in Zig (terminal UI on libvaxis, tree-sitter
 # syntax highlighting, LSP, vim and emacs-style key sets; the binary is `flow`). The
-# source is GitHub's tag archive: its Zig dependencies (syntax, flags, dizzy, thespian,
+# source is a pinned commit of master (5514cb7, 2026-11-14), not the v0.7.2 tag: the tag's
+# manifest asks for Zig 0.15.2 and its dependency pins (zigwin32's old-style build.zig.zon,
+# thespian's asio hash) do not fetch with the tree's Zig 0.17.1, while master declares
+# minimum_zig_version 0.17.0 and does. Move to the next release tag once one targets 0.17.
+# Its Zig dependencies (syntax, flags, dizzy, thespian,
 # themes, fuzzig, vaxis, zeit, ...) are fetched on the host (option `zigdeps`) and built
 # offline with --system zig-pkg. Terminal build only: no -Dgui (the standalone GUI window).
 name = "flow"
-version = "0.7.2"
+version = "0.7.2_git20261114"
 release = 1
 summary = "Programmer's text editor in Zig"
 license = "MIT"
@@ -14,7 +18,7 @@ hostdeps = ["zig"]
 options = ["zigdeps", "!check"]
 
 source = [
-    { url = "https://github.com/neurocyte/flow/archive/refs/tags/v0.7.2.tar.gz", sha256 = "f56313fd00a36ab04ee9a9ddb200aebf195df3882947a698c1d1760d4bbd1d4a" },
+    { url = "https://github.com/neurocyte/flow/archive/5514cb7d5db600a2b8b2bf33f2d27a1b203bb31c.tar.gz", sha256 = "7f5b0e431740b88f9982336ee492327b256ede149cc628fb4a146fa7af5ab994" },
 ]
 
 install = '''
