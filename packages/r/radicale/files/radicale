@@ -1,0 +1,10 @@
+# Radicale CalDAV/CardDAV server. Not enabled by default (README.FenrirOS):
+# it needs /etc/radicale/config (example: /usr/share/doc/radicale/config.example).
+type = process
+command = /usr/bin/radicale --config /etc/radicale/config
+run-as = radicale
+working-dir = /var/lib/radicale
+logfile = /var/log/radicale.log
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

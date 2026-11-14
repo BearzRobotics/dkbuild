@@ -1,0 +1,27 @@
+Radicale on FenrirOS
+====================
+
+Installed inert: the service is not enabled and there is no configuration,
+no rights file and no users.
+
+    cp /usr/share/doc/radicale/config.example /etc/radicale/config
+    $EDITOR /etc/radicale/config
+    dinitctl enable radicale
+
+Radicale's built-in default authentication is `denyall`: nobody can log in
+until you configure [auth]. For a first setup use htpasswd with bcrypt:
+
+    [auth]
+    type = htpasswd
+    htpasswd_filename = /etc/radicale/users
+    htpasswd_encryption = bcrypt
+    [storage]
+    filesystem_folder = /var/lib/radicale/collections
+
+and create the file with `htpasswd -B -c /etc/radicale/users alice` (apache
+utils) or any bcrypt-capable tool; make it readable by the radicale user.
+The server listens on localhost:5232 (`hosts` in [server]); put a TLS
+reverse proxy in front of it or use `ssl = True` with a certificate.
+Per-collection permissions are set in the rights file
+(/usr/share/doc/radicale/rights.example). Full documentation:
+/usr/share/doc/radicale/DOCUMENTATION.md.

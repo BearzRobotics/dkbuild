@@ -1,0 +1,39 @@
+# Radicale: a small CalDAV (calendars, to-do lists) and CardDAV (contacts)
+# server. Pure Python from PyPI's source distribution (setuptools).
+# Optional features whose libraries are packaged are pulled in as runtime
+# dependencies: bcrypt and argon2-cffi (htpasswd hashes), ldap3 (LDAP auth),
+# cheroot (an alternative HTTP/1.1 server) and requests (OAuth2). Not
+# available here: hypercorn (HTTP/2 server), pika (RabbitMQ hook) and PAM
+# authentication.
+# Installed inert (docs/requests.md): the dinit service is shipped, not
+# enabled; there is NO configuration, rights file or user database: only the
+# examples (config, rights) under /usr/share/doc/radicale. Without a config
+# Radicale's own default is `auth type = denyall` on localhost:5232, so even
+# a started server accepts no user. Setup: README.FenrirOS.
+name = "radicale"
+version = "3.9.1"
+release = 1
+summary = "Simple CalDAV and CardDAV server"
+license = "GPL-3.0-or-later"
+homepage = "https://radicale.org"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-defusedxml", "python-libpass", "python-vobject", "python-bcrypt", "python-argon2-cffi", "python-ldap3", "python-cheroot", "python-requests"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/b6/24/2b87773780065cb18a7c965ef678105bf03c1db09c9f68ee1d335a1cf582/radicale-3.9.1.tar.gz", sha256 = "f7bbee73377c669dbdce48ee8ee59d594ece246922535860c20b182a33147c87" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 config "$pkgdir/usr/share/doc/radicale/config.example"
+install -Dm644 rights "$pkgdir/usr/share/doc/radicale/rights.example"
+install -Dm644 radicale.wsgi "$pkgdir/usr/share/doc/radicale/radicale.wsgi"
+install -Dm644 DOCUMENTATION.md "$pkgdir/usr/share/doc/radicale/DOCUMENTATION.md"
+install -Dm644 $pkgfiles/radicale "$pkgdir/etc/dinit.d/radicale"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/radicale.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/radicale.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/radicale/README.FenrirOS"
+install -Dm644 COPYING.md "$pkgdir/usr/share/licenses/radicale/COPYING.md"
+'''
