@@ -1,0 +1,20 @@
+# sympy from PyPI.
+name = "python-sympy"
+version = "1.14.0"
+release = 1
+summary = "Computer algebra system (CAS) in Python"
+license = "BSD-3-Clause"
+homepage = "https://sympy.org"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-mpmath"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/83/d3/803453b36afefb7c2bb238361cd4ae6125a569b4db67cd9e79846ba2d68c/sympy-1.14.0.tar.gz", sha256 = "d3d3fe8df1e5a0b42f0e7bdf50541697dbe7d23746e894990c030e2b05e72517" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-sympy/LICENSE"
+'''
