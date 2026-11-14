@@ -1,0 +1,30 @@
+# libsvgtiny: part of the NetSurf project's libraries (needed by netsurf, elinks).
+# The NetSurf build system installs a shared and a static library from two
+# passes (COMPONENT_TYPE=lib-shared, lib-static); both are installed.
+# WARNFLAGS=-w: the libraries build with -Werror, which a newer clang than the
+# ones upstream tests turns into failures on harmless warnings.
+name = "libsvgtiny"
+version = "0.1.8"
+release = 1
+summary = "SVG rendering library"
+license = "MIT"
+homepage = "https://www.netsurf-browser.org/projects/svgtiny/"
+hostdeps = ["gperf", "netsurf-buildsystem", "perl", "pkgconf"]
+builddeps = ["libdom-devel", "libexpat-devel", "libhubbub-devel", "libparserutils-devel", "libwapcaplet-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.netsurf-browser.org/libs/releases/libsvgtiny-0.1.8-src.tar.gz", sha256 = "c357227f02e83fb2a76b12b901191a082229db1f007362e8f31c754510c2a01c" },
+]
+
+build = '''
+for t in lib-shared lib-static; do
+    %make PREFIX=/usr WARNFLAGS=-w COMPONENT_TYPE=$t
+done
+'''
+install = '''
+for t in lib-shared lib-static; do
+    make DESTDIR="$pkgdir" PREFIX=/usr WARNFLAGS=-w COMPONENT_TYPE=$t install
+done
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libsvgtiny/COPYING"
+'''
