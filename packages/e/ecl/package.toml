@@ -1,0 +1,54 @@
+# Adapted from Chimera Linux cports: main/ecl/template.py.
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Embeddable Common Lisp 24.5.10. It is built against the system Boehm GC (gc),
+# libatomic_ops, GMP and libffi (the bundled copies are not used), with threads,
+# Unicode, the C99 complex numbers and the dynamic FFI (libffi); everything else
+# is the default (the bytecode compiler and the C compiler `ecl` drives at run time,
+# so `llvm` (clang) is a run dependency). Shared libecl.so; the static libecl.a
+# and the build tools (dpp, ecl_min) are in -devel / -static, as Chimera splits.
+# Chimera runs autoreconf on src/; this tarball's generated configure is used as it is.
+# The test suite is not run: Chimera patches it to run from the build directory
+# and disables several tests on musl; no such patches are applied here.
+name = "ecl"
+version = "24.5.10"
+release = 1
+summary = "Embeddable Common Lisp"
+license = "LGPL-2.1-or-later"
+homepage = "https://ecl.common-lisp.dev"
+hostdeps = ["make"]
+builddeps = ["gc-devel", "gmp-devel", "libatomic-ops-devel", "libffi-devel"]
+rundeps = ["llvm"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://gitlab.com/embeddable-common-lisp/ecl/-/archive/24.5.10/ecl-24.5.10.tar.gz", sha256 = "7d21ac3bd99132cfb1bb2d73d31d602a536f3a31dac6b982007a8291372dd0bf" },
+]
+
+setup = '''
+%configure \
+    --enable-boehm=system \
+    --enable-libatomic=system \
+    --enable-gmp=system \
+    --enable-threads=yes \
+    --enable-unicode=yes \
+    --enable-c99complex=yes \
+    --with-dffi=system
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make install DESTDIR="$pkgdir"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ecl/LICENSE"
+# the licence files are installed (above) as /usr/share/licenses/ecl; the build stamp is a build artifact
+rm -f "$pkgdir/usr/lib/ecl-$version/COPYING" "$pkgdir/usr/lib/ecl-$version/LICENSE" \
+    "$pkgdir/usr/lib/ecl-$version/build-stamp"
+'''
+
+[subpackages.devel]
+summary = "Headers and development files for ECL"
+paths = ["/usr/include", "/usr/lib/*.so", "/usr/lib/pkgconfig", "/usr/share/pkgconfig", "/usr/lib/ecl-24.5.10/TAGS", "/usr/lib/ecl-24.5.10/dpp", "/usr/lib/ecl-24.5.10/ecl_min"]
+
+[subpackages.static]
+summary = "Static libraries for ECL"
+paths = ["/usr/lib/*.a", "/usr/lib/ecl-24.5.10/*.a"]
