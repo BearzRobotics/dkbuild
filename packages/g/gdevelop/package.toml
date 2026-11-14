@@ -88,6 +88,12 @@ sed -i 's|SUFFIX "\.bc"|SUFFIX ".a"|' Core/CMakeLists.txt GDJS/CMakeLists.txt Ex
 # @lingui/react, whose peer React (^15 || ^16) the app's "react": "$react"
 # override meets with React 18 only as "react@undefined" (ERESOLVE)
 (cd newIDE/app && npm install --offline --ignore-scripts --install-links --legacy-peer-deps && npx patch-package)
+# --legacy-peer-deps also leaves out the lockfile's top-level react-refresh 0.18.0, which
+# the lockfile has only as a peer of @pmmmwh/react-refresh-webpack-plugin: the production
+# build then stopped with "Cannot find module 'react-refresh'" (r5). The only copies are
+# nested (react-scripts', storybook's, 0.11.0); react-scripts' satisfies the plugin's peer
+# range (>=0.10.0 <1.0.0), so link it where the plugin looks.
+(cd newIDE/app/node_modules && { [ -e react-refresh ] || ln -s react-scripts/node_modules/react-refresh react-refresh; } && test -f react-refresh/runtime.js)
 (cd newIDE/electron-app && npm ci --ignore-scripts)
 (cd newIDE/electron-app/app && npm ci --ignore-scripts)
 # the bundled editors, where import-zipped-editor.js would download them
