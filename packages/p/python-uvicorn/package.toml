@@ -1,0 +1,20 @@
+# uvicorn from PyPI.
+name = "python-uvicorn"
+version = "0.54.0"
+release = 1
+summary = "The lightning-fast ASGI server"
+license = "BSD-3-Clause"
+homepage = "https://uvicorn.dev"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python", "python-click", "python-h11"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/da/34/30e9280707135d2cfc589dfff3cb796bd07a3aeb1a3e415ba09dd89d7bb4/uvicorn-0.54.0.tar.gz", sha256 = "a2e33cbfaa0306f8e6b0c13e0cb89d7d7a2da3e62b90c66e18c33d9807b28620" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/python-uvicorn/LICENSE.md"
+'''
