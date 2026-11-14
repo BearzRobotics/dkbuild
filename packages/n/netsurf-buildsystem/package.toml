@@ -1,0 +1,20 @@
+# netsurf-buildsystem: the shared makefiles the NetSurf libraries and NetSurf
+# itself are built with (installed under /usr/share/netsurf-buildsystem, which
+# they find through NSSHARED). A build dependency of the netsurf-* libraries.
+name = "netsurf-buildsystem"
+version = "1.10"
+release = 1
+summary = "NetSurf shared makefiles for its libraries"
+license = "MIT"
+homepage = "https://www.netsurf-browser.org"
+rundeps = ["make", "perl"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.netsurf-browser.org/libs/releases/buildsystem-1.10.tar.gz", sha256 = "3d3e39d569e44677c4b179129bde614c65798e2b3e6253160239d1fd6eae4d79" },
+]
+
+install = '''
+make DESTDIR="$pkgdir" PREFIX=/usr install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/netsurf-buildsystem/COPYING"
+'''
