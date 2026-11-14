@@ -1,0 +1,74 @@
+# Imported from Chimera Linux cports: main/weechat/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# WeeChat: extensible terminal chat client. The script plugins (Guile, Lua,
+# Perl, Python, Ruby, Tcl) are subpackages weechat-<language>, so an
+# interpreter is only pulled in when its plugin is installed.
+# Left out, with reasons:
+#  - the PHP plugin: PHP in this tree is not built with the embed SAPI
+#    (libphp) it links against.
+#  - the JavaScript plugin: needs a system V8 library; the tree's V8
+#    (euro-office-v8) is private to that suite.
+#  - tests: need CppUTest, which is not in the tree.
+# Spell checking uses Enchant; the relay plugin gets zlib and zstd.
+name = "weechat"
+version = "4.10.4"
+release = 1
+summary = "Extensible chat client"
+license = "GPL-3.0-or-later"
+homepage = "https://weechat.org"
+hostdeps = ["asciidoctor", "cmake", "gettext", "ninja", "perl", "pkgconf"]
+builddeps = ["cjson-devel", "curl-devel", "enchant-devel", "gettext-devel", "gnutls-devel", "guile-devel",
+             "libgcrypt-devel", "lua-devel", "ncurses-devel", "perl", "python-devel", "ruby-devel", "tcl-devel",
+             "zlib-ng-compat-devel", "zstd-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://weechat.org/files/src/weechat-4.10.4.tar.xz", sha256 = "9b67a869330f34498f08dcab49edc1c54e9a8af136188d30d5ed1fb8257106da" },
+]
+
+setup = '''
+%cmake \
+    -DENABLE_ENCHANT=ON \
+    -DENABLE_JAVASCRIPT=OFF \
+    -DENABLE_PHP=OFF \
+    -DENABLE_DOC=ON \
+    -DENABLE_DOC_INCOMPLETE=ON \
+    -DENABLE_MAN=ON \
+    -DENABLE_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''
+
+[subpackages.guile]
+summary = "WeeChat Guile plugin"
+paths = ["/usr/lib/weechat/plugins/guile.so"]
+depends = ["weechat"]
+
+[subpackages.lua]
+summary = "WeeChat Lua plugin"
+paths = ["/usr/lib/weechat/plugins/lua.so"]
+depends = ["weechat"]
+
+[subpackages.perl]
+summary = "WeeChat Perl plugin"
+paths = ["/usr/lib/weechat/plugins/perl.so"]
+depends = ["weechat"]
+
+[subpackages.python]
+summary = "WeeChat Python plugin"
+paths = ["/usr/lib/weechat/plugins/python.so"]
+depends = ["weechat"]
+
+[subpackages.ruby]
+summary = "WeeChat Ruby plugin"
+paths = ["/usr/lib/weechat/plugins/ruby.so"]
+depends = ["weechat"]
+
+[subpackages.tcl]
+summary = "WeeChat Tcl plugin"
+paths = ["/usr/lib/weechat/plugins/tcl.so"]
+depends = ["weechat"]
