@@ -1,0 +1,30 @@
+# libnsgif: part of the NetSurf project's libraries (needed by netsurf, elinks).
+# The NetSurf build system installs a shared and a static library from two
+# passes (COMPONENT_TYPE=lib-shared, lib-static); both are installed.
+# WARNFLAGS=-w: the libraries build with -Werror, which a newer clang than the
+# ones upstream tests turns into failures on harmless warnings.
+name = "libnsgif"
+version = "1.0.0"
+release = 1
+summary = "GIF decoding library"
+license = "MIT"
+homepage = "https://www.netsurf-browser.org/projects/nsgif/"
+hostdeps = ["netsurf-buildsystem", "perl", "pkgconf"]
+builddeps = []
+options = ["!check"]
+
+source = [
+    { url = "https://download.netsurf-browser.org/libs/releases/libnsgif-1.0.0-src.tar.gz", sha256 = "6014c842f61454d2f5a0f8243d7a8d7bde9b7da3ccfdca2d346c7c0b2c4c061b" },
+]
+
+build = '''
+for t in lib-shared lib-static; do
+    %make PREFIX=/usr WARNFLAGS=-w COMPONENT_TYPE=$t
+done
+'''
+install = '''
+for t in lib-shared lib-static; do
+    make DESTDIR="$pkgdir" PREFIX=/usr WARNFLAGS=-w COMPONENT_TYPE=$t install
+done
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libnsgif/COPYING"
+'''
