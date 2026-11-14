@@ -1,0 +1,32 @@
+# Adapted from Chimera Linux cports: main/libcerf. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# libcerf: complex error functions (Faddeeva, Voigt); gnuplot uses it.
+name = "libcerf"
+version = "3.6"
+release = 1
+summary = "Complex error function library"
+license = "MIT"
+homepage = "https://jugit.fz-juelich.de/mlz/libcerf"
+hostdeps = ["cmake", "ninja", "perl", "pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://jugit.fz-juelich.de/mlz/libcerf/-/archive/v3.6/libcerf-v3.6.tar.gz", sha256 = "fffbdb897590b67320e98a98048ce4c01185a0e788d49fffd798786f2e25f70b" },
+]
+
+setup = '''
+# CMake builds one kind per run: shared first, then static into build-static
+%cmake -DBUILD_SHARED_LIBS=ON
+cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+install = '''
+%cmake_install
+# the static run also installs headers, tools and man pages again: only its libraries are wanted
+mkdir -p /tmp/static-stage
+DESTDIR=/tmp/static-stage cmake --install build-static
+cp -a /tmp/static-stage/usr/lib/*.a "$pkgdir/usr/lib/"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libcerf/LICENSE"
+'''
