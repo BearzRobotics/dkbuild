@@ -1,0 +1,33 @@
+# colord-gtk: GTK 3 and GTK 4 helper libraries for colord (monitor calibration
+# widgets, display profiles); darktable uses the GTK 3 one.
+name = "colord-gtk"
+version = "0.3.1"
+release = 1
+summary = "GTK integration for colord"
+license = "LGPL-2.1-or-later"
+homepage = "https://www.freedesktop.org/software/colord"
+hostdeps = ["meson", "pkgconf", "gobject-introspection", "vala", "gettext"]
+builddeps = ["colord-devel", "glib-devel", "gtk+3-devel", "gtk4-devel", "lcms2-devel", "vala"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.freedesktop.org/software/colord/releases/colord-gtk-0.3.1.tar.xz", sha256 = "c176b889b75630a17f4e3d7ef24c09a3e12368e633496087459c8b53ac3a122d" },
+]
+
+setup = '''
+# docs and man pages need gtk-doc / docbook tooling that is not packaged; the tests need a display
+%meson \
+    -Dgtk3=true \
+    -Dgtk4=true \
+    -Dintrospection=true \
+    -Dvapi=true \
+    -Dtests=false \
+    -Dman=false \
+    -Ddocs=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''
