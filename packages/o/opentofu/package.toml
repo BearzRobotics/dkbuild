@@ -1,0 +1,26 @@
+# opentofu: the open-source Terraform fork (the tofu command). Go modules from
+# the shared module cache (godeps). Adapted from Chimera Linux cports
+# (user/opentofu, BSD-2-Clause, Copyright (c) Chimera Linux contributors).
+name = "opentofu"
+version = "1.13.9"
+release = 1
+summary = "Tool for building, changing and versioning infrastructure"
+license = "MPL-2.0"
+homepage = "https://opentofu.org"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/opentofu/opentofu/archive/refs/tags/v1.13.9.tar.gz", sha256 = "acb73b84a4f32150f8a097841fe2c48a2e13d35656ddab4851f46a4d681cdde4" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+go build -ldflags "-s -w -X main.version=$version -X github.com/opentofu/opentofu/version.dev=no" -o tofu ./cmd/tofu
+'''
+install = '''
+install -Dm755 tofu "$pkgdir/usr/bin/tofu"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/opentofu/LICENSE"
+'''
