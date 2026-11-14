@@ -1,0 +1,26 @@
+# girara: the GTK-free user interface/config toolkit library zathura is built on. Shared and static (meson default_library=both).
+name = "girara"
+version = "2026.07.18"
+release = 1
+summary = "User interface library with a focus on simplicity (zathura's)"
+license = "Zlib"
+homepage = "https://pwmt.org/projects/girara"
+hostdeps = ["meson", "pkgconf", "gettext", "doxygen"]
+builddeps = ["glib-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://pwmt.org/projects/girara/download/girara-2026.07.18.tar.xz", sha256 = "d7255635776a45d42d1e555aa425ab96caf23755442474cf240cbac966d8502f" },
+]
+
+setup = '''
+%meson \
+    -Ddocs=enabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/girara/LICENSE"
+'''
