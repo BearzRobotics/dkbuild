@@ -1,0 +1,47 @@
+# libwebsockets: a C library for WebSocket, HTTP/1-2 servers and clients,
+# MQTT-free (the MQTT role is not built) and TLS through OpenSSL. Shared and
+# static libraries (static with PIC so it can be linked into shared objects).
+# Optional features are built, not disabled: zlib, WebSocket extensions
+# (permessage-deflate), HTTP stream compression, HTTP/2, SOCKS5, CGI, ranges,
+# access log, zip file serving, HTTP proxy, thread pool, peer limits, JSON
+# structs, the libuv, libevent, libev and glib event loops (as runtime
+# plugins, LWS_WITH_EVLIB_PLUGINS) and the protocol plugins. Left off because
+# they need things that do not exist here: mbedTLS/wolfSSL/GnuTLS/BoringSSL
+# (OpenSSL is used), DBus role, sd-event, uloop, ALSA/Opus/GTK/Alexa examples,
+# WebRTC, V4L2, ffmpeg transcoding, hubbub, and the test and minimal examples.
+# Used by mosquitto (websockets listeners).
+name = "libwebsockets"
+version = "5.1.0"
+release = 1
+summary = "C library for WebSocket and HTTP servers and clients"
+license = "MIT"
+homepage = "https://libwebsockets.org"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["openssl-devel", "zlib-ng-compat-devel", "libuv-devel", "libevent-devel", "libev-devel", "glib-devel", "libcap-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/warmcat/libwebsockets/archive/refs/tags/v5.1.0.tar.gz", sha256 = "9acbba00aaa9e6178ae09c6f920d95449b527c1417e81d2cdd4103bc6d64d13f" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DLWS_WITH_SHARED=ON -DLWS_WITH_STATIC=ON -DLWS_STATIC_PIC=ON \
+    -DLWS_WITH_SSL=ON -DLWS_WITH_ZLIB=ON -DLWS_WITHOUT_EXTENSIONS=OFF \
+    -DLWS_WITH_HTTP2=ON -DLWS_WITH_HTTP_STREAM_COMPRESSION=ON \
+    -DLWS_WITH_LIBUV=ON -DLWS_WITH_LIBEVENT=ON -DLWS_WITH_LIBEV=ON -DLWS_WITH_GLIB=ON \
+    -DLWS_WITH_PLUGINS=ON -DLWS_WITH_SOCKS5=ON -DLWS_WITH_CGI=ON -DLWS_WITH_RANGES=ON \
+    -DLWS_WITH_ACCESS_LOG=ON -DLWS_WITH_ZIP_FOPS=ON -DLWS_WITH_HTTP_PROXY=ON \
+    -DLWS_WITH_THREADPOOL=ON -DLWS_WITH_PEER_LIMITS=ON -DLWS_WITH_STRUCT_JSON=ON \
+    -DLWS_IPV6=ON -DLWS_UNIX_SOCK=ON \
+    -DLWS_WITHOUT_TESTAPPS=ON -DLWS_WITH_MINIMAL_EXAMPLES=OFF \
+    -DDISABLE_WERROR=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libwebsockets/LICENSE"
+'''
