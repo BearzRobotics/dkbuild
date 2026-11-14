@@ -1,0 +1,50 @@
+# haproxy: TCP/HTTP load balancer and reverse proxy. Built with everything the
+# tree's libraries allow: OpenSSL (with kTLS), QUIC and HTTP/3 (OpenSSL 3.6
+# has the QUIC API haproxy needs; 0-RTT works from 3.5.2), PCRE2 with JIT, zlib,
+# Lua 5.5, network namespaces, the Prometheus exporter (promex), plus halog and
+# iprange/ip6range. Left out: 51Degrees, DeviceAtlas and WURFL (proprietary
+# device-detection databases), OpenTracing, systemd.
+# Adapted from Chimera Linux cports (main/haproxy, BSD-2-Clause, Copyright (c)
+# Chimera Linux contributors); TARGET=linux-musl, pthread emulation as there.
+# Installed inert: a dinit service is shipped, not enabled, and there is no
+# /etc/haproxy/haproxy.cfg (the example is in /usr/share/doc/haproxy). The
+# tests need vtest (no releases): !check.
+name = "haproxy"
+version = "3.4.7"
+release = 1
+summary = "TCP/HTTP reverse proxy for high availability environments"
+license = "GPL-2.0-or-later AND LGPL-2.1-or-later WITH custom:OpenSSL-exception"
+homepage = "https://www.haproxy.org"
+hostdeps = ["pkgconf"]
+builddeps = ["linux-headers", "openssl-devel", "pcre2-devel", "lua5.5-devel", "zlib-ng-compat-devel"]
+rundeps = []
+options = ["!check"]
+
+source = [
+    { url = "https://www.haproxy.org/download/3.4/src/haproxy-3.4.7.tar.gz", sha256 = "ccfd342f3724c2cd659574044d788f44e20b212467c6bd5edbbfc517a2775dca" },
+]
+
+environment = '''
+export HAP_OPTS="EXTRA=admin/halog/halog TARGET=linux-musl USE_GETADDRINFO=1 USE_KTLS=1 USE_LUA=1 LUA_INC=/usr/include/lua5.5 LUA_LIB_NAME=lua5.5 USE_NS=1 USE_OPENSSL=1 USE_PCRE2=1 USE_PCRE2_JIT=1 USE_PROMEX=1 USE_PTHREAD_EMULATION=1 USE_QUIC=1 USE_SHM_OPEN=1 USE_ZLIB=1"
+'''
+build = '''
+%make $HAP_OPTS
+%make -C admin/iprange
+'''
+install = '''
+%make_install $HAP_OPTS SBINDIR=/usr/bin PREFIX=/usr DOCDIR=/usr/share/doc/haproxy
+install -Dm755 admin/iprange/iprange "$pkgdir/usr/bin/iprange"
+install -Dm755 admin/iprange/ip6range "$pkgdir/usr/bin/ip6range"
+install -d "$pkgdir/usr/share/haproxy"
+cp -r examples "$pkgdir/usr/share/haproxy/examples"
+install -Dm644 $pkgfiles/haproxy.cfg.example "$pkgdir/usr/share/doc/haproxy/haproxy.cfg.example"
+install -Dm644 $pkgfiles/haproxy "$pkgdir/etc/dinit.d/haproxy"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/haproxy.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/haproxy.conf"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/haproxy/LICENSE"
+'''
+
+[subpackages.cli-scripts]
+summary = "HAProxy administration bash scripts"
+paths = ["/usr/bin/haproxy-dump-certs", "/usr/bin/haproxy-reload"]
+depends = ["bash"]

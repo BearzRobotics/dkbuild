@@ -1,0 +1,11 @@
+# HAProxy load balancer (master-worker mode), configured in
+# /etc/haproxy/haproxy.cfg (example: /usr/share/doc/haproxy/haproxy.cfg.example).
+# Not enabled by default, and it does not start until that file exists:
+# `dinitctl enable haproxy`.
+type = process
+command = /usr/bin/haproxy -Ws -f /etc/haproxy/haproxy.cfg
+logfile = /var/log/haproxy.log
+ready-notification = pipevar:HAPROXY_READY_FD
+smooth-recovery = true
+
+depends-on: rcboot
