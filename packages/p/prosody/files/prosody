@@ -1,0 +1,11 @@
+# Prosody XMPP server. Not enabled by default (README.FenrirOS): it needs
+# /etc/prosody/prosody.cfg.lua (example: /usr/share/doc/prosody/prosody.cfg.lua.dist).
+# Runs in the foreground (-F); the configuration must not set daemonize.
+type = process
+command = /usr/bin/prosody -F
+run-as = prosody
+working-dir = /var/lib/prosody
+logfile = /var/log/prosody.log
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

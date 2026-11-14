@@ -1,0 +1,54 @@
+# Prosody: a lightweight, extensible XMPP (Jabber) server in Lua 5.4. Its C
+# helper modules (util/*.so) are built against the system Lua and OpenSSL
+# (crypto), with ICU for IDNA/stringprep (upstream's default) and the
+# getrandom() CSPRNG. Lua libraries it needs are packaged separately:
+# lua5.4-socket, lua5.4-expat, lua5.4-filesystem, lua5.4-sec (TLS) and
+# lua5.4-zlib (stream compression). Not packaged: lua-unbound (DNS through
+# libunbound; no verifiable upstream source: Prosody falls back to its own
+# resolver), lua-dbi (SQL storage; Prosody's default file storage is used),
+# luaevent (libevent server backend; the default select/epoll one is used).
+# Source edits: none to the source; after `make install` the configuration
+# upstream installs as /etc/prosody/prosody.cfg.lua is moved to
+# /usr/share/doc/prosody/prosody.cfg.lua.dist. It defines an active
+# VirtualHost "localhost" and example.com, which the inert-server policy
+# forbids as an active site (docs/requests.md); the certs/ build files
+# upstream copies into /etc/prosody/certs are dropped (no example certificates
+# are generated: --no-example-certs).
+# Installed inert: the dinit service is shipped, not enabled; no
+# /etc/prosody/prosody.cfg.lua, no hosts, no accounts. Setup: README.FenrirOS.
+name = "prosody"
+version = "13.0.7"
+release = 1
+summary = "Lightweight XMPP (Jabber) server written in Lua"
+license = "MIT"
+homepage = "https://prosody.im"
+hostdeps = ["lua"]
+builddeps = ["lua-devel", "icu-devel", "openssl-devel"]
+rundeps = ["lua", "lua5.4-socket", "lua5.4-expat", "lua5.4-filesystem", "lua5.4-sec", "lua5.4-zlib"]
+options = ["!check"]
+
+source = [
+    { url = "https://prosody.im/downloads/source/prosody-13.0.7.tar.gz", sha256 = "f671df3c7535c7269afc89579ea26fc13d1006b40ef5df4ccb71a560197f151b" },
+]
+
+build = '''
+./configure --prefix=/usr --sysconfdir=/etc/prosody --libdir=/usr/lib --datadir=/var/lib/prosody \
+    --ostype=linux --lua-version=5.4 --with-lua=/usr --with-lua-include=/usr/include \
+    --with-lua-lib=/usr/lib --runwith=lua --idn-library=icu --with-random=getrandom \
+    --c-compiler="$CC" --linker="$CC" --add-cflags="$CFLAGS" --add-ldflags="$LDFLAGS" \
+    --no-example-certs
+make -j$jobs
+'''
+install = '''
+make install DESTDIR="$pkgdir"
+# see the header: the example configuration is documentation, not /etc
+install -Dm644 prosody.cfg.lua.dist "$pkgdir/usr/share/doc/prosody/prosody.cfg.lua.dist"
+rm -rf "$pkgdir/etc/prosody"
+# the data directory is made by tmpfiles with the service user's ownership
+rm -rf "$pkgdir/var/lib/prosody"
+install -Dm644 $pkgfiles/prosody "$pkgdir/etc/dinit.d/prosody"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/prosody.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/prosody.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/prosody/README.FenrirOS"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/prosody/COPYING"
+'''

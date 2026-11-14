@@ -1,0 +1,24 @@
+Prosody on FenrirOS
+===================
+
+Installed inert: the service is not enabled, there is no configuration, no
+virtual host and no account. Upstream's example configuration (it enables
+VirtualHost "localhost" and a commented example.com) is only
+/usr/share/doc/prosody/prosody.cfg.lua.dist.
+
+    cp /usr/share/doc/prosody/prosody.cfg.lua.dist /etc/prosody/prosody.cfg.lua
+    chgrp prosody /etc/prosody/prosody.cfg.lua; chmod 640 /etc/prosody/prosody.cfg.lua
+    $EDITOR /etc/prosody/prosody.cfg.lua   # your VirtualHost, certificates, admins
+    prosodyctl check                        # validates the setup
+    dinitctl enable prosody
+
+Certificates go in /etc/prosody/certs (readable by the prosody group; a
+Let's Encrypt setup can use `prosodyctl --root cert import`). Accounts:
+`prosodyctl adduser user@host` (asks for the password). The service runs as the prosody user in the foreground (`prosody -F`; the
+daemonize option is not used). Data is in /var/lib/prosody. The example
+configuration logs to prosody.log and prosody.err in the working directory
+(/var/lib/prosody); add `"*console"` to `log` to send logs to the service log
+/var/log/prosody.log instead.
+
+Community modules (mod_*) can be added under plugin_paths from
+https://modules.prosody.im.
