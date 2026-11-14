@@ -1,0 +1,28 @@
+# Imported from Chimera Linux cports: user/tree-sitter-query/template.py (cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors).
+# Parser sources are pre-generated in the release (src/parser.c), so the tree-sitter CLI is not needed.
+# The links in /usr/lib/tree-sitter are the parser directory neovim reads
+# (its runtime/parser is a link to it; see the neovim recipe).
+name = "tree-sitter-query"
+version = "0.8.0"
+release = 1
+summary = "Tree-sitter query language grammar for tree-sitter"
+license = "Apache-2.0"
+homepage = "https://github.com/tree-sitter-grammars/tree-sitter-query"
+hostdeps = ["pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/tree-sitter-grammars/tree-sitter-query/archive/v0.8.0.tar.gz", sha256 = "c2b23b9a54cffcc999ded4a5d3949daf338bebb7945dece229f832332e6e6a7d" },
+]
+
+build = '''
+# keep make from running the tree-sitter CLI: the generated files must not look older than grammar.js
+touch src/grammar.json src/parser.c 2>/dev/null || true
+%make PREFIX=/usr LIBDIR=/usr/lib
+'''
+install = '''
+%make_install PREFIX=/usr LIBDIR=/usr/lib
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/tree-sitter-query/LICENSE"
+mkdir -p "$pkgdir/usr/lib/tree-sitter"
+ln -s "../$(basename "$(find "$pkgdir/usr/lib" -maxdepth 1 -name 'libtree-sitter-query.so.*' -type l | head -1)")" "$pkgdir/usr/lib/tree-sitter/query.so"
+'''
