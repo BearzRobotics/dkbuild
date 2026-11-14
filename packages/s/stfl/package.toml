@@ -1,0 +1,33 @@
+# STFL: Structured Terminal Forms Language/Library, needed by newsboat. The
+# original (clifford.at) is gone from its server; this is Newsboat's fork,
+# which its README points to (version 0.24 plus fixes, snapshot of the master
+# branch, 2024-12-24; it has no tags or releases).
+# The Makefile hardcodes `CC = gcc -pthread` and its flags with `+=`: both are
+# set on the make command line instead (CFLAGS gets the include path,
+# _GNU_SOURCE and -fPIC the Makefile would add). The shared and the static
+# library are both built and installed by its install target.
+# The Perl, Python and Ruby (SWIG) bindings are not built: the Makefile only
+# enables them when `swig` is found, and swig is deliberately not a build
+# dependency here: the Python one is for Python 2, and nothing in the tree uses
+# the others.
+name = "stfl"
+version = "0.24"
+release = 1
+summary = "Structured Terminal Forms Language/Library"
+license = "LGPL-3.0-or-later"
+homepage = "https://github.com/newsboat/stfl"
+hostdeps = ["pkgconf"]
+builddeps = ["ncurses-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/newsboat/stfl/archive/bbb2404580e845df2556560112c8aefa27494d66.tar.gz", sha256 = "c5e77dd2e40e14f0e68dd08df1f21cd1378d88d5001e7c1926ceb7c4a977ab86" },
+]
+
+build = '''
+%make CC="$CC -pthread" CFLAGS="$CFLAGS -I. -D_GNU_SOURCE -fPIC" prefix=/usr libdir=lib
+'''
+install = '''
+make prefix=/usr libdir=lib DESTDIR="$pkgdir" install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/stfl/COPYING"
+'''
