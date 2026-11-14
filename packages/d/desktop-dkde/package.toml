@@ -1,9 +1,12 @@
 # The DKDE desktop, FenrirOS's default: dkde (panel, session and apps) on labwc,
 # with seat management, D-Bus, polkit, audio (PipeWire with WirePlumber), Mesa
 # with Vulkan, fonts and icons, and Xwayland for X11 programs. `dkde-session` starts it.
+# r3: greetd (the graphical login, with dkde's greeter) and NetworkManager (the
+# network service) are part of the default desktop, so a system with it has both
+# installed; images enable the services (dinit services are not enabled by packages).
 name = "desktop-dkde"
 version = "1"
-release = 2
+release = 3
 summary = "DKDE desktop for FenrirOS (the default)"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"
@@ -11,4 +14,5 @@ options = ["meta"]
 rundeps = [
     "dkde", "labwc", "seatd", "dbus", "polkit", "mesa", "vulkan-loader",
     "pipewire", "wireplumber", "fonts-dejavu", "shared-mime-info", "hicolor-icon-theme", "xwayland",
+    "greetd", "networkmanager",
 ]
