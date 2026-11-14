@@ -1,0 +1,24 @@
+# Flow Control: a programmer's text editor in Zig (terminal UI on libvaxis, tree-sitter
+# syntax highlighting, LSP, vim and emacs-style key sets; the binary is `flow`). The
+# source is GitHub's tag archive: its Zig dependencies (syntax, flags, dizzy, thespian,
+# themes, fuzzig, vaxis, zeit, ...) are fetched on the host (option `zigdeps`) and built
+# offline with --system zig-pkg. Terminal build only: no -Dgui (the standalone GUI window).
+name = "flow"
+version = "0.7.2"
+release = 1
+summary = "Programmer's text editor in Zig"
+license = "MIT"
+homepage = "https://github.com/neurocyte/flow"
+archs = ["x86_64"]
+hostdeps = ["zig"]
+options = ["zigdeps", "!check"]
+
+source = [
+    { url = "https://github.com/neurocyte/flow/archive/refs/tags/v0.7.2.tar.gz", sha256 = "f56313fd00a36ab04ee9a9ddb200aebf195df3882947a698c1d1760d4bbd1d4a" },
+]
+
+install = '''
+%zig_build
+install -Dm644 help.md "$pkgdir/usr/share/doc/flow/help.md"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/flow/LICENSE"
+'''
