@@ -17,3 +17,6 @@ series = "3.24."    # GTK 3's last series; 3.9x was GTK 4's development series
 
 [libmspack]
 regex = "libmspack-([0-9.]+)alpha"   # every release is named "<n>alpha"
+
+[brush]
+regex = "brush-shell-v([0-9.]+)"   # the repository also tags its library crates (brush-core-v0.5.0 is not a shell release)
