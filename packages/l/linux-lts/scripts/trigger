@@ -1,0 +1,7 @@
+#!/bin/sh
+# A package added or removed out-of-tree modules (zfs-kmod): rebuild the
+# module index of each installed kernel.
+for d in /usr/lib/modules/*/; do
+    [ -f "$d/modules.order" ] && depmod -a "$(basename "$d")"
+done
+exit 0

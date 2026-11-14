@@ -1,0 +1,78 @@
+# The LONG-TERM kernel: one of kernel.org's "longterm" series (6.18, the newest
+# one when this was written; the next one is moved to when it is out), with its
+# point releases. `linux` is the current stable kernel; the two install side by
+# side (their /boot files, module directories and build trees are named by
+# version). This is the kernel ZFS is built for (zfs-kmod-lts): OpenZFS 2.4
+# supports kernels up to 7.2, so not the current one. Files (the configuration)
+# and install scripts are copies of linux's. The configuration is the
+# live DKRescue ISO's own (boot/config-6.19-dkrescue, built from `defconfig` +
+# kvm_guest.config plus the options of the DKRescue posts), used as is:
+# `make olddefconfig` only fills in anything the config does not mention (for a
+# newer or older kernel than 6.19 that is the options that kernel added; options
+# it lacks are dropped).
+#
+# Modules go to /usr/lib/modules; /lib is a link to /usr/lib on this system.
+# r2: install and upgrade scripts write systemd-boot entries (gen-systemd-boot),
+# when systemd-boot is installed. UDF is built in (=y), like exFAT and NTFS3, so the
+# live ISO's init can find an image on any stick Ventoy or a DVD uses.
+# r10: linux-devel, the build tree out-of-tree modules (ZFS) are built against:
+# /usr/src/linux-<release>, linked from /usr/lib/modules/<release>/build.
+name = "linux-lts"
+version = "6.18.63"
+release = 1
+summary = "The Linux kernel (long-term series) and its modules"
+license = "GPL-2.0-only WITH Linux-syscall-note"
+homepage = "https://kernel.org"
+archs = ["x86_64"]
+hostdeps = ["bc", "flex", "bison", "perl", "kmod"]
+builddeps = ["openssl-devel", "elfutils", "zlib-ng-compat-devel"]
+# The kernel compiles one small file per job, so it uses every core (-j limits
+# it); lower priority like llvm.
+options = ["!check", "!strip"]
+# out-of-tree modules (zfs-kmod-lts) in /usr/lib/modules/<release>/extra: depmod
+triggers = ["/usr/lib/modules/*/extra"]
+
+source = [
+    { url = "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.63.tar.xz", sha256 = "81764a545072d160748beff4d9de2e7d95aa9f16e8261110288f067a2cc61d71" },
+]
+
+setup = '''
+cp $pkgfiles/config .config
+make LLVM=1 olddefconfig
+'''
+build = '''
+nice -n 10 make LLVM=1 -j$jobs
+'''
+install = '''
+make LLVM=1 INSTALL_MOD_PATH=$pkgdir/usr INSTALL_MOD_STRIP=1 modules_install
+# /boot names carry the series (6.18 from 6.18.63), so two kernels coexist
+kv=${version%.*}
+install -Dm644 arch/x86/boot/bzImage "$pkgdir/boot/vmlinuz-$kv-dkrescue"
+install -Dm644 System.map "$pkgdir/boot/System.map-$kv-dkrescue"
+install -Dm644 .config "$pkgdir/boot/config-$kv-dkrescue"
+# build and source links point into the build tree
+rm -f "$pkgdir"/usr/lib/modules/*/build "$pkgdir"/usr/lib/modules/*/source
+# the build tree for out-of-tree modules (linux-devel): what `make -C <it>
+# M=<module>` needs, as distributions ship it (configuration and symbol
+# versions, the built scripts/, headers, objtool, x86's Makefiles, Kconfig)
+krel=$(make -s kernelrelease)
+b="$pkgdir/usr/src/linux-$krel"
+install -Dt "$b" -m644 .config Makefile Module.symvers System.map
+install -Dt "$b/kernel" -m644 kernel/Makefile
+install -Dt "$b/arch/x86" -m644 arch/x86/Makefile arch/x86/Makefile_32.cpu
+install -Dt "$b/arch/x86/kernel" -m644 arch/x86/kernel/asm-offsets.s
+cp -a scripts include "$b/"
+cp -a arch/x86/include "$b/arch/x86/"
+install -Dt "$b/tools/objtool" tools/objtool/objtool
+find . -name 'Kconfig*' -not -path './debian/*' | while read -r k; do install -Dm644 "$k" "$b/$k"; done
+# object files and build leftovers in scripts/ are not needed
+find "$b/scripts" -name '*.o' -delete -o -name '.*.cmd' -delete
+ln -s "../../../src/linux-$krel" "$pkgdir/usr/lib/modules/$krel/build"
+test -x "$b/scripts/mod/modpost" && test -f "$b/Module.symvers"
+'''
+
+# the build tree out-of-tree modules are built against (ZFS's)
+[subpackages.devel]
+summary = "Build tree for out-of-tree kernel modules"
+paths   = ["/usr/src", "/usr/lib/modules/*/build"]
+depends = ["linux-lts"]

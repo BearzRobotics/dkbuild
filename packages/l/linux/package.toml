@@ -1,7 +1,13 @@
-# needed by: every bootable image. The configuration is the live DKRescue ISO's
-# own (boot/config-6.19-dkrescue, built from `defconfig` + kvm_guest.config plus the
-# options of the DKRescue posts), used as is: `make olddefconfig` only fills in
-# anything the config does not mention.
+# needed by: every bootable image. The CURRENT kernel: the newest stable release
+# (kernel.org's "stable"), moved up when the next one is out. linux-lts is the
+# long-term series; the two install side by side (their /boot files, module
+# directories and build trees are named by version). ZFS is built for linux-lts
+# only (OpenZFS 2.4 supports kernels up to 7.2; see zfs). The configuration is the
+# live DKRescue ISO's own (boot/config-6.19-dkrescue, built from `defconfig` +
+# kvm_guest.config plus the options of the DKRescue posts), used as is:
+# `make olddefconfig` only fills in anything the config does not mention (for a
+# newer or older kernel than 6.19 that is the options that kernel added; options
+# it lacks are dropped).
 #
 # Modules go to /usr/lib/modules; /lib is a link to /usr/lib on this system.
 # r2: install and upgrade scripts write systemd-boot entries (gen-systemd-boot),
@@ -10,8 +16,8 @@
 # r10: linux-devel, the build tree out-of-tree modules (ZFS) are built against:
 # /usr/src/linux-<release>, linked from /usr/lib/modules/<release>/build.
 name = "linux"
-version = "6.19"
-release = 12
+version = "7.3.4"
+release = 1
 summary = "The Linux kernel and its modules"
 license = "GPL-2.0-only WITH Linux-syscall-note"
 homepage = "https://kernel.org"
@@ -21,11 +27,11 @@ builddeps = ["openssl-devel", "elfutils", "zlib-ng-compat-devel"]
 # The kernel compiles one small file per job, so it uses every core (-j limits
 # it); lower priority like llvm.
 options = ["!check", "!strip"]
-# out-of-tree modules (zfs-kmod) in /usr/lib/modules/<release>/extra: depmod
+# out-of-tree modules (zfs-kmod-lts) in /usr/lib/modules/<release>/extra: depmod
 triggers = ["/usr/lib/modules/*/extra"]
 
 source = [
-    { url = "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.19.tar.xz", sha256 = "303079a8250b8f381f82b03f90463d12ac98d4f6b149b761ea75af1323521357" },
+    { url = "https://cdn.kernel.org/pub/linux/kernel/v7.x/linux-7.3.4.tar.xz", sha256 = "b11b6df8295e8e991ff040b71aaa4994a8b55caa23b6b092907f195b5840fd1f" },
 ]
 
 setup = '''
@@ -37,9 +43,11 @@ nice -n 10 make LLVM=1 -j$jobs
 '''
 install = '''
 make LLVM=1 INSTALL_MOD_PATH=$pkgdir/usr INSTALL_MOD_STRIP=1 modules_install
-install -Dm644 arch/x86/boot/bzImage "$pkgdir/boot/vmlinuz-6.19-dkrescue"
-install -Dm644 System.map "$pkgdir/boot/System.map-6.19-dkrescue"
-install -Dm644 .config "$pkgdir/boot/config-6.19-dkrescue"
+# /boot names carry the series (7.3 from 7.3.4), so two kernels coexist
+kv=${version%.*}
+install -Dm644 arch/x86/boot/bzImage "$pkgdir/boot/vmlinuz-$kv-dkrescue"
+install -Dm644 System.map "$pkgdir/boot/System.map-$kv-dkrescue"
+install -Dm644 .config "$pkgdir/boot/config-$kv-dkrescue"
 # build and source links point into the build tree
 rm -f "$pkgdir"/usr/lib/modules/*/build "$pkgdir"/usr/lib/modules/*/source
 # the build tree for out-of-tree modules (linux-devel): what `make -C <it>
@@ -57,7 +65,7 @@ install -Dt "$b/tools/objtool" tools/objtool/objtool
 find . -name 'Kconfig*' -not -path './debian/*' | while read -r k; do install -Dm644 "$k" "$b/$k"; done
 # object files and build leftovers in scripts/ are not needed
 find "$b/scripts" -name '*.o' -delete -o -name '.*.cmd' -delete
-ln -s ../../../src/linux-$krel "$pkgdir/usr/lib/modules/$krel/build"
+ln -s "../../../src/linux-$krel" "$pkgdir/usr/lib/modules/$krel/build"
 test -x "$b/scripts/mod/modpost" && test -f "$b/Module.symvers"
 '''
 

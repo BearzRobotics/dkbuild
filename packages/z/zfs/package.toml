@@ -1,22 +1,26 @@
 # OpenZFS: the ZFS filesystem and volume manager. The tools and libraries
-# (zfs), and the kernel modules built against linux-devel in zfs-kmod, which
-# installs itself whenever zfs and linux are both installed. Prebuilt for
-# FenrirOS's kernel (2026-11-11, docs: kernel flavors will each get their own
-# zfs-kmod-<flavor>). The modules go to /usr/lib/modules/<release>/extra;
-# linux's trigger runs depmod. Service `zfs` (dinit) imports the pools and
+# (zfs), and the kernel modules built against linux-lts-devel in zfs-kmod-lts,
+# which installs itself whenever zfs and linux-lts are both installed. Prebuilt
+# per kernel flavor (each flavor gets its own zfs-kmod-<flavor>); only the
+# long-term kernel has one: OpenZFS 2.4.4 supports kernels up to 7.2 (META
+# Linux-Maximum), and `linux` is the current stable kernel (7.3), so there is no
+# zfs-kmod for it until a ZFS release supports it (master, 2.4.99, does).
+# The modules go to /usr/lib/modules/<release>/extra; the kernel's trigger
+# runs depmod. r2: kmod became kmod-lts (built against linux-lts, not linux).
+# Service `zfs` (dinit) imports the pools and
 # mounts their datasets at boot; `zed` is the event daemon.
 # Based on Chimera Linux cports (BSD-2-Clause): main/zfs, with its musl
 # strftime patch.
 name = "zfs"
 version = "2.4.4"
-release = 1
+release = 2
 summary = "OpenZFS filesystem and volume manager"
 license = "CDDL-1.0"
 homepage = "https://openzfs.github.io/openzfs-docs"
 archs = ["x86_64"]
 patches = ["musl-strftime.patch"]
 hostdeps = ["autoconf", "automake", "libtool", "pkgconf", "python"]
-builddeps = ["linux-devel", "attr-devel", "libtirpc-devel", "linux-pam-devel", "openssl-devel", "eudev-devel", "util-linux-devel", "zlib-ng-compat-devel", "linux-headers"]
+builddeps = ["linux-lts-devel", "attr-devel", "libtirpc-devel", "linux-pam-devel", "openssl-devel", "eudev-devel", "util-linux-devel", "zlib-ng-compat-devel", "linux-headers"]
 options = ["!check"]
 
 source = [
@@ -66,11 +70,11 @@ install -Dm644 $pkgfiles/zed "$pkgdir/etc/dinit.d/zed"
 for f in COPYRIGHT LICENSE NOTICE; do install -Dm644 $f "$pkgdir/usr/share/licenses/zfs/$f"; done
 '''
 
-# the kernel modules, for FenrirOS's kernel; installed with zfs and linux
-# pinned to the exact kernel build the modules were made for (dkbuild turns
-# linux=@built into linux=<the version in the build root>)
-[subpackages.kmod]
-summary = "OpenZFS kernel modules for linux"
+# the kernel modules, for FenrirOS's long-term kernel; installed with zfs and
+# linux-lts, pinned to the exact kernel build the modules were made for
+# (dkbuild turns linux-lts=@built into linux-lts=<the version in the build root>)
+[subpackages.kmod-lts]
+summary = "OpenZFS kernel modules for linux-lts"
 paths   = ["/usr/lib/modules"]
-depends = ["linux=@built"]
-install_if = ["zfs", "linux"]
+depends = ["linux-lts=@built"]
+install_if = ["zfs", "linux-lts"]

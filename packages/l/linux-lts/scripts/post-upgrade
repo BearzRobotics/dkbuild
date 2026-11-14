@@ -1,0 +1,4 @@
+#!/bin/sh
+# Boot entries for the new kernel, when systemd-boot is in use.
+command -v gen-systemd-boot >/dev/null 2>&1 && gen-systemd-boot
+exit 0
