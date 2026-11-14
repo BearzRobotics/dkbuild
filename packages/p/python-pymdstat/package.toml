@@ -1,0 +1,20 @@
+# pymdstat from PyPI.
+name = "python-pymdstat"
+version = "0.5.1"
+release = 1
+summary = "Python library to parse Linux /proc/mdstat (software RAID)"
+license = "MIT"
+homepage = "https://github.com/nicolargo/pymdstat"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/ef/46/34b801321e0d373c9f73efabebc95ff7af223cf3b1b033286935d8639052/pymdstat-0.5.1.tar.gz", sha256 = "61565b436e79bc6d1338f31280ad5d39e2c11c608aa938e9faa3f5a3dde077fb" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pymdstat/LICENSE"
+'''
