@@ -1,0 +1,25 @@
+# osm-gps-map: GTK 3 widget that shows OpenStreetMap tiles (darktable's map view, gpsbabel front-ends).
+name = "osm-gps-map"
+version = "1.2.2"
+release = 1
+summary = "GTK widget for displaying OpenStreetMap tiles"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/nzjrs/osm-gps-map"
+hostdeps = ["pkgconf", "gobject-introspection"]
+builddeps = ["cairo-devel", "glib-devel", "gtk+3-devel", "libsoup-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/nzjrs/osm-gps-map/releases/download/1.2.2/osm-gps-map-1.2.2.tar.gz", sha256 = "051383588f0fdb60f59047c6559110c35025ea72b6eca700af532c020a6b55ec" },
+]
+
+setup = '''
+%configure --enable-shared --enable-static --disable-gtk-doc --enable-introspection
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/osm-gps-map/COPYING"
+'''
