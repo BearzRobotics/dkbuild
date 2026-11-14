@@ -1,0 +1,26 @@
+# zathura-pdf-poppler: the Poppler backend.
+name = "zathura-pdf-poppler"
+version = "2026.07.18"
+release = 1
+summary = "PDF support for zathura (Poppler)"
+license = "Zlib"
+homepage = "https://pwmt.org/projects/zathura-pdf-poppler"
+hostdeps = ["meson", "pkgconf"]
+rundeps = ["zathura"]
+builddeps = ["girara-devel", "glib-devel", "poppler-devel", "zathura-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://pwmt.org/projects/zathura-pdf-poppler/download/zathura-pdf-poppler-2026.07.18.tar.xz", sha256 = "605d3f2c2e90efbc0434bb7206f013dc8ff99d8b679c6b519e13543777635bf1" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/zathura-pdf-poppler/LICENSE"
+'''
