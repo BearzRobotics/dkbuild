@@ -1,0 +1,30 @@
+# libwapcaplet: part of the NetSurf project's libraries (needed by netsurf, elinks).
+# The NetSurf build system installs a shared and a static library from two
+# passes (COMPONENT_TYPE=lib-shared, lib-static); both are installed.
+# WARNFLAGS=-w: the libraries build with -Werror, which a newer clang than the
+# ones upstream tests turns into failures on harmless warnings.
+name = "libwapcaplet"
+version = "0.4.3"
+release = 1
+summary = "String internment library"
+license = "MIT"
+homepage = "https://www.netsurf-browser.org/projects/wapcaplet/"
+hostdeps = ["netsurf-buildsystem", "perl", "pkgconf"]
+builddeps = []
+options = ["!check"]
+
+source = [
+    { url = "https://download.netsurf-browser.org/libs/releases/libwapcaplet-0.4.3-src.tar.gz", sha256 = "9b2aa1dd6d6645f8e992b3697fdbd87f0c0e1da5721fa54ed29b484d13160c5c" },
+]
+
+build = '''
+for t in lib-shared lib-static; do
+    %make PREFIX=/usr WARNFLAGS=-w COMPONENT_TYPE=$t
+done
+'''
+install = '''
+for t in lib-shared lib-static; do
+    make DESTDIR="$pkgdir" PREFIX=/usr WARNFLAGS=-w COMPONENT_TYPE=$t install
+done
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libwapcaplet/COPYING"
+'''
