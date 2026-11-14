@@ -1,0 +1,76 @@
+# Pidgin 2.14.14: libpurple (the multi-protocol IM library), the Pidgin GTK
+# client and Finch, the ncurses client (with its own library, libgnt). This is
+# the last stable release: Pidgin 3 (GTK 3/4) has not been released, so the
+# GUI is GTK 2 (the tree's gtk+2).
+# Everything the configure script offers and the tree can provide: GnuTLS and
+# NSS for SSL (both plugins), Cyrus SASL, D-Bus (and the purple-* tools),
+# NetworkManager, Avahi (Bonjour), IDN, GtkSpell, startup notification, X
+# screensaver and session management, GStreamer 1.0 sound and voice/video
+# (Farstream), Perl, Tcl and Tk scripting, SQLite (the Contact Availability
+# Prediction plugin), all protocols. The plugin `pidgin-otr` is separate
+# upstream (libotr is in the tree for it).
+# Left out, with reasons:
+#  - Sametime (meanwhile: last release 2008, IBM's server product ended),
+#    the Evolution plugin (no Evolution data server in the tree), Unity
+#    integration, and Mono (experimental upstream).
+# The libpurple/libgnt libraries are in pidgin-libs; Finch is its own
+# subpackage so a console-only system does not need GTK.
+name = "pidgin"
+version = "2.14.14"
+release = 1
+summary = "Multi-protocol instant messaging client and libpurple"
+license = "GPL-2.0-or-later"
+homepage = "https://pidgin.im"
+hostdeps = ["gettext", "intltool", "perl", "pkgconf", "python"]
+builddeps = ["avahi-devel", "libsasl-devel", "dbus-glib-devel", "farstream-devel", "gettext-devel", "glib-devel",
+             "gnutls-devel", "gst-plugins-base-devel", "gstreamer-devel", "gtk+2-devel", "gtkspell-devel", "libidn-devel",
+             "libsm-devel", "libx11-devel", "libxml2-devel", "libxscrnsaver-devel", "ncurses-devel", "networkmanager-devel",
+             "nspr-devel", "nss-devel", "perl", "sqlite-devel", "startup-notification-devel", "tcl-devel", "tk-devel"]
+rundeps = ["ca-certificates", "gst-plugins-good"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/pidgin/Pidgin/2.14.14/pidgin-2.14.14.tar.bz2", sha256 = "0ffc9994def10260f98a55cd132deefa8dc4a9835451cc0e982747bd458e2356" },
+]
+
+setup = '''
+%configure \
+    --enable-gtkui \
+    --enable-consoleui \
+    --enable-gtkspell \
+    --enable-vv \
+    --enable-gstreamer \
+    --enable-farstream \
+    --enable-idn \
+    --enable-avahi \
+    --enable-dbus \
+    --enable-nm \
+    --enable-perl \
+    --enable-tcl \
+    --enable-tk \
+    --enable-cap \
+    --enable-gnutls=yes \
+    --enable-nss=yes \
+    --enable-cyrus-sasl \
+    --disable-meanwhile \
+    --disable-gevolution \
+    --disable-schemas-install \
+    --disable-doxygen \
+    --with-system-ssl-certs=/etc/ssl/certs \
+    --with-tclconfig=/usr/lib \
+    --with-tkconfig=/usr/lib \
+    --with-python3=/usr/bin/python3
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+# perl's own bookkeeping, shared by every perl module: not ours to own
+find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+'''
+
+[subpackages.finch]
+summary = "Finch: console (ncurses) interface for libpurple"
+paths = ["/usr/bin/finch", "/usr/lib/finch", "/usr/share/man/man1/finch.1"]
+depends = ["pidgin-libs"]
