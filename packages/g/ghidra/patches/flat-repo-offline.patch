@@ -1,0 +1,35 @@
+--- a/build.gradle
++++ b/build.gradle
+@@ -87,12 +87,31 @@
+  *  Use flat directory-style repository if flatRepo directory is present.
+  *********************************************************************************/
+ def flatRepo = file("${DEPS_DIR}/flatRepo") 
++// FenrirOS (dkbuild, offline Gradle builds):
++// - dkbuild resolves the dependencies once on a copy of the source with the recipe's
++//   patches applied but before its setup step, so dependencies/flatRepo and its two
++//   jars (AXMLPrinter2, java-sarif-2.1-modified, which the recipe copies there in
++//   setup) do not exist yet: create the directory and empty placeholders for them
++//   (the resolution only needs the file names; setup's real jars are kept).
++// - the build's init script replaces every project repository with the offline Maven
++//   store in afterEvaluate, which would drop the flat directory (the two jars have no
++//   group or version, they are not in a Maven store): it is added in afterEvaluate too,
++//   after that.
++flatRepo.mkdirs()
++["AXMLPrinter2.jar", "java-sarif-2.1-modified.jar"].each { n ->
++	def jar = new File(flatRepo, n)
++	if (!jar.exists()) jar.createNewFile()
++}
+ if (flatRepo.isDirectory()) {
+ 	allprojects {
+ 		repositories {
+ 			mavenLocal()
+ 			mavenCentral()
+-			flatDir name: "flat", dirs:["$flatRepo"]
++		}
++		afterEvaluate {
++			repositories {
++				flatDir name: "flat", dirs:["$flatRepo"]
++			}
+ 		}
+ 	}
+ }

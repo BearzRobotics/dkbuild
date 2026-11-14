@@ -4,10 +4,15 @@
 # Ghidra Server's YAJSW, BSim's PostgreSQL, the Python wheels its debugger and
 # PyGhidra ship) are sources here, laid into dependencies/ as that script does.
 # Gradle 9.1 (Ghidra 12.2's build.gradle: "Requires at least Gradle 9.1"; 8.14.6 stopped it).
+# patches/flat-repo-offline.patch: build.gradle's flat directory (the two jars with no Maven
+# coordinates) must exist for dkbuild's one-time dependency resolution (r2: "Unable to find the
+# local maven repo", it runs before setup) and survive the offline build's repository
+# replacement; see the patch.
 # The Windows debugger parts and the Eclipse (GhidraDev) plugin are left out.
 name = "ghidra"
 version = "12.2"
-release = 2
+release = 3
+patches = ["flat-repo-offline.patch"]
 summary = "Software reverse engineering suite (disassembler, decompiler)"
 license = "Apache-2.0"
 homepage = "https://ghidra-sre.org"
