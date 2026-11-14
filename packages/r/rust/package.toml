@@ -126,6 +126,10 @@ rpath = false
 frame-pointers = true
 deny-warnings = false
 llvm-libunwind = 'system'
+# llvm-tools: off. Bootstrap's stage 2 Assemble otherwise copies llvm-cov, llvm-profdata and the
+# other LLVM tools from the LLVM's bindir into the sysroot (what rustup's llvm-tools component is),
+# and llvm22 here ships llvm-config only ("src = /usr/lib/llvm22/bin/llvm-cov": No such file, r6).
+llvm-tools = false
 
 [dist]
 vendor = false
