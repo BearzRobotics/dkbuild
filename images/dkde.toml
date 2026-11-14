@@ -15,6 +15,8 @@ label    = "FENRIROS_DKDE"
 # fight); its other parts (OpenSSH, curl) are listed instead
 packages = ["base", "openssh", "openssh-server", "curl", "linux", "live-initramfs", "dkinstaller", "firmware-linux-meta", "desktop-dkde"]
 exclude  = ["*-devel", "*-doc", "*-static"]
+# never installed, even as a dependency (apk stops with a conflict if something needs it)
+unwanted = ["dhcpcd"]
 services = ["udevd", "udev-trigger", "udev-settle", "modules", "syslogd", "seatd", "dbus", "networkmanager", "greetd"]
 output   = ["iso"]
 login     = "greetd"

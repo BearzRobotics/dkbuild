@@ -863,6 +863,11 @@ groups   = ["wheel", "video", "render"]
 password = "locked"
 ```
 
+`unwanted = ["dhcpcd"]` keeps packages out of the image even as dependencies: each is
+passed to `apk add` as `!name`, so if something in the image requires one, apk stops with a
+conflict instead of installing it (`exclude` only checks the names in `packages`). A
+package may not be in both lists.
+
 Optional keys: `autologin = "user"` (that user logs in on tty1 at boot),
 `session = "dkde-session"` (the command tty1 runs), `issue = """..."""` (the
 text of `/etc/issue`, which agetty and dkconsole print before `login:`), and

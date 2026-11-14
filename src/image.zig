@@ -29,6 +29,10 @@ pub const Image = struct {
     packages: []const []const u8,
     /// Patterns (`*` within a name) no package named in `packages` may match.
     exclude: []const []const u8 = &.{},
+    /// Packages that must not be installed, even as a dependency: passed to apk as
+    /// `!name`, so it stops with a conflict when something in the image requires
+    /// one, instead of installing it. (`exclude` only checks the names in `packages`.)
+    unwanted: []const []const u8 = &.{},
     /// dinit services started at boot.
     services: []const []const u8 = &.{},
     users: []const User = &.{},
@@ -80,11 +84,12 @@ pub fn parse(arena: Allocator, text: []const u8, diag: *Diagnostic) Error!Image 
 
 fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error!Image {
     const root = try cfg.parse(arena, text, diag);
-    try cfg.onlyKeys(arena, diag, root, &.{ "name", "arch", "packages", "exclude", "services", "users", "hostname", "label", "autologin", "session", "issue", "console", "login", "output" }, "");
+    try cfg.onlyKeys(arena, diag, root, &.{ "name", "arch", "packages", "exclude", "unwanted", "services", "users", "hostname", "label", "autologin", "session", "issue", "console", "login", "output" }, "");
     var img: Image = .{
         .name = try cfg.reqString(arena, diag, root, "name"),
         .packages = try cfg.optStrings(arena, diag, root, "packages"),
         .exclude = try cfg.optStrings(arena, diag, root, "exclude"),
+        .unwanted = try cfg.optStrings(arena, diag, root, "unwanted"),
         .services = try cfg.optStrings(arena, diag, root, "services"),
         .output = try cfg.optStrings(arena, diag, root, "output"),
     };
@@ -113,6 +118,10 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
     if (contains(img.output, "iso") and !contains(img.packages, "live-initramfs"))
         return cfg.fail(arena, diag, "the iso output needs 'live-initramfs' in packages (the live system's initramfs)", .{});
     if (img.label.len > 32) return cfg.fail(arena, diag, "label '{s}' is longer than an ISO volume label (32)", .{img.label});
+    for (img.unwanted) |u| {
+        if (!safeWord(u)) return cfg.fail(arena, diag, "unwanted '{s}': only letters, digits, '-', '_', '.', '+'", .{u});
+        if (contains(img.packages, u)) return cfg.fail(arena, diag, "package '{s}' is in both 'packages' and 'unwanted'", .{u});
+    }
     for (img.packages) |p| for (img.exclude) |x| if (glob(x, p))
         return cfg.fail(arena, diag, "package '{s}' matches exclude pattern '{s}'", .{ p, x });
     for ([_][]const []const u8{ img.packages, img.services, &.{ img.name, img.hostname, img.label } }) |list| for (list) |s| if (!safeWord(s))
@@ -176,6 +185,7 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
     try w.add(arena, &s, "apk add --root /target --initdb --arch {s} --keys-dir /target/etc/apk/keys --repository /dkrepo/Packages.adb --no-network --no-cache", .{img.arch});
     for (img.packages) |p| try w.add(arena, &s, " {s}", .{p});
     if (std.mem.eql(u8, img.console, "dkconsole") and !contains(img.packages, "dkconsole")) try s.appendSlice(arena, " dkconsole");
+    for (img.unwanted) |u| try w.add(arena, &s, " '!{s}'", .{u});
     try s.appendSlice(arena, "\n");
     try w.add(arena, &s, "echo '{s}' > /target/etc/hostname\n", .{img.hostname});
 
@@ -542,4 +552,15 @@ test "login = greetd writes initial_session and a nullok PAM file instead of the
     try std.testing.expect(std.mem.indexOf(u8, con, "greetd") == null);
     try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\npackages = [\"a\"]\noutput = [\"tar\"]\nlogin = \"gdm\"\n", &diag));
     try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\npackages = [\"a\"]\noutput = [\"tar\"]\nlogin = \"greetd\"\nautologin = \"u\"\n[[users]]\nname = \"u\"\n", &diag));
+}
+
+test "unwanted packages are passed to apk as !name and may not also be asked for" {
+    var arena_state = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena_state.deinit();
+    const a = arena_state.allocator();
+    var diag: Diagnostic = .{};
+    const img = try parse(a, "name = \"x\"\npackages = [\"a\"]\nunwanted = [\"dhcpcd\"]\noutput = [\"tar\"]\n", &diag);
+    const s = try script(a, img);
+    try std.testing.expect(std.mem.indexOf(u8, s, " a '!dhcpcd'\n") != null);
+    try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\npackages = [\"a\"]\nunwanted = [\"a\"]\noutput = [\"tar\"]\n", &diag));
 }
