@@ -1518,10 +1518,13 @@ pub fn prune(arena: Allocator, io: std.Io, opts: Options, dry_run: bool) BuildEr
         out("{s} {s}\n", .{ if (dry_run) "would remove" else "removing", f });
         if (!dry_run) d.deleteFile(io, f) catch |err| out("warning: cannot remove {s}: {s}\n", .{ f, @errorName(err) });
     }
-    if (dry_run or stale.items.len == 0) {
-        out("{d} stale package(s){s}\n", .{ stale.items.len, if (dry_run) " (dry run: nothing removed)" else "" });
+    if (dry_run) {
+        out("{d} stale package(s) (dry run: nothing removed)\n", .{stale.items.len});
         return;
     }
+    // Always rebuilt on a real run, even with nothing stale: a run killed after
+    // removing packages and before the index was written would otherwise leave
+    // an index that lists files which are gone.
     const base_root = absPath(arena, io, try std.fs.path.join(arena, &.{ opts.root, "rootfs", "dkrescue" })) catch return error.PrepareFailed;
     const work = try std.fs.path.join(arena, &.{ opts.root, "work", "prune" });
     removeBuildDir(arena, io, work);
