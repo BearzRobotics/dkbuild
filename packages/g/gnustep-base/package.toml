@@ -17,7 +17,7 @@
 # build (gnustep-make builds one kind per pass).
 name = "gnustep-base"
 version = "1.31.1"
-release = 1
+release = 2
 summary = "GNUstep Foundation library"
 license = "LGPL-2.1-or-later AND GPL-3.0-or-later"
 homepage = "https://gnustep.github.io"
@@ -35,6 +35,14 @@ environment = '''
 export GNUSTEP_INSTALLATION_DOMAIN=SYSTEM
 '''
 setup = '''
+# configure's -fconstant-string-class test (config/config.constant-string-class.m)
+# assigns @"..." (an NSString *) to a FooConstantString * and returns a
+# const char * const as char *: warnings in older clang, errors in clang 23
+# (incompatible pointer types), so the test "fails" and configure aborts with
+# "compiler does not appear to implement -fconstant-string-class". Demote them
+# to warnings (the library's own code is Objective-C that relies on the same
+# loose pointer conversions).
+export CFLAGS="$CFLAGS -Wno-error=incompatible-pointer-types -Wno-error=incompatible-pointer-types-discards-qualifiers"
 %configure \
     --with-config-file=/etc/GNUstep/GNUstep.conf \
     --with-installation-domain=SYSTEM \
