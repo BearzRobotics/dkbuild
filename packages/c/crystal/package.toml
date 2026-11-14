@@ -1,0 +1,54 @@
+# Crystal 1.22.3: the compiler (crystal: build, run, spec, docs, format, the
+# interpreter and the playground) and its standard library source
+# (/usr/share/crystal/src), the manual pages and the shell completions.
+# Written in Crystal: the first build (stage 0) runs on Alpine's Crystal
+# (crystal-bootstrap, stage0deps; wrapper crystal-seed), every later one on the
+# previous crystal package (selfhost). The compiler itself is built by the
+# makefile's `build` target (release mode) against the tree's LLVM 23.1 (found
+# through llvm-config; Crystal supports 23.1), as a program linked to the shared
+# libLLVM.
+# Optional features on: the interpreter (interpreter=1: crystal i, crystal
+# run -i; links libffi) and libxml2 in the compiler (docs_sanitizer=1: the HTML
+# sanitizer of `crystal docs`). The compiler is built without its OpenSSL and
+# zlib bindings (-Dwithout_openssl -Dwithout_zlib, upstream's own makefile
+# flags: the compiler does not need them; programs it compiles can).
+# Programs it builds need a C compiler/linker (clang) and the libraries the
+# standard library binds: Boehm GC, PCRE2, libevent, GMP (big numbers), libyaml,
+# libxml2, OpenSSL, zlib and libffi are rundeps.
+# Not done: the test suites (hours; need git and network), the API docs.
+name = "crystal"
+version = "1.22.3"
+release = 1
+summary = "The Crystal programming language"
+license = "Apache-2.0"
+homepage = "https://crystal-lang.org"
+archs = ["x86_64"]
+hostdeps = ["make", "llvm", "llvm-clang", "llvm-lld", "pkgconf", "asciidoctor", "git"]
+builddeps = ["llvm-devel", "gc-devel", "libatomic-ops-devel", "pcre2-devel", "libevent-devel", "libffi-devel",
+             "libxml2-devel", "libyaml-devel", "gmp-devel", "openssl-devel", "zlib-ng-compat-devel", "linux-headers"]
+stage0deps = ["crystal-bootstrap"]
+rundeps = ["llvm-clang", "llvm-lld", "gc-devel", "libatomic-ops-devel", "pcre2-devel", "libevent-devel", "libffi-devel",
+           "libxml2-devel", "libyaml-devel", "gmp-devel", "openssl-devel", "zlib-ng-compat-devel"]
+options = ["!check", "!lto", "selfhost", "jobs:8"]
+
+source = [
+    { url = "https://github.com/crystal-lang/crystal/archive/refs/tags/1.22.3.tar.gz", sha256 = "90f2613cc004d5734fe0a0364c3fcac3918e3a50e357ae33bdcb506ac44fcbb1" },
+]
+
+environment = '''
+export HOME=/tmp
+# the Crystal that builds this one: the previous package's, or (stage 0) Alpine's
+if [ -x /usr/bin/crystal ] && [ ! -d /usr/lib/crystal-bootstrap ]; then
+    export CRYSTAL=/usr/bin/crystal
+else
+    export CRYSTAL=/usr/lib/crystal-bootstrap/crystal-seed
+fi
+export LLVM_CONFIG=/usr/bin/llvm-config
+'''
+build = '''
+make build PREFIX=/usr CRYSTAL="$CRYSTAL" interpreter=1 docs_sanitizer=1 \
+    CRYSTAL_CONFIG_BUILD_COMMIT=1.22.3 threads=$jobs
+'''
+install = '''
+make install PREFIX=/usr DESTDIR="$pkgdir" CRYSTAL="$CRYSTAL" interpreter=1 docs_sanitizer=1
+'''
