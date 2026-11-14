@@ -1,0 +1,35 @@
+# Adapted from Chimera Linux cports: user/opam/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# opam 2.6.1, the OCaml package manager, from the opam-full release tarball:
+# it carries the sources of all the OCaml libraries opam links (--with-vendored-deps)
+# and the mccs solver (--with-mccs: the built-in dependency solver, so opam
+# needs no external one), so the build is offline. It is not a compiler
+# switch: `opam init` downloads sources and builds at the user's request (the
+# tools it calls are the dependencies below; the OCaml compiler is the
+# user's choice, ocaml or an opam switch).
+name = "opam"
+version = "2.6.1"
+release = 1
+summary = "OCaml package manager"
+license = "LGPL-2.1-only WITH OCaml-LGPL-linking-exception"
+homepage = "https://opam.ocaml.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["ocaml", "make", "curl", "unzip", "patch"]
+builddeps = ["ocaml", "linux-headers"]
+rundeps = ["bash", "bubblewrap", "curl", "make", "libarchive", "rsync", "unzip", "patch"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://github.com/ocaml/opam/releases/download/2.6.1/opam-full-2.6.1.tar.gz", sha256 = "ebbaffa4192e69d612d2c1a5fc5a15b32730322d7e34bc4456ad4076bb987007" },
+]
+
+setup = '''
+%configure --with-vendored-deps --with-mccs
+'''
+build = '''
+make all
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/opam/LICENSE"
+'''
