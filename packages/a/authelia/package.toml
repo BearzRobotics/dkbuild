@@ -51,6 +51,18 @@ if grep -q '"packageManager"' package.json; then exit 1; fi
 sed -i 's/^    "pnpm": "12"$/    "pnpm": ">=11"/' package.json
 grep -q '"pnpm": ">=11"' package.json
 echo 'pm-on-fail=ignore' >> .npmrc
+# pnpm installs the native packages that have a libc field (lightningcss, rolldown, tailwind's
+# oxide, rollup...) for the platform it detects, and the install here left out the musl ones:
+# vite then failed with "Cannot find module '../lightningcss.linux-x64-musl.node'" (authelia r1).
+# Say it explicitly: this system is Linux on musl.
+case $(uname -m) in aarch64) pcpu=arm64 ;; *) pcpu=x64 ;; esac
+printf '\n' >> pnpm-workspace.yaml
+cat >> pnpm-workspace.yaml <<EOF2
+supportedArchitectures:
+  os: [linux]
+  cpu: [$pcpu]
+  libc: [musl]
+EOF2
 # --config.trustLockfile=true: pnpm 11 re-checks every lockfile entry against its supply-chain
 # policies (minimumReleaseAge, trustPolicy) and for that asks the registry for each package's
 # metadata; the offline registry (npmdeps) serves tarballs only and answers metadata with 404
