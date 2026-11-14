@@ -1,0 +1,20 @@
+# pandocfilters from PyPI.
+name = "python-pandocfilters"
+version = "1.5.1"
+release = 1
+summary = "Utilities for writing pandoc filters in python"
+license = "BSD-3-Clause"
+homepage = "http://github.com/jgm/pandocfilters"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/70/6f/3dd4940bbe001c06a65f88e36bad298bc7a0de5036115639926b0c5c0458/pandocfilters-1.5.1.tar.gz", sha256 = "002b4a555ee4ebc03f8b66307e287fa492e4a77b4ea14d3f934328297bb4939e" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pandocfilters/LICENSE"
+'''
