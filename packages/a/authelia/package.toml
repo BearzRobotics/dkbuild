@@ -15,7 +15,8 @@
 # expression that tar never expands, so they exclude nothing; copied as is).
 # Source edit: package.json's packageManager field (pnpm 12) is removed so the
 # system pnpm runs as it is instead of trying to download that version
-# (same as vikunja).
+# (same as vikunja), and engines.pnpm ("12") is relaxed to ">=11" because pnpm
+# refuses to run at all under a version that does not match it.
 # Installed inert: the dinit service is shipped, not enabled; no
 # configuration (config.template.yml is only a sample in /usr/share/doc), no
 # secrets, no users database; the service fails to start until the
@@ -45,6 +46,10 @@ setup = '''
 cd web
 sed -i '/^  "packageManager": /d' package.json
 if grep -q '"packageManager"' package.json; then exit 1; fi
+# engines.pnpm = "12" is enforced as an error (ERR_PNPM_UNSUPPORTED_ENGINE: the
+# system pnpm is 11.25.0); the lockfile is format 9.0, which pnpm 11 reads
+sed -i 's/^    "pnpm": "12"$/    "pnpm": ">=11"/' package.json
+grep -q '"pnpm": ">=11"' package.json
 echo 'pm-on-fail=ignore' >> .npmrc
 pnpm install --frozen-lockfile --ignore-scripts
 '''
