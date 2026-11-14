@@ -1,0 +1,74 @@
+# Adapted from Chimera Linux cports: main/chez-scheme/template.py.
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Chez Scheme 10.4.1 (Cisco's, the R6RS implementation: scheme, petite,
+# scheme-script). Standalone, not split out of racket: Racket builds its own fork
+# of Chez (src/ChezScheme, with Racket's changes) inside its build and installs
+# it only as part of the Racket runtime, so there is nothing to split; this
+# is the upstream release.
+# Bootstrap: the tarball has the portable-bytecode boot files (boot/pb); configure
+# with --machine=ta6le (x86_64) or tarm64le (aarch64) builds the pb machine first
+# and then the native one from it, so no system Chez is needed (as Chimera).
+# Libraries: system libffi (--enable-libffi), lz4 and zlib (instead of the bundled copies;
+# LZ4=-llz4 ZLIB=-lz), ncurses (the expression editor), X11.
+# Patches (Chimera's): always-ncurses.patch (configure: link ncurses also with the pb machine),
+# no_ub.patch (the C self test shifted into the sign bit: undefined behaviour under clang;
+# two test cases are replaced by `1`, no code of the system changes).
+# Chimera's disable-iconv-tests.patch (tests incompatible with musl's iconv) is not applied:
+# it only edits the test suite, and the check is off (the test suite takes long).
+# Chimera deletes libkernel.a, main.o and scheme.h as "assumed unnecessary"; they are
+# the embedding interface (scheme.h, the kernel library), so they are kept, in -devel and
+# -static. Hard links of the install are made symbolic, as Chimera does.
+name = "chez-scheme"
+version = "10.4.1"
+release = 1
+summary = "Compiler and runtime system for R6RS Scheme"
+license = "Apache-2.0"
+homepage = "https://cisco.github.io/ChezScheme"
+archs = ["x86_64", "aarch64"]
+patches = ["always-ncurses.patch", "no_ub.patch"]
+hostdeps = ["make"]
+builddeps = ["libffi-devel", "libx11-devel", "lz4-devel", "ncurses-devel", "zlib-ng-compat-devel"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://github.com/cisco/ChezScheme/releases/download/v10.4.1/csv10.4.1.tar.gz", sha256 = "2e74952db7bc177f0c3602e2217a341ba677d733eec4cd7726418c3a4e1ef308" },
+]
+
+environment = '''
+case "$arch" in
+    aarch64) machine=tarm64le ;;
+    x86_64) machine=ta6le ;;
+    *) echo "chez-scheme: no machine type for $arch" >&2; exit 1 ;;
+esac
+export ZUO_JOBS=$jobs
+'''
+setup = '''
+./configure --prefix=/usr --installprefix=/usr --temproot="$pkgdir" --machine=$machine \
+    --enable-libffi LZ4=-llz4 ZLIB=-lz
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make install
+d="$pkgdir/usr/lib/csv$version/$machine"
+# the hard links become symbolic links (Chimera)
+for pair in scheme-script.boot:scheme.boot scheme:scheme-script petite:scheme-script; do
+    dst=${pair%%:*}; src=${pair#*:}
+    rm -f "$d/$dst"
+    ln -s $src "$d/$dst"
+done
+# the examples go with the documentation
+install -dm755 "$pkgdir/usr/share/doc/chez-scheme"
+mv "$pkgdir/usr/lib/csv$version/examples" "$pkgdir/usr/share/doc/chez-scheme/"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/chez-scheme/LICENSE"
+install -Dm644 NOTICE "$pkgdir/usr/share/licenses/chez-scheme/NOTICE"
+'''
+
+[subpackages.devel]
+summary = "Chez Scheme embedding header and objects"
+paths = ["/usr/include", "/usr/lib/*.so", "/usr/lib/pkgconfig", "/usr/lib/csv10.4.1/*/scheme.h", "/usr/lib/csv10.4.1/*/main.o"]
+
+[subpackages.static]
+summary = "Chez Scheme kernel library"
+paths = ["/usr/lib/*.a", "/usr/lib/csv10.4.1/*/libkernel.a"]
