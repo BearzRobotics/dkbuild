@@ -1,0 +1,83 @@
+# Odin: the data-oriented systems language (compiler `odin`, the base and core
+# libraries, the vendor libraries). Upstream has no numbered releases: a tag
+# dev-YYYY-MM[letter] is a monthly snapshot (the current stable one), so this
+# recipe's version is the tag without "dev-" and with dots: 2026.11a is
+# dev-2026-11a.
+# LLVM: Odin 2026-11 supports LLVM 17 to 22 (build_odin.sh), not the tree's
+# 23.1, so it builds against llvm22 (static libraries, /usr/lib/llvm22, the one
+# Zig and Rust use) and links them statically: the odin binary needs no libLLVM
+# at run time. llvm22 is built with libc++, as the rest of the tree.
+# Source edit: build_odin.sh puts the build month (`date +%Y-%m`) in `odin
+# version` when it is not run in a git checkout: the tag's month is fixed
+# instead, so the build is reproducible.
+# Run time: odin compiles to objects and links with clang (rundeps llvm-clang,
+# llvm-lld), and finds base, core and vendor beside its own executable, after
+# resolving symlinks: all in /usr/lib/odin, /usr/bin/odin points at it.
+# Vendor libraries: the release carries prebuilt Windows, macOS, WASM and
+# glibc-Linux binaries (*.lib, *.dll, *.a, *.so, *.o): none can be used here
+# and all are deleted. The Linux libraries whose C source is in the tree are
+# built by upstream's own scripts (stb, cgltf, miniaudio, kb_text_shape) and
+# by this recipe (box3d's src, with the CMake-less loop of its build.sh). The
+# vendor packages that bind an external library (raylib, glfw, SDL2/3, curl,
+# lua, ENet, box2d, wgpu, OpenEXRCore, portmidi, commonmark, zlib, LZ4) need
+# that library's own Linux build, which the release ships only for glibc:
+# these vendor packages do not work until each is packaged for the tree and
+# Odin's foreign imports point at it (not done). `odin report`, the core
+# library, vendor:stb, vendor:cgltf, vendor:miniaudio, vendor:kb_text_shape,
+# vendor:box3d, vendor:vulkan, x11, egl, OpenGL, microui, nanovg and fontstash
+# (pure Odin or built here) work.
+# Not done: Odin's tests; aarch64 (box3d's library path is amd64 only).
+name = "odin"
+version = "2026.11a"
+release = 1
+summary = "The Odin programming language"
+license = "BSD-3-Clause"
+homepage = "https://odin-lang.org"
+archs = ["x86_64"]
+hostdeps = ["llvm22", "llvm-clang", "llvm-lld", "llvm-libcxx-devel", "make"]
+builddeps = ["llvm22", "llvm-libcxx-devel", "llvm-libunwind-devel", "zlib-ng-compat-devel", "zlib-ng-compat-static",
+             "zstd-devel", "zstd-static"]
+rundeps = ["llvm-clang", "llvm-lld"]
+options = ["!check", "!lto", "!strip"]
+
+source = [
+    { url = "https://github.com/odin-lang/Odin/archive/refs/tags/dev-2026-11a.tar.gz", sha256 = "f8ab36b8d6045d7ae953b60e30edea80d2e616da44b0712d73dd0688d684f278" },
+]
+
+environment = '''
+export LLVM_CONFIG=/usr/lib/llvm22/bin/llvm-config
+export CC=clang CXX=clang++
+'''
+setup = '''
+# the version string: the tag's month, not the date of the build
+sed -i 's|GIT_DATE=$(date +"%Y-%m")|GIT_DATE=2026-11|' build_odin.sh
+grep -q 'GIT_DATE=2026-11' build_odin.sh
+# prebuilt binaries of other systems (and glibc): unusable, deleted
+find vendor -type f \( -name '*.lib' -o -name '*.dll' -o -name '*.dylib' -o -name '*.a' -o -name '*.so' -o -name '*.so.*' -o -name '*.o' \) -delete
+find vendor -type d -name darwin -exec rm -rf {} + 2>/dev/null || true
+rm -f LLVM-C.dll
+'''
+build = '''
+sh build_odin.sh release
+# the vendor libraries that have their source in the tree
+export ODIN_ROOT=$PWD
+for s in vendor/stb/src/build_stb.sh vendor/cgltf/src/build_cgltf.sh vendor/miniaudio/src/build_miniaudio.sh \
+         vendor/kb_text_shape/src/build_unix.sh; do
+    sh "$s" unix 2>/dev/null || sh "$s"
+done
+# box3d (C17): what its build.sh does for Linux
+( cd vendor/box3d/src && mkdir -p build ../lib/linux-amd64 &&
+  for f in src/*.c; do clang -c -O2 -std=c17 -fPIC -Iinclude "$f" -o "build/$(basename "${f%.c}").o"; done &&
+  ar rcs ../lib/linux-amd64/libbox3d.a build/*.o && rm -rf build )
+'''
+install = '''
+d="$pkgdir/usr/lib/odin"
+mkdir -p "$d" "$pkgdir/usr/bin"
+install -m755 odin "$d/odin"
+cp -a base core vendor shared "$d/"
+# the C sources of the vendor libraries stay (the libraries are built); the
+# docs and the example are for reading
+cp -a examples "$d/"
+ln -s /usr/lib/odin/odin "$pkgdir/usr/bin/odin"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/odin/LICENSE"
+'''
