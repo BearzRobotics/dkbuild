@@ -1,0 +1,21 @@
+# scikit-learn from PyPI (meson-python, Cython; OpenMP from the tree's openmp package).
+name = "python-scikit-learn"
+version = "1.9.1"
+release = 1
+summary = "A set of python modules for machine learning and data mining"
+license = "BSD-3-Clause"
+homepage = "https://pypi.org/project/scikit-learn"
+hostdeps = ["python", "python-meson-python", "python-cython", "python-numpy", "python-scipy", "meson", "ninja", "pkgconf"]
+builddeps = ["python-devel", "python-numpy", "openmp-devel"]
+rundeps = ["python", "python-numpy", "python-scipy", "python-joblib", "python-narwhals", "python-threadpoolctl"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/d2/eb/eaf5e07fcc0da7149b0e084f24e54edd7441b9a89ce7e034032ae97fe3a0/scikit_learn-1.9.1.tar.gz", sha256 = "629cada3e33e2b9bf376cdc7614a47a4140b8aedc1d836579e359736fbd82977" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/python-scikit-learn/COPYING"
+'''
