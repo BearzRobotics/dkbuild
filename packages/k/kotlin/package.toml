@@ -1,0 +1,30 @@
+# Kotlin 2.4.21 compiler (kotlinc, kotlinc-jvm, kotlinc-js, kotlinc-wasm,
+# kotlin, kapt), installed from JetBrains' compiler release zip. The zip is
+# platform-independent JVM jars (the compiler is written in Kotlin and built
+# with Gradle against a Kotlin bootstrap of its own, so there is no source
+# build short of a multi-hundred-megabyte Gradle bootstrap); like the other
+# JVM tools of this tree it is taken as released. Nothing is compiled or
+# patched. Kotlin/Native is a separate download and is not part of this zip.
+name = "kotlin"
+version = "2.4.21"
+release = 1
+summary = "Kotlin compiler (JVM, JS and Wasm front ends)"
+license = "Apache-2.0"
+homepage = "https://kotlinlang.org"
+rundeps = ["openjdk25", "bash"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/JetBrains/kotlin/releases/download/v2.4.21/kotlin-compiler-2.4.21.zip", sha256 = "7cc140e76daf416a0424a5557f99afd7ca89ebd463ea1101261e3e01c33e75cd" },
+]
+
+install = '''
+home=/usr/lib/kotlin
+d="$pkgdir$home"
+rm -f bin/*.bat
+install -dm755 "$d" "$pkgdir/usr/bin"
+cp -r bin lib license build.txt "$d/"
+# the scripts resolve their own symlinks (KOTLIN_HOME = the real directory)
+for t in "$d"/bin/*; do ln -s $home/bin/$(basename "$t") "$pkgdir/usr/bin/$(basename "$t")"; done
+install -Dm644 license/LICENSE.txt "$pkgdir/usr/share/licenses/kotlin/LICENSE.txt"
+'''
