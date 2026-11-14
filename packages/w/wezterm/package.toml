@@ -1,0 +1,54 @@
+# wezterm: GPU-accelerated terminal emulator and multiplexer (Rust, Lua
+# configuration). The release is the dated 20240203-110809-5046fc22 (upstream
+# only tags nightlies since; this is GitHub's "Latest"), built from the
+# -src tarball the maintainers ask for (it carries the .tag version file and
+# the bundled C dependencies in deps/: freetype, harfbuzz, libpng, zlib are
+# compiled from them, libssh and libz-sys vendored by their -sys crates).
+# Patch time-0.3.31.patch (Cargo.lock): time 0.3.31 does not compile with
+# any Rust since 1.80 (a type inference regression that time fixed in 0.3.35),
+# so the lock file is moved to time 0.3.55 (`cargo update -p time`: time-core,
+# time-macros, deranged, num-conv and, through them, serde 1.0.229, syn 3 and
+# proc-macro2 move too; the patch is that lock diff and applies before the
+# crate fetch).
+# Four programs: wezterm (CLI), wezterm-gui, wezterm-mux-server and
+# strip-ansi-escapes; Wayland and X11 (libxcb, xkbcommon-x11) both.
+# Not installed: terminfo (ncurses ships wezterm's entry), the Nautilus
+# python extension, and the shell integration script is in
+# /usr/share/wezterm/shell-integration/ instead of /etc/profile.d, so
+# no shell sources it until the user does (upstream's .deb puts it in
+# /etc/profile.d).
+name = "wezterm"
+version = "20240203_110809_5046fc22"
+release = 1
+summary = "GPU-accelerated cross-platform terminal emulator and multiplexer"
+license = "MIT"
+homepage = "https://wezterm.org"
+patches = ["time-0.3.31.patch"]
+hostdeps = ["rust", "cmake", "ninja", "pkgconf", "perl", "python"]
+builddeps = ["fontconfig-devel", "freetype-devel", "libx11-devel", "libxcb-devel", "libxkbcommon-devel", "mesa-devel", "openssl-devel", "wayland-devel", "xcb-util-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel", "xcb-util-wm-devel", "zlib-ng-compat-devel"]
+rundeps = ["mesa"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/wezterm/wezterm/releases/download/20240203-110809-5046fc22/wezterm-20240203-110809-5046fc22-src.tar.gz", sha256 = "df60b1081d402b5a9239cc4cef16fc699eab68bbbeac9c669cb5d991a6010b2c" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs -p wezterm -p wezterm-gui -p wezterm-mux-server -p strip-ansi-escapes
+'''
+install = '''
+for b in wezterm wezterm-gui wezterm-mux-server strip-ansi-escapes; do
+    install -Dm755 target/release/$b "$pkgdir/usr/bin/$b"
+done
+install -Dm755 assets/open-wezterm-here "$pkgdir/usr/bin/open-wezterm-here"
+install -Dm644 assets/wezterm.desktop "$pkgdir/usr/share/applications/org.wezfurlong.wezterm.desktop"
+install -Dm644 assets/wezterm.appdata.xml "$pkgdir/usr/share/metainfo/org.wezfurlong.wezterm.appdata.xml"
+install -Dm644 assets/icon/terminal.png "$pkgdir/usr/share/icons/hicolor/128x128/apps/org.wezfurlong.wezterm.png"
+install -Dm644 assets/shell-completion/bash "$pkgdir/usr/share/bash-completion/completions/wezterm"
+install -Dm644 assets/shell-completion/zsh "$pkgdir/usr/share/zsh/site-functions/_wezterm"
+install -Dm644 assets/shell-integration/wezterm.sh "$pkgdir/usr/share/wezterm/shell-integration/wezterm.sh"
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/wezterm/LICENSE.md"
+'''
