@@ -7,22 +7,27 @@
 # packaging/build.sh also writes a greetd login screen and PAM files; this
 # system logs in on dkconsole and has no PAM, so those are not part of this package.
 #
+# 0.2.0: archives (libarchive), MTP/PTP, servers, Network, Online accounts; the source tarball
+# is named dkde-v0.2.0.tar.gz.
 # NOT BUILT YET: needs gtk4, gtk4-layer-shell, wayland, cairo, pango, glib and the
 # Zig dependency fetch to have been run (`dkbuild fetch dkde`).
 name = "dkde"
-version = "0.1.0"
-release = 2
+version = "0.2.0"
+release = 1
 summary = "A Wayland desktop shell in Zig on GTK4 and labwc"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkde"
 archs = ["x86_64"]
 hostdeps = ["zig", "pkgconf"]
-builddeps = ["gtk4-devel", "gtk4-layer-shell-devel", "wayland-devel", "wayland-protocols", "glib-devel", "cairo-devel", "pango-devel", "harfbuzz-devel", "gdk-pixbuf-devel", "graphene-devel"]
-rundeps = ["labwc", "seatd", "dbus", "polkit"]
+builddeps = ["gtk4-devel", "gtk4-layer-shell-devel", "wayland-devel", "wayland-protocols", "glib-devel", "cairo-devel", "pango-devel", "harfbuzz-devel", "gdk-pixbuf-devel", "graphene-devel", "libarchive-devel", "fontconfig-devel"]
+# gvfs: Files' phones/cameras (MTP, PTP) and servers (sftp, ftp, smb); gnome-online-accounts:
+# Settings' read-only Google calendars. NetworkManager is optional for Settings > Network
+# (without it: wpa_cli and dhcpcd.conf), so it is not required here.
+rundeps = ["labwc", "seatd", "dbus", "polkit", "gvfs", "gnome-online-accounts"]
 options = ["zigdeps", "!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/dkde/releases/download/v0.1.0/dkde-0.1.0.tar.gz", sha256 = "a0a579eb50a20f2feb7bf571a0aa465947b3807366bb846a80579b8098122f54" },
+    { url = "https://github.com/BearzRobotics/dkde/releases/download/v0.2.0/dkde-v0.2.0.tar.gz", sha256 = "4b8b380112c3adb22a9477a406ff1f92fb1b5007349c21f44fbeff5514301342" },
 ]
 
 install = '''
