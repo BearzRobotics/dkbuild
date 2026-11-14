@@ -1,0 +1,44 @@
+# Imported from Chimera Linux cports: main/foot/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# terminfo-base-name=foot-extra, as Chimera: ncurses already ships the "foot"
+# entry, so foot's own (newer, with extra capabilities) are installed as
+# foot-extra / foot-direct-extra in the foot-terminfo subpackage, and the
+# default TERM stays foot. Not carried over: Chimera's dinit user service (this
+# tree has no per-user service manager; foot --server is started by the
+# session, nothing is enabled). libutempter is not packaged, so no utmp
+# logging (utmp-backend=none); everything else (IME, grapheme clustering,
+# themes, docs, completions) is on.
+name = "foot"
+version = "1.28.0"
+release = 1
+summary = "Wayland terminal emulator"
+license = "MIT"
+homepage = "https://codeberg.org/dnkl/foot"
+hostdeps = ["meson", "ncurses", "pkgconf", "scdoc", "wayland-protocols"]
+builddeps = ["fcft-devel", "fontconfig-devel", "freetype-devel", "libinput-devel", "libxkbcommon-devel", "ncurses-devel", "pixman-devel", "tllist", "utf8proc-devel", "wayland-devel", "wayland-protocols"]
+options = ["!check"]
+
+source = [
+    { url = "https://codeberg.org/dnkl/foot/archive/1.28.0.tar.gz", sha256 = "4296be402b5684d049534598e69db92b918f92beac9dab76b585207045f0b037" },
+]
+
+setup = '''
+%meson \
+    -Dterminfo-base-name=foot-extra \
+    -Dgrapheme-clustering=enabled \
+    -Ddocs=enabled \
+    -Dutmp-backend=none \
+    -Dtests=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+mkdir -p "$pkgdir/usr/share/licenses/foot"
+mv "$pkgdir/usr/share/doc/foot/LICENSE" "$pkgdir/usr/share/licenses/foot/LICENSE"
+'''
+
+[subpackages.terminfo]
+summary = "foot extra terminfo data"
+paths = ["/usr/share/terminfo"]
