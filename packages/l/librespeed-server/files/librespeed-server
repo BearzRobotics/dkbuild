@@ -1,0 +1,10 @@
+# LibreSpeed speed test server. Not enabled by default (README.FenrirOS): it
+# needs /etc/librespeed/settings.toml (example in /usr/share/doc/librespeed-server).
+type = process
+command = /usr/bin/librespeed-server -c /etc/librespeed/settings.toml
+run-as = librespeed
+working-dir = /var/lib/librespeed
+logfile = /var/log/librespeed-server.log
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

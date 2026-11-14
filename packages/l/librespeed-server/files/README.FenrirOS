@@ -1,0 +1,13 @@
+LibreSpeed server on FenrirOS
+=============================
+
+Installed inert: the service is not enabled and there is no configuration.
+
+    cp /usr/share/doc/librespeed-server/settings.toml.example /etc/librespeed/settings.toml
+    $EDITOR /etc/librespeed/settings.toml
+    dinitctl enable librespeed-server
+
+It serves the speed test on port 8989 (listen_port). The statistics page
+stays disabled until you set statistics_password; the example keeps results
+in memory (database_type="memory"). Put it behind a reverse proxy for TLS
+or set enable_tls and the certificate paths.

@@ -1,0 +1,48 @@
+# librespeed-server: the LibreSpeed speed test backend (librespeed/speedtest-go,
+# the Go rewrite of the PHP backend: serves the HTML5 speed test, the
+# download/upload/ping/getIP endpoints and optional result statistics).
+# Chosen over the PHP backend (librespeed/speedtest) because it is a single
+# static binary with the front end embedded; the client librespeed-cli is a
+# separate upstream project and not part of this package.
+# Go, modules from the store (godeps), pure Go (CGO off: SQLite via modernc),
+# as upstream's Dockerfile builds it. The web assets (web/assets) are embedded
+# by the source (go:embed), nothing to build.
+# Installed inert (docs/requests.md): the dinit service is shipped, not
+# enabled. The example settings.toml is only in /usr/share/doc; upstream's
+# default statistics_password "PASSWORD" is refused by the program itself
+# (statistics stay disabled until a password is set), and the example sets
+# no password.
+name = "librespeed-server"
+version = "1.1.6"
+release = 1
+summary = "LibreSpeed self-hosted HTML5 speed test server (Go backend)"
+license = "LGPL-3.0-or-later"
+homepage = "https://github.com/librespeed/speedtest-go"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/librespeed/speedtest-go/archive/refs/tags/v1.1.6.tar.gz", sha256 = "ca7c21db3f5dce7f305b09b9e881e90d50980e8b506c161643402f93ac4ba7f2" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+go build -ldflags "-s -w" -o librespeed-server .
+'''
+install = '''
+install -Dm755 librespeed-server "$pkgdir/usr/bin/librespeed-server"
+# example settings: upstream's file with the sample statistics password
+# commented out (the server then keeps statistics disabled) and the database
+# file moved to the service's state directory
+sed -e 's|^statistics_password=.*|# statistics_password=""   # set one to enable the statistics page|' \
+    -e 's|^database_file="speedtest.db"|database_file="/var/lib/librespeed/speedtest.db"|' \
+    settings.toml > settings.toml.example
+install -Dm644 settings.toml.example "$pkgdir/usr/share/doc/librespeed-server/settings.toml.example"
+install -Dm644 $pkgfiles/librespeed-server "$pkgdir/etc/dinit.d/librespeed-server"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/librespeed-server.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/librespeed-server.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/librespeed-server/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/librespeed-server/LICENSE"
+'''
