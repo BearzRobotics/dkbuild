@@ -30,7 +30,7 @@ rundeps = ["binutils"]
 options = ["!check", "!lto", "!strip", "selfhost"]
 
 source = [
-    { url = "https://gitlab.com/freepascal.org/fpc/source/-/archive/release_3_2_4/source-release_3_2_4.tar.gz", sha256 = "d740b5ee5ea8afad263e88f9db27885ab9c228f1f02829695f4c2f9ee866b2b0", name = "fpc-3.2.4.src.tar.gz" },
+    { url = "https://gitlab.com/freepascal.org/fpc/source/-/archive/release_3_2_4/source-release_3_2_4.tar.gz", sha256 = "d740b5ee5ea8afad263e88f9db27885ab9c228f1f02829695f4c2f9ee866b2b0" },
 ]
 
 environment = '''
