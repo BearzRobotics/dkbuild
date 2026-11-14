@@ -1,0 +1,28 @@
+# log4cplus: a C++ logging library modeled on Java's log4j (appenders, layouts,
+# hierarchical loggers, a socket appender and logging server). Needed by ISC
+# Kea. Autotools, shared and static libraries (the static ones become
+# log4cplus-static); wide-character (UNICODE) support is on by default in
+# upstream's configure and is kept. The test suite is not run.
+name = "log4cplus"
+version = "2.2.1"
+release = 1
+summary = "C++ logging library"
+license = "BSD-2-Clause AND Apache-2.0"
+homepage = "https://github.com/log4cplus/log4cplus"
+hostdeps = ["make", "pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/log4cplus/log4cplus/releases/download/REL_2_2_1/log4cplus-2.2.1.tar.xz", sha256 = "4b2801aedcdb32476a6f139a93ca01c9dac5158682516ca5a02df68c600292c6" },
+]
+
+setup = '''
+%configure --enable-shared --enable-static
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/log4cplus/LICENSE"
+'''
