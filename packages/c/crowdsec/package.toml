@@ -43,11 +43,13 @@ sed -i -e 's/^  daemonize: true/  daemonize: false/' \
     -e 's/group: nogroup/group: nobody/' config/config.yaml
 grep -q 'daemonize: false' config/config.yaml
 make build BUILD_VERSION=v$version BUILD_TAG=dkbuild BUILD_TIMESTAMP=1970-01-01_00:00:00
-test -x crowdsec -a -x cscli
+# the Makefile builds in the command directories, not at the top of the source
+test -x cmd/crowdsec/crowdsec
+test -x cmd/crowdsec-cli/cscli
 '''
 install = '''
-install -Dm755 crowdsec "$pkgdir/usr/bin/crowdsec"
-install -Dm755 cscli "$pkgdir/usr/bin/cscli"
+install -Dm755 cmd/crowdsec/crowdsec "$pkgdir/usr/bin/crowdsec"
+install -Dm755 cmd/crowdsec-cli/cscli "$pkgdir/usr/bin/cscli"
 for d in cmd/notification-*; do
     n=${d#cmd/notification-}
     install -Dm755 $d/notification-$n "$pkgdir/usr/lib/crowdsec/plugins/notification-$n"
