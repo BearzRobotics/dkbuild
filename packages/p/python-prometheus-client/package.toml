@@ -1,0 +1,20 @@
+# prometheus-client from PyPI.
+name = "python-prometheus-client"
+version = "0.26.0"
+release = 1
+summary = "Python client for the Prometheus monitoring system."
+license = "Apache-2.0 AND BSD-2-Clause"
+homepage = "https://github.com/prometheus/client_python"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/52/73/f1334c29c2af4cd9dba6c7817e61b611bd0215e2eb5565c6064a4de18802/prometheus_client-0.26.0.tar.gz", sha256 = "04a91bcf94e2cf74a44a1a874d651a2e853ed354b6e822f3b7487751465d5c2b" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-prometheus-client/LICENSE"
+'''
