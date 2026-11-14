@@ -1,0 +1,48 @@
+# Adapted from Chimera Linux cports: user/ocaml/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# OCaml 5.5.2: the native-code compilers (ocamlopt), the bytecode compiler
+# and runtime (ocamlc, ocamlrun, toplevel), ocamldoc, the standard library
+# and the runtime libraries (libasmrun.a, libasmrun_pic.a, libasmrun_shared.so,
+# libcamlrun*.a: static and shared). Bootstrapping needs no seed: the source
+# release carries the bytecode compiler's boot executables (boot/ocamlc).
+# Optional features: zstd-compressed marshalling (libzstd), ocamltest is
+# built (--enable-ocamltest; the test suite itself is not run). Code is
+# compiled position-independent (--with-pic) so OCaml objects link into PIE
+# executables and shared libraries. Libraries go to /usr/lib/ocaml, as
+# Chimera and Alpine. The assembler is the C compiler (clang) as Chimera.
+# Not enabled: flambda (--enable-flambda): it makes every build of OCaml
+# code slower and is a per-user choice; not built in Chimera or Alpine.
+name = "ocaml"
+version = "5.5.2"
+release = 1
+summary = "Implementation of the OCaml language"
+license = "LGPL-2.1-only WITH OCaml-LGPL-linking-exception"
+homepage = "https://ocaml.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["make"]
+builddeps = ["zstd-devel", "linux-headers"]
+rundeps = ["zstd-devel"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://github.com/ocaml/ocaml/releases/download/5.5.2/ocaml-5.5.2.tar.gz", sha256 = "bb3ffef5e4fce4f04915b9f254f570663311e1f227fd669aa87a5ef7de9a1523" },
+]
+
+environment = '''
+export ASPP="cc -c" AS="cc -c"
+'''
+setup = '''
+%configure --enable-ocamltest --libdir=/usr/lib/ocaml --with-pic
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ocaml/LICENSE"
+# consistency (Chimera): ocamldoc is the native one
+if [ -e "$pkgdir/usr/bin/ocamldoc.opt" ]; then
+    mv "$pkgdir/usr/bin/ocamldoc" "$pkgdir/usr/bin/ocamldoc.byte"
+    ln -s ocamldoc.opt "$pkgdir/usr/bin/ocamldoc"
+fi
+'''
