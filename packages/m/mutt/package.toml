@@ -1,0 +1,52 @@
+# Mutt: the original terminal mail reader (neomutt is the fork, packaged
+# separately). With every feature whose libraries are in the tree: IMAP, POP,
+# SMTP, OpenSSL TLS, GPGME (PGP/S-MIME), Autocrypt (SQLite), the sidebar,
+# compressed folders, IDN (libidn2), SASL (Cyrus libsasl), GSSAPI (Heimdal),
+# DEFLATE for IMAP (zlib), header cache in LMDB, ncurses.
+# Left out, with reasons: GnuTLS (Mutt supports one TLS library: OpenSSL),
+# GNU SASL (one SASL library: Cyrus), and the Kyoto/Tokyo Cabinet, QDBM, GDBM
+# and Berkeley DB header-cache backends (Mutt uses one: LMDB; none of those
+# libraries is in the tree), Mixmaster (not in the tree), the external setgid
+# dotlock (the internal locking is used: nothing is installed setgid).
+name = "mutt"
+version = "2.4.3"
+release = 1
+summary = "Terminal mail reader"
+license = "GPL-2.0-or-later"
+homepage = "http://www.mutt.org"
+hostdeps = ["gettext", "perl", "pkgconf"]
+builddeps = ["gettext-devel", "gpgme-devel", "heimdal-devel", "libidn2-devel", "libsasl-devel", "lmdb-devel", "ncurses-devel",
+             "openssl-devel", "sqlite-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://ftp.osuosl.org/pub/mutt/mutt-2.4.3.tar.gz", sha256 = "ce9154e3afede622d98b90a22c87d06f32051c930a9afb2b7ef41656c4dbc948" },
+]
+
+setup = '''
+%configure \
+    --enable-autocrypt \
+    --enable-compressed \
+    --enable-gpgme \
+    --enable-hcache \
+    --enable-imap \
+    --enable-pop \
+    --enable-sidebar \
+    --enable-smtp \
+    --with-curses \
+    --with-gss \
+    --with-idn2 \
+    --with-lmdb \
+    --with-mailpath=/var/mail \
+    --with-sasl \
+    --with-ssl \
+    --with-sqlite3 \
+    --with-zlib \
+    --with-docdir=/usr/share/doc/mutt
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''
