@@ -1,0 +1,62 @@
+# grafana: the observability and dashboard server (the OSS edition, AGPL-3.0).
+# The backend is built from the source tarball (godeps; CGO on for SQLite);
+# `grafana` is the one binary, and grafana-server / grafana-cli are the
+# wrappers upstream's packages ship (`grafana server`, `grafana cli`).
+#
+# FRONTEND: Grafana's frontend is a yarn workspace of ~100 packages built with
+# nx and webpack (tens of GB of node_modules, an hour of build); that is not
+# tractable offline here, so the pre-built frontend of upstream's own OSS
+# release (public/, the built bundles) is taken from the official
+# grafana-<version>.linux-amd64.tar.gz, per the policy for pre-built web UIs.
+# Only that public/ directory is used from it (it is the same for every
+# architecture); the binary in the tarball is not.
+#
+# Source edits: patches/no-go-work.patch removes go.work. The repository is a Go workspace of
+# ~35 modules, and workspace mode refuses the -mod=mod that the godeps store
+# uses; the root go.mod has `replace` lines for each of those modules, so the
+# main module builds identically without go.work.
+#
+# Installed inert: the dinit service is shipped, not enabled, with no
+# /etc/grafana/grafana.ini (the example is in /usr/share/doc/grafana) and no
+# provisioned data sources. Grafana's own first-run admin login (admin/admin,
+# forced to change at first login) is the application's default.
+name = "grafana"
+version = "13.3.1"
+release = 1
+summary = "Observability and data visualization platform"
+license = "AGPL-3.0-only"
+homepage = "https://grafana.com"
+patches = ["no-go-work.patch"]
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/grafana/grafana/archive/refs/tags/v13.3.1.tar.gz", sha256 = "48a032e9c4a8dec237f3cb9cf8ed58196441625b55d18e0d9978dcf3f97d7801" },
+    { url = "https://dl.grafana.com/oss/release/grafana-13.3.1.linux-amd64.tar.gz", sha256 = "6acf8939dd2f73332cbcafc27a33973fb1115b8867e7ffa3223c6e2ecbed8531", unpack = false, name = "grafana-frontend.tar.gz" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=1 GOWORK=off
+'''
+build = '''
+go build -tags oss -ldflags "-X main.version=$version -X main.commit=v$version -X main.buildBranch=release -X main.buildstamp=${SOURCE_DATE_EPOCH:-0}" -o grafana ./pkg/cmd/grafana
+mkdir -p /tmp/gf
+tar -xzf /build/sources/grafana-frontend.tar.gz -C /tmp/gf --strip-components=1 grafana-$version/public
+'''
+install = '''
+install -Dm755 grafana "$pkgdir/usr/bin/grafana"
+for w in server cli; do
+    printf '#!/bin/sh\nexec /usr/bin/grafana %s "$@"\n' "$w" > grafana-$w
+    install -Dm755 grafana-$w "$pkgdir/usr/bin/grafana-$w"
+done
+install -d "$pkgdir/usr/share/grafana"
+cp -r /tmp/gf/public "$pkgdir/usr/share/grafana/public"
+cp -r conf "$pkgdir/usr/share/grafana/conf"
+install -d "$pkgdir/usr/share/grafana/plugins-bundled"
+install -Dm644 conf/sample.ini "$pkgdir/usr/share/doc/grafana/grafana.ini.example"
+install -Dm644 $pkgfiles/grafana "$pkgdir/etc/dinit.d/grafana"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/grafana.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/grafana.conf"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/grafana/LICENSE"
+install -Dm644 NOTICE.md "$pkgdir/usr/share/licenses/grafana/NOTICE.md"
+'''

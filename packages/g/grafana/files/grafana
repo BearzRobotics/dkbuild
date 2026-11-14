@@ -1,0 +1,14 @@
+# Grafana server. Not enabled by default: `dinitctl enable grafana`. It runs
+# with its built-in defaults (conf/defaults.ini under /usr/share/grafana);
+# /etc/grafana/grafana.ini, if present, overrides them (example:
+# /usr/share/doc/grafana/grafana.ini.example). Listens on port 3000; the first
+# login is Grafana's own admin/admin, which it asks to change.
+type = process
+command = /usr/bin/grafana server --homepath=/usr/share/grafana --config=/etc/grafana/grafana.ini cfg:default.paths.data=/var/lib/grafana cfg:default.paths.logs=/var/log/grafana cfg:default.paths.plugins=/var/lib/grafana/plugins cfg:default.paths.provisioning=/etc/grafana/provisioning
+run-as = grafana
+working-dir = /usr/share/grafana
+logfile = /var/log/grafana.log
+smooth-recovery = true
+
+depends-on: rcboot
+waits-for: syslogd
