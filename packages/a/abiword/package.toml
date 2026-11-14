@@ -1,0 +1,43 @@
+# AbiWord 3.0.8: GTK 3 word processor. The release is a GNOME GitLab tag (the
+# abisource.com download host no longer resolves), so there is no configure: it is
+# generated with autoreconf from autogen's steps (autogen-common.sh makes the
+# plugin lists the build reads).
+# --enable-plugins builds every plugin whose libraries are present (OpenDocument,
+# OpenXML, EPUB, LaTeX, WordPerfect, PDF import via Poppler, SVG, ...), with the
+# GOffice charting/formula plugin and spell checking through Enchant.
+# Not built, with the reason: the MS Word plugin (needs libwv, whose upstream site
+# is the same dead host; no package), collab (asio, loudmouth/telepathy not
+# packaged), grammar (link-grammar), gda/gimp/mathview (not packaged).
+name = "abiword"
+version = "3.0.8"
+release = 1
+summary = "Word processor"
+license = "GPL-2.0-or-later"
+homepage = "https://gitlab.gnome.org/World/AbiWord"
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf", "gettext", "gobject-introspection"]
+builddeps = ["boost-devel", "enchant-devel", "fribidi-devel", "glib-devel", "goffice-devel", "gtk+3-devel", "libgsf-devel", "libjpeg-turbo-devel", "libpng-devel", "librevenge-devel", "librsvg-devel", "libwpd-devel", "libwpg-devel", "libwps-devel", "libxml2-devel", "libxslt-devel", "pcre2-devel", "poppler-devel", "zlib-ng-compat-devel", "libgcrypt-devel", "popt-devel"]
+rundeps = ["adwaita-icon-theme", "hicolor-icon-theme"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.gnome.org/World/AbiWord/-/archive/release-3.0.8/AbiWord-release-3.0.8.tar.gz", sha256 = "7c490e46f0a6143f84d5c7e3fed246f34486ad70cd55f162c792827607cd7e9a" },
+]
+
+setup = '''
+./autogen-common.sh
+autoreconf --force --install
+%configure \
+    --enable-shared --enable-static \
+    --enable-plugins \
+    --enable-spell \
+    --enable-clipart --enable-templates \
+    --with-goffice --with-gio \
+    --enable-introspection=yes
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/abiword/COPYING"
+'''
