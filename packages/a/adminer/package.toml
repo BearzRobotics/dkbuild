@@ -1,0 +1,35 @@
+# Adminer: database management in a single PHP file (MySQL/MariaDB,
+# PostgreSQL, SQLite, MS SQL, Oracle, MongoDB, Elasticsearch and others,
+# each through the PHP extension that is installed). Packaged as the release's
+# compiled files: adminer-<version>.php (all drivers, all languages) and
+# editor-<version>.php (Adminer Editor, the data-entry front end). Upstream
+# publishes only these compiled files and the source zip; the compiled file
+# is what upstream's own documentation says to deploy, and compiling the
+# source (compile.php) would produce the same file. Source edits: none.
+# Installed inert: the files are in /usr/share/adminer, NOT under any web
+# root, with no web server site, no pool and no login (Adminer logs in with
+# the database server's own accounts; it refuses empty passwords). An example
+# nginx location is in /usr/share/doc/adminer/README.FenrirOS.
+name = "adminer"
+version = "6.3.0"
+release = 1
+summary = "Database management in a single PHP file"
+license = "Apache-2.0 OR GPL-2.0-only"
+homepage = "https://www.adminer.org"
+rundeps = ["php"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/vrana/adminer/releases/download/v6.3.0/adminer-6.3.0.php", sha256 = "641e1a31e8cc333a309e202ef9446e1fd38c2069ed5f9ee509b80d70089d0503", unpack = false, name = "adminer.php" },
+    { url = "https://github.com/vrana/adminer/releases/download/v6.3.0/editor-6.3.0.php", sha256 = "8073d4cc14a7a0952221e25814578f667a4367ec7aca00fe7d20d5be2d6c5ad3", unpack = false, name = "editor.php" },
+]
+
+install = '''
+install -Dm644 /build/sources/adminer.php "$pkgdir/usr/share/adminer/adminer.php"
+install -Dm644 /build/sources/editor.php "$pkgdir/usr/share/adminer/editor.php"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/adminer/README.FenrirOS"
+# no licence file is published: the dual licence (Apache-2.0 or GPL-2.0) is
+# stated in the header of the file, which is kept as the licence notice
+head -8 /build/sources/adminer.php > /tmp/NOTICE
+install -Dm644 /tmp/NOTICE "$pkgdir/usr/share/licenses/adminer/NOTICE"
+'''

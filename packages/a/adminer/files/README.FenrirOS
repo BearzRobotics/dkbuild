@@ -1,0 +1,27 @@
+Adminer on FenrirOS
+===================
+
+Installed inert: the files are /usr/share/adminer/adminer.php (all database
+systems) and editor.php (Adminer Editor). There is no web server site, no
+PHP pool and no account: Adminer signs in with a database server's own user
+and password (and refuses an empty password).
+
+The PHP extension of each database you want to reach must be installed
+(mysqli for MySQL/MariaDB, pgsql / pdo_pgsql, sqlite3 / pdo_sqlite, ...).
+
+To serve it, an example for nginx with php-fpm, limited to your own address
+(never expose a database admin tool to the internet):
+
+    location = /adminer.php {
+        allow 192.168.0.0/16;
+        deny all;
+        root /usr/share/adminer;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME /usr/share/adminer/adminer.php;
+        fastcgi_pass unix:/run/php-fpm.sock;
+    }
+
+or, for a quick local session without a web server:
+
+    php -S 127.0.0.1:8080 -t /usr/share/adminer
+    (then open http://127.0.0.1:8080/adminer.php)
