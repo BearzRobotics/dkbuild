@@ -1,0 +1,44 @@
+# rclone: rsync for cloud storage (Go; 70+ backends). Go modules from the shared
+# module cache (godeps). Built with CGO and the cmount tag against libfuse 2
+# (fuse2-devel), as upstream's Linux builds, so `rclone mount` and `nfsmount`
+# work through libfuse. The web GUI (`rclone gui`) is embedded in the tree
+# (cmd/gui/dist.zip), so nothing is downloaded. Man page (rclone.1) and shell
+# completions: the man page is the one shipped in the tarball, the completions
+# are written by rclone itself. Version string as the Makefile's LDFLAGS (fs.Version).
+# The mount helper links (mount.rclone, rclonefs) are installed as upstream's
+# packages do, so /etc/fstab can mount remotes.
+name = "rclone"
+version = "1.76.0"
+release = 1
+summary = "Rsync for cloud storage"
+license = "MIT"
+homepage = "https://rclone.org"
+hostdeps = ["go"]
+builddeps = ["fuse2-devel"]
+rundeps = ["fuse"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/rclone/rclone/archive/refs/tags/v1.76.0.tar.gz", sha256 = "8cb7e5d576fe9a3aef8b1a0785e2ffc6c1953f8ed109f42000b0b86718f6628b" },
+]
+
+environment = '''
+export GOTOOLCHAIN=local GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=1
+'''
+build = '''
+go build -tags cmount -ldflags "-s -w -X github.com/rclone/rclone/fs.Version=v$version" -o rclone .
+mkdir -p gen
+./rclone genautocomplete bash gen/rclone.bash
+./rclone genautocomplete zsh gen/_rclone
+./rclone genautocomplete fish gen/rclone.fish
+'''
+install = '''
+install -Dm755 rclone "$pkgdir/usr/bin/rclone"
+ln -s rclone "$pkgdir/usr/bin/mount.rclone"
+ln -s rclone "$pkgdir/usr/bin/rclonefs"
+install -Dm644 rclone.1 "$pkgdir/usr/share/man/man1/rclone.1"
+install -Dm644 gen/rclone.bash "$pkgdir/usr/share/bash-completion/completions/rclone"
+install -Dm644 gen/_rclone "$pkgdir/usr/share/zsh/site-functions/_rclone"
+install -Dm644 gen/rclone.fish "$pkgdir/usr/share/fish/vendor_completions.d/rclone.fish"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/rclone/COPYING"
+'''
