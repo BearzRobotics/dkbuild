@@ -1,0 +1,44 @@
+# borgbackup: deduplicating backup program with compression and authenticated
+# encryption (Python 3 with C/Cython extensions). The extensions are linked
+# against the system OpenSSL (libcrypto), lz4, zstd, xxhash and libacl, found
+# through pkg-config (borg's setup.py uses the pkgconfig Python module): none
+# of borg's bundled/optional code paths is turned off. Version 1.4 is the
+# stable series (2.x is still beta).
+# Python dependencies come from the pydeps store (files/python.lock): msgpack
+# (borg pins it to <=1.2.1, hence not the newest) and llfuse, the FUSE binding
+# `borg mount` needs, built against fuse2 (libfuse 2). They are installed into
+# the package alongside borg, as upstream's own wheels/venvs do, because the tree
+# has no python-msgpack/python-llfuse packages. packaging is python-packaging.
+# pyfuse3 (the other FUSE binding, trio based) is not packaged; llfuse is the
+# one the 1.4 docs list first for 1.x.
+# Source edits: none. setuptools_scm cannot read git from a release tarball, so
+# SETUPTOOLS_SCM_PRETEND_VERSION gives the version (the tarball also has the
+# generated src/borg/_version.py). Man pages (docs/man) and shell completions
+# (scripts/shell_completions) are the ones in the tarball.
+name = "borgbackup"
+version = "1.4.5"
+release = 1
+summary = "Deduplicating backup program with compression and encryption"
+license = "BSD-3-Clause"
+homepage = "https://www.borgbackup.org"
+hostdeps = ["python", "python-setuptools", "python-setuptools-scm", "python-wheel", "python-pkgconfig", "python-cython", "pkgconf"]
+builddeps = ["python-devel", "openssl-devel", "lz4-devel", "zstd-devel", "xxhash-devel", "acl-devel", "fuse2-devel", "linux-headers"]
+rundeps = ["python", "python-packaging", "fuse"]
+options = ["!check", "pydeps"]
+
+source = [
+    { url = "https://github.com/borgbackup/borg/releases/download/1.4.5/borgbackup-1.4.5.tar.gz", sha256 = "4f9a5fe584c504b15485841236750dea16aa7cd2ddbc4a594e9d2ce5c49c4508" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-compile \
+    --root "$pkgdir" --prefix /usr msgpack==1.2.1 llfuse==1.5.2 .
+for m in docs/man/*.1; do install -Dm644 "$m" "$pkgdir/usr/share/man/man1/$(basename "$m")"; done
+install -Dm644 scripts/shell_completions/bash/borg "$pkgdir/usr/share/bash-completion/completions/borg"
+install -Dm644 scripts/shell_completions/zsh/_borg "$pkgdir/usr/share/zsh/site-functions/_borg"
+install -Dm644 scripts/shell_completions/fish/borg.fish "$pkgdir/usr/share/fish/vendor_completions.d/borg.fish"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/borgbackup/LICENSE"
+'''
