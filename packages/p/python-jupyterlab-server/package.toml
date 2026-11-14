@@ -1,0 +1,20 @@
+# jupyterlab-server from PyPI.
+name = "python-jupyterlab-server"
+version = "2.28.1"
+release = 1
+summary = "A set of server components for JupyterLab and JupyterLab like applications."
+license = "BSD-3-Clause"
+homepage = "https://jupyterlab-server.readthedocs.io"
+hostdeps = ["python", "python-hatchling"]
+rundeps = ["python", "python-babel", "python-jinja2", "python-json5", "python-jsonschema", "python-jupyter-server", "python-packaging", "python-requests"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/16/c5/08946a10b81bd64408d8b78cb352e17fe52d3ee11c2aef00a0f06e506938/jupyterlab_server-2.28.1.tar.gz", sha256 = "0c3c2418d51021ce280916e63dfe4cba8386b4e2787be5c25433c98f560ddb31" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-jupyterlab-server/LICENSE"
+'''
