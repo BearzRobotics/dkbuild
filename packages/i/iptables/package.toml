@@ -2,7 +2,7 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "iptables"
 version = "1.8.13"
-release = 1
+release = 2
 summary = "Linux packet filtering system"
 license = "GPL-2.0-only"
 homepage = "https://www.netfilter.org/projects/iptables"
@@ -38,6 +38,14 @@ install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/iptables.conf
 # default rule sets (originally Void's)
 for f in empty simple_firewall; do install -Dm644 $pkgfiles/$f.rules "$pkgdir/usr/share/xtables/etc/$f.rules"; done
 for f in filter mangle nat raw security; do install -Dm644 $pkgfiles/empty-$f.rules "$pkgdir/usr/share/xtables/var/empty-$f.rules"; done
-# room for the iptables-nft / -legacy alternatives' names
-for f in tables tables-save tables-restore; do rm -f "$pkgdir/usr/bin/ip$f" "$pkgdir/usr/bin/ip6$f"; done
+# the plain names (iptables, iptables-save, iptables-restore, ip6tables ...) use the nftables compat
+# backend (xtables-nft-multi): this system favours nftables, and a program that calls `iptables` (docker,
+# libvirt, old scripts) then writes nftables rules that firewalld, nft list ruleset and the rest see.
+# The legacy backend stays by its own names (iptables-legacy ...), for those who prefer the older setup.
+for f in iptables iptables-save iptables-restore ip6tables ip6tables-save ip6tables-restore; do
+    for d in usr/sbin usr/bin; do
+        [ -L "$pkgdir/$d/$f" ] && ln -sf xtables-nft-multi "$pkgdir/$d/$f"
+    done
+done
+test "$(readlink "$pkgdir/usr/sbin/iptables" || readlink "$pkgdir/usr/bin/iptables")" = xtables-nft-multi
 '''

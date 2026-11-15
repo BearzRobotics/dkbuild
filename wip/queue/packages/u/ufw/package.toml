@@ -5,6 +5,8 @@
 # /lib here), 0001-syntaxwarning.patch (Python 3.12+ warnings), iptables-version.patch; its test
 # patches are not used (no tests). Inert: a dinit service (files/ufw) that is not enabled, and ufw
 # ships disabled (ENABLED=no in /etc/ufw/ufw.conf): installing it changes no firewall rule.
+# The firewall of FenrirOS is firewalld on nftables (2026-11-15); ufw, with the iptables tools, is for those who
+# prefer the older setup (iptables here uses the nftables compat backend; `iptables-legacy` is the old one).
 # Not built (queued, wip/queue): expect first-build fixes (the iptables front end is
 # the legacy iptables of this tree; nftables is its own package).
 name = "ufw"
