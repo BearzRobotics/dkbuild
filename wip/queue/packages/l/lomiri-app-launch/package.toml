@@ -1,0 +1,31 @@
+# Lomiri application launcher: starts, tracks and stops applications: built without systemd (the Alpine/postmarketOS route: processes are started directly) and without the Mir client interface. Ubuntu Touch / UBports (Lomiri) component, version 0.2.0. Recipe written after Alpine
+# Linux's testing/lomiri-app-launch (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-app-launch"
+version = "0.2.0"
+release = 1
+summary = "Lomiri application launcher: starts, tracks and stops applications"
+license = "GPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+patches = ["0001-liblomiri-app-launch-jobs-posix.cpp-pass-more-enviro.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf", "lttng-ust"]
+builddeps = ["cmake-extras", "click-devel", "curl-devel", "dbus-test-runner-devel", "glib-devel", "gobject-introspection-devel", "gtest-devel", "json-glib-devel", "lomiri-api-devel", "lttng-ust-devel", "properties-cpp-devel", "zeitgeist-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/lomiri-app-launch/-/archive/0.2.0/lomiri-app-launch-0.2.0.tar.gz", sha256 = "3709cc36ce4c74b9aed55051cd020667ad039df48e37d648f4a9a2244cb51396" },
+]
+
+setup = '''
+%cmake \
+    -DUSE_SYSTEMD=OFF \
+    -DLOMIRI_APP_LAUNCH_ARCH=foo \
+    -DENABLE_MIRCLIENT=OFF \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

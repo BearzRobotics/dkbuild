@@ -1,0 +1,27 @@
+# Suru icon theme of Ubuntu Touch / Lomiri: Ubuntu Touch / UBports (Lomiri) component, version 2026.10.0. Recipe written after Alpine
+# Linux's testing/suru-icon-theme (MIT-licensed APKBUILD and patches; the software's licence is CC-BY-SA-3.0).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "suru-icon-theme"
+version = "2026.10.0"
+release = 1
+summary = "Suru icon theme of Ubuntu Touch / Lomiri"
+license = "CC-BY-SA-3.0"
+homepage = "https://gitlab.com/ubports"
+hostdeps = []
+builddeps = []
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/suru-icon-theme/-/archive/2026.10.0/suru-icon-theme-2026.10.0.tar.gz", sha256 = "66567b5654d38d5c8fef814be4ccf7bfeadc5ebf034f087cea93d483332a37aa" },
+]
+
+setup = '''
+true
+'''
+build = '''
+true
+'''
+install = '''
+mkdir -p "$pkgdir/usr/share/icons"
+cp -r suru "$pkgdir/usr/share/icons/suru"
+'''

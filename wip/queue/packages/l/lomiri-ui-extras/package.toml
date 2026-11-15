@@ -1,0 +1,28 @@
+# Extra QML components for Lomiri applications (Qt 5 build): Ubuntu Touch / UBports (Lomiri) component, version 0.8.2. Recipe written after Alpine
+# Linux's testing/lomiri-ui-extras (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-ui-extras"
+version = "0.8.2"
+release = 1
+summary = "Extra QML components for Lomiri applications (Qt 5 build)"
+license = "GPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["cmake-extras", "cups-devel", "exiv2-devel", "linux-pam-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel"]
+rundeps = ["lomiri-ui-toolkit"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/lomiri-ui-extras/-/archive/0.8.2/lomiri-ui-extras-0.8.2.tar.gz", sha256 = "82ca9d0a63fee8a31fef588733127f11d936b42902d47e0504309b276a6dbb15" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

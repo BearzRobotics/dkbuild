@@ -1,0 +1,30 @@
+# Suru style for Qt Quick Controls 2 (Qt 5 build): the Qt 5 build only (qmake; a CMake build for Qt 6 exists beside it). Ubuntu Touch / UBports (Lomiri) component, version 0.20260619. Recipe written after Alpine
+# Linux's testing/qqc2-suru-style (MIT-licensed APKBUILD and patches; the software's licence is GPL-2.0-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "qqc2-suru-style"
+version = "0.20260619"
+release = 1
+summary = "Suru style for Qt Quick Controls 2 (Qt 5 build)"
+license = "GPL-2.0-or-later"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["make", "pkgconf"]
+builddeps = ["qt5-qtbase-devel", "qt5-qtdeclarative-devel", "qt5-qtquickcontrols2-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/qqc2-suru-style/-/archive/0.20260619/qqc2-suru-style-0.20260619.tar.gz", sha256 = "bc02698ca7ea669d133fd1311033028b81a8c3f618e635683854e63e3415cb64" },
+]
+
+setup = '''
+mkdir -p build-qt5
+cd build-qt5
+qmake-qt5 ..
+'''
+build = '''
+cd build-qt5
+make -j$jobs
+'''
+install = '''
+cd build-qt5
+make INSTALL_ROOT="$pkgdir" install
+'''

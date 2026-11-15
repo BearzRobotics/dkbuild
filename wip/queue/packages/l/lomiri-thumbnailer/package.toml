@@ -1,0 +1,31 @@
+# Lomiri thumbnailer: thumbnails of images, videos and audio for the shell and applications: Ubuntu Touch / UBports (Lomiri) component, version 3.1.3. Recipe written after Alpine
+# Linux's testing/lomiri-thumbnailer (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-thumbnailer"
+version = "3.1.3"
+release = 1
+summary = "Lomiri thumbnailer: thumbnails of images, videos and audio for the shell and applications"
+license = "GPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["boost-devel", "cmake-extras", "gdk-pixbuf-devel", "gst-plugins-base-devel", "gstreamer-devel", "leveldb-devel", "libapparmor-devel", "libexif-devel", "librsvg-devel", "lomiri-api-devel", "persistent-cache-cpp-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel", "qt5-qtquickcontrols2-devel", "taglib-devel"]
+rundeps = ["dconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/lomiri-thumbnailer/-/archive/3.1.3/lomiri-thumbnailer-3.1.3.tar.gz", sha256 = "a0760662106c97c8c788a3a2ee860f1d492eee8ddfbc70a1b3ce3eb06280a97b" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_INSTALL_SYSCONFDIR=/etc \
+    -DCMAKE_INSTALL_LOCALSTATEDIR=/var \
+    -DBUILD_TESTING=OFF \
+    -DENABLE_DOC=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

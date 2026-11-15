@@ -1,0 +1,26 @@
+# Sound theme of Lomiri (ringtones, notification sounds): Ubuntu Touch / UBports (Lomiri) component, version 25.01. Recipe written after Alpine
+# Linux's testing/lomiri-sounds (MIT-licensed APKBUILD and patches; the software's licence is CC0-1.0 AND CC-BY-3.0 AND CC-BY-SA-3.0 AND CC-BY-4.0).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-sounds"
+version = "25.01"
+release = 1
+summary = "Sound theme of Lomiri (ringtones, notification sounds)"
+license = "CC0-1.0 AND CC-BY-3.0 AND CC-BY-SA-3.0 AND CC-BY-4.0"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = []
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/lomiri-sounds/-/archive/25.01/lomiri-sounds-25.01.tar.gz", sha256 = "00aeb6c36ef311145a270deffc02728067ef3bd18c00d3a90353712eadf2cc8c" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

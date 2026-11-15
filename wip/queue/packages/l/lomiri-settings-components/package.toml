@@ -1,0 +1,29 @@
+# QML components for the Lomiri system settings and indicators: Ubuntu Touch / UBports (Lomiri) component, version 1.2.1. Recipe written after Alpine
+# Linux's testing/lomiri-settings-components (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only AND LGPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-settings-components"
+version = "1.2.1"
+release = 1
+summary = "QML components for the Lomiri system settings and indicators"
+license = "GPL-3.0-only AND LGPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+patches = ["qmltestrunner.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["cmake-extras", "qt5-qtbase-devel", "qt5-qtdeclarative-devel"]
+rundeps = ["qt5-qtdeclarative"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/lomiri-settings-components/-/archive/1.2.1/lomiri-settings-components-1.2.1.tar", sha256 = "ef78aabb27bb96553b99492ba1252c2078e942d58dd2ce6ca33e2d2ac06afa48" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

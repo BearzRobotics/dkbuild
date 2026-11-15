@@ -1,0 +1,31 @@
+From 0a99a2187b9d8a2e0ebef251c13aacce49916a58 Mon Sep 17 00:00:00 2001
+From: Luca Weiss <luca@lucaweiss.eu>
+Date: Wed, 30 Sep 2026 16:49:03 +0200
+Subject: [PATCH] tests: Fix wrong error checking with aa_getcon()
+
+> On error, -1 is returned, and errno(3) is set appropriately.
+
+Therefore correctly check if -1 is returned, as -1 is seen as 'true'
+(non-zero).
+
+Fixes: 3f7974c ("tests: Use current AppArmor label, which might not be unconfined")
+---
+ tests/test_dbus_stub_skeleton.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/test_dbus_stub_skeleton.cpp b/tests/test_dbus_stub_skeleton.cpp
+index b46134f..1303c69 100644
+--- a/tests/test_dbus_stub_skeleton.cpp
++++ b/tests/test_dbus_stub_skeleton.cpp
+@@ -160,7 +160,7 @@ TEST_F(TestDbusStubSkeleton, stub_skeleton_service_can_talk_with_one_another)
+     auto stub = [this]()
+     {
+         biometry::Application app;
+-        if (char *label; aa_getcon(&label, NULL))
++        if (char *label; aa_getcon(&label, NULL) != -1)
+         {
+             app = biometry::Application{label};
+             free(label);
+-- 
+2.55.0
+

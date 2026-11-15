@@ -1,0 +1,30 @@
+# biometryd: biometric authentication service of Lomiri (Qt 5 build): the Qt 5 build, without systemd. Ubuntu Touch / UBports (Lomiri) component, version 0.4.1. Recipe written after Alpine
+# Linux's testing/biometryd (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "biometryd"
+version = "0.4.1"
+release = 1
+summary = "biometryd: biometric authentication service of Lomiri (Qt 5 build)"
+license = "GPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+patches = ["0001-Add-missing-headers-for-gcc-13.patch", "0004-disable_flaky_test.patch", "0005-add-missing-types-header.patch", "0006-direct-path-to-qmlplugindump.patch", "0001-tests-Fix-wrong-error-checking-with-aa_getcon.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["cmake-extras", "dbus-cpp-devel", "elfutils-devel", "gtest-devel", "libapparmor-devel", "nlohmann-json", "process-cpp-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/biometryd/-/archive/0.4.1/biometryd-0.4.1.tar.gz", sha256 = "e0ff6a5ed63517592679520e8f30f94cff9d6b07b2acbf9ad94c01d4008df70c" },
+]
+
+setup = '''
+%cmake \
+    -DUSE_SYSTEMD=OFF \
+    -DENABLE_QT6=OFF \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,32 @@
+# Lomiri UI toolkit: the QML components of Lomiri applications (Qt 5 build): the Qt 5 build only (qmake). Ubuntu Touch / UBports (Lomiri) component, version 1.3.5909. Recipe written after Alpine
+# Linux's testing/lomiri-ui-toolkit (MIT-licensed APKBUILD and patches; the software's licence is LGPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-ui-toolkit"
+version = "1.3.5909"
+release = 1
+summary = "Lomiri UI toolkit: the QML components of Lomiri applications (Qt 5 build)"
+license = "LGPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+patches = ["0001-Remove-debian-isms-from-test-runner.patch"]
+hostdeps = ["make", "pkgconf"]
+builddeps = ["eudev-devel", "libevdev-devel", "libxi-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel", "qt5-qtfeedback-devel", "qt5-qtpim-devel", "qt5-qtsvg-devel", "qt5-qtsystems-devel", "qt5-qttools-devel"]
+rundeps = ["qt5-qtdeclarative", "qt5-qtfeedback", "qt5-qtgraphicaleffects", "qt5-qtpim", "qt5-qtquickcontrols2", "qt5-qtsvg", "qt5-qtsystems"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/lomiri-ui-toolkit/-/archive/1.3.5909/lomiri-ui-toolkit-1.3.5909.tar.gz", sha256 = "257ccf837f48889835a3ec70efdb1324513bc126f42a616c319657fff4e37da5" },
+]
+
+setup = '''
+mkdir -p build-qt5
+cd build-qt5
+qmake-qt5 CONFIG+="no_docs no_lttng" ..
+'''
+build = '''
+cd build-qt5
+make -j$jobs
+'''
+install = '''
+cd build-qt5
+make INSTALL_ROOT="$pkgdir" install
+'''

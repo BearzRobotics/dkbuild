@@ -1,0 +1,32 @@
+# Lomiri download manager: background downloads for applications (Qt 5 build): the Qt 5 build, without systemd. Ubuntu Touch / UBports (Lomiri) component, version 0.3.3. Recipe written after Alpine
+# Linux's testing/lomiri-download-manager (MIT-licensed APKBUILD and patches; the software's licence is LGPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-download-manager"
+version = "0.3.3"
+release = 1
+summary = "Lomiri download manager: background downloads for applications (Qt 5 build)"
+license = "LGPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+patches = ["0001-Find-qdoc-correctly-on-distros-without-qtchooser.patch", "0002-Revert-tests-common-workaround-CMake-dependency-bug.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["boost-devel", "cmake-extras", "glog-devel", "gtest-devel", "libapparmor-devel", "libcap-devel", "lomiri-api-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel", "qt5-qttools-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/lomiri-download-manager/-/archive/0.3.3/lomiri-download-manager-0.3.3.tar.gz", sha256 = "43bb4f5ad5b7cfe16853656cea9708ade6fbec2f855e65e3ec6c4fb641ab7b1b" },
+]
+
+setup = '''
+%cmake \
+    -DUSE_SYSTEMD=OFF \
+    -DENABLE_WERROR=OFF \
+    -DENABLE_QT6=OFF \
+    -DENABLE_DOC=OFF \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

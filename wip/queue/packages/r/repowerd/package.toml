@@ -1,0 +1,30 @@
+# repowerd: power management daemon of Lomiri (screen blanking, suspend, lid and button handling): without the Android (Hybris, Binder) backends. Ubuntu Touch / UBports (Lomiri) component, version 2026.06. Recipe written after Alpine
+# Linux's testing/repowerd (MIT-licensed APKBUILD and patches; the software's licence is LGPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "repowerd"
+version = "2026.06"
+release = 1
+summary = "repowerd: power management daemon of Lomiri (screen blanking, suspend, lid and button handling)"
+license = "LGPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+patches = ["0001-dbus-Remove-at_console-filtering.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["cmake-extras", "glib-devel", "gtest-devel", "lomiri-deviceinfo-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/repowerd/-/archive/2026.06/repowerd-2026.06.tar.gz", sha256 = "9282d7c7a77c16c938ee076a77ee38a518476de24906b7f9f0c2b10f66f127a1" },
+]
+
+setup = '''
+%cmake \
+    -DREPOWERD_ENABLE_HYBRIS=OFF \
+    -DREPOWERD_ENABLE_BINDER=OFF \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''
