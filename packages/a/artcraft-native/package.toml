@@ -1,5 +1,6 @@
-# artcraft-native: ArtCraft's pure-Rust desktop app (egui over the ArtCraft API client; no Tauri,
-# no webview, no Node frontend), from the artcraft repository (storytold/artcraft). ArtCraft
+# artcraft-native: ArtCraft's pure-Rust desktop app (egui over the ArtCraft API client; no Tauri and
+# no Node frontend, but it uses wry for a web view: WebKitGTK and libsoup 3, and rfd's GTK 3 file
+# dialogs: gtk+3), from the artcraft repository (storytold/artcraft). ArtCraft
 # Studio itself, the released app, is a Tauri program (WebKitGTK, a React frontend built with
 # nx); that one is not packaged here yet. The native app's crate is version 0.1.0 and is built
 # from the release tag artcraft-v0.41.1 of the whole workspace; the recipe's version is the tag's.
@@ -17,8 +18,8 @@ summary = "ArtCraft: AI image and video studio (pure-Rust desktop app)"
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/storytold/artcraft"
 hostdeps = ["rust", "pkgconf", "cmake"]
-builddeps = ["libxcb-devel", "libxkbcommon-devel", "wayland-devel", "openssl-devel", "zlib-ng-compat-devel", "alsa-lib-devel"]
-rundeps = ["libxkbcommon", "mesa", "vulkan-loader", "wayland", "libx11", "libxcb", "alsa-lib", "hicolor-icon-theme"]
+builddeps = ["libxcb-devel", "libxkbcommon-devel", "wayland-devel", "openssl-devel", "zlib-ng-compat-devel", "alsa-lib-devel", "gtk+3-devel", "webkitgtk-devel", "libsoup-devel"]
+rundeps = ["libxkbcommon", "mesa", "vulkan-loader", "wayland", "libx11", "libxcb", "alsa-lib", "gtk+3", "webkitgtk", "libsoup", "hicolor-icon-theme"]
 options = ["!check", "cargodeps"]
 
 source = [
