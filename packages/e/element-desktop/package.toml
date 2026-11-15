@@ -56,10 +56,31 @@ const p = JSON.parse(fs.readFileSync("package.json", "utf8"));
 delete p.packageManager;
 fs.writeFileSync("package.json", JSON.stringify(p, null, 4) + "\n");
 '
-! grep -q '"packageManager"' package.json
+if grep -q '"packageManager"' package.json; then exit 1; fi
 echo 'pm-on-fail=ignore' >> .npmrc
 # --ignore-scripts: the postinstall (electron-builder install-app-deps) and the
 # npm electron package's binary download are not wanted
+# pnpm 11 no longer reads package.json's "pnpm" field or its yarn-style "resolutions" (pnpm 10
+# did): the frozen install stopped with ERR_PNPM_LOCKFILE_CONFIG_MISMATCH, the "overrides" not
+# matching the lockfile's (r2). The same settings, as pnpm 11 wants them, in pnpm-workspace.yaml
+# (which already has nodeLinker: hoisted): resolutions -> overrides, and the "pnpm" field's
+# patchedDependencies, peerDependencyRules and allowedDeprecatedVersions.
+printf '\n' >> pnpm-workspace.yaml
+cat >> pnpm-workspace.yaml <<'EOF2'
+overrides:
+  atomically: 2.1.1
+  '@types/node': 18.19.130
+  config-file-ts: 0.2.8-rc1
+  node-abi: 4.26.0
+  '@types/pg-pool': 2.0.7
+patchedDependencies:
+  '@types/auto-launch': patches/@types__auto-launch.patch
+peerDependencyRules:
+  allowedVersions:
+    eslint: '8'
+allowedDeprecatedVersions:
+  eslint: '8'
+EOF2
 # --config.trustLockfile=true: pnpm 11 re-checks every lockfile entry against its supply-chain
 # policies (minimumReleaseAge, trustPolicy) and for that asks the registry for each package's
 # metadata; the offline registry (npmdeps) serves tarballs only and answers metadata with 404
