@@ -1,0 +1,21 @@
+# Uniform interface to local, remote and embedded file systems: PyPI sdist fsspec 2026.9.0 (build backend hatchling.build); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: hatchling>=1.27.0, hatch-vcs).
+name = "python-fsspec"
+version = "2026.9.0"
+release = 1
+summary = "Uniform interface to local, remote and embedded file systems"
+license = "BSD-3-Clause"
+homepage = "https://pypi.org/project/fsspec"
+hostdeps = ["python", "python-hatchling", "python-hatch-vcs"]
+builddeps = []
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/77/cd/9be253869fc42e764de7f3dedd6969af7d44ff9c3375214a3442a6f3fc08/fsspec-2026.9.0.tar.gz", sha256 = "0f08147951c8cb31d844c3547d631053b127863b60be04cf06e121333ee0e2fe" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

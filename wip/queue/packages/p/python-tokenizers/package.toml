@@ -1,0 +1,26 @@
+# Fast state-of-the-art tokenizers (Hugging Face; Rust): PyPI sdist tokenizers 0.23.3 (build backend maturin); crates from cargodeps. Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: maturin>=1.0,<2.0).
+name = "python-tokenizers"
+version = "0.23.3"
+release = 1
+summary = "Fast state-of-the-art tokenizers (Hugging Face; Rust)"
+license = "Apache-2.0"
+homepage = "https://pypi.org/project/tokenizers"
+hostdeps = ["python", "maturin", "rust"]
+builddeps = ["python-devel"]
+rundeps = ["python", "python-huggingface-hub"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/e0/7c/2cabb2174e772636683008f2c5621949b645da7d303c596589e84516a184/tokenizers-0.23.3.tar.gz", sha256 = "cded33237c77caeef62944d32aa9a7ef42bdce2b3497e18d137e072a8c4be438" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+maturin build --release --frozen --offline -i python3 --compatibility linux --out dist -j $jobs
+'''
+install = '''
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr dist/*.whl
+'''

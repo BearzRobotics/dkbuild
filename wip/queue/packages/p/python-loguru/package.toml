@@ -1,0 +1,21 @@
+# Python logging made simple: PyPI sdist loguru 0.8.0 (build backend flit_core.buildapi); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: flit_core>=3,<5).
+name = "python-loguru"
+version = "0.8.0"
+release = 1
+summary = "Python logging made simple"
+license = "MIT"
+homepage = "https://pypi.org/project/loguru"
+hostdeps = ["python", "python-flit-core"]
+builddeps = []
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/61/ce/b5bb93d4d9fc7a067f69140b3bb3782f6ad6360bc76e99b6e3d386cb1320/loguru-0.8.0.tar.gz", sha256 = "fb3e4623288e37700a0577f6e0ce776cc1860b5d95c657d67f07a2476b304867" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

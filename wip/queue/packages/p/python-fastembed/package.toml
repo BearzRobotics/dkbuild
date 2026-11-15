@@ -1,0 +1,22 @@
+# fastembed: fast, lightweight embedding generation (ONNX Runtime based), from Qdrant. Pure Python: its sdist
+# builds with `uv_build`, which is not packaged, so the project's own pure-Python wheel (fastembed-0.9.1-py3-none-any.whl, pinned
+# by sha256, as the pydeps store does for pure-Python wheels) is installed as it is. It needs onnxruntime's
+# Python module (the onnxruntime package installs it), tokenizers, huggingface-hub, mmh3, py-rust-stemmers.
+# Not built (queued, wip/queue).
+name = "python-fastembed"
+version = "0.9.1"
+release = 1
+summary = "Fast, lightweight embedding generation (ONNX Runtime based)"
+license = "Apache-2.0"
+homepage = "https://github.com/qdrant/fastembed"
+hostdeps = ["python"]
+rundeps = ["python", "python-huggingface-hub", "python-loguru", "python-mmh3", "python-numpy", "onnxruntime", "python-pillow", "python-py-rust-stemmers", "python-requests", "python-tokenizers", "python-tqdm"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/25/9f/04650110be2c2554655e8b2c216567e6028cc767a2a0ad26f84972829c60/fastembed-0.9.1-py3-none-any.whl", sha256 = "95042ac7f685bda6697861066d49f8b119fbde8b75ed5162bbb7e84e2dad0e1d", unpack = false },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr ../sources/fastembed-0.9.1-py3-none-any.whl
+'''

@@ -1,0 +1,21 @@
+# Protocol Buffers runtime for Python: PyPI sdist protobuf 7.36.2 (build backend setuptools.build_meta); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: none declared).
+name = "python-protobuf"
+version = "7.36.2"
+release = 1
+summary = "Protocol Buffers runtime for Python"
+license = "BSD-3-Clause"
+homepage = "https://pypi.org/project/protobuf"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = []
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/d9/89/5b8517baa72f84a67b8a307ba953c91057af618bf40bf676f3c03551f8f0/protobuf-7.36.2.tar.gz", sha256 = "497d0463ff3316681da6c0b9e8d06cb465d61abce00b613ab42226175644d1bb" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

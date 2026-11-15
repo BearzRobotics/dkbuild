@@ -1,0 +1,26 @@
+# Safe and fast tensor serialization format (Hugging Face): PyPI sdist safetensors 0.8.0 (build backend maturin); crates from cargodeps. Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: maturin>=1.0,<2.0).
+name = "python-safetensors"
+version = "0.8.0"
+release = 1
+summary = "Safe and fast tensor serialization format (Hugging Face)"
+license = "Apache-2.0"
+homepage = "https://pypi.org/project/safetensors"
+hostdeps = ["python", "maturin", "rust"]
+builddeps = ["python-devel"]
+rundeps = ["python", "python-numpy"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/45/06/f955dbbb1859e3bd23c8ac6141af5106e7ad5fedec4a3a6e3d60f94b7001/safetensors-0.8.0.tar.gz", sha256 = "fabaf3e0f18a6618d9b36560682562157f77c2b71fcffc7b432be2baed9d753d" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+maturin build --release --frozen --offline -i python3 --compatibility linux --out dist -j $jobs
+'''
+install = '''
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr dist/*.whl
+'''

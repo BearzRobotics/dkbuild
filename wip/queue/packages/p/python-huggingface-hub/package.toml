@@ -1,0 +1,21 @@
+# Client for the Hugging Face Hub: download and upload models and datasets: without hf-xet (the optional Rust download accelerator; not packaged yet). PyPI sdist huggingface-hub 2.4.0 (build backend setuptools.build_meta); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: none declared).
+name = "python-huggingface-hub"
+version = "2.4.0"
+release = 1
+summary = "Client for the Hugging Face Hub: download and upload models and datasets"
+license = "Apache-2.0"
+homepage = "https://github.com/huggingface/huggingface_hub"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = []
+rundeps = ["python", "python-filelock", "python-fsspec", "python-packaging", "python-pyyaml", "python-requests", "python-tqdm", "python-typing-extensions"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/b5/3b/2fcef1eabe52aec90fc8cd253cc154da1d02a446d7bbcdec59b4a51d4be7/huggingface_hub-2.4.0.tar.gz", sha256 = "13a6158b9e3393d9d3f248ce99074d50c2a0a1449fb9d8e2f710751e2084c188" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

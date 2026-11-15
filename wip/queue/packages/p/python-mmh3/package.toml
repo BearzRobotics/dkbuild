@@ -1,0 +1,21 @@
+# MurmurHash3 for Python: PyPI sdist mmh3 5.3.1 (build backend setuptools.build_meta); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: setuptools >= 74.1.0, wheel).
+name = "python-mmh3"
+version = "5.3.1"
+release = 1
+summary = "MurmurHash3 for Python"
+license = "MIT"
+homepage = "https://pypi.org/project/mmh3"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = ["python-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/8d/3c/eb1d82a87c504259dac5ce1c7de7587b68ffac841b55d23f8ea2c9df8422/mmh3-5.3.1.tar.gz", sha256 = "bd86d0c86b52332319d981d03781ff77811a29db544a69902dc06b5506bb3e19" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

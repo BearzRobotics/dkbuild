@@ -1,0 +1,26 @@
+# Fast Snowball stemmers for Python (Rust): PyPI sdist py-rust-stemmers 0.1.8 (build backend maturin); crates from cargodeps. Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: maturin>=0.12).
+name = "python-py-rust-stemmers"
+version = "0.1.8"
+release = 1
+summary = "Fast Snowball stemmers for Python (Rust)"
+license = "MIT"
+homepage = "https://pypi.org/project/py-rust-stemmers"
+hostdeps = ["python", "maturin", "rust"]
+builddeps = ["python-devel"]
+rundeps = ["python"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/6b/c1/9763f9fb1cd73f9c317a83feeed6e0d4af320c6bbddab47b4a94f3a47d0c/py_rust_stemmers-0.1.8.tar.gz", sha256 = "6b0f6f48bc54d607aed802de872fcd5a71bae969a6760976dc78ce55e8eaf3da" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+maturin build --release --frozen --offline -i python3 --compatibility linux --out dist -j $jobs
+'''
+install = '''
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr dist/*.whl
+'''

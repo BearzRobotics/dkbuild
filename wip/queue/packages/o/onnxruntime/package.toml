@@ -1,0 +1,88 @@
+# ONNX Runtime 1.30: the inference engine for ONNX models (CPU), as the C/C++ library and its Python
+# module (`import onnxruntime`), for fastembed and the other AI packages in the queue. After Alpine's
+# community/onnxruntime (MIT-licensed APKBUILD and patches): system.patch makes it use this system's
+# abseil, protobuf, re2 and nlohmann-json instead of fetching them, and its other patches fix the
+# build on musl and drop a failing test.
+# Offline: the project's cmake fetches about 14 more sources while it configures (cmake/deps.txt; Alpine's
+# build uses the network, ours cannot). They are pinned here as further sources (GitHub archives of
+# the same commits and tags as deps.txt, with our own sha256) and handed to FetchContent with
+# FETCHCONTENT_SOURCE_DIR_<NAME>, FETCHCONTENT_FULLY_DISCONNECTED=ON. Not used (CPU build only): XNNPACK,
+# onnxruntime-extensions, CUDA, DirectML, CoreML, mimalloc, the Windows and Android pieces.
+# RISK: this tree's protobuf (35.1) and abseil (20260526) are newer than the ones this ONNX Runtime was
+# written for (33.6, 20250814): the first build may need patches. The Python module is built with
+# setup.py as Alpine does.
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "onnxruntime"
+version = "1.30.0"
+release = 1
+summary = "ONNX Runtime: cross-platform inference engine for machine learning models"
+license = "MIT"
+homepage = "https://onnxruntime.ai"
+patches = ["system.patch", "0001-Remove-MATH_NO_EXCEPT-macro.patch", "upb-fix.patch", "skip-matmul_8bits_test-unavailable-kernel.patch"]
+hostdeps = ["bash", "cmake", "ninja", "pkgconf", "python", "python-setuptools", "python-wheel", "python-pybind11"]
+builddeps = ["abseil-cpp-devel", "icu-devel", "linux-headers", "nlohmann-json", "protobuf-devel", "python-devel", "python-numpy", "python-pybind11-devel", "python-protobuf", "re2-devel", "zlib-ng-compat-devel"]
+rundeps = ["python", "python-numpy", "python-protobuf"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.30.0.tar.gz", sha256 = "f6681ecbddf53898adf0cc9e8e9e84657485b84d2eca3c8aa353de6d7dd417ef" },
+    { url = "https://github.com/jarro2783/cxxopts/archive/3c73d91c0b04e2b59462f0a741be8c07024c1bc0.tar.gz", sha256 = "cdf33246ee6b25f982d9af26b63bbb26f4c9bd56685bc2d8a7496be4b54ed20d" },
+    { url = "https://github.com/HowardHinnant/date/archive/refs/tags/v3.0.1.tar.gz", sha256 = "7a390f200f0ccd207e8cff6757e04817c1a0aec3e327b006b7eb451c57ee3538" },
+    { url = "https://github.com/dmlc/dlpack/archive/5c210da409e7f1e51ddf445134a4376fdbd70d7d.tar.gz", sha256 = "3ba78a833efca69e37fbfaa0c0c58a105810fcd85b3c222bda8136c614ba48c3" },
+    { url = "https://github.com/eigen-mirror/eigen/archive/1d8b82b0740839c0de7f1242a3585e3390ff5f33.tar.gz", sha256 = "c8adb6532fbfacd2ec1418c66404159b00c34d855bdc19cefa1f0db0e5e0aa5f" },
+    { url = "https://github.com/google/flatbuffers/archive/refs/tags/v23.5.26.tar.gz", sha256 = "1cce06b17cddd896b6d73cc047e36a254fb8df4d7ea18a46acf16c4c0cd3f3f3" },
+    { url = "https://github.com/Maratyszcza/FP16/archive/0a92994d729ff76a58f692d3028ca1b64b145d91.tar.gz", sha256 = "a91f4770ff9c39f4d72e339c379f566b3bbb359fa66122d85fc0bae3dde7abc7" },
+    { url = "https://github.com/Maratyszcza/FXdiv/archive/63058eff77e11aa15bf531df5dd34395ec3017c8.tar.gz", sha256 = "ec74d882a0a47cfd9c0f95bc4fae9901a4ade802a96a3b76e02671bb7340a4c5" },
+    { url = "https://github.com/microsoft/GSL/archive/refs/tags/v4.2.1.tar.gz", sha256 = "d959f1cb8bbb9c94f033ae5db60eaf5f416be1baa744493c32585adca066fe1f" },
+    { url = "https://github.com/boostorg/mp11/archive/refs/tags/boost-1.82.0.tar.gz", sha256 = "1705680b0849cac3258e528270c9071b440b95372e5be0b9197da89e84a794eb" },
+    { url = "https://github.com/onnx/onnx/archive/refs/tags/v1.22.0.tar.gz", sha256 = "70bb8b25cf31ea9b1d9f94baacfdc8c4fa27a760f9a10f5d93881bc9eede5fbc" },
+    { url = "https://github.com/Maratyszcza/psimd/archive/072586a71b55b7f8c584153d223e95687148a900.tar.gz", sha256 = "f6c4dab91ae9a03b3019e7cab0572743afd0e1b6e75b97fcca50259c737c924e" },
+    { url = "https://github.com/google/pthreadpool/archive/dcc9f28589066af0dbd4555579281230abbf74dd.tar.gz", sha256 = "0389798275becd558c1cecb60a9b79bbbd34e1828988ac2d55b4f02c10bca77f" },
+    { url = "https://github.com/pytorch/cpuinfo/archive/66ee79c038d70dad9f08705b2c9b3e58f6d8f512.tar.gz", sha256 = "e3d09aa27ec50da6310da45d1ec6b2e903c367a1455d8ee350bda12b9dedf556" },
+    { url = "https://github.com/dcleblanc/SafeInt/archive/refs/tags/3.0.28.tar.gz", sha256 = "d6b164bcea92a746e4d44132e505c7ab1816d1089ba99ebc674ccd4b70262ed5" },
+]
+
+setup = '''
+# the flatbuffers sources fetched for the build need a fix for musl's locale (Alpine's patch: the
+# patch is applied to the flatbuffers tree here, before cmake uses it)
+patch -p1 -d /build/flatbuffers-23.5.26 < "$pkgfiles/flatbuffers-locale.patch"
+export CFLAGS="$CFLAGS -O2"
+export CXXFLAGS="$CXXFLAGS -O2 -Wno-deprecated-declarations -Wno-error=template-id-cdtor -U_FORTIFY_SOURCE"
+export LDFLAGS="$LDFLAGS -Wl,--copy-dt-needed-entries"
+cmake -S cmake -B build -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DFETCHCONTENT_FULLY_DISCONNECTED=ON \
+    -DFETCHCONTENT_SOURCE_DIR_CXXOPTS=/build/cxxopts-3c73d91c0b04e2b59462f0a741be8c07024c1bc0 \
+    -DFETCHCONTENT_SOURCE_DIR_DATE=/build/date-3.0.1 \
+    -DFETCHCONTENT_SOURCE_DIR_DLPACK=/build/dlpack-5c210da409e7f1e51ddf445134a4376fdbd70d7d \
+    -DFETCHCONTENT_SOURCE_DIR_EIGEN=/build/eigen-1d8b82b0740839c0de7f1242a3585e3390ff5f33 \
+    -DFETCHCONTENT_SOURCE_DIR_FLATBUFFERS=/build/flatbuffers-23.5.26 \
+    -DFETCHCONTENT_SOURCE_DIR_FP16=/build/FP16-0a92994d729ff76a58f692d3028ca1b64b145d91 \
+    -DFETCHCONTENT_SOURCE_DIR_FXDIV=/build/FXdiv-63058eff77e11aa15bf531df5dd34395ec3017c8 \
+    -DFETCHCONTENT_SOURCE_DIR_MICROSOFT_GSL=/build/GSL-4.2.1 \
+    -DFETCHCONTENT_SOURCE_DIR_MP11=/build/mp11-boost-1.82.0 \
+    -DFETCHCONTENT_SOURCE_DIR_ONNX=/build/onnx-1.22.0 \
+    -DFETCHCONTENT_SOURCE_DIR_PSIMD=/build/psimd-072586a71b55b7f8c584153d223e95687148a900 \
+    -DFETCHCONTENT_SOURCE_DIR_PTHREADPOOL=/build/pthreadpool-dcc9f28589066af0dbd4555579281230abbf74dd \
+    -DFETCHCONTENT_SOURCE_DIR_PYTORCH_CPUINFO=/build/cpuinfo-66ee79c038d70dad9f08705b2c9b3e58f6d8f512 \
+    -DFETCHCONTENT_SOURCE_DIR_SAFEINT=/build/SafeInt-3.0.28 \
+    -DBUILD_ONNX_PYTHON=ON \
+    -Donnxruntime_BUILD_SHARED_LIB=ON \
+    -Donnxruntime_BUILD_UNIT_TESTS=OFF \
+    -Donnxruntime_ENABLE_PYTHON=ON
+'''
+build = '''
+cmake --build build
+cd build
+python3 ../setup.py build
+'''
+install = '''
+DESTDIR="$pkgdir" cmake --install build
+cd build
+python3 ../setup.py install --skip-build --root="$pkgdir"
+cd "$pkgdir"/usr/lib/python3*/site-packages/onnxruntime/capi
+ln -sfv ../../../../libonnxruntime_providers_shared.so ../../../../libonnxruntime.so.* .
+'''
