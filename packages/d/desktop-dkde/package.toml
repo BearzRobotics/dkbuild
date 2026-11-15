@@ -1,28 +1,20 @@
 # The DKDE desktop, FenrirOS's default: dkde (panel, session and apps) on labwc,
 # with seat management, D-Bus, polkit, audio (PipeWire with WirePlumber), Mesa
 # with Vulkan, fonts and icons, and Xwayland for X11 programs. `dkde-session` starts it.
+# r5: the packages a rescue disk does not need (cups, cups-filters, ocrmypdf, gnome-online-accounts-gtk) are
+# this package's own; the rest moved to desktop-dkde-core (which the rescue image uses).
 # r3: greetd (the graphical login, with dkde's greeter) and NetworkManager (the
 # network service) are part of the default desktop, so a system with it has both
 # installed; images enable the services (dinit services are not enabled by packages).
 name = "desktop-dkde"
 version = "1"
-release = 4
+release = 5
 summary = "DKDE desktop for FenrirOS (the default)"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"
 options = ["meta"]
 rundeps = [
-    "dkde", "labwc", "seatd", "dbus", "polkit", "mesa", "vulkan-loader",
-    "pipewire", "wireplumber", "fonts-dejavu", "shared-mime-info", "hicolor-icon-theme", "xwayland",
-    "greetd", "networkmanager",
-    # dkde's optional dependencies, treated as runtime ones (dkde's README table): sound tools
-    # (pactl, paplay), Bluetooth, brightness, screen lock, printing, Wi-Fi radio switch, the
-    # Qt theme plugins, WebP images, icons and the fonts, clock sync, OCR, and what the
-    # partition manager runs to format and check each file system.
-    "libpulse", "bluez", "brightnessctl", "swaylock", "wlr-randr", "cups", "cups-filters",
-    "qt6ct", "kvantum", "webp-pixbuf-loader", "librsvg", "papirus-icon-theme", "fonts-noto", "fonts-noto-emoji-ttf",
-    "chrony", "sudo", "shadow", "openssh", "ocrmypdf", "gnome-online-accounts-gtk", "udisks", "libmtp",
-    "parted", "e2fsprogs", "dosfstools", "exfatprogs", "xfsprogs", "btrfs-progs", "ntfs-3g",
-    "f2fs-tools", "jfsutils", "reiserfsprogs", "nilfs-utils", "udftools", "fatresize",
-    "tmux", "vim", "htop",
+    "desktop-dkde-core",
+    # printing (dkde's print dialogs), OCR (the PDF reader and image viewer), online accounts (Settings, calendars)
+    "cups", "cups-filters", "ocrmypdf", "gnome-online-accounts-gtk",
 ]

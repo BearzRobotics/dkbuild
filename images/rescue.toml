@@ -7,7 +7,10 @@ name     = "rescue"
 arch     = "x86_64"
 hostname = "fenriros-rescue"
 label    = "FENRIROS_RESCUE"
-packages = ["base", "base-net", "linux", "live-initramfs", "dkinstaller", "firmware-linux-meta", "rescue-tools", "desktop-dkde", "base-devel", "dos2unix", "vim"]
+# desktop-dkde-core, not desktop-dkde: the desktop without printing (cups), OCR (ocrmypdf) and online
+# accounts (gnome-online-accounts), which make no sense on a rescue disk. (`unwanted` cannot drop them: it
+# is a conflict for apk, and desktop-dkde depends on them.)
+packages = ["base", "base-net", "linux", "live-initramfs", "dkinstaller", "firmware-linux-meta", "rescue-tools", "desktop-dkde-core", "base-devel", "dos2unix", "vim"]
 exclude  = ["*-static"]
 services = ["udevd", "udev-trigger", "udev-settle", "modules", "dhcpcd", "syslogd", "seatd", "dbus"]
 issue    = """

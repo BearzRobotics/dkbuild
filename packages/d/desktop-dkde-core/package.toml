@@ -1,0 +1,31 @@
+# The DKDE desktop without what a rescue disk has no use for: printing (cups, cups-filters), OCR
+# (ocrmypdf) and online accounts (gnome-online-accounts-gtk). desktop-dkde is this plus those; the
+# rescue image (images/rescue.toml) installs this one. Everything else of desktop-dkde is here:
+# dkde, labwc, seatd, D-Bus, polkit, Mesa, audio, fonts, greetd, NetworkManager and dkde's other
+# optional dependencies (treated as runtime ones: sound tools, Bluetooth, brightness, screen lock, the Qt
+# theme plugins, icons, clock sync, the partition manager's file system tools ...).
+# (An image's `unwanted` list cannot do this: it is passed to apk as a conflict, and desktop-dkde
+# depends on those packages.)
+name = "desktop-dkde-core"
+version = "1"
+release = 1
+summary = "DKDE desktop for FenrirOS, without printing, OCR and online accounts"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+options = ["meta"]
+rundeps = [
+    "dkde", "labwc", "seatd", "dbus", "polkit", "mesa", "vulkan-loader",
+    "pipewire", "wireplumber", "fonts-dejavu", "shared-mime-info", "hicolor-icon-theme", "xwayland",
+    "greetd", "networkmanager",
+    # dkde's optional dependencies, treated as runtime ones (dkde's README table): sound tools
+    # (pactl, paplay), Bluetooth, brightness, screen lock, Wi-Fi radio switch, the
+    # Qt theme plugins, WebP images, icons and the fonts, clock sync, and what the
+    # partition manager runs to format and check each file system. (Printing, OCR and online accounts
+    # are in desktop-dkde, not here.)
+    "libpulse", "bluez", "brightnessctl", "swaylock", "wlr-randr",
+    "qt6ct", "kvantum", "webp-pixbuf-loader", "librsvg", "papirus-icon-theme", "fonts-noto", "fonts-noto-emoji-ttf",
+    "chrony", "sudo", "shadow", "openssh", "udisks", "libmtp",
+    "parted", "e2fsprogs", "dosfstools", "exfatprogs", "xfsprogs", "btrfs-progs", "ntfs-3g",
+    "f2fs-tools", "jfsutils", "reiserfsprogs", "nilfs-utils", "udftools", "fatresize",
+    "tmux", "vim", "htop",
+]
