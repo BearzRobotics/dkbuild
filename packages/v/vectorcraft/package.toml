@@ -6,6 +6,10 @@
 # Windowing (Wayland, X11, xkbcommon) and the GPU (Vulkan, EGL) are opened at run time, so they
 # are run-time dependencies, as for alacritty.
 # Generated from the wordcraft recipe's pattern; source edits: none. Not built yet when written.
+# drop-unused-patches.patch (Cargo.toml and Cargo.lock): the egui fork [patch] entries no member uses
+# (egui_demo_lib, egui_inspection, ...) are removed, as cargo vendor leaves those crates out and the
+# offline build then failed in cargo ("patch location ... does not contain packages matching
+# egui_demo_lib").
 name = "vectorcraft"
 version = "0.24.1"
 release = 1
@@ -16,6 +20,7 @@ hostdeps = ["rust", "pkgconf", "cmake"]
 builddeps = ["libxcb-devel", "libxkbcommon-devel", "wayland-devel"]
 rundeps = ["libxkbcommon", "mesa", "vulkan-loader", "wayland", "libx11", "libxcb", "shared-mime-info", "hicolor-icon-theme"]
 options = ["!check", "cargodeps"]
+patches = ["drop-unused-patches.patch"]
 
 source = [
     { url = "https://github.com/storytold/vectorcraft/archive/refs/tags/v0.24.1.tar.gz", sha256 = "529bbf6a3ee7349fef75c4d04a5db2dca78b6116d2fa42cf1caa5d95677f1292" },

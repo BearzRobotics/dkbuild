@@ -6,6 +6,10 @@
 # Windowing (Wayland, X11, xkbcommon) and the GPU (Vulkan, EGL) are opened at run time, so they
 # are run-time dependencies, as for alacritty.
 # Generated from the wordcraft recipe's pattern; source edits: none. Not built yet when written.
+# drop-unused-patches.patch (Cargo.toml and Cargo.lock): the egui fork [patch] entries no member uses
+# (egui_demo_lib, egui_inspection, ...) are removed, as cargo vendor leaves those crates out and the
+# offline build then failed in cargo ("patch location ... does not contain packages matching
+# egui_demo_lib").
 name = "photocraft"
 version = "0.23.1"
 release = 1
@@ -16,6 +20,7 @@ hostdeps = ["rust", "pkgconf", "cmake", "nasm", "llvm-clang"]
 builddeps = ["libxcb-devel", "libxkbcommon-devel", "wayland-devel", "fontconfig-devel", "pipewire-devel"]
 rundeps = ["libxkbcommon", "mesa", "vulkan-loader", "wayland", "libx11", "libxcb", "shared-mime-info", "hicolor-icon-theme", "fontconfig", "pipewire"]
 options = ["!check", "cargodeps"]
+patches = ["drop-unused-patches.patch"]
 
 source = [
     { url = "https://github.com/storytold/photocraft/archive/refs/tags/v0.23.1.tar.gz", sha256 = "66786e5b1e88bff0a1f04ab5073be50faa7e65b3cdebcbd679e1837ff52a82c6" },

@@ -6,6 +6,10 @@
 # Windowing (Wayland, X11, xkbcommon) and the GPU (Vulkan, EGL) are opened at run time, so they
 # are run-time dependencies, as for alacritty.
 # Generated from the wordcraft recipe's pattern; source edits: none. Not built yet when written.
+# drop-unused-patches.patch (Cargo.toml and Cargo.lock): the egui fork [patch] entries no member uses
+# (egui_demo_lib, egui_inspection, ...) are removed, as cargo vendor leaves those crates out and the
+# offline build then failed in cargo ("patch location ... does not contain packages matching
+# egui_demo_lib").
 name = "artcraft-launcher"
 version = "0.19.2"
 release = 1
@@ -16,6 +20,7 @@ hostdeps = ["rust", "pkgconf"]
 builddeps = ["libxcb-devel", "libxkbcommon-devel", "wayland-devel", "gtk+3-devel"]
 rundeps = ["libxkbcommon", "mesa", "vulkan-loader", "wayland", "libx11", "libxcb", "shared-mime-info", "hicolor-icon-theme", "gtk+3", "libayatana-appindicator"]
 options = ["!check", "cargodeps"]
+patches = ["drop-unused-patches.patch"]
 
 source = [
     { url = "https://github.com/storytold/craft-launcher/archive/refs/tags/v0.19.2.tar.gz", sha256 = "8eba378121d0f8805a113995fd915a95f9a7f58dfd71a74236c4df869e1cd919" },
