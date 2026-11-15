@@ -4,7 +4,7 @@
 # r10 and earlier removed them from the install (no reason recorded).
 name = "openssl"
 version = "3.6.1"
-release = 12
+release = 13
 summary = "TLS and cryptography library"
 license = "Apache-2.0"
 homepage = "https://www.openssl.org"

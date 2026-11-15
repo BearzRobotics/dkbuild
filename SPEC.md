@@ -410,6 +410,12 @@ and Chimera. Only for those recipes because the line is part of the script hash
 (7.x): in every recipe it rebuilt the whole tree. The `rust` recipe itself has no
 `rust` in its `hostdeps` and manages its own flags.
 
+Every build step also gets `SOURCE_DATE_EPOCH=1767225600` (2026-01-01 UTC) in its
+environment, not in the script (so it is not part of the script hash): a build
+date or file time that a package embeds (OpenSSL's "built on", Python's `.pyc`
+and documentation dates) is then the same in every build, a rebuild comes out
+identical, and the early cutoff (7.x) stops the cascade there.
+
 ### 5.6 Dependencies found automatically
 
 After `install`, dkbuild scans `$pkgdir`:

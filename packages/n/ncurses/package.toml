@@ -5,7 +5,7 @@
 # (readline, vim, python curses) links ncursesw.
 name = "ncurses"
 version = "6.5"
-release = 3
+release = 5
 summary = "Terminal handling library"
 license = "MIT"
 homepage = "https://invisible-island.net/ncurses"
@@ -18,6 +18,11 @@ source = [
 setup = '''
 # configure prefers mawk when it finds one; the system awk instead
 sed -i s/mawk// configure
+# configure's "if poll really works" test runs a program on whatever stdin the build has (a terminal,
+# /dev/null, a pipe) and so answered differently from one run to the next: the library used poll()
+# in one build and select() in the next, and every rebuild came out different (release bumps, and
+# every dependent rebuilt). Answered here: musl's poll works. (Not a source edit: a cached answer.)
+export cf_cv_working_poll=yes
 ./configure --prefix=/usr --mandir=/usr/share/man --with-shared --with-normal \
     --without-debug --without-cxx-binding --without-ada --enable-pc-files \
     --enable-widec --with-pkg-config-libdir=/usr/lib/pkgconfig AWK=gawk

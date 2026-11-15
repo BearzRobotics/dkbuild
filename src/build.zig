@@ -540,7 +540,11 @@ fn runTool(arena: Allocator, io: std.Io, base_root: []const u8, sb: SbDirs, bind
         .work = sb.work,
         .merged = sb.merged,
         .binds = binds,
-        .env = &.{ "PATH=/usr/bin:/bin", "HOME=/root" },
+        // SOURCE_DATE_EPOCH, fixed: a build date or a file time a package embeds (OpenSSL's "built on",
+        // Python's .pyc and documentation dates) is the same on every build, so a rebuild comes
+        // out identical and the early cutoff (SPEC 4.x) stops there. Not in the script, so it is
+        // not part of the script hash.
+        .env = &.{ "PATH=/usr/bin:/bin", "HOME=/root", "SOURCE_DATE_EPOCH=1767225600" },
         .argv = argv,
     }, log);
 }
