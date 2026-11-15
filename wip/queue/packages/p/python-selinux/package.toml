@@ -1,0 +1,26 @@
+# Python binding of libselinux (the `selinux` module): built from the libselinux source (the C library is the libselinux package, built without bindings). SELinux userspace 3.11 (https://github.com/SELinuxProject/selinux). Not built (queued, wip/queue): expect first-build fixes.
+name = "python-selinux"
+version = "3.11"
+release = 1
+summary = "Python binding of libselinux (the `selinux` module)"
+license = "LicenseRef-Public-Domain"
+homepage = "https://github.com/SELinuxProject/selinux"
+hostdeps = ["make", "pkgconf", "swig", "python", "python-setuptools"]
+builddeps = ["libselinux-devel", "libsepol-devel", "musl-fts-devel", "pcre2-devel", "python-devel"]
+rundeps = ["python", "libselinux"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/SELinuxProject/selinux/releases/download/3.11/libselinux-3.11.tar.gz", sha256 = "73d419c6e20e874adaa4019372cbd097eecf4d276e13f27ec5e67d35c0bd203c" },
+]
+
+setup = '''
+true
+'''
+build = '''
+make -C src PYTHON=python3 FTS_LDLIBS="-lfts" SHLIBDIR=/usr/lib swigify
+make -C src PYTHON=python3 FTS_LDLIBS="-lfts" SHLIBDIR=/usr/lib pywrap
+'''
+install = '''
+make -C src PYTHON=python3 FTS_LDLIBS="-lfts" SHLIBDIR=/usr/lib DESTDIR="$pkgdir" install-pywrap
+'''

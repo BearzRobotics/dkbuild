@@ -1,0 +1,11 @@
+# FenrirOS: musl's dynamic linker and libc (the loader is /usr/lib/ld-musl-<arch>.so.1, libc.so is the same file)
+/usr/lib/ld-musl-[^/]*\.so\.1		--	gen_context(system_u:object_r:ld_so_t,s0)
+/usr/lib/libc\.so			--	gen_context(system_u:object_r:ld_so_t,s0)
+# dinit, the init system, and its tools
+/usr/sbin/dinit			--	gen_context(system_u:object_r:init_exec_t,s0)
+/usr/sbin/dinit-monitor		--	gen_context(system_u:object_r:init_exec_t,s0)
+/usr/bin/dinitctl			--	gen_context(system_u:object_r:init_exec_t,s0)
+/usr/bin/dinitcheck			--	gen_context(system_u:object_r:init_exec_t,s0)
+# dinit's service descriptions and boot scripts (not executed by anyone else)
+/etc/dinit\.d(/.*)?			gen_context(system_u:object_r:etc_t,s0)
+/usr/lib/dinit(/.*)?			gen_context(system_u:object_r:lib_t,s0)

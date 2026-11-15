@@ -33,3 +33,17 @@ secon; PAM-using, which the system-wide PAM adoption allows), secilc, mcstrans, 
    /etc/selinux/config with SELINUX=permissive, and the installer step in /stuff/git/dkinstaller
    (setfiles on the target, /.autorelabel as the fallback).
 7. **snapd** for SELinux systems: devmode/classic only (docs/requests.md).
+
+## Update 2026-11-15 (policy and bindings written)
+
+Added to the queue: semodule-utils, restorecond, python-selinux and python-semanage (the bindings, built from the
+libselinux and libsemanage sources with swig), setools (Cython, networkx), and
+**selinux-policy-targeted** (Red Hat/Fedora's policy: fedora-selinux/selinux-policy, pinned rawhide commit
+5df1131 = 41.34, + container-selinux 2.251.0, modular, MCS, `make base modules install ...` as the project's INSTALL
+describes; `scripts/post-install` runs semodule to build the store; `/etc/selinux/config` is `SELINUX=permissive`,
+`SELINUXTYPE=targeted`), with a first local module `fenriros` (files/fenriros.{te,fc,if}: musl's loader, dinit
+and /etc/dinit.d labels). 15 SELinux recipes in all. UNVERIFIED parts are named in the policy recipe's header.
+
+Next in the SELinux list: PAM with `pam_selinux` (linux-pam `-Dselinux=enabled`, stacks), coreutils/util-linux/
+tar/shadow/openssh/sudo/cronie built with SELinux, the kernel options, dinit hooks and the installer step.
+Those change packages that are in the main tree: they wait for the policy to build and for the QEMU boot test.

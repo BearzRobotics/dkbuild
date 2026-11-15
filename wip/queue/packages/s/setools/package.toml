@@ -1,0 +1,24 @@
+# SETools 4.7.1: policy analysis tools for SELinux (seinfo, sesearch, sediff, apol, sechecker ...) and the
+# Python library `setools` that selinux-python's sepolicy and audit2why use. Python with a Cython
+# extension (setuptools build backend), linking libselinux and libsepol. The GUI tools (apol, sediffx)
+# need PyQt: their module is installed but PyQt is not a dependency (optional). Not built (queued,
+# wip/queue): expect first-build fixes.
+name = "setools"
+version = "4.7.1"
+release = 1
+summary = "SELinux policy analysis tools and library"
+license = "GPL-2.0-only AND LGPL-2.1-only"
+homepage = "https://github.com/SELinuxProject/setools"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-cython"]
+builddeps = ["libselinux-devel", "libsepol-devel", "python-devel"]
+rundeps = ["python", "python-networkx", "python-selinux", "libselinux", "libsepol"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/SELinuxProject/setools/archive/refs/tags/4.7.1.tar.gz", sha256 = "13a39cdccae7fc8454c41e5bf619514d84d7113ffcdcd0cf6ea7ef867a74937e" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

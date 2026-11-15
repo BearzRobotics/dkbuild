@@ -1,0 +1,9 @@
+policy_module(fenriros, 1.0.0)
+
+########################################
+#
+# FenrirOS: the local additions to the Fedora policy. The labelling of what differs from
+# Fedora is in fenriros.fc (musl's dynamic linker, dinit as the init system and its service
+# files). Domain transitions for dinit's services are NOT written: dinit runs everything it starts
+# in the init domain until the services get their own (permissive mode logs what a domain
+# would need: audit2allow on that log is how the rules are written).

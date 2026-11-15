@@ -1,0 +1,15 @@
+#!/bin/sh
+# Builds the policy store and the binary policy from the installed modules (what Fedora's
+# package does in its %post): semodule links base.pp and the other modules into
+# /var/lib/selinux/targeted and writes /etc/selinux/targeted/policy/policy.<version>.
+d=/usr/share/selinux/targeted
+[ -f "$d/base.pp" ] || exit 0
+command -v semodule >/dev/null 2>&1 || exit 0
+mkdir -p /etc/selinux/targeted/policy /etc/selinux/targeted/contexts/files
+set -- -s targeted -n -b "$d/base.pp"
+for m in "$d"/*.pp; do
+    [ "$m" = "$d/base.pp" ] && continue
+    set -- "$@" -i "$m"
+done
+semodule "$@" || echo "selinux-policy: semodule failed; run it by hand: semodule -s targeted -b $d/base.pp -i ..." >&2
+exit 0

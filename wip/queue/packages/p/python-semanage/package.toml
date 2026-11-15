@@ -1,0 +1,26 @@
+# Python binding of libsemanage (the `semanage` module, used by the semanage tool): built from the libsemanage source (the C library is the libsemanage package). SELinux userspace 3.11 (https://github.com/SELinuxProject/selinux). Not built (queued, wip/queue): expect first-build fixes.
+name = "python-semanage"
+version = "3.11"
+release = 1
+summary = "Python binding of libsemanage (the `semanage` module, used by the semanage tool)"
+license = "LGPL-2.0-or-later"
+homepage = "https://github.com/SELinuxProject/selinux"
+hostdeps = ["make", "pkgconf", "swig", "python", "python-setuptools", "bison", "flex"]
+builddeps = ["audit-devel", "bzip2-devel", "libselinux-devel", "libsemanage-devel", "libsepol-devel", "python-devel"]
+rundeps = ["python", "libsemanage", "python-selinux"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/SELinuxProject/selinux/releases/download/3.11/libsemanage-3.11.tar.gz", sha256 = "e76160286bbfb0821602c6c0c3220ebcf366ad3246d3b9d0a0fbefcd35e86043" },
+]
+
+setup = '''
+true
+'''
+build = '''
+make -C src PYTHON=python3 swigify
+make -C src PYTHON=python3 pywrap
+'''
+install = '''
+make -C src PYTHON=python3 DESTDIR="$pkgdir" install-pywrap
+'''

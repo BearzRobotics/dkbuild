@@ -1,0 +1,54 @@
+# selinux-policy-targeted: Red Hat's SELinux policy (Fedora's selinux-policy, the upstream of RHEL's and
+# AlmaLinux's), the `targeted` type with MCS, modular, built as loadable modules (base.pp and
+# about 400 module packages) that are linked into the policy store when the package is installed
+# (scripts/post-install runs semodule). Source: fedora-selinux/selinux-policy, a pinned rawhide
+# commit (5df1131, 2026-11-12: version 41.34; the contributed modules are in the tree since the
+# `contrib` merge) with container-selinux (containers/container-selinux v2.251.0, a pinned second
+# source: podman, Incus and Docker modules, copied into policy/modules/contrib as the project's
+# INSTALL says). Build flow from the project's INSTALL and Rules.modular: `make bare conf`
+# with dist/targeted/*.conf (modules.conf, booleans.conf, setrans.conf, users), `make base modules`,
+# `make install install-headers install-appconfig` into the package.
+# FenrirOS differences (wip/queue/selinux/NOTES.md): Fedora's file contexts name Fedora's paths; this
+# system has a musl dynamic linker in /usr/lib, dinit (not systemd) as init and /etc/dinit.d for
+# services. files/fenriros.{te,fc,if} is a first local module that labels them (musl's loader, dinit and
+# its tools, the service directory); per-service domains are not written. The policy is for permissive
+# mode (the default of /etc/selinux/config here) until the denials seen on a running system are
+# resolved with audit2allow.
+# UNVERIFIED: the exact make variables (MLS_CATS, MCS_CATS, DISTRO=redhat), whether the
+# Makefile needs the Python selinux module (support/genhomedircon is Python), and the store
+# creation at install time. Not built (queued, wip/queue): expect first-build fixes.
+name = "selinux-policy-targeted"
+version = "41.34"
+release = 1
+summary = "SELinux targeted policy (Fedora/Red Hat), permissive by default"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/fedora-selinux/selinux-policy"
+hostdeps = ["make", "m4", "python", "python-selinux", "checkpolicy", "policycoreutils", "semodule-utils", "gawk", "sed", "grep"]
+builddeps = []
+rundeps = ["policycoreutils", "libselinux", "libsemanage", "checkpolicy"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/fedora-selinux/selinux-policy/archive/5df11316337c290e108c8e8df637c31e87494c08.tar.gz", sha256 = "56e38fb196f8de50a88248a2562cbe4876f3af00132f12984609bbbf41e9807b" },
+    { url = "https://github.com/containers/container-selinux/archive/refs/tags/v2.251.0.tar.gz", sha256 = "701271b9221eadec0f5f4c99a74a3ef4214123222b757d78d62ef73690f7d8e7" },
+]
+
+setup = '''
+# container-selinux's policy sources go beside the contributed modules
+cp ../container-selinux-2.251.0/container.if ../container-selinux-2.251.0/container.te ../container-selinux-2.251.0/container.fc policy/modules/contrib/
+# the configuration of the targeted policy that Fedora ships
+cp dist/targeted/modules.conf dist/targeted/booleans.conf policy/
+# FenrirOS's own module (musl, dinit; files/fenriros.*), built with the others
+cp $pkgfiles/fenriros.te $pkgfiles/fenriros.fc $pkgfiles/fenriros.if policy/modules/contrib/
+printf 'fenriros = module\n' >> policy/modules.conf
+'''
+build = '''
+make NAME=targeted TYPE=mcs DISTRO=redhat UBAC=n DIRECT_INITRC=n MONOLITHIC=n UNK_PERMS=allow MLS_CATS=1024 MCS_CATS=1024 -j$jobs base modules
+'''
+install = '''
+make NAME=targeted TYPE=mcs DISTRO=redhat UBAC=n DIRECT_INITRC=n MONOLITHIC=n UNK_PERMS=allow MLS_CATS=1024 MCS_CATS=1024 DESTDIR="$pkgdir" install install-headers install-appconfig
+install -Dm644 $pkgfiles/config "$pkgdir/etc/selinux/config"
+install -Dm644 dist/targeted/setrans.conf "$pkgdir/etc/selinux/targeted/setrans.conf"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/selinux-policy-targeted/COPYING"
+test -f "$pkgdir/usr/share/selinux/targeted/base.pp"
+'''
