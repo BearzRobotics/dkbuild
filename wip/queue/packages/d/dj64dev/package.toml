@@ -1,0 +1,34 @@
+# dj64dev: the DJGPP-64 tool-chain: libc and crt for 64-bit programs that run as DOS programs
+# under dosemu2, plus libdjdev64 and libdjstub64 (the host-side loader libraries dosemu2 links;
+# this one source also provides djdev64.pc, so the separate dosemu2/djdev64 repository is not
+# packaged). The 32-bit parts (dj32) are built too; ncurses is the copy bundled in contrib/.
+# The 32-bit code is compiled by clang through the i686-linux-gnu-* wrappers.
+# UNVERIFIED: first build; sysroots are /usr/lib/i386-pc-dj64 and /usr/lib/i586-pc-msdosdjgpp-ish
+# defaults replaced by explicit --with-sysroot options.
+name = "dj64dev"
+version = "0.5"
+release = 1
+summary = "DJGPP-64 tool-chain and the djdev64 loader libraries"
+license = "LGPL-2.1-or-later AND GPL-3.0-or-later"
+homepage = "https://github.com/stsp/dj64dev"
+archs = ["x86_64"]
+hostdeps = ["autoconf", "automake", "libtool", "m4", "pkgconf", "thunk-gen", "i686-linux-gnu-tools", "djstub", "python3", "ncurses", "clang", "bash"]
+builddeps = ["elfutils-devel", "linux-headers"]
+rundeps = ["thunk-gen", "djstub", "i686-linux-gnu-tools"]
+
+source = [
+    { url = "https://github.com/stsp/dj64dev/archive/refs/tags/0.5.tar.gz", sha256 = "d9a35a429d4adda44e2d1d76ef9c9c6c7a515d1e1cc9d3fd09db425008123ac0" },
+]
+
+setup = '''
+./autogen.sh
+%configure \
+    --with-sysroot=/usr/lib/x86_64-pc-dj64 \
+    --with-sysroot32=/usr/lib/i386-pc-dj64
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

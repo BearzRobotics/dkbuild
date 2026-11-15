@@ -1,0 +1,27 @@
+# libsearpc: simple C RPC framework over JSON (from Seafile); dosemu2 builds its optional
+# `searpc` plugin against it. Autotools, needs glib and json-glib.
+# UNVERIFIED: the v3.3-latest tag (a moving tag upstream) is pinned by hash.
+name = "libsearpc"
+version = "3.3_git"
+release = 1
+summary = "C RPC framework over JSON (Seafile)"
+license = "LGPL-3.0-or-later"
+homepage = "https://github.com/haiwen/libsearpc"
+archs = ["x86_64"]
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf", "python3", "gettext"]
+builddeps = ["glib-devel", "json-glib-devel"]
+
+source = [
+    { url = "https://github.com/haiwen/libsearpc/archive/refs/tags/v3.3-latest.tar.gz", sha256 = "a23f4c1c78264add8bcef77aecc657fe93b2a86412aaa9cec22a9bf6de9c4396" },
+]
+
+setup = '''
+./autogen.sh
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

@@ -1,0 +1,28 @@
+# comcom64: 64-bit COMMAND.COM (the DOS shell dosemu2 uses), built as a dj64 program with the
+# dj64dev tool-chain and thunk_gen; only the 64-bit part (the 32-bit comcom32 is not built).
+# Source edit (sed): djgpp/makefile asks `git describe --dirty=+` for a
+# revision string; the source is a tarball, so the release is written in.
+# UNVERIFIED: the top-level configure and makefile targets (`64`, install_64) are read, not run.
+name = "comcom64"
+version = "0.5"
+release = 1
+summary = "64-bit DOS command interpreter for dosemu2"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/dosemu2/comcom64"
+archs = ["x86_64"]
+hostdeps = ["pkgconf", "thunk-gen", "dj64dev", "djstub", "i686-linux-gnu-tools", "nasm", "python3", "m4", "clang", "bash"]
+
+source = [
+    { url = "https://github.com/dosemu2/comcom64/archive/refs/tags/0.5.tar.gz", sha256 = "7dd7f5db57309fdd25e13dc47f23eeeb5b85260aae9d9618ba6f1ea47c6fb13a" },
+]
+
+setup = '''
+sed -i 's|^REVISIONID := \$(shell git describe --dirty=+)|REVISIONID := 0.5|' djgpp/makefile
+./configure --prefix=/usr
+'''
+build = '''
+%make 64
+'''
+install = '''
+%make_install install_64
+'''

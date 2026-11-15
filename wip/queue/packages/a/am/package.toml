@@ -1,0 +1,31 @@
+# AM (Application Manager, "AppMan"): installs, updates and sandboxes AppImages and other
+# portable programs from upstream's app database (a bash script plus modules). Packaged in
+# upstream's distro layout: /usr/bin/am with the modules in /usr/lib/am/modules (APP-MANAGER
+# switches to that path when it is run as /usr/bin/am), and /usr/bin/appman for the per-user
+# mode, which keeps its own modules under the user's chosen apps directory.
+# The app database (programs/, 51 MB) is NOT shipped: AM reads it from GitHub when the user runs
+# it, which is its normal operation (network use is at run time, not build time).
+# Most AppImages are glibc programs; some upstreams build musl AppImages, and asking the rest to
+# is the way to make them run here (user request, 2026-11-15).
+# No source edits.
+name = "am"
+version = "10.7"
+release = 1
+summary = "AM: AppImage and portable-app package manager"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/ivan-hc/AM"
+archs = ["x86_64", "aarch64"]
+rundeps = ["bash", "coreutils", "curl", "grep", "sed", "file", "tar", "xz", "unzip", "sudo", "fuse", "libnotify", "desktop-file-utils", "xdg-utils", "wget2", "binutils", "squashfs-tools"]
+
+source = [
+    { url = "https://github.com/ivan-hc/AM/archive/refs/tags/10.7.tar.gz", sha256 = "16b154d46d7487f5d29d2079cb4b7c392947b18c782e57511682e119fcf25050" },
+]
+
+install = '''
+install -Dm755 APP-MANAGER "$pkgdir/usr/bin/am"
+install -Dm755 APP-MANAGER "$pkgdir/usr/bin/appman"
+install -d "$pkgdir/usr/lib/am/modules"
+install -m644 modules/*.am "$pkgdir/usr/lib/am/modules/"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/am/LICENSE"
+install -Dm644 README.md "$pkgdir/usr/share/doc/am/README.md"
+'''

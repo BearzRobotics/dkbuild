@@ -1,0 +1,33 @@
+# fdpp: FreeDOS kernel ported to C++ (the DOS that dosemu2 runs). Meson build in three
+# subprojects (libfdpp, loader, kernel); the kernel is 16-bit-style code assembled with nasm and
+# linked as 32-bit x86 by i686-linux-gnu-ld, and compiled by clang with C++20.
+# Source edits (sed): upstream asks `git describe` for its version text, and the source here is a
+# tarball; the version is fixed to the release. subprojects/ holds .wrap files (thunk_gen, ...);
+# --wrap-mode=nofallback keeps meson from downloading (thunk-gen comes from pkg-config).
+# UNVERIFIED: the first build will show what else the kernel's cross file needs.
+name = "fdpp"
+version = "1.11"
+release = 1
+summary = "FreeDOS kernel in C++ for dosemu2"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/dosemu2/fdpp"
+archs = ["x86_64"]
+hostdeps = ["meson", "pkgconf", "nasm", "clang", "thunk-gen", "i686-linux-gnu-tools", "python3", "m4", "bash"]
+builddeps = ["linux-headers"]
+
+source = [
+    { url = "https://github.com/dosemu2/fdpp/archive/refs/tags/1.11.tar.gz", sha256 = "66a66103847ed33167c9d869c9272d6a96613489b381060e61f84e385e8a3db5" },
+]
+
+setup = '''
+sed -i "s|run_command('git', 'describe', check: false).stdout().strip()|'1.11'|" fdpp/kernel/meson.build
+sed -i 's|^GIT_DESCRIBE := .*|GIT_DESCRIBE := 1.11|' fdpp/makefile fdpp/kernel/makefile
+meson setup --prefix=/usr --libdir=lib --buildtype=release --wrap-mode=nofallback \
+    --cross-file fdpp/kernel/toolchain-clang.ini build .
+'''
+build = '''
+meson compile -C build
+'''
+install = '''
+DESTDIR="$pkgdir" meson install -C build
+'''

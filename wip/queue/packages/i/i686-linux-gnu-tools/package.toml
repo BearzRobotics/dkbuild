@@ -1,0 +1,32 @@
+# i686-linux-gnu-<tool> names for the dosemu2 / DJGPP-64 tool-chain (dj64dev, fdpp, comcom64),
+# whose build scripts look for a 32-bit x86 cross tool-chain under those names. No cross
+# compiler is built: each name is a small sh wrapper that points the host's LLVM (clang) or
+# binutils (gas, ld.bfd, ...) at 32-bit x86 (-target i686 / --32 / -m elf_i386).
+# UNVERIFIED: the wrappers are untested; if binutils lacks elf_i386 or elf32-i386, build it
+# with --enable-targets=i686-pc-linux-gnu or point ld at ld.lld.
+name = "i686-linux-gnu-tools"
+version = "1"
+release = 1
+summary = "i686-linux-gnu-{gcc,as,ld,ar,nm,strip,objcopy} wrappers around clang and binutils"
+license = "MIT"
+homepage = "https://github.com/dosemu2/dosemu2"
+archs = ["x86_64"]
+rundeps = ["llvm", "binutils"]
+
+install = '''
+mkdir -p "$pkgdir/usr/bin"
+w() { # w <name> <command line>
+    printf '#!/bin/sh\nexec %s "$@"\n' "$2" > "$pkgdir/usr/bin/i686-linux-gnu-$1"
+    chmod 755 "$pkgdir/usr/bin/i686-linux-gnu-$1"
+}
+w gcc "clang -target i686-unknown-linux-gnu"
+w as "gas --32"
+w ld "gld.bfd -m elf_i386"
+w ar "gar"
+w nm "gnm"
+w strip "gstrip"
+w objcopy "gobjcopy"
+for t in gcc as ld ar nm strip objcopy; do
+    ln -s "i686-linux-gnu-$t" "$pkgdir/usr/bin/i686-unknown-linux-gnu-$t"
+done
+'''

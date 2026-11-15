@@ -1,0 +1,41 @@
+# libb64: base64 encoder/decoder library (the one dosemu2 asks for as `b64`). The upstream
+# makefile builds only static libraries and installs nothing, so this installs by hand: header
+# directory b64/, libb64.a, and a pkg-config file (upstream has none; dosemu2's configure
+# checks pkg-config for `b64`). The shared library is built from the same objects.
+name = "libb64"
+version = "1.2.1"
+release = 1
+summary = "Base64 encoding/decoding library"
+license = "CC-PDDC"
+homepage = "https://libb64.sourceforge.net/"
+archs = ["x86_64"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/libb64/libb64/libb64/libb64-1.2.1.zip", sha256 = "20106f0ba95cfd9c35a13c71206643e3fb3e46512df3e2efb2fdbf87116314b2" },
+]
+
+build = '''
+cd src
+for f in cencode cdecode; do
+    $CC $CFLAGS -fPIC -I../include -c $f.c -o $f.o
+done
+$CC $LDFLAGS -shared -Wl,-soname,libb64.so.0 -o libb64.so.0 cencode.o cdecode.o
+ar rcs libb64.a cencode.o cdecode.o
+'''
+install = '''
+cd src
+install -Dm755 libb64.so.0 "$pkgdir/usr/lib/libb64.so.0"
+ln -s libb64.so.0 "$pkgdir/usr/lib/libb64.so"
+install -Dm644 libb64.a "$pkgdir/usr/lib/libb64.a"
+install -Dm644 ../include/b64/cencode.h ../include/b64/cdecode.h ../include/b64/decode.h ../include/b64/encode.h -t "$pkgdir/usr/include/b64"
+install -Dm644 /dev/stdin "$pkgdir/usr/lib/pkgconfig/b64.pc" <<PC
+prefix=/usr
+libdir=\${prefix}/lib
+includedir=\${prefix}/include
+Name: b64
+Description: Base64 encoding/decoding library
+Version: 1.2.1
+Libs: -L\${libdir} -lb64
+Cflags: -I\${includedir}
+PC
+'''
