@@ -1,0 +1,35 @@
+# libphonenumber: parse, format and validate phone numbers (Google; C++): uses the system abseil and protobuf (Alpine's patches, including one for abseil 2026). Needed by the Lomiri stack, version 9.0.43. Recipe written after Alpine
+# Linux's testing/libphonenumber (MIT-licensed APKBUILD and patches; the software's licence is Apache-2.0).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "libphonenumber"
+version = "9.0.43"
+release = 1
+summary = "libphonenumber: parse, format and validate phone numbers (Google; C++)"
+license = "Apache-2.0"
+homepage = "https://github.com/google/libphonenumber"
+patches = ["system-abseil.patch", "absl-cpp-2026.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["abseil-cpp-devel", "icu-devel", "protobuf-devel", "gtest-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/google/libphonenumber/archive/v9.0.43/libphonenumber-v9.0.43.tar.gz", sha256 = "bea4c2afec1fd43f4a7b3bda7b00dc99392ba1345dddd147059856889d174248" },
+]
+
+setup = '''
+cd cpp
+export LDFLAGS="$LDFLAGS -Wl,--copy-dt-needed-entries"
+%cmake \
+    -DREGENERATE_METADATA=OFF \
+    -DUSE_BOOST=OFF \
+    -DUSE_STDMUTEX=ON \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+cd cpp
+%cmake_build
+'''
+install = '''
+cd cpp
+%cmake_install
+'''

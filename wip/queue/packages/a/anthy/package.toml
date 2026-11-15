@@ -1,0 +1,27 @@
+# Anthy: Japanese kana-kanji conversion library: for maliit-keyboard's Japanese engine; the source is Alpine's archive of the upstream tarball. Needed by the Lomiri stack, version 9100h. Recipe written after Alpine
+# Linux's testing/anthy (MIT-licensed APKBUILD and patches; the software's licence is LGPL-2.1-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "anthy"
+version = "9100h"
+release = 1
+summary = "Anthy: Japanese kana-kanji conversion library"
+license = "LGPL-2.1-or-later"
+homepage = "https://osdn.net/projects/anthy"
+hostdeps = ["make", "pkgconf"]
+builddeps = []
+options = ["!check"]
+
+source = [
+    { url = "https://dev.alpinelinux.org/archive/anthy/anthy-9100h.tar.gz", sha256 = "d256f075f018b4a3cb0d165ed6151fda4ba7db1621727e0eb54569b6e2275547" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+rm -rf "$pkgdir/usr/share/emacs"
+'''

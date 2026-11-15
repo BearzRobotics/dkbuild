@@ -1,0 +1,28 @@
+# libpinyin: intelligent Chinese pinyin input library (and zhuyin): for maliit-keyboard's Chinese engine. Needed by the Lomiri stack, version 2.11.92. Recipe written after Alpine
+# Linux's testing/libpinyin (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "libpinyin"
+version = "2.11.92"
+release = 1
+summary = "libpinyin: intelligent Chinese pinyin input library (and zhuyin)"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/libpinyin/libpinyin"
+hostdeps = ["make", "pkgconf", "autoconf", "automake", "libtool"]
+builddeps = ["glib-devel", "kyotocabinet-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/libpinyin/libpinyin/releases/download/v2.11.92/libpinyin-2.11.92.tar.gz", sha256 = "3fca1818aec7f17dfe807d9707adcb279bb8dcd6a2931cb9a3d2bfadc50029e9" },
+]
+
+setup = '''
+%configure \
+    --enable-libzhuyin \
+    --with-dbm=KyotoCabinet
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

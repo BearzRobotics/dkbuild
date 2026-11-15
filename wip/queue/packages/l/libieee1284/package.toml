@@ -1,0 +1,29 @@
+# libieee1284: parallel port access library: for dosemu2. Needed by the Lomiri stack, version 0.2.11. Recipe written after Alpine
+# Linux's testing/libieee1284 (MIT-licensed APKBUILD and patches; the software's licence is GPL-2.0-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "libieee1284"
+version = "0.2.11"
+release = 1
+summary = "libieee1284: parallel port access library"
+license = "GPL-2.0-or-later"
+homepage = "http://cyberelk.net/tim/software/libieee1284/"
+patches = ["include.patch"]
+hostdeps = ["make", "pkgconf"]
+builddeps = []
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/libieee1284/libieee1284-0.2.11.tar.bz2", sha256 = "7730de107782e5d2b071bdcb5b06a44da74856f00ef4a9be85d1ba4806a38f1a" },
+]
+
+setup = '''
+%configure \
+    --without-python \
+    ac_cv_header_sys_io_h=no
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

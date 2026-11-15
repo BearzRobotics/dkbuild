@@ -1,0 +1,29 @@
+# Kyoto Cabinet: library of database routines (hash and tree databases): libpinyin uses it as its database. The static library is kept (Alpine deletes it). Needed by the Lomiri stack, version 1.2.80. Recipe written after Alpine
+# Linux's testing/kyotocabinet (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "kyotocabinet"
+version = "1.2.80"
+release = 1
+summary = "Kyoto Cabinet: library of database routines (hash and tree databases)"
+license = "GPL-3.0-or-later"
+homepage = "https://dbmx.net/kyotocabinet"
+patches = ["cflags.patch"]
+hostdeps = ["make", "pkgconf"]
+builddeps = ["lzo-devel", "xz-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://dbmx.net/kyotocabinet/pkg/kyotocabinet-1.2.80.tar.gz", sha256 = "4c85d736668d82920bfdbdb92ac3d66b7db1108f09581a769dd9160a02def349" },
+]
+
+setup = '''
+%configure \
+    --enable-lzo \
+    --enable-lzma
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

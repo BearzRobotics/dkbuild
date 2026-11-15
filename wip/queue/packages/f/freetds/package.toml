@@ -1,0 +1,30 @@
+# FreeTDS: Sybase and Microsoft SQL Server client libraries (db-lib, ct-lib, ODBC driver): the TDS SQL plugin of qt5-qtbase needs it. Needed by the Lomiri stack, version 1.5.14. Recipe written after Alpine
+# Linux's testing/freetds (MIT-licensed APKBUILD and patches; the software's licence is GPL-2.0-or-later OR LGPL-2.0-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "freetds"
+version = "1.5.14"
+release = 1
+summary = "FreeTDS: Sybase and Microsoft SQL Server client libraries (db-lib, ct-lib, ODBC driver)"
+license = "GPL-2.0-or-later OR LGPL-2.0-or-later"
+homepage = "https://www.freetds.org"
+hostdeps = ["make", "pkgconf"]
+builddeps = ["openssl-devel", "linux-headers", "readline-devel", "unixodbc-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.freetds.org/files/stable/freetds-1.5.14.tar.bz2", sha256 = "2422a04d6fb546f168e69dd4a8289d13ac9f53ef86fc852ab11f5e0de249207f" },
+]
+
+setup = '''
+%configure \
+    --enable-msdblib \
+    --with-openssl=/usr \
+    --enable-odbc \
+    --with-unixodbc=/usr
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

@@ -1,0 +1,30 @@
+# presage: intelligent predictive text entry platform (word completion): for maliit-keyboard's word prediction; the documentation is not built (doxygen/graphviz not needed). Needed by the Lomiri stack, version 0.9.1. Recipe written after Alpine
+# Linux's testing/presage (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "presage"
+version = "0.9.1"
+release = 1
+summary = "presage: intelligent predictive text entry platform (word completion)"
+license = "GPL-3.0-or-later"
+homepage = "https://presage.sourceforge.io"
+patches = ["gcc6.patch", "gcc11.patch"]
+hostdeps = ["make", "pkgconf", "autoconf", "automake", "libtool", "help2man"]
+builddeps = ["sqlite-devel", "tinyxml-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/presage/presage/0.9.1/presage-0.9.1.tar.gz", sha256 = "5ed567e350402a1d72c9053c78ecec3be710b7e72153a0223c6d19a7fe58a366" },
+]
+
+setup = '''
+autoreconf -fi
+%configure \
+    --enable-documentation=no \
+    --disable-gpresagemate
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''
