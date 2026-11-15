@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r2: static libraries too (in grep-static), for fully static programs on musl.
+# r3: 2026-11-15: installed under its plain name. Chimera prefixes GNU tools with g because its base tools are BSD; this system has no BSD tools, so the base image had no grep at all (a live ISO boot found `grep: command not found`). The g-prefix is gone: grep, egrep, fgrep.
 name = "grep"
 version = "3.12"
-release = 2
+release = 3
 summary = "GNU grep"
 license = "GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/grep"
@@ -17,8 +18,7 @@ source = [
 ]
 
 setup = '''
-%configure \
-    --program-prefix=g
+%configure
 '''
 build = '''
 %make

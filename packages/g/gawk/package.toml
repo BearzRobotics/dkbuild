@@ -5,7 +5,7 @@
 # r3: static libraries too (in gawk-static), for fully static programs on musl.
 name = "gawk"
 version = "5.3.2"
-release = 3
+release = 4
 summary = "GNU awk utility"
 license = "GPL-3.0-or-later"
 homepage = "http://www.gnu.org/software/gawk"
@@ -36,4 +36,6 @@ rm -rf "$pkgdir/usr/bin/awk"
 rm -rf "$pkgdir/usr/bin/gawk"
 mkdir -p "$pkgdir/usr/bin"
 ln -sf gawk-5.3.2 "$pkgdir/usr/bin/gawk"
+# r4: awk too (nothing else on this system provides it)
+ln -sf gawk "$pkgdir/usr/bin/awk"
 '''
