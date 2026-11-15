@@ -41,6 +41,8 @@ environment = '''
 export HOME=/tmp
 mkdir -p /tmp/fpcbin
 ln -sf /usr/bin/gas /tmp/fpcbin/as
+# FPC links with `ld --format elf64-x86-64`, which lld (the system's ld) does not accept: GNU ld instead
+ln -sf /usr/bin/ld.bfd /tmp/fpcbin/ld
 export PATH=/tmp/fpcbin:$PATH
 unset CFLAGS CXXFLAGS LDFLAGS CPPFLAGS
 # the Pascal compiler that builds this one: the previous package's, or (stage 0) Alpine's
@@ -64,9 +66,11 @@ ln -sf ../lib/fpc/$v/ppcx64 "$pkgdir/usr/bin/ppcx64"
 # /etc/fpc.cfg: the unit and library paths of this version
 mkdir -p "$pkgdir/etc"
 "$pkgdir/usr/bin/fpcmkcfg" -d basepath='/usr/lib/fpc/$fpcversion' -o "$pkgdir/etc/fpc.cfg"
-# GNU as is gas here: -FD names the directory holding an `as` link to it
+# GNU as is gas here and GNU ld is ld.bfd (lld rejects the --format option FPC passes): -FD names the
+# directory holding `as` and `ld` links to them
 mkdir -p "$pkgdir/usr/lib/fpc/$v/bin"
 ln -s ../../../../bin/gas "$pkgdir/usr/lib/fpc/$v/bin/as"
+ln -s ../../../../bin/ld.bfd "$pkgdir/usr/lib/fpc/$v/bin/ld"
 printf '%s\n' '# the assembler (gas, as `as`)' '-FD/usr/lib/fpc/$fpcversion/bin' >> "$pkgdir/etc/fpc.cfg"
 test -x "$pkgdir/usr/lib/fpc/$v/ppcx64"
 test -f "$pkgdir/etc/fpc.cfg"

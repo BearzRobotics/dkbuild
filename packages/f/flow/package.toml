@@ -28,12 +28,18 @@ rm -rf zig-pkg/libfuzzer_kit-*
 # build.zig asks git (describe, show, rev-parse, diff) for the version text and panics in a release
 # build when git fails: the source here is a tarball, not a checkout. The same answers, fixed: the
 # pinned commit as the version, its date, no branch, no local changes. (Source edit: sed.)
+# The dependency nightwatch asks git for the same in its build.zig (describe and diff): its copy in zig-pkg
+# is a link into the package store, which is read-only, so it is copied first and the same sed runs on it.
+for p in zig-pkg/nightwatch-*; do
+    [ -L "$p" ] || continue
+    t=$(readlink -f "$p"); rm "$p"; cp -a "$t" "$p"; chmod -R u+w "$p"
+done
 sed -i \
   -e 's|{ "git", "describe", "--always", "--tags" }|{ "echo", "0.7.2-5514cb7" }|' \
   -e 's|{ "git", "show", "-s", "--format=%ci", "HEAD" }|{ "echo", "2026-11-14" }|' \
   -e 's|{ "git", "rev-parse", "--abbrev-ref", "HEAD" }|{ "true" }|' \
-  -e 's|{ "git", "diff", "--stat", "--patch", "HEAD" }|{ "true" }|' build.zig
-test "$(grep -c '"git", "describe", "--always", "--tags" }' build.zig)" = 0
+  -e 's|{ "git", "diff", "--stat", "--patch", "HEAD" }|{ "true" }|' build.zig zig-pkg/nightwatch-*/build.zig
+test "$(grep -c '"git", "describe", "--always", "--tags" }' build.zig zig-pkg/nightwatch-*/build.zig | grep -vc ':0$')" = 0
 %zig_build
 install -Dm644 help.md "$pkgdir/usr/share/doc/flow/help.md"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/flow/LICENSE"
