@@ -2,7 +2,7 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "android-tools"
 version = "37.0.0_p1"
-release = 2
+release = 3
 summary = "Android platform tools, such as adb and fastboot"
 license = "Apache-2.0 AND ISC AND GPL-2.0-only AND MIT"
 homepage = "https://github.com/nmeum/android-tools"

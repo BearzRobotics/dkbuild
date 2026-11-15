@@ -3,7 +3,7 @@
 # not); crates vendored on the host (`cargodeps`).
 name = "cargo-c"
 version = "0.10.26"
-release = 1
+release = 2
 summary = "Cargo subcommands to build and install C-ABI libraries from Rust"
 license = "MIT"
 homepage = "https://github.com/lu-zero/cargo-c"
