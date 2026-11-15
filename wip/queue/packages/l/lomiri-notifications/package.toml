@@ -1,0 +1,27 @@
+# Lomiri notifications: the notification server and QML plugin of the shell: Ubuntu Touch / UBports (Lomiri) component, version 1.4.0. Recipe written after Alpine
+# Linux's testing/lomiri-notifications (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-notifications"
+version = "1.4.0"
+release = 1
+summary = "Lomiri notifications: the notification server and QML plugin of the shell"
+license = "GPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["cmake-extras", "qt5-qtbase-devel", "qt5-qtdeclarative-devel", "qt5-qtquickcontrols2-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/lomiri-notifications/-/archive/1.4.0/lomiri-notifications-1.4.0.tar.gz", sha256 = "093c608cb99af51d7b0bab3672049fd62ffd8c2967c154f7481f2e7fd02bab95" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

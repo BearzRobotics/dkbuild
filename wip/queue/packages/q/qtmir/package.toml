@@ -1,0 +1,31 @@
+# qtmir: the Qt 5 platform plugin that makes a Qt application a Mir compositor (Lomiri's shell runs on it): Ubuntu Touch / UBports (Lomiri) component, version 0.7.2_git20261027. Recipe written after Alpine
+# Linux's testing/qtmir (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only AND LGPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "qtmir"
+version = "0.7.2_git20261027"
+release = 1
+summary = "qtmir: the Qt 5 platform plugin that makes a Qt application a Mir compositor (Lomiri's shell runs on it)"
+license = "GPL-3.0-only AND LGPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "ninja", "pkgconf", "lttng-ust"]
+builddeps = ["cmake-extras", "glib-devel", "gsettings-qt-devel", "lomiri-app-launch-devel", "lomiri-content-hub-devel", "lomiri-url-dispatcher-devel", "mir-devel", "process-cpp-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel", "qt5-qtsensors-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/qtmir/-/archive/8b0336b6c077e76f88cba916f75fd349f6e28e8f/qtmir-8b0336b6c077e76f88cba916f75fd349f6e28e8f.tar.gz", sha256 = "fa8008163aea2fd23f739fe5efb90592d782de9b12f18072347bcc43fc09fd3f" },
+]
+
+setup = '''
+%cmake \
+    -DWITH_MIR2=ON \
+    -DWITH_VALGRIND=OFF \
+    -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
+    -DBUILD_TESTING=OFF \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

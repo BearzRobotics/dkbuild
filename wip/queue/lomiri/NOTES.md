@@ -59,3 +59,38 @@ morph-browser: needs QtWebEngine 5, very large; skipped at first), phone-only pa
   non-systemd path.
 - **Qt 5 scope:** Qt 5 stays only for Lomiri (the tree is Qt 6 for dkde); QtWebEngine 5
   (morph-browser) is left out.
+
+## Update 2026-11-15 (later): what Alpine's packaging showed, and what is written
+
+Alpine Linux (testing/ and community/, postmarketOS's route) packages Lomiri 0.6.2 on musl, with
+elogind and no systemd, and with a patch that disables the LightDM integration. So the earlier
+open questions are settled: **no LightDM** is needed, the shell uses PAM (linux-pam, now adopted
+system-wide: docs/pam-qemu-test.md), and the systemd pieces are patched out (Alpine's
+`0003-No-systemd.patch`, `-DUSE_SYSTEMD=OFF` in the services, lomiri-url-dispatcher's
+`remove-systemd.patch`). The recipes follow Alpine's, with its patches (checksums verified).
+
+Written in `wip/queue/packages/` (none built; each passes `dkbuild --tree wip/queue check`):
+
+- Qt 5.15 (KDE branch): qt5-qtbase (clang mkspec), svg, declarative, xmlpatterns, multimedia,
+  quickcontrols, quickcontrols2, graphicaleffects, wayland, tools, sensors, location, pim, systems, feedback.
+- Foundation libraries: cmake-extras, properties-cpp, process-cpp, net-cpp, dbus-cpp, dbus-test-runner,
+  gsettings-qt, libqtdbustest, libqtdbusmock, geonames, lomiri-schemas, lomiri-api, qmenumodel,
+  libayatana-common, lomiri-url-dispatcher, lomiri-deviceinfo, lomiri-libusermetrics, libapparmor
+  (library only), libnih, leveldb, persistent-cache-cpp, click, telepathy-glib, raptor2,
+  python-isodate, python-rdflib, zeitgeist.
+- Lomiri components: lomiri-ui-toolkit, lomiri-ui-extras, qqc2-suru-style, suru-icon-theme,
+  lomiri-settings-components, lomiri-sounds, lomiri-app-launch, lomiri-trust-store,
+  lomiri-download-manager, lomiri-content-hub, lomiri-thumbnailer, lomiri-notifications,
+  repowerd, biometryd.
+- The compositor: mir 2.28 (Rust parts through cargodeps; its Wayland generator uses libxml++2, in the tree) and qtmir.
+
+Still to write for a working shell: **lomiri** itself (0.6.2; Alpine's seven patches), lomiri-indicator-network
+(Qt 5, NetworkManager, ofono-less?), lomiri-system-settings (+ its plugins; it is a *build* dependency of
+lomiri), the Ayatana indicators (session, power, datetime, display, sound, keyboard, bluetooth, messages,
+notifications), the on-screen keyboard (maliit-framework, lomiri-keyboard), gsettings-desktop-schemas
+and gnome-desktop checks, accountsservice, lomiri-telephony-service (a runtime dependency of the shell
+in Alpine; phone features: telepathy-qt, ofono, history-service, libphonenumber; to be made optional
+or written), wallpapers and the session scripts (a dinit service and a Wayland session entry), the
+apps (calculator, clock, terminal, gallery, docviewer, filemanager, weather), and the Mir
+EGL/GBM platform check on this Mesa. Packages Alpine has that this tree does not: libucontext (not
+needed: capnproto is not used by Mir 2.28's build), umockdev/py3-dbusmock (tests only, tests are off).
