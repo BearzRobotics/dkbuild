@@ -36,6 +36,6 @@ packaged) -> fdpp, comcom64 -> libb64, libsearpc -> dosemu2. Missing: libieee128
 plugin left out). All UNVERIFIED; expect fix-up rounds (git-describe seds, cross files).
 
 ## am (AppMan, 10.7)
-Written 2026-11-15 at the user's request: /usr/bin/am + /usr/bin/appman, modules in
-/usr/lib/am/modules, database fetched by AM at run time. Ready to move to packages/ (a plain
+Moved to packages/ 2026-11-15 (user request): /usr/bin/am + /usr/bin/appman, modules in
+/usr/lib/am/modules, database fetched by AM at run time. (a plain
 shell package, no build).
