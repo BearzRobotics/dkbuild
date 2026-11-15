@@ -1,0 +1,4 @@
+#!/bin/sh
+# Starts Apache Tika's server (document text and metadata extraction over HTTP). It listens on
+# localhost:9998 unless --host/--port say otherwise (see `tika-server --help`).
+exec java -jar /usr/share/tika-server/tika-server-standard-4.2.0.jar "$@"

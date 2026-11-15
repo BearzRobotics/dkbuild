@@ -1,0 +1,8 @@
+# Apache Tika server: extracts text and metadata from about a thousand file formats over HTTP
+# (PUT a document to /tika). Not enabled by default (dinitctl enable tika). Listens on localhost:9998.
+type = process
+command = /usr/bin/tika-server --host 127.0.0.1 --port 9998
+working-dir = /var/lib/tika
+run-as = _tika
+smooth-recovery = true
+depends-on: rcboot

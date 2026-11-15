@@ -1,0 +1,33 @@
+# Apache Tika 4.2.0: the server (tika-server-standard) that extracts text and metadata from documents (PDF,
+# Office, HTML, images with OCR through Tesseract when it is installed, archives ...) over HTTP, the usual
+# companion of RAG and search stacks. The Apache project's own release distribution
+# (tika-server-standard-4.2.0.zip: the server jar and its lib/ and plugins/ directories, pinned by sha256),
+# not a source build: Tika builds with Maven and about 400 dependencies, which this tree has no store for
+# (gradledeps keeps a Maven-layout store; a Maven resolve step like it is not written). Needs a Java
+# runtime (openjdk21). Inert: a dinit service (files/tika) that is not enabled, listening on 127.0.0.1:9998,
+# a system user (sysusers), no configuration files. Not built (queued, wip/queue).
+name = "apache-tika"
+version = "4.2.0"
+release = 1
+summary = "Apache Tika server: text and metadata extraction from documents over HTTP"
+license = "Apache-2.0"
+homepage = "https://tika.apache.org"
+hostdeps = ["unzip"]
+rundeps = ["openjdk21", "shadow"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://archive.apache.org/dist/tika/4.2.0/tika-server-standard-4.2.0.zip", sha256 = "4cc31eefdea6739811ce7451a7a8b9ee782d5b7799a0554b7d4f599896edbef1", name = "tika-server-standard-4.2.0.zip" },
+]
+
+install = '''
+mkdir -p "$pkgdir/usr/share/tika-server"
+unzip -q ../sources/tika-server-standard-4.2.0.zip -d "$pkgdir/usr/share/tika-server"
+# the zip's own start scripts (bin/) are for init systems that are not here
+rm -rf "$pkgdir/usr/share/tika-server/bin"
+test -f "$pkgdir/usr/share/tika-server/tika-server-standard-4.2.0.jar"
+install -Dm755 $pkgfiles/tika-server "$pkgdir/usr/bin/tika-server"
+install -Dm644 $pkgfiles/tika "$pkgdir/etc/dinit.d/tika"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/tika.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/tika.conf"
+'''
