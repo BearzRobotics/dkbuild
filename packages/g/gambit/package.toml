@@ -3,9 +3,11 @@
 # Bootstrap: the git tag archive already holds the C translation of the compiler
 # and runtime (lib/_gambit.c, gsc/_gsc.c, ...; gsc-boot.unix is the dummy that leaves
 # them alone), so only a C compiler is needed.
-# Options (the usual distribution set): --enable-single-host (the runtime compiled as
-# one C unit: faster), --enable-shared, --enable-openssl (TLS, OpenSSL), --enable-poll
-# (poll as the select method), --enable-high-res-timing. Not enabled, with reason: --enable-smp
+# Options (the usual distribution set): --enable-shared, --enable-openssl (TLS, OpenSSL), --enable-poll
+# (poll as the select method), --enable-high-res-timing. Not enabled, with reason:
+# --enable-single-host (the runtime as one C unit, a little faster: clang -O2 spent over 2
+# hours on one of the generated files, lib/_irregex.o, and was killed; upstream's default,
+# one file per module, is used), --enable-smp
 # and --enable-multiple-vms (experimental upstream, change the runtime's performance
 # profile), --enable-guide (the Gambit IDE, off upstream by default; not tried, to keep the first build simple), the
 # debugging/profiling build flavours, --enable-cplusplus. The test suite (`make check`)
@@ -26,7 +28,6 @@ source = [
 
 setup = '''
 %configure \
-    --enable-single-host \
     --enable-shared \
     --enable-openssl \
     --enable-poll \
