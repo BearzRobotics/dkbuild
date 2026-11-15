@@ -1,0 +1,26 @@
+# SELinux policy compiler (checkpolicy, checkmodule): SELinux userspace 3.11. Needed by the Lomiri stack, version 3.11. Recipe written after Alpine
+# Linux's testing/checkpolicy (MIT-licensed APKBUILD and patches; the software's licence is GPL-2.0).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "checkpolicy"
+version = "3.11"
+release = 1
+summary = "SELinux policy compiler (checkpolicy, checkmodule)"
+license = "GPL-2.0"
+homepage = "https://github.com/SELinuxProject/selinux"
+hostdeps = ["make", "pkgconf", "bison", "flex"]
+builddeps = ["libsepol-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/SELinuxProject/selinux/archive/checkpolicy-3.11.tar.gz", sha256 = "9b14482240ed117df1a85aa97b80e26b5c9fc316a57421a56c2103e1c2171a68" },
+]
+
+setup = '''
+true
+'''
+build = '''
+make -j$jobs CFLAGS="$CFLAGS -fcommon"
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+'''

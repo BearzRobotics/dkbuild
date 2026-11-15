@@ -1,0 +1,26 @@
+# SELinux Common Intermediate Language compiler (secilc): SELinux userspace 3.11 (no man pages: xmlto is not packaged). Needed by the Lomiri stack, version 3.11. Recipe written after Alpine
+# Linux's testing/secilc (MIT-licensed APKBUILD and patches; the software's licence is BSD-2-Clause).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "secilc"
+version = "3.11"
+release = 1
+summary = "SELinux Common Intermediate Language compiler (secilc)"
+license = "BSD-2-Clause"
+homepage = "https://github.com/SELinuxProject/selinux"
+hostdeps = ["make", "pkgconf"]
+builddeps = ["libsepol-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/SELinuxProject/selinux/releases/download/3.11/secilc-3.11.tar.gz", sha256 = "1fb7de005d35ae0ac6ff8f8fc955d08a15b5c1a67e961b97ef987576af0db11a" },
+]
+
+setup = '''
+true
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+'''

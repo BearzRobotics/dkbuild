@@ -1,0 +1,28 @@
+# SELinux policy core utilities: setfiles, restorecon, load_policy, semodule, sestatus, setsebool, newrole, run_init, secon: SELinux userspace 3.11; newrole and run_init use PAM (their service files come from the patch). Not included: sandbox, the GUI and the python tools (selinux-python). Needed by the Lomiri stack, version 3.11. Recipe written after Alpine
+# Linux's testing/policycoreutils (MIT-licensed APKBUILD and patches; the software's licence is GPL-2.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "policycoreutils"
+version = "3.11"
+release = 1
+summary = "SELinux policy core utilities: setfiles, restorecon, load_policy, semodule, sestatus, setsebool, newrole, run_init, secon"
+license = "GPL-2.0-only"
+homepage = "https://github.com/SELinuxProject/selinux"
+patches = ["0002-hack-around-GLOB-BRACE-TILDE.patch", "0003-fix-pam-rules.patch", "duplicate-symlink.patch"]
+hostdeps = ["make", "pkgconf", "gawk", "gettext"]
+builddeps = ["audit-devel", "gettext-devel", "libcap-ng-devel", "libselinux-devel", "libsemanage-devel", "libsepol-devel", "linux-pam-devel", "musl-fts-devel"]
+rundeps = ["linux-pam-base"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/SELinuxProject/selinux/releases/download/3.11/policycoreutils-3.11.tar.gz", sha256 = "054e41ec039731a5ee6b797a8e0b8d6e346ee1d0a9bac2f252db48c23f9a8b1b" },
+]
+
+setup = '''
+true
+'''
+build = '''
+make -j$jobs LDLIBS="$LDLIBS -lintl" LSPP_PRIV=y
+'''
+install = '''
+make LSPP_PRIV=y DESTDIR="$pkgdir" SBINDIR=/usr/sbin install
+'''

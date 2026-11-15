@@ -1,0 +1,27 @@
+# SELinux MCS translation daemon (mcstransd, setrans): SELinux userspace 3.11. Needed by the Lomiri stack, version 3.11. Recipe written after Alpine
+# Linux's testing/mcstrans (MIT-licensed APKBUILD and patches; the software's licence is GPL-2.0-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "mcstrans"
+version = "3.11"
+release = 1
+summary = "SELinux MCS translation daemon (mcstransd, setrans)"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/SELinuxProject/selinux"
+hostdeps = ["make", "pkgconf"]
+builddeps = ["libcap-devel", "libselinux-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/SELinuxProject/selinux/releases/download/3.11/mcstrans-3.11.tar.gz", sha256 = "b7561929e50ec668b88b55377e64d0f71726a048236de2708a935f6c73962a7a" },
+]
+
+setup = '''
+true
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make DESTDIR="$pkgdir" SBINDIR=/usr/sbin install
+rm -rf "$pkgdir/etc/rc.d"
+'''

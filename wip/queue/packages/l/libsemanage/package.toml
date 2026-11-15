@@ -1,0 +1,27 @@
+# SELinux policy management library (libsemanage): SELinux userspace 3.11. Needed by the Lomiri stack, version 3.11. Recipe written after Alpine
+# Linux's testing/libsemanage (MIT-licensed APKBUILD and patches; the software's licence is LGPL-2.0-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "libsemanage"
+version = "3.11"
+release = 1
+summary = "SELinux policy management library (libsemanage)"
+license = "LGPL-2.0-or-later"
+homepage = "https://github.com/SELinuxProject/selinux"
+patches = ["basename.patch"]
+hostdeps = ["make", "pkgconf", "bison", "flex", "python"]
+builddeps = ["audit-devel", "bzip2-devel", "libselinux-devel", "libsepol-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/SELinuxProject/selinux/releases/download/3.11/libsemanage-3.11.tar.gz", sha256 = "e76160286bbfb0821602c6c0c3220ebcf366ad3246d3b9d0a0fbefcd35e86043" },
+]
+
+setup = '''
+true
+'''
+build = '''
+make -j$jobs PYTHON=python3
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+'''

@@ -1,0 +1,26 @@
+# SELinux library (libselinux): the userspace interface to SELinux: SELinux userspace 3.11, without the Python and Ruby bindings. Needed by the Lomiri stack, version 3.11. Recipe written after Alpine
+# Linux's testing/libselinux (MIT-licensed APKBUILD and patches; the software's licence is LicenseRef-Public-Domain).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "libselinux"
+version = "3.11"
+release = 1
+summary = "SELinux library (libselinux): the userspace interface to SELinux"
+license = "LicenseRef-Public-Domain"
+homepage = "https://github.com/SELinuxProject/selinux"
+hostdeps = ["make", "pkgconf"]
+builddeps = ["libsepol-devel", "linux-headers", "musl-fts-devel", "pcre2-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/SELinuxProject/selinux/releases/download/3.11/libselinux-3.11.tar.gz", sha256 = "73d419c6e20e874adaa4019372cbd097eecf4d276e13f27ec5e67d35c0bd203c" },
+]
+
+setup = '''
+true
+'''
+build = '''
+make -j$jobs SHLIBDIR=/usr/lib FTS_LDLIBS="-lfts"
+'''
+install = '''
+make SHLIBDIR=/usr/lib DESTDIR="$pkgdir" install
+'''

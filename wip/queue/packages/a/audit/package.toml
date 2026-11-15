@@ -1,0 +1,28 @@
+# Linux Audit userspace: libaudit, auditd, auditctl, ausearch (needed by the SELinux tools): without Python and Go bindings, AppArmor and io_uring; auditd is not started by anything (no dinit service here yet). Needed by the Lomiri stack, version 4.2.1. Recipe written after Alpine
+# Linux's testing/audit (MIT-licensed APKBUILD and patches; the software's licence is LGPL-2.1-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "audit"
+version = "4.2.1"
+release = 1
+summary = "Linux Audit userspace: libaudit, auditd, auditctl, ausearch (needed by the SELinux tools)"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/linux-audit/audit-userspace"
+patches = ["0003-all-get-rid-of-strndupa.patch", "fix-basename.patch"]
+hostdeps = ["make", "pkgconf", "autoconf", "automake", "libtool"]
+builddeps = ["libcap-ng-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/linux-audit/audit-userspace/archive/v4.2.1/audit-4.2.1.tar.gz", sha256 = "42876d195ee2ded19e5f72d7664096eee314928aa36ad346719ba5b25818fc84" },
+]
+
+setup = '''
+autoreconf -fvi
+%configure --runstatedir=/run --disable-zos-remote --enable-shared=audit --with-arm --with-aarch64 --with-libcap-ng=yes --with-python3=no --with-golang=no --with-apparmor=no --with-io_uring=no
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

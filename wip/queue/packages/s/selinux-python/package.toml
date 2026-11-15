@@ -1,0 +1,27 @@
+# SELinux Python tools: audit2allow, chcat, semanage, sepolgen, sepolicy: SELinux userspace 3.11; needs the Python bindings of libselinux and libsemanage (not built yet: swig), so semanage and sepolicy stay unusable until they are. Needed by the Lomiri stack, version 3.11. Recipe written after Alpine
+# Linux's testing/selinux-python (MIT-licensed APKBUILD and patches; the software's licence is GPL-2.0-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "selinux-python"
+version = "3.11"
+release = 1
+summary = "SELinux Python tools: audit2allow, chcat, semanage, sepolgen, sepolicy"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/SELinuxProject/selinux"
+hostdeps = ["make", "pkgconf", "gettext", "python", "python-setuptools", "python-pip"]
+builddeps = ["gettext-devel", "libselinux-devel", "libsepol-devel", "linux-headers"]
+rundeps = ["checkpolicy", "python"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/SELinuxProject/selinux/releases/download/3.11/selinux-python-3.11.tar.gz", sha256 = "f854d7fe67981d80c612067e97c1804f641a9dfcca2d38baeb3efe52b7875398" },
+]
+
+setup = '''
+true
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+'''
