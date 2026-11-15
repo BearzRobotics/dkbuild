@@ -3,7 +3,7 @@
 # its own programs, so the two exclude each other (`!` dependencies).
 name = "cdrtools"
 version = "2024.03.21"
-release = 1
+release = 2
 summary = "cdrecord, mkisofs, readcd, cdda2wav (Schily's original cdrtools)"
 license = "CDDL-1.0 AND GPL-2.0-only"
 homepage = "https://codeberg.org/schilytools/schilytools"

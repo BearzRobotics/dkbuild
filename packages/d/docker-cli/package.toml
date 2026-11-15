@@ -9,7 +9,7 @@
 # bsd-date patch is not needed (GNU date).
 name = "docker-cli"
 version = "29.9.3"
-release = 1
+release = 2
 summary = "Docker container and image management command"
 license = "Apache-2.0"
 homepage = "https://www.docker.com"

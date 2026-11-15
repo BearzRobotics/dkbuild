@@ -25,7 +25,7 @@
 # cmake config packages are dropped for the same reason.
 name = "whisper.cpp"
 version = "1.9.5"
-release = 2
+release = 3
 summary = "Whisper speech recognition in C/C++, with Vulkan and BLAS backends"
 license = "MIT"
 homepage = "https://github.com/ggml-org/whisper.cpp"

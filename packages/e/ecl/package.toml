@@ -11,7 +11,7 @@
 # and disables several tests on musl; no such patches are applied here.
 name = "ecl"
 version = "24.5.10"
-release = 1
+release = 2
 summary = "Embeddable Common Lisp"
 license = "LGPL-2.1-or-later"
 homepage = "https://ecl.common-lisp.dev"

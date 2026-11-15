@@ -8,7 +8,7 @@
 # needed by: ffmpeg (libdavs2).
 name = "davs2"
 version = "1.7"
-release = 3
+release = 4
 summary = "AVS2 video decoder"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/pkuvcl/davs2"

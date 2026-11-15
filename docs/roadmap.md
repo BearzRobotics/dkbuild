@@ -133,6 +133,7 @@ Details and per-package notes: `docs/requests.md` and `wip/`.
 | Security tools | written (metasploit built) |
 | Server web apps (help desks, ERP, mail, project management, finance) | written, inert, not built; some failing |
 | Flatpak (+ builder), Flathub as default remote | written, not built |
+| Document search and AI stack (requested 2026-11-15; priorities 1-4 in `docs/requests.md`): OCR and PDF tools; sqlite-vec, pgvector, tantivy, qdrant; onnxruntime, fastembed, sentence-transformers, huggingface-hub; docling, apache-tika, llama-index, haystack, langchain | priority 1 and sqlite/postgresql/llama.cpp/ollama in the tree; the rest queued, not written (PyTorch not packaged: decide CPU or Vulkan first) |
 
 ## dkbuild features
 

@@ -5,7 +5,7 @@
 # r2: static libraries too (in libpsl-static), for fully static programs on musl.
 name = "libpsl"
 version = "0.23.3"
-release = 3
+release = 4
 summary = "Public Suffix List library"
 license = "MIT"
 homepage = "https://rockdaboot.github.io/libpsl"
