@@ -1,0 +1,26 @@
+# Fast iterable JSON parser (Rust; used by pydantic and the OpenAI client): PyPI sdist jiter 0.19.0 (build backend maturin); crates from cargodeps. Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: maturin>=1.16.0,<2).
+name = "python-jiter"
+version = "0.19.0"
+release = 1
+summary = "Fast iterable JSON parser (Rust; used by pydantic and the OpenAI client)"
+license = "MIT"
+homepage = "https://pypi.org/project/jiter"
+hostdeps = ["python", "maturin", "rust"]
+builddeps = ["python-devel"]
+rundeps = ["python"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/67/de/8dfd06a2153d8ab6a83a8ca8f8ae3ff860ce2fe324ee6a5d05294b621c2a/jiter-0.19.0.tar.gz", sha256 = "ba3064f8be276d7cfb83c2fb85c858be533da2c2f80f9b048c3781b45a57a195" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+maturin build --release --frozen --offline -i python3 --compatibility linux --out dist -j $jobs
+'''
+install = '''
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr dist/*.whl
+'''

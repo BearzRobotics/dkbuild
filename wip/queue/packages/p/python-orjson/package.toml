@@ -1,0 +1,26 @@
+# Fast JSON library for Python (Rust): PyPI sdist orjson 3.13.0 (build backend maturin); crates from cargodeps. Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: maturin>=1,<2).
+name = "python-orjson"
+version = "3.13.0"
+release = 1
+summary = "Fast JSON library for Python (Rust)"
+license = "MPL-2.0 AND (Apache-2.0 OR MIT)"
+homepage = "https://pypi.org/project/orjson"
+hostdeps = ["python", "maturin", "rust"]
+builddeps = ["python-devel"]
+rundeps = ["python"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/f2/72/380b97dc45bd162d23afe5194721ef678d9eac7cfaa549fe2873f7f0a518/orjson-3.13.0.tar.gz", sha256 = "d1de5eb04485110c5da4c657e49168995d55e076b1ce60f1a042e254f4186c4f" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+maturin build --release --frozen --offline -i python3 --compatibility linux --out dist -j $jobs
+'''
+install = '''
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr dist/*.whl
+'''

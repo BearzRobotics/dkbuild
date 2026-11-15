@@ -23,3 +23,15 @@ Not written, and why:
   file: `dkbuild python-lock` on a uv.lock or requirements); written when the base is there.
 - **MinerU, kotaemon, Verba, danswer/Onyx, RAG-Anything** and the legal RAG repos: applications on top of the
   above (torch, vector databases, web UIs); see docs/requests.md.
+
+## Update 2026-11-15: the RAG libraries
+
+Written: llama-index 0.14.26 (the meta package: core, OpenAI LLM and embeddings, readers, workflows), haystack-ai 3.5.0 and
+langchain 1.5.0 (with langchain-core and langgraph), each with the pydeps store (`files/python.lock` made by
+`dkbuild python-lock` from what pip resolves: 82, 50 and 48 lines; the pure-Python wheels, plus greenlet and xxhash that
+compile). The compiled dependencies that the tree already has (numpy, pillow, pydantic-core, pyyaml, markupsafe, regex,
+rpds-py, zstandard) are left out of the locks and named as build and run dependencies; the Rust ones that it does not
+have are packages of their own (python-jiter, python-tiktoken, python-orjson, python-ormsgpack, python-uuid-utils:
+cargodeps, like python-pydantic-core). These integrations call remote model APIs (OpenAI and others) by default: with the
+local stack (ollama, llama.cpp, fastembed, qdrant) the user points them at local endpoints. langchain-community and the
+other langchain integrations are not included (install what is needed with pip into a venv, or ask for them).

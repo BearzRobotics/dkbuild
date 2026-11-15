@@ -1,0 +1,22 @@
+# llama-index 0.14.26: LlamaIndex: data framework for building LLM applications over your own data (RAG). The meta package: core, the OpenAI LLM and embedding integrations, the file readers and workflows. 
+# Packaged with the pydeps store: files/python.lock pins every Python dependency (pure-Python wheels, plus the
+# sdists greenlet/xxhash that compile), made with `dkbuild python-lock` from the set pip resolved on
+# 2026-11-15; the lock leaves out what the tree already has (numpy, pillow, pydantic-core, pyyaml, markupsafe, regex,
+# rpds-py, zstandard) and the Rust extensions that have their own packages (jiter, tiktoken, orjson, ormsgpack,
+# uuid-utils: cargodeps recipes beside this one), which pip finds installed in the build root. Installed into
+# the package alongside llama-index (as borgbackup does). No source of its own: the project's wheel is in the lock.
+# Not built (queued, wip/queue): expect first-build fixes (the `dkbuild fetch llama-index` fills cache/python first).
+name = "llama-index"
+version = "0.14.26"
+release = 1
+summary = "LlamaIndex: data framework for building LLM applications over your own data (RAG)"
+license = "MIT"
+homepage = "https://www.llamaindex.ai"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = ["python-devel", "python-numpy", "python-pillow", "python-pydantic", "python-pydantic-core", "python-pyyaml", "python-markupsafe", "python-regex", "python-jiter", "python-tiktoken"]
+rundeps = ["python", "python-numpy", "python-pillow", "python-pydantic", "python-pydantic-core", "python-pyyaml", "python-markupsafe", "python-regex", "python-jiter", "python-tiktoken"]
+options = ["!check", "pydeps"]
+
+install = '''
+python3 -m pip install --no-build-isolation --no-compile --root "$pkgdir" --prefix /usr llama-index==0.14.26
+'''

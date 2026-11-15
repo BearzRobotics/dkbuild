@@ -1,0 +1,26 @@
+# Fast MessagePack serialisation (Rust): PyPI sdist ormsgpack 1.13.1 (build backend maturin); crates from cargodeps. Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: maturin>=1.0,<2.0).
+name = "python-ormsgpack"
+version = "1.13.1"
+release = 1
+summary = "Fast MessagePack serialisation (Rust)"
+license = "Apache-2.0 OR MIT"
+homepage = "https://pypi.org/project/ormsgpack"
+hostdeps = ["python", "maturin", "rust"]
+builddeps = ["python-devel"]
+rundeps = ["python"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/aa/cf/6fc4c892122f46d0660fa99e9a07514511bb6b33865e1629af88d7534ed9/ormsgpack-1.13.1.tar.gz", sha256 = "803143ae0ab68e55baa14967595332e5c372b7f27f1ddf1b5b115329b17ccc41" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+maturin build --release --frozen --offline -i python3 --compatibility linux --out dist -j $jobs
+'''
+install = '''
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr dist/*.whl
+'''

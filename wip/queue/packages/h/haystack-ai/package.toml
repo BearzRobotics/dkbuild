@@ -1,0 +1,22 @@
+# haystack-ai 3.5.0: Haystack: LLM orchestration framework for RAG pipelines and agents (deepset). 
+# Packaged with the pydeps store: files/python.lock pins every Python dependency (pure-Python wheels, plus the
+# sdists greenlet/xxhash that compile), made with `dkbuild python-lock` from the set pip resolved on
+# 2026-11-15; the lock leaves out what the tree already has (numpy, pillow, pydantic-core, pyyaml, markupsafe, regex,
+# rpds-py, zstandard) and the Rust extensions that have their own packages (jiter, tiktoken, orjson, ormsgpack,
+# uuid-utils: cargodeps recipes beside this one), which pip finds installed in the build root. Installed into
+# the package alongside haystack-ai (as borgbackup does). No source of its own: the project's wheel is in the lock.
+# Not built (queued, wip/queue): expect first-build fixes (the `dkbuild fetch haystack-ai` fills cache/python first).
+name = "haystack-ai"
+version = "3.5.0"
+release = 1
+summary = "Haystack: LLM orchestration framework for RAG pipelines and agents (deepset)"
+license = "Apache-2.0"
+homepage = "https://haystack.deepset.ai"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = ["python-devel", "python-numpy", "python-pydantic", "python-pydantic-core", "python-pyyaml", "python-markupsafe", "python-jiter", "python-rpds-py"]
+rundeps = ["python", "python-numpy", "python-pydantic", "python-pydantic-core", "python-pyyaml", "python-markupsafe", "python-jiter", "python-rpds-py"]
+options = ["!check", "pydeps"]
+
+install = '''
+python3 -m pip install --no-build-isolation --no-compile --root "$pkgdir" --prefix /usr haystack-ai==3.5.0
+'''

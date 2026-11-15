@@ -1,0 +1,22 @@
+# langchain 1.5.0: LangChain: building applications with LLMs through composability (with langchain-core and langgraph). 
+# Packaged with the pydeps store: files/python.lock pins every Python dependency (pure-Python wheels, plus the
+# sdists greenlet/xxhash that compile), made with `dkbuild python-lock` from the set pip resolved on
+# 2026-11-15; the lock leaves out what the tree already has (numpy, pillow, pydantic-core, pyyaml, markupsafe, regex,
+# rpds-py, zstandard) and the Rust extensions that have their own packages (jiter, tiktoken, orjson, ormsgpack,
+# uuid-utils: cargodeps recipes beside this one), which pip finds installed in the build root. Installed into
+# the package alongside langchain (as borgbackup does). No source of its own: the project's wheel is in the lock.
+# Not built (queued, wip/queue): expect first-build fixes (the `dkbuild fetch langchain` fills cache/python first).
+name = "langchain"
+version = "1.5.0"
+release = 1
+summary = "LangChain: building applications with LLMs through composability (with langchain-core and langgraph)"
+license = "MIT"
+homepage = "https://www.langchain.com"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = ["python-devel", "python-pydantic", "python-pydantic-core", "python-pyyaml", "python-orjson", "python-ormsgpack", "python-uuid-utils", "python-zstandard"]
+rundeps = ["python", "python-pydantic", "python-pydantic-core", "python-pyyaml", "python-orjson", "python-ormsgpack", "python-uuid-utils", "python-zstandard"]
+options = ["!check", "pydeps"]
+
+install = '''
+python3 -m pip install --no-build-isolation --no-compile --root "$pkgdir" --prefix /usr langchain==1.5.0
+'''
