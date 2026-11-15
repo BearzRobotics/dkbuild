@@ -32,12 +32,16 @@ export GOTOOLCHAIN=local GOPROXY=off GOFLAGS="-mod=vendor -trimpath -buildvcs=fa
 build = '''
 pkg=github.com/distribution/distribution/v3
 ld="-s -w -X $pkg/version.version=v$version -X $pkg/version.revision=v$version -X $pkg/version.mainpkg=$pkg"
-go build -buildmode=pie -ldflags "$ld" -o registry ./cmd/registry
-go build -buildmode=pie -ldflags "$ld" -o registry-digest ./cmd/digest
+# the source tree has a registry/ package directory, and `go build -o registry` into an existing
+# directory puts the binary inside it (registry/registry; install then failed with "omitting
+# directory 'registry'", r1): build into out/
+mkdir -p out
+go build -buildmode=pie -ldflags "$ld" -o out/registry ./cmd/registry
+go build -buildmode=pie -ldflags "$ld" -o out/registry-digest ./cmd/digest
 '''
 install = '''
-install -Dm755 registry "$pkgdir/usr/bin/registry"
-install -Dm755 registry-digest "$pkgdir/usr/bin/registry-digest"
+install -Dm755 out/registry "$pkgdir/usr/bin/registry"
+install -Dm755 out/registry-digest "$pkgdir/usr/bin/registry-digest"
 install -Dm644 cmd/registry/config-example.yml "$pkgdir/usr/share/doc/docker-registry/config-example.yml"
 install -Dm644 $pkgfiles/docker-registry "$pkgdir/etc/dinit.d/docker-registry"
 install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/docker-registry.conf"
