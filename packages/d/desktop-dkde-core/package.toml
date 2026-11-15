@@ -6,6 +6,9 @@
 # Mesa, audio, fonts, greetd, NetworkManager, the file system tools of the partition manager and the rest.
 # (An image's `unwanted` list cannot do this: it is passed to apk as a conflict, and desktop-dkde
 # depends on those packages.)
+# RULE (user, 2026-11-15): keep this split when the desktop is updated. What dkde newly needs only for
+# optional features goes into desktop-dkde, not here: the full desktop gets all the extras, and the
+# rescue disk's space is kept for its tools. New hard requirements of the desktop go here.
 name = "desktop-dkde-core"
 version = "1"
 release = 1

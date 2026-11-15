@@ -7,6 +7,9 @@
 # r3: greetd (the graphical login, with dkde's greeter) and NetworkManager (the
 # network service) are part of the default desktop, so a system with it has both
 # installed; images enable the services (dinit services are not enabled by packages).
+# RULE (user, 2026-11-15): the optional extras of dkde (a new optional dependency in its README table)
+# are added to this list, never to desktop-dkde-core: the rescue disk uses the core and its space is
+# kept for its own tools.
 name = "desktop-dkde"
 version = "1"
 release = 5
