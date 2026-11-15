@@ -1,0 +1,20 @@
+# Convert LaTeX math to MathML: Pure Python: the project's own wheel (latex2mathml-3.81.1-py3-none-any.whl, pinned by sha256, as the pydeps store
+# does for pure-Python wheels) is installed as it is: its sdist needs a build backend that is not packaged here.
+# Not built (queued, wip/queue).
+name = "python-latex2mathml"
+version = "3.81.1"
+release = 1
+summary = "Convert LaTeX math to MathML"
+license = "MIT"
+homepage = "https://pypi.org/project/latex2mathml"
+hostdeps = ["python"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/07/30/b8bcfb01a2514cb7554a048ed52883de276e66d757c3cc535a3c29eb9e98/latex2mathml-3.81.1-py3-none-any.whl", sha256 = "c337668441b71c819b6733905a8058ba9a9d767bae11a0c5fdacb3aff31361bd", unpack = false },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr ../sources/latex2mathml-3.81.1-py3-none-any.whl
+'''

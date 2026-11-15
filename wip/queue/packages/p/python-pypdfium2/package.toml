@@ -1,0 +1,26 @@
+# Python bindings to PDFium (PDF rendering, text extraction, editing): built against the system pdfium (PDFIUM_PLATFORM=system-search): the pdfium package. PyPI sdist pypdfium2 5.15.2 (build backend setuptools.build_meta); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: setuptools, packaging, wheel !=0.38.0, !=0.38.1).
+name = "python-pypdfium2"
+version = "5.15.2"
+release = 1
+summary = "Python bindings to PDFium (PDF rendering, text extraction, editing)"
+license = "Apache-2.0 OR BSD-3-Clause"
+homepage = "https://github.com/pypdfium2-team/pypdfium2"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = ["pdfium", "python-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/fb/47/8555ff96dd676dd7b2029b8c98a8afd255f5f9eef4a2f4a0445566a323bb/pypdfium2-5.15.2.tar.gz", sha256 = "0185193bbdf0cc39f0bf31954c25f12edb81048bcb628ea4fc3dccf8d2ce2aef" },
+]
+
+environment = '''
+# bind against the system pdfium (the pdfium package: libpdfium.so, headers in /usr/include/pdfium)
+export PDFIUM_PLATFORM=system-search:8152
+export PDFIUM_HEADERS=/usr/include/pdfium
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

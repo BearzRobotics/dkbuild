@@ -1,0 +1,21 @@
+# Docling parse: PDF parsing (C++ with Python bindings): PyPI sdist docling-parse 7.26.0 (build backend setuptools.build_meta); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: setuptools>=77.0.3, pybind11>=2.13.6, cibuildwheel>=2.19.2,<3.0.0; python_version < '3.11', cibuildwheel>=4.3.0,<5.0.0; python_version >= '3.11', wheel>=0.43.0,<1.0.0, delocate>=0.11.0,<1.0.0, cmake>=3.27.0,<5.0.0; sys_platform != 'win32', cmake>=4.2.0,<5.0.0; sys_platform == 'win32').
+name = "python-docling-parse"
+version = "7.26.0"
+release = 1
+summary = "Docling parse: PDF parsing (C++ with Python bindings)"
+license = "MIT"
+homepage = "https://pypi.org/project/docling-parse"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = ["python-devel", "python-pybind11-devel", "zlib-ng-compat-devel", "qpdf-devel", "libjpeg-turbo-devel", "libpng-devel"]
+rundeps = ["python", "python-docling-core", "python-pydantic", "python-pillow", "python-tabulate"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/53/8f/7e702bd6282e679993d602fd4df6147bc7a42d735b73a50676aa2240ddde/docling_parse-7.26.0.tar.gz", sha256 = "0a6bfb0fc7bb4f1581f69513235dc6c569eba4892d12ee49fe2d2329c79ff431" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

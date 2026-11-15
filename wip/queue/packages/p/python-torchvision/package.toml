@@ -1,0 +1,32 @@
+# torchvision 0.29.2: image and video datasets, models and transforms for PyTorch (the C++ operators, decode
+# and resize extension _C and the Python package), CPU only, for docling's models. Built against the pytorch package
+# with setup.py (bdist_wheel); the image decoders use the system libpng, libjpeg-turbo and zlib; no CUDA
+# (FORCE_CUDA=0), no NVJPEG, no FFmpeg video decoding (TORCHVISION_USE_FFMPEG=0, TORCHVISION_USE_VIDEO_CODEC=0).
+# Not built (queued, wip/queue): expect first-build fixes (the same musl/libc++ risks as pytorch).
+name = "python-torchvision"
+version = "0.29.2"
+release = 1
+summary = "PyTorch vision library (CPU): datasets, models, transforms"
+license = "BSD-3-Clause"
+homepage = "https://github.com/pytorch/vision"
+hostdeps = ["python", "python-setuptools", "python-wheel", "cmake", "ninja", "pkgconf", "pytorch"]
+builddeps = ["libjpeg-turbo-devel", "libpng-devel", "pytorch", "python-devel", "python-numpy", "zlib-ng-compat-devel"]
+rundeps = ["python", "pytorch", "python-numpy", "python-pillow", "libjpeg-turbo", "libpng"]
+options = ["!check", "!lto", "jobs:8"]
+
+source = [
+    { url = "https://github.com/pytorch/vision/archive/refs/tags/v0.29.2.tar.gz", sha256 = "6239575329eb0149ff7a7f5cabfab254129f758961afdba650aab37276d8196d" },
+]
+
+environment = '''
+export FORCE_CUDA=0 TORCHVISION_USE_NVJPEG=0 TORCHVISION_USE_FFMPEG=0 TORCHVISION_USE_VIDEO_CODEC=0
+export BUILD_VERSION=0.29.2 MAX_JOBS=$jobs
+export CXXFLAGS="$CXXFLAGS -Wno-error"
+'''
+build = '''
+python3 setup.py bdist_wheel
+'''
+install = '''
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr dist/*.whl
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-torchvision/LICENSE"
+'''

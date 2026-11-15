@@ -1,0 +1,21 @@
+# Docling: convert PDF, Office, HTML and image documents to Markdown/JSON for RAG (IBM Research): the core (PDF, DOCX, PPTX, XLSX, HTML, Markdown, images); the OCR engines (easyocr, rapidocr, tesseract) are separate optional packages. PyPI sdist docling 2.150.1 (build backend hatchling.build); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: hatchling).
+name = "python-docling"
+version = "2.150.1"
+release = 1
+summary = "Docling: convert PDF, Office, HTML and image documents to Markdown/JSON for RAG (IBM Research)"
+license = "MIT"
+homepage = "https://pypi.org/project/docling"
+hostdeps = ["python", "python-hatchling"]
+builddeps = []
+rundeps = ["python", "python-docling-core", "python-docling-parse", "python-docling-ibm-models", "python-pypdfium2", "python-pydantic", "python-huggingface-hub", "python-requests", "python-tqdm", "python-typer", "python-rich", "python-pillow", "python-beautifulsoup4", "python-lxml", "python-openpyxl", "python-marko", "python-pluggy", "python-filetype", "python-rtree", "python-scipy", "python-pandas"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/c0/5a/0a72c8557e1cb9b4935a2776db8d88f3fd52f316341e00580297e9cbec72/docling-2.150.1.tar.gz", sha256 = "9740bb29a1384e3867eb9bed98c1e2bc93c814c937d69a56879a0a8f57bd4d9c" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

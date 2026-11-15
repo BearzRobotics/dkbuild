@@ -1,0 +1,21 @@
+# Read and write Excel 2010 xlsx/xlsm files: PyPI sdist openpyxl 3.1.5 (build backend setuptools.build_meta); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: none declared).
+name = "python-openpyxl"
+version = "3.1.5"
+release = 1
+summary = "Read and write Excel 2010 xlsx/xlsm files"
+license = "MIT"
+homepage = "https://pypi.org/project/openpyxl"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = []
+rundeps = ["python", "python-et-xmlfile"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/3d/f9/88d94a75de065ea32619465d2f77b29a0469500e99012523b91cc4141cd1/openpyxl-3.1.5.tar.gz", sha256 = "cf0e3cf56142039133628b5acffe8ef0c12bc902d2aadd3e0fe5878dc08d1050" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

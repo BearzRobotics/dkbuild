@@ -1,0 +1,45 @@
+# PDFium: Google's PDF rendering library (Chromium's), as the shared library libpdfium.so and its headers,
+# for pypdfium2 (docling and the other Python PDF tools in the queue). PREBUILT: bblanchon/pdfium-binaries'
+# build for musl x86_64 of Chromium's PDFium 8152 (pdfium-linux-musl-x64.tgz, pinned by sha256; the libraries it
+# needs, libc++, ICU and the rest, are linked in: licenses/ lists them). Building PDFium from source needs
+# Chromium's depot_tools and a gclient checkout of about 10 GB (the "snapshot" work in wip/README.md): not
+# done; this is the pragmatic first step and can be replaced by a source build later. A pdfium.pc is written
+# so that `pkg-config pdfium` works; the headers are in /usr/include/pdfium.
+# Not built (queued, wip/queue).
+name = "pdfium"
+version = "8152"
+release = 1
+summary = "PDFium PDF rendering library (prebuilt, musl)"
+license = "Apache-2.0 AND BSD-3-Clause"
+homepage = "https://pdfium.googlesource.com/pdfium"
+archs = ["x86_64"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/8152/pdfium-linux-musl-x64.tgz", sha256 = "2cbbf30c71b9946655ac515131956b0a2f088915c80b84ec82fe8a5dc3baeb02", name = "pdfium-linux-musl-x64.tgz" },
+]
+
+install = '''
+cd ../sources
+mkdir -p unpack && tar -xzf pdfium-linux-musl-x64.tgz -C unpack
+cd unpack
+install -Dm755 lib/libpdfium.so "$pkgdir/usr/lib/libpdfium.so"
+mkdir -p "$pkgdir/usr/include/pdfium"
+cp -r include/. "$pkgdir/usr/include/pdfium/"
+mkdir -p "$pkgdir/usr/lib/pkgconfig"
+cat > "$pkgdir/usr/lib/pkgconfig/pdfium.pc" <<'EOF2'
+prefix=/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include/pdfium
+
+Name: pdfium
+Description: PDF rendering library
+Version: 8152
+Libs: -L${libdir} -lpdfium
+Cflags: -I${includedir}
+EOF2
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/pdfium/LICENSE"
+mkdir -p "$pkgdir/usr/share/licenses/pdfium"
+cp licenses/* "$pkgdir/usr/share/licenses/pdfium/"
+test -f "$pkgdir/usr/include/pdfium/fpdfview.h"
+'''

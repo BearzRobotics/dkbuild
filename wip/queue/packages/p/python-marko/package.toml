@@ -1,0 +1,20 @@
+# Markdown parser with CommonMark and extensions: Pure Python: the project's own wheel (marko-2.2.5-py3-none-any.whl, pinned by sha256, as the pydeps store
+# does for pure-Python wheels) is installed as it is: its sdist needs a build backend that is not packaged here.
+# Not built (queued, wip/queue).
+name = "python-marko"
+version = "2.2.5"
+release = 1
+summary = "Markdown parser with CommonMark and extensions"
+license = "MIT"
+homepage = "https://pypi.org/project/marko"
+hostdeps = ["python"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/63/67/be743617363627442717c2b865993eba99d17f2d1e0ad814bf703f190afb/marko-2.2.5-py3-none-any.whl", sha256 = "26380a6b037b5b49cec3847ee3585ba66f6782a4b9aec0d1216b7194ec5871ee", unpack = false },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr ../sources/marko-2.2.5-py3-none-any.whl
+'''

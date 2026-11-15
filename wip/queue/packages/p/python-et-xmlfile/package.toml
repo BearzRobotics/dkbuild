@@ -1,0 +1,21 @@
+# Low memory XML file writing (openpyxl): PyPI sdist et-xmlfile 2.0.0 (build backend setuptools.build_meta); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: none declared).
+name = "python-et-xmlfile"
+version = "2.0.0"
+release = 1
+summary = "Low memory XML file writing (openpyxl)"
+license = "MIT"
+homepage = "https://pypi.org/project/et-xmlfile"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = []
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/d3/38/af70d7ab1ae9d4da450eeec1fa3918940a5fafb9055e934af8d6eb0c2313/et_xmlfile-2.0.0.tar.gz", sha256 = "dab3f4764309081ce75662649be815c4c9081e88f0837825f90fd28317d4da54" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

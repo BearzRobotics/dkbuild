@@ -1,0 +1,21 @@
+# Docling core: the document data model (DoclingDocument), chunking and serialisation: PyPI sdist docling-core 2.107.0 (build backend setuptools.build_meta); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: none declared).
+name = "python-docling-core"
+version = "2.107.0"
+release = 1
+summary = "Docling core: the document data model (DoclingDocument), chunking and serialisation"
+license = "MIT"
+homepage = "https://pypi.org/project/docling-core"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = []
+rundeps = ["python", "python-pydantic", "python-pyyaml", "python-jsonschema", "python-typing-extensions", "python-pillow", "python-tabulate", "python-latex2mathml"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/b5/2b/ac9bc84de5d4c4d013b257b3eaff7697e0d09bd15e1deb646ad645bb9c01/docling_core-2.107.0.tar.gz", sha256 = "fc58762f1e0d213feeccc009668a11aedbd7a4f10711222ee62934e4b818f61f" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''
