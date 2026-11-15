@@ -1,7 +1,13 @@
-# C++/Python bindings. needed by: python-pillow.
+# C++/Python bindings. needed by: python-pillow, opencolorio, openimageio, openshadinglanguage, scipy ...
+# r2: a -devel package (python-pybind11-devel: the headers and the CMake files; the recipes that build
+# against pybind11 name it) and the usual places for them: /usr/include/pybind11 and
+# /usr/share/cmake/pybind11 are links into the Python package's own copies (pip puts them in
+# site-packages/pybind11), so find_package(pybind11) and #include <pybind11/...> work without
+# `pybind11-config`. The r1 build had no -devel (the headers were not under /usr/include), and
+# opencolorio, and everything behind it (gpgme, poppler, sane-backends, colord, gtk+3 ...), was skipped.
 name = "python-pybind11"
 version = "3.1.0"
-release = 1
+release = 2
 summary = "pybind11 for Python"
 license = "BSD-3-Clause"
 homepage = "https://pypi.org/project/pybind11"
@@ -17,4 +23,16 @@ source = [
 install = '''
 python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
     --root "$pkgdir" --prefix /usr .
+site=$(echo "$pkgdir"/usr/lib/python3*/site-packages)
+sitepath=${site#"$pkgdir"}
+mkdir -p "$pkgdir/usr/include" "$pkgdir/usr/share/cmake"
+ln -s "../lib${sitepath#/usr/lib}/pybind11/include/pybind11" "$pkgdir/usr/include/pybind11"
+ln -s "../../lib${sitepath#/usr/lib}/pybind11/share/cmake/pybind11" "$pkgdir/usr/share/cmake/pybind11"
+test -f "$pkgdir/usr/include/pybind11/pybind11.h"
+test -f "$pkgdir/usr/share/cmake/pybind11/pybind11Config.cmake"
 '''
+
+[subpackages.devel]
+summary = "pybind11 headers and CMake files"
+depends = ["python-pybind11"]
+paths = ["/usr/include/pybind11", "/usr/share/cmake/pybind11", "/usr/lib/python3*/site-packages/pybind11/include", "/usr/lib/python3*/site-packages/pybind11/share"]
