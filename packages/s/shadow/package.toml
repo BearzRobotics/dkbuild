@@ -1,22 +1,25 @@
 # Imported from Chimera Linux cports: main/shadow/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # login, su, passwd, useradd and friends (util-linux is built without login
-# and su, which come from here). Without PAM (not built; DKRescue has none):
-# shadow checks passwords against /etc/shadow itself and login.defs is
-# upstream's. Patches are Chimera's (default shell /bin/sh, no mail spool, two
-# fixes); its login.defs patch and pam.d files are PAM-only and left out.
+# and su, which come from here). With PAM (r6, 2026-11-15: the system adopts PAM all the way,
+# SELinux's pam_selinux and the shell lock screens need it): login, su, passwd and the account
+# tools authenticate through linux-pam; the stacks are in files/pam.d (installed to /usr/lib/pam.d,
+# included from linux-pam-base's system-auth and system-login). The root-only account tools
+# (useradd, groupadd ...) accept root with pam_rootok and nobody else. login.defs is
+# upstream's; Chimera's login.defs patch is still left out. Patches are Chimera's (default shell
+# /bin/sh, no mail spool, two fixes).
 # r2: no sulogin: util-linux's is the system one.
 # r3: rebuilt with the empty directories it installs (dkbuild's splitter dropped them).
 # r4: static libraries too (in shadow-static), for fully static programs on musl.
 name = "shadow"
 version = "4.17.2"
-release = 5
+release = 6
 summary = "Shadow password file utilities"
 license = "BSD-3-Clause"
 homepage = "https://github.com/shadow-maint/shadow"
 patches = ["defaults.patch", "xstrdup.patch", "usermod-move-home-errmsg.patch"]
-builddeps = ["acl-devel", "attr-devel", "linux-headers"]
-rundeps = ["base-files"]
+builddeps = ["acl-devel", "attr-devel", "linux-headers", "linux-pam-devel"]
+rundeps = ["base-files", "linux-pam", "linux-pam-base"]
 options = ["!check"]
 
 source = [
@@ -27,7 +30,7 @@ setup = '''
 %configure \
     --enable-shared \
     --enable-lastlog \
-    --without-libpam \
+    --with-libpam \
     --with-acl \
     --with-attr \
     --without-libbsd \
@@ -54,6 +57,10 @@ install -Dm644 $pkgfiles/default.useradd "$pkgdir/etc/default/useradd"
 for f in chage chfn chsh expiry gpasswd newgidmap newuidmap newgrp passwd sg su; do
     [ -e "$pkgdir/usr/bin/$f" ] && chmod 4755 "$pkgdir/usr/bin/$f"
 done
+# upstream's own /etc/pam.d files are replaced by ours, in the vendor directory
 rm -rf "$pkgdir/etc/pam.d"
+for f in "$pkgfiles"/pam.d/*; do
+    install -Dm644 "$f" "$pkgdir/usr/lib/pam.d/$(basename "$f")"
+done
 install -Dm644 $pkgfiles/LICENSE "$pkgdir/usr/share/licenses/shadow/LICENSE"
 '''

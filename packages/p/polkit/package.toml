@@ -2,7 +2,8 @@
 # anything that asks for privileged actions through D-Bus.
 #
 # Written from Chimera's recipe (polkit 128), changed for this system:
-#  - authfw=shadow: no PAM here (polkit 128 can authenticate against shadow).
+#  - authfw=pam (r5, 2026-11-15: the system adopts PAM all the way); the polkit-1 service is
+#    files/polkit-1.pam, installed to /usr/lib/pam.d (it uses the system-auth stack).
 #  - a REDUCED polkit: session_tracking=ConsoleKit builds polkit's generic session
 #    monitor, which needs no logind or elogind at all. It asks ConsoleKit over
 #    D-Bus for the caller's session; with no ConsoleKit running that fails, so
@@ -18,14 +19,14 @@
 # r4: static libraries too (in polkit-static), for fully static programs on musl.
 name = "polkit"
 version = "128"
-release = 4
+release = 5
 summary = "Toolkit for defining and handling authorizations"
 license = "GPL-2.0-or-later"
 homepage = "https://www.freedesktop.org/wiki/Software/polkit"
 patches = ["dbus-activation.patch", "disable-sd-pidfd.patch", "readiness.patch"]
 hostdeps = ["gettext", "meson", "perl", "pkgconf"]
-builddeps = ["duktape-devel", "glib-devel", "libexpat-devel"]
-rundeps = ["dbus"]
+builddeps = ["duktape-devel", "glib-devel", "libexpat-devel", "linux-pam-devel"]
+rundeps = ["dbus", "linux-pam", "linux-pam-base"]
 options = ["!check", "!cross"]
 
 source = [
@@ -37,7 +38,7 @@ setup = '''
     -Dsession_tracking=ConsoleKit \
     -Dsystemdsystemunitdir= \
     -Dpolkitd_user=polkitd \
-    -Dauthfw=shadow \
+    -Dauthfw=pam \
     -Dos_type=lfs \
     -Dman=false \
     -Dintrospection=false \
@@ -51,4 +52,5 @@ install = '''
 %meson_install
 rm -rf "$pkgdir/usr/lib/sysusers.d" "$pkgdir/usr/lib/tmpfiles.d" "$pkgdir/usr/lib/systemd"
 install -Dm644 $pkgfiles/polkitd "$pkgdir/etc/dinit.d/polkitd"
+install -Dm644 $pkgfiles/polkit-1.pam "$pkgdir/usr/lib/pam.d/polkit-1"
 '''

@@ -2,17 +2,17 @@
 # CUPS, the print server: cupsd, lp/lpr/lpstat/cancel, lpadmin, the IPP
 # backends (ipp, ipps, usb, socket, lpd, dnssd) and libcups. TLS through
 # OpenSSL; network printers found through Avahi. Administrators are root and
-# the lpadmin and wheel groups. No PAM on this system: the web interface
-# authenticates with /etc/shadow.
+# the lpadmin and wheel groups. With PAM (r2, 2026-11-15: the system adopts PAM all the way): the
+# web interface authenticates through the `cups` service (files/cups.pam, system-auth).
 name = "cups"
 version = "2.4.20"
-release = 1
+release = 2
 summary = "Common Unix Printing System"
 license = "Apache-2.0"
 homepage = "https://openprinting.github.io/cups"
 patches = ["broken-tests.patch", "cups-tlslibs-no-export.patch"]
 hostdeps = ["pkgconf"]
-builddeps = ["acl-devel", "avahi-devel", "dbus-devel", "libpaper-devel", "libpng-devel", "libtiff-devel", "libusb-devel", "linux-headers", "openssl-devel", "zlib-ng-compat-devel"]
+builddeps = ["acl-devel", "avahi-devel", "dbus-devel", "libpaper-devel", "libpng-devel", "libtiff-devel", "libusb-devel", "linux-headers", "linux-pam-devel", "openssl-devel", "zlib-ng-compat-devel"]
 options = ["!check", "!lto"]
 
 source = [
@@ -31,7 +31,7 @@ setup = '''
     --enable-acl \
     --enable-dbus \
     --enable-libpaper \
-    --disable-pam \
+    --enable-pam \
     --enable-raw-printing \
     --disable-gssapi \
     --without-rcdir \
@@ -54,6 +54,7 @@ build = '''
 install = '''
 %make_install
 install -Dm644 $pkgfiles/cupsd "$pkgdir/etc/dinit.d/cupsd"
+install -Dm644 $pkgfiles/cups.pam "$pkgdir/usr/lib/pam.d/cups"
 # Made at install time (scripts/post-install), with their owners.
 rm -rf "$pkgdir/var/spool" "$pkgdir/var/cache" "$pkgdir/var/log" "$pkgdir/run"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/cups/LICENSE"

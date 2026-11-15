@@ -1,14 +1,16 @@
 # Follows the DKRescue post's build of sudo 1.9.17p2.
-# Built without PAM: authentication goes through shadow, not PAM.
+# Built with PAM (r4, 2026-11-15: the system adopts PAM all the way): sudo and sudo -i go through
+# files/sudo and files/sudo-i (/usr/lib/pam.d), which use the system-auth stack.
 # r2: rebuilt with the empty directories it installs (dkbuild's splitter dropped them).
 # r3: static libraries too (in sudo-static), for fully static programs on musl.
 name = "sudo"
 version = "1.9.17_p2"
-release = 3
+release = 4
 summary = "Run commands as another user"
 license = "ISC"
 homepage = "https://www.sudo.ws"
-builddeps = ["zlib-ng-compat-devel"]
+builddeps = ["zlib-ng-compat-devel", "linux-pam-devel"]
+rundeps = ["linux-pam", "linux-pam-base"]
 options = ["!check"]
 
 source = [
@@ -16,7 +18,7 @@ source = [
 ]
 
 setup = '''
-%configure --libexecdir=/usr/lib --with-secure-path --with-all-insults --with-env-editor --without-pam
+%configure --libexecdir=/usr/lib --with-secure-path --with-all-insults --with-env-editor --with-pam
 '''
 build = '''
 %make
@@ -25,4 +27,6 @@ install = '''
 make DESTDIR=$pkgdir install
 chmod 4755 "$pkgdir/usr/bin/sudo"
 rm -rf "$pkgdir/run"
+install -Dm644 $pkgfiles/sudo "$pkgdir/usr/lib/pam.d/sudo"
+install -Dm644 $pkgfiles/sudo-i "$pkgdir/usr/lib/pam.d/sudo-i"
 '''
