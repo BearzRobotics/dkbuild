@@ -9,7 +9,11 @@
 # its /etc/fpc.cfg). `make all` builds the compiler once with that compiler,
 # then the compiler again with itself, the RTL and the packages.
 # FPC emits assembler and calls the external `as` and `ld`: binutils is a
-# runtime dependency (GNU as; ld is the system's).
+# runtime dependency (GNU as; ld is the system's). Our binutils installs as
+# g<tool> (gas), so there is no `as`: the build puts an `as` link to gas in
+# PATH, and the package ships one in /usr/lib/fpc/<version>/bin, which the
+# installed fpc.cfg names with -FD (the compiler's directory for its
+# assembler and linker; ld is still found in PATH).
 # Source: the tag release_3_2_4 archive of the project's GitLab (the release
 # tarball on the download server refuses downloads); the archive's checksum is
 # pinned, but GitLab does not promise a stable archive format.
@@ -35,6 +39,9 @@ source = [
 
 environment = '''
 export HOME=/tmp
+mkdir -p /tmp/fpcbin
+ln -sf /usr/bin/gas /tmp/fpcbin/as
+export PATH=/tmp/fpcbin:$PATH
 unset CFLAGS CXXFLAGS LDFLAGS CPPFLAGS
 # the Pascal compiler that builds this one: the previous package's, or (stage 0) Alpine's
 if [ -x /usr/bin/ppcx64 ] && [ ! -d /usr/lib/fpc-bootstrap ]; then
@@ -57,6 +64,10 @@ ln -sf ../lib/fpc/$v/ppcx64 "$pkgdir/usr/bin/ppcx64"
 # /etc/fpc.cfg: the unit and library paths of this version
 mkdir -p "$pkgdir/etc"
 "$pkgdir/usr/bin/fpcmkcfg" -d basepath='/usr/lib/fpc/$fpcversion' -o "$pkgdir/etc/fpc.cfg"
+# GNU as is gas here: -FD names the directory holding an `as` link to it
+mkdir -p "$pkgdir/usr/lib/fpc/$v/bin"
+ln -s ../../../../bin/gas "$pkgdir/usr/lib/fpc/$v/bin/as"
+printf '%s\n' '# the assembler (gas, as `as`)' '-FD/usr/lib/fpc/$fpcversion/bin' >> "$pkgdir/etc/fpc.cfg"
 test -x "$pkgdir/usr/lib/fpc/$v/ppcx64"
 test -f "$pkgdir/etc/fpc.cfg"
 install -Dm644 compiler/COPYING.txt "$pkgdir/usr/share/licenses/fpc/COPYING.txt"

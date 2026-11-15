@@ -3,7 +3,7 @@
 # the host). No manual: building it needs Sphinx, which is not in the tree yet.
 name = "fish"
 version = "4.9.3"
-release = 1
+release = 2
 summary = "Friendly interactive command line shell"
 license = "GPL-2.0-only"
 homepage = "https://fishshell.com"
