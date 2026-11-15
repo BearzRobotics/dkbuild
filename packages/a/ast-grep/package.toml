@@ -4,7 +4,7 @@
 # installed: its short alias `sg` is shadow's sg (run a command as a group).
 name = "ast-grep"
 version = "0.51.2"
-release = 1
+release = 2
 summary = "Structural code search, lint and rewriting tool"
 license = "MIT"
 homepage = "https://ast-grep.github.io"
