@@ -3,9 +3,13 @@
 # firewall-config (GTK) and firewall-applet programs, and the Python module `firewall`. The default
 # firewall of the Red Hat family (RHEL, AlmaLinux, Fedora). After Alpine's community/firewalld
 # (GPL-2.0-or-later; its OpenRC script is not used): systemd, sysconfig and the RPM macros are
-# off. nftables only, by decision (2026-11-15: this system favours nftables and firewalld; iptables and
-# ufw are for those who prefer the older setup): no iptables, ip6tables, ebtables or ipset support, so
-# firewalld's `direct` rules and ipset-based sets are not available (nftables sets replace them).
+# off. nftables first, by decision (2026-11-15: this system favours nftables and firewalld; iptables and ufw are for
+# those who prefer the older setup): the nftables backend is the default and the only dependency (nftables).
+# The paths of the iptables, ip6tables, ebtables and ipset tools are compiled in (/usr/sbin), but they are NOT
+# dependencies: nothing pulls them into an image. Whoever wants the older backend, or the `direct` rules and
+# ipsets, installs iptables, ebtables and ipset and sets FirewallBackend=iptables in /etc/firewalld/firewalld.conf
+# (upstream calls that backend deprecated); without the tools firewalld says "iptables is not usable".
+# (An earlier draft of this recipe was nftables-only: the paths cost nothing and one package serves both.)
 # Split (user request 2026-11-15): the daemon, firewall-cmd and firewall-offline-cmd are
 # `firewalld`; the graphical configuration tool (firewall-config), the tray applet (firewall-applet), their
 # glade file, desktop files, icons, GSettings schema and applet.conf are `firewalld-gui` (it pulls GTK and
@@ -14,8 +18,8 @@
 # firewalld's policy is part of the distribution's selinux-policy.
 # r1 build: configure wants DocBook XSL (the namespace-less stylesheets, docbook-xsl-nons) in the XML catalog for the
 # man pages (not the namespaced docbook-xsl).
-# Not built (queued, wip/queue): expect first-build fixes. The Python bits it needs: python-dbus
-# and python-gobject (in the tree), python-nftables and python-libcap-ng (written in the queue).
+# Not built yet: expect first-build fixes. The Python bits it needs: python-dbus and python-gobject, and
+# python-nftables and python-libcap-ng (all in the tree).
 name = "firewalld"
 version = "2.5.2"
 release = 1
@@ -38,13 +42,13 @@ setup = '''
     --disable-systemd \
     --disable-sysconfig \
     --with-bashcompletiondir=/usr/share/bash-completion/completions \
-    --without-iptables \
-    --without-iptables-restore \
-    --without-ip6tables \
-    --without-ip6tables-restore \
-    --without-ebtables \
-    --without-ebtables-restore \
-    --without-ipset
+    --with-iptables=/usr/sbin/iptables \
+    --with-iptables-restore=/usr/sbin/iptables-restore \
+    --with-ip6tables=/usr/sbin/ip6tables \
+    --with-ip6tables-restore=/usr/sbin/ip6tables-restore \
+    --with-ebtables=/usr/sbin/ebtables \
+    --with-ebtables-restore=/usr/sbin/ebtables-restore \
+    --with-ipset=/usr/sbin/ipset
 '''
 build = '''
 %make
