@@ -135,7 +135,7 @@ Details and per-package notes: `docs/requests.md` and `wip/`.
 | Server web apps (help desks, ERP, mail, project management, finance) | written, inert, not built; some failing |
 | Flatpak (+ builder), Flathub as default remote | written, not built |
 | SELinux (requested 2026-11-15, for Red Hat family users such as Alma): libsepol, libselinux, libsemanage, checkpolicy, policycoreutils, setools, a policy, kernel options, SELinux-aware coreutils, openssh and others, dinit hooks | queued, not written (see `docs/requests.md`) |
-| snapd (requested 2026-11-15; needs dinit equivalents for its systemd units, apparmor not packaged) | queued, not written (see `docs/requests.md`) |
+| snapd (requested 2026-11-15) | dropped: needs systemd (docs/decisions/0003-no-snapd.md); use Flatpak |
 | Document search and AI stack (requested 2026-11-15; priorities 1-4 in `docs/requests.md`): OCR and PDF tools; sqlite-vec, pgvector, tantivy, qdrant; onnxruntime, fastembed, sentence-transformers, huggingface-hub; docling, apache-tika, llama-index, haystack, langchain | priority 1 and sqlite/postgresql/llama.cpp/ollama in the tree; the rest queued, not written (PyTorch not packaged: decide CPU or Vulkan first) |
 | RAG projects (requested 2026-11-15): docling, MinerU, danswer/Onyx, Verba, kotaemon, RAG-Anything; legal RAG repos (Legal-RAG, legalRAG, legal-rag-hy, legal-rag-router, legal-rag-bench) | queued; repositories not yet inspected (see `docs/requests.md`) |
 
