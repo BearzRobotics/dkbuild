@@ -57,14 +57,14 @@ has no store; inert dinit service, localhost:9998); **MinerU** 4.2.2, **RAG-Anyt
 74, 40 and 33 of their dependencies are tree/queue packages) with the compiled packages they need (python-onnx, ml-dtypes,
 hf-xet, nh3, resvg-py, brotli, jieba, audioop-lts, rl-accel).
 
-Deliberately NOT packaged, with the reason (the user asked for all of them; these cannot be done natively):
+Deliberately NOT packaged, with the reason (the user asked for all of them; these cannot be done natively; and the user wants docker avoided whenever possible: podman, Incus or a native venv instead):
 - **kotaemon** (Cinnamon/kotaemon 0.12.0): its uv.lock pins a 2024-25 stack (numpy 1.26.4, torch 2.2.2, gradio 4.39,
   llama-index 0.10, chromadb 0.5, pydantic 2.10) that does not build on Python 3.14 or against this tree's PyTorch 2.15;
-  it targets Python 3.10-3.12. Use its container image (podman/docker are in the tree), or a Python 3.12 venv with `uv sync`.
+  it targets Python 3.10-3.12. Not with docker (the user avoids it): a Python 3.12 venv with `uv sync` (needs a python3.12 package: open), or its container image run with podman or in an Incus container if it must.
 - **Verba** (weaviate/Verba 2.1.3): Python 3.10-3.12 only, and it needs a Weaviate database (a Go server: not
-  written; run Weaviate in a container, or use qdrant here with a different front end).
+  written; run Weaviate with podman or in Incus, or use qdrant here with a different front end).
 - **danswer / Onyx** (unoplat/danswer fork): a multi-service system (PostgreSQL, Redis, **Vespa**, a Next.js web UI, a model
-  server, the API); Vespa alone is a large C++/Java build. Run it with its docker compose files in containers.
+  server, the API); Vespa alone is a large C++/Java build. If wanted, run its services with podman (podman-compose) or in Incus containers, not docker.
 - **The legal RAG repositories** (Fan-Luo/Legal-RAG, arulkumarann/legalRAG, defrecord/legal-rag-hy,
   azterizm/legal-rag-router, isaacus-dev/legal-rag-bench): sample projects and a benchmark without releases or installable
   packages; clone and run them in a venv against the local stack (ollama/llama.cpp, fastembed, qdrant, docling, MinerU).
