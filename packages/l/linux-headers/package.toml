@@ -1,13 +1,15 @@
+# Tracks the newest kernel (the `linux` package): the user runs the bleeding-edge kernel; the
+# userspace API is backward compatible, so linux-lts (6.18) runs the same userspace.
 name     = "linux-headers"
-version  = "6.19"
-release  = 4
+version  = "7.3.4"
+release  = 1
 summary  = "Linux kernel API headers for userspace"
 license  = "GPL-2.0-only WITH Linux-syscall-note"
 homepage = "https://www.kernel.org/"
 options  = ["!check", "!strip"]
 
 source = [
-    { url = "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.19.tar.xz", sha256 = "303079a8250b8f381f82b03f90463d12ac98d4f6b149b761ea75af1323521357" },
+    { url = "https://cdn.kernel.org/pub/linux/kernel/v7.x/linux-7.3.4.tar.xz", sha256 = "b11b6df8295e8e991ff040b71aaa4994a8b55caa23b6b092907f195b5840fd1f" },
 ]
 
 build = '''
