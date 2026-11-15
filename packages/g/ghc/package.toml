@@ -192,7 +192,14 @@ tar -czf /tmp/hadrian-sources.tar.gz -C /tmp/hadrian-src .
 build = '''
 (cd hadrian/bootstrap && python3 bootstrap.py -w $bootghc -s /tmp/hadrian-sources.tar.gz)
 ghc_configure GHC=$bootghc
-$hadrian
+# r5 compiled and linked everything (ld.lld crashed five times in the merge-objects step, each
+# recovered by the single-threaded retry in /tmp/cc-bin/ld.lld) and then stopped at the very end
+# with "_build/stage1/bin/haddock: createProcess: execvp: does not exist" after running that haddock
+# many times: lld deletes its output when it crashes, so a relink that crashed leaves the file
+# missing until the retry writes it again, and a parallel (-j) haddock run can hit that gap.
+# Hadrian resumes from its build state: one more run finishes what was left, and if the failure
+# is not a one-off the second log shows it again, from the start of the failing target.
+$hadrian || { echo "hadrian failed: resuming once" >&2; $hadrian; }
 '''
 install = '''
 # Hadrian's install has no DESTDIR: install the binary distribution it makes
