@@ -1,0 +1,8 @@
+# Qdrant, the vector database. Not enabled by default (dinitctl enable qdrant). Listens on
+# 127.0.0.1:6333 (HTTP, with the web UI at /dashboard) and :6334 (gRPC): see /etc/qdrant/config.yaml.
+type = process
+command = /usr/bin/qdrant --config-path /etc/qdrant/config.yaml
+working-dir = /usr/share/qdrant
+run-as = _qdrant
+smooth-recovery = true
+depends-on: rcboot

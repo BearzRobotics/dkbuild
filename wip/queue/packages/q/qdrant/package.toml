@@ -1,0 +1,54 @@
+# Qdrant 1.20: the vector database and search engine (Rust). The server binary, with the
+# web UI (qdrant-web-ui, the project's prebuilt dist-qdrant.zip: a pinned second source, as the
+# project's own Docker build downloads "latest" at build time; here it is fixed and checked)
+# served at /dashboard. Inert: a dinit service (files/qdrant) that is not enabled, a system user
+# (sysusers), data in /var/lib/qdrant, and a configuration that listens on 127.0.0.1 only (upstream's
+# default is 0.0.0.0): see /etc/qdrant/config.yaml (set an api_key before exposing it).
+# Rust 1.98 or newer (rust-version in Cargo.toml). Crates from cargodeps (Cargo.lock, with git
+# dependencies on tikv/raft-rs and qdrant's tonic fork, both vendored by cargo vendor).
+# Not built (queued, wip/queue): expect first-build fixes: jemalloc and aws-lc-sys build C code (cmake,
+# a C compiler), prost-build needs protoc, unwind-sys needs libunwind (llvm-libunwind here).
+name = "qdrant"
+version = "1.20.1"
+release = 1
+summary = "Qdrant vector database and search engine"
+license = "Apache-2.0"
+homepage = "https://qdrant.tech"
+hostdeps = ["rust", "protobuf", "cmake", "pkgconf", "perl", "make", "unzip", "llvm"]
+builddeps = ["llvm-libunwind-devel", "lz4-devel", "openssl-devel", "zstd-devel"]
+rundeps = ["shadow"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/qdrant/qdrant/archive/refs/tags/v1.20.1.tar.gz", sha256 = "1d2800e1c17708c922b291d2808299fdcb5b1fb0ff8be2f7ca88ca386d13c55d" },
+    { url = "https://github.com/qdrant/qdrant-web-ui/releases/download/v0.2.21/dist-qdrant.zip", sha256 = "04394a5ea0c3f508a689ea0e03a92b5b48a560daa779800f0ce9fe6ff1388a63", unpack = false },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export PROTOC=/usr/bin/protoc
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs --bin qdrant
+'''
+install = '''
+install -Dm755 target/release/qdrant "$pkgdir/usr/bin/qdrant"
+# the web UI: the zip holds dist/, which is the static directory (qdrant looks for ./static: the
+# dinit service runs it with /usr/share/qdrant as its working directory)
+mkdir -p "$pkgdir/usr/share/qdrant/static"
+unzip -q -o ../sources/dist-qdrant.zip -d "$pkgdir/usr/share/qdrant"
+cp -r "$pkgdir"/usr/share/qdrant/dist/. "$pkgdir/usr/share/qdrant/static/"
+rm -rf "$pkgdir/usr/share/qdrant/dist"
+install -Dm644 docs/redoc/master/openapi.json "$pkgdir/usr/share/qdrant/static/openapi.json"
+# this system's places for the data, and no listening on the network by default
+install -Dm640 config/config.yaml "$pkgdir/etc/qdrant/config.yaml"
+sed -i -e 's|^  storage_path: ./storage|  storage_path: /var/lib/qdrant/storage|' \
+       -e 's|^  snapshots_path: ./snapshots|  snapshots_path: /var/lib/qdrant/snapshots|' \
+       -e 's|^  host: 0.0.0.0|  host: 127.0.0.1|' "$pkgdir/etc/qdrant/config.yaml"
+grep -q 'storage_path: /var/lib/qdrant/storage' "$pkgdir/etc/qdrant/config.yaml"
+grep -q 'host: 127.0.0.1' "$pkgdir/etc/qdrant/config.yaml"
+install -Dm644 $pkgfiles/qdrant "$pkgdir/etc/dinit.d/qdrant"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/qdrant.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/qdrant.conf"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/qdrant/LICENSE"
+'''
