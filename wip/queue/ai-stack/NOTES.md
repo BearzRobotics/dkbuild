@@ -47,3 +47,27 @@ python-pypdfium2 (bound to the system pdfium) and **pdfium**, which is the proje
 python-openpyxl (+ et-xmlfile), python-typer, python-marko, python-latex2mathml (wheels where the sdist needs an unpackaged
 build backend). docling's OCR engines (easyocr, rapidocr, tesseract bindings) are not included: they are optional.
 Still not written: apache-tika (Java/Maven), MinerU, kotaemon, Verba, danswer/Onyx, RAG-Anything, the legal RAG repos.
+
+## Update 2026-11-15 (end): the AI stack as far as it goes
+
+Written since: docling's OCR engines (python-easyocr, python-rapidocr, python-tesserocr, python-pytesseract; with geos, shapely,
+pyclipper, python-bidi, omegaconf, scikit-image, imageio, tifffile, lazy-loader) and the meta `python-docling-ocr`;
+**apache-tika** 4.2.0 (the Apache release of the server, pinned; it builds with Maven and ~400 dependencies, for which the tree
+has no store; inert dinit service, localhost:9998); **MinerU** 4.2.2, **RAG-Anything** 1.4.4 and **LightRAG** 1.5.7 (pydeps locks;
+74, 40 and 33 of their dependencies are tree/queue packages) with the compiled packages they need (python-onnx, ml-dtypes,
+hf-xet, nh3, resvg-py, brotli, jieba, audioop-lts, rl-accel).
+
+Deliberately NOT packaged, with the reason (the user asked for all of them; these cannot be done natively):
+- **kotaemon** (Cinnamon/kotaemon 0.12.0): its uv.lock pins a 2024-25 stack (numpy 1.26.4, torch 2.2.2, gradio 4.39,
+  llama-index 0.10, chromadb 0.5, pydantic 2.10) that does not build on Python 3.14 or against this tree's PyTorch 2.15;
+  it targets Python 3.10-3.12. Use its container image (podman/docker are in the tree), or a Python 3.12 venv with `uv sync`.
+- **Verba** (weaviate/Verba 2.1.3): Python 3.10-3.12 only, and it needs a Weaviate database (a Go server: not
+  written; run Weaviate in a container, or use qdrant here with a different front end).
+- **danswer / Onyx** (unoplat/danswer fork): a multi-service system (PostgreSQL, Redis, **Vespa**, a Next.js web UI, a model
+  server, the API); Vespa alone is a large C++/Java build. Run it with its docker compose files in containers.
+- **The legal RAG repositories** (Fan-Luo/Legal-RAG, arulkumarann/legalRAG, defrecord/legal-rag-hy,
+  azterizm/legal-rag-router, isaacus-dev/legal-rag-bench): sample projects and a benchmark without releases or installable
+  packages; clone and run them in a venv against the local stack (ollama/llama.cpp, fastembed, qdrant, docling, MinerU).
+The packaged stack (ollama, llama.cpp, onnxruntime, PyTorch, transformers, sentence-transformers, fastembed, qdrant,
+pgvector, sqlite-vec, tantivy, docling+OCR, MinerU, Tika, llama-index, haystack, langchain, LightRAG, RAG-Anything) is what
+these applications are built from.
