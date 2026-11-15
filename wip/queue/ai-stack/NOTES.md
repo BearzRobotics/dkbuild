@@ -35,3 +35,15 @@ have are packages of their own (python-jiter, python-tiktoken, python-orjson, py
 cargodeps, like python-pydantic-core). These integrations call remote model APIs (OpenAI and others) by default: with the
 local stack (ollama, llama.cpp, fastembed, qdrant) the user points them at local endpoints. langchain-community and the
 other langchain integrations are not included (install what is needed with pip into a venv, or ask for them).
+
+## Update 2026-11-15: PyTorch and docling written
+
+Written: pytorch 2.15.0 (CPU; bundled third_party; the biggest risk of the queue: musl and libc++ patches probably needed,
+6 hours to build), python-transformers, python-sentence-transformers, python-torchvision (CPU), and the docling chain:
+python-docling, python-docling-core, python-docling-parse (C++, pybind11, qpdf), python-docling-ibm-models,
+python-pypdfium2 (bound to the system pdfium) and **pdfium**, which is the project's PREBUILT musl x86_64 library
+(bblanchon/pdfium-binaries, Chromium 8152, pinned): a source build needs a Chromium gclient checkout (the
+"snapshot" work in wip/README.md); this is the pragmatic first step. Also libspatialindex + python-rtree,
+python-openpyxl (+ et-xmlfile), python-typer, python-marko, python-latex2mathml (wheels where the sdist needs an unpackaged
+build backend). docling's OCR engines (easyocr, rapidocr, tesseract bindings) are not included: they are optional.
+Still not written: apache-tika (Java/Maven), MinerU, kotaemon, Verba, danswer/Onyx, RAG-Anything, the legal RAG repos.
