@@ -12,6 +12,8 @@
 # NetworkManager's typelib, which a headless machine does not need).
 # Inert: a dinit service (files/firewalld) that is not enabled. SELinux needs nothing here:
 # firewalld's policy is part of the distribution's selinux-policy.
+# r1 build: configure wants DocBook XSL (the namespace-less stylesheets, docbook-xsl-nons) in the XML catalog for the
+# man pages (not the namespaced docbook-xsl).
 # Not built (queued, wip/queue): expect first-build fixes. The Python bits it needs: python-dbus
 # and python-gobject (in the tree), python-nftables and python-libcap-ng (written in the queue).
 name = "firewalld"
@@ -20,7 +22,7 @@ release = 1
 summary = "Dynamic firewall daemon with D-Bus interface (nftables)"
 license = "GPL-2.0-or-later"
 homepage = "https://firewalld.org"
-hostdeps = ["autoconf", "automake", "libtool", "gettext", "intltool", "libxslt", "docbook-xsl", "make", "pkgconf", "python", "desktop-file-utils"]
+hostdeps = ["autoconf", "automake", "libtool", "gettext", "intltool", "libxslt", "docbook-xsl-nons", "make", "pkgconf", "python", "desktop-file-utils"]
 builddeps = ["glib-devel"]
 rundeps = ["dbus", "nftables", "python", "python-dbus", "python-gobject", "python-nftables", "python-libcap-ng", "polkit"]
 options = ["!check"]
