@@ -1,0 +1,29 @@
+# pgvector: vector similarity search (exact and approximate: HNSW, IVFFlat) as a
+# PostgreSQL extension. The extension is a PGXS build against the postgresql package
+# (pg_config); it installs vector.so and the extension's SQL and control files under
+# the server's own directories.
+# OPTFLAGS="" because the Makefile's default is -march=native (the build machine's
+# CPU, not the target's): the profile's -march (CFLAGS) applies instead.
+# Not built (queued, wip/queue).
+name = "pgvector"
+version = "0.8.7"
+release = 1
+summary = "Vector similarity search for PostgreSQL"
+license = "PostgreSQL"
+homepage = "https://github.com/pgvector/pgvector"
+hostdeps = ["pkgconf"]
+builddeps = ["postgresql-devel"]
+rundeps = ["postgresql"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/pgvector/pgvector/archive/refs/tags/v0.8.7.tar.gz", sha256 = "cac0b10c360f05b2d521200105ba3697e773d4cd3731f5a915a7e37ebe0bea85" },
+]
+
+build = '''
+make OPTFLAGS="" PG_CONFIG=pg_config -j$jobs
+'''
+install = '''
+make OPTFLAGS="" PG_CONFIG=pg_config DESTDIR="$pkgdir" install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/pgvector/LICENSE"
+'''

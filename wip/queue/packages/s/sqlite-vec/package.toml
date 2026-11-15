@@ -1,0 +1,45 @@
+# sqlite-vec: vector search for SQLite (vec0 virtual tables, KNN queries, float, int8 and
+# binary vectors), a single C file with no dependencies. Built the way the project's own
+# Makefile does the "loadable" and "static" targets, without the Makefile: it asks git for
+# the commit and the date (the source here is a tarball, not a checkout) and pulls in a
+# vendored SQLite for the CLI target, which is not wanted (the system sqlite has the shell).
+# sqlite-vec.h is made from its template with fixed values. Installed: the loadable
+# extension (/usr/lib/sqlite-vec/vec0.so: `.load /usr/lib/sqlite-vec/vec0`), the header and
+# the static library (libsqlite_vec0.a, for programs that link it in with SQLITE_VEC_STATIC).
+# SIMD: the Makefile only enables AVX and NEON for macOS; the plain build is used.
+# Not built (queued, wip/queue).
+name = "sqlite-vec"
+version = "0.1.9"
+release = 1
+summary = "Vector search extension for SQLite"
+license = "Apache-2.0 OR MIT"
+homepage = "https://github.com/asg017/sqlite-vec"
+builddeps = ["sqlite-devel"]
+rundeps = ["sqlite"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/asg017/sqlite-vec/archive/refs/tags/v0.1.9.tar.gz", sha256 = "9823e737d9934dcbe85dff75d3fca81018a9beee803d70fa77b16faab5d61dc9" },
+]
+
+build = '''
+v=$(cat VERSION)
+major=${v%%.*}
+rest=${v#*.}
+minor=${rest%%.*}
+patch=${rest#*.}
+sed -e "s/\${VERSION}/$v/" -e "s/\${VERSION_MAJOR}/$major/" -e "s/\${VERSION_MINOR}/$minor/" \
+    -e "s/\${VERSION_PATCH}/$patch/" -e "s/\${DATE}/$(date -u -d "@$SOURCE_DATE_EPOCH" +%Y-%m-%dT%H:%M:%SZ)/" \
+    -e 's/\${SOURCE}/release v'"$v"'/' sqlite-vec.h.tmpl > sqlite-vec.h
+grep -q 'SQLITE_VEC_VERSION "v0.1.9"' sqlite-vec.h
+$CC $CFLAGS -fPIC -shared -O2 -Wall sqlite-vec.c -o vec0.so -lm
+$CC $CFLAGS -fPIC -DSQLITE_CORE -DSQLITE_VEC_STATIC -O2 -c sqlite-vec.c -o vec.o
+llvm-ar rcs libsqlite_vec0.a vec.o
+'''
+install = '''
+install -Dm755 vec0.so "$pkgdir/usr/lib/sqlite-vec/vec0.so"
+install -Dm644 libsqlite_vec0.a "$pkgdir/usr/lib/libsqlite_vec0.a"
+install -Dm644 sqlite-vec.h "$pkgdir/usr/include/sqlite-vec.h"
+install -Dm644 LICENSE-MIT "$pkgdir/usr/share/licenses/sqlite-vec/LICENSE-MIT"
+install -Dm644 LICENSE-APACHE "$pkgdir/usr/share/licenses/sqlite-vec/LICENSE-APACHE"
+'''
