@@ -13,10 +13,14 @@ hostname = "fenriros"
 label    = "FENRIROS_DKDE"
 # not base-net: it depends on dhcpcd, and NetworkManager does the DHCP here (two DHCP clients
 # fight); its other parts (OpenSSH, curl) are listed instead
+# firewalld (the firewall of this image, nftables backend; recipe in wip/queue/packages/f/firewalld until
+# the main tree builds consistently): add "firewalld" to this list and to `services` below when it is in
+# the tree. Not firewalld-gui: dkde's own firewalld front end is under development.
 packages = ["base", "openssh", "openssh-server", "curl", "linux", "live-initramfs", "dkinstaller", "firmware-linux-meta", "desktop-dkde"]
 exclude  = ["*-devel", "*-doc", "*-static"]
 # never installed, even as a dependency (apk stops with a conflict if something needs it)
 unwanted = ["dhcpcd"]
+# firewalld goes here too ("firewalld", after "dbus": it needs the system bus), see the packages note above
 services = ["udevd", "udev-trigger", "udev-settle", "modules", "syslogd", "seatd", "dbus", "networkmanager", "greetd"]
 output   = ["iso"]
 login     = "greetd"
