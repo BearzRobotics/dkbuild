@@ -1,0 +1,52 @@
+# firewalld 2.5.2: the dynamic firewall daemon (zones and services, runtime and permanent
+# configuration, the D-Bus API NetworkManager and desktops talk to), the firewall-cmd, firewall-offline-cmd,
+# firewall-config (GTK) and firewall-applet programs, and the Python module `firewall`. The default
+# firewall of the Red Hat family (RHEL, AlmaLinux, Fedora). After Alpine's community/firewalld
+# (GPL-2.0-or-later; its OpenRC script is not used): systemd, sysconfig and the RPM macros are
+# off. Backend: nftables (the default); the iptables, ip6tables, ebtables and ipset
+# tools of this tree are named for firewalld's `direct` rules and ipset support (they are in /usr/bin).
+# Inert: a dinit service (files/firewalld) that is not enabled. SELinux needs nothing here:
+# firewalld's policy is part of the distribution's selinux-policy.
+# Not built (queued, wip/queue): expect first-build fixes. The Python bits it needs: python-dbus
+# and python-gobject (in the tree), python-nftables and python-libcap-ng (written in the queue).
+name = "firewalld"
+version = "2.5.2"
+release = 1
+summary = "Dynamic firewall daemon with D-Bus interface (nftables)"
+license = "GPL-2.0-or-later"
+homepage = "https://firewalld.org"
+hostdeps = ["autoconf", "automake", "libtool", "gettext", "intltool", "libxslt", "docbook-xsl", "make", "pkgconf", "python", "desktop-file-utils"]
+builddeps = ["glib-devel"]
+rundeps = ["dbus", "nftables", "python", "python-dbus", "python-gobject", "python-nftables", "python-libcap-ng", "polkit", "iptables", "ipset", "ebtables", "gtk+3", "networkmanager"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/firewalld/firewalld/releases/download/v2.5.2/firewalld-2.5.2.tar.bz2", sha256 = "99d7468c22f6cafd8c72aa53173a632f2ca29cb19aec913e8ed45b6102af322d" },
+]
+
+setup = '''
+%configure \
+    --sysconfdir=/etc \
+    --disable-rpmmacros \
+    --disable-systemd \
+    --disable-sysconfig \
+    --with-bashcompletiondir=/usr/share/bash-completion/completions \
+    --with-iptables=/usr/bin/iptables \
+    --with-iptables-restore=/usr/bin/iptables-restore \
+    --with-ip6tables=/usr/bin/ip6tables \
+    --with-ip6tables-restore=/usr/bin/ip6tables-restore \
+    --with-ebtables=/usr/bin/ebtables \
+    --with-ebtables-restore=/usr/bin/ebtables-restore \
+    --with-ipset=/usr/bin/ipset
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+# nothing of the RPM or sysconfig world
+rm -rf "$pkgdir/etc/sysconfig" "$pkgdir/etc/rc.d"
+install -Dm644 $pkgfiles/firewalld "$pkgdir/etc/dinit.d/firewalld"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/firewalld/COPYING"
+test -x "$pkgdir/usr/sbin/firewalld" -o -x "$pkgdir/usr/bin/firewalld"
+'''

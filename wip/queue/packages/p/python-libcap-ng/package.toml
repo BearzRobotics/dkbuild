@@ -1,0 +1,29 @@
+# python-libcap-ng: the Python binding (swig) of libcap-ng, for firewalld (it drops capabilities). The
+# libcap-ng package here is built without its Python bindings (--without-python3), so they are
+# built from the same source (0.8.5): configure the whole tree, then build and install only
+# bindings/python3 against the installed libcap-ng. Not built (queued, wip/queue).
+name = "python-libcap-ng"
+version = "0.8.5"
+release = 1
+summary = "Python binding of libcap-ng (POSIX capabilities)"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/stevegrubb/libcap-ng"
+hostdeps = ["autoconf", "automake", "libtool", "make", "pkgconf", "python", "python-setuptools", "swig"]
+builddeps = ["libcap-ng-devel", "python-devel"]
+rundeps = ["python", "libcap-ng"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/stevegrubb/libcap-ng/archive/refs/tags/v0.8.5.tar.gz", sha256 = "e4be07fdd234f10b866433f224d183626003c65634ed0552b02e654a380244c2" },
+]
+
+setup = '''
+./autogen.sh
+%configure --with-python3 --without-python
+'''
+build = '''
+make -C bindings/python3 -j$jobs
+'''
+install = '''
+make -C bindings/python3 DESTDIR="$pkgdir" install
+'''

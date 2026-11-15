@@ -1,0 +1,10 @@
+# firewalld, the dynamic firewall daemon (zones, services, D-Bus API; the nftables backend). Not
+# enabled by default (dinitctl enable firewalld). Configure with firewall-cmd, firewall-config or
+# the network settings: the default zone is `public` (incoming connections other than ssh and
+# DHCPv6 are dropped). Rules are in /etc/firewalld.
+type = process
+command = /usr/sbin/firewalld --nofork --nopid
+smooth-recovery = true
+depends-on: rcboot
+depends-on: dbus
+waits-for: nftables

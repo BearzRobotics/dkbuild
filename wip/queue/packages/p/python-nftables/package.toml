@@ -1,0 +1,22 @@
+# python-nftables: the Python binding of libnftables (the `nftables` module, from the py/ directory of the
+# nftables source: it drives nft through its JSON interface). Needed by firewalld. The same source release as
+# the nftables package (1.1.7, which is built with --with-json). Not built (queued, wip/queue).
+name = "python-nftables"
+version = "1.1.7"
+release = 1
+summary = "Python binding of libnftables (JSON API)"
+license = "GPL-2.0-only"
+homepage = "https://netfilter.org/projects/nftables"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python", "nftables"]
+options = ["!check"]
+
+source = [
+    { url = "http://netfilter.org/projects/nftables/files/nftables-1.1.7.tar.xz", sha256 = "a6fbf060d8d4fff001517a2b94f356bb4366bfbf0ba366366f9d27cc38caa58f" },
+]
+
+install = '''
+cd py
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''
