@@ -1,0 +1,32 @@
+# ufw 0.36.2: the Uncomplicated Firewall, a command line front end to netfilter (iptables) with
+# simple rules (`ufw allow ssh`, `ufw default deny incoming`, application profiles). Python
+# (setuptools), from Launchpad (launchpad.net/ufw). After Alpine's community/ufw (MIT-licensed
+# APKBUILD and patches): fix-lib_path.patch (the state directory is /usr/lib/ufw, as there is no
+# /lib here), 0001-syntaxwarning.patch (Python 3.12+ warnings), iptables-version.patch; its test
+# patches are not used (no tests). Inert: a dinit service (files/ufw) that is not enabled, and ufw
+# ships disabled (ENABLED=no in /etc/ufw/ufw.conf): installing it changes no firewall rule.
+# Not built (queued, wip/queue): expect first-build fixes (the iptables front end is
+# the legacy iptables of this tree; nftables is its own package).
+name = "ufw"
+version = "0.36.2"
+release = 1
+summary = "Uncomplicated Firewall: simple front end to netfilter"
+license = "GPL-3.0-or-later"
+homepage = "https://launchpad.net/ufw"
+patches = ["0001-syntaxwarning.patch", "fix-lib_path.patch", "iptables-version.patch"]
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "iptables", "bash"]
+options = ["!check"]
+
+source = [
+    { url = "https://launchpad.net/ufw/0.36/0.36.2/+download/ufw-0.36.2.tar.gz", sha256 = "2a57a99eecef6b44db3537ed2520b30bae3759f8465456e22e404cd643838bf5" },
+]
+
+install = '''
+python3 setup.py install --root="$pkgdir" --prefix=/usr
+# the rules files hold no secrets but are not for everyone to edit
+chmod 644 "$pkgdir"/etc/ufw/*.rules
+install -Dm644 shell-completion/bash "$pkgdir/usr/share/bash-completion/completions/ufw"
+install -Dm644 $pkgfiles/ufw "$pkgdir/etc/dinit.d/ufw"
+test -x "$pkgdir/usr/lib/ufw/ufw-init" -o -x "$pkgdir/usr/sbin/ufw"
+'''

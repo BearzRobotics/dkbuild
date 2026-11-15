@@ -18,7 +18,7 @@ fixed there.
   with shellcheck).
 - Move with `git mv wip/queue/packages/x/name packages/x/name` and update this file.
 
-Written so far (2026-11-15):
+Written so far (2026-11-15; ufw added later):
 - pgvector, sqlite-vec.
 - Qt 5.15 for Lomiri (KDE's 5.15 branch via Alpine's snapshots and patches; installs in /usr/lib/qt5 beside
   Qt 6): qt5-qtbase (clang mkspec), qt5-qtsvg, qt5-qtdeclarative, qt5-qtxmlpatterns, qt5-qtmultimedia,
@@ -27,3 +27,4 @@ Written so far (2026-11-15):
   real files); nothing compiled. Still needed for Lomiri from Qt 5: qtfeedback, qtpim/qtcontacts,
   qtlocation, qtquickcontrols (1), qtscript? (to check against each Lomiri component).
 - Lomiri: the stack of 85 recipes listed in `lomiri/NOTES.md` (Qt 5, foundation libraries, components, Mir, qtmir, the shell, indicators, settings, keyboard); also the session script and desktop-lomiri, four apps; what is left is repowerd's dinit service, the telephony decision, more apps and branding.
+- ufw (the Uncomplicated Firewall, 0.36.2; inert service).

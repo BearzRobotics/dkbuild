@@ -1,0 +1,8 @@
+# ufw, the Uncomplicated Firewall: loads the rules in /etc/ufw and /etc/ufw/user.rules into netfilter
+# (iptables) at boot. Not enabled by default (dinitctl enable ufw), and nothing is blocked until
+# `ufw enable` has been run (ENABLED=yes in /etc/ufw/ufw.conf): set up the rules first, over
+# a local console, as `ufw default deny incoming` cuts off remote logins that are not allowed.
+type = scripted
+command = /usr/lib/ufw/ufw-init start
+stop-command = /usr/lib/ufw/ufw-init stop
+depends-on: rcboot
