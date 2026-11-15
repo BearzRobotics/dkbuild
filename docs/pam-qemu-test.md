@@ -1,5 +1,17 @@
 # PAM: build and QEMU test plan (2026-11-15)
 
+**Result, 2026-11-15: passed.** shadow r6, sudo r4 and openssh r5 were built and the base
+ISO made from them boots in QEMU (UEFI and BIOS) and passes `tests/qemu-pam.sh`: console
+login as `live` (empty password), `sudo` for a wheel user, `useradd` + `chpasswd`, `su`
+with the right and a wrong password, `sudo` refused for a user outside wheel, ssh to
+localhost with the right and a wrong password, `su` and `sudo` setuid. Not tested: polkit,
+cronie, cups, samba (built with PAM in their recipes, not built yet), graphical logins
+(greetd, SDDM), `passwd` as a normal user. Findings: `useradd` warned that group 100 does
+not exist (default.useradd now names 999, shadow r7); the base image has no `grep`
+(unrelated to PAM; to look at). Run it again with:
+
+    tests/qemu-pam.sh out/base/base.iso uefi
+
 PAM is adopted system-wide (memory/docs: shadow, sudo, openssh, polkit, cronie, cups,
 samba switched; commit d05cb1a). Nothing had been built or booted with it. This is the
 plan to prove login works before anyone relies on it. A mistake in a PAM stack locks
