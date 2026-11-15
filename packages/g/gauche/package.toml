@@ -10,7 +10,7 @@
 # The CA bundle for TLS is the tree's /etc/ssl/certs/ca-certificates.crt.
 name = "gauche"
 version = "0.9.15"
-release = 1
+release = 2
 summary = "R7RS Scheme implementation"
 license = "BSD-3-Clause"
 homepage = "https://practical-scheme.net/gauche/"
