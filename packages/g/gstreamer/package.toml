@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "gstreamer"
 version = "1.28.7"
-release = 2
+release = 3
 summary = "Core GStreamer libraries and elements"
 license = "LGPL-2.1-or-later"
 homepage = "https://gstreamer.freedesktop.org"
@@ -19,6 +19,11 @@ source = [
 
 environment = '''
 export LDFLAGS="${LDFLAGS} -Wl,-z,stack-size=0x200000"
+# gst-ptp-helper is a Rust program and meson links it with /usr/lib/libcap.so; Rust's musl target
+# links static by default ("attempted static link of dynamic object /usr/lib/libcap.so", r2: the
+# first build that has a rust to build it with). Dynamic against the system's musl, as for any
+# program that uses system shared libraries.
+export RUSTFLAGS="${RUSTFLAGS:+$RUSTFLAGS }-C target-feature=-crt-static"
 '''
 setup = '''
 %meson \
