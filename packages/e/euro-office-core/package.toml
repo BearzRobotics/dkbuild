@@ -41,7 +41,7 @@ license = "AGPL-3.0-only"
 homepage = "https://github.com/Euro-Office/core"
 archs = ["x86_64", "aarch64"]
 hostdeps = ["cmake", "ninja", "python", "pkgconf"]
-builddeps = ["euro-office-v8", "boost-devel", "icu-devel", "openssl-devel", "zlib-ng-compat-devel"]
+builddeps = ["euro-office-v8", "boost-devel", "icu-devel", "nettle-devel", "openssl-devel", "zlib-ng-compat-devel"]
 options = ["!check", "jobs:12"]
 patches = ["system-libraries.patch"]
 
@@ -61,6 +61,7 @@ source = [
     { url = "https://github.com/Distrotech/libodfgen/archive/8ef8c171ebe3c5daebdce80ee422cf7bb96aa3bc.tar.gz", sha256 = "c6dd47cc88683c7589dbaac5bdc94e492333c53def88a0f40a004d3f1379d063" },
     { url = "https://github.com/LibreOffice/libetonyek/archive/cb396b4a9453a457469b62a740d8fb933c9442c3.tar.gz", sha256 = "951ebb7e7c9f254f9bfede0574247392d0ccaf7397a4e1b0f3b95db16564e923" },
     { url = "https://github.com/Tencent/rapidjson/archive/a36110e11874bcf35af854940e0ce910c19a8b49.tar.gz", sha256 = "3c9995d06ec49fa0d47d31e2abaf6aadc08395c98ab08b844e837a22ffc493fd" },
+    { url = "https://github.com/hunspell/hyphen/releases/download/v2.8.9/hyphen-2.8.9.tar.gz", sha256 = "783743daf477de8c4d16e3c74b4d2827377017718d8e17e2d9440210246f6abe" },
 ]
 
 setup = '''
@@ -122,6 +123,50 @@ sed -i 's/m_thread = NULL;/m_thread = 0;/' core/DesktopEditor/graphics/BaseThrea
 # with NULL as nullptr (musl, C++11) that is an error, not glibc's int conversion
 sed -i 's/pRegion->shScanCount = NULL;/pRegion->shScanCount = 0;/' core/DesktopEditor/raster/Metafile/Common/MetaFileUtils.h
 grep -q 'pRegion->shScanCount = 0;' core/DesktopEditor/raster/Metafile/Common/MetaFileUtils.h
+# --- r3 build, with ninja -k 0, listed every file that does not compile on this system ---
+# libc++ does not pull in what libstdc++'s headers do: std::fill (cfcpp/sector.cpp), std::nothrow
+# (graphics/pro/officedrawingfile.cpp), std::atoi (SvgReader.cpp, HwpDoc XMLReader.cpp) and
+# std::abs (HWPRecordNumbering.cpp) are used without their headers
+export CXXFLAGS="$CXXFLAGS -include algorithm -include new -include cstdlib -include cmath -include vector"
+# NULL is nullptr in C++11 on musl: a nullptr cannot be an integer or a bool. Each of these was an
+# error in the r3 log, at exactly these lines of this pinned source (fixline checks the line holds
+# the text before it replaces it)
+fixline() {
+    sed -n "$2p" "$1" | grep -qF -e "$3" || { echo "fixline: $1:$2 has no '$3'" >&2; return 1; }
+    sed -i "$2s|$3|$4|" "$1"
+}
+c=core
+fixline $c/DesktopEditor/cximage/CxImage/ximagif.cpp 89 'return NULL;' 'return false;'
+fixline $c/DesktopEditor/doctrenderer/nativecontrol.h 323 '= NULL;' '= 0;'
+fixline $c/OOXML/Binary/Presentation/Converter.cpp 242 'NULL != pPointerN' '0 != pPointerN'
+fixline $c/OOXML/Binary/Sheets/Reader/ChartFromToBinary.cpp 10116 'NULL != oVal.m_shape.IsInit()' 'oVal.m_shape.IsInit()'
+fixline $c/OOXML/XlsxFormat/Chart/ChartSerialize.cpp 1310 'NULL != m_l.IsInit()' 'm_l.IsInit()'
+fixline $c/PdfFile/PdfEditor.cpp 1860 'return NULL;' 'return false;'
+fixline $c/TxtFile/Source/ConvertDocx2Txt.cpp 145 'Lists(NULL)' 'Lists()'
+# OpenSSL 3 has no MD2 (doctrenderer/hash.cpp: use of undeclared identifier 'MD2'): nettle's, behind
+# the same function name, and linked in
+cat > $c/DesktopEditor/doctrenderer/md2_nettle.h <<'EOF2'
+#ifndef MD2_NETTLE_H
+#define MD2_NETTLE_H
+#include <stddef.h>
+#include <nettle/md2.h>
+/* OpenSSL 3 has no MD2: nettle's, with OpenSSL's MD2() signature */
+static inline unsigned char* MD2(const unsigned char* d, size_t n, unsigned char* md)
+{
+    struct md2_ctx ctx;
+    md2_init(&ctx);
+    md2_update(&ctx, n, d);
+    md2_digest(&ctx, MD2_DIGEST_SIZE, md);
+    return md;
+}
+#endif
+EOF2
+fixline $c/DesktopEditor/doctrenderer/hash.cpp 8 '#include "openssl/md2.h"' '#include "md2_nettle.h"'
+export LDFLAGS="$LDFLAGS -lnettle"
+# libhyphen's sources: TextHyphen.cpp includes hyphen/hnjalloc.c and hyphen/hyphen.c, which core
+# expects checked out in Common/3dParty/hyphen/hyphen (git-ignored there): the release tarball
+cp -a ../hyphen-2.8.9 $c/Common/3dParty/hyphen/hyphen
+test -f $c/Common/3dParty/hyphen/hyphen/hnjalloc.h
 %cmake -S core \
     -DTHIRD_PARTY_PREPARED=ON \
     -DEO_CORE_3RD_PARTY_DIR=$PWD/third_party \
