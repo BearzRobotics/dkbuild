@@ -1,0 +1,29 @@
+# Qt 5 System Information, Service Framework and Publish/Subscribe: Qt add-on module for Qt 5, not part of Qt 5.15's own releases (a snapshot of github.com/qt/qtsystems, commit
+# 81e08ee, as Alpine Linux packages it: community/qt5-qtsystems; MIT-licensed APKBUILD). Needed by the Lomiri UI toolkit.
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "qt5-qtsystems"
+version = "0_git20230712"
+release = 1
+summary = "Qt 5 System Information, Service Framework and Publish/Subscribe"
+license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only AND Qt-GPL-exception-1.0"
+homepage = "https://github.com/qt/qtsystems"
+builddeps = ["qt5-qtbase-devel", "qt5-qtdeclarative-devel"]
+options = ["!check", "!cross", "!lto"]
+
+source = [
+    { url = "https://github.com/qt/qtsystems/archive/81e08ee508d0a49c588705cc9c47568b09a258db/qtsystem-81e08ee508d0a49c588705cc9c47568b09a258db.tar.gz", sha256 = "ee64caffb897178dafa9badacc71006014f1ff1c77ad1acf08b19506a47d978b" },
+]
+
+setup = '''
+# the build system only runs syncqt.pl in a git checkout: an empty .git directory is enough
+mkdir -p .git
+qmake-qt5
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make INSTALL_ROOT="$pkgdir" install
+# the .prl files name the build directory
+find "$pkgdir/usr/lib" -type f -name '*.prl' -exec sed -i -e '/^QMAKE_PRL_BUILD_DIR/d' {} +
+'''

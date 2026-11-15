@@ -1,0 +1,29 @@
+# Qt 5 Feedback: haptics and audio feedback: Qt add-on module for Qt 5, not part of Qt 5.15's own releases (a snapshot of github.com/qt/qtfeedback, commit
+# a14bd0b, as Alpine Linux packages it: community/qt5-qtfeedback; MIT-licensed APKBUILD). Needed by the Lomiri UI toolkit.
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "qt5-qtfeedback"
+version = "0_git20180903"
+release = 1
+summary = "Qt 5 Feedback: haptics and audio feedback"
+license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only AND Qt-GPL-exception-1.0"
+homepage = "https://github.com/qt/qtfeedback"
+builddeps = ["qt5-qtbase-devel", "qt5-qtdeclarative-devel", "qt5-qtmultimedia-devel"]
+options = ["!check", "!cross", "!lto"]
+
+source = [
+    { url = "https://github.com/qt/qtfeedback/archive/a14bd0bb1373cde86e09e3619fb9dc70f34c71f2/qtfeedback-a14bd0bb1373cde86e09e3619fb9dc70f34c71f2.tar.gz", sha256 = "9d63759185e8faecd92f8d90e5a198010393e3d7fa3cb1e68f06b963d2bf95f9" },
+]
+
+setup = '''
+# the build system only runs syncqt.pl in a git checkout: an empty .git directory is enough
+mkdir -p .git
+qmake-qt5
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make INSTALL_ROOT="$pkgdir" install
+# the .prl files name the build directory
+find "$pkgdir/usr/lib" -type f -name '*.prl' -exec sed -i -e '/^QMAKE_PRL_BUILD_DIR/d' {} +
+'''

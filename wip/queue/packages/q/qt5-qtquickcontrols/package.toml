@@ -1,0 +1,29 @@
+# Qt 5 Quick Controls (1, the older set Lomiri apps still use), from KDE's Qt 5.15 branch (qtquickcontrols, invent.kde.org/qt/qt/qtquickcontrols), the snapshot Alpine Linux
+# makes of it (dev.alpinelinux.org/archive/qt, commit 0c3c18b, 5.15.18_git20250330). After Alpine's
+# community/qt5-qtquickcontrols. Qt 5 installs beside Qt 6 (qt5-qtbase's header). qmake builds it against
+# qt5-qtbase's mkspec, so the flags are the system's.
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "qt5-qtquickcontrols"
+version = "5.15.18_git20250330"
+release = 1
+summary = "Qt 5 Quick Controls (1, the older set Lomiri apps still use)"
+license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only WITH Qt-GPL-exception-1.0"
+homepage = "https://www.qt.io"
+builddeps = ["qt5-qtbase-devel", "qt5-qtdeclarative-devel"]
+options = ["!check", "!cross", "!lto"]
+
+source = [
+    { url = "https://dev.alpinelinux.org/archive/qt/qtquickcontrols-0c3c18bf8bdac1ef1afdb8aade903edb5c2bc041.tar.xz", sha256 = "5d3be55301da5c9ca901aecfa89a5196ec573de2a4183d3644285c6e6dbb7730" },
+]
+
+setup = '''
+qmake-qt5
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make INSTALL_ROOT="$pkgdir" install
+# the .prl files name the build directory
+find "$pkgdir/usr/lib" -type f -name '*.prl' -exec sed -i -e '/^QMAKE_PRL_BUILD_DIR/d' {} +
+'''

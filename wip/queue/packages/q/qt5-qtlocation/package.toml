@@ -1,0 +1,30 @@
+# Qt 5 location and positioning, from KDE's Qt 5.15 branch (qtlocation, invent.kde.org/qt/qt/qtlocation), the snapshot Alpine Linux
+# makes of it (dev.alpinelinux.org/archive/qt, commit ba48a8b, 5.15.18_git20251101). After Alpine's
+# community/qt5-qtlocation. Qt 5 installs beside Qt 6 (qt5-qtbase's header). qmake builds it against
+# qt5-qtbase's mkspec, so the flags are the system's.
+# Built with CONFIG+=posix (Alpine).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "qt5-qtlocation"
+version = "5.15.18_git20251101"
+release = 1
+summary = "Qt 5 location and positioning"
+license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only WITH Qt-GPL-exception-1.0"
+homepage = "https://www.qt.io"
+builddeps = ["icu-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel"]
+options = ["!check", "!cross", "!lto"]
+
+source = [
+    { url = "https://dev.alpinelinux.org/archive/qt/qtlocation-ba48a8b5cedd157d972c08d371ac2581db166bf7.tar.xz", sha256 = "d4134c4a778b42fb4596db545f80eee3703e6ba7e04e51b17723d9e2aad36585" },
+]
+
+setup = '''
+qmake-qt5 "CONFIG+=posix"
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make INSTALL_ROOT="$pkgdir" install
+# the .prl files name the build directory
+find "$pkgdir/usr/lib" -type f -name '*.prl' -exec sed -i -e '/^QMAKE_PRL_BUILD_DIR/d' {} +
+'''

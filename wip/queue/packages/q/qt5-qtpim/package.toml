@@ -1,0 +1,28 @@
+# Qt 5 PIM: contacts, organizer and versit: Qt add-on module for Qt 5, not part of Qt 5.15's own releases (a snapshot of github.com/qt/qtpim, commit
+# f9a8f0f, as Alpine Linux packages it: community/qt5-qtpim; MIT-licensed APKBUILD). Needed by the Lomiri UI toolkit.
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "qt5-qtpim"
+version = "0_git20201102"
+release = 1
+summary = "Qt 5 PIM: contacts, organizer and versit"
+license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only AND Qt-GPL-exception-1.0"
+homepage = "https://github.com/qt/qtpim"
+patches = ["0002-Set-PLUGIN_CLASS_NAME-in-.pro-files.patch", "0003-Set-MODULE_VERSION-to-5.0.0.patch"]
+builddeps = ["qt5-qtbase-devel", "qt5-qtdeclarative-devel"]
+options = ["!check", "!cross", "!lto"]
+
+source = [
+    { url = "https://github.com/qt/qtpim/archive/f9a8f0fc914c040d48bbd0ef52d7a68eea175a98/qtpim-f9a8f0fc914c040d48bbd0ef52d7a68eea175a98.tar.gz", sha256 = "7d06c9a4534eb1cbcaaac4c17defdf648c03fe01044c6b2ccbf6c00553b407d2" },
+]
+
+setup = '''
+qmake-qt5 CONFIG+=git_build
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make INSTALL_ROOT="$pkgdir" install
+# the .prl files name the build directory
+find "$pkgdir/usr/lib" -type f -name '*.prl' -exec sed -i -e '/^QMAKE_PRL_BUILD_DIR/d' {} +
+'''
