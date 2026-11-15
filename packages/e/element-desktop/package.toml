@@ -96,7 +96,8 @@ install = '''
 app="$pkgdir/usr/lib/element-desktop"
 mkdir -p "$app"
 # runtime dependencies only (dependencies in package.json), not the build tools
-pnpm prune --prod --ignore-scripts
+# prune re-installs and re-checks the lockfile like install does: the same trustLockfile
+pnpm prune --prod --ignore-scripts --config.trustLockfile=true
 cp -a node_modules "$app/node_modules"
 cp -a lib "$app/lib"
 cp -a ../element-v$version "$app/webapp"
