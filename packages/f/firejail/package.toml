@@ -18,7 +18,7 @@
 # --enable-x11-legacy (the X Security extension is gone from current X).
 name = "firejail"
 version = "0.9.82.2"
-release = 1
+release = 2
 summary = "SUID sandboxing tool"
 license = "GPL-2.0-only"
 homepage = "https://github.com/netblue30/firejail"
