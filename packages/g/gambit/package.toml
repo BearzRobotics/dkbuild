@@ -5,6 +5,8 @@
 # them alone), so only a C compiler is needed.
 # Options (the usual distribution set): --enable-shared, --enable-openssl (TLS, OpenSSL), --enable-poll
 # (poll as the select method), --enable-high-res-timing. Not enabled, with reason:
+# --enable-absolute-shared-libs (upstream's makefile refuses it together with DESTDIR, which packaging
+# uses: libgambit is found through the normal library path in /usr/lib instead),
 # --enable-single-host (the runtime as one C unit, a little faster: clang -O2 spent over 2
 # hours on one of the generated files, lib/_irregex.o, and was killed; upstream's default,
 # one file per module, is used), --enable-smp
@@ -29,6 +31,7 @@ source = [
 setup = '''
 %configure \
     --enable-shared \
+    --disable-absolute-shared-libs \
     --enable-openssl \
     --enable-poll \
     --enable-high-res-timing
