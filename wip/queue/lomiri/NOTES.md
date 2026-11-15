@@ -132,3 +132,12 @@ Left out on purpose: lomiri-docviewer-app (needs poppler's Qt 5 binding and Libr
 lomiri-telephony-service / history-service (phone). repowerd is a system service with no dinit file yet.
 First build will tell about everything else: the indicator service paths in the session script, the apps'
 libintl links (Alpine's patches), and Mir on this Mesa (EGL/GBM).
+
+## Update 2026-11-15 (telephony, input engines)
+
+Added: telepathy-farstream, telepathy-qt (Qt 5), telepathy-mission-control, lomiri-history-service and
+lomiri-telephony-service (a runtime dependency of the shell on Alpine; now in lomiri's and desktop-lomiri's
+rundeps, as Alpine has it: the shell starts without a modem or a Telepathy connection manager), and the maliit keyboard's
+optional engines: presage (word prediction), anthy (Japanese), libpinyin (+ kyotocabinet) (Chinese), so maliit-keyboard
+is built with all of them. qt5-qtbase now builds the TDS plugin (freetds). libphonenumber and libieee1284 are in
+too (the second is for dosemu2). 131 recipes in the queue.

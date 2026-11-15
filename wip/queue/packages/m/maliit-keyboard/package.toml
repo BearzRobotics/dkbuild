@@ -1,4 +1,4 @@
-# Maliit keyboard: the on-screen keyboard of Lomiri (Qt 5): without presage (word prediction) and without the Japanese (anthy) and Chinese (libpinyin) engines, which are not packaged yet; hunspell corrections are on. Needed by the Lomiri stack, version 2.3.1. Recipe written after Alpine
+# Maliit keyboard: the on-screen keyboard of Lomiri (Qt 5): with presage (word prediction), the Japanese (anthy) and Chinese (libpinyin) engines and hunspell corrections: all of them are packages in the queue. Needed by the Lomiri stack, version 2.3.1. Recipe written after Alpine
 # Linux's testing/maliit-keyboard (MIT-licensed APKBUILD and patches; the software's licence is LGPL-3.0-only AND BSD-3-Clause AND CC-BY-SA-3.0).
 # Not built (queued, wip/queue): expect first-build fixes.
 name = "maliit-keyboard"
@@ -9,7 +9,7 @@ license = "LGPL-3.0-only AND BSD-3-Clause AND CC-BY-SA-3.0"
 homepage = "https://github.com/maliit/keyboard"
 patches = ["vibrate-duration.patch"]
 hostdeps = ["cmake", "ninja", "pkgconf"]
-builddeps = ["glib-devel", "hunspell-devel", "maliit-framework-devel", "qt5-qtbase-devel", "qt5-qtfeedback-devel", "qt5-qtmultimedia-devel"]
+builddeps = ["anthy-devel", "glib-devel", "hunspell-devel", "libpinyin-devel", "presage-devel", "maliit-framework-devel", "qt5-qtbase-devel", "qt5-qtfeedback-devel", "qt5-qtmultimedia-devel"]
 rundeps = ["dconf"]
 options = ["!check"]
 
@@ -19,8 +19,7 @@ source = [
 
 setup = '''
 %cmake \
-    -Denable-tests=OFF \
-    -Denable-presage=OFF
+    -Denable-tests=OFF
 '''
 build = '''
 %cmake_build

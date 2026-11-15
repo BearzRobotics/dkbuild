@@ -14,8 +14,7 @@
 #  - patches kept from Alpine: egl-x11.patch, lfs64.patch (musl has no stat64 and friends),
 #    qt-musl-iconv-no-bom.patch, qt5-base-nostrip.patch (qmake must not strip on install:
 #    dkbuild does), loongarch64.patch (harmless).
-#  - no TDS (FreeTDS) SQL plugin: FreeTDS is not packaged yet; the sqlite, mysql (MariaDB),
-#    PostgreSQL and ODBC plugins are built.
+#  - the SQL plugins: sqlite, mysql (MariaDB), PostgreSQL, ODBC and TDS (FreeTDS, a package in the queue).
 #  - no subpackages for the SQL plugins: they are in qt5-qtbase, their libraries are runtime
 #    dependencies found by dkbuild.
 # Not built (queued, wip/queue): expect first-build fixes (libc++ headers, musl).
@@ -29,7 +28,7 @@ patches = ["egl-x11.patch", "lfs64.patch", "loongarch64.patch", "qt-musl-iconv-n
 hostdeps = ["bison", "flex", "gawk", "gperf", "perl", "pkgconf"]
 builddeps = [
     "at-spi2-core-devel", "cups-devel", "dbus-devel", "eudev-devel", "fontconfig-devel",
-    "freetype-devel", "glib-devel", "gtk+3-devel", "icu-devel", "libice-devel", "libinput-devel",
+    "freetds-devel", "freetype-devel", "glib-devel", "gtk+3-devel", "icu-devel", "libice-devel", "libinput-devel",
     "libjpeg-turbo-devel", "libpng-devel", "libsm-devel", "libx11-devel", "libxcb-devel",
     "libxext-devel", "libxi-devel", "libxkbcommon-devel", "libxrandr-devel", "libxrender-devel",
     "libxslt-devel", "libxv-devel", "linux-headers", "mariadb-devel", "mesa-devel", "mtdev-devel",
@@ -81,6 +80,7 @@ mkdir -p .git
     -plugin-sql-odbc \
     -plugin-sql-psql \
     -plugin-sql-sqlite \
+    -plugin-sql-tds \
     -plugindir /usr/lib/qt5/plugins \
     -prefix /usr \
     -sysconfdir /etc/xdg \

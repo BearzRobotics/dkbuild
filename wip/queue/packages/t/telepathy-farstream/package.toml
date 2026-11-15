@@ -1,0 +1,29 @@
+# telepathy-farstream: Telepathy client library for audio and video calls through Farstream: for telepathy-qt's call support. Needed by the Lomiri stack, version 0.6.2_git20190919. Recipe written after Alpine
+# Linux's testing/telepathy-farstream (MIT-licensed APKBUILD and patches; the software's licence is LGPL-2.1-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "telepathy-farstream"
+version = "0.6.2_git20190919"
+release = 1
+summary = "telepathy-farstream: Telepathy client library for audio and video calls through Farstream"
+license = "LGPL-2.1-or-later"
+homepage = "https://telepathy.freedesktop.org"
+hostdeps = ["make", "pkgconf", "python", "gtk-doc-tools", "autoconf", "automake", "libtool", "git"]
+builddeps = ["dbus-glib-devel", "farstream-devel", "glib-devel", "gstreamer-devel", "telepathy-glib-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/TelepathyIM/telepathy-farstream/archive/c7299b4ef37726155a7fcb7ebbdb9786c1e9e81e.tar.gz", sha256 = "a99f84555c059894d3aabc1af562a14c37bf44b86be97690a32c1a6c564c8375" },
+]
+
+setup = '''
+NOCONFIGURE=1 ./autogen.sh
+%configure \
+    --libexecdir=/usr/lib/telepathy \
+    --disable-Werror
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

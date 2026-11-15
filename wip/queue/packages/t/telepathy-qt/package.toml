@@ -1,0 +1,31 @@
+# telepathy-qt: Qt 5 bindings for the Telepathy messaging framework: the Qt 5 build; the API documentation (doxygen) is not built. Needed by the Lomiri stack, version 0.9.8. Recipe written after Alpine
+# Linux's testing/telepathy-qt (MIT-licensed APKBUILD and patches; the software's licence is LGPL-2.1-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "telepathy-qt"
+version = "0.9.8"
+release = 1
+summary = "telepathy-qt: Qt 5 bindings for the Telepathy messaging framework"
+license = "LGPL-2.1-or-later"
+homepage = "https://telepathy.freedesktop.org"
+patches = ["fix-finding-gio-unix.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf", "python", "libxslt"]
+builddeps = ["gstreamer-devel", "qt5-qtbase-devel", "telepathy-farstream-devel", "telepathy-glib-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://telepathy.freedesktop.org/releases/telepathy-qt/telepathy-qt-0.9.8.tar.gz", sha256 = "bf8e2a09060addb80475a4938105b9b41d9e6837999b7a00e5351783857e18ad" },
+]
+
+setup = '''
+%cmake \
+    -DPYTHON_EXECUTABLE=/usr/bin/python3 \
+    -DDESIRED_QT_VERSION=5 \
+    -DENABLE_EXAMPLES=OFF \
+    -DENABLE_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

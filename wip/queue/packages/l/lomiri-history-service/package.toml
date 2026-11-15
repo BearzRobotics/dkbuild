@@ -1,0 +1,33 @@
+# Lomiri history service: stores call and message history (SQLite) and exposes it to the shell and apps: without systemd. Ubuntu Touch / UBports (Lomiri) component, version 0.7. Recipe written after Alpine
+# Linux's testing/lomiri-history-service (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-history-service"
+version = "0.7"
+release = 1
+summary = "Lomiri history service: stores call and message history (SQLite) and exposes it to the shell and apps"
+license = "GPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+patches = ["0003-remove-daemon-directory.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["cmake-extras", "libphonenumber-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel", "qt5-qtpim-devel", "sqlite-devel", "telepathy-qt-devel"]
+rundeps = ["dconf", "telepathy-mission-control"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/lomiri-history-service/-/archive/0.7/lomiri-history-service-0.7.tar.gz", sha256 = "cdbdb807e983c78374d214be4ed63d2e8e73b81b3ddcf29a288df687323e9a0e" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_INSTALL_SYSCONFDIR=/etc \
+    -DCMAKE_INSTALL_LOCALSTATEDIR=/var \
+    -DUSE_SYSTEMD=OFF \
+    -DENABLE_WERROR=OFF \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

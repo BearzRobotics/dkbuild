@@ -1,0 +1,26 @@
+# Telepathy Mission Control: manages Telepathy accounts and connection managers: Needed by the Lomiri stack, version 5.16.6. Recipe written after Alpine
+# Linux's testing/telepathy-mission-control (MIT-licensed APKBUILD and patches; the software's licence is LGPL-2.1-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "telepathy-mission-control"
+version = "5.16.6"
+release = 1
+summary = "Telepathy Mission Control: manages Telepathy accounts and connection managers"
+license = "LGPL-2.1-or-later"
+homepage = "https://telepathy.freedesktop.org"
+hostdeps = ["make", "pkgconf", "libxslt", "python"]
+builddeps = ["dbus-devel", "dbus-glib-devel", "glib-devel", "networkmanager-devel", "telepathy-glib-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://telepathy.freedesktop.org/releases/telepathy-mission-control/telepathy-mission-control-5.16.6.tar.gz", sha256 = "2df8ae3995e919a7670e01aa3568215ef0777e34961ace1cac1c6477cb297a45" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

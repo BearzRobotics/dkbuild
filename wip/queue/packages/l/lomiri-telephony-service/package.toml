@@ -1,0 +1,31 @@
+# Lomiri telephony service: calls and messages for the shell (Telepathy, ofono): a runtime dependency of the Lomiri shell on Alpine; it needs telepathy-ofono or another connection manager for real calls, which is not packaged: on a PC the shell runs without calls. Ubuntu Touch / UBports (Lomiri) component, version 0.6.2. Recipe written after Alpine
+# Linux's testing/lomiri-telephony-service (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-telephony-service"
+version = "0.6.2"
+release = 1
+summary = "Lomiri telephony service: calls and messages for the shell (Telepathy, ofono)"
+license = "GPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["ayatana-indicator-messages-devel", "libnotify-devel", "libphonenumber-devel", "libpulse-devel", "lomiri-api-devel", "lomiri-history-service-devel", "lomiri-libusermetrics-devel", "lomiri-url-dispatcher-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel", "qt5-qtfeedback-devel", "qt5-qtmultimedia-devel", "qt5-qtpim-devel", "telepathy-qt-devel"]
+rundeps = ["dconf", "telepathy-mission-control"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/lomiri-telephony-service/-/archive/0.6.2/lomiri-telephony-service-0.6.2.tar.gz", sha256 = "ab9f5f8811dd0fcac5c5b052aa3f7f931ac12af2e800d9bd02646911f5c46afd" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_INSTALL_SYSCONFDIR=/etc \
+    -DCMAKE_INSTALL_LOCALSTATEDIR=/var \
+    -DSKIP_QML_TESTS=ON \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -10,7 +10,7 @@ homepage = "https://gitlab.com/ubports"
 patches = ["0001-Disable-broken-tests-due-to-dropped-mocks-from-mir-2.patch", "0002-Add-qt5-suffix-to-search-for-Qt-tools.patch", "0003-No-systemd.patch", "0004-Disable-lightdm-integration.patch", "0006-Build-with-C-20.patch", "329.patch", "342.patch"]
 hostdeps = ["cmake", "ninja", "pkgconf", "gettext"]
 builddeps = ["cmake-extras", "elogind-devel", "geonames-devel", "gnome-desktop-devel", "gsettings-qt-devel", "libqtdbusmock-devel", "libqtdbustest-devel", "linux-pam-devel", "lomiri-app-launch-devel", "lomiri-deviceinfo-devel", "lomiri-download-manager-devel", "lomiri-indicator-network-devel", "lomiri-libusermetrics-devel", "lomiri-notifications", "lomiri-ui-toolkit", "qmenumodel-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel", "qt5-qtsvg-devel", "qt5-qtxmlpatterns-devel", "qtmir-devel", "mir-devel"]
-rundeps = ["ayatana-indicator-keyboard", "ayatana-indicator-session", "biometryd", "gsettings-desktop-schemas", "lomiri-notifications", "lomiri-schemas", "lomiri-settings-components", "lomiri-thumbnailer", "qt5-qtbase", "qt5-qtgraphicaleffects", "suru-icon-theme", "maliit-keyboard", "lomiri-system-settings"]
+rundeps = ["ayatana-indicator-keyboard", "ayatana-indicator-session", "biometryd", "gsettings-desktop-schemas", "lomiri-notifications", "lomiri-schemas", "lomiri-settings-components", "lomiri-thumbnailer", "qt5-qtbase", "qt5-qtgraphicaleffects", "suru-icon-theme", "maliit-keyboard", "lomiri-system-settings", "lomiri-telephony-service"]
 options = ["!check"]
 
 source = [
