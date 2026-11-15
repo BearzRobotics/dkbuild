@@ -1,8 +1,9 @@
 # The DKDE desktop, FenrirOS's default: dkde (panel, session and apps) on labwc,
 # with seat management, D-Bus, polkit, audio (PipeWire with WirePlumber), Mesa
 # with Vulkan, fonts and icons, and Xwayland for X11 programs. `dkde-session` starts it.
-# r5: the packages a rescue disk does not need (cups, cups-filters, ocrmypdf, gnome-online-accounts-gtk) are
-# this package's own; the rest moved to desktop-dkde-core (which the rescue image uses).
+# r5: dkde's optional extras (cups, cups-filters, ocrmypdf, gnome-online-accounts-gtk, bluez, swaylock, qt6ct,
+# kvantum, webp-pixbuf-loader, libmtp, chrony) are this package's own; the rest moved to desktop-dkde-core
+# (which the rescue image uses).
 # r3: greetd (the graphical login, with dkde's greeter) and NetworkManager (the
 # network service) are part of the default desktop, so a system with it has both
 # installed; images enable the services (dinit services are not enabled by packages).
@@ -17,4 +18,6 @@ rundeps = [
     "desktop-dkde-core",
     # printing (dkde's print dialogs), OCR (the PDF reader and image viewer), online accounts (Settings, calendars)
     "cups", "cups-filters", "ocrmypdf", "gnome-online-accounts-gtk",
+    # Bluetooth, screen lock, the Qt theme plugins, WebP images, MTP (phones, cameras), clock sync
+    "bluez", "swaylock", "qt6ct", "kvantum", "webp-pixbuf-loader", "libmtp", "chrony",
 ]
