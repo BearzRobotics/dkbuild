@@ -321,3 +321,4 @@ The user accepted Claude's suggestion for every open question:
 36. Euro-Office core: use the system libraries where it builds.
 37. Libera Suite: Euro-Office's theme for now.
 38. core-fonts: drop the folders without a clear licence.
+Lomiri requested 2026-11-15 (https://gitlab.com/ubports/development/core/lomiri): the Ubuntu Touch / UBports desktop shell. QUEUED, nothing written yet. It is a large stack (Qt5/QML shell on Mir/MirAL plus the lomiri-ui-toolkit, content-hub, url-dispatcher, indicators, settings components, on-screen keyboard and many companions); upstream is moving to Qt6, and the tree has no Qt5 recipes. First step when it comes up: survey the ubports core group, list every dependency and what is missing, decide Qt5 vs the Qt6 branch.
