@@ -7,12 +7,13 @@
 # packaging/build.sh also writes a greetd login screen and PAM files; this
 # system logs in on dkconsole and has no PAM, so those are not part of this package.
 #
-# 0.2.0: archives (libarchive), MTP/PTP, servers, Network, Online accounts; the source tarball
-# is named dkde-v0.2.0.tar.gz.
+# 0.3.0: dkde-snap (Super+Z snap layouts), calculator Show Work, dsolve, taylor, laplace. 0.2.0: archives
+# (libarchive), MTP/PTP, servers, Network, Online accounts; the source tarball
+# is named dkde-v<version>.tar.gz.
 # NOT BUILT YET: needs gtk4, gtk4-layer-shell, wayland, cairo, pango, glib and the
 # Zig dependency fetch to have been run (`dkbuild fetch dkde`).
 name = "dkde"
-version = "0.2.0"
+version = "0.3.0"
 release = 1
 summary = "A Wayland desktop shell in Zig on GTK4 and labwc"
 license = "MIT"
@@ -28,7 +29,7 @@ rundeps = ["labwc", "seatd", "dbus", "polkit", "gvfs", "gnome-online-accounts", 
 options = ["zigdeps", "!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/dkde/releases/download/v0.2.0/dkde-v0.2.0.tar.gz", sha256 = "4b8b380112c3adb22a9477a406ff1f92fb1b5007349c21f44fbeff5514301342" },
+    { url = "https://github.com/BearzRobotics/dkde/releases/download/v0.3.0/dkde-v0.3.0.tar.gz", sha256 = "9a03efa484589ec739eb4977c9b1fc218255f8ff6b202201008a667d04244fba" },
 ]
 
 install = '''
