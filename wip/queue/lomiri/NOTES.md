@@ -140,4 +140,4 @@ lomiri-telephony-service (a runtime dependency of the shell on Alpine; now in lo
 rundeps, as Alpine has it: the shell starts without a modem or a Telepathy connection manager), and the maliit keyboard's
 optional engines: presage (word prediction), anthy (Japanese), libpinyin (+ kyotocabinet) (Chinese), so maliit-keyboard
 is built with all of them. qt5-qtbase now builds the TDS plugin (freetds). libphonenumber and libieee1284 are in
-too (the second is for dosemu2). 131 recipes in the queue.
+too (the second is for dosemu2). 129 recipes in the queue.
