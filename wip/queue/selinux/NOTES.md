@@ -47,3 +47,16 @@ and /etc/dinit.d labels). 15 SELinux recipes in all. UNVERIFIED parts are named 
 Next in the SELinux list: PAM with `pam_selinux` (linux-pam `-Dselinux=enabled`, stacks), coreutils/util-linux/
 tar/shadow/openssh/sudo/cronie built with SELinux, the kernel options, dinit hooks and the installer step.
 Those change packages that are in the main tree: they wait for the policy to build and for the QEMU boot test.
+
+## Update 2026-11-15: the integration script
+
+`wip/queue/selinux/integrate.sh` (POSIX sh, dash- and shellcheck-clean, tested on a copy of the recipes) does the edits in the
+main tree that turn SELinux on, once the SELinux packages have built and a QEMU boot has been tried: linux-pam
+`-Dselinux=enabled`, `pam_selinux.so close/open` in linux-pam-base's system-login, shadow, openssh, cronie, sudo and
+NetworkManager built with SELinux, libselinux-devel added to coreutils, findutils, tar and util-linux (their configure scripts use it
+when found); each touched package gets a release bump. NOT run yet: it would rebuild the base of the tree and a mistake in a
+PAM stack locks users out (run tests/qemu-pam.sh after it). Found while writing it: the kernel configs (`linux`, `linux-lts`) already
+have SELinux built in (SECURITY_SELINUX=y, bootparam, develop mode, LSM list with selinux, default SELinux), so step 5 of the
+plan above is done; the live squashfs has no xattr support (CONFIG_SQUASHFS_XATTR is not set), so the live ISO cannot carry labels
+(an installed system on ext4, btrfs or xfs can). Remaining: dinit's early-boot policy load (a service running `load_policy -i`),
+the installer step, a `selinux=1 enforcing=0` boot entry, and the policy's FenrirOS module.
