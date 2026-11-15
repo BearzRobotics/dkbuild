@@ -99,6 +99,7 @@ send live
 sleep 3
 check "console login as live" "^USER-live" 15 'echo "USER-$(id -un)"'
 check "live is in wheel" "^GROUPS-.*wheel" 10 'echo "GROUPS-$(id -Gn)"'
+check "base tools present: grep sed find xargs awk edit" "^TOOLS-none" 15 'm=; for t in grep sed find xargs awk edit; do command -v $t >/dev/null || m="$m $t"; done; echo "TOOLS-${m:-none}"'
 check "PAM service files installed" "^PAMDIR-.*sshd" 10 'echo "PAMDIR-$(ls /usr/lib/pam.d | tr "\n" " ")"'
 
 # --- sudo for a wheel user (the live user has an empty password)
