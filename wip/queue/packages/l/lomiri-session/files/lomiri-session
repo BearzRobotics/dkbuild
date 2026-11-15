@@ -1,0 +1,74 @@
+#!/bin/sh
+# Starts a Lomiri desktop session for the user on the current seat. Run by the login manager
+# (greetd or SDDM: see lomiri.desktop) or from a console: `lomiri-session`.
+#
+# Lomiri is written for systemd user sessions: its indicators are systemd user services and the
+# shell is started through lomiri-systemd-wrapper. Here (no systemd) this script does what those
+# units do: the environment of the wrapper, a private D-Bus session, the indicator services
+# started in the background, then the shell in the foreground. When the shell ends, so does
+# everything started here.
+
+if [ -z "$XDG_RUNTIME_DIR" ] || [ ! -d "$XDG_RUNTIME_DIR" ]; then
+    echo "lomiri-session: no XDG_RUNTIME_DIR: log in through a PAM session with elogind (pam_elogind)" >&2
+    exit 1
+fi
+
+# one D-Bus session bus for the whole session: start it, and run this script inside it
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
+    exec dbus-run-session -- "$0" "$@"
+fi
+
+export XDG_SESSION_TYPE=wayland
+export XDG_CURRENT_DESKTOP=Lomiri
+export XDG_SESSION_DESKTOP=lomiri
+export DESKTOP_SESSION=lomiri
+
+# from Lomiri's lomiri-systemd-wrapper
+export QML_NO_TOUCH_COMPRESSION=1
+export MIR_SERVER_FILE="$XDG_RUNTIME_DIR/mir_socket"
+export MIR_SERVER_PROMPT_FILE=1
+export QT_QPA_PLATFORM=mirserver
+export MIR_SERVER_ENABLE_X11=1
+export MIR_SERVER_XWAYLAND_PATH=/usr/libexec/Xwayland.lomiri
+export WAYLAND_DISPLAY=wayland-0
+rm -f "$MIR_SERVER_FILE" "${MIR_SERVER_FILE}_trusted"
+# Lomiri cannot work with software rendering
+unset LIBGL_ALWAYS_SOFTWARE
+[ "$MESA_LOADER_DRIVER_OVERRIDE" = swrast ] && unset MESA_LOADER_DRIVER_OVERRIDE
+
+# programs started through D-Bus activation (the thumbnailer, the content hub, the URL dispatcher,
+# maliit) need the same environment
+dbus-update-activation-environment MIR_SOCKET="$MIR_SERVER_FILE" WAYLAND_DISPLAY \
+    XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP QT_QPA_PLATFORM 2>/dev/null
+
+log_dir=${XDG_STATE_HOME:-$HOME/.local/state}/lomiri
+mkdir -p "$log_dir"
+
+pids=
+cleanup() {
+    trap - EXIT TERM INT HUP
+    for p in $pids; do kill "$p" 2>/dev/null; done
+    exit 0
+}
+trap cleanup EXIT TERM INT HUP
+
+# the indicator services: each is /usr/libexec/<name>/<name>-service (the shell's panel shows
+# the menus they export on D-Bus). One that is not installed is skipped.
+for ind in ayatana-indicator-session ayatana-indicator-power ayatana-indicator-notifications \
+    ayatana-indicator-messages ayatana-indicator-keyboard ayatana-indicator-bluetooth \
+    ayatana-indicator-datetime ayatana-indicator-display ayatana-indicator-sound; do
+    svc=/usr/libexec/$ind/$ind-service
+    [ -x "$svc" ] || continue
+    "$svc" >> "$log_dir/$ind.log" 2>&1 &
+    pids="$pids $!"
+done
+# the network indicator and its secret agent (lomiri-indicator-network)
+for svc in /usr/libexec/lomiri-indicator-network/lomiri-indicator-network-service \
+    /usr/libexec/lomiri-indicator-network/lomiri-indicator-network-secret-agent; do
+    [ -x "$svc" ] || continue
+    "$svc" >> "$log_dir/$(basename "$svc").log" 2>&1 &
+    pids="$pids $!"
+done
+
+# the shell; its exit ends the session
+lomiri --mode=full-shell "$@" >> "$log_dir/lomiri.log" 2>&1

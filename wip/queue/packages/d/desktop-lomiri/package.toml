@@ -1,0 +1,23 @@
+# The Lomiri desktop for FenrirOS (an alternative to desktop-dkde): the shell on Mir, its session
+# script, the indicators, settings, the on-screen keyboard and the services Lomiri needs (seat
+# management, D-Bus, polkit, audio, graphics, fonts). Choose it on an image as desktop-dkde is.
+# Not built (queued, wip/queue). The graphical login (greetd, SDDM) is not in the list: whichever
+# the image has shows the "Lomiri" entry of /usr/share/wayland-sessions.
+name = "desktop-lomiri"
+version = "1"
+release = 1
+summary = "Lomiri desktop for FenrirOS"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+options = ["meta"]
+rundeps = [
+    "lomiri", "lomiri-session", "lomiri-system-settings", "lomiri-indicator-network", "lomiri-content-hub",
+    "lomiri-thumbnailer", "lomiri-download-manager", "lomiri-url-dispatcher", "lomiri-sounds", "suru-icon-theme",
+    "ayatana-indicator-bluetooth", "ayatana-indicator-datetime", "ayatana-indicator-display",
+    "ayatana-indicator-keyboard", "ayatana-indicator-messages", "ayatana-indicator-notifications",
+    "ayatana-indicator-power", "ayatana-indicator-session", "ayatana-indicator-sound",
+    "maliit-keyboard", "biometryd", "repowerd",
+    "seatd", "elogind", "dbus", "polkit", "mesa", "vulkan-loader", "xwayland",
+    "pipewire", "wireplumber", "networkmanager", "upower", "accountsservice", "bluez",
+    "fonts-dejavu", "shared-mime-info", "hicolor-icon-theme", "gsettings-desktop-schemas", "dconf",
+]

@@ -1,0 +1,23 @@
+# The Lomiri desktop session: the script that starts it (lomiri-session) and its entry for the login
+# managers (/usr/share/wayland-sessions/lomiri.desktop, read by SDDM and greeters that list
+# Wayland sessions). Lomiri is written for systemd user sessions; the script does without: it
+# sets the environment of Lomiri's own wrapper, starts a D-Bus session, runs the indicator
+# services in the background and the shell in the foreground (files/lomiri-session). Our own
+# script, not Alpine's or Canonical's (ubuntu-touch-session is for devices and systemd).
+# Not built or run (queued, wip/queue): the paths of the indicator services (/usr/libexec/<name>/
+# <name>-service) are from the indicators' own systemd unit templates; check them on a built system.
+# Not done: repowerd (power management: a system service, a dinit file is still to write) and
+# autostarting the apps.
+name = "lomiri-session"
+version = "1"
+release = 1
+summary = "Lomiri desktop session (script and login manager entry)"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+rundeps = ["dbus", "lomiri", "elogind", "seatd"]
+options = ["!check"]
+
+install = '''
+install -Dm755 $pkgfiles/lomiri-session "$pkgdir/usr/bin/lomiri-session"
+install -Dm644 $pkgfiles/lomiri.desktop "$pkgdir/usr/share/wayland-sessions/lomiri.desktop"
+'''
