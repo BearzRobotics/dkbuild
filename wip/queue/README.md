@@ -18,4 +18,4 @@ fixed there.
   with shellcheck).
 - Move with `git mv wip/queue/packages/x/name packages/x/name` and update this file.
 
-Written so far (2026-11-15): pgvector, sqlite-vec.
+Written so far (2026-11-15): pgvector, sqlite-vec. Lomiri: survey in `lomiri/NOTES.md` (no recipes yet).
