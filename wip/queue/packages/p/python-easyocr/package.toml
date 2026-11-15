@@ -1,0 +1,20 @@
+# EasyOCR: ready-to-use OCR with 80+ languages (PyTorch): the models are downloaded at run time (to ~/.EasyOCR), not built in. Pure Python: the project's own wheel (easyocr-1.7.2-py3-none-any.whl, pinned by sha256, as the pydeps store
+# does for pure-Python wheels) is installed as it is: its sdist needs a build backend that is not packaged here.
+# Not built (queued, wip/queue).
+name = "python-easyocr"
+version = "1.7.2"
+release = 1
+summary = "EasyOCR: ready-to-use OCR with 80+ languages (PyTorch)"
+license = "Apache-2.0"
+homepage = "https://github.com/JaidedAI/EasyOCR"
+hostdeps = ["python"]
+rundeps = ["python", "pytorch", "python-torchvision", "opencv", "python-numpy", "python-pillow", "python-scikit-image", "python-scipy", "python-bidi", "python-pyyaml", "python-shapely", "python-pyclipper"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/bb/84/4a2cab0e6adde6a85e7ba543862e5fc0250c51f3ac721a078a55cdcff250/easyocr-1.7.2-py3-none-any.whl", sha256 = "5be12f9b0e595d443c9c3d10b0542074b50f0ec2d98b141a109cd961fd1c177c", unpack = false },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr ../sources/easyocr-1.7.2-py3-none-any.whl
+'''

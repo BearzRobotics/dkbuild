@@ -1,0 +1,21 @@
+# Lazy loading of Python submodules and functions: PyPI sdist lazy-loader 0.6 (build backend setuptools.build_meta); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: setuptools>=61.2).
+name = "python-lazy-loader"
+version = "0.6"
+release = 1
+summary = "Lazy loading of Python submodules and functions"
+license = "BSD-3-Clause"
+homepage = "https://pypi.org/project/lazy-loader"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = []
+rundeps = ["python", "python-packaging"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/19/8c/0f2ff2a8b7513e68871a74740c17a504b0488c679b379e6445ebb7bd78dc/lazy_loader-0.6.tar.gz", sha256 = "2f4b7824d6401958639008a0cae20c776b61dff619accd6890693e2de8260167" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

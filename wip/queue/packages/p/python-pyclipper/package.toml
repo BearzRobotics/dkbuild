@@ -1,0 +1,21 @@
+# Polygon clipping (Clipper, Cython): PyPI sdist pyclipper 1.4.0 (build backend setuptools.build_meta); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: setuptools, wheel, setuptools_scm, cython).
+name = "python-pyclipper"
+version = "1.4.0"
+release = 1
+summary = "Polygon clipping (Clipper, Cython)"
+license = "MIT"
+homepage = "https://pypi.org/project/pyclipper"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-setuptools-scm", "python-cython"]
+builddeps = ["python-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/f6/21/3c06205bb407e1f79b73b7b4dfb3950bd9537c4f625a68ab5cc41177f5bc/pyclipper-1.4.0.tar.gz", sha256 = "9882bd889f27da78add4dd6f881d25697efc740bf840274e749988d25496c8e1" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

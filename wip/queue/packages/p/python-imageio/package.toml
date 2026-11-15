@@ -1,0 +1,21 @@
+# Read and write images and video (Python): PyPI sdist imageio 2.38.1 (build backend setuptools.build_meta); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: setuptools>=61.0, wheel).
+name = "python-imageio"
+version = "2.38.1"
+release = 1
+summary = "Read and write images and video (Python)"
+license = "BSD-2-Clause"
+homepage = "https://pypi.org/project/imageio"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = []
+rundeps = ["python", "python-numpy", "python-pillow"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/f3/cd/69e4ac55b6dafdd2b5f32075236841a3945dea7323d0232d80f28c37cea8/imageio-2.38.1.tar.gz", sha256 = "6769f1f01c4dd46448307863a787c9a22fa4dbe11c0c88f525c6e410fdfd7983" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

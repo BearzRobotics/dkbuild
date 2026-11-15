@@ -1,0 +1,21 @@
+# Python wrapper for the Tesseract OCR command line: PyPI sdist pytesseract 0.3.13 (build backend setuptools.build_meta); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: setuptools >= 40.0.4, wheel >= 0.29.0).
+name = "python-pytesseract"
+version = "0.3.13"
+release = 1
+summary = "Python wrapper for the Tesseract OCR command line"
+license = "Apache-2.0"
+homepage = "https://pypi.org/project/pytesseract"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = []
+rundeps = ["python", "python-pillow", "python-packaging", "tesseract"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/9f/a6/7d679b83c285974a7cb94d739b461fa7e7a9b17a3abfd7bf6cbc5c2394b0/pytesseract-0.3.13.tar.gz", sha256 = "4bf5f880c99406f52a3cfc2633e42d9dc67615e69d8a509d74867d3baddb5db9" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

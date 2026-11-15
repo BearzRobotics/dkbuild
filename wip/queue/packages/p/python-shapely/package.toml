@@ -1,0 +1,21 @@
+# Manipulation and analysis of geometric objects (GEOS): builds against the system GEOS (GEOS_CONFIG). PyPI sdist shapely 2.2.0 (build backend mesonpy); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: Cython, meson-python>=0.15.0,!=0.22.0, numpy>=1.26,<3).
+name = "python-shapely"
+version = "2.2.0"
+release = 1
+summary = "Manipulation and analysis of geometric objects (GEOS)"
+license = "BSD-3-Clause"
+homepage = "https://github.com/shapely/shapely"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-cython", "python-numpy"]
+builddeps = ["geos-devel", "python-devel", "python-numpy"]
+rundeps = ["python", "python-numpy"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/f3/ab/924b6e202f796d270a3041a230151f7908db5ea48c74effe6f8023e9bd05/shapely-2.2.0.tar.gz", sha256 = "e8865e553d874a1ec4a032057ea81fca9def37b188cd8fb550af3b3480b3f88c" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

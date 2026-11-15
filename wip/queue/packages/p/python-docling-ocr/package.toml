@@ -1,0 +1,13 @@
+# python-docling-ocr: docling with its optional OCR engines: EasyOCR (PyTorch), RapidOCR (ONNX Runtime) and
+# Tesseract (tesserocr and pytesseract; the tesseract package and its language data are the engine).
+# A meta package: docling itself works without them (PDFs with a text layer, Office files); scanned pages
+# and images need one of these. The engines' models are downloaded at run time to the user's cache.
+# Not built (queued, wip/queue).
+name = "python-docling-ocr"
+version = "1"
+release = 1
+summary = "Docling with the EasyOCR, RapidOCR and Tesseract engines"
+license = "MIT"
+homepage = "https://github.com/docling-project/docling"
+options = ["meta"]
+rundeps = ["python-docling", "python-easyocr", "python-rapidocr", "python-tesserocr", "python-pytesseract", "tesseract", "tesseract-data"]

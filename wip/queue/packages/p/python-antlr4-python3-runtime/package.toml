@@ -1,0 +1,21 @@
+# ANTLR 4 runtime for Python 3: PyPI sdist antlr4-python3-runtime 4.9.3 (build backend setuptools.build_meta); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: none declared).
+name = "python-antlr4-python3-runtime"
+version = "4.9.3"
+release = 1
+summary = "ANTLR 4 runtime for Python 3"
+license = "BSD-3-Clause"
+homepage = "https://pypi.org/project/antlr4-python3-runtime"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = []
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/3e/38/7859ff46355f76f8d19459005ca000b6e7012f2f1ca597746cbcd1fbfe5e/antlr4-python3-runtime-4.9.3.tar.gz", sha256 = "f224469b4168294902bb1efa80a8bf7855f24c99aef99cbefc1bcd3cce77881b" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

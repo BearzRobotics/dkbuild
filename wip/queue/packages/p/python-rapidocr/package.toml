@@ -1,0 +1,20 @@
+# RapidOCR: OCR with ONNX Runtime (PaddleOCR models): the models are downloaded at run time (to the user's cache), not built in. Pure Python: the project's own wheel (rapidocr-3.10.0-py3-none-any.whl, pinned by sha256, as the pydeps store
+# does for pure-Python wheels) is installed as it is: its sdist needs a build backend that is not packaged here.
+# Not built (queued, wip/queue).
+name = "python-rapidocr"
+version = "3.10.0"
+release = 1
+summary = "RapidOCR: OCR with ONNX Runtime (PaddleOCR models)"
+license = "Apache-2.0"
+homepage = "https://github.com/RapidAI/RapidOCR"
+hostdeps = ["python"]
+rundeps = ["python", "python-colorlog", "python-numpy", "python-omegaconf", "opencv", "python-pillow", "python-pyclipper", "python-pyyaml", "python-requests", "python-shapely", "python-six", "python-tqdm", "onnxruntime"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/59/07/203065283bba0c5e9c10af3602dc25ab3e59ee54dc2d1d22c8faeabf5ed8/rapidocr-3.10.0-py3-none-any.whl", sha256 = "2fc34e26cd0f48514804a94f8832283039c7334076bff60768b1fed9ad068050", unpack = false },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr ../sources/rapidocr-3.10.0-py3-none-any.whl
+'''

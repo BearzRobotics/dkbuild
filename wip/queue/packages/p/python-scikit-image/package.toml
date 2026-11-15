@@ -1,0 +1,21 @@
+# Image processing in Python: a long compile (Cython and C++). PyPI sdist scikit-image 0.26.0 (build backend mesonpy); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: meson-python>=0.16, Cython>=3.0.8,!=3.2.0b1, pythran>=0.16, lazy_loader>=0.4, numpy>=2.0).
+name = "python-scikit-image"
+version = "0.26.0"
+release = 1
+summary = "Image processing in Python"
+license = "BSD-3-Clause AND BSD-2-Clause AND MIT"
+homepage = "https://scikit-image.org"
+hostdeps = ["python", "python-meson-python", "meson", "ninja", "pkgconf", "python-cython", "python-numpy", "python-pythran", "python-packaging"]
+builddeps = ["python-devel", "python-numpy"]
+rundeps = ["python", "python-numpy", "python-scipy", "python-networkx", "python-pillow", "python-imageio", "python-tifffile", "python-packaging", "python-lazy-loader"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/a1/b4/2528bb43c67d48053a7a649a9666432dc307d66ba02e3a6d5c40f46655df/scikit_image-0.26.0.tar.gz", sha256 = "f5f970ab04efad85c24714321fcc91613fcb64ef2a892a13167df2f3e59199fa" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

@@ -1,0 +1,21 @@
+# Read and write TIFF files: PyPI sdist tifffile 2026.11.12 (build backend setuptools.build_meta); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: setuptools).
+name = "python-tifffile"
+version = "2026.11.12"
+release = 1
+summary = "Read and write TIFF files"
+license = "BSD-3-Clause"
+homepage = "https://pypi.org/project/tifffile"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = []
+rundeps = ["python", "python-numpy"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/44/64/075031fb322ad0b0b8f6bb6581e67bc0c0afc5c978f9c183b397f32634a6/tifffile-2026.11.12.tar.gz", sha256 = "064e8b3b1a1baf0aed603e383f6efc67564a4340397fb8aff7d58bda1ceb1745" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

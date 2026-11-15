@@ -1,0 +1,21 @@
+# Python wrapper for the Tesseract C++ API (Cython): PyPI sdist tesserocr 2.13.0 (build backend setuptools.build_meta); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: setuptools, Cython>=3.1.8,<3.4.0).
+name = "python-tesserocr"
+version = "2.13.0"
+release = 1
+summary = "Python wrapper for the Tesseract C++ API (Cython)"
+license = "MIT"
+homepage = "https://pypi.org/project/tesserocr"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-cython"]
+builddeps = ["tesseract-devel", "leptonica-devel", "python-devel"]
+rundeps = ["python", "tesseract"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/8c/c5/be11a18c29f43369a3db8f418de81f98ca467783ddf8affadfacc16459fd/tesserocr-2.13.0.tar.gz", sha256 = "475460f736e5ac23dfcfbd414435581fa6eb0e849e80c816da2ff1b4af7d88ed" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''
