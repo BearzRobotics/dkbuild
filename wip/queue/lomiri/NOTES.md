@@ -94,3 +94,28 @@ or written), wallpapers and the session scripts (a dinit service and a Wayland s
 apps (calculator, clock, terminal, gallery, docviewer, filemanager, weather), and the Mir
 EGL/GBM platform check on this Mesa. Packages Alpine has that this tree does not: libucontext (not
 needed: capnproto is not used by Mir 2.28's build), umockdev/py3-dbusmock (tests only, tests are off).
+
+## Update 2026-11-15 (end): the shell itself is written
+
+Added: lomiri 0.6.2 (Alpine's seven patches, `-DNO_TESTS=ON`), lomiri-system-settings (Alpine's two patches),
+lomiri-indicator-network (needs ofono and libqofono: written, with ell, which ofono wants), the Ayatana
+indicators (session, power, datetime, display, sound, keyboard, bluetooth, messages, notifications; librda),
+maliit-framework and maliit-keyboard (without presage word prediction and without the anthy and libpinyin
+engines, which are not packaged), libqofono, ofono (inert: no dinit service). 78 recipes in all; every name in
+their build, host and run dependencies resolves to a recipe in `packages/` or `wip/queue/` (checked by script),
+none has been built.
+
+Still open before a Lomiri session can start (not recipes of upstream software):
+- **lomiri-telephony-service** and **lomiri-history-service** (Alpine's lomiri depends on the telephony service;
+  they pull telepathy-qt, telepathy-mission-control, libphonenumber, qtpim/qtfeedback (written)): decide to
+  drop the runtime dependency (Lomiri starts without phone features) or write them.
+- A **dinit session**: a service that starts the D-Bus session bus, the indicator services, lomiri-thumbnailer,
+  lomiri-url-dispatcher, repowerd and the shell on a seat (seatd/elogind), and a Wayland session entry for
+  greetd/SDDM; Alpine's `ubuntu-touch-session` (ubports/core/ubuntu-touch-session) is the starting point.
+- **gsettings-desktop-schemas, gnome-desktop-4, accountsservice, upower, polkit agent**: in the tree; check that
+  gnome-desktop provides gnome-desktop-4.pc.
+- Lomiri's **wallpapers** and a **FenrirOS launcher logo** (Alpine replaces Ubuntu's `home.svg`).
+- The **apps** (lomiri-calculator-app, clock, terminal, gallery, docviewer, filemanager, weather, mediaplayer,
+  morph-browser needs QtWebEngine 5: skipped) follow Alpine the same way.
+- Missing optional pieces named in the recipes: presage, anthy, libpinyin (maliit-keyboard), AppArmor itself
+  (libapparmor only), FreeTDS (qt5-qtbase's TDS plugin).

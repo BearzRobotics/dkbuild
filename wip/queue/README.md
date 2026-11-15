@@ -26,4 +26,4 @@ Written so far (2026-11-15):
   (recipe fields, Alpine's patches apply and match their checksums, qtbase's mkspec seds tried on the
   real files); nothing compiled. Still needed for Lomiri from Qt 5: qtfeedback, qtpim/qtcontacts,
   qtlocation, qtquickcontrols (1), qtscript? (to check against each Lomiri component).
-- Lomiri: the stack of about 65 recipes listed in `lomiri/NOTES.md` (Qt 5, foundation libraries, components, Mir and qtmir); the shell itself, indicators, settings and keyboard are still to write.
+- Lomiri: the stack of 78 recipes listed in `lomiri/NOTES.md` (Qt 5, foundation libraries, components, Mir, qtmir, the shell, indicators, settings, keyboard); what is left is the session (dinit), the telephony decision, the apps and branding.
