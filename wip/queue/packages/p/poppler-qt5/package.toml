@@ -1,0 +1,59 @@
+# Poppler's Qt 5 binding (libpoppler-qt5): the Lomiri document viewer and other Qt 5 PDF programs. Not built (queued, wip/queue). Same structure as poppler-qt5 (below).
+# Its own build of the poppler source, as Arch splits it: in poppler itself
+# it would make a dependency cycle (gtk+3 -> colord -> sane-backends ->
+# poppler -> qt5-qtbase -> gtk+3). Only the Qt 5 library, headers and
+# pkg-config file are packaged; it links against the system's libpoppler.
+name = "poppler-qt5"
+version = "26.08.0"
+release = 1
+summary = "Qt 5 binding for the Poppler PDF library"
+license = "GPL-2.0-only OR GPL-3.0-only"
+homepage = "https://poppler.freedesktop.org"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["poppler-devel", "qt5-qtbase-devel", "boost-devel", "cairo-devel", "curl-devel", "fontconfig-devel", "freetype-devel", "lcms2-devel", "libjpeg-turbo-devel", "libpng-devel", "libtiff-devel", "nss-devel", "gpgmepp-devel", "openjpeg-devel", "zlib-ng-compat-devel"]
+rundeps = ["poppler"]
+options = ["!check"]
+
+source = [
+    { url = "https://poppler.freedesktop.org/poppler-26.08.0.tar.xz", sha256 = "dc906e68cea698109706ac6aa3d2c9d4512fcfcac42d90b8afcda486d1b9abd0" },
+]
+
+environment = '''
+# FontInfo.h uses std::vector without <vector> (libc++ 23)
+export CXXFLAGS="$CXXFLAGS -include vector"
+'''
+setup = '''
+%cmake \
+    -DENABLE_UNSTABLE_API_ABI_HEADERS=ON \
+    -DENABLE_QT6=OFF \
+    -DENABLE_QT5=ON \
+    -DENABLE_GLIB=OFF \
+    -DENABLE_CPP=OFF \
+    -DENABLE_UTILS=OFF \
+    -DENABLE_BOOST=ON \
+    -DENABLE_NSS3=ON \
+    -DENABLE_GPGME=ON \
+    -DENABLE_LIBCURL=ON \
+    -DENABLE_LCMS=ON \
+    -DENABLE_LIBOPENJPEG=openjpeg2 \
+    -DENABLE_LIBTIFF=ON \
+    -DENABLE_GOBJECT_INTROSPECTION=OFF \
+    -DBUILD_GTK_TESTS=OFF \
+    -DBUILD_QT5_TESTS=OFF \
+    -DBUILD_CPP_TESTS=OFF \
+    -DBUILD_MANUAL_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+# everything into a staging root; only the Qt 5 parts are this package's
+DESTDIR=/tmp/stage cmake --install build
+install -dm755 "$pkgdir/usr/lib/pkgconfig" "$pkgdir/usr/include/poppler"
+cp -a /tmp/stage/usr/lib/libpoppler-qt5.so* "$pkgdir/usr/lib/"
+cp -a /tmp/stage/usr/lib/libpoppler-qt5.a "$pkgdir/usr/lib/" 2>/dev/null || true
+cp -a /tmp/stage/usr/lib/pkgconfig/poppler-qt5.pc "$pkgdir/usr/lib/pkgconfig/"
+cp -a /tmp/stage/usr/include/poppler/qt5 "$pkgdir/usr/include/poppler/"
+test -e "$pkgdir/usr/lib/libpoppler-qt5.so"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/poppler-qt5/COPYING"
+'''

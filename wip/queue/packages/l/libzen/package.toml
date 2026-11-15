@@ -1,0 +1,29 @@
+# libzen: C++ utility library of MediaArea (ZenLib: strings, files, threads, used by MediaInfo): Needed by the Lomiri stack, version 0.4.41. Recipe written after Alpine
+# Linux's testing/libzen (MIT-licensed APKBUILD and patches; the software's licence is Zlib).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "libzen"
+version = "0.4.41"
+release = 1
+summary = "libzen: C++ utility library of MediaArea (ZenLib: strings, files, threads, used by MediaInfo)"
+license = "Zlib"
+homepage = "https://mediaarea.net/ZenLib"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = []
+options = ["!check"]
+
+source = [
+    { url = "https://mediaarea.net/download/source/libzen/0.4.41/libzen_0.4.41.tar.bz2", sha256 = "eb237d7d3dca6dc6ba068719420a27de0934a783ccaeb2867562b35af3901e2d" },
+]
+
+setup = '''
+cd Project/CMake
+%cmake -DLIB_INSTALL_DIR=/usr/lib
+'''
+build = '''
+cd Project/CMake
+%cmake_build
+'''
+install = '''
+cd Project/CMake
+%cmake_install
+'''

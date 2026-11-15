@@ -18,6 +18,7 @@ rundeps = [
     "ayatana-indicator-power", "ayatana-indicator-session", "ayatana-indicator-sound",
     "maliit-keyboard", "biometryd", "repowerd", "lomiri-telephony-service", "lomiri-history-service",
     "lomiri-calculator-app", "lomiri-clock-app", "lomiri-terminal-app", "lomiri-filemanager-app",
+    "lomiri-gallery-app", "lomiri-docviewer-app",
     "seatd", "elogind", "dbus", "polkit", "mesa", "vulkan-loader", "xwayland",
     "pipewire", "wireplumber", "networkmanager", "upower", "accountsservice", "bluez",
     "fonts-dejavu", "shared-mime-info", "hicolor-icon-theme", "gsettings-desktop-schemas", "dconf",

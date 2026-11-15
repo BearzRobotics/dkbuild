@@ -1,0 +1,31 @@
+# Lomiri app: gallery (photos and videos): Ubuntu Touch / UBports (Lomiri) component, version 3.1.1. Recipe written after Alpine
+# Linux's testing/lomiri-gallery-app (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-gallery-app"
+version = "3.1.1"
+release = 1
+summary = "Lomiri app: gallery (photos and videos)"
+license = "GPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+patches = ["0001-Include-and-link-against-libintl.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf", "gettext"]
+builddeps = ["cmake-extras", "exiv2-devel", "libmediainfo-devel", "lomiri-trust-store-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel"]
+rundeps = ["exiv2", "libmediainfo", "lomiri-thumbnailer", "lomiri-trust-store", "lomiri-ui-extras", "lomiri-ui-toolkit", "qqc2-suru-style", "qt5-qtmultimedia", "qt5-qtbase"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/apps/lomiri-gallery-app/-/archive/v3.1.1/lomiri-gallery-app-v3.1.1.tar.gz", sha256 = "8ac8143021d9985e4197f793b878ad2e288428a223cb1af9a048c248f1f75f58" },
+]
+
+setup = '''
+%cmake \
+    -DCLICK_MODE=OFF \
+    -DINSTALL_TESTS=OFF \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

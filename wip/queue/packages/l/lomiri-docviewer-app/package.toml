@@ -1,0 +1,31 @@
+# Lomiri app: document viewer (PDF, text, office documents): without LibreOfficeKit (office documents are not rendered: PDF and text are; LOK can be added when libreofficekit's headers are split out of the libreoffice package). Ubuntu Touch / UBports (Lomiri) component, version 3.1.3. Recipe written after Alpine
+# Linux's testing/lomiri-docviewer-app (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-docviewer-app"
+version = "3.1.3"
+release = 1
+summary = "Lomiri app: document viewer (PDF, text, office documents)"
+license = "GPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+patches = ["0001-manually-link-libintl.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf", "gettext"]
+builddeps = ["cmake-extras", "poppler-qt5-devel", "lomiri-trust-store-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel"]
+rundeps = ["lomiri-content-hub", "lomiri-thumbnailer", "lomiri-trust-store", "lomiri-ui-extras", "lomiri-ui-toolkit", "poppler-qt5", "qqc2-suru-style", "qt5-qtmultimedia"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/apps/lomiri-docviewer-app/-/archive/v3.1.3/lomiri-docviewer-app-v3.1.3.tar.gz", sha256 = "d578231e2c7f5fba817826a14e8b7ec923ca03033da0d1dd869548ccf66a59de" },
+]
+
+setup = '''
+%cmake \
+    -DCLICK_MODE=OFF \
+    -DINSTALL_TESTS=OFF \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

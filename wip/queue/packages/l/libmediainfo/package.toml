@@ -1,0 +1,32 @@
+# MediaInfo library: technical and tag information of video and audio files (MediaArea): the bundled zlib and tinyxml2 are removed so that the system's are used. Needed by the Lomiri stack, version 26.10. Recipe written after Alpine
+# Linux's testing/libmediainfo (MIT-licensed APKBUILD and patches; the software's licence is BSD-2-Clause).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "libmediainfo"
+version = "26.10"
+release = 1
+summary = "MediaInfo library: technical and tag information of video and audio files (MediaArea)"
+license = "BSD-2-Clause"
+homepage = "https://mediaarea.net/MediaInfo"
+patches = ["fix-mp3-tag.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["curl-devel", "libmms-devel", "libzen-devel", "tinyxml2-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://mediaarea.net/download/source/libmediainfo/26.10/libmediainfo_26.10.tar.xz", sha256 = "a806fd36592549a03e810486f415a6858d4d8f14066bfbe97b32a447cd5eb590" },
+]
+
+setup = '''
+rm -rf Project/MS*
+rm -rf Project/zlib Source/ThirdParty/tinyxml2
+cd Project/CMake
+%cmake -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+cd Project/CMake
+%cmake_build
+'''
+install = '''
+cd Project/CMake
+%cmake_install
+'''
