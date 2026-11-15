@@ -6,7 +6,9 @@
 # minimum_zig_version 0.17.0 and does. Move to the next release tag once one targets 0.17.
 # Its Zig dependencies (syntax, flags, dizzy, thespian,
 # themes, fuzzig, vaxis, zeit, ...) are fetched on the host (option `zigdeps`) and built
-# offline with --system zig-pkg. Terminal build only: no -Dgui (the standalone GUI window).
+# offline with --system zig-pkg. libfuzzer_kit (a lazy dependency of dizzy, only for its
+# -Denable-fuzzing step) is removed from zig-pkg before the build: Zig compiles the build.zig
+# of every package it finds there, and that one uses addCSourceFile, which Zig 0.17 removed. Terminal build only: no -Dgui (the standalone GUI window).
 name = "flow"
 version = "0.7.2_git20261114"
 release = 1
@@ -22,6 +24,7 @@ source = [
 ]
 
 install = '''
+rm -rf zig-pkg/libfuzzer_kit-*
 %zig_build
 install -Dm644 help.md "$pkgdir/usr/share/doc/flow/help.md"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/flow/LICENSE"
