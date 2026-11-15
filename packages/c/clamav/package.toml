@@ -29,6 +29,10 @@ source = [
 
 environment = '''
 export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true LIBCLANG_PATH=/usr/lib
+# clamonacc's own fts (misc/priv_fts.h, the FreeBSD one, used because musl has no LFS fts) wraps
+# its prototypes in glibc's __BEGIN_DECLS / __END_DECLS, which <sys/types.h> brings in on glibc
+# and musl does not (clamonacc: unknown type name '__BEGIN_DECLS', r1). It is C: they are empty.
+export CFLAGS="$CFLAGS -D__BEGIN_DECLS= -D__END_DECLS="
 '''
 setup = '''
 %cmake \
