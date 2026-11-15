@@ -1,4 +1,4 @@
-# Common functions for the Ayatana indicators: Ubuntu Touch / UBports (Lomiri) component, version 0.9.13. Recipe written after Alpine
+# Common functions for the Ayatana indicators: Needed by the Lomiri stack, version 0.9.13. Recipe written after Alpine
 # Linux's testing/libayatana-common (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
 # Not built (queued, wip/queue): expect first-build fixes.
 name = "libayatana-common"
@@ -6,7 +6,7 @@ version = "0.9.13"
 release = 1
 summary = "Common functions for the Ayatana indicators"
 license = "GPL-3.0-only"
-homepage = "https://gitlab.com/ubports"
+homepage = "https://github.com/AyatanaIndicators/libayatana-common"
 hostdeps = ["cmake", "ninja", "pkgconf", "intltool", "vala"]
 builddeps = ["cmake-extras", "glib-devel", "gobject-introspection-devel"]
 options = ["!check"]

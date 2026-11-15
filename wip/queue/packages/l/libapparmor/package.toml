@@ -1,0 +1,30 @@
+# AppArmor library (libapparmor only: the client library other programs link to): only the library is built, not the AppArmor parser, utilities or profiles (the kernel LSM is not in use here). Needed by the Lomiri stack, version 4.1.8. Recipe written after Alpine
+# Linux's testing/apparmor (MIT-licensed APKBUILD and patches; the software's licence is GPL-2.0-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "libapparmor"
+version = "4.1.8"
+release = 1
+summary = "AppArmor library (libapparmor only: the client library other programs link to)"
+license = "GPL-2.0-or-later"
+homepage = "https://gitlab.com/apparmor/apparmor"
+hostdeps = ["make", "pkgconf", "autoconf", "automake", "libtool", "autoconf-archive", "bison", "flex", "gettext"]
+builddeps = []
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/apparmor/apparmor/-/archive/v4.1.8/apparmor-v4.1.8.tar.gz", sha256 = "00f0434405f72b2a624587a92e56fd5e350af91077603b372706469f7c5e9757" },
+]
+
+setup = '''
+cd libraries/libapparmor
+./autogen.sh
+%configure --without-python --without-perl
+'''
+build = '''
+cd libraries/libapparmor
+%make
+'''
+install = '''
+cd libraries/libapparmor
+%make_install
+'''

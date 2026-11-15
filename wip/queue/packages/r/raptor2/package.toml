@@ -1,0 +1,27 @@
+# RDF parser and serializer library: without yajl (JSON), which is not packaged. Needed by the Lomiri stack, version 2.0.16. Recipe written after Alpine
+# Linux's testing/raptor2 (MIT-licensed APKBUILD and patches; the software's licence is LGPL-2.1-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "raptor2"
+version = "2.0.16"
+release = 1
+summary = "RDF parser and serializer library"
+license = "LGPL-2.1-or-later"
+homepage = "https://librdf.org/raptor/"
+patches = ["libxml-2.11.0.patch"]
+hostdeps = ["make", "pkgconf"]
+builddeps = ["curl-devel", "libxml2-devel", "libxslt-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.librdf.org/source/raptor2-2.0.16.tar.gz", sha256 = "089db78d7ac982354bdbf39d973baf09581e6904ac4c92a98c5caadb3de44680" },
+]
+
+setup = '''
+%configure --with-yajl=no
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

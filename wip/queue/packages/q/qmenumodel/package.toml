@@ -1,4 +1,4 @@
-# Qt 5 model of GMenu: D-Bus exported menus for QML (Ayatana indicators): Ubuntu Touch / UBports (Lomiri) component, version 0.10.1. Recipe written after Alpine
+# Qt 5 model of GMenu: D-Bus exported menus for QML (Ayatana indicators): Needed by the Lomiri stack, version 0.10.1. Recipe written after Alpine
 # Linux's testing/qmenumodel (MIT-licensed APKBUILD and patches; the software's licence is LGPL-3.0-only).
 # Not built (queued, wip/queue): expect first-build fixes.
 name = "qmenumodel"
@@ -6,7 +6,7 @@ version = "0.10.1"
 release = 1
 summary = "Qt 5 model of GMenu: D-Bus exported menus for QML (Ayatana indicators)"
 license = "LGPL-3.0-only"
-homepage = "https://gitlab.com/ubports"
+homepage = "https://github.com/AyatanaIndicators/qmenumodel"
 hostdeps = ["cmake", "ninja", "pkgconf"]
 builddeps = ["cmake-extras", "glib-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel"]
 options = ["!check"]

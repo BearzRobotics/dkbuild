@@ -1,0 +1,28 @@
+# Zeitgeist: the activity log service (libzeitgeist for the Lomiri app launcher): Needed by the Lomiri stack, version 1.0.4. Recipe written after Alpine
+# Linux's testing/zeitgeist (MIT-licensed APKBUILD and patches; the software's licence is LGPL-2.1-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "zeitgeist"
+version = "1.0.4"
+release = 1
+summary = "Zeitgeist: the activity log service (libzeitgeist for the Lomiri app launcher)"
+license = "LGPL-2.1-or-later"
+homepage = "https://gitlab.freedesktop.org/zeitgeist/zeitgeist"
+patches = ["fix-xapian-2.0.0.patch"]
+hostdeps = ["make", "pkgconf", "autoconf", "automake", "libtool", "gettext", "vala", "python", "python-rdflib", "raptor2", "git"]
+builddeps = ["gobject-introspection-devel", "gtk+3-devel", "json-glib-devel", "sqlite-devel", "telepathy-glib-devel", "xapian-core-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.freedesktop.org/zeitgeist/zeitgeist/-/archive/v1.0.4/zeitgeist-v1.0.4.tar.gz", sha256 = "83b2a02c57c232e7d932af75295d5f4c685b21429c1de04347a114b9ac4fac40" },
+]
+
+setup = '''
+NOCONFIGURE=1 ./autogen.sh
+%configure --libexecdir=/usr/lib --enable-fts
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

@@ -1,0 +1,28 @@
+# Persistent cache for C++ on LevelDB (Lomiri): Ubuntu Touch / UBports (Lomiri) component, version 1.0.10. Recipe written after Alpine
+# Linux's testing/persistent-cache-cpp (MIT-licensed APKBUILD and patches; the software's licence is LGPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "persistent-cache-cpp"
+version = "1.0.10"
+release = 1
+summary = "Persistent cache for C++ on LevelDB (Lomiri)"
+license = "LGPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+patches = ["remove-docs-html-from-makefile.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["boost-devel", "cmake-extras", "gtest-devel", "leveldb-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/lib-cpp/persistent-cache-cpp/-/archive/1.0.10/persistent-cache-cpp-1.0.10.tar.gz", sha256 = "1d09864ca962d055fd4e74d734477ab413b1b2e1e9c3dae216019cbf40798f6f" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

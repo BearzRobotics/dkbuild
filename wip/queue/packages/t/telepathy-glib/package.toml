@@ -1,0 +1,31 @@
+# GLib bindings for the Telepathy messaging framework: Needed by the Lomiri stack, version 0.24.2. Recipe written after Alpine
+# Linux's testing/telepathy-glib (MIT-licensed APKBUILD and patches; the software's licence is LGPL-2.1-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "telepathy-glib"
+version = "0.24.2"
+release = 1
+summary = "GLib bindings for the Telepathy messaging framework"
+license = "LGPL-2.1-or-later"
+homepage = "https://telepathy.freedesktop.org"
+patches = ["test-cm.patch", "gcc14.patch"]
+hostdeps = ["make", "pkgconf", "autoconf", "automake", "libtool", "python", "vala", "intltool", "gtk-doc-tools", "diffutils"]
+builddeps = ["dbus-glib-devel", "glib-devel", "gobject-introspection-devel", "libxslt-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://telepathy.freedesktop.org/releases/telepathy-glib/telepathy-glib-0.24.2.tar.gz", sha256 = "b0a374d771cdd081125f38c3abd079657642301c71a543d555e2bf21919273f0" },
+]
+
+setup = '''
+# the build runs Python helper scripts: python3, not the python of the shebangs
+find . -type f -exec grep -lI python {} + | xargs sed -i -e 's|/usr/bin/python$|/usr/bin/python3|' -e 's|/usr/bin/env[ \t]*python$|/usr/bin/python3|'
+autoreconf -fi
+export PYTHON=python3
+%configure --enable-vala-bindings
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

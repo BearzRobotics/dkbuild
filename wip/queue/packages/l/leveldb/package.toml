@@ -1,0 +1,30 @@
+# Fast key-value storage library (Google): tests and benchmarks off (they need googletest and benchmark as submodules). Needed by the Lomiri stack, version 1.23. Recipe written after Alpine
+# Linux's testing/leveldb (MIT-licensed APKBUILD and patches; the software's licence is BSD-3-Clause).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "leveldb"
+version = "1.23"
+release = 1
+summary = "Fast key-value storage library (Google)"
+license = "BSD-3-Clause"
+homepage = "https://github.com/google/leveldb"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["snappy-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/google/leveldb/archive/1.23.tar.gz", sha256 = "9a37f8a6174f09bd622bc723b55881dc541cd50747cbd08831c2a82d620f6d76" },
+]
+
+setup = '''
+%cmake \
+    -DLEVELDB_BUILD_TESTS=OFF \
+    -DLEVELDB_BUILD_BENCHMARKS=OFF \
+    -DLEVELDB_INSTALL=ON \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

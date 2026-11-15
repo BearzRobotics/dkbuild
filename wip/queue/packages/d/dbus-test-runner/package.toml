@@ -1,4 +1,4 @@
-# Runs a set of programs under a private D-Bus session for tests: Ubuntu Touch / UBports (Lomiri) component, version 19.04.0. Recipe written after Alpine
+# Runs a set of programs under a private D-Bus session for tests: Needed by the Lomiri stack, version 19.04.0. Recipe written after Alpine
 # Linux's testing/dbus-test-runner (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-or-later).
 # Not built (queued, wip/queue): expect first-build fixes.
 name = "dbus-test-runner"
@@ -6,7 +6,7 @@ version = "19.04.0"
 release = 1
 summary = "Runs a set of programs under a private D-Bus session for tests"
 license = "GPL-3.0-or-later"
-homepage = "https://gitlab.com/ubports"
+homepage = "https://launchpad.net/dbus-test-runner"
 hostdeps = ["make", "intltool", "pkgconf"]
 builddeps = ["dbus-glib-devel", "glib-devel"]
 rundeps = ["dbus"]

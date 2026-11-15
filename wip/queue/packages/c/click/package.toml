@@ -1,0 +1,28 @@
+# Click: Ubuntu Touch app package format library (libclick, used by the Lomiri app launcher): Ubuntu Touch / UBports (Lomiri) component, version 0.5.2. Recipe written after Alpine
+# Linux's testing/click (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "click"
+version = "0.5.2"
+release = 1
+summary = "Click: Ubuntu Touch app package format library (libclick, used by the Lomiri app launcher)"
+license = "GPL-3.0-only"
+homepage = "https://gitlab.com/ubports/development/core/click"
+patches = ["0001-configure.ac-fix-building-against-BusyBox-sed.patch", "0002-gcc14-preload-fix-implicit-function-declaration.patch"]
+hostdeps = ["make", "pkgconf", "autoconf", "automake", "libtool", "cmake", "intltool", "python", "python-setuptools", "vala"]
+builddeps = ["dbus-test-runner", "gobject-introspection-devel", "json-glib-devel", "libgee-devel", "process-cpp-devel", "properties-cpp-devel", "gtest-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/click/-/archive/0.5.2/click-0.5.2.tar.gz", sha256 = "9cedd405852c6d6a16c4e15c43f9070cd53fb13ca05d50005a9bf790977daba5" },
+]
+
+setup = '''
+./autogen.sh
+%configure --disable-packagekit --disable-systemd
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''
