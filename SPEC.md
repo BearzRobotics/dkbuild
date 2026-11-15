@@ -749,7 +749,8 @@ For each recipe, in dependency order:
    dependencies (5.6), and apply the policy checks of 5.4: no files outside
    `/usr`, `/etc`, `/var`, `/opt` and `/boot`, nothing in `/usr/lib64` or
    `/usr/local`, no files in `/run`.
-6. **Package:** `apk mkpkg` for each package, into
+6. **Package:** `apk mkpkg --compression zstd:19` (about half the size of apk's
+   default deflate, and faster to unpack) for each package, into
    `repo/<arch>/`; then `apk mkndx` updates and signs that architecture's
    index.
 7. **Remove the build root** (kept with `--keep-root`, for debugging).

@@ -1276,7 +1276,9 @@ fn publish(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options, id: []
     for (pkgs) |pk| {
         var argv: std.ArrayList([]const u8) = .empty;
         const binds = [_]sandbox.Bind{ out_bind, .{ .src = pk.files, .dst = "/tmp/files" }, .{ .src = key_abs, .dst = "/tmp/key", .read_only = true } };
-        try argv.appendSlice(arena, &.{ "/usr/bin/apk", "mkpkg", "--sign-key", "/tmp/key" });
+        // zstd level 19: about half the size of apk's default deflate (python: 57 MB to 27 MB), and
+        // it unpacks faster; every apk 3 here (build roots, installer, DKRescue's) links libzstd
+        try argv.appendSlice(arena, &.{ "/usr/bin/apk", "mkpkg", "--compression", "zstd:19", "--sign-key", "/tmp/key" });
         const ver = try std.fmt.allocPrint(arena, "{s}-r{d}", .{ r.version, r.release });
         const info = [_][2][]const u8{
             .{ "name", pk.name },
