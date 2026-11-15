@@ -401,6 +401,13 @@ name undefined symbols and many packages ship such scripts (zlib and
 LVM2 in the DKRescue build). `FORCE_UNSAFE_CONFIGURE=1` is exported too, so
 autotools packages that refuse to configure as root (tar, cpio) do, as every
 build runs as root of its user namespace.
+`RUSTFLAGS` is `-C target-feature=-crt-static` (`+crt-static` with the `static`
+option): Rust's musl targets link static by default, which cannot use the
+system's shared libraries (a program given `/usr/lib/libcap.so`, or
+`libfreetype.a` without the libraries it needs), so Rust programs link dynamic
+against the system's musl, as in Alpine and Chimera. Not for the `rust` recipe
+itself (its bootstrap inherits `RUSTFLAGS` into every cargo it runs and manages
+its own flags): the build script unsets it there.
 
 ### 5.6 Dependencies found automatically
 

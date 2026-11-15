@@ -88,6 +88,11 @@ pub const Profile = struct {
     pub fn buildEnv(p: Profile, arena: Allocator, cross: bool, static: bool) Allocator.Error![]const u8 {
         const sys: []const u8 = if (cross) " --sysroot=" ++ sysroot else "";
         const st: []const u8 = if (static) " -static" else "";
+        // Rust's musl targets link static by default, which cannot use this system's shared
+        // libraries (libcap.so, libfreetype with its dependencies ...). A distribution's Rust
+        // links dynamic against its own musl (Alpine, Chimera): so does this, unless the recipe
+        // asks for a static build.
+        const crt: []const u8 = if (static) "+crt-static" else "-crt-static";
         return std.fmt.allocPrint(arena,
             \\export CC="clang --target={[t]s}{[sys]s}"
             \\export CXX="clang++ --target={[t]s}{[sys]s}"
@@ -95,8 +100,9 @@ pub const Profile = struct {
             \\export CFLAGS="-O2 -march={[c]s}"
             \\export CXXFLAGS="-O2 -march={[c]s}"
             \\export LDFLAGS="-fuse-ld=lld -Wl,--undefined-version{[st]s}"
+            \\export RUSTFLAGS="-C target-feature={[crt]s}"
             \\
-        , .{ .t = p.triple, .sys = sys, .c = p.cpu, .st = st });
+        , .{ .t = p.triple, .sys = sys, .c = p.cpu, .st = st, .crt = crt });
     }
 };
 
@@ -175,6 +181,10 @@ test "profile parses and generates cross files" {
     const env = try p.buildEnv(a, true, true);
     try std.testing.expect(std.mem.indexOf(u8, env, "--sysroot=/sysroot") != null);
     try std.testing.expect(std.mem.indexOf(u8, env, "-Wl,--undefined-version -static") != null);
+    // Rust: dynamic against the system's musl, static only for a static recipe
+    try std.testing.expect(std.mem.indexOf(u8, env, "RUSTFLAGS=\"-C target-feature=+crt-static\"") != null);
+    const env_dyn = try p.buildEnv(a, false, false);
+    try std.testing.expect(std.mem.indexOf(u8, env_dyn, "RUSTFLAGS=\"-C target-feature=-crt-static\"") != null);
     try std.testing.expect(std.mem.indexOf(u8, env, "native") == null);
 }
 
