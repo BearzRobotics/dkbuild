@@ -1,0 +1,43 @@
+# Python 3.12, beside the system's Python 3.14 (the `python` package): for software that is pinned to
+# Python 3.10-3.12 and cannot move yet (kotaemon, Verba and similar AI projects, older tools), used through
+# `python3.12 -m venv` and `pip3.12`. Installed with `make altinstall`, so it only owns versioned names:
+# /usr/bin/python3.12, python3.12-config, pip3.12, pydoc3.12, idle3.12; the library libpython3.12.so, headers in
+# /usr/include/python3.12, modules in /usr/lib/python3.12, pkg-config files python-3.12.pc. The names
+# `python`, `python3`, `pip`, `pip3`, `pydoc3`, `2to3` and libpython3.so stay Python 3.14's: the install step
+# removes any of them that 3.12 would have written, and checks that none is left. pip comes through ensurepip
+# (altinstall), so venvs have pip. Security fixes only (3.12 is in its security-only phase). Built the way the
+# `python` recipe builds 3.14 (shared library, system expat), with the same dependencies.
+# Not built (queued, wip/queue).
+name = "python3.12"
+version = "3.12.16"
+release = 1
+summary = "Python 3.12 programming language (beside the system's Python)"
+license = "Python-2.0.1"
+homepage = "https://www.python.org"
+hostdeps = ["make", "pkgconf"]
+builddeps = ["libffi-devel", "libexpat-devel", "openssl-devel", "sqlite-devel", "ncurses-devel", "readline-devel", "zlib-ng-compat-devel", "bzip2-devel", "xz-devel"]
+options = ["!check", "!lto"]
+
+source = [
+    { url = "https://www.python.org/ftp/python/3.12.16/Python-3.12.16.tar.xz", sha256 = "b5796915dc45ff745cfb4e990a7e7c93d6f546328a102ce31448d69ebc37575c" },
+]
+
+setup = '''
+%configure --enable-shared --with-system-expat --with-ensurepip=upgrade
+'''
+build = '''
+%make
+'''
+install = '''
+# altinstall: versioned names only (no python3, pip3, pydoc3, 2to3, libpython3.so)
+make DESTDIR="$pkgdir" altinstall
+rm -f "$pkgdir/usr/lib/libpython3.so"
+rm -f "$pkgdir/usr/bin/python3" "$pkgdir/usr/bin/python3-config" "$pkgdir/usr/bin/pip" "$pkgdir/usr/bin/pip3" \
+      "$pkgdir/usr/bin/pydoc3" "$pkgdir/usr/bin/idle3" "$pkgdir/usr/bin/2to3"
+# nothing in /usr/bin may be left without 3.12 in its name
+if find "$pkgdir/usr/bin" \( -type f -o -type l \) | grep -v '3\.12'; then
+    echo "python3.12: unversioned file in /usr/bin" >&2
+    exit 1
+fi
+test -x "$pkgdir/usr/bin/python3.12"
+'''

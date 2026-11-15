@@ -60,7 +60,7 @@ hf-xet, nh3, resvg-py, brotli, jieba, audioop-lts, rl-accel).
 Deliberately NOT packaged, with the reason (the user asked for all of them; these cannot be done natively; and the user wants docker avoided whenever possible: podman, Incus or a native venv instead):
 - **kotaemon** (Cinnamon/kotaemon 0.12.0): its uv.lock pins a 2024-25 stack (numpy 1.26.4, torch 2.2.2, gradio 4.39,
   llama-index 0.10, chromadb 0.5, pydantic 2.10) that does not build on Python 3.14 or against this tree's PyTorch 2.15;
-  it targets Python 3.10-3.12. Not with docker (the user avoids it): a Python 3.12 venv with `uv sync` (needs a python3.12 package: open), or its container image run with podman or in an Incus container if it must.
+  it targets Python 3.10-3.12. Not with docker (the user avoids it): a Python 3.12 venv with `uv sync` (the python3.12 package is in the queue), or its container image run with podman or in an Incus container if it must.
 - **Verba** (weaviate/Verba 2.1.3): Python 3.10-3.12 only, and it needs a Weaviate database (a Go server: not
   written; run Weaviate with podman or in Incus, or use qdrant here with a different front end).
 - **danswer / Onyx** (unoplat/danswer fork): a multi-service system (PostgreSQL, Redis, **Vespa**, a Next.js web UI, a model
