@@ -206,3 +206,13 @@ Details and per-package notes: `docs/requests.md` and `wip/`.
   stage 2 as above.
 - Optional per-target GCC cross suites and every LLVM backend stay as they are:
   AVR code is built without LTO.
+- **Package deltas** (for discussion, not decided): a patch from the previous
+  release of a package to the new one, to cut update downloads. The user knows
+  it from the Solus project. Producing them is the easy half (a binary diff of
+  the unpacked payloads written at publish time, next to the new `.apk`, with a
+  rule for how long old packages are kept); applying them is the hard half
+  (apk-tools has no delta support, so it needs a patch or a wrapper; the client
+  needs the exact old package or a file-level delta against the installed
+  files; the result must verify against the signed package). Reproducible
+  builds and early cutoff (SPEC 7) already keep unchanged packages from being
+  republished, and make deltas small. Discuss before any work.
