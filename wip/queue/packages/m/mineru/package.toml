@@ -1,0 +1,21 @@
+# mineru 4.2.2: MinerU: converts PDFs and documents to Markdown and JSON, with layout, tables and formulas (OpenDataLab). The models are downloaded at run time (mineru-models-download). 
+# Packaged with the pydeps store: files/python.lock pins what the tree does not already have as packages (pure-Python
+# wheels; sdists that compile are listed below); the packages the tree or the queue has (74 of 116) are
+# build and run dependencies, which pip finds installed in the build root. Installed into the package alongside
+# mineru (as borgbackup does). No source of its own: the project's wheel is in the lock.
+# Sdists left in the lock: none; build requirements of those: none.
+# Not built (queued, wip/queue): expect first-build fixes (`dkbuild fetch mineru` fills cache/python first).
+name = "mineru"
+version = "4.2.2"
+release = 1
+summary = "MinerU: converts PDFs and documents to Markdown and JSON, with layout, tables and formulas (OpenDataLab)"
+license = "AGPL-3.0-only"
+homepage = "https://github.com/opendatalab/MinerU"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = ["python-devel", "onnxruntime", "python-annotated-doc", "python-annotated-types", "python-anyio", "python-audioop-lts", "python-beautifulsoup4", "python-brotli", "python-certifi", "python-cffi", "python-charset-normalizer", "python-click", "python-cryptography", "python-distro", "python-et-xmlfile", "python-fastapi", "python-filelock", "python-fonttools", "python-fsspec", "python-h11", "python-hf-xet", "python-httpcore", "python-httpx", "python-huggingface-hub", "python-idna", "python-jieba", "python-jinja2", "python-jiter", "python-latex2mathml", "python-loguru", "python-lxml", "python-markdown-it-py", "python-markupsafe", "python-mdurl", "python-ml-dtypes", "python-nh3", "python-numpy", "python-onnx", "python-openpyxl", "python-opentelemetry-api", "python-orjson", "python-packaging", "python-pandas", "python-pillow", "python-protobuf", "python-pyclipper", "python-pycparser", "python-pydantic", "python-pydantic-core", "python-pygments", "python-pypdfium2", "python-pytz", "python-pyyaml", "python-requests", "python-resvg-py", "python-rich", "python-rl-accel", "python-semantic-version", "python-setuptools", "python-shapely", "python-soupsieve", "python-starlette", "python-tinycss2", "python-tokenizers", "python-tomlkit", "python-tqdm", "python-typer", "python-typing-extensions", "python-typing-inspection", "python-tzdata", "python-urllib3", "python-uvicorn", "python-watchfiles", "python-wcwidth", "python-webencodings"]
+rundeps = ["python", "onnxruntime", "python-annotated-doc", "python-annotated-types", "python-anyio", "python-audioop-lts", "python-beautifulsoup4", "python-brotli", "python-certifi", "python-cffi", "python-charset-normalizer", "python-click", "python-cryptography", "python-distro", "python-et-xmlfile", "python-fastapi", "python-filelock", "python-fonttools", "python-fsspec", "python-h11", "python-hf-xet", "python-httpcore", "python-httpx", "python-huggingface-hub", "python-idna", "python-jieba", "python-jinja2", "python-jiter", "python-latex2mathml", "python-loguru", "python-lxml", "python-markdown-it-py", "python-markupsafe", "python-mdurl", "python-ml-dtypes", "python-nh3", "python-numpy", "python-onnx", "python-openpyxl", "python-opentelemetry-api", "python-orjson", "python-packaging", "python-pandas", "python-pillow", "python-protobuf", "python-pyclipper", "python-pycparser", "python-pydantic", "python-pydantic-core", "python-pygments", "python-pypdfium2", "python-pytz", "python-pyyaml", "python-requests", "python-resvg-py", "python-rich", "python-rl-accel", "python-semantic-version", "python-setuptools", "python-shapely", "python-soupsieve", "python-starlette", "python-tinycss2", "python-tokenizers", "python-tomlkit", "python-tqdm", "python-typer", "python-typing-extensions", "python-typing-inspection", "python-tzdata", "python-urllib3", "python-uvicorn", "python-watchfiles", "python-wcwidth", "python-webencodings", "pytorch"]
+options = ["!check", "pydeps"]
+
+install = '''
+python3 -m pip install --no-build-isolation --no-compile --root "$pkgdir" --prefix /usr mineru==4.2.2
+'''

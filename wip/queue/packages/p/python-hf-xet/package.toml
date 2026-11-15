@@ -1,0 +1,26 @@
+# Hugging Face Xet: fast transfer of model files (Rust): PyPI sdist hf-xet 1.8.0 (build backend maturin); crates from cargodeps. Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: maturin>=1.7,<2.0).
+name = "python-hf-xet"
+version = "1.8.0"
+release = 1
+summary = "Hugging Face Xet: fast transfer of model files (Rust)"
+license = "Apache-2.0"
+homepage = "https://github.com/huggingface/xet-core"
+hostdeps = ["python", "maturin", "rust"]
+builddeps = ["python-devel", "openssl-devel"]
+rundeps = ["python"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/2f/18/d91c20f815df6cc496a5d0ad8db6d274dad5c0cfcd59babfa2440a9aba44/hf_xet-1.8.0.tar.gz", sha256 = "10ed23b51dacf7917d64f335c25048deb470efa755e9989b218fc0531386138e" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+maturin build --release --frozen --offline -i python3 --compatibility linux --out dist -j $jobs
+'''
+install = '''
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr dist/*.whl
+'''

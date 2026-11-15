@@ -1,0 +1,26 @@
+# Python bindings for resvg: SVG rendering (Rust): PyPI sdist resvg-py 0.5.0 (build backend maturin); crates from cargodeps. Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: maturin>=1.4,<2.0).
+name = "python-resvg-py"
+version = "0.5.0"
+release = 1
+summary = "Python bindings for resvg: SVG rendering (Rust)"
+license = "MIT"
+homepage = "https://pypi.org/project/resvg-py"
+hostdeps = ["python", "maturin", "rust"]
+builddeps = ["python-devel"]
+rundeps = ["python"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/2a/64/a24f8f29d8bf158e01f6ccad68a1366afd922dc0f0977cbd0c0aaa7a22f2/resvg_py-0.5.0.tar.gz", sha256 = "6d3bf8e866b4e129524d9432a809138b2d100931d8d635bc81294002abcdfd46" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+maturin build --release --frozen --offline -i python3 --compatibility linux --out dist -j $jobs
+'''
+install = '''
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr dist/*.whl
+'''

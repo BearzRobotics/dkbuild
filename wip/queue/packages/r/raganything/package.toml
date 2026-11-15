@@ -1,0 +1,21 @@
+# raganything 1.4.4: RAG-Anything: all-in-one multimodal RAG (documents, images, tables, equations) on LightRAG (HKUDS). Uses LightRAG, and MinerU or docling to parse documents (optional). 
+# Packaged with the pydeps store: files/python.lock pins what the tree does not already have as packages (pure-Python
+# wheels; sdists that compile are listed below); the packages the tree or the queue has (40 of 69) are
+# build and run dependencies, which pip finds installed in the build root. Installed into the package alongside
+# raganything (as borgbackup does). No source of its own: the project's wheel is in the lock.
+# Sdists left in the lock: none; build requirements of those: none.
+# Not built (queued, wip/queue): expect first-build fixes (`dkbuild fetch raganything` fills cache/python first).
+name = "raganything"
+version = "1.4.4"
+release = 1
+summary = "RAG-Anything: all-in-one multimodal RAG (documents, images, tables, equations) on LightRAG (HKUDS)"
+license = "MIT"
+homepage = "https://github.com/HKUDS/RAG-Anything"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = ["python-devel", "python-annotated-types", "python-anyio", "python-attrs", "python-certifi", "python-cffi", "python-charset-normalizer", "python-click", "python-cryptography", "python-distro", "python-filelock", "python-fsspec", "python-h11", "python-hf-xet", "python-httpcore", "python-httpx", "python-huggingface-hub", "python-idna", "python-networkx", "python-numpy", "python-opentelemetry-api", "python-packaging", "python-pandas", "python-protobuf", "python-pyasn1", "python-pyasn1-modules", "python-pycparser", "python-pydantic", "python-pydantic-core", "python-pytz", "python-pyyaml", "python-regex", "python-requests", "python-setuptools", "python-tiktoken", "python-tqdm", "python-typing-extensions", "python-typing-inspection", "python-tzdata", "python-urllib3", "python-wcwidth"]
+rundeps = ["python", "python-annotated-types", "python-anyio", "python-attrs", "python-certifi", "python-cffi", "python-charset-normalizer", "python-click", "python-cryptography", "python-distro", "python-filelock", "python-fsspec", "python-h11", "python-hf-xet", "python-httpcore", "python-httpx", "python-huggingface-hub", "python-idna", "python-networkx", "python-numpy", "python-opentelemetry-api", "python-packaging", "python-pandas", "python-protobuf", "python-pyasn1", "python-pyasn1-modules", "python-pycparser", "python-pydantic", "python-pydantic-core", "python-pytz", "python-pyyaml", "python-regex", "python-requests", "python-setuptools", "python-tiktoken", "python-tqdm", "python-typing-extensions", "python-typing-inspection", "python-tzdata", "python-urllib3", "python-wcwidth", "lightrag-hku"]
+options = ["!check", "pydeps"]
+
+install = '''
+python3 -m pip install --no-build-isolation --no-compile --root "$pkgdir" --prefix /usr raganything==1.4.4
+'''

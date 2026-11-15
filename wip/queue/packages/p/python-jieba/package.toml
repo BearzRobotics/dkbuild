@@ -1,0 +1,21 @@
+# Chinese text segmentation: PyPI sdist jieba 0.42.1 (build backend setuptools.build_meta); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: none declared).
+name = "python-jieba"
+version = "0.42.1"
+release = 1
+summary = "Chinese text segmentation"
+license = "MIT"
+homepage = "https://pypi.org/project/jieba"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = []
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/c6/cb/18eeb235f833b726522d7ebed54f2278ce28ba9438e3135ab0278d9792a2/jieba-0.42.1.tar.gz", sha256 = "055ca12f62674fafed09427f176506079bc135638a14e23e25be909131928db2" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

@@ -1,0 +1,21 @@
+# lightrag-hku 1.5.7: LightRAG: simple and fast retrieval-augmented generation with a knowledge graph (HKUDS). Calls remote model APIs by default; point it at ollama or another local endpoint. 
+# Packaged with the pydeps store: files/python.lock pins what the tree does not already have as packages (pure-Python
+# wheels; sdists that compile are listed below); the packages the tree or the queue has (33 of 58) are
+# build and run dependencies, which pip finds installed in the build root. Installed into the package alongside
+# lightrag-hku (as borgbackup does). No source of its own: the project's wheel is in the lock.
+# Sdists left in the lock: none; build requirements of those: none.
+# Not built (queued, wip/queue): expect first-build fixes (`dkbuild fetch lightrag-hku` fills cache/python first).
+name = "lightrag-hku"
+version = "1.5.7"
+release = 1
+summary = "LightRAG: simple and fast retrieval-augmented generation with a knowledge graph (HKUDS)"
+license = "MIT"
+homepage = "https://github.com/HKUDS/LightRAG"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = ["python-devel", "python-annotated-types", "python-anyio", "python-attrs", "python-certifi", "python-cffi", "python-charset-normalizer", "python-cryptography", "python-distro", "python-h11", "python-httpcore", "python-httpx", "python-idna", "python-networkx", "python-numpy", "python-opentelemetry-api", "python-packaging", "python-pandas", "python-protobuf", "python-pyasn1", "python-pyasn1-modules", "python-pycparser", "python-pydantic", "python-pydantic-core", "python-pyyaml", "python-regex", "python-requests", "python-setuptools", "python-tiktoken", "python-typing-extensions", "python-typing-inspection", "python-tzdata", "python-urllib3", "python-wcwidth"]
+rundeps = ["python", "python-annotated-types", "python-anyio", "python-attrs", "python-certifi", "python-cffi", "python-charset-normalizer", "python-cryptography", "python-distro", "python-h11", "python-httpcore", "python-httpx", "python-idna", "python-networkx", "python-numpy", "python-opentelemetry-api", "python-packaging", "python-pandas", "python-protobuf", "python-pyasn1", "python-pyasn1-modules", "python-pycparser", "python-pydantic", "python-pydantic-core", "python-pyyaml", "python-regex", "python-requests", "python-setuptools", "python-tiktoken", "python-typing-extensions", "python-typing-inspection", "python-tzdata", "python-urllib3", "python-wcwidth"]
+options = ["!check", "pydeps"]
+
+install = '''
+python3 -m pip install --no-build-isolation --no-compile --root "$pkgdir" --prefix /usr lightrag-hku==1.5.7
+'''

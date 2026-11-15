@@ -1,0 +1,26 @@
+# HTML sanitiser (Ammonia, Rust): PyPI sdist nh3 0.3.7 (build backend maturin); crates from cargodeps. Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: maturin>=1.0,<2.0).
+name = "python-nh3"
+version = "0.3.7"
+release = 1
+summary = "HTML sanitiser (Ammonia, Rust)"
+license = "MIT"
+homepage = "https://pypi.org/project/nh3"
+hostdeps = ["python", "maturin", "rust"]
+builddeps = ["python-devel"]
+rundeps = ["python"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/18/2f/022b27146d52d24b1b353b003359134788ecbcd6fcdf6283adbd57c0fbc8/nh3-0.3.7.tar.gz", sha256 = "71860d01c16f4d8c72e334e0674beb2b0899dbd0bf760de18932ef4390303848" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+maturin build --release --frozen --offline -i python3 --compatibility linux --out dist -j $jobs
+'''
+install = '''
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr dist/*.whl
+'''
