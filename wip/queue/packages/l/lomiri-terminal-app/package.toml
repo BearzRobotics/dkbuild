@@ -1,0 +1,31 @@
+# Lomiri app: terminal: Ubuntu Touch / UBports (Lomiri) component, version 2.0.6. Recipe written after Alpine
+# Linux's testing/lomiri-terminal-app (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-terminal-app"
+version = "2.0.6"
+release = 1
+summary = "Lomiri app: terminal"
+license = "GPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+patches = ["0001-Link-against-libintl.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf", "gettext"]
+builddeps = ["cmake-extras", "qt5-qtbase-devel", "qt5-qtdeclarative-devel", "gnome-desktop-devel", "lomiri-trust-store-devel"]
+rundeps = ["gsettings-qt", "lomiri-ui-extras", "lomiri-ui-toolkit", "qmltermwidget"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/apps/lomiri-terminal-app/-/archive/v2.0.6/lomiri-terminal-app-v2.0.6.tar.gz", sha256 = "c7abcd0c42df8e169d84dd7da855e1952bde656badf3fbd7607d8a5a108e3f37" },
+]
+
+setup = '''
+%cmake \
+    -DCLICK_MODE=OFF \
+    -DINSTALL_TESTS=OFF \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

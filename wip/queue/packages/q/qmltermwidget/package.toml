@@ -1,0 +1,27 @@
+# QML terminal widget for Qt 5 (the Lomiri terminal): Needed by the Lomiri stack, version 0.2.0_git20221028. Recipe written after Alpine
+# Linux's testing/qmltermwidget (MIT-licensed APKBUILD and patches; the software's licence is GPL-2.0-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "qmltermwidget"
+version = "0.2.0_git20221028"
+release = 1
+summary = "QML terminal widget for Qt 5 (the Lomiri terminal)"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/gber/qmltermwidget"
+patches = ["0001-Rename-KProcess-to-KTermProcess-to-not-BIC-KF5CoreAd.patch"]
+hostdeps = ["make", "pkgconf"]
+builddeps = ["qt5-qtbase-devel", "qt5-qtdeclarative-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/gber/qmltermwidget/archive/ffc6b2b2a20ca785f93300eca93c25c4b74ece17/qmltermwidget-ffc6b2b2a20ca785f93300eca93c25c4b74ece17.tar.gz", sha256 = "311cac17ee57787746feb664d084f54ad955e1dca10eb468c7294f06751f6b4a" },
+]
+
+setup = '''
+qmake-qt5
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make INSTALL_ROOT="$pkgdir" install
+'''

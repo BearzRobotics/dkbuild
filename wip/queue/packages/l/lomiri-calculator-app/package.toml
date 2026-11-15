@@ -1,0 +1,30 @@
+# Lomiri app: calculator: Ubuntu Touch / UBports (Lomiri) component, version 4.1.0. Recipe written after Alpine
+# Linux's testing/lomiri-calculator-app (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-calculator-app"
+version = "4.1.0"
+release = 1
+summary = "Lomiri app: calculator"
+license = "GPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "ninja", "pkgconf", "gettext"]
+builddeps = ["cmake-extras", "qt5-qtbase-devel", "qt5-qtdeclarative-devel", "lomiri-trust-store-devel"]
+rundeps = ["lomiri-ui-extras", "lomiri-ui-toolkit", "qqc2-suru-style"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/apps/lomiri-calculator-app/-/archive/v4.1.0/lomiri-calculator-app-v4.1.0.tar.gz", sha256 = "bc93e17c4f3e49842c78116a240c6734e89d960bf317214504c715d1344f4115" },
+]
+
+setup = '''
+%cmake \
+    -DCLICK_MODE=OFF \
+    -DINSTALL_TESTS=OFF \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

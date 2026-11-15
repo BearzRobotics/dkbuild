@@ -1,0 +1,30 @@
+# Lomiri app: clock: Ubuntu Touch / UBports (Lomiri) component, version 4.1.1. Recipe written after Alpine
+# Linux's testing/lomiri-clock-app (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-clock-app"
+version = "4.1.1"
+release = 1
+summary = "Lomiri app: clock"
+license = "GPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "ninja", "pkgconf", "gettext"]
+builddeps = ["cmake-extras", "qt5-qtbase-devel", "qt5-qtdeclarative-devel", "geonames-devel", "gnome-desktop-devel", "lomiri-trust-store-devel"]
+rundeps = ["geonames", "gsettings-qt", "lomiri-content-hub", "lomiri-libusermetrics", "lomiri-ui-extras", "lomiri-ui-toolkit", "qt5-qtlocation", "qt5-qtmultimedia", "u1db-qt"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/apps/lomiri-clock-app/-/archive/v4.1.1/lomiri-clock-app-v4.1.1.tar.gz", sha256 = "d7000f67578b7b182bea376a05e1669b0417d4931c7c9e4d29c053edc3b821be" },
+]
+
+setup = '''
+%cmake \
+    -DCLICK_MODE=OFF \
+    -DINSTALL_TESTS=OFF \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

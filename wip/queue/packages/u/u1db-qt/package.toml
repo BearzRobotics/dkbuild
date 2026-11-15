@@ -1,0 +1,29 @@
+# u1db-qt: QML bindings of the U1DB database (Lomiri clock app): Ubuntu Touch / UBports (Lomiri) component, version 0.1.8. Recipe written after Alpine
+# Linux's testing/u1db-qt (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "u1db-qt"
+version = "0.1.8"
+release = 1
+summary = "u1db-qt: QML bindings of the U1DB database (Lomiri clock app)"
+license = "GPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+patches = ["0001-point-qmlplugindump-to-qmlplugindump-qt5.patch", "0002-point-qmltestrunner-to-qmltestrunner-qt5.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["cmake-extras", "qt5-qtbase-devel", "qt5-qtdeclarative-devel"]
+rundeps = ["qt5-qtdeclarative"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/u1db-qt/-/archive/0.1.8/u1db-qt-0.1.8.tar.gz", sha256 = "d1d352755e170e29178653353521a8975accc5b0dc7c2e73eaa60001503b9a47" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

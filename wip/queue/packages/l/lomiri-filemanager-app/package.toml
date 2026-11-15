@@ -1,0 +1,31 @@
+# Lomiri app: filemanager: Ubuntu Touch / UBports (Lomiri) component, version 1.1.4. Recipe written after Alpine
+# Linux's testing/lomiri-filemanager-app (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-filemanager-app"
+version = "1.1.4"
+release = 1
+summary = "Lomiri app: filemanager"
+license = "GPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+patches = ["0001-manually-link-libintl.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf", "gettext"]
+builddeps = ["cmake-extras", "qt5-qtbase-devel", "qt5-qtdeclarative-devel", "lomiri-trust-store-devel", "samba-devel"]
+rundeps = ["lomiri-content-hub", "lomiri-thumbnailer", "lomiri-ui-extras", "lomiri-ui-toolkit", "qqc2-suru-style", "samba", "suru-icon-theme"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/apps/lomiri-filemanager-app/-/archive/v1.1.4/lomiri-filemanager-app-v1.1.4.tar.gz", sha256 = "cc57244f004dfa61ce10d77ad63f8282be78859590fff9594b0aca87421d4ae4" },
+]
+
+setup = '''
+%cmake \
+    -DCLICK_MODE=OFF \
+    -DINSTALL_TESTS=OFF \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -119,3 +119,16 @@ Still open before a Lomiri session can start (not recipes of upstream software):
   morph-browser needs QtWebEngine 5: skipped) follow Alpine the same way.
 - Missing optional pieces named in the recipes: presage, anthy, libpinyin (maliit-keyboard), AppArmor itself
   (libapparmor only), FreeTDS (qt5-qtbase's TDS plugin).
+
+## Update 2026-11-15 (session and apps)
+
+Written: `lomiri-session` (our own script, no systemd: the environment of Lomiri's wrapper, a D-Bus
+session, the indicator services in the background, the shell in the foreground; dash- and shellcheck-clean;
+plus the `lomiri.desktop` Wayland session entry), `desktop-lomiri` (the meta package, as desktop-dkde is),
+and the apps calculator, clock (+ u1db-qt), terminal (+ qmltermwidget) and filemanager. 85 recipes in all.
+
+Left out on purpose: lomiri-docviewer-app (needs poppler's Qt 5 binding and LibreOfficeKit), lomiri-gallery-app
+(libmediainfo, not packaged), lomiri-weather-app and morph-browser (QtWebEngine 5), lomiri-camera-app,
+lomiri-telephony-service / history-service (phone). repowerd is a system service with no dinit file yet.
+First build will tell about everything else: the indicator service paths in the session script, the apps'
+libintl links (Alpine's patches), and Mir on this Mesa (EGL/GBM).
