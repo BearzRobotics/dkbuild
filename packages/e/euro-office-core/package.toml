@@ -166,6 +166,10 @@ export LDFLAGS="$LDFLAGS -lnettle"
 # libhyphen's sources: TextHyphen.cpp includes hyphen/hnjalloc.c and hyphen/hyphen.c, which core
 # expects checked out in Common/3dParty/hyphen/hyphen (git-ignored there): the release tarball
 cp -a ../hyphen-2.8.9 $c/Common/3dParty/hyphen/hyphen
+# TextHyphen.cpp's #include "hyphen/hnjalloc.h" needs the directory above that checkout on the include path
+# (upstream's qmake .pri adds it; this CMake build does not: the r3 run's only failing file)
+export CXXFLAGS="$CXXFLAGS -I$PWD/$c/Common/3dParty/hyphen"
+export CFLAGS="$CFLAGS -I$PWD/$c/Common/3dParty/hyphen"
 test -f $c/Common/3dParty/hyphen/hyphen/hnjalloc.h
 %cmake -S core \
     -DTHIRD_PARTY_PREPARED=ON \
