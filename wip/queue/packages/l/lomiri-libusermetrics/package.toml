@@ -1,0 +1,27 @@
+# Lomiri user metrics (the shell's infographics): library, service and QML plugin: Ubuntu Touch / UBports (Lomiri) component, version 1.4.2. Recipe written after Alpine
+# Linux's testing/lomiri-libusermetrics (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only AND LGPL-3.0-only AND LGPL-2.1-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-libusermetrics"
+version = "1.4.2"
+release = 1
+summary = "Lomiri user metrics (the shell's infographics): library, service and QML plugin"
+license = "GPL-3.0-only AND LGPL-3.0-only AND LGPL-2.1-only"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["cmake-extras", "qt5-qtbase-devel", "qt5-qtdeclarative-devel", "glib-devel", "boost-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/libusermetrics/-/archive/1.4.2/libusermetrics-1.4.2.tar.gz", sha256 = "9fa4258f811985d7e24109bdaa63deac159b2f75d20893edd05e3e2ad40d9ec4" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,27 @@
+# GSettings schemas of the Lomiri shell: Ubuntu Touch / UBports (Lomiri) component, version 0.1.13. Recipe written after Alpine
+# Linux's testing/lomiri-schemas (MIT-licensed APKBUILD and patches; the software's licence is LGPL-2.1-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-schemas"
+version = "0.1.13"
+release = 1
+summary = "GSettings schemas of the Lomiri shell"
+license = "LGPL-2.1-or-later"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "make", "pkgconf", "intltool"]
+builddeps = ["cmake-extras", "glib-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/lomiri-schemas/-/archive/0.1.13/lomiri-schemas-0.1.13.tar.gz", sha256 = "7072d6d91c0a0f6364be2e298569e451684a057667d68929ce62d33c9be0b234" },
+]
+
+setup = '''
+# intltool's merge step does not work with the Ninja generator (Alpine's note)
+cmake -B build -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release
+'''
+build = '''
+cmake --build build
+'''
+install = '''
+DESTDIR="$pkgdir" cmake --install build
+'''

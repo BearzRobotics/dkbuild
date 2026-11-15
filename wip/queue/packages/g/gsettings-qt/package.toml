@@ -1,0 +1,29 @@
+# GSettings bindings for Qt 5 (QML and C++): the Qt 5 build only (Qt 6 would be a second build with ENABLE_QT6=ON). Ubuntu Touch / UBports (Lomiri) component, version 1.1.1. Recipe written after Alpine
+# Linux's testing/gsettings-qt (MIT-licensed APKBUILD and patches; the software's licence is LGPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "gsettings-qt"
+version = "1.1.1"
+release = 1
+summary = "GSettings bindings for Qt 5 (QML and C++)"
+license = "LGPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["cmake-extras", "glib-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/gsettings-qt/-/archive/v1.1.1/gsettings-qt-v1.1.1.tar.gz", sha256 = "636cff4336b8729f805bd1cb6904a4c140b69d8a8063949c61f39f8431fe9d00" },
+]
+
+setup = '''
+%cmake \
+    -DENABLE_QT6=OFF \
+    -DBUILD_TESTING=OFF \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

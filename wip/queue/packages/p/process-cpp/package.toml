@@ -1,0 +1,31 @@
+# C++ process management library (Lomiri): Ubuntu Touch / UBports (Lomiri) component, version 3.1.0. Recipe written after Alpine
+# Linux's testing/process-cpp (MIT-licensed APKBUILD and patches; the software's licence is LGPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "process-cpp"
+version = "3.1.0"
+release = 1
+summary = "C++ process management library (Lomiri)"
+license = "LGPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+patches = ["no-execinfo.patch", "gcc12.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["boost-devel", "cmake-extras", "properties-cpp-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/core/lib-cpp/process-cpp/-/archive/3.1.0/process-cpp-3.1.0.tar.gz", sha256 = "fa16a5d299379b490822af5d0a34e24eef1c42eee86702ecadac27113b3602e9" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_TESTING=OFF \
+    -DBUILD_SHARED_LIBS=ON \
+    -DPROCESS_CPP_ENABLE_DOC_GENERATION=OFF \
+    -DPROCESS_CPP_WERROR=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

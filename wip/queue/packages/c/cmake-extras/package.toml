@@ -1,0 +1,27 @@
+# CMake modules shared by the Lomiri projects: Ubuntu Touch / UBports (Lomiri) component, version 1.10. Recipe written after Alpine
+# Linux's testing/cmake-extras (MIT-licensed APKBUILD and patches; the software's licence is LGPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "cmake-extras"
+version = "1.10"
+release = 1
+summary = "CMake modules shared by the Lomiri projects"
+license = "LGPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "ninja"]
+builddeps = []
+rundeps = ["cmake"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/cmake-extras/-/archive/1.10/cmake-extras-1.10.tar.gz", sha256 = "3717ad7e666edaa043ee4525ad948c083b4dbb0a2e4b56b0c9e38c409f187003" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

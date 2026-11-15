@@ -1,0 +1,29 @@
+# C++ HTTP client library over libcurl (Lomiri): Ubuntu Touch / UBports (Lomiri) component, version 3.2.2. Recipe written after Alpine
+# Linux's testing/net-cpp (MIT-licensed APKBUILD and patches; the software's licence is LGPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "net-cpp"
+version = "3.2.2"
+release = 1
+summary = "C++ HTTP client library over libcurl (Lomiri)"
+license = "LGPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["boost-devel", "cmake-extras", "curl-devel", "jsoncpp-devel", "process-cpp-devel", "properties-cpp-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/lib-cpp/net-cpp/-/archive/3.2.2/net-cpp-3.2.2.tar.gz", sha256 = "d979501e5f76c6e3daa544d9d4be57795019ebde30c3ce564d0ad120174ad0ac" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_TESTING=OFF \
+    -DBUILD_SHARED_LIBS=ON \
+    -DENABLE_WERROR=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,27 @@
+# Qt 5 helpers to mock D-Bus services in tests: Ubuntu Touch / UBports (Lomiri) component, version 0.10.0. Recipe written after Alpine
+# Linux's testing/libqtdbusmock (MIT-licensed APKBUILD and patches; the software's licence is LGPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "libqtdbusmock"
+version = "0.10.0"
+release = 1
+summary = "Qt 5 helpers to mock D-Bus services in tests"
+license = "LGPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["cmake-extras", "gtest-devel", "libqtdbustest-devel", "networkmanager-devel", "qt5-qtbase-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/libqtdbusmock/-/archive/0.10.0/libqtdbusmock-0.10.0.tar.gz", sha256 = "370116a30ce01bf4dcc8346fbc9f7c806f36552777cf38946824738d52b6371c" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

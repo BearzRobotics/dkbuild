@@ -1,0 +1,29 @@
+# Lomiri URL dispatcher: opens URLs with the application that handles them: built without systemd (Alpine's patch); the mirclient interface is off (it needs the old Mir client library). Ubuntu Touch / UBports (Lomiri) component, version 0.1.5. Recipe written after Alpine
+# Linux's testing/lomiri-url-dispatcher (MIT-licensed APKBUILD and patches; the software's licence is LGPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-url-dispatcher"
+version = "0.1.5"
+release = 1
+summary = "Lomiri URL dispatcher: opens URLs with the application that handles them"
+license = "LGPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+patches = ["0001-remove-systemd.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf", "intltool"]
+builddeps = ["cmake-extras", "dbus-test-runner", "glib-devel", "gtest-devel", "json-glib-devel", "sqlite-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/lomiri-url-dispatcher/-/archive/0.1.5/lomiri-url-dispatcher-0.1.5.tar.gz", sha256 = "3619a8542e8a2b97257185ef5ee8c7a55e499616abcd9980079ec78ea481024e" },
+]
+
+setup = '''
+%cmake \
+    -Denable_mirclient=OFF \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

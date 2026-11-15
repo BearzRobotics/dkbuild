@@ -1,0 +1,28 @@
+# D-Bus C++ binding (Lomiri): its tests are part of the build (gtest). Ubuntu Touch / UBports (Lomiri) component, version 5.0.6. Recipe written after Alpine
+# Linux's testing/dbus-cpp (MIT-licensed APKBUILD and patches; the software's licence is LGPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "dbus-cpp"
+version = "5.0.6"
+release = 1
+summary = "D-Bus C++ binding (Lomiri)"
+license = "LGPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["boost-devel", "cmake-extras", "dbus-devel", "gtest-devel", "libxml2-devel", "process-cpp-devel", "properties-cpp-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/core/lib-cpp/dbus-cpp/-/archive/5.0.6/dbus-cpp-5.0.6.tar.gz", sha256 = "c325a62d7a041ff998284c2c0c6d6bb83619b93deb71e9f3a46c394c6654031f" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

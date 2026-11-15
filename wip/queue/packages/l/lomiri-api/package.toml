@@ -1,0 +1,27 @@
+# Lomiri API library: shell, notifications, application and hud interfaces: the library itself does not need Qt (its tests do, and are not built here). Ubuntu Touch / UBports (Lomiri) component, version 0.4.0. Recipe written after Alpine
+# Linux's testing/lomiri-api (MIT-licensed APKBUILD and patches; the software's licence is LGPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-api"
+version = "0.4.0"
+release = 1
+summary = "Lomiri API library: shell, notifications, application and hud interfaces"
+license = "LGPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["cmake-extras"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/lomiri-api/-/archive/0.4.0/lomiri-api-0.4.0.tar.gz", sha256 = "77c3249515a55f48692edb4596d0e6291b794c2bfacfa791ed0246265579c98a" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

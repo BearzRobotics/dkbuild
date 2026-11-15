@@ -1,0 +1,29 @@
+# City and country name database and lookup library (Lomiri): Ubuntu Touch / UBports (Lomiri) component, version 0.3.2. Recipe written after Alpine
+# Linux's testing/geonames (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "geonames"
+version = "0.3.2"
+release = 1
+summary = "City and country name database and lookup library (Lomiri)"
+license = "GPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["glib-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/geonames/-/archive/0.3.2/geonames-0.3.2.tar.gz", sha256 = "e88bcf6575746316bc743511eb5f7a151ddfea8f0d2e498b2e16c7e7965f5174" },
+]
+
+setup = '''
+%cmake \
+    -DWANT_TESTS=OFF \
+    -DWANT_DOC=OFF \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

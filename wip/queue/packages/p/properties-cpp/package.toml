@@ -1,0 +1,28 @@
+# C++11 properties library (Lomiri): Ubuntu Touch / UBports (Lomiri) component, version 0.0.4. Recipe written after Alpine
+# Linux's testing/properties-cpp (MIT-licensed APKBUILD and patches; the software's licence is LGPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "properties-cpp"
+version = "0.0.4"
+release = 1
+summary = "C++11 properties library (Lomiri)"
+license = "LGPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["cmake-extras"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/lib-cpp/properties-cpp/-/archive/0.0.4/properties-cpp-0.0.4.tar.gz", sha256 = "6f225a11652dd1396f2f3bd69820fb068817b08249f4f839b54c0ccc43e77947" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_TESTING=OFF \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

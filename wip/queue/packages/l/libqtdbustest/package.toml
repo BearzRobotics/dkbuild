@@ -1,0 +1,28 @@
+# Qt 5 helpers to run a private D-Bus for tests: the Qt 5 build only. Ubuntu Touch / UBports (Lomiri) component, version 0.4.1. Recipe written after Alpine
+# Linux's testing/libqtdbustest (MIT-licensed APKBUILD and patches; the software's licence is LGPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "libqtdbustest"
+version = "0.4.1"
+release = 1
+summary = "Qt 5 helpers to run a private D-Bus for tests"
+license = "LGPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["cmake-extras", "gtest-devel", "qt5-qtbase-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/libqtdbustest/-/archive/0.4.1/libqtdbustest-0.4.1.tar.gz", sha256 = "247fe75fef7763ecee7e38919588e3b5efe6becc4c84ccbaf83eb188d0a2b46c" },
+]
+
+setup = '''
+%cmake \
+    -DENABLE_QT6=OFF \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

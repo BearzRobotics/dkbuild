@@ -1,0 +1,29 @@
+# Library to detect the device a Lomiri system runs on and its properties: Ubuntu Touch / UBports (Lomiri) component, version 0.2.4. Recipe written after Alpine
+# Linux's testing/lomiri-deviceinfo (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-deviceinfo"
+version = "0.2.4"
+release = 1
+summary = "Library to detect the device a Lomiri system runs on and its properties"
+license = "GPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["cmake-extras", "yaml-cpp-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/deviceinfo/-/archive/0.2.4/deviceinfo-0.2.4.tar.gz", sha256 = "6cb41c5c5463f4cbecda5e4651e09971cc16b2969526ef377c525f7c96490d4b" },
+]
+
+setup = '''
+%cmake \
+    -DCONFIG_PATH=/etc/lomiri-deviceinfo \
+    -DDISABLE_TESTS=ON \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''
