@@ -129,6 +129,7 @@ Details and per-package notes: `docs/requests.md` and `wip/`.
 | Office: LibreOffice, Euro-Office + Libera Suite, OCR (tesseract, ocrmypdf), printing | OCR built; the rest written |
 | Media and graphics: ffmpeg (24 extra codec libraries), mpv, GStreamer, GIMP, Inkscape, Krita, Kdenlive, Blender | ffmpeg stack written (built before the extra libraries); apps written, not built |
 | Games and emulators: wine, MAME, dolphin-emu, ScummVM, RetroArch | written, not built |
+| dosemu2 (requested 2026-11-15; needs fdpp first, KVM or its CPU emulator) | queued, not written (see `docs/requests.md`) |
 | Electronics and CAD: KiCad, FreeCAD, avr-gcc, OpenOCD, ImHex | avr-gcc and ImHex built; the rest written |
 | Security tools | written (metasploit built) |
 | Server web apps (help desks, ERP, mail, project management, finance) | written, inert, not built; some failing |
