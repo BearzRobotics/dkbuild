@@ -1,0 +1,21 @@
+# State-of-the-art machine learning for PyTorch: models, tokenizers, pipelines (Hugging Face): the PyTorch side only (no TensorFlow or JAX). PyPI sdist transformers 5.23.0 (build backend setuptools.build_meta); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: none declared).
+name = "python-transformers"
+version = "5.23.0"
+release = 1
+summary = "State-of-the-art machine learning for PyTorch: models, tokenizers, pipelines (Hugging Face)"
+license = "Apache-2.0"
+homepage = "https://github.com/huggingface/transformers"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = []
+rundeps = ["python", "python-huggingface-hub", "python-numpy", "python-packaging", "python-pyyaml", "python-regex", "python-requests", "python-safetensors", "python-tokenizers", "python-tqdm"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/7e/d3/1ff04cfc1ddbc6853af16973b17cd437426b4303599bc3e84af11fe55057/transformers-5.23.0.tar.gz", sha256 = "19d647a4d5d903a7c644ca5cde2d86efc3dde7d8c687ae7988806ff2205efa71" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

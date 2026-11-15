@@ -1,0 +1,51 @@
+# PyTorch 2.15.0, CPU only: the `torch` Python package (tensors, autograd, nn, TorchScript, torch.compile
+# without GPU backends) with its C++ libraries (libtorch, libc10, libshm) and headers, for sentence-transformers
+# and transformers (the AI stack in the queue). The source is the project's release tarball WITH its submodules
+# (pytorch-v2.15.0.tar.gz, 800 MB: the bundled third_party: oneDNN/ideep, FBGEMM, cpuinfo, SLEEF, pthreadpool,
+# onnx, flatbuffers, pybind11 ...; the GitHub archive of the tag has none of them), pinned by sha256.
+# Build: scikit-build-core through pip (pyproject.toml), CMake with Ninja, offline (nothing is fetched: every
+# third_party is in the tarball). Switches (environment, as the project's own docs use): CUDA, ROCm, XPU, MPS, the
+# distributed stack (gloo, tensorpipe), Kineto, NNPACK (needs PeachPy), QNNPACK, flash attention and the tests
+# are OFF; OpenMP (the `openmp` package, libomp) and oneDNN (MKLDNN) and FBGEMM (quantised x86 kernels) are
+# ON; BLAS is OpenBLAS. PYTORCH_BUILD_VERSION is set because the tarball has no git history.
+# Resources: about 3 GB of RAM per compile job and 6 hours on 12 cores: `jobs:8` caps the jobs and
+# makes the scheduler run it alone.
+# RISKS (nothing here has been built): musl has no execinfo.h (c10's backtrace: SUPPORTS_BACKTRACE=0 is set
+# below); the bundled third_party may need patches for libc++ 23 and musl (SLEEF, FBGEMM, cpuinfo,
+# foxi); `-Wno-error` flags are added for newer clang. A first build will say.
+# Not built (queued, wip/queue).
+name = "pytorch"
+version = "2.15.0"
+release = 1
+summary = "PyTorch (CPU): tensors and neural networks in Python"
+license = "BSD-3-Clause"
+homepage = "https://pytorch.org"
+archs = ["x86_64"]
+hostdeps = ["cmake", "ninja", "pkgconf", "python", "python-scikit-build-core", "python-setuptools", "python-wheel", "python-packaging", "python-pyyaml", "python-typing-extensions", "python-six", "python-numpy", "python-jinja2", "perl"]
+builddeps = ["eigen-devel", "fmt-devel", "libuv-devel", "numactl-devel", "openblas-devel", "openmp-devel", "protobuf-devel", "python-devel", "python-numpy", "python-pybind11-devel", "zlib-ng-compat-devel", "linux-headers"]
+rundeps = ["python", "python-numpy", "python-typing-extensions", "python-sympy", "python-networkx", "python-jinja2", "python-filelock", "python-fsspec", "python-setuptools", "openmp", "openblas", "numactl"]
+options = ["!check", "!lto", "jobs:8"]
+
+source = [
+    { url = "https://github.com/pytorch/pytorch/releases/download/v2.15.0/pytorch-v2.15.0.tar.gz", sha256 = "d0688c9feb1139c6304675c41f4c5fbb8e5b084f19a83d9f95ddcb10ced9e3e7" },
+]
+
+environment = '''
+export MAX_JOBS=$jobs
+export CMAKE_BUILD_TYPE=Release
+export PYTORCH_BUILD_VERSION=2.15.0 PYTORCH_BUILD_NUMBER=1
+export USE_CUDA=0 USE_ROCM=0 USE_XPU=0 USE_MPS=0 USE_DISTRIBUTED=0 USE_KINETO=0 USE_NNPACK=0
+export USE_QNNPACK=0 USE_PYTORCH_QNNPACK=0 USE_FLASH_ATTENTION=0 USE_MEM_EFF_ATTENTION=0 USE_TENSORPIPE=0
+export USE_OPENMP=1 USE_MKLDNN=1 USE_FBGEMM=1 USE_NUMA=1 BLAS=OpenBLAS
+export BUILD_TEST=0 BUILD_BINARY=0 USE_SYSTEM_PYBIND11=1
+# musl has no <execinfo.h>; clang 23 is stricter than the project's CI compilers
+export CXXFLAGS="$CXXFLAGS -DSUPPORTS_BACKTRACE=0 -Wno-error -Wno-deprecated-declarations"
+export CFLAGS="$CFLAGS -Wno-error"
+'''
+build = '''
+python3 -m pip wheel --no-build-isolation --no-deps -v -w dist .
+'''
+install = '''
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr dist/*.whl
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/pytorch/LICENSE"
+'''

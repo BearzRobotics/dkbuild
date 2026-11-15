@@ -1,0 +1,21 @@
+# Embeddings, retrieval and reranking with transformer models (sentence-transformers): PyPI sdist sentence-transformers 6.3.0 (build backend setuptools.build_meta); Part of the AI/search stack in the queue.
+# Not built (queued, wip/queue): expect first-build fixes (build requirements: setuptools>=77.0.3).
+name = "python-sentence-transformers"
+version = "6.3.0"
+release = 1
+summary = "Embeddings, retrieval and reranking with transformer models (sentence-transformers)"
+license = "Apache-2.0"
+homepage = "https://www.sbert.net"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = []
+rundeps = ["python", "pytorch", "python-huggingface-hub", "python-numpy", "python-pillow", "python-scikit-learn", "python-scipy", "python-tqdm", "python-transformers", "python-typing-extensions"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/f0/8a/c3183ff50acb741b3ba56cee8f8c2537f438e318d149fb95fc2cb9e74095/sentence_transformers-6.3.0.tar.gz", sha256 = "a19acbf76a958817136ee4e89f90b483255d77f3dc9a7309814f7600592c450e" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''
