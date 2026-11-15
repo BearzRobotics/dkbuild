@@ -5,6 +5,10 @@
 # (GPL-2.0-or-later; its OpenRC script is not used): systemd, sysconfig and the RPM macros are
 # off. Backend: nftables (the default); the iptables, ip6tables, ebtables and ipset
 # tools of this tree are named for firewalld's `direct` rules and ipset support (they are in /usr/bin).
+# Split (user request 2026-11-15): the daemon, firewall-cmd and firewall-offline-cmd are
+# `firewalld`; the graphical configuration tool (firewall-config), the tray applet (firewall-applet), their
+# glade file, desktop files, icons, GSettings schema and applet.conf are `firewalld-gui` (it pulls GTK and
+# NetworkManager's typelib, which a headless machine does not need).
 # Inert: a dinit service (files/firewalld) that is not enabled. SELinux needs nothing here:
 # firewalld's policy is part of the distribution's selinux-policy.
 # Not built (queued, wip/queue): expect first-build fixes. The Python bits it needs: python-dbus
@@ -17,7 +21,7 @@ license = "GPL-2.0-or-later"
 homepage = "https://firewalld.org"
 hostdeps = ["autoconf", "automake", "libtool", "gettext", "intltool", "libxslt", "docbook-xsl", "make", "pkgconf", "python", "desktop-file-utils"]
 builddeps = ["glib-devel"]
-rundeps = ["dbus", "nftables", "python", "python-dbus", "python-gobject", "python-nftables", "python-libcap-ng", "polkit", "iptables", "ipset", "ebtables", "gtk+3", "networkmanager"]
+rundeps = ["dbus", "nftables", "python", "python-dbus", "python-gobject", "python-nftables", "python-libcap-ng", "polkit", "iptables", "ipset", "ebtables"]
 options = ["!check"]
 
 source = [
@@ -50,3 +54,23 @@ install -Dm644 $pkgfiles/firewalld "$pkgdir/etc/dinit.d/firewalld"
 install -Dm644 COPYING "$pkgdir/usr/share/licenses/firewalld/COPYING"
 test -x "$pkgdir/usr/sbin/firewalld" -o -x "$pkgdir/usr/bin/firewalld"
 '''
+
+# firewall-config (GTK) and firewall-applet (tray icon): what only they use
+[subpackages.gui]
+summary = "firewalld graphical configuration tool (firewall-config) and tray applet"
+depends = ["firewalld", "gtk+3", "networkmanager", "python-dbus", "python-gobject", "hicolor-icon-theme"]
+paths = [
+    "/usr/bin/firewall-config",
+    "/usr/bin/firewall-applet",
+    "/usr/share/firewalld/firewall-config.glade",
+    "/usr/share/firewalld/gtk3_chooserbutton.py",
+    "/usr/share/firewalld/gtk3_niceexpander.py",
+    "/usr/share/applications/firewall-config.desktop",
+    "/usr/share/metainfo/org.firewalld.firewall-config.metainfo.xml",
+    "/etc/xdg/autostart/firewall-applet.desktop",
+    "/etc/firewall",
+    "/usr/share/glib-2.0/schemas/org.fedoraproject.FirewallConfig.gschema.xml",
+    "/usr/share/icons/hicolor",
+    "/usr/share/man/man1/firewall-config.1",
+    "/usr/share/man/man1/firewall-applet.1",
+]
