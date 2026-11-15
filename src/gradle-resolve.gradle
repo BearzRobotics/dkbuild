@@ -9,6 +9,14 @@
 //   gradle --continue -I gradle-resolve.gradle dkbuildResolveAll
 allprojects { p ->
     p.tasks.register("dkbuildResolveAll") {
+        // a composite build (includeBuild) is not reached by the root build's task name:
+        // the root project of each build waits for its own subprojects, and the top build
+        // for its included builds (geogebra's :shared:common:javacc configuration)
+        if (p == p.rootProject) {
+            dependsOn({ p.subprojects.collect { it.path + ":dkbuildResolveAll" } })
+            if (p.gradle.parent == null)
+                dependsOn({ p.gradle.includedBuilds.collect { it.task(":dkbuildResolveAll") } })
+        }
         doLast {
             def failed = []
             p.buildscript.configurations.each { c ->

@@ -976,7 +976,9 @@ Gradle (`gradledeps`) has no lockfile to read, so its dependencies are
 found by letting Gradle resolve them: the first build of a source runs the
 recipe's own Gradle (a `gradle-<version>-bin.zip` source) in its build root,
 with the network for that one step, with an init script that resolves every
-configuration of every project (`gradle-resolve.gradle`), on a copy of the
+configuration of every project (`gradle-resolve.gradle`; the root project of
+each build waits for its subprojects and the top build for its included builds,
+`includeBuild`, which a task name alone does not reach), on a copy of the
 source with the recipe's patches applied (so a change to the Gradle files
 belongs in a patch, not in `setup`, which runs later); a configuration that
 cannot be resolved fails the step, so no partial list is kept. Gradle's
