@@ -1,0 +1,30 @@
+# Qt 5 Wayland platform plugin and compositor API, from KDE's Qt 5.15 branch (qtwayland, invent.kde.org/qt/qt/qtwayland), the snapshot Alpine Linux
+# makes of it (dev.alpinelinux.org/archive/qt, commit df49b9f, 5.15.18_git20251101). After Alpine's
+# community/qt5-qtwayland. Qt 5 installs beside Qt 6 (qt5-qtbase's header). qmake builds it against
+# qt5-qtbase's mkspec, so the flags are the system's.
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "qt5-qtwayland"
+version = "5.15.18_git20251101"
+release = 1
+summary = "Qt 5 Wayland platform plugin and compositor API"
+license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only WITH Qt-GPL-exception-1.0"
+homepage = "https://www.qt.io"
+patches = ["0001-Update-wayland.xml-to-version-1.23.0.patch"]
+builddeps = ["libxcomposite-devel", "libxkbcommon-devel", "qt5-qtquickcontrols2-devel", "wayland-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel", "vulkan-headers"]
+options = ["!check", "!cross", "!lto"]
+
+source = [
+    { url = "https://dev.alpinelinux.org/archive/qt/qtwayland-df49b9f3badce793a0a9ea850cf1a02cc5bafef6.tar.xz", sha256 = "65766e620ec4e1c189d9ff61d0b5e49ea397605939d8cd753ce61dedb8450045" },
+]
+
+setup = '''
+qmake-qt5
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make INSTALL_ROOT="$pkgdir" install
+# the .prl files name the build directory
+find "$pkgdir/usr/lib" -type f -name '*.prl' -exec sed -i -e '/^QMAKE_PRL_BUILD_DIR/d' {} +
+'''

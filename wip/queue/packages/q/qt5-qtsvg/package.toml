@@ -1,0 +1,29 @@
+# Qt 5 SVG module, from KDE's Qt 5.15 branch (qtsvg, invent.kde.org/qt/qt/qtsvg), the snapshot Alpine Linux
+# makes of it (dev.alpinelinux.org/archive/qt, commit b74f729, 5.15.18_git20251101). After Alpine's
+# community/qt5-qtsvg. Qt 5 installs beside Qt 6 (qt5-qtbase's header). qmake builds it against
+# qt5-qtbase's mkspec, so the flags are the system's.
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "qt5-qtsvg"
+version = "5.15.18_git20251101"
+release = 1
+summary = "Qt 5 SVG module"
+license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only WITH Qt-GPL-exception-1.0"
+homepage = "https://www.qt.io"
+builddeps = ["qt5-qtbase-devel", "zlib-ng-compat-devel"]
+options = ["!check", "!cross", "!lto"]
+
+source = [
+    { url = "https://dev.alpinelinux.org/archive/qt/qtsvg-b74f7291f343dcbcb487b020868f042d8fe83098.tar.xz", sha256 = "2da4251fdcb64068a3aa193b24cf4eec9f449b3818a5815d1feab0c3810b0b1b" },
+]
+
+setup = '''
+qmake-qt5
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make INSTALL_ROOT="$pkgdir" install
+# the .prl files name the build directory
+find "$pkgdir/usr/lib" -type f -name '*.prl' -exec sed -i -e '/^QMAKE_PRL_BUILD_DIR/d' {} +
+'''

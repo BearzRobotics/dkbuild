@@ -1,0 +1,29 @@
+# Qt 5 Graphical Effects for Qt Quick, from KDE's Qt 5.15 branch (qtgraphicaleffects, invent.kde.org/qt/qt/qtgraphicaleffects), the snapshot Alpine Linux
+# makes of it (dev.alpinelinux.org/archive/qt, commit dfb2e7b, 5.15.18_git20250330). After Alpine's
+# community/qt5-qtgraphicaleffects. Qt 5 installs beside Qt 6 (qt5-qtbase's header). qmake builds it against
+# qt5-qtbase's mkspec, so the flags are the system's.
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "qt5-qtgraphicaleffects"
+version = "5.15.18_git20250330"
+release = 1
+summary = "Qt 5 Graphical Effects for Qt Quick"
+license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only WITH Qt-GPL-exception-1.0"
+homepage = "https://www.qt.io"
+builddeps = ["qt5-qtbase-devel", "qt5-qtdeclarative-devel"]
+options = ["!check", "!cross", "!lto"]
+
+source = [
+    { url = "https://dev.alpinelinux.org/archive/qt/qtgraphicaleffects-dfb2e7b2c98a9b7185c300d0b92b4048f5d89ba5.tar.xz", sha256 = "8f45247923c417f8f64d9fb57a87eb0d5104a5e2c0ee9612d1ba0559243d772e" },
+]
+
+setup = '''
+qmake-qt5
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make INSTALL_ROOT="$pkgdir" install
+# the .prl files name the build directory
+find "$pkgdir/usr/lib" -type f -name '*.prl' -exec sed -i -e '/^QMAKE_PRL_BUILD_DIR/d' {} +
+'''

@@ -18,4 +18,12 @@ fixed there.
   with shellcheck).
 - Move with `git mv wip/queue/packages/x/name packages/x/name` and update this file.
 
-Written so far (2026-11-15): pgvector, sqlite-vec. Lomiri: survey in `lomiri/NOTES.md` (no recipes yet).
+Written so far (2026-11-15):
+- pgvector, sqlite-vec.
+- Qt 5.15 for Lomiri (KDE's 5.15 branch via Alpine's snapshots and patches; installs in /usr/lib/qt5 beside
+  Qt 6): qt5-qtbase (clang mkspec), qt5-qtsvg, qt5-qtdeclarative, qt5-qtxmlpatterns, qt5-qtmultimedia,
+  qt5-qtquickcontrols2, qt5-qtgraphicaleffects, qt5-qtwayland, qt5-qttools, qt5-qtsensors. Checked
+  (recipe fields, Alpine's patches apply and match their checksums, qtbase's mkspec seds tried on the
+  real files); nothing compiled. Still needed for Lomiri from Qt 5: qtfeedback, qtpim/qtcontacts,
+  qtlocation, qtquickcontrols (1), qtscript? (to check against each Lomiri component).
+- Lomiri: survey in `lomiri/NOTES.md` (no Lomiri recipes yet).

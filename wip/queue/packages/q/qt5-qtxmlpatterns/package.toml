@@ -1,0 +1,29 @@
+# Qt 5 XML patterns (XPath, XQuery, XSLT), from KDE's Qt 5.15 branch (qtxmlpatterns, invent.kde.org/qt/qt/qtxmlpatterns), the snapshot Alpine Linux
+# makes of it (dev.alpinelinux.org/archive/qt, commit 0b64426, 5.15.18_git20250330). After Alpine's
+# community/qt5-qtxmlpatterns. Qt 5 installs beside Qt 6 (qt5-qtbase's header). qmake builds it against
+# qt5-qtbase's mkspec, so the flags are the system's.
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "qt5-qtxmlpatterns"
+version = "5.15.18_git20250330"
+release = 1
+summary = "Qt 5 XML patterns (XPath, XQuery, XSLT)"
+license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only WITH Qt-GPL-exception-1.0"
+homepage = "https://www.qt.io"
+builddeps = ["qt5-qtbase-devel"]
+options = ["!check", "!cross", "!lto"]
+
+source = [
+    { url = "https://dev.alpinelinux.org/archive/qt/qtxmlpatterns-0b644263abca66503db1ce8a4e126cf358a34685.tar.xz", sha256 = "2421ed5840e62f2253b12d70624a70420a2379f5532310ceec1037a9b3d5510d" },
+]
+
+setup = '''
+qmake-qt5
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make INSTALL_ROOT="$pkgdir" install
+# the .prl files name the build directory
+find "$pkgdir/usr/lib" -type f -name '*.prl' -exec sed -i -e '/^QMAKE_PRL_BUILD_DIR/d' {} +
+'''

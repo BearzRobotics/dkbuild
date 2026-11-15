@@ -1,0 +1,39 @@
+# Qt 5 tools (linguist, designer, qdbus, lupdate, qdoc ...), from KDE's Qt 5.15 branch (qttools, invent.kde.org/qt/qt/qttools), the snapshot Alpine Linux
+# makes of it (dev.alpinelinux.org/archive/qt, commit fa40a2d, 5.15.18_git20251101). After Alpine's
+# community/qt5-qttools. Qt 5 installs beside Qt 6 (qt5-qtbase's header). qmake builds it against
+# qt5-qtbase's mkspec, so the flags are the system's.
+# Alpine adds .desktop files for designer, linguist and qdbusviewer, and removes the assistant (it needs QtWebKit): the assistant is removed here, the desktop files are not installed.
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "qt5-qttools"
+version = "5.15.18_git20251101"
+release = 1
+summary = "Qt 5 tools (linguist, designer, qdbus, lupdate, qdoc ...)"
+license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only WITH Qt-GPL-exception-1.0"
+homepage = "https://www.qt.io"
+builddeps = ["llvm-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel", "vulkan-headers"]
+options = ["!check", "!cross", "!lto"]
+
+source = [
+    { url = "https://dev.alpinelinux.org/archive/qt/qttools-fa40a2d3373b89be0cd0a43fe0c1d047e3d34058.tar.xz", sha256 = "d0b426e286457770eff1b42f2a4263987194f1543fc05f65b4be9ea3beb5b3b4" },
+]
+
+setup = '''
+qmake-qt5
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make INSTALL_ROOT="$pkgdir" install
+# the tools by their versioned names (Qt 6's are in /usr/lib/qt6)
+mkdir -p "$pkgdir/usr/bin"
+for i in "$pkgdir"/usr/lib/qt5/bin/*; do
+    [ -e "$i" ] || continue
+    ln -sf "../lib/qt5/bin/${i##*/}" "$pkgdir/usr/bin/${i##*/}-qt5"
+    ln -sf "../lib/qt5/bin/${i##*/}" "$pkgdir/usr/bin/${i##*/}"
+done
+# the assistant needs QtWebKit, which Qt 5.15 no longer has
+rm -f "$pkgdir"/usr/bin/assistant* "$pkgdir/usr/lib/qt5/bin/assistant"
+# the .prl files name the build directory
+find "$pkgdir/usr/lib" -type f -name '*.prl' -exec sed -i -e '/^QMAKE_PRL_BUILD_DIR/d' {} +
+'''

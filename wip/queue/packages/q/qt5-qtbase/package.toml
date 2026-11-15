@@ -1,0 +1,114 @@
+# Qt 5 (qtbase): the Qt 5.15 LTS application framework, kept for programs that are not ported
+# to Qt 6 yet (Lomiri, the UBports shell, first of them). The tree's Qt is Qt 6 (qt6-*), for dkde
+# and KDE; this one installs next to it: everything in /usr/lib/qt5, /usr/include/qt5,
+# /usr/share/qt5, the tools as /usr/bin/<tool>-qt5 (and the plain names, as Alpine does).
+# Source: KDE's Qt 5.15 branch of qtbase (invent.kde.org/qt/qt/qtbase, kde/5.15: the open-source
+# 5.15.x LTS patch collection; Qt's own 5.15.3+ tarballs are commercial only), as the snapshot
+# Alpine Linux makes of it (dev.alpinelinux.org/archive/qt, commit bebdfd5, 5.15.18_git20251101).
+# After Alpine's community/qt5-qtbase (MIT-licensed APKBUILD and patches; Qt itself is
+# LGPL-2.1/3.0, GPL-3.0). Differences from Alpine:
+#  - the build uses clang (qmake's `linux-clang` mkspec) with this system's flags, not g++:
+#    the sed in setup points the mkspec at `clang --target=$target` and adds CFLAGS, CXXFLAGS and
+#    LDFLAGS; Alpine's qt5-base-cflags.patch (it edits the g++ mkspec for the same purpose) is
+#    not used.
+#  - patches kept from Alpine: egl-x11.patch, lfs64.patch (musl has no stat64 and friends),
+#    qt-musl-iconv-no-bom.patch, qt5-base-nostrip.patch (qmake must not strip on install:
+#    dkbuild does), loongarch64.patch (harmless).
+#  - no TDS (FreeTDS) SQL plugin: FreeTDS is not packaged yet; the sqlite, mysql (MariaDB),
+#    PostgreSQL and ODBC plugins are built.
+#  - no subpackages for the SQL plugins: they are in qt5-qtbase, their libraries are runtime
+#    dependencies found by dkbuild.
+# Not built (queued, wip/queue): expect first-build fixes (libc++ headers, musl).
+name = "qt5-qtbase"
+version = "5.15.18_git20251101"
+release = 1
+summary = "Qt 5 application framework (qtbase)"
+license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only WITH Qt-GPL-exception-1.0"
+homepage = "https://www.qt.io"
+patches = ["egl-x11.patch", "lfs64.patch", "loongarch64.patch", "qt-musl-iconv-no-bom.patch", "qt5-base-nostrip.patch"]
+hostdeps = ["bison", "flex", "gawk", "gperf", "perl", "pkgconf"]
+builddeps = [
+    "at-spi2-core-devel", "cups-devel", "dbus-devel", "eudev-devel", "fontconfig-devel",
+    "freetype-devel", "glib-devel", "gtk+3-devel", "icu-devel", "libice-devel", "libinput-devel",
+    "libjpeg-turbo-devel", "libpng-devel", "libsm-devel", "libx11-devel", "libxcb-devel",
+    "libxext-devel", "libxi-devel", "libxkbcommon-devel", "libxrandr-devel", "libxrender-devel",
+    "libxslt-devel", "libxv-devel", "linux-headers", "mariadb-devel", "mesa-devel", "mtdev-devel",
+    "openssl-devel", "pcre2-devel", "postgresql-devel", "sqlite-devel", "unixodbc-devel",
+    "vulkan-headers", "xcb-util-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
+    "xcb-util-renderutil-devel", "xcb-util-wm-devel", "zlib-ng-compat-devel",
+]
+rundeps = ["shared-mime-info"]
+options = ["!check", "!cross", "!lto"]
+
+source = [
+    { url = "https://dev.alpinelinux.org/archive/qt/qtbase-bebdfd54917e25d1c100e6bd9f5dd53c2e645fd8.tar.xz", sha256 = "799fa2ff319b18da102ca0da40f0c5fee9ef081921598425f0137cff4bf87522" },
+]
+
+setup = '''
+# the clang mkspec: this system's compiler with its target, and its flags (the mkspec's own
+# flags are -O2 and none of ours); no -ccc-gcc-name (an old clang option: g++ is not here)
+sed -i -e "s|^QMAKE_CC .*|QMAKE_CC = clang --target=$target|" \
+       -e "s|^QMAKE_CXX .*|QMAKE_CXX = clang++ --target=$target|" mkspecs/common/clang.conf
+grep -q "^QMAKE_CXX = clang++ --target=$target" mkspecs/common/clang.conf
+sed -i -e '/-ccc-gcc-name g++/d' \
+       -e "s|^load(qt_config)|QMAKE_CFLAGS += $CFLAGS\nQMAKE_CXXFLAGS += $CXXFLAGS\nQMAKE_LFLAGS += $LDFLAGS\nload(qt_config)|" \
+       mkspecs/linux-clang/qmake.conf
+grep -q '^QMAKE_CXXFLAGS += ' mkspecs/linux-clang/qmake.conf
+# no rpaths in qmake-built programs
+sed -i -e '/^QMAKE_RPATH/s| -Wl,-rpath,||g' mkspecs/common/*.conf
+# configure only makes the include/ links (syncqt) in what it takes for a git checkout
+mkdir -p .git
+./configure -confirm-license -opensource -platform linux-clang \
+    -archdatadir /usr/lib/qt5 \
+    -bindir /usr/lib/qt5/bin \
+    -datadir /usr/share/qt5 \
+    -dbus-linked \
+    -docdir /usr/share/doc/qt5 \
+    -examplesdir /usr/share/doc/qt5/examples \
+    -glib \
+    -headerdir /usr/include/qt5 \
+    -icu \
+    -importdir /usr/lib/qt5/imports \
+    -libexecdir /usr/lib/qt5/libexec \
+    -no-rpath \
+    -no-separate-debug-info \
+    -no-pch \
+    -nomake examples \
+    -opengl \
+    -openssl-linked \
+    -optimized-qmake \
+    -plugin-sql-mysql \
+    -plugin-sql-odbc \
+    -plugin-sql-psql \
+    -plugin-sql-sqlite \
+    -plugindir /usr/lib/qt5/plugins \
+    -prefix /usr \
+    -sysconfdir /etc/xdg \
+    -system-libjpeg \
+    -system-libpng \
+    -system-pcre \
+    -system-sqlite \
+    -system-zlib \
+    -translationdir /usr/share/qt5/translations \
+    -no-reduce-relocations
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make INSTALL_ROOT="$pkgdir" install
+# the tools by their versioned names next to Qt 6's, and by their plain names
+mkdir -p "$pkgdir/usr/bin"
+for i in "$pkgdir"/usr/lib/qt5/bin/*; do
+    n=${i##*/}
+    case $n in
+        *.*) dest="$pkgdir/usr/bin/${n%.*}-qt5.${n##*.}" ;;
+        *) dest="$pkgdir/usr/bin/$n-qt5" ;;
+    esac
+    ln -s "../lib/qt5/bin/$n" "$dest"
+    ln -s "../lib/qt5/bin/$n" "$pkgdir/usr/bin/$n"
+done
+# the .prl files name the build directory
+find "$pkgdir/usr/lib" -type f -name '*.prl' -exec sed -i -e '/^QMAKE_PRL_BUILD_DIR/d' {} +
+test -x "$pkgdir/usr/lib/qt5/bin/qmake"
+'''

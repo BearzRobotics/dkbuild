@@ -1,0 +1,39 @@
+# Qt 5 QML and Qt Quick (qtdeclarative), from KDE's Qt 5.15 branch (qtdeclarative, invent.kde.org/qt/qt/qtdeclarative), the snapshot Alpine Linux
+# makes of it (dev.alpinelinux.org/archive/qt, commit f78bc0b, 5.15.18_git20251107). After Alpine's
+# community/qt5-qtdeclarative. Qt 5 installs beside Qt 6 (qt5-qtbase's header). qmake builds it against
+# qt5-qtbase's mkspec, so the flags are the system's.
+# Alpine notes that -Os segfaults: the flags here are -O2.
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "qt5-qtdeclarative"
+version = "5.15.18_git20251107"
+release = 1
+summary = "Qt 5 QML and Qt Quick (qtdeclarative)"
+license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only WITH Qt-GPL-exception-1.0"
+homepage = "https://www.qt.io"
+patches = ["qt-musl-stackbottom.patch", "link-libatomic-on-rv64.patch"]
+hostdeps = ["python"]
+builddeps = ["qt5-qtbase-devel", "vulkan-headers"]
+options = ["!check", "!cross", "!lto"]
+
+source = [
+    { url = "https://dev.alpinelinux.org/archive/qt/qtdeclarative-f78bc0b2c6884fd730bf34a931870d67936cf01d.tar.xz", sha256 = "e996262e485c371b43788115610f0b72e0917b950242f1c8981d17bf90d888e1" },
+]
+
+setup = '''
+qmake-qt5
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make INSTALL_ROOT="$pkgdir" install
+# the tools by their versioned names (Qt 6's are in /usr/lib/qt6)
+mkdir -p "$pkgdir/usr/bin"
+for i in "$pkgdir"/usr/lib/qt5/bin/*; do
+    [ -e "$i" ] || continue
+    ln -sf "../lib/qt5/bin/${i##*/}" "$pkgdir/usr/bin/${i##*/}-qt5"
+    ln -sf "../lib/qt5/bin/${i##*/}" "$pkgdir/usr/bin/${i##*/}"
+done
+# the .prl files name the build directory
+find "$pkgdir/usr/lib" -type f -name '*.prl' -exec sed -i -e '/^QMAKE_PRL_BUILD_DIR/d' {} +
+'''

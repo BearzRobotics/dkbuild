@@ -1,0 +1,29 @@
+# Qt 5 multimedia (audio, video, camera) on GStreamer, from KDE's Qt 5.15 branch (qtmultimedia, invent.kde.org/qt/qt/qtmultimedia), the snapshot Alpine Linux
+# makes of it (dev.alpinelinux.org/archive/qt, commit ff83d11, 5.15.18_git20251101). After Alpine's
+# community/qt5-qtmultimedia. Qt 5 installs beside Qt 6 (qt5-qtbase's header). qmake builds it against
+# qt5-qtbase's mkspec, so the flags are the system's.
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "qt5-qtmultimedia"
+version = "5.15.18_git20251101"
+release = 1
+summary = "Qt 5 multimedia (audio, video, camera) on GStreamer"
+license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only WITH Qt-GPL-exception-1.0"
+homepage = "https://www.qt.io"
+builddeps = ["alsa-lib-devel", "gst-plugins-base-devel", "gstreamer-devel", "libxv-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel"]
+options = ["!check", "!cross", "!lto"]
+
+source = [
+    { url = "https://dev.alpinelinux.org/archive/qt/qtmultimedia-ff83d119c75cd8406f73ccc08958fe36747e7390.tar.xz", sha256 = "e74435835a179ec9c12317226e158d72d6a97d2e25149f3c56d049151fb10d32" },
+]
+
+setup = '''
+qmake-qt5
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make INSTALL_ROOT="$pkgdir" install
+# the .prl files name the build directory
+find "$pkgdir/usr/lib" -type f -name '*.prl' -exec sed -i -e '/^QMAKE_PRL_BUILD_DIR/d' {} +
+'''
