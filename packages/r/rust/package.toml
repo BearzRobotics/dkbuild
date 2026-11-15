@@ -38,7 +38,6 @@ patches = [
     "0002-remove-a-bunch-of-unused-junk.patch",
     "0003-move-debugger-scripts-to-usr-share-rust.patch",
     "0004-fix-shebang-on-install-template.sh.patch",
-    "0005-get-rid-of-wrong-linkage.patch",
     "0006-do-not-install-libunwind-source-removed.patch",
     "0008-link-stage-2-tools-dynamically-to-libstd.patch",
     "0010-do-not-export-LD_LIBRARY_PATH.patch",
@@ -76,13 +75,11 @@ test -x "$boot/bin/rustc" && test -x "$boot/bin/cargo"
 # root has this link: the rust built here links libunwind itself
 # (llvm-libunwind = 'system'), so nothing in the package needs it.
 [ -e /usr/lib/libgcc_s.so ] || ln -s libunwind.so.1 /usr/lib/libgcc_s.so
-# Patch 0005 edits src/unix/mod.rs in every vendored libc crate. cargo refuses
-# a directory source whose files no longer match .cargo-checksum.json, so (as
-# Chimera does) empty the per-file checksum list of the patched crates; the
-# "package" checksum stays.
-for d in vendor/libc-*; do
-    sed -i 's/"files":{[^}]*}/"files":{}/' "$d/.cargo-checksum.json"
-done
+# Chimera's patch 0005 (get rid of wrong linkage: it removes the libc crate's link(name = "c")
+# for musl) is not applied: it goes with Chimera's own target, which does not pass
+# -nodefaultlibs; upstream's x86_64-unknown-linux-musl does, so without the crate's own -lc the
+# stage 1 compiler linked every program without a C library (r6: undefined symbol memcpy,
+# __libc_start_main, pthread_key_create ...). The vendored libc crates stay as they are.
 cat > bootstrap.toml <<EOF
 change-id = 160100
 
