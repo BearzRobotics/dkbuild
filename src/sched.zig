@@ -175,6 +175,11 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
     var stop = false;
 
     while (true) {
+        // Set when a job is settled inline in the pass below (up to date, skipped): one that
+        // an earlier index was waiting for may now be ready, so another pass is needed even
+        // when nothing is running (a package named on `pkg` waits for its run-time
+        // dependencies, which come after it in the order).
+        var settled = false;
         if (!stop) {
             // Nothing starts beside a heavy build, nor past one waiting for the others to end.
             var hold = heavy_running;
@@ -196,6 +201,7 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
                 const r = t.recipes[jobs[j].idx];
                 if (blocked) |b| {
                     state[j] = .skipped;
+                    settled = true;
                     try skipped.append(arena, r.name);
                     const why = if (state[b] == .failed) "failed" else "was skipped";
                     term.print("==> {s}: skipped, it needs {s}, which {s}\n", .{ r.name, t.recipes[jobs[b].idx].name, why });
@@ -207,6 +213,7 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
                 if (!jobs[j].certain) {
                     if (jobs[j].old_root) |old| if (!jobs[j].script_changed and std.mem.eql(u8, &old, &roots[j])) {
                         state[j] = .ok;
+                        settled = true;
                         term.print("==> {s}: up to date\n", .{jobs[j].id});
                         continue;
                     };
@@ -239,7 +246,10 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
                 }
             }
         }
-        if (running == 0) break;
+        if (running == 0) {
+            if (settled and !stop) continue;
+            break;
+        }
 
         shared.mutex.lockUncancelable(io);
         while (shared.done.items.len == 0) shared.cond.waitUncancelable(io, &shared.mutex);
