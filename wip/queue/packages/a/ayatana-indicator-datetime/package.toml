@@ -1,0 +1,29 @@
+# Ayatana indicator: datetime (system menu of the Lomiri shell): Needed by the Lomiri stack, version 26.6.0. Recipe written after Alpine
+# Linux's testing/ayatana-indicator-datetime (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "ayatana-indicator-datetime"
+version = "26.6.0"
+release = 1
+summary = "Ayatana indicator: datetime (system menu of the Lomiri shell)"
+license = "GPL-3.0-only"
+homepage = "https://github.com/AyatanaIndicators/ayatana-indicator-datetime"
+patches = ["disable-failing-test.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf", "intltool"]
+builddeps = ["cmake-extras", "libayatana-common-devel", "ayatana-indicator-messages-devel", "dbus-test-runner-devel", "evolution-data-server-devel", "glib-devel", "gstreamer-devel", "libaccounts-glib-devel", "libical-devel", "libnotify-devel", "properties-cpp-devel", "util-linux-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/AyatanaIndicators/ayatana-indicator-datetime/archive/26.6.0/ayatana-indicator-datetime-26.6.0.tar.gz", sha256 = "2bae8b4d4bb4910f7644478c46106a3e263972fc8e1fa11e350f4d47c2678419" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DENABLE_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

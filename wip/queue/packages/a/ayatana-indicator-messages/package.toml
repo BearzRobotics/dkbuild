@@ -1,0 +1,28 @@
+# Ayatana indicator: messages (system menu of the Lomiri shell): Needed by the Lomiri stack, version 24.5.1. Recipe written after Alpine
+# Linux's testing/ayatana-indicator-messages (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "ayatana-indicator-messages"
+version = "24.5.1"
+release = 1
+summary = "Ayatana indicator: messages (system menu of the Lomiri shell)"
+license = "GPL-3.0-only"
+homepage = "https://github.com/AyatanaIndicators/ayatana-indicator-messages"
+hostdeps = ["cmake", "ninja", "pkgconf", "intltool", "vala", "gtk-doc-tools"]
+builddeps = ["cmake-extras", "libayatana-common-devel", "accountsservice-devel", "dbus-test-runner-devel", "glib-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/AyatanaIndicators/ayatana-indicator-messages/archive/24.5.1/ayatana-indicator-messages-24.5.1.tar.gz", sha256 = "bbefac4a0c280b78f015d2afddc6d108f20cf6f8bfb1a35bd5e7fb0c6912a9bd" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DENABLE_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

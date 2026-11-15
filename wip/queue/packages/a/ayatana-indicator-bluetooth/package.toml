@@ -1,0 +1,28 @@
+# Ayatana indicator: bluetooth (system menu of the Lomiri shell): Needed by the Lomiri stack, version 26.6.1. Recipe written after Alpine
+# Linux's testing/ayatana-indicator-bluetooth (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "ayatana-indicator-bluetooth"
+version = "26.6.1"
+release = 1
+summary = "Ayatana indicator: bluetooth (system menu of the Lomiri shell)"
+license = "GPL-3.0-only"
+homepage = "https://github.com/AyatanaIndicators/ayatana-indicator-bluetooth"
+hostdeps = ["cmake", "ninja", "pkgconf", "intltool", "vala"]
+builddeps = ["cmake-extras", "libayatana-common-devel", "libnotify-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/AyatanaIndicators/ayatana-indicator-bluetooth/archive/26.6.1/ayatana-indicator-bluetooth-26.6.1.tar.gz", sha256 = "c03f2155ed5cd292464100aedc3dfd511c3df690e67a606fe56de9abfef740ca" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DENABLE_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

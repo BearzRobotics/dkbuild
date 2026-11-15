@@ -1,0 +1,28 @@
+# Ayatana indicator: sound (system menu of the Lomiri shell): Needed by the Lomiri stack, version 24.5.3. Recipe written after Alpine
+# Linux's testing/ayatana-indicator-sound (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "ayatana-indicator-sound"
+version = "24.5.3"
+release = 1
+summary = "Ayatana indicator: sound (system menu of the Lomiri shell)"
+license = "GPL-3.0-only"
+homepage = "https://github.com/AyatanaIndicators/ayatana-indicator-sound"
+hostdeps = ["cmake", "ninja", "pkgconf", "intltool", "vala"]
+builddeps = ["cmake-extras", "libayatana-common-devel", "accountsservice-devel", "dbus-test-runner-devel", "libgee-devel", "libnotify-devel", "libpulse-devel", "libxml2-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/AyatanaIndicators/ayatana-indicator-sound/archive/24.5.3/ayatana-indicator-sound-24.5.3.tar.gz", sha256 = "3f2b4a33d753c0239f048af2d08431417ebbc7616627242796c7ca90769fb2b3" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DENABLE_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

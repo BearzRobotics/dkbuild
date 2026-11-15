@@ -1,0 +1,28 @@
+# Ayatana indicator: keyboard (system menu of the Lomiri shell): Needed by the Lomiri stack, version 26.6.3. Recipe written after Alpine
+# Linux's testing/ayatana-indicator-keyboard (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "ayatana-indicator-keyboard"
+version = "26.6.3"
+release = 1
+summary = "Ayatana indicator: keyboard (system menu of the Lomiri shell)"
+license = "GPL-3.0-only"
+homepage = "https://github.com/AyatanaIndicators/ayatana-indicator-keyboard"
+hostdeps = ["cmake", "ninja", "pkgconf", "intltool"]
+builddeps = ["cmake-extras", "libayatana-common-devel", "accountsservice-devel", "eudev-devel", "glib-devel", "libx11-devel", "libxkbcommon-devel", "libxklavier-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/AyatanaIndicators/ayatana-indicator-keyboard/archive/26.6.3/ayatana-indicator-keyboard-26.6.3.tar.gz", sha256 = "fb7129364b95a23af72217150bd124480734e5cb554bb158faf0eb63ed81ada9" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DENABLE_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

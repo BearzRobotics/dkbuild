@@ -1,0 +1,30 @@
+# Lomiri system settings application and its plugin API: libsystemd comes from elogind (libsystemd.pc). Ubuntu Touch / UBports (Lomiri) component, version 1.5.0. Recipe written after Alpine
+# Linux's testing/lomiri-system-settings (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-system-settings"
+version = "1.5.0"
+release = 1
+summary = "Lomiri system settings application and its plugin API"
+license = "GPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+patches = ["0001-Migrate-to-upstream-maliit-keyboard.patch", "0002-Use-qmltestrunner-qt5.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf", "intltool"]
+builddeps = ["accountsservice-devel", "boost-devel", "click-devel", "cmake-extras", "elogind-devel", "geonames-devel", "gnome-desktop-devel", "gsettings-qt-devel", "icu-devel", "lomiri-deviceinfo-devel", "lomiri-trust-store-devel", "networkmanager-devel", "polkit-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel", "upower-devel"]
+rundeps = ["accountsservice", "ayatana-indicator-bluetooth", "ayatana-indicator-datetime", "ayatana-indicator-power", "lomiri-content-hub", "lomiri-indicator-network", "lomiri-settings-components", "lomiri-ui-toolkit", "qt5-qtmultimedia"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/lomiri-system-settings/-/archive/1.5.0/lomiri-system-settings-1.5.0.tar.gz", sha256 = "bbe2418d49022fde86aef3742f34a489c056fe2aece0eecbebee14f44d0f4ecc" },
+]
+
+setup = '''
+%cmake \
+    -DENABLE_TESTS=OFF \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

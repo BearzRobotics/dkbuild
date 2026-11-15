@@ -1,0 +1,27 @@
+# Embedded Linux Library (Intel): the base library of ofono and iwd: Needed by the Lomiri stack, version 0.83. Recipe written after Alpine
+# Linux's testing/ell (MIT-licensed APKBUILD and patches; the software's licence is LGPL-2.1-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "ell"
+version = "0.83"
+release = 1
+summary = "Embedded Linux Library (Intel): the base library of ofono and iwd"
+license = "LGPL-2.1-or-later"
+homepage = "https://git.kernel.org/pub/scm/libs/ell/ell.git"
+patches = ["use-libgen-basename.patch"]
+hostdeps = ["make", "pkgconf"]
+builddeps = ["glib-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://mirrors.edge.kernel.org/pub/linux/libs/ell/ell-0.83.tar.gz", sha256 = "311c99ddd7252f5e38363873b1455919254f3b445f9572067fcbc4244feeafba" },
+]
+
+setup = '''
+%configure --enable-glib
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

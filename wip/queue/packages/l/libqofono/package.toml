@@ -1,0 +1,30 @@
+# Qt bindings for ofono (Qt 5 build): Needed by the Lomiri stack, version 0.133. Recipe written after Alpine
+# Linux's testing/libqofono (MIT-licensed APKBUILD and patches; the software's licence is LGPL-2.1-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "libqofono"
+version = "0.133"
+release = 1
+summary = "Qt bindings for ofono (Qt 5 build)"
+license = "LGPL-2.1-or-later"
+homepage = "https://github.com/sailfishos/libqofono"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["qt5-qtbase-devel", "qt5-qtdeclarative-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/sailfishos/libqofono/archive/0.133/libqofono-0.133.tar.gz", sha256 = "2339d2210a9bb85789f4697068cb4c5505fab97ebaa967e1370247eb31e90d32" },
+]
+
+setup = '''
+%cmake \
+    -DQT_MAJOR_VERSION=5 \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# the installed tests
+rm -rf "$pkgdir/opt"
+'''

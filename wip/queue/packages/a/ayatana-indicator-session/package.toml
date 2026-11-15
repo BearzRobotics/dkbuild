@@ -1,0 +1,28 @@
+# Ayatana indicator: session (system menu of the Lomiri shell): Needed by the Lomiri stack, version 26.6.1. Recipe written after Alpine
+# Linux's testing/ayatana-indicator-session (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "ayatana-indicator-session"
+version = "26.6.1"
+release = 1
+summary = "Ayatana indicator: session (system menu of the Lomiri shell)"
+license = "GPL-3.0-only"
+homepage = "https://github.com/AyatanaIndicators/ayatana-indicator-session"
+hostdeps = ["cmake", "ninja", "pkgconf", "intltool"]
+builddeps = ["cmake-extras", "libayatana-common-devel", "glib-devel", "librda-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/AyatanaIndicators/ayatana-indicator-session/archive/26.6.1/ayatana-indicator-session-26.6.1.tar.gz", sha256 = "07e46976346f47dd852f33aaa71fb47d51062fee2f442de90fac4753c76676f4" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DENABLE_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,27 @@
+# Remote desktop abstraction library (Ayatana indicators): Needed by the Lomiri stack, version 0.0.5. Recipe written after Alpine
+# Linux's testing/librda (MIT-licensed APKBUILD and patches; the software's licence is LGPL-2.0-or-later).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "librda"
+version = "0.0.5"
+release = 1
+summary = "Remote desktop abstraction library (Ayatana indicators)"
+license = "LGPL-2.0-or-later"
+homepage = "https://github.com/ArcticaProject/librda"
+hostdeps = ["make", "pkgconf", "autoconf", "automake", "libtool", "intltool"]
+builddeps = ["glib-devel", "gobject-introspection-devel", "gtk+3-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/ArcticaProject/librda/archive/0.0.5/librda-0.0.5.tar.gz", sha256 = "7228c64b206629809c42ddad7131d4b952a40dac598f32f434e2ace95790e95f" },
+]
+
+setup = '''
+autoreconf -fi
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

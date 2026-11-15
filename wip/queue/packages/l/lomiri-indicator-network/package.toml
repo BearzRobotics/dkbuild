@@ -1,0 +1,31 @@
+# Lomiri network indicator and the connectivity library (NetworkManager, ofono): without systemd. Ubuntu Touch / UBports (Lomiri) component, version 1.99.0. Recipe written after Alpine
+# Linux's testing/lomiri-indicator-network (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri-indicator-network"
+version = "1.99.0"
+release = 1
+summary = "Lomiri network indicator and the connectivity library (NetworkManager, ofono)"
+license = "GPL-3.0-only"
+homepage = "https://gitlab.com/ubports"
+hostdeps = ["cmake", "ninja", "pkgconf", "intltool"]
+builddeps = ["cmake-extras", "glib-devel", "libqofono-devel", "libsecret-devel", "lomiri-api-devel", "lomiri-url-dispatcher-devel", "networkmanager-devel", "ofono-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel", "qt5-qttools-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/lomiri-indicator-network/-/archive/1.99.0/lomiri-indicator-network-1.99.0.tar.gz", sha256 = "e9e10699d67cac5f60fd042565a241423e4aaf7a22c317dcfa19ab3c4a873c93" },
+]
+
+setup = '''
+%cmake \
+    -DUSE_SYSTEMD=OFF \
+    -DENABLE_TESTS=OFF \
+    -DENABLE_COVERAGE=OFF \
+    -DENABLE_QT6=OFF \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,29 @@
+# oFono: open source telephony stack (modems, SMS, data); the Lomiri network indicator talks to it: an inert package: its dinit service is not written and not enabled. Needed by the Lomiri stack, version 2.19. Recipe written after Alpine
+# Linux's testing/ofono (MIT-licensed APKBUILD and patches; the software's licence is GPL-2.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "ofono"
+version = "2.19"
+release = 1
+summary = "oFono: open source telephony stack (modems, SMS, data); the Lomiri network indicator talks to it"
+license = "GPL-2.0-only"
+homepage = "https://ofono.org"
+patches = ["skip-broken-test.patch"]
+hostdeps = ["make", "pkgconf"]
+builddeps = ["bluez-devel", "dbus-devel", "ell-devel", "eudev-devel", "glib-devel", "linux-headers", "musl-bsd-headers"]
+rundeps = ["dbus"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.kernel.org/pub/linux/network/ofono/ofono-2.19.tar.xz", sha256 = "d554525ad2db1ccd2fe3ed733e437d76997e7f443c085b87e6be1fded020bc8f" },
+]
+
+setup = '''
+%configure --sbindir=/usr/sbin --enable-external-ell --with-dbusconfdir=/usr/share
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 plugins/ofono.rules "$pkgdir/usr/lib/udev/rules.d/60-ofono.rules"
+'''

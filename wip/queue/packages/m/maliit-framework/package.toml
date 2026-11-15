@@ -1,0 +1,31 @@
+# Maliit: input method framework (on-screen keyboards) for Wayland and X11: Needed by the Lomiri stack, version 2.3.0. Recipe written after Alpine
+# Linux's testing/maliit-framework (MIT-licensed APKBUILD and patches; the software's licence is LGPL-2.1-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "maliit-framework"
+version = "2.3.0"
+release = 1
+summary = "Maliit: input method framework (on-screen keyboards) for Wayland and X11"
+license = "LGPL-2.1-only"
+homepage = "https://github.com/maliit/framework"
+patches = ["0001-ut_mimserveroptions-Move-the-operator-definition-to-.patch", "0002-connection-Move-dbus-socket-to-well-known-path-in-XD.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["eudev-devel", "gtk+3-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel", "qt5-qtwayland-devel", "wayland-devel", "wayland-protocols"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/maliit/framework/archive/2.3.0/framework-2.3.0.tar.gz", sha256 = "bfc23919ac8b960243f85e8228ad7dfc28d557b52182a0b5a2a216a5c6a8057c" },
+]
+
+setup = '''
+%cmake \
+    -Denable-dbus-activation=ON \
+    -Denable-wayland-gtk=ON \
+    -Denable-tests=OFF \
+    -Denable-docs=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,28 @@
+# Ayatana indicator: display (system menu of the Lomiri shell): Needed by the Lomiri stack, version 26.6.0. Recipe written after Alpine
+# Linux's testing/ayatana-indicator-display (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "ayatana-indicator-display"
+version = "26.6.0"
+release = 1
+summary = "Ayatana indicator: display (system menu of the Lomiri shell)"
+license = "GPL-3.0-only"
+homepage = "https://github.com/AyatanaIndicators/ayatana-indicator-display"
+hostdeps = ["cmake", "ninja", "pkgconf", "intltool"]
+builddeps = ["cmake-extras", "libayatana-common-devel", "accountsservice-devel", "geoclue-devel", "glib-devel", "libgudev-devel", "librda-devel", "libxrandr-devel", "properties-cpp-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/AyatanaIndicators/ayatana-indicator-display/archive/26.6.0/ayatana-indicator-display-26.6.0.tar.gz", sha256 = "57f0dfd3b47416cb4ad5b66baec2ad57ad59aa604f1e10f5b584f64fdbcbdffc" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DENABLE_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

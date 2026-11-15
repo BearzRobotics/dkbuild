@@ -1,0 +1,37 @@
+# Lomiri: the UBports desktop and mobile shell (Qt 5, on Mir): built with Alpine's patches: no systemd, no LightDM integration (the lock screen uses PAM). The launcher logo is Ubuntu's here; Alpine swaps it for its own: a FenrirOS logo goes in later. Ubuntu Touch / UBports (Lomiri) component, version 0.6.2. Recipe written after Alpine
+# Linux's testing/lomiri (MIT-licensed APKBUILD and patches; the software's licence is GPL-3.0-only AND LGPL-2.1-only).
+# Not built (queued, wip/queue): expect first-build fixes.
+name = "lomiri"
+version = "0.6.2"
+release = 1
+summary = "Lomiri: the UBports desktop and mobile shell (Qt 5, on Mir)"
+license = "GPL-3.0-only AND LGPL-2.1-only"
+homepage = "https://gitlab.com/ubports"
+patches = ["0001-Disable-broken-tests-due-to-dropped-mocks-from-mir-2.patch", "0002-Add-qt5-suffix-to-search-for-Qt-tools.patch", "0003-No-systemd.patch", "0004-Disable-lightdm-integration.patch", "0006-Build-with-C-20.patch", "329.patch", "342.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf", "gettext"]
+builddeps = ["cmake-extras", "elogind-devel", "geonames-devel", "gnome-desktop-devel", "gsettings-qt-devel", "libqtdbusmock-devel", "libqtdbustest-devel", "linux-pam-devel", "lomiri-app-launch-devel", "lomiri-deviceinfo-devel", "lomiri-download-manager-devel", "lomiri-indicator-network-devel", "lomiri-libusermetrics-devel", "lomiri-notifications", "lomiri-ui-toolkit", "qmenumodel-devel", "qt5-qtbase-devel", "qt5-qtdeclarative-devel", "qt5-qtsvg-devel", "qt5-qtxmlpatterns-devel", "qtmir-devel", "mir-devel"]
+rundeps = ["ayatana-indicator-keyboard", "ayatana-indicator-session", "biometryd", "gsettings-desktop-schemas", "lomiri-notifications", "lomiri-schemas", "lomiri-settings-components", "lomiri-thumbnailer", "qt5-qtbase", "qt5-qtgraphicaleffects", "suru-icon-theme", "maliit-keyboard", "lomiri-system-settings"]
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/ubports/development/core/lomiri/-/archive/0.6.2/lomiri-0.6.2.tar.gz", sha256 = "b01f2142518f34a20445c6cf1175b8cbb2734c56dfaf2af0bff607d35a7a2997" },
+]
+
+setup = '''
+%cmake \
+    -DWITH_MIR2=ON \
+    -DNO_TESTS=ON \
+    -DCMAKE_INSTALL_LOCALSTATEDIR=/var \
+    -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# Alpine removes the mocks and test files the build installs
+rm -f "$pkgdir/usr/bin/indicators-client" "$pkgdir/usr/bin/lomiri-mock-indicator-service"
+rm -rf "$pkgdir/usr/lib/lomiri/qml/mocks" "$pkgdir/usr/lib/lomiri/qml/utils/Lomiri/SelfTest"
+rm -rf "$pkgdir/usr/libexec/lomiri/tests" "$pkgdir/usr/share/lomiri/mocks" "$pkgdir/usr/share/lomiri/tests"
+rm -f "$pkgdir/usr/libexec/lomiri/uqmlscene" "$pkgdir/usr/share/applications/indicators-client.desktop"
+'''
