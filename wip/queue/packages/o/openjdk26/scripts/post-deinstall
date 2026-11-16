@@ -1,0 +1,4 @@
+#!/bin/sh
+# The default Java: set when there is none, moved when the active one is removed.
+[ -x /usr/bin/java-select ] && /usr/bin/java-select fix >/dev/null 2>&1
+exit 0

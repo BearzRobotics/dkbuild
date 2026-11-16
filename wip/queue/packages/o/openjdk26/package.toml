@@ -1,0 +1,79 @@
+# FenrirOS: OpenJDK 26 (jdk-26.0.2.1+1, the 26 update tree jdk26u), copied from the openjdk25 recipe: the same patches (they apply to this tree: checked with patch --dry-run), the
+# same configure. Built by the JDK 25 of the tree (the boot JDK, a build dependency) instead of the bootstrap JDK: JDK N is built by N-1. Needed by Marginalia Search
+# (its Gradle build asks for a Java 26 toolchain). The JDK in /usr/lib/jvm/java-26-openjdk; java-common makes it the system's
+# Java through /usr/lib/jvm/default (java-select). One package with the JDK (Chimera splits jre-headless/jre/jdk/jmods/demos).
+# The JDK's own CA truststore is kept (no system Java keystore is generated yet).
+# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/openjdk25/template.py
+# cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
+# dependency names (they are Chimera's) before building.
+name = "openjdk26"
+version = "26.0.2.1_p1"
+release = 1
+summary = "OpenJDK 26 (Java development kit and runtime)"
+license = "GPL-2.0-only WITH Classpath-exception-2.0"
+homepage = "https://openjdk.org"
+patches = ["JDK-8218814_Wformat-security.patch", "JDK-8299245_disable-tests.patch", "ppc64le.patch", "riscv64.patch"]
+archs = ["x86_64", "aarch64"]
+hostdeps = ["autoconf", "automake", "bash", "file", "libtool", "linux-headers", "openjdk25", "openssl", "pkgconf", "zip", "unzip", "zlib-ng-compat-devel"]
+builddeps = ["alsa-lib-devel", "cups-devel", "fontconfig-devel", "freetype-devel", "giflib-devel", "lcms2-devel", "libjpeg-turbo-devel", "libxrandr-devel", "libxrender-devel", "libxt-devel", "libxtst-devel", "linux-headers"]
+rundeps = ["java-common"]
+options = ["!check", "jobs:12"]
+
+source = [
+    { url = "https://github.com/openjdk/jdk26u/archive/jdk-26.0.2.1+1.tar.gz", sha256 = "334810683c6beafe00e4945d95b398f0d93ae09fe483c7b30f0c3f9d32403416" },
+]
+environment = '''
+export LD_LIBRARY_PATH=/usr/lib/jvm/java-25-openjdk/lib:/usr/lib/jvm/java-25-openjdk/lib/server
+'''
+setup = '''
+# libc++ 23: jpackage's SysInfo.h uses std::nothrow_t without <new>
+sed -i 's|^#include "tstrings.h"$|#include <new>\n#include "tstrings.h"|' src/jdk.jpackage/share/native/common/SysInfo.h
+grep -q '^#include <new>$' src/jdk.jpackage/share/native/common/SysInfo.h
+# Built by the seed JDK (openjdk25-bootstrap, a prebuilt musl JDK), which is
+# installed where this one goes; the seed is only ever a build dependency.
+# no javac server (a background compile daemon reached over a socket, which
+# the build sandbox does not allow): javac runs per batch instead.
+# OpenJDK's configure wants CC to be a bare program name: the --target (and
+# any --sysroot) the profile puts in CC go into the extra flags instead
+tflags=${CC#clang }
+CC=clang CXX=clang++ bash ./configure \
+    --prefix=/usr/lib/jvm/java-26-openjdk \
+    --with-boot-jdk=/usr/lib/jvm/java-25-openjdk \
+    --with-jobs=$jobs \
+    --with-extra-cflags="$tflags $CFLAGS" \
+    --with-extra-cxxflags="$tflags $CXXFLAGS" \
+    --with-extra-ldflags="$tflags $LDFLAGS" \
+    --disable-warnings-as-errors \
+    --disable-javac-server \
+    --disable-precompiled-headers \
+    --enable-dtrace=no \
+    --with-jvm-variants=server \
+    --with-zlib=system \
+    --with-libjpeg=system \
+    --with-libpng=system \
+    --with-giflib=system \
+    --with-lcms=system \
+    --with-jtreg=no \
+    --with-debug-level=release \
+    --with-native-debug-symbols=none \
+    --with-toolchain-type=clang \
+    --with-version-pre= \
+    --with-version-build=1 \
+    --with-version-opt=fenriros-r$release \
+    --with-vendor-name=FenrirOS \
+    --with-vendor-url=https://github.com/BearzRobotics/dkbuild \
+    --with-vendor-bug-url=https://github.com/BearzRobotics/dkbuild/issues \
+    --with-vendor-vm-bug-url=https://github.com/BearzRobotics/dkbuild/issues
+'''
+build = '''
+make JOBS=$jobs jdk-image
+'''
+install = '''
+d="$pkgdir/usr/lib/jvm/java-26-openjdk"
+mkdir -p "$d"
+cp -a build/*/images/jdk/. "$d/"
+install -m644 ASSEMBLY_EXCEPTION LICENSE README.md "$d/"
+# The JDK keeps its own CA truststore (lib/security/cacerts).
+'''
+
