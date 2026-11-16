@@ -7,20 +7,22 @@
 # packaging/build.sh also writes a greetd login screen and PAM files; this
 # system logs in on dkconsole and has no PAM, so those are not part of this package.
 #
+# 0.3.1 (2026-11-16): the main build now links libxcb and libxcb-randr (src/x11desktop: the panel, snip and tools on X11); builddeps libxcb-devel.
+# dkde-compositor (wlroots) and dkde-wm (XCB) are separate packages in the same tarball (src/compositor, src/xwm): not built here.
 # 0.3.0: dkde-snap (Super+Z snap layouts), calculator Show Work, dsolve, taylor, laplace. 0.2.0: archives
 # (libarchive), MTP/PTP, servers, Network, Online accounts; the source tarball
 # is named dkde-v<version>.tar.gz.
 # NOT BUILT YET: needs gtk4, gtk4-layer-shell, wayland, cairo, pango, glib and the
 # Zig dependency fetch to have been run (`dkbuild fetch dkde`).
 name = "dkde"
-version = "0.3.0"
+version = "0.3.1"
 release = 1
 summary = "A Wayland desktop shell in Zig on GTK4 and labwc"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkde"
 archs = ["x86_64"]
 hostdeps = ["zig", "pkgconf"]
-builddeps = ["gtk4-devel", "gtk4-layer-shell-devel", "wayland-devel", "wayland-protocols", "glib-devel", "cairo-devel", "pango-devel", "harfbuzz-devel", "gdk-pixbuf-devel", "graphene-devel", "libarchive-devel", "fontconfig-devel"]
+builddeps = ["gtk4-devel", "gtk4-layer-shell-devel", "wayland-devel", "wayland-protocols", "glib-devel", "cairo-devel", "pango-devel", "harfbuzz-devel", "gdk-pixbuf-devel", "graphene-devel", "libarchive-devel", "fontconfig-devel", "libxcb-devel"]
 # The desktop treats optional dependencies as runtime ones, so it is fully functional:
 # gvfs (Files: phones, cameras, servers, Google Drive), gnome-online-accounts (Settings:
 # Online accounts, calendars) and NetworkManager (Settings > Network, the full page; without
@@ -29,7 +31,7 @@ rundeps = ["labwc", "seatd", "dbus", "polkit", "gvfs", "gnome-online-accounts", 
 options = ["zigdeps", "!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/dkde/releases/download/v0.3.0/dkde-v0.3.0.tar.gz", sha256 = "9a03efa484589ec739eb4977c9b1fc218255f8ff6b202201008a667d04244fba" },
+    { url = "https://github.com/BearzRobotics/dkde/releases/download/v0.3.1/dkde-v0.3.1.tar.gz", sha256 = "1446c8a969a6dacf11bb8b56066198ebbd2ad0370b445b0d919f7c452caf5e77" },
 ]
 
 install = '''

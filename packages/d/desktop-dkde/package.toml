@@ -1,6 +1,7 @@
 # The DKDE desktop, FenrirOS's default: dkde (panel, session and apps) on labwc,
 # with seat management, D-Bus, polkit, audio (PipeWire with WirePlumber), Mesa
 # with Vulkan, fonts and icons, and Xwayland for X11 programs. `dkde-session` starts it.
+# r6: brightnessctl (dkde 0.3.1: Settings > Power & lock dims the screen through it; also the brightness slider).
 # r5: dkde's optional extras (cups, cups-filters, ocrmypdf, gnome-online-accounts-gtk, bluez, swaylock, qt6ct,
 # kvantum, webp-pixbuf-loader, libmtp, chrony) are this package's own; the rest moved to desktop-dkde-core
 # (which the rescue image uses).
@@ -12,7 +13,7 @@
 # kept for its own tools.
 name = "desktop-dkde"
 version = "1"
-release = 5
+release = 6
 summary = "DKDE desktop for FenrirOS (the default)"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"
@@ -23,4 +24,6 @@ rundeps = [
     "cups", "cups-filters", "ocrmypdf", "gnome-online-accounts-gtk",
     # Bluetooth, screen lock, the Qt theme plugins, WebP images, MTP (phones, cameras), clock sync
     "bluez", "swaylock", "qt6ct", "kvantum", "webp-pixbuf-loader", "libmtp", "chrony",
+    # backlight control: the brightness slider and, new in dkde 0.3.1, dimming the screen before it locks
+    "brightnessctl",
 ]
