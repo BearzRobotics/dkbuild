@@ -25,7 +25,7 @@
 # ... build-server shutdown --msbuild", seed version ''), r6 of the world run, 2026-11-16.
 name = "dotnet"
 version = "10.0.114"
-release = 7
+release = 8
 summary = ".NET SDK, runtime and ASP.NET Core"
 license = "MIT"
 homepage = "https://dotnet.microsoft.com"
@@ -93,6 +93,19 @@ ulimit -n 4096 || true
 # with no .git and no release manifest (v10.0.114 is commit 0427b9ab...)
 # the previous dotnet's SDK and source-built packages, or (stage 0, none in
 # repo/ yet) the snapshot's Microsoft ones
+# r8: the stub below was only in the stage-0 branch. The seed of a later build is the dotnet package's own SDK (/usr/lib/dotnet), and it segfaults at
+# its first command in the same way ("Segmentation fault ... build-server shutdown --msbuild", seed version '', r6 and r7 of the world run), because it also finds
+# the real lttng-ust at run time here: so both seeds get the empty library first in their search path.
+# Microsoft's seed runtime (libcoreclr.so) dlopens liblttng-ust-tracepoint.so.1 when it
+# finds one, and registers its tracepoints with it. Since lttng-ust-devel is a builddep (r4)
+# it finds ours, and the seed's own `dotnet` segfaults at start (version '' and a core dump
+# in `build-server shutdown`; r3 without lttng-ust ran fine, the library was absent and the
+# tracepoints just went unregistered). Put an empty library of that name first in the seed's
+# search path: the dlopen succeeds, finds no symbols and registers nothing, as before.
+# (Only the seed needs this; the SDK built here is linked against the real lttng-ust.)
+mkdir -p /tmp/lttng-stub
+echo 'int lttng_stub;' | clang -shared -x c - -o /tmp/lttng-stub/liblttng-ust-tracepoint.so.1
+export LD_LIBRARY_PATH=/tmp/lttng-stub${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 if [ -x /usr/lib/dotnet/dotnet ]; then
     a=$(ls /usr/lib/dotnet-artifacts/Private.SourceBuilt.Artifacts.*.tar.gz)
     mkdir -p /tmp/previously-source-built
@@ -100,16 +113,6 @@ if [ -x /usr/lib/dotnet/dotnet ]; then
     seed="--with-sdk /usr/lib/dotnet --with-packages /tmp/previously-source-built"
 else
     seed="--with-sdk $PWD/.dotnet-musl"
-    # Microsoft's seed runtime (libcoreclr.so) dlopens liblttng-ust-tracepoint.so.1 when it
-    # finds one, and registers its tracepoints with it. Since lttng-ust-devel is a builddep (r4)
-    # it finds ours, and the seed's own `dotnet` segfaults at start (version '' and a core dump
-    # in `build-server shutdown`; r3 without lttng-ust ran fine, the library was absent and the
-    # tracepoints just went unregistered). Put an empty library of that name first in the seed's
-    # search path: the dlopen succeeds, finds no symbols and registers nothing, as before.
-    # (Only the seed needs this; the SDK built here is linked against the real lttng-ust.)
-    mkdir -p /tmp/lttng-stub
-    echo 'int lttng_stub;' | clang -shared -x c - -o /tmp/lttng-stub/liblttng-ust-tracepoint.so.1
-    export LD_LIBRARY_PATH=/tmp/lttng-stub${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 fi
 ./build.sh --source-only $seed \
     --source-repository https://github.com/dotnet/dotnet \
