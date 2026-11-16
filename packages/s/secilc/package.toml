@@ -1,7 +1,7 @@
 # SELinux Common Intermediate Language compiler (secilc): SELinux userspace 3.11 (no man pages: xmlto is not packaged). Needed by the Lomiri stack, version 3.11. Recipe written after Alpine
 # Linux's testing/secilc (MIT-licensed APKBUILD and patches; the software's licence is BSD-2-Clause).
 # Not built (queued, wip/queue): expect first-build fixes.
-# r2: hostdeps xmlto (with the DocBook XML DTDs and XSL stylesheets it needs): the Makefile builds secilc.8 and secilc.8 from DocBook XML with `xmlto man`
+# r2: hostdeps xmlto (with the DocBook XML DTDs and XSL stylesheets it needs): the Makefile builds its manual pages from DocBook XML with `xmlto man`
 # ("make: xmlto: No such file or directory").
 name = "secilc"
 version = "3.11"
