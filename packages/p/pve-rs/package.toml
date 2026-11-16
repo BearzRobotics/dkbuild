@@ -14,7 +14,7 @@
 # templates at /usr/share/proxmox-frr/templates (proxmox-frr-templates).
 name = "pve-rs"
 version = "0.16.1"
-release = 3
+release = 4
 summary = "Proxmox VE Rust components for Perl"
 license = "AGPL-3.0-or-later"
 homepage = "https://git.proxmox.com/?p=proxmox-perl-rs.git"
@@ -55,6 +55,16 @@ chmod -R u+w pve-rs/vendor/proxmox-sys
 sed -i 's/fs_type: stat\.f_type,/fs_type: stat.f_type as i64,/' pve-rs/vendor/proxmox-sys/src/fs/mod.rs
 grep -q 'stat.f_type as i64' pve-rs/vendor/proxmox-sys/src/fs/mod.rs
 sed -i 's/"files":{[^}]*}/"files":{}/' pve-rs/vendor/proxmox-sys/.cargo-checksum.json
+# r4: this perl is not built with multiplicity (no ithreads), and perlmod's ffi.rs, in the code it compiles for exactly that case
+# (`#[cfg(not(perlmod = "multiplicity"))] mod vtbl_types_impl`), imports `Interpreter`, a type that exists only WITH multiplicity ("unresolved
+# import `super::Interpreter`"). The import is not used there: a copy of the vendored crate without it, checksums emptied as above.
+src=$(readlink -f pve-rs/vendor/perlmod)
+rm pve-rs/vendor/perlmod
+cp -r "$src" pve-rs/vendor/perlmod
+chmod -R u+w pve-rs/vendor/perlmod
+sed -i 's/use super::{Interpreter, MAGIC, SV};/use super::{MAGIC, SV};/' pve-rs/vendor/perlmod/src/ffi.rs
+if grep -q 'use super::{Interpreter, MAGIC, SV};' pve-rs/vendor/perlmod/src/ffi.rs; then exit 1; fi
+sed -i 's/"files":{[^}]*}/"files":{}/' pve-rs/vendor/perlmod/.cargo-checksum.json
 '''
 build = '''
 make -C pve-rs BUILD_MODE=release CARGO_BUILD_ARGS="--release --offline" GITVERSION=1021ded9d0898b98d50b9a3bbcb36bf2a3982883
