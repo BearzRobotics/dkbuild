@@ -1,0 +1,27 @@
+# pipx: install and run Python applications in isolated environments (each app gets its own venv
+# under ~/.local/share/pipx, its commands link into ~/.local/bin). From PyPI. It drives pip
+# (python's own) and venv at run time, from the network when the user installs something;
+# nothing happens at build time. The `uv` extra is not enabled. Shell completion comes from
+# argcomplete (`register-python-argcomplete pipx`).
+name = "pipx"
+version = "1.18.16"
+release = 1
+summary = "Install and run Python applications in isolated environments"
+license = "MIT"
+homepage = "https://pipx.pypa.io"
+hostdeps = ["python", "python-hatchling", "python-hatch-vcs"]
+rundeps = ["python", "python-argcomplete", "python-filelock", "python-packaging", "python-platformdirs", "python-userpath"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/b4/a6/3bfb09e7b4ce1f0602474ce7a4158d2c649e8f9151d8b93138ad27134579/pipx-1.18.16.tar.gz", sha256 = "06795f5cd689f3ea36b574a7d1ddfc7b4c1ebee66116db7b70ded868f95d5057" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/pipx/LICENSE"
+'''
