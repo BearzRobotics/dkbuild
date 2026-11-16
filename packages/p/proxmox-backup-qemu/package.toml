@@ -16,7 +16,7 @@
 # package.
 name = "proxmox-backup-qemu"
 version = "2.0.4"
-release = 4
+release = 5
 summary = "Proxmox Backup Server client library for QEMU"
 license = "AGPL-3.0-or-later"
 homepage = "https://git.proxmox.com/?p=proxmox-backup-qemu.git"
@@ -53,6 +53,10 @@ sed -i 's/"files":{[^}]*}/"files":{}/' vendor/proxmox-sys/.cargo-checksum.json
 # r4: pbs-tools/src/lib.rs raises glibc malloc's mmap threshold at start-up (libc::mallopt(M_MMAP_THRESHOLD, 128 KiB)): musl has no mallopt
 # ("cannot find function `mallopt` in crate `libc`"). A tuning call for glibc's allocator only; it is removed.
 sed -i '/libc::mallopt(libc::M_MMAP_THRESHOLD, 4096 \* 32);/d' submodules/proxmox-backup/pbs-tools/src/lib.rs
+# r5: pbs-client/src/pxar/create.rs returns statfs's f_type as an i64 (`Ok(fs_stat.f_type)`); musl's is unsigned (u64), glibc's is signed
+# ("mismatched types: expected `i64`, found `u64`"): the cast, as for fs_type in proxmox-sys above. (Source edit: sed.)
+sed -i 's/^    Ok(fs_stat\.f_type)$/    Ok(fs_stat.f_type as i64)/' submodules/proxmox-backup/pbs-client/src/pxar/create.rs
+grep -q 'Ok(fs_stat.f_type as i64)' submodules/proxmox-backup/pbs-client/src/pxar/create.rs
 if grep -q 'mallopt' submodules/proxmox-backup/pbs-tools/src/lib.rs; then exit 1; fi
 '''
 build = '''
