@@ -39,3 +39,9 @@ plugin left out). All UNVERIFIED; expect fix-up rounds (git-describe seds, cross
 Moved to packages/ 2026-11-15 (user request): /usr/bin/am + /usr/bin/appman, modules in
 /usr/lib/am/modules, database fetched by AM at run time. (a plain
 shell package, no build).
+
+## Proton Mail Bridge (written 2026-11-15, user's default mail is Proton)
+Two separate packages (user): proton-bridge (Go core, CLI/noninteractive, `protonmail-bridge`)
+and proton-bridge-gui (Qt 6 window; needs new grpc, sentry-native). Also new: libfido2.
+Not in desktop-dkde or desktop-dkde-core. Needs a Secret Service (gnome-keyring/KWallet) or
+`pass` at run time; nothing enabled. UNVERIFIED; godeps fetch on first `fetch`.

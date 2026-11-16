@@ -1,0 +1,31 @@
+# libfido2: FIDO2 / U2F library (CTAP over USB HID, NFC) with the fido2-* tools. Proton Bridge
+# links it (cgo) for security-key two-factor login. Man pages are off (they need mandoc);
+# the udev rules install to /usr/lib/udev/rules.d for eudev.
+name = "libfido2"
+version = "1.17.0"
+release = 1
+summary = "FIDO2 / U2F library and tools"
+license = "BSD-2-Clause"
+homepage = "https://github.com/Yubico/libfido2"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["libcbor-devel", "openssl-devel", "zlib-ng-compat-devel", "eudev-devel"]
+
+source = [
+    { url = "https://github.com/Yubico/libfido2/archive/refs/tags/1.17.0.tar.gz", sha256 = "ace062d14a482ff9325410ff63d06c8b5fe87e79ebc18dda07add2bc0188c77f" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_MANPAGES=OFF \
+    -DBUILD_EXAMPLES=OFF \
+    -DBUILD_TESTS=OFF \
+    -DUDEV_RULES_DIR=/usr/lib/udev/rules.d
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libfido2/LICENSE"
+'''

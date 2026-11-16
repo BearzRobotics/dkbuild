@@ -1,0 +1,57 @@
+# Proton Mail Bridge's Qt 6 window (system-tray app and account setup): bridge-gui, which
+# starts the `bridge` core from proton-bridge (looked up in its own directory) and talks to it
+# over gRPC. A separate package so the core stays free of Qt and gRPC. Not part of
+# desktop-dkde or desktop-dkde-core (user, 2026-11-15).
+# Source edits: Bridge's CMake wants a vcpkg tree for gRPC and sentry-native (extern/vcpkg, an
+# empty submodule in the tarball) and bundles Qt in a deploy step. gRPC, Protobuf and
+# sentry-native are system packages here, so extern/vcpkg/vcpkg and the toolchain file are
+# created as empty stubs (the checks look for them), only the bridge-gui target is built, and
+# the binary is installed by hand (the CMake install/deploy rules copy Qt into the prefix).
+# UNVERIFIED: first build.
+name = "proton-bridge-gui"
+version = "3.27.1"
+release = 1
+summary = "Proton Mail Bridge graphical front end (Qt 6)"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/ProtonMail/proton-bridge"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja", "pkgconf", "bash", "qt6-qtbase", "qt6-qtdeclarative", "grpc", "protobuf"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "grpc-devel", "protobuf-devel", "abseil-cpp-devel", "sentry-native-devel", "c-ares-devel", "re2-devel", "openssl-devel", "zlib-ng-compat-devel"]
+rundeps = ["proton-bridge", "qt6-qtdeclarative", "qt6-qtsvg"]
+
+source = [
+    { url = "https://github.com/ProtonMail/proton-bridge/archive/refs/tags/v3.27.1.tar.gz", sha256 = "57191e08f5f3204d414aabe54972ea18d9e1dd76d7f71d21a1456a280aa52605" },
+]
+
+setup = '''
+mkdir -p extern/vcpkg/scripts/buildsystems
+printf '#!/bin/sh\nexit 0\n' > extern/vcpkg/vcpkg
+chmod 755 extern/vcpkg/vcpkg
+: > extern/vcpkg/scripts/buildsystems/vcpkg.cmake
+cd internal/frontend/bridge-gui
+cmake -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBRIDGE_APP_VERSION=3.27.1 \
+    -DBRIDGE_APP_FULL_NAME="Proton Mail Bridge" \
+    -DBRIDGE_VENDOR="Proton AG" \
+    -DBRIDGE_REVISION=v3.27.1 -DBRIDGE_TAG=v3.27.1 \
+    -DBRIDGE_BUILD_TIME=2026-11-06T00:00:00+0000 \
+    -DBRIDGE_BUILD_ENV=prod -DBRIDGE_DSN_SENTRY= \
+    -S .
+'''
+build = '''
+cd internal/frontend/bridge-gui
+cmake --build build --target bridge-gui
+'''
+install = '''
+cd internal/frontend/bridge-gui
+b=$(find build -type f -name bridge-gui -perm -u+x | head -n1)
+test -n "$b"
+install -Dm755 "$b" "$pkgdir/usr/lib/proton-bridge/bridge-gui"
+install -d "$pkgdir/usr/bin"
+ln -s ../lib/proton-bridge/bridge-gui "$pkgdir/usr/bin/protonmail-bridge-gui"
+cd ../../..
+sed -e 's|^Exec=.*|Exec=protonmail-bridge-gui|' dist/proton-bridge.desktop \
+  | install -Dm644 /dev/stdin "$pkgdir/usr/share/applications/protonmail-bridge.desktop"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/proton-bridge-gui/LICENSE"
+'''

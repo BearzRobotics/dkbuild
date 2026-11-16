@@ -1,0 +1,41 @@
+# gRPC (C++ library, the code generator plugins and grpc_cpp_plugin). Proton Bridge's Qt
+# front end (bridge-gui) talks to the Go core over gRPC and needs gRPC and protobuf at build
+# time. 1.84.3 is the release whose MODULE.bazel pins protobuf 35.1, the version in this
+# tree. Everything it can take from the system comes from the system (abseil, c-ares,
+# protobuf, re2, OpenSSL, zlib): no bundled third_party copies and no network.
+# UNVERIFIED: first build.
+name = "grpc"
+version = "1.84.3"
+release = 1
+summary = "RPC framework (C++ library and code generator plugins)"
+license = "Apache-2.0"
+homepage = "https://grpc.io"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja", "pkgconf", "protobuf"]
+builddeps = ["abseil-cpp-devel", "c-ares-devel", "protobuf-devel", "re2-devel", "openssl-devel", "zlib-ng-compat-devel"]
+
+source = [
+    { url = "https://github.com/grpc/grpc/archive/refs/tags/v1.84.3.tar.gz", sha256 = "c75a91397231e4e7cc3e6b98d9e169db0636c1c854489c5e6a11b0494e8c554d" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DCMAKE_CXX_STANDARD=17 \
+    -DgRPC_INSTALL=ON \
+    -DgRPC_BUILD_TESTS=OFF \
+    -DgRPC_ABSL_PROVIDER=package \
+    -DgRPC_CARES_PROVIDER=package \
+    -DgRPC_PROTOBUF_PROVIDER=package \
+    -DgRPC_RE2_PROVIDER=package \
+    -DgRPC_SSL_PROVIDER=package \
+    -DgRPC_ZLIB_PROVIDER=package \
+    -DgRPC_DOWNLOAD_ARCHIVES=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/grpc/LICENSE"
+'''

@@ -1,0 +1,53 @@
+# Proton Mail Bridge, the core: the local IMAP/SMTP gateway for a Proton Mail account (Go, cgo
+# for libfido2 and libsecret). This package is the program without a GUI: `protonmail-bridge`
+# starts it, run it with --cli for the interactive terminal (add the account with `login`,
+# then `info` shows the IMAP/SMTP user name and password for the mail client) or
+# --noninteractive. The Qt window is the separate package proton-bridge-gui.
+# Built with `make build-nogui`'s own go build lines, by hand: the Makefile's version, revision
+# and launcher steps ask git (the source is a tarball). Version, empty revision, tag and
+# build time are passed as -ldflags -X. The updater launcher (cmd/launcher) is not built or
+# installed: it exists for Proton's signed self-updates (its public key is not in the source),
+# and updates come through this package manager. No Sentry DSN is compiled in, so no crash
+# reports are sent.
+# Keychain: Bridge stores the account secrets through the Secret Service (D-Bus: gnome-keyring,
+# KWallet) or `pass`; one of them has to run, the package starts none and enables nothing.
+# Nothing is listening until the user starts it, and it listens on 127.0.0.1 only.
+# The `bridge` program goes to /usr/lib/proton-bridge/ because bridge-gui looks for it in its
+# own directory.
+name = "proton-bridge"
+version = "3.27.1"
+release = 1
+summary = "Proton Mail Bridge: local IMAP/SMTP gateway for Proton Mail"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/ProtonMail/proton-bridge"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["go", "pkgconf", "bash", "sed"]
+builddeps = ["libfido2-devel", "libsecret-devel", "libcbor-devel", "openssl-devel"]
+rundeps = ["libsecret"]
+options = ["godeps", "!check"]
+
+source = [
+    { url = "https://github.com/ProtonMail/proton-bridge/archive/refs/tags/v3.27.1.tar.gz", sha256 = "57191e08f5f3204d414aabe54972ea18d9e1dd76d7f71d21a1456a280aa52605" },
+]
+
+environment = '''
+export CGO_ENABLED=1
+export GOFLAGS="$GOFLAGS -trimpath -buildmode=pie"
+export CGO_LDFLAGS="$CGO_LDFLAGS -lfido2 -lcbor -lssl -lcrypto"
+'''
+build = '''
+# credits.go (the dependency list shown in About) is generated from go.mod by a bash script.
+( cd utils && bash ./credits.sh bridge )
+c=github.com/ProtonMail/proton-bridge/v3/internal/constants
+go build -tags= -ldflags "-X $c.Version=3.27.1 -X $c.Revision=v3.27.1 -X $c.Tag=v3.27.1 \
+  -X $c.BuildTime=2026-11-06T00:00:00+0000 -X \"$c.FullAppName=Proton Mail Bridge\" -X $c.BuildEnv=prod" \
+  -o bridge ./cmd/Desktop-Bridge/
+'''
+install = '''
+install -Dm755 bridge "$pkgdir/usr/lib/proton-bridge/bridge"
+install -d "$pkgdir/usr/bin"
+ln -s ../lib/proton-bridge/bridge "$pkgdir/usr/bin/protonmail-bridge"
+install -Dm644 dist/bridge.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/protonmail-bridge.svg"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/proton-bridge/LICENSE"
+install -Dm644 Changelog.md "$pkgdir/usr/share/doc/proton-bridge/Changelog.md"
+'''
