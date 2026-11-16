@@ -3,13 +3,14 @@
 # (python's own) and venv at run time, from the network when the user installs something;
 # nothing happens at build time. The `uv` extra is not enabled. Shell completion comes from
 # argcomplete (`register-python-argcomplete pipx`).
+# r2: hostdeps python-hatch-fancy-pypi-readme: pyproject.toml uses its metadata hook ("Unknown metadata hook: fancy-pypi-readme").
 name = "pipx"
 version = "1.18.16"
-release = 1
+release = 2
 summary = "Install and run Python applications in isolated environments"
 license = "MIT"
 homepage = "https://pipx.pypa.io"
-hostdeps = ["python", "python-hatchling", "python-hatch-vcs"]
+hostdeps = ["python", "python-hatchling", "python-hatch-vcs", "python-hatch-fancy-pypi-readme"]
 rundeps = ["python", "python-argcomplete", "python-filelock", "python-packaging", "python-platformdirs", "python-userpath"]
 options = ["!check"]
 
