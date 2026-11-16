@@ -12,7 +12,7 @@
 # kept for its own tools.
 name = "desktop-dkde"
 version = "1"
-release = 5
+release = 6
 summary = "DKDE desktop for FenrirOS (the default)"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"
@@ -23,4 +23,7 @@ rundeps = [
     "cups", "cups-filters", "ocrmypdf", "gnome-online-accounts-gtk",
     # Bluetooth, screen lock, the Qt theme plugins, WebP images, MTP (phones, cameras), clock sync
     "bluez", "swaylock", "qt6ct", "kvantum", "webp-pixbuf-loader", "libmtp", "chrony",
+    # r6: a real X server (xwayland, in desktop-dkde-core, only runs X11 apps inside the Wayland session): the Xorg server with the libinput input driver
+    # (modesetting is built in), startx (xinit) and the usual X utilities; dkde-wm needs an X server. Requested 2026-11-16.
+    "xserver-xorg", "xserver-xorg-input-libinput", "xinit", "xrandr", "xset", "xsetroot", "xrdb", "xmodmap", "xkbcomp",
 ]
