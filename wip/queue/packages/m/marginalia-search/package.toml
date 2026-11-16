@@ -30,7 +30,7 @@ source = [
     { url = "https://services.gradle.org/distributions/gradle-9.7.1-bin.zip", sha256 = "acd53f1edaf02f1a8ff99879f8a34b302661a057d9b063ae9e35b552f804d20a", unpack = false },
     { url = "https://archive.apache.org/dist/opennlp/models/ud-models-1.0/opennlp-en-ud-ewt-sentence-1.0-1.9.3.bin", sha256 = "8dddd7e582cedef4a79a83fd340cefcdafe58419bd20520fec90492ea4bffd11", unpack = false, name = "opennlp-sentence.bin" },
     { url = "https://huggingface.co/MarginaliaNu/MarginaliaModelData/resolve/c9339e4224f1dfad7f628809c32687e748198ae3/segments.bin?download=true", sha256 = "7fc313b6fd97576a5ecc1baf9dc0b88d7be41dece34cf0fd9e64ae07e907ebf3", unpack = false, name = "segments.bin" },
-    { url = "https://huggingface.co/MarginaliaNu/MarginaliaModelData/resolve/c9339e4224f1dfad7f628809c32687e748198ae3/tfreq-new-algo3.bin?download=true", sha256 = "@TF@", unpack = false, name = "tfreq-new-algo3.bin" },
+    { url = "https://huggingface.co/MarginaliaNu/MarginaliaModelData/resolve/c9339e4224f1dfad7f628809c32687e748198ae3/tfreq-new-algo3.bin?download=true", sha256 = "957afc5499374770c52fff9a7456c7d2b36a041c55db637260603308378add0c", unpack = false, name = "tfreq-new-algo3.bin" },
     { url = "https://huggingface.co/MarginaliaNu/MarginaliaModelData/resolve/c9339e4224f1dfad7f628809c32687e748198ae3/lid.176.ftz?download=true", sha256 = "8f3472cfe8738a7b6099e8e999c3cbfae0dcd15696aac7d7738a8039db603e83", unpack = false, name = "lid.176.ftz" },
 ]
 
