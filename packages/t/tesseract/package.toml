@@ -6,7 +6,7 @@
 # pages: they need asciidoc, which is not in the tree yet.
 name = "tesseract"
 version = "5.5.2"
-release = 2
+release = 3
 summary = "OCR engine"
 license = "Apache-2.0"
 homepage = "https://tesseract-ocr.github.io"
@@ -32,6 +32,10 @@ add 'cstdlib|stdlib.h' '\b(getenv|strtol|strtod|strtoul|atoi|atof|malloc|free|ab
 add 'cstring|string.h' '\b(memcpy|memset|memcmp|memmove|strlen|strcmp|strncmp|strcpy|strchr|strstr)\b'
 add 'cstdio|stdio.h' '\b(printf|fprintf|snprintf|sprintf|fopen|fclose|FILE)\b'
 grep -q '^#include <cstdlib>' src/arch/simddetect.cpp
+# r3: capi.h is the C API header: C programs include it (ffmpeg's libtesseract check failed with
+# "'cstdlib' file not found"), and the loop above put C++ headers at its top. Source edit: take them out again.
+sed -i -e '/^#include <cstdlib>$/d' -e '/^#include <cstring>$/d' -e '/^#include <cstdio>$/d' include/tesseract/capi.h
+! grep -q '<cstdlib>\|<cstring>\|<cstdio>' include/tesseract/capi.h
 ./autogen.sh
 %configure --disable-doc
 '''
