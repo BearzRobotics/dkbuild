@@ -36,7 +36,7 @@
 # separate testsuite tarball).
 name = "ghc"
 version = "9.14.1"
-release = 5
+release = 6
 summary = "Glasgow Haskell Compiler"
 license = "BSD-3-Clause"
 homepage = "https://www.haskell.org/ghc/"
@@ -204,7 +204,10 @@ $hadrian || { echo "hadrian failed: resuming once" >&2; $hadrian; }
 install = '''
 # Hadrian's install has no DESTDIR: install the binary distribution it makes
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ghc/LICENSE"
-$hadrian binary-dist-dir
+# r6: the build step finished (the resume above worked), and the same haddock gap came back here: binary-dist-dir relinks haddock, an lld crash
+# deletes its output until the single-threaded retry writes it again, and a parallel run hit the gap ("_build/stage1/bin/haddock: createProcess:
+# execvp: does not exist"). The same one resume.
+$hadrian binary-dist-dir || { echo "hadrian binary-dist-dir failed: resuming once" >&2; $hadrian binary-dist-dir; }
 cd _build/bindist/ghc-$version-*
 ghc_configure
 make DESTDIR="$pkgdir" install
