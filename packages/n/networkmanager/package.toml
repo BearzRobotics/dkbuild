@@ -1,9 +1,11 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/networkmanager/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # 2026-11-11: elogind (session tracking is set to it).
+# r5: the dinit service runs /usr/sbin/NetworkManager (it was /usr/bin/NetworkManager, which does not exist: QEMU boot test of the
+# dkde ISO, 2026-11-16: "networkmanager" failed to start).
 name = "networkmanager"
 version = "1.58.1"
-release = 3
+release = 5
 summary = "Network management daemon"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://gitlab.freedesktop.org/NetworkManager/NetworkManager"

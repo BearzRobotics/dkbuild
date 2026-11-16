@@ -1,5 +1,5 @@
 type = process
-command = /usr/bin/NetworkManager -n
+command = /usr/sbin/NetworkManager -n
 smooth-recovery = true
 depends-on: dbus
 depends-on: rcboot

@@ -20,15 +20,18 @@
 # man pages (not the namespaced docbook-xsl).
 # Not built yet: expect first-build fixes. The Python bits it needs: python-dbus and python-gobject, and
 # python-nftables and python-libcap-ng (all in the tree).
+# r2: rundeps glib: the GLib, GObject and Gio typelibs are in the main glib package, which the image does not otherwise
+# install (only glib-libs, found from the shared libraries); `firewalld` died with "cannot import name GLib, introspection typelib
+# not found" (QEMU boot test of the dkde ISO, 2026-11-16).
 name = "firewalld"
 version = "2.5.2"
-release = 1
+release = 2
 summary = "Dynamic firewall daemon with D-Bus interface (nftables)"
 license = "GPL-2.0-or-later"
 homepage = "https://firewalld.org"
 hostdeps = ["autoconf", "automake", "libtool", "gettext", "intltool", "libxslt", "docbook-xsl-nons", "make", "pkgconf", "python", "desktop-file-utils"]
 builddeps = ["glib-devel"]
-rundeps = ["dbus", "nftables", "python", "python-dbus", "python-gobject", "python-nftables", "python-libcap-ng", "polkit"]
+rundeps = ["dbus", "nftables", "python", "python-dbus", "python-gobject", "python-nftables", "python-libcap-ng", "polkit", "glib"]
 options = ["!check"]
 
 source = [
