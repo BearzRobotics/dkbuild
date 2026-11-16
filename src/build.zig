@@ -877,7 +877,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 var f = std.mem.tokenizeScalar(u8, l, ' ');
                 const n = f.next() orelse continue;
                 const k = f.next() orelse continue;
-                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "rm -rf 'vendor/{1s}'\nln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}'\n", .{ k, n }));
+                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "if [ -d 'vendor/{1s}' ] && [ ! -L 'vendor/{1s}' ] && [ \"$(sed -n 's/^version = \"\\(.*\\)\"$/\\1/p' 'vendor/{1s}/Cargo.toml' | head -n 1)\" != \"$(sed -n 's/^version = \"\\(.*\\)\"$/\\1/p' '/dkdeps/crates/{0s}/Cargo.toml' | head -n 1)\" ]; then ln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}-dkdeps'; else rm -rf 'vendor/{1s}'; ln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}'; fi\n", .{ k, n }));
             }
             if (clock != null) try lay.appendSlice(arena, ")\n");
         }
@@ -890,7 +890,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 var f = std.mem.tokenizeScalar(u8, l, ' ');
                 const n = f.next() orelse continue;
                 const k = f.next() orelse continue;
-                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "rm -rf 'vendor/{1s}'\nln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}'\n", .{ k, n }));
+                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "if [ -d 'vendor/{1s}' ] && [ ! -L 'vendor/{1s}' ] && [ \"$(sed -n 's/^version = \"\\(.*\\)\"$/\\1/p' 'vendor/{1s}/Cargo.toml' | head -n 1)\" != \"$(sed -n 's/^version = \"\\(.*\\)\"$/\\1/p' '/dkdeps/crates/{0s}/Cargo.toml' | head -n 1)\" ]; then ln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}-dkdeps'; else rm -rf 'vendor/{1s}'; ln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}'; fi\n", .{ k, n }));
             }
             try lay.appendSlice(arena, ")\n");
         }
