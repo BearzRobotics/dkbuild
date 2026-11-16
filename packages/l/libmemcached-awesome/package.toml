@@ -9,7 +9,7 @@
 # Tests need a running memcached server (!check).
 name = "libmemcached-awesome"
 version = "1.1.4"
-release = 4
+release = 5
 summary = "C/C++ client library and tools for memcached"
 license = "BSD-3-Clause"
 homepage = "https://github.com/awesomized/libmemcached"
@@ -36,7 +36,9 @@ grep -q 'add_custom_target(docs-man ALL ' docs/CMakeLists.txt
 # two builds, shared and static (the project builds one kind per build tree);
 # the manual pages (Sphinx's man builder) come from the shared one
 for kind in shared static; do
-    if [ $kind = shared ]; then shared=ON; docs=ON; else shared=OFF; docs=OFF; fi
+    # r5: docs=OFF FOR NOW (docs/disabled-features.md): this Sphinx and docutils reject the manual's reStructuredText ("ERROR: Inconsistent title style:
+    # skip from level 2 to 4" in bin/common/note_*.rst, then sphinx-build exits 2), and no man pages are built; the library and the tools are complete.
+    if [ $kind = shared ]; then shared=ON; docs=OFF; else shared=OFF; docs=OFF; fi
     cmake -S . -B build-$kind -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
         -DBUILD_SHARED_LIBS=$shared \
         -DBUILD_TESTING=OFF \
