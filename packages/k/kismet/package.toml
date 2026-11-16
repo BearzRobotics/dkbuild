@@ -1,7 +1,9 @@
 # Kismet with its capture tools (Wi-Fi, Bluetooth, ...); the Python tools,
 # SDR and MQTT parts are off (libraries not in the tree yet).
+# version 2026.10.1 for upstream's 2026-10-R1: apk refuses "2026.10.R1" ("package version is invalid"; a version is numbers, with an optional
+# letter and _suffix). The source is still the R1 tarball.
 name = "kismet"
-version = "2026.10.R1"
+version = "2026.10.1"
 release = 5
 summary = "Wireless network detector, sniffer and IDS"
 license = "GPL-2.0-or-later"
