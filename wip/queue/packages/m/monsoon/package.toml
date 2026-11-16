@@ -1,0 +1,27 @@
+# A fast HTTP enumerator that allows you to execute a large number of HTTP requests. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: ..
+name = "monsoon"
+version = "0.10.1"
+release = 1
+summary = "A fast HTTP enumerator that allows you to execute a large number of HTTP requests."
+license = "MIT"
+homepage = "https://github.com/RedTeamPentesting/monsoon"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/RedTeamPentesting/monsoon/archive/refs/tags/v0.10.1.tar.gz", sha256 = "6ca06b5377392350d5ce4d8f2731d5d634d2532002fb3eb2bd2b7f162489f5a8" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/monsoon .
+'''
+install = '''
+install -Dm755 build/monsoon "$pkgdir/usr/bin/monsoon"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/monsoon/LICENSE"
+'''

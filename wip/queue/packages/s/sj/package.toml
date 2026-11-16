@@ -1,0 +1,27 @@
+# A tool for auditing endpoints defined in exposed (Swagger/OpenAPI) definition files. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: ..
+name = "sj"
+version = "2.8.4"
+release = 1
+summary = "A tool for auditing endpoints defined in exposed (Swagger/OpenAPI) definition files."
+license = "MIT"
+homepage = "https://github.com/BishopFox/sj"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/BishopFox/sj/archive/refs/tags/2.8.4.tar.gz", sha256 = "fd275730760967fda56940914b291bc21922c65590d8fa3cc145b1e04845656b" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/sj .
+'''
+install = '''
+install -Dm755 build/sj "$pkgdir/usr/bin/sj"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/sj/LICENSE"
+'''

@@ -1,0 +1,27 @@
+# TLS grabber focused on TLS based data collection. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: cmd/tlsx.
+name = "tlsx"
+version = "1.4.0"
+release = 1
+summary = "TLS grabber focused on TLS based data collection."
+license = "MIT"
+homepage = "https://github.com/projectdiscovery/tlsx"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/projectdiscovery/tlsx/archive/refs/tags/v1.4.0.tar.gz", sha256 = "02e29cb128415e673312b7176e95126891a223d29e54dce898d5a0277a7d35ea" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/tlsx ./cmd/tlsx
+'''
+install = '''
+install -Dm755 build/tlsx "$pkgdir/usr/bin/tlsx"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/tlsx/LICENSE"
+'''

@@ -1,0 +1,27 @@
+# Discover exposed hosts on the internet using multiple search engines. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: cmd/uncover.
+name = "uncover"
+version = "1.2.1"
+release = 1
+summary = "Discover exposed hosts on the internet using multiple search engines."
+license = "MIT"
+homepage = "https://github.com/projectdiscovery/uncover"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/projectdiscovery/uncover/archive/refs/tags/v1.2.1.tar.gz", sha256 = "80e5e8531ac53a24b4acba2ab96e5ab33ecc137a3e0baa97caabae0c859b64eb" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/uncover ./cmd/uncover
+'''
+install = '''
+install -Dm755 build/uncover "$pkgdir/usr/bin/uncover"
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/uncover/LICENSE.md"
+'''

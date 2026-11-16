@@ -1,0 +1,27 @@
+# Open-Source Solution for Out of band Data Extraction. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: cmd/interactsh-client.
+name = "interactsh-client"
+version = "1.4.1"
+release = 1
+summary = "Open-Source Solution for Out of band Data Extraction."
+license = "MIT"
+homepage = "https://github.com/projectdiscovery/interactsh"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/projectdiscovery/interactsh/archive/refs/tags/v1.4.1.tar.gz", sha256 = "504b3cf8c8381e1a7a6c8d96d278b4eded8e3cfa4025c580fddd4432a6e1ce22" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/interactsh-client ./cmd/interactsh-client
+'''
+install = '''
+install -Dm755 build/interactsh-client "$pkgdir/usr/bin/interactsh-client"
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/interactsh-client/LICENSE.md"
+'''

@@ -1,0 +1,27 @@
+# A fast WordPress plugin enumeration tool. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: ..
+name = "wpprobe"
+version = "0.12.13"
+release = 1
+summary = "A fast WordPress plugin enumeration tool."
+license = "MIT"
+homepage = "https://github.com/Chocapikk/wpprobe"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/Chocapikk/wpprobe/archive/refs/tags/v0.12.13.tar.gz", sha256 = "927d0aa2dd7bdcdcc5f2c4328462a52dcbe007d0334d2a414a3665f570f0ecb1" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/wpprobe .
+'''
+install = '''
+install -Dm755 build/wpprobe "$pkgdir/usr/bin/wpprobe"
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/wpprobe/LICENSE.md"
+'''

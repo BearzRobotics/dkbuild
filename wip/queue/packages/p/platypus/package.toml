@@ -1,0 +1,27 @@
+# A modern multiple reverse shell sessions manager written in go. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: ..
+name = "platypus"
+version = "1.5.0"
+release = 1
+summary = "A modern multiple reverse shell sessions manager written in go."
+license = "LGPL-3.0"
+homepage = "https://github.com/WangYihang/Platypus"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/WangYihang/Platypus/archive/refs/tags/v1.5.0.tar.gz", sha256 = "50080df26d599d5fbbe8aea31ffe3fe0f6c2cd6ca8f5c8dd9a2296a44e4d4067" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/Platypus .
+'''
+install = '''
+install -Dm755 build/Platypus "$pkgdir/usr/bin/Platypus"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/platypus/LICENSE"
+'''

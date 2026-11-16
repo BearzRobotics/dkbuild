@@ -1,0 +1,27 @@
+# Hunt down API key leaks in JS files and pages. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: ..
+name = "mantra"
+version = "3.1"
+release = 1
+summary = "Hunt down API key leaks in JS files and pages."
+license = "GPL-3.0"
+homepage = "https://github.com/MrEmpy/mantra"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/MrEmpy/mantra/archive/refs/tags/v3.1.tar.gz", sha256 = "379894f36ef04a6b4e57e77112070e23dcc75569d1df98a8f128fe24a8b5e0b1" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/mantra .
+'''
+install = '''
+install -Dm755 build/mantra "$pkgdir/usr/bin/mantra"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/mantra/LICENSE"
+'''

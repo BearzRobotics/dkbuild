@@ -1,0 +1,27 @@
+# Fast Application Layer Scanner. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: cmd/zgrab2.
+name = "zgrab2"
+version = "1.0.0"
+release = 1
+summary = "Fast Application Layer Scanner."
+license = "Apache-2.0"
+homepage = "https://github.com/zmap/zgrab2"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/zmap/zgrab2/archive/refs/tags/v1.0.0.tar.gz", sha256 = "682e9c12ecd8714d8702c88f37916c43654ec1091e97d7d0cc76e54236fcd6cc" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/zgrab2 ./cmd/zgrab2
+'''
+install = '''
+install -Dm755 build/zgrab2 "$pkgdir/usr/bin/zgrab2"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/zgrab2/LICENSE"
+'''

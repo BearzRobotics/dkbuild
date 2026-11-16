@@ -1,0 +1,27 @@
+# Simple, fast web crawler designed for easy, quick discovery of endpoints and assets... (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: ..
+name = "hakrawler"
+version = "2.1"
+release = 1
+summary = "Simple, fast web crawler designed for easy, quick discovery of endpoints and assets..."
+license = "GPL-3.0"
+homepage = "https://github.com/hakluke/hakrawler"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/hakluke/hakrawler/archive/refs/tags/2.1.tar.gz", sha256 = "bdd108e83ac590121abed30fea5ecf41136007e720dfcac3dd429cd04f860292" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/hakrawler .
+'''
+install = '''
+install -Dm755 build/hakrawler "$pkgdir/usr/bin/hakrawler"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/hakrawler/LICENSE"
+'''

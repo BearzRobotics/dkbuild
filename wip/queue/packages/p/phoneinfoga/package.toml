@@ -1,0 +1,27 @@
+# Information gathering & OSINT framework for phone numbers. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: ..
+name = "phoneinfoga"
+version = "2.11.0"
+release = 1
+summary = "Information gathering & OSINT framework for phone numbers."
+license = "GPL-3.0"
+homepage = "https://github.com/sundowndev/PhoneInfoga"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/sundowndev/PhoneInfoga/archive/refs/tags/v2.11.0.tar.gz", sha256 = "adb3cf459d36c4372b5cab235506afcba24df175eca87bb36539126bb1dbf64e" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/PhoneInfoga .
+'''
+install = '''
+install -Dm755 build/PhoneInfoga "$pkgdir/usr/bin/PhoneInfoga"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/phoneinfoga/LICENSE"
+'''

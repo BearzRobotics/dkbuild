@@ -1,0 +1,27 @@
+# A wrapper around massdns written in GO. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: cmd/shuffledns.
+name = "shuffledns"
+version = "1.2.1"
+release = 1
+summary = "A wrapper around massdns written in GO."
+license = "GPL-3.0"
+homepage = "https://github.com/projectdiscovery/shuffledns"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/projectdiscovery/shuffledns/archive/refs/tags/v1.2.1.tar.gz", sha256 = "f1a067b81980c57c9c024aab5988c78cb93159312d6fcf5c2ba0fd6b46d6f4e0" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/shuffledns ./cmd/shuffledns
+'''
+install = '''
+install -Dm755 build/shuffledns "$pkgdir/usr/bin/shuffledns"
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/shuffledns/LICENSE.md"
+'''

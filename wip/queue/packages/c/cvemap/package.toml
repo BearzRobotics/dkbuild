@@ -1,0 +1,27 @@
+# CLI tool designed to provide a structured and easily navigable interface to various... (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: cmd/cvemap.
+name = "cvemap"
+version = "2.0.2"
+release = 1
+summary = "CLI tool designed to provide a structured and easily navigable interface to various..."
+license = "MIT"
+homepage = "https://github.com/projectdiscovery/cvemap"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/projectdiscovery/cvemap/archive/refs/tags/v2.0.2.tar.gz", sha256 = "d3954dbcbee35fc7ff5417d3314949d7f7e1cf4939082a153515ce58b51ab7a6" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/cvemap ./cmd/cvemap
+'''
+install = '''
+install -Dm755 build/cvemap "$pkgdir/usr/bin/integration-test"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/cvemap/LICENSE"
+'''

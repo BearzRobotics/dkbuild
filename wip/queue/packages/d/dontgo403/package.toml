@@ -1,0 +1,27 @@
+# Tool to bypass 40X response codes.. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: ..
+name = "dontgo403"
+version = "2.0.1"
+release = 1
+summary = "Tool to bypass 40X response codes.."
+license = "MIT"
+homepage = "https://github.com/devploit/dontgo403"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/devploit/dontgo403/archive/refs/tags/v2.0.1.tar.gz", sha256 = "d020655d1834d78ec8a6bb944d1c43b3600333411bb312d5faeacf082e488242" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/dontgo403 .
+'''
+install = '''
+install -Dm755 build/dontgo403 "$pkgdir/usr/bin/dontgo403"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/dontgo403/LICENSE"
+'''

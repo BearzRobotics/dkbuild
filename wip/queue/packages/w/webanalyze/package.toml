@@ -1,0 +1,27 @@
+# Port of Wappalyzer (uncovers technologies used on websites) in go to automate scanning. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: cmd/webanalyze.
+name = "webanalyze"
+version = "0.4.6"
+release = 1
+summary = "Port of Wappalyzer (uncovers technologies used on websites) in go to automate scanning."
+license = "MIT"
+homepage = "https://github.com/rverton/webanalyze"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/rverton/webanalyze/archive/refs/tags/v0.4.6.tar.gz", sha256 = "15213937f964b32a6d165f38008b1163628c0a0f6948691553ee0694869254e3" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/webanalyze ./cmd/webanalyze
+'''
+install = '''
+install -Dm755 build/webanalyze "$pkgdir/usr/bin/webanalyze"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/webanalyze/LICENSE"
+'''

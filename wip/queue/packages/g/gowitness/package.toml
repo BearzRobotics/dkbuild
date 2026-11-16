@@ -1,0 +1,27 @@
+# A golang, web screenshot utility using Chrome Headless. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: ..
+name = "gowitness"
+version = "3.2.2"
+release = 1
+summary = "A golang, web screenshot utility using Chrome Headless."
+license = "GPL-3.0"
+homepage = "https://github.com/sensepost/gowitness"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/sensepost/gowitness/archive/refs/tags/3.2.2.tar.gz", sha256 = "8c63b547bcafcae2b93246a598fb06124d8794cb8d5d3719c5cfc791a78ad3d2" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/gowitness .
+'''
+install = '''
+install -Dm755 build/gowitness "$pkgdir/usr/bin/gowitness"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/gowitness/LICENSE"
+'''

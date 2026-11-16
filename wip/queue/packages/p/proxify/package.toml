@@ -1,0 +1,27 @@
+# Swiss Army knife Proxy tool for HTTP/HTTPS traffic capture, manipulation, and replay... (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: cmd/proxify.
+name = "proxify"
+version = "0.0.16"
+release = 1
+summary = "Swiss Army knife Proxy tool for HTTP/HTTPS traffic capture, manipulation, and replay..."
+license = "MIT"
+homepage = "https://github.com/projectdiscovery/proxify"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/projectdiscovery/proxify/archive/refs/tags/v0.0.16.tar.gz", sha256 = "a156d8094ac5a31bc92029c1a9e02300caa5e2f189dc13949410d792e9f4e63c" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/proxify ./cmd/proxify
+'''
+install = '''
+install -Dm755 build/proxify "$pkgdir/usr/bin/proxify"
+install -Dm644 LICENSE.MD "$pkgdir/usr/share/licenses/proxify/LICENSE.MD"
+'''

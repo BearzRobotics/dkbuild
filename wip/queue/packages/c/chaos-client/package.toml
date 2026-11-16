@@ -1,0 +1,27 @@
+# Go client to communicate with Chaos dataset API. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: cmd/chaos.
+name = "chaos-client"
+version = "0.5.2"
+release = 1
+summary = "Go client to communicate with Chaos dataset API."
+license = "MIT"
+homepage = "https://github.com/projectdiscovery/chaos-client"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/projectdiscovery/chaos-client/archive/refs/tags/v0.5.2.tar.gz", sha256 = "322f0c200887c2b0e6c412c70ad5de741a30e7687028966cfe26aa7534218369" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/chaos ./cmd/chaos
+'''
+install = '''
+install -Dm755 build/chaos "$pkgdir/usr/bin/chaos"
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/chaos-client/LICENSE.md"
+'''

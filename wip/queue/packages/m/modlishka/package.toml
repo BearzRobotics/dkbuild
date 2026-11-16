@@ -1,0 +1,27 @@
+# A powerful and flexible HTTP reverse proxy. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: ..
+name = "modlishka"
+version = "1.1.1"
+release = 1
+summary = "A powerful and flexible HTTP reverse proxy."
+license = "GPL-3.0"
+homepage = "https://github.com/drk1wi/Modlishka"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/drk1wi/Modlishka/archive/refs/tags/v.1.1.1.tar.gz", sha256 = "10e9a293716ee69b061c7595cce9350ebd888dcfdb2c7cc5add3b38dfc208a22" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/Modlishka .
+'''
+install = '''
+install -Dm755 build/Modlishka "$pkgdir/usr/bin/Modlishka"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/modlishka/LICENSE"
+'''

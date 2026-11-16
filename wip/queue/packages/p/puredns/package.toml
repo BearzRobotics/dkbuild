@@ -1,0 +1,27 @@
+# Fast domain resolver and subdomain bruteforcing with accurate wildcard filtering. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: ..
+name = "puredns"
+version = "2.1.1"
+release = 1
+summary = "Fast domain resolver and subdomain bruteforcing with accurate wildcard filtering."
+license = "GPL-3.0"
+homepage = "https://github.com/d3mondev/puredns"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/d3mondev/puredns/archive/refs/tags/v2.1.1.tar.gz", sha256 = "cff6466a422ab7db00a8277b32159cc6c416980f0921a5a7c72c43255d233c0f" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/puredns .
+'''
+install = '''
+install -Dm755 build/puredns "$pkgdir/usr/bin/puredns"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/puredns/LICENSE"
+'''

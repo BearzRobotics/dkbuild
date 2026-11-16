@@ -1,0 +1,29 @@
+# A Multi-hop proxy tool for security researchers and pentesters. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main packages: admin and agent, installed as stowaway-admin and stowaway-agent.
+name = "stowaway"
+version = "2.2"
+release = 1
+summary = "A Multi-hop proxy tool for security researchers and pentesters."
+license = "MIT"
+homepage = "https://github.com/ph4ntonn/Stowaway"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/ph4ntonn/Stowaway/archive/refs/tags/v2.2.tar.gz", sha256 = "265fbe45778cf694ee3a2c3e0c17f2d824f580adad6d3e61d67eb9250ac72858" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/stowaway-admin ./admin
+go build -o build/stowaway-agent ./agent
+'''
+install = '''
+install -Dm755 build/stowaway-admin "$pkgdir/usr/bin/stowaway-admin"
+install -Dm755 build/stowaway-agent "$pkgdir/usr/bin/stowaway-agent"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/stowaway/LICENSE"
+'''

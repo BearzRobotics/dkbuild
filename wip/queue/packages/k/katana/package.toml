@@ -1,0 +1,27 @@
+# Crawling and spidering framework. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: cmd/katana.
+name = "katana"
+version = "1.8.0"
+release = 1
+summary = "Crawling and spidering framework."
+license = "MIT"
+homepage = "https://github.com/projectdiscovery/katana"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/projectdiscovery/katana/archive/refs/tags/v1.8.0.tar.gz", sha256 = "490f23c25daeea0ccf93268a81b4a89ba84ec43ac2bf6dc988392ec3a65d9329" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/katana ./cmd/katana
+'''
+install = '''
+install -Dm755 build/katana "$pkgdir/usr/bin/katana"
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/katana/LICENSE.md"
+'''

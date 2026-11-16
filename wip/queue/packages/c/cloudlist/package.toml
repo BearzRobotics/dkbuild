@@ -1,0 +1,27 @@
+# A tool for listing Assets from multiple Cloud Providers. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: cmd/cloudlist.
+name = "cloudlist"
+version = "1.5.1"
+release = 1
+summary = "A tool for listing Assets from multiple Cloud Providers."
+license = "MIT"
+homepage = "https://github.com/projectdiscovery/cloudlist"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/projectdiscovery/cloudlist/archive/refs/tags/v1.5.1.tar.gz", sha256 = "e75a769df7418f51b011b444c62fd4b758547e2dcc130369f69872a1b6e7009c" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/cloudlist ./cmd/cloudlist
+'''
+install = '''
+install -Dm755 build/cloudlist "$pkgdir/usr/bin/cloudlist"
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/cloudlist/LICENSE.md"
+'''

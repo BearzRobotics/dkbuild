@@ -1,0 +1,27 @@
+# Fast and customizable subdomain wordlist generator using DSL. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: cmd/alterx.
+name = "alterx"
+version = "0.1.0"
+release = 1
+summary = "Fast and customizable subdomain wordlist generator using DSL."
+license = "MIT"
+homepage = "https://github.com/projectdiscovery/alterx"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/projectdiscovery/alterx/archive/refs/tags/v0.1.0.tar.gz", sha256 = "6bcb57f569b99daebc7d7c94e8168d04e1e8ff1815eb8a1ce4e97ec45ff6fd04" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/alterx ./cmd/alterx
+'''
+install = '''
+install -Dm755 build/alterx "$pkgdir/usr/bin/alterx"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/alterx/LICENSE"
+'''

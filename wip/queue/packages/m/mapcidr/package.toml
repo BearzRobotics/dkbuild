@@ -1,0 +1,27 @@
+# Utility program to perform multiple operations for a given subnet/CIDR ranges. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: cmd/mapcidr.
+name = "mapcidr"
+version = "1.1.97"
+release = 1
+summary = "Utility program to perform multiple operations for a given subnet/CIDR ranges."
+license = "MIT"
+homepage = "https://github.com/projectdiscovery/mapcidr"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/projectdiscovery/mapcidr/archive/refs/tags/v1.1.97.tar.gz", sha256 = "d1253ab474de254cb77628d3274bf6fdcf087223f219dcf26186de83776bf717" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/mapcidr ./cmd/mapcidr
+'''
+install = '''
+install -Dm755 build/mapcidr "$pkgdir/usr/bin/mapcidr"
+install -Dm644 LICENSE.MD "$pkgdir/usr/share/licenses/mapcidr/LICENSE.MD"
+'''

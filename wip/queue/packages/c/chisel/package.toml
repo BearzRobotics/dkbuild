@@ -1,0 +1,27 @@
+# A fast TCP tunnel over HTTP. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: ..
+name = "chisel"
+version = "1.12.0"
+release = 1
+summary = "A fast TCP tunnel over HTTP."
+license = "MIT"
+homepage = "https://github.com/jpillora/chisel"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/jpillora/chisel/archive/refs/tags/v1.12.0.tar.gz", sha256 = "5c25f054b64814f770725593db525faa1999960aecf4eb15c86529dea573c431" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/chisel .
+'''
+install = '''
+install -Dm755 build/chisel "$pkgdir/usr/bin/chisel"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/chisel/LICENSE"
+'''

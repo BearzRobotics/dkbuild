@@ -1,0 +1,27 @@
+# Second-order subdomain takeover scanner. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: ..
+name = "second-order"
+version = "3.2"
+release = 1
+summary = "Second-order subdomain takeover scanner."
+license = "MIT"
+homepage = "https://github.com/mhmdiaa/second-order"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/mhmdiaa/second-order/archive/refs/tags/v3.2.tar.gz", sha256 = "2269828399e4c5b7d6ed22d041d3b203a4af367d07266c7b8a113c001644598f" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/second-order .
+'''
+install = '''
+install -Dm755 build/second-order "$pkgdir/usr/bin/second-order"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/second-order/LICENSE"
+'''

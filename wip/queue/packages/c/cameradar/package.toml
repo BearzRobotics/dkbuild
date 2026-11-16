@@ -1,0 +1,27 @@
+# Hacks its way into RTSP videosurveillance cameras. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: cmd/cameradar.
+name = "cameradar"
+version = "6.2.1"
+release = 1
+summary = "Hacks its way into RTSP videosurveillance cameras."
+license = "MIT"
+homepage = "https://github.com/Ullaakut/cameradar"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/Ullaakut/cameradar/archive/refs/tags/v6.2.1.tar.gz", sha256 = "5dfa905ee69942dd4238dab2644c5a1006734977dae1f058342755124b867f6f" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/cameradar ./cmd/cameradar
+'''
+install = '''
+install -Dm755 build/cameradar "$pkgdir/usr/bin/cameradar"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/cameradar/LICENSE"
+'''

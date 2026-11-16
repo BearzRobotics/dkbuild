@@ -1,0 +1,27 @@
+# Onion addresses for anything. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: ..
+name = "oniongrok"
+version = "1.1.11"
+release = 1
+summary = "Onion addresses for anything."
+license = "MIT"
+homepage = "https://github.com/cmars/oniongrok"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/cmars/oniongrok/archive/refs/tags/v1.1.11.tar.gz", sha256 = "8ee50b86b00181926fcf0845943dc38290dbec73f81dc4917298b002dcfff6a5" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/oniongrok .
+'''
+install = '''
+install -Dm755 build/oniongrok "$pkgdir/usr/bin/oniongrok"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/oniongrok/LICENSE"
+'''

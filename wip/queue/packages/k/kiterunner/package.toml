@@ -1,0 +1,27 @@
+# Contextual Content Discovery Tool. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: cmd/kiterunner.
+name = "kiterunner"
+version = "1.0.2"
+release = 1
+summary = "Contextual Content Discovery Tool."
+license = "AGPL-3.0"
+homepage = "https://github.com/assetnote/kiterunner"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/assetnote/kiterunner/archive/refs/tags/v1.0.2.tar.gz", sha256 = "d553ed6a063b1a65bc72060be137b89d7c48f4da6ebf4fe46057807a5aa3d069" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/kiterunner ./cmd/kiterunner
+'''
+install = '''
+install -Dm755 build/kiterunner "$pkgdir/usr/bin/kiterunner"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/kiterunner/LICENSE"
+'''

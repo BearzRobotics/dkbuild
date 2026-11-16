@@ -1,0 +1,27 @@
+# A tool to find open S3 buckets in AWS or other cloud providers. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: ..
+name = "s3scanner"
+version = "3.1.1"
+release = 1
+summary = "A tool to find open S3 buckets in AWS or other cloud providers."
+license = "MIT"
+homepage = "https://github.com/sa7mon/S3Scanner"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/sa7mon/S3Scanner/archive/refs/tags/v3.1.1.tar.gz", sha256 = "2d333c31909baa21e024d11db1b03647fff3d210d73fa7fa47f598d3d459a20c" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/S3Scanner .
+'''
+install = '''
+install -Dm755 build/S3Scanner "$pkgdir/usr/bin/S3Scanner"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/s3scanner/LICENSE"
+'''

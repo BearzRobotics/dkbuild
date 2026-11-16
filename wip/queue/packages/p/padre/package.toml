@@ -1,0 +1,26 @@
+# Padding Oracle attack tool. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: ..
+name = "padre"
+version = "2.1.0"
+release = 1
+summary = "Padding Oracle attack tool."
+license = "MIT"
+homepage = "https://github.com/glebarez/padre"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/glebarez/padre/archive/refs/tags/v2.1.0.tar.gz", sha256 = "3de8a2b6fb0a4c7aa20e5e3fbf35a50ca6760b3bf2464b182618085e9de7995c" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/padre .
+'''
+install = '''
+install -Dm755 build/padre "$pkgdir/usr/bin/padre"
+'''

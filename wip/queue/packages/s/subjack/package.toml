@@ -1,0 +1,27 @@
+# Subdomain Takeover tool written in Go. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: ..
+name = "subjack"
+version = "3.1.0"
+release = 1
+summary = "Subdomain Takeover tool written in Go."
+license = "MIT"
+homepage = "https://github.com/haccer/subjack"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/haccer/subjack/archive/refs/tags/v3.1.0.tar.gz", sha256 = "3daf124c32a1bf839736420a0f3bc6d92c5358987c9e08ec00a0c8cf3a3febe4" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/subjack .
+'''
+install = '''
+install -Dm755 build/subjack "$pkgdir/usr/bin/subjack"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/subjack/LICENSE"
+'''

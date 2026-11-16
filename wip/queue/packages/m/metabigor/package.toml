@@ -1,0 +1,27 @@
+# Intelligence Tool but without API key. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
+# Go module, dependencies fetched on the host (godeps). Main package: cmd/metabigor.
+name = "metabigor"
+version = "2.2.0"
+release = 1
+summary = "Intelligence Tool but without API key."
+license = "MIT"
+homepage = "https://github.com/j3ssie/metabigor"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/j3ssie/metabigor/archive/refs/tags/v2.2.0.tar.gz", sha256 = "865d5940c157894d707be83cc4eb34f6f18b4e716f460259f823aa322e616407" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -o build/metabigor ./cmd/metabigor
+'''
+install = '''
+install -Dm755 build/metabigor "$pkgdir/usr/bin/metabigor"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/metabigor/LICENSE"
+'''
