@@ -1,0 +1,27 @@
+# hyprlock: screen locker; its PAM stack (/etc/pam.d/hyprlock) is installed by the project (PAM is system-wide here). The systemd-only parts are removed.
+name = "hyprlock"
+version = "0.9.7"
+release = 1
+summary = "Hyprland's screen locker"
+license = "BSD-3-Clause"
+homepage = "https://github.com/hyprwm/hyprlock"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja", "pkgconf", "hyprwayland-scanner-devel"]
+builddeps = ["hyprutils-devel", "hyprlang-devel", "hyprgraphics-devel", "hyprland-protocols-devel", "wayland-devel", "wayland-protocols", "mesa-devel", "libxkbcommon-devel", "cairo-devel", "pango-devel", "libdrm-devel", "sdbus-cpp-devel", "linux-pam-devel", "libglvnd-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/hyprwm/hyprlock/archive/refs/tags/v0.9.7.tar.gz", sha256 = "01145790570ffabd31e9b528c517bdccae76f36e72d733f00c2696d9c3bf2c88" },
+]
+
+setup = '''
+%cmake -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/lib/systemd"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/hyprlock/LICENSE"
+'''

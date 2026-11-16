@@ -1,0 +1,23 @@
+# The fonts the ML4W dotfiles bundle in their setup/fonts: Fira Code Nerd Font, Fira Sans
+# and Material Icons (the bar, launcher and notification styles name them). Taken from the
+# same tarball as ml4w-dotfiles; plain font files, no build.
+name = "fonts-ml4w"
+version = "2.17"
+release = 1
+summary = "Fonts used by the ML4W dotfiles (Fira Code Nerd, Fira Sans, Material Icons)"
+license = "OFL-1.1 AND Apache-2.0"
+homepage = "https://github.com/mylinuxforwork/dotfiles"
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/mylinuxforwork/dotfiles/archive/refs/tags/2.17.tar.gz", sha256 = "05c3d87ab0ac8f6017c1ab50e86d97ab08089f3917fc0b79af3c373ef452ed97" },
+]
+
+install = '''
+for d in FiraCode Fira_Sans Material-Icons; do
+    mkdir -p "$pkgdir/usr/share/fonts/ml4w/$d"
+    find "setup/fonts/$d" -type f \( -name '*.ttf' -o -name '*.otf' \) -exec install -m644 {} "$pkgdir/usr/share/fonts/ml4w/$d/" \;
+done
+install -Dm644 setup/fonts/FiraCode/LICENSE "$pkgdir/usr/share/licenses/fonts-ml4w/FiraCode-LICENSE"
+install -Dm644 setup/fonts/Fira_Sans/OFL.txt "$pkgdir/usr/share/licenses/fonts-ml4w/FiraSans-OFL.txt"
+'''

@@ -1,0 +1,2 @@
+# the session bus is started by dbus-run-session (ml4w-session), not by dinit
+type = internal

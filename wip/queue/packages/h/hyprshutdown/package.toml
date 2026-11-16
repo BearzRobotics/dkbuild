@@ -1,0 +1,27 @@
+# hyprshutdown: closes the windows politely, then logs out or powers off. Glaze is a system package (CMake would otherwise fetch it).
+name = "hyprshutdown"
+version = "0.1.2"
+release = 1
+summary = "Graceful shutdown/logout for Hyprland sessions"
+license = "BSD-3-Clause"
+homepage = "https://github.com/hyprwm/hyprshutdown"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja", "pkgconf", "hyprwayland-scanner-devel"]
+builddeps = ["hyprtoolkit-devel", "hyprutils-devel", "pixman-devel", "libdrm-devel", "glaze-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/hyprwm/hyprshutdown/archive/refs/tags/v0.1.2.tar.gz", sha256 = "c4f1d52830e3d1865b496453094ac74174fc8914b699510892947d8fd3fbdad0" },
+]
+
+setup = '''
+%cmake -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/lib/systemd"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/hyprshutdown/LICENSE"
+'''

@@ -1,0 +1,67 @@
+# ML4W OS dotfiles for Hyprland (mylinuxforwork/dotfiles 2.17): the Hyprland config (Lua), waybar,
+# rofi, swaync, wlogout, quickshell, kitty and other settings, scripts and themes. Installed
+# for new users: /etc/skel/.config (so `useradd -m` and the installer give each user a copy;
+# an existing user copies it by hand: cp -a /etc/skel/.config/. ~/.config/). The 35 MB of
+# wallpapers are installed once, in /usr/share/ml4w/wallpapers, and ~/.config/ml4w/wallpapers
+# in /etc/skel is a link to it.
+#
+# SOURCE EDITS (patches/ml4w-dinit.patch, 8 files): the dotfiles are written for systemd. The
+# patch converts them to dinit, which has no `systemctl`, `loginctl`, `--systemd` or user units:
+#  - hypr/conf/autostart.lua, hypr/scripts/xdg.sh: `systemctl --user start/stop X` becomes
+#    `dinitctl --user start/stop X`; the environment export goes to D-Bus and to the user dinit
+#    (`dinitctl --user setenv`); the polkit agent is a user dinit service (hyprpolkitagent) with
+#    polkit-gnome as the fallback.
+#  - hypr/hypridle.conf, hypr/scripts/power.sh, ml4w/scripts/ml4w-power: lock with hyprlock
+#    directly (no `loginctl lock-session`); reboot, poweroff, suspend and hibernate go through
+#    ml4w-powerctl (below); hyprshutdown's --post-cmd values (`reboot`, `shutdown -P 0`) too.
+#  - ml4w/scripts/ml4w-network: starts the dinit service `networkmanager`.
+#  - ml4w/scripts/ml4w-install-sddm: exits with a message (SDDM is not used; greetd is).
+#  - wlogout/README.txt: the text-login logout command no longer uses loginctl.
+#
+# ADDED (files/): ml4w-session (starts D-Bus session, `dinit --user`, then Hyprland) with its
+# wayland-sessions entry; the user dinit services in /usr/lib/dinit.d/user (boot, login.target,
+# dbus, wireplumber, xdg-desktop-portal(-hyprland), hyprpolkitagent; PipeWire's own come with
+# the pipewire package); ml4w-powerctl (power actions through `sudo -n`; the user needs a
+# sudoers rule). Both scripts pass `shellcheck -s dash`.
+# Not packaged: ML4W's Settings, Welcome and Hyprland-settings apps (Flathub installs by its
+# own installer; flatpak is in the tree); walker (+ elephant) as launcher: rofi is used.
+name = "ml4w-dotfiles"
+version = "2.17"
+release = 1
+summary = "ML4W dotfiles for Hyprland (dinit)"
+license = "GPL-3.0-only"
+homepage = "https://github.com/mylinuxforwork/dotfiles"
+patches = ["ml4w-dinit.patch"]
+rundeps = [
+    "hyprland", "hyprlock", "hypridle", "hyprpaper", "hyprsunset", "hyprpicker", "hyprpolkitagent",
+    "hyprshutdown", "xdg-desktop-portal-hyprland", "xdg-desktop-portal", "xdg-desktop-portal-gtk",
+    "waybar", "rofi", "swaync", "wlogout", "quickshell", "awww", "matugen", "nwg-look", "nwg-displays",
+    "cliphist", "wl-clipboard", "grim", "slurp", "playerctl", "brightnessctl", "libnotify",
+    "kitty", "fish", "zsh", "fastfetch", "btop", "eza", "fzf", "inotify-tools", "jq", "imagemagick",
+    "tesseract", "pavucontrol", "network-manager-applet", "qt6ct", "xcursorgen", "fonts-ml4w",
+    "bibata-cursor-theme", "fonts-font-awesome", "fonts-nerd-symbols-only", "fonts-noto-emoji-ttf",
+    "pipewire", "wireplumber", "dbus", "dinit", "sudo",
+]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/mylinuxforwork/dotfiles/archive/refs/tags/2.17.tar.gz", sha256 = "05c3d87ab0ac8f6017c1ab50e86d97ab08089f3917fc0b79af3c373ef452ed97" },
+]
+
+install = '''
+mkdir -p "$pkgdir/etc/skel" "$pkgdir/usr/share/ml4w"
+cp -a dotfiles/.config "$pkgdir/etc/skel/.config"
+for f in .Xresources .gtkrc-2.0; do
+    [ -e "dotfiles/$f" ] && cp -a "dotfiles/$f" "$pkgdir/etc/skel/$f"
+done
+mv "$pkgdir/etc/skel/.config/ml4w/wallpapers" "$pkgdir/usr/share/ml4w/wallpapers"
+ln -s /usr/share/ml4w/wallpapers "$pkgdir/etc/skel/.config/ml4w/wallpapers"
+install -Dm755 "$pkgfiles/ml4w-session" "$pkgdir/usr/bin/ml4w-session"
+install -Dm755 "$pkgfiles/ml4w-powerctl" "$pkgdir/usr/bin/ml4w-powerctl"
+install -Dm644 "$pkgfiles/ml4w-hyprland.desktop" "$pkgdir/usr/share/wayland-sessions/ml4w-hyprland.desktop"
+mkdir -p "$pkgdir/usr/lib/dinit.d/user"
+for f in "$pkgfiles"/dinit-user/*; do
+    install -Dm644 "$f" "$pkgdir/usr/lib/dinit.d/user/$(basename "$f")"
+done
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ml4w-dotfiles/LICENSE"
+'''

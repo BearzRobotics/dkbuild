@@ -1,0 +1,32 @@
+# Quickshell: build desktop shells (bars, docks, widgets) with QML on Qt 6; the ML4W dotfiles'
+# new bar and dock run on it (the `qs` command). All features on (Wayland layer-shell, session
+# lock, Hyprland IPC, screencopy, X11, i3 IPC, tray, PipeWire, MPRIS, PAM, Polkit, greetd,
+# UPower, notifications, Bluetooth, NetworkManager), jemalloc on.
+# CRASH_HANDLER is OFF: it needs cpptrace, which brings libdwarf through FetchContent (a
+# network download at build time); revisit when cpptrace is packaged.
+name = "quickshell"
+version = "0.3.2"
+release = 1
+summary = "QML-based toolkit for desktop shells"
+license = "LGPL-3.0-only"
+homepage = "https://quickshell.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja", "pkgconf", "wayland", "qt6-qtbase", "qt6-qtdeclarative", "qt6-qtshadertools", "qt6-qtwayland", "spirv-tools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "qt6-qtwayland-devel", "qt6-qtshadertools-devel", "cli11", "jemalloc-devel", "wayland-devel", "wayland-protocols", "libdrm-devel", "mesa-devel", "libxcb-devel", "pipewire-devel", "polkit-devel", "linux-pam-devel", "glib-devel", "vulkan-headers"]
+rundeps = ["qt6-qtdeclarative", "qt6-qtsvg", "qt6-qtwayland", "qt6-qtimageformats"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/quickshell-mirror/quickshell/archive/refs/tags/v0.3.2.tar.gz", sha256 = "946a27e2a276917a03c1079e5c60971af84ece73088c3661dee455d92eb420f7" },
+]
+
+setup = '''
+%cmake -DCRASH_HANDLER=OFF -DBUILD_TESTING=OFF -DDISTRIBUTOR="dkbuild"
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/quickshell/LICENSE"
+'''

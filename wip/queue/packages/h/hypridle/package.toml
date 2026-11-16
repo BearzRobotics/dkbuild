@@ -1,0 +1,27 @@
+# hypridle: idle daemon (talks to logind/upower over D-Bus for lock and sleep hooks; no service enabled). The systemd user unit is removed.
+name = "hypridle"
+version = "0.1.8"
+release = 1
+summary = "Hyprland's idle daemon"
+license = "BSD-3-Clause"
+homepage = "https://github.com/hyprwm/hypridle"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja", "pkgconf", "hyprwayland-scanner-devel"]
+builddeps = ["hyprutils-devel", "hyprlang-devel", "hyprland-protocols-devel", "wayland-devel", "wayland-protocols", "sdbus-cpp-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/hyprwm/hypridle/archive/refs/tags/v0.1.8.tar.gz", sha256 = "08703613cc33cc796c2179bcaa6076e8618113f67b938daaf7535f90c7d39595" },
+]
+
+setup = '''
+%cmake -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/lib/systemd"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/hypridle/LICENSE"
+'''

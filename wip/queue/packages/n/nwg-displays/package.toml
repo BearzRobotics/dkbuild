@@ -1,0 +1,24 @@
+# nwg-displays: output (monitor) configuration for Hyprland and Sway (Python, GTK 3,
+# gtk-layer-shell). Installed with pip from the source tree (no network); the Python deps
+# are runtime: python-gobject, gtk-layer-shell's GI typelib.
+name = "nwg-displays"
+version = "0.5.0"
+release = 1
+summary = "Output configuration GUI for Hyprland and Sway"
+license = "MIT"
+homepage = "https://github.com/nwg-piotr/nwg-displays"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python", "python-gobject", "gtk+3", "gtk-layer-shell"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/nwg-piotr/nwg-displays/archive/refs/tags/v0.5.0.tar.gz", sha256 = "28dfe825e7a6a18df62d36aa1b6b7d232ab86b7f06f99994ad00c04e8b4ccfbc" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 nwg-displays.desktop "$pkgdir/usr/share/applications/nwg-displays.desktop"
+install -Dm644 nwg-displays.svg "$pkgdir/usr/share/pixmaps/nwg-displays.svg"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/nwg-displays/LICENSE"
+'''

@@ -1,0 +1,11 @@
+# A Hyprland desktop with the ML4W dotfiles: desktop-hyprland (compositor, seat, audio, Mesa)
+# plus the dotfiles' programs and the dinit session (ml4w-session), greetd for the login screen
+# and NetworkManager. Not part of desktop-dkde / desktop-dkde-core.
+name = "desktop-hyprland-ml4w"
+version = "1"
+release = 1
+summary = "Hyprland desktop with the ML4W dotfiles"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+options = ["meta"]
+rundeps = ["desktop-hyprland", "ml4w-dotfiles", "greetd", "networkmanager", "polkit", "upower"]

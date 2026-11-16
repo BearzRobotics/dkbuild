@@ -1,0 +1,35 @@
+# fzf: command-line fuzzy finder (Go). Shell key bindings and completion are installed under
+# /usr/share/fzf.
+name = "fzf"
+version = "0.75.0"
+release = 1
+summary = "Command-line fuzzy finder"
+license = "MIT"
+homepage = "https://github.com/junegunn/fzf"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["go"]
+options = ["godeps", "!check"]
+
+source = [
+    { url = "https://github.com/junegunn/fzf/archive/refs/tags/v0.75.0.tar.gz", sha256 = "165f6e0c1b9ba082346233681e3f1d1374e37f9fd3c1d7b6dfe09659ab893faa" },
+]
+
+environment = '''
+export CGO_ENABLED=0
+export GOFLAGS="$GOFLAGS -trimpath"
+'''
+build = '''
+go build -ldflags "-X main.version=0.75.0 -X main.revision=release" -o fzf .
+'''
+install = '''
+install -Dm755 fzf "$pkgdir/usr/bin/fzf"
+install -Dm755 bin/fzf-tmux "$pkgdir/usr/bin/fzf-tmux"
+install -Dm644 man/man1/fzf.1 "$pkgdir/usr/share/man/man1/fzf.1"
+install -Dm644 man/man1/fzf-tmux.1 "$pkgdir/usr/share/man/man1/fzf-tmux.1"
+install -Dm644 shell/key-bindings.bash "$pkgdir/usr/share/fzf/key-bindings.bash"
+install -Dm644 shell/key-bindings.zsh "$pkgdir/usr/share/fzf/key-bindings.zsh"
+install -Dm644 shell/key-bindings.fish "$pkgdir/usr/share/fzf/key-bindings.fish"
+install -Dm644 shell/completion.bash "$pkgdir/usr/share/fzf/completion.bash"
+install -Dm644 shell/completion.zsh "$pkgdir/usr/share/fzf/completion.zsh"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/fzf/LICENSE"
+'''

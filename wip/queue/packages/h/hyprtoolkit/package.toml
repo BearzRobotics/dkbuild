@@ -1,0 +1,27 @@
+# hyprtoolkit: the toolkit hyprpaper, hyprpolkitagent, hyprshutdown and hyprland-guiutils draw with. libinotify is a BSD shim and is not needed on Linux. UNVERIFIED: builddeps are read from CMakeLists (the PRIVATE list is longer than shown by the survey).
+name = "hyprtoolkit"
+version = "0.6.0"
+release = 1
+summary = "GUI toolkit of the Hypr* tools"
+license = "BSD-3-Clause"
+homepage = "https://github.com/hyprwm/hyprtoolkit"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja", "pkgconf", "hyprwayland-scanner-devel"]
+builddeps = ["aquamarine-devel", "hyprgraphics-devel", "hyprutils-devel", "hyprlang-devel", "wayland-devel", "wayland-protocols", "pixman-devel", "libdrm-devel", "mesa-devel", "libxkbcommon-devel", "cairo-devel", "pango-devel", "iniparser-devel", "libheif-devel", "librsvg-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/hyprwm/hyprtoolkit/archive/refs/tags/v0.6.0.tar.gz", sha256 = "53c41be72af97d9ede274a63c9c1034c58726d862905763ed6e5a564ae42ba6b" },
+]
+
+setup = '''
+%cmake -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/lib/systemd"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/hyprtoolkit/LICENSE"
+'''

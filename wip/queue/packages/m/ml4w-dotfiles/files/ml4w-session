@@ -1,0 +1,32 @@
+#!/bin/sh
+# ml4w-session: starts a Hyprland session on a system with dinit and no systemd.
+# It gives the session a D-Bus session bus (dbus-run-session), a user dinit instance
+# (`dinit --user`, services in /usr/lib/dinit.d/user: PipeWire, WirePlumber, the portals, the
+# polkit agent) and then runs Hyprland; when Hyprland ends the user instance is shut down.
+
+export XDG_CURRENT_DESKTOP=Hyprland
+export XDG_SESSION_TYPE=wayland
+export XDG_SESSION_DESKTOP=Hyprland
+
+if [ -z "${XDG_RUNTIME_DIR:-}" ]; then
+    d=/run/user/$(id -u)
+    if [ ! -d "$d" ] || [ ! -w "$d" ]; then
+        d=${TMPDIR:-/tmp}/runtime-$(id -u)
+        mkdir -p "$d"
+        chmod 700 "$d"
+    fi
+    export XDG_RUNTIME_DIR=$d
+fi
+
+if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ] && command -v dbus-run-session >/dev/null 2>&1; then
+    exec dbus-run-session -- "$0" "$@"
+fi
+
+if command -v dinit >/dev/null 2>&1; then
+    dinit --user --quiet >"$XDG_RUNTIME_DIR/dinit-user.log" 2>&1 &
+fi
+
+Hyprland "$@"
+status=$?
+dinitctl --user shutdown >/dev/null 2>&1
+exit "$status"

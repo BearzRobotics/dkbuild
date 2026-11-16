@@ -1,0 +1,25 @@
+# FenrirOS with Hyprland and the ML4W dotfiles: a live ISO that boots to the Hyprland desktop
+# through greetd (the live user logs in by itself, with no password typed, running ml4w-session:
+# a session D-Bus, a user dinit instance, then Hyprland). After a logout greetd asks for a login
+# and the live user's empty password is accepted (the image's /etc/pam.d/greetd has nullok).
+# Like images/dkde.toml: NetworkManager does the DHCP (dhcpcd's service is not enabled), firewalld
+# is the firewall, every firmware group is included. The dotfiles come from ml4w-dotfiles:
+# /etc/skel/.config is copied into the live user's home when the user is created.
+# The packages come from wip/queue until they are moved to packages/ and built.
+name     = "hyprland"
+arch     = "x86_64"
+hostname = "fenriros"
+label    = "FENRIROS_HYPR"
+packages = ["base", "openssh", "openssh-server", "curl", "linux", "live-initramfs", "dkinstaller", "firmware-linux-meta", "desktop-hyprland-ml4w", "firewalld"]
+exclude  = ["*-devel", "*-doc", "*-static"]
+unwanted = ["dhcpcd"]
+services = ["udevd", "udev-trigger", "udev-settle", "modules", "syslogd", "seatd", "dbus", "networkmanager", "firewalld", "greetd"]
+output   = ["iso"]
+login     = "greetd"
+autologin = "live"
+session   = "ml4w-session"
+
+[[users]]
+name     = "live"
+groups   = ["wheel", "video", "render", "audio", "input", "plugdev"]
+password = "empty"

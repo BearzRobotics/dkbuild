@@ -1,0 +1,27 @@
+# grim: screenshots for Wayland compositors (wlr-screencopy / ext-image-copy-capture).
+# JPEG output on (libjpeg-turbo), man page through scdoc.
+name = "grim"
+version = "1.4.0"
+release = 1
+summary = "Screenshot tool for Wayland"
+license = "MIT"
+homepage = "https://git.sr.ht/~emersion/grim"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["meson", "pkgconf", "scdoc"]
+builddeps = ["wayland-devel", "wayland-protocols", "pixman-devel", "libpng-devel", "libjpeg-turbo-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://git.sr.ht/~emersion/grim/refs/download/v1.4.0/grim-1.4.0.tar.gz", sha256 = "b6786e889ed93568634189a59f6b6429c041bf74883c10e8b6e2ed6772ae7ffb" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/grim/LICENSE"
+'''

@@ -1,0 +1,26 @@
+# rofi 2.x: application launcher, window switcher and dmenu; X11 (xcb) and native Wayland
+# in one program since 2.0 (the old rofi-wayland fork is merged). Both backends on.
+name = "rofi"
+version = "2.1.1"
+release = 1
+summary = "Window switcher, application launcher and dmenu replacement"
+license = "MIT"
+homepage = "https://github.com/davatorium/rofi"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["meson", "pkgconf", "bison", "flex", "wayland"]
+builddeps = ["glib-devel", "cairo-devel", "pango-devel", "gdk-pixbuf-devel", "libxkbcommon-devel", "wayland-devel", "wayland-protocols", "libxcb-devel", "xcb-util-devel", "xcb-util-wm-devel", "xcb-util-cursor-devel", "xcb-util-keysyms-devel", "startup-notification-devel", "xcb-imdkit-devel", "libxkbcommon-x11-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/davatorium/rofi/releases/download/2.1.1/rofi-2.1.1.tar.gz", sha256 = "5fe33afce841994eebfc0302ba869e7b9c035b97c26858fb0142a54a1627d3e4" },
+]
+
+setup = '''
+%meson -Dwayland=enabled -Dxcb=enabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

@@ -1,0 +1,28 @@
+# nwg-look: GTK settings editor for Wayland (GTK 3 through cgo; Go). Installs by the project's
+# Makefile with PREFIX=/usr.
+name = "nwg-look"
+version = "1.2.1"
+release = 1
+summary = "GTK 3 settings editor for Wayland"
+license = "MIT"
+homepage = "https://github.com/nwg-piotr/nwg-look"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["go", "pkgconf"]
+builddeps = ["gtk+3-devel", "glib-devel", "cairo-devel"]
+rundeps = ["gtk+3"]
+options = ["godeps", "!check"]
+
+source = [
+    { url = "https://github.com/nwg-piotr/nwg-look/archive/refs/tags/v1.2.1.tar.gz", sha256 = "1c66053f559f1756b18b615987a450433117c6b6c08759debdef94b6fd906480" },
+]
+
+environment = '''
+export CGO_ENABLED=1
+export GOFLAGS="$GOFLAGS -trimpath"
+'''
+build = '''
+%make PREFIX=/usr
+'''
+install = '''
+%make_install PREFIX=/usr
+'''

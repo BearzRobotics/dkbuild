@@ -1,0 +1,4 @@
+type = internal
+waits-for: login.target
+waits-for: pipewire-pulse
+waits-for: wireplumber

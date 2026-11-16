@@ -1,0 +1,27 @@
+# matugen: Material You colour schemes from a wallpaper (Rust); the dotfiles generate their
+# waybar/rofi/kitty colours with it. Default features (JSON dump, JPEG XL images). Crates
+# vendored on the host.
+name = "matugen"
+version = "4.2.0"
+release = 1
+summary = "Material You colour generator for wallpapers"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/InioX/matugen"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["rust", "pkgconf"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/InioX/matugen/archive/refs/tags/v4.2.0.tar.gz", sha256 = "82044ab8ac3e793b2b94f8f75917b348b4038585133a77c07f5de59c88d65244" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs
+'''
+install = '''
+install -Dm755 target/release/matugen "$pkgdir/usr/bin/matugen"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/matugen/LICENSE"
+'''

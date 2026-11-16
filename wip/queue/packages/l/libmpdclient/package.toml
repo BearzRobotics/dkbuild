@@ -1,0 +1,25 @@
+# libmpdclient: client library for the Music Player Daemon (waybar's mpd module).
+name = "libmpdclient"
+version = "2.27"
+release = 1
+summary = "Client library for the Music Player Daemon"
+license = "BSD-2-Clause"
+homepage = "https://www.musicpd.org/libs/libmpdclient/"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["meson", "pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/MusicPlayerDaemon/libmpdclient/archive/refs/tags/v2.27.tar.gz", sha256 = "d1c25732d8f4ffefb65994763e1f2137747327e632c42d9d52e5d54fec182492" },
+]
+
+setup = '''
+%meson -Ddocumentation=false -Dtest=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSES/BSD-2-Clause.txt "$pkgdir/usr/share/licenses/libmpdclient/BSD-2-Clause.txt" 2>/dev/null || true
+'''

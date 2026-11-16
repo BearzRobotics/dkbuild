@@ -1,0 +1,27 @@
+# hyprpaper: wallpaper daemon. The systemd user unit is removed.
+name = "hyprpaper"
+version = "0.8.5"
+release = 1
+summary = "Hyprland's wallpaper utility"
+license = "BSD-3-Clause"
+homepage = "https://github.com/hyprwm/hyprpaper"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja", "pkgconf", "hyprwayland-scanner-devel"]
+builddeps = ["hyprutils-devel", "hyprlang-devel", "hyprtoolkit-devel", "hyprwire-devel", "wayland-devel", "wayland-protocols", "pixman-devel", "libdrm-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/hyprwm/hyprpaper/archive/refs/tags/v0.8.5.tar.gz", sha256 = "d5868931dc485fd2e798717ce885bc62abd1e00796ff921f31e1903147bff3bf" },
+]
+
+setup = '''
+%cmake -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/lib/systemd"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/hyprpaper/LICENSE"
+'''

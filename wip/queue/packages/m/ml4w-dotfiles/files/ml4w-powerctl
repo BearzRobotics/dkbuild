@@ -1,0 +1,36 @@
+#!/bin/sh
+# ml4w-powerctl: power actions for the ML4W dotfiles on a system with dinit and no logind.
+#   ml4w-powerctl suspend|hibernate|reboot|poweroff
+#   ml4w-powerctl service-start NAME     start a dinit system service
+# The actions need root: as an ordinary user they run through `sudo -n` (no password prompt, a
+# bar or key binding cannot answer one), so the user needs a sudoers rule (the wheel group
+# in this system's images). A failure is reported with notify-send when it is there.
+
+fail() {
+    echo "ml4w-powerctl: $1" >&2
+    command -v notify-send >/dev/null 2>&1 && notify-send -u critical "Power action failed" "$1"
+    exit 1
+}
+
+as_root() {
+    if [ "$(id -u)" -eq 0 ]; then
+        "$@"
+    elif command -v sudo >/dev/null 2>&1; then
+        sudo -n "$@" || fail "sudo could not run: $*"
+    else
+        fail "not root and sudo is not installed"
+    fi
+}
+
+case "${1:-}" in
+    suspend)   as_root sh -c 'echo mem > /sys/power/state' ;;
+    hibernate) as_root sh -c 'echo disk > /sys/power/state' ;;
+    reboot)    as_root reboot ;;
+    poweroff)  as_root poweroff ;;
+    service-start)
+        [ -n "${2:-}" ] || fail "service-start needs a service name"
+        as_root dinitctl start "$2" ;;
+    *)
+        echo "usage: ml4w-powerctl suspend|hibernate|reboot|poweroff|service-start NAME" >&2
+        exit 2 ;;
+esac

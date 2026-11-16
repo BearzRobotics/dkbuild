@@ -1,0 +1,32 @@
+# xdg-desktop-portal-hyprland: the screen-sharing/screenshot portal backend for Hyprland
+# (PipeWire). D-Bus activated (share/dbus-1/services); the systemd user unit and its
+# SystemdService line are removed because there is no systemd here: dbus-daemon starts it.
+# The dotfiles' session script (ml4w-dotfiles) no longer calls systemctl for it.
+name = "xdg-desktop-portal-hyprland"
+version = "1.5.0"
+release = 1
+summary = "xdg-desktop-portal backend for Hyprland"
+license = "BSD-3-Clause"
+homepage = "https://github.com/hyprwm/xdg-desktop-portal-hyprland"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja", "pkgconf", "hyprwayland-scanner-devel"]
+builddeps = ["hyprutils-devel", "hyprlang-devel", "hyprland-protocols-devel", "wayland-devel", "wayland-protocols", "pipewire-devel", "libdrm-devel", "util-linux-devel", "mesa-devel", "sdbus-cpp-devel"]
+rundeps = ["xdg-desktop-portal", "pipewire", "hyprland"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/hyprwm/xdg-desktop-portal-hyprland/archive/refs/tags/v1.5.0.tar.gz", sha256 = "8f9eddad706b0bbca2dc24f9894e07969ec5aed163249d6eac3932cfaf38e6a9" },
+]
+
+setup = '''
+%cmake -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/lib/systemd"
+sed -i '/^SystemdService=/d' "$pkgdir"/usr/share/dbus-1/services/org.freedesktop.impl.portal.desktop.hyprland.service
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/xdg-desktop-portal-hyprland/LICENSE"
+'''

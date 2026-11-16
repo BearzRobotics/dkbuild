@@ -1,0 +1,30 @@
+# SwayNotificationCenter (swaync, swaync-client): notification daemon and control centre
+# for Wayland (GTK 4, libadwaita, Granite 7, gtk4-layer-shell; Vala). The systemd user unit
+# is not installed (-Dsystemd-service=false): the session script starts it, and it is also
+# D-Bus activatable. PulseAudio widget and scripting on; man pages and the three shells'
+# completions on.
+name = "swaync"
+version = "0.12.6"
+release = 1
+summary = "Notification daemon with a control centre for Wayland"
+license = "GPL-3.0-only"
+homepage = "https://github.com/ErikReider/SwayNotificationCenter"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["meson", "pkgconf", "vala", "gobject-introspection", "glib-devel", "gettext", "scdoc", "sassc", "wayland"]
+builddeps = ["gtk4-devel", "gtk4-layer-shell-devel", "libadwaita-devel", "granite-devel", "json-glib-devel", "libgee-devel", "libpulse-devel", "wayland-devel", "wayland-protocols", "bash-completion", "fish"]
+rundeps = ["libnotify"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/ErikReider/SwayNotificationCenter/archive/refs/tags/v0.12.6.tar.gz", sha256 = "0c844eb5c9524f924495bd4145e5db575096de36f3ec87fb37e4c1ed6eacb897" },
+]
+
+setup = '''
+%meson -Dsystemd-service=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

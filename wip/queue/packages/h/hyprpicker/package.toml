@@ -1,0 +1,27 @@
+# hyprpicker: colour picker.
+name = "hyprpicker"
+version = "0.4.8"
+release = 1
+summary = "Wayland colour picker"
+license = "BSD-3-Clause"
+homepage = "https://github.com/hyprwm/hyprpicker"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja", "pkgconf", "hyprwayland-scanner-devel"]
+builddeps = ["hyprutils-devel", "wayland-devel", "wayland-protocols", "libxkbcommon-devel", "cairo-devel", "pango-devel", "libjpeg-turbo-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/hyprwm/hyprpicker/archive/refs/tags/v0.4.8.tar.gz", sha256 = "b3c1714d25bed3a1d59b813a7c59156a7c55f1f1cf2bea2306ba6b01cf8d49a7" },
+]
+
+setup = '''
+%cmake -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/lib/systemd"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/hyprpicker/LICENSE"
+'''

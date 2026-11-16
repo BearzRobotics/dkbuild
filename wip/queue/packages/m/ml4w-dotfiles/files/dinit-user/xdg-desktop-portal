@@ -1,0 +1,6 @@
+type = process
+command = /usr/libexec/xdg-desktop-portal
+log-type = buffer
+depends-on: dbus
+depends-on: xdg-desktop-portal-hyprland
+smooth-recovery = true

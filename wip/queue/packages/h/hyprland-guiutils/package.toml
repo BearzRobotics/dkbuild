@@ -1,0 +1,27 @@
+# hyprland-guiutils: the dialogs Hyprland starts (permission and update prompts).
+name = "hyprland-guiutils"
+version = "0.2.2"
+release = 1
+summary = "Hyprland GUI helper programs"
+license = "BSD-3-Clause"
+homepage = "https://github.com/hyprwm/hyprland-guiutils"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja", "pkgconf", "hyprwayland-scanner-devel"]
+builddeps = ["hyprlang-devel", "hyprutils-devel", "hyprtoolkit-devel", "pixman-devel", "libxkbcommon-devel", "libdrm-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/hyprwm/hyprland-guiutils/archive/refs/tags/v0.2.2.tar.gz", sha256 = "16f92a6c5a22ac58e1fc313f6b202c188da45e804e1f21ff57dfd0da5c1a01b7" },
+]
+
+setup = '''
+%cmake -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+rm -rf "$pkgdir/usr/lib/systemd"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/hyprland-guiutils/LICENSE"
+'''

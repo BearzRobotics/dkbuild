@@ -1,0 +1,26 @@
+# playerctl: MPRIS media-player control (the dotfiles' waybar and key bindings call it); the
+# library has GObject introspection. Docs (gtk-doc) off.
+name = "playerctl"
+version = "2.4.1"
+release = 1
+summary = "MPRIS media player command-line controller and library"
+license = "LGPL-3.0-or-later"
+homepage = "https://github.com/altdesktop/playerctl"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["meson", "pkgconf", "gobject-introspection", "glib-devel"]
+builddeps = ["glib-devel", "gobject-introspection-devel", "bash-completion"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/altdesktop/playerctl/archive/refs/tags/v2.4.1.tar.gz", sha256 = "75957ad5071956f563542c7557af16a57e40b4a7f66bc9b6373d022ec5eef548" },
+]
+
+setup = '''
+%meson -Dgtk-doc=false -Dintrospection=true -Dbash-completions=true -Dzsh-completions=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

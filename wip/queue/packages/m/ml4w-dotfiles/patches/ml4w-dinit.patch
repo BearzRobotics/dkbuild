@@ -1,0 +1,244 @@
+diff -ruN a/dotfiles/.config/hypr/conf/autostart.lua b/dotfiles/.config/hypr/conf/autostart.lua
+--- a/dotfiles/.config/hypr/conf/autostart.lua
++++ b/dotfiles/.config/hypr/conf/autostart.lua
+@@ -9,12 +9,14 @@
+         f:close()
+     end
+ 
+-    -- Export variables to systemd
+-    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
++    -- Export variables to the D-Bus session and to the user dinit instance
++    -- (dinit instead of systemd: dinit-session starts `dinit --user`)
++    hl.exec_cmd("dbus-update-activation-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE")
++    hl.exec_cmd("dinitctl --user setenv WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE")
+ 
+     -- Restart portals so they catch the environment
+-    hl.exec_cmd("systemctl --user stop xdg-desktop-portal xdg-desktop-portal-hyprland")
+-    hl.exec_cmd("systemctl --user start xdg-desktop-portal-hyprland xdg-desktop-portal")
++    hl.exec_cmd("dinitctl --user stop xdg-desktop-portal xdg-desktop-portal-hyprland")
++    hl.exec_cmd("dinitctl --user start xdg-desktop-portal-hyprland xdg-desktop-portal")
+ 
+     -- awww daemon
+     hl.exec_cmd("awww-daemon")
+@@ -28,13 +30,10 @@
+     -- Start waybar
+     hl.exec_cmd(HOME .. "/.config/waybar/launch.sh")
+ 
+-    -- Start polkit agent: prefer hyprpolkitagent.service (Ubuntu, via
+-    -- packages-ubuntu -- its unit is WantedBy=graphical-session.target,
+-    -- which Hyprland never activates, so start it explicitly), falling
+-    -- back to polkit-gnome-authentication-agent-1 where that unit
+-    -- doesn't exist. Only one should run -- starting both means
+-    -- duplicate polkit auth dialogs.
+-    hl.exec_cmd("systemctl --user start hyprpolkitagent.service 2>/dev/null || /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 || true")
++    -- Start the polkit agent as a user dinit service (ml4w-dotfiles ships it);
++    -- falling back to polkit-gnome-authentication-agent-1 when that fails.
++    -- Only one should run -- starting both means duplicate polkit auth dialogs.
++    hl.exec_cmd("dinitctl --user start hyprpolkitagent 2>/dev/null || /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 || true")
+ 
+     -- Restore wallpaper (skip for quickshell — handled inside ml4w-autostart)
+     if wallpaper_app ~= "quickshell" then
+diff -ruN a/dotfiles/.config/hypr/hypridle.conf b/dotfiles/.config/hypr/hypridle.conf
+--- a/dotfiles/.config/hypr/hypridle.conf
++++ b/dotfiles/.config/hypr/hypridle.conf
+@@ -1,7 +1,7 @@
+ general {
+     lock_cmd = pidof hyprlock || hyprlock       # avoid starting multiple hyprlock instances.
+     # lock_cmd = playerctl --all-players pause && pidof hyprlock || hyprlock  # pause all system audio and avoid starting multiple hyprlock instances.
+-    before_sleep_cmd = loginctl lock-session    # lock before suspend.
++    before_sleep_cmd = pidof hyprlock || hyprlock    # lock before suspend (no logind here).
+     after_sleep_cmd = hyprctl dispatch 'hl.dsp.dpms({ action = "enable" })'  # to avoid having to press a key twice to turn on the display.
+ }
+ 
+@@ -20,7 +20,7 @@
+ 
+ listener {
+     timeout = 600                                 # 10min
+-    on-timeout = loginctl lock-session            # lock screen when timeout has passed
++    on-timeout = pidof hyprlock || hyprlock       # lock screen when timeout has passed
+ }
+ 
+ listener {
+@@ -31,5 +31,5 @@
+ 
+ listener {
+     timeout = 1800                                # 30min
+-    on-timeout = systemctl suspend                # suspend pc
++    on-timeout = ml4w-powerctl suspend            # suspend pc
+ }
+diff -ruN a/dotfiles/.config/hypr/scripts/power.sh b/dotfiles/.config/hypr/scripts/power.sh
+--- a/dotfiles/.config/hypr/scripts/power.sh
++++ b/dotfiles/.config/hypr/scripts/power.sh
+@@ -55,24 +55,24 @@
+ 	echo ":: Reboot"
+ 	terminate_clients
+ 	sleep 0.5
+-	systemctl reboot
++	ml4w-powerctl reboot
+ fi
+ 
+ if [[ "$1" == "shutdown" ]]; then
+ 	echo ":: Shutdown"
+ 	terminate_clients
+ 	sleep 0.5
+-	systemctl poweroff
++	ml4w-powerctl poweroff
+ fi
+ 
+ if [[ "$1" == "suspend" ]]; then
+ 	echo ":: Suspend"
+ 	sleep 0.5
+-	systemctl suspend
++	ml4w-powerctl suspend
+ fi
+ 
+ if [[ "$1" == "hibernate" ]]; then
+ 	echo ":: Hibernate"
+ 	sleep 1
+-	systemctl hibernate
++	ml4w-powerctl hibernate
+ fi
+diff -ruN a/dotfiles/.config/hypr/scripts/xdg.sh b/dotfiles/.config/hypr/scripts/xdg.sh
+--- a/dotfiles/.config/hypr/scripts/xdg.sh
++++ b/dotfiles/.config/hypr/scripts/xdg.sh
+@@ -24,37 +24,22 @@
+ killall -e xdg-desktop-portal
+ 
+ # Set required environment variables
+-dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=hyprland
++dbus-update-activation-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=hyprland
++dinitctl --user setenv WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=hyprland
+ 
+-# Stop all services
+-systemctl --user stop pipewire
+-systemctl --user stop wireplumber
+-systemctl --user stop xdg-desktop-portal
+-systemctl --user stop xdg-desktop-portal-gnome
+-systemctl --user stop xdg-desktop-portal-kde
+-systemctl --user stop xdg-desktop-portal-wlr
+-systemctl --user stop xdg-desktop-portal-hyprland
++# Stop all services (user dinit; the ones that do not exist here are ignored)
++for s in wireplumber pipewire-pulse pipewire xdg-desktop-portal xdg-desktop-portal-hyprland; do
++    dinitctl --user stop "$s" 2>/dev/null
++done
+ sleep $_sleep1
+ 
+-# Start xdg-desktop-portal-hyprland
+-/usr/lib/xdg-desktop-portal-hyprland &
+-sleep $_sleep3
+-
+-# Start xdg-desktop-portal-gtk
+-if [ -f /usr/lib/xdg-desktop-portal-gtk ]; then
+-    /usr/lib/xdg-desktop-portal-gtk &
+-    sleep $_sleep1
+-fi
+-
+-# Start xdg-desktop-portal
+-/usr/lib/xdg-desktop-portal &
+-sleep $_sleep2
+-
+-# Start required services
+-systemctl --user start pipewire
+-systemctl --user start wireplumber
+-systemctl --user start xdg-desktop-portal
+-systemctl --user start xdg-desktop-portal-hyprland
++# Start the services again, as user dinit services (they start in dependency order:
++# PipeWire, WirePlumber, the Hyprland portal, then the main portal)
++dinitctl --user start pipewire
++dinitctl --user start pipewire-pulse
++dinitctl --user start wireplumber
++dinitctl --user start xdg-desktop-portal-hyprland
++dinitctl --user start xdg-desktop-portal
+ 
+ # Run waybar
+ sleep $_sleep3
+diff -ruN a/dotfiles/.config/ml4w/scripts/ml4w-install-sddm b/dotfiles/.config/ml4w/scripts/ml4w-install-sddm
+--- a/dotfiles/.config/ml4w/scripts/ml4w-install-sddm
++++ b/dotfiles/.config/ml4w/scripts/ml4w-install-sddm
+@@ -1,5 +1,11 @@
+ #!/usr/bin/env bash
+ 
++# dinit: this installer enables systemd units, which do not exist here. The display
++# manager of this system is greetd (see its package); nothing to install.
++echo "SDDM is not supported on this system (it uses greetd and dinit)." >&2
++exit 1
++
++
+ # --- 1. PRE-FLIGHT CHECKS ---
+ 
+ if ! command -v gum &> /dev/null; then
+diff -ruN a/dotfiles/.config/ml4w/scripts/ml4w-network b/dotfiles/.config/ml4w/scripts/ml4w-network
+--- a/dotfiles/.config/ml4w/scripts/ml4w-network
++++ b/dotfiles/.config/ml4w/scripts/ml4w-network
+@@ -1,19 +1,19 @@
+ #!/usr/bin/env bash
+ 
+-SERVICE="NetworkManager"
++# dinit: the system service is called "networkmanager"
++SERVICE="networkmanager"
+ 
+-if systemctl is-active --quiet "$SERVICE"; then
++if dinitctl is-started "$SERVICE" >/dev/null 2>&1; then
+     echo "✅ $SERVICE is already running."
+     nmtui
+ else
+     echo "⚠️  $SERVICE is not running. Attempting to start it..."
+-    sudo systemctl enable "$SERVICE"
+-    sudo systemctl start "$SERVICE"
+-    if systemctl is-active --quiet "$SERVICE"; then
++    ml4w-powerctl service-start "$SERVICE"
++    if dinitctl is-started "$SERVICE" >/dev/null 2>&1; then
+         echo "✅ $SERVICE was successfully started."
+         nmtui
+     else
+-        echo "❌ Failed to start $SERVICE. You may need to check 'journalctl -xe' for errors."
++        echo "❌ Failed to start $SERVICE. See the system log (/var/log) for errors."
+         exit 1
+     fi
+ fi
+diff -ruN a/dotfiles/.config/ml4w/scripts/ml4w-power b/dotfiles/.config/ml4w/scripts/ml4w-power
+--- a/dotfiles/.config/ml4w/scripts/ml4w-power
++++ b/dotfiles/.config/ml4w/scripts/ml4w-power
+@@ -2,16 +2,16 @@
+ 
+ # 1. Define fallbacks as explicit functions to prevent quote-stripping issues
+ lock_action()     { pidof hyprlock || hyprlock; }
+-suspend_action()  { systemctl suspend; }
++suspend_action()  { ml4w-powerctl suspend; }
+ logout_action()   { hyprctl dispatch 'hl.dsp.exit()'; }
+-reboot_action()   { systemctl reboot; }
+-poweroff_action() { systemctl poweroff; }
++reboot_action()   { ml4w-powerctl reboot; }
++poweroff_action() { ml4w-powerctl poweroff; }
+ 
+ # 2. Dynamic Check: If hyprshutdown is present, override the functions directly
+ if command -v hyprshutdown &> /dev/null; then
+     logout_action()   { hyprshutdown; }
+-    reboot_action()   { hyprshutdown -t 'Restarting...' --post-cmd 'reboot'; }
+-    poweroff_action() { hyprshutdown -t 'Shutting down...' --post-cmd 'shutdown -P 0'; }
++    reboot_action()   { hyprshutdown -t 'Restarting...' --post-cmd 'ml4w-powerctl reboot'; }
++    poweroff_action() { hyprshutdown -t 'Shutting down...' --post-cmd 'ml4w-powerctl poweroff'; }
+ fi
+ 
+ # Help menu output
+@@ -23,7 +23,7 @@
+ 
+ Options:
+   -l, --lock        Lock the screen using hyprlock
+-  -s, --suspend     Suspend the system via systemctl
++  -s, --suspend     Suspend the system (ml4w-powerctl)
+   -e, --logout      Gracefully exit the desktop environment
+   -r, --reboot      Reboot the machine
+   -p, --poweroff    Power off the machine completely
+diff -ruN a/dotfiles/.config/wlogout/README.txt b/dotfiles/.config/wlogout/README.txt
+--- a/dotfiles/.config/wlogout/README.txt
++++ b/dotfiles/.config/wlogout/README.txt
+@@ -3,6 +3,6 @@
+ Use for Display Manager e.g., sddm (DEFAULT)
+ sleep 1; hyprctl dispatch "hl.dsp.exit()"
+ 
+-Use for Arch Linux text based login
+-sleep 1; loginctl terminate-user $USER
++Use for a text based login (no logind here)
++sleep 1; pkill -u $USER -x Hyprland
+ 

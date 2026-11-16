@@ -1,0 +1,30 @@
+# Waybar: highly customisable Wayland bar (GTK 3 through gtkmm). Modules enabled for what the
+# tree has: libinput, libnl (network), upower, PipeWire, PulseAudio, libudev, libevdev,
+# WirePlumber, MPRIS (playerctl), MPD (libmpdclient), dbusmenu (tray), sndio, jack off
+# (no JACK package: PipeWire's jack is not a package here). Left out: gps (gpsd, not packaged),
+# wwan (ModemManager's mm-glib IS packaged, so on), cava (libcava not packaged), systemd.
+name = "waybar"
+version = "0.16.0"
+release = 1
+summary = "Highly customisable Wayland bar"
+license = "MIT"
+homepage = "https://github.com/Alexays/Waybar"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["meson", "pkgconf", "scdoc", "wayland", "glib-devel"]
+builddeps = ["fmt-devel", "spdlog-devel", "jsoncpp-devel", "gtkmm3.0-devel", "glibmm2.4-devel", "libsigc++2-devel", "wayland-devel", "wayland-protocols", "gtk-layer-shell-devel", "libdbusmenu-devel", "libinput-devel", "libnl-devel", "upower-devel", "pipewire-devel", "libpulse-devel", "eudev-devel", "libevdev-devel", "wireplumber-devel", "playerctl-devel", "libmpdclient-devel", "libxkbcommon-devel", "sndio-devel", "modemmanager-devel", "catch2"]
+rundeps = ["fonts-font-awesome"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/Alexays/Waybar/archive/refs/tags/0.16.0.tar.gz", sha256 = "ce74962053002c35e80f569298baebd6887088c80454d0ce9a2c9ca5e21e97c7" },
+]
+
+setup = '''
+%meson -Dsystemd=disabled -Dgps=disabled -Dcava=disabled -Djack=disabled -Dtests=disabled -Dwwan=enabled -Dsndio=enabled -Dmpd=enabled -Dmpris=enabled -Dwireplumber=enabled -Dpipewire=enabled -Dpulseaudio=enabled -Dupower_glib=enabled -Dlibnl=enabled -Dlibinput=enabled -Dlibudev=enabled -Dlibevdev=enabled -Ddbusmenu-gtk=enabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

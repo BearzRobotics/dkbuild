@@ -1,0 +1,32 @@
+# sdbus-c++: C++ binding for sd-bus (the Hypr tools talk D-Bus through it). Built against
+# elogind's libelogind (its sd-bus), which its CMake accepts in place of libsystemd; no systemd
+# here and no daemon is needed from elogind just to link. Docs and codegen off.
+name = "sdbus-cpp"
+version = "2.3.1"
+release = 1
+summary = "High-level C++ D-Bus library over sd-bus"
+license = "LGPL-2.1-only"
+homepage = "https://github.com/Kistler-Group/sdbus-cpp"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["elogind-devel"]
+rundeps = ["elogind-libs"]
+
+source = [
+    { url = "https://github.com/Kistler-Group/sdbus-cpp/archive/refs/tags/v2.3.1.tar.gz", sha256 = "3a289eded586c26d06c1387de72c7bf7c809527a70d51ba6401fe61059b19626" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DSDBUSCPP_BUILD_DOCS=OFF \
+    -DSDBUSCPP_BUILD_CODEGEN=OFF \
+    -DSDBUSCPP_BUILD_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/sdbus-cpp/LICENSE"
+'''

@@ -1,0 +1,30 @@
+# eza: a modern ls (Rust). Git status column on (libgit2 from the system when its version
+# fits, else the crate's vendored copy). Crates vendored on the host.
+name = "eza"
+version = "0.23.5"
+release = 1
+summary = "Modern replacement for ls"
+license = "EUPL-1.2"
+homepage = "https://github.com/eza-community/eza"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["rust", "pkgconf"]
+builddeps = ["libgit2-devel", "zlib-ng-compat-devel"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/eza-community/eza/archive/refs/tags/v0.23.5.tar.gz", sha256 = "bbf179f2611c904014431740b559e8055276c12fcf978a7e31c271663548337f" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs
+'''
+install = '''
+install -Dm755 target/release/eza "$pkgdir/usr/bin/eza"
+install -Dm644 completions/bash/eza "$pkgdir/usr/share/bash-completion/completions/eza"
+install -Dm644 completions/zsh/_eza "$pkgdir/usr/share/zsh/site-functions/_eza"
+install -Dm644 completions/fish/eza.fish "$pkgdir/usr/share/fish/vendor_completions.d/eza.fish"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/eza/LICENSE.txt"
+'''

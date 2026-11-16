@@ -1,0 +1,27 @@
+# inotify-tools: inotifywait and inotifywatch (the dotfiles' listeners use inotifywait).
+# 4.25.9.0, the last autotools/C release: 4.26 is a Rust rewrite whose version comes from a
+# git script.
+name = "inotify-tools"
+version = "4.25.9.0"
+release = 1
+summary = "Command-line inotify tools and library"
+license = "GPL-2.0-only"
+homepage = "https://github.com/inotify-tools/inotify-tools"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/inotify-tools/inotify-tools/archive/refs/tags/4.25.9.0.tar.gz", sha256 = "d33a4fd24c72c2d08893f129d724adf725b93dae96c359e4f4e9f32573cc853b" },
+]
+
+setup = '''
+./autogen.sh
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''

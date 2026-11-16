@@ -1,0 +1,30 @@
+# awww: the wallpaper daemon (swww renamed; animated transitions, Wayland layer-shell; Rust).
+# Binaries awww and awww-daemon; man pages through scdoc (doc/gen.sh). Crates vendored on the
+# host. The source is on Codeberg.
+name = "awww"
+version = "0.12.1"
+release = 1
+summary = "Animated wallpaper daemon for Wayland"
+license = "GPL-3.0-only"
+homepage = "https://codeberg.org/LGFae/awww"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["rust", "pkgconf", "scdoc"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://codeberg.org/LGFae/awww/archive/v0.12.1.tar.gz", sha256 = "97b3f1c6d65d9d30e51b17092a45244f8c8549607c9207f3c98d82b28ba18fca" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs
+sh doc/gen.sh
+'''
+install = '''
+install -Dm755 target/release/awww "$pkgdir/usr/bin/awww"
+install -Dm755 target/release/awww-daemon "$pkgdir/usr/bin/awww-daemon"
+for f in doc/generated/*.1; do install -Dm644 "$f" "$pkgdir/usr/share/man/man1/$(basename "$f")"; done
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/awww/LICENSE"
+'''

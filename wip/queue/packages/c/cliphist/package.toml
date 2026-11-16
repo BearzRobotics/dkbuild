@@ -1,0 +1,28 @@
+# cliphist: clipboard history manager for Wayland (Go; the dotfiles pipe wl-paste into it
+# and pick entries through rofi).
+name = "cliphist"
+version = "0.7.0"
+release = 1
+summary = "Wayland clipboard history manager"
+license = "GPL-3.0-only"
+homepage = "https://github.com/sentriz/cliphist"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["go"]
+rundeps = ["wl-clipboard"]
+options = ["godeps", "!check"]
+
+source = [
+    { url = "https://github.com/sentriz/cliphist/archive/refs/tags/v0.7.0.tar.gz", sha256 = "8d7dc7b4495e5812b5613274c250ba5d3900933d78888ce7921c01247f191cc8" },
+]
+
+environment = '''
+export CGO_ENABLED=0
+export GOFLAGS="$GOFLAGS -trimpath"
+'''
+build = '''
+go build -o cliphist .
+'''
+install = '''
+install -Dm755 cliphist "$pkgdir/usr/bin/cliphist"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/cliphist/LICENSE"
+'''
