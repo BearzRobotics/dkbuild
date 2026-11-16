@@ -48,7 +48,7 @@
 # Not built yet.
 name = "libera-suite"
 version = "0.7.0"
-release = 3
+release = 4
 summary = "Desktop office suite built on Euro-Office's editors (GTK, WebKitGTK)"
 license = "Apache-2.0 AND AGPL-3.0-only AND CC-BY-SA-4.0"
 homepage = "https://docs.liberasuite.eu"
@@ -179,7 +179,8 @@ build = '''
 # with libc++ does not), so it is force-included for every file, and
 # BaseThread.cpp resets a pthread_t with NULL, which is an integer on musl and
 # nullptr here, so 0 is used.
-export CXXFLAGS="$CXXFLAGS -include stdlib.h"
+# r4: + -include new (DesktopEditor/graphics/pro/officedrawingfile.cpp uses std::nothrow without <new>: "no member named 'nothrow' in namespace 'std'")
+export CXXFLAGS="$CXXFLAGS -include stdlib.h -include new"
 export CFLAGS="$CFLAGS -include stdlib.h"
 sed -i 's/m_thread = NULL;/m_thread = 0;/' $core/DesktopEditor/graphics/BaseThread.cpp
 # r3: the same for a short: MetaFileUtils.h:990 (`pRegion->shScanCount = NULL;`, NULL being nullptr here: "assigning to 'short' from
