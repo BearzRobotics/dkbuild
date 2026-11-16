@@ -36,7 +36,7 @@
 # separate testsuite tarball).
 name = "ghc"
 version = "9.14.1"
-release = 6
+release = 7
 summary = "Glasgow Haskell Compiler"
 license = "BSD-3-Clause"
 homepage = "https://www.haskell.org/ghc/"
@@ -173,7 +173,10 @@ ghc_configure() {
     ./configure --prefix=/usr --with-system-libffi --enable-numa --disable-ld-override \
         CC=clang CXX=clang++ LD=ld.lld AR=llvm-ar NM=llvm-nm RANLIB=llvm-ranlib "$@"
 }
-hadrian="hadrian/bootstrap/_build/bin/hadrian -j$jobs --flavour=release --docs=no-sphinx-pdfs"
+# r7: --docs=none, FOR NOW (docs/disabled-features.md). The build step finishes (compiler, libraries and tools, linked), but binary-dist-dir stops twice, with
+# the one resume as well, on "_build/stage1/bin/haddock: createProcess: execvp: does not exist" when it runs haddock to write the libraries' HTML documentation
+# (r5 and r6 of the world run). Without the documentation step haddock is not run; the haddock program itself is still built and installed.
+hadrian="hadrian/bootstrap/_build/bin/hadrian -j$jobs --flavour=release --docs=none"
 '''
 setup = '''
 # bootstrap.py's sources tarball (plan-bootstrap.json, each Hackage tarball
