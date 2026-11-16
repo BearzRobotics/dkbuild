@@ -28,7 +28,7 @@
 # the test suite.
 name = "nim"
 version = "2.4.2"
-release = 1
+release = 2
 summary = "Nim programming language and its package manager"
 license = "MIT"
 homepage = "https://nim-lang.org"
@@ -44,6 +44,17 @@ source = [
 
 environment = '''
 export HOME=/tmp
+# r2: the bundled nimony tools (nifler, ...) are compiled by Nim with its default C compiler name, `gcc`, which does not exist here
+# (\"gcc: not found\", \"execution of an external compiler program 'gcc -c ...'\"); a `gcc` for the build's PATH that runs clang with this
+# system's target and drops -fmax-errors, a GCC-only option (the setup step removes it from build.sh for the same reason).
+mkdir -p /tmp/nimbin
+cat > /tmp/nimbin/gcc <<'EOF2'
+#!/bin/sh
+for a in "$@"; do shift; case "$a" in -fmax-errors=*) ;; *) set -- "$@" "$a" ;; esac; done
+exec clang --target=x86_64-fenriros-linux-musl "$@"
+EOF2
+chmod 755 /tmp/nimbin/gcc
+export PATH=/tmp/nimbin:$PATH
 '''
 setup = '''
 sed -i 's| -fmax-errors=3||' build.sh
