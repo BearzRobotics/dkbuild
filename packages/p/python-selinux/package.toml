@@ -1,7 +1,7 @@
 # Python binding of libselinux (the `selinux` module): built from the libselinux source (the C library is the libselinux package, built without bindings). SELinux userspace 3.11 (https://github.com/SELinuxProject/selinux). Not built (queued, wip/queue): expect first-build fixes.
 name = "python-selinux"
 version = "3.11"
-release = 2
+release = 3
 summary = "Python binding of libselinux (the `selinux` module)"
 license = "LicenseRef-Public-Domain"
 homepage = "https://github.com/SELinuxProject/selinux"
@@ -16,7 +16,10 @@ source = [
 
 # r2: libselinux's top-level Makefile chooses PCRE2 and exports PCRE_MODULE, PCRE_CFLAGS and PCRE_LDLIBS to src/; these steps run make in src/ directly,
 # so src/ fell back to <pcre.h> ("'pcre.h' file not found"). The same values, for PCRE2, are passed on each command line.
+# r3: -D_FILE_OFFSET_BITS=64: src/matchpathcon.c picks its inode-size assertion by that macro (or __INO_T_MATCHES_INO64_T) and otherwise asserts a 32-bit
+# ino_t ("inode size mismatch", '4 == 8' on 64-bit musl); the top-level Makefile, which these steps bypass by running make in src/, sets it.
 environment = '''
+export CFLAGS="$CFLAGS -D_FILE_OFFSET_BITS=64"
 pcre_cflags="-DUSE_PCRE2 -DPCRE2_CODE_UNIT_WIDTH=8 $(pkg-config --cflags libpcre2-8)"
 pcre_ldlibs="$(pkg-config --libs libpcre2-8)"
 '''
