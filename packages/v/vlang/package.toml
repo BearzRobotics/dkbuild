@@ -15,15 +15,18 @@
 # here, so the install tree needs no writing. V programs use the Boehm GC,
 # zstd, mbedtls and the other libraries bundled in thirdparty/ unless built with
 # -d dynamic_boehm and the like (the bundled copies are what upstream tests).
+# r2: Boehm GC (gc, gc-devel): V links the programs it compiles, itself included, with -lgc ("ld.lld: error: unable to find library -lgc", "C library `gc` was not
+# found while linking the generated program"); build-time dependency for the compiler, and run-time for the programs V compiles.
 name = "vlang"
 version = "0.5.2"
-release = 1
+release = 2
 summary = "The V programming language"
 license = "MIT"
 homepage = "https://vlang.io"
 archs = ["x86_64", "aarch64"]
 hostdeps = ["make"]
-rundeps = ["llvm-clang", "llvm-lld"]
+builddeps = ["gc-devel"]
+rundeps = ["llvm-clang", "llvm-lld", "gc", "gc-devel"]
 options = ["!check", "!lto", "!strip"]
 
 source = [
