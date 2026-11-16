@@ -11,7 +11,7 @@
 # of every package it finds there, and that one uses addCSourceFile, which Zig 0.17 removed. Terminal build only: no -Dgui (the standalone GUI window).
 name = "flow"
 version = "0.7.2_git20261114"
-release = 1
+release = 2
 summary = "Programmer's text editor in Zig"
 license = "MIT"
 homepage = "https://github.com/neurocyte/flow"
@@ -40,7 +40,9 @@ sed -i \
   -e 's|{ "git", "rev-parse", "--abbrev-ref", "HEAD" }|{ "true" }|' \
   -e 's|{ "git", "diff", "--stat", "--patch", "HEAD" }|{ "true" }|' build.zig zig-pkg/nightwatch-*/build.zig
 test "$(grep -c '"git", "describe", "--always", "--tags" }' build.zig zig-pkg/nightwatch-*/build.zig | grep -vc ':0$')" = 0
-%zig_build
+# not %zig_build: it passes -Dcpu=, which this build.zig refuses ("invalid option: cpu"; its target is the one option, -Dtarget).
+# The explicit target is the baseline x86-64 CPU (a native default would tune the binary to the build machine).
+DESTDIR="$pkgdir" zig build --release=safe --prefix /usr -Dtarget=x86_64-linux-musl --system zig-pkg -j$jobs
 install -Dm644 help.md "$pkgdir/usr/share/doc/flow/help.md"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/flow/LICENSE"
 '''
