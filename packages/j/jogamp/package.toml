@@ -13,7 +13,7 @@
 # Archives: jogamp.org drops long downloads; a fetch may need retrying.
 name = "jogamp"
 version = "2.6.0"
-release = 4
+release = 5
 summary = "Java bindings for OpenGL (JOGL) and their native glue (GlueGen)"
 license = "BSD-2-Clause AND BSD-3-Clause"
 homepage = "https://jogamp.org"
@@ -36,6 +36,12 @@ export ANT_OPTS="-Xmx2g"
 antflags="-Dgcc.compat.compiler=clang -Dtarget.sourcelevel=11 -Dtarget.targetlevel=11 -Dtarget.rt.jar= -Djavacdebug=false -Dc.compiler.debug=false"
 '''
 setup = '''
+# r5: NEWT's Broadcom (Raspberry Pi VideoCore) natives are compiled on this platform too, and bcm_egl.c and bcm_vc_iv.c call
+# NewtCommon_ExceptionCheck1_throwNewRuntimeException without including NewtCommon.h, which declares it (an implicit declaration
+# is an error in this clang: "call to undeclared function"). Source edit: the include, after their first project include.
+sed -i 's|^#include "jogamp_newt_driver_bcm_egl_WindowDriver.h"$|&\n#include "NewtCommon.h"|' src/newt/native/bcm_egl.c
+sed -i 's|^#include "bcm_vc_iv.h"$|&\n#include "NewtCommon.h"|' src/newt/native/bcm_vc_iv.c
+grep -q '^#include "NewtCommon.h"' src/newt/native/bcm_egl.c && grep -q '^#include "NewtCommon.h"' src/newt/native/bcm_vc_iv.c
 ln -sfn gluegen-v2.6.0 ../gluegen
 rmdir ../gluegen-v2.6.0/jcpp
 ln -sfn ../jcpp-7bf095d6426ce9b88f901a70bf8237b04009a0ff ../gluegen-v2.6.0/jcpp
