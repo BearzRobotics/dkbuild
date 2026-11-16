@@ -24,7 +24,7 @@
 # Run time: ncurses (Console), certificates (`cert-sync` for the trust store).
 name = "mono"
 version = "6.14.1"
-release = 1
+release = 2
 summary = "Mono runtime and C# compiler (mcs)"
 license = "MIT AND LGPL-2.1-only AND GPL-2.0-only WITH Classpath-exception-2.0"
 homepage = "https://www.mono-project.com"
@@ -38,6 +38,13 @@ source = [
     { url = "https://dl.winehq.org/mono/sources/mono/mono-6.14.1.tar.xz", sha256 = "3024c97c0bc8cbcd611c401d5f994528704108ceb31f31b28dea4783004d0820" },
 ]
 
+environment = '''
+# r2: the build's AOT step compiles the class libraries to native code with `as` ("sh: 1: as: not found", then "AOT of image mscorlib.dll
+# failed"); GNU binutils' assembler is gas here, so an `as` link to it is in PATH for the build.
+mkdir -p /tmp/monobin
+ln -sf /usr/bin/gas /tmp/monobin/as
+export PATH=/tmp/monobin:$PATH
+'''
 setup = '''
 %configure \
     --disable-boehm \
