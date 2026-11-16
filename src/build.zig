@@ -877,7 +877,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 var f = std.mem.tokenizeScalar(u8, l, ' ');
                 const n = f.next() orelse continue;
                 const k = f.next() orelse continue;
-                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "ln -sfn '/dkdeps/crates/{s}' 'vendor/{s}'\n", .{ k, n }));
+                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "rm -rf 'vendor/{1s}'\nln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}'\n", .{ k, n }));
             }
             if (clock != null) try lay.appendSlice(arena, ")\n");
         }
@@ -890,7 +890,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 var f = std.mem.tokenizeScalar(u8, l, ' ');
                 const n = f.next() orelse continue;
                 const k = f.next() orelse continue;
-                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "ln -sfn '/dkdeps/crates/{s}' 'vendor/{s}'\n", .{ k, n }));
+                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "rm -rf 'vendor/{1s}'\nln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}'\n", .{ k, n }));
             }
             try lay.appendSlice(arena, ")\n");
         }
