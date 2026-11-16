@@ -24,12 +24,12 @@
 # Run time: ncurses (Console), certificates (`cert-sync` for the trust store).
 name = "mono"
 version = "6.14.1"
-release = 2
+release = 3
 summary = "Mono runtime and C# compiler (mcs)"
 license = "MIT AND LGPL-2.1-only AND GPL-2.0-only WITH Classpath-exception-2.0"
 homepage = "https://www.mono-project.com"
 archs = ["x86_64", "aarch64"]
-hostdeps = ["make", "python", "pkgconf", "perl"]
+hostdeps = ["make", "python", "pkgconf", "perl", "binutils"]
 builddeps = ["zlib-ng-compat-devel", "linux-headers"]
 rundeps = ["ncurses", "ca-certificates"]
 options = ["!check", "!lto"]
@@ -39,6 +39,8 @@ source = [
 ]
 
 environment = '''
+# r3: + hostdeps binutils: r2's `as` link pointed at /usr/bin/gas, which only exists with GNU binutils installed, and it was not in the build root
+# ("sh: 1: as: not found" again, "AOT of image mscorlib.dll failed").
 # r2: the build's AOT step compiles the class libraries to native code with `as` ("sh: 1: as: not found", then "AOT of image mscorlib.dll
 # failed"); GNU binutils' assembler is gas here, so an `as` link to it is in PATH for the build.
 mkdir -p /tmp/monobin
