@@ -1,14 +1,16 @@
 # thunk_gen: generates the thunks between 64-bit and 32-bit code (a Python script plus m4
 # scripts). dj64dev, djdev64, comcom64 and dosemu2 find it through pkg-config.
+# r3: runtime dependencies python-ply (src/thunk_gen.py: `from ply import lex, yacc`; fdpp's build stopped with "No module named
+# ply") and autoconf (scripts/tg_m4 runs autom4te -l m4sugar); r2: the Python package is called python here, not python3.
 name = "thunk-gen"
 version = "1.11"
-release = 2
+release = 3
 summary = "Thunk generator for dj64 and dosemu2"
 license = "GPL-3.0-or-later"
 homepage = "https://github.com/stsp/thunk_gen"
 archs = ["x86_64"]
 hostdeps = ["meson", "pkgconf"]
-rundeps = ["python", "m4", "clang", "bash"]
+rundeps = ["python", "python-ply", "m4", "autoconf", "clang", "bash", "sed"]
 
 source = [
     { url = "https://github.com/stsp/thunk_gen/archive/refs/tags/1.11.tar.gz", sha256 = "579f8bc5a6d090495a30ac6ac090bf62ce5633c1fbfefb1f087367d02970456a" },
