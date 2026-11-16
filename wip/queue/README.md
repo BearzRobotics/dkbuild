@@ -29,7 +29,7 @@ Written so far (2026-11-15; ufw added later):
 - Lomiri: the stack of 85 recipes listed in `lomiri/NOTES.md` (Qt 5, foundation libraries, components, Mir, qtmir, the shell, indicators, settings, keyboard); also the session script and desktop-lomiri, four apps; what is left is repowerd's dinit service, the telephony decision, more apps and branding.
 - ufw (the Uncomplicated Firewall, 0.36.2; inert service).
 
-## dosemu2 chain (written 2026-11-15, nothing fetched or built; user WANTS it)
+## dosemu2 chain (written 2026-11-15; MOVED to packages/ the same day, fetched, not built; user WANTS it)
 Build order: i686-linux-gnu-tools (sh wrappers: clang -target i686, gas --32, ld.bfd -m elf_i386)
 -> thunk-gen -> djstub -> dj64dev (also provides djdev64.pc, so the separate djdev64 repo is not
 packaged) -> fdpp, comcom64 -> libb64, libsearpc -> dosemu2. Missing: libieee1284 (parallel-port
