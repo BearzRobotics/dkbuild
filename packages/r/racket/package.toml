@@ -23,7 +23,7 @@
 # and GUI are not dependencies of the compiler core: left to the user.
 name = "racket"
 version = "9.3"
-release = 2
+release = 3
 summary = "Language-oriented programming language (Racket CS)"
 license = "MIT OR Apache-2.0"
 homepage = "https://racket-lang.org"
@@ -56,6 +56,7 @@ install = '''
 cd src
 make install DESTDIR="$pkgdir"
 cd ..
-install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/racket/LICENSE.txt"
+# r3: the licence files are in src/ (racket installed fine; `install: cannot stat 'LICENSE.txt'` failed the step): MIT or Apache 2.0, at the user's option
+for f in LICENSE.txt LICENSE-MIT.txt LICENSE-APACHE.txt; do install -Dm644 "src/$f" "$pkgdir/usr/share/licenses/racket/$f"; done
 rmdir "$pkgdir"/usr/share/applications 2>/dev/null || true
 '''
