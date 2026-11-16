@@ -39,13 +39,13 @@
 # Setup: /usr/share/doc/stalwart/README.FenrirOS.
 name = "stalwart"
 version = "1.1.0"
-release = 3
+release = 4
 summary = "Mail and collaboration server (SMTP, IMAP, JMAP, CalDAV, CardDAV)"
 license = "AGPL-3.0-only"
 homepage = "https://stalw.art"
 archs = ["x86_64", "aarch64"]
 patches = ["webui-from-package.patch", "no-sel-code.patch"]
-hostdeps = ["rust", "nodejs", "zip", "pkgconf", "cmake", "llvm-clang"]
+hostdeps = ["rust", "nodejs", "zip", "pkgconf", "cmake", "llvm-clang", "llvm-libunwind"]
 builddeps = ["rocksdb-devel", "llvm-libcxx-devel", "snappy-devel", "sqlite-devel", "openssl-devel", "zstd-devel", "bzip2-devel", "zlib-ng-compat-devel"]
 options = ["!check", "cargodeps", "npmdeps"]
 
@@ -72,6 +72,11 @@ export CXXSTDLIB=c++
 # rusqlite asks for its bundled SQLite ("bundled"); this makes libsqlite3-sys
 # link the system SQLite instead
 export LIBSQLITE3_SYS_USE_PKG_CONFIG=1
+# r4: the web UI's vite build loads musl Rust addons (lightningcss, ...) that link libgcc_s.so.1, which this system lacks; LLVM's libunwind has the same
+# _Unwind_* functions, and node hides the dlopen error behind MODULE_NOT_FOUND (lightningcss/node/index.js; as authelia, ntfy and listmonk): a private link.
+mkdir -p /tmp/gccshim
+ln -sf /usr/lib/libunwind.so.1 /tmp/gccshim/libgcc_s.so.1
+export LD_LIBRARY_PATH="/tmp/gccshim${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
     npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
 '''
