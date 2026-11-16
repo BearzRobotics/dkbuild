@@ -1,8 +1,11 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/wpa_supplicant/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# r3: a dinit service (wpa_supplicant, D-Bus interface on, log to syslog), started as a dependency of networkmanager: NetworkManager reached
+# wpa_supplicant only through D-Bus activation, which (the system bus runs with dbus-daemon --dinit) was never confirmed to work, and a live ISO could not use WiFi.
+# Not enabled by itself: nothing but a dependent service starts it.
 name = "wpa-supplicant"
 version = "2.12"
-release = 2
+release = 3
 summary = "WPA/WPA2/IEEE 802.1X Supplicant"
 license = "BSD-3-Clause"
 homepage = "http://w1.fi/wpa_supplicant"
@@ -30,6 +33,7 @@ install -dm755 "$pkgdir/usr/share/dbus-1/system-services"
 install -m644 dbus/*.service "$pkgdir/usr/share/dbus-1/system-services/"
 install -Dm644 dbus/dbus-wpa_supplicant.conf "$pkgdir/usr/share/dbus-1/system.d/wpa_supplicant.conf"
 install -Dm640 $pkgfiles/wpa_supplicant.conf "$pkgdir/etc/wpa_supplicant/wpa_supplicant.conf"
+install -Dm644 $pkgfiles/wpa_supplicant.dinit "$pkgdir/etc/dinit.d/wpa_supplicant"
 for m in doc/docbook/*.5 doc/docbook/*.8; do
     case "${m##*/}" in wpa_gui.*|wpa_priv.*|eapol_test.*) continue ;; esac
     install -Dm644 "$m" "$pkgdir/usr/share/man/man${m##*.}/${m##*/}"

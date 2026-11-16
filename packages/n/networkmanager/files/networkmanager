@@ -2,4 +2,5 @@ type = process
 command = /usr/sbin/NetworkManager -n
 smooth-recovery = true
 depends-on: dbus
+depends-on: wpa_supplicant
 depends-on: rcboot

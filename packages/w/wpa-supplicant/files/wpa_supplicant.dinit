@@ -1,0 +1,5 @@
+type = process
+command = /usr/bin/wpa_supplicant -u -s -O /run/wpa_supplicant
+smooth-recovery = true
+depends-on: dbus
+depends-on: rcboot

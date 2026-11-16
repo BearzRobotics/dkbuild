@@ -3,9 +3,10 @@
 # 2026-11-11: elogind (session tracking is set to it).
 # r5: the dinit service runs /usr/sbin/NetworkManager (it was /usr/bin/NetworkManager, which does not exist: QEMU boot test of the
 # dkde ISO, 2026-11-16: "networkmanager" failed to start).
+# r6: depends on the wpa_supplicant service (wpa-supplicant r3), so the WiFi backend is running when NetworkManager starts instead of relying on D-Bus activation.
 name = "networkmanager"
 version = "1.58.1"
-release = 5
+release = 6
 summary = "Network management daemon"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://gitlab.freedesktop.org/NetworkManager/NetworkManager"
