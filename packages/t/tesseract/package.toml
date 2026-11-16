@@ -35,7 +35,7 @@ grep -q '^#include <cstdlib>' src/arch/simddetect.cpp
 # r3: capi.h is the C API header: C programs include it (ffmpeg's libtesseract check failed with
 # "'cstdlib' file not found"), and the loop above put C++ headers at its top. Source edit: take them out again.
 sed -i -e '/^#include <cstdlib>$/d' -e '/^#include <cstring>$/d' -e '/^#include <cstdio>$/d' include/tesseract/capi.h
-! grep -q '<cstdlib>\|<cstring>\|<cstdio>' include/tesseract/capi.h
+if grep -q '<cstdlib>\|<cstring>\|<cstdio>' include/tesseract/capi.h; then exit 1; fi
 ./autogen.sh
 %configure --disable-doc
 '''
