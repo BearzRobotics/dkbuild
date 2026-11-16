@@ -1,0 +1,26 @@
+# Fast directory scanning and scraping tool. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of bashrs; not built yet when written (wip/queue): expect first-build fixes.
+# Rust crate (binaries: dirble), crates vendored on the host (cargodeps). OpenSSL is linked from the system.
+name = "dirble"
+version = "1.4.2"
+release = 1
+summary = "Fast directory scanning and scraping tool."
+license = "GPL-3.0"
+homepage = "https://github.com/nccgroup/dirble"
+hostdeps = ["rust", "pkgconf", "cmake"]
+builddeps = ["openssl-devel"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/nccgroup/dirble/archive/refs/tags/v1.4.2.tar.gz", sha256 = "6eac61a20c10b07a38f1e3eeba581582283dab646fd3998fec0f7e4b0fa432bd" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline --locked -j $jobs
+'''
+install = '''
+install -Dm755 target/release/dirble "$pkgdir/usr/bin/dirble"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/dirble/LICENSE"
+'''

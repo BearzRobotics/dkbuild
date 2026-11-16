@@ -1,0 +1,26 @@
+# Active Directory data collector for BloodHound written in Rust. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of bashrs; not built yet when written (wip/queue): expect first-build fixes.
+# Rust crate (binaries: rusthound), crates vendored on the host (cargodeps). OpenSSL is linked from the system.
+name = "rusthound"
+version = "1.1.69"
+release = 1
+summary = "Active Directory data collector for BloodHound written in Rust."
+license = "MIT"
+homepage = "https://github.com/NH-RED-TEAM/RustHound"
+hostdeps = ["rust", "pkgconf"]
+builddeps = ["openssl-devel"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/NH-RED-TEAM/RustHound/archive/refs/tags/v1.1.69.tar.gz", sha256 = "0c39aed4c15bc23a9ab7fe0e489a6f2bf31395d86542caf3aa137a17c4495ae6" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline --locked -j $jobs
+'''
+install = '''
+install -Dm755 target/release/rusthound "$pkgdir/usr/bin/rusthound"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/rusthound/LICENSE"
+'''

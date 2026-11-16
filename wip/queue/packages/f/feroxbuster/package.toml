@@ -1,0 +1,26 @@
+# A fast, simple, recursive content discovery tool written in Rust. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of bashrs; not built yet when written (wip/queue): expect first-build fixes.
+# Rust crate (binaries: feroxbuster), crates vendored on the host (cargodeps). OpenSSL is linked from the system.
+name = "feroxbuster"
+version = "2.14.0"
+release = 1
+summary = "A fast, simple, recursive content discovery tool written in Rust."
+license = "MIT"
+homepage = "https://github.com/epi052/feroxbuster"
+hostdeps = ["rust", "pkgconf", "cmake"]
+builddeps = ["openssl-devel"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/epi052/feroxbuster/archive/refs/tags/v2.14.0.tar.gz", sha256 = "1d6cc31d5ce3bd21e8b58ef32ac5745f6684682278be4b905b229cf49990887d" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline --locked -j $jobs
+'''
+install = '''
+install -Dm755 target/release/feroxbuster "$pkgdir/usr/bin/feroxbuster"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/feroxbuster/LICENSE"
+'''

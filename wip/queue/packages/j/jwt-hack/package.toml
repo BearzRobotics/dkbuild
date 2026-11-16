@@ -1,0 +1,26 @@
+# A tool for hacking / security testing to JWT. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of bashrs; not built yet when written (wip/queue): expect first-build fixes.
+# Rust crate (binaries: jwt-hack), crates vendored on the host (cargodeps). OpenSSL is linked from the system.
+name = "jwt-hack"
+version = "2.6.0"
+release = 1
+summary = "A tool for hacking / security testing to JWT."
+license = "MIT"
+homepage = "https://github.com/hahwul/jwt-hack"
+hostdeps = ["rust", "pkgconf", "cmake"]
+builddeps = ["openssl-devel"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/hahwul/jwt-hack/archive/refs/tags/v2.6.0.tar.gz", sha256 = "f510ce2a1fb1bb98844536810659c9e310ee6a2e844af9dc7f0b874222ca7f6d" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline --locked -j $jobs
+'''
+install = '''
+install -Dm755 target/release/jwt-hack "$pkgdir/usr/bin/jwt-hack"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/jwt-hack/LICENSE"
+'''

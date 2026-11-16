@@ -1,0 +1,25 @@
+# A modern port listener and reverse shell. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of bashrs; not built yet when written (wip/queue): expect first-build fixes.
+# Rust crate (binaries: rcat), crates vendored on the host (cargodeps).
+name = "rustcat"
+version = "3.0.0"
+release = 1
+summary = "A modern port listener and reverse shell."
+license = "GPL-3.0"
+homepage = "https://github.com/robiot/rustcat"
+hostdeps = ["rust", "pkgconf"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/robiot/rustcat/archive/refs/tags/v3.0.0.tar.gz", sha256 = "59648e51ab41e4aeb825174dfbb53710207257feb3757521be98ed28c4249922" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline --locked -j $jobs
+'''
+install = '''
+install -Dm755 target/release/rcat "$pkgdir/usr/bin/rcat"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/rustcat/LICENSE"
+'''

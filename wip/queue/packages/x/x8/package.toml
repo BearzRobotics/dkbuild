@@ -1,0 +1,26 @@
+# Hidden parameters discovery suite. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of bashrs; not built yet when written (wip/queue): expect first-build fixes.
+# Rust crate (binaries: x8), crates vendored on the host (cargodeps). OpenSSL is linked from the system.
+name = "x8"
+version = "4.3.0"
+release = 1
+summary = "Hidden parameters discovery suite."
+license = "GPL-3.0"
+homepage = "https://github.com/Sh1Yo/x8"
+hostdeps = ["rust", "pkgconf"]
+builddeps = ["openssl-devel"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/Sh1Yo/x8/archive/refs/tags/v4.3.0.tar.gz", sha256 = "e53732ec9280570bcb8730404b7b25948e6bd00548fcb721780693f9052edbcd" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline --locked -j $jobs
+'''
+install = '''
+install -Dm755 target/release/x8 "$pkgdir/usr/bin/x8"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/x8/LICENSE"
+'''

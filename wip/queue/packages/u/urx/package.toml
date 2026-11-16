@@ -1,0 +1,25 @@
+# Extracts URLs from OSINT Archives for Security Insights. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of bashrs; not built yet when written (wip/queue): expect first-build fixes.
+# Rust crate (binaries: urx), crates vendored on the host (cargodeps).
+name = "urx"
+version = "0.11.0"
+release = 1
+summary = "Extracts URLs from OSINT Archives for Security Insights."
+license = "MIT"
+homepage = "https://github.com/hahwul/urx"
+hostdeps = ["rust", "pkgconf", "cmake"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/hahwul/urx/archive/refs/tags/0.11.0.tar.gz", sha256 = "ff8f5d9bbd4c3ca1c3cdafb17a4742bc0f8a132ca2edc9b76d9c871af3cb4dec" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline --locked -j $jobs
+'''
+install = '''
+install -Dm755 target/release/urx "$pkgdir/usr/bin/urx"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/urx/LICENSE"
+'''

@@ -1,0 +1,25 @@
+# Powerful open-source XSS scanner and utility focused on automation. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of bashrs; not built yet when written (wip/queue): expect first-build fixes.
+# Rust crate (binaries: dalfox), crates vendored on the host (cargodeps).
+name = "dalfox"
+version = "3.3.0"
+release = 1
+summary = "Powerful open-source XSS scanner and utility focused on automation."
+license = "MIT"
+homepage = "https://github.com/hahwul/dalfox"
+hostdeps = ["rust", "pkgconf"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/hahwul/dalfox/archive/refs/tags/v3.3.0.tar.gz", sha256 = "9613d8266b7fa7348829590caed0af567ba7cd0137075add913d8037066dd9dd" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline --locked -j $jobs
+'''
+install = '''
+install -Dm755 target/release/dalfox "$pkgdir/usr/bin/dalfox"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/dalfox/LICENSE.txt"
+'''
