@@ -13,7 +13,7 @@
 # API is not packaged, and neovim needs exactly wasmtime 36).
 name = "neovim"
 version = "0.12.6"
-release = 1
+release = 2
 summary = "Fork of Vim aiming to improve user experience, plugins and GUIs"
 license = "Apache-2.0 AND Vim"
 homepage = "https://neovim.io"
@@ -27,7 +27,10 @@ source = [
 ]
 
 setup = '''
+# r2: -DENABLE_LTO=OFF: the thin-LTO link of nvim crashed lld ("clang: error: unable to execute command: Segmentation fault", linker exit code -2);
+# only some speed is lost, no feature. Recorded here, not in docs/disabled-features.md.
 %cmake \
+    -DENABLE_LTO=OFF \
     -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     -DPREFER_LUA=OFF \
     -DENABLE_TRANSLATIONS=ON \

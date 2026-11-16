@@ -16,7 +16,7 @@
 # first, then static libs only.
 name = "mupdf"
 version = "1.28.6"
-release = 1
+release = 2
 summary = "Lightweight PDF, XPS and EPUB viewer and library"
 license = "AGPL-3.0-or-later"
 homepage = "https://mupdf.com"
@@ -29,6 +29,9 @@ source = [
 ]
 
 environment = '''
+# r2: zxing-cpp 3 installs its headers in /usr/include/ZXing and mupdf includes them as "ReadBarcode.h" ("fatal error: ReadBarcode.h file not found"):
+# that directory is on the C++ include path.
+export CPLUS_INCLUDE_PATH=/usr/include/ZXing
 export MUOPTS="build=release USE_SYSTEM_LIBS=yes USE_SYSTEM_MUJS=yes tesseract=yes barcode=yes archive=yes prefix=/usr libdir=/usr/lib"
 export XCFLAGS="$CFLAGS"
 '''
