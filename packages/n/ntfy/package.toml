@@ -11,12 +11,12 @@
 # no users, no default credentials. Setup: README.FenrirOS.
 name = "ntfy"
 version = "2.37.2"
-release = 1
+release = 2
 summary = "Send push notifications to your phone or desktop with HTTP PUT/POST"
 license = "Apache-2.0 OR GPL-2.0-only"
 homepage = "https://ntfy.sh"
 archs = ["x86_64", "aarch64"]
-hostdeps = ["go", "nodejs"]
+hostdeps = ["go", "nodejs", "llvm-libunwind"]
 options = ["!check", "!strip", "godeps", "npmdeps"]
 
 source = [
@@ -27,6 +27,12 @@ environment = '''
 export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
     npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
 export GOTOOLCHAIN=local GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=1
+# r2: the musl builds of the Rust-based npm addons (lightningcss, rolldown, ...) link libgcc_s.so.1, which this system does not have; LLVM's
+# libunwind has the same _Unwind_* functions, and node's loader hides the dlopen error behind "Cannot find module '../lightningcss.linux-x64-musl.node'"
+# (the same as authelia r1 and listmonk): a private link for this build only.
+mkdir -p /tmp/gccshim
+ln -sf /usr/lib/libunwind.so.1 /tmp/gccshim/libgcc_s.so.1
+export LD_LIBRARY_PATH="/tmp/gccshim${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 '''
 setup = '''
 cd web
