@@ -24,7 +24,7 @@
 # refused for remote use. Setup: README.FenrirOS.
 name = "mosquitto"
 version = "2.1.2"
-release = 1
+release = 2
 summary = "Eclipse Mosquitto MQTT broker and client libraries"
 license = "EPL-2.0 OR BSD-3-Clause"
 homepage = "https://mosquitto.org"
@@ -37,6 +37,12 @@ source = [
 ]
 
 setup = '''
+# r2: lib/CMakeLists.txt gives the shared libmosquitto the libcommon/ and common/ include directories (property_common.h) but the static libmosquitto_static
+# only include/ and lib/, so with WITH_STATIC_LIBRARIES=ON its files stop at "'property_common.h' file not found". The same two directories for the static
+# target. (Source edit: sed on lib/CMakeLists.txt.)
+sed -i '/target_include_directories(libmosquitto_static PRIVATE/{n;s|^\(\t\t"${mosquitto_SOURCE_DIR}"\)$|\1\n\t\t"${mosquitto_SOURCE_DIR}/common"\n\t\t"${mosquitto_SOURCE_DIR}/libcommon"|}' lib/CMakeLists.txt
+grep -q 'mosquitto_SOURCE_DIR}/libcommon' lib/CMakeLists.txt
+test "$(grep -c 'mosquitto_SOURCE_DIR}/libcommon' lib/CMakeLists.txt)" -ge 2
 %cmake \
     -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DWITH_TLS=ON -DWITH_TLS_PSK=ON -DWITH_WEBSOCKETS=ON -DWITH_WEBSOCKETS_BUILTIN=OFF \
