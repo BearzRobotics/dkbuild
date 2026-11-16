@@ -1,0 +1,77 @@
+# Marginalia Search: an independent search engine and crawler that favours the non-commercial small web (Java 26, Gradle; index, query, search, assistant,
+# control, explorer and API services, one launcher script per service). Built from a pinned commit of master (33ef7a1, 2026-11-16: the only release tag, v24.10.0,
+# is two years old and the project runs from master), with the project's own aggregate distribution task (dist.gradle's installAggregateDist, its
+# "non-docker distribution for running the services under systemd or similar").
+# - Java 26: the build asks for a Java 26 toolchain (build.gradle jvmVersion): the tree's openjdk26 (wip/queue). Gradle 9.7.1 (the wrapper's version) is a source,
+#   gradledeps resolves the libraries and plugins once with the network.
+# - The web UI's CSS is built by `npx --yes tailwindcss@3` from the search-service's Gradle build, which fetches it from the npm registry: here tailwindcss
+#   3.4.17 comes from the engine's npm store (files/package-lock.json, npmdeps), is installed in a scratch directory and put on PATH, and `setup` changes the
+#   one command to the plain `tailwindcss` (source edit: sed on code/services-application/search-service/build.gradle).
+# - dist.gradle writes release.txt from `git log`; the source is a tarball: the commit as a constant (source edit: sed).
+# - The language models run/setup.sh downloads (an OpenNLP sentence model, segments.bin, tfreq-new-algo3.bin, lid.176.ftz; pinned revisions, the same files)
+#   are sources here and install into /usr/share/marginalia/model (the tfreq model is 830 MB).
+# It needs MariaDB (the database) and ZooKeeper (service discovery) at run time: both are packages of the tree (rundeps).
+# Installed inert (docs/requests.md): nothing runs. marginalia-install-dir DIR makes an install directory (WMSA_HOME) from the packaged template; the template's
+# database password is the placeholder CHANGE-ME, not upstream's sample password. See /usr/share/doc/marginalia-search/README.FenrirOS.
+# Not built yet when written (wip/queue): expect first-build fixes.
+name = "marginalia-search"
+version = "2026.11.16_git33ef7a1"
+release = 1
+summary = "Independent search engine and crawler for the small web"
+license = "AGPL-3.0-or-later"
+homepage = "https://www.marginalia.nu"
+archs = ["x86_64"]
+hostdeps = ["openjdk26", "unzip", "nodejs"]
+rundeps = ["openjdk26", "bash", "mariadb", "zookeeper"]
+options = ["!check", "gradledeps", "npmdeps", "jobs:8", "!strip"]
+
+source = [
+    { url = "https://github.com/MarginaliaSearch/MarginaliaSearch/archive/33ef7a171fb0bd4d19b9d94719e179436b7c1515.tar.gz", sha256 = "170176cf0e9eed219e0f1365a8a5bf181cdf4eb19ee24c5cc7c7f3aba25a4518", name = "marginalia-33ef7a1.tar.gz" },
+    { url = "https://services.gradle.org/distributions/gradle-9.7.1-bin.zip", sha256 = "acd53f1edaf02f1a8ff99879f8a34b302661a057d9b063ae9e35b552f804d20a", unpack = false },
+    { url = "https://archive.apache.org/dist/opennlp/models/ud-models-1.0/opennlp-en-ud-ewt-sentence-1.0-1.9.3.bin", sha256 = "8dddd7e582cedef4a79a83fd340cefcdafe58419bd20520fec90492ea4bffd11", unpack = false, name = "opennlp-sentence.bin" },
+    { url = "https://huggingface.co/MarginaliaNu/MarginaliaModelData/resolve/c9339e4224f1dfad7f628809c32687e748198ae3/segments.bin?download=true", sha256 = "@SEG@", unpack = false, name = "segments.bin" },
+    { url = "https://huggingface.co/MarginaliaNu/MarginaliaModelData/resolve/c9339e4224f1dfad7f628809c32687e748198ae3/tfreq-new-algo3.bin?download=true", sha256 = "@TF@", unpack = false, name = "tfreq-new-algo3.bin" },
+    { url = "https://huggingface.co/MarginaliaNu/MarginaliaModelData/resolve/c9339e4224f1dfad7f628809c32687e748198ae3/lid.176.ftz?download=true", sha256 = "@LID@", unpack = false, name = "lid.176.ftz" },
+]
+
+environment = '''
+export JAVA_HOME=/usr/lib/jvm/java-26-openjdk
+export GRADLE_OPTS="-Dorg.gradle.java.installations.paths=/usr/lib/jvm/java-26-openjdk -Dorg.gradle.java.installations.auto-download=false"
+export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
+    npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+'''
+setup = '''
+# tailwindcss 3.4.17 from the npm store, installed outside the source tree
+mkdir -p /tmp/tw && cp $pkgfiles/tailwind-package.json /tmp/tw/package.json && cp $pkgfiles/package-lock.json /tmp/tw/package-lock.json
+(cd /tmp/tw && node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json && npm ci --ignore-scripts)
+export PATH="/tmp/tw/node_modules/.bin:$PATH"
+test -x /tmp/tw/node_modules/.bin/tailwindcss
+# the Gradle task runs `npx --yes tailwindcss@3` (a registry fetch): the installed one instead. (Source edit: sed.)
+sed -i "s|commandLine 'npx', '--yes', 'tailwindcss@3',|commandLine 'tailwindcss',|" code/services-application/search-service/build.gradle
+grep -q "commandLine 'tailwindcss'," code/services-application/search-service/build.gradle
+# release.txt: the commit, not `git log` (a tarball is not a checkout). (Source edit: sed.)
+sed -i "s|gitVersion.get() + '\\\\n'|'2026-11-16-33ef7a1-master' + '\\\\n'|" dist.gradle
+grep -q "2026-11-16-33ef7a1-master" dist.gradle
+'''
+build = '''
+export PATH="/tmp/tw/node_modules/.bin:$PATH"
+gradle --no-daemon installAggregateDist
+test -d build/dist/marginalia/lib
+'''
+install = '''
+d="$pkgdir/usr/share/marginalia"
+mkdir -p "$d"
+cp -a build/dist/marginalia/. "$d/"
+# the language models
+mkdir -p "$d/model"
+for m in opennlp-sentence.bin segments.bin tfreq-new-algo3.bin lid.176.ftz; do
+    install -m644 /build/sources/$m "$d/model/$m"
+done
+# the install-directory template (the sample database password is a placeholder here)
+mkdir -p "$d/install-template"
+cp -a run/template/conf "$d/install-template/conf"
+sed -i 's|^db.pass=.*|db.pass=CHANGE-ME|' "$d/install-template/conf/db.properties"
+install -Dm755 $pkgfiles/marginalia-install-dir "$pkgdir/usr/bin/marginalia-install-dir"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/marginalia-search/README.FenrirOS"
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/marginalia-search/LICENSE.md"
+'''

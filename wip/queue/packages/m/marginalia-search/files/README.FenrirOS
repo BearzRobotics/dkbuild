@@ -1,0 +1,25 @@
+Marginalia Search on FenrirOS
+=============================
+
+Marginalia is a search engine and crawler for the non-commercial small web. It is a set of
+services (control, index, query, assistant, search, API, explorer) that talk to each other
+through ZooKeeper and keep their state in MariaDB. Nothing is installed running or
+configured: this package installs the programs, the language models and a template.
+
+  /usr/share/marginalia/bin/<service>    the launcher scripts of the services
+  /usr/share/marginalia/lib              their libraries (shared)
+  /usr/share/marginalia/model            the language models
+  marginalia-install-dir DIR             makes DIR a Marginalia home (WMSA_HOME) from the template
+
+Setting up (the project's own guide: https://docs.marginalia.nu/ and the run/ directory of its source):
+
+ 1. A MariaDB database and user for it (package mariadb), and a ZooKeeper (package zookeeper, service
+    "zookeeper"; both are installed as dependencies and neither is enabled).
+ 2. marginalia-install-dir /srv/marginalia, then edit /srv/marginalia/conf/db.properties (the password
+    there is the placeholder CHANGE-ME) and conf/properties/system.properties (ZooKeeper address,
+    crawler user agent: set your own).
+ 3. Start the services, each with its WMSA_HOME, for example (control partition 1, HTTP 7000, gRPC 7001,
+    bound to 127.0.0.1):  WMSA_HOME=/srv/marginalia /usr/share/marginalia/bin/control-service
+
+Marginalia wants a lot of RAM and fast storage for a real index; a small install with a limited crawl runs on
+modest hardware. It crawls the web only when you tell it to, and identifies itself with the user agent you set.

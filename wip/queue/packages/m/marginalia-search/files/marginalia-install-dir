@@ -1,0 +1,15 @@
+#!/bin/sh
+# marginalia-install-dir DIR: makes DIR a Marginalia Search install directory (WMSA_HOME):
+# conf/ from the package's template (edit it), model/ linked to the packaged language
+# models, empty data/ and logs. Then:
+#   WMSA_HOME=DIR /usr/share/marginalia/bin/<service> ...   (see /usr/share/doc/marginalia-search/README.FenrirOS)
+set -eu
+[ $# -eq 1 ] || { echo "usage: marginalia-install-dir DIR" >&2; exit 2; }
+d=$1
+t=/usr/share/marginalia/install-template
+mkdir -p "$d/conf" "$d/data" "$d/logs"
+for f in "$t"/conf/*; do
+    [ -e "$d/conf/$(basename "$f")" ] || cp "$f" "$d/conf/"
+done
+[ -e "$d/model" ] || ln -s /usr/share/marginalia/model "$d/model"
+echo "$d is ready: edit $d/conf/db.properties and $d/conf/properties/system.properties (the MariaDB and ZooKeeper addresses)"
