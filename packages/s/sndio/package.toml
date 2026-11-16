@@ -3,11 +3,12 @@
 # (pve-qemu, as Proxmox VE enables it) links libsndio. No cports template;
 # written for FenrirOS. The sndiod service is shipped but not enabled; sndiod
 # drops privileges to the "sndiod" user (made by sysusers.d).
+# r2: shared library (see the build step: the two --enable options exclude each other).
 # libbsd: sndio's Linux build uses it for strtonum, arc4random_buf,
 # getpeereid and reallocarray, which musl does not have.
 name = "sndio"
 version = "1.11.0"
-release = 1
+release = 2
 summary = "Small audio and MIDI framework from OpenBSD"
 license = "ISC"
 homepage = "https://sndio.org"
@@ -20,14 +21,24 @@ source = [
 ]
 
 build = '''
-# not autoconf: its own script, which takes only these options
-./configure --prefix=/usr --mandir=/usr/share/man --enable-alsa \
-    --enable-dynamic --enable-static --privsep-user=sndiod \
+# not autoconf: its own script, which takes only these options. --enable-dynamic and
+# --enable-static EXCLUDE each other (the last one given wins): the shared library is
+# built here, the static one in a second tree below (r1 passed both and got only
+# libsndio.a, so there was no libsndio.so for anything to link against).
+./configure --prefix=/usr --libdir=/usr/lib --mandir=/usr/share/man --enable-alsa \
+    --enable-dynamic --privsep-user=sndiod \
     CC="$CC" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" AR=llvm-ar
 %make
+cp -a "$PWD" ../sndio-static-build
+cd ../sndio-static-build
+./configure --prefix=/usr --libdir=/usr/lib --mandir=/usr/share/man --enable-alsa \
+    --enable-static --privsep-user=sndiod \
+    CC="$CC" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" AR=llvm-ar
+%make -C libsndio
 '''
 install = '''
 %make_install
+install -Dm644 ../sndio-static-build/libsndio/libsndio.a "$pkgdir/usr/lib/libsndio.a"
 install -Dm644 $pkgfiles/sndiod "$pkgdir/etc/dinit.d/sndiod"
 install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/sndio.conf"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/sndio/LICENSE"
