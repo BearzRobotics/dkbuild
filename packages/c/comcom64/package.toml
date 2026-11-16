@@ -10,7 +10,7 @@ summary = "64-bit DOS command interpreter for dosemu2"
 license = "GPL-3.0-or-later"
 homepage = "https://github.com/dosemu2/comcom64"
 archs = ["x86_64"]
-hostdeps = ["pkgconf", "thunk-gen", "dj64dev", "djstub", "i686-linux-gnu-tools", "nasm", "python3", "m4", "clang", "bash"]
+hostdeps = ["pkgconf", "thunk-gen", "dj64dev", "djstub", "i686-linux-gnu-tools", "nasm", "python", "m4", "clang", "bash"]
 
 source = [
     { url = "https://github.com/dosemu2/comcom64/archive/refs/tags/0.5.tar.gz", sha256 = "7dd7f5db57309fdd25e13dc47f23eeeb5b85260aae9d9618ba6f1ea47c6fb13a" },

@@ -1,0 +1,32 @@
+# Smaller C: a small single-pass C compiler (smlrcc, smlrc, smlrpp, smlrl) that targets DOS and 16/32-bit x86 flat
+# and real-mode formats. djstub builds its DOS stub (stub.exe) with it (`CC = smlrcc`, `-dosp`). Pinned to a commit of
+# alexfru/SmallerC master (2024-12-22; upstream's last release tags are binary bundles). Needs nasm (the library
+# sources include assembly). Built with the host C compiler by upstream's own make (the compiler and its libraries
+# are built in two stages: the tools first, then lcdh.a... with the new smlrcc), installed under /usr (tools) and
+# /usr/smlrc (libraries and headers), where smlrcc looks (PATH_PREFIX).
+name = "smallerc"
+version = "0_git20241222"
+release = 1
+summary = "Simple single-pass C compiler for DOS and x86 targets"
+license = "BSD-2-Clause"
+homepage = "https://github.com/alexfru/SmallerC"
+archs = ["x86_64"]
+hostdeps = ["make", "nasm"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/alexfru/SmallerC/archive/1865d79ce7a5ad3f8a9515a571437cee084b8b1d.tar.gz", sha256 = "b5df9bad7fdb2de917efd1053f5488741021292a7c9cbde4ec02afc377d4a374" },
+]
+
+setup = '''
+./configure
+'''
+build = '''
+# plain make: %make would put CC=clang on the command line, but the tools' own makefile builds the libraries with the
+# freshly built smlrcc (SMLRCC), and the host compiler for the tools
+make prefix=/usr CC="$CC" CFLAGS="$CFLAGS"
+'''
+install = '''
+make DESTDIR="$pkgdir" prefix=/usr install
+install -Dm644 license.txt "$pkgdir/usr/share/licenses/smallerc/license.txt"
+'''

@@ -16,7 +16,7 @@ summary = "DOS emulator for Linux (with FreeDOS kernel and DJGPP-64 support)"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/dosemu2/dosemu2"
 archs = ["x86_64"]
-hostdeps = ["autoconf", "automake", "libtool", "m4", "pkgconf", "bison", "flex", "nasm", "clang", "thunk-gen", "i686-linux-gnu-tools", "dj64dev", "python3", "bash"]
+hostdeps = ["autoconf", "automake", "libtool", "m4", "pkgconf", "bison", "flex", "nasm", "clang", "thunk-gen", "i686-linux-gnu-tools", "dj64dev", "python", "bash"]
 builddeps = ["fdpp", "dj64dev", "comcom64", "libslirp", "libb64", "libsearpc", "fluidsynth", "ladspa-sdk", "slang", "gpm", "alsa-lib", "sdl2-ttf", "readline", "json-c", "libseccomp", "fontconfig", "libx11", "libxext", "libxxf86vm", "libxcursor", "libxkbfile", "libxpm", "libxt", "libsndfile", "linux-headers"]
 rundeps = ["fdpp", "comcom64", "dj64dev"]
 

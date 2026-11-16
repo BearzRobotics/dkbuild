@@ -8,7 +8,7 @@ summary = "C RPC framework over JSON (Seafile)"
 license = "LGPL-3.0-or-later"
 homepage = "https://github.com/haiwen/libsearpc"
 archs = ["x86_64"]
-hostdeps = ["autoconf", "automake", "libtool", "pkgconf", "python3", "gettext"]
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf", "python", "gettext"]
 builddeps = ["glib-devel", "json-glib-devel"]
 
 source = [

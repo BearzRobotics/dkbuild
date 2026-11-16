@@ -2,13 +2,13 @@
 # scripts). dj64dev, djdev64, comcom64 and dosemu2 find it through pkg-config.
 name = "thunk-gen"
 version = "1.11"
-release = 1
+release = 2
 summary = "Thunk generator for dj64 and dosemu2"
 license = "GPL-3.0-or-later"
 homepage = "https://github.com/stsp/thunk_gen"
 archs = ["x86_64"]
 hostdeps = ["meson", "pkgconf"]
-rundeps = ["python3", "m4", "clang", "bash"]
+rundeps = ["python", "m4", "clang", "bash"]
 
 source = [
     { url = "https://github.com/stsp/thunk_gen/archive/refs/tags/1.11.tar.gz", sha256 = "579f8bc5a6d090495a30ac6ac090bf62ce5633c1fbfefb1f087367d02970456a" },

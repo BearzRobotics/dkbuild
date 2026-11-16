@@ -12,7 +12,7 @@ summary = "FreeDOS kernel in C++ for dosemu2"
 license = "GPL-3.0-or-later"
 homepage = "https://github.com/dosemu2/fdpp"
 archs = ["x86_64"]
-hostdeps = ["meson", "pkgconf", "nasm", "clang", "thunk-gen", "i686-linux-gnu-tools", "python3", "m4", "bash"]
+hostdeps = ["meson", "pkgconf", "nasm", "clang", "thunk-gen", "i686-linux-gnu-tools", "python", "m4", "bash"]
 builddeps = ["linux-headers"]
 
 source = [

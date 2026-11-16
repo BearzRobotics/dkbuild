@@ -12,7 +12,7 @@ summary = "DJGPP-64 tool-chain and the djdev64 loader libraries"
 license = "LGPL-2.1-or-later AND GPL-3.0-or-later"
 homepage = "https://github.com/stsp/dj64dev"
 archs = ["x86_64"]
-hostdeps = ["autoconf", "automake", "libtool", "m4", "pkgconf", "thunk-gen", "i686-linux-gnu-tools", "djstub", "python3", "ncurses", "clang", "bash"]
+hostdeps = ["autoconf", "automake", "libtool", "m4", "pkgconf", "thunk-gen", "i686-linux-gnu-tools", "djstub", "python", "ncurses", "clang", "bash"]
 builddeps = ["elfutils-devel", "linux-headers"]
 rundeps = ["thunk-gen", "djstub", "i686-linux-gnu-tools"]
 
