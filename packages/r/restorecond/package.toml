@@ -1,7 +1,7 @@
 # SELinux restorecond daemon: relabels files as they are created: its systemd and D-Bus activation files are removed (a dinit service is not written). SELinux userspace 3.11 (https://github.com/SELinuxProject/selinux). Not built (queued, wip/queue): expect first-build fixes.
 name = "restorecond"
 version = "3.11"
-release = 1
+release = 2
 summary = "SELinux restorecond daemon: relabels files as they are created"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/SELinuxProject/selinux"
@@ -13,8 +13,14 @@ source = [
     { url = "https://github.com/SELinuxProject/selinux/releases/download/3.11/restorecond-3.11.tar.gz", sha256 = "f40ce5246d42746b22dbe363c43c6ebd28d051b568e4c06d2dec1c4b8a87a5ca" },
 ]
 
+# r2: watch.c lets glob(3) walk directories through its own functions (glibc's GLOB_ALTDIRFUNC and gl_opendir, gl_readdir, gl_closedir, gl_lstat,
+# gl_stat) so that a pattern never follows a symlink; musl has none of them ("no member named 'gl_opendir' in 'glob_t'", "undeclared identifier
+# 'GLOB_ALTDIRFUNC'"). Source edit: plain glob(3), which stats through links. What restorecond does with each match is unchanged (it relabels the
+# path with selinux_restorecon, which does not follow links); only the directory walk of a pattern may now pass through a symlink.
 setup = '''
-true
+sed -i -e '/globbuf\.gl_\(opendir\|readdir\|closedir\|lstat\|stat\) = /d' -e 's/ | GLOB_ALTDIRFUNC//' watch.c
+sed -i 's/^static \(.*nofollow_[a-z]*(\)/static __attribute__((unused)) \1/' watch.c
+if grep -q 'GLOB_ALTDIRFUNC\|globbuf\.gl_\(opendir\|readdir\|closedir\|lstat\|stat\) ' watch.c; then exit 1; fi
 '''
 build = '''
 make -j$jobs
