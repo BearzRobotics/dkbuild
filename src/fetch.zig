@@ -367,6 +367,9 @@ pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_s
         \\: > "$t/list"
         \\for d in "$top"/vendor/*/; do
         \\    n=$(basename "$d")
+        \\    # a crate the project carries in its own vendor/ (a [patch] path copy) has no checksum file, which cargo's vendored source
+        \\    # needs: an empty one, as `cargo vendor` writes for a crate with no checked files
+        \\    [ -f "$d/.cargo-checksum.json" ] || printf '{{"files":{{}},"package":null}}' > "$d/.cargo-checksum.json"
         \\    k="$n-$(sha256sum "$d/.cargo-checksum.json" | cut -c1-16)"
         \\    [ -e "$store/$k" ] || mv -T "$d" "$store/$k" 2>/dev/null || [ -e "$store/$k" ]
         \\    echo "$n $k" >> "$t/list"
