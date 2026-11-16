@@ -16,7 +16,7 @@
 # (or any full texmf-dist) is installed. texmf-dist itself is not in this package.
 name = "texlive-bin"
 version = "20260301"
-release = 2
+release = 3
 summary = "TeX Live binaries: TeX engines, dvips, dvipdfmx, bibtex, kpathsea, ..."
 license = "GPL-2.0-or-later"
 homepage = "https://tug.org/texlive"
@@ -31,7 +31,9 @@ source = [
 
 environment = '''
 export CFLAGS="$CFLAGS -Wno-implicit-function-declaration -Wno-int-conversion -Wno-incompatible-function-pointer-types -Wno-deprecated-non-prototype"
-export CXXFLAGS="$CXXFLAGS -Wno-deprecated-declarations"
+# r3: -include iterator: dvisvgm's PDFParser.cpp uses back_inserter without <iterator> ("use of undeclared identifier 'back_inserter'"), which libc++ 23
+# no longer gets through other headers (the same as tesseract, libtorrent-rasterbar and qttools' litehtml).
+export CXXFLAGS="$CXXFLAGS -Wno-deprecated-declarations -include iterator"
 '''
 setup = '''
 # Tree layout: TEXMFROOT=/usr/share (so TEXMFDIST=/usr/share/texmf-dist), generated
