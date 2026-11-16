@@ -10,9 +10,13 @@
 # (OpenSSL is used), DBus role, sd-event, uloop, ALSA/Opus/GTK/Alexa examples,
 # WebRTC, V4L2, ffmpeg transcoding, hubbub, and the test and minimal examples.
 # Used by mosquitto (websockets listeners).
+# r2: -DLWS_WITH_HTTP3=OFF, FOR NOW (docs/disabled-features.md). With HTTP/3 (QUIC) on, CMakeLists.txt forces LWS_WITH_GNUTLS=ON (line ~290: QUIC
+# needs GnuTLS), and libwebsockets.h then typedefs the SSL types (BIO, X509, SSL, SSL_CTX) as GnuTLS ones, which clash with OpenSSL's headers in every
+# consumer that uses OpenSSL (mosquitto: "typedef redefinition with different types ('struct bio_st' vs 'void')"). TLS stays OpenSSL, as the
+# recipe said all along; HTTP/3 is the only feature lost (Debian's libwebsockets leaves it off too).
 name = "libwebsockets"
 version = "5.1.0"
-release = 1
+release = 2
 summary = "C library for WebSocket and HTTP servers and clients"
 license = "MIT"
 homepage = "https://libwebsockets.org"
@@ -28,7 +32,7 @@ setup = '''
 %cmake \
     -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DLWS_WITH_SHARED=ON -DLWS_WITH_STATIC=ON -DLWS_STATIC_PIC=ON \
-    -DLWS_WITH_SSL=ON -DLWS_WITH_ZLIB=ON -DLWS_WITHOUT_EXTENSIONS=OFF \
+    -DLWS_WITH_HTTP3=OFF -DLWS_WITH_SSL=ON -DLWS_WITH_ZLIB=ON -DLWS_WITHOUT_EXTENSIONS=OFF \
     -DLWS_WITH_HTTP2=ON -DLWS_WITH_HTTP_STREAM_COMPRESSION=ON \
     -DLWS_WITH_LIBUV=ON -DLWS_WITH_LIBEVENT=ON -DLWS_WITH_LIBEV=ON -DLWS_WITH_GLIB=ON \
     -DLWS_WITH_PLUGINS=ON -DLWS_WITH_SOCKS5=ON -DLWS_WITH_CGI=ON -DLWS_WITH_RANGES=ON \
