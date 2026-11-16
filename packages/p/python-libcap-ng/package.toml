@@ -1,3 +1,4 @@
+# r4: PYTHON=python3 as a make argument (the Makefile assigns PYTHON itself, so the environment value of r3 was ignored).
 # r3: install with PYTHON=python3 (py-compile: "python: not found").
 # r2: builds src/libcap-ng.la first (the binding's Makefile needs it in the tree); no --without-python.
 # python-libcap-ng: the Python binding (swig) of libcap-ng, for firewalld (it drops capabilities). The
@@ -6,7 +7,7 @@
 # bindings/python3 against the installed libcap-ng. Not built (queued, wip/queue).
 name = "python-libcap-ng"
 version = "0.8.5"
-release = 3
+release = 4
 summary = "Python binding of libcap-ng (POSIX capabilities)"
 license = "LGPL-2.1-or-later"
 homepage = "https://github.com/stevegrubb/libcap-ng"
@@ -30,5 +31,5 @@ make -C bindings/python3 -j$jobs
 '''
 install = '''
 # py-compile (run by the install) calls plain `python`, which does not exist: PYTHON=python3
-PYTHON=python3 make -C bindings/python3 DESTDIR="$pkgdir" install
+make -C bindings/python3 PYTHON=python3 DESTDIR="$pkgdir" install
 '''

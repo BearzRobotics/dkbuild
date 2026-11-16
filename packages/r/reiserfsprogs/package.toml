@@ -5,13 +5,13 @@
 # (glibc declares it by default). Nothing else is changed.
 name = "reiserfsprogs"
 version = "3.6.27"
-release = 4
+release = 5
 summary = "ReiserFS (version 3) filesystem utilities"
 patches = ["musl-printf.patch"]
 license = "GPL-2.0-only"
 homepage = "https://www.kernel.org/pub/linux/kernel/people/jeffm/reiserfsprogs/"
 hostdeps = ["pkgconf"]
-builddeps = ["linux-headers", "util-linux-devel"]
+builddeps = ["linux-headers", "util-linux-devel", "musl-obstack-devel"]
 options = ["!check"]
 
 source = [
@@ -20,6 +20,8 @@ source = [
 
 environment = '''
 export CFLAGS="${CFLAGS} -D_LARGEFILE64_SOURCE"
+export LDFLAGS="${LDFLAGS} -lobstack"
+# r5: links libobstack (musl-obstack): the library uses glibc's obstack ("undefined symbol: _obstack_begin"), as cronie and elfutils do here.
 # r4: patches/musl-printf.patch. reiserfsprogs prints its structures (keys, item heads, block heads)
 # through glibc's register_printf_specifier(): the format letters %K %k %H %b %y %M %U are registered
 # and then handled inside vfprintf, and <printf.h> does not exist on musl ("'printf.h' file not
