@@ -1,0 +1,10 @@
+#!/bin/sh
+# Apache Nutch (local mode): the program is in /usr/share/nutch, the configuration in /etc/nutch
+# (NUTCH_CONF_DIR), the logs under your own ~/.local/state/nutch. Set http.agent.name in
+# /etc/nutch/nutch-site.xml (copy it from nutch-default.xml's documentation) before crawling:
+# Nutch refuses to fetch without an agent name.
+export NUTCH_HOME=/usr/share/nutch
+export NUTCH_CONF_DIR=${NUTCH_CONF_DIR:-/etc/nutch}
+export NUTCH_LOG_DIR=${NUTCH_LOG_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/nutch}
+mkdir -p "$NUTCH_LOG_DIR"
+exec /usr/share/nutch/bin/nutch "$@"

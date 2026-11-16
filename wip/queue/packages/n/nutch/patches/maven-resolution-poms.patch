@@ -1,0 +1,992 @@
+diff -ruN a/dk-maven/m000/pom.xml b/dk-maven/m000/pom.xml
+--- a/dk-maven/m000/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m000/pom.xml	2026-11-16 16:45:06.716312701 -0500
+@@ -0,0 +1,53 @@
++<?xml version="1.0"?>
++<!-- generated from ivy/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m000</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>org.apache.logging.log4j</groupId><artifactId>log4j-api</artifactId><version>2.26.0</version><scope>compile</scope><exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>org.apache.logging.log4j</groupId><artifactId>log4j-core</artifactId><version>2.26.0</version><scope>compile</scope><exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>org.apache.logging.log4j</groupId><artifactId>log4j-slf4j2-impl</artifactId><version>2.26.0</version><scope>compile</scope><exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>org.slf4j</groupId><artifactId>slf4j-api</artifactId><version>2.0.18</version><scope>compile</scope><exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>org.apache.commons</groupId><artifactId>commons-lang3</artifactId><version>3.20.0</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.commons</groupId><artifactId>commons-collections4</artifactId><version>4.5.0</version><scope>compile</scope><exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>org.apache.httpcomponents</groupId><artifactId>httpclient</artifactId><version>4.5.14</version><scope>compile</scope><exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>commons-httpclient</groupId><artifactId>commons-httpclient</artifactId><version>3.1</version><scope>compile</scope></dependency>
++<dependency><groupId>commons-codec</groupId><artifactId>commons-codec</artifactId><version>1.22.0</version><scope>compile</scope></dependency>
++<dependency><groupId>commons-io</groupId><artifactId>commons-io</artifactId><version>2.22.0</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.commons</groupId><artifactId>commons-compress</artifactId><version>1.28.0</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.commons</groupId><artifactId>commons-jexl3</artifactId><version>3.6.0</version><scope>compile</scope></dependency>
++<dependency><groupId>com.tdunning</groupId><artifactId>t-digest</artifactId><version>3.3</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.hadoop</groupId><artifactId>hadoop-common</artifactId><version>3.5.0</version><scope>compile</scope><exclusions><exclusion><groupId>ch.qos.reload4j</groupId><artifactId>*</artifactId></exclusion><exclusion><groupId>org.slf4j</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>org.apache.hadoop</groupId><artifactId>hadoop-hdfs</artifactId><version>3.5.0</version><scope>compile</scope><exclusions><exclusion><groupId>ch.qos.reload4j</groupId><artifactId>*</artifactId></exclusion><exclusion><groupId>org.slf4j</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>org.apache.hadoop</groupId><artifactId>hadoop-mapreduce-client-core</artifactId><version>3.5.0</version><scope>compile</scope><exclusions><exclusion><groupId>ch.qos.reload4j</groupId><artifactId>*</artifactId></exclusion><exclusion><groupId>org.slf4j</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>org.apache.hadoop</groupId><artifactId>hadoop-mapreduce-client-jobclient</artifactId><version>3.5.0</version><scope>compile</scope><exclusions><exclusion><groupId>ch.qos.reload4j</groupId><artifactId>*</artifactId></exclusion><exclusion><groupId>org.slf4j</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>org.apache.tika</groupId><artifactId>tika-core</artifactId><version>3.3.1</version><scope>compile</scope></dependency>
++<dependency><groupId>xerces</groupId><artifactId>xercesImpl</artifactId><version>2.12.2</version><scope>compile</scope></dependency>
++<dependency><groupId>com.ibm.icu</groupId><artifactId>icu4j</artifactId><version>78.3</version><scope>compile</scope></dependency>
++<dependency><groupId>com.google.guava</groupId><artifactId>guava</artifactId><version>33.6.0-jre</version><scope>compile</scope></dependency>
++<dependency><groupId>com.github.crawler-commons</groupId><artifactId>crawler-commons</artifactId><version>1.6</version><scope>compile</scope></dependency>
++<dependency><groupId>com.google.code.gson</groupId><artifactId>gson</artifactId><version>2.13.2</version><scope>compile</scope></dependency>
++<dependency><groupId>com.martinkl.warc</groupId><artifactId>warc-hadoop</artifactId><version>0.1.0</version><scope>compile</scope><exclusions><exclusion><groupId>*</groupId><artifactId>hadoop-client</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-databind</artifactId><version>2.18.8</version><scope>compile</scope></dependency>
++<dependency><groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-annotations</artifactId><version>2.18.8</version><scope>compile</scope></dependency>
++<dependency><groupId>com.fasterxml.jackson.dataformat</groupId><artifactId>jackson-dataformat-cbor</artifactId><version>2.18.8</version><scope>compile</scope></dependency>
++<dependency><groupId>org.netpreserve.commons</groupId><artifactId>webarchive-commons</artifactId><version>3.0.4</version><scope>compile</scope><exclusions><exclusion><groupId>*</groupId><artifactId>hadoop-core</artifactId></exclusion><exclusion><groupId>com.google.guava</groupId><artifactId>*</artifactId></exclusion><exclusion><groupId>junit</groupId><artifactId>*</artifactId></exclusion><exclusion><groupId>org.json</groupId><artifactId>*</artifactId></exclusion><exclusion><groupId>it.unimi.dsi</groupId><artifactId>dsiutils</artifactId></exclusion><exclusion><groupId>org.gnu.inet</groupId><artifactId>libidn</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>org.hamcrest</groupId><artifactId>hamcrest</artifactId><version>3.0</version><scope>test</scope></dependency>
++<dependency><groupId>org.jspecify</groupId><artifactId>jspecify</artifactId><version>1.0.0</version><scope>compile</scope></dependency>
++<dependency><groupId>org.junit.platform</groupId><artifactId>junit-platform-launcher</artifactId><version>6.1.0</version><scope>test</scope></dependency>
++<dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter-engine</artifactId><version>6.1.0</version><scope>test</scope></dependency>
++<dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter-api</artifactId><version>6.1.0</version><scope>test</scope></dependency>
++<dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter-params</artifactId><version>6.1.0</version><scope>test</scope></dependency>
++<dependency><groupId>org.mockito</groupId><artifactId>mockito-core</artifactId><version>5.23.0</version><scope>test</scope></dependency>
++<dependency><groupId>org.mockito</groupId><artifactId>mockito-junit-jupiter</artifactId><version>5.23.0</version><scope>test</scope></dependency>
++<dependency><groupId>org.testcontainers</groupId><artifactId>testcontainers</artifactId><version>2.0.5</version><scope>test</scope></dependency>
++<dependency><groupId>org.testcontainers</groupId><artifactId>junit-jupiter</artifactId><version>1.21.4</version><scope>test</scope></dependency>
++<dependency><groupId>com.github.tomakehurst</groupId><artifactId>wiremock-standalone</artifactId><version>3.0.1</version><scope>test</scope></dependency>
++<dependency><groupId>org.mockftpserver</groupId><artifactId>MockFtpServer</artifactId><version>3.2.0</version><scope>test</scope></dependency>
++<dependency><groupId>org.mock-server</groupId><artifactId>mockserver-netty-no-dependencies</artifactId><version>7.2.0</version><scope>test</scope></dependency>
++<dependency><groupId>org.mock-server</groupId><artifactId>mockserver-client-java-no-dependencies</artifactId><version>7.2.0</version><scope>test</scope></dependency>
++<dependency><groupId>org.apache.httpcomponents</groupId><artifactId>httpcore-nio</artifactId><version>4.4.16</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.httpcomponents</groupId><artifactId>httpcore</artifactId><version>4.4.16</version><scope>compile</scope></dependency>
++<dependency><groupId>de.vandermeer</groupId><artifactId>asciitable</artifactId><version>0.3.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.littleshoot</groupId><artifactId>littleproxy</artifactId><version>1.1.2</version><scope>test</scope></dependency>
++<dependency><groupId>org.apache.ivy</groupId><artifactId>ivy</artifactId><version>2.5.3</version><scope>compile</scope></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m001/pom.xml b/dk-maven/m001/pom.xml
+--- a/dk-maven/m001/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m001/pom.xml	2026-11-16 16:45:06.716918355 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/creativecommons/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m001</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m002/pom.xml b/dk-maven/m002/pom.xml
+--- a/dk-maven/m002/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m002/pom.xml	2026-11-16 16:45:06.717026135 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/exchange-jexl/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m002</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m003/pom.xml b/dk-maven/m003/pom.xml
+--- a/dk-maven/m003/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m003/pom.xml	2026-11-16 16:45:06.717129596 -0500
+@@ -0,0 +1,7 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/feed/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m003</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>com.rometools</groupId><artifactId>rome</artifactId><version>1.5.1</version><scope>compile</scope><exclusions><exclusion><groupId>*</groupId><artifactId>slf4j-api</artifactId></exclusion></exclusions></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m004/pom.xml b/dk-maven/m004/pom.xml
+--- a/dk-maven/m004/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m004/pom.xml	2026-11-16 16:45:06.717191937 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/headings/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m004</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m005/pom.xml b/dk-maven/m005/pom.xml
+--- a/dk-maven/m005/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m005/pom.xml	2026-11-16 16:45:06.717250547 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/index-anchor/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m005</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m006/pom.xml b/dk-maven/m006/pom.xml
+--- a/dk-maven/m006/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m006/pom.xml	2026-11-16 16:45:06.717304507 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/index-arbitrary/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m006</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m007/pom.xml b/dk-maven/m007/pom.xml
+--- a/dk-maven/m007/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m007/pom.xml	2026-11-16 16:45:06.717370648 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/index-basic/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m007</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m008/pom.xml b/dk-maven/m008/pom.xml
+--- a/dk-maven/m008/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m008/pom.xml	2026-11-16 16:45:06.717445308 -0500
+@@ -0,0 +1,7 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/index-geoip/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m008</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>com.maxmind.geoip2</groupId><artifactId>geoip2</artifactId><version>5.0.2</version><scope>compile</scope><exclusions><exclusion><groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-annotations</artifactId></exclusion><exclusion><groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-databind</artifactId></exclusion><exclusion><groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-core</artifactId></exclusion></exclusions></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m009/pom.xml b/dk-maven/m009/pom.xml
+--- a/dk-maven/m009/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m009/pom.xml	2026-11-16 16:45:06.717522579 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/index-jexl-filter/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m009</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m010/pom.xml b/dk-maven/m010/pom.xml
+--- a/dk-maven/m010/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m010/pom.xml	2026-11-16 16:45:06.717596059 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/index-links/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m010</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m011/pom.xml b/dk-maven/m011/pom.xml
+--- a/dk-maven/m011/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m011/pom.xml	2026-11-16 16:45:06.717670990 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/index-metadata/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m011</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m012/pom.xml b/dk-maven/m012/pom.xml
+--- a/dk-maven/m012/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m012/pom.xml	2026-11-16 16:45:06.717756340 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/index-more/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m012</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m013/pom.xml b/dk-maven/m013/pom.xml
+--- a/dk-maven/m013/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m013/pom.xml	2026-11-16 16:45:06.717825921 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/index-replace/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m013</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m014/pom.xml b/dk-maven/m014/pom.xml
+--- a/dk-maven/m014/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m014/pom.xml	2026-11-16 16:45:06.717884371 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/index-static/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m014</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m015/pom.xml b/dk-maven/m015/pom.xml
+--- a/dk-maven/m015/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m015/pom.xml	2026-11-16 16:45:06.717936091 -0500
+@@ -0,0 +1,7 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/indexer-cloudsearch/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m015</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>com.amazonaws</groupId><artifactId>aws-java-sdk-cloudsearch</artifactId><version>1.10.0</version><scope>compile</scope></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m016/pom.xml b/dk-maven/m016/pom.xml
+--- a/dk-maven/m016/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m016/pom.xml	2026-11-16 16:45:06.718007672 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/indexer-csv/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m016</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m017/pom.xml b/dk-maven/m017/pom.xml
+--- a/dk-maven/m017/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m017/pom.xml	2026-11-16 16:45:06.718114053 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/indexer-dummy/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m017</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m018/pom.xml b/dk-maven/m018/pom.xml
+--- a/dk-maven/m018/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m018/pom.xml	2026-11-16 16:45:06.719364131 -0500
+@@ -0,0 +1,22 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/indexer-elastic/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m018</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>org.testcontainers</groupId><artifactId>testcontainers-elasticsearch</artifactId><version>2.0.3</version><scope>test</scope></dependency>
++<dependency><groupId>org.elasticsearch.client</groupId><artifactId>elasticsearch-rest-high-level-client</artifactId><version>7.10.2</version><scope>compile</scope><exclusions><exclusion><groupId>org.apache.logging.log4j</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-analyzers-common</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-backward-codecs</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-core</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-grouping</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-highlighter</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-join</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-memory</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-misc</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-queries</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-queryparser</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-sandbox</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-spatial-extras</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-spatial3d</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-suggest</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m019/pom.xml b/dk-maven/m019/pom.xml
+--- a/dk-maven/m019/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m019/pom.xml	2026-11-16 16:45:06.719534472 -0500
+@@ -0,0 +1,9 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/indexer-kafka/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m019</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>org.testcontainers</groupId><artifactId>testcontainers-kafka</artifactId><version>2.0.3</version><scope>test</scope></dependency>
++<dependency><groupId>org.apache.kafka</groupId><artifactId>kafka_2.12</artifactId><version>3.7.0</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.kafka</groupId><artifactId>connect-json</artifactId><version>3.7.0</version><scope>compile</scope></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m020/pom.xml b/dk-maven/m020/pom.xml
+--- a/dk-maven/m020/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m020/pom.xml	2026-11-16 16:45:06.721415114 -0500
+@@ -0,0 +1,21 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/indexer-opensearch-1x/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m020</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>org.opensearch.client</groupId><artifactId>opensearch-rest-high-level-client</artifactId><version>1.3.8</version><scope>compile</scope><exclusions><exclusion><groupId>commons-codec</groupId><artifactId>commons-codec</artifactId></exclusion><exclusion><groupId>commons-logging</groupId><artifactId>commons-logging</artifactId></exclusion><exclusion><groupId>com.tdunning</groupId><artifactId>t-digest</artifactId></exclusion><exclusion><groupId>org.apache.logging.log4j</groupId><artifactId>log4j-api</artifactId></exclusion><exclusion><groupId>org.apache.lucene</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-analyzers-common</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-backward-codecs</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-core</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-grouping</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-highlighter</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-join</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-memory</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-misc</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-queries</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-queryparser</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-sandbox</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-spatial-extras</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-spatial3d</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-suggest</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m021/pom.xml b/dk-maven/m021/pom.xml
+--- a/dk-maven/m021/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m021/pom.xml	2026-11-16 16:45:06.722531042 -0500
+@@ -0,0 +1,7 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/indexer-rabbit/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m021</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>org.testcontainers</groupId><artifactId>testcontainers-rabbitmq</artifactId><version>2.0.3</version><scope>test</scope></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m022/pom.xml b/dk-maven/m022/pom.xml
+--- a/dk-maven/m022/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m022/pom.xml	2026-11-16 16:45:06.722621852 -0500
+@@ -0,0 +1,11 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/indexer-solr/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m022</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>org.testcontainers</groupId><artifactId>testcontainers-solr</artifactId><version>2.0.3</version><scope>test</scope></dependency>
++<dependency><groupId>org.apache.solr</groupId><artifactId>solr-solrj</artifactId><version>8.11.4</version><scope>compile</scope><exclusions><exclusion><groupId>commons-codec</groupId><artifactId>commons-codec</artifactId></exclusion><exclusion><groupId>commons-logging</groupId><artifactId>commons-logging</artifactId></exclusion><exclusion><groupId>org.slf4j</groupId><artifactId>slf4j-api</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>org.apache.httpcomponents</groupId><artifactId>httpclient</artifactId><version>4.5.14</version><scope>compile</scope><exclusions><exclusion><groupId>commons-codec</groupId><artifactId>commons-codec</artifactId></exclusion><exclusion><groupId>commons-logging</groupId><artifactId>commons-logging</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>org.apache.httpcomponents</groupId><artifactId>httpmime</artifactId><version>4.5.14</version><scope>compile</scope><exclusions><exclusion><groupId>commons-codec</groupId><artifactId>commons-codec</artifactId></exclusion><exclusion><groupId>commons-logging</groupId><artifactId>commons-logging</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>org.apache.httpcomponents</groupId><artifactId>httpcore</artifactId><version>4.4.16</version><scope>compile</scope><exclusions><exclusion><groupId>commons-logging</groupId><artifactId>commons-logging</artifactId></exclusion></exclusions></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m023/pom.xml b/dk-maven/m023/pom.xml
+--- a/dk-maven/m023/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m023/pom.xml	2026-11-16 16:45:06.722842434 -0500
+@@ -0,0 +1,7 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/language-identifier/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m023</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>org.apache.tika</groupId><artifactId>tika-langdetect-optimaize</artifactId><version>3.3.1</version><scope>compile</scope><exclusions><exclusion><groupId>org.apache.tika</groupId><artifactId>tika-core</artifactId></exclusion><exclusion><groupId>com.google.guava</groupId><artifactId>guava</artifactId></exclusion><exclusion><groupId>org.slf4j</groupId><artifactId>slf4j-api</artifactId></exclusion></exclusions></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m024/pom.xml b/dk-maven/m024/pom.xml
+--- a/dk-maven/m024/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m024/pom.xml	2026-11-16 16:45:06.723143086 -0500
+@@ -0,0 +1,8 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/lib-htmlunit/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m024</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>org.seleniumhq.selenium</groupId><artifactId>selenium-java</artifactId><version>4.7.2</version><scope>compile</scope></dependency>
++<dependency><groupId>org.seleniumhq.selenium</groupId><artifactId>htmlunit-driver</artifactId><version>4.7.0</version><scope>compile</scope></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m025/pom.xml b/dk-maven/m025/pom.xml
+--- a/dk-maven/m025/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m025/pom.xml	2026-11-16 16:45:06.723234326 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/lib-http/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m025</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m026/pom.xml b/dk-maven/m026/pom.xml
+--- a/dk-maven/m026/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m026/pom.xml	2026-11-16 16:45:06.723312637 -0500
+@@ -0,0 +1,7 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/lib-nekohtml/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m026</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>net.sourceforge.nekohtml</groupId><artifactId>nekohtml</artifactId><version>1.9.22</version><scope>compile</scope><exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m027/pom.xml b/dk-maven/m027/pom.xml
+--- a/dk-maven/m027/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m027/pom.xml	2026-11-16 16:45:06.723394048 -0500
+@@ -0,0 +1,8 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/lib-rabbitmq/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m027</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>com.rabbitmq</groupId><artifactId>amqp-client</artifactId><version>5.2.0</version><scope>compile</scope><exclusions><exclusion><groupId>org.slf4j</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>com.google.code.gson</groupId><artifactId>gson</artifactId><version>2.8.4</version><scope>compile</scope></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m028/pom.xml b/dk-maven/m028/pom.xml
+--- a/dk-maven/m028/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m028/pom.xml	2026-11-16 16:45:06.723479768 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/lib-regex-filter/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m028</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m029/pom.xml b/dk-maven/m029/pom.xml
+--- a/dk-maven/m029/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m029/pom.xml	2026-11-16 16:45:06.723569979 -0500
+@@ -0,0 +1,7 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/lib-selenium/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m029</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>org.seleniumhq.selenium</groupId><artifactId>selenium-java</artifactId><version>4.18.1</version><scope>compile</scope></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m030/pom.xml b/dk-maven/m030/pom.xml
+--- a/dk-maven/m030/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m030/pom.xml	2026-11-16 16:45:06.723660209 -0500
+@@ -0,0 +1,9 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/lib-xml/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m030</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>org.jdom</groupId><artifactId>jdom</artifactId><version>2.0.2</version><scope>compile</scope></dependency>
++<dependency><groupId>jaxen</groupId><artifactId>jaxen</artifactId><version>2.0.6</version><scope>compile</scope><exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>xerces</groupId><artifactId>xercesImpl</artifactId><version>2.12.2</version><scope>compile</scope><exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m031/pom.xml b/dk-maven/m031/pom.xml
+--- a/dk-maven/m031/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m031/pom.xml	2026-11-16 16:45:06.723807800 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/microformats-reltag/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m031</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m032/pom.xml b/dk-maven/m032/pom.xml
+--- a/dk-maven/m032/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m032/pom.xml	2026-11-16 16:45:06.723893841 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/mimetype-filter/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m032</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m033/pom.xml b/dk-maven/m033/pom.xml
+--- a/dk-maven/m033/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m033/pom.xml	2026-11-16 16:45:06.724259573 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/nutch-extensionpoints/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m033</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m034/pom.xml b/dk-maven/m034/pom.xml
+--- a/dk-maven/m034/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m034/pom.xml	2026-11-16 16:45:06.724366034 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/parse-ext/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m034</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m035/pom.xml b/dk-maven/m035/pom.xml
+--- a/dk-maven/m035/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m035/pom.xml	2026-11-16 16:45:06.724458475 -0500
+@@ -0,0 +1,7 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/parse-html/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m035</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>org.ccil.cowan.tagsoup</groupId><artifactId>tagsoup</artifactId><version>1.2.1</version><scope>compile</scope></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m036/pom.xml b/dk-maven/m036/pom.xml
+--- a/dk-maven/m036/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m036/pom.xml	2026-11-16 16:45:06.724538505 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/parse-js/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m036</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m037/pom.xml b/dk-maven/m037/pom.xml
+--- a/dk-maven/m037/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m037/pom.xml	2026-11-16 16:45:06.724611816 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/parse-metatags/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m037</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m038/pom.xml b/dk-maven/m038/pom.xml
+--- a/dk-maven/m038/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m038/pom.xml	2026-11-16 16:45:06.724685216 -0500
+@@ -0,0 +1,8 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/parse-tika/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m038</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>org.apache.tika</groupId><artifactId>tika-parsers-standard-package</artifactId><version>3.3.1</version><scope>compile</scope><exclusions><exclusion><groupId>org.apache.tika</groupId><artifactId>tika-core</artifactId></exclusion><exclusion><groupId>org.slf4j</groupId><artifactId>slf4j-api</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>org.apache.tika</groupId><artifactId>tika-handler-boilerpipe</artifactId><version>3.3.1</version><scope>compile</scope><exclusions><exclusion><groupId>org.slf4j</groupId><artifactId>slf4j-api</artifactId></exclusion></exclusions></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m039/pom.xml b/dk-maven/m039/pom.xml
+--- a/dk-maven/m039/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m039/pom.xml	2026-11-16 16:45:06.724759947 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/parse-zip/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m039</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m040/pom.xml b/dk-maven/m040/pom.xml
+--- a/dk-maven/m040/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m040/pom.xml	2026-11-16 16:45:06.724831117 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/parsefilter-debug/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m040</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m041/pom.xml b/dk-maven/m041/pom.xml
+--- a/dk-maven/m041/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m041/pom.xml	2026-11-16 16:45:06.724900567 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/parsefilter-naivebayes/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m041</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m042/pom.xml b/dk-maven/m042/pom.xml
+--- a/dk-maven/m042/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m042/pom.xml	2026-11-16 16:45:06.724969608 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/parsefilter-regex/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m042</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m043/pom.xml b/dk-maven/m043/pom.xml
+--- a/dk-maven/m043/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m043/pom.xml	2026-11-16 16:45:06.725052188 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/protocol-file/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m043</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m044/pom.xml b/dk-maven/m044/pom.xml
+--- a/dk-maven/m044/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m044/pom.xml	2026-11-16 16:45:06.725123179 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/protocol-foo/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m044</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m045/pom.xml b/dk-maven/m045/pom.xml
+--- a/dk-maven/m045/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m045/pom.xml	2026-11-16 16:45:06.725197709 -0500
+@@ -0,0 +1,8 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/protocol-ftp/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m045</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>commons-net</groupId><artifactId>commons-net</artifactId><version>3.9.0</version><scope>compile</scope><exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
++<dependency><groupId>org.mockftpserver</groupId><artifactId>MockFtpServer</artifactId><version>3.2.0</version><scope>test</scope></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m046/pom.xml b/dk-maven/m046/pom.xml
+--- a/dk-maven/m046/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m046/pom.xml	2026-11-16 16:45:06.725280010 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/protocol-htmlunit/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m046</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m047/pom.xml b/dk-maven/m047/pom.xml
+--- a/dk-maven/m047/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m047/pom.xml	2026-11-16 16:45:06.725357360 -0500
+@@ -0,0 +1,8 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/protocol-http/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m047</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>org.littleshoot</groupId><artifactId>littleproxy</artifactId><version>1.1.2</version><scope>compile</scope></dependency>
++<dependency><groupId>com.google.guava</groupId><artifactId>guava</artifactId><version>20.0</version><scope>compile</scope></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m048/pom.xml b/dk-maven/m048/pom.xml
+--- a/dk-maven/m048/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m048/pom.xml	2026-11-16 16:45:06.725431081 -0500
+@@ -0,0 +1,8 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/protocol-httpclient/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m048</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>org.jsoup</groupId><artifactId>jsoup</artifactId><version>1.8.1</version><scope>compile</scope></dependency>
++<dependency><groupId>com.github.tomakehurst</groupId><artifactId>wiremock-standalone</artifactId><version>3.0.1</version><scope>test</scope></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m049/pom.xml b/dk-maven/m049/pom.xml
+--- a/dk-maven/m049/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m049/pom.xml	2026-11-16 16:45:06.725519132 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/protocol-interactiveselenium/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m049</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m050/pom.xml b/dk-maven/m050/pom.xml
+--- a/dk-maven/m050/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m050/pom.xml	2026-11-16 16:45:06.725590042 -0500
+@@ -0,0 +1,9 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/protocol-okhttp/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m050</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>com.squareup.okhttp3</groupId><artifactId>okhttp</artifactId><version>5.4.0</version><scope>compile</scope></dependency>
++<dependency><groupId>com.squareup.okhttp3</groupId><artifactId>okhttp-brotli</artifactId><version>5.4.0</version><scope>compile</scope></dependency>
++<dependency><groupId>com.squareup.okhttp3</groupId><artifactId>okhttp-zstd</artifactId><version>5.4.0</version><scope>compile</scope></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m051/pom.xml b/dk-maven/m051/pom.xml
+--- a/dk-maven/m051/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m051/pom.xml	2026-11-16 16:45:06.725670183 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/protocol-selenium/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m051</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m052/pom.xml b/dk-maven/m052/pom.xml
+--- a/dk-maven/m052/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m052/pom.xml	2026-11-16 16:45:06.725749023 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/publish-rabbitmq/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m052</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m053/pom.xml b/dk-maven/m053/pom.xml
+--- a/dk-maven/m053/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m053/pom.xml	2026-11-16 16:45:06.725820554 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/scoring-depth/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m053</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m054/pom.xml b/dk-maven/m054/pom.xml
+--- a/dk-maven/m054/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m054/pom.xml	2026-11-16 16:45:06.725888794 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/scoring-link/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m054</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m055/pom.xml b/dk-maven/m055/pom.xml
+--- a/dk-maven/m055/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m055/pom.xml	2026-11-16 16:45:06.725960084 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/scoring-metadata/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m055</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m056/pom.xml b/dk-maven/m056/pom.xml
+--- a/dk-maven/m056/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m056/pom.xml	2026-11-16 16:45:06.726033775 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/scoring-opic/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m056</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m057/pom.xml b/dk-maven/m057/pom.xml
+--- a/dk-maven/m057/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m057/pom.xml	2026-11-16 16:45:06.726111755 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/scoring-orphan/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m057</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m058/pom.xml b/dk-maven/m058/pom.xml
+--- a/dk-maven/m058/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m058/pom.xml	2026-11-16 16:45:06.726194106 -0500
+@@ -0,0 +1,7 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/scoring-similarity/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m058</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>org.apache.lucene</groupId><artifactId>lucene-analyzers-common</artifactId><version>8.11.2</version><scope>compile</scope></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m059/pom.xml b/dk-maven/m059/pom.xml
+--- a/dk-maven/m059/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m059/pom.xml	2026-11-16 16:45:06.726282567 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/subcollection/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m059</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m060/pom.xml b/dk-maven/m060/pom.xml
+--- a/dk-maven/m060/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m060/pom.xml	2026-11-16 16:45:06.726352217 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/tld/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m060</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m061/pom.xml b/dk-maven/m061/pom.xml
+--- a/dk-maven/m061/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m061/pom.xml	2026-11-16 16:45:06.726417007 -0500
+@@ -0,0 +1,7 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/urlfilter-automaton/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m061</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++<dependency><groupId>dk.brics</groupId><artifactId>automaton</artifactId><version>1.12-4</version><scope>compile</scope></dependency>
++</dependencies></project>
+diff -ruN a/dk-maven/m062/pom.xml b/dk-maven/m062/pom.xml
+--- a/dk-maven/m062/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m062/pom.xml	2026-11-16 16:45:06.726479428 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/urlfilter-domain/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m062</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m063/pom.xml b/dk-maven/m063/pom.xml
+--- a/dk-maven/m063/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m063/pom.xml	2026-11-16 16:45:06.726540068 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/urlfilter-domaindenylist/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m063</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m064/pom.xml b/dk-maven/m064/pom.xml
+--- a/dk-maven/m064/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m064/pom.xml	2026-11-16 16:45:06.726616039 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/urlfilter-fast/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m064</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m065/pom.xml b/dk-maven/m065/pom.xml
+--- a/dk-maven/m065/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m065/pom.xml	2026-11-16 16:45:06.726678899 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/urlfilter-ignoreexempt/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m065</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m066/pom.xml b/dk-maven/m066/pom.xml
+--- a/dk-maven/m066/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m066/pom.xml	2026-11-16 16:45:06.726739530 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/urlfilter-prefix/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m066</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m067/pom.xml b/dk-maven/m067/pom.xml
+--- a/dk-maven/m067/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m067/pom.xml	2026-11-16 16:45:06.726800910 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/urlfilter-regex/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m067</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m068/pom.xml b/dk-maven/m068/pom.xml
+--- a/dk-maven/m068/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m068/pom.xml	2026-11-16 16:45:06.726891561 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/urlfilter-suffix/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m068</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m069/pom.xml b/dk-maven/m069/pom.xml
+--- a/dk-maven/m069/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m069/pom.xml	2026-11-16 16:45:06.727336814 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/urlfilter-validator/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m069</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m070/pom.xml b/dk-maven/m070/pom.xml
+--- a/dk-maven/m070/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m070/pom.xml	2026-11-16 16:45:06.727422524 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/urlmeta/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m070</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m071/pom.xml b/dk-maven/m071/pom.xml
+--- a/dk-maven/m071/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m071/pom.xml	2026-11-16 16:45:06.727514495 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/urlnormalizer-ajax/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m071</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m072/pom.xml b/dk-maven/m072/pom.xml
+--- a/dk-maven/m072/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m072/pom.xml	2026-11-16 16:45:06.727591235 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/urlnormalizer-basic/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m072</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m073/pom.xml b/dk-maven/m073/pom.xml
+--- a/dk-maven/m073/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m073/pom.xml	2026-11-16 16:45:06.727677256 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/urlnormalizer-host/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m073</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m074/pom.xml b/dk-maven/m074/pom.xml
+--- a/dk-maven/m074/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m074/pom.xml	2026-11-16 16:45:06.727748076 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/urlnormalizer-pass/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m074</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m075/pom.xml b/dk-maven/m075/pom.xml
+--- a/dk-maven/m075/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m075/pom.xml	2026-11-16 16:45:06.727825797 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/urlnormalizer-protocol/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m075</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m076/pom.xml b/dk-maven/m076/pom.xml
+--- a/dk-maven/m076/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m076/pom.xml	2026-11-16 16:45:06.727902077 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/urlnormalizer-querystring/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m076</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m077/pom.xml b/dk-maven/m077/pom.xml
+--- a/dk-maven/m077/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m077/pom.xml	2026-11-16 16:45:06.727964838 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/urlnormalizer-regex/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m077</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/m078/pom.xml b/dk-maven/m078/pom.xml
+--- a/dk-maven/m078/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/m078/pom.xml	2026-11-16 16:45:06.728028058 -0500
+@@ -0,0 +1,6 @@
++<?xml version="1.0"?>
++<!-- generated from src/plugin/urlnormalizer-slash/ivy.xml by ivy2pom.py (FenrirOS): Maven resolves the same coordinates for the offline store -->
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>m078</artifactId><version>1</version><packaging>pom</packaging>
++<dependencies>
++</dependencies></project>
+diff -ruN a/dk-maven/pom.xml b/dk-maven/pom.xml
+--- a/dk-maven/pom.xml	1969-12-31 19:00:00.000000000 -0500
++++ b/dk-maven/pom.xml	2026-11-16 16:45:06.728050728 -0500
+@@ -0,0 +1,84 @@
++<?xml version="1.0"?>
++<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
++<groupId>dk.ivy</groupId><artifactId>all</artifactId><version>1</version><packaging>pom</packaging>
++<modules>
++<module>m000</module>
++<module>m001</module>
++<module>m002</module>
++<module>m003</module>
++<module>m004</module>
++<module>m005</module>
++<module>m006</module>
++<module>m007</module>
++<module>m008</module>
++<module>m009</module>
++<module>m010</module>
++<module>m011</module>
++<module>m012</module>
++<module>m013</module>
++<module>m014</module>
++<module>m015</module>
++<module>m016</module>
++<module>m017</module>
++<module>m018</module>
++<module>m019</module>
++<module>m020</module>
++<module>m021</module>
++<module>m022</module>
++<module>m023</module>
++<module>m024</module>
++<module>m025</module>
++<module>m026</module>
++<module>m027</module>
++<module>m028</module>
++<module>m029</module>
++<module>m030</module>
++<module>m031</module>
++<module>m032</module>
++<module>m033</module>
++<module>m034</module>
++<module>m035</module>
++<module>m036</module>
++<module>m037</module>
++<module>m038</module>
++<module>m039</module>
++<module>m040</module>
++<module>m041</module>
++<module>m042</module>
++<module>m043</module>
++<module>m044</module>
++<module>m045</module>
++<module>m046</module>
++<module>m047</module>
++<module>m048</module>
++<module>m049</module>
++<module>m050</module>
++<module>m051</module>
++<module>m052</module>
++<module>m053</module>
++<module>m054</module>
++<module>m055</module>
++<module>m056</module>
++<module>m057</module>
++<module>m058</module>
++<module>m059</module>
++<module>m060</module>
++<module>m061</module>
++<module>m062</module>
++<module>m063</module>
++<module>m064</module>
++<module>m065</module>
++<module>m066</module>
++<module>m067</module>
++<module>m068</module>
++<module>m069</module>
++<module>m070</module>
++<module>m071</module>
++<module>m072</module>
++<module>m073</module>
++<module>m074</module>
++<module>m075</module>
++<module>m076</module>
++<module>m077</module>
++<module>m078</module>
++</modules></project>
