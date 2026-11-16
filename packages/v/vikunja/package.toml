@@ -15,7 +15,7 @@
 # Setup: /usr/share/doc/vikunja/README.FenrirOS.
 name = "vikunja"
 version = "2.8.0"
-release = 4
+release = 5
 summary = "Self-hosted to-do list and project management"
 license = "AGPL-3.0-or-later"
 homepage = "https://vikunja.io"
@@ -41,6 +41,9 @@ export npm_config_manage_package_manager_versions=false npm_config_package_manag
 # libunwind has the same _Unwind_* functions. node's loader hides the dlopen error behind
 # "Cannot find module '../lightningcss.linux-x64-musl.node'" (authelia r1). A private link for
 # this build only, as in listmonk.
+# r5: puppeteer's postinstall downloads a headless Chrome ("Failed to set up chrome-headless-shell ... getaddrinfo EAI_AGAIN"): a build must not use the network, and
+# the frontend build does not run a browser. Its own switch for skipping the download.
+export PUPPETEER_SKIP_DOWNLOAD=1 PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
 mkdir -p /tmp/gccshim
 ln -sf /usr/lib/libunwind.so.1 /tmp/gccshim/libgcc_s.so.1
 export LD_LIBRARY_PATH="/tmp/gccshim${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
