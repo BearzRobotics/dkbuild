@@ -1,0 +1,23 @@
+# Automated All-in-One OS Command Injection and Exploitation Tool. (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (setuptools); not built yet when written (wip/queue): expect first-build fixes.
+name = "commix"
+version = "4.1"
+release = 1
+summary = "Automated All-in-One OS Command Injection and Exploitation Tool."
+license = "NOASSERTION"
+homepage = "https://github.com/commixproject/commix"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/commixproject/commix/archive/refs/tags/v4.1.tar.gz", sha256 = "d71e6a98231c2eb434eb9cc1b835523ad5618578309e2f835c40d767f2af79de" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=4.1 PDM_BUILD_SCM_VERSION=4.1
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/commix/LICENSE.txt"
+'''

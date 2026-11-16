@@ -1,0 +1,23 @@
+# Active Directory Certificate Services enumeration and abuse. (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (setuptools.build_meta); not built yet when written (wip/queue): expect first-build fixes.
+name = "certipy"
+version = "5.1.0"
+release = 1
+summary = "Active Directory Certificate Services enumeration and abuse."
+license = "MIT"
+homepage = "https://github.com/ly4k/Certipy"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-argcomplete", "python-asn1crypto", "python-beautifulsoup4", "python-cryptography", "python-dnspython", "python-httpx", "python-impacket", "python-ldap3", "python-pyasn1", "python-pycryptodome", "python-requests"]
+rundeps = ["python", "python-argcomplete", "python-asn1crypto", "python-beautifulsoup4", "python-cryptography", "python-dnspython", "python-httpx", "python-impacket", "python-ldap3", "python-pyasn1", "python-pycryptodome", "python-requests"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/ly4k/Certipy/archive/refs/tags/5.1.0.tar.gz", sha256 = "8fe8d87e1ef935c9468204c0333d1900586680c90b5767d632359394cee6a0c4" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=5.1.0 PDM_BUILD_SCM_VERSION=5.1.0
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/certipy/LICENSE"
+'''

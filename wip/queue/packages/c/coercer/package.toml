@@ -1,0 +1,22 @@
+# Coerce a Windows server to authenticate on an arbitrary machine through 15 methods. (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (poetry.core.masonry.api); not built yet when written (wip/queue): expect first-build fixes.
+name = "coercer"
+version = "2.4.3"
+release = 1
+summary = "Coerce a Windows server to authenticate on an arbitrary machine through 15 methods."
+license = "GPL-2.0"
+homepage = "https://github.com/p0dalirius/Coercer"
+hostdeps = ["python", "python-poetry-core", "python-impacket", "python-xlsxwriter"]
+rundeps = ["python", "python-impacket", "python-xlsxwriter"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/p0dalirius/Coercer/archive/refs/tags/2.4.3.tar.gz", sha256 = "c232d517e082a650e10fb6cdb26389c460737743e01d1ae37e3a4cbbbe1382ea" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=2.4.3 PDM_BUILD_SCM_VERSION=2.4.3
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

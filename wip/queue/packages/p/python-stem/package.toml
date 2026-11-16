@@ -1,0 +1,20 @@
+# stem from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
+name = "python-stem"
+version = "1.8.2"
+release = 1
+summary = "Stem is a Python controller library that allows applications to interact with Tor (https:/"
+license = "GNU Lesser General Public License v3 (LGPLv3)"
+homepage = "https://stem.torproject.org/"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/94/c6/b2258155546f966744e78b9862f62bd2b8671b422bb9951a1330e4c8fd73/stem-1.8.2.tar.gz", sha256 = "83fb19ffd4c9f82207c006051480389f80af221a7e4783000aedec4e384eb582" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-stem/LICENSE"
+'''

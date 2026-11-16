@@ -1,0 +1,20 @@
+# badauth from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
+name = "python-badauth"
+version = "0.1.7"
+release = 1
+summary = "Unified authentication library"
+license = "custom"
+homepage = "https://github.com/CravateRouge/badauth"
+hostdeps = ["python", "python-asn1crypto", "python-asysocks", "python-kerbad", "python-setuptools", "python-unicrypto", "python-wheel"]
+rundeps = ["python", "python-asn1crypto", "python-asysocks", "python-kerbad", "python-unicrypto"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/39/b9/375d135fd7dd04eaee55926afc7eba583f9d327da6c08bfd1967f9a6d51c/badauth-0.1.7.tar.gz", sha256 = "92ff94d2c52f789b12acba27742a55cbf1be1005674c497fac60bb676eea08a7" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-badauth/LICENSE"
+'''

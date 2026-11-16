@@ -1,0 +1,20 @@
+# requests-ntlm from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
+name = "python-requests-ntlm"
+version = "1.3.0"
+release = 1
+summary = "This package allows for HTTP NTLM authentication using the requests library."
+license = "ISC License (ISCL)"
+homepage = "https://github.com/requests/requests-ntlm"
+hostdeps = ["python", "python-cryptography", "python-pyspnego", "python-requests", "python-setuptools", "python-wheel"]
+rundeps = ["python", "python-cryptography", "python-pyspnego", "python-requests"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/15/74/5d4e1815107e9d78c44c3ad04740b00efd1189e5a9ec11e5275b60864e54/requests_ntlm-1.3.0.tar.gz", sha256 = "b29cc2462623dffdf9b88c43e180ccb735b4007228a542220e882c58ae56c668" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-requests-ntlm/LICENSE"
+'''

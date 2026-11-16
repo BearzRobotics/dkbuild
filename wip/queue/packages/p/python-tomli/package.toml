@@ -1,0 +1,20 @@
+# tomli from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
+name = "python-tomli"
+version = "2.5.0"
+release = 1
+summary = "A lil' TOML parser"
+license = "MIT"
+homepage = "https://github.com/hukkin/tomli/blob/master/CHANGELOG.md"
+hostdeps = ["python", "python-flit-core"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/b0/78/9ad63712633ed3ab5cc1a648d863d7e7da371e9425e209555a0fe711b695/tomli-2.5.0.tar.gz", sha256 = "264507556cd8b8c8e7c6ee037cdf443a463f03f4c958e57195e3d369711b8ff6" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-tomli/LICENSE"
+'''

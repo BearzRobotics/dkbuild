@@ -1,0 +1,20 @@
+# python-dotenv from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
+name = "python-dotenv"
+version = "1.2.4"
+release = 1
+summary = "Read key-value pairs from a .env file and set them as environment variables"
+license = "BSD-3-Clause"
+homepage = "https://github.com/theskumar/python-dotenv"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/74/26/2fbeedb218a787a5eea551c7532cac4e009f83d689dd2faa0d0353473f86/python_dotenv-1.2.4.tar.gz", sha256 = "f0d53e69935a851c0dcc78f3ab7aaccd8cabef0b92382b576b824212902873c0" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-dotenv/LICENSE"
+'''

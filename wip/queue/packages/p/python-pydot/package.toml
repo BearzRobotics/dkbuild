@@ -1,0 +1,20 @@
+# pydot from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
+name = "python-pydot"
+version = "4.0.1"
+release = 1
+summary = "Python interface to Graphviz's Dot"
+license = "MIT"
+homepage = "https://github.com/pydot/pydot/issues"
+hostdeps = ["python", "python-pyparsing", "python-setuptools", "python-wheel"]
+rundeps = ["python", "python-pyparsing"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/50/35/b17cb89ff865484c6a20ef46bf9d95a5f07328292578de0b295f4a6beec2/pydot-4.0.1.tar.gz", sha256 = "c2148f681c4a33e08bf0e26a9e5f8e4099a82e0e2a068098f32ce86577364ad5" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSES "$pkgdir/usr/share/licenses/python-pydot/LICENSES"
+'''

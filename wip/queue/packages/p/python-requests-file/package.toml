@@ -1,0 +1,20 @@
+# requests-file from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
+name = "python-requests-file"
+version = "3.0.1"
+release = 1
+summary = "File transport adapter for Requests"
+license = "Apache Software License"
+homepage = "https://codeberg.org/dashea/requests-file"
+hostdeps = ["python", "python-requests", "python-setuptools", "python-setuptools-scm", "python-wheel"]
+rundeps = ["python", "python-requests"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/3c/f8/5dc70102e4d337063452c82e1f0d95e39abfe67aa222ed8a5ddeb9df8de8/requests_file-3.0.1.tar.gz", sha256 = "f14243d7796c588f3521bd423c5dea2ee4cc730e54a3cac9574d78aca1272576" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-requests-file/LICENSE"
+'''

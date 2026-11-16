@@ -1,0 +1,22 @@
+# HTTP(S) directory/file brute forcer. (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (setuptools.build_meta); not built yet when written (wip/queue): expect first-build fixes.
+name = "dirsearch"
+version = "0.5.0"
+release = 1
+summary = "HTTP(S) directory/file brute forcer."
+license = "custom"
+homepage = "https://github.com/maurosoria/dirsearch"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-beautifulsoup4", "python-colorama", "python-defusedcsv", "python-defusedxml", "python-httpx", "python-httpx-ntlm", "python-jinja2", "python-openssl", "python-pysocks", "python-requests", "python-requests-ntlm", "python-requests-toolbelt", "python-setuptools"]
+rundeps = ["python", "python-beautifulsoup4", "python-colorama", "python-defusedcsv", "python-defusedxml", "python-httpx", "python-httpx-ntlm", "python-jinja2", "python-openssl", "python-pysocks", "python-requests", "python-requests-ntlm", "python-requests-toolbelt", "python-setuptools"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/maurosoria/dirsearch/archive/refs/tags/v0.5.0.tar.gz", sha256 = "105630d99f4c7af687890c108ae9e9b173bcdf0206e9e1202aca5a7deb76b73c" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=0.5.0 PDM_BUILD_SCM_VERSION=0.5.0
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

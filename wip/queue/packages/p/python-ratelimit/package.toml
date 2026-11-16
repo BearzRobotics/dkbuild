@@ -1,0 +1,20 @@
+# ratelimit from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
+name = "python-ratelimit"
+version = "2.2.1"
+release = 1
+summary = "API rate limit decorator"
+license = "MIT License"
+homepage = "https://github.com/tomasbasham/ratelimit"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/ab/38/ff60c8fc9e002d50d48822cc5095deb8ebbc5f91a6b8fdd9731c87a147c9/ratelimit-2.2.1.tar.gz", sha256 = "af8a9b64b821529aca09ebaf6d8d279100d766f19e90b5059ac6a718ca6dee42" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-ratelimit/LICENSE.txt"
+'''

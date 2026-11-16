@@ -1,0 +1,23 @@
+# A next generation version of enum4linux. (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (setuptools); not built yet when written (wip/queue): expect first-build fixes.
+name = "enum4linux-ng"
+version = "1.3.10"
+release = 1
+summary = "A next generation version of enum4linux."
+license = "GPL-3.0"
+homepage = "https://github.com/cddmp/enum4linux-ng"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-impacket", "python-ldap3", "python-pyyaml"]
+rundeps = ["python", "python-impacket", "python-ldap3", "python-pyyaml"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/cddmp/enum4linux-ng/archive/refs/tags/v1.3.10.tar.gz", sha256 = "563235acd56278dbcc405e436d78cf29eaa55dc83b11b6c38d46077198f6a427" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=1.3.10 PDM_BUILD_SCM_VERSION=1.3.10
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/enum4linux-ng/LICENSE"
+'''

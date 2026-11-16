@@ -1,0 +1,20 @@
+# kerbad from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
+name = "python-kerbad"
+version = "0.5.12"
+release = 1
+summary = "Kerberos manipulation library in pure Python"
+license = "MIT License"
+homepage = "https://github.com/CravateRouge/kerbad"
+hostdeps = ["python", "python-asn1crypto", "python-asysocks", "python-cryptography", "python-dnspython", "python-setuptools", "python-six", "python-tqdm", "python-unicrypto", "python-wheel"]
+rundeps = ["python", "python-asn1crypto", "python-asysocks", "python-cryptography", "python-dnspython", "python-six", "python-tqdm", "python-unicrypto"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/3b/94/351a265d3765e8c8635426891615a67a19c64b86e84863307a2106d82e59/kerbad-0.5.12.tar.gz", sha256 = "983df9cc5042a5d660f4310d9e155ced25afbba1a365ffcd0903fc50c4708502" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-kerbad/LICENSE"
+'''

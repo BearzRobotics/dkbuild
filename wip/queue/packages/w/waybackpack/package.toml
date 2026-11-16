@@ -1,0 +1,23 @@
+# Download the entire Wayback Machine archive for a given URL. (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (setuptools); not built yet when written (wip/queue): expect first-build fixes.
+name = "waybackpack"
+version = "0.6.4"
+release = 1
+summary = "Download the entire Wayback Machine archive for a given URL."
+license = "MIT"
+homepage = "https://github.com/jsvine/waybackpack"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-requests"]
+rundeps = ["python", "python-requests"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/jsvine/waybackpack/archive/refs/tags/v0.6.4.tar.gz", sha256 = "d112cd09addbca0b02cb356388063a57f6d842c870a53bf58d578c7a82bee91f" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=0.6.4 PDM_BUILD_SCM_VERSION=0.6.4
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/waybackpack/LICENSE.txt"
+'''

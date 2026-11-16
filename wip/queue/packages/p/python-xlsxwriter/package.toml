@@ -1,0 +1,20 @@
+# xlsxwriter from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
+name = "python-xlsxwriter"
+version = "3.3.1"
+release = 1
+summary = "A Python module for creating Excel XLSX files."
+license = "BSD-2-Clause"
+homepage = "https://github.com/jmcnamara/XlsxWriter/blob/main/Changes"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/9c/fb/31bdbf3737222d92ef7d2db4d50089b2253dbbb63ceb6d20a4447f6b7ed0/xlsxwriter-3.3.1.tar.gz", sha256 = "0867761912cceac76f97ffa76eeda18c623ae9217f601be8512f55b1af4bdb6e" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-xlsxwriter/LICENSE.txt"
+'''

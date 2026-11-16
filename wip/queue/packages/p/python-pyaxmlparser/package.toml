@@ -1,0 +1,20 @@
+# pyaxmlparser from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
+name = "python-pyaxmlparser"
+version = "0.3.31"
+release = 1
+summary = "Python3 Parser for Android XML file and get Application Name without using Androguard"
+license = "Apache Software License"
+homepage = "https://github.com/appknox/pyaxmlparser"
+hostdeps = ["python", "python-asn1crypto", "python-click", "python-lxml", "python-setuptools", "python-wheel"]
+rundeps = ["python", "python-asn1crypto", "python-click", "python-lxml"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/1e/1f/7a7318ad054d66253d2b96e2d9038ea920f17c8a9bd687cdcfa16a655bdf/pyaxmlparser-0.3.31.tar.gz", sha256 = "fecb858ff1fb456466f8dcdcd814207b4c15edb95f67cfe0a38c7d7cd4a28d4d" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pyaxmlparser/LICENSE"
+'''

@@ -1,0 +1,20 @@
+# badldap from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
+name = "python-badldap"
+version = "0.7.7"
+release = 1
+summary = "Python library to play with MS LDAP"
+license = "MIT License"
+homepage = "https://github.com/CravateRouge/badldap"
+hostdeps = ["python", "python-asn1crypto", "python-asysocks", "python-badauth", "python-dnspython", "python-prompt-toolkit", "python-setuptools", "python-tabulate", "python-tqdm", "python-unicrypto", "python-unidns", "python-wcwidth", "python-wheel", "python-winacl"]
+rundeps = ["python", "python-asn1crypto", "python-asysocks", "python-badauth", "python-dnspython", "python-prompt-toolkit", "python-tabulate", "python-tqdm", "python-unicrypto", "python-unidns", "python-wcwidth", "python-winacl"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/5d/6f/5e5b83c9f7bdfb32e01fd88b25c115ad0d86e6226039f65c2ac769b31970/badldap-0.7.7.tar.gz", sha256 = "8280cc7be3fbd8abd48d34469dbd8158de8409fadf172e3c3138d4e337706b8d" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-badldap/LICENSE"
+'''

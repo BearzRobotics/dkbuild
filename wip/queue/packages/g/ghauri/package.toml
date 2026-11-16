@@ -1,0 +1,23 @@
+# An advanced cross-platform tool that automates the process of detecting and exploiting... (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (setuptools); not built yet when written (wip/queue): expect first-build fixes.
+name = "ghauri"
+version = "1.4.3"
+release = 1
+summary = "An advanced cross-platform tool that automates the process of detecting and exploiting..."
+license = "MIT"
+homepage = "https://github.com/r0oth3x49/ghauri"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-chardet", "python-colorama", "python-requests", "python-tldextract", "python-ua-generator"]
+rundeps = ["python", "python-chardet", "python-colorama", "python-requests", "python-tldextract", "python-ua-generator"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/r0oth3x49/ghauri/archive/refs/tags/1.4.3.tar.gz", sha256 = "b8b7f266b3e8af879ca98aaf052f49f9d6b467d6f7175ef607a194172328bc27" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=1.4.3 PDM_BUILD_SCM_VERSION=1.4.3
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ghauri/LICENSE"
+'''

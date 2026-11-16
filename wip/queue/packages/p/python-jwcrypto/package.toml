@@ -1,0 +1,20 @@
+# jwcrypto from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
+name = "python-jwcrypto"
+version = "1.6.1"
+release = 1
+summary = "Implementation of JOSE Web standards"
+license = "LGPL-3.0-or-later"
+homepage = "https://github.com/latchset/jwcrypto"
+hostdeps = ["python", "python-cryptography", "python-hatchling", "python-typing-extensions"]
+rundeps = ["python", "python-cryptography", "python-typing-extensions"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/13/8f/e802d77957903483129813ce6fa01a72a906f9cdd454039d1ec1e6d1e44a/jwcrypto-1.6.1.tar.gz", sha256 = "a1e1570da5c2e35dbcd375ec1d2891a24de8eb35ee2c1fe8e91978efb72cfe90" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-jwcrypto/LICENSE"
+'''

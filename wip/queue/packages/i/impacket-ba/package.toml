@@ -1,0 +1,23 @@
+# Collection of classes for working with network protocols. (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (setuptools); not built yet when written (wip/queue): expect first-build fixes.
+name = "impacket-ba"
+version = "impacket_0_13_1"
+release = 1
+summary = "Collection of classes for working with network protocols."
+license = "NOASSERTION"
+homepage = "https://github.com/fortra/impacket"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-charset-normalizer", "python-flask", "python-ldap3", "python-ldapdomaindump", "python-openssl", "python-pyasn1", "python-pyasn1-modules", "python-pycryptodomex", "python-six"]
+rundeps = ["python", "python-charset-normalizer", "python-flask", "python-ldap3", "python-ldapdomaindump", "python-openssl", "python-pyasn1", "python-pyasn1-modules", "python-pycryptodomex", "python-six"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/fortra/impacket/archive/refs/tags/impacket_0_13_1.tar.gz", sha256 = "33cb2d3630647196dd816b762ae16487a6469a09dc15ff3628b751f14c6d1eaa" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=impacket_0_13_1 PDM_BUILD_SCM_VERSION=impacket_0_13_1
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/impacket-ba/LICENSE"
+'''

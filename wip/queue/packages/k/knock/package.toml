@@ -1,0 +1,23 @@
+# Subdomain scanner. (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (setuptools); not built yet when written (wip/queue): expect first-build fixes.
+name = "knock"
+version = "9.0.0"
+release = 1
+summary = "Subdomain scanner."
+license = "GPL-3.0"
+homepage = "https://github.com/guelfoweb/knock"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-dnspython", "python-dotenv", "python-httpx", "python-openssl", "python-rich"]
+rundeps = ["python", "python-dnspython", "python-dotenv", "python-httpx", "python-openssl", "python-rich"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/guelfoweb/knock/archive/refs/tags/9.0.0.tar.gz", sha256 = "3db667c2198865c58df527ff70f9a03a9b154ae19cada389535d404bbc28b025" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=9.0.0 PDM_BUILD_SCM_VERSION=9.0.0
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/knock/LICENSE"
+'''

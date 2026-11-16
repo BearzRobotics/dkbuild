@@ -1,0 +1,23 @@
+# Find usernames across social networks. (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (poetry.core.masonry.api); not built yet when written (wip/queue): expect first-build fixes.
+name = "sherlock"
+version = "0.16.2"
+release = 1
+summary = "Find usernames across social networks."
+license = "MIT"
+homepage = "https://github.com/sherlock-project/sherlock"
+hostdeps = ["python", "python-poetry-core", "python-certifi", "python-colorama", "python-openpyxl", "python-pandas", "python-pysocks", "python-requests", "python-requests-futures", "python-stem", "python-tomli"]
+rundeps = ["python", "python-certifi", "python-colorama", "python-openpyxl", "python-pandas", "python-pysocks", "python-requests", "python-requests-futures", "python-stem", "python-tomli"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/sherlock-project/sherlock/archive/refs/tags/v0.16.2.tar.gz", sha256 = "5888c02c0fb79caf3e1612c8ee2deef59ca9797f6fffa8e597cf094af9e74b10" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=0.16.2 PDM_BUILD_SCM_VERSION=0.16.2
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/sherlock/LICENSE"
+'''

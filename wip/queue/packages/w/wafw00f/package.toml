@@ -1,0 +1,23 @@
+# Identify and fingerprint Web Application Firewall (WAF) products protecting a website. (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (setuptools.build_meta); not built yet when written (wip/queue): expect first-build fixes.
+name = "wafw00f"
+version = "2.4.2"
+release = 1
+summary = "Identify and fingerprint Web Application Firewall (WAF) products protecting a website."
+license = "BSD-3-Clause"
+homepage = "https://github.com/EnableSecurity/wafw00f"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-requests"]
+rundeps = ["python", "python-requests"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/EnableSecurity/wafw00f/archive/refs/tags/v2.4.2.tar.gz", sha256 = "4c8e1247780e2c6f1ebf86c18a2db323a9701edb2355e14f99a2692b29c1c973" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=2.4.2 PDM_BUILD_SCM_VERSION=2.4.2
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/wafw00f/LICENSE"
+'''

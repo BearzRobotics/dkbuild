@@ -1,0 +1,23 @@
+# Tool to scan for secret files on HTTP servers. (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (setuptools); not built yet when written (wip/queue): expect first-build fixes.
+name = "snallygaster"
+version = "0.0.14"
+release = 1
+summary = "Tool to scan for secret files on HTTP servers."
+license = "0BSD"
+homepage = "https://github.com/hannob/snallygaster"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-dnspython", "python-lxml", "python-urllib3"]
+rundeps = ["python", "python-dnspython", "python-lxml", "python-urllib3"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/hannob/snallygaster/archive/refs/tags/v0.0.14.tar.gz", sha256 = "8ef8cd7e1b55ee16000fcc235ccba7450e69a01bdde1c15a9c2d8e9feb142a15" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=0.0.14 PDM_BUILD_SCM_VERSION=0.0.14
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/snallygaster/LICENSE"
+'''

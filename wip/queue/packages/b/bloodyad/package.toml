@@ -1,0 +1,23 @@
+# An Active Directory Privilege Escalation Framework. (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (hatchling.build); not built yet when written (wip/queue): expect first-build fixes.
+name = "bloodyad"
+version = "2.5.7"
+release = 1
+summary = "An Active Directory Privilege Escalation Framework."
+license = "MIT"
+homepage = "https://github.com/CravateRouge/bloodyAD"
+hostdeps = ["python", "python-hatchling", "python-asn1crypto", "python-badldap", "python-cryptography", "python-kerbad", "python-winacl"]
+rundeps = ["python", "python-asn1crypto", "python-badldap", "python-cryptography", "python-kerbad", "python-winacl"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/CravateRouge/bloodyAD/archive/refs/tags/v2.5.7.tar.gz", sha256 = "3d33e20ce3e21002709ccbf33d007af359a7eb6bf9c6d1c516eaf877ee97f319" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=2.5.7 PDM_BUILD_SCM_VERSION=2.5.7
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/bloodyad/LICENSE"
+'''

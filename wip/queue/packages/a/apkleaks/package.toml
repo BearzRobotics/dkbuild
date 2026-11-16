@@ -1,0 +1,23 @@
+# Scanning APK file for URIs, endpoints & secrets. (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (setuptools.build_meta); not built yet when written (wip/queue): expect first-build fixes.
+name = "apkleaks"
+version = "2.6.3"
+release = 1
+summary = "Scanning APK file for URIs, endpoints & secrets."
+license = "Apache-2.0"
+homepage = "https://github.com/dwisiswant0/apkleaks"
+hostdeps = ["python", "python-setuptools", "python-pyaxmlparser"]
+rundeps = ["python", "python-pyaxmlparser"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/dwisiswant0/apkleaks/archive/refs/tags/v2.6.3.tar.gz", sha256 = "72bded9d30dd2bff88852bdb44582d6f03b9657f013134e78854919972c0d60d" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=2.6.3 PDM_BUILD_SCM_VERSION=2.6.3
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/apkleaks/LICENSE"
+'''

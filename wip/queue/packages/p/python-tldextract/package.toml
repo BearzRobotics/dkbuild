@@ -1,0 +1,20 @@
+# tldextract from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
+name = "python-tldextract"
+version = "5.4.0"
+release = 1
+summary = "Accurately separates a URL's subdomain, domain, and public suffix, using the Public Suffix"
+license = "BSD-3-Clause"
+homepage = "https://github.com/john-kurkowski/tldextract"
+hostdeps = ["python", "python-filelock", "python-idna", "python-requests", "python-requests-file", "python-setuptools", "python-setuptools-scm", "python-wheel"]
+rundeps = ["python", "python-filelock", "python-idna", "python-requests", "python-requests-file"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/fd/5d/45ece871390ccc985f821353543165bcf3784fa97d8484fd0ca5f2726612/tldextract-5.4.0.tar.gz", sha256 = "6c9223212c15c25c0da2bf7313893c14f175cb36b64a0c42da67a468e0c61ee3" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-tldextract/LICENSE"
+'''

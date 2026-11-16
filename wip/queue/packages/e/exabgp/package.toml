@@ -1,0 +1,23 @@
+# The BGP swiss army knife of networking. (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (setuptools); not built yet when written (wip/queue): expect first-build fixes.
+name = "exabgp"
+version = "5.0.15"
+release = 1
+summary = "The BGP swiss army knife of networking."
+license = "NOASSERTION"
+homepage = "https://github.com/Exa-Networks/exabgp"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/Exa-Networks/exabgp/archive/refs/tags/5.0.15.tar.gz", sha256 = "7cea19051488a9f3a9f29322044e37a3049765f4f9483a9ab693e438df1d7666" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=5.0.15 PDM_BUILD_SCM_VERSION=5.0.15
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENCE.txt "$pkgdir/usr/share/licenses/exabgp/LICENCE.txt"
+'''

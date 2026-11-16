@@ -1,0 +1,23 @@
+# Multi-cloud OSINT tool. Enumerate public resources in AWS, Azure, and Google Cloud. (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (setuptools.build_meta); not built yet when written (wip/queue): expect first-build fixes.
+name = "cloud-enum"
+version = "0.9"
+release = 1
+summary = "Multi-cloud OSINT tool. Enumerate public resources in AWS, Azure, and Google Cloud."
+license = "MIT"
+homepage = "https://github.com/initstring/cloud_enum"
+hostdeps = ["python", "python-setuptools", "python-dnspython", "python-requests", "python-requests-futures"]
+rundeps = ["python", "python-dnspython", "python-requests", "python-requests-futures"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/initstring/cloud_enum/archive/refs/tags/0.9.tar.gz", sha256 = "3ffcd7729849cd7d75f06c334a1fd18615af18ddf28c183e7be85fa4e5e1ee2a" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=0.9 PDM_BUILD_SCM_VERSION=0.9
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/cloud_enum/LICENSE"
+'''

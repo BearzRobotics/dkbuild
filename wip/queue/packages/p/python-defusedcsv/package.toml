@@ -1,0 +1,20 @@
+# defusedcsv from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
+name = "python-defusedcsv"
+version = "3.0.0"
+release = 1
+summary = "Drop-in replacement for Python's CSV library that tries to mitigate CSV injection attacks"
+license = "Apache Software License"
+homepage = "https://github.com/raphaelm/defusedcsv"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/1d/1d/0c17ea5e5f8e456515e3368aa8821fbdf094ed29ac886f0b2f0f3779ab34/defusedcsv-3.0.0.tar.gz", sha256 = "018678533bc375f3bf2f70f9721e48daf3800a88320dc325c1dac67ee09e2a45" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-defusedcsv/LICENSE"
+'''

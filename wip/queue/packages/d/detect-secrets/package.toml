@@ -1,0 +1,23 @@
+# An enterprise friendly way of detecting and preventing secrets in code. (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (setuptools); not built yet when written (wip/queue): expect first-build fixes.
+name = "detect-secrets"
+version = "1.5.0"
+release = 1
+summary = "An enterprise friendly way of detecting and preventing secrets in code."
+license = "Apache-2.0"
+homepage = "https://github.com/Yelp/detect-secrets"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-pyyaml", "python-requests"]
+rundeps = ["python", "python-pyyaml", "python-requests"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/Yelp/detect-secrets/archive/refs/tags/v1.5.0.tar.gz", sha256 = "4789cadf12468316f09317b825c4b4beb869bd9777afcbf842079c5d18f07107" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=1.5.0 PDM_BUILD_SCM_VERSION=1.5.0
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/detect-secrets/LICENSE"
+'''

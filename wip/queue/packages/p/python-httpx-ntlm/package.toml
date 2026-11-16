@@ -1,0 +1,20 @@
+# httpx-ntlm from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
+name = "python-httpx-ntlm"
+version = "1.4.0"
+release = 1
+summary = "This package allows for HTTP NTLM authentication using the HTTPX library."
+license = "ISC License (ISCL)"
+homepage = "https://github.com/ulodciv/httpx-ntlm"
+hostdeps = ["python", "python-httpx", "python-pyspnego", "python-setuptools", "python-wheel"]
+rundeps = ["python", "python-httpx", "python-pyspnego"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/ba/9c/fee5d1a348ac85fe7c4c38a431edb007c0469c1f0170a2643eeba41a463d/httpx_ntlm-1.4.0.tar.gz", sha256 = "41be8a2ba85143484e617dcb917d4b19e3ae12afdc688622a4901034993b53e4" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-httpx-ntlm/LICENSE"
+'''

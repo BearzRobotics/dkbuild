@@ -1,0 +1,23 @@
+# HTTP parameter discovery suite. (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (setuptools); not built yet when written (wip/queue): expect first-build fixes.
+name = "arjun"
+version = "2.2.7"
+release = 1
+summary = "HTTP parameter discovery suite."
+license = "AGPL-3.0"
+homepage = "https://github.com/s0md3v/Arjun"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-dicttoxml", "python-ratelimit", "python-requests"]
+rundeps = ["python", "python-dicttoxml", "python-ratelimit", "python-requests"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/s0md3v/Arjun/archive/refs/tags/2.2.7.tar.gz", sha256 = "78cad728303eca046e6e8360416c5dacd89248f72962bbf9a8b60b886f56b4ec" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=2.2.7 PDM_BUILD_SCM_VERSION=2.2.7
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/arjun/LICENSE"
+'''

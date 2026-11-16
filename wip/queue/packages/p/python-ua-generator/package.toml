@@ -1,0 +1,20 @@
+# ua-generator from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
+name = "python-ua-generator"
+version = "2.1.9"
+release = 1
+summary = "A random user-agent generator"
+license = "Apache Software License"
+homepage = "https://github.com/iamdual/ua-generator"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/4e/fb/fdb3455b63d5ad3aa2576cf5117fe34672cbde093904fbd1235b4ffcee10/ua_generator-2.1.9.tar.gz", sha256 = "c16108880cfe0f9fa6addc36b017b23e1262c04bc01ca01f6e991cfb606beb8e" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-ua-generator/LICENSE"
+'''

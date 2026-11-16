@@ -1,0 +1,20 @@
+# dicttoxml from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
+name = "python-dicttoxml"
+version = "1.7.16"
+release = 1
+summary = "Converts a Python dictionary or other native data type into a valid XML string."
+license = "GNU GENERAL PUBLIC LICENSE  Version 2, J"
+homepage = "https://github.com/quandyfactory/dicttoxml"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/ee/c9/3132427f9e64d572688e6a1cbe3d542d1a03f676b81fb600f3d1fd7d2ec5/dicttoxml-1.7.16.tar.gz", sha256 = "6f36ce644881db5cd8940bee9b7cb3f3f6b7b327ba8a67d83d3e2caa0538bf9d" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENCE.txt "$pkgdir/usr/share/licenses/python-dicttoxml/LICENCE.txt"
+'''

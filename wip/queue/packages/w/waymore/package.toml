@@ -1,0 +1,23 @@
+# Find way more from the Wayback Machine, Common Crawl, Alien Vault OTX, URLScan &... (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (setuptools.build_meta); not built yet when written (wip/queue): expect first-build fixes.
+name = "waymore"
+version = "8.9"
+release = 1
+summary = "Find way more from the Wayback Machine, Common Crawl, Alien Vault OTX, URLScan &..."
+license = "MIT"
+homepage = "https://github.com/xnl-h4ck3r/waymore"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-psutil", "python-pyyaml", "python-requests", "python-termcolor", "python-tldextract"]
+rundeps = ["python", "python-psutil", "python-pyyaml", "python-requests", "python-termcolor", "python-tldextract"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/xnl-h4ck3r/waymore/archive/refs/tags/v8.9.tar.gz", sha256 = "cd36d7a1f8df76c598f4ca239bb3eb06840005fbf3f71169d58f079de1696fb0" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=8.9 PDM_BUILD_SCM_VERSION=8.9
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/waymore/LICENSE"
+'''

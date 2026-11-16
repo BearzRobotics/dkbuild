@@ -1,0 +1,20 @@
+# unidns from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
+name = "python-unidns"
+version = "0.0.4"
+release = 1
+summary = "Rudimentary async DNS client in Python"
+license = "MIT License"
+homepage = "https://github.com/skelsec/unidns"
+hostdeps = ["python", "python-asysocks", "python-setuptools", "python-wheel"]
+rundeps = ["python", "python-asysocks"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/ad/46/647e8a4916889f393e08ef5b8baf186e6700f351bdec86f7179db3b21415/unidns-0.0.4.tar.gz", sha256 = "14783281f24eb1595f417106d55d406c6c182683c5425650934a6983f9e0f91e" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-unidns/LICENSE"
+'''
