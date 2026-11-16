@@ -4,9 +4,18 @@
 # with a key made at build time, after stripping (a module whose signature
 # does not match still works, but runs isolated): so this recipe strips its
 # own files and signs the modules, and dkbuild's strip stays off.
+# r9 (reproducible build): libcamera's build made a NEW RSA key every time (utils/gen-ipa-priv-key.sh), compiled its public half
+# into libcamera.so and signed the IPA modules with it, so every build came out different. dkbuild counts a package as changed
+# when its output differs, libcamera sits in its own build closure (through gst-plugins-base, gtk+3 and pipewire, which needs
+# libcamera), and so it rebuilt itself on every run and dragged samba, gtk4 and the rest after it. Source edit (in `setup`):
+# the key script now copies files/ipa-priv-key.pem, a key generated once for this recipe (openssl genpkey -algorithm RSA
+# -pkeyopt rsa_keygen_bits:2048) and kept in the repository. Module signing is an integrity check (a module that does not
+# match runs isolated); a key anyone can read adds nothing to what a random key protects, since anyone who can replace an
+# installed module can replace the library holding the matching public key too. The RSA PKCS#1 v1.5 signatures are
+# deterministic, so the output is the same on every build.
 name = "libcamera"
 version = "0.7.2"
-release = 3
+release = 9
 summary = "Open source camera stack and framework"
 license = "LGPL-2.1-or-later AND GPL-2.0-or-later"
 homepage = "https://libcamera.org"
@@ -21,6 +30,8 @@ source = [
 ]
 
 setup = '''
+printf '#!/bin/sh\ncp "%s" "$1"\n' "$pkgfiles/ipa-priv-key.pem" > utils/gen-ipa-priv-key.sh
+grep -q ipa-priv-key.pem utils/gen-ipa-priv-key.sh
 # internal/process.h uses pid_t without <sys/types.h> (glibc's C++ headers bring
 # it in, musl's do not)
 sed -i 's|^#include <string>$|#include <string>\n#include <sys/types.h>|' include/libcamera/internal/process.h
