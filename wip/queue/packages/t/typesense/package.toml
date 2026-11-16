@@ -1,0 +1,93 @@
+# Typesense: a fast, typo-tolerant, in-memory search engine (C++: H2O's HTTP server, RocksDB, s2geometry, an HNSW vector index, ONNX Runtime for embeddings).
+# Upstream's CMake downloads and builds its third parties itself into external-Linux/ (cmake/*.cmake): each with `file(DOWNLOAD ...)` only if the tarball is
+# not already there. They are sources of this recipe at the same pinned versions (libfor, googletest 1.8.0, H2O, hnswlib (Typesense's fork), libiconv 1.15,
+# jemalloc 5.3.0, kakasi (Typesense's fork), lru-cache, RocksDB 6.20.3, s2geometry; the three test data files), copied into external-Linux/ under the names
+# the cmake files expect, so those steps run unchanged and offline. They stay the pinned, bundled copies: Typesense builds against RocksDB 6.20 and a patched
+# H2O/kakasi/hnswlib, not the system ones.
+# ONNX Runtime: upstream builds ONNX Runtime 1.14 from git with `git submodule update --remote` (branch heads: not reproducible) and links nine static libraries
+# plus the dependencies' libraries from its build tree. Here it links the tree's own onnxruntime (shared library, system headers): the `setup` edits (sed, each
+# checked) drop cmake/onnxruntime.cmake and the imported static libraries, link `onnxruntime`, and include <onnxruntime_cxx_api.h> instead of
+# <core/session/onnxruntime_cxx_api.h>. Typesense only uses the stable C++ API (Ort::Env, Session, Value, MemoryInfo, allocators).
+# onnxruntime-extensions: the project compiles a few of its tokenizer sources into the server (operators/src_dir/*): the source is a pinned commit of the rel-0.6.0
+# branch (36a9c99) extracted into external-Linux/onnxruntime_ext, with Typesense's own cmake/onnx_ext.patch applied (git apply, in a scratch repository),
+# and cmake/onnxruntime_ext.cmake (a git clone) replaced by an empty file.
+# Installed inert (docs/requests.md): dinit service shipped, not enabled; no api-key in the configuration (Typesense refuses to start without one).
+# Not built yet when written (wip/queue): expect first-build fixes (RocksDB 6.20, H2O and s2geometry are old code under clang 23 and libc++ 23).
+name = "typesense"
+version = "30.2"
+release = 1
+summary = "Fast, typo-tolerant search engine for instant search (vector and semantic search)"
+license = "GPL-3.0-only"
+homepage = "https://typesense.org"
+archs = ["x86_64"]
+hostdeps = ["cmake", "ninja", "pkgconf", "make", "perl", "git", "patch", "autoconf", "automake", "libtool", "bzip2"]
+builddeps = ["openssl-devel", "snappy-devel", "zlib-ng-compat-devel", "curl-devel", "icu-devel", "protobuf-devel", "leveldb-devel", "gflags-devel", "glog-devel", "elfutils-devel", "onnxruntime-devel", "linux-headers"]
+rundeps = ["onnxruntime", "ca-certificates"]
+options = ["!check", "jobs:8"]
+
+source = [
+    { url = "https://github.com/typesense/typesense/archive/refs/tags/v30.2.tar.gz", sha256 = "98ce13b5f05b68ff280b2e4b463c9a0f3be303d2c83a1e18ffbddf90f2b19ad1", name = "typesense-30.2.tar.gz" },
+    { url = "https://github.com/cruppstahl/libfor/archive/49611808d08d4e47116aa2a3ddcabeb418f405f7.tar.gz", sha256 = "fc22e65f6ad37c01973a24e9cda01e3affe1f68c7012af9a80e6b1b54d701018", unpack = false, name = "libfor-49611808d08d4e47116aa2a3ddcabeb418f405f7.tar.gz" },
+    { url = "https://github.com/google/googletest/archive/release-1.8.0.tar.gz", sha256 = "58a6f4277ca2bc8565222b3bbd58a177609e9c488e8a72649359ba51450db7d8", unpack = false, name = "googletest-release-1.8.0.tar.gz" },
+    { url = "https://github.com/h2o/h2o/archive/1491a703195790278091fd7aee547fbba78e89af.tar.gz", sha256 = "99d3f362a8df5cebbaffdc7ba455cb44d6d3073ba71ca9ac9d60441484e3ecff", unpack = false, name = "h2o-1491a703195790278091fd7aee547fbba78e89af.tar.gz" },
+    { url = "https://github.com/typesense/hnswlib/archive/21de18ffabea1a9d1e8b16b49afc6045d7707e4c.tar.gz", sha256 = "c1c07c6d0c90119c1f1d41a67df144b3791966392115510dae51e15e598b19f5", unpack = false, name = "hnswlib-21de18ffabea1a9d1e8b16b49afc6045d7707e4c.tar.gz" },
+    { url = "https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.15.tar.gz", sha256 = "ccf536620a45458d26ba83887a983b96827001e92a13847b45e4925cc8913178", unpack = false },
+    { url = "https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2", sha256 = "2db82d1e7119df3e71b7640219b6dfe84789bc0537983c3b7ac4f7189aecfeaa", unpack = false },
+    { url = "https://github.com/typesense/kakasi/archive/9e0825a02c7ea5605e968f6208f769f7c49d6860.tar.gz", sha256 = "4f283a0f1d1f6d2a003e4c65a06aa67698de6a2d30abe782fd214baa9da7f9d3", unpack = false, name = "kakasi-9e0825a02c7ea5605e968f6208f769f7c49d6860.tar.gz" },
+    { url = "https://github.com/goldsborough/lru-cache/archive/13f30ad33a227a3e9682578c450777380ecddfcf.tar.gz", sha256 = "36097dbf40f5ce83eb146bb6176f10f0b29b0b9c991b0795cc1359d51be6a506", unpack = false, name = "lru-cache-13f30ad33a227a3e9682578c450777380ecddfcf.tar.gz" },
+    { url = "https://github.com/facebook/rocksdb/archive/v6.20.3.tar.gz", sha256 = "c6502c7aae641b7e20fafa6c2b92273d935d2b7b2707135ebd9a67b092169dca", unpack = false, name = "rocksdb-6.20.3.tar.gz" },
+    { url = "https://github.com/google/s2geometry/archive/efb124d8eaf3433323d3e877dedd5e94a63339a3.tar.gz", sha256 = "546da753873ce96c605e8c216b29550c32285f28c52cc8c3cb11752b600b18bf", unpack = false, name = "s2geometry-efb124d8eaf3433323d3e877dedd5e94a63339a3.tar.gz" },
+    { url = "https://github.com/microsoft/onnxruntime-extensions/archive/36a9c991a20a9fd9eb49909117e2528d64fdeda5.tar.gz", sha256 = "994c0b1edd7cfa4fbef30a1062e7897a5034e3d32fa660686258541b4345efe9", unpack = false, name = "onnxruntime-extensions-36a9c99.tar.gz" },
+    { url = "https://raw.githubusercontent.com/kishorenc/libart/bbbf588bca55bce095538ee8ca8b422904baebc5/tests/words.txt", sha256 = "69d1a74371b98676d3312727115b13fefaf57d561561b6ee347d13b1eea0d0c9", unpack = false },
+    { url = "https://raw.githubusercontent.com/kishorenc/libart/bbbf588bca55bce095538ee8ca8b422904baebc5/tests/uuid.txt", sha256 = "f8cb59e1ed23fb77fa170eff0b75321d556be06b1fd09582809edc28632c5a4c", unpack = false },
+    { url = "https://gist.githubusercontent.com/kishorenc/1d330714eb07019f210f16ccb3991217/raw/bd52e05375d305d5aaa7ac06219af999726933a4/token_offsets.log", sha256 = "55c1c510ca6335c049f5696f3b94ac7be61e84f3e27cd8169021929b3db99651", unpack = false },
+]
+
+environment = '''
+export TYPESENSE_VERSION=30.2
+'''
+setup = '''
+# the pinned third parties where cmake/*.cmake look for their tarballs
+dep=external-Linux
+mkdir -p $dep
+s=/build/sources
+for f in libfor-49611808d08d4e47116aa2a3ddcabeb418f405f7.tar.gz googletest-release-1.8.0.tar.gz h2o-1491a703195790278091fd7aee547fbba78e89af.tar.gz \
+         hnswlib-21de18ffabea1a9d1e8b16b49afc6045d7707e4c.tar.gz libiconv-1.15.tar.gz jemalloc-5.3.0.tar.bz2 kakasi-9e0825a02c7ea5605e968f6208f769f7c49d6860.tar.gz \
+         lru-cache-13f30ad33a227a3e9682578c450777380ecddfcf.tar.gz rocksdb-6.20.3.tar.gz s2geometry-efb124d8eaf3433323d3e877dedd5e94a63339a3.tar.gz; do
+    cp "$s/$f" "$dep/$f"
+done
+# the three test data files, where TestResources.cmake looks (CMAKE_SOURCE_DIR/external/)
+mkdir -p external/libart/tests external/token_offsets/file
+cp "$s/words.txt" "$s/uuid.txt" external/libart/tests/
+cp "$s/token_offsets.log" external/token_offsets/file/token_offsets.txt
+
+# onnxruntime-extensions: extracted, Typesense's patch applied (a scratch git repository: the patch has renames)
+mkdir -p $dep/onnxruntime_ext
+tar -xzf "$s/onnxruntime-extensions-36a9c99.tar.gz" -C $dep/onnxruntime_ext --strip-components=1
+(cd $dep/onnxruntime_ext && git init -q . && git apply "$OLDPWD/cmake/onnx_ext.patch" && mkdir -p operators/src_dir/token && test -f operators/src_dir/ustring.cc)
+printf '%s\n' '# FenrirOS: onnxruntime-extensions is extracted and patched by the recipe (it was a git clone)' > cmake/onnxruntime_ext.cmake
+sed -i '/^include(cmake\/onnxruntime_ext.cmake)$/d; /^add_dependencies(.* onnxruntime_ext)$/d' CMakeLists.txt
+
+# the system ONNX Runtime instead of the bundled 1.14 build (see the header). Source edits: sed.
+sed -i '/^include(cmake\/onnxruntime.cmake)$/d; /^add_dependencies(.* onnxruntime)$/d' CMakeLists.txt
+sed -i '/^link_directories(.*ONNX_NAME.*-build/d; /^include_directories(.*ONNX_NAME.*\/include\/onnxruntime)$/d' CMakeLists.txt
+sed -i '/^add_library(\(ONNX[A-Z_]*\|ABSL[A-Z_]*\|NSYNC\|CPUI\|CLOG\) /d; /^set_target_properties(\(ONNX[A-Z_]*\|ABSL[A-Z_]*\|NSYNC\|CPUI\|CLOG\) PROPERTIES/d' CMakeLists.txt
+sed -i 's/ ONNX_SESSION ONNX_OPT ONNX_PRO ONNX_UTL ONNX_FRM ONNX_GRP ONNX_MLS ONNX_CMN ONNX_FLT ONNX ONNX_PRT ONNX_PRTL ONNX_RE ABSL[A-Z_ ]* NSYNC CPUI CLOG/ onnxruntime/' CMakeLists.txt
+sed -i 's|<core/session/onnxruntime_cxx_api.h>|<onnxruntime_cxx_api.h>|' $(grep -rl 'core/session/onnxruntime_cxx_api.h' src include)
+sed -i 's|^include_directories(include)$|include_directories(include)\ninclude_directories(/usr/include/onnxruntime)|' CMakeLists.txt
+! grep -n 'ONNX_SESSION\|ONNX_NAME}-build\|core/session' CMakeLists.txt src/*.cpp include/*.h | head -5
+grep -q 'include_directories(/usr/include/onnxruntime)' CMakeLists.txt
+cmake -S . -B build-Linux -G Ninja -DCMAKE_BUILD_TYPE=Release -DTYPESENSE_VERSION=$TYPESENSE_VERSION
+'''
+build = '''
+cmake --build build-Linux --target typesense-server
+'''
+install = '''
+install -Dm755 build-Linux/typesense-server "$pkgdir/usr/bin/typesense-server"
+install -Dm644 $pkgfiles/typesense-server.ini "$pkgdir/etc/typesense/typesense-server.ini"
+install -Dm644 $pkgfiles/typesense "$pkgdir/etc/dinit.d/typesense"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/typesense.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/typesense.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/typesense/README.FenrirOS"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/typesense/LICENSE.txt"
+'''

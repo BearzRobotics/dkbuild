@@ -1,0 +1,14 @@
+Typesense on FenrirOS
+=====================
+
+Typesense is a fast, typo-tolerant search engine for instant search (an alternative to Algolia),
+with vector and semantic search. Nothing is enabled or configured:
+
+  /etc/typesense/typesense-server.ini   the configuration: api-key is NOT set, Typesense will not start
+                                        without one (generate it, put it there; it is the admin credential)
+  /etc/dinit.d/typesense                the service (dinitctl enable typesense): _typesense user, 127.0.0.1:8108
+  /var/lib/typesense                    the data
+
+Typesense is built here against the system ONNX Runtime for its embedding models (text and image
+embeddings are downloaded by Typesense itself when a collection asks for a model; that needs a
+network at run time).

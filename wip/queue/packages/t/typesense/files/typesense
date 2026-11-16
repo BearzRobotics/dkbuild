@@ -1,0 +1,7 @@
+type = process
+command = /usr/bin/typesense-server --config=/etc/typesense/typesense-server.ini
+working-dir = /var/lib/typesense
+smooth-recovery = true
+stop-timeout = 30.0
+depends-on: rcboot
+run-as = _typesense

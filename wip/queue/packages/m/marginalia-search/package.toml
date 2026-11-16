@@ -29,9 +29,9 @@ source = [
     { url = "https://github.com/MarginaliaSearch/MarginaliaSearch/archive/33ef7a171fb0bd4d19b9d94719e179436b7c1515.tar.gz", sha256 = "170176cf0e9eed219e0f1365a8a5bf181cdf4eb19ee24c5cc7c7f3aba25a4518", name = "marginalia-33ef7a1.tar.gz" },
     { url = "https://services.gradle.org/distributions/gradle-9.7.1-bin.zip", sha256 = "acd53f1edaf02f1a8ff99879f8a34b302661a057d9b063ae9e35b552f804d20a", unpack = false },
     { url = "https://archive.apache.org/dist/opennlp/models/ud-models-1.0/opennlp-en-ud-ewt-sentence-1.0-1.9.3.bin", sha256 = "8dddd7e582cedef4a79a83fd340cefcdafe58419bd20520fec90492ea4bffd11", unpack = false, name = "opennlp-sentence.bin" },
-    { url = "https://huggingface.co/MarginaliaNu/MarginaliaModelData/resolve/c9339e4224f1dfad7f628809c32687e748198ae3/segments.bin?download=true", sha256 = "@SEG@", unpack = false, name = "segments.bin" },
+    { url = "https://huggingface.co/MarginaliaNu/MarginaliaModelData/resolve/c9339e4224f1dfad7f628809c32687e748198ae3/segments.bin?download=true", sha256 = "7fc313b6fd97576a5ecc1baf9dc0b88d7be41dece34cf0fd9e64ae07e907ebf3", unpack = false, name = "segments.bin" },
     { url = "https://huggingface.co/MarginaliaNu/MarginaliaModelData/resolve/c9339e4224f1dfad7f628809c32687e748198ae3/tfreq-new-algo3.bin?download=true", sha256 = "@TF@", unpack = false, name = "tfreq-new-algo3.bin" },
-    { url = "https://huggingface.co/MarginaliaNu/MarginaliaModelData/resolve/c9339e4224f1dfad7f628809c32687e748198ae3/lid.176.ftz?download=true", sha256 = "@LID@", unpack = false, name = "lid.176.ftz" },
+    { url = "https://huggingface.co/MarginaliaNu/MarginaliaModelData/resolve/c9339e4224f1dfad7f628809c32687e748198ae3/lid.176.ftz?download=true", sha256 = "8f3472cfe8738a7b6099e8e999c3cbfae0dcd15696aac7d7738a8039db603e83", unpack = false, name = "lid.176.ftz" },
 ]
 
 environment = '''
