@@ -26,7 +26,7 @@
 # against the first build's file list.
 name = "gcc"
 version = "15.2.0"
-release = 3
+release = 4
 summary = "GNU Compiler Collection 15 (C and C++; the other languages are gcc-<language> packages)"
 license = "GPL-3.0-or-later AND GPL-3.0-or-later WITH GCC-exception-3.1"
 homepage = "https://gcc.gnu.org"
@@ -34,7 +34,7 @@ archs = ["x86_64"]
 patches = ["0001-posix_memalign.patch", "0002-gcc-poison-system-directories.patch", "0003-specs-turn-on-Wl-z-now-by-default.patch", "0004-Turn-on-D_FORTIFY_SOURCE-2-by-default-for-C-C-ObjC-O.patch", "0005-On-linux-targets-pass-as-needed-by-default-to-the-li.patch", "0006-Enable-Wformat-and-Wformat-security-by-default.patch", "0007-Enable-Wtrampolines-by-default.patch", "0008-gcc-disable-SSP-on-ffreestanding-nostdlib-and-nodefa.patch", "0009-gcc-params-set-default-ssp-buffer-size-to-4.patch", "0010-Ensure-that-msgfmt-doesn-t-encounter-problems-during.patch", "0011-Don-t-declare-asprintf-if-defined-as-a-macro.patch", "0012-libiberty-copy-PIC-objects-during-build-process.patch", "0013-libgcc_s.patch", "0014-nopie.patch", "0015-ada-fix-shared-linking.patch", "0016-build-fix-CXXFLAGS_FOR_BUILD-passing.patch", "0017-add-fortify-headers-paths.patch", "0019-DP-Use-push-state-pop-state-for-gold-as-well-when-li.patch", "0020-aarch64-disable-multilib-support.patch", "0021-s390x-disable-multilib-support.patch", "0022-ppc64-le-disable-multilib-support.patch", "0023-x86_64-disable-multilib-support.patch", "0024-riscv-disable-multilib-support.patch", "0025-always-build-libgcc_eh.a.patch", "0026-ada-libgnarl-remove-use-of-glibc-specific-pthread_rw.patch", "0027-ada-libgnarl-use-posix_openpt-instead-of-glibc-speci.patch", "0028-ada-libgnarl-adaint-fix-sched.h-inclusion-for-musl.patch", "0029-configure-Add-enable-autolink-libatomic-use-in-LINK_.patch", "0030-configure-fix-detection-of-atomic-builtins-in-libato.patch", "0031-libstdc-do-not-throw-exceptions-for-non-C-locales-on.patch", "0032-gdc-unconditionally-link-libgphobos-against-libucont.patch", "0033-druntime-link-against-libucontext-on-all-platforms.patch", "0034-libgnat-time_t-is-always-64-bit-on-musl-libc.patch", "0035-libphobos-do-not-use-LFS64-symbols.patch", "0036-libgo-fix-lfs64-use.patch", "0037-loongarch-disable-multilib-support.patch", "0038-static-PIE-ensure-static-reaches-the-linker.patch", "0039-except-Don-t-use-the-cached-value-of-the-gcc_except_.patch", "0040-ada-libgnat-use-stub-symbolic-module-name-functions.patch", "0041-ada-libgnat-recognize-linux-musleabi-and-linux-muslg.patch", "0001-tree-object-size.cc-Fix-assert-constant-offset-in-ch.patch", "0001-LoongArch-Only-allow-valid-binary-op-when-optimize-c.patch", "9001-libgcobol-no-execinfo.patch"]
 hostdeps = ["binutils", "bison", "flex", "gawk", "make", "perl", "python", "texinfo", "findutils", "rust"]
 builddeps = ["gmp-devel", "mpfr-devel", "mpc-devel", "isl-devel", "zlib-ng-compat-devel", "zstd-devel",
-             "libucontext-devel", "linux-headers"]
+             "libucontext-devel", "linux-headers", "gcc-bootstrap"]
 stage0deps = ["gcc-bootstrap"]
 rundeps = ["binutils"]
 options = ["!check", "selfhost", "jobs:12"]
@@ -46,11 +46,11 @@ source = [
 environment = '''
 # GCC builds with GCC: the seed's (stage 0) or the previous package's, never
 # clang, and with GNU binutils under their usual names
-if [ -x /usr/lib/gcc15/bin/gnatmake ]; then
-    seed=/usr/lib/gcc15/bin; seedlib=/usr/lib/gcc15/lib
-else
-    seed=/usr/lib/gcc-bootstrap/usr/bin; seedlib=/usr/lib/gcc-bootstrap/usr/lib
-fi
+# r4: always the stage-0 seed (Alpine's GCC, the gcc-bootstrap package), not the previous gcc package: with the previous package as the seed the
+# first Ada tool GCC builds and runs (xsnamest, gen_il-main: "Error relocating ./xsnamest: interfaces__c___elabs: symbol not found", world runs 1 and 2)
+# links against its shared libgnat, which lacks the elaboration symbols its binder file refers to. The three-stage bootstrap rebuilds the compiler with
+# itself anyway, so the seed only has to be a working GNAT, which Alpine's is (r2 and the first r3 were built with it).
+seed=/usr/lib/gcc-bootstrap/usr/bin; seedlib=/usr/lib/gcc-bootstrap/usr/lib
 mkdir -p /tmp/gnu-bin
 for t in as ar nm ranlib objcopy objdump readelf strip; do ln -sf /usr/bin/g$t /tmp/gnu-bin/$t; done
 ln -sf /usr/bin/ld.bfd /tmp/gnu-bin/ld
