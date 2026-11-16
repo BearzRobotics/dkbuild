@@ -20,6 +20,8 @@ const pnpm_registry_js = @embedFile("pnpm-registry.js");
 const gradle_resolve = @embedFile("gradle-resolve.gradle");
 const gradle_store_sh = @embedFile("gradle-store.sh");
 const gradle_offline = @embedFile("gradle-offline.gradle");
+/// mavendeps: copies a restore's local repository into the shared Maven-layout store.
+const maven_store_sh = @embedFile("maven-store.sh");
 /// nugetdeps: copies a restore's packages into the shared store.
 const nuget_store_sh = @embedFile("nuget-store.sh");
 const macro = @import("macro.zig");
@@ -218,6 +220,17 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
             \\chmod 755 /tmp/dkbin/gradle
             \\# Gradle's native helpers (file events, ...) are glibc builds: off
             \\mkdir -p /tmp/ghome && printf 'org.gradle.native=false\norg.gradle.vfs.watch=false\n' > /tmp/ghome/gradle.properties
+            \\export PATH="/tmp/dkbin:$PATH"
+            \\
+        );
+    // Maven (mavendeps): the recipe's Maven distribution, and `mvn` on PATH with the store (a file:// repository) as the mirror of every repository.
+    if (contains(r.options, "mavendeps"))
+        try s.appendSlice(arena,
+            \\mkdir -p /tmp/maven-dist /tmp/dkbin
+            \\tar -xzf "$(ls /build/sources/apache-maven-*-bin.tar.gz | head -n1)" -C /tmp/maven-dist
+            \\printf '%s\n' '<settings><localRepository>/tmp/m2</localRepository><mirrors><mirror><id>dkstore</id><mirrorOf>*</mirrorOf><url>file:///dkdeps/maven</url></mirror></mirrors></settings>' > /tmp/dk-settings.xml
+            \\printf '#!/bin/sh\nexec %s/bin/mvn -B -s /tmp/dk-settings.xml "$@"\n' "$(ls -d /tmp/maven-dist/apache-maven-*)" > /tmp/dkbin/mvn
+            \\chmod 755 /tmp/dkbin/mvn
             \\export PATH="/tmp/dkbin:$PATH"
             \\
         );
@@ -1056,6 +1069,62 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         }
     }
 
+    // 3d. Maven (mavendeps): like Gradle and NuGet, the first build of a source runs the recipe's `restore` step once with the network, in this
+    // build root, with the recipe's own Maven and a private local repository; what it downloaded goes into the shared Maven-layout store.
+    const uses_maven = contains(r.options, "mavendeps") and first_tarball != null;
+    if (uses_maven) {
+        const first_sha = std.fs.path.basename(first_tarball.?);
+        const maven_rel = try std.fs.path.join(arena, &.{ cache, "maven" });
+        const mlists_rel = try std.fs.path.join(arena, &.{ cache, "mavendeps" });
+        Dir.cwd().createDirPath(io, maven_rel) catch return error.PrepareFailed;
+        Dir.cwd().createDirPath(io, mlists_rel) catch return error.PrepareFailed;
+        const dk = try std.fs.path.join(arena, &.{ root_rel, "dkbuild" });
+        Dir.cwd().writeFile(io, .{ .sub_path = try std.fs.path.join(arena, &.{ dk, "maven-store.sh" }), .data = maven_store_sh }) catch return error.PrepareFailed;
+        const mlist = try std.fmt.allocPrint(arena, "{s}/{s}.list", .{ mlists_rel, first_sha });
+        if (Dir.cwd().access(io, mlist, .{})) |_| {} else |_| {
+            out("    restoring Maven dependencies (network, once for this source)\n", .{});
+            const menv = try std.fmt.allocPrint(arena, "export name='{s}' version='{s}' srcdir='{s}' jobs={d}\n{s}\n", .{ r.name, r.version, srcdir, opts.jobs, r.environment orelse "" });
+            var mpatches: std.ArrayList(u8) = .empty;
+            for (r.patches) |pt| try mpatches.appendSlice(arena, try std.fmt.allocPrint(arena, "patch -Np1 -s -i '/dkbuild/patches/{s}'\n", .{pt}));
+            const sh = try std.fmt.allocPrint(arena,
+                \\set -e
+                \\{s}
+                \\export HOME=/tmp
+                \\mkdir -p /tmp/maven-dist /tmp/dkbin
+                \\tar -xzf "$(ls /build/sources/apache-maven-*-bin.tar.gz | head -n1)" -C /tmp/maven-dist
+                \\printf '%s\n' '<settings><localRepository>/tmp/m2-restore</localRepository></settings>' > /tmp/dk-restore-settings.xml
+                \\printf '#!/bin/sh\nexec %s/bin/mvn -B -s /tmp/dk-restore-settings.xml "$@"\n' "$(ls -d /tmp/maven-dist/apache-maven-*)" > /tmp/dkbin/mvn
+                \\chmod 755 /tmp/dkbin/mvn
+                \\export PATH="/tmp/dkbin:$PATH"
+                \\# on a copy with the recipe's patches applied (the build applies them to its own tree later)
+                \\rm -rf /tmp/maven-src && cp -a '{s}' /tmp/maven-src && cd /tmp/maven-src
+                \\{s}
+                \\{s}
+                \\sh /dkbuild/maven-store.sh /tmp/m2-restore /dkstore/maven /dkstore/mavendeps/{s}.list
+            , .{ menv, srcdir, mpatches.items, r.restore.?, first_sha });
+            const ok = sandbox.run(arena, io, .{
+                .lower = base_root,
+                .upper = sb.upper,
+                .work = sb.work,
+                .merged = sb.merged,
+                .net = true,
+                .binds = &.{
+                    .{ .src = try std.fs.path.join(arena, &.{ root_abs, "build" }), .dst = "/build" },
+                    .{ .src = try std.fs.path.join(arena, &.{ root_abs, "dkbuild" }), .dst = "/dkbuild" },
+                    .{ .src = absPath(arena, io, maven_rel) catch return error.PrepareFailed, .dst = "/dkstore/maven" },
+                    .{ .src = absPath(arena, io, mlists_rel) catch return error.PrepareFailed, .dst = "/dkstore/mavendeps" },
+                    .{ .src = "/etc/resolv.conf", .dst = "/etc/resolv.conf", .read_only = true },
+                },
+                .env = &.{ "PATH=/usr/bin:/bin", "HOME=/tmp" },
+                .argv = &.{ "/usr/bin/sh", "-c", sh },
+            }, &log) catch false;
+            if (!ok) {
+                out("error: {s}: restoring its Maven dependencies failed; log: {s}\n", .{ r.name, logpath });
+                return error.PrepareFailed;
+            }
+        }
+    }
+
     // 4. Steps, in the sandbox
     var bad: []const u8 = "";
     const text = script(arena, r, ctx, srcdir, opts, &bad) catch |err| switch (err) {
@@ -1087,7 +1156,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
             .{ .use = zig_list != null, .sub = "zigpkg", .dst = "/dkdeps/zig" },
             .{ .use = uses_go, .sub = "gomod", .dst = "/dkdeps/go" },
             .{ .use = uses_npm, .sub = "npm", .dst = "/dkdeps/npm" },
-            .{ .use = uses_gradle, .sub = "maven", .dst = "/dkdeps/maven" },
+            .{ .use = uses_gradle or uses_maven, .sub = "maven", .dst = "/dkdeps/maven" },
             .{ .use = uses_nuget, .sub = "nuget", .dst = "/dkdeps/nuget" },
             .{ .use = gem_lists.items.len > 0, .sub = "gems", .dst = "/dkdeps/gems" },
             .{ .use = hackage_pkgs != null, .sub = "hackage", .dst = "/dkdeps/hackage" },

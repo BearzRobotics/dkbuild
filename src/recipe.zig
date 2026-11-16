@@ -64,7 +64,7 @@ pub const Recipe = struct {
     triggers: []const []const u8 = &.{},
     options: []const []const u8 = &.{},
     environment: ?[]const u8 = null,
-    /// nugetdeps: the commands that restore the source's NuGet packages. Run
+    /// nugetdeps and mavendeps: the commands that restore the source's NuGet packages. Run
     /// once per source with the network, to fill the shared store (SPEC.md 7.4).
     restore: ?[]const u8 = null,
     setup: ?[]const u8 = null,
@@ -87,7 +87,7 @@ const known_keys = [_][]const u8{
     "noscan",
 };
 
-const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap", "zigdeps", "godeps", "cargodeps", "npmdeps", "gradledeps", "nugetdeps", "gemdeps", "pubdeps", "hackagedeps", "pydeps", "meta", "rootlayout", "repo-iso", "selfhost", "gcc" };
+const known_options = [_][]const u8{ "check", "cross", "strip", "lto", "static", "bootstrap", "zigdeps", "godeps", "cargodeps", "npmdeps", "gradledeps", "mavendeps", "nugetdeps", "gemdeps", "pubdeps", "hackagedeps", "pydeps", "meta", "rootlayout", "repo-iso", "selfhost", "gcc" };
 const known_archs = [_][]const u8{ "x86_64", "aarch64", "riscv64" };
 
 /// Parse and validate `text`. All returned memory lives in `arena`.
@@ -189,6 +189,17 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
         };
         if (!dist) return cfg.fail(arena, diag, "option 'gradledeps' needs a Gradle distribution (gradle-<version>-bin.zip) among the sources", .{});
         if (!contains(r.hostdeps, "unzip")) return cfg.fail(arena, diag, "option 'gradledeps' needs 'unzip' in hostdeps", .{});
+    }
+    // mavendeps (SPEC.md 7.4): like gradledeps, the Maven used is a source of the recipe; its `restore` step (the mvn commands that fetch
+    // everything the build needs) runs once with the network.
+    if (contains(r.options, "mavendeps")) {
+        var dist = false;
+        for (r.source) |src| if (src == .tarball) {
+            const base = std.fs.path.basename(src.tarball.url);
+            if (std.mem.startsWith(u8, base, "apache-maven-") and std.mem.endsWith(u8, base, "-bin.tar.gz")) dist = true;
+        };
+        if (!dist) return cfg.fail(arena, diag, "option 'mavendeps' needs a Maven distribution (apache-maven-<version>-bin.tar.gz, unpack = false) among the sources", .{});
+        if (r.restore == null) return cfg.fail(arena, diag, "option 'mavendeps' needs a 'restore' step (the mvn commands that fetch the build's dependencies)", .{});
     }
     if (contains(r.options, "nugetdeps") and r.restore == null)
         return cfg.fail(arena, diag, "option 'nugetdeps' needs a 'restore' step (the dotnet restore commands)", .{});

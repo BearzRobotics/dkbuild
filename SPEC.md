@@ -301,6 +301,7 @@ release, or a `snapshot:git` source (below), which is a checksummed tarball.
 | `godeps` | Go modules downloaded on the host (`go mod download`, needs `go`) into the shared module cache `cache/gomod/`; the build gets `GOMODCACHE`, `GOPROXY=off`, `GOFLAGS=-mod=mod` (7.4) |
 | `npmdeps` | npm packages of every `package-lock.json` in the recipe's unpacked sources (any of them), fetched into the shared `cache/npm/` (each checked against its lockfile integrity hash); the build installs offline with `npm ci` (7.4) |
 | `gradledeps` | Gradle dependencies resolved once per source, in the build root with the network, into the shared Maven-layout `cache/maven/`; then the build runs Gradle offline against it. Needs a `gradle-<version>-bin.zip` source and `unzip` in `hostdeps` (7.4) |
+| `mavendeps` | Apache Maven projects: the first build of a source runs the recipe's `restore` step (the `mvn` commands that make Maven fetch everything the build needs: plugins and dependencies) once with the network, with the recipe's own Maven (an `apache-maven-<version>-bin.tar.gz` source, `unpack = false`) and a private local repository; what it downloaded goes into the shared Maven-layout `cache/maven/` (the store gradledeps fills too) and `cache/mavendeps/<sha256>.list` lists it. Builds get `mvn` on PATH with the store (a `file://` repository) as the mirror of every repository (7.4) |
 | `nugetdeps` | NuGet packages: the recipe's `restore` step (its `dotnet restore` commands) runs once per source with the network, in the build root, and the packages go into the shared `cache/nuget/` (a local NuGet feed); every build has `$DKBUILD_NUGET` (the store, read-only) and restores with `--source $DKBUILD_NUGET` offline (7.4) |
 | `gemdeps` | Ruby gems of every `Gemfile.lock` in the recipe's unpacked sources, fetched into the shared `cache/gems/` (checked against the lockfile's CHECKSUMS, or rubygems.org's sha256), always the ruby-platform gem; laid into `vendor/cache` for `bundle install --local` (7.4) |
 | `cargodeps` | Rust crates vendored on the host (`cargo vendor`, needs `cargo`) into the shared `cache/crates/`, laid in as `vendor/` with a `.cargo/config.toml` pointing at it; build with `--offline` (7.4). The Cargo project is the one at the top of the source, or else the first `Cargo.lock` below it; `vendor/` and `.cargo/` stay at the top either way |
@@ -1003,6 +1004,21 @@ read-only store. Tested outside dkbuild with Gradle 9.9.0 (a project with
 Maven Central and plugin-portal dependencies built offline from the
 store. `openjdk` 17, 21 and 25 are packaged, and a Gradle recipe
 (geogebra) is written; it has not been built in this option yet.
+
+Maven (`mavendeps`): the recipe's `restore` step is whatever makes Maven
+download what the build will need, typically the build itself with the tests off
+(`mvn -DskipTests -Dmaven.javadoc.skip=true package`; a `dependency:go-offline`
+alone misses plugin dependencies). It runs in the build root on a copy of the
+source with the recipe's patches applied, with `mvn` as a wrapper that gives
+Maven a private local repository (`/tmp/m2-restore`, so everything is downloaded,
+none of it taken from elsewhere). `maven-store.sh` copies that repository into
+`cache/maven/` (Maven's repository layout, `.sha1` and `.sha256` beside each file;
+the bookkeeping files of a local repository are left out and the repository
+metadata `maven-metadata-<id>.xml` is kept as `maven-metadata.xml`). The build's
+`mvn` wrapper uses a settings file whose only mirror (of `*`) is
+`file:///dkdeps/maven`, so every plugin, parent POM and dependency comes from the
+store, and a build that needs something the restore did not fetch fails instead of
+reaching the network. Not tested against a real project yet when written.
 
 The build binds the stores read-only into the sandbox (the table above) and lays `vendor/`
 (for Rust, and `vendor/cache` for gems), `zig-pkg/`, `.dkpub`, `.dkhackage` and `.dkpython` into the source
