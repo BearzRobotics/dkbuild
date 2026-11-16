@@ -18,7 +18,7 @@
 # DRAFT, not built: needs electron and emscripten.
 name = "gdevelop"
 version = "5.6.287"
-release = 5
+release = 6
 summary = "Open-source game engine and editor, no-code and with JavaScript"
 license = "MIT"
 homepage = "https://gdevelop.io"
@@ -94,6 +94,10 @@ sed -i 's|SUFFIX "\.bc"|SUFFIX ".a"|' Core/CMakeLists.txt GDJS/CMakeLists.txt Ex
 # nested (react-scripts', storybook's, 0.11.0); react-scripts' satisfies the plugin's peer
 # range (>=0.10.0 <1.0.0), so link it where the plugin looks.
 (cd newIDE/app/node_modules && { [ -e react-refresh ] || ln -s react-scripts/node_modules/react-refresh react-refresh; } && test -f react-refresh/runtime.js)
+# r6: the same gap for babel-plugin-macros: the production build's eslint step failed with "Cannot find module 'babel-plugin-macros'"
+# (required from @babel/core while loading babel-preset-react-app's config); a copy exists nested somewhere, and is linked to the top
+# level, where the lookup from the app's files reaches it. The build stops here, with a clear message, if no copy was installed.
+(cd newIDE/app/node_modules && { [ -e babel-plugin-macros ] || { p=$(find . -type d -name babel-plugin-macros -prune | head -n 1); [ -n "$p" ] && ln -s "$p" babel-plugin-macros; }; } && test -f babel-plugin-macros/package.json)
 (cd newIDE/electron-app && npm ci --ignore-scripts)
 (cd newIDE/electron-app/app && npm ci --ignore-scripts)
 # the bundled editors, where import-zipped-editor.js would download them
