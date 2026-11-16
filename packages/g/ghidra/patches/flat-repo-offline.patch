@@ -15,7 +15,7 @@
 +//   group or version, they are not in a Maven store): it is added in afterEvaluate too,
 +//   after that.
 +flatRepo.mkdirs()
-+["AXMLPrinter2.jar", "java-sarif-2.1-modified.jar"].each { n ->
++["AXMLPrinter2.jar", "java-sarif-2.1-modified.jar", "com.microsoft.z3.jar"].each { n ->
 +	def jar = new File(flatRepo, n)
 +	if (!jar.exists()) jar.createNewFile()
 +}

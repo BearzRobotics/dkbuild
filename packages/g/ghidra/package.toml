@@ -18,15 +18,19 @@
 # real dbgmodel.tlb (laid in by setup, above) is not there yet and Debugger-agent-dbgeng's configuration stopped the resolution ("Failed to
 # locate prebuilt TLB file", r4 of the world run, 2026-11-16). The patch creates an empty file at that path (the resolution only
 # needs it to exist); setup's cp then puts the real one over it, as for the flatRepo jars.
+# r6: the SymbolicSummaryZ3 extension needs com.microsoft.z3.jar (a flat-directory jar, like the other two) and Z3's native libraries; fetchDependencies.gradle
+# downloads Microsoft's glibc release zip (Z3 4.13.0) for them, which does not run on musl. They come from our z3 package instead (4.15.1 with its Java bindings:
+# libz3.so, libz3java.so, the jar), put where fetchDependencies would unpack the zip (dependencies/SymbolicSummaryZ3/os/linux_x86_64). The patch's
+# placeholder list has the jar too (the dependency resolution before setup, as for the others). Untested against the 4.15 API: the extension is plain Z3 Java calls.
 name = "ghidra"
 version = "12.2"
-release = 5
+release = 6
 patches = ["flat-repo-offline.patch", "dbgmodel-placeholder.patch"]
 summary = "Software reverse engineering suite (disassembler, decompiler)"
 license = "Apache-2.0"
 homepage = "https://ghidra-sre.org"
 archs = ["x86_64", "aarch64"]
-hostdeps = ["openjdk21", "unzip", "bison", "flex", "python"]
+hostdeps = ["openjdk21", "unzip", "bison", "flex", "python", "z3"]
 rundeps = ["openjdk21", "bash"]
 options = ["!check", "!strip", "gradledeps", "jobs:12"]
 
@@ -64,6 +68,15 @@ setup = '''
 mkdir -p dependencies/Debugger-agent-dbgeng && cp "/build/sources/dbgmodel.tlb" dependencies/Debugger-agent-dbgeng/
 mkdir -p dependencies/flatRepo && cp "/build/sources/java-sarif-2.1-modified.jar" dependencies/flatRepo/
 mkdir -p dependencies/flatRepo && cp "/build/sources/AXMLPrinter2.jar" dependencies/flatRepo/
+z3jar=$(find /usr -name com.microsoft.z3.jar | head -n 1)
+test -n "$z3jar"
+cp "$z3jar" dependencies/flatRepo/com.microsoft.z3.jar
+mkdir -p dependencies/SymbolicSummaryZ3/os/linux_x86_64
+for l in libz3.so libz3java.so; do
+    f=$(find /usr -name "$l" | head -n 1)
+    test -n "$f"
+    cp -L "$f" dependencies/SymbolicSummaryZ3/os/linux_x86_64/
+done
 mkdir -p dependencies/GhidraServer && cp "/build/sources/yajsw-stable-13.18.zip" dependencies/GhidraServer/
 mkdir -p dependencies/BSim && cp "/build/sources/postgresql-15.18.tar.gz" dependencies/BSim/
 mkdir -p dependencies/fidb && cp "/build/sources/vs2012_x64.fidb" dependencies/fidb/
