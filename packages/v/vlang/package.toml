@@ -19,7 +19,7 @@
 # found while linking the generated program"); build-time dependency for the compiler, and run-time for the programs V compiles.
 name = "vlang"
 version = "0.5.2"
-release = 2
+release = 3
 summary = "The V programming language"
 license = "MIT"
 homepage = "https://vlang.io"
@@ -32,6 +32,7 @@ options = ["!check", "!lto", "!strip"]
 source = [
     { url = "https://github.com/vlang/v/archive/refs/tags/0.5.2.tar.gz", sha256 = "1a05f646fba9516ec6307979b282d0cc5327075bef268d40c0ca7d0b887e4f52" },
     { url = "https://github.com/vlang/vc/archive/7eb8c54a3843e5107d5af06d7a8c3e928f322475.tar.gz", sha256 = "255d5e999edf71dd2786c06a0fdcda47ecfd79d9fde3c9cf7548e36996284f45" },
+    { url = "https://github.com/vlang/markdown/archive/55292d1aa5dc2ba79d53e3430306755a56d91b6b.tar.gz", sha256 = "47e429f3c66cc59898e0f3ae50045251fb52089e40b0a93c128c3775908cdfdd" },
 ]
 
 environment = '''
@@ -49,6 +50,11 @@ clang -std=gnu11 -w -O2 -o v1 ../vc-7eb8c54a3843e5107d5af06d7a8c3e928f322475/v.c
 rm -f v1 v2
 # the tools (v fmt, v doc, ...) prebuilt, since the installed tree is not
 # writable by the people who run it
+# r3: `v build-tools` builds `v doc`, which imports the external module `markdown` and made V clone it from github.com into ~/.vmodules ("Cloning into
+# '/tmp/.vmodules/markdown'... Could not resolve host", ten retries, no network in the build). The module is a pinned source here (vlang/markdown master of
+# 2026-10-01), put where V looks for installed modules (HOME is /tmp, see the environment).
+mkdir -p /tmp/.vmodules
+cp -a ../markdown-55292d1aa5dc2ba79d53e3430306755a56d91b6b /tmp/.vmodules/markdown
 ./v build-tools
 '''
 install = '''
