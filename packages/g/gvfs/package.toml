@@ -10,9 +10,14 @@
 # Online accounts page now (0.2.0), so there is somewhere to set the accounts up, and the
 # desktop treats optional dependencies as runtime ones. (r1 had them off, as Chimera does:
 # its accounts are set up in GNOME Settings.)
+# r3: -Dgoogle=false, FOR NOW (recorded in docs/disabled-features.md): the Google Drive backend needs libgdata, which is not
+# in the tree, and libgdata 0.18.1 (the last release; main is 0.19.0 with the same dependency) is written for libsoup 2.4, while
+# this tree has libsoup 3 only and gvfs itself uses libsoup 3. Wanted back: package libsoup 2.74 beside libsoup 3 (the two
+# install side by side: libsoup-2.4 and libsoup-3.0), then libgdata, then -Dgoogle=true. The other GOA backends (OneDrive, ...)
+# stay on.
 name = "gvfs"
 version = "1.60.0"
-release = 2
+release = 3
 summary = "GNOME virtual file system"
 license = "LGPL-2.0-or-later"
 homepage = "https://wiki.gnome.org/Projects/gvfs"
@@ -33,7 +38,7 @@ setup = '''
     -Dman=true \
     -Dgoa=true \
     -Donedrive=true \
-    -Dgoogle=true
+    -Dgoogle=false
 '''
 build = '''
 %meson_build
