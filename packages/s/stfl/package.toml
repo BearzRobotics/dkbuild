@@ -12,7 +12,7 @@
 # the others.
 name = "stfl"
 version = "0.24"
-release = 2
+release = 3
 summary = "Structured Terminal Forms Language/Library"
 license = "LGPL-3.0-or-later"
 homepage = "https://github.com/newsboat/stfl"
@@ -24,6 +24,8 @@ source = [
     { url = "https://github.com/newsboat/stfl/archive/bbb2404580e845df2556560112c8aefa27494d66.tar.gz", sha256 = "c5e77dd2e40e14f0e68dd08df1f21cd1378d88d5001e7c1926ceb7c4a977ab86" },
 ]
 
+# r3: -DNCURSES_WIDECHAR=1: ncurses' header declares the wide-character calls (mvwaddnwstr, wget_wch, ...) only when that is set or
+# _XOPEN_SOURCE_EXTENDED is ("call to undeclared function 'mvwaddnwstr'"); this ncurses is the wide one, as r2's comment says.
 setup = '''
 # r2: stfl_internals.h includes <ncursesw/ncurses.h>, the Debian-style location of the
 # wide-character headers; this system's ncurses (wide-only, see the ncurses package)
@@ -33,7 +35,7 @@ sed -i 's|<ncursesw/ncurses.h>|<ncurses.h>|' stfl_internals.h
 grep -q '<ncurses.h>' stfl_internals.h
 '''
 build = '''
-%make CC="$CC -pthread" CFLAGS="$CFLAGS -I. -D_GNU_SOURCE -fPIC" prefix=/usr libdir=lib
+%make CC="$CC -pthread" CFLAGS="$CFLAGS -I. -D_GNU_SOURCE -DNCURSES_WIDECHAR=1 -fPIC" prefix=/usr libdir=lib
 '''
 install = '''
 make prefix=/usr libdir=lib DESTDIR="$pkgdir" install
