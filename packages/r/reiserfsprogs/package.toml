@@ -5,7 +5,7 @@
 # (glibc declares it by default). Nothing else is changed.
 name = "reiserfsprogs"
 version = "3.6.27"
-release = 5
+release = 6
 summary = "ReiserFS (version 3) filesystem utilities"
 patches = ["musl-printf.patch"]
 license = "GPL-2.0-only"
@@ -21,6 +21,8 @@ source = [
 environment = '''
 export CFLAGS="${CFLAGS} -D_LARGEFILE64_SOURCE"
 export LDFLAGS="${LDFLAGS} -lobstack"
+# r6: the compat header also declares what glibc's headers pull in by themselves: _GNU_SOURCE (basename() from <string.h>),
+# <sys/mount.h> (mount(), fe.c), and LONG_LONG_MIN/MAX (resize_reiserfs.c; musl has LLONG_*).
 # r5: links libobstack (musl-obstack): the library uses glibc's obstack ("undefined symbol: _obstack_begin"), as cronie and elfutils do here.
 # r4: patches/musl-printf.patch. reiserfsprogs prints its structures (keys, item heads, block heads)
 # through glibc's register_printf_specifier(): the format letters %K %k %H %b %y %M %U are registered
@@ -41,8 +43,16 @@ export LDFLAGS="${LDFLAGS} -lobstack"
 # redefinitions are legal C11, so nothing breaks if a header does define them.
 mkdir -p /tmp/dkcompat
 cat > /tmp/dkcompat/reiserfs-compat.h <<'EOF2'
+#define _GNU_SOURCE 1
 #include <sys/types.h>
 #include <stdlib.h>
+#include <string.h>
+#include <limits.h>
+#include <sys/mount.h>
+#ifndef LONG_LONG_MAX
+#define LONG_LONG_MAX LLONG_MAX
+#define LONG_LONG_MIN LLONG_MIN
+#endif
 typedef off_t loff_t;
 typedef int (*comparison_fn_t)(const void *, const void *);
 typedef int (*__compar_fn_t)(const void *, const void *);
