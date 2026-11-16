@@ -1,0 +1,50 @@
+# Flameshot: screenshot tool with an annotation editor (arrows, text, blur, pixelate, upload
+# to the clipboard or a file; Qt 6). Works on Wayland through xdg-desktop-portal (and
+# wlroots compositors through grim) and on X11. The `flameshot` command starts the tray
+# program or takes a shot (`flameshot gui`).
+# Offline build: its CMake downloads Qt-Color-Widgets with FetchContent; that source (the
+# commit upstream pins) is the second `source` and is copied to external/Qt-Color-Widgets,
+# where the CMake looks for it first. KDSingleApplication comes from the system package
+# (USE_BUNDLED_KDSINGLEAPPLICATION=OFF), QHotkey is only for Windows and macOS.
+# Options: Wayland clipboard on (KF6 GuiAddons, which keeps the copied image available after the
+# window closes); the update checker OFF (DISABLE_UPDATE_CHECKER: it contacts the project's
+# server, and updates come through the package manager); the Imgur uploader left at its default,
+# off (it sends images to a third-party service; upstream builds it that way too).
+# The desktop launcher runs `flameshot` from PATH (USE_LAUNCHER_ABSOLUTE_PATH=OFF).
+name = "flameshot"
+version = "15.0.0"
+release = 1
+summary = "Screenshot tool with an annotation editor"
+license = "GPL-3.0-or-later"
+homepage = "https://flameshot.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qtbase", "qt6-qttools"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtsvg-devel", "qt6-qttools-devel", "kdsingleapplication-devel", "kguiaddons-devel", "openssl-devel"]
+rundeps = ["qt6-qtsvg", "qt6-qtwayland", "xdg-desktop-portal"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/flameshot-org/flameshot/archive/refs/tags/v15.0.0.tar.gz", sha256 = "9e38bb699a152873e9ccc4b9a54b06baa16762298444aff8c72f218a7741e146" },
+    { url = "https://gitlab.com/mattbas/Qt-Color-Widgets/-/archive/5d52e907e50dc88cf969b41cea44665ff6c475b1/Qt-Color-Widgets-5d52e907e50dc88cf969b41cea44665ff6c475b1.tar.gz", sha256 = "99edd39dca0367b1cfd388bf031c4915137580bd73f87c65f7720b8a4af14efa" },
+]
+
+setup = '''
+mkdir -p external
+cp -a /build/Qt-Color-Widgets-5d52e907e50dc88cf969b41cea44665ff6c475b1 external/Qt-Color-Widgets
+test -f external/Qt-Color-Widgets/CMakeLists.txt
+# the source is a tarball, not a checkout: no `git rev-parse` for the version text
+export GIT_HASH=v15.0.0
+%cmake \
+    -DUSE_BUNDLED_KDSINGLEAPPLICATION=OFF \
+    -DUSE_WAYLAND_CLIPBOARD=ON \
+    -DDISABLE_UPDATE_CHECKER=ON \
+    -DUSE_LAUNCHER_ABSOLUTE_PATH=OFF \
+    -DGENERATE_TS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/flameshot/LICENSE"
+'''
