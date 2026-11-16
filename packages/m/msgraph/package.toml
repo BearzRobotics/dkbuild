@@ -1,0 +1,29 @@
+# msgraph (libmsgraph): GLib library for the Microsoft Graph API (OneDrive); built on libsoup 3,
+# json-glib and GNOME Online Accounts. gvfs's OneDrive backend asks for the `msgraph-1` pkg-config
+# module ("Dependency msgraph-1 not found"). GNOME calls the source `msgraph` (0.3.x; the old
+# libmsgraph name is the 0.1 series). Tests and docs off (the tests need uhttpmock, which is not packaged);
+# GObject introspection on.
+name = "msgraph"
+version = "0.3.5"
+release = 1
+summary = "GLib library for the Microsoft Graph API (OneDrive)"
+license = "LGPL-3.0-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/msgraph"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["meson", "pkgconf", "gobject-introspection", "glib-devel"]
+builddeps = ["glib-devel", "json-glib-devel", "libsoup-devel", "gnome-online-accounts-devel", "gobject-introspection-devel", "libxml2-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/msgraph/0.3/msgraph-0.3.5.tar.xz", sha256 = "e3dadbf638d0207040f6da6d852db516e463423da710af6cbc35d00572f17d9b" },
+]
+
+setup = '''
+%meson -Dtests=false -Dgtk_doc=false -Dintrospection=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

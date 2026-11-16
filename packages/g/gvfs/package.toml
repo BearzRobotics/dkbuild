@@ -15,14 +15,15 @@
 # this tree has libsoup 3 only and gvfs itself uses libsoup 3. Wanted back: package libsoup 2.74 beside libsoup 3 (the two
 # install side by side: libsoup-2.4 and libsoup-3.0), then libgdata, then -Dgoogle=true. The other GOA backends (OneDrive, ...)
 # stay on.
+# r4: builddeps msgraph (new recipe: libmsgraph, the OneDrive backend's library; libsoup 3, so no conflict).
 name = "gvfs"
 version = "1.60.0"
-release = 3
+release = 4
 summary = "GNOME virtual file system"
 license = "LGPL-2.0-or-later"
 homepage = "https://wiki.gnome.org/Projects/gvfs"
 hostdeps = ["docbook-xsl-nons", "gettext", "glib-devel", "libxslt", "meson", "openssh", "pkgconf", "polkit-devel"]
-builddeps = ["avahi-devel", "bluez-devel", "dbus-devel", "elogind-devel", "fuse-devel", "gcr-devel", "glib-devel", "gnome-online-accounts-devel", "gsettings-desktop-schemas-devel", "libarchive-devel", "libbluray-devel", "libcap-devel", "libcdio-paranoia-devel", "libgcrypt-devel", "libgphoto2-devel", "libgudev-devel", "libimobiledevice-devel", "libmtp-devel", "libnfs-devel", "libplist-devel", "libsecret-devel", "libsoup-devel", "libusb-devel", "libxml2-devel", "polkit-devel", "samba-devel", "udisks-devel"]
+builddeps = ["avahi-devel", "bluez-devel", "dbus-devel", "elogind-devel", "fuse-devel", "gcr-devel", "glib-devel", "gnome-online-accounts-devel", "msgraph-devel", "gsettings-desktop-schemas-devel", "libarchive-devel", "libbluray-devel", "libcap-devel", "libcdio-paranoia-devel", "libgcrypt-devel", "libgphoto2-devel", "libgudev-devel", "libimobiledevice-devel", "libmtp-devel", "libnfs-devel", "libplist-devel", "libsecret-devel", "libsoup-devel", "libusb-devel", "libxml2-devel", "polkit-devel", "samba-devel", "udisks-devel"]
 rundeps = ["desktop-file-utils"]
 options = ["!check"]
 
