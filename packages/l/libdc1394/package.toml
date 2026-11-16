@@ -5,10 +5,16 @@
 # The Linux backend is the firewire-cdev ("juju") one, over libraw1394; the
 # libusb backend is built too. The example programs are built when their
 # X11/SDL dependencies are present (configure checks).
+# r3: clang (this tree's compiler) rejects a variable-length array inside a struct, which the juju backend
+# uses twice for the trailing data of a kernel event ("fields must have a constant size", juju/control.c:286
+# and juju/capture.c:324). Source edit (sed in `setup`): the arrays get a fixed upper bound,
+# 4096 quads for a response and 2*8192+16 header words for an ISO interrupt (8192 packets per frame is
+# far above any camera mode); the kernel never returns more than the buffer it is given, and capture.c
+# returns DC1394_FAILURE up front if a frame would need more.
 # needed by: ffmpeg (libdc1394).
 name = "libdc1394"
 version = "2.2.7"
-release = 2
+release = 3
 summary = "Library for controlling IIDC (DCAM) 1394 cameras"
 license = "LGPL-2.1-or-later"
 homepage = "https://damien.douxchamps.net/ieee1394/libdc1394"
@@ -22,6 +28,11 @@ source = [
 ]
 
 setup = '''
+sed -i 's|__u32 buffer\[cam->max_response_quads\];|__u32 buffer[4096]; /* was max_response_quads: no VLA in a struct under clang */|' dc1394/juju/control.c
+sed -i 's|__u32 headers\[craw->packets_per_frame\*2 + 16\]; // HPK 20161209|__u32 headers[2*8192 + 16]; /* was packets_per_frame*2+16: no VLA in a struct under clang */|' dc1394/juju/capture.c
+sed -i 's|^    struct {$|    if (craw->packets_per_frame > 8192)\n        return DC1394_FAILURE;\n    struct {|' dc1394/juju/capture.c
+test "$(grep -c '4096\]' dc1394/juju/control.c)" = 1
+test "$(grep -c '2\*8192 + 16' dc1394/juju/capture.c)" = 1
 autoreconf -fi -W none
 %configure \
     --enable-shared \
