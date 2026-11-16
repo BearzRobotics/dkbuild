@@ -14,10 +14,14 @@
 # ("Failed to locate prebuilt TLB file"); the file is a source, laid into
 # dependencies/Debugger-agent-dbgeng/ as fetchDependencies.gradle does. Its Windows
 # wheels (pybag, pywin32...) stay out: a missing one is only a warning.
+# r5: patches/dbgmodel-placeholder.patch: dkbuild's dependency resolution evaluates every Gradle project BEFORE `setup`, so the
+# real dbgmodel.tlb (laid in by setup, above) is not there yet and Debugger-agent-dbgeng's configuration stopped the resolution ("Failed to
+# locate prebuilt TLB file", r4 of the world run, 2026-11-16). The patch creates an empty file at that path (the resolution only
+# needs it to exist); setup's cp then puts the real one over it, as for the flatRepo jars.
 name = "ghidra"
 version = "12.2"
-release = 4
-patches = ["flat-repo-offline.patch"]
+release = 5
+patches = ["flat-repo-offline.patch", "dbgmodel-placeholder.patch"]
 summary = "Software reverse engineering suite (disassembler, decompiler)"
 license = "Apache-2.0"
 homepage = "https://ghidra-sre.org"
