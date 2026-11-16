@@ -1,0 +1,45 @@
+# SearXNG: a privacy-respecting, self-hostable metasearch engine (Python, Flask; Jinja templates, its web assets are built and committed
+# upstream: searx/static/themes/simple holds the minified CSS and JS, so no Node build). SearXNG has no tagged releases: the version is the
+# date of the pinned commit (2d500cb, 2026-11-15), as upstream versions its own builds (searx/version_frozen.py is written here, as the
+# upstream build does, because the source is a tarball and not a git checkout).
+# Dependencies: the tree's python-* packages (flask, jinja2, babel, lxml, msgspec, pyyaml, valkey, ...), python-curl-cffi (browser
+# impersonation, needs libcurl-impersonate) and the WSGI server waitress (upstream's container uses granian, a Rust extension; any WSGI
+# server works, waitress is pure Python).
+# Installed inert (docs/requests.md): dinit service shipped, not enabled; settings.yml has a placeholder secret_key SearXNG refuses to start with
+# (the administrator sets one); the _searxng user and its empty directories. See /usr/share/doc/searxng/README.FenrirOS.
+# Not built yet when written (wip/queue): expect first-build fixes.
+name = "searxng"
+version = "2026.11.15_git2d500cb"
+release = 1
+summary = "Privacy-respecting metasearch engine"
+license = "AGPL-3.0-or-later"
+homepage = "https://github.com/searxng/searxng"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-certifi", "python-babel", "python-flask-babel", "python-flask", "python-jinja2", "python-lxml", "python-pygments", "python-dateutil", "python-pyyaml", "python-curl-cffi", "python-valkey", "python-markdown-it-py", "python-msgspec", "python-typer", "python-isodate", "python-whitenoise", "python-typing-extensions", "python-waitress"]
+rundeps = ["python", "python-certifi", "python-babel", "python-flask-babel", "python-flask", "python-jinja2", "python-lxml", "python-pygments", "python-dateutil", "python-pyyaml", "python-curl-cffi", "python-valkey", "python-markdown-it-py", "python-msgspec", "python-typer", "python-isodate", "python-whitenoise", "python-typing-extensions", "python-waitress"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/searxng/searxng/archive/2d500cb6b8e98b5f57fb446786e91f8de03be89f.tar.gz", sha256 = "d214b4d411ebecbc913ab9a1548d43ce818dde49e6676a88bd547f46665fb487", name = "searxng-2d500cb.tar.gz" },
+]
+
+setup = '''
+# the version module the upstream build freezes from git (VERSION_STRING, VERSION_TAG, DOCKER_TAG, GIT_URL, GIT_BRANCH)
+cat > searx/version_frozen.py <<'PYEOF'
+VERSION_STRING = "2026.11.15+2d500cb"
+VERSION_TAG = "2026.11.15+2d500cb"
+DOCKER_TAG = "2026.11.15-2d500cb"
+GIT_URL = "https://github.com/searxng/searxng"
+GIT_BRANCH = "master"
+PYEOF
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 $pkgfiles/settings.yml "$pkgdir/etc/searxng/settings.yml"
+install -Dm644 $pkgfiles/searxng.env "$pkgdir/etc/searxng/searxng.env"
+install -Dm644 $pkgfiles/searxng "$pkgdir/etc/dinit.d/searxng"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/searxng.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/searxng.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/searxng/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/searxng/LICENSE"
+'''

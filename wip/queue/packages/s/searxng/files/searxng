@@ -1,0 +1,8 @@
+type = process
+command = /usr/bin/waitress-serve --listen=127.0.0.1:8888 --threads=8 searx.webapp:app
+working-dir = /var/lib/searxng
+env-file = /etc/searxng/searxng.env
+smooth-recovery = true
+stop-timeout = 20.0
+depends-on: rcboot
+run-as = _searxng

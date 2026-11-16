@@ -1,0 +1,14 @@
+SearXNG on FenrirOS
+===================
+
+SearXNG is a privacy-respecting metasearch engine: it queries many search engines
+and shows the merged result without tracking you. Nothing is enabled for you.
+
+  /etc/searxng/settings.yml    settings: set server.secret_key (SearXNG refuses to start with the default)
+  /etc/dinit.d/searxng         the service (dinitctl enable searxng): runs as _searxng on 127.0.0.1:8888
+                               with the pure-Python waitress server
+
+Put a web server in front (nginx or Apache) for TLS and a public address; the limiter needs a
+Valkey/Redis server (python-valkey is installed) and `limiter: true`. The `json` output format is on
+for scripts; turn it off in settings.yml if the instance is public.
+Settings reference: https://docs.searxng.org/admin/settings/

@@ -1,0 +1,20 @@
+# waitress from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
+name = "python-waitress"
+version = "3.0.2"
+release = 1
+summary = "Waitress WSGI server"
+license = "Zope Public License"
+homepage = "https://github.com/Pylons/waitress"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/bf/cb/04ddb054f45faa306a230769e868c28b8065ea196891f09004ebace5b184/waitress-3.0.2.tar.gz", sha256 = "682aaaf2af0c44ada4abfb70ded36393f0e307f4ab9456a215ce0020baefc31f" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-waitress/LICENSE.txt"
+'''

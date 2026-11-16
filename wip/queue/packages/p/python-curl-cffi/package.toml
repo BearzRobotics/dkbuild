@@ -1,0 +1,37 @@
+# curl_cffi: Python bindings for libcurl-impersonate (browser-like TLS/HTTP2/HTTP3 fingerprints): requests-style API, sync and asyncio, WebSockets.
+# The sdist's scripts/build.py downloads a prebuilt libcurl-impersonate release archive (a manylinux/musllinux binary) for its C extension;
+# offline, and from our own package: IMPERSONATE_BUILD_DIR names a directory that already holds libcurl-impersonate.a and its include/
+# (links to the libcurl-impersonate package's files), so the download is skipped ("already downloaded"). The static archive is linked into
+# the extension whole, as upstream's own musllinux wheel does; it carries BoringSSL, which is C++: libc++ is linked too.
+# Needs the libcurl-impersonate version scripts/build.py names (2.3.1); the package is the same version.
+# Not built yet when written (wip/queue): expect first-build fixes.
+name = "python-curl-cffi"
+version = "0.17.0"
+release = 1
+summary = "Python binding for curl-impersonate (browser TLS fingerprints) via cffi"
+license = "MIT"
+homepage = "https://github.com/lexiforest/curl_cffi"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-cffi", "python-certifi", "libcurl-impersonate", "pkgconf"]
+builddeps = ["python-devel", "linux-headers"]
+rundeps = ["python", "python-cffi", "python-certifi"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/96/4c/69074f9797d83a5401b3c6bc58c5de5aad6d1a085d0497b87a093a152e87/curl_cffi-0.17.0.tar.gz", sha256 = "31ee8500d06d6502ce1ec0b7ded1c5aa8e8f3401bbe37ccd78d6153d859d8f3c" },
+]
+
+environment = '''
+export IMPERSONATE_BUILD_DIR=/tmp/impersonate
+export LDFLAGS="$LDFLAGS -lc++"
+'''
+setup = '''
+mkdir -p /tmp/impersonate
+ln -sf /usr/lib/libcurl-impersonate.a /tmp/impersonate/libcurl-impersonate.a
+ln -sfn /usr/include /tmp/impersonate/include
+test -s /tmp/impersonate/libcurl-impersonate.a
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-curl-cffi/LICENSE"
+'''
