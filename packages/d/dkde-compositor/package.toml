@@ -1,0 +1,33 @@
+# dkde-compositor: DKDE's own Wayland compositor (experimental), in Zig on wlroots 0.20: floating and tiling windows,
+# workspaces, configurable shortcuts, layer-shell, taskbar and workspace protocols, output management, screen lock, idle,
+# Xwayland and screen capture. A separate Zig package inside the dkde tarball (src/compositor), built against the
+# tarball's vendored dependencies (zig-pkg/, offline: --system). With it installed, labwc becomes optional: select it
+# with `compositor=dkde-compositor` in ~/.config/dkde/session.conf or DKDE_COMPOSITOR (the session entry
+# dkde-compositor.desktop is installed). Same source and version as dkde.
+name = "dkde-compositor"
+version = "0.3.2"
+release = 1
+summary = "DKDE's Wayland compositor (experimental)"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkde"
+archs = ["x86_64"]
+hostdeps = ["zig", "pkgconf", "wayland"]
+builddeps = ["wlroots0.20-devel", "wayland-devel", "wayland-protocols", "libxkbcommon-devel", "pixman-devel", "libinput-devel"]
+rundeps = ["dkde", "seatd"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/BearzRobotics/dkde/releases/download/v0.3.2/dkde-v0.3.2.tar.gz", sha256 = "1dc036485ea26cb8a85da66cd402029d857287b7d9163e8a3b1df273119c1266" },
+]
+
+build = '''
+cd src/compositor
+zig build --release=safe --prefix /usr -Dcpu=$zig_cpu -Dwlroots=0.20 --system "$srcdir/zig-pkg" -j$jobs
+'''
+install = '''
+cd src/compositor
+DESTDIR=$pkgdir zig build --release=safe --prefix /usr -Dcpu=$zig_cpu -Dwlroots=0.20 --system "$srcdir/zig-pkg" -j$jobs install
+cd ../..
+install -Dm644 data/dkde-compositor.desktop "$pkgdir/usr/share/wayland-sessions/dkde-compositor.desktop"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/dkde-compositor/LICENSE"
+'''

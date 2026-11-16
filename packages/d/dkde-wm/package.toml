@@ -1,0 +1,30 @@
+# dkde-wm: DKDE's X11 window manager (experimental), in Zig on XCB: ICCCM/EWMH, workspaces, floating and tiling,
+# a work area per monitor, title bars for windows that draw none, the same shortcuts and settings file as
+# dkde-compositor. A separate Zig package inside the dkde tarball (src/xwm), built against the tarball's vendored
+# dependencies (offline: --system). `dkde-session --x11` starts an X11 session with it (it needs an X server: Xorg or Xvfb).
+name = "dkde-wm"
+version = "0.3.2"
+release = 1
+summary = "DKDE's X11 window manager (experimental)"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkde"
+archs = ["x86_64"]
+hostdeps = ["zig", "pkgconf"]
+builddeps = ["libxcb-devel", "libxkbcommon-devel", "pango-devel", "cairo-devel"]
+rundeps = ["dkde"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/BearzRobotics/dkde/releases/download/v0.3.2/dkde-v0.3.2.tar.gz", sha256 = "1dc036485ea26cb8a85da66cd402029d857287b7d9163e8a3b1df273119c1266" },
+]
+
+build = '''
+cd src/xwm
+zig build --release=safe --prefix /usr -Dcpu=$zig_cpu --system "$srcdir/zig-pkg" -j$jobs
+'''
+install = '''
+cd src/xwm
+DESTDIR=$pkgdir zig build --release=safe --prefix /usr -Dcpu=$zig_cpu --system "$srcdir/zig-pkg" -j$jobs install
+cd ../..
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/dkde-wm/LICENSE"
+'''
