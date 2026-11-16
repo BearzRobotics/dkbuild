@@ -28,7 +28,7 @@
 # /usr/share/doc/openproject/README.FenrirOS.
 name = "openproject"
 version = "17.9.7"
-release = 2
+release = 3
 summary = "Web-based project management system"
 license = "GPL-3.0-only"
 homepage = "https://www.openproject.org"
@@ -43,6 +43,7 @@ source = [
     { url = "https://github.com/gjtorikian/commonmarker/archive/refs/tags/v2.8.3.tar.gz", sha256 = "8a4ad7bb99ac71b7e41e284ce58700bc45ee592ba89cb65ce52b3df80c73d68a" },
     { url = "https://github.com/opf/openproject/archive/refs/tags/v17.9.7.tar.gz", sha256 = "898cbe78b4708b24e473d6d81753f91d54dc0d431cd5e8ebd268ae934b8dc41a" },
     { url = "https://gitlab.com/gitlab-org/ruby/gems/prometheus-client-mmap/-/archive/1.6.0/prometheus-client-mmap-1.6.0.tar.gz", sha256 = "8175915b6c5ce433bf95162c8c70e4388b5cf85e7aa463b7e808e3c9534a4abe" },
+    { url = "https://rubygems.org/downloads/mini_portile2-2.8.9.gem", sha256 = "0cd7c7f824e010c072e33f68bc02d85a00aeb6fce05bb4819c03dfd3c140c289", unpack = false },
 ]
 
 environment = '''
@@ -63,6 +64,10 @@ op=/build/openproject-$version
 # gemdeps lays vendor/cache in $srcdir (commonmarker's tree): OpenProject's
 rm -rf "$op/vendor/cache"
 mv vendor/cache "$op/vendor/cache"
+# r3: mini_portile2, which the source gem of nokogiri needs (force_ruby_platform: Gemfile.lock has nokogiri only as prebuilt platform gems, which do not
+# depend on it), so the gem store has no copy: "Because every version of nokogiri depends on mini_portile2 ~> 2.8.2 ... could not be found in cached gems".
+# It is never built or run: nokogiri uses the system libxml2 (below).
+cp /build/sources/mini_portile2-2.8.9.gem "$op/vendor/cache/"
 # Bundler looks for a git gem's checkout in vendor/cache as <repository name>-<revision>,
 # the name of the repository (github.com/opf/md-to-pdf), not the gem's (md_to_pdf):
 # gemdeps lays it under the gem's name, and Bundler went to GitHub for it
