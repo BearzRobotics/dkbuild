@@ -11,7 +11,7 @@
 # installed by upstream.
 name = "libtorrent-rasterbar"
 version = "2.1.2"
-release = 2
+release = 3
 summary = "C++ BitTorrent library"
 license = "BSD-3-Clause"
 homepage = "https://libtorrent.org"
@@ -28,7 +28,9 @@ source = [
 # calls std::transform without including <algorithm> (libstdc++ pulled it in; libc++ does
 # not), so the header is force-included for every C++ file.
 environment = '''
-export CXXFLAGS="$CXXFLAGS -Wno-unsafe-buffer-usage -Wno-deprecated -include algorithm"
+# r3: -include iterator as well: src/escape_string.cpp uses std::back_inserter without <iterator> ("no member named 'back_inserter' in
+# namespace 'std'"), which libc++ 23 no longer gets through other headers.
+export CXXFLAGS="$CXXFLAGS -Wno-unsafe-buffer-usage -Wno-deprecated -include algorithm -include iterator"
 '''
 setup = '''
 %cmake \
