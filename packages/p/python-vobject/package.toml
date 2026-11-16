@@ -1,11 +1,13 @@
 # vobject from PyPI.
+# r2: the run-time modules are host dependencies too: setuptools reads the version from the package (`vobject.VERSION`), which imports six, dateutil
+# and pytz ("ModuleNotFoundError: No module named 'six'" while generating metadata).
 name = "python-vobject"
 version = "0.9.9"
-release = 1
+release = 2
 summary = "Python module for parsing and generating iCalendar and vCard files"
 license = "Apache-2.0"
 homepage = "https://py-vobject.github.io/"
-hostdeps = ["python", "python-setuptools"]
+hostdeps = ["python", "python-setuptools", "python-six", "python-dateutil", "python-pytz"]
 rundeps = ["python", "python-dateutil", "python-pytz", "python-six"]
 options = ["!check"]
 
