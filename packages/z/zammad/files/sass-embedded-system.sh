@@ -18,14 +18,15 @@ s = File.read(f)
 head = "file File.absolute_path(\x27dart-sass/sass\x27, ARCHDIR) do"
 i = s.index(head) or abort("sass-embedded: dart-sass task not found")
 j = s.index("\nend\n", i) + 5
-s[i...j] = <<~RUBY
-  #{head}
-    dir = File.absolute_path("dart-sass", ARCHDIR)
-    mkdir_p dir
-    File.write(File.join(dir, "sass"), "#!/bin/sh\nexec /usr/bin/sass \"$@\"\n")
-    chmod 0o755, File.join(dir, "sass")
-  end
-RUBY
+# a %q literal: the \n and \" below must reach the Rakefile as they are (r2: in an interpolating heredoc they became a real newline and a bare
+# quote inside the Ruby string, and rake died with "SyntaxError ... unexpected global variable"); no single quote, as this is inside shell quotes
+body = %q|  dir = File.absolute_path("dart-sass", ARCHDIR)
+  mkdir_p dir
+  File.write(File.join(dir, "sass"), "#!/bin/sh\nexec /usr/bin/sass \"$@\"\n")
+  chmod 0o755, File.join(dir, "sass")
+end
+|
+s[i...j] = head + "\n" + body
 File.write(f, s)
 ' "sass-embedded-$v/ext/sass/Rakefile"
 grep -q '/usr/bin/sass' "sass-embedded-$v/ext/sass/Rakefile"

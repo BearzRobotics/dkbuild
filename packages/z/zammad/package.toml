@@ -12,9 +12,11 @@
 # Installed inert (docs/requests.md): services not enabled, no site, no
 # database, no accounts. Home: /opt/zammad. Setup:
 # /usr/share/doc/zammad/README.FenrirOS.
+# r2: files/sass-embedded-system.sh wrote the sass-embedded Rakefile with an interpolating heredoc, which turned the \\n and \\" of the wrapper script it
+# embeds into a real newline and a bare quote ("rake aborted! SyntaxError"): a %q literal now. Checked: the generated Rakefile passes `ruby -c`.
 name = "zammad"
 version = "7.2.3"
-release = 1
+release = 2
 summary = "Web-based help desk and customer support system"
 license = "AGPL-3.0-only"
 homepage = "https://zammad.org"
