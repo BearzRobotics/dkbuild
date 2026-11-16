@@ -1,0 +1,159 @@
+## Mail: running a mail server
+Stalwart is the all-in-one choice (SMTP, IMAP, JMAP, calendars, contacts). The classic route is Postfix (sends and receives) with Dovecot (mailboxes, IMAP), Rspamd (spam) and a webmail.
+- stalwart | SMTP, IMAP, POP3, JMAP, CalDAV and CardDAV in one program (the first choice)
+- postfix | the classic SMTP server
+- dovecot | IMAP/POP3 mailboxes (with Pigeonhole for Sieve filters)
+- rspamd | spam filtering and DKIM signing
+- opensmtpd | a small alternative SMTP server
+- exim | another SMTP server, very configurable
+- mox | a complete mail server in one Go program
+- clamav | virus scanning for mail and files
+- listmonk | newsletters and mailing lists
+
+## Mail: webmail and groupware
+- roundcube | the standard webmail
+- snappymail | a fast, light webmail (fork of RainLoop)
+- sogo | webmail, calendars and contacts for Outlook-style groupware
+- radicale | small CalDAV/CardDAV server (calendars and contacts)
+
+## Mail: desktop clients
+- thunderbird | the mail client of Mozilla
+- betterbird | Thunderbird with extra features
+- evolution | GNOME mail, calendar and contacts
+- aerc | mail in the terminal
+- neomutt | mail in the terminal (mutt, extended)
+
+## Web servers and runtimes
+Run an app behind nginx or Caddy; PHP apps use php-fpm.
+- nginx | web server and reverse proxy
+- caddy | web server with automatic HTTPS
+- httpd | the Apache web server
+- haproxy | load balancer and TCP/HTTP proxy
+- php | PHP (the version most PHP apps here run on)
+- php8.5 | PHP 8.5, beside the main PHP (Firefly III)
+
+## Databases and caches
+- mariadb | MySQL-compatible database
+- postgresql | the PostgreSQL database
+- sqlite | the embedded database
+- valkey | Redis-compatible key-value store and cache
+- memcached | simple memory cache
+- openldap | directory server (LDAP): users, groups, logins
+
+## Files, sync and collaboration
+- nextcloud | files, calendars, contacts and office in the browser
+- syncthing | peer-to-peer file sync, no server
+- samba | Windows file and print sharing, and Active Directory-style domains
+- nfs-utils | NFS file sharing for Unix hosts
+- euro-office-documentserver | office documents in the browser (editing server for Nextcloud and others)
+- collabora-online | LibreOffice in the browser
+- libreoffice | the office suite
+- bookstack | a wiki for documentation
+- cups | printing
+
+## Help desk, business and finance
+- osticket | support tickets
+- glpi | IT asset management and help desk
+- freescout | shared mailbox help desk
+- znuny | ticket system (OTRS fork)
+- zammad | support and ticket system
+- suitecrm | customer relationship management
+- invoiceshelf | invoicing
+- solidinvoice | invoicing
+- firefly-iii | personal finance
+- gnucash | desktop bookkeeping
+
+## Passwords and identity
+- vaultwarden | a Bitwarden-compatible password server
+- passbolt | team password manager
+- authelia | login portal and two-factor in front of web apps
+- openldap | directory server (LDAP)
+- heimdal | Kerberos single sign-on
+
+## Source code and CI
+- gitea | self-hosted Git service
+- forgejo | self-hosted Git service (Gitea's community fork)
+- woodpecker | continuous integration
+- git | version control
+
+## Virtualization and containers
+Incus is the container and VM manager here, with Proxmox VE as the full web-managed alternative; Podman runs containers without a daemon.
+- incus | system containers and virtual machines
+- lxc | Linux containers
+- lxcfs | container-aware /proc files for LXC and Incus
+- podman | containers without a daemon
+- moby | the Docker engine
+- qemu | virtual machines
+- libvirt | VM management
+- proxmox-ve | the Proxmox virtualization platform
+
+## Backup and file transfer
+- restic | encrypted backups
+- borgbackup | deduplicating backups
+- kopia | backups with a web UI
+- rclone | sync with cloud storage
+- rsync | file copy and mirroring
+- filezilla | FTP/SFTP client
+
+## Networking: DNS, DHCP, VPN
+- unbound | caching DNS resolver
+- bind | authoritative and recursive DNS server
+- dnsmasq | small DNS and DHCP server
+- kea | DHCP server
+- adguardhome | DNS ad and tracker blocking for the network
+- pi-hole | DNS ad blocking
+- wireguard-tools | WireGuard VPN
+- openvpn | OpenVPN
+- headscale | self-hosted control server for a WireGuard mesh
+- chrony | time synchronization
+- openssh | remote login (client and server)
+
+## Firewall and security
+- firewalld | the firewall manager (nftables)
+- nftables | the packet filter
+- fail2ban | bans addresses that fail logins
+- crowdsec | shared-intelligence intrusion blocking
+
+## Monitoring
+- zabbix | server monitoring and alerts
+- uptime-kuma | status and uptime page
+- prometheus | metrics
+- grafana | dashboards
+- webmin | web-based system administration
+- htop | process viewer
+- btop | resource monitor
+
+## Automation
+- ansible | configuration management
+- opentofu | infrastructure as code (Terraform fork)
+- helm | Kubernetes package manager
+
+## Messaging, chat and notifications
+- mosquitto | MQTT message broker (IoT, smart home)
+- ntfy | push notifications to phones
+- transmission | BitTorrent client and daemon
+
+## Media
+- jellyfin | media server
+- blender | 3D and animation
+- ffmpeg | audio and video conversion library and tools
+- vlc | media player
+
+## Browsers and apps
+- firefox | web browser
+- chromium | web browser
+- brave | web browser
+- electron | runtime for desktop web apps
+- code-oss | code editor
+- geogebra | mathematics
+- remmina | remote desktop client
+- dosemu2 | run DOS programs
+
+## Desktops
+- desktop-dkde | the DKDE desktop (default image)
+- desktop-hyprland | Hyprland (tiling) desktop
+- desktop-plasma | KDE Plasma
+- desktop-xfce | Xfce
+
+## AI tools
+- ollama | run language models locally
