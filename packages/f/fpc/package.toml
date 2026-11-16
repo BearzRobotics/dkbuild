@@ -22,7 +22,7 @@
 # Not done: the documentation (needs TeX), the test suite.
 name = "fpc"
 version = "3.2.4"
-release = 1
+release = 2
 summary = "Free Pascal compiler"
 license = "GPL-2.0-or-later WITH Linking-exception"
 homepage = "https://www.freepascal.org"
@@ -43,6 +43,9 @@ mkdir -p /tmp/fpcbin
 ln -sf /usr/bin/gas /tmp/fpcbin/as
 # FPC links with `ld --format elf64-x86-64`, which lld (the system's ld) does not accept: GNU ld instead
 ln -sf /usr/bin/ld.bfd /tmp/fpcbin/ld
+# r2: the makefile finds libgcc with `gcc -print-libgcc-file-name` ("Could not find libgcc", "gcc: not found"); the C compiler here is clang,
+# which answers the same option, so a `gcc` link to it is in PATH for the build.
+ln -sf /usr/bin/clang /tmp/fpcbin/gcc
 export PATH=/tmp/fpcbin:$PATH
 unset CFLAGS CXXFLAGS LDFLAGS CPPFLAGS
 # the Pascal compiler that builds this one: the previous package's, or (stage 0) Alpine's
