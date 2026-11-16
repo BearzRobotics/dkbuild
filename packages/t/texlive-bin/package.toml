@@ -16,7 +16,7 @@
 # (or any full texmf-dist) is installed. texmf-dist itself is not in this package.
 name = "texlive-bin"
 version = "20260301"
-release = 3
+release = 4
 summary = "TeX Live binaries: TeX engines, dvips, dvipdfmx, bibtex, kpathsea, ..."
 license = "GPL-2.0-or-later"
 homepage = "https://tug.org/texlive"
@@ -33,7 +33,10 @@ environment = '''
 export CFLAGS="$CFLAGS -Wno-implicit-function-declaration -Wno-int-conversion -Wno-incompatible-function-pointer-types -Wno-deprecated-non-prototype"
 # r3: -include iterator: dvisvgm's PDFParser.cpp uses back_inserter without <iterator> ("use of undeclared identifier 'back_inserter'"), which libc++ 23
 # no longer gets through other headers (the same as tesseract, libtorrent-rasterbar and qttools' litehtml).
-export CXXFLAGS="$CXXFLAGS -Wno-deprecated-declarations -include iterator"
+# r4: + -include fstream -include cstdio: kpathsea's debug.h has `#define fopen kpse_fopen_trace`, and dvisvgm's FileFinder.cpp includes it before <fstream>, so libc++'s
+# `std::fopen` inside <fstream> became `std::kpse_fopen_trace` ("no member named 'kpse_fopen_trace' in namespace 'std'"). With the standard headers
+# included first (by every file, here) their include guards keep the macro out of them.
+export CXXFLAGS="$CXXFLAGS -Wno-deprecated-declarations -include iterator -include fstream -include cstdio"
 '''
 setup = '''
 # Tree layout: TEXMFROOT=/usr/share (so TEXMFDIST=/usr/share/texmf-dist), generated
