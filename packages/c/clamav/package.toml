@@ -15,7 +15,7 @@
 # neither daemon runs), and dinit services for clamd and freshclam, not enabled.
 name = "clamav"
 version = "1.5.4"
-release = 1
+release = 2
 summary = "Antivirus engine and scanner"
 license = "GPL-2.0-only AND custom:unrar AND BSD-3-Clause AND Apache-2.0 AND MIT"
 homepage = "https://www.clamav.net"
@@ -32,9 +32,14 @@ export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true LIBCLANG_PATH=/usr/lib
 # clamonacc's own fts (misc/priv_fts.h, the FreeBSD one, used because musl has no LFS fts) wraps
 # its prototypes in glibc's __BEGIN_DECLS / __END_DECLS, which <sys/types.h> brings in on glibc
 # and musl does not (clamonacc: unknown type name '__BEGIN_DECLS', r1). It is C: they are empty.
-export CFLAGS="$CFLAGS -D__BEGIN_DECLS= -D__END_DECLS="
+# r2: the same header marks its prototypes __THROW (glibc: an attribute; musl has no such macro: "expected function body after
+# function declarator"), and fts.c uses _D_EXACT_NAMLEN, a glibc <dirent.h> macro (implicit declaration, which would fail at link
+# time): __THROW is empty, and the setup step replaces the macro with strlen of the name (what it is on glibc for a plain dirent).
+export CFLAGS="$CFLAGS -D__BEGIN_DECLS= -D__END_DECLS= -D__THROW="
 '''
 setup = '''
+sed -i 's|_D_EXACT_NAMLEN(dp)|strlen(dp->d_name)|g' clamonacc/misc/fts.c
+if grep -q _D_EXACT_NAMLEN clamonacc/misc/fts.c; then exit 1; fi
 %cmake \
     -DCMAKE_INSTALL_SYSCONFDIR=/etc \
     -DAPP_CONFIG_DIRECTORY=/etc/clamav \
