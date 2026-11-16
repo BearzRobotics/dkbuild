@@ -1,0 +1,232 @@
+--- a/reiserfscore/prints.c
++++ b/reiserfscore/prints.c
+@@ -8,7 +8,10 @@
+ #include "includes.h"
+ #include <stdarg.h>
+ #include <limits.h>
+-#include <printf.h>
++#include <stdint.h>
++#include <stddef.h>
++#include <sys/types.h>
++#include <string.h>
+ #include <limits.h>
+ #include <time.h>
+ 
+@@ -16,22 +19,13 @@
+ #  include <uuid/uuid.h>
+ #endif
+ 
+-#ifndef HAVE_REGISTER_PRINTF_SPECIFIER
+-#define register_printf_specifier(x, y, z) register_printf_function(x, y, z)
+-static int arginfo_ptr(const struct printf_info *info, size_t n, int *argtypes)
+-#else
+-static int arginfo_ptr(const struct printf_info *info, size_t n,
+-		       int *argtypes, int *size)
+-#endif
+-{
+-	if (n > 0) {
+-		argtypes[0] = PA_FLAG_PTR;
+-#ifdef HAVE_REGISTER_PRINTF_SPECIFIER
+-		size[0] = sizeof(void *);
+-#endif
+-	}
+-	return 1;
+-}
++/* musl has no <printf.h> and no register_printf_specifier(): the handlers below are called by
++ * reiserfs_warning() itself (see its definition), and only read these two fields of glibc's
++ * struct printf_info. */
++struct printf_info {
++	int left;
++	int width;
++};
+ 
+ #define FPRINTF \
+     if (len == -1) {\
+@@ -189,25 +183,173 @@
+ #endif
+ }
+ 
++/* Calls the handler of one of reiserfs' own conversions (%K %k %H %b %y %M %U) for the pointer. */
++static int custom_conv(FILE * fp, int conv, const struct printf_info *pi,
++		       const void *ptr)
++{
++	const void *const args[1] = { &ptr };
++
++	switch (conv) {
++	case 'K':
++		return print_short_key(fp, pi, args);
++	case 'k':
++		return print_key(fp, pi, args);
++	case 'H':
++		return print_item_head(fp, pi, args);
++	case 'b':
++		return print_block_head(fp, pi, args);
++	case 'y':
++		return print_disk_child(fp, pi, args);
++	case 'M':
++		return print_sd_mode(fp, pi, args);
++	case 'U':
++		return print_sd_uuid(fp, pi, args);
++	}
++	return -1;
++}
++
++/* Appends the decimal number n to the conversion spec being built. */
++static void spec_add_int(char *spec, size_t *n, int v)
++{
++	*n += snprintf(spec + *n, 24, "%d", v);
++}
++
++/* printf with reiserfs' own conversions, without glibc's register_printf_specifier(): the format
++ * is walked here; the custom conversions go to their handlers, every standard one is taken
++ * from the argument list by its type and printed by fprintf with its own one-conversion spec. */
+ void reiserfs_warning(FILE * fp, const char *fmt, ...)
+ {
+-	static int registered = 0;
+ 	va_list args;
+-
+-	if (!registered) {
+-		registered = 1;
+-
+-		register_printf_specifier('K', print_short_key, arginfo_ptr);
+-		register_printf_specifier('k', print_key, arginfo_ptr);
+-		register_printf_specifier('H', print_item_head, arginfo_ptr);
+-		register_printf_specifier('b', print_block_head, arginfo_ptr);
+-		register_printf_specifier('y', print_disk_child, arginfo_ptr);
+-		register_printf_specifier('M', print_sd_mode, arginfo_ptr);
+-		register_printf_specifier('U', print_sd_uuid, arginfo_ptr);
+-	}
++	const char *p = fmt;
+ 
+ 	va_start(args, fmt);
+-	vfprintf(fp, fmt, args);
++	while (*p) {
++		char spec[96];
++		size_t n = 0;
++		struct printf_info pi = { 0, 0 };
++		int lng = 0;	/* 0 plain/h/hh, 1 l, 2 ll/q, 3 L, 4 z, 5 j, 6 t */
++
++		if (*p != '%') {
++			fputc(*p++, fp);
++			continue;
++		}
++		spec[n++] = *p++;
++		while (*p && strchr("-+ #0", *p)) {
++			if (*p == '-')
++				pi.left = 1;
++			spec[n++] = *p++;
++		}
++		if (*p == '*') {
++			int w = va_arg(args, int);
++
++			if (w < 0) {
++				pi.left = 1;
++				w = -w;
++				spec[n++] = '-';
++			}
++			pi.width = w;
++			spec_add_int(spec, &n, w);
++			p++;
++		} else {
++			while (*p >= '0' && *p <= '9') {
++				pi.width = pi.width * 10 + (*p - '0');
++				spec[n++] = *p++;
++			}
++		}
++		if (*p == '.') {
++			spec[n++] = *p++;
++			if (*p == '*') {
++				int pr = va_arg(args, int);
++
++				spec_add_int(spec, &n, pr < 0 ? 0 : pr);
++				p++;
++			} else {
++				while (*p >= '0' && *p <= '9')
++					spec[n++] = *p++;
++			}
++		}
++		for (;;) {
++			if (*p == 'h') {
++			} else if (*p == 'l') {
++				lng = lng == 1 ? 2 : 1;
++			} else if (*p == 'q') {
++				lng = 2;
++			} else if (*p == 'L') {
++				lng = 3;
++			} else if (*p == 'z') {
++				lng = 4;
++			} else if (*p == 'j') {
++				lng = 5;
++			} else if (*p == 't') {
++				lng = 6;
++			} else {
++				break;
++			}
++			spec[n++] = *p++;
++		}
++		if (!*p)
++			break;
++		spec[n++] = *p;
++		spec[n] = 0;
++
++		switch (*p++) {
++		case '%':
++			fputc('%', fp);
++			break;
++		case 'K': case 'k': case 'H': case 'b': case 'y': case 'M': case 'U':
++			custom_conv(fp, p[-1], &pi, va_arg(args, const void *));
++			break;
++		case 'd': case 'i':
++			if (lng == 0)
++				fprintf(fp, spec, va_arg(args, int));
++			else if (lng == 1)
++				fprintf(fp, spec, va_arg(args, long));
++			else if (lng == 4)
++				fprintf(fp, spec, va_arg(args, ssize_t));
++			else if (lng == 5)
++				fprintf(fp, spec, va_arg(args, intmax_t));
++			else if (lng == 6)
++				fprintf(fp, spec, va_arg(args, ptrdiff_t));
++			else
++				fprintf(fp, spec, va_arg(args, long long));
++			break;
++		case 'u': case 'x': case 'X': case 'o':
++			if (lng == 0)
++				fprintf(fp, spec, va_arg(args, unsigned int));
++			else if (lng == 1)
++				fprintf(fp, spec, va_arg(args, unsigned long));
++			else if (lng == 4)
++				fprintf(fp, spec, va_arg(args, size_t));
++			else if (lng == 5)
++				fprintf(fp, spec, va_arg(args, uintmax_t));
++			else if (lng == 6)
++				fprintf(fp, spec, va_arg(args, ptrdiff_t));
++			else
++				fprintf(fp, spec, va_arg(args, unsigned long long));
++			break;
++		case 'c':
++			fprintf(fp, spec, va_arg(args, int));
++			break;
++		case 's':
++			fprintf(fp, spec, va_arg(args, char *));
++			break;
++		case 'p':
++			fprintf(fp, spec, va_arg(args, void *));
++			break;
++		case 'e': case 'E': case 'f': case 'F': case 'g': case 'G': case 'a': case 'A':
++			if (lng == 3)
++				fprintf(fp, spec, va_arg(args, long double));
++			else
++				fprintf(fp, spec, va_arg(args, double));
++			break;
++		case 'n':
++			(void)va_arg(args, int *);
++			break;
++		default:
++			fputs(spec, fp);
++			break;
++		}
++	}
+ 	va_end(args);
+ }
+ 

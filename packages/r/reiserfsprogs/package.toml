@@ -5,8 +5,9 @@
 # (glibc declares it by default). Nothing else is changed.
 name = "reiserfsprogs"
 version = "3.6.27"
-release = 3
+release = 4
 summary = "ReiserFS (version 3) filesystem utilities"
+patches = ["musl-printf.patch"]
 license = "GPL-2.0-only"
 homepage = "https://www.kernel.org/pub/linux/kernel/people/jeffm/reiserfsprogs/"
 hostdeps = ["pkgconf"]
@@ -19,6 +20,14 @@ source = [
 
 environment = '''
 export CFLAGS="${CFLAGS} -D_LARGEFILE64_SOURCE"
+# r4: patches/musl-printf.patch. reiserfsprogs prints its structures (keys, item heads, block heads)
+# through glibc's register_printf_specifier(): the format letters %K %k %H %b %y %M %U are registered
+# and then handled inside vfprintf, and <printf.h> does not exist on musl ("'printf.h' file not
+# found"). The patch (reiserfscore/prints.c only) removes the include and the registration and
+# makes reiserfs_warning(), the one function every message goes through, walk the format itself:
+# the seven conversions go to the same handler functions, every standard conversion (with flags,
+# width, precision, length) is taken from the argument list by type and printed by fprintf with its
+# own one-conversion spec. Syntax-checked with clang; the output is unchanged for glibc's users.
 # r3: a third glibc-only name, __compar_fn_t (include/misc.h:248, "unknown type name"), the internal
 # spelling of comparison_fn_t; the compat header declares it the same way.
 # r2: the code uses two glibc-only types, loff_t (io.c, include/reiserfs_lib.h: "use of
