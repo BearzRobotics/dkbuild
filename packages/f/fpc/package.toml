@@ -22,7 +22,7 @@
 # Not done: the documentation (needs TeX), the test suite.
 name = "fpc"
 version = "3.2.4"
-release = 2
+release = 3
 summary = "Free Pascal compiler"
 license = "GPL-2.0-or-later WITH Linking-exception"
 homepage = "https://www.freepascal.org"
@@ -60,7 +60,11 @@ else
 fi
 '''
 build = '''
-make all PP="$PP" OPT="-O2" -j1
+# r3: -FL: the dynamic linker the programs FPC builds ask for. The compiler's default is glibc's (/lib64/ld-linux-x86-64.so.2), so the first program this
+# build runs after compiling it (fpmake) was "No such file or directory" (exit 127: the file is there, its interpreter is not) right after "Linking fpmake";
+# musl's is /lib/ld-musl-<arch>.so.1. Also in the installed fpc.cfg, for every program FPC builds on this system.
+ldso=/lib/ld-musl-$(uname -m).so.1
+make all PP="$PP" OPT="-O2 -FL$ldso" -j1
 '''
 install = '''
 make install PP="$PP" PREFIX=/usr INSTALL_PREFIX="$pkgdir/usr"
@@ -75,6 +79,7 @@ mkdir -p "$pkgdir/usr/lib/fpc/$v/bin"
 ln -s ../../../../bin/gas "$pkgdir/usr/lib/fpc/$v/bin/as"
 ln -s ../../../../bin/ld.bfd "$pkgdir/usr/lib/fpc/$v/bin/ld"
 printf '%s\n' '# the assembler (gas, as `as`)' '-FD/usr/lib/fpc/$fpcversion/bin' >> "$pkgdir/etc/fpc.cfg"
+printf '%s\n' '# the dynamic linker (musl)' "-FL/lib/ld-musl-$(uname -m).so.1" >> "$pkgdir/etc/fpc.cfg"
 test -x "$pkgdir/usr/lib/fpc/$v/ppcx64"
 test -f "$pkgdir/etc/fpc.cfg"
 install -Dm644 compiler/COPYING.txt "$pkgdir/usr/share/licenses/fpc/COPYING.txt"
