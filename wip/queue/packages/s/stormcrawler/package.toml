@@ -1,0 +1,40 @@
+# Apache StormCrawler: a collection of resources for building low-latency, scalable web crawlers on Apache Storm (Java): the core library
+# (fetching, parsing, URL filters, metrics, the spouts and bolts) and the external modules (OpenSearch, Solr, SQL, AWS, Tika, WARC, AI, URLFrontier, ...).
+# Library jars only, installed in /usr/share/java/stormcrawler/ (a crawl is a Storm topology built on these jars: Apache Storm, not in the tree,
+# runs it). Built from the release tag with Maven 3.9.11 (a source of this recipe, the engine's `mavendeps`): the `restore` step builds the whole
+# project once with the network, into the shared Maven store, and the build repeats the same command offline against that store.
+# Java 25 (the project's maven.compiler.release); the tests are skipped (-DskipTests).
+# Not built yet when written (wip/queue): the first use of the engine's mavendeps; expect first-build fixes.
+name = "stormcrawler"
+version = "3.7.0"
+release = 1
+summary = "Library for building low-latency web crawlers on Apache Storm"
+license = "Apache-2.0"
+homepage = "https://stormcrawler.apache.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["openjdk25", "git"]
+rundeps = ["openjdk25"]
+options = ["!check", "mavendeps", "!strip"]
+
+source = [
+    { url = "https://github.com/apache/stormcrawler/archive/refs/tags/stormcrawler-3.7.0.tar.gz", sha256 = "6c75929be30cf200a85b59be5e15ce24041405f3bb458ba1e402f395a00e5580", name = "stormcrawler-3.7.0.tar.gz" },
+    { url = "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.11/apache-maven-3.9.11-bin.tar.gz", sha256 = "4b7195b6a4f5c81af4c0212677a32ee8143643401bc6e1e8412e6b06ea82beac", unpack = false },
+]
+
+environment = '''
+export JAVA_HOME=/usr/lib/jvm/java-25-openjdk
+export MAVEN_OPTS="-Xmx2g"
+'''
+restore = '''
+mvn -DskipTests -Dmaven.javadoc.skip=true -Drat.skip=true -Dgpg.skip=true -Dlicense.skip=true package
+'''
+build = '''
+mvn -DskipTests -Dmaven.javadoc.skip=true -Drat.skip=true -Dgpg.skip=true -Dlicense.skip=true package
+'''
+install = '''
+mkdir -p "$pkgdir/usr/share/java/stormcrawler"
+find . -path '*/target/*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' ! -name '*-tests.jar' ! -path '*/archetype*' -exec cp {} "$pkgdir/usr/share/java/stormcrawler/" \;
+test -n "$(ls "$pkgdir/usr/share/java/stormcrawler")"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/stormcrawler/LICENSE"
+install -Dm644 NOTICE "$pkgdir/usr/share/licenses/stormcrawler/NOTICE"
+'''
