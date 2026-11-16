@@ -4,15 +4,17 @@
 # installs and cbuild env tweaks; dependency names are Chimera's and resolve from stage 0 until they are recipes.
 # r2: static libraries too (in wireplumber-static), for fully static programs on musl.
 # 2026-11-11: GObject introspection.
+# r6: hostdeps doxygen as well: with -Dintrospection=enabled docs/meson.build requires doxygen (it generates the API data the
+# introspection files are made from), lxml and g-ir-scanner; -Ddoc=disabled only drops the Sphinx manual.
 # r5: hostdeps python-lxml: docs/meson.build (run for the GObject introspection data) stops with "python3 is missing modules: lxml"
 # when the build root has no lxml; it used to get one only by chance, through another package's dependencies.
 name = "wireplumber"
 version = "0.5.18"
-release = 5
+release = 6
 summary = "Session and policy manager implementation for PipeWire"
 license = "MIT"
 homepage = "https://pipewire.pages.freedesktop.org/wireplumber"
-hostdeps = ["glib-devel", "meson", "pkgconf", "gobject-introspection", "python-lxml"]
+hostdeps = ["glib-devel", "meson", "pkgconf", "gobject-introspection", "python-lxml", "doxygen"]
 builddeps = ["glib-devel", "lua-devel", "lua-static", "pipewire-devel"]
 checkdeps = ["pipewire", "dbus"]
 rundeps = ["pipewire"]
