@@ -9,7 +9,7 @@
 # pkg-config's own libs make redundant.
 name = "gtkspell"
 version = "2.0.16"
-release = 1
+release = 2
 summary = "Spell checking for GTK 2 text widgets"
 license = "GPL-2.0-or-later"
 homepage = "https://gtkspell.sourceforge.net"
@@ -24,6 +24,10 @@ source = [
 setup = '''
 sed -i -e 's/enchant >= 0\.4\.0/enchant-2 >= 2.0/g' -e 's/^SPELLER_LIB=-lenchant$/SPELLER_LIB=/' configure
 grep -q 'enchant-2 >= 2.0' configure
+# r2: gtkspell.c calls enchant_dict_add_to_pwl (\"call to undeclared function\"), which Enchant 2 removed: enchant_dict_add is the same call
+# (adds a word to the personal word list). Source edit: sed.
+sed -i 's/enchant_dict_add_to_pwl/enchant_dict_add/g' gtkspell/gtkspell.c
+! grep -q enchant_dict_add_to_pwl gtkspell/gtkspell.c
 %configure \
     --disable-gtk-doc
 '''
