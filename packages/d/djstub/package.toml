@@ -2,14 +2,15 @@
 # Makefile with prefix=/usr, needs only Python and a C compiler.
 # r2: builds stub.exe with Smaller C (smlrcc -dosp, the Makefile's own compiler; new recipe smallerc). r1 used %make, whose CC=clang
 # replaced smlrcc and failed on DOS headers ("dpmi.h file not found"); plain make keeps the makefile's CC.
+# r3: hostdeps nasm: the stub's assembly part (src/stub.asm) is assembled with `nasm -f elf` ("nasm: not found"), the C parts with Smaller C.
 name = "djstub"
 version = "0.9.2"
-release = 2
+release = 3
 summary = "DJGPP-64 stub tools (djstubify, djlink, djstrip)"
 license = "GPL-3.0-or-later"
 homepage = "https://github.com/stsp/djstub"
 archs = ["x86_64"]
-hostdeps = ["smallerc", "make"]
+hostdeps = ["smallerc", "make", "nasm"]
 rundeps = ["python"]
 
 source = [
