@@ -6,7 +6,7 @@
 # lock, so --locked failed.
 name = "kalker"
 version = "2.2.3"
-release = 1
+release = 2
 summary = "Scientific command-line calculator with user-defined functions and units"
 license = "MIT"
 homepage = "https://kalker.strct.net"
@@ -20,6 +20,13 @@ source = [
 
 environment = '''
 export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+# r2: gmp-mpfr-sys's build.rs runs $CC as ONE program name ("Unable to execute: clang --target=x86_64-fenriros-linux-musl ...") and the
+# build environment's CC has the target in it; a one-word wrapper for the compiler gives it the same compiler, so the check of the system
+# GMP (system_gmp.c) can run and the system libraries are used.
+mkdir -p /tmp/ccwrap
+printf '#!/bin/sh\nexec clang --target=x86_64-fenriros-linux-musl "$@"\n' > /tmp/ccwrap/cc
+chmod 755 /tmp/ccwrap/cc
+export CC=/tmp/ccwrap/cc
 '''
 setup = '''
 # upstream's stale lock -> the corrected one the crates were vendored from
