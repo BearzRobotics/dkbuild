@@ -1,7 +1,7 @@
 # SELinux restorecond daemon: relabels files as they are created: its systemd and D-Bus activation files are removed (a dinit service is not written). SELinux userspace 3.11 (https://github.com/SELinuxProject/selinux). Not built (queued, wip/queue): expect first-build fixes.
 name = "restorecond"
 version = "3.11"
-release = 2
+release = 3
 summary = "SELinux restorecond daemon: relabels files as they are created"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/SELinuxProject/selinux"
@@ -28,4 +28,6 @@ make -j$jobs
 install = '''
 make DESTDIR="$pkgdir" SBINDIR=/usr/sbin install
 rm -rf "$pkgdir/usr/lib/systemd" "$pkgdir/usr/share/dbus-1/services"
+# r3: the Makefile's systemd unit directories are empty variables here, so the two units landed in / ("policy: installs /restorecond.service, outside /usr /etc /var /opt /boot"): systemd files are not wanted, as above.
+rm -f "$pkgdir/restorecond.service" "$pkgdir/restorecond_user.service"
 '''
