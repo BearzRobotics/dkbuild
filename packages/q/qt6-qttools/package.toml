@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "qt6-qttools"
 version = "6.12.0"
-release = 2
+release = 3
 summary = "Qt6 tools"
 license = "LGPL-2.1-only AND LGPL-3.0-only AND GPL-3.0-only WITH Qt-GPL-exception-1.0"
 homepage = "https://www.qt.io"
@@ -18,13 +18,14 @@ source = [
 ]
 
 setup = '''
+# r3: not in src/gumbo: it is C (an <cstring> in its headers failed the C files: "'cstring' file not found").
 # r2: Qt Assistant's bundled litehtml (src/assistant/qlitehtml/src/3rdparty/litehtml) uses C library functions
 # (atoi, strtol, memcpy, ...) without including their headers: libc++ 23 no longer brings them in through other
 # headers ("use of undeclared identifier 'atoi'", el_font.cpp). Source edit: each litehtml source that uses one
 # gets the header (the same fix as in tesseract).
 lh=src/assistant/qlitehtml/src/3rdparty/litehtml
 add() {
-    for f in $(grep -rlE "$2" "$lh" --include='*.cpp' --include='*.h' | xargs -r grep -LE "#include <($1)>"); do
+    for f in $(grep -rlE "$2" "$lh" --exclude-dir=gumbo --include='*.cpp' --include='*.h' | xargs -r grep -LE "#include <($1)>"); do
         h=${1%%|*}
         sed -i "0,/^#include/s//#include <$h>\n#include/" "$f"
     done
