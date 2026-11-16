@@ -5,7 +5,7 @@
 # (glibc declares it by default). Nothing else is changed.
 name = "reiserfsprogs"
 version = "3.6.27"
-release = 2
+release = 3
 summary = "ReiserFS (version 3) filesystem utilities"
 license = "GPL-2.0-only"
 homepage = "https://www.kernel.org/pub/linux/kernel/people/jeffm/reiserfsprogs/"
@@ -19,6 +19,8 @@ source = [
 
 environment = '''
 export CFLAGS="${CFLAGS} -D_LARGEFILE64_SOURCE"
+# r3: a third glibc-only name, __compar_fn_t (include/misc.h:248, "unknown type name"), the internal
+# spelling of comparison_fn_t; the compat header declares it the same way.
 # r2: the code uses two glibc-only types, loff_t (io.c, include/reiserfs_lib.h: "use of
 # undeclared identifier 'loff_t'") and comparison_fn_t (misc.c: "unknown type name"; glibc's
 # <stdlib.h> typedef for a qsort/bsearch comparison function). musl has neither on
@@ -32,6 +34,7 @@ cat > /tmp/dkcompat/reiserfs-compat.h <<'EOF2'
 #include <stdlib.h>
 typedef off_t loff_t;
 typedef int (*comparison_fn_t)(const void *, const void *);
+typedef int (*__compar_fn_t)(const void *, const void *);
 EOF2
 export CFLAGS="${CFLAGS} -include /tmp/dkcompat/reiserfs-compat.h"
 '''
