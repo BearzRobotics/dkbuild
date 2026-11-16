@@ -10,6 +10,8 @@
 # and without the AD domain controller,
 # as Chimera does. Uses the system's Heimdal, talloc, tevent and tdb; ldb is
 # part of Samba now and comes from here.
+# r9: builddeps talloc-python-libs: samba_python linked with -lpytalloc-util, whose development link (in talloc-devel) points
+# at libpytalloc-util.so.* in talloc-python-libs; without it the link dangled ("unable to find library -lpytalloc-util").
 # r8: configure stopped with "The configuration failed" after the PAM checks: the four checks that pick
 # how the program changes its user id (source3/wscript: USE_SETREUID, USE_SETRESUID, USE_SETEUID,
 # USE_SETUIDX) compile AND RUN a test that calls setregid(-1, 1), which fails in the build sandbox
@@ -20,13 +22,13 @@
 # r5: rewritten (the import lost the waf configure), split client/libs/python.
 name = "samba"
 version = "4.23.3"
-release = 8
+release = 9
 summary = "SMB/CIFS file, print, and login server for Unix"
 license = "GPL-3.0-or-later"
 homepage = "https://www.samba.org"
 patches = ["0001-usershare.patch", "0002-ctdb-syslog.patch", "0003-ctdb_etcd_lock-path.patch", "0004-silence-waf-uselib.patch", "0005-msg-sock-run-samba.patch", "0009-getpwent_r.patch", "0010-missing-headers.patch", "0012-musl-uintptr.patch", "0013-paths.patch", "0014-python-so.patch", "0015-samba-bgqd-signal.patch", "unistd.patch"]
 hostdeps = ["bison", "docbook-xsl-nons", "flex", "gettext-devel", "heimdal", "libtasn1", "libxslt", "perl", "perl-parse-yapp", "pkgconf", "python", "rpcsvc-proto", "tdb-python", "tevent-python", "talloc-python"]
-builddeps = ["acl-devel", "attr-devel", "avahi-devel", "cmocka-devel", "cups-devel", "dbus-devel", "e2fsprogs-devel", "fuse-devel", "gettext-devel", "glib-devel", "gnutls-devel", "gpgme-devel", "heimdal-devel", "icu-devel", "jansson-devel", "libarchive-devel", "libedit-devel", "libtirpc-devel", "lmdb-devel", "musl-bsd-headers", "ncurses-devel", "ngtcp2-devel", "linux-pam-devel", "openldap-devel", "popt-devel", "python-devel", "talloc-devel", "tdb-devel", "tevent-devel", "zlib-ng-compat-devel"]
+builddeps = ["acl-devel", "attr-devel", "avahi-devel", "cmocka-devel", "cups-devel", "dbus-devel", "e2fsprogs-devel", "fuse-devel", "gettext-devel", "glib-devel", "gnutls-devel", "gpgme-devel", "heimdal-devel", "icu-devel", "jansson-devel", "libarchive-devel", "libedit-devel", "libtirpc-devel", "lmdb-devel", "musl-bsd-headers", "ncurses-devel", "ngtcp2-devel", "linux-pam-devel", "openldap-devel", "popt-devel", "python-devel", "talloc-devel", "talloc-python-libs", "tdb-devel", "tevent-devel", "zlib-ng-compat-devel"]
 rundeps = ["tdb-progs"]
 options = ["!cross", "!check"]
 
