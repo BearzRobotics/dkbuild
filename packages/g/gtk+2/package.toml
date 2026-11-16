@@ -13,7 +13,7 @@
 # warnings here (the same as Alpine's -Wno-error switches).
 name = "gtk+2"
 version = "2.24.33"
-release = 2
+release = 3
 summary = "Gimp Toolkit version 2"
 license = "LGPL-2.1-or-later"
 homepage = "https://gtk.org"
@@ -49,5 +49,10 @@ build = '''
 '''
 install = '''
 %make_install
+# r3: gtk+-2.0.pc and gdk-2.0.pc name their backend library as `Requires: gdk-${target}-2.0` (target=x11 is set in the same file). dkbuild's
+# dependency scan copies that into the -devel package as `pc:gdk-${target}-2.0`, which apk refuses ("dependency format is invalid", apk mkpkg
+# for gtk+2-devel, world run 2026-11-16): the variable is replaced by its value in the .pc files.
+for f in "$pkgdir"/usr/lib/pkgconfig/*.pc; do sed -i 's/\${target}/x11/g' "$f"; done
+if grep -l '\${target}' "$pkgdir"/usr/lib/pkgconfig/*.pc; then exit 1; fi
 rm -f "$pkgdir/usr/bin/gtk-update-icon-cache" "$pkgdir/usr/share/man/man1/gtk-update-icon-cache.1"
 '''
