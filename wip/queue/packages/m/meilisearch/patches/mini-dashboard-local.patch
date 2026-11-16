@@ -1,0 +1,13 @@
+--- a/crates/meilisearch/build.rs
++++ b/crates/meilisearch/build.rs
+@@ -47,7 +47,9 @@
+ 
+         let url = meta["assets-url"].as_str().unwrap();
+ 
+-        let dashboard_assets_bytes = get(url)?.bytes()?;
++        // FenrirOS: the offline build reads the pinned zip (the same file; the SHA-1 check below still runs) from MEILI_DASHBOARD_ZIP
++        let _ = url;
++        let dashboard_assets_bytes = std::fs::read(env::var("MEILI_DASHBOARD_ZIP")?)?;
+ 
+         let mut hasher = Sha1::new();
+         hasher.update(&dashboard_assets_bytes);

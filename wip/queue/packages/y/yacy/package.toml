@@ -1,0 +1,59 @@
+# YaCy: a free, peer-to-peer web search engine and crawler (Java, with its own Solr-based
+# index and web interface on port 8090). Built from the release tag with Ant; the libraries
+# are the Maven artifacts of ivy.xml.
+# Offline dependencies: build.xml resolves them with Ivy over the network, which dkbuild's
+# offline build cannot. patches/offline-libs-from-gradle.patch adds a small Gradle project
+# (build.gradle: the same coordinates as ivy.xml, 'compile->master' ones non-transitive, the
+# `exclude module` entries kept; generated from ivy.xml) that gradledeps resolves once with
+# the network, `gradle copyYacyLibs` then copies the jars to lib/ with the names Ivy's
+# retrieve pattern gave them, and the patch makes build.xml's `resolve` target use lib/
+# instead of Ivy (no ivy.jar download). Same version of every jar as upstream's build, the
+# transitive ones as Maven resolves them (Ivy's default conf is close to, not identical to,
+# Gradle's runtime classpath: a missing jar shows as a compile or start-up error).
+# The test configuration is not resolved (the tests are not run).
+# Installed inert (docs/requests.md): dinit service shipped, not enabled; no configuration
+# written (YaCy creates its settings on first start); no accounts or passwords here. See
+# /usr/share/doc/yacy/README.FenrirOS. Not built yet when written (wip/queue): expect
+# first-build fixes.
+name = "yacy"
+version = "1.941"
+release = 1
+summary = "Peer-to-peer web search engine and crawler"
+license = "GPL-2.0-or-later"
+homepage = "https://yacy.net"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["openjdk21", "apache-ant", "unzip", "git"]
+rundeps = ["openjdk21", "bash", "util-linux"]
+options = ["!check", "gradledeps", "!strip"]
+patches = ["offline-libs-from-gradle.patch"]
+
+source = [
+    { url = "https://github.com/yacy/yacy_search_server/archive/refs/tags/Release_1.941.tar.gz", sha256 = "90e0bdef16893cdc5f0e812add1b977ee5fee34fa18ac56d4f6deba6fe521050" },
+    { url = "https://services.gradle.org/distributions/gradle-8.5-bin.zip", sha256 = "9d926787066a081739e8200858338b4a69e837c3a821a33aca9db09dd4a41026", unpack = false },
+]
+
+environment = '''
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+export GRADLE_OPTS="-Dorg.gradle.java.installations.paths=/usr/lib/jvm/java-21-openjdk -Dorg.gradle.java.installations.auto-download=false"
+'''
+build = '''
+gradle --no-daemon copyYacyLibs
+test -f lib/commons-io-2.19.0.jar
+ant -Dtarget-resolve-already-run=true dist
+'''
+install = '''
+t=$(ls RELEASE/yacy_*.tar.gz | head -n 1)
+mkdir -p "$pkgdir/usr/share" /tmp/yacy-x
+tar -xzf "$t" -C /tmp/yacy-x --no-same-owner
+test "$(ls /tmp/yacy-x | wc -l)" = 1
+mv /tmp/yacy-x/* "$pkgdir/usr/share/yacy"
+test -x "$pkgdir/usr/share/yacy/startYACY.sh"
+install -Dm755 $pkgfiles/yacy "$pkgdir/usr/bin/yacy"
+install -Dm644 $pkgfiles/yacy.dinit "$pkgdir/etc/dinit.d/yacy"
+install -Dm644 $pkgfiles/yacy.env "$pkgdir/etc/yacy/yacy.env"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/yacy.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/yacy.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/yacy/README.FenrirOS"
+install -Dm644 gpl.txt "$pkgdir/usr/share/licenses/yacy/gpl.txt"
+install -Dm644 COPYRIGHT "$pkgdir/usr/share/licenses/yacy/COPYRIGHT"
+'''

@@ -1,0 +1,8 @@
+type = process
+command = /usr/bin/yacy
+working-dir = /var/lib/yacy
+env-file = /etc/yacy/yacy.env
+smooth-recovery = true
+stop-timeout = 60.0
+depends-on: rcboot
+run-as = _yacy

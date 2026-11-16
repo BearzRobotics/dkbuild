@@ -1,0 +1,58 @@
+# Apache Lucene: the Java full-text search library (the engine under Solr, OpenSearch and
+# Elasticsearch, Nutch, ...) with its command-line and GUI tools. Built from the release tag
+# with Gradle (the version the tag's wrapper asks for, 9.8.0, as a source; gradledeps resolves
+# the plugins and libraries once, with the network, then the build runs offline). The binary
+# distribution (what the release's lucene-<version>.tgz holds: modules/ with the Lucene jars,
+# modules-thirdparty/ with their dependencies, luke/, demo/ and the HTML documentation) is
+# assembled by upstream's own task and installed whole into /usr/share/lucene, with the jars
+# also linked into /usr/share/java/lucene/ for other Java packages (Nutch, YaCy builds).
+# The build needs Java 21 or newer (openjdk21). Luke (the index browser, a Swing GUI) gets a
+# launcher, lucene-luke; the library itself has no service and no configuration.
+# Not built yet when written (wip/queue): expect first-build fixes (Lucene's Gradle build is
+# strict: validation tasks that want git, forbidden-apis signatures, javadoc linting).
+name = "lucene"
+version = "10.6.0"
+release = 1
+summary = "Java full-text search library (jars, Luke, demo)"
+license = "Apache-2.0"
+homepage = "https://lucene.apache.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["openjdk21", "unzip", "git"]
+rundeps = ["openjdk21"]
+options = ["!check", "gradledeps", "jobs:8", "!strip"]
+
+source = [
+    { url = "https://github.com/apache/lucene/archive/refs/tags/releases/lucene/10.6.0.tar.gz", sha256 = "9915350a681080092ada181e015d536cb3ae000ede61ce81fc8b649680987d5f" },
+    { url = "https://services.gradle.org/distributions/gradle-9.8.0-bin.zip", sha256 = "bafd5ce9cfaea0fbccfdc8439a1ac42fbd4cd9c89dc9a988228d8a2639a58e6c", unpack = false },
+]
+
+environment = '''
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+export GRADLE_OPTS="-Dorg.gradle.java.installations.paths=/usr/lib/jvm/java-21-openjdk -Dorg.gradle.java.installations.auto-download=false"
+'''
+build = '''
+gradle --no-daemon :lucene:distribution:assembleBinaryTgz
+'''
+install = '''
+t=$(find lucene/distribution/build/packages -maxdepth 1 -name 'lucene-*.tgz' ! -name '*-src.tgz' | head -n 1)
+test -n "$t"
+mkdir -p "$pkgdir/usr/share"
+tar -xzf "$t" -C "$pkgdir/usr/share" --no-same-owner
+mv "$pkgdir"/usr/share/lucene-* "$pkgdir/usr/share/lucene"
+# the jars, also where the other Java packages look
+mkdir -p "$pkgdir/usr/share/java/lucene"
+for j in "$pkgdir"/usr/share/lucene/modules/*.jar; do
+    ln -s "../../lucene/modules/$(basename "$j")" "$pkgdir/usr/share/java/lucene/$(basename "$j")"
+done
+# Luke, the index browser: its own launcher script when the distribution has one, else the jar
+install -d "$pkgdir/usr/bin"
+cat > "$pkgdir/usr/bin/lucene-luke" <<'LAUNCH'
+#!/bin/sh
+d=/usr/share/lucene
+if [ -x "$d/luke/luke.sh" ]; then exec "$d/luke/luke.sh" "$@"; fi
+exec java --module-path "$d/modules:$d/modules-thirdparty" --add-modules ALL-MODULE-PATH -m org.apache.lucene.luke "$@"
+LAUNCH
+chmod 755 "$pkgdir/usr/bin/lucene-luke"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/lucene/LICENSE.txt"
+install -Dm644 NOTICE.txt "$pkgdir/usr/share/licenses/lucene/NOTICE.txt"
+'''

@@ -1,0 +1,11 @@
+# Meilisearch configuration (the FenrirOS package's starting point; every option:
+# /usr/share/doc/meilisearch/config.toml.example). Listening on the loopback only.
+db_path = "/var/lib/meilisearch/data.ms"
+dump_dir = "/var/lib/meilisearch/dumps"
+snapshot_dir = "/var/lib/meilisearch/snapshots"
+http_addr = "127.0.0.1:7700"
+# Production mode refuses to start without a master key: set one here
+# (master_key = "...", at least 16 bytes) before turning the service on, or
+# keep "development" on a machine nobody else can reach.
+env = "development"
+no_analytics = true

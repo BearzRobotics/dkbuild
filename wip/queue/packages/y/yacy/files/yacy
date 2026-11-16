@@ -1,0 +1,7 @@
+#!/bin/sh
+# YaCy: the program is in /usr/share/yacy, the data (DATA/: settings, index, logs) in
+# ~/yacy-data of the user who runs it (the _yacy service user: /var/lib/yacy/yacy-data).
+# `yacy` runs it in the foreground; the web interface is http://localhost:8090/
+# (the first run, from this machine, needs no password: adminAccountForLocalhost).
+cd /usr/share/yacy || exit 1
+exec ./startYACY.sh --foreground --startup yacy-data "$@"

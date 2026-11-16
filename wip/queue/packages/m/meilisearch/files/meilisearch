@@ -1,0 +1,7 @@
+type = process
+command = /usr/bin/meilisearch --config-file-path /etc/meilisearch/config.toml
+working-dir = /var/lib/meilisearch
+smooth-recovery = true
+stop-timeout = 30.0
+depends-on: rcboot
+run-as = _meilisearch

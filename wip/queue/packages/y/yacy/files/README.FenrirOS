@@ -1,0 +1,15 @@
+YaCy on FenrirOS
+================
+
+YaCy is a peer-to-peer web search engine: it crawls pages for its own index and
+shares index fragments with other peers. Nothing is enabled or started for you.
+
+  yacy                              runs it in the foreground as yourself (data: ~/yacy-data)
+  /etc/dinit.d/yacy                 the service (dinitctl enable yacy): runs as _yacy, data in /var/lib/yacy/yacy-data
+  http://localhost:8090/            the web interface (the administration pages need no password
+                                    from this machine: adminAccountForLocalhost is on in YaCy's defaults;
+                                    set an administrator password under Administration before opening it up)
+
+YaCy joins the public freeworld network as soon as it starts, and then talks to other
+peers and crawls what you tell it to crawl: start it only where that is wanted. Memory
+use is set in the data directory's settings (Performance pages), 600 MB by default.

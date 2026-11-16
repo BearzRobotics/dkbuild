@@ -1,0 +1,52 @@
+# Meilisearch: a fast, typo-tolerant search engine with a REST API (Rust, LMDB-based).
+# One source build, upstream's default features: all tokenisations (Chinese, Japanese,
+# Korean, Hebrew, Thai, Khmer, Greek, Turkish, ...) and the mini-dashboard (the small
+# web search UI served at /). The Rust crates are vendored on the host (cargodeps, git
+# dependency bbqueue included).
+# - The mini-dashboard's build.rs downloads its prebuilt assets (mini-dashboard 0.4.2,
+#   build.zip) at build time. The zip is a source here, and patches/mini-dashboard-local.patch
+#   makes build.rs read it from MEILI_DASHBOARD_ZIP instead of fetching it; its SHA-1 check
+#   against Cargo.toml stays, so it is the same file. (Prebuilt web UI: allowed.)
+# - build-info asks git for the commit (vergen); the tarball has no git directory:
+#   MEILI_NO_VERGEN=1 turns that off, as upstream's own Dockerfile-less builds do.
+# - Enterprise Edition code (LICENSE-EE) is in the tree and built, as upstream's default build.
+# Installed inert (docs/requests.md): dinit service shipped, not enabled; no master key
+# (the config is loopback-only, development mode, analytics off); the _meilisearch user
+# and its empty directories. See /usr/share/doc/meilisearch/README.FenrirOS.
+# Not built yet when written (wip/queue): expect first-build fixes.
+name = "meilisearch"
+version = "1.57.0"
+release = 1
+summary = "Fast, typo-tolerant search engine with a REST API"
+license = "MIT"
+homepage = "https://www.meilisearch.com"
+hostdeps = ["rust", "pkgconf", "cmake", "llvm-clang"]
+builddeps = ["zlib-ng-compat-devel", "zstd-devel", "bzip2-devel", "xz-devel", "linux-headers"]
+options = ["!check", "cargodeps"]
+patches = ["mini-dashboard-local.patch"]
+
+source = [
+    { url = "https://github.com/meilisearch/meilisearch/archive/refs/tags/v1.57.0.tar.gz", sha256 = "efe82a64d647e4959729306c3cee50c0b08f3bcbd72785c67cd55ea189fbd0ad" },
+    { url = "https://github.com/meilisearch/mini-dashboard/releases/download/v0.4.2/build.zip", sha256 = "239ad6c1c47544ad5d7bd3d648814f24ea6797466b07ddfcac4a3523659aca6b", unpack = false, name = "mini-dashboard-0.4.2.zip" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export MEILI_NO_VERGEN=1 MEILI_DASHBOARD_ZIP=/build/sources/mini-dashboard-0.4.2.zip
+export LIBCLANG_PATH=/usr/lib
+'''
+build = '''
+test -f "$MEILI_DASHBOARD_ZIP"
+cargo build --release --frozen --offline --locked -j $jobs -p meilisearch
+'''
+install = '''
+install -Dm755 target/release/meilisearch "$pkgdir/usr/bin/meilisearch"
+install -Dm644 $pkgfiles/meilisearch "$pkgdir/etc/dinit.d/meilisearch"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/meilisearch.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/meilisearch.conf"
+install -Dm640 $pkgfiles/config.toml "$pkgdir/etc/meilisearch/config.toml"
+install -Dm644 config.toml "$pkgdir/usr/share/doc/meilisearch/config.toml.example"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/meilisearch/README.FenrirOS"
+install -Dm644 LICENSE-MIT "$pkgdir/usr/share/licenses/meilisearch/LICENSE-MIT"
+install -Dm644 LICENSE-EE "$pkgdir/usr/share/licenses/meilisearch/LICENSE-EE"
+'''

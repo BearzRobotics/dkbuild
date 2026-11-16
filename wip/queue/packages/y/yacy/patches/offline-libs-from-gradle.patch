@@ -1,0 +1,124 @@
+--- a/build.xml
++++ b/build.xml
+@@ -84,13 +84,14 @@
+     <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpath="${ivy.jar.file}"/>
+   </target>
+ 
+-  <target name="resolve" depends="install-ivy" description="--> retrieve dependencies with Ivy" unless="target-resolve-already-run">
++  <target name="resolve" description="--> the dependencies are already in lib/ (FenrirOS: copied by Gradle, see build.gradle)" unless="target-resolve-already-run">
+     <!-- The recommended way is to [conf] in the retrieve pattern instead of two calls to retrieve.
+          We can move there in a following step.
+          ${lib} just happens to be equal to ${ivy.lib.dir}.
+     -->
+-    <ivy:retrieve conf="compile" pathid="compile.path" pattern="${ivy.lib.dir}/[artifact]-[revision].[ext]" />
+-    <ivy:retrieve conf="test" pathid="test.path" pattern="${libt}/[artifact]-[revision].[ext]" />
++    <!-- FenrirOS: no Ivy (it resolves over the network): lib/ is filled by `gradle copyYacyLibs`; the compile path is lib/*.jar -->
++    <path id="compile.path"><fileset dir="${ivy.lib.dir}" includes="*.jar"/></path>
++    <path id="test.path"><fileset dir="${libt}" includes="*.jar" erroronmissingdir="false"/></path>
+     <property name="target-resolve-already-run" value="true" />
+   </target>
+ 
+--- /dev/null
++++ b/build.gradle
+@@ -0,0 +1,97 @@
++// FenrirOS: dependency resolution for the offline Ant build. YaCy's ivy.xml is resolved by Ivy over the network; dkbuild's gradledeps resolves
++// Maven coordinates once, with the network, into its offline store. This project lists the same coordinates (generated from ivy.xml: 'compile->master' is
++// a non-transitive dependency, the others bring their Maven dependencies, `exclude module` is kept; the test configuration is not needed) and `copyYacyLibs`
++// copies the jars into lib/ the way Ivy's retrieve pattern ([artifact]-[revision].[ext]) did.
++configurations { yacyLibs }
++repositories { mavenCentral() }
++dependencies {
++  yacyLibs('commons-fileupload:commons-fileupload:1.6.0') { transitive = false }
++  yacyLibs('org.apache.commons:commons-lang3:3.18.0') { exclude module: 'junit' }
++  yacyLibs('com.cybozu.labs:langdetect:1.1-20120112') { transitive = false }
++  yacyLibs('com.drewnoakes:metadata-extractor:2.19.0')
++  yacyLibs('com.fasterxml.jackson.core:jackson-databind:2.18.2')
++  yacyLibs('com.github.ben-manes.caffeine:caffeine:3.1.8')
++  yacyLibs('com.google.guava:guava:33.4.8-jre') { transitive = false }
++  yacyLibs('com.google.guava:failureaccess:1.0.2')
++  yacyLibs('com.ibm.icu:icu4j:76.1')
++  yacyLibs('com.github.mwiede:jsch:0.2.21')
++  yacyLibs('com.twelvemonkeys.imageio:imageio-core:3.12.0')
++  yacyLibs('com.twelvemonkeys.imageio:imageio-bmp:3.12.0')
++  yacyLibs('com.twelvemonkeys.imageio:imageio-tiff:3.12.0')
++  yacyLibs('commons-codec:commons-codec:1.17.1')
++  yacyLibs('commons-io:commons-io:2.19.0')
++  yacyLibs('commons-logging:commons-logging:1.3.3')
++  yacyLibs('io.dropwizard.metrics:metrics-core:4.1.5')
++  yacyLibs('io.dropwizard.metrics:metrics-jmx:4.1.5') { transitive = false }
++  yacyLibs('io.opentracing:opentracing-noop:0.33.0')
++  yacyLibs('io.opentracing:opentracing-util:0.33.0')
++  yacyLibs('javax.servlet:javax.servlet-api:4.0.1')
++  yacyLibs('javainetlocator:inetaddresslocator:2.18')
++  yacyLibs('jcifs:jcifs:1.3.17') { transitive = false }
++  yacyLibs('net.arnx:jsonic:1.3.10')
++  yacyLibs('net.jthink:jaudiotagger:2.2.5')
++  yacyLibs('net.sourceforge.jchardet:jchardet:1.0')
++  yacyLibs('org.apache.commons:commons-collections4:4.4')
++  yacyLibs('org.apache.commons:commons-compress:1.27.1')
++  yacyLibs('org.apache.calcite.avatica:avatica-core:1.13.0') { transitive = false }
++  yacyLibs('org.apache.calcite:calcite-core:1.18.0') { transitive = false }
++  yacyLibs('org.apache.calcite:calcite-linq4j:1.18.0') { transitive = false }
++  yacyLibs('org.apache.commons:commons-math3:3.6.1')
++  yacyLibs('org.apache.commons:commons-lang3:3.18.0')
++  yacyLibs('org.apache.httpcomponents:httpclient:4.5.14')
++  yacyLibs('org.apache.httpcomponents:httpmime:4.5.14')
++  yacyLibs('org.apache.james:apache-mime4j:0.6')
++  yacyLibs('org.apache.lucene:lucene-analysis-common:9.0.0')
++  yacyLibs('org.apache.lucene:lucene-backward-codecs:9.0.0')
++  yacyLibs('org.apache.lucene:lucene-classification:9.0.0')
++  yacyLibs('org.apache.lucene:lucene-codecs:9.0.0')
++  yacyLibs('org.apache.lucene:lucene-grouping:9.0.0')
++  yacyLibs('org.apache.lucene:lucene-highlighter:9.0.0')
++  yacyLibs('org.apache.lucene:lucene-join:9.0.0')
++  yacyLibs('org.apache.lucene:lucene-memory:9.0.0')
++  yacyLibs('org.apache.lucene:lucene-misc:9.0.0')
++  yacyLibs('org.apache.lucene:lucene-queries:9.0.0')
++  yacyLibs('org.apache.lucene:lucene-queryparser:9.0.0') { transitive = false }
++  yacyLibs('org.apache.lucene:lucene-spatial-extras:9.0.0') { transitive = false }
++  yacyLibs('org.apache.lucene:lucene-suggest:9.0.0')
++  yacyLibs('org.apache.pdfbox:pdfbox:3.0.3')
++  yacyLibs('org.apache.poi:poi:5.3.0')
++  yacyLibs('org.apache.poi:poi-scratchpad:5.3.0')
++  yacyLibs('org.apache.solr:solr-core:9.0.0') { transitive = false }
++  yacyLibs('org.apache.solr:solr-scripting:9.0.0') { transitive = false }
++  yacyLibs('org.apache.solr:solr-solrj:9.0.0') { transitive = false }
++  yacyLibs('org.apache.zookeeper:zookeeper:3.7.0') { transitive = false }
++  yacyLibs('org.bitlet:weupnp:0.1.4')
++  yacyLibs('org.bouncycastle:bcmail-jdk18on:1.81')
++  yacyLibs('com.fasterxml.woodstox:woodstox-core:6.2.8')
++  yacyLibs('org.eclipse.jetty:jetty-client:9.4.57.v20241219')
++  yacyLibs('org.eclipse.jetty:jetty-deploy:9.4.57.v20241219') { transitive = false }
++  yacyLibs('org.eclipse.jetty:jetty-jmx:9.4.57.v20241219') { transitive = false }
++  yacyLibs('org.eclipse.jetty:jetty-http:9.4.57.v20241219')
++  yacyLibs('org.eclipse.jetty:jetty-proxy:9.4.57.v20241219')
++  yacyLibs('org.eclipse.jetty:jetty-security:9.4.57.v20241219')
++  yacyLibs('org.eclipse.jetty:jetty-server:9.4.57.v20241219')
++  yacyLibs('org.eclipse.jetty:jetty-servlets:9.4.57.v20241219')
++  yacyLibs('org.eclipse.jetty:jetty-servlet:9.4.57.v20241219') { exclude module: 'jetty-util-ajax' }
++  yacyLibs('org.eclipse.jetty:jetty-util:9.4.57.v20241219')
++  yacyLibs('org.eclipse.jetty:jetty-webapp:9.4.57.v20241219')
++  yacyLibs('org.eclipse.jetty.http2:http2-client:9.4.57.v20241219') { transitive = false }
++  yacyLibs('org.eclipse.jetty.http2:http2-common:9.4.57.v20241219') { transitive = false }
++  yacyLibs('org.eclipse.jetty.http2:http2-http-client-transport:9.4.57.v20241219') { transitive = false }
++  yacyLibs('org.jsoup:jsoup:1.15.3')
++  yacyLibs('org.jwat:jwat-warc:1.1.3')
++  yacyLibs('org.locationtech.spatial4j:spatial4j:0.8')
++  yacyLibs('org.rrd4j:rrd4j:3.2')
++  yacyLibs('org.slf4j:jcl-over-slf4j:1.7.36')
++  yacyLibs('org.slf4j:log4j-over-slf4j:1.7.36')
++  yacyLibs('org.slf4j:slf4j-jdk14:1.7.36')
++  yacyLibs('org.tukaani:xz:1.8')
++  yacyLibs('oro:oro:2.0.8')
++  yacyLibs('com.github.luben:zstd-jni:1.5.5-6')
++  yacyLibs('ai.djl:api:0.27.0')
++}
++tasks.register('copyYacyLibs', Copy) {
++  from configurations.yacyLibs
++  into 'lib'
++  rename { n -> n }
++}
+--- /dev/null
++++ b/settings.gradle
+@@ -0,0 +1 @@
++rootProject.name = 'yacy-deps'

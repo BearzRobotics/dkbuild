@@ -1,0 +1,20 @@
+Meilisearch on FenrirOS
+=======================
+
+Nothing is enabled or configured for you: the service is shipped, not turned on.
+
+  /etc/dinit.d/meilisearch          the service (dinitctl enable meilisearch)
+  /etc/meilisearch/config.toml      its configuration (loopback only, development mode)
+  /var/lib/meilisearch              the data (the _meilisearch user owns it)
+
+Before using it beyond this machine: set env = "production" and a master_key in
+config.toml (production mode refuses to start without one). Analytics are off
+(no_analytics = true).
+
+The built-in search dashboard (the mini-dashboard, as upstream's default build)
+is at http://127.0.0.1:7700/ in development mode.
+
+The source tree has an Enterprise Edition part (LICENSE-EE, the sharding and
+replication features of Meilisearch's commercial edition); this package builds
+it as upstream's default build does. Read LICENSE-EE before using those features
+in production.
