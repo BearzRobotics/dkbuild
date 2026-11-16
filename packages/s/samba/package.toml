@@ -10,10 +10,17 @@
 # and without the AD domain controller,
 # as Chimera does. Uses the system's Heimdal, talloc, tevent and tdb; ldb is
 # part of Samba now and comes from here.
+# r8: configure stopped with "The configuration failed" after the PAM checks: the four checks that pick
+# how the program changes its user id (source3/wscript: USE_SETREUID, USE_SETRESUID, USE_SETEUID,
+# USE_SETUIDX) compile AND RUN a test that calls setregid(-1, 1), which fails in the build sandbox
+# (one uid and one gid are mapped, so gid 1 does not exist: "Failed to set gid privileges to (-1,1)
+# now set to (0,0)"); with none passing the code falls back to HP-UX/Solaris names (ID_REAL...) and
+# does not compile. Source edit (sed, in `setup`): those four checks only compile (execute=False).
+# On Linux the first one passes either way, so the result is the one every distro gets (USE_SETREUID).
 # r5: rewritten (the import lost the waf configure), split client/libs/python.
 name = "samba"
 version = "4.23.3"
-release = 7
+release = 8
 summary = "SMB/CIFS file, print, and login server for Unix"
 license = "GPL-3.0-or-later"
 homepage = "https://www.samba.org"
@@ -33,6 +40,8 @@ export CFLAGS="${CFLAGS} -D_BSD_SOURCE"
 export PYTHONHASHSEED=1 WAF_MAKE=1
 '''
 setup = '''
+sed -i "/^ *'USE_SET[A-Z]*',$/,/msg=/ s/execute=True/execute=False/" source3/wscript
+test "$(grep -c 'execute=False' source3/wscript)" -ge 4
 ./buildtools/bin/waf configure \
     --prefix=/usr \
     --libdir=/usr/lib \
