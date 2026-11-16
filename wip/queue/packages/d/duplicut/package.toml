@@ -1,0 +1,22 @@
+# Remove duplicates from massive wordlist, without sorting it (for dictionnary-based... (BlackArch list, requested 2026-11-16; docs/requests.md). Generated from the sources' build files (make); the build dependencies are guessed from the #includes. Not built yet when written (wip/queue): expect first-build fixes.
+name = "duplicut"
+version = "2.4"
+release = 1
+summary = "Remove duplicates from massive wordlist, without sorting it (for dictionnary-based..."
+license = "GPL-3.0"
+homepage = "https://github.com/nil0x42/duplicut"
+hostdeps = ["make", "pkgconf"]
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/nil0x42/duplicut/archive/refs/tags/v2.4.tar.gz", sha256 = "33352afc42e71c9bbfdcd1014ab6e704a8effba2c6fb8034cf21a9a29e887b6e" },
+]
+
+build = '''
+make -j$jobs CC="${CC:-clang}"
+'''
+install = '''
+make PREFIX=/usr DESTDIR="$pkgdir" install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/duplicut/LICENSE"
+'''

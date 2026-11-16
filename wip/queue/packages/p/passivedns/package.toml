@@ -1,0 +1,26 @@
+# A network sniffer that logs all DNS server replies for use in a passive DNS setup. (BlackArch list, requested 2026-11-16; docs/requests.md). Generated from the sources' build files (autotools); the build dependencies are guessed from the #includes. Not built yet when written (wip/queue): expect first-build fixes.
+name = "passivedns"
+version = "2.0.2"
+release = 1
+summary = "A network sniffer that logs all DNS server replies for use in a passive DNS setup."
+license = "GPL-2.0-only"
+homepage = "https://github.com/gamelinux/passivedns"
+hostdeps = ["make", "pkgconf", "autoconf", "automake", "libtool"]
+builddeps = ["jansson-devel", "ldns-devel", "libpcap-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/gamelinux/passivedns/archive/refs/tags/v2.0.2.tar.gz", sha256 = "d988740affaa3a01f385ba90de896b426e9dd91dee2986cce51021705c4fbc74" },
+]
+
+setup = '''
+autoreconf -fi
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/passivedns/LICENSE"
+'''

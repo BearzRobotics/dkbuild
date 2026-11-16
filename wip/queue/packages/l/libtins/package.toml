@@ -1,0 +1,25 @@
+# High-level, multiplatform C++ network packet sniffing and crafting library. (BlackArch list, requested 2026-11-16; docs/requests.md). Generated from the sources' build files (cmake); the build dependencies are guessed from the #includes. Not built yet when written (wip/queue): expect first-build fixes.
+name = "libtins"
+version = "4.6"
+release = 1
+summary = "High-level, multiplatform C++ network packet sniffing and crafting library."
+license = "BSD-2-Clause"
+homepage = "https://github.com/mfontanini/libtins"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["libpcap-devel", "openssl-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/mfontanini/libtins/archive/refs/tags/v4.6.tar.gz", sha256 = "37a9cc407929c56c2081e717347cac455287ba354016bad5bad6243d1f0a4a7a" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libtins/LICENSE"
+'''

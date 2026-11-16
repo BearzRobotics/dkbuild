@@ -1,0 +1,26 @@
+# DCFL (DoD Computer Forensics Lab) dd replacement with hashing. (BlackArch list, requested 2026-11-16; docs/requests.md). Generated from the sources' build files (autotools); the build dependencies are guessed from the #includes. Not built yet when written (wip/queue): expect first-build fixes.
+name = "dcfldd"
+version = "1.9.3"
+release = 1
+summary = "DCFL (DoD Computer Forensics Lab) dd replacement with hashing."
+license = "GPL-2.0"
+homepage = "https://github.com/resurrecting-open-source-projects/dcfldd"
+hostdeps = ["make", "pkgconf", "autoconf", "automake", "libtool"]
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/resurrecting-open-source-projects/dcfldd/archive/refs/tags/v1.9.3.tar.gz", sha256 = "e5813e97bbc8f498f034f5e05178489c1be86de015e8da838de59f90f68491e7" },
+]
+
+setup = '''
+autoreconf -fi
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/dcfldd/COPYING"
+'''

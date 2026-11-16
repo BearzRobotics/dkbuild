@@ -1,0 +1,25 @@
+# A small tool that implements part of the functionality of the Microsoft tool signtool.exe. (BlackArch list, requested 2026-11-16; docs/requests.md). Generated from the sources' build files (cmake); the build dependencies are guessed from the #includes. Not built yet when written (wip/queue): expect first-build fixes.
+name = "osslsigncode"
+version = "2.16"
+release = 1
+summary = "A small tool that implements part of the functionality of the Microsoft tool signtool.exe."
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/mtrojnar/osslsigncode"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["curl-devel", "openssl-devel", "zlib-ng-compat-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/mtrojnar/osslsigncode/archive/refs/tags/2.16.tar.gz", sha256 = "c8fce7cdb0f1643d98a6689cb3106fda8265f17014fd7912856c9473f9b141a7" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING.txt "$pkgdir/usr/share/licenses/osslsigncode/COPYING.txt"
+'''

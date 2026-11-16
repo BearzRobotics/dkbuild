@@ -1,0 +1,26 @@
+# A set of tools to collect and process netflow data. (BlackArch list, requested 2026-11-16; docs/requests.md). Generated from the sources' build files (autotools); the build dependencies are guessed from the #includes. Not built yet when written (wip/queue): expect first-build fixes.
+name = "nfdump"
+version = "1.7.10"
+release = 1
+summary = "A set of tools to collect and process netflow data."
+license = "BSD-3-Clause"
+homepage = "https://github.com/phaag/nfdump"
+hostdeps = ["make", "pkgconf", "autoconf", "automake", "libtool"]
+builddeps = ["bzip2-devel", "curl-devel", "libpcap-devel", "zlib-ng-compat-devel", "zstd-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/phaag/nfdump/archive/refs/tags/v1.7.10.tar.gz", sha256 = "9a1bc84eb484c7383eea3b48ad2abe5b9ffe7e90aab3fda7055aa3f64be0cc29" },
+]
+
+setup = '''
+autoreconf -fi
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/nfdump/COPYING"
+'''

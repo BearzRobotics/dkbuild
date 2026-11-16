@@ -1,0 +1,22 @@
+# Library and command line tool to detect SHA collision in a file (BlackArch list, requested 2026-11-16; docs/requests.md). Generated from the sources' build files (make); the build dependencies are guessed from the #includes. Not built yet when written (wip/queue): expect first-build fixes.
+name = "sha1collisiondetection"
+version = "stable-v1.0.3"
+release = 1
+summary = "Library and command line tool to detect SHA collision in a file"
+license = "MIT"
+homepage = "https://github.com/cr-marcstevens/sha1collisiondetection"
+hostdeps = ["make", "pkgconf"]
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/cr-marcstevens/sha1collisiondetection/archive/refs/tags/stable-v1.0.3.tar.gz", sha256 = "77a1c2b2a4fbe4f78de288fa4831ca63938c3cb84a73a92c79f436238bd9ac07" },
+]
+
+build = '''
+make -j$jobs CC="${CC:-clang}"
+'''
+install = '''
+make PREFIX=/usr DESTDIR="$pkgdir" install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/sha1collisiondetection/LICENSE.txt"
+'''

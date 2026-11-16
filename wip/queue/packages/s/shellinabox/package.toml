@@ -1,0 +1,26 @@
+# Implements a web server that can export arbitrary command line tools to a web based... (BlackArch list, requested 2026-11-16; docs/requests.md). Generated from the sources' build files (autotools); the build dependencies are guessed from the #includes. Not built yet when written (wip/queue): expect first-build fixes.
+name = "shellinabox"
+version = "2.21"
+release = 1
+summary = "Implements a web server that can export arbitrary command line tools to a web based..."
+license = "GPL-2.0-only"
+homepage = "https://github.com/shellinabox/shellinabox"
+hostdeps = ["make", "pkgconf", "autoconf", "automake", "libtool"]
+builddeps = ["openssl-devel", "zlib-ng-compat-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/shellinabox/shellinabox/archive/refs/tags/v2.21.tar.gz", sha256 = "2a8f94beb286d0851bb146f7a7c480a8740f59b959cbd274e21a8fcbf0a7f307" },
+]
+
+setup = '''
+autoreconf -fi
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/shellinabox/COPYING"
+'''

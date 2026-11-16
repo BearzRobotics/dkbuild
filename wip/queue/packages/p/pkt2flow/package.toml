@@ -1,0 +1,25 @@
+# A simple utility to classify packets into flows. (BlackArch list, requested 2026-11-16; docs/requests.md). Generated from the sources' build files (cmake); the build dependencies are guessed from the #includes. Not built yet when written (wip/queue): expect first-build fixes.
+name = "pkt2flow"
+version = "1.4.1"
+release = 1
+summary = "A simple utility to classify packets into flows."
+license = "MIT"
+homepage = "https://github.com/caesar0301/pkt2flow"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["libpcap-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/caesar0301/pkt2flow/archive/refs/tags/v1.4.1.tar.gz", sha256 = "ebb0c0a259884a59d9df69f5a961055ef0816feeb2ab29a5ea7776692263f213" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/pkt2flow/LICENSE"
+'''

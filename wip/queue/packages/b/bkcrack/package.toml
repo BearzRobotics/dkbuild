@@ -1,0 +1,25 @@
+# Crack legacy zip encryption with Biham and Kocher known plaintext attack. (BlackArch list, requested 2026-11-16; docs/requests.md). Generated from the sources' build files (cmake); the build dependencies are guessed from the #includes. Not built yet when written (wip/queue): expect first-build fixes.
+name = "bkcrack"
+version = "1.8.1"
+release = 1
+summary = "Crack legacy zip encryption with Biham and Kocher known plaintext attack."
+license = "Zlib"
+homepage = "https://github.com/kimci86/bkcrack"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/kimci86/bkcrack/archive/refs/tags/v1.8.1.tar.gz", sha256 = "bb6a6d0bb1ccbb3c39cf8b3113581b5514b127023bbe0e864992c57e79346053" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 license.txt "$pkgdir/usr/share/licenses/bkcrack/license.txt"
+'''
