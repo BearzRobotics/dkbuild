@@ -11,7 +11,7 @@
 # of every package it finds there, and that one uses addCSourceFile, which Zig 0.17 removed. Terminal build only: no -Dgui (the standalone GUI window).
 name = "flow"
 version = "0.7.2_git20261114"
-release = 2
+release = 3
 summary = "Programmer's text editor in Zig"
 license = "MIT"
 homepage = "https://github.com/neurocyte/flow"
@@ -21,10 +21,17 @@ options = ["zigdeps", "!check"]
 
 source = [
     { url = "https://github.com/neurocyte/flow/archive/5514cb7d5db600a2b8b2bf33f2d27a1b203bb31c.tar.gz", sha256 = "7f5b0e431740b88f9982336ee492327b256ede149cc628fb4a146fa7af5ab994" },
+    { url = "https://download.savannah.gnu.org/releases/freetype/freetype-2.14.3.tar.gz", sha256 = "e61b31ab26358b946e767ed7eb7f4bb2e507da1cfefeb7a8861ace7fd5c899a1", unpack = false },
 ]
 
 install = '''
 rm -rf zig-pkg/libfuzzer_kit-*
+# r3: freetype is a lazy dependency (build.zig.zon: the embedded colour-emoji font is rasterised with it, `embed-emoji`, on by default) that the host's
+# `zig build --fetch=all` did not bring into zig-pkg, so the offline build stopped with "lazy dependency package not found: zig-pkg/N-V-__8AAJo-LAHF...".
+# The same tarball as the one the .zon names (the package is the tarball without its top directory), put where Zig looks.
+mkdir -p zig-pkg/N-V-__8AAJo-LAHFNfa0p0oMQqmwlBEAZMOeo03azXgrKLTT
+tar -xzf /build/sources/freetype-2.14.3.tar.gz -C zig-pkg/N-V-__8AAJo-LAHFNfa0p0oMQqmwlBEAZMOeo03azXgrKLTT --strip-components=1 --no-same-owner
+test -f zig-pkg/N-V-__8AAJo-LAHFNfa0p0oMQqmwlBEAZMOeo03azXgrKLTT/include/freetype/freetype.h
 # build.zig asks git (describe, show, rev-parse, diff) for the version text and panics in a release
 # build when git fails: the source here is a tarball, not a checkout. The same answers, fixed: the
 # pinned commit as the version, its date, no branch, no local changes. (Source edit: sed.)
