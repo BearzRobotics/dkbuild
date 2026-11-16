@@ -49,7 +49,8 @@ environment = '''
 # r4: always the stage-0 seed (Alpine's GCC, the gcc-bootstrap package), not the previous gcc package: with the previous package as the seed the
 # first Ada tool GCC builds and runs (xsnamest, gen_il-main: "Error relocating ./xsnamest: interfaces__c___elabs: symbol not found", world runs 1 and 2)
 # links against its shared libgnat, which lacks the elaboration symbols its binder file refers to. The three-stage bootstrap rebuilds the compiler with
-# itself anyway, so the seed only has to be a working GNAT, which Alpine's is (r2 and the first r3 were built with it).
+# itself anyway, so the seed only has to be a working GNAT; Alpine's is the one the stage-0 build uses. (Not yet tried as the seed after the first build: this is the fix
+# for the failure above, untested.)
 seed=/usr/lib/gcc-bootstrap/usr/bin; seedlib=/usr/lib/gcc-bootstrap/usr/lib
 mkdir -p /tmp/gnu-bin
 for t in as ar nm ranlib objcopy objdump readelf strip; do ln -sf /usr/bin/g$t /tmp/gnu-bin/$t; done
