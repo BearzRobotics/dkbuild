@@ -5,7 +5,7 @@
 # (glibc declares it by default). Nothing else is changed.
 name = "reiserfsprogs"
 version = "3.6.27"
-release = 6
+release = 7
 summary = "ReiserFS (version 3) filesystem utilities"
 patches = ["musl-printf.patch"]
 license = "GPL-2.0-only"
@@ -21,6 +21,7 @@ source = [
 environment = '''
 export CFLAGS="${CFLAGS} -D_LARGEFILE64_SOURCE"
 export LDFLAGS="${LDFLAGS} -lobstack"
+# r7: <libgen.h> as well: musl declares basename() there (POSIX version), not in <string.h> (resize_reiserfs.c:200).
 # r6: the compat header also declares what glibc's headers pull in by themselves: _GNU_SOURCE (basename() from <string.h>),
 # <sys/mount.h> (mount(), fe.c), and LONG_LONG_MIN/MAX (resize_reiserfs.c; musl has LLONG_*).
 # r5: links libobstack (musl-obstack): the library uses glibc's obstack ("undefined symbol: _obstack_begin"), as cronie and elfutils do here.
@@ -47,6 +48,7 @@ cat > /tmp/dkcompat/reiserfs-compat.h <<'EOF2'
 #include <sys/types.h>
 #include <stdlib.h>
 #include <string.h>
+#include <libgen.h>
 #include <limits.h>
 #include <sys/mount.h>
 #ifndef LONG_LONG_MAX
