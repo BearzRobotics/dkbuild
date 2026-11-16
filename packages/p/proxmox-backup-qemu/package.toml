@@ -16,7 +16,7 @@
 # package.
 name = "proxmox-backup-qemu"
 version = "2.0.4"
-release = 3
+release = 4
 summary = "Proxmox Backup Server client library for QEMU"
 license = "AGPL-3.0-or-later"
 homepage = "https://git.proxmox.com/?p=proxmox-backup-qemu.git"
@@ -50,6 +50,10 @@ chmod -R u+w vendor/proxmox-sys
 sed -i 's/fs_type: stat\.f_type,/fs_type: stat.f_type as i64,/' vendor/proxmox-sys/src/fs/mod.rs
 grep -q 'stat.f_type as i64' vendor/proxmox-sys/src/fs/mod.rs
 sed -i 's/"files":{[^}]*}/"files":{}/' vendor/proxmox-sys/.cargo-checksum.json
+# r4: pbs-tools/src/lib.rs raises glibc malloc's mmap threshold at start-up (libc::mallopt(M_MMAP_THRESHOLD, 128 KiB)): musl has no mallopt
+# ("cannot find function `mallopt` in crate `libc`"). A tuning call for glibc's allocator only; it is removed.
+sed -i '/libc::mallopt(libc::M_MMAP_THRESHOLD, 4096 \* 32);/d' submodules/proxmox-backup/pbs-tools/src/lib.rs
+if grep -q 'mallopt' submodules/proxmox-backup/pbs-tools/src/lib.rs; then exit 1; fi
 '''
 build = '''
 cargo build --release --frozen --offline -j $jobs
