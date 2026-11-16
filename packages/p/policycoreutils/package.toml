@@ -3,7 +3,7 @@
 # Not built (queued, wip/queue): expect first-build fixes.
 name = "policycoreutils"
 version = "3.11"
-release = 1
+release = 2
 summary = "SELinux policy core utilities: setfiles, restorecon, load_policy, semodule, sestatus, setsebool, newrole, run_init, secon"
 license = "GPL-2.0-only"
 homepage = "https://github.com/SELinuxProject/selinux"
@@ -20,8 +20,10 @@ source = [
 setup = '''
 true
 '''
+# r2: no -lintl: musl's libc has gettext, ngettext and bindtextdomain itself, and this tree's gettext ships no libintl ("ld.lld: error:
+# unable to find library -lintl"); libintl.h comes from gettext-devel.
 build = '''
-make -j$jobs LDLIBS="$LDLIBS -lintl" LSPP_PRIV=y
+make -j$jobs LSPP_PRIV=y
 '''
 install = '''
 make LSPP_PRIV=y DESTDIR="$pkgdir" SBINDIR=/usr/sbin install
