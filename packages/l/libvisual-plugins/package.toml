@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "libvisual-plugins"
 version = "0.4.2"
-release = 3
+release = 4
 summary = "Plugins for libvisual"
 license = "GPL-2.0-or-later"
 homepage = "http://libvisual.org"
@@ -31,6 +31,10 @@ autoreconf -if -W none
 # had compiled). The po directory is one level down: set it.
 sed -i '/^top_builddir[[:space:]]*=/d' po/Makefile
 sed -i '1i top_builddir = ..' po/Makefile
+# r4: the same Makefile.in.in has a dependency list, @POMAKEFILEDEPS@, that this configure.ac never substitutes ("No rule to make target
+# '@POMAKEFILEDEPS@'", after all the plugins had compiled): it is empty.
+sed -i 's/@POMAKEFILEDEPS@//g' po/Makefile
+if grep -q '@POMAKEFILEDEPS@' po/Makefile; then exit 1; fi
 grep -q '^top_builddir = \.\.' po/Makefile
 '''
 build = '''
