@@ -17,7 +17,7 @@
 # build (gnustep-make builds one kind per pass).
 name = "gnustep-base"
 version = "1.31.1"
-release = 4
+release = 5
 summary = "GNUstep Foundation library"
 license = "LGPL-2.1-or-later AND GPL-3.0-or-later"
 homepage = "https://gnustep.github.io"
@@ -38,6 +38,11 @@ setup = '''
 # r4: Source/GSFormat.m copies its va_list with __va_copy under `#ifdef __va_copy`, and falls back to `ap_save = ap`, which does not
 # compile where va_list is an array type (x86-64: "array type 'va_list' is not assignable", line 891): clang's <stdarg.h> on musl does
 # not define the GCC-era __va_copy. Source edit: the compiler's own builtin, in both places.
+# r5: Headers/Foundation/NSBackgroundActivityScheduler.h declares its block instance variable as `BLOCK_SCOPE GSScheduledBlock _block;`, BLOCK_SCOPE being
+# `__block`, which this clang rejects on an Objective-C ivar ("'__block' is not allowed on an Objective-C instance variable"); the qualifier means nothing
+# there (it only matters for locals a block captures). Dropped from that one declaration. (Source edit: sed.)
+sed -i 's/^  BLOCK_SCOPE GSScheduledBlock _block;/  GSScheduledBlock _block;/' Headers/Foundation/NSBackgroundActivityScheduler.h
+! grep -q 'BLOCK_SCOPE GSScheduledBlock _block' Headers/Foundation/NSBackgroundActivityScheduler.h
 sed -i -e 's/^#ifdef __va_copy$/#if 1/' -e 's/__va_copy (/__builtin_va_copy (/' Source/GSFormat.m
 if grep -q '__va_copy' Source/GSFormat.m; then exit 1; fi
 # configure's -fconstant-string-class test (config/config.constant-string-class.m)
