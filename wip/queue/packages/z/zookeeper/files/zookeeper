@@ -1,0 +1,8 @@
+type = process
+command = /usr/share/zookeeper/bin/zkServer.sh start-foreground
+working-dir = /var/lib/zookeeper
+env-file = /etc/zookeeper/zookeeper.env
+smooth-recovery = true
+stop-timeout = 30.0
+depends-on: rcboot
+run-as = _zookeeper
