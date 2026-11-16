@@ -7,7 +7,7 @@
 # UNVERIFIED: the first build will show what else the kernel's cross file needs.
 name = "fdpp"
 version = "1.11"
-release = 1
+release = 2
 summary = "FreeDOS kernel in C++ for dosemu2"
 license = "GPL-3.0-or-later"
 homepage = "https://github.com/dosemu2/fdpp"
@@ -19,6 +19,11 @@ source = [
     { url = "https://github.com/dosemu2/fdpp/archive/refs/tags/1.11.tar.gz", sha256 = "66a66103847ed33167c9d869c9272d6a96613489b381060e61f84e385e8a3db5" },
 ]
 
+environment = '''
+# r2: -include cstdlib and cstring: libfdpp's ctors.hpp uses std::free ("no type named 'free' in namespace 'std'"), which libc++ 23 no longer gets
+# through other headers (as in tesseract, libtorrent-rasterbar, qttools' litehtml and texlive's dvisvgm).
+export CXXFLAGS="$CXXFLAGS -include cstdlib -include cstring"
+'''
 setup = '''
 sed -i "s|run_command('git', 'describe', check: false).stdout().strip()|'1.11'|" fdpp/kernel/meson.build
 sed -i 's|^GIT_DESCRIBE := .*|GIT_DESCRIBE := 1.11|' fdpp/makefile fdpp/kernel/makefile
