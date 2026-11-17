@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "kio"
 version = "6.31.0"
-release = 1
+release = 2
 summary = "KDE Network transparent access to files and data"
 license = "LGPL-2.1-only AND LGPL-2.1-or-later AND (LGPL-2.1-only OR LGPL-3.0-only)"
 homepage = "https://community.kde.org/Frameworks"
@@ -19,11 +19,14 @@ source = [
     { url = "https://download.kde.org/stable/frameworks/6.31/kio-6.31.0.tar.xz", sha256 = "cdc8e3787be1f4a5c8f8a45fabab5cf540ef6380c549c6fd984f15f093b5eac0" },
 ]
 
+# r2: moc_predefs.h could not be generated ("clang++: error: no such file or directory: ' --target=x86_64-fenriros-linux-musl'"): the build's CXX is
+# "clang++ --target=...", CMake keeps the part after the first space as CMAKE_CXX_COMPILER_ARG1 *with its leading space*, and AUTOMOC's predefs command
+# passes it as one argument. ARG1 is given here without the space (a cache value; the same flag, so nothing else changes).
 environment = '''
 export LDFLAGS="${LDFLAGS} -Wl,-z,stack-size=0x200000"
 '''
 setup = '''
-%cmake
+%cmake -DCMAKE_CXX_COMPILER_ARG1=--target=$target
 '''
 build = '''
 %cmake_build
