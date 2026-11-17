@@ -1,7 +1,7 @@
 # Cross-platform tools to message digests for any number of files. (BlackArch list, requested 2026-11-16; docs/requests.md). Generated from the sources' build files (autotools); the build dependencies are guessed from the #includes. Not built yet when written (wip/queue): expect first-build fixes.
 name = "hashdeep"
 version = "4.4"
-release = 2
+release = 3
 summary = "Cross-platform tools to message digests for any number of files."
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/jessek/hashdeep"
@@ -18,7 +18,9 @@ source = [
 environment = '''
 export CXXFLAGS="$CXXFLAGS -std=gnu++03"
 '''
+# r+1: hash.cpp compares a pointer with 0 using > ("ordered comparison between pointer and zero", an error in C++ since clang 15's DR handling): != 0. Source edit: sed.
 setup = '''
+sed -i 's/->base>0/->base!=0/g' src/*.cpp
 autoreconf -fi
 %configure
 '''
