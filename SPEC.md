@@ -1168,7 +1168,7 @@ implemented (**OPEN**: the live images carry no repository).
 Meta-packages (`options = ["meta"]`) keep image lists short: `base` (boots to
 a login prompt with apk working), `base-net` (dhcpcd, OpenSSH and its server,
 curl, ca-certificates), `base-devel` (the build tools), `desktop-dkde`,
-`desktop-hyprland`, `desktop-xfce`, `desktop-plasma` and `rescue-tools`.
+`desktop-hyprland`, `desktop-plasma` and `rescue-tools`.
 
 ## 9. Bootstrap and the base system
 

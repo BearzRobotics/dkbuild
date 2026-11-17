@@ -262,7 +262,6 @@ Incus is the container and VM manager here, with Proxmox VE as the full web-mana
 | [desktop-dkde](https://github.com/BearzRobotics/dkbuild) | 1 | DKDE desktop for FenrirOS (the default) | the DKDE desktop (default image) |
 | [desktop-hyprland](https://github.com/BearzRobotics/dkbuild) | 1 | Hyprland desktop for FenrirOS | Hyprland (tiling) desktop |
 | [desktop-plasma](https://kde.org/plasma-desktop) | 6.8.2 | KDE Plasma desktop | KDE Plasma |
-| [desktop-xfce](https://www.xfce.org) | 4.20 | Xfce desktop | Xfce |
 
 
 ## AI tools

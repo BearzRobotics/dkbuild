@@ -180,7 +180,6 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | cargo-c | 0.10.26 | Cargo subcommands to build and install C-ABI libraries from Rust |
 | catatonit | 0.2.1 | Init for containers |
 | catch2 | 3.11.0 | C++-based test framework |
-| catfish | 4.20.1 | Xfce file search tool |
 | cbindgen | 0.29.4 | Tool to generate C bindings for Rust code |
 | ccache | 4.14.3 | Fast C/C++ compiler cache |
 | cdparanoia | 10.2 | CDDA reading utility with extra data verification features |
@@ -235,7 +234,6 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | corosync | 3.2.0 | Cluster engine: membership, messaging and quorum |
 | corrosion | 0.6.1 | Tool for integrating Rust into an existing CMake project |
 | coulomb | 0.6.1 | Simple electronic circuit simulator (GTK 4) |
-| cover-thumbnailer | 0.10.2 | Thumbnailer for music album and picture folder covers |
 | cowsay | 3.8.4 | Configurable talking cows and other creatures |
 | cowsql | 1.15.9 | Embeddable, replicated and fault tolerant SQL engine |
 | cpio | 2.15 | Copy files to and from archives |
@@ -282,7 +280,6 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | desktop-file-utils | 0.28 | Utilities to manage desktop entries |
 | desktop-hyprland | 1 | Hyprland desktop for FenrirOS |
 | desktop-plasma | 6.8.2 | KDE Plasma desktop |
-| desktop-xfce | 4.20 | Xfce desktop |
 | dfu-util | 0.11 | Device Firmware Upgrade (USB DFU) tool |
 | dhcpcd | 10.5.2 | RFC2131 compliant DHCP client |
 | dia | 0.98_git20260425 | Diagram editor (flowcharts, UML, networks) |
@@ -379,7 +376,6 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | exfatprogs | 1.4.3 | ExFAT filesystem utilities |
 | exim | 4.100.1 | Message transfer agent |
 | exiv2 | 0.28.7 | Image metadata manipulation |
-| exo | 4.20.0 | Xfce extensions library |
 | extjs | 7.0.0.9 | Sencha Ext JS JavaScript framework (GPL edition) |
 | extra-cmake-modules | 6.31.0 | Extra modules and scripts for CMake |
 
@@ -479,7 +475,6 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | gambit | 4.9.8 | Gambit Scheme, Scheme to C compiler and interpreter |
 | gamemode | 1.8.2 | Optimise Linux system performance on demand |
 | gamescope | 3.17.0 | SteamOS compositor |
-| garcon | 4.20.0 | Xfce implementation of the freedesktop compliant menu spec |
 | gatus | 5.38.0 | Developer-oriented health dashboard and status page |
 | gauche | 0.9.15 | R7RS Scheme implementation |
 | gavl | 1.4.0 | Audiovisual library |
@@ -515,7 +510,6 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | ghostscript | 10.08.0 | PostScript and PDF language interpreter |
 | ghostwriter | 26.08.2 | KDE markdown editor |
 | giflib | 5.2.2 | Library to read and write GIF images |
-| gigolo | 0.6.0 | Xfce GIO/GVFS frontend |
 | gimp | 3.2.6 | GNU Image Manipulation Program |
 | girara | 2026.07.18 | User interface library with a focus on simplicity (zathura's) |
 | git | 2.56.0 | Fast, distributed version control system |
@@ -1032,7 +1026,6 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | libgpiod | 2.2.2 | C library and tools for the linux GPIO character device |
 | libgravatar | 26.08.2 | KDE PIM Gravatar lookup library |
 | libgsf | 1.14.53 | Structured File Library |
-| libgtop | 2.41.3 | GNOME library to retrieve system information |
 | libgudev | 238 | GObject bindings for libudev |
 | libgusb | 0.4.9 | GLib wrapper around libusb |
 | libgweather | 4.6.0 | GNOME Weather information access library |
@@ -1063,7 +1056,6 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | libkdepim | 26.08.2 | KDE PIM common library |
 | libkeduvocdocument | 26.08.3 | Library for KDE Edu vocabulary documents |
 | libkexiv2 | 26.08.2 | KDE wrapper around exiv2 |
-| libkeybinder3 | 0.3.2 | Gtk+3 library for registering global keyboard shortcuts |
 | libkgapi | 26.08.2 | KDE library for accessing Google services |
 | libkleo | 26.08.2 | KDE PIM cryptography library |
 | libksane | 26.08.2 | KDE image scanning library |
@@ -1123,7 +1115,6 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | libofx | 0.10.9 | Library for the Open Financial Exchange (OFX) format |
 | libogg | 1.3.6 | Ogg bitstream file format library |
 | libopenmpt | 0.8.9 | Library for rendering tracker music to PCM |
-| libopenraw | 0.3.7 | RAW format parsing library |
 | libopenshot | 1.1.1 | Video editing library for OpenShot |
 | libopenshot-audio | 1.0.2 | Audio library for OpenShot |
 | libopusenc | 0.2.1 | Library for encoding Opus files |
@@ -1239,7 +1230,6 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | libwebp | 1.6.0 | WebP image format library |
 | libwebp-tools | 1.6.0 | WebP image tools |
 | libwebsockets | 5.1.0 | C library for WebSocket and HTTP servers and clients |
-| libwnck | 43.3 | Window Navigator Construction Kit |
 | libwpd | 0.10.3 | Library for importing WordPerfect documents |
 | libwpe | 1.16.3 | General-purpose library for WPE WebKit |
 | libwpg | 0.3.4 | Library for importing WordPerfect graphics |
@@ -1254,9 +1244,6 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | libxdamage | 1.1.7 | Xdamage extension Library |
 | libxdmcp | 1.1.5 | X Display Manager Control Protocol library |
 | libxext | 1.3.7 | X extension library |
-| libxfce4ui | 4.20.2 | Xfce UI library |
-| libxfce4util | 4.20.1 | Utility library for Xfce |
-| libxfce4windowing | 4.20.4 | Xfce windowing abstraction library |
 | libxfixes | 6.0.2 | Xfixes library and extension of X RandR |
 | libxfont2 | 2.0.9 | X font 2 library |
 | libxfontcache | 1.0.5 | X-TrueType font cache extension client library |
@@ -1414,7 +1401,6 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | mold | 3.0.0 | Modern high-speed linker (mold, ld.mold, mold -run) |
 | mono | 6.14.1 | Mono runtime and C# compiler (mcs) |
 | mosquitto | 2.1.2 | Eclipse Mosquitto MQTT broker and client libraries |
-| mousepad | 0.7.0 | Xfce text editor |
 | mox | 0.0.17 | Modern full-featured mail server (SMTP, IMAP, webmail) |
 | mpc | 1.3.1 | C library for complex numbers |
 | mpfr | 4.2.2 | Library for multiple-precision floating-point computations |
@@ -1567,7 +1553,6 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | openvswitch | 4.0.0 | Multilayer virtual switch |
 | opus | 1.6.1 | Opus audio codec |
 | opusfile | 0.12 | Library for opening, seeking and decoding .opus files |
-| orage | 4.20.2 | Xfce time-managing app |
 | orc | 0.4.44 | Optimized Inner Loop Runtime Compiler |
 | orcaslicer | 2.5.0 | 3D printing slicer (Bambu Studio/PrusaSlicer lineage) |
 | os-prober | 1.83 | Finds other operating systems for boot menus |
@@ -2268,7 +2253,6 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | retroarch | 1.22.2 | Frontend for emulators and game engines (libretro) |
 | rinutils | 0.10.3 | Shlomi Fish's C utility headers (CMake package) |
 | ripgrep | 15.2.0 | Fast recursive search that respects .gitignore (rg) |
-| ristretto | 0.13.4 | Xfce image viewer |
 | rizin | 0.9.1 | Reverse engineering framework |
 | rnnoise | 0.2 | Neural network based noise reduction library |
 | robin-map | 1.4.0 | Hash map and hash set implementation |
@@ -2465,8 +2449,6 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | texturecraft | 0.6.1 | Paint PBR textures directly on 3D meshes |
 | thin-provisioning-tools | 1.3.4 | Tools for the metadata of device-mapper thin, cache and era targets |
 | threadweaver | 6.31.0 | KDE Multithreading helper library |
-| thunar | 4.20.6 | Xfce file manager |
-| thunar-volman | 4.20.0 | Thunar volume manager extension |
 | thunderbird | 159.0 | Thunderbird mail client |
 | thunk-gen | 1.11 | Thunk generator for dj64 and dosemu2 |
 | tiff | 4.7.2 | TIFF library and tools |
@@ -2494,7 +2476,6 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | tree-sitter-vimdoc | 4.3.0 | Vimdoc grammar for tree-sitter |
 | tslib | 1.24 | Touchscreen access library |
 | ttt | 1.11.0 | Terminal text editor that feels like a GUI |
-| tumbler | 4.20.1 | Xfce implementation of the thumbnail management D-Bus spec |
 | tuxmath | 2.0.3 | Arithmetic game for children: Tux defends the city from comets |
 | tuxpaint | 0.9.35 | Drawing program for children |
 | tuxpaint-stamps | 2025.05.26 | Stamp pictures for Tux Paint |
@@ -2635,54 +2616,7 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | xerces-c | 3.3.0 | Validating XML parser library (Apache) |
 | xev | 1.2.6 | Display X events |
 | xeyes | 1.3.1 | Follow the mouse |
-| xfburn | 0.8.0 | Xfce burning software |
-| xfce4-appfinder | 4.20.0 | Xfce application finder |
-| xfce4-battery-plugin | 1.2.0 | Xfce battery panel plugin |
-| xfce4-calculator-plugin | 0.8.0 | Xfce calculator panel plugin |
-| xfce4-clipman-plugin | 1.7.0 | Xfce clipboard manager app and panel plugin |
-| xfce4-cpufreq-plugin | 1.3.0 | Xfce CPU governor and frequency panel plugin |
-| xfce4-cpugraph-plugin | 1.3.0 | Xfce clipboard manager app and panel plugin |
-| xfce4-dev-tools | 4.20.0 | Xfce development tools |
-| xfce4-dict | 0.8.9 | Xfce dictionary search app |
-| xfce4-diskperf-plugin | 2.8.0 | Xfce disk performance panel plugin |
-| xfce4-docklike-plugin | 0.5.0 | Xfce taskbar panel plugin |
-| xfce4-eyes-plugin | 4.7.0 | Xfce eyes panel plugin |
-| xfce4-fsguard-plugin | 1.2.0 | Xfce free space guard panel plugin |
-| xfce4-generic-slider | 1.1.0 | Xfce generic slider panel plugin |
-| xfce4-genmon-plugin | 4.3.0 | Xfce generic program monitor panel plugin |
-| xfce4-indicator-plugin | 2.5.0 | Xfce messaging menu panel plugin |
-| xfce4-mailwatch-plugin | 1.4.0 | Xfce mail watcher panel plugin |
-| xfce4-mixer | 4.20.0 | Xfce volume control app |
-| xfce4-netload-plugin | 1.5.0 | Xfce network load panel plugin |
-| xfce4-notes-plugin | 1.11.2 | Xfce notes panel plugin |
-| xfce4-notifyd | 0.9.7 | Xfce notification daemon |
-| xfce4-panel | 4.20.5 | Xfce panel |
-| xfce4-places-plugin | 1.9.0 | Xfce folders and media quick access panel plugin |
-| xfce4-power-manager | 4.20.0 | Xfce power manager |
-| xfce4-pulseaudio-plugin | 0.5.1 | Xfce pulseaudio panel plugin |
-| xfce4-screensaver | 4.20.0 | Xfce screensaver |
-| xfce4-screenshooter | 1.11.2 | Xfce screenshot app |
-| xfce4-sensors-plugin | 1.5.0 | Xfce hardware sensors panel plugin |
-| xfce4-session | 4.20.3 | Xfce desktop session |
-| xfce4-settings | 4.20.2 | Xfce settings app |
-| xfce4-smartbookmark-plugin | 0.6.0 | Xfce browser search panel plugin |
-| xfce4-stopwatch-plugin | 0.6.0 | Xfce stopwatch panel plugin |
-| xfce4-systemload-plugin | 1.4.0 | Xfce system load panel plugin |
-| xfce4-taskmanager | 1.6.0 | Xfce task manager |
-| xfce4-terminal | 1.1.5 | Xfce terminal emulator |
-| xfce4-time-out-plugin | 1.2.0 | Xfce time-out panel plugin |
-| xfce4-timer-plugin | 1.8.0 | Xfce timer panel plugin |
-| xfce4-verve-plugin | 2.1.0 | Xfce command line panel plugin |
-| xfce4-volumed-pulse | 0.3.0 | Xfce volume keys control daemon |
-| xfce4-wavelan-plugin | 0.7.0 | Xfce WLAN stats panel plugin |
-| xfce4-weather-plugin | 0.12.0 | Xfce weather panel plugin |
-| xfce4-whiskermenu-plugin | 2.10.0 | Xfce application launcher panel plugin |
-| xfce4-windowck-plugin | 0.6.1 | Xfce window controls/title bar panel plugin |
-| xfce4-xkb-plugin | 0.9.0 | Xfce keyboard layout panel plugin |
-| xfconf | 4.20.0 | Xfce configuration system |
-| xfdesktop | 4.20.1 | Xfce desktop manager |
 | xfsprogs | 7.2.1 | XFS file system utilities |
-| xfwm4 | 4.20.0 | Xfce window manager |
 | xgamma | 1.0.8 | X gamma utility |
 | xhost | 1.0.10 | X server access control program |
 | xinit | 1.4.4 | X init program |

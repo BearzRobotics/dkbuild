@@ -105,7 +105,7 @@ Image keys: `packages`, `exclude`, `unwanted` (apk `!name`), `services`, `users`
 - **Hyprland** 0.57 and its libraries (`desktop-hyprland`): built. Dotfile configs
   (ML4W, dionysus) are only an idea: no recipes; dionysus has no licence.
 - **labwc**, wayland, mesa, xwayland, Qt 6 (6.12), GTK 3/4: built.
-- **Plasma 6.8** (Frameworks, Gear, PIM, SDDM), **Xfce 4.20**, **LXQt**: written
+- **Plasma 6.8** (Frameworks, Gear, PIM, SDDM), **LXQt**: written
   (imported from Chimera), not built.
 - **X server**: written as `xserver-xorg` 21.1.24 plus
   `xserver-xorg-input-libinput`, not built. XLibre is not packaged (verified:
