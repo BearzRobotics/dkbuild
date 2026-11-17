@@ -1,0 +1,27 @@
+# simavr: an AVR simulator (a library, libsimavr, and the `simavr` command that runs an ELF or hex firmware, with GDB support
+# for debugging it). Pairs with avr-gcc, avr-binutils, avr-libc and avrdude. Only the simulator is built: the top-level Makefile
+# also builds the examples and the board simulations, which need avr-gcc firmware builds and freeglut (an OpenGL window); not part of
+# the package. Written 2026-11-17 (user's list: qemu-system-misc lld gcc-avr binutils-avr avr-libc avrdude simavr).
+# Source edits: none. simavr's Makefile uses DESTDIR as the install prefix itself (it installs to $(DESTDIR)/bin, /lib, /include), so DESTDIR is
+# "$pkgdir/usr" here and PREFIX=/usr only fills the .pc files. RELEASE=1 builds without debug info. Installs the shared and static library.
+name = "simavr"
+version = "1.8"
+release = 1
+summary = "AVR simulator with GDB support"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/buserror/simavr"
+hostdeps = ["make", "pkgconf"]
+builddeps = ["elfutils-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/buserror/simavr/archive/refs/tags/v1.8.tar.gz", sha256 = "51e2682d23fb4843191ee81dadcb5488fa6194553a108bbd6e60e8b1260269d6" },
+]
+
+build = '''
+make -C simavr RELEASE=1 PREFIX=/usr V=1 -j$jobs
+'''
+install = '''
+make -C simavr RELEASE=1 PREFIX=/usr DESTDIR="$pkgdir/usr" install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/simavr/COPYING"
+'''

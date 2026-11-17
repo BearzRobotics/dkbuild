@@ -16,14 +16,14 @@
 # the PVE stack at build time; see wip/proxmox/NOTES.md).
 name = "pve-storage"
 version = "9.1.16"
-release = 1
+release = 2
 summary = "Proxmox VE storage management library"
 license = "AGPL-3.0-or-later"
 homepage = "https://git.proxmox.com/?p=pve-storage.git"
 hostdeps = ["perl", "make"]
 rundeps = ["perl", "pve-common", "pve-cluster", "pve-access-control", "pve-apiclient", "perl-file-chdir",
            "perl-posix-strptime", "perl-xml-libxml", "lvm2", "thin-provisioning-tools", "cstream", "lzop",
-           "zstd", "bzip2", "nfs-utils", "cifs-utils", "smartmontools", "qemu", "gptfdisk", "util-linux",
+           "zstd", "bzip2", "nfs-utils", "cifs-utils", "smartmontools", "qemu", "qemu-system-x86", "gptfdisk", "util-linux",
            "file", "e2fsprogs", "open-iscsi", "libiscsi"]
 options = ["!check"]
 
