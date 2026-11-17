@@ -13,7 +13,7 @@
 # /usr/share/doc/containerd).
 name = "containerd"
 version = "2.4.2"
-release = 1
+release = 2
 summary = "Industry-standard container runtime"
 license = "Apache-2.0"
 homepage = "https://containerd.io"

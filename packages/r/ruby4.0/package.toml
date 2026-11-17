@@ -24,7 +24,7 @@
 # builds YJIT the same way. The tree's ruby 3.4 recipe does not (yet).
 name = "ruby4.0"
 version = "4.0.9"
-release = 2
+release = 3
 summary = "Ruby scripting language 4.0.x"
 license = "Ruby OR BSD-2-Clause"
 homepage = "https://www.ruby-lang.org/en"

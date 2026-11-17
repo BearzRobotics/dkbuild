@@ -16,7 +16,7 @@
 # r10: PipeWire's libjack in /usr/lib (-Dlibjack-path, as Chimera), not /usr/lib/pipewire-0.3/jack: programs linked against JACK (ffmpeg, SDL 3, fluidsynth, mpg123) find it, and it provides so:libjack.so.0.
 name = "pipewire"
 version = "1.6.10"
-release = 10
+release = 11
 summary = "Server and user space API to deal with multimedia pipelines"
 license = "MIT"
 homepage = "https://pipewire.org"

@@ -10,7 +10,7 @@
 # Crates vendored on the host.
 name = "thin-provisioning-tools"
 version = "1.3.4"
-release = 2
+release = 3
 summary = "Tools for the metadata of device-mapper thin, cache and era targets"
 license = "GPL-3.0-or-later"
 homepage = "https://github.com/jthornber/thin-provisioning-tools"

@@ -3,7 +3,7 @@
 # Chimera Linux cports (BSD-2-Clause): main/mingw-w64-crt.
 name = "mingw-w64-crt"
 version = "13.0.0"
-release = 1
+release = 2
 summary = "C runtime for cross-compiling Windows programs"
 license = "ZPL-2.1"
 homepage = "https://www.mingw-w64.org"

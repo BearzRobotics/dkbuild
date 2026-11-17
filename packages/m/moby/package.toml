@@ -14,7 +14,7 @@
 # /usr/share/doc/moby/README.FenrirOS. The client is docker-cli.
 name = "moby"
 version = "29.9.3"
-release = 2
+release = 3
 summary = "Docker container engine (dockerd)"
 license = "Apache-2.0"
 homepage = "https://mobyproject.org"

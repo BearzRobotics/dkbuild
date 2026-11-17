@@ -17,7 +17,7 @@
 # No longer a pure meta package (it ships that file).
 name = "desktop-dkde-core"
 version = "1"
-release = 3
+release = 4
 summary = "DKDE desktop for FenrirOS, without printing, OCR and online accounts"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"
@@ -37,6 +37,9 @@ rundeps = [
     "parted", "e2fsprogs", "dosfstools", "exfatprogs", "xfsprogs", "btrfs-progs", "ntfs-3g",
     "f2fs-tools", "jfsutils", "reiserfsprogs", "nilfs-utils", "udftools", "fatresize",
     "tmux", "vim", "htop",
+    # r4 (user, 2026-11-17): the X11 session (dkde-session --x11 starts dkde-wm under startx) is part of the core desktop: the Xorg
+    # server with libinput, startx (xinit) and the X utilities the session scripts use. desktop-dkde lists the same ones.
+    "xserver-xorg", "xserver-xorg-input-libinput", "xinit", "xrandr", "xset", "xsetroot", "xrdb", "xmodmap", "xkbcomp",
 ]
 
 install = '''

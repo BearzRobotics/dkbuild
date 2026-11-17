@@ -4,7 +4,7 @@
 # lock signals) through libelogind's sd-bus; the tree has no systemd.
 name = "swayidle"
 version = "1.9.1"
-release = 1
+release = 2
 summary = "Idle management daemon for Wayland"
 license = "MIT"
 homepage = "https://github.com/swaywm/swayidle"

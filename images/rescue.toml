@@ -10,8 +10,10 @@ label    = "FENRIROS_RESCUE"
 # desktop-dkde-core, not desktop-dkde: the desktop without printing (cups), OCR (ocrmypdf) and online
 # accounts (gnome-online-accounts), which make no sense on a rescue disk. (`unwanted` cannot drop them: it
 # is a conflict for apk, and desktop-dkde depends on them.)
-packages = ["base", "base-net", "linux", "live-initramfs", "dkinstaller", "firmware-linux-meta", "rescue-tools", "desktop-dkde-core", "base-devel", "dos2unix", "vim"]
-exclude  = ["*-static"]
+packages = ["base", "base-net", "linux", "live-initramfs", "dkinstaller", "firmware-linux-meta", "rescue-tools", 
+"desktop-dkde-core", "base-devel", "dos2unix", "vim", "claude-code", "xserver-xorg", "xserver-xorg-input-libinput", 
+"xinit", "gcc", "gdb", "ntfs-3g"]
+#exclude  = ["*-static"]
 services = ["udevd", "udev-trigger", "udev-settle", "modules", "dhcpcd", "syslogd", "seatd", "dbus"]
 issue    = """
 FenrirOS Rescue \\r (\\l)

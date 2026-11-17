@@ -6,7 +6,7 @@
 # calls xset only on X11, and xset is installable on its own.
 name = "xdg-utils"
 version = "1.2.1"
-release = 1
+release = 2
 summary = "Basic desktop integration scripts"
 license = "MIT"
 homepage = "https://www.freedesktop.org/wiki/Software/xdg-utils"

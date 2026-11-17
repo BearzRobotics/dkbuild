@@ -4,7 +4,7 @@
 # (dinit).
 name = "lxcfs"
 version = "6.0.6"
-release = 1
+release = 2
 summary = "FUSE filesystem for container resource views"
 license = "LGPL-2.1-or-later"
 homepage = "https://linuxcontainers.org/lxcfs"

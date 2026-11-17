@@ -5,7 +5,7 @@
 # dependencies are in the tarball's vendor/.
 name = "runc"
 version = "1.5.3"
-release = 1
+release = 2
 summary = "CLI tool for spawning and running OCI containers"
 license = "Apache-2.0"
 homepage = "https://github.com/opencontainers/runc"

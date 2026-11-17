@@ -10,7 +10,7 @@
 # Crates vendored on the host.
 name = "virtiofsd"
 version = "1.14.0"
-release = 1
+release = 2
 summary = "vhost-user virtio-fs device daemon for QEMU"
 license = "Apache-2.0 AND BSD-3-Clause"
 homepage = "https://gitlab.com/virtio-fs/virtiofsd"

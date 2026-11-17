@@ -2,7 +2,7 @@
 # Alpine's testing/libofx. The static library is a second build.
 name = "libofx"
 version = "0.10.9"
-release = 3
+release = 4
 summary = "Library for the Open Financial Exchange (OFX) format"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/libofx/libofx"

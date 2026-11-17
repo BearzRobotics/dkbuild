@@ -4,7 +4,7 @@
 # are opened at run time (dlopen), hence the rundeps.
 name = "htop"
 version = "3.5.3"
-release = 1
+release = 2
 summary = "Interactive process viewer"
 license = "GPL-2.0-only"
 homepage = "https://htop.dev"

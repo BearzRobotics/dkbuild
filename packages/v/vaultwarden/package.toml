@@ -4,7 +4,7 @@
 # there); data in /var/lib/vaultwarden. The Bitwarden apps work with it.
 name = "vaultwarden"
 version = "1.37.5"
-release = 1
+release = 2
 summary = "Bitwarden-compatible password server (Rust)"
 license = "AGPL-3.0-only"
 homepage = "https://github.com/dani-garcia/vaultwarden"

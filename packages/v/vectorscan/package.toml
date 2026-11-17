@@ -8,7 +8,7 @@
 # microarchitecture). The fat runtime renames symbols with nm/objcopy: LLVM's.
 name = "vectorscan"
 version = "5.4.14"
-release = 2
+release = 3
 summary = "High-performance regular expression matching library (Hyperscan fork)"
 license = "BSD-3-Clause"
 homepage = "https://www.vectorcamp.gr/vectorscan"

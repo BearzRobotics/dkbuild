@@ -2,7 +2,7 @@
 # Lua; that tarball is the recipe's second source instead.
 name = "nethack"
 version = "5.0.0"
-release = 1
+release = 2
 summary = "Exploring the Dungeons of Doom (terminal roguelike)"
 license = "custom:NGPL"
 homepage = "https://www.nethack.org"

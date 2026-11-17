@@ -3,7 +3,7 @@
 # test-only CPAN modules or the network.
 name = "perl-lwp-protocol-https"
 version = "6.17"
-release = 1
+release = 2
 summary = "Provide https support for LWP::UserAgent"
 license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
 homepage = "https://metacpan.org/dist/LWP-Protocol-https"

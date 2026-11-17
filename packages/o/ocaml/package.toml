@@ -14,7 +14,7 @@
 # code slower and is a per-user choice; not built in Chimera or Alpine.
 name = "ocaml"
 version = "5.5.2"
-release = 1
+release = 2
 summary = "Implementation of the OCaml language"
 license = "LGPL-2.1-only WITH OCaml-LGPL-linking-exception"
 homepage = "https://ocaml.org"

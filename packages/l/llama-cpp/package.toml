@@ -7,7 +7,7 @@
 # r2: ggml's CPU backend threads with OpenMP (openmp is in the tree now).
 name = "llama-cpp"
 version = "0.9.0"
-release = 2
+release = 3
 summary = "LLM inference in C/C++, with Vulkan GPU support"
 license = "MIT"
 homepage = "https://github.com/ggml-org/llama.cpp"

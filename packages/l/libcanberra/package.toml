@@ -6,7 +6,7 @@
 # 2026-11-11: its GTK 3, PulseAudio (PipeWire's), GStreamer and tdb parts.
 name = "libcanberra"
 version = "0.30"
-release = 5
+release = 6
 summary = "Portable sound event API"
 license = "LGPL-2.1-or-later"
 homepage = "https://0pointer.de/lennart/projects/libcanberra"

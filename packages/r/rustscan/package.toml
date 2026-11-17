@@ -1,7 +1,7 @@
 # RustScan: fast port discovery that hands the open ports to nmap.
 name = "rustscan"
 version = "2.4.1"
-release = 1
+release = 2
 summary = "Fast port scanner that pipes results into nmap"
 license = "GPL-3.0-or-later"
 homepage = "https://github.com/bee-san/RustScan"

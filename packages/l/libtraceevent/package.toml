@@ -2,7 +2,7 @@
 # needed by: libtracefs, ndctl.
 name = "libtraceevent"
 version = "1.8.4"
-release = 1
+release = 2
 summary = "Linux kernel trace event library"
 license = "LGPL-2.1-only AND GPL-2.0-only"
 homepage = "https://git.kernel.org/pub/scm/libs/libtrace/libtraceevent.git"

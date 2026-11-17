@@ -5,7 +5,7 @@
 # r2: static libraries too (in smartmontools-static), for fully static programs on musl.
 name = "smartmontools"
 version = "7.5"
-release = 3
+release = 4
 summary = "Utilities for SMART-enabled drives"
 license = "GPL-2.0-or-later"
 homepage = "https://www.smartmontools.org"

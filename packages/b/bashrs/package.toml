@@ -10,7 +10,7 @@
 # the tree's rust builds it. Crates vendored on the host.
 name = "bashrs"
 version = "7.4.3"
-release = 2
+release = 3
 summary = "Shell safety and purification tool: linter, bash to POSIX sh, Rust to shell"
 license = "MIT"
 homepage = "https://github.com/paiml/bashrs"

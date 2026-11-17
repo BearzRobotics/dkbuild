@@ -5,7 +5,7 @@
 # release archive leaves out (and cargo needs it to vendor the crates).
 name = "rustdesk-server"
 version = "1.1.16"
-release = 1
+release = 2
 summary = "RustDesk ID and relay server (hbbs, hbbr)"
 license = "AGPL-3.0-only"
 homepage = "https://github.com/rustdesk/rustdesk-server"

@@ -14,7 +14,7 @@
 # bash scripts, hence bash in rundeps.
 name = "open-iscsi"
 version = "2.1.13"
-release = 1
+release = 2
 summary = "iSCSI initiator: iscsiadm, iscsid and libopeniscsiusr"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://www.open-iscsi.com/"

@@ -3,7 +3,7 @@
 # test-only CPAN modules or the network.
 name = "perl-crypt-openssl-bignum"
 version = "0.09"
-release = 1
+release = 2
 summary = "OpenSSL's multiprecision integer arithmetic"
 license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
 homepage = "https://metacpan.org/dist/Crypt-OpenSSL-Bignum"

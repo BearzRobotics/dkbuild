@@ -7,7 +7,7 @@
 # installer does: /usr/bin/msedit, with `edit` linked to it.
 name = "msedit"
 version = "2.0.0_git20261102"
-release = 1
+release = 2
 summary = "Microsoft Edit, a simple terminal text editor"
 license = "MIT"
 homepage = "https://github.com/microsoft/edit"

@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "firefox"
 version = "159.0"
-release = 1
+release = 3
 summary = "Mozilla Firefox web browser"
 license = "GPL-3.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND MPL-2.0"
 homepage = "https://www.mozilla.org/firefox"
@@ -21,9 +21,15 @@ environment = '''
 export MOZBUILD_STATE_PATH="$PWD/.mozbuild" MOZ_MAKE_FLAGS="-j$jobs" AS="$CC"
 export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
 export RUST_TARGET=x86_64-unknown-linux-musl RUSTFLAGS="-C target-feature=-crt-static"
+# r2/r3: the Rust build scripts (bindgen's, for gecko-profiler, ohttp, ...) are linked static on musl, and then bindgen cannot dlopen
+# libclang ("Dynamic loading not supported"). Mozilla gives host edges none of RUSTFLAGS (rust_commands.py: only the target ones), and
+# its `extra_rustflags` variable had no effect here (the build scripts were still static-pie). So every rustc call goes through a
+# wrapper that adds -crt-static (cargo runs RUSTC_WRAPPER in front of rustc; Mozilla passes the environment's through).
+export RUSTC_WRAPPER=/tmp/rustc-dynamic
 export MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE=system MOZ_NOSPAM=1
 '''
 setup = '''
+printf '#!/bin/sh\nexec "$@" -C target-feature=-crt-static\n' > /tmp/rustc-dynamic; chmod 755 /tmp/rustc-dynamic
 # Chimera's breakpad header (musl has no stab.h).
 cp $pkgfiles/stab.h toolkit/crashreporter/google-breakpad/src/
 # No WASI toolchain yet: the RLBox-sandboxed libraries (graphite, ogg, expat,

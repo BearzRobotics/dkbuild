@@ -6,7 +6,7 @@
 # Crates vendored on the host (cargodeps).
 name = "libpathrs"
 version = "0.2.6"
-release = 2
+release = 3
 summary = "Safe path resolution library for Linux (C API)"
 license = "MPL-2.0 OR LGPL-3.0-or-later"
 homepage = "https://github.com/cyphar/libpathrs"

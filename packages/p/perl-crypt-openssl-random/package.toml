@@ -3,7 +3,7 @@
 # test-only CPAN modules or the network.
 name = "perl-crypt-openssl-random"
 version = "0.17"
-release = 1
+release = 2
 summary = "OpenSSL/LibreSSL pseudo-random number generator access"
 license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
 homepage = "https://metacpan.org/dist/Crypt-OpenSSL-Random"

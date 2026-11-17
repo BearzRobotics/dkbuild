@@ -4,7 +4,7 @@
 # Python wrapper module is not needed.
 name = "maturin"
 version = "1.16.0"
-release = 1
+release = 2
 summary = "Build and publish crates with pyo3, cffi and uniffi bindings as Python packages"
 license = "MIT OR Apache-2.0"
 homepage = "https://www.maturin.rs"

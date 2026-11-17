@@ -7,7 +7,7 @@
 # shells, the user does that (or chsh) when they want it as a login shell.
 name = "brush"
 version = "0.4.0"
-release = 2
+release = 3
 summary = "Bash-compatible shell written in Rust"
 license = "MIT"
 homepage = "https://github.com/reubeno/brush"

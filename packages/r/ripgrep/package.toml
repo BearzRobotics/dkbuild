@@ -3,7 +3,7 @@
 # With PCRE2 (-P), against the system library. Crates vendored on the host.
 name = "ripgrep"
 version = "15.2.0"
-release = 1
+release = 2
 summary = "Fast recursive search that respects .gitignore (rg)"
 license = "MIT OR Unlicense"
 homepage = "https://github.com/BurntSushi/ripgrep"

@@ -8,7 +8,7 @@
 # libsystemd. Patch 0003: the socket code on musl's msghdr/cmsghdr types.
 name = "pve-lxc-syscalld"
 version = "2.0.2"
-release = 2
+release = 3
 summary = "Proxmox VE LXC syscall daemon"
 license = "AGPL-3.0-or-later"
 homepage = "https://git.proxmox.com/?p=pve-lxc-syscalld.git"

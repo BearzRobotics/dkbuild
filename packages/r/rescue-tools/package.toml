@@ -7,7 +7,7 @@
 # xorriso), and rsync, ssh and curl for moving data off a machine.
 name = "rescue-tools"
 version = "1"
-release = 4
+release = 5
 summary = "FenrirOS rescue toolset (DKRescue's)"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"
@@ -26,4 +26,6 @@ rundeps = [
     # r4: imaging and recovery (partclone, safecopy, foremost, gpart), SCSI/hardware/stress tools, and small helpers
     "partclone", "safecopy", "foremost", "gpart", "sg3-utils", "lsscsi", "lshw", "kpartx", "memtester", "stress-ng", "fio",
     "pv", "lsof", "ncdu", "mc", "screen", "dialog", "lftp", "mbuffer", "par2cmdline",
+    # r5 (user, 2026-11-17): the whole backup toolset (backup-tools) is part of the rescue tools
+    "backup-tools",
 ]

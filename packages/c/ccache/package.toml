@@ -16,7 +16,7 @@
 # The man page and HTML manual are built with asciidoctor (hostdep).
 name = "ccache"
 version = "4.14.3"
-release = 1
+release = 2
 summary = "Fast C/C++ compiler cache"
 license = "GPL-3.0-or-later"
 homepage = "https://ccache.dev"
