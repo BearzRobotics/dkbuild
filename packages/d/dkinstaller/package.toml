@@ -4,20 +4,23 @@
 # dies with "Illegal instruction" on other CPUs). It needs, on the live ISO:
 # dklilo at 380a5b3 or later, /run/live/medium visible, live/rootfs.size, and
 # tzdb (see its docs/ISO-REQUIREMENTS.md; all provided by `dkbuild image`).
+# 0.0.3 (2026-11-17): SELinux labelling, offline package installs from a repository medium, services/SSH/network/NTP/firewall screens, a chroot shell.
 # The release tarball is attached to the GitHub release (made with
 # `git archive --prefix=dkinstaller-<version>/`), so its checksum is stable.
 name = "dkinstaller"
-version = "0.0.2"
+version = "0.0.3"
 release = 1
 summary = "FenrirOS installer: installs the live system onto a disk"
 license = "GPL-2.0-only"
 homepage = "https://github.com/BearzRobotics/dkinstaller"
 hostdeps = ["zig"]
-rundeps = ["dklilo", "util-linux", "e2fsprogs", "dosfstools", "squashfs-tools", "shadow", "sudo", "bash", "coreutils", "tzdb"]
+rundeps = ["dklilo", "util-linux", "e2fsprogs", "dosfstools", "squashfs-tools", "shadow", "sudo", "bash", "coreutils", "tzdb",
+    # 0.0.3: ssh-keygen (host keys, key checks), setfiles (labelling the new root; skipped when absent), apk (package installs from a repository disc)
+    "openssh", "policycoreutils", "apk-tools"]
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/dkinstaller/releases/download/v0.0.2/dkinstaller-0.0.2.tar.gz", sha256 = "65d0443b1f101696f5da26978970db62a33021a7eb3582ef9439f1dcf3048098" },
+    { url = "https://github.com/BearzRobotics/dkinstaller/releases/download/v0.0.3/dkinstaller-0.0.3.tar.gz", sha256 = "ee18e3fa8edf62f83e913a41f42458215a5153e6aa5aab0b6adbe8bebacc0b51" },
 ]
 
 install = '''
