@@ -11,14 +11,15 @@ homepage = "https://obsproject.com"
 patches = ["gl-egl-32bit.patch", "no-web.patch", "no-werror.patch", "qt610-guiprivate.patch"]
 hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf", "python", "qt6-qtbase", "swig"]
 builddeps = ["curl-devel", "ffmpeg-devel", "fontconfig-devel", "freetype-devel", "jansson-devel", "libdatachannel-devel", "libdrm-devel", "libpulse-devel", "librist-devel", "libva-devel", "libx11-devel", "libxcb-devel", "libxkbcommon-devel", "mbedtls-static", "mesa-devel", "nlohmann-json", "nv-codec-headers", "pciutils-devel", "pipewire-devel", "python-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel", "rnnoise-devel", "simde", "speexdsp-devel", "srt-devel", "eudev-devel", "uthash", "v4l-utils-devel", "wayland-devel", "x264-devel"]
-options = ["!check", "!lto"]
+options = ["!check"]
 
 source = [
     { url = "https://github.com/obsproject/obs-studio/archive/refs/tags/32.0.2.tar.gz", sha256 = "39e99b9fbdc77e7e87cfd9c7e8709d1d427627bad5b21b791019c887c8598d13" },
 ]
 
-# r11: !lto: the ThinLTO link of libobs.so crashes ld.lld ("clang: error: unable to execute command: Segmentation fault", libobs/libobs.so.30 after the
-# whole tree compiled); LTO is turned off for this package, as for wine and other large C/C++ recipes.
+# r11: the ThinLTO link of libobs.so crashes ld.lld ("clang: error: unable to execute command: Segmentation fault", libobs/libobs.so.30, after the whole tree
+# compiled). OBS turns IPO on for Release builds when CMake's check passes (cmake/common/compiler_common.cmake); that check's result is a cache variable, given
+# here as OFF. (The `!lto` option is reserved and does nothing: the build system never turns LTO on itself.)
 # r10: libc++ 23 no longer pulls <stdlib.h>, <cstdlib>, <algorithm>, <new>, <cstdint> in through other headers: plugins/decklink/linux/platform.cpp uses free()
 # without <stdlib.h> ("use of undeclared identifier 'free'"), and more files will follow. Not a source edit: force-included. `-k 0` keeps ninja going so
 # one run lists every file the compiler rejects.
@@ -28,6 +29,7 @@ export CFLAGS="$CFLAGS -include stdlib.h"
 '''
 setup = '''
 %cmake \
+    -DHAS_INTERPROCEDURAL_OPTIMIZATION=OFF \
     -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
     -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
     -DOBS_CMAKE_VERSION=3.0.0 \
