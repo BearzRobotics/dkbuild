@@ -1,7 +1,7 @@
 # Linux-CAN / SocketCAN user space applications. (BlackArch list, requested 2026-11-16; docs/requests.md). Generated from the sources' build files (cmake); the build dependencies are guessed from the #includes. Not built yet when written (wip/queue): expect first-build fixes.
 name = "can-utils"
 version = "2025.01"
-release = 2
+release = 3
 summary = "Linux-CAN / SocketCAN user space applications."
 license = "GPL-2.0-only OR BSD-3-Clause"
 homepage = "https://github.com/linux-can/can-utils"
@@ -25,5 +25,7 @@ build = '''
 '''
 install = '''
 %cmake_install
-install -Dm644 LICENSES "$pkgdir/usr/share/licenses/can-utils/LICENSES"
+# new release: LICENSES is a directory ("install: omitting directory 'LICENSES'"): its files are installed.
+mkdir -p "$pkgdir/usr/share/licenses/can-utils"
+cp -r LICENSES/. "$pkgdir/usr/share/licenses/can-utils/"
 '''
