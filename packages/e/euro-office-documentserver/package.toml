@@ -55,7 +55,7 @@
 # lockfile: statsd uses it only for its syslog backend, which the Metrics service does not configure.
 name = "euro-office-documentserver"
 version = "9.3.7.1"
-release = 2
+release = 3
 summary = "Euro-Office Document Server: online office editors"
 license = "AGPL-3.0-only AND CC-BY-SA-4.0"
 homepage = "https://github.com/Euro-Office/DocumentServer"
@@ -95,7 +95,9 @@ node /dkbuild/npm-offline.js /tmp/npm-cache sdkjs/build/npm-shrinkwrap.json \
 for d in Common DocService FileConverter Metrics AdminPanel/server; do
     (cd server/$d && npm ci --omit=dev --ignore-scripts)
 done
-(cd server/AdminPanel/client && npm ci --ignore-scripts)
+# r3: --legacy-peer-deps for the React client: its lockfile was converted from a version 1 one (npm 6, which did not install peer dependencies), and npm 9+ then
+# asks the registry for the peers the lockfile lacks (@types/react, a peer of two packages): "ENOTCACHED ... cache mode is 'only-if-cached'". The same set as upstream's lock.
+(cd server/AdminPanel/client && npm ci --ignore-scripts --legacy-peer-deps)
 # sharp 0.32 for DocService, from source against the system libvips (its
 # install script would download a prebuilt libvips)
 (cd server/DocService && npm_config_build_from_source=true npm rebuild sharp)
