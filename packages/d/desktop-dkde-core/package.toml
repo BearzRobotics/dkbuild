@@ -11,13 +11,17 @@
 # rescue disk's space is kept for its tools. New hard requirements of the desktop go here.
 # r2 (2026-11-16, user): dkde-compositor and dkde-wm (dkde 0.3.2: DKDE's own Wayland compositor and X11 window manager) are part of
 # the core desktop. labwc stays: it is still the session's default compositor until the session setting says otherwise.
+# r3 (2026-11-17, user): the images start DKDE's own compositor, not labwc, for every new user: /etc/skel/.config/dkde/session.conf
+# says `compositor=dkde-compositor` (dkde-session reads it; the live user and users the installer creates get it from /etc/skel). labwc stays
+# installed: dkde-session falls back to it when the named compositor is missing, and a user can set `compositor=labwc` in their own file.
+# No longer a pure meta package (it ships that file).
 name = "desktop-dkde-core"
 version = "1"
-release = 2
+release = 3
 summary = "DKDE desktop for FenrirOS, without printing, OCR and online accounts"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"
-options = ["meta"]
+options = ["!check", "!strip"]
 rundeps = [
     "dkde", "dkde-compositor", "dkde-wm", "labwc", "seatd", "dbus", "polkit", "mesa", "vulkan-loader",
     "pipewire", "wireplumber", "fonts-dejavu", "shared-mime-info", "hicolor-icon-theme", "xwayland",
@@ -34,3 +38,7 @@ rundeps = [
     "f2fs-tools", "jfsutils", "reiserfsprogs", "nilfs-utils", "udftools", "fatresize",
     "tmux", "vim", "htop",
 ]
+
+install = '''
+install -Dm644 $pkgfiles/session.conf "$pkgdir/etc/skel/.config/dkde/session.conf"
+'''
