@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "inkscape"
 version = "1.4.4"
-release = 4
+release = 5
 summary = "Vector graphics editor"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://inkscape.org"
@@ -18,10 +18,11 @@ source = [
     { url = "https://media.inkscape.org/dl/resources/file/inkscape-1.4.4.tar.xz", sha256 = "bbce5753a1e08b871a5cf16c665eb060700aaab9a6a379dc63f4c4d9b3b8856e" },
 ]
 
+# r5: + <vector> and the other common standard headers (src/util/longest-common-suffix.h uses std::vector without <vector>), and `-k 0` so one run lists every file.
 # r4: libc++ 23 no longer pulls <new>, <algorithm>, <memory>, <cstdint> in through other headers: src/io/stream/gzipstream.cpp uses std::nothrow
 # without <new> ("no member named 'nothrow' in namespace 'std'"), and more files will follow. Not a source edit: they are included on every compile line.
 environment = '''
-export CXXFLAGS="$CXXFLAGS -include new -include algorithm -include memory -include cstdint"
+export CXXFLAGS="$CXXFLAGS -include new -include algorithm -include memory -include cstdint -include vector -include string -include map -include set -include functional -include utility -include iterator -include numeric -include limits -include cstring"
 '''
 setup = '''
 %cmake \
@@ -32,7 +33,7 @@ setup = '''
     -DWITH_INTERNAL_CAIRO=OFF
 '''
 build = '''
-%cmake_build
+%cmake_build -- -k 0
 '''
 install = '''
 %cmake_install
