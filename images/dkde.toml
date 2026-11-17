@@ -18,7 +18,7 @@ label    = "FENRIROS_DKDE"
 
 
 packages = ["base", "openssh", "openssh-server", "curl", "linux", "live-initramfs", "dkinstaller", "firmware-linux-meta", "desktop-dkde", "firewalld",
-"xserver-xorg", "xserver-xorg-input-libinput", "xinit", "libselinux", "policycoreutils", "selinux-python", "selinux-policy-targeted", "ncurses", "iputils", "net-tools", "iproute2", "iw", "traceroute", "ntfs-3g"]
+"xserver-xorg", "xserver-xorg-input-libinput", "xinit", "libselinux", "policycoreutils", "selinux-python", "selinux-policy-targeted", "firefox", "ncurses", "iputils", "net-tools", "iproute2", "iw", "traceroute", "ntfs-3g"]
 #exclude  = ["*-devel", "*-doc", "*-static"]
 # never installed, even as a dependency (apk stops with a conflict if something needs it)
 unwanted = ["dhcpcd"]
