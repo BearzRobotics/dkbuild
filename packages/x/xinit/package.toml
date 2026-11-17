@@ -1,8 +1,9 @@
 # Imported from Chimera Linux cports: main/xinit/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# r2: startx runs the command given on its command line (dkde-session --x11 does `exec startx dkde-session --x11`), else ~/.xinitrc, else dkde-session --x11 or xterm; it used to exit when there was no ~/.xinitrc.
 name = "xinit"
 version = "1.4.4"
-release = 1
+release = 2
 summary = "X init program"
 license = "MIT"
 homepage = "https://xorg.freedesktop.org"

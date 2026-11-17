@@ -22,12 +22,25 @@ done
 display=":$d"
 unset d
 
-rcfile=${XDG_CONFIG_HOME:-$HOME/.config}/xinitrc
-[ -x "$rcfile" ] || rcfile=${HOME}/.xinitrc
-
-if [ ! -x "$rcfile" ]; then
-    echo "$0: $rcfile does not exist or is not executable"
-    exit 1
+# What to run inside the X server, as with upstream startx: a command given on the command line
+# (`startx dkde-session --x11`) wins; else the user's ~/.config/xinitrc or ~/.xinitrc; else, with
+# neither, the system default: DKDE's X11 session when it is installed, else a terminal.
+if [ $# -gt 0 ] && [ "$1" != -- ]; then
+    client=""
+else
+    client=${XDG_CONFIG_HOME:-$HOME/.config}/xinitrc
+    [ -x "$client" ] || client=${HOME}/.xinitrc
+    if [ ! -x "$client" ]; then
+        if command -v dkde-session >/dev/null 2>&1; then
+            set -- dkde-session --x11 "$@"
+        elif command -v xterm >/dev/null 2>&1; then
+            set -- xterm "$@"
+        else
+            echo "$0: no command given, no ~/.xinitrc, and neither dkde-session nor xterm is installed"
+            exit 1
+        fi
+        client=""
+    fi
 fi
 
 if [ -z "$XAUTHORITY" ]; then
@@ -47,7 +60,7 @@ export XDG_SESSION_TYPE=x11
 
 xauth add "$display" . `/usr/bin/mcookie`
 
-xinit /etc/X11/Xsession "$rcfile" "$@" -- \
+xinit /etc/X11/Xsession $client "$@" -- \
     /usr/bin/X "$display" vt$TTY -nolisten tcp -keeptty -noreset -auth "$XAUTHORITY"
 
 ret=$?
