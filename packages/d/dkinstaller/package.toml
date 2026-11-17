@@ -4,11 +4,12 @@
 # dies with "Illegal instruction" on other CPUs). It needs, on the live ISO:
 # dklilo at 380a5b3 or later, /run/live/medium visible, live/rootfs.size, and
 # tzdb (see its docs/ISO-REQUIREMENTS.md; all provided by `dkbuild image`).
+# 0.0.4 (2026-11-17): autoinstall (`dkrescue-install --auto`, kernel flag dkinstall.auto=1) and the dinit service that runs it (files/dkinstall-auto).
 # 0.0.3 (2026-11-17): SELinux labelling, offline package installs from a repository medium, services/SSH/network/NTP/firewall screens, a chroot shell.
 # The release tarball is attached to the GitHub release (made with
 # `git archive --prefix=dkinstaller-<version>/`), so its checksum is stable.
 name = "dkinstaller"
-version = "0.0.3"
+version = "0.0.4"
 release = 1
 summary = "FenrirOS installer: installs the live system onto a disk"
 license = "GPL-2.0-only"
@@ -20,13 +21,14 @@ rundeps = ["dklilo", "util-linux", "e2fsprogs", "dosfstools", "squashfs-tools", 
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/dkinstaller/releases/download/v0.0.3/dkinstaller-0.0.3.tar.gz", sha256 = "ee18e3fa8edf62f83e913a41f42458215a5153e6aa5aab0b6adbe8bebacc0b51" },
+    { url = "https://github.com/BearzRobotics/dkinstaller/releases/download/v0.0.4/dkinstaller-0.0.4.tar.gz", sha256 = "88b0a36cc4253b269726a1af65d1f109532558b8f4ad80c0e94afc2df765afd1" },
 ]
 
 install = '''
 %zig_build
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/dkinstaller/LICENSE"
 # The ISO requirements name /usr/bin/dkrescue-install; /usr/sbin gets a link too.
+install -Dm644 $pkgfiles/dkinstall-auto "$pkgdir/etc/dinit.d/dkinstall-auto"
 install -d "$pkgdir/usr/sbin"
 ln -s ../bin/dkrescue-install "$pkgdir/usr/sbin/dkrescue-install"
 '''

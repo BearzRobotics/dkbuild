@@ -22,7 +22,7 @@ packages = ["base", "openssh", "openssh-server", "curl", "linux", "live-initramf
 #exclude  = ["*-devel", "*-doc", "*-static"]
 # never installed, even as a dependency (apk stops with a conflict if something needs it)
 unwanted = ["dhcpcd"]
-services = ["udevd", "udev-trigger", "udev-settle", "modules", "syslogd", "seatd", "dbus", "networkmanager", "firewalld", "greetd"]
+services = ["udevd", "udev-trigger", "udev-settle", "modules", "syslogd", "seatd", "dbus", "networkmanager", "firewalld", "greetd", "dkinstall-auto"]
 output   = ["iso"]
 login     = "greetd"
 autologin = "live"

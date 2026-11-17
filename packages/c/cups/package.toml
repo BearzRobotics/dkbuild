@@ -6,13 +6,16 @@
 # web interface authenticates through the `cups` service (files/cups.pam, system-auth).
 name = "cups"
 version = "2.4.20"
-release = 2
+release = 3
 summary = "Common Unix Printing System"
 license = "Apache-2.0"
 homepage = "https://openprinting.github.io/cups"
 patches = ["broken-tests.patch", "cups-tlslibs-no-export.patch"]
 hostdeps = ["pkgconf"]
 builddeps = ["acl-devel", "avahi-devel", "dbus-devel", "libpaper-devel", "libpng-devel", "libtiff-devel", "libusb-devel", "linux-headers", "linux-pam-devel", "openssl-devel", "zlib-ng-compat-devel"]
+# r+1 (2026-11-17): its dinit service (files/cupsd) waits-for avahi-daemon, and dinit refuses to load a service whose dependency is not installed
+# ("could not load dependency": enabling cupsd stopped the boot of an image without avahi). Found by the installer's QEMU tests.
+rundeps = ["avahi"]
 options = ["!check", "!lto"]
 
 source = [
