@@ -55,7 +55,7 @@
 # lockfile: statsd uses it only for its syslog backend, which the Metrics service does not configure.
 name = "euro-office-documentserver"
 version = "9.3.7.1"
-release = 5
+release = 6
 summary = "Euro-Office Document Server: online office editors"
 license = "AGPL-3.0-only AND CC-BY-SA-4.0"
 homepage = "https://github.com/Euro-Office/DocumentServer"
@@ -112,7 +112,10 @@ test -f deploy/sdkjs/word/sdk-all.js
 (cd web-apps/translation && python3 merge_and_check.py)
 # r5: sharp's prebuilt musl binary (@img/sharp-linuxmusl-x64, used by the web-apps pipeline's image step: "Error loading shared library libstdc++.so.6") needs GCC's C++
 # runtime; this system's own C++ library is libc++. The `gcc` package (builddep) keeps libstdc++ in /usr/lib/gcc15/lib, put on the library path for this command only.
-(cd web-apps/build && LD_LIBRARY_PATH=/usr/lib/gcc15/lib THEME=euro-office node scripts/build-pipeline.js)
+# r6: build-pipeline.js's Phase 1 starts six webpack builds and four mobile builds at once (each a few GB of Node heap) and this build ended there with no message at all
+# (the log stops at the mobile install's npm warnings; not an error from any task). files/limit-pipeline.py adds an optional cap (PIPELINE_JOBS), set to 3.
+python3 $pkgfiles/limit-pipeline.py web-apps/build/scripts/build-pipeline.js
+(cd web-apps/build && PIPELINE_JOBS=3 LD_LIBRARY_PATH=/usr/lib/gcc15/lib THEME=euro-office node scripts/build-pipeline.js)
 test -d deploy/web-apps/apps
 # the admin panel's client, as server.bake.Dockerfile
 (cd server/AdminPanel/client && APP_NAME=Euro-Office npm run build)
