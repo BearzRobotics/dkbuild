@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "firefox"
 version = "159.0"
-release = 4
+release = 5
 summary = "Mozilla Firefox web browser"
 license = "GPL-3.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND MPL-2.0"
 homepage = "https://www.mozilla.org/firefox"
@@ -16,7 +16,6 @@ options = ["jobs:12", "!cross", "!check"]
 
 source = [
     { url = "https://ftp.mozilla.org/pub/firefox/releases/159.0/source/firefox-159.0.source.tar.xz", sha256 = "3d98df785894057fce60603e845828e758a5411ad79aaaaff2b8230597f500d9" },
-    { url = "https://static.crates.io/crates/bindgen/bindgen-0.73.2.crate", sha256 = "787ef8ef523575546b106a58213d6e6b06198a05c2f757258c68a74273670cfa", unpack = false },
 ]
 environment = '''
 export MOZBUILD_STATE_PATH="$PWD/.mozbuild" MOZ_MAKE_FLAGS="-j$jobs" AS="$CC"
@@ -30,25 +29,13 @@ export RUSTC_WRAPPER=/tmp/rustc-dynamic
 export MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE=system MOZ_NOSPAM=1
 '''
 setup = '''
-# r4: the vendored bindgen 0.73.1 panics on this tree's LLVM 23 headers ("Not an item: ItemId(43962)" in Type::layout while generating the
-# gecko-profiler bindings; found by running its build script by hand). 0.73.2 is the release that fixes bitfield and alignment layout regressions
-# of 0.72/0.73. Source edit: third_party/rust/bindgen is replaced by the 0.73.2 crate (same dependencies), Cargo.lock names that version and its
-# checksum, and the vendored directory's .cargo-checksum.json holds the package checksum (an empty file list: cargo checks only that).
-rm -rf third_party/rust/bindgen
-mkdir third_party/rust/bindgen
-tar -xzf /build/sources/bindgen-0.73.2.crate -C third_party/rust/bindgen --strip-components=1 --no-same-owner
-printf '{"files":{},"package":"787ef8ef523575546b106a58213d6e6b06198a05c2f757258c68a74273670cfa"}' > third_party/rust/bindgen/.cargo-checksum.json
-python3 - <<'PY'
-import re
-s = open("Cargo.lock").read()
-m = re.search(r'name = "bindgen"\nversion = "0\.73\.1"\nsource = "[^"]*"\nchecksum = "([0-9a-f]{64})"', s)
-assert m, "bindgen 0.73.1 entry not found in Cargo.lock"
-blk = m.group(0)
-s = s.replace(blk, blk.replace('version = "0.73.1"', 'version = "0.73.2"').replace(m.group(1), "787ef8ef523575546b106a58213d6e6b06198a05c2f757258c68a74273670cfa"))
-s = s.replace('"bindgen 0.73.1"', '"bindgen 0.73.2"')
-open("Cargo.lock", "w").write(s)
-PY
-grep -n 'bindgen 0.73' Cargo.lock | head -3
+# r5: gecko-profiler's build script (bindgen 0.73.1) panics on this tree's LLVM 23 / libc++ headers: "Not an item: ItemId(43962)" in
+# Type::layout, while computing the layout of a class whose field or base is one of libc++'s internal std:: types (found by running its build
+# script by hand in the kept build root; bindgen 0.73.2, tried in r4, panics the same way). The script already makes std::string,
+# std::vector.*, std::unique_ptr opaque for the same reason; every std:: type is made opaque (bindgen keeps size and alignment from clang
+# for an opaque type, and the profiler bindings only pass those types around by value). Source edit: sed on tools/profiler/rust-api/build.rs.
+sed -i 's|        .opaque_type("std::vector.\*")|        .opaque_type("std::vector.*")\n        .opaque_type("std::.*")|' tools/profiler/rust-api/build.rs
+grep -q 'opaque_type("std::\.\*")' tools/profiler/rust-api/build.rs
 printf '#!/bin/sh\nexec "$@" -C target-feature=-crt-static\n' > /tmp/rustc-dynamic; chmod 755 /tmp/rustc-dynamic
 # Chimera's breakpad header (musl has no stab.h).
 cp $pkgfiles/stab.h toolkit/crashreporter/google-breakpad/src/
