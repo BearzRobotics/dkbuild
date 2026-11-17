@@ -1,14 +1,16 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/opencv/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# r+1 (2026-11-17): builddep python-numpy, not python-numpy-devel: python-numpy keeps its headers inside the Python package directory (numpy/_core/include),
+# so no -devel package exists and the build was skipped ("needs python-numpy-devel, which is not built").
 name = "opencv"
 version = "4.13.0"
-release = 4
+release = 5
 summary = "Computer vision and machine learning libraries"
 license = "Apache-2.0"
 homepage = "https://opencv.org"
 patches = ["vec_cvfo.patch"]
 hostdeps = ["cmake", "ninja", "pkgconf", "protobuf", "python-devel"]
-builddeps = ["eigen", "ffmpeg-devel", "freetype-devel", "gflags-devel", "gflags-static", "glog-devel", "gst-plugins-base-devel", "gstreamer-devel", "gtk+3-devel", "harfbuzz-devel", "libva-devel", "libwebp-devel", "libxkbcommon-devel", "linux-headers", "mesa-devel", "ocl-icd-devel", "onetbb-devel", "openblas-devel", "openexr-devel", "openjpeg-devel", "protobuf-devel", "python-numpy-devel", "vulkan-headers", "vulkan-loader-devel"]
+builddeps = ["eigen", "ffmpeg-devel", "freetype-devel", "gflags-devel", "gflags-static", "glog-devel", "gst-plugins-base-devel", "gstreamer-devel", "gtk+3-devel", "harfbuzz-devel", "libva-devel", "libwebp-devel", "libxkbcommon-devel", "linux-headers", "mesa-devel", "ocl-icd-devel", "onetbb-devel", "openblas-devel", "openexr-devel", "openjpeg-devel", "protobuf-devel", "python-numpy", "vulkan-headers", "vulkan-loader-devel"]
 options = ["!check", "!cross"]
 
 source = [
