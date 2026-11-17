@@ -1,0 +1,31 @@
+# VeraCrypt: disk encryption (the successor of TrueCrypt): encrypted files and partitions, hidden volumes, system encryption
+# on other platforms; here the command line (`veracrypt -t`) and the wxWidgets GTK3 interface (`veracrypt`), with the FUSE mount
+# helper (mount.veracrypt). Requested 2026-11-17 ("did we add veracrypt to the repo?": no; written then). Written, not built: expect first-build
+# fixes for musl (the upstream Makefile has no musl case; fixes go in patches, each explained here).
+# Licence: Apache-2.0 for VeraCrypt's own code and the TrueCrypt License 3.0 for the code derived from TrueCrypt (License.txt in the
+# tarball has both). Redistribution is allowed under both; recorded as "Apache-2.0 AND LicenseRef-TrueCrypt-3.0".
+# The release tarball has no top directory (its files unpack into the build directory). Build: src/Makefile with WITHGTK3=1, NOSTRIP=1 (the package
+# step strips) and NOTEST=1 (the test runs the program); install: upstream's `make install` honours DESTDIR.
+name = "veracrypt"
+version = "1.26.31"
+release = 1
+summary = "Disk encryption (TrueCrypt's successor)"
+license = "Apache-2.0 AND LicenseRef-TrueCrypt-3.0"
+homepage = "https://veracrypt.io"
+archs = ["x86_64"]
+hostdeps = ["pkgconf", "yasm", "make"]
+builddeps = ["wxwidgets-devel", "fuse2-devel", "gtk+3-devel", "pcsc-lite-devel", "linux-headers"]
+rundeps = ["fuse2", "sudo", "lvm2", "cryptsetup"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/veracrypt/VeraCrypt/releases/download/VeraCrypt_1.26.31/VeraCrypt_1.26.31_Source.tar.bz2", sha256 = "6e9447c63a3a9c6f2b17ae4341caf973ed327bf7c9458b7d0c8f4f7b20a62da2" },
+]
+
+build = '''
+make -C src WITHGTK3=1 NOSTRIP=1 NOTEST=1 -j$jobs
+'''
+install = '''
+make -C src WITHGTK3=1 NOSTRIP=1 NOTEST=1 DESTDIR="$pkgdir" install
+install -Dm644 License.txt "$pkgdir/usr/share/licenses/veracrypt/License.txt"
+'''
