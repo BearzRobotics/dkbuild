@@ -1,0 +1,25 @@
+--- a/ir/comp.rs
++++ b/ir/comp.rs
+@@ -1167,6 +1167,12 @@
+             return None;
+         }
+ 
++        if self.kind == CompKind::Union && !self.template_params.is_empty() {
++            // Uninstantiated template unions do not have layout in C++ and can
++            // cause infinite layout recursion.
++            return None;
++        }
++
+         let mut max_size = 0;
+         // Don't allow align(0)
+         let mut max_align = 1;
+@@ -1799,7 +1805,8 @@
+ 
+         let all_can_copy = self.fields().iter().all(|f| match *f {
+             Field::DataMember(ref field_data) => {
+-                field_data.ty().can_derive_copy(ctx)
++                field_data.ty().can_derive_copy(ctx) &&
++                    !ctx.uses_any_template_parameters(field_data.ty().into())
+             }
+             Field::Bitfields(_) => true,
+         });
