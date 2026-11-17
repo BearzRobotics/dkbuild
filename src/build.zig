@@ -1340,7 +1340,13 @@ fn publish(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options, id: []
         return error.PrepareFailed;
     };
     const repo_rel = try std.fmt.allocPrint(arena, "{s}/repo/{s}", .{ opts.root, opts.arch });
-    Dir.cwd().createDirPath(io, repo_rel) catch return error.PrepareFailed;
+    // repo/<arch> may be a symlink to another disk (a fast one for the packages): createDirPath does not follow a symlink it finds in the
+    // last component and reports NotDir, so an existing directory is opened first.
+    if (Dir.cwd().openDir(io, repo_rel, .{})) |existing| {
+        existing.close(io);
+    } else |_| {
+        Dir.cwd().createDirPath(io, repo_rel) catch return error.PrepareFailed;
+    }
     const repo_abs = absPath(arena, io, repo_rel) catch return error.PrepareFailed;
 
     // Mount points live under /tmp (a tmpfs) so the rootfs stays untouched.
