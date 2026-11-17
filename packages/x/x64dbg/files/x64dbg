@@ -1,0 +1,23 @@
+#!/bin/sh
+# x64dbg, x32dbg or the x96dbg launcher under Wine (the debugger is a Windows program). x64dbg writes its settings,
+# plugins and databases next to its executables, so the program tree (read-only in /usr/lib/x64dbg) is copied to
+# ~/.local/share/x64dbg the first time and again whenever the package version changes; your settings stay in that copy.
+# Wine's prefix is the usual ~/.wine unless WINEPREFIX is set.
+name=${0##*/}
+case $name in
+    x64dbg) exe=x64/x64dbg.exe ;;
+    x32dbg) exe=x32/x32dbg.exe ;;
+    x96dbg) exe=x96dbg.exe ;;
+    *) echo "$0: run as x64dbg, x32dbg or x96dbg" >&2; exit 1 ;;
+esac
+src=/usr/lib/x64dbg
+dest=${XDG_DATA_HOME:-$HOME/.local/share}/x64dbg
+ver=$(cat "$src/VERSION" 2>/dev/null)
+if [ ! -f "$dest/.version" ] || [ "$(cat "$dest/.version")" != "$ver" ]; then
+    mkdir -p "$dest"
+    # keep the user's databases, plugins and ini files; replace the program files
+    cp -a "$src/release/." "$dest/"
+    printf '%s\n' "$ver" > "$dest/.version"
+fi
+command -v wine >/dev/null 2>&1 || { echo "$name: wine is not installed" >&2; exit 1; }
+exec wine "$dest/$exe" "$@"

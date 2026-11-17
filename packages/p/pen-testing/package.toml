@@ -1,0 +1,14 @@
+# Everything in the pentest-* groups: reconnaissance, web, passwords, network, wireless, Active Directory and exploitation, plus forensics helpers (YARA, foremost, ClamAV, binwalk). For authorised testing and learning only.
+# A meta package (2026-11-17, user: "a reverse engineer meta package and some for pen testing too"): it installs the tools, nothing more.
+# Tools that are written but not built yet are added when they build; see wip/queue/BLACKARCH-NOTES.md for what is still to come.
+name = "pen-testing"
+version = "1"
+release = 1
+summary = "Penetration testing toolbox"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+options = ["meta"]
+rundeps = [
+    "pentest-recon", "pentest-web", "pentest-passwords", "pentest-network", "pentest-wireless", "pentest-ad",
+    "pentest-exploit", "yara", "foremost", "clamav", "binwalk",
+]

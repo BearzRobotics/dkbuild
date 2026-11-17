@@ -1,0 +1,35 @@
+# x64dbg: an open-source user-mode debugger for Windows programs (x64dbg, x32dbg and the x96dbg launcher), run here under Wine.
+# Requested again 2026-11-17 ("lets add it and use wine to run it"). It is a Windows program built with MSVC/Qt on Windows: there is
+# nothing to build on this system, so the package is upstream's official snapshot release (the same kind of package as claude-code: a prebuilt
+# upstream binary), with the matching source tag as a second source for the licence text. Source: https://github.com/x64dbg/x64dbg
+# Installed: the program tree in /usr/lib/x64dbg/release (read-only) and launchers x64dbg, x32dbg, x96dbg (files/x64dbg; one script, three names)
+# that copy the tree to ~/.local/share/x64dbg (x64dbg writes its settings and databases next to its executables) and run it with wine.
+# The plugin SDK headers and the debug symbols archive are not installed. x86_64 only (Wine runs x86 Windows programs here).
+name = "x64dbg"
+version = "2026.05.27"
+release = 1
+summary = "Windows debugger (x64dbg, x32dbg), run with Wine"
+license = "GPL-3.0-or-later"
+homepage = "https://x64dbg.com"
+archs = ["x86_64"]
+hostdeps = ["unzip"]
+rundeps = ["wine"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/x64dbg/x64dbg/releases/download/2026.05.27/snapshot_2026-05-27_12-11.zip", sha256 = "d41966dfc5b435a372798245300ca0ab7bb8e48bdbf48512c6fb20fcca427697", unpack = false },
+    { url = "https://github.com/x64dbg/x64dbg/archive/refs/tags/2026.05.27.tar.gz", sha256 = "cd2ac05b0d75436460c4b7ba1bafbb0e72bc95ffba622466ccd1ab006a058f83", unpack = false },
+]
+
+install = '''
+d="$pkgdir/usr/lib/x64dbg"
+mkdir -p "$d"
+unzip -q /build/sources/snapshot_2026-05-27_12-11.zip 'release/*' -d "$d"
+printf '%s\n' 2026.05.27-r1 > "$d/VERSION"
+install -Dm755 $pkgfiles/x64dbg "$pkgdir/usr/bin/x64dbg"
+ln -s x64dbg "$pkgdir/usr/bin/x32dbg"
+ln -s x64dbg "$pkgdir/usr/bin/x96dbg"
+mkdir -p "$pkgdir/usr/share/licenses/x64dbg"
+tar -xzf /build/sources/2026.05.27.tar.gz -O x64dbg-2026.05.27/LICENSE > "$pkgdir/usr/share/licenses/x64dbg/LICENSE"
+test -s "$pkgdir/usr/share/licenses/x64dbg/LICENSE"
+'''
