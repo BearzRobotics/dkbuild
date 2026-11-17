@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/linux-pam/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # needed by: kscreenlocker (KDE's screen locker has no other way to check a
-# password), kwallet-pam, sddm, krdp. A library for the
+# password), kwallet-pam, sddm, xfce4-screensaver, krdp. A library for the
 # programs that need it: login, su, sudo and shadow keep using /etc/shadow
 # directly. Its modules check the same /etc/shadow (pam_unix, through the
 # setuid unix_chkpwd).
