@@ -6,6 +6,7 @@
 # dbus (the bus daemon runs as dbus, -Ddbus_user=dbus), sshd (openssh), dhcpcd. polkit adds polkitd itself.
 # Every account starts locked; an image sets passwords.
 # r2: rebuilt with the empty directories it installs (dkbuild's splitter dropped them).
+# r7: root has ~/.profile, ~/.shrc, ~/.bashrc and ~/.bash_profile (the skel files).
 # r3: /etc/skel/.profile, so a new user (useradd -m, the installer) gets a working login shell.
 # r4: the sgx group, which udev rules name (Intel SGX devices).
 # r5: a full /etc/skel (.profile, .shrc, .bashrc, .bash_profile, ~/.local/bin) and /etc/shrc,
@@ -15,7 +16,7 @@
 # rules the logic analysers; the desktop users are in it.
 name = "base-files"
 version = "1"
-release = 6
+release = 7
 summary = "FenrirOS base directory layout and configuration files"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"
@@ -49,6 +50,12 @@ for f in profile shrc bashrc bash_profile; do
 done
 # ~/.local/bin is on PATH (~/.profile); it is there from the start.
 mkdir -p "$d/etc/skel/.local/bin"
+# r7: root gets the same dotfiles as a new user (root's shell is bash: a login shell reads ~/.bash_profile, which reads
+# ~/.profile and ~/.bashrc, which reads ~/.shrc), so logging in as root has the prompt, history and aliases and a sane PATH.
+for f in profile shrc bashrc bash_profile; do
+    install -Dm644 "$pkgfiles/skel-$f" "$d/root/.$f"
+done
+mkdir -p "$d/root/.local/bin"
 mv "$d/etc/os-release" "$d/usr/lib/os-release"
 ln -s ../usr/lib/os-release "$d/etc/os-release"
 '''
