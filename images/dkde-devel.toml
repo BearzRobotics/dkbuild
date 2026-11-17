@@ -18,7 +18,7 @@ label    = "FENRIROS_DKDE"
 
 # "claude-code" Is added for now So I can spin up an instance to help debug on the running system.
 packages = ["base", "openssh", "openssh-server", "curl", "linux", "live-initramfs", "dkinstaller", "firmware-linux-meta", 
-"desktop-dkde", "firewalld", "claude-code", "base-devel", "xserver-xorg", "xserver-xorg-input-libinput", "xinit", "ncurses", "iputils", "net-tools", "iproute2", "iw", "traceroute"]
+"desktop-dkde", "firewalld", "claude-code", "base-devel", "xserver-xorg", "xserver-xorg-input-libinput", "xinit", "libselinux", "policycoreutils", "selinux-python", "selinux-policy-targeted", "ncurses", "iputils", "net-tools", "iproute2", "iw", "traceroute"]
 #exclude  = ["*-devel", "*-doc", "*-static"]
 # never installed, even as a dependency (apk stops with a conflict if something needs it)
 unwanted = ["dhcpcd"]
