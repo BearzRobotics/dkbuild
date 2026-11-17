@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "obs-studio"
 version = "32.0.2"
-release = 9
+release = 10
 summary = "Live streaming and screen recording software"
 license = "GPL-2.0-or-later"
 homepage = "https://obsproject.com"
@@ -17,6 +17,13 @@ source = [
     { url = "https://github.com/obsproject/obs-studio/archive/refs/tags/32.0.2.tar.gz", sha256 = "39e99b9fbdc77e7e87cfd9c7e8709d1d427627bad5b21b791019c887c8598d13" },
 ]
 
+# r10: libc++ 23 no longer pulls <stdlib.h>, <cstdlib>, <algorithm>, <new>, <cstdint> in through other headers: plugins/decklink/linux/platform.cpp uses free()
+# without <stdlib.h> ("use of undeclared identifier 'free'"), and more files will follow. Not a source edit: force-included. `-k 0` keeps ninja going so
+# one run lists every file the compiler rejects.
+environment = '''
+export CXXFLAGS="$CXXFLAGS -include stdlib.h -include cstdlib -include algorithm -include new -include cstdint"
+export CFLAGS="$CFLAGS -include stdlib.h"
+'''
 setup = '''
 %cmake \
     -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
@@ -36,7 +43,7 @@ setup = '''
     -DOPENGL_opengl_LIBRARY=/usr/lib/libGL.so
 '''
 build = '''
-%cmake_build
+%cmake_build -- -k 0
 '''
 install = '''
 %cmake_install
