@@ -15,8 +15,11 @@ label    = "FENRIROS_DKDE"
 # fight); its other parts (OpenSSH, curl) are listed instead
 # firewalld: the firewall of this image (nftables backend; its recipe is in the tree since 2026-11-15). Not
 # firewalld-gui: dkde has its own front end for it.
-packages = ["base", "openssh", "openssh-server", "curl", "linux", "live-initramfs", "dkinstaller", "firmware-linux-meta", "desktop-dkde", "firewalld"]
-exclude  = ["*-devel", "*-doc", "*-static"]
+
+
+packages = ["base", "openssh", "openssh-server", "curl", "linux", "live-initramfs", "dkinstaller", "firmware-linux-meta", "desktop-dkde", "firewalld",
+"xserver-xorg", "xserver-xorg-input-libinput", "xinit", "iputils", "net-tools", "iproute2", "iw", "traceroute", "ntfs-3g"]
+#exclude  = ["*-devel", "*-doc", "*-static"]
 # never installed, even as a dependency (apk stops with a conflict if something needs it)
 unwanted = ["dhcpcd"]
 services = ["udevd", "udev-trigger", "udev-settle", "modules", "syslogd", "seatd", "dbus", "networkmanager", "firewalld", "greetd"]

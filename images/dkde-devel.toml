@@ -1,0 +1,34 @@
+# FenrirOS with the DKDE desktop: a live ISO that boots straight to the
+# graphical desktop through greetd (the DKDE greeter; dkde-session starts for
+# the live user as greetd's initial_session, with no password typed). After a
+# logout the greeter asks for a login, and the live user's empty password is
+# accepted (the image's /etc/pam.d/greetd has nullok; the package's has none).
+# greetd and NetworkManager come with desktop-dkde; NetworkManager does DHCP,
+# so dhcpcd (base-net) is installed but its service is not enabled. greetd takes
+# vt 7, the text consoles tty1-tty6 keep their gettys. Every firmware group is
+# included.
+name     = "dkde-devel"
+arch     = "x86_64"
+hostname = "fenriros"
+label    = "FENRIROS_DKDE"
+# not base-net: it depends on dhcpcd, and NetworkManager does the DHCP here (two DHCP clients
+# fight); its other parts (OpenSSH, curl) are listed instead
+# firewalld: the firewall of this image (nftables backend; its recipe is in the tree since 2026-11-15). Not
+# firewalld-gui: dkde has its own front end for it.
+
+# "claude-code" Is added for now So I can spin up an instance to help debug on the running system.
+packages = ["base", "openssh", "openssh-server", "curl", "linux", "live-initramfs", "dkinstaller", "firmware-linux-meta", 
+"desktop-dkde", "firewalld", "claude-code", "base-devel", "xserver-xorg", "xserver-xorg-input-libinput", "xinit", "iputils", "net-tools", "iproute2", "iw", "traceroute"]
+#exclude  = ["*-devel", "*-doc", "*-static"]
+# never installed, even as a dependency (apk stops with a conflict if something needs it)
+unwanted = ["dhcpcd"]
+services = ["udevd", "udev-trigger", "udev-settle", "modules", "syslogd", "seatd", "dbus", "networkmanager", "firewalld", "greetd"]
+output   = ["iso"]
+login     = "greetd"
+autologin = "live"
+session   = "dkde-session"
+
+[[users]]
+name     = "live"
+groups   = ["wheel", "video", "render", "audio", "input", "plugdev"]
+password = "empty"
