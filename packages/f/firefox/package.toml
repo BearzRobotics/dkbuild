@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "firefox"
 version = "159.0"
-release = 9
+release = 10
 summary = "Mozilla Firefox web browser"
 license = "GPL-3.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND MPL-2.0"
 homepage = "https://www.mozilla.org/firefox"
@@ -26,6 +26,8 @@ export RUST_TARGET=x86_64-unknown-linux-musl RUSTFLAGS="-C target-feature=-crt-s
 # its `extra_rustflags` variable had no effect here (the build scripts were still static-pie). So every rustc call goes through a
 # wrapper that adds -crt-static (cargo runs RUSTC_WRAPPER in front of rustc; Mozilla passes the environment's through).
 export RUSTC_WRAPPER=/tmp/rustc-dynamic
+# r10: build scripts that compile C++ (webrender's glsl-to-cxx, through the `cc` crate) link `-lstdc++` by default; this system has libc++.
+export CXXSTDLIB=c++
 export MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE=system MOZ_NOSPAM=1
 '''
 setup = '''
