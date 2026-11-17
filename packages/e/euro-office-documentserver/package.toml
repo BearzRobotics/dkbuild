@@ -55,13 +55,13 @@
 # lockfile: statsd uses it only for its syslog backend, which the Metrics service does not configure.
 name = "euro-office-documentserver"
 version = "9.3.7.1"
-release = 4
+release = 5
 summary = "Euro-Office Document Server: online office editors"
 license = "AGPL-3.0-only AND CC-BY-SA-4.0"
 homepage = "https://github.com/Euro-Office/DocumentServer"
 archs = ["x86_64", "aarch64"]
 hostdeps = ["nodejs", "python", "make", "pkgconf", "m4", "euro-office-core"]
-builddeps = ["libvips-devel"]
+builddeps = ["gcc", "libvips-devel"]
 rundeps = ["nodejs", "euro-office-core"]
 options = ["!check", "!strip", "npmdeps"]
 
@@ -110,7 +110,9 @@ test -f deploy/sdkjs/word/sdk-all.js
 # web-apps, as web-apps.bake.Dockerfile (merge_and_check.py fills missing
 # translations from the English ones)
 (cd web-apps/translation && python3 merge_and_check.py)
-(cd web-apps/build && THEME=euro-office node scripts/build-pipeline.js)
+# r5: sharp's prebuilt musl binary (@img/sharp-linuxmusl-x64, used by the web-apps pipeline's image step: "Error loading shared library libstdc++.so.6") needs GCC's C++
+# runtime; this system's own C++ library is libc++. The `gcc` package (builddep) keeps libstdc++ in /usr/lib/gcc15/lib, put on the library path for this command only.
+(cd web-apps/build && LD_LIBRARY_PATH=/usr/lib/gcc15/lib THEME=euro-office node scripts/build-pipeline.js)
 test -d deploy/web-apps/apps
 # the admin panel's client, as server.bake.Dockerfile
 (cd server/AdminPanel/client && APP_NAME=Euro-Office npm run build)
