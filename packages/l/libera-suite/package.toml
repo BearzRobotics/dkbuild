@@ -48,7 +48,7 @@
 # Not built yet.
 name = "libera-suite"
 version = "0.7.0"
-release = 7
+release = 8
 summary = "Desktop office suite built on Euro-Office's editors (GTK, WebKitGTK)"
 license = "Apache-2.0 AND AGPL-3.0-only AND CC-BY-SA-4.0"
 homepage = "https://docs.liberasuite.eu"
@@ -163,7 +163,9 @@ ln -sfn $sdkjs /build/sdkjs
 ln -sfn $webapps /build/web-apps
 # the editors' npm packages, offline (sdkjs's npm-shrinkwrap.json is
 # files/sdkjs.package-lock.json for npmdeps; web-apps has a package-lock.json)
-node /dkbuild/npm-offline.js /tmp/npm-cache $sdkjs/build/npm-shrinkwrap.json $webapps/build/package-lock.json
+# r8: + web-apps/vendor/framework7-react/npm-shrinkwrap.json (files/framework7.package-lock.json for npmdeps): the build pipeline runs `npm install` there for the mobile
+# editors ("mobile:install failed": ENOTCACHED yocto-queue); its packages were not in the offline cache.
+node /dkbuild/npm-offline.js /tmp/npm-cache $sdkjs/build/npm-shrinkwrap.json $webapps/build/package-lock.json $webapps/vendor/framework7-react/npm-shrinkwrap.json
 (cd $sdkjs/build && npm ci --ignore-scripts)
 (cd $webapps/build && npm ci --ignore-scripts)
 # The update check asks Abilian's CDN once a day unless config.toml says

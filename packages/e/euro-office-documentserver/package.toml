@@ -55,7 +55,7 @@
 # lockfile: statsd uses it only for its syslog backend, which the Metrics service does not configure.
 name = "euro-office-documentserver"
 version = "9.3.7.1"
-release = 3
+release = 4
 summary = "Euro-Office Document Server: online office editors"
 license = "AGPL-3.0-only AND CC-BY-SA-4.0"
 homepage = "https://github.com/Euro-Office/DocumentServer"
@@ -89,7 +89,8 @@ node /dkbuild/npm-offline.js /tmp/npm-cache sdkjs/build/npm-shrinkwrap.json \
     web-apps/build/package-lock.json server/Common/npm-shrinkwrap.json \
     server/DocService/npm-shrinkwrap.json server/FileConverter/npm-shrinkwrap.json \
     server/Metrics/npm-shrinkwrap.json server/AdminPanel/server/package-lock.json \
-    server/AdminPanel/client/package-lock.json
+    server/AdminPanel/client/package-lock.json web-apps/vendor/framework7-react/npm-shrinkwrap.json
+# r4: + web-apps/vendor/framework7-react/npm-shrinkwrap.json (files/framework7.package-lock.json): the web-apps pipeline runs `npm install` there for the mobile editors.
 (cd sdkjs/build && npm ci --ignore-scripts)
 (cd web-apps/build && npm ci --ignore-scripts)
 for d in Common DocService FileConverter Metrics AdminPanel/server; do
