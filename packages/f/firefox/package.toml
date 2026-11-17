@@ -4,12 +4,12 @@
 # dependency names (they are Chimera's) before building.
 name = "firefox"
 version = "159.0"
-release = 5
+release = 8
 summary = "Mozilla Firefox web browser"
 license = "GPL-3.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND MPL-2.0"
 homepage = "https://www.mozilla.org/firefox"
 patches = ["atoi.patch", "clang-ias.patch", "clang-memory-throw-gcc.patch", "depflags.patch", "enable-elfhack-relr.patch", "fix-fortify-system-wrappers.patch", "fix-rust-target.patch", "fix-webrtc-pid_t.patch", "google-sucks.patch", "lfs64.patch", "libcxx18.patch", "loong0001-Enable-WebRTC-for-loongarch64.patch", "loong0003-Define-HWCAP_LOONGARCH_LSX_and_LASX.patch", "loong0004-Fix-ycbcr-chromium_types-warning.patch", "musl-prctl.patch", "no-ccache-stats.patch", "ppc64-webrtc.patch", "riscv64-no-llama-simd.patch", "riscv64-reduce-debug.patch", "sandbox-sched_setscheduler.patch", "sqlite-ppc.patch", "use-gtar.patch", "wasip1.patch", "wasm2c-various-archs.patch", "x11lol.patch", "x86_64-Fix-stack-alignment-in-breakpad_getcontext.S.patch", "xptcall-integrated-as.patch"]
-hostdeps = ["automake", "rust", "cbindgen", "llvm-devel", "llvm-clang", "llvm-lld", "dbus", "gettext", "tar", "libtool", "nasm", "nodejs", "pkgconf", "python", "zip", "unzip"]
+hostdeps = ["automake", "bindgen", "rust", "cbindgen", "llvm-devel", "llvm-clang", "llvm-lld", "dbus", "gettext", "tar", "libtool", "nasm", "nodejs", "pkgconf", "python", "zip", "unzip"]
 builddeps = ["alsa-lib-devel", "dbus-devel", "ffmpeg-devel", "freetype-devel", "glib-devel", "gtk+3-devel", "icu-devel", "libevent-devel", "libffi-devel", "libjpeg-turbo-devel", "libnotify-devel", "libogg-devel", "libpng-devel", "libpulse-devel", "libtheora-devel", "libvorbis-devel", "libvpx-devel", "libwebp-devel", "libxcomposite-devel", "libxscrnsaver-devel", "libxt-devel", "mesa-devel", "nspr-devel", "nss-devel", "pipewire-devel", "pixman-devel", "zlib-ng-compat-devel"]
 rundeps = ["ffmpeg", "openh264", "speechd"]
 options = ["jobs:12", "!cross", "!check"]
@@ -29,13 +29,21 @@ export RUSTC_WRAPPER=/tmp/rustc-dynamic
 export MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE=system MOZ_NOSPAM=1
 '''
 setup = '''
-# r5: gecko-profiler's build script (bindgen 0.73.1) panics on this tree's LLVM 23 / libc++ headers: "Not an item: ItemId(43962)" in
-# Type::layout, while computing the layout of a class whose field or base is one of libc++'s internal std:: types (found by running its build
-# script by hand in the kept build root; bindgen 0.73.2, tried in r4, panics the same way). The script already makes std::string,
-# std::vector.*, std::unique_ptr opaque for the same reason; every std:: type is made opaque (bindgen keeps size and alignment from clang
-# for an opaque type, and the profiler bindings only pass those types around by value). Source edit: sed on tools/profiler/rust-api/build.rs.
-sed -i 's|        .opaque_type("std::vector.\*")|        .opaque_type("std::vector.*")\n        .opaque_type("std::.*")|' tools/profiler/rust-api/build.rs
-grep -q 'opaque_type("std::\.\*")' tools/profiler/rust-api/build.rs
+# r8: gecko-profiler's build script panics in bindgen's library on this tree's LLVM 23 / libc++ headers ("Not an item: ItemId(43962)" in
+# Type::layout). Found by running the script by hand in the kept build root; tried and not enough: bindgen 0.73.2 in place of the vendored
+# 0.73.1, every std:: type opaque. The `bindgen` command-line tool (0.73.2, package `bindgen`, hostdep) generates the bindings from the same
+# headers with the same options without error, so tools/profiler/rust-api/build.rs calls it (files/profiler-bindgen-cli.rs is inserted at the
+# start of generate_bindings(), with the options read back from the library builder in a debug build). Source edit: python3 insert.
+python3 - "$pkgfiles" <<'PY'
+import sys
+p = "tools/profiler/rust-api/build.rs"
+s = open(p).read()
+marker = "fn generate_bindings() {\n"
+assert marker in s
+s = s.replace(marker, marker + open(sys.argv[1] + "/profiler-bindgen-cli.rs").read(), 1)
+open(p, "w").write(s)
+PY
+grep -q 'std::process::Command::new("bindgen")' tools/profiler/rust-api/build.rs
 printf '#!/bin/sh\nexec "$@" -C target-feature=-crt-static\n' > /tmp/rustc-dynamic; chmod 755 /tmp/rustc-dynamic
 # Chimera's breakpad header (musl has no stab.h).
 cp $pkgfiles/stab.h toolkit/crashreporter/google-breakpad/src/
