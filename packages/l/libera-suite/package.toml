@@ -48,13 +48,13 @@
 # Not built yet.
 name = "libera-suite"
 version = "0.7.0"
-release = 8
+release = 9
 summary = "Desktop office suite built on Euro-Office's editors (GTK, WebKitGTK)"
 license = "Apache-2.0 AND AGPL-3.0-only AND CC-BY-SA-4.0"
 homepage = "https://docs.liberasuite.eu"
 archs = ["x86_64", "aarch64"]
 hostdeps = ["python", "python-hatchling", "cmake", "ninja", "pkgconf", "nodejs", "git"]
-builddeps = ["euro-office-v8", "boost-devel", "icu-devel", "openssl-devel", "zlib-ng-compat-devel"]
+builddeps = ["gcc", "euro-office-v8", "boost-devel", "icu-devel", "openssl-devel", "zlib-ng-compat-devel"]
 rundeps = ["python", "python-pywebview", "python-gobject", "python-typing-extensions", "webkitgtk", "gtk+3"]
 options = ["!check", "npmdeps", "jobs:12"]
 
@@ -237,7 +237,10 @@ cp build-core/tools/allfontsgen $bin/tools/
 test -x $bin/x2t && test -x $bin/libera-sign
 # the editors (payload.sh): sdkjs and web-apps for the desktop platform
 (cd $sdkjs/build && BUILD_ROOT=$P SDK_PLATFORM=desktop node scripts/build-pipeline.cjs)
-(cd $webapps/build && BUILD_ROOT=$P THEME=euro-office node scripts/build-pipeline.js)
+# r9: sharp's prebuilt musl binary (@img/sharp-linuxmusl-x64, used by the web-apps build's image step: "deploy-common failed: Could not load the sharp module ...
+# Error loading shared library libstdc++.so.6") needs GCC's C++ runtime; this system's own C++ library is libc++. The `gcc` package (builddep) keeps libstdc++
+# in /usr/lib/gcc15/lib, which is put on the library path for that one command only.
+(cd $webapps/build && LD_LIBRARY_PATH=/usr/lib/gcc15/lib BUILD_ROOT=$P THEME=euro-office node scripts/build-pipeline.js)
 # payload.sh: English for the strings a translation lacks
 python3 -I - $P/web-apps/apps/*/main/locale <<'FILL'
 import json, pathlib, sys
