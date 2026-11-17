@@ -383,9 +383,10 @@ lists those recipes without building anything, and `outdated --bump` raises
 their `release`.
 
 Build roots are made in `work/<name>/`, or in `$DKBUILD_FAST_WORK/<name>/`
-when that variable is set (a faster disk than the project's): only for recipes
-that are not heavy (no `jobs:N`), and only while that file system has 30 GB
-free, so a small fast disk is never filled.
+when that variable is set (a faster disk than the project's), and only while
+that file system has 30 GB free, or 100 GB for a heavy recipe (`jobs:N`), so a
+small fast disk is never filled. (Heavy recipes were kept off it at first; a
+Firefox build root on a shingled hard disk stalled the whole machine.)
 
 Variables available in every step: `$name`, `$version`, `$release` (the
 recipe's), `$pkgdir` (the install root, `/destdir`), `$srcdir`,

@@ -104,14 +104,19 @@ fn runLogged(arena: Allocator, io: std.Io, argv: []const []const u8, log: *std.A
 }
 
 /// Where a recipe's build root goes (SPEC.md 7): `<root>/work/<name>`, or
-/// `$DKBUILD_FAST_WORK/<name>` when that is set, the recipe is not heavy
-/// (no `jobs:N`) and the directory's file system has at least 30 GB free, so a
-/// fast but small disk is never filled.
+/// `$DKBUILD_FAST_WORK/<name>` when that is set and the directory's file system
+/// has enough free space, so a fast but small disk is never filled: at least
+/// 30 GB for an ordinary recipe, at least 100 GB for a heavy one (`jobs:N`:
+/// LLVM, Firefox, Chromium; their trees are tens of GB and are the ones that
+/// stall a slow disk, a shingled hard disk above all).
 fn buildWorkDir(arena: Allocator, io: std.Io, opts: Options, r: recipe.Recipe) ![]const u8 {
     const default = try std.fs.path.join(arena, &.{ opts.root, "work", r.name });
     const fast = opts.fast_work orelse return default;
     if (fast.len == 0) return default;
-    for (r.options) |o| if (std.mem.startsWith(u8, o, "jobs:")) return default;
+    var need_kb: u64 = 30 * 1024 * 1024;
+    for (r.options) |o| if (std.mem.startsWith(u8, o, "jobs:")) {
+        need_kb = 100 * 1024 * 1024;
+    };
     Dir.cwd().createDirPath(io, fast) catch return default;
     const res = std.process.run(arena, io, .{ .argv = &.{ "df", "-Pk", fast } }) catch return default;
     var lines = std.mem.tokenizeScalar(u8, res.stdout, '\n');
@@ -121,7 +126,7 @@ fn buildWorkDir(arena: Allocator, io: std.Io, opts: Options, r: recipe.Recipe) !
     var i: usize = 0;
     while (cols.next()) |c| : (i += 1) if (i == 3) {
         const kb = std.fmt.parseInt(u64, c, 10) catch return default;
-        if (kb < 30 * 1024 * 1024) return default;
+        if (kb < need_kb) return default;
         return try std.fs.path.join(arena, &.{ fast, r.name });
     };
     return default;
