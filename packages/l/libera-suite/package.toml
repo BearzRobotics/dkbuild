@@ -48,7 +48,7 @@
 # Not built yet.
 name = "libera-suite"
 version = "0.7.0"
-release = 5
+release = 6
 summary = "Desktop office suite built on Euro-Office's editors (GTK, WebKitGTK)"
 license = "Apache-2.0 AND AGPL-3.0-only AND CC-BY-SA-4.0"
 homepage = "https://docs.liberasuite.eu"
@@ -180,9 +180,29 @@ build = '''
 # BaseThread.cpp resets a pthread_t with NULL, which is an integer on musl and
 # nullptr here, so 0 is used.
 # r4: + -include new (DesktopEditor/graphics/pro/officedrawingfile.cpp uses std::nothrow without <new>: "no member named 'nothrow' in namespace 'std'")
-export CXXFLAGS="$CXXFLAGS -include stdlib.h -include new"
+# r6: the list one `ninja -k 0` run gave: <algorithm> and <cstdlib> are not pulled in by other headers any more (std::fill: Common/cfcpp/sector.cpp; std::atoi:
+# SvgReader.cpp, HwpDoc/Common/XMLReader.cpp; std::abs: HWPRecordNumbering.cpp), so they are force-included too.
+export CXXFLAGS="$CXXFLAGS -include stdlib.h -include new -include algorithm -include cstdlib"
 export CFLAGS="$CFLAGS -include stdlib.h"
 sed -i 's/m_thread = NULL;/m_thread = 0;/' $core/DesktopEditor/graphics/BaseThread.cpp
+# r6: NULL is nullptr in C++ here, and this code used it as 0 (each line below was reported by the compiler; each edit is checked to have happened):
+#  - nativecontrol.h:323  `*pData = NULL;` assigns to a BYTE -> 0
+#  - PdfEditor.cpp:1885   `return NULL;` in a bool function -> false
+#  - ChartFromToBinary.cpp:10116, ChartSerialize.cpp:1310  `NULL != x.IsInit()` (a bool) -> `x.IsInit()`
+#  - Presentation/Converter.cpp:242  `NULL != pPointerN` (a size_t) -> `0 != pPointerN`
+#  - ConvertDocx2Txt.cpp:145  `Lists(NULL)`, a std::vector<int> member initialised with 0 elements -> `Lists()`
+sed -i '323s/\*pData = NULL;/*pData = 0;/' $core/DesktopEditor/doctrenderer/nativecontrol.h
+sed -i '1885s/return NULL;/return false;/' $core/PdfFile/PdfEditor.cpp
+sed -i '10116s/if (NULL != oVal.m_shape.IsInit())/if (oVal.m_shape.IsInit())/' $core/OOXML/Binary/Sheets/Reader/ChartFromToBinary.cpp
+sed -i '1310s/if (NULL != m_l.IsInit())/if (m_l.IsInit())/' $core/OOXML/XlsxFormat/Chart/ChartSerialize.cpp
+sed -i '242s/if (NULL != pPointerN)/if (0 != pPointerN)/' $core/OOXML/Binary/Presentation/Converter.cpp
+sed -i '145s/Lists(NULL)/Lists()/' $core/TxtFile/Source/ConvertDocx2Txt.cpp
+sed -n '323p' $core/DesktopEditor/doctrenderer/nativecontrol.h | grep -q '\*pData = 0;'
+sed -n '1885p' $core/PdfFile/PdfEditor.cpp | grep -q 'return false;'
+sed -n '10116p' $core/OOXML/Binary/Sheets/Reader/ChartFromToBinary.cpp | grep -q 'if (oVal.m_shape.IsInit())'
+sed -n '1310p' $core/OOXML/XlsxFormat/Chart/ChartSerialize.cpp | grep -q 'if (m_l.IsInit())'
+sed -n '242p' $core/OOXML/Binary/Presentation/Converter.cpp | grep -q 'if (0 != pPointerN)'
+sed -n '145p' $core/TxtFile/Source/ConvertDocx2Txt.cpp | grep -q 'Lists()'
 # r3: the same for a short: MetaFileUtils.h:990 (`pRegion->shScanCount = NULL;`, NULL being nullptr here: "assigning to 'short' from
 # incompatible type 'std::nullptr_t'"), which stopped the x2t graphics library.
 sed -i 's/shScanCount = NULL;/shScanCount = 0;/' $core/DesktopEditor/raster/Metafile/Common/MetaFileUtils.h
