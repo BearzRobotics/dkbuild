@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "libaccounts-qt"
 version = "1.17"
-release = 3
+release = 4
 summary = "GLib-based library for managing the accounts database"
 license = "LGPL-2.1-only"
 homepage = "https://gitlab.com/accounts-sso/libaccounts-qt"
@@ -16,6 +16,10 @@ source = [
     { url = "https://gitlab.com/accounts-sso/libaccounts-qt/-/archive/VERSION_1.17/libaccounts-qt-VERSION_1.17.tar.gz", sha256 = "6ed3e976133962c1c88f6c66928ba0d0a17a570843577d31e783dc891659e5d8" },
 ]
 
+# r4: the Chimera template's configure() (qmake6) was not carried over by the importer: the build stopped with "No targets specified and no makefile found".
+setup = '''
+qmake6 PREFIX=/usr QMAKE_CFLAGS="$CFLAGS" QMAKE_CXXFLAGS="$CXXFLAGS" QMAKE_LFLAGS="$LDFLAGS"
+'''
 build = '''
 %make
 '''
