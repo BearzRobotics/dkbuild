@@ -50,9 +50,12 @@
 # yet: no rundeps on them. Setup: /usr/share/doc/euro-office-documentserver/
 # README.FenrirOS.
 # Not built yet.
+# r2: files/metrics.package-lock.json lacked an entry for modern-syslog (an optional dependency of statsd, a native syslog binding; the version 1 lockfile it was
+# converted from does not list it), so `npm ci` stopped: "Missing: modern-syslog@ from lock file". statsd's optionalDependencies line for it is removed from the
+# lockfile: statsd uses it only for its syslog backend, which the Metrics service does not configure.
 name = "euro-office-documentserver"
 version = "9.3.7.1"
-release = 1
+release = 2
 summary = "Euro-Office Document Server: online office editors"
 license = "AGPL-3.0-only AND CC-BY-SA-4.0"
 homepage = "https://github.com/Euro-Office/DocumentServer"
