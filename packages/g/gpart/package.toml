@@ -5,7 +5,7 @@
 # project's tag archive, so autogen.sh runs. /usr/bin (--sbindir=/usr/bin).
 name = "gpart"
 version = "0.3"
-release = 1
+release = 2
 summary = "Guess PC disk partition table"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/baruch/gpart"
@@ -17,6 +17,10 @@ source = [
     { url = "https://github.com/baruch/gpart/archive/refs/tags/0.3.tar.gz", sha256 = "ec56d12ec9ffdb9877c12692ea6e51620b1ae44473d3d253b27fc31ed9ebb4dd" },
 ]
 
+# new release: loff_t (l64seek.h) is only declared by musl under _GNU_SOURCE ("unknown type name 'loff_t'").
+environment = '''
+export CFLAGS="$CFLAGS -D_GNU_SOURCE"
+'''
 setup = '''
 sh ./autogen.sh
 %configure --sbindir=/usr/bin

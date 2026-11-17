@@ -4,7 +4,7 @@
 # (COPYING is the GPL-3 text, COPYING.LESSER the LGPL-3 grant).
 name = "libthreadar"
 version = "1.6.1"
-release = 1
+release = 2
 summary = "C++ POSIX thread wrapper library"
 license = "LGPL-3.0-or-later"
 homepage = "https://libthreadar.sourceforge.net"
@@ -15,6 +15,10 @@ source = [
     { url = "https://downloads.sourceforge.net/project/libthreadar/1.6.1/libthreadar-1.6.1.tar.gz", sha256 = "467709320c54215ac8829ef48e856d890caa4f6a7831633d3992e0b5359f38d8" },
 ]
 
+# new release: thread.cpp uses std::exception_ptr without <exception> (libc++ 23 no longer includes it through other headers): force-included.
+environment = '''
+export CXXFLAGS="$CXXFLAGS -include exception"
+'''
 setup = '''
 %configure
 '''

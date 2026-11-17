@@ -1,7 +1,7 @@
 # Linux-CAN / SocketCAN user space applications. (BlackArch list, requested 2026-11-16; docs/requests.md). Generated from the sources' build files (cmake); the build dependencies are guessed from the #includes. Not built yet when written (wip/queue): expect first-build fixes.
 name = "can-utils"
 version = "2025.01"
-release = 1
+release = 2
 summary = "Linux-CAN / SocketCAN user space applications."
 license = "GPL-2.0-only OR BSD-3-Clause"
 homepage = "https://github.com/linux-can/can-utils"
@@ -13,6 +13,10 @@ source = [
     { url = "https://github.com/linux-can/can-utils/archive/refs/tags/v2025.01.tar.gz", sha256 = "88b30feace372c4a61e6adb2534791c0cfba6123ebcca7f59bbb76580d4a6915" },
 ]
 
+# new release: libj1939.h uses struct timespec without <time.h> ("field has incomplete type 'struct timespec'"): force-included.
+environment = '''
+export CFLAGS="$CFLAGS -include time.h"
+'''
 setup = '''
 %cmake
 '''

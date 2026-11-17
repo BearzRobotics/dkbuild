@@ -11,7 +11,7 @@
 #   (/usr/bin, /usr/share/man/man8, /etc/foremost.conf).
 name = "foremost"
 version = "1.5.7"
-release = 1
+release = 2
 summary = "File carving tool for forensic recovery"
 license = "LicenseRef-Public-Domain"
 homepage = "https://github.com/korczis/foremost"
@@ -22,6 +22,10 @@ source = [
     { url = "https://github.com/korczis/foremost/archive/refs/tags/v1.5.7.tar.gz", sha256 = "da27368947a3402b15f63190a90a37c09e45517783e0d9435c87a81f97d29e80" },
 ]
 
+# new release: main.c and helpers.c define `wildcard` in more than one file ("ld.lld: error: duplicate symbol: wildcard"): clang 11 and later default to -fno-common; -fcommon restores the old merging.
+environment = '''
+export CFLAGS="$CFLAGS -fcommon"
+'''
 setup = '''
 sed -i 's/fopen64(/fopen(/' engine.c
 '''

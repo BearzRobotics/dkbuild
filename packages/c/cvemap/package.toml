@@ -1,8 +1,8 @@
 # CLI tool designed to provide a structured and easily navigable interface to various... (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
-# Go module, dependencies fetched on the host (godeps). Main package: cmd/cvemap.
+# Go module, dependencies fetched on the host (godeps). Main package: cmd/vulnx (r2: the project was renamed vulnx; the source tree has no cmd/cvemap any more: "directory not found"); the binary keeps the name cvemap.
 name = "cvemap"
 version = "2.0.2"
-release = 1
+release = 2
 summary = "CLI tool designed to provide a structured and easily navigable interface to various..."
 license = "MIT"
 homepage = "https://github.com/projectdiscovery/cvemap"
@@ -19,9 +19,9 @@ export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
 '''
 build = '''
 mkdir -p build
-go build -o build/cvemap ./cmd/cvemap
+go build -o build/cvemap ./cmd/vulnx
 '''
 install = '''
-install -Dm755 build/cvemap "$pkgdir/usr/bin/integration-test"
+install -Dm755 build/cvemap "$pkgdir/usr/bin/cvemap"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/cvemap/LICENSE"
 '''
