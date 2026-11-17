@@ -1,0 +1,41 @@
+# drbl (Diskless Remote Boot in Linux): only the part Clonezilla needs. Written
+# for this tree from the project's tag archive. DRBL proper is a network-boot
+# cluster server toolkit (drblsrv/drblpush configure DHCP, TFTP, NFS, PXE and
+# the clients' root file systems); none of that is installed: it would write
+# server configuration and enable services, and Clonezilla does not use it.
+# Installed here is what `clonezilla` / `ocs-sr` source and call:
+# - /etc/drbl/drbl.conf and the other /etc/drbl example files (settings),
+# - /usr/share/drbl/sbin: drbl-conf-functions, drbl-functions (the shell
+#   function library every ocs-* script loads), and the helper programs of
+#   /usr/share/drbl/bin (get-nic-devs, drbl-get-ipadd, ...),
+# - /usr/share/drbl/lang: the translated message catalogues (bash and perl),
+#   with the *.UTF-8 links `make -C lang` makes,
+# - /usr/bin: drbl's own bin/ programs (drbl-run-parts, drbl-uriparse,
+#   drbl-gethostip, drbl-wakeonlan, ...).
+# Left out: sbin/ (the server programs), setup/, pkg/, pki/, image/, prerun,
+# postrun, themes (a GDM theme), doc.
+# No source edits; "make install" is not used (it installs everything above).
+name = "drbl"
+version = "5.11.25"
+release = 1
+summary = "DRBL function library and tools used by Clonezilla"
+license = "GPL-2.0-or-later"
+homepage = "https://drbl.org"
+rundeps = ["bash", "coreutils", "gawk", "grep", "sed", "iproute2", "util-linux"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/stevenshiau/drbl/archive/refs/tags/v5.11.25.tar.gz", sha256 = "4d4769ee560c16216b09df213a401152652796d23cd7d5232e69f7c8005324bd" },
+]
+
+build = '''
+make -C lang all
+'''
+install = '''
+install -d "$pkgdir/usr/bin" "$pkgdir/usr/share/drbl" "$pkgdir/etc/drbl"
+cp -a bin/. "$pkgdir/usr/bin/"
+cp -a scripts/sbin scripts/bin lang "$pkgdir/usr/share/drbl/"
+rm -f "$pkgdir/usr/share/drbl/lang/Makefile"
+cp -a conf/. "$pkgdir/etc/drbl/"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/drbl/LICENSE"
+'''

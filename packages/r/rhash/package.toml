@@ -1,0 +1,33 @@
+# rhash: hash sums tool (CRC32, MD5, SHA-1/2/3, Whirlpool, BTIH, ...) and
+# librhash, which dar needs for its Whirlpool hash. Written for this tree.
+# configure here is upstream's own hand-written script (not autoconf):
+# OpenSSL is linked at load time (--enable-openssl) for the optimized MD5/SHA
+# code; gettext is not enabled (musl, no GNU libintl). Both the shared and
+# static library are built (--enable-lib-shared/--enable-lib-static) and
+# installed with the extra make targets upstream documents
+# (install-lib-so-link, install-lib-headers, install-pkg-config).
+name = "rhash"
+version = "1.4.6"
+release = 1
+summary = "Hash sums tool and library"
+license = "0BSD"
+homepage = "https://rhash.sourceforge.net"
+builddeps = ["openssl-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/rhash/RHash/archive/refs/tags/v1.4.6.tar.gz", sha256 = "9f6019cfeeae8ace7067ad22da4e4f857bb2cfa6c2deaa2258f55b2227ec937a" },
+]
+
+setup = '''
+CC="$CC" ./configure --prefix=/usr --sysconfdir=/etc --mandir=/usr/share/man \
+    --extra-cflags="$CFLAGS" --extra-ldflags="$LDFLAGS" \
+    --enable-lib-shared --enable-lib-static --enable-openssl --disable-openssl-runtime
+'''
+build = '''
+%make all lib-shared lib-static
+'''
+install = '''
+make DESTDIR="$pkgdir" install install-lib-shared install-lib-static install-lib-so-link install-lib-headers install-pkg-config
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/rhash/COPYING"
+'''

@@ -1,0 +1,36 @@
+# libx86emu: x86 real-mode emulation library (runs video BIOS code in user
+# space); hwinfo's libhd uses it to read VESA/BIOS data. Written for this tree
+# from the 3.7 tag archive. The Makefile builds the shared library only and
+# its default LIBDIR probes `ldd /bin/sh` for lib64 (policy forbids
+# /usr/lib64 here), so LIBDIR is given. The static library is made by hand
+# from the same objects (the shared one needs -fPIC, which the Makefile's
+# CFLAGS already set, so the objects serve both).
+# Source edits: none. VERSION is not in the tag archive (upstream's git2log
+# makes it): the build writes it, `3.7`.
+# License: the SciTech/Mosberger/Eich/SUSE notice is an MIT-style permissive
+# licence; its own LICENSE file is kept.
+name = "libx86emu"
+version = "3.7"
+release = 1
+summary = "x86 real-mode emulation library"
+license = "MIT"
+homepage = "https://github.com/wfeldt/libx86emu"
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/wfeldt/libx86emu/archive/refs/tags/3.7.tar.gz", sha256 = "03754aede79530baa0e862e1aad5527e9c1bd3371736b1ab5a2bc769e4a3d680" },
+]
+
+setup = '''
+echo 3.7 > VERSION
+'''
+build = '''
+make -j$jobs CC="$CC" CFLAGS="$CFLAGS -fPIC -fvisibility=hidden -Wall" LDFLAGS="$LDFLAGS" LIBDIR=/usr/lib shared
+ar rcs libx86emu.a *.o
+'''
+install = '''
+make DESTDIR="$pkgdir" LIBDIR=/usr/lib install
+install -Dm644 libx86emu.a "$pkgdir/usr/lib/libx86emu.a"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libx86emu/LICENSE"
+'''

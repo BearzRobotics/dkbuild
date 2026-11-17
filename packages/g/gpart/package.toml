@@ -1,0 +1,30 @@
+# gpart: guess PC disk partitions (scans a disk for filesystem signatures to
+# rebuild a damaged MBR partition table). Written for this tree. The upstream
+# is old (0.3 is from 2012; Baruch Even's git tree adds autotools only), still
+# the one every distribution ships, still works on MBR disks. Built from the
+# project's tag archive, so autogen.sh runs. /usr/bin (--sbindir=/usr/bin).
+name = "gpart"
+version = "0.3"
+release = 1
+summary = "Guess PC disk partition table"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/baruch/gpart"
+hostdeps = ["autoconf", "automake", "libtool"]
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/baruch/gpart/archive/refs/tags/0.3.tar.gz", sha256 = "ec56d12ec9ffdb9877c12692ea6e51620b1ae44473d3d253b27fc31ed9ebb4dd" },
+]
+
+setup = '''
+sh ./autogen.sh
+%configure --sbindir=/usr/bin
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/gpart/COPYING"
+'''

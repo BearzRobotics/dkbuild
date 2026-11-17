@@ -1,0 +1,35 @@
+# sg3-utils (upstream: sg3_utils): SCSI generic utilities (sg_inq, sg_readcap, sg_sync, sg_start,
+# sg_format, sg_vpd, ...), also useful for SATA/USB bridges and NVMe-ish
+# passthrough (--enable-nvme-supp is the default). Written for this tree; built
+# from the project's tag archive (not the tarball host sg.danny.cz), so
+# autogen.sh runs. Upstream's udev rules (scripts/*.rules) are not installed by
+# its make install and are not shipped.
+# Programs install to /usr/bin (--sbindir=/usr/bin: no /usr/sbin here).
+# The scripts directory (rescan-scsi-bus.sh etc.) is installed by upstream's
+# make install; they are shell scripts upstream (bash/sh) and are not rewritten.
+name = "sg3-utils"
+version = "1.49"
+release = 1
+summary = "SCSI generic utilities"
+license = "BSD-2-Clause AND GPL-2.0-or-later"
+homepage = "https://sg.danny.cz/sg/sg3_utils.html"
+hostdeps = ["autoconf", "automake", "libtool"]
+builddeps = ["linux-headers"]
+rundeps = ["bash"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/doug-gilbert/sg3_utils/archive/refs/tags/release-1.49.tar.gz", sha256 = "b1eac8f50cf588fb777a1fb615598d8d70bef1adb15a14148761035a9a43a847" },
+]
+
+setup = '''
+sh ./autogen.sh
+%configure --sbindir=/usr/bin
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/sg3-utils/COPYING"
+'''

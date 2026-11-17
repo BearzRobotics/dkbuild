@@ -1,0 +1,35 @@
+# rdiff-backup: reverse-incremental backup (the newest copy is a plain mirror,
+# increments go backwards) using the rsync algorithm, locally or over ssh.
+# Written for this tree. This is the 2.2 series (Python with a C extension
+# linked against librsync, plus PyYAML): the Rust rewrite announced for
+# 3.0 is not released (upstream tags are 2.x only), so there are no crates and
+# no cargodeps. When 3.0 ships the recipe changes to cargodeps.
+# Extras used when present: python-pylibacl (ACLs) and python-pyxattr (extended
+# attributes), packages of this tree, plus psutil and PyYAML.
+# Source edit: none. setuptools-scm cannot read git in a release tarball:
+# SETUPTOOLS_SCM_PRETEND_VERSION gives the version. The build is not isolated;
+# upstream pins setuptools<70 and setuptools-scm==7.1.0 only as development
+# requirements, the tree's versions are used.
+name = "rdiff-backup"
+version = "2.2.7"
+release = 1
+summary = "Reverse-incremental backup tool using the rsync algorithm"
+license = "GPL-2.0-or-later"
+homepage = "https://rdiff-backup.net"
+hostdeps = ["python", "python-setuptools", "python-setuptools-scm", "python-wheel", "pkgconf"]
+builddeps = ["python-devel", "librsync-devel"]
+rundeps = ["python", "python-pyyaml", "python-psutil", "python-pylibacl", "python-pyxattr"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/ab/23/3fab9ee2a2691859bcd99601682806cd86f530bfeaff13d284c5f1f8bfae/rdiff_backup-2.2.7.tar.gz", sha256 = "a88a1eb895f3c6c7dcc12d897ab53e301f9f49c9ac61b05039be212891c7d5d7" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/rdiff-backup/COPYING"
+'''

@@ -1,0 +1,52 @@
+# bcachefs-tools: userspace tools for bcachefs (`bcachefs format|mount|fsck|
+# device|subvolume ...`, mkfs/fsck/mount.bcachefs, the FUSE implementation
+# `mount.fuse.bcachefs`). Written for this tree from the 1.39.7 tag archive.
+# UNVERIFIED: not built here; needs a first run to find musl problems
+# (Alpine packages it, so none is expected beyond dependency detection).
+# Rust crates come from cargodeps (the repository's Cargo.lock);
+# bindgen (bch_bindgen) needs libclang (llvm, LIBCLANG_PATH). The C side finds
+# blkid, uuid, liburcu, libsodium, zlib, lz4, zstd, libudev and libkeyutils with
+# pkg-config, and links libaio and libunwind. libunwind is LLVM's (llvm ships
+# it, but no libunwind.pc): the recipe writes a small .pc in a scratch directory
+# on PKG_CONFIG_PATH. Without the git repository the Makefile would ask
+# `cargo metadata | jq` for the version; a .version file with 1.39.7 stands in.
+# Install: PREFIX=/usr and ROOT_SBINDIR=/usr/bin (upstream puts the programs
+# in /sbin, which is a link to usr/sbin here, and the packaging policy needs
+# /usr). The mkfs/fsck/mount helper links are upstream's. install also puts
+# the DKMS source of the kernel module in /usr/src/bcachefs-1.39.7 (bcachefs is
+# not in the mainline kernel since 6.18; with dkms and linux-devel the module is
+# built from it; nothing is built or loaded by the package). The systemd unit and generator
+# are not installed (no systemd .pc in this tree: the Makefile skips them); the
+# initramfs-tools hook and the dracut module are packaged as upstream installs them
+# (data files, inert).
+name = "bcachefs-tools"
+version = "1.39.7"
+release = 1
+summary = "Userspace tools for the bcachefs filesystem"
+license = "GPL-2.0-only"
+homepage = "https://bcachefs.org"
+hostdeps = ["rust", "pkgconf", "llvm", "perl"]
+builddeps = ["libaio-devel", "util-linux-devel", "userspace-rcu-devel", "libsodium-devel", "zlib-ng-compat-devel", "lz4-devel", "zstd-devel", "eudev-devel", "keyutils-devel", "fuse-devel", "linux-headers"]
+rundeps = ["util-linux"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/koverstreet/bcachefs-tools/archive/refs/tags/v1.39.7.tar.gz", sha256 = "0d2d6f9689212cd1056137f932c6f786bc0c88ad569618b481ace52803c4e990" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true LIBCLANG_PATH=/usr/lib
+mkdir -p /tmp/pcdir
+printf 'Name: libunwind\nDescription: LLVM libunwind\nVersion: 1.0\nLibs: -lunwind\n' > /tmp/pcdir/libunwind.pc
+export PKG_CONFIG_PATH="/tmp/pcdir${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+'''
+setup = '''
+echo 1.39.7 > .version
+'''
+build = '''
+make -j$jobs PREFIX=/usr ROOT_SBINDIR=/usr/bin CARGO_BUILD_ARGS="--release --frozen --offline"
+'''
+install = '''
+make PREFIX=/usr ROOT_SBINDIR=/usr/bin DESTDIR="$pkgdir" CARGO_BUILD_ARGS="--release --frozen --offline" install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/bcachefs-tools/COPYING"
+'''

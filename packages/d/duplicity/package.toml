@@ -1,0 +1,41 @@
+# duplicity: encrypted, bandwidth-efficient incremental backups (tar format,
+# GnuPG, rsync algorithm) to local disk, SFTP, S3, WebDAV, ... Written for this
+# tree. Python with a C extension (_librsync) linked against librsync.
+# Python dependencies: requests, paramiko (SFTP), pexpect, PySocks, dateutil,
+# urllib3, pyparsing are tree packages (rundeps); fasteners, httplib2,
+# requests-oauthlib (+oauthlib) and boto3 (+botocore, s3transfer, jmespath: the S3 backend)
+# come from the pydeps store (files/python.lock) and are installed into the
+# package. The cloud backends whose SDKs the tree lacks and that are large
+# (Azure, B2, Dropbox, Google, Box, Jottacloud, Mediafire, Swift, pyrax) are
+# not installed: duplicity imports each backend only when its URL scheme is
+# used. gnupg (encryption) and lftp (the FTP backend) are rundeps.
+# setuptools-gettext (needed by duplicity's build, to compile the .po files with
+# msgfmt, which is why gettext is a hostdep) is installed in a throw-away
+# directory on PYTHONPATH, since the build is not isolated.
+# Source edits: none.
+name = "duplicity"
+version = "3.2.2"
+release = 1
+summary = "Encrypted incremental backups to local and remote storage"
+license = "GPL-2.0-or-later"
+homepage = "https://duplicity.us"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-build", "gettext", "pkgconf"]
+builddeps = ["python-devel", "librsync-devel"]
+rundeps = ["python", "python-requests", "python-paramiko", "python-pexpect", "python-pysocks", "python-dateutil", "python-urllib3", "python-pyparsing", "gnupg", "lftp"]
+options = ["!check", "pydeps"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/48/af/f7790e2222213629076c3dc608f8b1175939cdbe0b78cabb818ef1b6d99d/duplicity-3.2.2.tar.gz", sha256 = "2ab85e429c72d2398f6b7627b8e2b99026bcd5c909749c15085fc569777a2861" },
+]
+
+setup = '''
+python3 -m pip install --no-deps --no-build-isolation --no-compile --target /tmp/pybuild setuptools-gettext==0.1.20
+'''
+install = '''
+export PYTHONPATH=/tmp/pybuild
+python3 -m pip install --no-deps --no-build-isolation --no-compile \
+    --root "$pkgdir" --prefix /usr \
+    fasteners==0.20 httplib2==0.32.1 requests-oauthlib==2.0.0 oauthlib==4.0.1 \
+    boto3==1.44.4 botocore==1.44.4 jmespath==1.1.0 s3transfer==0.19.3 .
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/duplicity/COPYING"
+'''

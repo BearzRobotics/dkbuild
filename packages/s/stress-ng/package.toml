@@ -1,0 +1,33 @@
+# stress-ng: stress test a computer in various selectable ways. From Chimera's
+# main/stress-ng, updated to 0.22.02, with the optional libraries of this tree
+# linked rather than left out: acl, libcap, libgcrypt, kmod, keyutils, SCTP,
+# libaio, libjpeg, xxhash, libbsd, libmd, zlib (its Makefile probes each one
+# with pkg-config/compile tests and builds the matching stressors).
+# MAN_COMPRESS=0 installs the man page uncompressed (the tree compresses
+# nothing itself); PRESERVE_CFLAGS=1 stops the Makefile overriding our CFLAGS
+# with its own -O2 set.
+name = "stress-ng"
+version = "0.22.02"
+release = 1
+summary = "Stress test a computer in various selectable ways"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/ColinIanKing/stress-ng"
+hostdeps = ["pkgconf"]
+builddeps = ["acl-devel", "libcap-devel", "libgcrypt-devel", "kmod-devel", "keyutils-devel", "lksctp-tools-devel", "libaio-devel", "libjpeg-turbo-devel", "xxhash-devel", "libbsd-devel", "libmd-devel", "zlib-ng-compat-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/ColinIanKing/stress-ng/archive/refs/tags/V0.22.02.tar.gz", sha256 = "860004ce7484311b3296fc52796fbbc34dfb7f644a769bbd4e03935b7a1b0ccb" },
+]
+
+environment = '''
+export MAN_COMPRESS=0
+export PRESERVE_CFLAGS=1
+'''
+build = '''
+%make PREFIX=/usr
+'''
+install = '''
+%make_install PREFIX=/usr
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/stress-ng/COPYING"
+'''

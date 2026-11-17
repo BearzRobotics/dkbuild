@@ -1,0 +1,66 @@
+# snapper: filesystem snapshot manager (Btrfs subvolumes, LVM thin volumes;
+# timeline and cleanup algorithms, rollback, diff). From Chimera's user/snapper,
+# kept at 0.12.1: the Chimera patches below do not apply to 0.13.x.
+# Configure: --disable-systemd (this tree uses dinit; the service is
+# files/snapper, installed to /etc/dinit.d but not enabled), --disable-zypp
+# (libzypp, openSUSE's package manager), --disable-ext4 (needs the ext4
+# snapshot kernel patch, which mainline does not have), --disable-bcachefs
+# (the kernel here has no bcachefs snapper support).
+# Source edits (Chimera's patches, each documented in its header):
+# - boost189.patch: Boost 1.89 no longer ships the boost_system library;
+#   removes it from the link lines (dbus/Makefile.am, examples).
+# - btrfs.patch: forces the btrfs-progs headers (#if 1 instead of
+#   HAVE_LIBBTRFS) in snapper/BtrfsUtils.cc; the fallback copies of the kernel
+#   headers clash with musl.
+# - fix-cron.patch and miscdata.patch: /etc/snapper/snapper replaces
+#   /etc/sysconfig/snapper in snapper-hourly, and the cron script is installed
+#   as /etc/cron.hourly/snapper with plain permissions.
+# - tests.patch: drops the cmp-lt and humanstring unit tests from the
+#   testsuite (they fail on musl); the testsuite is not run here anyway.
+# - xml-funcptr.patch: snapper/Logger.cc passes the libxml2 error-handler
+#   function pointer without the extra & (initGenericErrorDefaultFunc takes
+#   the pointer itself; newer libxml2 headers reject the pointer-to-pointer).
+# The recipe moves the cron script out of /etc/cron.hourly into
+# /usr/share/doc/snapper/ (no cron job is active by default; copy it to
+# cron.hourly to enable the timeline). The testsuite and the systemd helper
+# are dropped from the install. /etc/snapper/configs is made at boot by tmpfiles.d.
+name = "snapper"
+version = "0.12.1"
+release = 1
+summary = "Filesystem snapshot manager"
+license = "GPL-2.0-only"
+homepage = "https://github.com/openSUSE/snapper"
+patches = ["boost189.patch", "btrfs.patch", "fix-cron.patch", "miscdata.patch", "tests.patch", "xml-funcptr.patch"]
+hostdeps = ["autoconf", "automake", "libtool", "docbook-xsl-nons", "gettext", "libxslt", "pkgconf"]
+builddeps = ["acl-devel", "boost-devel", "btrfs-progs-devel", "dbus-devel", "e2fsprogs-devel", "json-c-devel", "libxml2-devel", "linux-pam-devel", "ncurses-devel", "util-linux-devel", "linux-headers"]
+rundeps = ["dbus", "btrfs-progs"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/openSUSE/snapper/archive/refs/tags/v0.12.1.tar.gz", sha256 = "eec9de03c8c224ac06e0b2970fde4c37cf89f848b4b49c904e8ee00bb7c3aff3" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-systemd \
+    --disable-ext4 \
+    --disable-bcachefs \
+    --disable-zypp \
+    --with-conf=/etc/snapper
+'''
+build = '''
+%make DOCBOOK_XSL=/usr/share/xsl-nons/docbook/manpages/docbook.xsl
+'''
+install = '''
+%make_install
+install -Dm644 data/sysconfig.snapper "$pkgdir/etc/snapper/snapper"
+install -Dm644 $pkgfiles/snapper "$pkgdir/etc/dinit.d/snapper"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/snapper.conf"
+mkdir -p "$pkgdir/usr/share/doc/snapper"
+mv "$pkgdir/etc/cron.hourly/snapper" "$pkgdir/usr/share/doc/snapper/cron.hourly.example"
+rmdir "$pkgdir/etc/cron.hourly" 2>/dev/null || true
+rm -rf "$pkgdir/usr/lib/snapper/testsuite"
+rm -rf "$pkgdir/usr/lib/snapper/systemd-helper"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/snapper/COPYING"
+'''

@@ -1,0 +1,41 @@
+# partclone: file system aware disk cloning (the engine of Clonezilla). Written
+# from scratch for this tree. Built with every file system whose support
+# libraries exist in this tree: ext2/3/4 (libext2fs), XFS (liburcu; the XFS
+# reader is built in), f2fs, NILFS2 (libnilfs), NTFS (libntfs-3g), Btrfs, FAT,
+# exFAT, HFS+, APFS, Minix and ZFS (the clean-room parser, only lz4 and zlib),
+# plus imgfuse (FUSE 3: mount an image) and the ncursesw progress screen.
+# Left out, each for a missing library: JFS (needs libjfs, which jfsutils does
+# not ship), ReiserFS (libreiserfs/libdal: not packaged), UFS (libufs2), VMFS
+# (vmfs-tools), OpenZFS (needs libzfs/libzpool development files, no OpenZFS
+# userland in this tree), and Intel ISA-L (optional CRC32 speed-up, not
+# packaged; the generic CRC code is used). xxhash is on by default upstream.
+# Source edits: none. The release tarball has no configure, so ./autogen runs
+# first (libtoolize, aclocal, automake, autoreconf).
+name = "partclone"
+version = "0.3.54"
+release = 1
+summary = "File system aware disk partition cloning and restoring"
+license = "GPL-2.0-or-later"
+homepage = "https://partclone.org"
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf", "gettext"]
+builddeps = ["e2fsprogs-devel", "userspace-rcu-devel", "nilfs-utils-devel", "ntfs-3g-devel", "util-linux-devel", "fuse-devel", "ncurses-devel", "openssl-devel", "zlib-ng-compat-devel", "lz4-devel", "xxhash-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/Thomas-Tsai/partclone/archive/refs/tags/0.3.54.tar.gz", sha256 = "7a09a4676327ecea284df2cf1c6a1fa36b11308659d58e32fec9a723e18e52ab" },
+]
+
+setup = '''
+sh ./autogen
+%configure \
+    --enable-extfs --enable-xfs --enable-f2fs --enable-nilfs2 --enable-ntfs \
+    --enable-btrfs --enable-fat --enable-exfat --enable-hfsp --enable-apfs \
+    --enable-minix --enable-zfs --enable-fuse --enable-ncursesw
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/partclone/COPYING"
+'''

@@ -1,0 +1,44 @@
+# clonezilla: disk and partition imaging and cloning (the `clonezilla` dialog
+# menu and the `ocs-sr` save/restore engine, which drive partclone and the
+# other imagers). Written for this tree from the project's tag archive. Plain
+# bash scripts: nothing to build. `make install` puts the programs in
+# /usr/sbin and /usr/bin, the function library (ocs-functions) in
+# /usr/share/drbl/sbin and settings in /etc/drbl/drbl-ocs.conf; it needs drbl
+# (the function library it sources). The text interface is the `clonezilla`
+# command (as root: it asks for the image repository and a mode with dialog).
+# The `create-*-live` scripts, which build Clonezilla Live / DRBL Live
+# images from Debian, Ubuntu or gparted ISOs with debootstrap, are removed:
+# they cannot work on this system. Clonezilla's other programs call what the
+# image formats need: partclone (ext/xfs/btrfs/ntfs/...), ntfsclone (ntfs-3g),
+# udpcast (multicast restore), pigz/xz/zstd/lz4/bzip2 (image compression),
+# cryptsetup (encrypted images), parted/gptfdisk/sfdisk (partition tables),
+# fsarchiver, pv, kpartx, lvm2/mdadm (LVM and software RAID).
+name = "clonezilla"
+version = "5.20.17"
+release = 1
+summary = "Disk and partition imaging and cloning (text interface)"
+license = "GPL-2.0-or-later"
+homepage = "https://clonezilla.org"
+rundeps = [
+    "drbl", "bash", "dialog", "partclone", "ntfs-3g", "udpcast", "pigz", "pv", "parted", "gptfdisk",
+    "fsarchiver", "cryptsetup", "util-linux", "coreutils", "e2fsprogs", "dosfstools", "xfsprogs",
+    "btrfs-progs", "f2fs-tools", "exfatprogs", "nilfs-utils", "jfsutils", "reiserfsprogs", "lvm2",
+    "mdadm", "hdparm", "gawk", "grep", "sed", "findutils", "kmod", "xz", "zstd", "lz4", "bzip2", "gzip",
+    "openssh", "rsync", "kpartx", "pciutils", "dmidecode", "file", "procps", "psmisc", "eudev",
+]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/stevenshiau/clonezilla/archive/refs/tags/v5.20.17.tar.gz", sha256 = "1c648e869ab17bdf5e0eb1cd1c45504d56f44b3c24c9179731dcf634338ed867" },
+]
+
+build = '''
+make ocs-sbin
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+rm -f "$pkgdir"/usr/sbin/create-debian-live "$pkgdir"/usr/sbin/create-ubuntu-live \
+    "$pkgdir"/usr/sbin/create-gparted-live "$pkgdir"/usr/sbin/create-drbl-live \
+    "$pkgdir"/usr/sbin/create-drbl-live-by-pkg
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/clonezilla/LICENSE"
+'''

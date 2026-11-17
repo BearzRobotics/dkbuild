@@ -1,0 +1,37 @@
+# mc: Midnight Commander file manager. From Chimera's main/mc, curses (ncurses)
+# interface, no X11 (--without-x) since it is for consoles and rescue systems.
+# Libraries: glib, gpm (console mouse), libssh2 (the sftp VFS), libext2fs
+# (ext2 undelete VFS), ncurses.
+# Source edit: patches/ncurses-mouse.patch (lib/tty/key.c) makes the
+# mouse-key input of ncurses 6 work in terminals without basic X10 mouse
+# support (it breaks the same under ncurses 5, which this tree does not have);
+# see https://github.com/MidnightCommander/mc/issues/4144.
+name = "mc"
+version = "4.8.33"
+release = 1
+summary = "Midnight Commander file manager"
+license = "GPL-3.0-or-later"
+homepage = "https://midnight-commander.org"
+patches = ["ncurses-mouse.patch"]
+hostdeps = ["pkgconf", "perl"]
+builddeps = ["e2fsprogs-devel", "glib-devel", "gpm-devel", "libssh2-devel", "ncurses-devel"]
+
+source = [
+    { url = "https://ftp.osuosl.org/pub/midnightcommander/mc-4.8.33.tar.xz", sha256 = "cae149d42f844e5185d8c81d7db3913a8fa214c65f852200a9d896b468af164c" },
+]
+
+setup = '''
+%configure \
+    --with-screen=ncurses \
+    --without-x
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/mc/COPYING"
+'''

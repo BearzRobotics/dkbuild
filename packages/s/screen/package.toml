@@ -1,0 +1,47 @@
+# screen: GNU screen terminal multiplexer. From Chimera's main/screen. PAM
+# (screen locking) uses the system-auth stack (files/screen, /usr/lib/pam.d).
+# The sockets directory /run/screens is made at boot by tmpfiles.d
+# (files/screen.conf, mode 0777: screen's non-setuid layout, each user's
+# sockets live in a per-user subdirectory it creates). Not setuid: the install
+# makes it setuid root, the recipe resets it to 0755 (utmp updates are then
+# skipped, which is Chimera's choice too).
+name = "screen"
+version = "5.0.2"
+release = 1
+summary = "GNU screen"
+license = "GPL-3.0-or-later"
+homepage = "https://www.gnu.org/software/screen"
+hostdeps = ["autoconf", "automake", "libtool", "gettext"]
+builddeps = ["linux-headers", "linux-pam-devel", "ncurses-devel"]
+rundeps = ["linux-pam", "linux-pam-base"]
+options = ["!check"]
+
+source = [
+    { url = "https://ftp.gnu.org/gnu/screen/screen-5.0.2.tar.gz", sha256 = "ca9a2c7e240919bc7ac12124593ae4529bb4eb5f7349d8857829b7e3f0b3b332" },
+]
+
+setup = '''
+./autogen.sh
+%configure \
+    --enable-pam \
+    --enable-colors256 \
+    --enable-rxvt_osc \
+    --enable-telnet \
+    --enable-use-locale \
+    --with-pty-group=5 \
+    --enable-socket-dir=/run/screens \
+    --with-system_screenrc=/etc/screenrc
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 etc/etcscreenrc "$pkgdir/etc/screenrc"
+install -Dm644 etc/screenrc "$pkgdir/usr/share/examples/screen/dotscreenrc"
+install -Dm644 $pkgfiles/screen "$pkgdir/usr/lib/pam.d/screen"
+install -Dm644 $pkgfiles/screen.conf "$pkgdir/usr/lib/tmpfiles.d/screen.conf"
+# not setuid
+chmod 755 "$pkgdir"/usr/bin/screen*
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/screen/COPYING"
+'''

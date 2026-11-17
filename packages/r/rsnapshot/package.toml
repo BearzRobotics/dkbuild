@@ -1,0 +1,29 @@
+# rsnapshot: filesystem snapshot utility built on rsync and hard links (a Perl
+# script). Written for this tree. It installs /etc/rsnapshot.conf.default only;
+# no cron job, no config in use, nothing enabled: the administrator copies it
+# to /etc/rsnapshot.conf and schedules it. rsync, ssh and cp (GNU coreutils)
+# are rundeps because the script runs them.
+name = "rsnapshot"
+version = "1.5.1"
+release = 1
+summary = "Filesystem snapshot utility based on rsync"
+license = "GPL-2.0-or-later"
+homepage = "https://rsnapshot.org"
+hostdeps = ["perl"]
+rundeps = ["perl", "rsync", "openssh", "coreutils"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/rsnapshot/rsnapshot/releases/download/1.5.1/rsnapshot-1.5.1.tar.gz", sha256 = "8f6af8046ee6b0293b26389d08cb6950c7f7ddfffc1f74eefcb087bd49d44f62" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/rsnapshot/COPYING"
+'''

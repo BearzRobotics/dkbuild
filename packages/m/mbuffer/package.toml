@@ -1,0 +1,27 @@
+# mbuffer: buffer data streams (tape, network, pipes). Chimera built it with
+# CMake, which installs only the binary; this uses the autotools build the
+# tarball ships so the man page and the mbuffer.rc sample (/etc) install too.
+# MD5 hashing uses OpenSSL's libcrypto (configure finds MD5_Init there).
+name = "mbuffer"
+version = "20250429"
+release = 1
+summary = "Tool for buffering data streams"
+license = "GPL-3.0-only"
+homepage = "https://www.maier-komor.de/mbuffer.html"
+builddeps = ["linux-headers", "openssl-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.maier-komor.de/software/mbuffer/mbuffer-20250429.tgz", sha256 = "a853ef720d5fc3ef47c1788f9657477b76d70ab0c9b8a7d96e995e31e3536bbf" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/mbuffer/LICENSE"
+'''

@@ -1,10 +1,10 @@
 # The backup toolset, a meta package: whole-disk and partition imaging (fsarchiver; partclone and Clonezilla are
 # written in wip/queue), file-level backup with deduplication and encryption (borg, restic, kopia), cloud and remote
 # sync (rclone, rsync, sshfs over OpenSSH), and the compressors they use (zstd, lz4, pigz, xz).
-# The recipes written for this set that have not been built yet are added here as they are (see wip/queue/BACKUP-NOTES.md).
+# r2: partclone and Clonezilla (with DRBL's function library), the file-level tools (duplicity, rdiff-backup, bup, borgmatic, rsnapshot, btrbk, snapper, dar) and the helpers they use (par2cmdline, mbuffer, pv, dialog, udpcast, lftp). Notes: wip/queue/BACKUP-NOTES.md.
 name = "backup-tools"
 version = "1"
-release = 1
+release = 2
 summary = "FenrirOS backup toolset"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"
@@ -14,4 +14,6 @@ rundeps = [
     "borgbackup", "restic", "kopia",
     "rclone", "rsync", "sshfs", "openssh",
     "zstd", "lz4", "pigz", "xz",
+    "partclone", "clonezilla", "udpcast", "dialog", "pv", "mbuffer", "par2cmdline", "lftp",
+    "duplicity", "rdiff-backup", "bup", "borgmatic", "rsnapshot", "btrbk", "snapper", "dar",
 ]

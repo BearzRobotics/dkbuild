@@ -1,0 +1,35 @@
+# bup: highly efficient backup system based on the git packfile format
+# (deduplication, rolling-checksum splitting, par2 recovery, a mountable
+# FUSE view when python-fuse is present). Written for this tree.
+# Python 3 program with C helpers (compiled against python3-config and
+# readline: `bup ftp` line editing). Hand-written configure/GNUmakefile,
+# installed with PREFIX=/usr. Manual pages are generated with pandoc.
+# Optional Python modules used when present: pylibacl and pyxattr (ACL and
+# xattr metadata), packages of this tree. git and par2 are called at runtime
+# (git: the repository format; par2: `bup fsck -g`).
+# Source edits: none. (`make check` needs a full git setup and is not run.)
+name = "bup"
+version = "0.34.1"
+release = 1
+summary = "Efficient backup system based on the git packfile format"
+license = "LGPL-2.0-only"
+homepage = "https://bup.github.io"
+hostdeps = ["python", "pkgconf", "pandoc"]
+builddeps = ["python-devel", "readline-devel", "linux-headers"]
+rundeps = ["python", "git", "par2cmdline", "python-pylibacl", "python-pyxattr"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/bup/bup/archive/refs/tags/0.34.1.tar.gz", sha256 = "3ffe5c8bf9da8c291972939959517f98b41f7c62476557bcc00ffa6b54752fe4" },
+]
+
+setup = '''
+./configure
+'''
+build = '''
+make -j$jobs PREFIX=/usr
+'''
+install = '''
+make PREFIX=/usr DESTDIR="$pkgdir" install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/bup/LICENSE"
+'''

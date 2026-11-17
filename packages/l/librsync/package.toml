@@ -1,0 +1,36 @@
+# librsync: delta/signature library (the rsync algorithm as a library) and the
+# rdiff tool; the C extension of duplicity and the library dar uses for delta
+# compression. Written for this tree. Optional parts built, not left out:
+# zlib+bzip2 compression (ENABLE_COMPRESSION), blake2 through libb2
+# (USE_LIBB2), rdiff (popt). Shared library from the main build, the static
+# library from a second build with -fPIC, as the other CMake recipes do.
+# CMake 4 rejects very old cmake_minimum_required values, hence
+# CMAKE_POLICY_VERSION_MINIMUM.
+name = "librsync"
+version = "2.3.4"
+release = 1
+summary = "Library for delta/signature generation (rsync algorithm)"
+license = "LGPL-2.1-or-later"
+homepage = "https://librsync.github.io"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["zlib-ng-compat-devel", "bzip2-devel", "libb2-devel", "popt-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/librsync/librsync/releases/download/v2.3.4/librsync-2.3.4.tar.gz", sha256 = "a0dedf9fff66d8e29e7c25d23c1f42beda2089fb4eac1b36e6acd8a29edfbd1f" },
+]
+
+setup = '''
+opts="-DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DENABLE_COMPRESSION=ON -DUSE_LIBB2=ON"
+%cmake $opts -DBUILD_SHARED_LIBS=ON
+cmake -B build-static -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release $opts -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+install = '''
+DESTDIR="$pkgdir" cmake --install build-static
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/librsync/COPYING"
+'''

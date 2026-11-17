@@ -1,0 +1,35 @@
+# lsof: list open files. From Chimera's main/lsof.
+# Source edits (both patches):
+# - curuid.patch defines HASSECURITY in lib/dialects/linux/machine.h, so a
+#   non-root user sees only their own processes instead of a wall of
+#   permission errors (lsof's own "security" mode, restricting to the real uid).
+# - muloverflow.patch makes the hash constants unsigned (31415U) in dfile.c and
+#   dnode.c: signed overflow in those hashes is undefined behaviour that clang
+#   reports.
+# The tests need a running lsof against the live system and are skipped (!check).
+name = "lsof"
+version = "4.99.7"
+release = 1
+summary = "List open files"
+license = "custom:lsof"
+homepage = "https://lsof.readthedocs.io/en/latest"
+patches = ["curuid.patch", "muloverflow.patch"]
+hostdeps = ["autoconf", "automake", "libtool", "mandoc", "pkgconf"]
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/lsof-org/lsof/archive/refs/tags/4.99.7.tar.gz", sha256 = "bac1b0acbc50aede42fc97dffaa0b0475e97973e36a6351de5f349c6155afc68" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/lsof/COPYING"
+'''

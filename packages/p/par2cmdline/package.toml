@@ -1,0 +1,30 @@
+# par2cmdline: PAR 2.0 parity archive tool (create, verify and repair with
+# Reed-Solomon recovery files). Written for this tree. This is the classic
+# Parchive implementation, 1.4.0; par2cmdline-turbo (a faster fork that
+# is a drop-in) is not packaged (no release tarballs upstream, only git tags).
+# Source: the release tarball ships configure; no source edits.
+name = "par2cmdline"
+version = "1.4.0"
+release = 1
+summary = "PAR 2.0 parity archive tool"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/Parchive/par2cmdline"
+builddeps = ["linux-headers"]
+
+source = [
+    { url = "https://github.com/Parchive/par2cmdline/releases/download/v1.4.0/par2cmdline-1.4.0.tar.gz", sha256 = "f738242adf3bbfe0b041b3263e5be4d76e4b16a4e938952a38265efd94c7869d" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/par2cmdline/COPYING"
+'''

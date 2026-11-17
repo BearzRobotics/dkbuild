@@ -1,0 +1,31 @@
+# borgmatic: configuration-driven wrapper for borgbackup (a YAML file lists
+# sources, repositories, retention and hooks; `borgmatic` creates, prunes and
+# checks archives). Written for this tree. Pure Python.
+# Python dependencies: jsonschema, packaging, psutil and requests are tree
+# packages (rundeps); ruamel.yaml, which the tree lacks, comes from the pydeps
+# store (files/python.lock) and is installed into the package next to
+# borgmatic, as borgbackup does for msgpack. The optional extras (Apprise
+# notifications, the `browse` TUI with textual) are not installed: neither
+# apprise nor textual is in the tree.
+# No default configuration, no timer or service is installed; the user writes
+# /etc/borgmatic/config.yaml (`borgmatic config generate`) and schedules it.
+# Source edits: none.
+name = "borgmatic"
+version = "2.2.0"
+release = 1
+summary = "Configuration-driven backup wrapper for borgbackup"
+license = "GPL-3.0-or-later"
+homepage = "https://torsion.org/borgmatic/"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python", "python-jsonschema", "python-packaging", "python-psutil", "python-requests", "borgbackup"]
+options = ["!check", "pydeps"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/d9/6e/76e1bff53c336ad7d5698fa4abf948faf2d820e9f5c2b99917a14268a9a9/borgmatic-2.2.0.tar.gz", sha256 = "2f3a1e8f697b267e64fac9aaec628e68f89075854807436956c64d3b8542af3b" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-compile \
+    --root "$pkgdir" --prefix /usr ruamel-yaml==0.19.1 .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/borgmatic/LICENSE"
+'''

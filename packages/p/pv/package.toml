@@ -1,0 +1,33 @@
+# pv: monitor the progress of data through a pipeline. From Chimera's main/pv.
+# Source edit: patches/gettext-ver.patch raises AM_GNU_GETTEXT_VERSION in
+# configure.ac from 0.21 to 0.23 (upstream's release configure.ac still names
+# 0.21, which makes autoreconf look for a gettext that is not installed); the
+# tarball ships a configure, but the patch needs autoreconf to take effect, so
+# autoreconf runs with the gettext in hostdeps.
+name = "pv"
+version = "1.9.34"
+release = 1
+summary = "Tool for monitoring the progress of data through a pipeline"
+license = "GPL-3.0-or-later"
+homepage = "https://www.ivarch.com/programs/pv.shtml"
+patches = ["gettext-ver.patch"]
+hostdeps = ["autoconf", "automake", "libtool", "gettext", "pkgconf"]
+
+source = [
+    { url = "https://www.ivarch.com/programs/sources/pv-1.9.34.tar.gz", sha256 = "c0626bed6cbef5006b53d3281e8e3ae4b2838729462b21eccf28140eefef6bb1" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 docs/COPYING "$pkgdir/usr/share/licenses/pv/COPYING"
+'''

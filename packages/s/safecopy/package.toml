@@ -1,0 +1,26 @@
+# safecopy: data recovery tool for damaged media (skips and retries bad sectors,
+# stops on reading errors in a controlled way). Written for this tree; builds
+# with the configure script the release tarball ships.
+name = "safecopy"
+version = "1.7"
+release = 1
+summary = "Data recovery tool for damaged media"
+license = "GPL-2.0-or-later"
+homepage = "https://safecopy.sourceforge.net"
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/safecopy/safecopy/safecopy-1.7/safecopy-1.7.tar.gz", sha256 = "42fbed5d4764020eb0f34d95e97a0e14e62d801c3ef80f89bd497d94d39cc4fd" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/safecopy/COPYING"
+'''

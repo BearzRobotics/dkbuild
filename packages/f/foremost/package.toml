@@ -1,0 +1,35 @@
+# foremost: file carving (recovers files from a disk image by header/footer
+# signatures). Written for this tree from the 1.5.7 release (the Jesse
+# Kornblum / Kris Kendall code; Kornblum's last release and the US
+# government work, so no copyright; 1.5.7 is still the current release).
+# Source edits (sed in setup):
+# - engine.c calls fopen64(); musl exposes the *64 names only behind
+#   _LARGEFILE64_SOURCE, and the Makefile already builds with
+#   -D_FILE_OFFSET_BITS=64, which makes plain fopen() 64-bit: fopen64 -> fopen.
+# - the Makefile installs to /usr/local and does `RAW_CC = gcc`: the build line
+#   below sets RAW_CC (compiler plus our flags) and the install is by hand
+#   (/usr/bin, /usr/share/man/man8, /etc/foremost.conf).
+name = "foremost"
+version = "1.5.7"
+release = 1
+summary = "File carving tool for forensic recovery"
+license = "LicenseRef-Public-Domain"
+homepage = "https://github.com/korczis/foremost"
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/korczis/foremost/archive/refs/tags/v1.5.7.tar.gz", sha256 = "da27368947a3402b15f63190a90a37c09e45517783e0d9435c87a81f97d29e80" },
+]
+
+setup = '''
+sed -i 's/fopen64(/fopen(/' engine.c
+'''
+build = '''
+make -j$jobs SYS=linux RAW_CC="$CC $CFLAGS -Wall -DVERSION=\\\"1.5.7\\\"" LINK_OPT="$LDFLAGS"
+'''
+install = '''
+install -Dm755 foremost "$pkgdir/usr/bin/foremost"
+install -Dm644 foremost.8.gz "$pkgdir/usr/share/man/man8/foremost.8.gz"
+install -Dm644 foremost.conf "$pkgdir/etc/foremost.conf"
+'''

@@ -1,0 +1,37 @@
+# dialog: display dialog boxes from shell scripts (used by Clonezilla's
+# text interface). From Chimera's main/dialog, wide-character ncurses.
+# --disable-nls: dialog's translations need GNU libintl at link time, which
+# this tree does not provide for musl; the messages are English.
+# Source edit: patches/fix-run-test-path.patch makes `make check` run
+# run_test.sh from $(srcdir) rather than the build directory.
+# The library libdialog is not installed (dialog's `install` target installs only
+# the program and its man page; the lib goes with install-lib, never run), so
+# there is no -static package.
+name = "dialog"
+version = "1.3.20251001"
+release = 1
+summary = "Tool to display dialog boxes from shell scripts"
+license = "LGPL-2.1-only"
+homepage = "https://invisible-island.net/dialog"
+patches = ["fix-run-test-path.patch"]
+builddeps = ["ncurses-devel"]
+
+source = [
+    { url = "https://invisible-mirror.net/archives/dialog/dialog-1.3-20251001.tgz", sha256 = "bee47347a983312facc4dbcccd7fcc86608d684e1f119d9049c4692213db96c3" },
+]
+
+setup = '''
+%configure \
+    --with-ncursesw \
+    --disable-nls
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/dialog/COPYING"
+'''

@@ -1,0 +1,54 @@
+# lshw: hardware lister. From Chimera's user/lshw. Split in two: the text tool
+# (lshw) and the GTK3 front end in lshw-gui, so a rescue image does not carry
+# GTK. Zlib is on (ZLIB=1: reads compressed device-id lists); the SQLite output
+# option is left at upstream's default (off). Device names come from hwdata.
+# Source edits (all four patches are Chimera's, kept):
+# - 0001 installs into /usr/bin instead of /usr/sbin (usr-merge: no sbin here):
+#   SBINDIR in src/Makefile, src/core/config.h and the console.apps file.
+# - 0002 makes install-gui also install the .desktop file, AppStream metadata,
+#   the PAM service (/usr/lib/pam.d/gtk-lshw) and console.apps from
+#   gui/integration/.
+# - 0003 makes CXXFLAGS in src/Makefile and the GUI makefile append to the
+#   environment's flags instead of replacing them (so the toolchain flags and
+#   _FORTIFY_SOURCE apply) and drops the LDFLAGS reset.
+# - 0004 renames lshw's own readlink() to readsymlink(): with fortified headers
+#   it clashed with libc's readlink.
+name = "lshw"
+version = "02.20"
+release = 1
+summary = "Hardware lister"
+license = "GPL-2.0-only"
+homepage = "https://ezix.org/project/wiki/HardwareLiSter"
+patches = ["0001-use-bin-instead-of-sbin.patch", "0002-install-files-from-integration-s-folder.patch", "0003-fortify-source.patch", "0004-fix-unresolved-reference-when-fortifying-headers.patch"]
+hostdeps = ["gettext", "pkgconf"]
+builddeps = ["gtk+3-devel", "linux-headers", "zlib-ng-compat-devel"]
+rundeps = ["hwdata"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.ezix.org/software/files/lshw-B.02.20.tar.gz", sha256 = "06d9cf122422220e5dc94e8ea5b01816a69bb6b59368f63d7f21fff31fc6922a" },
+]
+
+build = '''
+%make \
+    all \
+    gui \
+    VERSION=02.20 \
+    NO_VERSION_CHECK=1 \
+    ZLIB=1
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr \
+    install \
+    install-gui \
+    VERSION=02.20 \
+    NO_VERSION_CHECK=1 \
+    ZLIB=1
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/lshw/COPYING"
+'''
+
+[subpackages.gui]
+summary = "GTK front end for lshw"
+paths   = ["/usr/bin/gtk-lshw", "/usr/share/lshw", "/usr/share/applications", "/usr/share/metainfo", "/usr/lib/pam.d/gtk-lshw", "/usr/share/doc/lshw/console.apps"]

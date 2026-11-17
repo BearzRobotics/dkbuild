@@ -1,0 +1,23 @@
+# pyxattr from PyPI: Python module for extended file attributes (xattr), a C
+# extension against libattr. Written for rdiff-backup and bup, which use it
+# when present. Source edits: none.
+name = "python-pyxattr"
+version = "0.8.1"
+release = 1
+summary = "Python module for extended file attributes"
+license = "LGPL-2.1-or-later"
+homepage = "https://pyxattr.k1024.org"
+hostdeps = ["python", "python-setuptools", "pkgconf"]
+builddeps = ["python-devel", "attr-devel", "linux-headers"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/97/d1/7b85f2712168dfa26df6471082403013f3f815f3239aee3def17b6fd69ee/pyxattr-0.8.1.tar.gz", sha256 = "48c578ecf8ea0bd4351b1752470e301a90a3761c7c21f00f953dcf6d6fa6ee5a" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/python-pyxattr/COPYING"
+'''

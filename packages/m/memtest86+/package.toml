@@ -1,0 +1,41 @@
+# memtest86+: stand-alone memory tester, booted outside any operating system
+# (a PE/EFI executable that also carries the Linux boot-protocol header, so
+# GRUB's `linux`/`chainloader`, a UEFI boot entry or a boot-loader menu can
+# start it). Written for this tree from the 9.00 release.
+# Built with GCC 15 and GNU binutils (option gcc): the freestanding build
+# uses GNU ld linker scripts and GCC-only flags (-fexcess-precision=standard),
+# and the project's Makefiles read CC/LD/AS/OBJCOPY. Its CFLAGS are the
+# Makefile's own (hardened system flags would break a freestanding image), so
+# the environment's flags do not apply. GIT=none: no git in a release tarball,
+# the version string says "unknown" for the hash.
+# The architecture directory is chosen from $arch (x86_64 and aarch64 have
+# one; the 32-bit i586 and loongarch64 directories are not built).
+# Installed: /usr/share/memtest86+/memtest.efi (the mt86plus binary) and
+# memtest.bin (the same file under the name boot loaders conventionally use).
+# Nothing is added to a boot menu or to /boot: the administrator or an image
+# recipe does that.
+name = "memtest86+"
+version = "9.00"
+release = 1
+summary = "Stand-alone memory tester for x86 and arm64 (UEFI and BIOS)"
+license = "GPL-2.0-only"
+homepage = "https://memtest.org"
+hostdeps = ["gawk", "coreutils"]
+options = ["!check", "gcc"]
+
+source = [
+    { url = "https://github.com/memtest86plus/memtest86plus/archive/refs/tags/v9.00.tar.gz", sha256 = "57ca5e0c0b0abcb8deee75735d0aa814f303e801c8a41e6b9b2ed1dfa733c684" },
+]
+
+build = '''
+case "$arch" in
+    x86_64|aarch64) bdir=build/$arch ;;
+    *) echo "memtest86+ has no build for $arch"; exit 1 ;;
+esac
+make -C "$bdir" -j$jobs GIT=none CC="$CC" mt86plus
+'''
+install = '''
+install -Dm755 build/$arch/mt86plus "$pkgdir/usr/share/memtest86+/memtest.efi"
+install -Dm755 build/$arch/mt86plus "$pkgdir/usr/share/memtest86+/memtest.bin"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/memtest86+/LICENSE"
+'''

@@ -1,0 +1,45 @@
+# dar: Disk ARchive, a full/differential/incremental backup tool with slices,
+# per-file compression, strong encryption, catalogue isolation and a library
+# (libdar). Written for this tree. Every optional library of this tree is
+# linked (configure's *-linking switches are all left on): zlib, bzip2, lzo,
+# xz, zstd, lz4 (compression), libgcrypt and gpgme (symmetric and asymmetric
+# encryption), argon2 (key derivation), librhash (Whirlpool), librsync (delta
+# compression), libcurl and libssh (FTP/SFTP repositories), libthreadar (multi-
+# threaded libdar), extended attributes (attr), Linux capabilities (libcap) and
+# ext2 nodump flag support (e2fsprogs).
+# Switched off, each for a stated reason:
+# --disable-upx: UPX is not packaged and compressing the executables is not wanted.
+# --disable-dar-static: dar_static needs every dependency (curl, libssh,
+#   gpgme...) as a -static library with all its own libraries; the shared
+#   `dar` is what is shipped.
+# --disable-python-binding: pybind11 is not packaged.
+# --disable-build-html: the libdar API reference (doxygen, with graphviz
+#   diagrams) is not wanted in a rescue/backup image; the man pages are installed.
+name = "dar"
+version = "2.8.6"
+release = 1
+summary = "Disk ARchive: full/incremental backup with slices and encryption"
+license = "GPL-3.0-or-later"
+homepage = "http://dar.linux.free.fr"
+hostdeps = ["pkgconf"]
+builddeps = ["zlib-ng-compat-devel", "bzip2-devel", "lzo-devel", "xz-devel", "zstd-devel", "lz4-devel", "libgcrypt-devel", "libgpg-error-devel", "gpgme-devel", "argon2-devel", "rhash-devel", "librsync-devel", "curl-devel", "libssh-devel", "libthreadar-devel", "attr-devel", "libcap-devel", "e2fsprogs-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/dar/dar/2.8.6/dar-2.8.6.tar.gz", sha256 = "d56caeb6c86f751cb454d8fef45f3daecc508f208290d9f51e8c75bba5dc46c5" },
+]
+
+setup = '''
+%configure \
+    --disable-upx \
+    --disable-dar-static \
+    --disable-python-binding \
+    --disable-build-html
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/dar/COPYING"
+'''

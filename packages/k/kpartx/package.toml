@@ -1,0 +1,33 @@
+# kpartx: create device maps from partition tables (kpartx -a disk.img maps the
+# partitions of an image or a device). It is a part of multipath-tools'
+# source; only kpartx is built here (not multipathd, libmultipath, libdmmp).
+# Written for this tree from Chimera's main/kpartx; updated to 0.15.1.
+# `make -f create-config.mk` is the project's own configure step: it probes
+# libdevmapper and writes config.mk, which kpartx's Makefile includes. The
+# install paths are given on the make line because upstream's default is
+# /sbin: bindir=/usr/bin (usr-merge) and libudevdir=/usr/lib/udev for the
+# dm-parts/kpartx udev rules, with prefix=/usr.
+name = "kpartx"
+version = "0.15.1"
+release = 1
+summary = "Create device maps from partition tables"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/opensvc/multipath-tools"
+hostdeps = ["pkgconf"]
+builddeps = ["lvm2-devel", "linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/opensvc/multipath-tools/archive/refs/tags/0.15.1.tar.gz", sha256 = "99e4a4b8c245479dd5c5d473a031acb67d752b94dcd76be172279cd445845421" },
+]
+
+setup = '''
+make -f create-config.mk
+'''
+build = '''
+%make -C kpartx prefix=/usr bindir=/usr/bin libudevdir=/usr/lib/udev
+'''
+install = '''
+%make_install -C kpartx prefix=/usr bindir=/usr/bin libudevdir=/usr/lib/udev
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/kpartx/COPYING"
+'''

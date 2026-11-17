@@ -1,0 +1,30 @@
+# ncdu: disk usage analyzer with an ncurses interface. From Chimera's
+# main/ncdu. This is the C series (1.22, the last of it); 2.x is a Zig rewrite,
+# not used here so the tool builds with the plain C toolchain.
+name = "ncdu"
+version = "1.22"
+release = 1
+summary = "Disk usage analyzer with an ncurses interface"
+license = "MIT"
+homepage = "https://dev.yorhel.nl/ncdu"
+hostdeps = ["autoconf", "automake", "pkgconf"]
+builddeps = ["ncurses-devel", "linux-headers"]
+
+source = [
+    { url = "https://dev.yorhel.nl/download/ncdu-1.22.tar.gz", sha256 = "0ad6c096dc04d5120581104760c01b8f4e97d4191d6c9ef79654fa3c691a176b" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+check = '''
+%make check
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/ncdu/COPYING"
+'''

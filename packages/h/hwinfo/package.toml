@@ -1,0 +1,42 @@
+# hwinfo: hardware detection tool and library (libhd) from openSUSE; the
+# probing behind YaST/SUSE tools (`hwinfo --short`, --block, --gfxcard ...).
+# Written for this tree from the 26.0 tag archive. UNTESTED against musl:
+# libhd includes <sys/io.h> (x86 and x86_64 only in musl); on aarch64 the
+# build is expected to need a patch for it, not written yet.
+# The Makefile derives the version from git (git2log); HWINFO_VERSION on the
+# make line gives it. The library directory defaults to /usr/lib64 on x86_64,
+# which this tree's policy forbids: LIBDIR=/usr/lib. Programs are installed by
+# upstream in /usr/sbin; they are moved to /usr/bin to match the other
+# packages of this tree. libhd.a (the static library) is installed by hand:
+# upstream installs it only when the shared build is off.
+# The build runs with -j1: the recursive makefiles are not parallel safe.
+# CFLAGS/LDFLAGS from the environment are appended by Makefile.common.
+# /var/lib/hardware/udi, which `make install` creates, is not packaged
+# (empty; hwinfo makes it on demand).
+name = "hwinfo"
+version = "26.0"
+release = 1
+summary = "Hardware detection tool and library from openSUSE"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/openSUSE/hwinfo"
+hostdeps = ["perl", "flex", "pkgconf"]
+builddeps = ["libx86emu-devel", "util-linux-devel", "linux-headers"]
+rundeps = ["hwdata"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/openSUSE/hwinfo/archive/refs/tags/26.0.tar.gz", sha256 = "7774b23bc271a15b8db8f90b7c92ab0409c781a794163c0eb372c96a9c7fc293" },
+]
+
+build = '''
+make -j1 HWINFO_VERSION=26.0 LIBDIR=/usr/lib CC="$CC"
+'''
+install = '''
+make HWINFO_VERSION=26.0 LIBDIR=/usr/lib DESTDIR="$pkgdir" install
+install -Dm644 src/libhd.a "$pkgdir/usr/lib/libhd.a"
+mkdir -p "$pkgdir/usr/bin"
+mv "$pkgdir"/usr/sbin/* "$pkgdir/usr/bin/"
+rmdir "$pkgdir/usr/sbin" 2>/dev/null || true
+rmdir "$pkgdir/var/lib/hardware/udi" "$pkgdir/var/lib/hardware" "$pkgdir/var/lib" "$pkgdir/var" 2>/dev/null || true
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/hwinfo/COPYING"
+'''

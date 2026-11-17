@@ -1,0 +1,29 @@
+# udpcast: multicast/broadcast file transfer (udp-sender / udp-receiver), used
+# by Clonezilla's multicast restore. Written for this tree. Programs go to
+# /usr/bin (--sbindir=/usr/bin: there is no /usr/sbin here). Only the two
+# programs are built and installed; the udpcast "busybox applet" build (Kbuild)
+# is not used. Licence: the package as a whole is GPL-2.0-or-later; fec.c
+# (Luigi Rizzo's forward error correction) is under the BSD 2-clause terms.
+name = "udpcast"
+version = "20250223"
+release = 1
+summary = "UDP multicast file distribution (udp-sender, udp-receiver)"
+license = "GPL-2.0-or-later AND BSD-2-Clause"
+homepage = "https://www.udpcast.linux.lu"
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.udpcast.linux.lu/download/udpcast-20250223.tar.gz", sha256 = "cefd7554c877e1bc76987d2b96b23f7699a2e5340c254454f61b6e0dae370aa7" },
+]
+
+setup = '''
+%configure --sbindir=/usr/bin
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/udpcast/COPYING"
+'''

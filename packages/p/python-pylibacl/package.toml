@@ -1,0 +1,23 @@
+# pylibacl from PyPI: Python module for POSIX.1e ACLs, a C extension against
+# libacl. Written for rdiff-backup and bup, which use it when present.
+# Source edits: none.
+name = "python-pylibacl"
+version = "0.7.3"
+release = 1
+summary = "Python module for POSIX ACLs"
+license = "LGPL-2.1-or-later"
+homepage = "https://pylibacl.k1024.org"
+hostdeps = ["python", "python-setuptools", "pkgconf"]
+builddeps = ["python-devel", "acl-devel", "linux-headers"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/cd/9e/e23f907c8e2cdc721c3d87eddda0cedee2f7cd7edf22f8439cee67f48a03/pylibacl-0.7.3.tar.gz", sha256 = "9d9ffb580e0c582d5de598087f75f6940458b23810c615529143c61b172bf922" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/python-pylibacl/COPYING"
+'''

@@ -1,0 +1,35 @@
+# lftp: sophisticated command-line FTP/HTTP/SFTP/BitTorrent client. From
+# Chimera's main/lftp, updated to 4.9.3. The C99 fix Chimera carried
+# (needtrio.patch, #include <stdio.h> in m4/needtrio.m4) is in 4.9.3 already.
+# TLS through OpenSSL; readline for the prompt; the protocol modules are
+# loadable (--with-modules). --disable-nls: lftp's gettext needs GNU libintl,
+# not provided for musl in this tree; messages are English.
+name = "lftp"
+version = "4.9.3"
+release = 1
+summary = "FTP/HTTP client"
+license = "GPL-3.0-or-later"
+homepage = "https://lftp.yar.ru"
+hostdeps = ["autoconf", "automake", "gettext", "libtool", "pkgconf"]
+builddeps = ["ncurses-devel", "openssl-devel", "readline-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://lftp.yar.ru/ftp/lftp-4.9.3.tar.xz", sha256 = "96e7199d7935be33cf6b1161e955b2aab40ab77ecdf2a19cea4fc1193f457edc" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure \
+    --disable-nls \
+    --enable-threads=posix \
+    --with-openssl \
+    --with-modules
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/lftp/COPYING"
+'''

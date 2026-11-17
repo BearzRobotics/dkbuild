@@ -1,0 +1,29 @@
+# lsscsi: list SCSI (and SATA, NVMe, USB storage) devices and hosts from sysfs.
+# Written for this tree; built from the project's tag archive (not the
+# tarball host sg.danny.cz), so autogen.sh runs.
+# /usr/bin (--sbindir=/usr/bin: no /usr/sbin here).
+name = "lsscsi"
+version = "0.33"
+release = 1
+summary = "List SCSI devices and hosts"
+license = "GPL-2.0-or-later"
+homepage = "https://sg.danny.cz/scsi/lsscsi.html"
+hostdeps = ["autoconf", "automake", "libtool"]
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/doug-gilbert/lsscsi/archive/refs/tags/r0.33.tar.gz", sha256 = "bdb38cd930df73b7879125fba2a63c97d3c20d46c222707243445ddf5b8a0dd0" },
+]
+
+setup = '''
+sh ./autogen.sh
+%configure --sbindir=/usr/bin
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/lsscsi/COPYING"
+'''

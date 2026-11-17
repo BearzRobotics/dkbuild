@@ -1,0 +1,27 @@
+# libthreadar: C++ POSIX threads wrapper library (by dar's author); libdar uses
+# it for multi-threaded compression and encryption. Written for this tree;
+# autotools from the release tarball, no source edits. LGPL-3.0-or-later
+# (COPYING is the GPL-3 text, COPYING.LESSER the LGPL-3 grant).
+name = "libthreadar"
+version = "1.6.1"
+release = 1
+summary = "C++ POSIX thread wrapper library"
+license = "LGPL-3.0-or-later"
+homepage = "https://libthreadar.sourceforge.net"
+hostdeps = ["pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/libthreadar/1.6.1/libthreadar-1.6.1.tar.gz", sha256 = "467709320c54215ac8829ef48e856d890caa4f6a7831633d3992e0b5359f38d8" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING.LESSER "$pkgdir/usr/share/licenses/libthreadar/COPYING.LESSER"
+'''

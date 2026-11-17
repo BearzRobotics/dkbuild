@@ -1,0 +1,34 @@
+# memtester: userspace memory tester (locks a block of RAM and runs pattern
+# tests on it; for a full test, memtest86+ boots outside the OS). Written for
+# this tree.
+# Source edit: memtester has no configure; its Makefile reads the compile and
+# link commands from the first line of conf-cc and conf-ld. Both files are
+# rewritten with this build's compiler and flags (keeping upstream's defines:
+# -DPOSIX -D_POSIX_C_SOURCE=200809L -D_FILE_OFFSET_BITS=64 -DTEST_NARROW_WRITES).
+# The Makefile installs under INSTALLPATH/man (not share/man), so the program
+# and man page are installed by hand.
+name = "memtester"
+version = "4.7.1"
+release = 1
+summary = "Userspace memory tester"
+license = "GPL-2.0-only"
+homepage = "https://pyropus.ca/software/memtester/"
+builddeps = ["linux-headers"]
+options = ["!check"]
+
+source = [
+    { url = "https://pyropus.ca/software/memtester/old-versions/memtester-4.7.1.tar.gz", sha256 = "e427de663f7bd22d1ebee8af12506a852c010bd4fcbca1e0e6b02972d298b5bb" },
+]
+
+setup = '''
+echo "$CC $CFLAGS -DPOSIX -D_POSIX_C_SOURCE=200809L -D_FILE_OFFSET_BITS=64 -DTEST_NARROW_WRITES -c" > conf-cc
+echo "$CC $LDFLAGS" > conf-ld
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+install -Dm755 memtester "$pkgdir/usr/bin/memtester"
+install -Dm644 memtester.8 "$pkgdir/usr/share/man/man8/memtester.8"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/memtester/COPYING"
+'''
