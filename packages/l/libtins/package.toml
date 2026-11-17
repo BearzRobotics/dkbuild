@@ -1,7 +1,7 @@
 # High-level, multiplatform C++ network packet sniffing and crafting library. (BlackArch list, requested 2026-11-16; docs/requests.md). Generated from the sources' build files (cmake); the build dependencies are guessed from the #includes. Not built yet when written (wip/queue): expect first-build fixes.
 name = "libtins"
 version = "4.6"
-release = 1
+release = 2
 summary = "High-level, multiplatform C++ network packet sniffing and crafting library."
 license = "BSD-2-Clause"
 homepage = "https://github.com/mfontanini/libtins"
@@ -13,6 +13,10 @@ source = [
     { url = "https://github.com/mfontanini/libtins/archive/refs/tags/v4.6.tar.gz", sha256 = "37a9cc407929c56c2081e717347cac455287ba354016bad5bad6243d1f0a4a7a" },
 ]
 
+# new release: include/tins/ipv6_address.h uses std::equal without <algorithm> (libc++ 23): force-included.
+environment = '''
+export CXXFLAGS="$CXXFLAGS -include algorithm"
+'''
 setup = '''
 %cmake
 '''

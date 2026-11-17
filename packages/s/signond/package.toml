@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "signond"
 version = "8.61"
-release = 2
+release = 3
 summary = "D-Bus service for user authentication"
 license = "LGPL-2.1-only"
 homepage = "https://gitlab.com/accounts-sso/signond"
@@ -17,6 +17,10 @@ source = [
     { url = "https://gitlab.com/accounts-sso/signond/-/archive/VERSION_8.61/signond-VERSION_8.61.tar.gz", sha256 = "3dd57c25e1bf1583b2cb857f96831e38e73d40264ff66ca43e63bb7233f76828" },
 ]
 
+# new release: the Chimera template's configure() (qmake6) was not carried over by the importer ("make: No targets specified and no makefile found").
+setup = '''
+qmake6 PREFIX=/usr QMAKE_CFLAGS="$CFLAGS" QMAKE_CXXFLAGS="$CXXFLAGS" QMAKE_LFLAGS="$LDFLAGS"
+'''
 build = '''
 %make
 '''

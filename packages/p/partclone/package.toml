@@ -13,7 +13,7 @@
 # first (libtoolize, aclocal, automake, autoreconf).
 name = "partclone"
 version = "0.3.54"
-release = 1
+release = 2
 summary = "File system aware disk partition cloning and restoring"
 license = "GPL-2.0-or-later"
 homepage = "https://partclone.org"
@@ -25,7 +25,9 @@ source = [
     { url = "https://github.com/Thomas-Tsai/partclone/archive/refs/tags/0.3.54.tar.gz", sha256 = "7a09a4676327ecea284df2cf1c6a1fa36b11308659d58e32fec9a723e18e52ab" },
 ]
 
+# new release: autogen stopped with "required file './config.rpath' not found" (gettext's autopoint step is not run by it): the file is copied from gettext.
 setup = '''
+cp /usr/share/gettext/config.rpath .
 sh ./autogen
 %configure \
     --enable-extfs --enable-xfs --enable-f2fs --enable-nilfs2 --enable-ntfs \

@@ -2,7 +2,7 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "libspiel"
 version = "1.0.4"
-release = 3
+release = 4
 summary = "Speech synthesis client library"
 license = "LGPL-2.1-or-later"
 homepage = "https://project-spiel.org"
@@ -16,7 +16,9 @@ source = [
 ]
 
 setup = '''
+# new release: -Dtests=false: tests/test-simultaneous-init.c includes a generated header (spiel-provider-proxy.h) that this build does not make in time ("fatal error ... file not found").
 %meson \
+    -Dtests=false \
     -Ddocs=false
 '''
 build = '''
