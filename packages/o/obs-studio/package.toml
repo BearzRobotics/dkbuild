@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "obs-studio"
 version = "32.0.2"
-release = 12
+release = 13
 summary = "Live streaming and screen recording software"
 license = "GPL-2.0-or-later"
 homepage = "https://obsproject.com"
@@ -17,6 +17,7 @@ source = [
     { url = "https://github.com/obsproject/obs-studio/archive/refs/tags/32.0.2.tar.gz", sha256 = "39e99b9fbdc77e7e87cfd9c7e8709d1d427627bad5b21b791019c887c8598d13" },
 ]
 
+# r13: + <sstream> and more (frontend/widgets/OBSBasic*.cpp use std::stringstream: 3 files).
 # r12: + <functional> and the other common standard headers (frontend/utility/BasicOutputHandler.hpp uses std::function without <functional>: 6 files).
 # r11: the ThinLTO link of libobs.so crashes ld.lld ("clang: error: unable to execute command: Segmentation fault", libobs/libobs.so.30, after the whole tree
 # compiled). OBS turns IPO on for Release builds when CMake's check passes (cmake/common/compiler_common.cmake); that check's result is a cache variable, given
@@ -25,7 +26,7 @@ source = [
 # without <stdlib.h> ("use of undeclared identifier 'free'"), and more files will follow. Not a source edit: force-included. `-k 0` keeps ninja going so
 # one run lists every file the compiler rejects.
 environment = '''
-export CXXFLAGS="$CXXFLAGS -include stdlib.h -include cstdlib -include algorithm -include new -include cstdint -include functional -include memory -include vector -include string -include map -include set -include utility -include mutex -include chrono -include thread"
+export CXXFLAGS="$CXXFLAGS -include stdlib.h -include cstdlib -include algorithm -include new -include cstdint -include functional -include memory -include vector -include string -include map -include set -include utility -include mutex -include chrono -include thread -include sstream -include iostream -include fstream -include list -include deque -include array -include tuple -include optional -include cmath"
 export CFLAGS="$CFLAGS -include stdlib.h"
 '''
 setup = '''
