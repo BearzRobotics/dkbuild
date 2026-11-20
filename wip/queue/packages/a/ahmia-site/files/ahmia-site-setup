@@ -1,0 +1,43 @@
+#!/bin/sh
+# First start of ahmia-site: make /etc/ahmia-site/env (random SECRET_KEY and SALT), empty filter
+# lists (see README.FenrirOS: this means NO filtering), and the SQLite database. Existing files
+# are never touched. Runs as root, before the site.
+set -e
+e=/etc/ahmia-site
+share=/usr/share/ahmia-site
+
+install -d -m 0750 -o root -g ahmia "$e" "$e/filters"
+install -d -m 0750 -o ahmia -g ahmia /var/lib/ahmia-site
+install -d -m 0750 -o root -g ahmia /var/log/ahmia-site
+
+if [ ! -f "$e/env" ]; then
+    key=$(head -c 48 /dev/urandom | od -An -tx1 | tr -d ' \n')
+    salt=$(head -c 16 /dev/urandom | od -An -tx1 | tr -d ' \n')
+    umask 077
+    {
+        echo "# ahmia-site settings (see $share/example.env for the others)."
+        echo "SECRET_KEY=$key"
+        echo "SALT=$salt"
+        echo "ES_URL=https://localhost:9200/"
+        echo "ES_USERNAME=elastic"
+        echo "ES_PASSWORD=CHANGE_ME"
+        echo "ES_CA_CERTS=/etc/ahmia-site/http_ca.crt"
+        echo "VERIFY_CERT=True"
+    } >"$e/env"
+    chown root:ahmia "$e/env"
+    chmod 0640 "$e/env"
+fi
+
+for c in AI_CSAM COM_groups contact_offending_related CSAM_known_content CSAM_site_navigation \
+         CSAM_harm_framing CSAM_affiliative_framing CSAM_general; do
+    f="$e/filters/banned_terms_$c.map"
+    [ -f "$f" ] || install -m 0640 -o root -g ahmia /dev/null "$f"
+done
+
+cd /var/lib/ahmia-site
+set -a
+# shellcheck source=/dev/null
+. "$e/env"
+set +a
+# util-linux here has no runuser: use su from shadow
+PYTHONPATH=$share su -s /bin/sh ahmia -c "python3 $share/manage.py migrate --noinput"

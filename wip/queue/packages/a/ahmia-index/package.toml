@@ -1,0 +1,35 @@
+# ahmia-index (requested 2026-11-17): the scripts that set up and maintain the Elasticsearch
+# index of the Ahmia search engine (monthly indexes, the latest-tor alias, abuse-site filtering).
+# Written, not built (wip/queue). Elasticsearch 8 itself is NOT packaged (the Python client
+# refuses other servers, so OpenSearch is no substitute).
+# Upstream runs the scripts from a checkout (relative paths, .env in the current directory):
+# the `ahmia-index` wrapper makes /var/lib/ahmia-index with links to them and runs from there.
+# Installed inert: no service, no cron entry.
+name = "ahmia-index"
+version = "20260317"
+release = 1
+summary = "Setup and maintenance scripts for the Ahmia Elasticsearch index"
+license = "BSD-3-Clause"
+homepage = "https://github.com/ahmia/ahmia-index"
+hostdeps = ["python"]
+rundeps = ["python", "python-elasticsearch", "python-decouple", "bash", "curl"]
+options = ["!check"]
+
+# no tagged releases upstream: pinned commit
+source = [
+    { url = "https://github.com/ahmia/ahmia-index/archive/9b99b6da0c35cbf81d5820a2fd05697ce3aca5c5.tar.gz", sha256 = "c1c3d97fc7ecc51431b13441a2a1ab4d2e86080e13441525a618670067973fb9" },
+]
+
+install = '''
+d="$pkgdir/usr/share/ahmia-index"
+install -d "$d"
+install -m644 mappings_tor.json settings.py gather_from_index.py filter_onions.py point_to_indexes.py "$d/"
+install -m755 setup_index.sh call_filtering.sh wrap_filtering.sh delete.sh migrate.sh "$d/"
+install -Dm755 $pkgfiles/ahmia-index "$pkgdir/usr/bin/ahmia-index"
+install -Dm644 example.env "$pkgdir/etc/ahmia-index/env.example"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/ahmia-index.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/ahmia-index.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/ahmia-index/README.FenrirOS"
+install -Dm644 README.md "$pkgdir/usr/share/doc/ahmia-index/README.md"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ahmia-index/LICENSE"
+'''

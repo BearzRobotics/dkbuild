@@ -1,0 +1,23 @@
+#!/bin/sh
+# ahmia-index setup | alias [--add|--rm] | filter | delete | migrate
+# Runs the upstream script from /var/lib/ahmia-index (links to the shipped scripts, .env linked to
+# /etc/ahmia-index/env, which is the example copied and edited).
+share=/usr/share/ahmia-index
+work=${AHMIA_INDEX_HOME:-/var/lib/ahmia-index}
+if [ ! -r /etc/ahmia-index/env ]; then
+    echo "ahmia-index: cannot read /etc/ahmia-index/env (copy env.example there and edit it)" >&2
+    exit 1
+fi
+cmd=${1:-}
+[ $# -gt 0 ] && shift
+cd "$work" || exit 1
+for f in "$share"/*; do ln -sf "$f" .; done
+ln -sf /etc/ahmia-index/env .env
+case $cmd in
+    setup) exec bash ./setup_index.sh "$@" ;;
+    alias) exec python3 ./point_to_indexes.py "$@" ;;
+    filter) exec bash ./wrap_filtering.sh "$@" ;;
+    delete) exec bash ./delete.sh "$@" ;;
+    migrate) exec bash ./migrate.sh "$@" ;;
+    *) echo "usage: ahmia-index setup | alias [--add|--rm] | filter | delete | migrate" >&2; exit 2 ;;
+esac

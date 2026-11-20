@@ -1,0 +1,21 @@
+# django from PyPI, added for ahmia-site (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-django"
+version = "5.2.16"
+release = 1
+summary = "A high-level Python web framework (5.2 LTS)"
+license = "BSD-3-Clause"
+homepage = "https://www.djangoproject.com/"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python", "python-asgiref", "python-sqlparse"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/a9/26/889449d521ae508b26de715954faecd8bcf3f740affb81b2d146a83b42a5/django-5.2.16.tar.gz", sha256 = "59ea02020c3136fce14bef0bbece21a10a4febef5eed1c51c22ae468efa22200" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-django/LICENSE"
+install -Dm644 LICENSE.python "$pkgdir/usr/share/licenses/python-django/LICENSE.python"
+'''

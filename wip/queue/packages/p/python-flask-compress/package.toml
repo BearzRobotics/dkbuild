@@ -1,0 +1,20 @@
+# flask-compress from PyPI, added for OnionShare (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-flask-compress"
+version = "1.26"
+release = 1
+summary = "Compress responses in a Flask app"
+license = "MIT"
+homepage = "https://github.com/colour-science/flask-compress"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python", "python-flask", "python-brotli"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/36/60/d6928ccf04c6cde5f66155d0d841f80981b452702e41ddcd23386f3c738f/flask_compress-1.26.tar.gz", sha256 = "bd5299504e564eac273951811a1c161d893f5d51b8722066fcef1b4da556749f" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-flask-compress/$(basename LICENSE.txt)"
+'''

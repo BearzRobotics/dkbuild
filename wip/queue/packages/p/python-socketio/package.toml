@@ -1,0 +1,20 @@
+# socketio from PyPI, added for OnionShare (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-socketio"
+version = "5.18.1"
+release = 1
+summary = "Socket.IO server and client for Python"
+license = "MIT"
+homepage = "https://github.com/miguelgrinberg/python-socketio"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python", "python-bidict", "python-engineio"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/71/b9/4ab083267c1f8ece9a9e019808412af7c7a03321411a1263cd863321baa2/python_socketio-5.18.1.tar.gz", sha256 = "07ab0e7c94a52833a67af1dc05958ad6fb0de69adc87de9198a61b22588c40d4" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-socketio/$(basename LICENSE)"
+'''

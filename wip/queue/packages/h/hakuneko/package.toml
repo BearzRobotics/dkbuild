@@ -1,0 +1,73 @@
+# HakuNeko Desktop (the legacy HakuNeko 6 line), from https://github.com/manga-download/hakuneko
+# (requested 2026-11-18): downloads manga and anime from many sites. DRAFT, not built, and the
+# Electron port below is untested: nothing here has been run.
+# Source: the master commit 128f3c77 (2026-03-29, "Reset Commit History": upstream's history is one commit;
+# the newest release tag, v6.1.7, is from 2020 and older). Version 20260329 is that commit's date.
+# The active successor is manga-download/haruneko (TypeScript, no releases yet); this is not it.
+# How it runs: an Electron app (src/app) that opens the HakuNeko web-application (src/web, in the
+# repo, its Polymer libraries vendored) through its own hakuneko:// protocol. By default it downloads
+# a signed update of that web-application at start; here it is turned off (the `start:dev` flags:
+# --update-url=DISABLED --cache-directory=<web dir>), so the installed copy is the only one and
+# nothing is fetched at run time except what the sites it downloads from serve.
+# Electron: upstream is built for Electron 8.3.4 (its build-app.js downloads one); the tree's
+# Electron is 42 (the system one, as scratch-desktop). Two APIs it uses are gone there, so
+# patches/electron42.patch ports them (all of it untested):
+#  - protocol.registerBufferProtocol (removed in Electron 25) becomes protocol.handle(), for the
+#    hakuneko:// cache protocol and the connector protocol;
+#  - electron.remote (removed in Electron 14, used all over the web-application: Storage, Settings,
+#    Request, index.html) is given back by the @electron/remote package (a new dependency, in
+#    files/package-lock.json): the main process initialises and enables it, and index.html
+#    assigns it to require('electron').remote before the web-application starts; contextIsolation
+#    is turned off, as the web-application's own require() calls need.
+# Dependencies: upstream's "latest" versions are pinned in files/package-lock.json (made with
+# `npm install --package-lock-only --ignore-scripts --legacy-peer-deps` in src/app, so the
+# peer `electron` npm package, which downloads a binary, is not in it). Only the app's runtime
+# dependencies are installed (@logtrine/logtrine, discord-rpc, fs-extra, jszip, @electron/remote).
+# discord-rpc's optional native register-scheme is not installed (--omit=optional); checked once on
+# the pinned source: that `npm ci` installs 25 packages and discord-rpc, fs-extra, jszip and
+# @logtrine/logtrine load under node (@electron/remote needs Electron itself, so it was not).
+# Left out: upstream's bundled ffmpeg, ImageMagick and kindlegen binaries (npm packages that
+# download them): ffmpeg and imagemagick are the tree's, found through PATH; kindlegen
+# (Amazon, proprietary, no longer distributed) is not packaged, so "export to Kindle" is missing.
+name = "hakuneko"
+version = "20260329"
+release = 1
+summary = "Manga and anime downloader (HakuNeko Desktop 6, on the system Electron)"
+license = "Unlicense"
+homepage = "https://hakuneko.download"
+archs = ["x86_64", "aarch64"]
+patches = ["electron42.patch"]
+hostdeps = ["nodejs"]
+rundeps = ["electron", "ffmpeg", "imagemagick"]
+options = ["!check", "!strip", "npmdeps"]
+
+source = [
+    { url = "https://github.com/manga-download/hakuneko/archive/128f3c771c7d50bf4eec19638d480f133469eca8.tar.gz", sha256 = "db4558f52ff5bb80f1d37aeaa4adfe03ca6a8ca5b188591d80feedc7d558b0e0" },
+]
+
+environment = '''
+export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
+    npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+export ELECTRON_SKIP_BINARY_DOWNLOAD=1
+'''
+setup = '''
+cd src/app
+cp $pkgfiles/package-lock.json .
+node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
+# no scripts and no optional packages (discord-rpc's register-scheme is native code), no dev
+# dependencies; --legacy-peer-deps as the lock was made (it leaves out @electron/remote's peer
+# `electron`, the npm package that downloads a binary; the system Electron is the one that runs)
+npm ci --ignore-scripts --omit=dev --omit=optional --legacy-peer-deps
+'''
+install = '''
+app="$pkgdir/usr/lib/hakuneko"
+web="$pkgdir/usr/share/hakuneko/web"
+mkdir -p "$app" "$web"
+cp -a src/app/*.js src/app/package.json src/app/node_modules "$app/"
+cp -a src/web/. "$web/"
+find "$web" -name __tests__ -type d -prune -exec rm -rf {} +
+install -Dm755 $pkgfiles/hakuneko "$pkgdir/usr/bin/hakuneko"
+install -Dm644 $pkgfiles/hakuneko.desktop "$pkgdir/usr/share/applications/hakuneko.desktop"
+install -Dm644 assets/logo_64.png "$pkgdir/usr/share/icons/hicolor/64x64/apps/hakuneko.png"
+install -Dm644 UNLICENSE "$pkgdir/usr/share/licenses/hakuneko/UNLICENSE"
+'''

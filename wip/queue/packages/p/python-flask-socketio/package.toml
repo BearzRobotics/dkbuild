@@ -1,0 +1,20 @@
+# flask-socketio from PyPI, added for OnionShare (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-flask-socketio"
+version = "5.7.2"
+release = 1
+summary = "Socket.IO integration for Flask applications"
+license = "MIT"
+homepage = "https://github.com/miguelgrinberg/Flask-SocketIO"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python", "python-flask", "python-socketio"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/39/11/ee1cb9153537ffa0342eb9c3f2d393c4db8ccce0085503081080139a0db1/flask_socketio-5.7.2.tar.gz", sha256 = "6b2f967f24f693f2316d108b2d2125642db856b2681c12e60ded9bff1b8035e0" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-flask-socketio/$(basename LICENSE)"
+'''

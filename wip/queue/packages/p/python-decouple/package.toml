@@ -1,0 +1,20 @@
+# decouple from PyPI, added for ahmia-site (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-decouple"
+version = "3.8"
+release = 1
+summary = "Strict separation of settings from code"
+license = "MIT"
+homepage = "https://github.com/HBNetwork/python-decouple"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/e1/97/373dcd5844ec0ea5893e13c39a2c67e7537987ad8de3842fe078db4582fa/python-decouple-3.8.tar.gz", sha256 = "ba6e2657d4f376ecc46f77a3a615e058d93ba5e465c01bbe57289bfb7cce680f" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-decouple/LICENSE"
+'''

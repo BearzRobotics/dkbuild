@@ -1,0 +1,112 @@
+diff --git a/src/app/ElectronBootstrap.js b/src/app/ElectronBootstrap.js
+index d74f41f..bd8086d 100644
+--- a/src/app/ElectronBootstrap.js
++++ b/src/app/ElectronBootstrap.js
+@@ -1,6 +1,7 @@
+ const path = require('path');
+ const fs = require('fs-extra');
+ const electron = require('electron');
++const remoteMain = require('@electron/remote/main');
+ const { ConsoleLogger } = require('@logtrine/logtrine');
+ const urlFilterAll = { urls: ['http://*/*', 'https://*/*'] };
+ const trayTooltipMinimize = 'HakuNeko\nClick to hide window';
+@@ -47,6 +48,7 @@ module.exports = class ElectronBootstrap {
+          * See: https://fossies.org/linux/electron/atom/browser/api/atom_api_protocol.cc
+          * { standard, secure, bypassCSP, corsEnabled, supportFetchAPI, allowServiceWorkers }
+          */
++        remoteMain.initialize();
+         electron.protocol.registerSchemesAsPrivileged(this._schemes);
+ 
+         // update userdata path (e.g. for portable version)
+@@ -81,12 +83,13 @@ module.exports = class ElectronBootstrap {
+      *
+      */
+     _registerCacheProtocol() {
+-        electron.protocol.registerBufferProtocol(this._configuration.applicationProtocol, async (request, callback) => {
++        // Electron >= 25: protocol.handle() (registerBufferProtocol was removed)
++        electron.protocol.handle(this._configuration.applicationProtocol, async request => {
+             try {
+                 let uri = new URL(request.url);
+-                let endpoint = path.join(this._directoryMap[uri.hostname], path.normalize(uri.pathname));
++                let endpoint = path.join(this._directoryMap[uri.hostname], path.normalize(decodeURIComponent(uri.pathname)));
+                 if(!await fs.exists(endpoint)) {
+-                    throw -6; // https://cs.chromium.org/chromium/src/net/base/net_error_list.h
++                    return new Response(null, { status: 404 });
+                 }
+                 let stats = await fs.stat(endpoint);
+                 let mime;
+@@ -99,22 +102,25 @@ module.exports = class ElectronBootstrap {
+                     mime = endpoint.endsWith('.mjs') ? 'text/javascript' : undefined;
+                     buffer = await fs.readFile(endpoint);
+                 }
+-                callback({
+-                    mimeType: mime, // leaving this blank seems to use autodetect
+-                    data: buffer
+-                });
++                return new Response(buffer, mime ? { headers: { 'content-type': mime } } : undefined);
+             } catch(error) {
+-                callback(error);
++                return new Response(null, { status: 500 });
+             }
+         });
+     }
+ 
+     _registerConnectorProtocol() {
+-        electron.protocol.registerBufferProtocol(this._configuration.connectorProtocol, async (request, callback) => {
++        electron.protocol.handle(this._configuration.connectorProtocol, async request => {
+             try {
+-                callback(await this._ipcSend('on-connector-protocol-handler', request));
++                // the web-application answers with { mimeType, data } (the old buffer-protocol response)
++                let result = await this._ipcSend('on-connector-protocol-handler', request);
++                if(!result) {
++                    return new Response(null, { status: 404 });
++                }
++                let init = result.mimeType ? { headers: { 'content-type': result.mimeType } } : undefined;
++                return new Response(result.data ? Buffer.from(result.data) : null, init);
+             } catch(error) {
+-                callback(undefined);
++                return new Response(null, { status: 500 });
+             }
+         });
+     }
+@@ -258,11 +264,13 @@ module.exports = class ElectronBootstrap {
+             webPreferences: {
+                 experimentalFeatures: true,
+                 nodeIntegration: true,
++                contextIsolation: false, // the web-application calls require() and electron.remote itself
+                 webSecurity: false // required to open local images in browser
+             },
+             frame: false
+         });
+ 
++        remoteMain.enable(this._window.webContents);
+         this._setupBeforeSendHeaders();
+         this._setupHeadersReceived();
+         this._setupTray(this._showTray);
+diff --git a/src/app/package.json b/src/app/package.json
+index 72840b4..5ce2911 100644
+--- a/src/app/package.json
++++ b/src/app/package.json
+@@ -10,6 +10,7 @@
+   },
+   "main": "main.js",
+   "dependencies": {
++    "@electron/remote": "^2.1.3",
+     "@logtrine/logtrine": "latest",
+     "discord-rpc": "^3.2.0",
+     "fs-extra": "latest",
+diff --git a/src/web/index.html b/src/web/index.html
+index afa8cdf..c51d86a 100644
+--- a/src/web/index.html
++++ b/src/web/index.html
+@@ -5,6 +5,10 @@
+     <title>HakuNeko</title>
+     <link rel="icon" href="./img/logo.png">
+     <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
++    <script>
++        // Electron >= 14 has no electron.remote: give the web-application the @electron/remote module in its place
++        require('electron').remote = require('/usr/lib/hakuneko/node_modules/@electron/remote');
++    </script>
+     <script src="./js/protobufjs.min.js"></script>
+     <script src="./js/crypto-js.min.js"></script>
+     <script src="./js/oauth-1.0a.min.js"></script>

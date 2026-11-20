@@ -1,0 +1,16 @@
+ahmia-crawler on FenrirOS
+=========================
+
+Installed but not started; nothing runs by itself. It crawls .onion sites, so read the points below first.
+
+1. Needs Elasticsearch 8 (the index, see ahmia-index). Elasticsearch is not in the repository.
+2. Needs the local HTTP proxy pool on localhost:15000-15099, one Tor client behind each. The
+   scripts are in /usr/share/ahmia-crawler/torfleet: copy that directory somewhere writable
+   (it writes its data, logs and pids next to itself), then run   bash runfleet.sh
+   (100 tor + privoxy pairs; edit NUM_INSTANCES for fewer, and change HTTP_PROXY_TOR_PROXIES in
+   settings to match). Privoxy's own config in privoxy_configs/ is used instead of /etc/privoxy.
+3. Settings: copy /etc/ahmia-crawler/env.example to /etc/ahmia-crawler/env and edit.
+4. Run as the ahmia-crawler user:
+     su -s /bin/sh ahmia-crawler -c 'ahmia-crawl -s DEPTH_LIMIT=1 -s LOG_LEVEL=DEBUG'
+   The upstream daily and monthly schedules are in /usr/share/ahmia-crawler/run_daily.sh,
+   run.sh and systemd_examples/ (adapt them to cron/dinit yourself; no job is installed).

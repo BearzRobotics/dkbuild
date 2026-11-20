@@ -1,0 +1,28 @@
+diff --git a/distribution/archives/build.gradle b/distribution/archives/build.gradle
+index c610b351..765e755b 100644
+--- a/distribution/archives/build.gradle
++++ b/distribution/archives/build.gradle
+@@ -40,7 +40,7 @@ CopySpec archiveFiles(String distributionType, String os, String architecture, b
+       }
+       into("darwin".equals(os) ? 'jdk.app' : 'jdk') {
+         if (isTestDistro == false) {
+-          with jdkFiles(project, os, architecture)
++          // FenrirOS: no bundled JDK (see distribution/build.gradle)
+         }
+       }
+       into('') {
+diff --git a/distribution/build.gradle b/distribution/build.gradle
+index 8b1f4bd5..78529680 100644
+--- a/distribution/build.gradle
++++ b/distribution/build.gradle
+@@ -258,7 +258,9 @@ configure(subprojects.findAll { ['archives', 'packages'].contains(it.name) }) {
+   apply plugin: 'elasticsearch.repositories'
+ 
+   int bundledJdkMajor = BundledJdkPlatforms.bundledJdkMajor(buildParams)
+-  def architecturesFor = { String platform -> BundledJdkPlatforms.architecturesFor(platform, bundledJdkMajor) }
++  // FenrirOS: no JDK is bundled into the archives (the package depends on the system JDK), so no
++  // bundled JDK is registered, downloaded or resolved. bin/elasticsearch uses ES_JAVA_HOME.
++  def architecturesFor = { String platform -> [] }
+ 
+   if (buildParams.runtimeJava.preRelease) {
+     Integer buildNumber = Integer.getInteger("runtime.java.build")

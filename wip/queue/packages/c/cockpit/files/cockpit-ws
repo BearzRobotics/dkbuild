@@ -1,0 +1,7 @@
+# Cockpit web service. Not enabled by default (README.FenrirOS). Plain HTTP on the loopback
+# address only: log in with a system account; for remote use tunnel it over SSH or put a TLS
+# reverse proxy in front (then use: cockpit-ws --for-tls-proxy).
+type = process
+command = /usr/lib/cockpit-ws --no-tls --address 127.0.0.1 --port 9090
+logfile = /var/log/cockpit-ws.log
+depends-on: elogind

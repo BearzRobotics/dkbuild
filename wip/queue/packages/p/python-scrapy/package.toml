@@ -1,0 +1,24 @@
+# 2.17.0, not the newest (2.20): 2.18+ need brotlicffi, 2.20 also aiohttp/aiodns/aioftp/formerly (unpackaged); ahmia-crawler asks for >= 2.15.
+# 2.15.2 does NOT work with the repo's Twisted 26.10 (imports twisted.internet._sslverify._setAcceptableProtocols, removed); 2.16 and 2.17 import and crawl
+# on Twisted 26.10 (smoke test with a venv, 2026-11-17: CrawlSpider + LinkExtractor + html2text against a local server).
+# scrapy from PyPI, added for ahmia-crawler (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-scrapy"
+version = "2.17.0"
+release = 1
+summary = "A high-level web crawling and web scraping framework"
+license = "BSD-3-Clause"
+homepage = "https://scrapy.org/"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-hatchling"]
+rundeps = ["python", "python-twisted", "python-pydispatcher", "python-cryptography", "python-cssselect", "python-defusedxml", "python-itemadapter", "python-itemloaders", "python-lxml", "python-packaging", "python-parsel", "python-protego", "python-openssl", "python-queuelib", "python-service-identity", "python-tldextract", "python-w3lib", "python-zope-interface"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/35/9f/9800513193aacb44825f0b9a75e4e6d4a0c416e9ed23ca3aac7374d03d17/scrapy-2.17.0.tar.gz", sha256 = "b536d14166b05e2183b19ae105a7af849cd14d4c1f70d3009d9b1828c0ab3d92" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-scrapy/LICENSE"
+install -Dm644 AUTHORS "$pkgdir/usr/share/licenses/python-scrapy/AUTHORS"
+'''

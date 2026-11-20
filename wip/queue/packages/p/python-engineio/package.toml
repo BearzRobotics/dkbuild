@@ -1,0 +1,20 @@
+# engineio from PyPI, added for OnionShare (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-engineio"
+version = "4.15.1"
+release = 1
+summary = "Engine.IO server and client for Python"
+license = "MIT"
+homepage = "https://github.com/miguelgrinberg/python-engineio"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python", "python-simple-websocket"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/dd/91/b565807fa922620ed575b412bf978d032e4c5d79558b400fdbfe1008c95a/python_engineio-4.15.1.tar.gz", sha256 = "1a412e798a90c64fabe7b20798939ae6d4a03f34da8a33d5a21a25a8bbbc3612" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-engineio/$(basename LICENSE)"
+'''

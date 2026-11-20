@@ -1,0 +1,33 @@
+# frostwork from PyPI: Zyte's treeless HTML extraction engine (Rust, PyO3 abi3 extension). w3lib
+# imports it (w3lib.html: `from frostwork import navigation`), so Scrapy needs it; added for
+# ahmia-crawler (requested 2026-11-17). Built like python-rpds-py: crates vendored on the host
+# (`cargodeps`, from Cargo.lock), `maturin build` makes the wheel offline. Not built (wip/queue):
+# expect first-build fixes. The sdist's pyproject names the python feature for maturin itself
+# (features = ["python"] in [tool.maturin]; checked at write time). If the wheel comes out without
+# the extension module, add `--features python` to the maturin line.
+name = "python-frostwork"
+version = "0.2.2"
+release = 1
+summary = "Treeless, one-pass HTML extraction: CSS/XPath selectors matched on a streaming scan"
+license = "Apache-2.0"
+homepage = "https://github.com/scrapy/frostwork"
+hostdeps = ["python", "rust", "maturin"]
+builddeps = ["python-devel"]
+rundeps = ["python", "python-typing-extensions"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/00/df/dc5971ef6c3025ac0734eb4552abbb45adaa6a410733f8119293d99f4e84/frostwork-0.2.2.tar.gz", sha256 = "da4ac35a703b68a6fd1ad92dba53abeed4d38bcfaa5125b6f7f50b4405de7066" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export RUSTFLAGS="-C target-feature=-crt-static"
+'''
+build = '''
+maturin build --release --frozen --offline -i python3 --compatibility linux --out dist -j $jobs
+'''
+install = '''
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr dist/*.whl
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-frostwork/LICENSE"
+'''

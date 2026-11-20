@@ -1,0 +1,16 @@
+Elasticsearch on FenrirOS
+=========================
+
+Installed but NOT started. Elasticsearch 8.19, built from source without the bundled JDK: it runs on the
+system openjdk21 (/usr/share/elasticsearch/jdk is a link to it).
+
+  dinitctl enable elasticsearch      (or: dinitctl start elasticsearch once)
+
+The first start (security is on by default) prints the password of the `elastic` user once, in the log
+(/var/log/elasticsearch/service.log) and creates the TLS certificates in /etc/elasticsearch/certs. Set your own with
+  su -s /bin/sh elasticsearch -c 'elasticsearch-reset-password -u elastic -i'
+It listens on 127.0.0.1:9200 only. The CA certificate for clients is /etc/elasticsearch/certs/http_ca.crt
+(the ES_CA_CERTS of ahmia-site, ahmia-crawler and ahmia-index). The heap is sized automatically; set
+-Xms/-Xmx in /etc/elasticsearch/jvm.options.d/*.options on a big machine. The sysctl file makes
+vm.max_map_count 262144 at boot (run `sysctl --system` once to apply it before the first start).
+The Python client (python-elasticsearch 8.17.1 for the Ahmia tools) talks to the 8.x series.

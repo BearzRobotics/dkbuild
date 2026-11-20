@@ -1,0 +1,4 @@
+#!/bin/sh
+# HakuNeko Desktop on the system Electron, with its own web-application (no update download).
+exec /usr/bin/electron /usr/lib/hakuneko \
+    --update-url=DISABLED --cache-directory=/usr/share/hakuneko/web "$@"

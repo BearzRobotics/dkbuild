@@ -1,0 +1,9 @@
+# Elasticsearch, as the unprivileged elasticsearch user, on 127.0.0.1:9200 with TLS and
+# passwords (upstream's defaults). Not enabled by default (README.FenrirOS).
+type = process
+command = /usr/share/elasticsearch/bin/elasticsearch
+run-as = elasticsearch
+working-dir = /usr/share/elasticsearch
+rlimit-nofile = 65535:65535
+logfile = /var/log/elasticsearch/service.log
+depends-on: rcboot

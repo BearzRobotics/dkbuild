@@ -1,0 +1,20 @@
+# greenlet from PyPI, added for OnionShare (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-greenlet"
+version = "3.5.6"
+release = 1
+summary = "Lightweight in-process concurrent programming"
+license = "MIT AND PSF-2.0"
+homepage = "https://github.com/python-greenlet/greenlet"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/3e/6e/0091f175ccd02b02bc8811bbcbcc6ac2e980be116e3b2f7a736ca322bf84/greenlet-3.5.6.tar.gz", sha256 = "8e67c43bdfc88d5fee6db0d3e40175b362fc95fb85f0412d233b9b203c53a575" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-greenlet/$(basename LICENSE)"
+'''

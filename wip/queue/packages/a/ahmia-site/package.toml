@@ -1,0 +1,75 @@
+# ahmia-site (requested 2026-11-17): the Django web front end of the Ahmia search engine for Tor
+# hidden services. Written, not built (wip/queue). It is only the website: it queries an
+# Elasticsearch 8 index (ahmia-index, filled by ahmia-crawler) that is NOT packaged. Elasticsearch
+# itself is not in the repo, so the site installs but cannot return results until one is
+# reachable at ES_URL. Python client: python-elasticsearch.
+# Installed inert (docs/requests.md): the dinit services are shipped, not enabled.
+#
+# Source edits (all done by sed in install, each one checked with grep so a changed upstream
+# fails the build instead of silently keeping the old value):
+#  1. The eight filter-term lists (banned_terms_*.map) are read when settings are imported, from
+#     /etc/nginx/. They are deliberately not in the repository (child-safety term lists). Settings now read them from
+#     FILTER_TERMS_DIR (default /etc/ahmia-site/filters); the package ships EMPTY lists there, which
+#     means NO result filtering until the operator installs real lists. README.FenrirOS says so.
+#  2. SECRET_KEY was a hard-coded "django-insecure" key; it now comes from the environment
+#     (/etc/ahmia-site/env), generated at first start by ahmia-site-setup.
+#  3. collectstatic is replaced by a plain copy of ahmia/static to ahmia/staticfiles (the project
+#     has no admin app, so collectstatic only copies), and the migration for the ahmia app,
+#     which upstream asks the operator to generate with makemigrations, is generated at
+#     build time (against a throwaway empty filter directory) and shipped.
+name = "ahmia-site"
+version = "20261008"
+release = 1
+summary = "Ahmia, the search engine for Tor hidden services: Django site"
+license = "BSD-3-Clause"
+homepage = "https://github.com/ahmia/ahmia-site"
+hostdeps = ["python", "python-django", "python-decouple", "python-elasticsearch"]
+rundeps = [
+    "python", "python-django", "python-decouple", "python-elasticsearch",
+    "python-gunicorn", "tor",
+]
+options = ["!check"]
+
+# no tagged releases upstream: pinned commit
+source = [
+    { url = "https://github.com/ahmia/ahmia-site/archive/db1a091d29a3b2103b031058782d29d9868b230b.tar.gz", sha256 = "301272eaef9efd14b5cc80a15a80a8675832868dba0dafedc97cc998a3490f70" },
+]
+
+install = '''
+s=ahmia/settings.py
+
+# 1. filter lists
+grep -q '"/etc/nginx/banned_terms_' $s
+sed -i 's#"/etc/nginx/banned_terms_#FILTER_DIR + "/banned_terms_#' $s
+sed -i "s#^FILTER_TERM_FILES = {#FILTER_DIR = config('FILTER_TERMS_DIR', default='/etc/ahmia-site/filters')\n\nFILTER_TERM_FILES = {#" $s
+grep -q "^FILTER_DIR = " $s
+! grep -q '/etc/nginx' $s
+
+# 2. secret key
+grep -q "^SECRET_KEY = 'django-insecure-" $s
+sed -i "s#^SECRET_KEY = 'django-insecure-.*#SECRET_KEY = config('SECRET_KEY', default='django-insecure-unset-run-ahmia-site-setup')#" $s
+grep -q "^SECRET_KEY = config" $s
+
+# 3. static files and the ahmia app migration
+cp -a ahmia/static ahmia/staticfiles
+t=$(mktemp -d)
+for c in AI_CSAM COM_groups contact_offending_related CSAM_known_content CSAM_site_navigation \
+         CSAM_harm_framing CSAM_affiliative_framing CSAM_general; do : > "$t/banned_terms_$c.map"; done
+FILTER_TERMS_DIR=$t PYTHONPATH=$PWD python3 manage.py makemigrations ahmia
+rm -rf "$t"
+test -f ahmia/migrations/0001_initial.py
+
+d="$pkgdir/usr/share/ahmia-site"
+install -d "$d"
+cp -a ahmia manage.py "$d/"
+find "$d" -name __pycache__ -prune -exec rm -rf {} +
+install -Dm644 banned_terms.map "$pkgdir/usr/share/doc/ahmia-site/banned_terms.map.example"
+install -Dm644 ahmia/example.env "$pkgdir/usr/share/ahmia-site/example.env"
+install -Dm755 $pkgfiles/ahmia-site-setup "$pkgdir/usr/lib/ahmia-site/setup"
+install -Dm644 $pkgfiles/ahmia-site-setup.dinit "$pkgdir/etc/dinit.d/ahmia-site-setup"
+install -Dm644 $pkgfiles/ahmia-site.dinit "$pkgdir/etc/dinit.d/ahmia-site"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/ahmia-site.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/ahmia-site.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/ahmia-site/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ahmia-site/LICENSE"
+'''

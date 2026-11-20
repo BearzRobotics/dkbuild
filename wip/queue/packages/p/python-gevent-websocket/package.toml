@@ -1,0 +1,20 @@
+# gevent-websocket from PyPI, added for OnionShare (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-gevent-websocket"
+version = "0.10.1"
+release = 1
+summary = "WebSocket library for the gevent WSGI server"
+license = "Apache-2.0"
+homepage = "https://pypi.org/project/gevent-websocket/"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python", "python-gevent"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/98/d2/6fa19239ff1ab072af40ebf339acd91fb97f34617c2ee625b8e34bf42393/gevent-websocket-0.10.1.tar.gz", sha256 = "7eaef32968290c9121f7c35b973e2cc302ffb076d018c9068d2f5ca8b2d85fb0" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-gevent-websocket/$(basename LICENSE)"
+'''

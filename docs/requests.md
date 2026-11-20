@@ -350,3 +350,33 @@ BlackArch tools requested 2026-11-16 ("pen testing is something I've always want
 AVR and emulator tools requested 2026-11-17 (qemu-system-misc, lld, gcc-avr, binutils-avr, avr-libc, avrdude, simavr): already in the tree under their names here: lld is `llvm-lld`, gcc-avr is `avr-gcc`, binutils-avr is `avr-binutils`, avr-libc and avrdude as named; simavr written (packages/s/simavr). qemu split by architecture (qemu-system-x86, -arm, -aarch64, -riscv, -ppc, -mips, -s390x, -sparc, -loongarch64, -misc; qemu-full installs all); incus, virt-manager and pve-storage depend on the right ones. pve-qemu (wip) `replaces` qemu: it needs the same split or a conflict rule before it is used.
 
 x64dbg requested again 2026-11-17: packaged as the upstream snapshot release run under Wine (packages/x/x64dbg). Meta packages reverse-engineering, pentest-recon, -web, -passwords, -network, -wireless, -ad, -exploit and pen-testing (the umbrella) written the same day.
+Firewall web interfaces requested 2026-11-17 (pasted list 6-9 and links: easywall, Webmin, Cockpit, enforza-cockpit, openwrt/luci, NethServer/nethsecurity). "In the repo if simple, else wip in batches." Webmin: already in the tree (packages/w/webmin). easywall: WRITTEN in packages/e/easywall (the Go 2.x rewrite, jp1337/easywall v2.29.2; core + web, dinit services shipped inert, first-run setup script, random session key per machine; not built). enforza-cockpit: WRITTEN in wip/queue/packages/e/enforza-cockpit (static Cockpit plugin, pinned commit; rundeps cockpit). Cockpit 372: QUEUED, surveyed (wip/queue/COCKPIT-NOTES.md: needs a libsystemd.pc shim over elogind, a dinit service for cockpit-ws, and the systemd-only pages would not work); meson, glib, json-glib, gnutls, libssh, pam, polkit, python3; its Services, Logs and Timers pages talk to systemd over D-Bus and journald, so on dinit only the shell, terminal, files, accounts, network (NetworkManager) and storage pages would work; first step is a survey of what cockpit-ws and cockpit-bridge need without systemd. openwrt/luci: QUEUED, not written; LuCI is OpenWrt's interface and needs OpenWrt's stack (uci, ubus, rpcd, uhttpd, netifd, libubox); it does not drive nftables on a general distribution, so Claude's recommendation is to skip it unless an OpenWrt-style router image is wanted. NethServer/nethsecurity: NOT a package (an OpenWrt firmware image and build environment, 8.8.1); its UI and Python libraries sit on OpenWrt's stack too; listed only.
+Network interface names 2026-11-17 (user: want eth0, wlan0 ... but still predictable): new package eudev-net-names (in base r4): masks eudev's 80-net-name-slot.rules and pins each physical interface's MAC address to ethN / wlanN / wwanN in /etc/udev/rules.d/70-persistent-net.rules on first sight (dk-net-name). Limit: two new cards in one boot can need one more boot to settle. Kernel r3: the nftables expressions that were missing (log, limit, quota, redirect, tproxy, socket, netdev family, flow offload ...) are now in hardware.config, since firewalld, nft rulesets and easywall use them.
+
+## OnionShare (requested 2026-11-17)
+- Written in wip/queue (not built): `onionshare-cli` and `onionshare` (desktop, PySide6), plus the Python
+  dependencies that were missing: python-flask-compress, flask-socketio, socketio, engineio, simple-websocket,
+  wsproto, bidict, eventlet, greenlet, gevent, gevent-websocket, zope-event, zope-interface, brotli,
+  qrcode, gnupg. Tor bridges (obfs4proxy, snowflake-client, meek-client, webtunnel-client) are not packaged,
+  so the bridge options will not work yet. Desktop upstream says Python < 3.14; built with --ignore-requires-python.
+
+## ahmia-site (requested 2026-11-17)
+- Written in wip/queue (not built): `ahmia-site` (Django front end of the Ahmia Tor search engine) and python-django,
+  asgiref, sqlparse, elasticsearch, elastic-transport, decouple, gunicorn, dateutil, sniffio. Installed inert.
+  Elasticsearch 8 (ahmia-index) and ahmia-crawler are not packaged, so the site returns no results until an
+  Elasticsearch is reachable. Upstream's child-safety filter lists are not in its repo: the package ships empty
+  lists in /etc/ahmia-site/filters (no filtering until the operator supplies real ones; README.FenrirOS says so).
+
+## ahmia-crawler, ahmia-index (requested 2026-11-17)
+- Written in wip/queue (not built): `ahmia-crawler`, `ahmia-index`, `privoxy`, and python-scrapy 2.17.0 (2.15 breaks on Twisted 26; 2.18+ need
+  brotlicffi, 2.20 aiohttp/aiodns/aioftp/formerly), python-frostwork (Rust, needed by w3lib), itemadapter, itemloaders, parsel, w3lib, queuelib, protego,
+  pydispatcher, jmespath, html2text. Both installed inert (wrappers `ahmia-crawl`, `ahmia-index`, no services, no cron).
+  Elasticsearch 8 is still the missing server for the whole Ahmia stack (the 8.x client refuses OpenSearch).
+  The crawler needs torfleet (100 tor+privoxy pairs, scripts shipped under /usr/share/ahmia-crawler/torfleet).
+- Elasticsearch 8 from source (Gradle) approved 2026-11-17; survey and blockers in wip/queue/search-stack/ELASTICSEARCH-NOTES.md (recipe written 2026-11-17: wip/queue/packages/e/elasticsearch, no-bundled-JDK patch, not built).
+- gallery-dl 1.32.20 (https://github.com/mikf/gallery-dl/releases/tag/v1.32.20) requested 2026-11-18: recipes written (now in packages/ at the user's request, 2026-11-18):
+  gallery-dl, python-truststore, python-jeepney, python-secretstorage — the last three are gallery-dl's
+  optional extras, packaged as runtime deps). Not built.
+- HakuNeko (https://github.com/manga-download/hakuneko) requested 2026-11-18: recipe written in wip/queue/packages/h/hakuneko
+  (not the packages/ tree: it is the legacy Electron-8 app on Electron 42 with an untested port patch, not "simple").
+  Master is a one-commit history reset (2026-03-29); the active successor is manga-download/haruneko. Not built.

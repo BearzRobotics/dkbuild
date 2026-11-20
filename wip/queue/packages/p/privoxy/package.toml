@@ -1,0 +1,41 @@
+# Privoxy 4.2.0: non-caching filtering HTTP proxy. Added for ahmia-crawler (requested 2026-11-17),
+# whose torfleet puts one Privoxy in front of each Tor client. Not built (wip/queue): expect
+# first-build fixes. The -src tarball has no configure, so autoheader and autoconf run first.
+# Installed inert: no service. The packaged /etc/privoxy/config is upstream's (listens on
+# 127.0.0.1:8118, forwards nothing to Tor); torfleet uses its own configs.
+# `make install` wants to chown the files to the privoxy user and group; the build has neither,
+# so USER and GROUP are blanked and the ownership is the package's (root), with /var/log/privoxy
+# made by tmpfiles for the privoxy user.
+name = "privoxy"
+version = "4.2.0"
+release = 1
+summary = "Non-caching web proxy with advanced filtering capabilities"
+license = "GPL-3.0-or-later"
+homepage = "https://www.privoxy.org/"
+hostdeps = ["autoconf", "pkgconf"]
+builddeps = ["pcre2-devel", "zlib-ng-compat-devel", "brotli-devel", "openssl-devel"]
+rundeps = []
+options = ["!check"]
+
+source = [
+    { url = "https://www.privoxy.org/sf-download-mirror/Sources/4.2.0%20%28stable%29/privoxy-4.2.0-stable-src.tar.gz", sha256 = "6f91267f81f626c416994db89ab62f4d09246eebf4754b81186e13a18ee9028f" },
+]
+
+setup = '''
+autoheader
+autoconf
+%configure \
+    --sysconfdir=/etc/privoxy --localstatedir=/var \
+    --with-user=privoxy --with-group=privoxy \
+    --enable-zlib --with-brotli --with-openssl
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install USER= GROUP= GROUP_T=
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/privoxy.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/privoxy.conf"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/privoxy/LICENSE"
+install -Dm644 LICENSE.GPLv3 "$pkgdir/usr/share/licenses/privoxy/LICENSE.GPLv3"
+'''

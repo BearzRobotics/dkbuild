@@ -1,0 +1,20 @@
+# elastic-transport from PyPI, added for ahmia-site (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-elastic-transport"
+version = "9.4.3"
+release = 1
+summary = "Transport classes and utilities shared among Python Elastic client libraries"
+license = "Apache-2.0"
+homepage = "https://github.com/elastic/elastic-transport-python"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python", "python-urllib3", "python-certifi", "python-sniffio"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/27/75/37f7fdabe5493dd26e37fed72dbf4069f6c95a92acba8050792b7ad9444d/elastic_transport-9.4.3.tar.gz", sha256 = "f38bf3e99cd6c572304350edffa69635be681e26f159fc686208122acd9616fa" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-elastic-transport/LICENSE"
+'''

@@ -1,0 +1,19 @@
+# python-gnupg from PyPI, added for OnionShare (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-gnupg"
+version = "0.5.7"
+release = 1
+summary = "A wrapper for the GNU Privacy Guard (GPG or GnuPG)"
+license = "BSD-3-Clause"
+homepage = "https://github.com/vsajip/python-gnupg"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python", "gnupg"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/bb/d4/47aa0f34b6a06a976063e3e0bf1512b140ec1e6efda83bc717fac58071db/python_gnupg-0.5.7.tar.gz", sha256 = "73ea46219f992b361eb1ce54cb0968101670654454916a3ee5df8bb9bf0cc8cc" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+'''

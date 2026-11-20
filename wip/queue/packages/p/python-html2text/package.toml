@@ -1,0 +1,23 @@
+# html2text from PyPI, added for ahmia-crawler (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-html2text"
+version = "2025.4.15"
+release = 1
+summary = "Turn HTML into equivalent Markdown-structured text"
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/Alir3z4/html2text"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-setuptools-scm"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/f8/27/e158d86ba1e82967cc2f790b0cb02030d4a8bef58e0c79a8590e9678107f/html2text-2025.4.15.tar.gz", sha256 = "948a645f8f0bc3abe7fd587019a2197a12436cd73d0d4908af95bfc8da337588" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/python-html2text/COPYING"
+'''

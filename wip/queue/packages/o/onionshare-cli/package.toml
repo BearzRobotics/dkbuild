@@ -1,0 +1,34 @@
+# OnionShare command-line tool (requested 2026-11-17): share files, host a website, receive files
+# or chat over a Tor onion service. The GUI is the separate package "onionshare".
+# Written, not built (wip/queue). Pure Python; the Tor daemon is started per session by the
+# program itself (it runs `tor` from PATH), so tor is a runtime dependency and no service is installed.
+# Bridges (obfs4proxy, snowflake-client, meek-client, webtunnel-client) are found on PATH when
+# present; none of them is packaged yet, so the "Tor bridges" options will not work until they are.
+name = "onionshare-cli"
+version = "2.7.2"
+release = 1
+summary = "Share files, host websites and chat anonymously over Tor (command line)"
+license = "GPL-3.0-or-later"
+homepage = "https://onionshare.org"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-poetry-core"]
+rundeps = [
+    "python", "tor",
+    "python-click", "python-flask", "python-flask-compress", "python-flask-socketio",
+    "python-psutil", "python-pysocks", "python-requests", "python-unidecode", "python-urllib3",
+    "python-eventlet", "python-setuptools", "python-pynacl", "python-colorama",
+    "python-gevent-websocket", "python-gevent", "python-stem", "python-waitress",
+    "python-werkzeug", "python-packaging", "python-qrcode",
+]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/onionshare/onionshare/archive/refs/tags/v2.7.2.tar.gz", sha256 = "3850620a139efbb04f2948d1ae66a88c0252a77bba29ca231fd0607ac0ad4ec9" },
+]
+
+install = '''
+cd cli
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+cd ..
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/onionshare-cli/LICENSE.txt"
+'''

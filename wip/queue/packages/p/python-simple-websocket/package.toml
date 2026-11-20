@@ -1,0 +1,20 @@
+# simple-websocket from PyPI, added for OnionShare (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-simple-websocket"
+version = "1.1.0"
+release = 1
+summary = "Simple WebSocket server and client for Python"
+license = "MIT"
+homepage = "https://github.com/miguelgrinberg/simple-websocket"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python", "python-wsproto"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/b0/d4/bfa032f961103eba93de583b161f0e6a5b63cebb8f2c7d0c6e6efe1e3d2e/simple_websocket-1.1.0.tar.gz", sha256 = "7939234e7aa067c534abdab3a9ed933ec9ce4691b0713c78acb195560aa52ae4" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-simple-websocket/$(basename LICENSE)"
+'''

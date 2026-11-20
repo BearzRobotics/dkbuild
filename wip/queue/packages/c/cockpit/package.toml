@@ -1,0 +1,49 @@
+# Cockpit: a web interface for servers (shell, terminal, files, accounts, network, storage).
+# Release tarball (autotools; the JavaScript bundles in dist/ are already built). Survey and
+# limits: wip/queue/COCKPIT-NOTES.md. WRITTEN, NOT BUILT: expect fixes at configure time.
+# - libsystemd: elogind ships libsystemd.pc (sd-bus, sd-login, sd-daemon), so configure finds it;
+#   --with-systemdunitdir keeps configure away from systemd.pc and the unit files it installs
+#   are removed again (nothing here runs them).
+# - krb5: heimdal (krb5.pc / krb5-gssapi.pc); not MIT, so a gssapi call may need a patch.
+# - No systemd: the Services, Logs and Timers pages cannot work (systemd D-Bus, journald).
+# - cockpit-ws runs as a dinit service on 127.0.0.1:9090 without TLS (cockpit-tls and the
+#   per-connection instances are systemd socket units, not used). Reach it through an SSH
+#   tunnel or a TLS reverse proxy (cockpit-ws --for-tls-proxy); see README.FenrirOS.
+# Installed inert (docs/requests.md): the service is shipped, not enabled; logins are the
+# system's own accounts through PAM (the `cockpit` stack), no default credentials.
+name = "cockpit"
+version = "372"
+release = 1
+summary = "Web interface for servers"
+license = "LGPL-2.1-or-later"
+homepage = "https://cockpit-project.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["pkgconf", "gettext", "python", "python-setuptools"]
+builddeps = ["glib-devel", "json-glib-devel", "gnutls-devel", "heimdal-devel", "linux-pam-devel", "elogind-devel", "linux-headers"]
+rundeps = ["python", "linux-pam", "polkit", "elogind", "openssh"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/cockpit-project/cockpit/releases/download/372/cockpit-372.tar.xz", sha256 = "a74d28489341e880f73224174dd21e0b48ce7e78999801369855f74d6df4a53b" },
+]
+
+setup = '''
+%configure \
+    --libexecdir=/usr/lib \
+    --localstatedir=/var \
+    --with-systemdunitdir=/usr/lib/systemd/system \
+    --with-admin-group=wheel \
+    --with-pamdir=/usr/lib/security \
+    --disable-doc \
+    --disable-silent-rules
+'''
+build = '''
+%make PYTHON3=python3
+'''
+install = '''
+%make_install PYTHON3=python3
+# the systemd units and socket files are not used (dinit starts cockpit-ws)
+rm -rf "$pkgdir/usr/lib/systemd" "$pkgdir/usr/lib/tmpfiles.d/cockpit-tmpfiles.conf"
+install -Dm644 $pkgfiles/cockpit-ws "$pkgdir/etc/dinit.d/cockpit-ws"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/cockpit/README.FenrirOS"
+'''

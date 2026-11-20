@@ -1,0 +1,12 @@
+ahmia-index on FenrirOS
+=======================
+
+Installed, nothing scheduled. Elasticsearch 8 is not in the repository: install and start one,
+then copy /etc/ahmia-index/env.example to /etc/ahmia-index/env and set ES_URL, ES_CA_CERTS,
+ES_USERNAME and ES_PASSWORD (the index names must match ahmia-site).
+
+As the ahmia-index user (su -s /bin/sh ahmia-index -c '...'):
+  ahmia-index setup          create the monthly mappings 2018-2030 (first time only)
+  ahmia-index alias --add    point latest-tor at the newest monthly indexes (monthly; --rm later)
+  ahmia-index filter         hourly abuse-site filtering over the index
+Upstream's cron lines are in /usr/share/doc/ahmia-index/README.md; none is installed.

@@ -1,0 +1,6 @@
+# Makes the configuration and the database on first start. Not enabled by itself: ahmia-site
+# depends on it.
+type = scripted
+command = /usr/lib/ahmia-site/setup
+restart = false
+depends-on: rcboot

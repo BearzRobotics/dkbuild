@@ -1,0 +1,41 @@
+# ahmia-crawler (requested 2026-11-17): the Scrapy crawlers behind the Ahmia search engine for
+# Tor hidden services (spider "ahmia-tor"). Written, not built (wip/queue). Pure Python.
+# It writes pages into an Elasticsearch 8 index (see ahmia-index), which is NOT packaged, and it
+# fetches through a pool of local HTTP proxies on localhost:15000-15099 that each sit on a Tor
+# client ("torfleet": runfleet.sh starts 100 tor + privoxy pairs). Privoxy is queued (privoxy);
+# the torfleet scripts are installed under /usr/share/ahmia-crawler/torfleet to be copied and run
+# by the operator (they write next to themselves).
+# Installed inert (docs/requests.md): no service, no cron entry; `ahmia-crawl` is a wrapper.
+# Left out: `igraph` is in upstream's requirements.txt but nothing imports it, so it is not a
+# dependency here. Scrapy is 2.17.0 (see python-scrapy: 2.15 does not work with the repo's Twisted 26).
+name = "ahmia-crawler"
+version = "20260911"
+release = 1
+summary = "Scrapy crawlers of the Ahmia Tor hidden-service search engine"
+license = "BSD-3-Clause"
+homepage = "https://github.com/ahmia/ahmia-crawler"
+hostdeps = ["python"]
+rundeps = [
+    "python", "python-scrapy", "python-cssselect", "python-html2text", "python-decouple",
+    "python-elasticsearch", "python-requests", "tor", "privoxy",
+]
+options = ["!check"]
+
+# no tagged releases upstream: pinned commit
+source = [
+    { url = "https://github.com/ahmia/ahmia-crawler/archive/9fcee8fcfe0df6a0f3c5c3b09570ac3d21c6cd85.tar.gz", sha256 = "2b0751ba1af0e93aec97e15cc5e61f6ade26dafde029609ed9c8d568206162d8" },
+]
+
+install = '''
+d="$pkgdir/usr/share/ahmia-crawler"
+install -d "$d"
+cp -a ahmia torfleet run.sh run_daily.sh systemd_examples "$d/"
+find "$d" -name __pycache__ -prune -exec rm -rf {} +
+rm -f "$d/ahmia/ahmia/.env"
+install -Dm755 $pkgfiles/ahmia-crawl "$pkgdir/usr/bin/ahmia-crawl"
+install -Dm644 ahmia/ahmia/example.env "$pkgdir/etc/ahmia-crawler/env.example"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/ahmia-crawler.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/ahmia-crawler.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/ahmia-crawler/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ahmia-crawler/LICENSE"
+'''

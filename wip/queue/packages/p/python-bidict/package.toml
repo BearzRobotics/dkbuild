@@ -1,0 +1,20 @@
+# bidict from PyPI, added for OnionShare (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-bidict"
+version = "0.24.1"
+release = 1
+summary = "The bidirectional mapping library for Python"
+license = "MPL-2.0"
+homepage = "https://github.com/jab/bidict"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/a8/f2/8d2dd8276ca05e1f5157b6a0d34efb2f585f47a0fbed61e8aad04b221f0b/bidict-0.24.1.tar.gz", sha256 = "4dca6c17f0b01700e9f24359daa5ebabf7be022d99f4cb2a257b6af2a5076c88" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-bidict/$(basename LICENSE)"
+'''

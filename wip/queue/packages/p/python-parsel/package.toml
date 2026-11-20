@@ -1,0 +1,20 @@
+# parsel from PyPI, added for ahmia-crawler (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-parsel"
+version = "1.12.1"
+release = 1
+summary = "Library to extract data from HTML and XML using XPath and CSS selectors"
+license = "BSD-3-Clause"
+homepage = "https://github.com/scrapy/parsel"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-hatchling"]
+rundeps = ["python", "python-cssselect", "python-jmespath", "python-lxml", "python-w3lib"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/c4/04/b7eca3afc99d9dc1178ad22b5a37597d09c259d00693052480f2b2bbca83/parsel-1.12.1.tar.gz", sha256 = "f526df846f3a91e13f5499156ea3e755114834cd126b62cd1d784ef558f3a713" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-parsel/LICENSE"
+'''

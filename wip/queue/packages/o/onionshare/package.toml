@@ -1,0 +1,30 @@
+# OnionShare desktop application (Qt, PySide6) (requested 2026-11-17). Written, not built (wip/queue).
+# Upstream's pyproject says python < 3.14 (it targets the PySide6 it pins, 6.8.2.1); the system has
+# Python 3.14 and PySide6 6.12, so pip runs with --ignore-requires-python. Not verified at runtime.
+# The command-line tool lives in onionshare-cli, which this depends on.
+name = "onionshare"
+version = "2.7.2"
+release = 1
+summary = "Share files, host websites and chat anonymously over Tor (desktop app)"
+license = "GPL-3.0-or-later"
+homepage = "https://onionshare.org"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-poetry-core"]
+rundeps = ["python", "onionshare-cli", "pyside6", "python-qrcode", "python-werkzeug", "python-gnupg"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/onionshare/onionshare/archive/refs/tags/v2.7.2.tar.gz", sha256 = "3850620a139efbb04f2948d1ae66a88c0252a77bba29ca231fd0607ac0ad4ec9" },
+]
+
+install = '''
+cd desktop
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --ignore-requires-python --root "$pkgdir" --prefix /usr .
+# The desktop package also declares an onionshare-cli script; onionshare-cli owns it.
+rm -f "$pkgdir/usr/bin/onionshare-cli"
+install -Dm644 org.onionshare.OnionShare.desktop "$pkgdir/usr/share/applications/org.onionshare.OnionShare.desktop"
+install -Dm644 org.onionshare.OnionShare.appdata.xml "$pkgdir/usr/share/metainfo/org.onionshare.OnionShare.appdata.xml"
+install -Dm644 org.onionshare.OnionShare.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/org.onionshare.OnionShare.svg"
+cd ..
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/onionshare/LICENSE.txt"
+'''

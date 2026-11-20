@@ -1,0 +1,20 @@
+# elasticsearch from PyPI, added for ahmia-site (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-elasticsearch"
+version = "8.17.1"
+release = 1
+summary = "Python client for Elasticsearch"
+license = "Apache-2.0"
+homepage = "https://github.com/elastic/elasticsearch-py"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-hatchling"]
+rundeps = ["python", "python-elastic-transport", "python-anyio", "python-dateutil", "python-sniffio", "python-typing-extensions"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/f2/c2/408130a5e3b2dd7c13f9941df7886a35c7fdbb04757dec3e75f5f8b84184/elasticsearch-8.17.1.tar.gz", sha256 = "057ab44cae8b3acffbf826a31678e46eafc38f26fcffa91015352d973299cdf0" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-elasticsearch/LICENSE"
+'''

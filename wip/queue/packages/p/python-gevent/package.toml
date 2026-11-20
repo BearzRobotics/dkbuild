@@ -1,0 +1,20 @@
+# gevent from PyPI, added for OnionShare (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-gevent"
+version = "26.9.0"
+release = 1
+summary = "Coroutine-based network library"
+license = "MIT"
+homepage = "https://www.gevent.org/"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-cython", "python-cffi", "python-greenlet"]
+rundeps = ["python", "python-greenlet", "python-zope-event", "python-zope-interface"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/2b/ac/dd3137ae695aef399373088c84c66398f3eac597fba542f0a22280bc21d6/gevent-26.9.0.tar.gz", sha256 = "4dd4703d71737a456c1c9df5cd43a82934e5b10c87549caa02495f487d1ef0b1" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-gevent/$(basename LICENSE)"
+'''

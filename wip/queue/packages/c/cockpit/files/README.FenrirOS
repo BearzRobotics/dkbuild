@@ -1,0 +1,16 @@
+Cockpit on FenrirOS
+===================
+
+Installed inert: the service is not enabled and there are no extra accounts; you log in with
+a system account through PAM (users in the wheel group are administrators).
+
+    dinitctl enable cockpit-ws
+
+It listens on http://127.0.0.1:9090 only, without TLS (the TLS front end is a systemd socket
+service). From another machine: ssh -L 9090:localhost:9090 host, then open
+http://localhost:9090. Or put a TLS reverse proxy in front and change the service line to
+`cockpit-ws --for-tls-proxy --address 127.0.0.1`.
+
+Without systemd the Services, Logs and Timers pages do not work. Shell, terminal, files,
+accounts, networking (NetworkManager) and storage (udisks) do. Plugins such as enforza-cockpit
+go in /usr/share/cockpit/.

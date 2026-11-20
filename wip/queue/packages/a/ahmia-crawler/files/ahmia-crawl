@@ -1,0 +1,22 @@
+#!/bin/sh
+# Run the Ahmia crawler: ahmia-crawl [scrapy options], e.g.
+#   ahmia-crawl -s DEPTH_LIMIT=1 -O /var/lib/ahmia-crawler/items.json:json
+# Settings come from /etc/ahmia-crawler/env (see env.example there). Work directory:
+# /var/lib/ahmia-crawler (the project tree under /usr/share is read-only).
+envfile=${AHMIA_CRAWLER_ENV:-/etc/ahmia-crawler/env}
+if [ ! -r "$envfile" ]; then
+    echo "ahmia-crawl: cannot read $envfile (copy /etc/ahmia-crawler/env.example and edit it)" >&2
+    exit 1
+fi
+set -a
+# shellcheck source=/dev/null
+. "$envfile"
+set +a
+share=/usr/share/ahmia-crawler/ahmia
+work=${AHMIA_CRAWLER_HOME:-/var/lib/ahmia-crawler}
+cd "$work" || exit 1
+PYTHONPATH=$share${PYTHONPATH:+:$PYTHONPATH}
+export PYTHONPATH
+SCRAPY_SETTINGS_MODULE=ahmia.settings
+export SCRAPY_SETTINGS_MODULE
+exec scrapy crawl ahmia-tor "$@"

@@ -1,0 +1,20 @@
+# queuelib from PyPI, added for ahmia-crawler (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-queuelib"
+version = "1.10.0"
+release = 1
+summary = "Collection of persistent (disk-based) and non-persistent (memory-based) queues"
+license = "BSD-3-Clause"
+homepage = "https://github.com/scrapy/queuelib"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-hatchling"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/b3/b3/d9da691d2729b00b63cc67869aaf96fb9b612bd3ec6acba30f3af2a33d32/queuelib-1.10.0.tar.gz", sha256 = "063c821c32859ae8bdce2cc9e74156645c074218a464f8262e29a3b8de839737" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-queuelib/LICENSE"
+'''

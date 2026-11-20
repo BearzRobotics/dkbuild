@@ -1,0 +1,20 @@
+# itemloaders from PyPI, added for ahmia-crawler (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-itemloaders"
+version = "1.5.0"
+release = 1
+summary = "Base loaders powering the loaders in Scrapy and parsel"
+license = "BSD-3-Clause"
+homepage = "https://github.com/scrapy/itemloaders"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-hatchling"]
+rundeps = ["python", "python-itemadapter", "python-jmespath", "python-parsel"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/af/38/a235115b71aea5e3104e627e2e00f664232a8e9faaa7aa63b1469a893b86/itemloaders-1.5.0.tar.gz", sha256 = "e6feec5e44e92e1931dbd70fce4da430491ee4cbc9a93a725351e4f0d614a411" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-itemloaders/LICENSE"
+'''

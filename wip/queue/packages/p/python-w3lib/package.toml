@@ -1,0 +1,21 @@
+# w3lib from PyPI, added for ahmia-crawler (requested 2026-11-17). Not built yet (wip/queue).
+# w3lib.html imports frostwork (checked 2026-11-17: import fails without it), so it is a real dependency.
+name = "python-w3lib"
+version = "2.6.0"
+release = 1
+summary = "Library of web-related functions"
+license = "BSD-3-Clause"
+homepage = "https://github.com/scrapy/w3lib"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-hatchling"]
+rundeps = ["python", "python-frostwork"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/c1/4a/76a2b98d6d93eb1d7e69b382faf3290f571547d9eb13f612d5ddab740f60/w3lib-2.6.0.tar.gz", sha256 = "821f78cfdeb9e675c736ffe0b874bd1e50e9e02997e675ce046b373c009f27be" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-w3lib/LICENSE"
+'''

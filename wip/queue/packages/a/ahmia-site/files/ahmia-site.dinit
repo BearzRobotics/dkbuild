@@ -1,0 +1,9 @@
+# Ahmia site under gunicorn, as the unprivileged ahmia user, on 127.0.0.1:8000 (put nginx or a
+# Tor onion service in front). Not enabled by default (README.FenrirOS).
+type = process
+command = /usr/bin/gunicorn ahmia.wsgi:application --bind 127.0.0.1:8000 --worker-class gthread --workers 4 --threads 4 --max-requests 4000 --max-requests-jitter 400 --timeout 200
+run-as = ahmia
+working-dir = /var/lib/ahmia-site
+env-file = /etc/ahmia-site/env
+logfile = /var/log/ahmia-site/gunicorn.log
+depends-on: ahmia-site-setup

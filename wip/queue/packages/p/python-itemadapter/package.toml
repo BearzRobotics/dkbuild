@@ -1,0 +1,20 @@
+# itemadapter from PyPI, added for ahmia-crawler (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-itemadapter"
+version = "0.14.0"
+release = 1
+summary = "Common interface for data container classes"
+license = "BSD-3-Clause"
+homepage = "https://github.com/scrapy/itemadapter"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-hatchling"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/ba/18/8059aad5eff65039e51428971c4d4038012796dff276ecb7a2afb98b06be/itemadapter-0.14.0.tar.gz", sha256 = "ba7c46f434cc127dfdc55b077e724bcf88721e0bbfd472fe6cf8dde8bcd2008b" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-itemadapter/LICENSE"
+'''

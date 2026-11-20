@@ -1,0 +1,20 @@
+# zope-event from PyPI, added for OnionShare (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-zope-event"
+version = "6.2"
+release = 1
+summary = "Very basic event publishing system"
+license = "ZPL-2.1"
+homepage = "https://github.com/zopefoundation/zope.event"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/93/41/faa10af34d48d9cd6fa0249a1162943ad84a9590bd1a06939981e6640416/zope_event-6.2.tar.gz", sha256 = "b97d5d6327067ee6b9dfcbdf606ade9ade70991e19c162e808ea39e5fcf0f8d3" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-zope-event/$(basename LICENSE.txt)"
+'''

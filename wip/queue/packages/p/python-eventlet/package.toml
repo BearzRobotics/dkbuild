@@ -1,0 +1,24 @@
+# eventlet from PyPI, added for OnionShare (requested 2026-11-17). Not built yet (wip/queue).
+name = "python-eventlet"
+version = "0.41.3"
+release = 1
+summary = "Highly concurrent networking library"
+license = "MIT"
+homepage = "https://github.com/eventlet/eventlet"
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-hatchling", "python-hatch-vcs"]
+rundeps = ["python", "python-dnspython", "python-greenlet"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/66/01/8b19d7b98cdb4e4bdf9baf93c7a635155161d39339ad24f461e475aed23f/eventlet-0.41.3.tar.gz", sha256 = "66d1883f276e94d040d007e99d7085e6aa5f2738c5b8783d165a137050dc8fb6" },
+]
+
+environment = '''
+# hatch-vcs: the sdist has no git metadata.
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-eventlet/$(basename LICENSE)"
+'''

@@ -1,0 +1,23 @@
+ahmia-site on FenrirOS
+======================
+
+Installed but NOT started. Read this before enabling it.
+
+1. This is only the web front end. Search results come from an Elasticsearch 8 index
+   (ahmia-index, filled by ahmia-crawler). Neither Elasticsearch nor the crawler is in the
+   repository. Without a reachable Elasticsearch the site shows no results. Set ES_URL,
+   ES_USERNAME, ES_PASSWORD and ES_CA_CERTS in /etc/ahmia-site/env.
+
+2. Result filtering is OFF until you supply the term lists. Upstream keeps its eight
+   child-safety filter lists (banned_terms_*.map) out of its repository. The setup step creates
+   them EMPTY in /etc/ahmia-site/filters/. Format: nginx map lines like
+   "~*term" 1;   (see /usr/share/doc/ahmia-site/banned_terms.map.example). An operator who makes
+   a public search engine for hidden services should install real lists first.
+
+3. /etc/ahmia-site/env is created at first start with a random SECRET_KEY and SALT. Edit it,
+   then:   dinitctl enable ahmia-site
+   The site listens on 127.0.0.1:8000 (gunicorn). To publish it as an onion service, add a
+   HiddenServiceDir/HiddenServicePort entry to torrc pointing at 127.0.0.1:8000. ALLOWED_HOSTS in
+   /usr/share/ahmia-site/ahmia/settings.py lists upstream's own domains; add yours.
+
+4. The SQLite database is /var/lib/ahmia-site/onionAddDatabase.

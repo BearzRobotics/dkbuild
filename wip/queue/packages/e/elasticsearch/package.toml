@@ -1,0 +1,89 @@
+# Elasticsearch 8.19.25 from source (requested 2026-11-17, for the Ahmia stack: ahmia-site, ahmia-crawler
+# and ahmia-index use the 8.x Python client, which refuses every other server). Survey and open points:
+# wip/queue/search-stack/ELASTICSEARCH-NOTES.md. Written, NOT built, and this one is the likeliest of all
+# the queued recipes to need several rounds of first-build fixes (about 700 Gradle projects).
+#
+# Built with Gradle 9.7.1 (a source, the version the tag's wrapper asks for; gradledeps resolves the
+# libraries once with the network). Task: :distribution:archives:linux-tar:assemble. The default
+# distribution (x-pack included: security with TLS and passwords, which Ahmia needs, and machine learning, whose
+# prebuilt ml-cpp zips are Gradle dependencies resolved by gradledeps from Elastic's artifact host).
+#
+# Source edit (patches/no-bundled-jdk.patch; it is a patch because gradledeps resolves on the patched
+# source): upstream puts a downloaded JDK 27 into the archive; the repo has no JDK 27 and a package manager
+# should not bundle one. The patch registers no bundled JDK (distribution/build.gradle) and leaves it out of the
+# archive (distribution/archives/build.gradle). Java 17 is Elasticsearch's own minimum for building and
+# running; the system openjdk21 does both. bin/elasticsearch finds its Java in $ES_HOME/jdk, which is made a
+# symbolic link to /usr/lib/jvm/java-21-openjdk, so every tool in bin/ works without ES_JAVA_HOME.
+#
+# Layout: /usr/share/elasticsearch (program, modules, plugins/), config in /etc/elasticsearch (the install's
+# config/ is a link to it, because the first start writes the TLS certificates and the generated settings there),
+# data /var/lib/elasticsearch, logs /var/log/elasticsearch, user elasticsearch. Installed inert
+# (docs/requests.md): the dinit service is shipped, not enabled. Security is on (upstream's default): the
+# first start prints the `elastic` password once; reset it with elasticsearch-reset-password -u elastic -i.
+# The HTTP CA for clients (ES_CA_CERTS of ahmia-site/-crawler/-index) is /etc/elasticsearch/certs/http_ca.crt.
+# x86_64 only for now (the aarch64 archive is :distribution:archives:linux-aarch64-tar).
+#
+# Likely first-build items: the resolve step reaching test-only projects (qa/, bwc downloads of old releases);
+# the "precommit"/forbidden-apis/licence checks; ml-cpp being a `changing` module (try -Dbuild.ml_cpp.repo
+# pointed at a directory in Maven layout if the store lookup fails).
+name = "elasticsearch"
+version = "8.19.25"
+release = 1
+summary = "Distributed search and analytics engine (Lucene-based, REST API)"
+license = "AGPL-3.0-only OR SSPL-1.0 OR Elastic-2.0"
+homepage = "https://www.elastic.co/elasticsearch"
+archs = ["x86_64"]
+hostdeps = ["openjdk21", "unzip", "git"]
+rundeps = ["openjdk21", "bash"]
+options = ["!check", "gradledeps", "jobs:8", "!strip"]
+
+source = [
+    { url = "https://github.com/elastic/elasticsearch/archive/refs/tags/v8.19.25.tar.gz", sha256 = "7dc4da5b88ed52b273aaae82bf7b8323734df5c132c5ce6c2e6188f64774c929" },
+    { url = "https://services.gradle.org/distributions/gradle-9.7.1-bin.zip", sha256 = "acd53f1edaf02f1a8ff99879f8a34b302661a057d9b063ae9e35b552f804d20a", unpack = false },
+]
+
+environment = '''
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+export RUNTIME_JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+export GRADLE_OPTS="-Dorg.gradle.java.installations.paths=/usr/lib/jvm/java-21-openjdk -Dorg.gradle.java.installations.auto-download=false"
+'''
+build = '''
+gradle --no-daemon -Dbuild.snapshot=false :distribution:archives:linux-tar:assemble
+'''
+install = '''
+t=$(find distribution/archives/linux-tar/build/distributions -maxdepth 1 -name 'elasticsearch-*-linux-x86_64.tar.gz' | head -n 1)
+test -n "$t"
+mkdir -p "$pkgdir/usr/share"
+tar -xzf "$t" -C "$pkgdir/usr/share" --no-same-owner
+mv "$pkgdir"/usr/share/elasticsearch-* "$pkgdir/usr/share/elasticsearch"
+e="$pkgdir/usr/share/elasticsearch"
+test ! -e "$e/jdk"
+ln -s /usr/lib/jvm/java-21-openjdk "$e/jdk"
+
+# config: the shipped files go to /etc/elasticsearch, the install's config/ becomes a link
+install -d "$pkgdir/etc/elasticsearch"
+cp -a "$e/config/." "$pkgdir/etc/elasticsearch/"
+rm -rf "$e/config"
+ln -s /etc/elasticsearch "$e/config"
+cat >> "$pkgdir/etc/elasticsearch/elasticsearch.yml" <<'YML'
+
+# FenrirOS: where the data and logs live (the service user owns them)
+path.data: /var/lib/elasticsearch
+path.logs: /var/log/elasticsearch
+YML
+# plugins/ and the empty directories of the archive stay in the install tree (read-only is fine)
+
+install -Dm644 $pkgfiles/elasticsearch.dinit "$pkgdir/etc/dinit.d/elasticsearch"
+install -Dm644 $pkgfiles/sysctl.conf "$pkgdir/usr/lib/sysctl.d/30-elasticsearch.conf"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/elasticsearch.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/elasticsearch.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/elasticsearch/README.FenrirOS"
+install -d "$pkgdir/usr/bin"
+for b in elasticsearch elasticsearch-reset-password elasticsearch-keystore elasticsearch-users \
+         elasticsearch-setup-passwords elasticsearch-create-enrollment-token elasticsearch-certutil \
+         elasticsearch-plugin elasticsearch-node elasticsearch-shard; do
+    if [ -e "$e/bin/$b" ]; then ln -s "/usr/share/elasticsearch/bin/$b" "$pkgdir/usr/bin/$b"; fi
+done
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/elasticsearch/LICENSE.txt"
+for l in licenses/*.txt; do install -Dm644 "$l" "$pkgdir/usr/share/licenses/elasticsearch/$(basename "$l")"; done
+'''
