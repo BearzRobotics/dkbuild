@@ -586,6 +586,22 @@ pub const Built = struct {
     published: bool,
 };
 
+/// A build of the same name, version and release as an earlier one used to overwrite its log, so a
+/// diagnosis of what the earlier build did (samba r16, whose log the r17 build replaced) was
+/// impossible. The earlier `<id>.log` is kept as `<id>.1.log`, `<id>.2.log`, ... (oldest first);
+/// `<id>.log` stays the newest, which is the path the messages print.
+fn archivePreviousLog(arena: Allocator, io: std.Io, logdir: []const u8, id: []const u8) void {
+    const cur = std.fmt.allocPrint(arena, "{s}/{s}.log", .{ logdir, id }) catch return;
+    Dir.cwd().access(io, cur, .{}) catch return;
+    var n: u32 = 1;
+    while (n < 1000) : (n += 1) {
+        const dst = std.fmt.allocPrint(arena, "{s}/{s}.{d}.log", .{ logdir, id, n }) catch return;
+        if (Dir.cwd().access(io, dst, .{})) |_| continue else |_| {}
+        Dir.cwd().rename(cur, Dir.cwd(), dst, io) catch {};
+        return;
+    }
+}
+
 /// Builds `r` and publishes it. A `rebuild` that comes out identical to the
 /// last build is not published (its package stays, at its release); one that
 /// differs gets the next release first (SPEC.md 7.2).
@@ -786,7 +802,10 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     const logdir = try std.fs.path.join(arena, &.{ opts.root, "logs", opts.arch });
     Dir.cwd().createDirPath(io, logdir) catch {};
     const logpath = try std.fmt.allocPrint(arena, "{s}/{s}.log", .{ logdir, id });
-    defer Dir.cwd().writeFile(io, .{ .sub_path = logpath, .data = log.items }) catch {};
+    defer {
+        archivePreviousLog(arena, io, logdir, id);
+        Dir.cwd().writeFile(io, .{ .sub_path = logpath, .data = log.items }) catch {};
+    }
 
     const local_repo = try std.fmt.allocPrint(arena, "{s}/repo/{s}", .{ opts.root, opts.arch });
     const local_abs: ?[]const u8 = absPath(arena, io, local_repo) catch null;

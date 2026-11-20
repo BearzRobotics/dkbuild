@@ -442,6 +442,12 @@ pub fn childMain(args: []const [:0]const u8) noreturn {
         }
         mkdirAll(z("{s}/dev/shm", .{merged}));
         mountFs("tmpfs", z("{s}/dev/shm", .{merged}), "tmpfs", linux.MS.NOSUID | linux.MS.NODEV, "mode=1777");
+        // A private devpts instance, so programs that need a pseudo-terminal
+        // (texinfo's info tests, gawk's pty1) can open one. "newinstance" keeps
+        // it apart from the host's ptys; no gid=, as group 5 may be unmapped here.
+        mkdirAll(z("{s}/dev/pts", .{merged}));
+        mountFs("devpts", z("{s}/dev/pts", .{merged}), "devpts", linux.MS.NOSUID | linux.MS.NOEXEC, "newinstance,ptmxmode=0666,mode=0620");
+        sys(linux.symlink("pts/ptmx", z("{s}/dev/ptmx", .{merged})), "symlink", "/dev/ptmx");
         sys(linux.symlink("/proc/self/fd", z("{s}/dev/fd", .{merged})), "symlink", "/dev/fd");
         sys(linux.symlink("/proc/self/fd/0", z("{s}/dev/stdin", .{merged})), "symlink", "/dev/stdin");
         sys(linux.symlink("/proc/self/fd/1", z("{s}/dev/stdout", .{merged})), "symlink", "/dev/stdout");
