@@ -380,3 +380,7 @@ Network interface names 2026-11-17 (user: want eth0, wlan0 ... but still predict
 - HakuNeko (https://github.com/manga-download/hakuneko) requested 2026-11-18: recipe written in wip/queue/packages/h/hakuneko
   (not the packages/ tree: it is the legacy Electron-8 app on Electron 42 with an untested port patch, not "simple").
   Master is a one-commit history reset (2026-03-29); the active successor is manga-download/haruneko. Not built.
+- ugrep 7.8.5 (https://github.com/Genivia/ugrep) requested 2026-11-20: packages/u/ugrep (x86_64 only for now: its configure uses
+  -march=native for NEON on aarch64), with every optional compression library; bzip3 1.5.5 packaged for its .bz3 support (packages/b/bzip3).
+  Not built yet.
+- dkman 0.5.1 (https://github.com/BearzRobotics/dkman/releases/tag/v0.5.1) 2026-11-20: recipe updated (regex-zig 0.3.0).

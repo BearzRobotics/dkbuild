@@ -1,0 +1,40 @@
+# ugrep 7.8.5 (https://github.com/Genivia/ugrep; requested 2026-11-20): a fast grep with an interactive query TUI
+# (ug -Q), fuzzy and Boolean search, archive and compressed-file search (-z), and a pager. Installs ugrep, ug
+# (ugrep with ~/.ugrep read), ugrep+ and ug+ (ugrep -z with the filters). It does not replace grep.
+# Source: the tag archive (it ships configure). Every optional library in the tree is used (the project's
+# "build libraries, not disables" rule): PCRE2 (-P), zlib, bzip2, xz, lz4, zstd, brotli and bzip3 (-z); built-in 7zip.
+# Boost.Regex is only ugrep's fallback when PCRE2 is missing, so it is not used. --disable-arch-native does not
+# exist here: ugrep picks SSE2/AVX2/AVX512BW at run time (matcher_avx2.cpp and matcher_avx512bw.cpp are built
+# with -mavx2/-mavx512bw only for themselves), so the build stays baseline x86-64. The completions go in the usual
+# directories, named explicitly because the configure otherwise looks them up with pkg-config.
+# x86_64 only for now: on aarch64 its configure adds -march=native -mfpu=neon for the NEON code (not valid for a
+# baseline aarch64 build); to be looked at when the arm64 packages are built.
+name = "ugrep"
+version = "7.8.5"
+release = 1
+summary = "Fast grep with interactive query UI and archive search"
+license = "BSD-3-Clause"
+homepage = "https://ugrep.com"
+archs = ["x86_64"]
+hostdeps = ["pkgconf"]
+builddeps = ["pcre2-devel", "zlib-ng-compat-devel", "bzip2-devel", "xz-devel", "lz4-devel", "zstd-devel", "brotli-devel", "bzip3-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/Genivia/ugrep/archive/refs/tags/v7.8.5.tar.gz", sha256 = "f080ab6cd9d96a5357570cb60a99e09ebe5eef11cf322c35373dbe815378a1f2" },
+]
+
+setup = '''
+%configure \
+    --with-bzip3 \
+    --with-bash-completion-dir=/usr/share/bash-completion/completions \
+    --with-zsh-completion-dir=/usr/share/zsh/site-functions \
+    --with-fish-completion-dir=/usr/share/fish/vendor_completions.d
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/ugrep/LICENSE.txt"
+'''

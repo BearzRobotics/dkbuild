@@ -1,0 +1,31 @@
+# bzip3 1.5.5 (https://github.com/kspalaiologos/bzip3; requested 2026-11-20 as ugrep's optional .bz3 support):
+# a Burrows-Wheeler compressor with better ratios than bzip2: the bzip3 program, bunzip3, bz3cat, bz3grep, bz3less,
+# bz3more, bz3most and libbzip3. Release tarball (it ships configure and .tarball-version, which its version script
+# reads). --disable-arch-native: the default builds with -march=native, which dies with "Illegal instruction" on other
+# CPUs (the same reason %zig_build passes -Dcpu=baseline). Licence: the whole is LGPL-3.0-only (README, "Licensing");
+# the libsais code under 3rdparty is Apache-2.0, bz3grep is BSD-2-Clause.
+name = "bzip3"
+version = "1.5.5"
+release = 1
+summary = "Burrows-Wheeler based compressor and library"
+license = "LGPL-3.0-only AND Apache-2.0 AND BSD-2-Clause"
+homepage = "https://github.com/kspalaiologos/bzip3"
+hostdeps = ["pkgconf"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/kspalaiologos/bzip3/releases/download/1.5.5/bzip3-1.5.5.tar.gz", sha256 = "dc3bd8237178e1a2b99d8dcf1f4aeb3593c723788a9863606e121b40784e596d" },
+]
+
+setup = '''
+%configure \
+    --disable-arch-native
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/bzip3/LICENSE"
+install -Dm644 3rdparty/libsais-LICENSE "$pkgdir/usr/share/licenses/bzip3/libsais-LICENSE"
+'''
