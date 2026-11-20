@@ -1,6 +1,6 @@
 # Hands-off installation on the live system: runs `dkrescue-install --auto` once at boot. Without `dkinstall.auto=1`
 # on the kernel command line it prints "nothing to do" and exits 0 at once, so it is harmless on every boot; with the
-# flag it looks for an answers file (install/answers.ini on the live medium, dkinstall.ini on a mounted or unmounted
+# flag it looks for an answers file (install/answers.toml on the live medium, dkinstall.toml on a mounted or unmounted
 # USB stick or disk, or the path in dkinstall.answers=) and, only if all the safety gates pass (the flag, a
 # `confirm_erase` that names the disk to be wiped, never the live medium), installs without a screen and then reboots,
 # powers off or leaves a shell (`when_done`). See docs/AUTOINSTALL.md in the dkinstaller source.
