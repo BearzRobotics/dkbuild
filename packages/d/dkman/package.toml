@@ -1,13 +1,15 @@
 # Man page tool: finds, searches and renders man pages and Markdown docs.
-# Zig dependencies (md-zig, gtroff-zig) are fetched on the host (option `zigdeps`).
+# Zig dependencies (md-zig, gtroff-zig, regex-zig) are fetched on the host (option `zigdeps`).
 # r2: the system's `man` (a link), with its own page as man(1) too.
+# 0.5.1 (2026-11-20): depends on regex-zig 0.3.0 (was 0.1.0); when regex-zig cannot build a matcher for a -k
+# expression, dkman searches for the word literally instead of failing. Otherwise unchanged from 0.5.0.
 # r3 (0.5.0): dkman also stands in for man-db's whatis, apropos, manpath and mandb (it acts
 # as the one it is started under): built with upstream's -Dinstall-as-man, which installs
 # man, whatis, apropos, manpath and mandb. The page is made by the build now (man(7)
 # from the Markdown source), with bash, zsh and fish completions.
 name = "dkman"
-version = "0.5.0"
-release = 3
+version = "0.5.1"
+release = 1
 summary = "Man page tool: finds, searches and renders man pages and Markdown docs"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkman"
@@ -15,7 +17,7 @@ hostdeps = ["zig"]
 options = ["zigdeps", "!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/dkman/releases/download/v0.5.0/dkman-0.5.0.tar.gz", sha256 = "6e0839c722a821b409495855941d7d129730cadbf63ee7d7c7d7b5f7c1a55660" },
+    { url = "https://github.com/BearzRobotics/dkman/releases/download/v0.5.1/dkman-0.5.1.tar.gz", sha256 = "053bb9c3a99c41c45e669769c69a22aff950b41bb40955c5ccb7df1dab3d6c0f" },
 ]
 
 install = '''
