@@ -16,7 +16,8 @@ medium, or to understand what the installer does.
 | dklilo on BIOS or UEFI (what `dkinstaller` runs) | steps below are the installer's own; the installer is not yet verified end to end on hardware |
 | GRUB on BIOS or UEFI | the steps are GRUB's standard ones; not yet run on FenrirOS |
 | Copying the live medium's `rootfs.sfs` instead of a tar | the steps are the installer's own; not yet run by hand |
-| btrfs or XFS as the root file system | **not available yet**: needs an initramfs for installed systems, or a kernel with them built in (see `docs/initramfs.md`) |
+| btrfs or XFS as the root file system | built into the kernel from linux r4 (the next kernel build); until then they are modules and need an initramfs (`docs/initramfs.md`). XFS needs a separate `/boot` for dklilo. Not yet run on FenrirOS |
+| ZFS as the root file system | needs the installed-system initramfs with ZFS: not available yet |
 
 Where a step says "unverified", treat it as the plan and read the result.
 
@@ -111,14 +112,19 @@ mkfs.ext4 -L fenriros "$ROOT"
 **ext4** is the root that works today, because the kernel has ext4, NVMe, SATA
 (AHCI), USB storage and virtio built in, so it boots with no initramfs.
 
-**btrfs and XFS** are modules in the current kernel, so a root on them cannot
-mount without an initramfs, and installed systems do not have one yet. The plan
-is in `docs/initramfs.md`. Until then, use ext4 for `/` and put btrfs or XFS on
-other mounts (`/home`, `/data`), which can be mounted after boot (`modprobe
-btrfs` happens automatically on first mount).
+**btrfs and XFS** are built into the kernel from linux r4 (and linux-lts r4), so
+a single-disk root on either boots with no initramfs, like ext4. On a kernel from
+before that they are modules and cannot be the root: check
+`grep -E 'CONFIG_(BTRFS|XFS)_FS=' /boot/config-*` (`=y` is built in). Multi-device
+btrfs, LUKS, LVM, RAID and ZFS roots need the initramfs in `docs/initramfs.md`.
 
-When it is available, a btrfs root will look like this (unverified; it needs the
-initramfs and `rootflags=` on the kernel command line):
+**XFS** is a special case for the boot loader: **dklilo cannot read XFS**, so with
+an XFS root `/boot` must be a separate partition (ext4 or FAT, 1 GiB) that holds
+the kernel; GRUB can read XFS. Tools for each file system on the live disc:
+ext2/3/4 `mkfs.ext{2,3,4}` (e2fsprogs), btrfs `mkfs.btrfs` (btrfs-progs), XFS
+`mkfs.xfs` (xfsprogs), FAT (the ESP) `mkfs.vfat` (dosfstools).
+
+A btrfs root with subvolumes looks like this (unverified on FenrirOS):
 
 ```sh
 mkfs.btrfs -L fenriros "$ROOT"

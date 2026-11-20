@@ -13,11 +13,14 @@
 # r2: install and upgrade scripts write systemd-boot entries (gen-systemd-boot),
 # when systemd-boot is installed. UDF is built in (=y), like exFAT and NTFS3, so the
 # live ISO's init can find an image on any stick Ventoy or a DVD uses.
+# r4 (2026-11-20): btrfs and XFS are built in (CONFIG_BTRFS_FS=y, CONFIG_XFS_FS=y; with XFS quota and POSIX ACL, and the options
+# btrfs pulls in, XOR_BLOCKS, RAID6_PQ and ZSTD_COMPRESS, set to =y so olddefconfig changes nothing), so a single-disk btrfs or XFS
+# root boots with no initramfs, like ext4 (docs/initramfs.md). Needs a kernel rebuild: left for the next world run.
 # r10: linux-devel, the build tree out-of-tree modules (ZFS) are built against:
 # /usr/src/linux-<release>, linked from /usr/lib/modules/<release>/build.
 name = "linux"
 version = "7.3.4"
-release = 3
+release = 4
 summary = "The Linux kernel and its modules"
 license = "GPL-2.0-only WITH Linux-syscall-note"
 homepage = "https://kernel.org"

@@ -1,6 +1,6 @@
 # The initramfs for installed systems
 
-Status: **design, not implemented** (2026-11-20). The live ISOs already have an
+Status: **design, not implemented** (2026-11-20). btrfs and XFS are built into the kernel from linux r4 / linux-lts r4 (decided 2026-11-20; takes effect with the next kernel build), so a single-disk btrfs or XFS root already boots without it; the initramfs is for what has to be assembled first. The live ISOs already have an
 initramfs (`live-initramfs`); installed systems have none, and boot because the
 kernel has ext4, NVMe, SATA (AHCI), USB storage and virtio built in.
 
@@ -24,8 +24,8 @@ module, assembles the devices and mounts the root. The kernel also cannot turn
 
 ## Two ways, and we want both
 
-1. **Built in.** Change `CONFIG_BTRFS_FS=y` and `CONFIG_XFS_FS=y` (a few hundred
-   kilobytes each). A single-disk btrfs or XFS root then boots with no
+1. **Built in** (done in linux r4 and linux-lts r4: `CONFIG_BTRFS_FS=y`, `CONFIG_XFS_FS=y`, with XFS quota and POSIX ACL;
+   a few hundred kilobytes each). A single-disk btrfs or XFS root then boots with no
    initramfs, like ext4 does today. Cheap, and the simple case stays simple.
    Costs a kernel rebuild (it can wait for the next world run).
 2. **An initramfs for installed systems**, for everything that has to be
@@ -82,11 +82,38 @@ module, assembles the devices and mounts the root. The kernel also cannot turn
    kernel images (kernel + initramfs + command line in one signed file, which
    systemd-boot boots directly and helps Secure Boot).
 
+## ZFS root
+
+Yes, the initramfs is where a ZFS root belongs: ZFS is not in the kernel (its
+licence), so it is an out-of-tree module that is prebuilt per kernel flavor
+(the `zfs` packages, for linux-lts only today) and has to be loaded, and the pool
+imported, before the root can mount. The initramfs needs:
+
+- the **`zfs` module for exactly that kernel** (and `spl`/dependencies) and the
+  `zpool` and `zfs` programs, static or with their libraries copied in;
+- a `zfs` hook: parse `root=ZFS=<pool>/<dataset>` (or `root=zfs:<dataset>`), then
+  `zpool import -N -d /dev/disk/by-id <pool>` (using `/etc/zfs/zpool.cache` or a
+  scan), `zfs load-key` for native encryption (the same passphrase prompt as
+  LUKS), mount the dataset, and export or leave imported cleanly;
+- **the hostid**: ZFS refuses a pool last used by another host, so `/etc/hostid`
+  is copied into the image and must match the installed system's;
+- **regeneration** whenever the kernel *or* the `zfs` package is upgraded, because
+  the module is tied to the kernel version: the kernel hook runs on a `linux-lts`
+  upgrade and a `zfs` package hook runs it again.
+
+Limits: dklilo cannot read ZFS, so `/boot` is a separate partition (ext4 or
+FAT); GRUB can read a pool only if it was made with `-o compatibility=grub2`
+(and not with newer feature flags). The live disc must run linux-lts with the
+module to create the pool. ZFS is therefore the last in the priority list below,
+after the pieces it shares with LUKS (prompts, keymap) exist.
+
 ## Also needed outside the initramfs
 
-- **The installer** (`dkinstaller`) only makes an ext4 root today: it needs
-  `mkfs.btrfs` and `mkfs.xfs`, a btrfs subvolume layout (`@`, `@home`),
-  `rootflags=` in the loader config, and `fstab` lines to match.
+- **The installer** (`dkinstaller`) only made an ext4 root: since 0.0.6 it
+  offers ext2/3/4, btrfs and XFS and shows each one's missing tools or reason
+  (dkinstaller SPEC 5.3.4); ZFS is listed but unavailable until this initramfs
+  exists. Still to do there: a btrfs subvolume layout (`@`, `@home`) with
+  `rootflags=subvol=@` in the loader config.
 - **dklilo** reads btrfs but not XFS: with an XFS root, `/boot` must be a
   separate ext4 or FAT partition (or use GRUB).
 - **The default `/etc/default/grub`** said `GRUB_DISTRIBUTOR="Chimera"` and
