@@ -1,0 +1,20 @@
+# A live ISO to test dkinstaller in QEMU (dkinstaller/tests/qemu): the base system with every boot loader and
+# filesystem tool the installer can offer (GRUB with its BIOS and EFI modules, systemd-boot, btrfs-progs, xfsprogs),
+# and no firmware blobs or desktop. Not for users. The binary under test is put on the seed disk by the test.
+name     = "dkinstall-test"
+arch     = "x86_64"
+hostname = "fenriros"
+label    = "FENRIROS"
+packages = ["base", "linux", "live-initramfs", "dkinstaller", "grub", "grub-i386-pc", "grub-x86_64-efi", "systemd-boot",
+            "btrfs-progs", "xfsprogs", "e2fsprogs", "dosfstools"]
+services = ["udevd", "udev-trigger", "udev-settle", "modules", "syslogd"]
+issue    = """
+FenrirOS installer test image \\r (\\l)
+"""
+output   = ["iso"]
+autologin = "live"
+
+[[users]]
+name     = "live"
+groups   = ["wheel", "video", "render", "audio", "input", "plugdev"]
+password = "empty"
