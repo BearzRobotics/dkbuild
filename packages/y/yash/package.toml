@@ -1,0 +1,31 @@
+# yash 2.61 (https://github.com/magicant/yash; requested 2026-11-20): Yet Another SHell, a POSIX shell with command
+# line editing, history, completion and a few extensions (arrays, ** globbing, [[ ]], pushd/popd). Release tarball.
+# Its configure is a hand-written script, not autoconf's: it rejects --sysconfdir and --localstatedir ("invalid
+# option"), so %configure is not used; ./configure --prefix=/usr is. Every optional feature is on (they are the
+# defaults): array, dirstack, double-bracket, help, history, lineedit, NLS (libintl from gettext), printf, socket
+# redirection, test, ulimit. The terminal library is found by its own search (tinfo, curses, ncurses, ncursesw).
+# Not added to /etc/shells: like the tree's other shells, the user does that (or chsh) when they want it as a login shell.
+# Tests are off (not tried here; `make check` runs its own test scripts).
+name = "yash"
+version = "2.61"
+release = 1
+summary = "Yet another shell: a POSIX shell with line editing and history"
+license = "GPL-2.0-only"
+homepage = "https://magicant.github.io/yash/"
+builddeps = ["ncurses-devel", "gettext-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/magicant/yash/releases/download/2.61/yash-2.61.tar.gz", sha256 = "e2429ab497f1e7e3984ba9ac5fdf54a9ec0a0e42d8c82a85aac44bf3c06e3ae0" },
+]
+
+setup = '''
+./configure --prefix=/usr
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/yash/COPYING"
+'''
