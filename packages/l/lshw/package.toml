@@ -13,9 +13,11 @@
 #   _FORTIFY_SOURCE apply) and drops the LDFLAGS reset.
 # - 0004 renames lshw's own readlink() to readsymlink(): with fortified headers
 #   it clashed with libc's readlink.
+# - r2: src/core/spd.cc calls free() without including <stdlib.h> ("use of undeclared identifier 'free'"); the libc++
+#   here no longer pulls it in by chance, so the include is added at the top of the file by sed.
 name = "lshw"
 version = "02.20"
-release = 1
+release = 2
 summary = "Hardware lister"
 license = "GPL-2.0-only"
 homepage = "https://ezix.org/project/wiki/HardwareLiSter"
@@ -30,6 +32,8 @@ source = [
 ]
 
 build = '''
+sed -i '1i #include <stdlib.h>' src/core/spd.cc
+grep -q '^#include <stdlib.h>' src/core/spd.cc
 %make \
     all \
     gui \

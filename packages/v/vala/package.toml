@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "vala"
 version = "0.56.19"
-release = 1
+release = 3
 summary = "Programming language based on the GObject type system"
 license = "LGPL-2.1-or-later"
 homepage = "https://wiki.gnome.org/Projects/Vala"
@@ -25,8 +25,15 @@ autoreconf -if -W none
 build = '''
 %make
 '''
+# r3: the tests failed 797 of 1433, all with "Unknown option --target=x86_64-fenriros-linux-musl": build-aux/testrunner.sh
+# passes the compiler as `--cc $CC`, unquoted, and our CC is "clang --target=...", which splits in two, so valac gets
+# a stray --target= argument. A one-word wrapper script as CC for the tests fixes that (found 2026-11-18).
 check = '''
-%make check
+printf '#!/bin/sh
+exec %s "$@"
+' "$CC" > /tmp/vala-cc
+chmod +x /tmp/vala-cc
+%make check CC=/tmp/vala-cc
 '''
 install = '''
 %make_install

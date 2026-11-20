@@ -13,11 +13,14 @@
 # first (libtoolize, aclocal, automake, autoreconf).
 name = "partclone"
 version = "0.3.54"
-release = 2
+release = 3
 summary = "File system aware disk partition cloning and restoring"
 license = "GPL-2.0-or-later"
 homepage = "https://partclone.org"
-hostdeps = ["autoconf", "automake", "libtool", "pkgconf", "gettext"]
+# libxslt, docbook-xsl-nons, docbook-xml: docs/Makefile.am renders the man pages from DocBook XML with
+# xsltproc and the (no-namespace) manpages stylesheet at docbook.sourceforge.net, which the stylesheets'
+# catalog maps to the installed copy ("xsltproc: not found" and no man pages, then install-man8 failed, r2).
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf", "gettext", "libxslt", "docbook-xsl-nons", "docbook-xml"]
 builddeps = ["e2fsprogs-devel", "userspace-rcu-devel", "nilfs-utils-devel", "ntfs-3g-devel", "util-linux-devel", "fuse-devel", "ncurses-devel", "openssl-devel", "zlib-ng-compat-devel", "lz4-devel", "xxhash-devel", "linux-headers"]
 options = ["!check"]
 

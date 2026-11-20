@@ -3,12 +3,15 @@
 # system bundle.
 name = "librest"
 version = "0.10.2"
-release = 1
+release = 2
 summary = "GNOME RESTful web services library"
 license = "LGPL-2.1-or-later"
 homepage = "https://gitlab.gnome.org/GNOME/librest"
 patches = ["no-network.patch"]
 hostdeps = ["gettext", "glib-devel", "gobject-introspection", "meson", "pkgconf", "vala"]
+# gsettings-desktop-schemas: 5 of the 8 tests abort with "Settings schema org.gnome.system.proxy is not
+# installed" without it (2026-11-18); the schemas are compiled in the check step, as the build root has no trigger for it.
+checkdeps = ["gsettings-desktop-schemas"]
 builddeps = ["glib-devel", "json-glib-devel", "libsoup-devel", "libxml2-devel"]
 rundeps = ["ca-certificates"]
 
@@ -28,6 +31,7 @@ build = '''
 %meson_build
 '''
 check = '''
+glib-compile-schemas /usr/share/glib-2.0/schemas
 meson test -C build --print-errorlogs
 '''
 install = '''

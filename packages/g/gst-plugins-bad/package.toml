@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "gst-plugins-bad"
 version = "1.28.7"
-release = 3
+release = 4
 summary = "GStreamer bad plugins"
 license = "LGPL-2.1-or-later"
 homepage = "https://gstreamer.freedesktop.org"
@@ -17,6 +17,13 @@ source = [
     { url = "https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-1.28.7.tar.xz", sha256 = "dc525383c18b2c265bbe6a43d498656cd918aaa130aa4e3abeabcdaa741c3ffe" },
 ]
 
+# r4: ninja runs several g-ir-scanner jobs at once (GstVulkan, GstHip, ...), and they share one cache directory.
+# Its default, /root/.cache/g-ir-scanner, is on another file system than the scanner's temporary file in /tmp, so
+# the cache store is copy-and-chmod instead of one rename and the jobs trip over each other ("FileNotFoundError:
+# '/root/.cache/g-ir-scanner/...'", r3). The cache is moved to /tmp, where the rename is atomic.
+environment = '''
+export XDG_CACHE_HOME=/tmp/xdg-cache
+'''
 setup = '''
 %meson \
     --auto-features=enabled \

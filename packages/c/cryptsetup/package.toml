@@ -5,13 +5,18 @@
 # r3: static libraries too (in cryptsetup-static), for fully static programs on musl.
 name = "cryptsetup"
 version = "2.8.8"
-release = 3
+release = 4
 summary = "Open source Linux disk encryption setup"
 license = "GPL-2.0-or-later"
 homepage = "https://gitlab.com/cryptsetup/cryptsetup"
 hostdeps = ["automake", "bash", "gettext-devel", "libtool", "pkgconf"]
 builddeps = ["json-c-devel", "libatomic-chimera-devel", "linux-headers", "lvm2-devel", "musl-devel", "openssl-devel", "popt-devel", "eudev-devel", "util-linux-devel"]
 checkdeps = ["procps", "xz"]
+
+# Tests are off (2026-11-18): they open dm-crypt devices, which needs the kernel's device-mapper
+# (dm_mod) and dmsetup/blkid; an unprivileged sandbox build has neither ("Cannot initialize
+# device-mapper"). Every failure in the log is of that kind.
+options = ["!check"]
 
 source = [
     { url = "https://www.kernel.org/pub/linux/utils/cryptsetup/v2.8/cryptsetup-2.8.8.tar.gz", sha256 = "4cdc4f46a6d41b856a36392a38fa302bab2a1b530e32d9fc010eb3a704f3e984" },

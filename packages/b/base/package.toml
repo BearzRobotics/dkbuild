@@ -7,13 +7,13 @@
 # r3: man pages: dkman as `man`, with the Linux and POSIX pages.
 name = "base"
 version = "1"
-release = 3
+release = 4
 summary = "FenrirOS base system"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"
 options = ["meta"]
 rundeps = [
-    "base-files", "musl", "dinit", "dinit-services", "eudev", "kmod",
+    "base-files", "musl", "dinit", "dinit-services", "eudev", "eudev-net-names", "kmod",
     "util-linux", "shadow", "sudo", "apk-tools", "ca-certificates", "tzdb",
     "coreutils", "dash", "bash", "sed", "grep", "gawk", "findutils", "diffutils",
     "which", "less", "file", "procps", "psmisc", "iproute2", "kbd", "sysklogd",

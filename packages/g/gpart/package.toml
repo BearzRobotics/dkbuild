@@ -5,7 +5,7 @@
 # project's tag archive, so autogen.sh runs. /usr/bin (--sbindir=/usr/bin).
 name = "gpart"
 version = "0.3"
-release = 3
+release = 4
 summary = "Guess PC disk partition table"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/baruch/gpart"
@@ -20,7 +20,9 @@ source = [
 # new release: loff_t (l64seek.h) is only declared by musl under _GNU_SOURCE ("unknown type name 'loff_t'").
 environment = '''
 # r+1: l64seek.h does `typedef loff_t off64_t;` and musl declares loff_t only in some headers: it is the same type as off_t here (64-bit): -Dloff_t=off_t.
-export CFLAGS="$CFLAGS -D_GNU_SOURCE -Dloff_t=off_t"
+# r4: gm_s86dl.h uses the BSD type daddr_t (a disk address), which musl does not declare ("unknown type name
+# 'daddr_t'"); it is a 32-bit int there (glibc: typedef __int32_t __daddr_t): -Ddaddr_t=int.
+export CFLAGS="$CFLAGS -D_GNU_SOURCE -Dloff_t=off_t -Ddaddr_t=int"
 '''
 setup = '''
 sh ./autogen.sh
