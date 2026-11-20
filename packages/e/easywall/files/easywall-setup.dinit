@@ -1,0 +1,6 @@
+# Makes easywall's configuration on first start. Not enabled by itself: easywall-core and
+# easywall-web depend on it.
+type = scripted
+command = /usr/lib/easywall/setup
+restart = false
+depends-on: rcboot

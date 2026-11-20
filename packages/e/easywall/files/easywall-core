@@ -1,0 +1,7 @@
+# easywall core: the root daemon that writes the nftables rules. Not enabled by default
+# (README.FenrirOS).
+type = process
+command = /usr/sbin/easywall-core --config /etc/easywall/easywall.toml
+logfile = /var/log/easywall/core.log
+depends-on: easywall-setup
+smooth-recovery = true

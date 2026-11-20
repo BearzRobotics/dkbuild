@@ -1,0 +1,21 @@
+# truststore 0.10.5 (PyPI), the optional "extra" of gallery-dl (requested 2026-11-18): lets Python
+# use the system certificate store. Pure Python, flit_core. Not built yet (wip/queue).
+name = "python-truststore"
+version = "0.10.5"
+release = 1
+summary = "Verify certificates using the native system trust stores"
+license = "MIT"
+homepage = "https://github.com/sethmlarson/truststore"
+hostdeps = ["python", "python-flit-core"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/ee/9f/c5201d42a484c061e528825fc8e2d565f5abd50a4ced6fb7d29c4ec99b2b/truststore-0.10.5.tar.gz", sha256 = "30d36967ccaded5cbb38d602c433f53600036c79d502f4533a49b60a03bbefcd" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-truststore/LICENSE"
+'''

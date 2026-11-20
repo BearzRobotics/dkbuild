@@ -1,0 +1,21 @@
+# jeepney 0.9.0 (PyPI), needed by python-secretstorage for gallery-dl (requested 2026-11-18).
+# Pure-Python D-Bus client. flit_core. Not built yet (wip/queue).
+name = "python-jeepney"
+version = "0.9.0"
+release = 1
+summary = "Low-level, pure Python D-Bus protocol wrapper"
+license = "MIT"
+homepage = "https://gitlab.com/takluyver/jeepney"
+hostdeps = ["python", "python-flit-core"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/7b/6f/357efd7602486741aa73ffc0617fb310a29b588ed0fd69c2399acbb85b0c/jeepney-0.9.0.tar.gz", sha256 = "cf0e9e845622b81e4a28df94c40345400256ec608d0e55bb8a3feaa9163f5732" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-jeepney/LICENSE"
+'''

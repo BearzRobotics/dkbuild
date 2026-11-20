@@ -1,0 +1,52 @@
+# easywall: a web interface for the nftables firewall (Go; the 2.x rewrite, not the old
+# Python project). Two programs: easywall-core runs as root and talks netlink to nftables
+# (table inet easywall); easywall-web serves the interface as the unprivileged `easywall`
+# user and reaches the core over /run/easywall/core.sock. Every apply undoes itself after
+# 120 s unless confirmed. Go modules from the store (godeps). The stylesheet
+# (web/static/style.css) is committed upstream, so Tailwind/npm is not needed.
+# Not packaged: easywall-selftest.service (a systemd one-shot that proves the rules in a
+# throwaway network namespace; the core records "unprovable" without it).
+# Installed inert (docs/requests.md): both dinit services are shipped, not enabled; no
+# account, no password (the first-run wizard on port 12227 makes them), and a fresh random
+# session key per machine, made on the first start. Setup: /usr/share/doc/easywall/README.FenrirOS.
+name = "easywall"
+version = "2.29.2"
+release = 1
+summary = "Web interface for the nftables firewall"
+license = "GPL-3.0-only"
+homepage = "https://easywall-project.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["go"]
+rundeps = ["nftables", "sd-tools"]
+options = ["!check", "!strip", "godeps"]
+
+source = [
+    { url = "https://github.com/jp1337/easywall/archive/refs/tags/v2.29.2.tar.gz", sha256 = "5228cb98595c52f935f4f2c93c2d30e1a92649468a020c3e4c14f7b4df408442" },
+]
+
+environment = '''
+export CGO_ENABLED=0
+'''
+# What `make build` does, without the CSS step (style.css is in the tarball) and without git.
+build = '''
+for p in core web; do
+    go build -trimpath -ldflags "-s -w -X github.com/jp1337/easywall/internal/shared.CurrentVersion=v$version" \
+        -o easywall-$p ./cmd/easywall-$p
+done
+'''
+install = '''
+install -Dm755 easywall-core "$pkgdir/usr/sbin/easywall-core"
+install -Dm755 easywall-web "$pkgdir/usr/sbin/easywall-web"
+install -dm755 "$pkgdir/usr/share/easywall"
+cp -r web/templates web/static locales "$pkgdir/usr/share/easywall/"
+install -Dm644 config/easywall.toml "$pkgdir/usr/share/easywall/easywall.toml.template"
+install -Dm644 config/web.toml "$pkgdir/usr/share/easywall/web.toml.template"
+install -Dm755 $pkgfiles/easywall-setup "$pkgdir/usr/lib/easywall/setup"
+install -Dm644 $pkgfiles/easywall-setup.dinit "$pkgdir/etc/dinit.d/easywall-setup"
+install -Dm644 $pkgfiles/easywall-core "$pkgdir/etc/dinit.d/easywall-core"
+install -Dm644 $pkgfiles/easywall-web "$pkgdir/etc/dinit.d/easywall-web"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/easywall.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/easywall.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/easywall/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/easywall/LICENSE"
+'''

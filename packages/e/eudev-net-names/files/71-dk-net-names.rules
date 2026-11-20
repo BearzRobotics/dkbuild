@@ -1,0 +1,12 @@
+# Classic interface names (eth0, wlan0, wwan0) that stay put: see dk-net-name.
+# A name pinned in 70-persistent-net.rules has already been applied above.
+ACTION!="add", GOTO="dk_net_end"
+SUBSYSTEM!="net", GOTO="dk_net_end"
+NAME!="", GOTO="dk_net_end"
+# Only real hardware: loopback, bridges, veth, tun, VLAN, WireGuard ... live under /devices/virtual.
+DEVPATH=="/devices/virtual/*", GOTO="dk_net_end"
+ATTR{type}!="1", GOTO="dk_net_end"
+ATTR{address}!="?*", GOTO="dk_net_end"
+IMPORT{program}="/usr/lib/udev/dk-net-name $attr{address} $env{DEVTYPE}"
+ENV{DK_NET_NAME}=="?*", NAME="$env{DK_NET_NAME}"
+LABEL="dk_net_end"

@@ -1,0 +1,23 @@
+# Snapshot of https://github.com/avinash201199/Free-programming-books at commit 0ec51835, packaged to preserve the collection.
+# MIT covers the repository; each book stays under its own authors' terms.
+name = "free-programming-books-pdf"
+version = "20251031"
+release = 1
+summary = "Free programming books as PDFs, by topic"
+license = "MIT"
+homepage = "https://github.com/avinash201199/Free-programming-books"
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/avinash201199/Free-programming-books/archive/0ec518356ab3e84bcf9239cbad4196ff9bc55e23.tar.gz", sha256 = "f799dcca2af6b868a9ba19b5ba42b61f9969a4b24822312065dcef30411d5590" },
+]
+
+# The whole tree is shipped as it is (nothing split or renamed; file names
+# contain spaces).
+install = '''
+d="$pkgdir/usr/share/free-programming-books-pdf"
+install -dm755 "$d"
+cp -a . "$d/"
+rm -rf "$d/.github"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/free-programming-books-pdf/LICENSE"
+'''

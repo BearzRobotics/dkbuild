@@ -1,0 +1,24 @@
+# Classic network interface names (eth0, wlan0, wwan0) that still follow the card.
+# eudev's own 80-net-name-slot.rules renames devices to enp3s0 / wlp2s0 style names. This
+# package masks that file (an empty /etc/udev/rules.d/80-net-name-slot.rules overrides the
+# one in /usr/lib) and adds 71-dk-net-names.rules: the first time a physical interface is
+# seen, dk-net-name picks the next free ethN / wlanN / wwanN and pins the MAC address to it
+# in /etc/udev/rules.d/70-persistent-net.rules (the old persistent-net scheme), so the name
+# is predictable: it follows the hardware, not the probe order, and you can edit the file.
+# Known limit: if two new cards appear in the same boot and the kernel's temporary name of
+# one is the name pinned for the other, the rename can fail once; the next boot is stable.
+name = "eudev-net-names"
+version = "1"
+release = 1
+summary = "Classic eth0/wlan0 interface names pinned by MAC address"
+license = "MIT"
+homepage = "https://github.com/BearzRobotics/dkbuild"
+rundeps = ["eudev"]
+options = ["!check", "!strip"]
+
+install = '''
+install -Dm755 $pkgfiles/dk-net-name "$pkgdir/usr/lib/udev/dk-net-name"
+install -Dm644 $pkgfiles/71-dk-net-names.rules "$pkgdir/usr/lib/udev/rules.d/71-dk-net-names.rules"
+install -dm755 "$pkgdir/etc/udev/rules.d"
+: > "$pkgdir/etc/udev/rules.d/80-net-name-slot.rules"
+'''

@@ -1,0 +1,23 @@
+easywall on FenrirOS
+====================
+
+Installed inert: neither service is enabled, there is no account and no
+password.
+
+    dinitctl enable easywall-web      # starts easywall-setup and easywall-core first
+
+On the first start easywall-setup copies the default configuration from
+/usr/share/easywall/*.toml.template to /etc/easywall/ (the web configuration
+gets a random session key for this machine). Then open https://<host>:12227:
+whoever gets there first runs the first-run wizard and chooses the account.
+Do this at once, on a trusted network; until then the port answers on every
+interface.
+
+Every apply is undone after 120 seconds unless you confirm it in the browser,
+so a bad rule cannot lock you out. easywall-core keeps its own nftables table
+(inet easywall); rules from firewalld or other tools are not the same table:
+run one firewall manager, not both. The kernel needs the nftables options in
+linux r3 or later (log, limit, redirect and the other expressions).
+
+easywall-selftest (a systemd one-shot upstream) is not packaged: without it
+the core reports "unprovable" for its throwaway-namespace rule test.

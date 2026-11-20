@@ -1,0 +1,29 @@
+# gallery-dl 1.32.20, from https://github.com/mikf/gallery-dl/releases/tag/v1.32.20 (requested 2026-11-18).
+# Command-line downloader for image galleries and collections from many sites. Not built yet (wip/queue).
+# Python, setuptools. The sdist's setup.py installs the man pages, the bash/zsh/fish
+# completions and the entry point itself. The sdist (PyPI) is used because it carries the same
+# files as the GitHub release's tag, with the generated data/ already in place.
+# Optional extras (gallery_dl "extra" and "video"), all as runtime dependencies: requests[socks]
+# (python-pysocks), yt-dlp, jinja2, pyyaml, truststore, secretstorage (keyring access for
+# browser cookies; python-secretstorage, python-jeepney).
+name = "gallery-dl"
+version = "1.32.20"
+release = 1
+summary = "Command-line program to download image galleries and collections"
+license = "GPL-2.0-only"
+homepage = "https://github.com/mikf/gallery-dl"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-requests", "python-pysocks", "yt-dlp", "python-jinja2", "python-pyyaml", "python-truststore", "python-secretstorage"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/6c/ed/0499729ee864503256e3892843f990a5785160b05ad3510f62fd426648dc/gallery_dl-1.32.20.tar.gz", sha256 = "335792dc3af065dd70ec2908f28e46a5653ff66e35a447326be620e990d7c0f3" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/gallery-dl/LICENSE"
+install -Dm644 docs/gallery-dl.conf "$pkgdir/usr/share/doc/gallery-dl/gallery-dl.conf"
+install -Dm644 docs/gallery-dl-example.conf "$pkgdir/usr/share/doc/gallery-dl/gallery-dl-example.conf"
+'''

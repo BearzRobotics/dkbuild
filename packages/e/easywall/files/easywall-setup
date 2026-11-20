@@ -1,0 +1,22 @@
+#!/bin/sh
+# First start of easywall: make /etc/easywall/{easywall,web}.toml from the shipped
+# templates. The web configuration gets a random session key (the template's is a
+# placeholder). Existing files are never touched. Runs as root, before the core and web.
+set -e
+t=/usr/share/easywall
+d=/etc/easywall
+
+install -d -m 0750 -o root -g easywall "$d"
+install -d -m 0750 -o easywall -g easywall "$d/ssl"
+install -d -m 0750 -o root -g easywall /var/lib/easywall /var/log/easywall
+install -d -m 0750 -o easywall -g easywall /var/lib/easywall/web
+
+if [ ! -f "$d/easywall.toml" ]; then
+    install -m 0600 -o root -g root "$t/easywall.toml.template" "$d/easywall.toml"
+fi
+if [ ! -f "$d/web.toml" ]; then
+    key=$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n')
+    umask 077
+    sed "s/CHANGE_ME_32_BYTES_HEX_ENCODED_SESSION_SECRET_HERE_XXXXXXXX/$key/" "$t/web.toml.template" >"$d/web.toml"
+    chown easywall:easywall "$d/web.toml"
+fi

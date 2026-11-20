@@ -1,0 +1,21 @@
+# SecretStorage 3.5.0 (PyPI), the optional keyring access of gallery-dl (requested 2026-11-18):
+# talks to the Secret Service (gnome-keyring, KWallet) over D-Bus. setuptools >= 77. Not built yet (wip/queue).
+name = "python-secretstorage"
+version = "3.5.0"
+release = 1
+summary = "Python bindings to the freedesktop.org Secret Service API"
+license = "BSD-3-Clause"
+homepage = "https://github.com/mitya57/secretstorage"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-cryptography", "python-jeepney"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/1c/03/e834bcd866f2f8a49a85eaff47340affa3bfa391ee9912a952a1faa68c7b/secretstorage-3.5.0.tar.gz", sha256 = "f04b8e4689cbce351744d5537bf6b1329c6fc68f91fa666f60a380edddcd11be" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-secretstorage/LICENSE"
+'''

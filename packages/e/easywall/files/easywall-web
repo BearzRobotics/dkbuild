@@ -1,0 +1,9 @@
+# easywall web interface, as the unprivileged easywall user. Not enabled by default
+# (README.FenrirOS). Until the first-run wizard has made an account, port 12227 answers on
+# every interface: set it up at once, or enable it only on a trusted network.
+type = process
+command = /usr/sbin/easywall-web --config /etc/easywall/web.toml
+run-as = easywall
+working-dir = /usr/share/easywall
+logfile = /var/log/easywall/web.log
+depends-on: easywall-core

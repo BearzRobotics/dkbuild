@@ -1,0 +1,50 @@
+#!/bin/sh
+# dk-net-name MAC DEVTYPE: udev IMPORT{program} helper. Gives a network device
+# its classic name (eth0, wlan0, wwan0) and keeps it: the MAC address is pinned
+# in /etc/udev/rules.d/70-persistent-net.rules the first time it is seen, so the
+# name follows the card, not the probe order. Prints DK_NET_NAME=<name>, or
+# nothing when it cannot write (the kernel's own name then stays).
+mac=$(printf '%s' "$1" | tr 'A-F' 'a-f')
+case "$2" in
+wlan) prefix=wlan ;;
+wwan) prefix=wwan ;;
+*) prefix=eth ;;
+esac
+rules=/etc/udev/rules.d/70-persistent-net.rules
+lock=/run/dk-net-name.lock
+
+case "$mac" in
+'' | 00:00:00:00:00:00) exit 0 ;;
+esac
+
+# Several cards can appear at once: one allocation at a time.
+tries=0
+until mkdir "$lock" 2>/dev/null; do
+    tries=$((tries + 1))
+    [ "$tries" -gt 100 ] && exit 0
+    sleep 0.1
+done
+trap 'rmdir "$lock"' EXIT
+
+# Already pinned (the 70 rule normally handles that before this runs).
+if [ -f "$rules" ]; then
+    name=$(sed -n "s/.*address}==\"$mac\".*NAME=\"\\([^\"]*\\)\".*/\\1/p" "$rules" | head -n 1)
+    if [ -n "$name" ]; then
+        echo "DK_NET_NAME=$name"
+        exit 0
+    fi
+fi
+
+n=0
+while [ -f "$rules" ] && grep -q "NAME=\"$prefix$n\"" "$rules"; do
+    n=$((n + 1))
+done
+name=$prefix$n
+
+if ! {
+    [ -f "$rules" ] || printf '%s\n' '# Network names pinned by dk-net-name (MAC -> name). Edit the names freely.' >"$rules"
+    printf 'SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="%s", NAME="%s"\n' "$mac" "$name" >>"$rules"
+} 2>/dev/null; then
+    exit 0
+fi
+echo "DK_NET_NAME=$name"
