@@ -17,7 +17,7 @@
 # /usr/src/linux-<release>, linked from /usr/lib/modules/<release>/build.
 name = "linux"
 version = "7.3.4"
-release = 2
+release = 3
 summary = "The Linux kernel and its modules"
 license = "GPL-2.0-only WITH Linux-syscall-note"
 homepage = "https://kernel.org"
@@ -34,6 +34,7 @@ source = [
     { url = "https://cdn.kernel.org/pub/linux/kernel/v7.x/linux-7.3.4.tar.xz", sha256 = "b11b6df8295e8e991ff040b71aaa4994a8b55caa23b6b092907f195b5840fd1f" },
 ]
 
+# r3: hardware.config adds the nftables expressions the base config lacked (log, limit, quota, redirect, tproxy, socket, netdev family, flow offload...), checked below.
 # r2: files/hardware.config is merged over the base config (VM-oriented: it had no PINCTRL, no I2C DesignWare controller, no Bluetooth, no HDA codecs, no
 # webcam driver: an ASUS Vivobook's touchpad, Bluetooth and sound did not work). The merge result is checked below: a symbol olddefconfig dropped (a dependency
 # is missing) stops the build instead of quietly leaving the hardware unsupported.
@@ -41,7 +42,7 @@ setup = '''
 cp $pkgfiles/config .config
 sh scripts/kconfig/merge_config.sh -m .config $pkgfiles/hardware.config
 make LLVM=1 olddefconfig
-for o in I2C_DESIGNWARE_PLATFORM PINCTRL_AMD PINCTRL_ALDERLAKE I2C_HID_ACPI HID_MULTITOUCH HID_ASUS MFD_INTEL_LPSS_PCI BT_HCIBTUSB SND_HDA_CODEC_REALTEK ASUS_WMI USB_VIDEO_CLASS MICROCODE DRM_AMDGPU HSA_AMD X86_AMD_PSTATE SENSORS_K10TEMP AMD_PMC DRM_NOUVEAU DRM_I915 DRM_XE HID_LOGITECH HID_PLAYSTATION ZRAM WIREGUARD USB4; do
+for o in I2C_DESIGNWARE_PLATFORM PINCTRL_AMD PINCTRL_ALDERLAKE I2C_HID_ACPI HID_MULTITOUCH HID_ASUS MFD_INTEL_LPSS_PCI BT_HCIBTUSB SND_HDA_CODEC_REALTEK ASUS_WMI USB_VIDEO_CLASS MICROCODE DRM_AMDGPU HSA_AMD X86_AMD_PSTATE SENSORS_K10TEMP AMD_PMC DRM_NOUVEAU DRM_I915 DRM_XE HID_LOGITECH HID_PLAYSTATION ZRAM WIREGUARD USB4 NFT_LOG NFT_LIMIT NFT_REDIR NFT_QUOTA NFT_FLOW_OFFLOAD; do
     grep -Eq "^CONFIG_$o=[ym]$" .config || { echo "kernel config: CONFIG_$o was not enabled (hardware.config)"; exit 1; }
 done
 '''
