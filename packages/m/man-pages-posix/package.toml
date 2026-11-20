@@ -1,9 +1,12 @@
 # The POSIX.1-2017 man pages (sections 0p, 1p, 3p): the standard's view of
 # each header, utility and function, beside the Linux ones (`man 3p printf`).
+# r2: man-pages-posix(7) says which edition these are. The latest upstream release is 2017-a; POSIX.1-2024 (Issue 8) has no man
+# pages from that project, and the Open Group's terms for redistributing a conversion of the 2024 text were not checked, so
+# none is shipped (decision 2026-11-20: keep 2017-a and say so).
 name = "man-pages-posix"
 version = "2017a"
-release = 1
-summary = "POSIX.1-2017 man pages"
+release = 2
+summary = "POSIX.1-2017 man pages (the 2024 edition has none here)"
 license = "custom:posix-man-pages"
 homepage = "https://www.kernel.org/doc/man-pages"
 options = ["!check"]
@@ -17,6 +20,7 @@ for s in man0p man1p man3p; do
     install -dm755 "$pkgdir/usr/share/man/$s"
     install -m644 $s/* "$pkgdir/usr/share/man/$s/"
 done
+install -Dm644 $pkgfiles/man-pages-posix.7 "$pkgdir/usr/share/man/man7/man-pages-posix.7"
 install -Dm644 POSIX-COPYRIGHT "$pkgdir/usr/share/licenses/man-pages-posix/POSIX-COPYRIGHT"
 '''
 

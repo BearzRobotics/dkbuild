@@ -1,0 +1,24 @@
+.TH MAN-PAGES-POSIX 7 "2026-11-20" "FenrirOS" "Miscellaneous Information Manual"
+.SH NAME
+man-pages-posix \- which POSIX edition the 0p, 1p and 3p manual pages describe
+.SH DESCRIPTION
+The pages in sections 0p (headers), 1p (utilities) and 3p (functions) are from the
+Linux man-pages-posix project, release 2017-a. They describe
+.B IEEE Std 1003.1-2017
+(POSIX.1-2017, the Single UNIX Specification version 4, 2018 edition).
+.PP
+They are
+.B not
+the current standard. POSIX.1-2024 (IEEE Std 1003.1-2024, "Issue 8") changed and added things
+that these pages do not show, for example the shell option
+.BR "set -o pipefail" ,
+and changes to several utilities and functions. When a page here and the 2024 text disagree,
+the 2024 text is the standard.
+.PP
+No manual pages for the 2024 edition are shipped. The man-pages-posix project has not published
+a release after 2017-a, and the terms under which the Open Group allows its text to be
+redistributed have not been checked for a conversion of the 2024 edition. The standard itself
+can be read at
+.IR https://pubs.opengroup.org/onlinepubs/9799919799/ .
+.SH SEE ALSO
+.BR man (1)
