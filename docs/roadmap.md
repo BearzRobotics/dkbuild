@@ -156,7 +156,7 @@ Details and per-package notes: `docs/requests.md` and `wip/`.
   disc with a signed MANIFEST and `import.sh`. Tested on a 4-CD set.
   `!repo-iso` keeps a package off the repository disc.
 - `import-cbuild` converts Chimera templates. A Solus `package.yml` importer was
-  planned and does not exist (verified: nothing in `src/`).
+  dropped: recipes come from Chimera's templates and Alpine's packaging.
 - `image --verbose`, `world --keep-going`, `--tree DIR`.
 - Tests: `tests/run-all.sh`, `tests/qemu-iso.sh`, `work/pipeline.sh`.
 

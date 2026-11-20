@@ -619,8 +619,8 @@ list their service files, a module-level `if`, and a file-rewriting block.
 It is a typing aid, not a compiler: a draft with TODOs is not expected to
 build.
 
-**Solus `package.yml`** files, read with `yaml-zig`, are the secondary path
-(**Planned, not implemented:** there is no YAML code in `src/`.)
+A Solus `package.yml` importer (reading them with `yaml-zig`) was planned as a second path and was **dropped**:
+recipes are written from Chimera's templates (above, `import-cbuild`) and from Alpine's packaging. There is no YAML code in `src/`.
 
 ## 6. Architectures
 

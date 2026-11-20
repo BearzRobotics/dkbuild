@@ -104,4 +104,4 @@ About 2300 recipes in `packages/` and about 4850 apks in `repo/x86_64` (approxim
 source), the base system, the kernel, dklilo, dkde and Hyprland are built. `dkbuild image` makes three live ISOs (base, rescue, dkde) that boot in QEMU on UEFI
 and BIOS; `dkinstaller` is on them. Not done: stage 2 (roots filled from `repo/` only, which also catches forgotten
 dependencies), aarch64 and riscv64 (profiles only) and the rest of the world build (see docs/roadmap.md and docs/handoff.md). The cbuild importer (SPEC 5.9) writes draft recipes with
-`TODO(cbuild)` markers; a Solus `package.yml` importer does not exist.
+`TODO(cbuild)` markers; there is no Solus `package.yml` importer (dropped: recipes come from Chimera and Alpine).

@@ -232,7 +232,7 @@ A failed build prints the end of its log; the whole log is in `logs/x86_64/<name
 - Only **stage 1**: builds run on the DKRescue image, so a dependency a recipe forgot to declare can still build
   (the image has it). Stage 2 will fill build roots from declared packages only and catch that.
 - No LLVM, no images, no cross-compiling; only x86_64.
-- Recipes can be imported from Chimera (step 12); Solus `package.yml` import is planned.
+- Recipes can be imported from Chimera (step 12); a Solus `package.yml` importer was dropped (recipes come from Chimera and Alpine).
 
 The design, with the reasoning, is in `SPEC.md` and `docs/decisions/`.
 
