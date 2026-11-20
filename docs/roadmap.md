@@ -63,8 +63,8 @@ much more than the disk ever had.
 | Live ISOs: base (CLI), rescue (DKRescue's successor, with rescue-tools and base-devel), dkde (desktop through greetd) | done, boot in QEMU on UEFI and BIOS |
 | `dkinstaller` 0.0.2 on the live ISOs | written, built; not verified end to end on hardware |
 | Installed system on UEFI: systemd-boot, ext4 root, no initramfs | done (docs/install.md, manual) |
-| Installed system on BIOS (GRUB is a package) | open: no documented path |
-| Other root file systems (btrfs, XFS) for installs | open: they are modules; the initramfs exists for live images only |
+| Installed system on BIOS (dklilo or GRUB) | documented in docs/install.md (2026-11-20); the dklilo steps are the installer's own, GRUB's are standard; neither is verified on FenrirOS yet |
+| Other root file systems (btrfs, XFS) for installs | open: they are modules; design for an installed-system initramfs, and for building them in, is in docs/initramfs.md (not implemented) |
 | Containers: `images/container.toml`, `container-build.toml` | written |
 | Packages on the install and rescue ISOs (`iso_repo`) | open: no image sets it yet |
 | Package ISOs and source ISOs | done, see "dkbuild features" |

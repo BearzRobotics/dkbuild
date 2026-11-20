@@ -1,8 +1,10 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/grub/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# r5: files/grub.default said GRUB_DISTRIBUTOR="Chimera" and "quiet splash" (copied from Chimera's package); it says FenrirOS and
+# "quiet" (no splash screen is shipped). Documented in docs/install.md.
 name = "grub"
 version = "2.12"
-release = 4
+release = 5
 summary = "GRand Unified Bootloader version 2"
 license = "GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/grub"
