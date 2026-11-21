@@ -17,16 +17,18 @@ label    = "FENRIROS_DKDE"
 # firewalld-gui: dkde has its own front end for it.
 
 # "claude-code" Is added for now So I can spin up an instance to help debug on the running system.
-packages = ["base", "openssh", "openssh-server", "curl", "linux", "live-initramfs", "dkinstaller", "firmware-linux-meta", 
+packages = ["base", "openssh", "openssh-server", "curl", "linux", "live-initramfs", "elogind", "dkinstaller", "firmware-linux-meta", 
 "desktop-dkde", "firewalld", "claude-code", "base-devel", "xserver-xorg", "xserver-xorg-input-libinput", "xinit", "libselinux", 
 "policycoreutils", "selinux-python", "selinux-policy-targeted", "firefox", "ncurses", "iputils", "net-tools", "iproute2", "iw", 
 "traceroute", "vim", "gcc", "dos2unix", "rescue-tools"]
 #exclude  = ["*-devel", "*-doc", "*-static"]
 # never installed, even as a dependency (apk stops with a conflict if something needs it)
 unwanted = ["dhcpcd"]
-services = ["udevd", "udev-trigger", "udev-settle", "modules", "syslogd", "seatd", "dbus", "networkmanager", "firewalld", "greetd", "dkinstall-auto"]
+services = ["udevd", "udev-trigger", "udev-settle", "modules", "syslogd", "elogind", "dbus", "networkmanager", "firewalld", "greetd", "dkinstall-auto"]
 output   = ["iso"]
 login     = "greetd"
+# elogind, not seatd: it registers the session, so Shut Down and Restart need no password (dkde 0.3.5).
+seat      = "elogind"
 autologin = "live"
 session   = "dkde-session"
 

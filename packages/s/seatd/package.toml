@@ -1,12 +1,14 @@
 # r2: static libraries too (in seatd-static), for fully static programs on musl.
+# r3: libseat also has the elogind backend (it tries seatd first, then logind, then the built-in one), so a
+# session on elogind needs no seatd daemon.
 name      = "seatd"
 version   = "0.9.1"
-release   = 2
+release   = 3
 summary   = "Seat management daemon and library"
 license   = "MIT"
 homepage  = "https://sr.ht/~kennylevinsen/seatd/"
 hostdeps  = ["meson", "ninja", "pkgconf"]
-builddeps = ["linux-headers"]
+builddeps = ["elogind-devel", "linux-headers"]
 options   = ["!check"]
 
 source = [
@@ -14,7 +16,7 @@ source = [
 ]
 
 build = '''
-%meson -Dlibseat-builtin=enabled -Dserver=enabled -Dexamples=disabled -Dman-pages=disabled
+%meson -Dlibseat-builtin=enabled -Dlibseat-logind=elogind -Dserver=enabled -Dexamples=disabled -Dman-pages=disabled
 %meson_build
 '''
 install = '''

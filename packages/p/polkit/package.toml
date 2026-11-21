@@ -4,13 +4,11 @@
 # Written from Chimera's recipe (polkit 128), changed for this system:
 #  - authfw=pam (r5, 2026-11-15: the system adopts PAM all the way); the polkit-1 service is
 #    files/polkit-1.pam, installed to /usr/lib/pam.d (it uses the system-auth stack).
-#  - a REDUCED polkit: session_tracking=ConsoleKit builds polkit's generic session
-#    monitor, which needs no logind or elogind at all. It asks ConsoleKit over
-#    D-Bus for the caller's session; with no ConsoleKit running that fails, so
-#    polkit treats nobody as being in an active local session. Rules that need
-#    one ("allow_active") do not match, and administrator password
-#    authentication, which is what the graphical prompt uses, is unaffected.
-#    UNVERIFIED until polkitd runs on the image.
+#  - session tracking through elogind (r6, 2026-11-21; was ConsoleKit, which needs a daemon nobody runs):
+#    polkit asks libelogind which session the caller is in, so "allow_active" rules match the user on
+#    the console. That is what lets elogind's `loginctl poweroff`/`reboot` (dkde 0.3.5's Shut Down and
+#    Restart) run without a password. With no elogind running (images on seatd) polkit finds no
+#    session, as it did before; administrator password authentication is unaffected.
 #  - Chimera's turnstile.patch is dropped: it tracks sessions through turnstile.
 #  - the polkitd user comes from scripts/pre-install, not sysusers.
 # NOT BUILT YET: needs dbus, glib and duktape in the tree.
@@ -19,13 +17,13 @@
 # r4: static libraries too (in polkit-static), for fully static programs on musl.
 name = "polkit"
 version = "128"
-release = 5
+release = 6
 summary = "Toolkit for defining and handling authorizations"
 license = "GPL-2.0-or-later"
 homepage = "https://www.freedesktop.org/wiki/Software/polkit"
 patches = ["dbus-activation.patch", "disable-sd-pidfd.patch", "readiness.patch"]
 hostdeps = ["gettext", "meson", "perl", "pkgconf"]
-builddeps = ["duktape-devel", "glib-devel", "libexpat-devel", "linux-pam-devel"]
+builddeps = ["duktape-devel", "elogind-devel", "glib-devel", "libexpat-devel", "linux-pam-devel"]
 rundeps = ["dbus", "linux-pam", "linux-pam-base"]
 options = ["!check", "!cross"]
 
@@ -35,7 +33,7 @@ source = [
 
 setup = '''
 %meson \
-    -Dsession_tracking=ConsoleKit \
+    -Dsession_tracking=elogind \
     -Dsystemdsystemunitdir= \
     -Dpolkitd_user=polkitd \
     -Dauthfw=pam \

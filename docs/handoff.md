@@ -164,7 +164,9 @@ NetworkManager.
 **Image tool (src/image.zig, SPEC section 8):** `issue` (writes /etc/issue), `console`
 ("agetty"|"dkconsole": tty1-5 on dkconsole, tty6 and serial stay agetty; the autologin VT
 stays agetty), `login` ("console"|"greetd": greetd initial_session for autologin; nullok
-PAM file only when a user has an empty password), `unwanted` (apk `!name`). images/dkde.toml
+PAM file only when a user has an empty password), `seat` ("seatd"|"elogind": with greetd, "elogind"
+makes greetd wait for elogind and adds pam_elogind to its PAM file; the image lists the elogind package and
+service itself; used by dkde-devel so Shut Down needs no password), `unwanted` (apk `!name`). images/dkde.toml
 boots through greetd on VT 7 with NetworkManager, no base-net, unwanted dhcpcd.
 
 **Open / watch:** the Rust source build and the FFmpeg libraries are the biggest untested

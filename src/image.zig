@@ -70,6 +70,12 @@ pub const Image = struct {
     /// with nothing typed, because the image's /etc/pam.d/greetd then gets
     /// `nullok` (the package's has none).
     login: []const u8 = "console",
+    /// What gives the graphical session its seat: "seatd" (the default: the
+    /// `seatd` service) or "elogind" (the `elogind` service, which also
+    /// registers the login session, so the desktop's Shut Down and Restart need
+    /// no password). With greetd, "elogind" makes the image's greetd service
+    /// wait for elogind instead of seatd and puts pam_elogind in its PAM file.
+    seat: []const u8 = "seatd",
     /// Any of "rootfs", "tar", "squashfs", "iso".
     output: []const []const u8,
 };
@@ -88,7 +94,7 @@ pub fn parse(arena: Allocator, text: []const u8, diag: *Diagnostic) Error!Image 
 
 fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error!Image {
     const root = try cfg.parse(arena, text, diag);
-    try cfg.onlyKeys(arena, diag, root, &.{ "name", "arch", "packages", "exclude", "unwanted", "repositories", "services", "users", "hostname", "label", "autologin", "session", "issue", "console", "login", "output" }, "");
+    try cfg.onlyKeys(arena, diag, root, &.{ "name", "arch", "packages", "exclude", "unwanted", "repositories", "services", "users", "hostname", "label", "autologin", "session", "issue", "console", "login", "seat", "output" }, "");
     var img: Image = .{
         .name = try cfg.reqString(arena, diag, root, "name"),
         .packages = try cfg.optStrings(arena, diag, root, "packages"),
@@ -106,6 +112,7 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
     if (!std.mem.eql(u8, img.console, "agetty") and !std.mem.eql(u8, img.console, "dkconsole"))
         return cfg.fail(arena, diag, "'console' must be \"agetty\" or \"dkconsole\"", .{});
     if (try cfg.optString(arena, diag, root, "login")) |l| img.login = l;
+    if (try cfg.optString(arena, diag, root, "seat")) |v| img.seat = v;
     if (!std.mem.eql(u8, img.login, "console") and !std.mem.eql(u8, img.login, "greetd"))
         return cfg.fail(arena, diag, "'login' must be \"console\" or \"greetd\"", .{});
     if (try cfg.optString(arena, diag, root, "issue")) |t| img.issue = t;
@@ -162,6 +169,8 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
             if (std.mem.eql(u8, u.name, img.autologin)) break;
         } else return cfg.fail(arena, diag, "autologin '{s}' is not one of the [[users]]", .{img.autologin});
     }
+    if (!std.mem.eql(u8, img.seat, "seatd") and !std.mem.eql(u8, img.seat, "elogind"))
+        return cfg.fail(arena, diag, "seat '{s}': give \"seatd\" or \"elogind\"", .{img.seat});
     if (std.mem.eql(u8, img.login, "greetd") and img.autologin.len > 0 and img.session.len == 0)
         return cfg.fail(arena, diag, "login = \"greetd\" with 'autologin' needs 'session' (the command greetd starts for that user)", .{});
     return img;
@@ -284,6 +293,14 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
             );
             break;
         };
+        if (std.mem.eql(u8, img.seat, "elogind")) try s.appendSlice(arena,
+            \\[ -f /target/usr/lib/security/pam_elogind.so ] || { echo "error: seat = \"elogind\" but no pam_elogind.so (add the elogind package)" >&2; exit 1; }
+            \\[ -f /target/etc/pam.d/greetd ] || { mkdir -p /target/etc/pam.d; cp /target/usr/lib/pam.d/greetd /target/etc/pam.d/greetd; }
+            \\echo 'session  optional pam_elogind.so' >> /target/etc/pam.d/greetd
+            \\sed -i 's/^depends-on: seatd$/depends-on: elogind/' /target/etc/dinit.d/greetd
+            \\grep -q '^depends-on: elogind$' /target/etc/dinit.d/greetd || { echo "error: /etc/dinit.d/greetd has no 'depends-on: seatd' line to point at elogind" >&2; exit 1; }
+            \\
+        );
         if (img.autologin.len > 0) try w.add(arena, &s,
             \\cat >> /target/etc/greetd/config.toml <<'EOF'
             \\
@@ -579,6 +596,20 @@ test "login = greetd writes initial_session and a nullok PAM file instead of the
     try std.testing.expect(std.mem.indexOf(u8, con, "greetd") == null);
     try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\npackages = [\"a\"]\noutput = [\"tar\"]\nlogin = \"gdm\"\n", &diag));
     try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\npackages = [\"a\"]\noutput = [\"tar\"]\nlogin = \"greetd\"\nautologin = \"u\"\n[[users]]\nname = \"u\"\n", &diag));
+}
+
+test "seat = elogind: greetd waits for elogind and its PAM file registers the session" {
+    var arena_state = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena_state.deinit();
+    const a = arena_state.allocator();
+    var diag: Diagnostic = .{};
+    const base = "name = \"x\"\npackages = [\"a\"]\noutput = [\"tar\"]\nlogin = \"greetd\"\n";
+    const el = try script(a, try parse(a, base ++ "seat = \"elogind\"\n", &diag));
+    try std.testing.expect(std.mem.indexOf(u8, el, "pam_elogind.so' >> /target/etc/pam.d/greetd") != null);
+    try std.testing.expect(std.mem.indexOf(u8, el, "s/^depends-on: seatd$/depends-on: elogind/") != null);
+    const sd = try script(a, try parse(a, base, &diag));
+    try std.testing.expect(std.mem.indexOf(u8, sd, "pam_elogind") == null);
+    try std.testing.expectError(error.InvalidImage, parse(a, base ++ "seat = \"x\"\n", &diag));
 }
 
 test "unwanted packages are passed to apk as !name and may not also be asked for" {
