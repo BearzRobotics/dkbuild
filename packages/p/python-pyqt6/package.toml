@@ -20,13 +20,17 @@ source = [
 setup = '''
 sip-build --confirm-license --no-make --qmake /usr/bin/qmake6 --api-dir /usr/share/qt6/qsci/api/python --pep484-pyi --verbose
 '''
+# sip-build writes its Makefiles into build/: build, check and install run there.
 build = '''
+cd build
 %make
 '''
 check = '''
+cd build
 %make check
 '''
 install = '''
+cd build
 # qmake-made Makefiles install under INSTALL_ROOT.
 make INSTALL_ROOT="$pkgdir" install \
     STRIP=true \
