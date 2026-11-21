@@ -7,6 +7,9 @@
 # packaging/build.sh also writes a greetd login screen and PAM files; this
 # system logs in on dkconsole and has no PAM, so those are not part of this package.
 #
+# 0.3.4 (2026-11-20): dkde-calc fixes (finance solves no longer crash, missed roots), calculator answers checked against mpmath/scipy/sympy,
+# new Learn courses (Networking, Statistics, Electronics, Finance, Differential Equations) and Formulas groups. New Zig dependencies util-unix 0.4.0 and
+# util-core 0.1.0 (libraries, fetched with zigdeps; the packages util-unix/util-core are not run-time dependencies), dkman 0.5.1.
 # 0.3.3 (2026-11-18): login screen session picker, dkde-calc Learn and Geometry, dinit fixes (tasks, panel, files); compiled GSettings schemas are made by dkde itself.
 # 0.3.2 (2026-11-16): upstream now packages dkde-compositor and dkde-wm from the same tarball: they are the separate recipes
 # dkde-compositor and dkde-wm here (this one still builds only the main programs).
@@ -18,7 +21,7 @@
 # NOT BUILT YET: needs gtk4, gtk4-layer-shell, wayland, cairo, pango, glib and the
 # Zig dependency fetch to have been run (`dkbuild fetch dkde`).
 name = "dkde"
-version = "0.3.3"
+version = "0.3.4"
 release = 1
 summary = "A Wayland desktop shell in Zig on GTK4 and labwc"
 license = "MIT"
@@ -34,7 +37,7 @@ rundeps = ["labwc", "seatd", "dbus", "polkit", "gvfs", "gnome-online-accounts", 
 options = ["zigdeps", "!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/dkde/releases/download/v0.3.3/dkde-v0.3.3.tar.gz", sha256 = "bd9a436bbe8f6796ecfca1a018b4c4700097bbf7899b858626bf0ce5ea9c097f" },
+    { url = "https://github.com/BearzRobotics/dkde/releases/download/v0.3.4/dkde-v0.3.4.tar.gz", sha256 = "abe4e2255dc2703d353a98a4511f1abdddcb52c0aac93bdb8a6261773dea9573" },
 ]
 
 install = '''
