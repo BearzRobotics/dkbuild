@@ -94,11 +94,10 @@ export RUSTC_BOOTSTRAP=1 CARGO_NET_OFFLINE=true
 export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-Ctarget-feature=-crt-static"
 export CXXSTDLIB=c++
 # packages/c/chromium's (Chimera's): no stack clash protection, less warning
-# noise, no debug information
-export CFLAGS="${CFLAGS/-g/}"
-export CFLAGS="${CFLAGS/-fstack-clash-protection} -Wno-unknown-warning-option -Wno-builtin-macro-redefined -Wno-deprecated-declarations -Wno-sign-compare -Wno-shorten-64-to-32"
-export CXXFLAGS="${CXXFLAGS/-g/}"
-export CXXFLAGS="${CXXFLAGS/-fstack-clash-protection} -Wno-unknown-warning-option -Wno-builtin-macro-redefined -Wno-deprecated-declarations -Wno-sign-compare -Wno-shorten-64-to-32"
+# noise, no debug information. POSIX sed, not ${VAR/x/}: the build script runs under dash
+# ("Bad substitution", 2026-11-21).
+export CFLAGS="$(printf '%s' "$CFLAGS" | sed -e 's/-g//' -e 's/-fstack-clash-protection//') -Wno-unknown-warning-option -Wno-builtin-macro-redefined -Wno-deprecated-declarations -Wno-sign-compare -Wno-shorten-64-to-32"
+export CXXFLAGS="$(printf '%s' "$CXXFLAGS" | sed -e 's/-g//' -e 's/-fstack-clash-protection//') -Wno-unknown-warning-option -Wno-builtin-macro-redefined -Wno-deprecated-declarations -Wno-sign-compare -Wno-shorten-64-to-32"
 '''
 
 setup = '''

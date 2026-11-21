@@ -51,11 +51,10 @@ source = [
 environment = '''
 export RUSTC_BOOTSTRAP=1 CARGO_NET_OFFLINE=true
 # Chimera's: no stack clash protection (hardening !scp), less warning noise;
-# no debug information (symbol_level=0 below; Chimera keeps level 1)
-export CFLAGS="${CFLAGS/-g/}"
-export CFLAGS="${CFLAGS/-fstack-clash-protection} -Wno-unknown-warning-option -Wno-builtin-macro-redefined -Wno-deprecated-declarations -Wno-sign-compare -Wno-shorten-64-to-32"
-export CXXFLAGS="${CXXFLAGS/-g/}"
-export CXXFLAGS="${CXXFLAGS/-fstack-clash-protection} -Wno-unknown-warning-option -Wno-builtin-macro-redefined -Wno-deprecated-declarations -Wno-sign-compare -Wno-shorten-64-to-32"
+# no debug information (symbol_level=0 below; Chimera keeps level 1).
+# POSIX sed, not ${VAR/x/}: the build script runs under dash ("Bad substitution").
+export CFLAGS="$(printf '%s' "$CFLAGS" | sed -e 's/-g//' -e 's/-fstack-clash-protection//') -Wno-unknown-warning-option -Wno-builtin-macro-redefined -Wno-deprecated-declarations -Wno-sign-compare -Wno-shorten-64-to-32"
+export CXXFLAGS="$(printf '%s' "$CXXFLAGS" | sed -e 's/-g//' -e 's/-fstack-clash-protection//') -Wno-unknown-warning-option -Wno-builtin-macro-redefined -Wno-deprecated-declarations -Wno-sign-compare -Wno-shorten-64-to-32"
 '''
 
 setup = '''

@@ -71,15 +71,16 @@ source = [
 environment = '''
 export RUSTC_BOOTSTRAP=1
 # Alpine's: less log noise, reproducible, no debug info (symbol_level=0)
-export CFLAGS="${CFLAGS/-g/} -O2 -Wno-builtin-macro-redefined -Wno-deprecated-declarations -Wno-shift-count-overflow -Wno-ignored-attributes"
-export CXXFLAGS="${CXXFLAGS/-g/} -O2 -Wno-builtin-macro-redefined -Wno-deprecated-declarations -Wno-invalid-constexpr"
-export CXXFLAGS="${CXXFLAGS/-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_FAST/}"
-export CXXFLAGS="${CXXFLAGS/-D_GLIBCXX_ASSERTIONS=1}"
-export CPPFLAGS="${CPPFLAGS/-g/} -D__DATE__=  -D__TIME__=  -D__TIMESTAMP__="
+dkstrip() { printf '%s' "$1" | sed -e "s/$2//"; }   # POSIX: the build script runs under dash, which has no ${VAR/x/}
+export CFLAGS="$(dkstrip "$CFLAGS" -g) -O2 -Wno-builtin-macro-redefined -Wno-deprecated-declarations -Wno-shift-count-overflow -Wno-ignored-attributes"
+export CXXFLAGS="$(dkstrip "$CXXFLAGS" -g) -O2 -Wno-builtin-macro-redefined -Wno-deprecated-declarations -Wno-invalid-constexpr"
+export CXXFLAGS="$(dkstrip "$CXXFLAGS" -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_FAST)"
+export CXXFLAGS="$(dkstrip "$CXXFLAGS" -D_GLIBCXX_ASSERTIONS=1)"
+export CPPFLAGS="$(dkstrip "$CPPFLAGS" -g) -D__DATE__=  -D__TIME__=  -D__TIMESTAMP__="
 case "$arch" in
 aarch64)
-    export CFLAGS="${CFLAGS/-fstack-clash-protection}"
-    export CXXFLAGS="${CXXFLAGS/-fstack-clash-protection}"
+    export CFLAGS="$(dkstrip "$CFLAGS" -fstack-clash-protection)"
+    export CXXFLAGS="$(dkstrip "$CXXFLAGS" -fstack-clash-protection)"
     ;;
 esac
 '''
