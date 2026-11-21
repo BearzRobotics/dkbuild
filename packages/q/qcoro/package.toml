@@ -16,7 +16,9 @@ source = [
     { url = "https://github.com/danvratil/qcoro/archive/refs/tags/v0.13.0.tar.gz", sha256 = "4bff7513c5c8e301b66308df05795043b1792ed16381a484e5c990171b8ff19e" },
 ]
 
+# tests/testlibs/testwsserver.cpp uses std::this_thread::sleep_for without <thread> (libc++ no longer pulls it in).
 setup = '''
+sed -i '1i #include <thread>' tests/testlibs/testwsserver.cpp
 %cmake \
     -DBUILD_SHARED_LIBS=ON \
     -DQCORO_BUILD_EXAMPLES=OFF
