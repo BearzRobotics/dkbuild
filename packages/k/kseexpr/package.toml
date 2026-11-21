@@ -20,7 +20,9 @@ source = [
 environment = '''
 export CXXFLAGS="${CXXFLAGS} -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_NONE"
 '''
+# Utils.cpp calls std::strtol without <cstdlib> (libc++'s headers no longer pull it in): include it.
 setup = '''
+sed -i '1i #include <cstdlib>' src/KSeExpr/Utils.cpp
 %cmake \
     -DBUILD_DEMOS=OFF \
     -DBUILD_TESTS=ON
