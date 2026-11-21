@@ -2,7 +2,7 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "xapian-core"
 version = "1.4.29"
-release = 1
+release = 2
 # Tests off: apitest hangs in the sandbox (xapian-progsrv stuck in a disk wait for 8 hours, 2026-11-21).
 options = ["!check"]
 summary = "Open source search engine library"

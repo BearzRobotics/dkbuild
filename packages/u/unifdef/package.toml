@@ -2,7 +2,7 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "unifdef"
 version = "2.12"
-release = 1
+release = 2
 # Tests off: the outeperm test expects "permission denied" on a read-only directory, which root in the sandbox never gets.
 options = ["!check"]
 summary = "Selectively remove C preprocessor conditionals"
