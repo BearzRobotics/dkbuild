@@ -978,7 +978,14 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
             while (lines.next()) |n| try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "ln -sfn '/dkdeps/zig/{s}' 'zig-pkg/{s}'\n", .{ n, n }));
         }
         if (lay.items.len > 0) {
-            const ok = runLogged(arena, io, &.{ "sh", "-ec", try std.fmt.allocPrint(arena, "cd '{s}'\n{s}", .{ dest, lay.items }) }, &log) catch false;
+            // The script goes through a file: a large crate list (cargo-c has 410)
+            // makes it longer than one argument may be (128 KiB).
+            const lay_dir = try std.fs.path.join(arena, &.{ root_rel, "dkbuild" });
+            Dir.cwd().createDirPath(io, lay_dir) catch return error.UnpackFailed;
+            const lay_file = try std.fs.path.join(arena, &.{ lay_dir, "lay.sh" });
+            Dir.cwd().writeFile(io, .{ .sub_path = lay_file, .data = try std.fmt.allocPrint(arena, "cd '{s}'\n{s}", .{ dest, lay.items }) }) catch return error.UnpackFailed;
+            const lay_abs = absPath(arena, io, lay_file) catch return error.UnpackFailed;
+            const ok = runLogged(arena, io, &.{ "sh", "-e", lay_abs }, &log) catch false;
             if (!ok) {
                 out("error: cannot lay out the vendored dependencies of {s}\n", .{r.name});
                 return error.UnpackFailed;

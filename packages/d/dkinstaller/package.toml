@@ -15,7 +15,7 @@
 # `git archive --prefix=dkinstaller-<version>/`), so its checksum is stable.
 name = "dkinstaller"
 version = "0.0.6"
-release = 1
+release = 2
 summary = "FenrirOS installer: installs the live system onto a disk"
 license = "GPL-2.0-only"
 homepage = "https://github.com/BearzRobotics/dkinstaller"
@@ -36,4 +36,6 @@ install -Dm644 LICENSE "$pkgdir/usr/share/licenses/dkinstaller/LICENSE"
 install -Dm644 $pkgfiles/dkinstall-auto "$pkgdir/etc/dinit.d/dkinstall-auto"
 install -d "$pkgdir/usr/sbin"
 ln -s ../bin/dkrescue-install "$pkgdir/usr/sbin/dkrescue-install"
+# r2: the command people look for is `dkinstall`.
+ln -s dkrescue-install "$pkgdir/usr/bin/dkinstall"
 '''
