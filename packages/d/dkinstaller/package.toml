@@ -5,13 +5,16 @@
 # dies with "Illegal instruction" on other CPUs). It needs, on the live ISO:
 # dklilo at 380a5b3 or later, /run/live/medium visible, live/rootfs.size, and
 # tzdb (see its docs/ISO-REQUIREMENTS.md; all provided by `dkbuild image`).
+# 0.0.6 (2026-11-20): root filesystem choice (ext2/3/4, btrfs, XFS; ZFS listed but refused) and boot loader choice (dklilo, GRUB, systemd-boot).
+# The other file system tools and boot loaders are NOT dependencies: the installer looks for them on the live disc (mkfs.btrfs, mkfs.xfs, grub-install,
+# bootctl ...) and offers only what is there, saying which package is missing for the rest. Images that want them list them (images/dkinstall-test.toml has all).
 # 0.0.5 (2026-11-19): the answers files are TOML (install/answers.toml, dkinstall.toml); earlier files in the old format are not read.
 # 0.0.4 (2026-11-17): autoinstall (`dkrescue-install --auto`, kernel flag dkinstall.auto=1) and the dinit service that runs it (files/dkinstall-auto).
 # 0.0.3 (2026-11-17): SELinux labelling, offline package installs from a repository medium, services/SSH/network/NTP/firewall screens, a chroot shell.
 # The release tarball is attached to the GitHub release (made with
 # `git archive --prefix=dkinstaller-<version>/`), so its checksum is stable.
 name = "dkinstaller"
-version = "0.0.5"
+version = "0.0.6"
 release = 1
 summary = "FenrirOS installer: installs the live system onto a disk"
 license = "GPL-2.0-only"
@@ -23,7 +26,7 @@ rundeps = ["dklilo", "util-linux", "e2fsprogs", "dosfstools", "squashfs-tools", 
 options = ["zigdeps", "!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/dkinstaller/releases/download/v0.0.5/dkinstaller-0.0.5.tar.gz", sha256 = "26a41f2e72a1d5eb8da137cc1155019875e12988a52806ec556feced44e0f483" },
+    { url = "https://github.com/BearzRobotics/dkinstaller/releases/download/v0.0.6/dkinstaller-0.0.6.tar.gz", sha256 = "ef6b9d09e72b223c6cc2b0433ab16214390c427aca7aa7b94f5fa91ac490abdb" },
 ]
 
 install = '''
