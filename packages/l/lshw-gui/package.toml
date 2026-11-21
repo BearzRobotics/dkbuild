@@ -1,0 +1,45 @@
+# lshw-gui: the GTK3 front end of lshw (gtk-lshw), a recipe of its own since 2026-11-20. It was a
+# subpackage of lshw, which made the text tool (and the rescue image) build GTK and its dependency chain.
+# From Chimera's user/lshw, same source and the same four patches as lshw (see its recipe for what each
+# does; 0002 matters here: install-gui also installs the .desktop file, AppStream metadata, the PAM
+# service /usr/lib/pam.d/gtk-lshw and console.apps). Only the gui files are installed; the lshw
+# program itself is in `lshw`, which this needs at run time (gtk-lshw runs it).
+# src/core/spd.cc gets the <stdlib.h> include by sed, as in lshw r2 (free() is undeclared otherwise).
+# Not yet built (written 2026-11-20); install-gui may want the text build's objects: if it fails, build
+# `all` first (the build step below does).
+name = "lshw-gui"
+version = "02.20"
+release = 1
+summary = "GTK front end for lshw"
+license = "GPL-2.0-only"
+homepage = "https://ezix.org/project/wiki/HardwareLiSter"
+patches = ["0001-use-bin-instead-of-sbin.patch", "0002-install-files-from-integration-s-folder.patch", "0003-fortify-source.patch", "0004-fix-unresolved-reference-when-fortifying-headers.patch"]
+hostdeps = ["gettext", "pkgconf"]
+builddeps = ["gtk+3-devel", "linux-headers", "zlib-ng-compat-devel"]
+rundeps = ["lshw", "hwdata"]
+options = ["!check"]
+
+source = [
+    { url = "https://www.ezix.org/software/files/lshw-B.02.20.tar.gz", sha256 = "06d9cf122422220e5dc94e8ea5b01816a69bb6b59368f63d7f21fff31fc6922a" },
+]
+
+build = '''
+sed -i '1i #include <stdlib.h>' src/core/spd.cc
+grep -q '^#include <stdlib.h>' src/core/spd.cc
+%make \
+    all \
+    gui \
+    VERSION=02.20 \
+    NO_VERSION_CHECK=1 \
+    ZLIB=1
+'''
+install = '''
+%make_install \
+    STRIP=true \
+    PREFIX=/usr \
+    install-gui \
+    VERSION=02.20 \
+    NO_VERSION_CHECK=1 \
+    ZLIB=1
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/lshw-gui/COPYING"
+'''
