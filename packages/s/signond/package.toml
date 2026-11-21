@@ -21,11 +21,13 @@ source = [
 setup = '''
 qmake6 PREFIX=/usr QMAKE_CFLAGS="$CFLAGS" QMAKE_CXXFLAGS="$CXXFLAGS" QMAKE_LFLAGS="$LDFLAGS"
 '''
+# %make passes AR=llvm-ar on the make command line, which overrides qmake's AR="llvm-ar cqs" and made the static
+# library step run "llvm-ar libsignon-qt6.a ..." (no operation); the later command-line AR here restores it.
 build = '''
-%make
+%make AR="llvm-ar cqs"
 '''
 check = '''
-%make check
+%make AR="llvm-ar cqs" check
 '''
 install = '''
 make INSTALL_ROOT="$pkgdir" install \
