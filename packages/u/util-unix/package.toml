@@ -1,37 +1,43 @@
 # util-unix: Unix/POSIX utilities in Zig (chmod, chown, chgrp, getent, id,
-# groups, tty, uname, stty, who, pinky, chcon, runcon, hostname), by
-# BearzRobotics, as an alternative to the GNU (and util-linux) ones, which
-# stay the default:
-#   util-unix          the multicall binary /usr/bin/util-unix and a link per
-#                      command in /usr/lib/util-unix/bin
-#   util-unix-default  puts /usr/lib/util-unix/bin first on every login's PATH
-#                      (/usr/lib/profile.d); remove it to go back.
+# groups, tty, uname, stty, who, pinky, chcon, runcon, hostname, and since 0.4.0 `sh`, a strict
+# POSIX shell), by BearzRobotics, as an alternative to the GNU (and util-linux) ones, which
+# stay the default. Installed since 0.4.0 (2026-11-20) in two places, so it can be tried live without touching the system:
+#   /usr/bin/util-unix                 the multicall binary (`util-unix <command> ...`), the only thing in /usr
+#   /opt/util-unix/bin/<command>       one real executable per command (upstream's standalone build; includes sh)
+#   /opt/util-unix/share/man/man1      the manual pages (Markdown, as dkman reads them; not in /usr: they would clash with GNU's page names)
+#   util-unix-default                  puts /opt/util-unix/bin first on every login's PATH
+#                                      (/usr/lib/profile.d); remove it to go back. `sh` typed at a prompt is then the
+#                                      util-unix one; scripts that start #!/bin/sh are unaffected.
 # Package builds never read profile.d.
+# 0.4.0 has no Zig dependencies, so no zigdeps and no --system.
 name = "util-unix"
-version = "0.3.0"
+version = "0.4.0"
 release = 1
 summary = "Unix/POSIX utilities in Zig (alternative to the GNU ones)"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/BearzRobotics/util-unix"
 hostdeps = ["zig"]
-options = ["zigdeps", "!check"]
+options = ["!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/util-unix/archive/refs/tags/v0.3.0.tar.gz", sha256 = "b00684a584c5d4c093dceff1a92c742afcbc563d51942f6afec07423cbfd33dc" },
+    { url = "https://github.com/BearzRobotics/util-unix/archive/refs/tags/v0.4.0.tar.gz", sha256 = "c803685b5c7a8c9317576dc14fa137b5b58fd61150c2cd9d24103f80931118ef" },
 ]
 
 build = '''
-# %zig_build's command, into a staging directory: only the multicall binary
-# is packaged (the one-per-command executables would sit on GNU's names)
-zig build --release=safe --prefix /tmp/stage -Dcpu=$zig_cpu --system zig-pkg -j$jobs
+# %zig_build's command, into a staging directory (the multicall binary goes to /usr/bin and the rest to /opt below)
+zig build --release=safe --prefix /tmp/stage -Dcpu=$zig_cpu -j$jobs
 '''
 install = '''
 install -Dm755 /tmp/stage/bin/util-unix "$pkgdir/usr/bin/util-unix"
-install -dm755 "$pkgdir/usr/lib/util-unix/bin"
-for c in $(/tmp/stage/bin/util-unix --list); do
-    ln -s ../../../bin/util-unix "$pkgdir/usr/lib/util-unix/bin/$c"
+install -dm755 "$pkgdir/opt/util-unix/bin"
+for f in /tmp/stage/bin/*; do
+    [ "${f##*/}" = util-unix ] || install -m755 "$f" "$pkgdir/opt/util-unix/bin/"
 done
-test -e "$pkgdir/usr/lib/util-unix/bin/chmod"
+test -x "$pkgdir/opt/util-unix/bin/chmod"
+if [ -d /tmp/stage/share/man ]; then
+    mkdir -p "$pkgdir/opt/util-unix/share"
+    cp -a /tmp/stage/share/man "$pkgdir/opt/util-unix/share/man"
+fi
 install -Dm644 $pkgfiles/util-unix.sh "$pkgdir/usr/lib/profile.d/util-unix.sh"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/util-unix/LICENSE"
 '''

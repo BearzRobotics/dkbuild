@@ -1,16 +1,18 @@
-# util-core: core utilities (ls, cat, cp, sort, date, find, sed, ...) in Zig,
+# util-core: core utilities (ls, cat, cp, sort, date, find, sed, grep, ...) in Zig,
 # by BearzRobotics, as an alternative to GNU coreutils: GNU stays the default.
-# Like Ubuntu's rust-coreutils switch, but without taking /usr/bin away:
-#   util-core          the multicall binary /usr/bin/util-core (`util-core ls`)
-#                      and a link per command in /usr/lib/util-core/bin
-#   util-core-default  puts /usr/lib/util-core/bin first on every login's PATH
-#                      (/usr/lib/profile.d); remove it to go back to GNU.
+# Installed since 0.1.0 (2026-11-20) in two places, so it can be tried live without touching the system:
+#   /usr/bin/util-core                 the multicall binary (`util-core <command> ...`), the only thing in /usr
+#   /opt/util-core/bin/<command>       one real executable per command (upstream's standalone build)
+#   /opt/util-core/share/man/man1      the manual pages (Markdown, as dkman reads them; not in /usr: they would clash with GNU's page names)
+#   util-core-default                  puts /opt/util-core/bin first on every login's PATH
+#                                      (/usr/lib/profile.d); remove it to go back to GNU.
 # Package builds never read profile.d, so recipes always use GNU.
-# Upstream builds the multicall binary as `main`; installed as util-core.
-# Licence: GPL-2.0-or-later (upstream's LICENSE, from commit 70ca8ee).
+# Licence: GPL-2.0-or-later (upstream's LICENSE).
+# r2: syntax-probe (a 1 MB developer tool upstream builds beside the commands) is not installed.
+# Source: the v0.1.0 tag; its one Zig dependency (regex-zig 0.4.0) is fetched on the host (zigdeps).
 name = "util-core"
-version = "0.0.0_git20261111"
-release = 1
+version = "0.1.0"
+release = 2
 summary = "Core utilities in Zig (alternative to GNU coreutils)"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/BearzRobotics/util-core"
@@ -18,21 +20,24 @@ hostdeps = ["zig"]
 options = ["zigdeps", "!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/util-core/archive/70ca8ee135d4701f72e389bb178237c5cdf57445.tar.gz", sha256 = "251db8ce70195c2daab01dcb51b4407e30f41e2b38d4303abca7a3eb9fb85050" },
+    { url = "https://github.com/BearzRobotics/util-core/archive/refs/tags/v0.1.0.tar.gz", sha256 = "40d9735d8e0816ff0ab25e2c6942b82badb70fc036818c0ab7f7f66547accd7f" },
 ]
 
 build = '''
-# %zig_build's command, into a staging directory: only the multicall binary
-# is packaged (the one-per-command executables would sit on GNU's names)
+# %zig_build's command, into a staging directory (the multicall binary goes to /usr/bin and the rest to /opt below)
 zig build --release=safe --prefix /tmp/stage -Dcpu=$zig_cpu --system zig-pkg -j$jobs
 '''
 install = '''
-install -Dm755 /tmp/stage/bin/main "$pkgdir/usr/bin/util-core"
-install -dm755 "$pkgdir/usr/lib/util-core/bin"
-for c in $(/tmp/stage/bin/main --list); do
-    ln -s ../../../bin/util-core "$pkgdir/usr/lib/util-core/bin/$c"
+install -Dm755 /tmp/stage/bin/util-core "$pkgdir/usr/bin/util-core"
+install -dm755 "$pkgdir/opt/util-core/bin"
+for f in /tmp/stage/bin/*; do
+    case "${f##*/}" in util-core|syntax-probe) ;; *) install -m755 "$f" "$pkgdir/opt/util-core/bin/" ;; esac
 done
-test -e "$pkgdir/usr/lib/util-core/bin/ls"
+test -x "$pkgdir/opt/util-core/bin/ls"
+if [ -d /tmp/stage/share/man ]; then
+    mkdir -p "$pkgdir/opt/util-core/share"
+    cp -a /tmp/stage/share/man "$pkgdir/opt/util-core/share/man"
+fi
 install -Dm644 $pkgfiles/util-core.sh "$pkgdir/usr/lib/profile.d/util-core.sh"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/util-core/LICENSE"
 '''
