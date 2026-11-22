@@ -1,0 +1,21 @@
+Continuwuity on FenrirOS
+========================
+
+Installed inert: the service is not enabled and there is no configuration,
+server name, signing key or registration token.
+
+    cp /usr/share/doc/continuwuity/conduwuit-example.toml /etc/continuwuity/continuwuity.toml
+    chgrp continuwuity /etc/continuwuity/continuwuity.toml; chmod 640 /etc/continuwuity/continuwuity.toml
+    $EDITOR /etc/continuwuity/continuwuity.toml
+    # set server_name (permanent! it is part of every user id and cannot be changed later),
+    # [global] address/port, database_path = "/var/lib/continuwuity/db",
+    # allow_registration with a registration_token (or leave registration off), allow_federation
+    dinitctl enable continuwuity
+
+Federation needs the server name to resolve to the server: serve
+/.well-known/matrix/server and /.well-known/matrix/client from your web server
+or open port 8448 with a certificate; a reverse proxy (nginx, caddy) with TLS in
+front of port 6167 is the usual setup. The first user to register on a fresh
+server becomes its admin; the server also takes admin commands in the admin
+room it creates. Voice/video calls: the coturn package (turn_uris, turn_secret).
+The binary is conduwuit (continuwuity is a link to it).

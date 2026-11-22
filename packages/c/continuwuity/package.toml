@@ -1,0 +1,43 @@
+# Continuwuity: a Matrix homeserver in Rust (the community continuation of conduwuit / Conduit), with an
+# embedded RocksDB (no external database). Crates vendored on the host (cargodeps); upstream pins some
+# crates (ruma, rust-rocksdb, jemallocator, hyper-util ...) as git dependencies: `cargo vendor` clones them
+# (RocksDB itself is a submodule of rust-rocksdb) and everything is local at build time.
+# Default features (upstream's "standard": brotli/gzip/zstd, direct TLS, io_uring, jemalloc, thumbnails with
+# the image crates, URL previews, sentry/otlp telemetry code compiled in but off by default, console) plus
+# bindgen-runtime for RocksDB's bindings (libclang from llvm).
+# Source edits: rust-toolchain.toml is removed (rustup syntax; the system rust is used).
+# Installed inert: the dinit service is shipped, not enabled; no configuration, no server name, no keys, no
+# registration token. Setup: README.FenrirOS. Example configuration: conduwuit-example.toml in the docs.
+name = "continuwuity"
+version = "26.7.2"
+release = 1
+summary = "Matrix homeserver written in Rust (conduwuit/Conduit fork)"
+license = "Apache-2.0"
+homepage = "https://continuwuity.org"
+hostdeps = ["rust", "pkgconf", "llvm", "cmake", "make"]
+builddeps = ["liburing-devel", "linux-headers"]
+options = ["!check", "cargodeps", "jobs:12"]
+
+source = [
+    { url = "https://github.com/continuwuity/continuwuity/archive/refs/tags/v26.7.2.tar.gz", sha256 = "b31c6122ddeda756ed1c1fb0e13f7a332a2dd48c926765f3649bfd4e82376da4" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true LIBCLANG_PATH=/usr/lib
+# jemalloc-sys builds its bundled jemalloc (autoconf, needs make); rocksdb builds with cmake/cc
+'''
+build = '''
+# rust-toolchain.toml is rustup syntax (see the header)
+rm -f rust-toolchain.toml
+cargo build --release --frozen --offline -j $jobs -p conduwuit
+'''
+install = '''
+install -Dm755 target/release/conduwuit "$pkgdir/usr/bin/conduwuit"
+ln -s conduwuit "$pkgdir/usr/bin/continuwuity"
+install -Dm644 conduwuit-example.toml "$pkgdir/usr/share/doc/continuwuity/conduwuit-example.toml"
+install -Dm644 $pkgfiles/continuwuity "$pkgdir/etc/dinit.d/continuwuity"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/continuwuity.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/continuwuity.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/continuwuity/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/continuwuity/LICENSE"
+'''

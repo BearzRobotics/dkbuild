@@ -1,0 +1,10 @@
+# Continuwuity Matrix homeserver. Not enabled by default (README.FenrirOS): it needs
+# /etc/continuwuity/continuwuity.toml with at least server_name.
+type = process
+command = /usr/bin/conduwuit --config /etc/continuwuity/continuwuity.toml
+run-as = continuwuity
+working-dir = /var/lib/continuwuity
+logfile = /var/log/continuwuity.log
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd
