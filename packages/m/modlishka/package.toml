@@ -13,9 +13,11 @@ source = [
     { url = "https://github.com/drk1wi/Modlishka/archive/refs/tags/v.1.1.1.tar.gz", sha256 = "10e9a293716ee69b061c7595cce9350ebd888dcfdb2c7cc5add3b38dfc208a22" },
 ]
 
+# r2: core/server.go has `import "C"` (no C code, but cgo must be on or the file is left out of the build:
+# "undefined: core.RunServer"), so CGO_ENABLED=1 where the Go recipes use 0.
 environment = '''
 export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
-export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=1
 '''
 build = '''
 mkdir -p build
