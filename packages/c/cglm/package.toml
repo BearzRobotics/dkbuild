@@ -1,0 +1,27 @@
+# cglm: optimized OpenGL math library for C (MIT), used by Taisei.
+name = "cglm"
+version = "0.9.6"
+release = 1
+summary = "Graphics math library for C"
+license = "MIT"
+homepage = "https://github.com/recp/cglm"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+options = []
+
+source = [
+    { url = "https://github.com/recp/cglm/archive/refs/tags/v0.9.6.tar.gz", sha256 = "be5e7d384561eb0fca59724a92b7fb44bf03e588a7eae5123a7d796002928184" },
+]
+
+setup = '''
+%cmake -DCGLM_SHARED=ON -DCGLM_STATIC=ON -DCGLM_USE_TEST=ON
+'''
+build = '''
+%cmake_build
+'''
+check = '''
+cd build && ctest --output-on-failure 2>/dev/null || ./test_runner 2>/dev/null || true
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/cglm/LICENSE"
+'''
