@@ -1,0 +1,34 @@
+# After Alpine aports: community/tlottie. Rust Lottie animation renderer with a
+# C API; telegram-desktop draws animated stickers with it (the rlottie of earlier
+# releases). 1.0.6 is what Alpine ships with tdesktop 7.4.4; tdesktop's own build
+# script pins a commit (92df98dc20) just past it.
+# The crate has no dependencies in the default features (hashbrown/dlmalloc are
+# optional, for no-std and wasm), so there is nothing to vendor: no cargodeps.
+# -crt-static: Rust's musl target links statically by default and then cannot
+# produce a cdylib (see libpathrs). The crate builds only the shared library
+# (crate-type rlib + cdylib), which tdesktop links, so there is no -static package.
+name = "tlottie"
+version = "1.0.6"
+release = 1
+summary = "Rust Lottie animation renderer with a C API"
+license = "MIT"
+homepage = "https://github.com/dkaraush/tlottie"
+hostdeps = ["rust"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/dkaraush/tlottie/archive/refs/tags/v1.0.6.tar.gz", sha256 = "a85dd1a8f62ca85248af380d5eee6f32e84b29c45134615b23355207ccb90359" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export RUSTFLAGS="$RUSTFLAGS -C target-feature=-crt-static"
+'''
+build = '''
+cargo build --release --frozen --offline --features c-api --lib -j $jobs
+'''
+install = '''
+install -Dm755 target/release/libtlottie.so "$pkgdir/usr/lib/libtlottie.so"
+install -Dm644 include/tlottie.h "$pkgdir/usr/include/tlottie.h"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/tlottie/LICENSE"
+'''

@@ -1,0 +1,38 @@
+# tde2e: the end-to-end encryption part of TDLib (TD_E2E_ONLY), which
+# telegram-desktop links for encrypted group calls. The commit is the one
+# tdesktop's own build script pins (Telegram/build/prepare/prepare.py, stage
+# tde2e); Alpine builds it the same way. Upstream installs static libraries
+# and a tde2eConfig.cmake that names them, so the .a files travel with -devel
+# (the -static split is turned off for this package).
+name = "tde2e"
+version = "0_git20250510"
+release = 1
+summary = "End-to-end encryption library of TDLib"
+license = "BSL-1.0"
+homepage = "https://github.com/tdlib/td"
+hostdeps = ["cmake", "gperf", "ninja", "pkgconf"]
+builddeps = ["openssl-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/tdlib/td/archive/51743dfd01dff6179e2d8f7095729caa4e2222e9.tar.gz", sha256 = "f2c6b92533ba41a024b9fdb86d346c8bfc876d5961738ad463effbd844d61405" },
+]
+
+setup = '''
+%cmake -DTD_E2E_ONLY=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE_1_0.txt "$pkgdir/usr/share/licenses/tde2e/LICENSE_1_0.txt"
+'''
+
+[subpackages.static]
+summary = "Static libraries"
+paths = []
+
+[subpackages.devel]
+summary = "Headers, static libraries and CMake files"
+paths = ["/usr/include", "/usr/lib/*.a", "/usr/lib/pkgconfig", "/usr/lib/cmake"]

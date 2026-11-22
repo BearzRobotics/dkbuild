@@ -1,0 +1,31 @@
+# uniffi-bindgen-cpp: C++ binding generator for UniFFI libraries (a fork of
+# NordSecurity's, 0.9.0 on uniffi 0.32), as vendored in the wallet-engine
+# repository (bindgen/cpp). wallet-engine runs it to make the C++ header and
+# source that telegram-desktop includes. Same tarball as wallet-engine; the
+# project is in bindgen/cpp, which has its own Cargo.lock, so the recipe keeps a
+# copy in files/Cargo.lock (cargolock) for the fetch to vendor with.
+# Installed as `uniffi-bindgen-cpp`.
+name = "uniffi-bindgen-cpp"
+version = "0.9.0"
+release = 1
+summary = "C++ binding generator for UniFFI (wallet-engine's copy)"
+license = "MPL-2.0"
+homepage = "https://github.com/i582/wallet-engine"
+hostdeps = ["rust"]
+options = ["!check", "cargodeps", "cargolock=bindgen/cpp"]
+
+source = [
+    { url = "https://github.com/i582/wallet-engine/archive/e59e0d89d7ee90c388bf36e3334c5b276f396697.tar.gz", sha256 = "45d22ed481dc4fab07390abfa811c095c424e11c745e87b9d0d27b40efa17da2" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cd bindgen/cpp
+cargo build --release --frozen --offline -p uniffi-bindgen-cpp -j $jobs
+'''
+install = '''
+install -Dm755 bindgen/cpp/target/release/uniffi-bindgen-cpp "$pkgdir/usr/bin/uniffi-bindgen-cpp"
+install -Dm644 bindgen/cpp/LICENSE "$pkgdir/usr/share/licenses/uniffi-bindgen-cpp/LICENSE"
+'''

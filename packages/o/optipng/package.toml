@@ -1,0 +1,28 @@
+# After Alpine aports: community/optipng. PNG recompressor; calibre runs it to
+# shrink the images it writes. System libpng and zlib.
+name = "optipng"
+version = "7.9.1"
+release = 1
+summary = "Lossless PNG file optimizer"
+license = "Zlib"
+homepage = "https://optipng.sourceforge.net"
+hostdeps = ["cmake", "ninja"]
+builddeps = ["libpng-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/sourceforge/optipng/optipng-7.9.1.tar.gz", sha256 = "c2579be58c2c66dae9d63154edcb3d427fef64cb00ec0aff079c9d156ec46f29" },
+]
+
+setup = '''
+%cmake -DOPTIPNG_USE_SYSTEM_LIBS=ON -DOPTIPNG_BUILD_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# the installed program is not executable (Alpine fixes it the same way)
+chmod +x "$pkgdir/usr/bin/optipng"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/optipng/LICENSE.txt"
+'''

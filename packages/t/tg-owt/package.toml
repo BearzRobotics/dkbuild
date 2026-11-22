@@ -1,0 +1,60 @@
+# (package name tg-owt: names cannot contain underscores; the CMake package is tg_owt.)
+# Telegram Desktop's fork of Google's WebRTC (calls, video chats), built the way
+# tdesktop's "packaged build" wiki page and Alpine's community/tg_owt do:
+# TG_OWT_PACKAGED_BUILD uses the system abseil, crc32c, libsrtp, ffmpeg, opus,
+# openh264, libvpx, libjpeg-turbo and openssl. Bundled in the source: pffft
+# (no stable ABI, patched), rnnoise (all remaining files are custom) and
+# libyuv (many breaking updates). libyuv is a git submodule (gitlab chromiumsrc,
+# commit 04821d1e...), absent from GitHub's archive, so the same commit from
+# the klemensn mirror (which Alpine uses) is a second source, copied into
+# src/third_party/libyuv.
+# The commit is the one tdesktop 7.4.4 pins (Telegram/build/prepare/prepare.py).
+# Static only, as upstream and Alpine ("dynamic version has broken linking"); the
+# installed CMake files name the .a files, so they travel with -devel (the -static
+# split is turned off).
+# -include cstdint: several webrtc headers use uint8_t and friends without
+# including <cstdint> (Alpine patches four of them for newer GCC; libc++ no longer
+# includes it transitively either), so it is forced for every C++ file.
+# TG_OWT_BUILD_AUDIO_BACKENDS is left off (default): tdesktop does its audio
+# through OpenAL.
+name = "tg-owt"
+version = "0_git20261030"
+release = 1
+summary = "Telegram Desktop's fork of Google's WebRTC"
+license = "BSD-3-Clause"
+homepage = "https://github.com/desktop-app/tg_owt"
+hostdeps = ["cmake", "ninja", "pkgconf", "yasm"]
+builddeps = ["abseil-cpp-devel", "crc32c-devel", "ffmpeg-devel", "glib-devel", "libdrm-devel", "libepoxy-devel", "libjpeg-turbo-devel", "libsrtp-devel", "libvpx-devel", "libx11-devel", "libxcomposite-devel", "libxdamage-devel", "libxext-devel", "libxfixes-devel", "libxrandr-devel", "libxrender-devel", "libxtst-devel", "mesa-devel", "openh264-devel", "openssl-devel", "opus-devel", "pipewire-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/desktop-app/tg_owt/archive/020feec5c040fdae2cf752c2c2be62ddde7c236d.tar.gz", sha256 = "4e21594f847f9fbbe24bbae9601bf4a58dbd33fdd77831f37c2922955ebb28e7" },
+    { url = "https://github.com/klemensn/libyuv/archive/04821d1e7d60845525e8db55c7bcd41ef5be9406.tar.gz", sha256 = "eadc1c7276135320f42a22599f23a2f55419e1d90a3c6a4c58cd1586f7b83bff" },
+]
+
+environment = '''
+export CXXFLAGS="$CXXFLAGS -include cstdint"
+'''
+setup = '''
+# libyuv submodule (second source, unpacked next to this directory)
+cp -a ../libyuv-04821d1e7d60845525e8db55c7bcd41ef5be9406/. src/third_party/libyuv/
+%cmake \
+    -DTG_OWT_PACKAGED_BUILD=ON \
+    -DTG_OWT_ARCH_ARMV7_USE_NEON=OFF \
+    -DBUILD_SHARED_LIBS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/tg-owt/LICENSE"
+'''
+
+[subpackages.static]
+summary = "Static libraries"
+paths = []
+
+[subpackages.devel]
+summary = "Headers, static library and CMake files"
+paths = ["/usr/include", "/usr/lib/*.a", "/usr/lib/pkgconfig", "/usr/lib/cmake"]

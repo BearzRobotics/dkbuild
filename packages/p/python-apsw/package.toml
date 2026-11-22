@@ -1,0 +1,24 @@
+# Another Python SQLite wrapper (links the system SQLite) (apsw from PyPI), added as a calibre dependency.
+name = "python-apsw"
+version = "3.54.1.0"
+release = 1
+summary = "Another Python SQLite wrapper (links the system SQLite)"
+license = "Zlib"
+homepage = "https://github.com/rogerbinns/apsw"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+builddeps = ["python-devel", "sqlite-devel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/84/75/be84a7237ea1af8374c67ff7468053bff538e1591526805c6574b2efef4d/apsw-3.54.1.0.tar.gz", sha256 = "d9fd64ed76dc0f3d2265d4aeedb74d678c2ac7dffbd4e8ba05bf9a87aa7c34d3" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-apsw/LICENSE"
+'''

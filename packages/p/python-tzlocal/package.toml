@@ -1,0 +1,23 @@
+# Local timezone information for Python (tzlocal from PyPI), added as a calibre dependency.
+name = "python-tzlocal"
+version = "5.4.5"
+release = 1
+summary = "Local timezone information for Python"
+license = "MIT"
+homepage = "https://github.com/regebro/tzlocal"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python", "tzdb"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/d8/89/2bd035df331499589fc92e59375c17c6cea6a500453b2c5f6a6ec9572825/tzlocal-5.4.5.tar.gz", sha256 = "ba976898bad27945178c9ca25c222c19e322b30c10342b9f40b46714f70d2d5f" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/python-tzlocal/LICENSE.txt"
+'''

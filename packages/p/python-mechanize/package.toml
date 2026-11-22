@@ -1,0 +1,23 @@
+# Stateful programmatic web browsing (mechanize from PyPI), added as a calibre dependency.
+name = "python-mechanize"
+version = "0.4.11"
+release = 1
+summary = "Stateful programmatic web browsing"
+license = "BSD-3-Clause OR ZPL-2.1"
+homepage = "https://github.com/python-mechanize/mechanize"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python", "python-html5lib"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/be/68/1cf35b16ee3006e22b6aaf997434d7a204a6c29b2d0a6840c58a2db88d9e/mechanize-0.4.11.tar.gz", sha256 = "544d1e5c97a03f20e726551fea80b5fe46db720491746923e89c9c6960c4b7e8" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-mechanize/LICENSE"
+'''

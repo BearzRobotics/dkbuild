@@ -1,0 +1,38 @@
+# ada: WHATWG-compliant URL parser (C++). telegram-desktop links it. 3.2.9 is the
+# version tdesktop's own build script pins (Telegram/build/prepare/prepare.py);
+# the 4.x line is newer.
+# Two build trees as in libtorrent-rasterbar: shared library first, then a
+# static one whose libada.a is installed by hand (BUILD_SHARED_LIBS selects one kind).
+name = "ada"
+version = "3.2.9"
+release = 1
+summary = "WHATWG URL parser library"
+license = "Apache-2.0 OR MIT"
+homepage = "https://github.com/ada-url/ada"
+hostdeps = ["cmake", "ninja", "python"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/ada-url/ada/archive/refs/tags/v3.2.9.tar.gz", sha256 = "3f34c6f997486c09a49769d9d659784e56d2fde8cbb3c94f610510fcdc890b4d" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DADA_TESTING=OFF \
+    -DADA_BENCHMARKS=OFF \
+    -DADA_TOOLS=OFF
+cmake -B build-static -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_LIBDIR=lib -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+    -DADA_TESTING=OFF -DADA_BENCHMARKS=OFF -DADA_TOOLS=OFF
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+install = '''
+%cmake_install
+install -Dm644 build-static/src/libada.a "$pkgdir/usr/lib/libada.a"
+install -Dm644 LICENSE-MIT "$pkgdir/usr/share/licenses/ada/LICENSE-MIT"
+install -Dm644 LICENSE-APACHE "$pkgdir/usr/share/licenses/ada/LICENSE-APACHE"
+'''

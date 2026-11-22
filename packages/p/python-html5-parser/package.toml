@@ -1,0 +1,24 @@
+# Fast C based HTML5 parser (gumbo, bundled) producing lxml trees (html5-parser from PyPI), added as a calibre dependency.
+name = "python-html5-parser"
+version = "0.5.0"
+release = 1
+summary = "Fast C based HTML5 parser (gumbo, bundled) producing lxml trees"
+license = "Apache-2.0"
+homepage = "https://github.com/kovidgoyal/html5-parser"
+hostdeps = ["python", "python-setuptools", "python-wheel", "pkgconf"]
+builddeps = ["libxml2-devel", "python-devel"]
+rundeps = ["python", "python-chardet", "python-lxml"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/bd/8f/1102064b4c20c2f42e9c9c34a59bfb0dde42ddb311f25de20684018d6ae0/html5_parser-0.5.0.tar.gz", sha256 = "8b32ed047a99c855c8a3c57d19df1fe8384dc16fc847b42847cbe202fd91cfde" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-html5-parser/LICENSE"
+'''

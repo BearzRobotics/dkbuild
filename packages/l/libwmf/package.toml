@@ -1,0 +1,40 @@
+# After Alpine aports: community/libwmf. Library for reading Windows Metafile
+# (WMF) vector images; calibre's WMF-to-PNG conversion links it. libwmflite
+# (the parser alone) is split out as Alpine does.
+# autoreconf -fi -Ipatches: the release tarball (GitHub tag archive) has no
+# configure script.
+# --with-gsfontdir/--with-fontdir/--with-gsfontmap: font locations the build
+# bakes in; the Ghostscript Fontmap path is the one Alpine uses.
+name = "libwmf"
+version = "0.2.15"
+release = 1
+summary = "Library for reading Windows Metafile (WMF) vector images"
+license = "LGPL-2.0-or-later"
+homepage = "https://wvware.sourceforge.net/libwmf.html"
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf"]
+builddeps = ["freetype-devel", "libexpat-devel", "libjpeg-turbo-devel", "libpng-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/caolanm/libwmf/archive/v0.2.15.tar.gz", sha256 = "379ae041dd53ab35f55c9b73a78a31f1ce530e925023c31607b05f2199d867e6" },
+]
+
+setup = '''
+autoreconf -fi -Ipatches
+%configure \
+    --with-gsfontdir=/usr/share/fonts/Type1 \
+    --with-fontdir=/usr/share/fonts/Type1 \
+    --with-gsfontmap=/usr/share/ghostscript/9.10/lib/Fontmap.GS
+'''
+build = '''
+%make
+'''
+# -j1: the install races on its own directories (Alpine does the same)
+install = '''
+%make_install -j1
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libwmf/COPYING"
+'''
+
+[subpackages.libwmflite]
+summary = "Parser-only WMF library"
+paths = ["/usr/lib/libwmflite*.so.*"]

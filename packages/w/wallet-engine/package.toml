@@ -1,0 +1,52 @@
+# After Alpine aports: community/wallet-engine. Rust library behind the wallet
+# feature of Telegram Desktop (TON Connect); tdesktop links its shared library and
+# compiles the C++ bindings generated from it. Taken at the commit tdesktop 7.4.4
+# pins (Telegram/build/prepare/prepare.py, walletEngineRevision), with tdesktop's
+# patch (desktop-app/patches wallet-engine.patch, at the commit Alpine uses, as a
+# second source). Not applied from Alpine: 0001-Upgrade-Rustix-to-1.1.5 (rustix is
+# only a dev-dependency here, nothing in the release library).
+# The C++ binding (wallet_engine.hpp, wallet_engine.cpp,
+# wallet_engine_scaffolding.hpp) is generated from the built library by
+# uniffi-bindgen-cpp (its own recipe, same upstream tarball), and installed under
+# /usr/include/wallet_engine/ (where tdesktop's find_path looks).
+# vendor/ton in the source is a path dependency (ton = { path = "vendor/ton" });
+# cargodeps lays the crates.io ones next to it in vendor/.
+# -crt-static: the musl target's default static linking cannot make a cdylib.
+# The profile is upstream's (opt-level z, panic abort).
+name = "wallet-engine"
+version = "0.0.7"
+release = 1
+summary = "Rust wallet engine library for Telegram Desktop"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/i582/wallet-engine"
+hostdeps = ["rust", "uniffi-bindgen-cpp"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/i582/wallet-engine/archive/e59e0d89d7ee90c388bf36e3334c5b276f396697.tar.gz", sha256 = "45d22ed481dc4fab07390abfa811c095c424e11c745e87b9d0d27b40efa17da2" },
+    { url = "https://raw.githubusercontent.com/desktop-app/patches/aec474953ff7ee9b6e4cd9b8658288ea86d124f3/wallet-engine.patch", sha256 = "b40aba82c39a42d0526a85ecfa40d613baa57b1a2d6600e601a42a1576b3b822", unpack = false, name = "wallet-engine.patch" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export RUSTFLAGS="$RUSTFLAGS -C target-feature=-crt-static"
+'''
+setup = '''
+# tdesktop's patch (adds the TON Connect TLB decoding API tdesktop calls)
+patch -Np1 < /build/sources/wallet-engine.patch
+'''
+build = '''
+cargo build --release --frozen --offline --lib -j $jobs
+# library mode reads the UniFFI metadata from the built library; `cargo metadata`
+# runs offline against the vendored crates
+uniffi-bindgen-cpp --library target/release/libwallet_engine.so --out-dir target/bindings
+'''
+install = '''
+install -Dm755 target/release/libwallet_engine.so "$pkgdir/usr/lib/libwallet_engine.so"
+install -Dm644 target/release/libwallet_engine.a "$pkgdir/usr/lib/libwallet_engine.a"
+for f in wallet_engine.hpp wallet_engine.cpp wallet_engine_scaffolding.hpp; do
+    install -Dm644 target/bindings/$f "$pkgdir/usr/include/wallet_engine/$f"
+done
+install -Dm644 LICENSE-MIT "$pkgdir/usr/share/licenses/wallet-engine/LICENSE-MIT"
+install -Dm644 LICENSE-APACHE "$pkgdir/usr/share/licenses/wallet-engine/LICENSE-APACHE"
+'''
