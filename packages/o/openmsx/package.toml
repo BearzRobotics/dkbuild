@@ -1,0 +1,24 @@
+# Music set for OpenTTD (GPL-2.0), from the upstream release zip: it holds one
+# ready-made openmsx-0.4.2.tar, which OpenTTD reads directly from its data directory.
+# (unpack = false: the zip has no top directory, so it is unzipped by the install step.)
+name = "openmsx"
+version = "0.4.2"
+release = 1
+summary = "Music set for OpenTTD"
+license = "GPL-2.0-only"
+homepage = "https://github.com/OpenTTD/OpenMSX"
+hostdeps = ["unzip"]
+options = ["!check"]  # data only
+
+source = [
+    { url = "https://cdn.openttd.org/openmsx-releases/0.4.2/openmsx-0.4.2-all.zip", unpack = false, sha256 = "5a4277a2e62d87f2952ea5020dc20fb2f6ffafdccf9913fbf35ad45ee30ec762" },
+]
+
+install = '''
+unzip -oq /build/sources/openmsx-0.4.2-all.zip -d zip
+t=zip/openmsx-0.4.2.tar
+install -Dm644 "$t" "$pkgdir/usr/share/games/openttd/baseset/openmsx-0.4.2.tar"
+# the licence text is inside the tar
+tar -xOf "$t" 'openmsx-0.4.2/license.txt' > license.txt
+install -Dm644 license.txt "$pkgdir/usr/share/licenses/openmsx/license.txt"
+'''

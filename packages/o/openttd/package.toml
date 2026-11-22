@@ -1,0 +1,35 @@
+# OpenTTD: open-source reimplementation of Transport Tycoon Deluxe (GPL-2.0).
+# It needs a graphics base set to start: opengfx (free replacement), plus
+# opensfx and openmsx for sound and music; they are rundeps.
+# Patches (from Chimera/Alpine):
+#  - musl-random: use <sys/random.h> getrandom on every Linux, not only glibc.
+#  - no-sse4: the build probe for SSE4 must fail so the baseline x86-64 ISA is kept.
+#  - redefs-fix: drop -D_FORTIFY_SOURCE=2, our toolchain flags already set it.
+name = "openttd"
+version = "15.3"
+release = 1
+summary = "Simulation game based upon Transport Tycoon Deluxe"
+license = "GPL-2.0-only"
+homepage = "https://openttd.org"
+patches = ["musl-random.patch", "no-sse4.patch", "redefs-fix.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["curl-devel", "fluidsynth-devel", "fontconfig-devel", "freetype-devel", "harfbuzz-devel", "icu-devel", "libpng-devel", "lzo-devel", "sdl2-compat-devel", "xz-devel", "zlib-ng-compat-devel", "zstd-devel"]
+rundeps = ["opengfx", "opensfx", "openmsx"]
+
+source = [
+    { url = "https://cdn.openttd.org/openttd-releases/15.3/openttd-15.3-source.tar.xz", sha256 = "5ea21eea7d59c78a42071924ac18c6bc0116088f2e96b14cfee9369175973be7" },
+]
+
+setup = '''
+%cmake -DOPTION_USE_ASSERTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+check = '''
+./build/openttd_test
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING.md "$pkgdir/usr/share/licenses/openttd/COPYING.md"
+'''

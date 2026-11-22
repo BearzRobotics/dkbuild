@@ -1,0 +1,24 @@
+# Sound effects set for OpenTTD (GPL-2.0), from the upstream release zip: it holds one
+# ready-made opensfx-1.0.3.tar, which OpenTTD reads directly from its data directory.
+# (unpack = false: the zip has no top directory, so it is unzipped by the install step.)
+name = "opensfx"
+version = "1.0.3"
+release = 1
+summary = "Sound effects set for OpenTTD"
+license = "GPL-2.0-only"
+homepage = "https://github.com/OpenTTD/OpenSFX"
+hostdeps = ["unzip"]
+options = ["!check"]  # data only
+
+source = [
+    { url = "https://cdn.openttd.org/opensfx-releases/1.0.3/opensfx-1.0.3-all.zip", unpack = false, sha256 = "e0a218b7dd9438e701503b0f84c25a97c1c11b7c2f025323fb19d6db16ef3759" },
+]
+
+install = '''
+unzip -oq /build/sources/opensfx-1.0.3-all.zip -d zip
+t=zip/opensfx-1.0.3.tar
+install -Dm644 "$t" "$pkgdir/usr/share/games/openttd/baseset/opensfx-1.0.3.tar"
+# the licence text is inside the tar
+tar -xOf "$t" 'opensfx-1.0.3/license.txt' > license.txt
+install -Dm644 license.txt "$pkgdir/usr/share/licenses/opensfx/license.txt"
+'''

@@ -1,0 +1,24 @@
+# Original graphics replacement set for OpenTTD (GPL-2.0), from the upstream release zip: it holds one
+# ready-made opengfx-8.0.tar, which OpenTTD reads directly from its data directory.
+# (unpack = false: the zip has no top directory, so it is unzipped by the install step.)
+name = "opengfx"
+version = "8.0"
+release = 1
+summary = "Original graphics replacement set for OpenTTD"
+license = "GPL-2.0-only"
+homepage = "https://github.com/OpenTTD/OpenGFX"
+hostdeps = ["unzip"]
+options = ["!check"]  # data only
+
+source = [
+    { url = "https://cdn.openttd.org/opengfx-releases/8.0/opengfx-8.0-all.zip", unpack = false, sha256 = "43a0c1dabf39cb865394f3a6cc36d4da5c10ecfaaf55652043104806810903be" },
+]
+
+install = '''
+unzip -oq /build/sources/opengfx-8.0-all.zip -d zip
+t=zip/opengfx-8.0.tar
+install -Dm644 "$t" "$pkgdir/usr/share/games/openttd/baseset/opengfx-8.0.tar"
+# the licence text is inside the tar
+tar -xOf "$t" 'opengfx-8.0/license.txt' > license.txt
+install -Dm644 license.txt "$pkgdir/usr/share/licenses/opengfx/license.txt"
+'''
