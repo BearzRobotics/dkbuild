@@ -1,0 +1,35 @@
+# vkQuake: Vulkan Quake engine based on QuakeSpasm (GPL-2.0). The engine is
+# free software; the game data (id1/pak0.pak) is not part of this package: put
+# the user's own copy (or the free-redistributable shareware episode) in
+# ~/.local/share/vkquake or /usr/share/quake.
+# no-execinfo.patch: musl has no <execinfo.h> backtrace.
+# pr_exec.c-ubsan-fix.patch: signed overflow in the profile counter.
+name = "vkquake"
+version = "1.37.0"
+release = 1
+summary = "Vulkan Quake port based on QuakeSpasm"
+license = "GPL-2.0-only"
+homepage = "https://github.com/Novum/vkQuake"
+patches = ["no-execinfo.patch", "pr_exec.c-ubsan-fix.patch"]
+hostdeps = ["glslang", "meson", "pkgconf", "spirv-tools"]
+builddeps = ["flac-devel", "libvorbis-devel", "libxcb-devel", "mpg123-devel", "opus-devel", "opusfile-devel", "sdl3-devel", "vulkan-headers", "vulkan-loader-devel", "libogg-devel"]
+options = ["!check"]  # no tests
+
+source = [
+    { url = "https://github.com/Novum/vkQuake/archive/refs/tags/1.37.0.tar.gz", sha256 = "955a7777ee9456973b1f3ea278d9f3b34538c788dc5938e42a734fad2e2d761a" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+install -Dm755 build/vkquake "$pkgdir/usr/bin/vkquake"
+install -Dm644 Misc/vkquake.desktop "$pkgdir/usr/share/applications/vkquake.desktop"
+install -Dm644 Misc/vkQuake_256.png "$pkgdir/usr/share/icons/hicolor/256x256/apps/vkquake.png"
+install -Dm644 Misc/vkQuake_512.png "$pkgdir/usr/share/icons/hicolor/512x512/apps/vkquake.png"
+install -Dm644 readme.md "$pkgdir/usr/share/doc/vkquake/readme.md"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/vkquake/LICENSE.txt"
+'''
