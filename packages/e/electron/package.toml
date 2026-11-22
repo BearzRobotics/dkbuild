@@ -48,7 +48,7 @@ patches = [
     "cr148-rust-toolchain-var.patch", "cr148-v8-no-san-trap.patch",
 ]
 hostdeps = ["bison", "esbuild", "git", "libarchive", "flex", "gn", "gperf", "hwdata", "ninja", "nodejs", "openjdk21", "perl",
-            "pkgconf", "python", "python-jinja2", "python-setuptools", "python-six", "rust", "bindgen", "xcbproto"]
+            "pkgconf", "python", "python-jinja2", "python-setuptools", "python-six", "rust", "rust-rustfmt", "bindgen", "xcbproto"]
 builddeps = ["alsa-lib-devel", "brotli-devel", "crc32c-devel", "hdrhistogram-c-devel", "llhttp-devel", "nghttp3-devel", "ngtcp2-devel", "c-ares-devel", "cairo-devel", "cups-devel", "curl-devel",
              "dav1d-devel", "double-conversion-devel", "eudev-devel", "ffmpeg-devel", "flac-devel",
              "fontconfig-devel", "freetype-devel", "glib-devel", "gtk+3-devel", "harfbuzz-devel",
