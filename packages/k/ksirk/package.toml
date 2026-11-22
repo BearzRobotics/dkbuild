@@ -1,0 +1,25 @@
+# KDE Games: Risk-like world conquest strategy game (KDE Gear 26.08.2, Qt6/KF6).
+name = "ksirk"
+version = "26.08.2"
+release = 1
+summary = "Risk-like world conquest strategy game"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/ksirk"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcompletion-devel", "kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "ki18n-devel", "knewstuff-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "libkdegames-devel", "qt6-qt5compat-devel", "qt6-qtbase-devel", "qt6-qtmultimedia-devel", "qt6-qtsvg-devel"]
+rundeps = ["libkdegames"]
+options = ["!check"]  # the tests, where there are any, need a display
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/ksirk-26.08.2.tar.xz", sha256 = "1f2b3fd9031094748b6830e384fafc6a67ab81df0ffb55ab970f05621512e6e3" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''
