@@ -1,0 +1,31 @@
+name = "shotcut"
+version = "26.11.15"
+release = 1
+summary = "Cross-platform video editor (Qt6, MLT)"
+license = "GPL-3.0-or-later"
+homepage = "https://www.shotcut.org"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools"]
+builddeps = ["fftw-devel", "libx11-devel", "mlt-devel", "qt6-qtbase-devel", "qt6-qtcharts-devel", "qt6-qtdeclarative-devel", "qt6-qtmultimedia-devel", "qt6-qtwebsockets-devel"]
+# Shotcut loads its UI from QML (QuickControls2, Charts) and uses the Qt SQL driver for its
+# recent-files/thumbnail database; the effects come from MLT's plugins and frei0r/LADSPA.
+rundeps = ["ffmpeg", "frei0r", "mlt", "qt6-qtbase-sql", "qt6-qtcharts", "qt6-qtdeclarative", "qt6-qtmultimedia", "qt6-qtwebsockets"]
+# The tests need a display.
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/mltframework/shotcut/archive/refs/tags/v26.11.15.tar.gz", sha256 = "01a2f114281faec7520ab6ee19a4c7ce1c54399381ab905ab565d27cf2b59e10" },
+]
+
+setup = '''
+# CLANG_FORMAT: a developer convenience target (wants clang-format 14 exactly).
+%cmake \
+    -DCLANG_FORMAT=OFF \
+    -DSHOTCUT_BUILD_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/shotcut/COPYING"
+'''
