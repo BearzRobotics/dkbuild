@@ -1,0 +1,12 @@
+# Mumble voice chat server. Not enabled by default: review /etc/mumble/mumble-server.ini
+# (set serverpassword and the superuser password with `mumble-server -supw`), then
+# `dinitctl enable mumble-server`. Listens on 64738 (TCP and UDP).
+type = process
+command = /usr/bin/mumble-server -fg -ini /etc/mumble/mumble-server.ini
+run-as = mumble-server
+working-dir = /var/lib/mumble-server
+logfile = /var/log/mumble-server.log
+smooth-recovery = true
+
+depends-on: rcboot
+waits-for: syslogd

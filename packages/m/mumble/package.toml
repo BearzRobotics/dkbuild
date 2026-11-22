@@ -1,0 +1,65 @@
+# Mumble 1.6.870: low-latency voice chat, client (mumble) and server (mumble-server, inert).
+# Written 2026-11-22, not built. Release tarball (includes the 3rdparty submodules).
+# Switched off, with reasons: Ice RPC (ZeroC Ice is not in the tree, gRPC is the supported path in 1.6),
+# update checks and crash reporting (phone-home), overlay-xcompile (32-bit overlay library: no multilib),
+# g15 (Logitech G15 daemon library not packaged), speech-dispatcher (qtspeech is used instead).
+# Bundled in the tarball and used as is: CLI11 (not packaged), utfcpp.
+name = "mumble"
+version = "1.6.870"
+release = 1
+summary = "Low-latency voice chat client"
+license = "BSD-3-Clause"
+homepage = "https://www.mumble.info"
+hostdeps = ["cmake", "ninja", "pkgconf", "python", "qt6-qttools", "protobuf"]
+builddeps = [
+    "alsa-lib-devel", "avahi-devel", "boost-devel", "libsndfile-devel", "libx11-devel", "libxext-devel",
+    "libxi-devel", "nlohmann-json-devel", "openssl-devel", "opus-devel", "pipewire-devel", "portaudio-devel",
+    "protobuf-devel", "qt6-qtbase-devel", "qt6-qtspeech-devel", "qt6-qtsvg-devel", "rnnoise-devel", "speexdsp-devel",
+    "spdlog-devel", "libpulse-devel", "poco-devel",
+]
+rundeps = ["qt6-qtsvg"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/mumble-voip/mumble/releases/download/v1.6.870/mumble-1.6.870.tar.gz", sha256 = "cd4726e36538d09b2fa4f7445cbe0be5cb1fcf642c2ea31ae6a6ed04d60e2513" },
+]
+
+# !check: the tests need a display, sockets and Qt Test; upstream's own suite is not run in distros.
+# -Dwarnings-as-errors=OFF: clang/libc++ and newer Qt print warnings upstream never saw.
+# -Dbundled-speex=OFF/-Dbundled-rnnoise=OFF/-Dbundled-json=OFF/-Dbundled-spdlog=OFF: use the tree's libraries.
+setup = '''
+%cmake \
+    -Dwarnings-as-errors=OFF \
+    -Dtests=OFF \
+    -Dpackaging=OFF \
+    -Dice=OFF \
+    -Dupdate=OFF \
+    -Dcrash-report=OFF \
+    -Doverlay=ON \
+    -Doverlay-xcompile=OFF \
+    -Dg15=OFF \
+    -Dqtspeech=ON \
+    -Dspeechd=OFF \
+    -Dbundled-speex=OFF \
+    -Drnnoise=ON \
+    -Dbundled-rnnoise=OFF \
+    -Dbundled-json=OFF \
+    -Dbundled-spdlog=OFF \
+    -Dalsa=ON -Dpulseaudio=ON -Dpipewire=ON -Djackaudio=ON -Dportaudio=ON \
+    -Dzeroconf=ON -Ddbus=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 $pkgfiles/mumble-server "$pkgdir/etc/dinit.d/mumble-server"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/mumble-server.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/mumble-server.conf"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/mumble/LICENSE"
+'''
+
+# The server is split out: `mumble` pulls in only the client.
+[subpackages.server]
+summary = "Mumble voice chat server (inert: service installed, not enabled)"
+paths   = ["/usr/bin/mumble-server", "/etc/dinit.d/mumble-server", "/usr/lib/sysusers.d/mumble-server.conf", "/usr/lib/tmpfiles.d/mumble-server.conf"]
