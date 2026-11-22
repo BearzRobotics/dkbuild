@@ -1,0 +1,34 @@
+# Taisei Project: open-source Touhou Project fangame, a vertical bullet-hell
+# shooter (MIT; art and music under CC-BY-SA/CC-BY, see COPYING.txt).
+# The release tarball taisei-1.4.6.tar.xz is the full source including the
+# submodules (koishi, basis_universal, SDL_GameControllerDB) and the game's
+# data (300 MB), so nothing is downloaded at build time.
+# -Dcpp_rtti=true: basis_universal needs RTTI. -Ddefault_library=static:
+# libkoishi is internal. The upstream build uses -Db_ndebug for releases.
+name = "taisei"
+version = "1.4.6"
+release = 1
+summary = "Open-source Touhou Project fangame"
+license = "MIT"
+homepage = "https://taisei-project.org"
+hostdeps = ["gettext", "meson", "pkgconf", "shaderc", "python", "zstd", "ninja"]
+builddeps = ["boost-devel", "cglm-devel", "freetype-devel", "gamemode-devel", "libpng-devel", "libunibreak-devel", "libwebp-devel", "mesa-devel", "ocl-icd-devel", "openssl-devel", "opus-devel", "opusfile-devel", "sdl3-devel", "zstd-devel", "libogg-devel"]
+options = ["jobs:12", "!check"]  # tests need a display and GPU
+
+source = [
+    { url = "https://github.com/taisei-project/taisei/releases/download/v1.4.6/taisei-1.4.6.tar.xz", sha256 = "18d03c67dcc8c7faff22e8defdafc3a734b46c591618d1a678e6e914846889d9" },
+]
+
+setup = '''
+%meson \
+    -Db_ndebug=true \
+    -Dcpp_rtti=true \
+    -Ddefault_library=static
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING.txt "$pkgdir/usr/share/licenses/taisei/COPYING.txt"
+'''
