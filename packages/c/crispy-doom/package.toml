@@ -1,0 +1,29 @@
+# Crispy Doom: limit-removing, enhanced-resolution Doom source port (GPL-2.0),
+# a Chocolate Doom fork that also plays Heretic, Hexen and Strife. Needs a
+# game WAD: freedoom is the free one.
+name = "crispy-doom"
+version = "7.2"
+release = 1
+summary = "Limit-removing enhanced-resolution Doom source port"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/fabiangreffrath/crispy-doom"
+hostdeps = ["automake", "autoconf", "pkgconf", "python"]
+builddeps = ["libpng-devel", "libsamplerate-devel", "sdl2-compat-devel", "sdl2-mixer-devel", "sdl2-net-devel", "fluidsynth-devel"]
+rundeps = ["freedoom"]
+options = ["!check"]  # `make check` only exercises man page generation
+
+source = [
+    { url = "https://github.com/fabiangreffrath/crispy-doom/archive/crispy-doom-7.2.tar.gz", sha256 = "8fc243bd8c29a17f7e25b5dc367ef93e4d727955d7f731ee4d743eb32445b74c" },
+]
+
+setup = '''
+autoreconf -if -W none
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING.md "$pkgdir/usr/share/licenses/crispy-doom/COPYING.md"
+'''
