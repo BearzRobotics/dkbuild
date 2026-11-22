@@ -1,0 +1,27 @@
+# GNOME Chess: chess game with GTK4/libadwaita front end that plays against
+# external UCI/CECP engines (GPL-3.0). It has no engine of its own: stockfish
+# (this tree) is the recommended one, a runtime dependency here.
+name = "gnome-chess"
+version = "50.1"
+release = 1
+summary = "Play the classic two-player board game of chess"
+license = "GPL-3.0-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/gnome-chess"
+hostdeps = ["desktop-file-utils", "gettext", "glib", "itstool", "meson", "pkgconf", "vala"]
+builddeps = ["gtk4-devel", "libadwaita-devel", "librsvg-devel", "glib-devel"]
+rundeps = ["stockfish"]
+options = ["!check"]  # the tests need a display and appstream-util
+
+source = [
+    { url = "https://download.gnome.org/sources/gnome-chess/50/gnome-chess-50.1.tar.xz", sha256 = "dc29a330b8157cfac8d04a24c1afa848b6f0f4792454d8479d2bfeb7a3519298" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

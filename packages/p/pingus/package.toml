@@ -1,0 +1,33 @@
+# Pingus: free Lemmings-like puzzle game (GPL-3.0; art and music free
+# licences). Uses SDL 1.2 (through sdl12-compat) and scons.
+# Patches (Alpine): 00 fixes Python 3 typos in the build scripts, 01 adapts to
+# newer Boost, 02 adds a missing include, 03 the user-defined-literal spacing
+# for C++11, 04 GCC/clang 15 fixes.
+name = "pingus"
+version = "0.7.6"
+release = 1
+summary = "Free Lemmings clone"
+license = "GPL-3.0-or-later"
+homepage = "https://pingus.seul.org"
+patches = ["00-fix-python-typos.patch", "01-pingus-1.76-boost-1.69.patch", "02-missing-header.patch", "03-pingus-0.7.6-gcc470-udl.patch", "04-gcc-15.patch"]
+hostdeps = ["scons", "pkgconf", "python"]
+builddeps = ["boost-devel", "freeglut-devel", "libpng-devel", "sdl12-compat-devel", "sdl-image-devel", "sdl-mixer-devel", "mesa-devel", "glu-devel"]
+rundeps = ["pingus-data"]
+options = ["!check"]  # no test suite
+
+source = [
+    { url = "https://github.com/Pingus/downloads/raw/master/pingus-0.7.6.tar.bz2", sha256 = "759c1253075d1e72691bc1e770b24cdd51917041fd1857c1daf85b65a6686460" },
+]
+
+build = '''
+scons prefix=/usr DESTDIR="$pkgdir"
+'''
+install = '''
+make PREFIX=/usr DESTDIR="$pkgdir" install
+install -Dm644 /dkbuild/files/pingus.desktop "$pkgdir/usr/share/applications/pingus.desktop"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/pingus/COPYING"
+'''
+
+[subpackages.data]
+summary = "Pingus levels, images and sounds"
+paths = ["/usr/share/pingus"]

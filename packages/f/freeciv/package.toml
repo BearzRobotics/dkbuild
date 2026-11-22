@@ -1,0 +1,63 @@
+# Freeciv: turn-based empire-building strategy game inspired by Civilization
+# (GPL-2.0-or-later; art and sounds free licences). Builds the server, the
+# modpack installer, the GTK3, GTK4, Qt6 and SDL2 clients, with sqlite3
+# for the server's database. Packages: the server and clients stay in the
+# main package; data (rulesets, tilesets, sounds) is the -data subpackage, the
+# four clients are subpackages so one can pick the toolkit.
+# Inert: nothing is started by the package (freeciv-server is run by hand).
+name = "freeciv"
+version = "3.2.6"
+release = 1
+summary = "Empire-building strategy game (server and clients)"
+license = "GPL-2.0-or-later"
+homepage = "https://www.freeciv.org"
+hostdeps = ["bash", "gettext", "gzip", "pkgconf", "python"]
+builddeps = ["at-spi2-core-devel", "curl-devel", "gdk-pixbuf-devel", "gettext-devel", "glib-devel", "gtk+3-devel", "gtk4-devel", "pango-devel", "qt6-qtbase-devel", "readline-devel", "sdl2-compat-devel", "sdl2-gfx-devel", "sdl2-image-devel", "sdl2-mixer-devel", "sdl2-ttf-devel", "sqlite-devel", "zlib-ng-compat-devel", "xz-devel", "zstd-devel", "bzip2-devel", "libx11-devel", "cairo-devel", "icu-devel"]
+rundeps = ["freeciv-data"]
+options = ["!check"]  # `make check` needs a display and a running server
+
+source = [
+    { url = "https://files.freeciv.org/stable/freeciv-3.2.6.tar.xz", sha256 = "b3ce15f54083b1fca146f62837a5f7d41d298537fa34940cca70eeb09c7a9c6e" },
+]
+
+setup = '''
+%configure \
+    --enable-client=gtk4,gtk3.22,qt,sdl2 \
+    --enable-debug=no \
+    --enable-fcmp=gtk4,gtk3,qt,cli \
+    --enable-fcdb=sqlite3 \
+    --enable-ipv6=yes \
+    --with-readline
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+rm -f "$pkgdir/usr/share/doc/freeciv/ChangeLog" "$pkgdir/usr/share/doc/freeciv/ChangeLog-1.0-S3_0"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/freeciv/COPYING"
+'''
+
+[subpackages.data]
+summary = "Freeciv rulesets, tilesets, sounds and data files"
+paths = ["/usr/share/freeciv"]
+
+[subpackages.client-gtk3]
+summary = "Freeciv GTK3 client"
+paths = ["/usr/bin/freeciv-gtk3.22"]
+depends = ["freeciv-data"]
+
+[subpackages.client-gtk4]
+summary = "Freeciv GTK4 client"
+paths = ["/usr/bin/freeciv-gtk4"]
+depends = ["freeciv-data"]
+
+[subpackages.client-qt]
+summary = "Freeciv Qt client"
+paths = ["/usr/bin/freeciv-qt"]
+depends = ["freeciv-data"]
+
+[subpackages.client-sdl2]
+summary = "Freeciv SDL2 client"
+paths = ["/usr/bin/freeciv-sdl2"]
+depends = ["freeciv-data"]
