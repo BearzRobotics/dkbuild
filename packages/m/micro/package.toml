@@ -1,0 +1,32 @@
+# micro: a modern, intuitive terminal text editor (Go). Modules fetched on the host (godeps). The
+# Makefile's `build` target runs `go run tools/build-version.go` (git for the version/commit) and
+# adds the version variables with -X: the same linker variables here, set directly (tarball, no git).
+name = "micro"
+version = "2.0.15"
+release = 1
+summary = "Modern and intuitive terminal-based text editor"
+license = "MIT"
+homepage = "https://micro-editor.github.io"
+hostdeps = ["go"]
+options = ["!check", "godeps"]
+
+source = [
+    { url = "https://github.com/zyedidia/micro/archive/refs/tags/v2.0.15.tar.gz", sha256 = "612c775321c268c8f9e1767505ff378bca9b9ab66f5c41b69ecb2464ecf15084" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+'''
+build = '''
+mkdir -p build
+go build -ldflags "-s -w -X github.com/zyedidia/micro/v2/internal/util.Version=$version -X github.com/zyedidia/micro/v2/internal/util.CommitHash=v$version -X 'github.com/zyedidia/micro/v2/internal/util.CompileDate=2026-11-22'" -o build/micro ./cmd/micro
+'''
+install = '''
+install -Dm755 build/micro "$pkgdir/usr/bin/micro"
+install -Dm644 assets/packaging/micro.1 "$pkgdir/usr/share/man/man1/micro.1"
+install -Dm644 assets/packaging/micro.desktop "$pkgdir/usr/share/applications/micro.desktop"
+install -Dm644 assets/micro-logo-mark.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/micro.svg"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/micro/LICENSE"
+install -Dm644 LICENSE-THIRD-PARTY "$pkgdir/usr/share/licenses/micro/LICENSE-THIRD-PARTY"
+'''
