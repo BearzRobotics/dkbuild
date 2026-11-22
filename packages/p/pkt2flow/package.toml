@@ -6,7 +6,7 @@ summary = "A simple utility to classify packets into flows."
 license = "MIT"
 homepage = "https://github.com/caesar0301/pkt2flow"
 hostdeps = ["cmake", "ninja", "pkgconf"]
-builddeps = ["gtest-devel", "libpcap-devel", "linux-headers"]
+builddeps = ["glog-devel", "gtest-devel", "libpcap-devel", "linux-headers"]
 options = ["!check"]
 
 source = [
