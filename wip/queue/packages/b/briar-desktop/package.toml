@@ -1,0 +1,35 @@
+# Briar Desktop 0.6.5-beta (Kotlin, Compose Multiplatform, Gradle). SKELETON, BLOCKED; written 2026-11-22.
+# gradledeps exists in the tree (see ghidra, geogebra) but:
+#  1. The messaging core is the `briar` git submodule (code.briarproject.org/briar/briar), absent from the GitLab
+#     archive: needs a `{ git, commit }` source at the commit the superproject pins (read from the gitlink of the
+#     0.6.5-beta tag, not available from the archive) unpacked into briar/. Its build also needs
+#     briar/libs/gradle-witness.jar (in that repo) and dependency-verification checksums.
+#  2. Compose Desktop pulls org.jetbrains.skiko native JNI libraries (libskiko-linux-x64.so, built for glibc)
+#     and Skia from Maven: they would need gcompat on musl (tree has gcompat; not tested) or a from-source Skiko.
+#  3. Tor and the Lyrebird (obfs4) transport: upstream bundles prebuilt Linux binaries through the onionwrapper
+#     artifacts (glibc); the tree has tor but no lyrebird/snowflake/obfs4 package (Go, small: lyrebird would be
+#     a godeps recipe). The wrapper has to be pointed at /usr/bin/tor and /usr/bin/lyrebird.
+#  4. The Gradle Kotlin plugin 2.1.10, Compose plugin and the Java toolchain (JDK 17+; the tree's openjdk).
+# Layout once built: ./gradlew createDistributable (or packageUberJarForCurrentOS) -> app jar + launcher script.
+name = "briar-desktop"
+version = "0.6.5-beta"
+release = 1
+summary = "Briar peer-to-peer messenger desktop client"
+license = "AGPL-3.0-or-later"
+homepage = "https://briarproject.org"
+archs = ["x86_64"]
+hostdeps = ["openjdk21"]
+rundeps = ["openjdk21", "tor"]
+options = ["!check"]  # + "gradledeps" with a gradle-<version>-bin.zip source once unblocked
+
+source = [
+    { url = "https://code.briarproject.org/briar/briar-desktop/-/archive/0.6.5-beta/briar-desktop-0.6.5-beta.tar.gz", sha256 = "1acb7fbb6c9637e0600733d5ebea0f318fdb11d15eaa7a404554ca29eeb99483" },
+]
+
+build = '''
+echo "briar-desktop: skeleton, see the comments in the recipe" >&2
+exit 1
+'''
+install = '''
+exit 1
+'''

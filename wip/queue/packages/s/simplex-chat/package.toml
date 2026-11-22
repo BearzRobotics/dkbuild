@@ -1,0 +1,40 @@
+# SimpleX Chat 6.5.6, the terminal client (exe:simplex-chat) and the Haskell core. SKELETON; written 2026-11-22,
+# never built. The Kotlin/Compose desktop and mobile apps in the same repository are not built here (they load
+# the core as a JNI library and need Compose/skiko, see briar-desktop). Blockers and plan:
+#  1. ghc fails to build in the tree at the moment (the reason the recipe is only a skeleton); the build is
+#     `cabal build exe:simplex-chat` with GHC 9.6.x (check `with-compiler`/tested-with in simplex-chat.cabal
+#     against the tree's ghc) on the hackagedeps store.
+#  2. hackagedeps needs files/hackage.lock, made with `dkbuild hackage-lock <cabal freeze file>`, and a freeze
+#     file needs cabal-install + a working ghc on the host (neither is available while ghc fails).
+#  3. cabal.project has source-repository-package stanzas (git, pinned commits) that the hackagedeps store does
+#     not cover and must come in as `{ git, commit }` sources placed under vendor/ with a cabal.project edit
+#     (documented source edit): simplexmq 92598c2d (the big one: SMP/XFTP protocol, also needs its own deps),
+#     hs-socks a30cc7a7, direct-sqlcipher f814ee68, sqlcipher-simple a46bd361, aeson (simplex fork) aab7b5a1,
+#     haskell-terminal f708b000, android-support 9aa09f14, zip 2eff156c, and yesodweb/wai (see cabal.project).
+#  4. direct-sqlcipher builds SQLCipher (the tree has sqlcipher-devel; use its `systemlib`-style flag if the fork
+#     has one, else the bundled amalgamation), cryptostore flag +use_crypton, zip flags -bzip2 -zstd upstream
+#     (the constraint `zip +disable-bzip2 +disable-zstd` is upstream's; bzip2/zstd could be enabled, they only
+#     matter for the app's zip handling).
+#  5. The source tarball is 170 MB (the apps' images and translations): `source` could use the git tag instead.
+name = "simplex-chat"
+version = "6.5.6"
+release = 1
+summary = "SimpleX Chat terminal client (private messenger without user identifiers)"
+license = "AGPL-3.0-only"
+homepage = "https://simplex.chat"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["ghc", "cabal-install", "pkgconf"]
+builddeps = ["openssl-devel", "sqlcipher-devel", "gmp-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/simplex-chat/simplex-chat/archive/refs/tags/v6.5.6.tar.gz", sha256 = "2fefff823fb44136c4dc44120246c6929e985d007a0dfabaa29f0929f281bc11" },
+]
+
+build = '''
+echo "simplex-chat: skeleton, see the comments in the recipe" >&2
+exit 1
+'''
+install = '''
+exit 1
+'''

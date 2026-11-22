@@ -1,0 +1,43 @@
+# Jami 20261110.0 (daemon + Qt6 client from the release tarball). SKELETON, BLOCKED; written 2026-11-22, never
+# built. The release tarball (dl.jami.net, 125 MB) is a monorepo: root CMakeLists.txt + src/ (the Qt client),
+# 3rdparty/ (hunspell, md4c, tidy-html5, zxing-cpp sources), daemon/ with daemon/contrib/tarballs/ (31 pinned
+# dependency tarballs: pjproject (Jami's patched fork), opendht, dhtnet, restinio, secp256k1, argon2, yffi,
+# asio, fmt, gnutls, ffmpeg 9.0.2, libgit2, libarchive, llhttp, msgpack-c, jsoncpp, yaml-cpp, opus, speex,
+# libvpx, x264, webrtc-audio-processing, pupnp, ...). So the sources are offline-complete; what is missing is
+# the build recipe, which should be written once the tree's world run is stable:
+#  1. Which contrib tarballs to use and which to replace with tree packages (tree has asio, fmt, gnutls,
+#     jsoncpp, yaml-cpp, libgit2, libarchive, llhttp, opus, speex(dsp), libvpx, x264, webrtc-audio-processing,
+#     nettle, ffmpeg; NOT in the tree: opendht, dhtnet, restinio, secp256k1, msgpack-c(xx), libupnp/pupnp,
+#     libnatpmp, argon2 and Jami's patched pjproject, which cannot be a plain system pjproject). Plan: package
+#     opendht, restinio, secp256k1, libnatpmp, pupnp as separate libraries (-static too), keep pjproject and
+#     dhtnet as in-tree contrib builds of the daemon, build the daemon with cmake (daemon/CMakeLists.txt).
+#  2. yffi (Rust, the y-crdt C bindings) is built by the contrib with cargo and downloads crates: needs its own
+#     vendoring (cargodeps expects a Cargo.lock in the main source; `cargolock=<dir>` or a separate yffi recipe
+#     from the contrib tarball).
+#  3. The Qt6 client needs Qt6 (base, declarative, multimedia, webengine, svg, networkauth, 5compat, positioning,
+#     webchannel), qwindowkit (git, not in the tarball's 3rdparty list), libnm, libnotify, libqrencode, and the
+#     daemon's headers/libjami; JAMI_DAEMON build via build.py in upstream.
+#  4. Jami is built against its own ffmpeg patches (daemon/contrib/src/ffmpeg/*.patch): the tree's ffmpeg has
+#     none of them; hardware-acceleration patches are optional.
+# Inert/security: the daemon registers nothing at install; account creation happens in the client.
+name = "jami"
+version = "20261110.0"
+release = 1
+summary = "Jami peer-to-peer communication platform (daemon and Qt client)"
+license = "GPL-3.0-or-later"
+homepage = "https://jami.net"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["cmake", "ninja", "pkgconf", "python", "qt6-qttools", "rust"]
+options = ["!check"]
+
+source = [
+    { url = "https://dl.jami.net/release/tarballs/jami-20261110.0.tar.gz", sha256 = "a2bc46f26aa77e6f74cc4d7b980277b3ec60eca1d0c2cb02ae38739c2a3240df" },
+]
+
+build = '''
+echo "jami: skeleton, see the comments in the recipe" >&2
+exit 1
+'''
+install = '''
+exit 1
+'''
