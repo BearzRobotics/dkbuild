@@ -1,0 +1,26 @@
+# unshield: extracts InstallShield CAB archives (MIT); OpenMW's installer
+# wizard uses it to unpack the user's own Morrowind disc.
+name = "unshield"
+version = "1.6.2"
+release = 1
+summary = "Utility for InstallShield CAB archive extraction"
+license = "MIT"
+homepage = "https://github.com/twogood/unshield"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["zlib-ng-compat-devel"]
+options = ["!check"]  # the test runner is not wired into the build
+
+source = [
+    { url = "https://github.com/twogood/unshield/archive/1.6.2.tar.gz", sha256 = "a937ef596ad94d16e7ed2c8553ad7be305798dcdcfd65ae60210b1e54ab51a2f" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/unshield/LICENSE"
+'''

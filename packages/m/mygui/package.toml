@@ -1,0 +1,35 @@
+# MyGUI: fast, flexible GUI library for games (MIT), with the OpenGL render
+# system, used by OpenMW. Patch (Chimera): char-traits - libc++ 19 no longer
+# defines std::char_traits for non-character types, so the UString code
+# points become char32_t/char16_t.
+name = "mygui"
+version = "3.4.3"
+release = 1
+summary = "Fast, flexible and simple GUI"
+license = "MIT"
+homepage = "https://github.com/MyGUI/mygui"
+patches = ["char-traits.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf", "doxygen"]
+builddeps = ["boost-devel", "freetype-devel", "libx11-devel", "mesa-devel", "sdl2-compat-devel", "zlib-ng-compat-devel"]
+options = ["!check"]  # no test suite is built
+
+source = [
+    { url = "https://github.com/MyGUI/mygui/archive/MyGUI3.4.3.tar.gz", sha256 = "33c91b531993047e77cace36d6fea73634b8c17bd0ed193d4cd12ac7c6328abd" },
+]
+
+setup = '''
+# the demos and the (Windows/Qt-dependent) tools are not built; RENDERSYSTEM=1 is
+# the plain OpenGL one
+%cmake \
+    -DMYGUI_BUILD_DEMOS=OFF \
+    -DMYGUI_BUILD_TOOLS=OFF \
+    -DMYGUI_DONT_USE_OBSOLETE=ON \
+    -DMYGUI_RENDERSYSTEM=1
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING.MIT "$pkgdir/usr/share/licenses/mygui/COPYING.MIT"
+'''
