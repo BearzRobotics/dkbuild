@@ -1,7 +1,7 @@
 # contourpy from PyPI (meson-python, pybind11 C++ extension).
 name = "python-contourpy"
 version = "1.4.0"
-release = 2
+release = 3
 summary = "Python library for calculating contours of 2D quadrilateral grids"
 license = "BSD-3-Clause"
 homepage = "https://github.com/contourpy/contourpy"

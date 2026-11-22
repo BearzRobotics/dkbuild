@@ -5,8 +5,10 @@ release = 1
 summary = "Check email address and username availability on online platforms."
 license = "MPL-2.0"
 homepage = "https://github.com/iojw/socialscan"
-hostdeps = ["python", "python-setuptools", "python-wheel", "python-dataclasses"]
-rundeps = ["python", "python-dataclasses"]
+# dataclasses is in the standard library since Python 3.7; the PyPI backport (0.8) only installs on 3.6 and
+# would shadow it, so python-dataclasses is gone and this does not depend on it.
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python"]
 options = ["!check"]
 
 source = [
