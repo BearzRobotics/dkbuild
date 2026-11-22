@@ -1,0 +1,25 @@
+# libxdg-basedir: implementation of the XDG Base Directory specification (MIT).
+name = "libxdg-basedir"
+version = "1.2.3"
+release = 1
+summary = "C implementation of the XDG Base Directory specification"
+license = "MIT"
+homepage = "https://github.com/devnev/libxdg-basedir"
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf"]
+options = ["!check"]  # the tests assume a particular environment
+
+source = [
+    { url = "https://github.com/devnev/libxdg-basedir/archive/refs/tags/libxdg-basedir-1.2.3.tar.gz", sha256 = "ff30c60161f7043df4dcc6e7cdea8e064e382aa06c73dcc3d1885c7d2c77451d" },
+]
+
+setup = '''
+autoreconf -if
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libxdg-basedir/COPYING"
+'''
