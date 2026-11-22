@@ -1,0 +1,84 @@
+# Zed, the GPU-accelerated code editor (editor `zed` + the `cli` launcher).
+# Crates (with the git dependencies of Cargo.lock: wgpu, cpal, rodio,
+# tree-sitter, zed forks of async-process etc.) are vendored on the host.
+#
+# Not built: the collab server (AGPL, crates/collab is not a dependency of
+# zed) and remote_server (the helper Zed uploads to an SSH host; upstream
+# downloads it from zed.dev, so it can be added as its own package later).
+# Zed downloads things at run time on user action (language servers, Node,
+# wasm extensions from the extension registry); there is no build flag for
+# that. Auto-update is turned off with ZED_UPDATE_EXPLANATION (below).
+#
+# musl: upstream supports glibc Linux only. The one glibc-only piece is
+# livekit/libwebrtc (calls and screen sharing): webrtc-sys downloads a
+# prebuilt glibc libwebrtc at build time. Upstream already has a mock client
+# (no libwebrtc) for FreeBSD and Windows-gnu; the seds below select it for
+# musl too, so voice/video calls are absent and the editor is complete.
+name = "zed"
+version = "1.29.3"
+release = 1
+summary = "High-performance, multiplayer code editor (GPUI, Rust)"
+license = "GPL-3.0-or-later AND Apache-2.0"
+homepage = "https://zed.dev"
+hostdeps = ["rust", "pkgconf", "cmake", "perl", "llvm", "bindgen"]
+builddeps = ["alsa-lib-devel", "dbus-devel", "fontconfig-devel", "freetype-devel", "libx11-devel", "libxcb-devel", "libxkbcommon-devel", "wayland-devel", "wayland-protocols", "openssl-devel", "zstd-devel", "zlib-ng-compat-devel", "pipewire-devel", "libsecret-devel", "vulkan-headers-devel", "linux-headers"]
+rundeps = ["vulkan-loader", "mesa", "fontconfig", "libxkbcommon", "wayland", "xdg-desktop-portal"]
+options = ["!check", "cargodeps", "jobs:12"]
+
+source = [
+    { url = "https://github.com/zed-industries/zed/archive/refs/tags/v1.29.3.tar.gz", sha256 = "dd3556ea8d5edaf6336b924c42997a0313070b428561cf32c776a3d5d744506a" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+# RUSTFLAGS replaces the rustflags of .cargo/config.toml, so its two flags
+# (v0 symbol mangling, tokio_unstable: zed needs it) are repeated here;
+# -crt-static: GPUI dlopens libvulkan and the C libraries are dynamic.
+export RUSTFLAGS="--cfg tokio_unstable -C symbol-mangling-version=v0 -C target-feature=-crt-static"
+# no debug info (upstream keeps "limited"): halves link time and size
+export CARGO_PROFILE_RELEASE_DEBUG=0
+# sqlite stays the bundled one (libsqlite3-sys "bundled", as upstream)
+export OPENSSL_NO_VENDOR=1 ZSTD_SYS_USE_PKG_CONFIG=1
+export LIBCLANG_PATH=/usr/lib
+# a packaged build: compiled-in release info, and the updater is told to
+# leave updates to the package manager (auto_update checks this variable)
+export ZED_BUNDLE=true RELEASE_VERSION=1.29.3 ZED_COMMIT_SHA=v1.29.3
+export ZED_UPDATE_EXPLANATION="Zed is installed by the package manager: update it with apk"
+'''
+build = '''
+# musl: use upstream's FreeBSD "no libwebrtc" code path (the cfg that says
+# target_os = "freebsd" now says target_env = "musl"), in the four places that
+# select it: livekit_client (Cargo.toml + lib.rs), audio (Cargo.toml +
+# echo_canceller.rs) and call (diagnostics.rs).
+sed -i 's/target_os = "freebsd"/target_env = "musl"/' \
+    crates/livekit_client/Cargo.toml crates/livekit_client/src/lib.rs \
+    crates/audio/Cargo.toml crates/audio/src/audio_pipeline/echo_canceller.rs \
+    crates/call/src/call_impl/diagnostics.rs
+# webrtc-sys (the libwebrtc download) is a linux-only dependency of
+# livekit_client: make it glibc-only. The dependency stays in Cargo.toml so
+# Cargo.lock is unchanged (--frozen); it is just never built.
+sed -i "s/^\[target.'cfg(target_os = \"linux\")'.dependencies\]/[target.'cfg(all(target_os = \"linux\", not(target_env = \"musl\")))'.dependencies]/" \
+    crates/livekit_client/Cargo.toml
+grep -q 'not(target_env = "musl")' crates/livekit_client/Cargo.toml
+# assets/licenses.md (the in-app licence page) is made by cargo-about
+# upstream; here the theme and icon licences only, so the page is not empty
+{ echo "# ###### THEME LICENSES ######"; echo; cat assets/themes/LICENSES; echo
+  echo "# ###### ICON LICENSES ######"; echo; cat assets/icons/LICENSES; } > assets/licenses.md
+
+cargo build --release --frozen --offline -j $jobs --package zed --package cli
+'''
+install = '''
+# layout of upstream's linux bundle: bin/zed is the launcher (cli), which finds
+# the editor at ../libexec/zed-editor
+install -Dm755 target/release/zed "$pkgdir/usr/libexec/zed-editor"
+install -Dm755 target/release/cli "$pkgdir/usr/bin/zed"
+install -Dm644 crates/zed/resources/app-icon.png "$pkgdir/usr/share/icons/hicolor/512x512/apps/zed.png"
+install -Dm644 crates/zed/resources/app-icon@2x.png "$pkgdir/usr/share/icons/hicolor/1024x1024/apps/zed.png"
+# the desktop template is for envsubst (not installed): same substitutions as bundle-linux
+sed -e 's/\$APP_NAME/Zed/g' -e 's/\$APP_CLI/zed/g' -e 's/\$APP_ICON/zed/g' \
+    -e 's/\$APP_ARGS/%U/g' -e 's/\$DO_STARTUP_NOTIFY/true/g' \
+    crates/zed/resources/zed.desktop.in > zed.desktop
+install -Dm644 zed.desktop "$pkgdir/usr/share/applications/dev.zed.Zed.desktop"
+install -Dm644 LICENSE-GPL "$pkgdir/usr/share/licenses/zed/LICENSE-GPL"
+install -Dm644 LICENSE-APACHE "$pkgdir/usr/share/licenses/zed/LICENSE-APACHE"
+'''
