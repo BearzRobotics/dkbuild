@@ -1,0 +1,30 @@
+# Nextcloud Talk (the "spreed" app): chat, audio/video calls and screen sharing inside Nextcloud. The app
+# archive from the Nextcloud release server mirror (nextcloud-releases/spreed), which holds the PHP code and the
+# compiled front end (js/); upstream signs it (appinfo/signature.json) and Nextcloud checks that signature, so
+# nothing in it is changed (policy: prebuilt web UI files may be kept). The app is for Nextcloud 35 (min/max-version in
+# appinfo/info.xml): it follows the nextcloud package's major version; bump together.
+# It installs into /usr/share/nextcloud/apps/spreed, next to the bundled apps, and is switched on by the admin
+# (`occ app:enable spreed`): nothing is enabled here.
+# Calls need a TURN server for clients behind NAT (package coturn; set it in Talk's admin settings) and, for more than
+# a handful of participants per call, Nextcloud's "High-performance backend" (nextcloud-spreed-signaling, Janus, NATS):
+# not packaged here (optional, separate Go service; an add-on for later).
+name = "nextcloud-talk"
+version = "25.0.8"
+release = 1
+summary = "Nextcloud Talk app: chat and video calls for Nextcloud"
+license = "AGPL-3.0-or-later"
+homepage = "https://github.com/nextcloud/spreed"
+archs = ["x86_64", "aarch64"]
+rundeps = ["nextcloud"]
+options = ["!check", "!strip"]
+
+source = [
+    { url = "https://github.com/nextcloud-releases/spreed/releases/download/v25.0.8/spreed-v25.0.8.tar.gz", sha256 = "e536f14826b5892c332608d07002dd1e3bdc32eabc5af83683d45599a77fd48e" },
+]
+
+install = '''
+d="$pkgdir/usr/share/nextcloud/apps/spreed"
+mkdir -p "$d"
+cp -a . "$d/"
+install -Dm644 LICENSES/AGPL-3.0-or-later.txt "$pkgdir/usr/share/licenses/nextcloud-talk/AGPL-3.0-or-later.txt"
+'''
