@@ -1,0 +1,36 @@
+# c-toxcore 0.2.25: Tox peer-to-peer messaging/AV core library (toxcore, toxav, toxencryptsave) and
+# tox-bootstrapd. Written 2026-11-22, not built. Dependency of qTox.
+# !check/-DUNITTEST=OFF: the test binaries open network ports and need gtest's death tests; not run in the sandbox.
+# The bootstrap daemon is installed but no service is shipped or enabled (inert).
+name = "c-toxcore"
+version = "0.2.25"
+release = 1
+summary = "Tox core library"
+license = "GPL-3.0-or-later"
+homepage = "https://tox.chat"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["libconfig-devel", "libsodium-devel", "libvpx-devel", "opus-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/TokTok/c-toxcore/releases/download/v0.2.25/c-toxcore-0.2.25.tar.gz", sha256 = "0f350d34243be4e987b92a76e63a8ab0a5203746f134a4296b873f86f213f460" },
+]
+
+setup = '''
+%cmake \
+    -DUNITTEST=OFF \
+    -DAUTOTEST=OFF \
+    -DBUILD_TOXAV=ON \
+    -DMUST_BUILD_TOXAV=ON \
+    -DDHT_BOOTSTRAP=ON \
+    -DBOOTSTRAP_DAEMON=ON \
+    -DENABLE_STATIC=ON \
+    -DENABLE_SHARED=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/c-toxcore/COPYING"
+'''

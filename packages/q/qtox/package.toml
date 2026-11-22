@@ -1,0 +1,37 @@
+# qTox 1.18.6: Qt6 Tox client. Written 2026-11-22, not built.
+# Off, with reasons: UPDATE_CHECK (phone-home; the package manager updates it), tests (need a display).
+name = "qtox"
+version = "1.18.6"
+release = 1
+summary = "Tox chat, voice and video client"
+license = "GPL-3.0-or-later"
+homepage = "https://qtox.github.io"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools"]
+builddeps = [
+    "c-toxcore-devel", "ffmpeg-devel", "libexif-devel", "libsodium-devel", "libvpx-devel", "libx11-devel",
+    "libxscrnsaver-devel", "openal-soft-devel", "opus-devel", "qrencode-devel", "qt6-qtbase-devel",
+    "qt6-qtsvg-devel", "sonnet-devel", "sqlcipher-devel", "v4l-utils-devel",
+]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/TokTok/qTox/archive/refs/tags/v1.18.6.tar.gz", sha256 = "3cbb24652ca7318c65d454b4de7530425121c14b480c011e9a1061a0d035a198" },
+]
+
+# SMILEYS=ON ships the bundled emoji sets (binary size only). SPELL_CHECK uses KF6 Sonnet.
+setup = '''
+%cmake \
+    -DUPDATE_CHECK=OFF \
+    -DSPELL_CHECK=ON \
+    -DSMILEYS=ON \
+    -DPLATFORM_EXTENSIONS=ON \
+    -DBUILD_TESTING=OFF \
+    -DUSE_CCACHE=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/qtox/LICENSE"
+'''
