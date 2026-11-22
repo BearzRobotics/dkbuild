@@ -5,7 +5,7 @@ release = 1
 summary = "Library and command line tool to detect SHA collision in a file"
 license = "MIT"
 homepage = "https://github.com/cr-marcstevens/sha1collisiondetection"
-hostdeps = ["make", "pkgconf"]
+hostdeps = ["make", "pkgconf", "libtool"]
 builddeps = ["linux-headers"]
 options = ["!check"]
 
@@ -14,7 +14,10 @@ source = [
 ]
 
 build = '''
-make -j$jobs CC="${CC:-clang}"
+# no CC= on the command line: the Makefile sets CC:=$(LIBTOOL) --mode=compile $(CC) when libtool exists, and a
+# command-line CC overrides that, so the objects came out plain while the link step used libtool
+# ("'obj_lib/sha1.lo' is not a valid libtool object"). The environment's CC (clang with the target) is what it wraps.
+make -j$jobs
 '''
 install = '''
 make PREFIX=/usr DESTDIR="$pkgdir" install
