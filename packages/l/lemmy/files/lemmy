@@ -1,0 +1,11 @@
+# Lemmy server. Not enabled by default (README.FenrirOS): it needs /etc/lemmy/lemmy.hjson
+# and a PostgreSQL database.
+type = process
+command = /usr/bin/lemmy_server
+env-file = /etc/lemmy/environment
+run-as = lemmy
+working-dir = /var/lib/lemmy
+logfile = /var/log/lemmy.log
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

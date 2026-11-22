@@ -1,0 +1,23 @@
+Lemmy on FenrirOS
+=================
+
+Installed inert: the service is not enabled, and there is no configuration,
+database or account. This package is the server (lemmy_server, port 8536). The
+web interface is the package lemmy-ui (port 1234). Images need pict-rs, a
+separate program (not packaged here yet; without it Lemmy runs, without image
+uploads).
+
+1. PostgreSQL (the `postgresql` package; see its docs to create a cluster):
+       createuser lemmy; createdb -O lemmy lemmy; set a password for the role.
+2. Write /etc/lemmy/lemmy.hjson (owner root, group lemmy, mode 640). Examples:
+   /usr/share/doc/lemmy/lemmy.hjson.example and the defaults in
+   /usr/share/doc/lemmy/defaults.hjson. You set the hostname, the database
+   user/password and the `setup` block (admin name, password, site name) that
+   Lemmy uses to create the first admin on first start. Nothing is set for you.
+3. /etc/lemmy/environment (optional; env-file of the service), for example
+   LEMMY_CONFIG_LOCATION=/etc/lemmy/lemmy.hjson. Without it the service reads
+   config/config.hjson in /var/lib/lemmy; set this variable.
+4. A reverse proxy with TLS in front: /usr/share/doc/lemmy/nginx-lemmy.conf.example.
+5. dinitctl enable lemmy
+
+Federation needs a public hostname that never changes after the first start.

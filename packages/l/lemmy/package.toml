@@ -1,0 +1,46 @@
+# Lemmy: federated link aggregator and forum for the fediverse (ActivityPub). The server (lemmy_server);
+# its web front end is the separate package lemmy-ui, its image host pict-rs (separate package, see below).
+# Rust crates vendored on the host (cargodeps). PostgreSQL client library (libpq) from the system
+# (pq-sys links it; diesel migrations are embedded in the binary and run at start).
+# Source edits: none. Not enabled: `embed-pictrs` (it compiles the pict-rs server into lemmy_server and needs
+# its whole tree and ffmpeg/imagemagick at runtime); Lemmy talks to the separate pict-rs service instead,
+# which upstream's own deployment does too.
+# Installed inert: the dinit service is shipped, not enabled; no lemmy.hjson, no database, no admin account.
+# Lemmy creates the admin it is told to in the `setup` block of the configuration the user writes.
+# Setup: README.FenrirOS.
+name = "lemmy"
+version = "0.19.21"
+release = 1
+summary = "Federated link aggregator and forum (server)"
+license = "AGPL-3.0-only"
+homepage = "https://join-lemmy.org"
+hostdeps = ["rust", "pkgconf", "make"]
+builddeps = ["postgresql-devel", "openssl-devel"]
+rundeps = ["postgresql"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/LemmyNet/lemmy/archive/refs/tags/0.19.21.tar.gz", sha256 = "3a18f3a6eaa0f0fd4b276aa1ca36c0a8664ce02687d8e7e9baf1df5592ac7e8c" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+# pq-sys: link the system libpq
+export PQ_LIB_DIR=/usr/lib
+'''
+build = '''
+# upstream pins channel 1.81 in rust-toolchain.toml (rustup syntax): the system rust is used as it is
+rm -f rust-toolchain.toml
+cargo build --release --frozen --offline -j $jobs
+'''
+install = '''
+install -Dm755 target/release/lemmy_server "$pkgdir/usr/bin/lemmy_server"
+install -Dm644 config/defaults.hjson "$pkgdir/usr/share/doc/lemmy/defaults.hjson"
+install -Dm644 docker/lemmy.hjson "$pkgdir/usr/share/doc/lemmy/lemmy.hjson.example"
+install -Dm644 $pkgfiles/nginx-lemmy.conf "$pkgdir/usr/share/doc/lemmy/nginx-lemmy.conf.example"
+install -Dm644 $pkgfiles/lemmy "$pkgdir/etc/dinit.d/lemmy"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/lemmy.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/lemmy.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/lemmy/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/lemmy/LICENSE"
+'''
