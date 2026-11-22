@@ -1,0 +1,110 @@
+# After Chimera user/godot (4.7.1) and Alpine. Godot 4, GDScript editor and export templates; no .NET/Mono.
+name = "godot"
+version = "4.7.2"
+release = 1
+summary = "2D and 3D game engine (editor and export templates)"
+license = "MIT"
+homepage = "https://godotengine.org"
+hostdeps = ["gettext", "pkgconf", "scons", "wayland-scanner"]
+builddeps = ["alsa-lib-devel", "brotli-devel", "dbus-devel", "enet-devel", "eudev-devel", "fontconfig-devel", "freetype-devel", "glslang-devel", "graphite2-devel", "libdecor-devel", "libjpeg-turbo-devel", "libogg-devel", "libpng-devel", "libpulse-devel", "libtheora-devel", "libvorbis-devel", "libwebp-devel", "libx11-devel", "libxcursor-devel", "libxext-devel", "libxi-devel", "libxinerama-devel", "libxkbcommon-devel", "libxrandr-devel", "libxrender-devel", "mbedtls-devel", "miniupnpc-devel", "pcre2-devel", "sdl3-devel", "speechd-devel", "wayland-devel", "wayland-protocols", "wslay-devel", "zlib-ng-compat-devel", "zstd-devel"]
+# The engine has unit tests (tests=yes builds a separate binary); they need a display.
+options = ["!check", "jobs:8"]
+
+source = [
+    { url = "https://github.com/godotengine/godot/releases/download/4.7.2-stable/godot-4.7.2-stable.tar.xz", sha256 = "a18ce0ccec3ecc40b0dd6c4f5132ca934e9fb7c2979717940ff32aee1eb35481" },
+]
+
+setup = '''
+arch=$(uname -m)
+case "$arch" in
+    x86_64) godot_arch=x86_64 ;;
+    aarch64) godot_arch=arm64 ;;
+    riscv64) godot_arch=rv64 ;;
+    *) echo "godot: unsupported architecture $arch"; exit 1 ;;
+esac
+# Shared flags for the three scons runs (editor, debug template, release template).
+# - use_llvm: clang/clang++/lld; lto none: the recipe flags decide;
+# - use_sowrap=false: link the system libraries (alsa, pulse, x11, wayland, dbus, udev,
+#   speechd, fontconfig, libdecor) instead of dlopen-wrapping them;
+# - engine_update_check=false: no phone-home;
+# - builtin_*=false: the system copy of each library the tree has. Kept bundled on purpose:
+#   harfbuzz and icu4c (Godot patches/trims them, upstream issues 91401 and 100301), embree
+#   (Godot's patched fork), clipper2, msdfgen, openxr, recastnavigation, rvo2, squish, xatlas
+#   (not packaged / Godot-specific forks).
+cat > scons-flags <<EOF2
+platform=linuxbsd
+arch=$godot_arch
+production=yes
+use_llvm=yes
+use_static_cpp=no
+lto=none
+engine_update_check=false
+use_sowrap=false
+alsa=true
+pulseaudio=true
+x11=true
+wayland=true
+speechd=true
+fontconfig=true
+udev=true
+dbus=true
+builtin_brotli=false
+builtin_certs=false
+builtin_enet=false
+builtin_freetype=false
+builtin_glslang=false
+builtin_graphite=false
+builtin_sdl=false
+builtin_libjpeg_turbo=false
+builtin_libogg=false
+builtin_libpng=false
+builtin_libtheora=false
+builtin_libvorbis=false
+builtin_libwebp=false
+builtin_mbedtls=false
+builtin_miniupnpc=false
+builtin_pcre2=false
+builtin_wslay=false
+builtin_zlib=false
+builtin_zstd=false
+builtin_harfbuzz=true
+builtin_icu4c=true
+builtin_clipper2=true
+builtin_msdfgen=true
+builtin_openxr=true
+builtin_recastnavigation=true
+builtin_rvo2_2d=true
+builtin_rvo2_3d=true
+builtin_squish=true
+builtin_xatlas=true
+builtin_embree=true
+EOF2
+echo "$godot_arch" > godot-arch
+'''
+build = '''
+godot_arch=$(cat godot-arch)
+# scons ignores the environment except what is listed here; BUILD_NAME labels the build
+export BUILD_NAME=dkbuild
+for target in editor template_debug template_release; do
+    scons -j$jobs target=$target $(cat scons-flags) \
+        cflags="$CFLAGS" cxxflags="$CXXFLAGS" linkflags="$LDFLAGS"
+done
+'''
+install = '''
+godot_arch=$(cat godot-arch)
+install -Dm755 bin/godot.linuxbsd.editor.$godot_arch.llvm "$pkgdir/usr/bin/godot"
+# same naming as Alpine/Chimera
+install -Dm755 bin/godot.linuxbsd.template_debug.$godot_arch.llvm "$pkgdir/usr/bin/godot-template-debug"
+install -Dm755 bin/godot.linuxbsd.template_release.$godot_arch.llvm "$pkgdir/usr/bin/godot-template-release"
+install -Dm644 misc/dist/linux/org.godotengine.Godot.desktop "$pkgdir/usr/share/applications/org.godotengine.Godot.desktop"
+install -Dm644 misc/dist/linux/org.godotengine.Godot.appdata.xml "$pkgdir/usr/share/metainfo/org.godotengine.Godot.appdata.xml"
+install -Dm644 misc/dist/linux/org.godotengine.Godot.xml "$pkgdir/usr/share/mime/packages/org.godotengine.Godot.xml"
+install -Dm644 misc/logo/icon.png "$pkgdir/usr/share/icons/hicolor/256x256/apps/godot.png"
+install -Dm644 misc/logo/icon.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/godot.svg"
+install -Dm644 misc/dist/linux/godot.6 "$pkgdir/usr/share/man/man6/godot.6"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/godot/LICENSE.txt"
+'''
+
+[subpackages.export-templates]
+summary = "Godot export templates (debug and release runtimes for exporting games)"
+paths = ["/usr/bin/godot-template-*"]
