@@ -1,0 +1,31 @@
+# deltachat-rpc-server 2.69.0: the Delta Chat core (chatmail/core, Rust) as a JSON-RPC server over stdio.
+# The backend of Delta Chat Desktop (deltachat-desktop, which finds it through DELTA_CHAT_RPC_SERVER) and of
+# the other Delta Chat clients. Written 2026-11-22, not built.
+# --no-default-features: the default "vendored" feature builds SQLCipher and OpenSSL from bundled sources;
+# the tree's sqlcipher and openssl are used instead (system libraries, as policy says).
+name = "deltachat-rpc-server"
+version = "2.69.0"
+release = 1
+summary = "Delta Chat core JSON-RPC server"
+license = "MPL-2.0"
+homepage = "https://delta.chat"
+hostdeps = ["rust", "pkgconf", "perl"]
+builddeps = ["openssl-devel", "sqlcipher-devel"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/chatmail/core/archive/refs/tags/v2.69.0.tar.gz", sha256 = "35adeea65de8bd2815b3ce4c217e48bb5bb2653e3f054deaee5b321f783b6faa" },
+]
+
+# !check: the core's tests need network access to mail servers and run for hours.
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+export OPENSSL_NO_VENDOR=1
+'''
+build = '''
+cargo build --release --frozen --offline --no-default-features -p deltachat-rpc-server -j $jobs
+'''
+install = '''
+install -Dm755 target/release/deltachat-rpc-server "$pkgdir/usr/bin/deltachat-rpc-server"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/deltachat-rpc-server/LICENSE"
+'''
