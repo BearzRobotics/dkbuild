@@ -1,0 +1,61 @@
+# Mattermost Desktop 6.4.0 on the system Electron (written 2026-11-22; DRAFT, not built, needs electron first).
+# Webpack builds main, preload and renderer into dist/ (npm run build-prod); electron-builder (which would
+# download an Electron and package it) is not used: dist/ becomes the app directory with a package.json whose
+# main is index.js (what electron-builder's extraMetadata does) and the production node_modules, run by
+# /usr/bin/electron. npm packages come from the npm store (package-lock.json is in the source).
+# Install scripts are off (--ignore-scripts): the postinstall rebuilds native Windows/macOS modules
+# (windows-focus-assist, macos-notification-state, registry-js, cf-prefs) and downloads Electron; none of the
+# first four is used on Linux (upstream's electron-builder file list drops their build outputs there too).
+# patch-package is run by hand because the postinstall is skipped: the patches fix electron-context-menu
+# (used at runtime) and the platform modules.
+# Unsure: koffi's Linux prebuilt binary (@koromix/koffi-linux-x64, check for a musl variant); node >= 24.
+name = "mattermost-desktop"
+version = "6.4.0"
+release = 1
+summary = "Mattermost team chat desktop client"
+license = "Apache-2.0"
+homepage = "https://mattermost.com"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["nodejs", "python"]
+rundeps = ["electron", "libnotify", "hicolor-icon-theme"]
+options = ["!check", "npmdeps"]
+
+source = [
+    { url = "https://github.com/mattermost/desktop/archive/refs/tags/v6.4.0.tar.gz", sha256 = "3fcdebde6c6f79e3ab86495c45252a08f599b4e20c7575b66bf584323b0a7418" },
+]
+
+environment = '''
+export HOME=/tmp/home npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+export ELECTRON_SKIP_BINARY_DOWNLOAD=1 CI=true
+export NODE_OPTIONS=--max-old-space-size=6144
+'''
+setup = '''
+npm ci --ignore-scripts
+node node_modules/patch-package/index.js
+'''
+build = '''
+npm run build-prod
+test -f dist/index.js
+'''
+install = '''
+app="$pkgdir/usr/lib/mattermost-desktop"
+mkdir -p "$app"
+cp -a dist/. "$app/"
+# electron-builder's extraMetadata: main is index.js inside the app directory
+node -e '
+const fs = require("fs");
+const p = JSON.parse(fs.readFileSync("package.json", "utf8"));
+p.main = "index.js";
+delete p.scripts; delete p.devDependencies;
+fs.writeFileSync(process.argv[1], JSON.stringify(p, null, 2));
+' "$app/package.json"
+# runtime dependencies only
+rm -rf node_modules
+npm ci --omit=dev --ignore-scripts
+cp -a node_modules "$app/node_modules"
+install -Dm755 $pkgfiles/mattermost-desktop "$pkgdir/usr/bin/mattermost-desktop"
+install -Dm644 $pkgfiles/mattermost-desktop.desktop "$pkgdir/usr/share/applications/mattermost-desktop.desktop"
+install -Dm644 src/assets/linux/app_icon.png "$pkgdir/usr/share/pixmaps/mattermost-desktop.png"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/mattermost-desktop/LICENSE.txt"
+install -Dm644 NOTICE.txt "$pkgdir/usr/share/licenses/mattermost-desktop/NOTICE.txt"
+'''
