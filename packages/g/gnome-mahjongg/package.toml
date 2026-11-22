@@ -1,0 +1,25 @@
+# GNOME Mahjongg: solitaire version of the classic Eastern tile game, GTK4 /
+# libadwaita (GPL-3.0-or-later).
+name = "gnome-mahjongg"
+version = "51.1"
+release = 1
+summary = "Disassemble a pile of tiles by removing matching pairs"
+license = "GPL-3.0-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/gnome-mahjongg"
+hostdeps = ["desktop-file-utils", "gettext", "glib", "meson", "pkgconf", "vala"]
+builddeps = ["glib-devel", "gtk4-devel", "libadwaita-devel", "librsvg-devel"]
+options = ["!check"]  # the tests need a display and appstream-util
+
+source = [
+    { url = "https://download.gnome.org/sources/gnome-mahjongg/51/gnome-mahjongg-51.1.tar.xz", sha256 = "2ef9a1cd246d8ccc9ccd27fa435f972a81def9cf3eccc4c880cbb8929ffb8821" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''
