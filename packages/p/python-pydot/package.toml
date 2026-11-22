@@ -16,5 +16,6 @@ source = [
 install = '''
 python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
     --root "$pkgdir" --prefix /usr .
-install -Dm644 LICENSES "$pkgdir/usr/share/licenses/python-pydot/LICENSES"
+install -Dm644 LICENSES/MIT.txt "$pkgdir/usr/share/licenses/python-pydot/MIT.txt"
+install -Dm644 LICENSES/Python-2.0.txt "$pkgdir/usr/share/licenses/python-pydot/Python-2.0.txt"
 '''
