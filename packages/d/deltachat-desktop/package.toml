@@ -1,0 +1,70 @@
+# Delta Chat Desktop 2.69.1 on the system Electron (written 2026-11-22; DRAFT, not built, needs electron first).
+# pnpm monorepo (pnpm-lock.yaml, served from the npm store as for element-desktop): the "target-electron"
+# package builds the main process (esbuild), the preload, the runtime and the React frontend into
+# html-dist/ and bundle_out/. electron-builder is not used: the app directory is packages/target-electron
+# (index.js, bundle_out, html-dist, package.json) plus a flat production node_modules written by upstream's
+# own bin/build/writeFlatDependencies.js. The core is the separate deltachat-rpc-server package (the npm
+# @deltachat/stdio-rpc-server ships a glibc binary); the launcher passes --allow-custom-rpc-server-path.
+# Source edit: the "packageManager" field is dropped (pnpm would fetch the pnpm it names; see element-desktop).
+# Unsure: the optional platform packages of @deltachat/stdio-rpc-server in the lockfile (store fetch pulls them
+# all; they are never installed here: install scripts are off and only the JS wrapper is needed).
+name = "deltachat-desktop"
+version = "2.69.1"
+release = 1
+summary = "Delta Chat desktop messenger (e-mail based, end-to-end encrypted)"
+license = "GPL-3.0-or-later"
+homepage = "https://delta.chat"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["nodejs", "pnpm"]
+rundeps = ["electron", "deltachat-rpc-server", "hicolor-icon-theme"]
+options = ["!check", "!strip", "npmdeps"]
+
+source = [
+    { url = "https://github.com/deltachat/deltachat-desktop/archive/refs/tags/v2.69.1.tar.gz", sha256 = "bd2f3e181ce1982e9b530990bf6319266a6982df7a8a371fcdf858af07ec965d" },
+]
+
+environment = '''
+export HOME=/tmp/home npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+export ELECTRON_SKIP_BINARY_DOWNLOAD=1 CI=true
+export npm_config_manage_package_manager_versions=false npm_config_package_manager_strict=false \
+    npm_config_pm_on_fail=ignore
+# gather-version-info.js asks git for the version: there is no git checkout here
+export VERSION_INFO_GIT_REF=v2.69.1
+export NODE_ENV=production
+export NODE_OPTIONS=--max-old-space-size=6144
+'''
+setup = '''
+node -e '
+const fs = require("fs");
+const p = JSON.parse(fs.readFileSync("package.json", "utf8"));
+delete p.packageManager;
+fs.writeFileSync("package.json", JSON.stringify(p, null, 2) + "\n");
+'
+if grep -q '"packageManager"' package.json; then exit 1; fi
+echo 'pm-on-fail=ignore' >> .npmrc
+pnpm install --frozen-lockfile --ignore-scripts --config.trustLockfile=true
+'''
+build = '''
+pnpm --filter=@deltachat-desktop/target-electron build
+test -f packages/target-electron/bundle_out/index.js
+test -d packages/target-electron/html-dist
+'''
+install = '''
+app="$pkgdir/usr/lib/deltachat-desktop"
+mkdir -p "$app"
+cd packages/target-electron
+cp -a index.js bundle_out html-dist "$app/"
+node -e '
+const fs = require("fs");
+const p = JSON.parse(fs.readFileSync("package.json", "utf8"));
+delete p.scripts; delete p.devDependencies;
+fs.writeFileSync(process.argv[1], JSON.stringify(p, null, 2));
+' "$app/package.json"
+# the flat production node_modules (upstream's electron-builder workaround script)
+node ../../bin/build/writeFlatDependencies.js packages/target-electron "$app/node_modules"
+cd ../..
+install -Dm755 $pkgfiles/deltachat-desktop "$pkgdir/usr/bin/deltachat-desktop"
+install -Dm644 $pkgfiles/deltachat-desktop.desktop "$pkgdir/usr/share/applications/deltachat-desktop.desktop"
+install -Dm644 packages/target-electron/build/icon.png "$pkgdir/usr/share/icons/hicolor/1024x1024/apps/deltachat-desktop.png"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/deltachat-desktop/LICENSE"
+'''

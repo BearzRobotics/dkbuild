@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Delta Chat
+GenericName=Messenger
+Comment=Decentralized, e-mail based, end-to-end encrypted messenger
+Exec=deltachat-desktop %U
+Icon=deltachat-desktop
+Terminal=false
+StartupWMClass=DeltaChat
+Categories=Network;InstantMessaging;Chat;Email;
+MimeType=x-scheme-handler/openpgp4fpr;x-scheme-handler/mailto;x-scheme-handler/dcaccount;x-scheme-handler/dclogin;
