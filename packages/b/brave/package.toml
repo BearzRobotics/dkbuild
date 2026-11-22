@@ -88,6 +88,9 @@ environment = '''
 export RUSTC_BOOTSTRAP=1 CARGO_NET_OFFLINE=true
 # pnpm refuses to purge node_modules without a TTY unless in CI mode
 export CI=true
+# pnpm 11 runs `pnpm install` before every `pnpm run` when it finds node_modules out of date,
+# which hung 7 h on its SQLite store in the offline sandbox: no verification, the tree is as the snapshot made it
+export npm_config_verify_deps_before_run=false pnpm_config_verify_deps_before_run=false
 # Brave's host tools that GN builds with cargo (brave/tools/crates, vendored:
 # wasm-bindgen, wasm-pack, and wasm-opt with binaryen's C++ through the cc
 # crate): linked dynamically (Rust's musl target links statically by
