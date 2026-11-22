@@ -1,0 +1,60 @@
+# After Alpine aports: community/telegram-desktop (packaged build mode:
+# https://github.com/telegramdesktop/tdesktop/wiki/The-Packaged-Building-Mode).
+# Source: the release's "full" tarball, which carries the git submodules
+# (Telegram/lib_*, Telegram/ThirdParty/*, cmake/external/*).
+# DESKTOP_APP_USE_PACKAGED=ON takes the libraries from the system; what has no
+# package in this tree falls back to the copy in Telegram/ThirdParty, which is
+# bundled here:
+#   bundled (ThirdParty): GSL, range-v3, expected (tl-expected), TooManyCooks, cld3,
+#     kcoreaddons (like Alpine:
+#     it must be built against Qt 6), kimageformats, libfido2/libcbor, MicroTeX,
+#     QR, cmark-gfm, zxcvbn, tgcalls, fcitx5-qt/hime/nimf Qt input plugins.
+#   packaged separately (new recipes, written for this): tg-owt (WebRTC fork),
+#     tde2e (TDLib's E2E part), tlottie and wallet-engine (Rust, with their C
+#     API/bindings), ada (URL parser).
+#   not packaged: libdispatch (optional: the dispatch external returns when it is
+#     neither found nor in ThirdParty) and the font OpenSans (Alpine depends on
+#     font-opensans; this tree has no such package. Unsure whether tdesktop falls
+#     back to its bundled copy in Telegram/Resources/fonts: check when it runs).
+# DESKTOP_APP_DISABLE_CRASH_REPORTS: no breakpad (it is Google's crash uploader).
+# API credentials: TDESKTOP_API_TEST uses upstream's own "TEST ONLY" api_id/hash
+# (17349, in telegram_options.cmake; Alpine passes the same pair), which Telegram's
+# servers limit. For a deployment get your own at https://core.telegram.org/api/obtaining_api_id
+# and pass -DTDESKTOP_API_ID/-DTDESKTOP_API_HASH instead.
+# -Wl,-z,stack-size: musl gives threads a 128 KiB stack by default; tdesktop's
+# deep recursion in worker threads overflows it. Alpine sets 1 MiB-ish
+# (1024768) for the same reason.
+name = "telegram-desktop"
+version = "7.4.4"
+release = 1
+summary = "Telegram Desktop messaging app"
+license = "GPL-3.0-or-later WITH openvpn-openssl-exception"
+homepage = "https://desktop.telegram.org"
+hostdeps = ["cmake", "gperf", "ninja", "pkgconf", "protobuf", "python"]
+builddeps = ["abseil-cpp-devel", "ada-devel", "alsa-lib-devel", "boost-devel", "ffmpeg-devel", "fmt-devel", "glib-devel", "gobject-introspection-devel", "hunspell-devel", "libavif-devel", "libheif-devel", "libjxl-devel", "libpulse-devel", "libvpx-devel", "libxcb-devel", "lz4-devel", "minizip-devel", "openal-soft-devel", "openssl-devel", "opus-devel", "pango-devel", "protobuf-devel", "qt6-qt5compat-devel", "qt6-qtbase-devel", "qt6-qtshadertools-devel", "qt6-qtsvg-devel", "qt6-qtwayland-devel", "rnnoise-devel", "tde2e-devel", "tg-owt-devel", "tlottie-devel", "wallet-engine-devel", "wayland-devel", "xcb-util-keysyms-devel", "xxhash-devel", "zlib-ng-compat-devel"]
+rundeps = ["qt6-qtimageformats"]
+# heavy C++ build (several GB of RAM when linking); no test suite
+options = ["!check", "jobs:12"]
+
+source = [
+    { url = "https://github.com/telegramdesktop/tdesktop/releases/download/v7.4.4/tdesktop-7.4.4-full.tar.gz", sha256 = "b563b3a35a5589f70f317297aa8dc4f19da065c393c3ae663ae11841b5ab0891" },
+]
+
+environment = '''
+export LDFLAGS="$LDFLAGS -Wl,-z,stack-size=1024768"
+'''
+setup = '''
+%cmake \
+    -DDESKTOP_APP_USE_PACKAGED=ON \
+    -DDESKTOP_APP_DISABLE_CRASH_REPORTS=ON \
+    -DDESKTOP_APP_DISABLE_AUTOUPDATE=ON \
+    -DTDESKTOP_API_TEST=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/telegram-desktop/LICENSE"
+install -Dm644 LEGAL "$pkgdir/usr/share/licenses/telegram-desktop/LEGAL"
+'''

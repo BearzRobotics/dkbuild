@@ -1,0 +1,50 @@
+# After Alpine aports: testing/qt-creator. Qt Creator, the Qt IDE (C++, QML,
+# CMake, clangd code model, debugger front ends, Help via QtWebEngine).
+# Qt 6 and LLVM/Clang come from this tree: the clang tooling plugins link to
+# libclang-cpp and libLLVM (CLANGTOOLING_LINK_CLANG_DYLIB, matching how llvm
+# is built here: one shared libLLVM and libclang-cpp). The code model itself
+# talks to clangd (llvm-clang, clang-tools-extra), which is a runtime dependency.
+# Switched off, with the reason:
+#  - BUILD_QBS: Qbs is not in the tree.
+#  - BUILD_PLUGIN_COPILOT: client for GitHub's proprietary Copilot service,
+#    which downloads and runs its own node language server.
+#  - BUILD_PLUGIN_CLANGFORMAT: links libclang-format against LLVM internals that
+#    change every release; Alpine builds it off too. Unsure whether it builds
+#    against LLVM 23: try turning it on once the rest builds.
+#  - BUILD_EXECUTABLE_CMDBRIDGE: Go helper for remote devices; its build
+#    downloads Go modules (offline sandbox).
+# musl.patch: glibc-only execinfo.h/malloc_trim guarded (see the patch).
+name = "qtcreator"
+version = "20.0.2"
+release = 1
+summary = "Qt Creator, the Qt IDE"
+license = "GPL-3.0-only WITH Qt-GPL-exception-1.0"
+homepage = "https://www.qt.io/product/development-tools"
+patches = ["musl.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools"]
+builddeps = ["elfutils-devel", "libarchive-devel", "libsecret-devel", "llvm-clang", "llvm-devel", "qt6-qt5compat-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtquick3d-devel", "qt6-qtserialport-devel", "qt6-qtshadertools-devel", "qt6-qtsvg-devel", "qt6-qttools-devel", "qt6-qtwebengine-devel"]
+rundeps = ["clang-tools-extra", "cmake", "gdb", "llvm-clang", "qt6-qttools"]
+# The tests need a display and the Qt test modules.
+options = ["!check"]
+
+source = [
+    { url = "https://download.qt.io/official_releases/qtcreator/20.0/20.0.2/qt-creator-opensource-src-20.0.2.tar.xz", sha256 = "f0505278792454d8fa1af029d05878b112773dc9d67503c8f9671cb67b07bfea" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_QBS=OFF \
+    -DBUILD_PLUGIN_COPILOT=OFF \
+    -DBUILD_PLUGIN_CLANGFORMAT=OFF \
+    -DBUILD_EXECUTABLE_CMDBRIDGE=OFF \
+    -DBUILD_WITH_PCH=OFF \
+    -DCLANGTOOLING_LINK_CLANG_DYLIB=ON \
+    -DQTC_CLANG_BUILDMODE_MATCH=ON \
+    -DWITH_TESTS=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

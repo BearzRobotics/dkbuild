@@ -1,0 +1,68 @@
+# After Alpine aports: community/calibre. E-book manager: library, converter,
+# reader, editor and content server (Python 3, Qt 6 + QtWebEngine, ~25 C/C++ extension modules).
+# The release tarball already carries what a git checkout would download or
+# generate: the iso-639/3166 data, MathJax, the hyphenation dictionaries, the
+# Mozilla CA bundle, user-agent and Piper voice lists, the compiled RapydScript
+# (content server, editor, viewer) and the translations, so no build step needs
+# the network (Alpine builds with the network and re-runs those steps).
+# Build = `setup.py build` (the extensions; CC/CXX are clang: calibre defaults to
+# gcc) + `setup.py gui` (forms and icons); install = `setup.py install` into a staging root.
+# Offscreen Qt: running calibre's code in the build imports PyQt6; QT_QPA_PLATFORM=offscreen
+# keeps it from wanting a display. CALIBRE_CONFIG_DIRECTORY goes to /tmp.
+# Liberation fonts: the system ones (fonts-liberation), as Alpine does, instead of
+# the bundled copies.
+# The update check at start-up is switched off: updates come from the package manager and
+# the check contacts calibre-ebook.com (Alpine's no-update patch does the same).
+# Dependencies that are new recipes for this: python-apsw, -css-parser, -html5-parser,
+# -mechanize, -msgpack, -tzlocal, -xxhash, -pyqt6-webengine, podofo (PDF editing;
+# calibre's build aborts without it), libwmf, optipng.
+# NOT YET IN THE TREE: onnxruntime-devel is in wip/queue/packages/o/onnxruntime (not built).
+# calibre's piper (text-to-speech) and seq2seq (grammar check) extensions need its
+# headers and library, and the build fails without them; move that recipe to packages/
+# before building calibre. Runtime: udisks mounts e-reader devices.
+name = "calibre"
+version = "9.19.0"
+release = 1
+summary = "E-book management application"
+license = "GPL-3.0-or-later"
+homepage = "https://calibre-ebook.com"
+hostdeps = ["cmake", "pkgconf", "python", "python-pyqt-builder", "python-pyqt6", "python-pyqt6-sip", "python-setuptools", "python-sip", "qt6-qtbase", "xdg-utils"]
+builddeps = ["espeak-ng-devel", "ffmpeg-devel", "freetype-devel", "hunspell-devel", "hyphen-devel", "icu-devel", "libavif-devel", "libjxl-devel", "libmtp-devel", "libusb-devel", "onnxruntime-devel", "openssl-devel", "podofo-devel", "python-devel", "qt6-qtbase-devel", "qt6-qtwebengine-devel", "snowball-devel", "uchardet-devel"]
+rundeps = ["fonts-liberation", "libjpeg-turbo", "libwmf", "mtdev", "optipng", "poppler", "python-apsw", "python-beautifulsoup4", "python-css-parser", "python-cssselect", "python-dateutil", "python-dnspython", "python-feedparser", "python-fonttools", "python-html2text", "python-html5-parser", "python-html5lib", "python-jeepney", "python-lxml", "python-markdown", "python-mechanize", "python-msgpack", "python-netifaces", "python-pillow", "python-psutil", "python-pycryptodome", "python-pygments", "python-pyqt6", "python-pyqt6-webengine", "python-regex", "python-tzlocal", "python-xxhash", "python-zeroconf", "qt6-qtimageformats", "qt6-qtsvg", "qt6-qtwebengine", "udisks"]
+# upstream's test suite needs a display, the network and the installed plugins
+options = ["!check"]
+
+source = [
+    { url = "https://download.calibre-ebook.com/9.19.0/calibre-9.19.0.tar.xz", sha256 = "15e4e4e30e16fed0c2aae8a59dd536cb90648b37789f50011bab1d1897796fff" },
+]
+
+environment = '''
+export CC=clang CXX=clang++
+export QMAKE=/usr/bin/qmake6
+export QT_QPA_PLATFORM=offscreen
+export CALIBRE_CONFIG_DIRECTORY=/tmp/calibre-config
+export LANG=C.UTF-8
+'''
+setup = '''
+# no update nag: the user-visible update check talks to calibre-ebook.com
+grep -q '^        if not opts.no_update_check:$' src/calibre/gui2/update.py
+sed -i 's/^        if not opts.no_update_check:$/        if False and not opts.no_update_check:/' src/calibre/gui2/update.py
+'''
+build = '''
+python3 setup.py build
+python3 setup.py liberation_fonts --system-liberation_fonts --path-to-liberation_fonts /usr/share/fonts/liberation
+python3 setup.py gui
+'''
+install = '''
+# the completion files go into site-functions, which must exist
+mkdir -p "$pkgdir/usr/share/zsh/site-functions"
+export XDG_UTILS_INSTALL_MODE=system
+python3 setup.py install \
+    --staging-root="$pkgdir/usr" \
+    --system-plugins-location=/usr/share/calibre/system-plugins
+mkdir -p "$pkgdir/usr/share/man"
+cp -a man-pages/. "$pkgdir/usr/share/man/"
+# the RapydScript sources are only needed to rebuild the compiled JavaScript
+rm -rf "$pkgdir/usr/share/calibre/rapydscript"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/calibre/LICENSE"
+'''
