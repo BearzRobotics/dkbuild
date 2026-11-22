@@ -28,7 +28,7 @@ rundeps = ["postgresql"]
 options = ["!check", "godeps", "npmdeps", "jobs:8"]
 
 source = [
-    { url = "https://github.com/mattermost/mattermost/archive/refs/tags/v12.1.0.tar.gz", sha256 = "534e6550b022a234ad19872a4a1ec8390149a5587d0ebc5fa48dc7fa20484ce4" },
+    { url = "https://github.com/mattermost/mattermost/archive/refs/tags/v12.1.0.tar.gz", sha256 = "40f95492b8032937a473ca449a460ce76fca575bbb959229def21d8fb81d7337" },
 ]
 
 environment = '''
