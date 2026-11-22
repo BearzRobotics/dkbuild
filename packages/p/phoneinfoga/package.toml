@@ -6,8 +6,12 @@ release = 1
 summary = "Information gathering & OSINT framework for phone numbers."
 license = "GPL-3.0"
 homepage = "https://github.com/sundowndev/PhoneInfoga"
-hostdeps = ["go"]
-options = ["!check", "godeps"]
+# r2: web/client.go embeds client/dist (the Vue 2 web UI), built from source with its npm packages from the
+# store (npmdeps). Upstream locks it with yarn.lock (v1); files/package-lock.json is `npm install
+# --package-lock-only --ignore-scripts --legacy-peer-deps` run in web/client on the host (npm seeds the
+# versions from yarn.lock).
+hostdeps = ["go", "nodejs"]
+options = ["!check", "godeps", "npmdeps"]
 
 source = [
     { url = "https://github.com/sundowndev/PhoneInfoga/archive/refs/tags/v2.11.0.tar.gz", sha256 = "adb3cf459d36c4372b5cab235506afcba24df175eca87bb36539126bb1dbf64e" },
@@ -16,8 +20,17 @@ source = [
 environment = '''
 export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
 export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
+    npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+'''
+setup = '''
+cd web/client
+cp /dkbuild/files/package-lock.json package-lock.json
+node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
+npm ci --ignore-scripts --legacy-peer-deps
 '''
 build = '''
+( cd web/client && npm run build )
 mkdir -p build
 go build -o build/PhoneInfoga .
 '''
