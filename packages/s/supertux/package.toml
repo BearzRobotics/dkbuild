@@ -1,0 +1,35 @@
+# SuperTux: classic 2D jump'n'run sidescroller in the style of Super Mario
+# (GPL-3.0; art and levels under GPL/CC-BY-SA, included in the source tarball).
+name = "supertux"
+version = "0.7.0"
+release = 1
+summary = "Classic 2D jump'n run sidescroller game"
+license = "GPL-3.0-or-later"
+homepage = "https://supertux.org"
+patches = ["no-execinfo.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["boost-devel", "curl-devel", "fmt-devel", "freetype-devel", "glew-devel", "glm", "libogg-devel", "libraqm-devel", "libvorbis-devel", "openal-soft-devel", "physfs-devel", "sdl2-compat-devel", "sdl2-image-devel", "sdl2-net-devel", "zlib-ng-compat-devel", "mesa-devel"]
+options = ["!check"]  # the test target needs a display and the data directory
+
+source = [
+    { url = "https://github.com/SuperTux/supertux/releases/download/v0.7.0/SuperTux-v0.7.0-Source.tar.gz", sha256 = "32fc5b99b9994ed58e58341d6f21de925764b381256e108591136de53bc31da5" },
+]
+
+setup = '''
+# no-execinfo.patch: musl has no <execinfo.h> (backtrace) for the crash handler.
+%cmake \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DINSTALL_SUBDIR_BIN=bin \
+    -DIS_SUPERTUX_RELEASE=ON \
+    -DUSE_STATIC_SIMPLESQUIRREL=ON \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# supertux.png/.xpm in pixmaps are unused: the icon theme has supertux2
+rm -rf "$pkgdir/usr/share/pixmaps"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/supertux/LICENSE.txt"
+'''
