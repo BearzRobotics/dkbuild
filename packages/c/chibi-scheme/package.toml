@@ -9,7 +9,7 @@
 # The test suite (test-r7rs and the libraries) is run.
 name = "chibi-scheme"
 version = "0.12"
-release = 1
+release = 2
 summary = "Small embeddable R7RS Scheme implementation"
 license = "BSD-3-Clause"
 homepage = "https://github.com/ashinn/chibi-scheme"
