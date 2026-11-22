@@ -1,0 +1,31 @@
+name = "calligra"
+version = "26.08.2"
+release = 1
+summary = "KDE office and graphic art suite (Words, Sheets, Stage, Karbon, Plan, Author)"
+license = "GPL-2.0-or-later AND LGPL-2.0-only"
+homepage = "https://calligra.org"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+# Optional import/export filters and generators, all packaged: libodfgen/librevenge
+# (WordPerfect, Visio, WPG, Pagemaker, ... through the libreoffice-style document libs),
+# okular (the Calligra generator), libgit2 (Plan/Words version control helper).
+builddeps = ["attica-devel", "boost-devel", "eigen-devel", "karchive-devel", "kcmutils-devel", "kcodecs-devel", "kcompletion-devel", "kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kdbusaddons-devel", "kdiagram-devel", "kdoctools-devel", "kguiaddons-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kitemviews-devel", "kjobwidgets-devel", "knewstuff-devel", "knotifications-devel", "knotifyconfig-devel", "kparts-devel", "ktextwidgets-devel", "kwallet-devel", "kwidgetsaddons-devel", "kwindowsystem-devel", "kxmlgui-devel", "libgit2-devel", "libodfgen-devel", "librevenge-devel", "libvisio-devel", "libwpd-devel", "libwpg-devel", "okular-devel", "poppler-qt6-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "qtkeychain-devel", "sonnet-devel", "threadweaver-devel"]
+rundeps = ["qt6-qtbase-sql"]
+# Upstream: the tests are broken (bugs.kde.org 423989) and need a display.
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/calligra-26.08.2.tar.xz", sha256 = "f4b9c11f5957798face6cf29834695d76506c5e28049e21abcb62884ce9cc96c" },
+]
+
+setup = '''
+# GHNS: KNewStuff download of templates/stencils (upstream default off; Alpine turns it on).
+# libc++ no longer includes these headers transitively; Calligra's sources rely on it.
+export CXXFLAGS="$CXXFLAGS -include vector -include cstdlib -include memory -include algorithm"
+%cmake -DGHNS=ON -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''
