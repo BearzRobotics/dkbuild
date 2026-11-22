@@ -1,0 +1,23 @@
+# Freedoom: free (BSD-3-Clause) game data for Doom engines: freedoom1.wad
+# (Ultimate Doom replacement), freedoom2.wad (Doom II) and freedm.wad, so
+# the source ports (chocolate-doom, crispy-doom, uzdoom, ...) play without
+# the commercial IWADs. The release zip's WADs are used as built by upstream
+# (building them needs deutex and a pile of Python image tooling).
+name = "freedoom"
+version = "0.13.0"
+release = 1
+summary = "Free game data for Doom engines"
+license = "BSD-3-Clause"
+homepage = "https://freedoom.github.io"
+options = ["!check"]  # data only
+
+source = [
+    { url = "https://github.com/freedoom/freedoom/releases/download/v0.13.0/freedoom-0.13.0.zip", sha256 = "3f9b264f3e3ce503b4fb7f6bdcb1f419d93c7b546f4df3e874dd878db9688f59" },
+]
+
+install = '''
+install -Dm644 freedoom1.wad "$pkgdir/usr/share/games/doom/freedoom1.wad"
+install -Dm644 freedoom2.wad "$pkgdir/usr/share/games/doom/freedoom2.wad"
+[ -f freedm.wad ] && install -Dm644 freedm.wad "$pkgdir/usr/share/games/doom/freedm.wad"
+install -Dm644 COPYING.txt "$pkgdir/usr/share/licenses/freedoom/COPYING.txt"
+'''
