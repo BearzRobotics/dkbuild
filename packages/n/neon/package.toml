@@ -4,12 +4,15 @@
 # dependency names (they are Chimera's) before building.
 name = "neon"
 version = "0.34.2"
-release = 2
+release = 3
 summary = "HTTP and WebDAV client library"
 license = "LGPL-2.0-or-later"
 homepage = "https://notroj.github.io/neon"
-patches = ["bsd-date.patch", "socket-ssl.patch"]
+patches = ["socket-ssl.patch"]
 hostdeps = ["automake", "libtool", "perl", "pkgconf", "xmlto"]
+# r3: the tests make their CA certificates with test/makekeys.sh, which wants GNU date (`date -d "2 days ago"`). Chimera's bsd-date.patch
+# rewrote it for BSD `date -v`, which neither GNU nor busybox date has, so the patch is gone and coreutils is a checkdep
+checkdeps = ["coreutils"]
 builddeps = ["libexpat-devel", "libproxy-devel", "openssl-devel", "zlib-ng-compat-devel"]
 rundeps = ["ca-certificates"]
 
