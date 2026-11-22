@@ -1,0 +1,34 @@
+# The next generation HTTP client (httpx fork by Pydantic) (PyPI httpx2), a Gajim 2.x dependency. Written 2026-11-22; not built yet.
+# The build backend wants the uv-dynamic-versioning hatch plugin (git-derived
+# versions), which is not packaged and pointless for an sdist: the install step
+# rewrites pyproject.toml to a static version (and, for httpx2, static
+# dependencies, which upstream computes in the same plugin hook).
+name = "python-httpx2"
+version = "2.16.2"
+release = 1
+summary = "The next generation HTTP client (httpx fork by Pydantic)"
+license = "BSD-3-Clause"
+homepage = "https://github.com/pydantic/httpx2"
+hostdeps = ["python", "python-hatchling", "python-hatch-fancy-pypi-readme"]
+rundeps = ["python", "python-truststore", "python-httpcore2", "python-anyio", "python-idna", "python-h2", "python-socksio"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/1c/77/6515121dc5ac3c743ad1bff5afe635bcd1a3f23cc40db3c5c89f7d02917d/httpx2-2.16.2.tar.gz", sha256 = "748b615678f07d8e3b183efe81ad13b655ca88bfc56ce4589219b2d442860574" },
+]
+
+install = '''
+python3 -I - "$version" <<'PYEOF'
+import re, sys
+v = sys.argv[1]
+s = open("pyproject.toml").read()
+s = re.sub(r"\[tool\.hatch\.version\]\nsource = \"uv-dynamic-versioning\"\n", "", s)
+s = s.replace('dynamic = ["readme", "version"]', 'dynamic = ["readme"]\nversion = "%s"' % v)
+s = s.replace('dynamic = ["readme", "version", "dependencies"]', 'dynamic = ["readme"]\nversion = "%s"\ndependencies = ["truststore>=0.10", "httpcore2==2.16.2", "anyio>=4.10", "idna>=3.18", "typing_extensions>=4.5.0; python_version < \"3.13\""]' % v)
+s = re.sub(r"\[tool\.hatch\.metadata\.hooks\.uv-dynamic-versioning\]\ndependencies = \[.*?\n\]\n", "", s, flags=re.S)
+open("pyproject.toml", "w").write(s)
+PYEOF
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/python-httpx2/LICENSE.md"
+'''

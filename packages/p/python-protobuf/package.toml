@@ -1,0 +1,20 @@
+# Protocol Buffers Python runtime (pure-Python implementation) (PyPI protobuf), written 2026-11-22 for the communication-client batch (gajim etc.). Not built yet.
+name = "python-protobuf"
+version = "7.36.2"
+release = 1
+summary = "Protocol Buffers Python runtime (pure-Python implementation)"
+license = "BSD-3-Clause"
+homepage = "https://protobuf.dev"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/d9/89/5b8517baa72f84a67b8a307ba953c91057af618bf40bf676f3c03551f8f0/protobuf-7.36.2.tar.gz", sha256 = "497d0463ff3316681da6c0b9e8d06cb465d61abce00b613ab42226175644d1bb" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-protobuf/LICENSE"
+'''

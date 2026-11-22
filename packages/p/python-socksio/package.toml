@@ -1,0 +1,20 @@
+# Sans-I/O implementation of SOCKS4, SOCKS4A, and SOCKS5 (PyPI socksio), written 2026-11-22 for the communication-client batch (gajim etc.). Not built yet.
+name = "python-socksio"
+version = "1.0.0"
+release = 1
+summary = "Sans-I/O implementation of SOCKS4, SOCKS4A, and SOCKS5"
+license = "MIT"
+homepage = "https://github.com/sethmlarson/socksio"
+hostdeps = ["python", "python-flit-core"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/f8/5c/48a7d9495be3d1c651198fd99dbb6ce190e2274d0f28b9051307bdec6b85/socksio-1.0.0.tar.gz", sha256 = "f88beb3da5b5c38b9890469de67d0cb0f9d494b78b106ca1845f96c10b91c4ac" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-socksio/LICENSE"
+'''

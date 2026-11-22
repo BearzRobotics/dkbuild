@@ -1,0 +1,20 @@
+# Python XMPP library for GTK applications (Gajim) (PyPI nbxmpp), written 2026-11-22 for the communication-client batch (gajim etc.). Not built yet.
+name = "python-nbxmpp"
+version = "7.5.0"
+release = 1
+summary = "Python XMPP library for GTK applications (Gajim)"
+license = "GPL-3.0-or-later"
+homepage = "https://dev.gajim.org/gajim/python-nbxmpp"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-gobject", "python-idna", "python-precis-i18n", "python-packaging", "libsoup", "glib"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/af/8c/b4d5c073daadba333929e012fd444146bc45fe0f72aa085ea5ea0fbef695/nbxmpp-7.5.0.tar.gz", sha256 = "be2163c2c83bf0743f83cd656e0e9ff2551f8499082f585f2eb57d56cc0c3715" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/python-nbxmpp/COPYING"
+'''

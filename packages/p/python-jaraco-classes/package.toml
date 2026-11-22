@@ -1,0 +1,23 @@
+# Utility functions for Python class constructs (PyPI jaraco.classes), written 2026-11-22 for the communication-client batch (gajim etc.). Not built yet.
+name = "python-jaraco-classes"
+version = "3.4.0"
+release = 1
+summary = "Utility functions for Python class constructs"
+license = "MIT"
+homepage = "https://github.com/jaraco/jaraco.classes"
+hostdeps = ["python", "python-setuptools", "python-setuptools-scm"]
+rundeps = ["python", "python-more-itertools"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/06/c0/ed4a27bc5571b99e3cff68f8a9fa5b56ff7df1c2251cc715a652ddd26402/jaraco.classes-3.4.0.tar.gz", sha256 = "47a024b51d0239c0dd8c8540c6c7f484be3b8fcf0b2d85c13825780d3b3f3acd" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-jaraco-classes/LICENSE"
+'''

@@ -1,0 +1,20 @@
+# HTTP/2 state-machine based protocol implementation (PyPI h2), written 2026-11-22 for the communication-client batch (gajim etc.). Not built yet.
+name = "python-h2"
+version = "4.4.1"
+release = 1
+summary = "HTTP/2 state-machine based protocol implementation"
+license = "MIT"
+homepage = "https://github.com/python-hyper/h2"
+hostdeps = ["python", "python-setuptools"]
+rundeps = ["python", "python-hpack", "python-hyperframe"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/e7/85/7c366e69d84c17bb778fe41419e1fbcce3033d5b7ce29bbffff0a98b859f/h2-4.4.1.tar.gz", sha256 = "4e866ffb1a869ae14dd9b5e6beb5c24a13da0495ad72b65925ded182521c1516" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-h2/LICENSE"
+'''

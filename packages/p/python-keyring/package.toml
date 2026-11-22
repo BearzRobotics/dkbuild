@@ -1,0 +1,23 @@
+# Store and access passwords safely (Secret Service, KWallet backends) (PyPI keyring), written 2026-11-22 for the communication-client batch (gajim etc.). Not built yet.
+name = "python-keyring"
+version = "25.7.0"
+release = 1
+summary = "Store and access passwords safely (Secret Service, KWallet backends)"
+license = "MIT"
+homepage = "https://github.com/jaraco/keyring"
+hostdeps = ["python", "python-setuptools", "python-setuptools-scm"]
+rundeps = ["python", "python-jaraco-classes", "python-jaraco-context", "python-jaraco-functools", "python-jeepney", "python-secretstorage"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/43/4b/674af6ef2f97d56f0ab5153bf0bfa28ccb6c3ed4d1babf4305449668807b/keyring-25.7.0.tar.gz", sha256 = "fe01bd85eb3f8fb3dd0405defdeac9a5b4f6f0439edbb3149577f244a2e8245b" },
+]
+
+environment = '''
+export SETUPTOOLS_SCM_PRETEND_VERSION=$version
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-keyring/LICENSE"
+'''

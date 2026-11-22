@@ -1,0 +1,37 @@
+# Gajim 2.x: GTK4/libadwaita XMPP client (written 2026-11-22, not built).
+# Python deps packaged for it: nbxmpp, omemo-dr, precis-i18n, qrcode, keyring (+jaraco), httpx2/httpcore2,
+# h2/hpack/hyperframe, socksio, pysequoia (Rust). Not packaged: gupnp-igd (NAT traversal, optional,
+# needs gssdp+gupnp which the tree lacks), gst-plugins-rs (rich previews, optional, big Rust workspace).
+name = "gajim"
+version = "2.7.0"
+release = 1
+summary = "GTK XMPP client"
+license = "GPL-3.0-only"
+homepage = "https://gajim.org"
+hostdeps = ["python", "python-setuptools", "gettext"]
+rundeps = [
+    "python", "python-gobject", "python-cairo", "python-cryptography", "python-css-parser", "python-emoji",
+    "python-httpx2", "python-h2", "python-socksio", "python-keyring", "python-nbxmpp", "python-omemo-dr",
+    "python-packaging", "python-pillow", "python-precis-i18n", "python-pysequoia", "python-qrcode",
+    "python-sqlalchemy", "python-truststore", "python-distro",
+    "gtk4", "libadwaita", "gtksourceview5", "libsoup", "gstreamer", "gst-plugins-base", "gst-plugins-good",
+    "gst-plugins-bad", "gobject-introspection", "libsecret", "libspelling", "geoclue", "hunspell",
+]
+options = ["!check"]
+
+source = [
+    { url = "https://gajim.org/downloads/2.7/gajim-2.7.0.tar.gz", sha256 = "8f893b527c22e3c87414aa6f3c7de51ced839959d26c520f8fb35d53f20df926" },
+]
+
+# make.py build: compiles the translations, man pages, .desktop/metainfo (msgfmt) and writes
+# src/gajim/config.py from config.py.in, which the wheel needs; make.py install then puts the
+# desktop file, metainfo, icons and man pages under the prefix.
+build = '''
+python3 make.py build
+'''
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+python3 make.py install --prefix "$pkgdir/usr"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/gajim/COPYING"
+'''
