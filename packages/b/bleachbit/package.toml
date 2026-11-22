@@ -1,0 +1,21 @@
+name = "bleachbit"
+version = "6.0.6"
+release = 1
+summary = "Disk space cleaner and privacy tool (GTK3, Python)"
+license = "GPL-3.0-or-later"
+homepage = "https://www.bleachbit.org"
+hostdeps = ["gettext", "python"]
+rundeps = ["adwaita-icon-theme", "gtk+3", "polkit", "python", "python-certifi", "python-chardet", "python-distro", "python-gobject", "python-psutil", "python-requests"]
+# Tests drive the GTK GUI and delete real files in $HOME.
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/bleachbit/bleachbit/archive/refs/tags/v6.0.6.tar.gz", sha256 = "31a87f6f38c19d62794a4d6fcbd8604e1a34d28aa7849f46f2971d95e3aefe36" },
+]
+
+# The Makefile installs everything (script, .py files byte-compiled, cleaners/*.xml,
+# translations, desktop file, metainfo, polkit policy, icons); there is nothing to build.
+install = '''
+make prefix=/usr DESTDIR="$pkgdir" install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/bleachbit/COPYING"
+'''
