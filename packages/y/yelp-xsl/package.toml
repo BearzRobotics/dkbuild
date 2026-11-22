@@ -1,0 +1,27 @@
+# After Chimera Linux cports: main/yelp-xsl. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# Yelp's XSLT stylesheets for Mallard/DocBook help; yelp-tools (and so GNOME
+# apps' help builds, gparted among them) use them. Pure data.
+name = "yelp-xsl"
+version = "49.0"
+release = 1
+summary = "XSL stylesheets for the GNOME help system"
+license = "GPL-2.0-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/yelp-xsl"
+hostdeps = ["bash", "gettext", "itstool", "libxml2", "libxslt", "meson", "pkgconf"]
+builddeps = ["libxslt-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/yelp-xsl/49/yelp-xsl-49.0.tar.xz", sha256 = "59d43a8f8fe67b784f14f9a04dd4a7a092a7f4a64a65e71b90fe02a47a50fbec" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/yelp-xsl/COPYING"
+'''

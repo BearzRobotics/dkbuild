@@ -1,0 +1,28 @@
+# After Chimera Linux cports: main/yelp-tools. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# yelp-build, yelp-check and yelp-new: tools for writing and building Mallard
+# and DocBook help; gparted's configure looks for them (yelp-build) to make its help.
+name = "yelp-tools"
+version = "42.1"
+release = 1
+summary = "Tools for creating GNOME help documentation"
+license = "GPL-2.0-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/yelp-tools"
+hostdeps = ["gettext", "itstool", "libxml2", "libxslt", "meson", "pkgconf", "python-lxml"]
+builddeps = ["yelp-xsl"]
+rundeps = ["itstool", "libxslt", "python-lxml", "yelp-xsl"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/yelp-tools/42/yelp-tools-42.1.tar.xz", sha256 = "3e496a4020d4145b99fd508a25fa09336a503a4e8900028421e72c6a4b11f905" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/yelp-tools/COPYING"
+'''

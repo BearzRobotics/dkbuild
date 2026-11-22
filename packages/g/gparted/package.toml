@@ -1,0 +1,36 @@
+# After Chimera Linux cports: main/gparted. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# GParted: GTK 3 partition editor on libparted. It drives the filesystem tools
+# at run time (mkfs, fsck, resize, label, ...); each one in the tree is a
+# rundep so that every filesystem GParted offers works. pkexec (polkit)
+# starts it as root from the desktop entry.
+# Not built: --enable-libparted-dmraid (Chimera enables it): dmraid (BIOS
+# fakeraid) is not in the tree; the option only adds fakeraid detection.
+name = "gparted"
+version = "1.8.1"
+release = 1
+summary = "Graphical disk partition editor"
+license = "GPL-2.0-or-later"
+homepage = "https://gparted.org"
+hostdeps = ["gettext", "itstool", "libxml2", "pkgconf", "yelp-tools"]
+builddeps = ["gtkmm3.0-devel", "parted-devel", "polkit-devel", "util-linux-devel"]
+# e2fsprogs: ext2/3/4; dosfstools: FAT; exfatprogs; ntfs-3g (ntfsresize, mkntfs);
+# btrfs-progs; xfsprogs; f2fs-tools; jfsutils; nilfs-utils; reiserfsprogs; udftools;
+# lvm2 and cryptsetup: LVM and LUKS members; mdadm: RAID members; parted: libparted's CLI;
+# polkit: pkexec; util-linux: blkid, sfdisk, mount, swaplabel, mkswap.
+rundeps = ["btrfs-progs", "cryptsetup", "dosfstools", "e2fsprogs", "exfatprogs", "f2fs-tools", "jfsutils", "lvm2", "mdadm", "nilfs-utils", "ntfs-3g", "parted", "polkit", "reiserfsprogs", "udftools", "util-linux", "xfsprogs"]
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/gparted/gparted-1.8.1.tar.gz", sha256 = "67388ac405f9fe92a40636cb03b0e1e0bb6403ad89ccc174b2ff190ef6f32349" },
+]
+
+setup = '''
+%configure
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/gparted/COPYING"
+'''
