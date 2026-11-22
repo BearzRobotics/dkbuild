@@ -1,0 +1,52 @@
+# Quassel IRC 0.14.0: distributed IRC client, core (server) + Qt client + monolithic client.
+# QUEUED, not in packages/: upstream is Qt5 only (a Qt6 port is not released) and Qt5 is only in
+# wip/queue (qt5-*, for Lomiri). Move to packages/ together with qt5-qtbase/-qttools/-qtsvg/-qtmultimedia.
+# Left off: WebEngine link previews (no Qt5 WebEngine; would need a second Chromium), Qca-qt5 (our qca
+# is Qt6; the blowfish-encrypted-channel feature needs a qca-qt5 build, not written), KDE integration.
+# Written 2026-11-22, not built. The core ships inert: no enabled service (see the dinit note below).
+name = "quassel"
+version = "0.14.0"
+release = 1
+summary = "Distributed IRC client (monolithic client)"
+license = "GPL-2.0-or-later OR GPL-3.0-or-later"
+homepage = "https://quassel-irc.org"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf", "qt5-qttools"]
+builddeps = ["boost-devel", "openldap-devel", "openssl-devel", "qt5-qtbase-devel", "qt5-qtmultimedia-devel", "qt5-qtsvg-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/quassel/quassel/archive/refs/tags/0.14.0.tar.gz", sha256 = "6b7037403357ebff67756d08e6377862c4f5254e896469f484015805fca73fa4" },
+]
+
+# Qt headers needed by moc: libc++ no longer includes <cstdlib>/<memory>/<vector> transitively.
+environment = '''
+export CXXFLAGS="$CXXFLAGS -include cstdlib -include memory -include vector -include algorithm"
+'''
+setup = '''
+%cmake \
+    -DWANT_CORE=ON \
+    -DWANT_QTCLIENT=ON \
+    -DWANT_MONO=ON \
+    -DWITH_KDE=OFF \
+    -DWITH_WEBENGINE=OFF \
+    -DWITH_WEBKIT=OFF \
+    -DWITH_LDAP=ON \
+    -DEMBED_DATA=OFF \
+    -DUSE_CCACHE=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/quassel/COPYING"
+'''
+
+# The core (/usr/bin/quasselcore) and the client-only binary are split out.
+[subpackages.core]
+summary = "Quassel IRC core (server, persistent connections)"
+paths   = ["/usr/bin/quasselcore", "/usr/share/man/man1/quasselcore.1*"]
+
+[subpackages.client]
+summary = "Quassel IRC client (needs a core)"
+paths   = ["/usr/bin/quasselclient", "/usr/share/applications/quasselclient.desktop", "/usr/share/man/man1/quasselclient.1*"]
