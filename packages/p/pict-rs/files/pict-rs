@@ -1,0 +1,11 @@
+# pict-rs image server. Not enabled by default (README.FenrirOS): it needs a configuration (PICTRS__* in
+# /etc/pict-rs/environment, or a pict-rs.toml passed with -c).
+type = process
+command = /usr/bin/pict-rs run
+env-file = /etc/pict-rs/environment
+run-as = pict-rs
+working-dir = /var/lib/pict-rs
+logfile = /var/log/pict-rs.log
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

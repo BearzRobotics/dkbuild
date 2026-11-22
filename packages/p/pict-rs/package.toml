@@ -1,0 +1,36 @@
+# pict-rs: simple image hosting microservice (uploads, thumbnails, transcoding through ImageMagick and ffmpeg, an
+# embedded sled/Postgres repo, filesystem or S3 object storage). It is the image backend of Lemmy (see packages/l/lemmy),
+# and used by other fediverse software. 0.5 series (Lemmy 0.19 expects 0.5.x; 0.6 is a release candidate).
+# Rust crates vendored on the host (cargodeps; upstream's tag ships Cargo.lock). Default features (none).
+# Run time: ffmpeg and ImageMagick (convert/identify) and exiftool are called as programs.
+# Source edits: none.
+# Installed inert: the dinit service is shipped, not enabled; no configuration, no storage directory contents, no API key.
+# Setup: README.FenrirOS.
+name = "pict-rs"
+version = "0.5.25"
+release = 1
+summary = "Simple image hosting service (Lemmy's image backend)"
+license = "AGPL-3.0-only"
+homepage = "https://git.asonix.dog/asonix/pict-rs"
+hostdeps = ["rust", "pkgconf"]
+rundeps = ["ffmpeg", "imagemagick", "perl-image-exiftool"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://git.asonix.dog/asonix/pict-rs/archive/v0.5.25.tar.gz", sha256 = "1c830e22912c0df2c6d47d5f4d9faf7f0a3d34df75185644ce589d3459df811e" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs
+'''
+install = '''
+install -Dm755 target/release/pict-rs "$pkgdir/usr/bin/pict-rs"
+install -Dm644 $pkgfiles/pict-rs "$pkgdir/etc/dinit.d/pict-rs"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/pict-rs.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/pict-rs.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/pict-rs/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/pict-rs/LICENSE"
+'''

@@ -1,0 +1,17 @@
+pict-rs on FenrirOS
+===================
+
+Installed inert: the service is not enabled and nothing is configured. pict-rs
+listens on 127.0.0.1:8080 by default; keep it off the public network: Lemmy
+(or another front end) talks to it, and its API key protects uploads.
+
+/etc/pict-rs/environment (KEY=value lines):
+    PICTRS__SERVER__API_KEY=<a long random string, also put in lemmy.hjson pictrs.api_key>
+    PICTRS__SERVER__ADDRESS=127.0.0.1:8080
+    PICTRS__REPO__TYPE=sled
+    PICTRS__REPO__PATH=/var/lib/pict-rs/sled-repo
+    PICTRS__STORE__TYPE=filesystem
+    PICTRS__STORE__PATH=/var/lib/pict-rs/files
+Options: https://git.asonix.dog/asonix/pict-rs (docs/configuration). Then
+    dinitctl enable pict-rs
+It calls ffmpeg, ImageMagick and exiftool as programs (rundeps).
