@@ -1,0 +1,30 @@
+# libspelling: spellchecking for GTK4/GtkSourceView 5 (Enchant based). Optional dependency of
+# Gajim 2.x ("libspelling and hunspell-LANG"); written 2026-11-22, not built.
+name = "libspelling"
+version = "0.4.11"
+release = 1
+summary = "Spellcheck library for GTK 4"
+license = "LGPL-2.1-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/libspelling"
+hostdeps = ["gobject-introspection", "meson", "ninja", "pkgconf", "vala", "glib-devel"]
+builddeps = ["enchant-devel", "glib-devel", "gtk4-devel", "gtksourceview5-devel", "icu-devel", "pango-devel", "sysprof-capture-devel", "vala"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/libspelling/0.4/libspelling-0.4.11.tar.xz", sha256 = "52e53ec3fba0f604cfd0931e26af7f7241a0d4f0208dd5574f43b3589f6d28b2" },
+]
+
+setup = '''
+%meson \
+    -Ddocs=false \
+    -Dintrospection=enabled \
+    -Dvapi=true \
+    -Dsysprof=true \
+    -Dinstall-static=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

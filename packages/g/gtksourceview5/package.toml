@@ -1,0 +1,30 @@
+# GtkSourceView 5 (GTK4 text-editor widget): needed by Gajim 2.x (written 2026-11-22; not built).
+name = "gtksourceview5"
+version = "5.22.0"
+release = 1
+summary = "Advanced GTK4 text editor widget"
+license = "LGPL-2.1-or-later"
+homepage = "https://wiki.gnome.org/Projects/GtkSourceView"
+hostdeps = ["gettext", "gobject-introspection", "glib-devel", "meson", "ninja", "pkgconf", "vala"]
+builddeps = ["fribidi-devel", "glib-devel", "gtk4-devel", "libxml2-devel", "pcre2-devel", "pango-devel", "sysprof-capture-devel", "vala"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/gtksourceview/5.22/gtksourceview-5.22.0.tar.xz", sha256 = "3ebce33c781e65590a450ecd3ffade480d8e3135b52ee996f1620d6c7dffbbff" },
+]
+
+# !check: the test suite needs a display.
+setup = '''
+%meson \
+    -Ddocumentation=false \
+    -Dbuild-testsuite=false \
+    -Dintrospection=enabled \
+    -Dvapi=true \
+    -Dsysprof=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''
