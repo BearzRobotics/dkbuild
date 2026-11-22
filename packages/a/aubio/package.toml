@@ -1,0 +1,39 @@
+# After Chimera main/aubio.
+name = "aubio"
+version = "0.4.9"
+release = 1
+summary = "Library for audio and music analysis (onset, pitch, tempo, beat tracking)"
+license = "GPL-3.0-or-later"
+homepage = "https://aubio.org"
+hostdeps = ["pkgconf", "python"]
+builddeps = ["ffmpeg-devel", "fftw-devel", "libsamplerate-devel", "libsndfile-devel", "pipewire-devel"]
+# The tests run as part of the waf build and need audio test files from the network.
+options = ["!check"]
+
+source = [
+    { url = "https://aubio.org/pub/aubio-0.4.9.tar.bz2", sha256 = "d48282ae4dab83b3dc94c16cf011bcb63835c1c02b515490e1883049c3d1f3da" },
+    # The bundled waf (2.0.x) imports Python modules that are gone from current Python;
+    # use the newer waf release, as Chimera does. Copied to /build/sources/waf-2.0.25.
+    { url = "https://waf.io/waf-2.0.25", sha256 = "21199cd220ccf60434133e1fd2ab8c8e5217c3799199c82722543970dc8e38d5" },
+]
+
+setup = '''
+# replace the bundled waf
+rm -rf waf waflib
+cp ../sources/waf-2.0.25 waf
+chmod +x waf
+python3 ./waf configure --prefix=/usr --libdir=/usr/lib \
+    --enable-fftw3f --enable-fftw3 \
+    --disable-docs --disable-tests --disable-examples
+'''
+build = '''
+python3 ./waf build -j$jobs
+# waf only builds the shared library: archive the same (PIC) objects as libaubio.a
+# so that the package ships a static library too.
+ar rcs build/src/libaubio.a $(find build/src -name '*.o')
+'''
+install = '''
+python3 ./waf install --destdir="$pkgdir"
+install -Dm644 build/src/libaubio.a "$pkgdir/usr/lib/libaubio.a"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/aubio/COPYING"
+'''

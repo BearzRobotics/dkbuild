@@ -1,0 +1,51 @@
+# After Chimera user/ardour (9.2.0); 9.10.0 from community.ardour.org.
+name = "ardour"
+version = "9.10.0"
+release = 1
+summary = "Digital audio workstation (recording, editing, mixing)"
+license = "GPL-2.0-or-later AND CC0-1.0 AND MIT"
+homepage = "https://ardour.org"
+hostdeps = ["gettext", "itstool", "perl", "pkgconf", "python"]
+builddeps = ["alsa-lib-devel", "at-spi2-core-devel", "aubio-devel", "boost-devel", "cairomm1.0-devel", "curl-devel", "fftw-devel", "fluidsynth-devel", "glibmm2.4-devel", "hidapi-devel", "libarchive-devel", "libedit-devel", "liblo-devel", "libpng-devel", "libpulse-devel", "libsamplerate-devel", "libsndfile-devel", "libusb-devel", "libxml2-devel", "lilv-devel", "lrdf-devel", "lv2", "pango-devel", "pangomm1.4-devel", "pipewire-devel", "rubberband-devel", "serd-devel", "sord-devel", "sratom-devel", "suil-devel", "taglib-devel", "vamp-plugin-sdk-devel"]
+rundeps = ["lilv", "suil"]
+# Chimera: bundled stuff is built by waf; the tests (waf test) need a display and JACK.
+options = ["!check", "jobs:8"]
+
+source = [
+    { url = "https://community.ardour.org/src/Ardour-9.10.0.tar.bz2", sha256 = "8d534a957c724aa8eca5802b225ca4ca19b63243573cb6891287b64e33b34c76" },
+]
+
+environment = '''
+# musl's default thread stack is 128 KiB; Ardour's GUI and DSP threads need more (as Chimera).
+export LDFLAGS="$LDFLAGS -Wl,-z,stack-size=0x200000"
+'''
+setup = '''
+# backends: PulseAudio, JACK (PipeWire's libjack), ALSA and the dummy backend.
+# --no-phone-home: no usage/update ping. --keepflags: use our CFLAGS, not waf's -O3 set.
+python3 ./waf configure \
+    --prefix=/usr \
+    --libdir=/usr/lib \
+    --configdir=/etc \
+    --cxx17 \
+    --freedesktop \
+    --keepflags \
+    --no-phone-home \
+    --optimize \
+    --with-backends=pulseaudio,jack,alsa,dummy
+'''
+build = '''
+python3 ./waf build -j$jobs
+'''
+install = '''
+python3 ./waf install --destdir="$pkgdir"
+# AppStream data belongs in metainfo/, not the legacy appdata/ directory.
+if [ -d "$pkgdir/usr/share/appdata" ]; then
+    mkdir -p "$pkgdir/usr/share/metainfo"
+    mv "$pkgdir"/usr/share/appdata/* "$pkgdir/usr/share/metainfo/"
+    rmdir "$pkgdir/usr/share/appdata"
+fi
+# Ardour's own internal libraries (libardour, libpbd, ...) live in /usr/lib/ardour9 and are
+# loaded only by Ardour: its .a copies of them are not wanted (as Chimera).
+rm -f "$pkgdir"/usr/lib/ardour9/*.a
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/ardour/COPYING"
+'''

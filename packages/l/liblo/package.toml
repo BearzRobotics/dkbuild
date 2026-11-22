@@ -1,0 +1,28 @@
+name = "liblo"
+version = "0.36"
+release = 1
+summary = "Lightweight OSC (Open Sound Control) implementation"
+license = "LGPL-2.1-or-later"
+homepage = "https://liblo.sourceforge.net"
+hostdeps = ["pkgconf"]
+# The tests start OSC servers on local UDP/TCP ports.
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/radarsat1/liblo/releases/download/0.36/liblo-0.36.tar.gz", sha256 = "c08d14832e8dcf8f06840405824a4f9611a0cb3daed0198946326c740941c8b6" },
+]
+
+setup = '''
+# doc: needs doxygen for the API manual; ipv6 and threads: on.
+%configure \
+    --enable-static \
+    --enable-ipv6 \
+    --enable-threads \
+    --disable-doc
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+'''
