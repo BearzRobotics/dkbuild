@@ -1,0 +1,22 @@
+Synapse (Matrix homeserver) on FenrirOS
+=======================================
+
+Installed inert: the service is not enabled; no configuration, server name,
+signing key or account exists.
+
+    cd /etc/matrix-synapse
+    generate_config --server-name example.org --report-stats=no \
+        --config-dir /etc/matrix-synapse --data-dir /var/lib/matrix-synapse --generate-keys \
+        > homeserver.yaml          # (or: python -m synapse.app.homeserver --generate-config ...)
+    chgrp -R synapse /etc/matrix-synapse; chmod 640 /etc/matrix-synapse/*
+    $EDITOR homeserver.yaml        # server_name is permanent; database: use PostgreSQL (psycopg2) for more
+                                   # than a test, registration, listeners (8008), TURN (coturn package)
+    dinitctl enable matrix-synapse
+    register_new_matrix_user -c /etc/matrix-synapse/homeserver.yaml http://localhost:8008
+
+PostgreSQL: createuser/createdb with `--locale=C --encoding=UTF8 --template=template0`
+(Synapse insists on C collation). Example nginx site (inactive):
+/usr/share/doc/matrix-synapse/nginx-synapse.conf.example. Workers: synapse_worker.
+The commands are launchers that put the private Python directory
+/usr/lib/matrix-synapse/site-packages on PYTHONPATH; `python3 -m synapse...` needs
+PYTHONPATH set the same way.

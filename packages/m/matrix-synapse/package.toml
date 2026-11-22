@@ -1,0 +1,60 @@
+# Synapse: the reference Matrix homeserver (Element's, Python/Twisted with a Rust extension), with every
+# optional feature of upstream's `all` extra: PostgreSQL (psycopg2, linked to libpq), SAML2, OIDC/JWT
+# (Authlib), LDAP (matrix-synapse-ldap3), URL previews (beautifulsoup4), Redis workers (txredisapi, hiredis),
+# Sentry, OpenTracing (jaeger-client), cache memory tracking (Pympler).
+# Build: the Rust extension (synapse.synapse_rust; crates vendored on the host, `cargodeps`) with maturin as
+# upstream's pyproject says, as python-rpds-py does; then the wheel and the pinned Python closure
+# (files/python.lock from upstream's poetry.lock main group and extras, `pydeps`) are installed into the
+# private directory /usr/lib/matrix-synapse/site-packages (as pgadmin4). Left out of the lock because the tree
+# packages them as runtime dependencies: cryptography, cffi/pycparser, pillow, bcrypt, pynacl, markupsafe,
+# msgpack, pyyaml, pydantic (+core), rpds-py, zope-interface. Compiled here from sdists: psycopg2, hiredis,
+# ijson, tornado, thrift (C accelerators; the wheels on PyPI are manylinux).
+# Source edits: none.
+# Installed inert: the dinit service is shipped, not enabled; no homeserver.yaml, no server name, no signing
+# key, no registration. Setup: README.FenrirOS.
+name = "matrix-synapse"
+version = "1.165.0"
+release = 1
+summary = "Matrix homeserver (reference implementation)"
+license = "AGPL-3.0-only"
+homepage = "https://github.com/element-hq/synapse"
+hostdeps = ["python", "python-setuptools", "python-wheel", "rust", "maturin", "pkgconf", "postgresql"]
+builddeps = ["python-devel", "postgresql-devel", "linux-headers"]
+rundeps = ["python", "python-cryptography", "python-cffi", "python-pycparser", "python-pillow", "python-bcrypt",
+           "python-pynacl", "python-markupsafe", "python-msgpack", "python-pyyaml", "python-pydantic",
+           "python-pydantic-core", "python-rpds-py", "python-zope-interface", "postgresql-libs"]
+options = ["!check", "cargodeps", "pydeps", "!strip"]
+
+source = [
+    { url = "https://github.com/element-hq/synapse/archive/refs/tags/v1.165.0.tar.gz", sha256 = "b6d23ff2761233a8ac83bf9e90b2e12840994af6ea5131f44753bebc94f55a82" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+# linked dynamically against musl (-crt-static off) so Python can load the extension (as python-rpds-py)
+export RUSTFLAGS="-C target-feature=-crt-static"
+'''
+build = '''
+maturin build --release --frozen --offline -i python3 --compatibility linux --out dist -j $jobs
+'''
+install = '''
+site="$pkgdir/usr/lib/matrix-synapse/site-packages"
+awk '!/^#/ && NF { print $1 "==" $2 }' $pkgfiles/python.lock > /tmp/requirements.txt
+python3 -m pip install --no-deps --no-build-isolation --no-compile --no-warn-script-location \
+    --target "$site" -r /tmp/requirements.txt
+python3 -m pip install --no-deps --no-index --no-compile --no-warn-script-location --target "$site" dist/*.whl
+# the commands of [project.scripts]: pip --target does not make scripts that run from the private directory
+mkdir -p "$pkgdir/usr/bin"
+while read -r cmd target; do
+    sed -e "s|@MODULE@|${target%:*}|" -e "s|@FUNC@|${target#*:}|" -e "s|@CMD@|$cmd|" \
+        $pkgfiles/launcher.in > "$pkgdir/usr/bin/$cmd"
+    chmod 755 "$pkgdir/usr/bin/$cmd"
+done < $pkgfiles/scripts.txt
+install -Dm644 $pkgfiles/synapse $pkgdir/etc/dinit.d/matrix-synapse
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/matrix-synapse.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/matrix-synapse.conf"
+install -Dm644 $pkgfiles/nginx-synapse.conf "$pkgdir/usr/share/doc/matrix-synapse/nginx-synapse.conf.example"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/matrix-synapse/README.FenrirOS"
+install -Dm644 LICENSE-AGPL-3.0 "$pkgdir/usr/share/licenses/matrix-synapse/LICENSE-AGPL-3.0"
+install -Dm644 LICENSE-COMMERCIAL "$pkgdir/usr/share/licenses/matrix-synapse/LICENSE-COMMERCIAL"
+'''

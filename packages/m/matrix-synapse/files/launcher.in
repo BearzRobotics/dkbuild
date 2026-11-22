@@ -1,0 +1,4 @@
+#!/bin/sh
+# @CMD@ (Synapse's Python packages are in a private directory)
+export PYTHONPATH=/usr/lib/matrix-synapse/site-packages${PYTHONPATH:+:$PYTHONPATH}
+exec python3 -c 'import sys; from @MODULE@ import @FUNC@; sys.argv[0] = "@CMD@"; sys.exit(@FUNC@())' "$@"
