@@ -1,0 +1,55 @@
+# ONLYOFFICE Desktop Editors (AGPL-3.0): SKELETON, NOT BUILDABLE YET. Kept in
+# wip/queue because it needs a CEF this tree does not have.
+#
+# Blockers (see also wip/euro-office/NOTES.md section 3, same code base):
+#  1. CEF (Chromium Embedded Framework). Upstream's build_tools
+#     (scripts/core_common/modules/cef.py) does not build it: it downloads a
+#     prebuilt glibc cef_binary.7z (CEF 109 / Chromium 109 for 9.x; newer for
+#     10.x) from github.com/ONLYOFFICE-data/build_tools_data. A glibc binary
+#     cannot run on this musl system and the sandbox is offline. A `cef` recipe
+#     (CEF's automate-git.py against an exact Chromium, i.e. a second full
+#     Chromium build with CEF's patches, on the musl/LLVM patch set of
+#     packages/c/chromium) must exist first; desktop-sdk
+#     (ChromiumBasedEditors/lib) is written against upstream's pinned CEF API
+#     and needs porting if the CEF version differs.
+#  2. The engine: build_tools builds core (x2t, doctrenderer, V8 8.9.45, ...)
+#     with qmake and prebuilt/cloned third parties. packages/e/euro-office-core
+#     (CMake, system ICU/Boost/OpenSSL, euro-office-v8) is the Euro-Office
+#     fork's server-platform build, not ONLYOFFICE's; reusing it for the
+#     desktop needs ONLYOFFICE's core at the DesktopEditors tag (not the
+#     fork's), BUILD_DESKTOP, and sdkjs/web-apps built with desktop platform
+#     (SDK_PLATFORM=desktop), none of which euro-office-core does. euro-office-v8
+#     (8.9.45) can be reused as is.
+#  3. Qt 6.x (5.15 upstream on Linux; tree has Qt6 only, Qt5 is allowed per
+#     project memory for Lomiri-like cases) with private headers; libvlc
+#     (media player; no vlc in the tree), x265/libheif/libde265, gtk3, dbus.
+#  4. desktop-apps/win-linux (Qt app) and common/loginpage (npm; needs an
+#     npmdeps lock). Many git submodules (core, sdkjs, web-apps,
+#     core-fonts, dictionaries, desktop-sdk, desktop-apps ...): use
+#     snapshot:git as euro-office-core does.
+#
+# Practical alternative already in the tree: packages/l/libera-suite (Euro-Office
+# editors in a WebKitGTK window, no CEF/Qt).
+#
+# Latest release: v10.0.0 (2026-10-13); v9.4.0 (2026-05-19). sha256 not
+# computed: the snapshot was not fetched because the build cannot proceed.
+name = "onlyoffice-desktopeditors"
+version = "10.0.0"
+release = 1
+summary = "ONLYOFFICE Desktop Editors (office suite)"
+license = "AGPL-3.0-only"
+homepage = "https://github.com/ONLYOFFICE/DesktopEditors"
+archs = ["x86_64"]
+hostdeps = ["python", "pkgconf", "nodejs", "qt6-qttools"]
+builddeps = ["euro-office-v8", "cef-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel", "qt6-qtmultimedia-devel", "gtk+3-devel", "icu-devel", "boost-devel", "openssl-devel", "libvlc-devel"]
+options = ["!check", "jobs:12"]
+
+# source = [{ url = "snapshot:git https://github.com/ONLYOFFICE/DesktopEditors v10.0.0", sha256 = "..." }]
+
+build = '''
+echo "onlyoffice-desktopeditors is a skeleton: see the header for the blockers" >&2
+exit 1
+'''
+install = '''
+exit 1
+'''

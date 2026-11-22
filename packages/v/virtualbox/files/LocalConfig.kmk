@@ -1,0 +1,29 @@
+# Settings for FenrirOS's host build (derived from Void Linux's
+# srcpkgs/virtualbox-ose/files/LocalConfig.kmk, BSD-2-Clause).
+# Host only: no Guest Additions (they need the guest's X server headers and
+# kernel modules, and nothing in a host package uses them).
+VBOX_WITHOUT_ADDITIONS = 1
+# no test cases, test suite, validation kit (they are for developers, and the
+# validation kit needs 32-bit and Windows binaries)
+VBOX_WITH_TESTCASES :=
+VBOX_WITH_TESTSUITE :=
+VBOX_WITH_VALIDATIONKIT :=
+# installed in the system's directories instead of upstream's /opt/VirtualBox
+# (hardening needs these to be root-owned and not writable by anyone else)
+VBOX_WITH_ORIGIN :=
+VBOX_PATH_APP_PRIVATE_ARCH := /usr/lib/virtualbox
+VBOX_PATH_SHARED_LIBS := $(VBOX_PATH_APP_PRIVATE_ARCH)
+VBOX_WITH_RUNPATH := $(VBOX_PATH_APP_PRIVATE_ARCH)
+VBOX_PATH_APP_PRIVATE := /usr/share/virtualbox
+VBOX_PATH_PACKAGE_DOCS := /usr/share/doc/virtualbox
+VBOX_PATH_APP_DOCS := $(VBOX_PATH_PACKAGE_DOCS)
+# no registration and update requests to Oracle's servers
+VBOX_WITH_REGISTRATION_REQUEST =
+VBOX_WITH_UPDATE_REQUEST =
+# warnings are not errors (a newer compiler than upstream tests with)
+VBOX_GCC_WERR =
+USERNAME = builder@fenriros
+KBUILD_VERBOSE := 2
+# the extension pack framework is built (the VNC pack is a GPL one that
+# --enable-vnc turns on); the proprietary Extension Pack (RDP, USB 2/3,
+# PXE boot ROM, disk encryption) is not part of the sources

@@ -1,0 +1,133 @@
+# VirtualBox (the Open Source Edition, GPL-3.0): host build, with the Qt6
+# manager, VBoxManage, VBoxHeadless, VBoxSDL, the VNC extension pack (GPL
+# source in the tree; libvncserver) and the Python bindings. The kernel modules
+# (vboxdrv, vboxnetflt, vboxnetadp) are the subpackage virtualbox-kmod-lts,
+# built against linux-lts-devel like zfs-kmod-lts (installed whenever
+# virtualbox and linux-lts are); the stable kernel (linux, 7.x) has none:
+# VirtualBox 7.2 only claims support for kernels it was released against, and
+# the same single-kernel build tree rule as zfs applies (/usr/src has one
+# linux-<release>).
+# Based on Void Linux srcpkgs/virtualbox-ose (BSD-2-Clause): the build
+# recipe, LocalConfig.kmk and two of its patches (Void also supports musl).
+# Not in the build: the proprietary Extension Pack (RDP, USB 2/3 host
+# controller, PXE ROM, disk encryption; not source-available), the Guest
+# Additions (separate, VBOX_WITHOUT_ADDITIONS), the documentation (needs the
+# DITA toolchain: --disable-docs), the web service (needs gSOAP, not in the
+# tree yet), VDE networking (needs vde2, not in the tree yet), the Java
+# bindings (--disable-java: no consumer), the cloud-VM integration is built
+# (libssh). No 32-bit code (the host build is amd64 only; --disable-vmmraw).
+# BIOS: Open Watcom is not available, so configure uses the alternative BIOS
+# sources (assembled with yasm/nasm), as every distribution does.
+# The tree is built with clang/libc++ (Qt6 is libc++), VirtualBox's
+# build system names the tool "gcc" but works with clang; both are passed to
+# configure. Untested on this system: see the report of what may break.
+# dinit: no service is enabled; VirtualBox needs none (vboxwebsrv is not built).
+name = "virtualbox"
+version = "7.2.22"
+release = 1
+summary = "General-purpose full virtualizer for x86 hardware"
+license = "GPL-3.0-only"
+homepage = "https://www.virtualbox.org"
+archs = ["x86_64"]
+hostdeps = ["acpica", "nasm", "yasm", "python", "pkgconf", "perl", "glslang", "libxslt", "qt6-qttools", "make", "which", "tar", "linux-lts-devel"]
+builddeps = ["libcap-devel", "curl-devel", "lvm2-devel", "libvpx-devel", "libogg-devel", "libvorbis-devel", "opus-devel", "libslirp-devel", "libtpms-devel", "libxml2-devel", "libvncserver-devel", "libssh-devel", "openssl-devel", "libpng-devel", "libjpeg-turbo-devel", "xz-devel", "zlib-ng-compat-devel", "linux-pam-devel", "dbus-devel", "alsa-lib-devel", "libpulse-devel", "sdl2-compat-devel", "qt6-qtbase-devel", "qt6-qtscxml-devel", "qt6-qttools-devel", "qt6-qtsvg-devel", "libglvnd-devel", "mesa-devel", "glu-devel", "libx11-devel", "libxt-devel", "libxext-devel", "libxmu-devel", "libxcursor-devel", "libxinerama-devel", "libxrandr-devel", "libxcomposite-devel", "xorgproto", "python-devel", "linux-lts-devel", "linux-headers"]
+rundeps = ["hicolor-icon-theme", "desktop-file-utils", "shared-mime-info"]
+options = ["!check", "jobs:12"]
+patches = ["kmod-kbuild-extmod.patch", "no-update-check.patch"]
+
+source = [
+    { url = "https://download.virtualbox.org/virtualbox/7.2.22/VirtualBox-7.2.22.tar.bz2", sha256 = "440a2b3eeb46e7e992961b70ef24f43e95b3c99fa2ab30aac20b963ef9e91ad7" },
+]
+
+environment = '''
+# the kernel modules with the kernel's own compiler and linker
+export LLVM=1
+'''
+setup = '''
+cp $pkgfiles/LocalConfig.kmk .
+# --nofatal: the checks for the static libstdc++ (this system's C++ library is
+# libc++) and for gSOAP/Open Watcom would stop configure otherwise;
+# --with-makeself=/bin/echo: the self-extracting installer is not made (the
+# files are packaged);  --disable-kmods: the modules are built in `build` for
+# the one kernel of linux-lts-devel;  --disable-vmmraw: no raw-mode (32-bit)
+# VMM: it needs a 32-bit toolchain and no host has used it for years;
+# --disable-java: no use for the bindings; --disable-docs: needs the DITA toolchain
+./configure \
+    --with-gcc=clang --with-g++=clang++ \
+    --nofatal --ose \
+    --with-makeself=/bin/echo \
+    --disable-kmods --disable-vmmraw --disable-java --disable-docs \
+    --enable-vnc
+'''
+build = '''
+. ./env.sh
+kmk -j$jobs all
+# the VNC extension pack is a separate target (as Void does)
+kmk -C src/VBox/ExtPacks/VNC
+b=out/linux.$BUILD_PLATFORM_ARCH/release/bin
+# kernel modules for linux-lts: the module sources kmk collected in bin/src
+# (their Makefiles want the headers in include/ next to them, which is how
+# Void's dkms package lays them out)
+krel=$(ls /usr/src | sed -n 's/^linux-//p' | head -n1)
+test -n "$krel"
+cp -a include $b/src/include
+make -C /usr/src/linux-$krel M=$PWD/$b/src LLVM=1 modules
+ls $b/src/vboxdrv/vboxdrv.ko $b/src/vboxnetflt/vboxnetflt.ko $b/src/vboxnetadp/vboxnetadp.ko >/dev/null
+'''
+install = '''
+. ./env.sh
+b=$PWD/out/linux.$BUILD_PLATFORM_ARCH/release/bin
+krel=$(ls /usr/src | sed -n 's/^linux-//p' | head -n1)
+make -C /usr/src/linux-$krel M=$b/src LLVM=1 INSTALL_MOD_PATH="$pkgdir/usr" INSTALL_MOD_DIR=extra INSTALL_MOD_STRIP=1 modules_install
+# depmod's files belong to linux-lts (its trigger rebuilds them)
+rm -f "$pkgdir"/usr/lib/modules/*/modules.*
+
+d="$pkgdir/usr/lib/virtualbox"
+mkdir -p "$d" "$pkgdir/usr/share/virtualbox" "$pkgdir/usr/bin"
+install -m755 $b/VBox.sh "$pkgdir/usr/bin/VBox"
+for f in VirtualBox VBoxManage VBoxHeadless VBoxSDL VBoxBalloonCtrl; do
+    ln -sf VBox "$pkgdir/usr/bin/$f"
+done
+ln -sf VBox "$pkgdir/usr/bin/vbox-img" 2>/dev/null || true
+cp -a $b/components $b/ExtensionPacks $b/tools "$d/"
+[ -d $b/dtrace ] && cp -a $b/dtrace "$d/"
+install -m755 $b/*.so "$d/"
+install -m644 $b/*.r0 $b/*.fd "$d/" 2>/dev/null || true
+# the hardened (setuid root) launchers: they open /dev/vboxdrv and drop
+# privileges; hardening refuses to start a VM from an unsafe directory
+install -m4755 $b/VirtualBoxVM $b/VBoxHeadless $b/VBoxNetDHCP $b/VBoxNetAdpCtl $b/VBoxNetNAT "$d/"
+install -m755 $b/VirtualBox $b/VBoxManage $b/VBoxSVC $b/VBoxExtPackHelperApp $b/VBoxBugReport $b/VBoxCpuReport \
+    $b/vboximg-mount $b/VBoxVolInfo $b/VBoxSDL "$d/" 2>/dev/null || true
+cp -a $b/nls "$pkgdir/usr/share/virtualbox/"
+install -m755 $b/VBoxCreateUSBNode.sh $b/VBoxSysInfo.sh "$pkgdir/usr/share/virtualbox/"
+[ -d $b/UnattendedTemplates ] && cp -a $b/UnattendedTemplates "$pkgdir/usr/share/virtualbox/"
+# python bindings
+if [ -d $b/sdk/installer/python ]; then
+    (cd $b/sdk/installer/python && VBOX_INSTALL_PATH=/usr/lib/virtualbox python3 vboxapisetup.py install --root="$pkgdir" --prefix=/usr)
+fi
+install -Dm644 $b/VBox.png "$pkgdir/usr/share/pixmaps/VBox.png"
+sed -i 's|^Icon=VBox$|Icon=VBox.png|' $b/virtualbox.desktop
+install -Dm644 $b/virtualbox.desktop "$pkgdir/usr/share/applications/virtualbox.desktop"
+install -Dm644 $b/virtualbox.xml "$pkgdir/usr/share/mime/packages/virtualbox.xml"
+for i in $b/icons/*; do
+    n=$(basename $i)
+    mkdir -p "$pkgdir/usr/share/icons/hicolor/$n/mimetypes"
+    cp -a $i/. "$pkgdir/usr/share/icons/hicolor/$n/mimetypes/"
+done
+# the install path VBox.sh reads
+install -Dm644 /dev/stdin "$pkgdir/etc/vbox/vbox.cfg" <<'EOF2'
+INSTALL_DIR=/usr/lib/virtualbox
+EOF2
+install -Dm644 $pkgfiles/60-virtualbox.rules "$pkgdir/usr/lib/udev/rules.d/60-virtualbox.rules"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/virtualbox.conf"
+install -Dm644 $pkgfiles/modules-load.conf "$pkgdir/usr/share/doc/virtualbox/modules-load.conf"
+# upstream ships COPYING (GPL-3.0) and COPYING.CDDL
+for f in COPYING COPYING.CDDL; do [ -f $f ] && install -Dm644 $f "$pkgdir/usr/share/licenses/virtualbox/$f"; done
+'''
+
+# the kernel modules, for FenrirOS's long-term kernel (as zfs-kmod-lts)
+[subpackages.kmod-lts]
+summary = "VirtualBox kernel modules for linux-lts"
+paths   = ["/usr/lib/modules"]
+depends = ["linux-lts=@built"]
+install_if = ["virtualbox", "linux-lts"]
