@@ -1,0 +1,34 @@
+name = "strawberry"
+version = "1.2.31"
+release = 1
+summary = "Music player and collection organizer (Qt6, GStreamer)"
+license = "GPL-3.0-or-later"
+homepage = "https://www.strawberrymusicplayer.org"
+hostdeps = ["cmake", "gettext", "ninja", "pkgconf", "protobuf", "qt6-qttools"]
+builddeps = ["alsa-lib-devel", "boost-devel", "chromaprint-devel", "dbus-devel", "fftw-devel", "gdk-pixbuf-devel", "glib-devel", "gst-plugins-base-devel", "gstreamer-devel", "gtest-devel", "icu-devel", "kdsingleapplication-devel", "libcdio-devel", "libebur128-devel", "libmtp-devel", "libpulse-devel", "libsecret-devel", "openssl-devel", "protobuf-devel", "qt6-qtbase-devel", "qt6-qttools-devel", "sqlite-devel", "taglib-devel", "uchardet-devel"]
+# gst-plugins-good gives the decoders and the sinks (pulsesink, alsasink); gst-plugins-ugly and gst-libav are not in the tree.
+rundeps = ["gst-plugins-base", "gst-plugins-good", "qt6-qtbase-sql"]
+# Tests need a display and write to $HOME.
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/strawberrymusicplayer/strawberry/releases/download/1.2.31/strawberry-1.2.31.tar.xz", sha256 = "cffc0cd453f3126a930b9e67f547e54d9fde0c8754fdead8185d2b2f5c68c037" },
+]
+
+setup = '''
+# GPOD (iPod classic support) needs libgpod, which is not in the tree (unmaintained,
+# needs libplist 1 era API): listed as not packaged.
+# QTSPARKLE/SPARKLE are self-updaters; apk updates the package, so they stay off.
+%cmake \
+    -DBUILD_TESTING=OFF \
+    -DENABLE_GPOD=OFF \
+    -DENABLE_QTSPARKLE=OFF \
+    -DENABLE_SPARKLE=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/strawberry/COPYING"
+'''
