@@ -6,8 +6,13 @@ release = 1
 summary = "HTTP toolkit for security research. Aims to become an open source alternative to..."
 license = "MIT"
 homepage = "https://github.com/dstotijn/hetty"
-hostdeps = ["go"]
-options = ["!check", "godeps"]
+# r2: the admin web UI (Next.js 12, embedded by cmd/hetty: `go:embed admin`; the Makefile's build-admin
+# runs `yarn export` and moves dist to cmd/hetty/admin) is built from source with its npm packages from
+# the store (npmdeps). Upstream locks it with yarn.lock (v1); files/package-lock.json is
+# `npm install --package-lock-only --ignore-scripts --legacy-peer-deps` run in admin/ on the host
+# (npm seeds the versions from yarn.lock; legacy peer deps because react-split-pane wants React 16).
+hostdeps = ["go", "nodejs"]
+options = ["!check", "godeps", "npmdeps"]
 
 source = [
     { url = "https://github.com/dstotijn/hetty/archive/refs/tags/v0.7.0.tar.gz", sha256 = "24dc2bd011579f121e08b58862e991b5d0881c95704ac493a3bccbb4a785e41c" },
@@ -16,8 +21,18 @@ source = [
 environment = '''
 export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
 export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
+    npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false NEXT_TELEMETRY_DISABLED=1
+'''
+setup = '''
+cd admin
+cp /dkbuild/files/package-lock.json package-lock.json
+node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
+npm ci --ignore-scripts --legacy-peer-deps
 '''
 build = '''
+( cd admin && NEXT_PUBLIC_VERSION=$version npm run export )
+mv admin/dist cmd/hetty/admin
 mkdir -p build
 go build -o build/hetty ./cmd/hetty
 '''
