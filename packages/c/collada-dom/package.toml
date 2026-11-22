@@ -1,0 +1,35 @@
+# COLLADA DOM: C++ API for reading and writing COLLADA (.dae) 3D scene files
+# (SCEA Shared Source License, MIT-style: see licenses/dom_license_e.txt);
+# the optional COLLADA plugin of OpenSceneGraph.
+# Patches (Chimera): boost.patch (Boost.Filesystem's convenience.hpp is gone),
+# cpp17.patch (std::auto_ptr removed in C++17), null.patch (NULL return from
+# an integer-returning function is an error in libc++/clang).
+name = "collada-dom"
+version = "2.5.0"
+release = 1
+summary = "COLLADA DOM access library"
+license = "MIT"
+homepage = "https://github.com/rdiankov/collada-dom"
+patches = ["boost.patch", "cpp17.patch", "null.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["boost-devel", "libxml2-devel", "minizip-devel", "uriparser-devel", "zlib-ng-compat-devel"]
+options = ["!check"]  # no test suite
+
+source = [
+    { url = "https://github.com/rdiankov/collada-dom/archive/refs/tags/v2.5.0.tar.gz", sha256 = "3be672407a7aef60b64ce4b39704b32816b0b28f61ebffd4fbd02c8012901e0d" },
+]
+
+setup = '''
+# CMAKE_POLICY_VERSION_MINIMUM: cmake_minimum_required is older than cmake 4 accepts
+%cmake \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DBUILD_SHARED_LIBS=ON \
+    -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 licenses/dom_license_e.txt "$pkgdir/usr/share/licenses/collada-dom/dom_license_e.txt"
+'''
