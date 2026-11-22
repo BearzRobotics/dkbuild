@@ -1,0 +1,36 @@
+name = "kdevelop"
+version = "26.08.2"
+release = 1
+summary = "KDE IDE for C, C++, Python, PHP and more"
+license = "GPL-2.0-or-later"
+homepage = "https://kdevelop.org"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+# libclang comes from llvm-devel (clang C++ support plugin, required);
+# libksysguard gives "Attach to Process"; qt6-qttools provides Qt6Help (qthelp
+# plugin); qtwebengine is optional (documentation viewer).
+# Not in the tree yet (optional plugins, built automatically once present):
+#   kdevelop-pg-qt (QMake manager plugin), libkomparediff2 (patch review plugin),
+#   astyle (library, formatter plugin), subversion (svn plugin).
+# Okteta is deliberately not wanted: CMakeLists force-disables it ("Qt6 port
+# not yet complete"), so packaging it would change nothing.
+builddeps = ["karchive-devel", "kcmutils-devel", "kconfig-devel", "kcrash-devel", "kdoctools-devel", "kguiaddons-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kitemmodels-devel", "kjobwidgets-devel", "knewstuff-devel", "knotifications-devel", "knotifyconfig-devel", "kparts-devel", "kservice-devel", "ktexteditor-devel", "ktexttemplate-devel", "ktextwidgets-devel", "kwindowsystem-devel", "kxmlgui-devel", "libksysguard-devel", "llvm-devel", "purpose-devel", "qt6-qt5compat-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel", "qt6-qtwebengine-devel", "shared-mime-info", "sonnet-devel", "threadweaver-devel"]
+rundeps = ["cmake", "gdb", "git", "llvm-clang"]
+# The tests need a display, a D-Bus session and a writable home; the sandbox has none.
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kdevelop-26.08.2.tar.xz", sha256 = "f17a064dd6cb8cbbd5345b3c0eccdff102c57f7ae4484affcdb172c9cace5dea" },
+]
+
+setup = '''
+# libc++ no longer includes these headers transitively; kdevelop's sources
+# rely on that. Force-include them rather than patching dozens of files.
+export CXXFLAGS="$CXXFLAGS -include vector -include cstdlib -include memory -include thread -include algorithm"
+%cmake -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''
