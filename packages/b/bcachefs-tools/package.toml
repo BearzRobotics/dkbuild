@@ -42,6 +42,13 @@ export PKG_CONFIG_PATH="/tmp/pcdir${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
 '''
 setup = '''
 echo 1.39.7 > .version
+# The userspace shim (include/linux/bvec.h) still has struct bvec_iter with bi_bvec_done, but the code asks
+# LINUX_VERSION_CODE (linux-headers here is 7.3.4, which tracks the newest kernel) whether to use the 7.3
+# kernel's bi_offset instead: "no member named 'bi_offset' in 'struct bvec_iter'" (fs/data/read.c). Upstream
+# builds against older headers; the shim's API is the pre-7.3 one, so those checks are moved past 7.3.x.
+# (Source edit: sed; the files are the ones with a 7.3 check.)
+grep -rl 'KERNEL_VERSION(7, *3, *0)' fs include 2>/dev/null | xargs sed -i 's/KERNEL_VERSION(7, *3, *0)/KERNEL_VERSION(7, 4, 0)/'
+test "$(grep -rc 'KERNEL_VERSION(7, *3, *0)' fs include | grep -vc ':0$')" = 0
 '''
 build = '''
 make -j$jobs PREFIX=/usr ROOT_SBINDIR=/usr/bin CARGO_BUILD_ARGS="--release --frozen --offline"
