@@ -1,0 +1,34 @@
+# libpeas 1.x (the gitg plugin engine). libpeas 2 is a different API (libpeas-2) and gitg still wants libpeas-1.0.
+name = "libpeas"
+version = "1.36.0"
+release = 1
+summary = "GObject plugin library (1.x API)"
+license = "LGPL-2.1-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/libpeas"
+hostdeps = ["gettext", "glib-devel", "gobject-introspection", "meson", "ninja", "pkgconf"]
+builddeps = ["glib-devel", "gobject-introspection-devel", "gtk+3-devel", "python-devel", "python-gobject-devel"]
+rundeps = ["python-gobject"]
+# The tests need a display and the Python/Lua loaders' typelibs.
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/libpeas/1.36/libpeas-1.36.0.tar.xz", sha256 = "297cb9c2cccd8e8617623d1a3e8415b4530b8e5a893e3527bbfd1edd13237b4c" },
+]
+
+setup = '''
+# lua51 needs lua-lgi (not in the tree: no GTK Lua plugins are wanted); glade_catalog needs
+# Glade, which is not in the tree (the GTK3 UI designer, unmaintained).
+# demos are not wanted.
+%meson \
+    -Dlua51=false \
+    -Dglade_catalog=false \
+    -Ddemos=false \
+    -Dgtk_doc=false \
+    -Dpython3=true
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

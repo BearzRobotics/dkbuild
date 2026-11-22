@@ -1,0 +1,27 @@
+name = "meld"
+version = "3.24.1"
+release = 1
+summary = "Visual diff and merge tool (GTK3, Python)"
+license = "GPL-2.0-or-later"
+homepage = "https://meldmerge.org"
+hostdeps = ["gettext", "glib-devel", "itstool", "meson", "ninja", "pkgconf", "python"]
+# configure checks gtk+-3.0, gtksourceview-4, pygobject-3.0 and py3cairo by pkg-config.
+builddeps = ["glib-devel", "gtk+3-devel", "gtksourceview4-devel", "python-cairo-devel", "python-devel", "python-gobject-devel"]
+rundeps = ["adwaita-icon-theme", "gsettings-desktop-schemas", "gtk+3", "gtksourceview4", "python", "python-cairo", "python-gobject"]
+# The tests need a display (GTK) and a writable home.
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/meld/3.24/meld-3.24.1.tar.xz", sha256 = "29dfee0d857b89c2fa4dad7c9fb9e48506d8bde3f71b6634798659e6697c6b1e" },
+]
+
+setup = '''
+%meson
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/meld/COPYING"
+'''

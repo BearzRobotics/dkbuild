@@ -1,0 +1,29 @@
+name = "libgit2-glib"
+version = "1.2.1"
+release = 1
+summary = "GLib wrapper around libgit2"
+license = "LGPL-2.1-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/libgit2-glib"
+hostdeps = ["gettext", "glib-devel", "gobject-introspection", "meson", "ninja", "pkgconf", "python", "vala"]
+builddeps = ["glib-devel", "gobject-introspection-devel", "libgit2-devel", "libssh2-devel", "python-devel", "python-gobject-devel", "vala"]
+rundeps = ["python-gobject"]
+# Tests need a writable git repository fixture set and a home directory.
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/libgit2-glib/1.2/libgit2-glib-1.2.1.tar.xz", sha256 = "97423a779002b3be8751c75f9d79049dfccca3616a26159fc162486772ba785f" },
+]
+
+setup = '''
+%meson \
+    -Dpython=true \
+    -Dssh=true \
+    -Dvapi=true \
+    -Dgtk_doc=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''

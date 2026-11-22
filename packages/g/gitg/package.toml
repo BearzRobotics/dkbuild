@@ -1,0 +1,29 @@
+name = "gitg"
+version = "50"
+release = 1
+summary = "GNOME graphical Git client"
+license = "GPL-2.0-or-later"
+homepage = "https://wiki.gnome.org/Apps/Gitg"
+hostdeps = ["desktop-file-utils", "gettext", "glib-devel", "gobject-introspection", "meson", "ninja", "pkgconf", "python", "vala"]
+builddeps = ["glib-devel", "gobject-introspection-devel", "gpgme-devel", "gsettings-desktop-schemas", "gspell-devel", "gtk+3-devel", "gtksourceview4-devel", "json-glib-devel", "libgee-devel", "libgit2-glib-devel", "libhandy-devel", "libpeas-devel", "libsecret-devel", "libxml2-devel", "python-devel", "python-gobject-devel", "vala"]
+rundeps = ["adwaita-icon-theme", "git", "gsettings-desktop-schemas", "python-gobject"]
+# Tests need a display and a home directory.
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.gnome.org/GNOME/gitg/-/archive/v50/gitg-v50.tar.gz", sha256 = "73a4953dbfc9b7a9607dfc6b26b1c544d50db9aed8188bdc3eda75da0480f7bf" },
+]
+
+setup = '''
+# glade_catalog: Glade is not in the tree. docs off: needs gi-docgen-less manual only.
+%meson \
+    -Dglade_catalog=false \
+    -Dpython=true \
+    -Ddocs=false
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+'''
