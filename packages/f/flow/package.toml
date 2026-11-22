@@ -32,20 +32,24 @@ rm -rf zig-pkg/libfuzzer_kit-*
 mkdir -p zig-pkg/N-V-__8AAJo-LAHFNfa0p0oMQqmwlBEAZMOeo03azXgrKLTT
 tar -xzf /build/sources/freetype-2.14.3.tar.gz -C zig-pkg/N-V-__8AAJo-LAHFNfa0p0oMQqmwlBEAZMOeo03azXgrKLTT --strip-components=1 --no-same-owner
 test -f zig-pkg/N-V-__8AAJo-LAHFNfa0p0oMQqmwlBEAZMOeo03azXgrKLTT/include/freetype/freetype.h
+# (r4: the one-element lists are written {"true"}, as zig fmt writes them: the lint step runs `zig fmt --check build.zig`.)
 # build.zig asks git (describe, show, rev-parse, diff) for the version text and panics in a release
 # build when git fails: the source here is a tarball, not a checkout. The same answers, fixed: the
 # pinned commit as the version, its date, no branch, no local changes. (Source edit: sed.)
 # The dependency nightwatch asks git for the same in its build.zig (describe and diff): its copy in zig-pkg
 # is a link into the package store, which is read-only, so it is copied first and the same sed runs on it.
-for p in zig-pkg/nightwatch-*; do
+# r4: all of zig-pkg's links are copied, not only nightwatch: a build step runs a generator it compiled
+# (uucode_generate) from inside zig-pkg/uucode-*, by a path through ../.. to the cache, and ../.. from
+# the store is elsewhere (FileNotFound; dkconsole has the same loop).
+for p in zig-pkg/*; do
     [ -L "$p" ] || continue
     t=$(readlink -f "$p"); rm "$p"; cp -a "$t" "$p"; chmod -R u+w "$p"
 done
 sed -i \
   -e 's|{ "git", "describe", "--always", "--tags" }|{ "echo", "0.7.2-5514cb7" }|' \
   -e 's|{ "git", "show", "-s", "--format=%ci", "HEAD" }|{ "echo", "2026-11-14" }|' \
-  -e 's|{ "git", "rev-parse", "--abbrev-ref", "HEAD" }|{ "true" }|' \
-  -e 's|{ "git", "diff", "--stat", "--patch", "HEAD" }|{ "true" }|' build.zig zig-pkg/nightwatch-*/build.zig
+  -e 's|{ "git", "rev-parse", "--abbrev-ref", "HEAD" }|{"true"}|' \
+  -e 's|{ "git", "diff", "--stat", "--patch", "HEAD" }|{"true"}|' build.zig zig-pkg/nightwatch-*/build.zig
 test "$(grep -c '"git", "describe", "--always", "--tags" }' build.zig zig-pkg/nightwatch-*/build.zig | grep -vc ':0$')" = 0
 # not %zig_build: it passes -Dcpu=, which this build.zig refuses ("invalid option: cpu"; its target is the one option, -Dtarget).
 # The explicit target is the baseline x86-64 CPU (a native default would tune the binary to the build machine).
