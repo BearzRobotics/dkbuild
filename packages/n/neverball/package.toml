@@ -1,0 +1,37 @@
+# Neverball and Neverputt: tilt-the-floor ball-rolling puzzle/action game and
+# its mini-golf sibling (GPL-2.0; levels and art under the same licence).
+# -fcommon: the 1.6 sources define globals in headers (tentative definitions),
+# which clang 11+ rejects by default.
+name = "neverball"
+version = "1.6.0"
+release = 1
+summary = "Puzzle/action game similar to Super Monkey Ball"
+license = "GPL-2.0-or-later"
+homepage = "https://neverball.org"
+hostdeps = ["gettext", "pkgconf"]
+builddeps = ["libjpeg-turbo-devel", "libpng-devel", "libvorbis-devel", "libogg-devel", "mesa-devel", "physfs-devel", "sdl2-compat-devel", "sdl2-ttf-devel", "gettext-devel"]
+options = ["!check"]  # no test suite
+
+source = [
+    { url = "https://neverball.org/neverball-1.6.0.tar.gz", sha256 = "73fe63cca4f96e2d355480d03bc0b2904e83a0abdf65fe8c52db5cc3cca88fa0" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -fcommon"
+'''
+build = '''
+%make ENABLE_NLS=1 DATADIR=/usr/share/neverball LOCALEDIR=/usr/share/locale
+'''
+install = '''
+install -dm755 "$pkgdir/usr/bin" "$pkgdir/usr/share/neverball" "$pkgdir/usr/share/locale" "$pkgdir/usr/share/applications" "$pkgdir/usr/share/pixmaps"
+for f in neverball neverputt mapc; do
+    install -m755 $f "$pkgdir/usr/bin/"
+done
+cp -a data/* "$pkgdir/usr/share/neverball/"
+find "$pkgdir/usr/share/neverball" -type f -exec chmod 0644 {} +
+cp -a locale/* "$pkgdir/usr/share/locale/"
+install -m644 dist/*.desktop "$pkgdir/usr/share/applications/"
+install -m644 dist/*.png "$pkgdir/usr/share/pixmaps/"
+ln -s neverball_48.png "$pkgdir/usr/share/pixmaps/neverball.png"
+install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/neverball/LICENSE.md" 2>/dev/null || install -Dm644 doc/license.txt "$pkgdir/usr/share/licenses/neverball/license.txt"
+'''
