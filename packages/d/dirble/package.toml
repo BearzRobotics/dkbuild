@@ -8,7 +8,11 @@ license = "GPL-3.0"
 homepage = "https://github.com/nccgroup/dirble"
 hostdeps = ["rust", "pkgconf", "cmake"]
 builddeps = ["openssl-devel"]
-options = ["!check", "cargodeps"]
+# r2: the release's Cargo.lock pins 2019-2020 crates that do not build any more (openssl-sys 0.9.47 cannot read OpenSSL 3's
+# headers: "pasting formed 'RUST_VERSION_OPENSSL_('"; rustc-serialize 0.3.24 fails E0310 on a current rustc). files/Cargo.lock is
+# `cargo update` run on it (Cargo.toml's semver ranges unchanged; upstream has been idle since 2020) and it builds with the
+# tree's rust; cargolock=. puts it in place of the release's before the crates are vendored
+options = ["!check", "cargodeps", "cargolock=."]
 
 source = [
     { url = "https://github.com/nccgroup/dirble/archive/refs/tags/v1.4.2.tar.gz", sha256 = "6eac61a20c10b07a38f1e3eeba581582283dab646fd3998fec0f7e4b0fa432bd" },
