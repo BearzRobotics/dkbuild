@@ -1,0 +1,58 @@
+# Rocket.Chat Desktop (Rocket.Chat.Electron) 4.19.3 on the system Electron (written 2026-11-22; DRAFT,
+# not built, needs electron first). Rollup (npm run build) writes app/; electron-builder is not used: the app
+# directory is app/ + package.json (main app/main.js) + the production node_modules, run by /usr/bin/electron.
+# npm lockfile: upstream uses yarn 4 and its lock has a git-hosted resolution (@electron/node-gyp, from
+# electron-builder's @electron/rebuild) that the offline store refuses, plus yarn "patch:" protocol entries.
+# Instead files/package-lock.json was made with `npm install --package-lock-only --ignore-scripts
+# --legacy-peer-deps` from package.json after files/transform-package.js (applied in setup, same edit):
+# drops packageManager/workspaces/resolutions/postinstall, pins @ewsjs/xhr 2.0.2 (its yarn patch is applied
+# by hand below) and removes electron-builder, @electron/fuses, electron-notarize and the jest electron runner
+# (packaging and tests are not used). Versions therefore follow the ranges, not yarn.lock's pins.
+# Source edit: the @ewsjs/xhr patch of .yarn/patches (an upstream fix) applied to node_modules after npm ci.
+# Unsure: the build's rollup/TypeScript against the Electron types of the npm `electron` devDependency
+# (43.8.1, only types; the tree has 42); servers.json (extraResources) is optional, the app falls back to userData.
+name = "rocketchat-electron"
+version = "4.19.3"
+release = 1
+summary = "Rocket.Chat desktop client"
+license = "MIT"
+homepage = "https://rocket.chat"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["nodejs", "python", "patch"]
+rundeps = ["electron", "hicolor-icon-theme"]
+options = ["!check", "npmdeps"]
+
+source = [
+    { url = "https://github.com/RocketChat/Rocket.Chat.Electron/archive/refs/tags/4.19.3.tar.gz", sha256 = "10d5b28aa6325371e271c045ac18e3e2aa86ac8f359a0baac6c7b959e2b80535" },
+]
+
+environment = '''
+export HOME=/tmp/home npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+export ELECTRON_SKIP_BINARY_DOWNLOAD=1 CI=true
+export NODE_OPTIONS=--max-old-space-size=6144
+'''
+setup = '''
+node $pkgfiles/transform-package.js
+cp $pkgfiles/package-lock.json package-lock.json
+rm -f yarn.lock .yarnrc.yml
+npm ci --ignore-scripts
+patch -d node_modules/@ewsjs/xhr -p1 < .yarn/patches/@ewsjs-xhr-npm-2.0.2-77506b0a6c.patch
+'''
+build = '''
+npm run build
+test -f app/main.js
+'''
+install = '''
+app="$pkgdir/usr/lib/rocketchat-desktop"
+mkdir -p "$app"
+cp -a app "$app/app"
+cp package.json "$app/package.json"
+rm -rf node_modules
+npm ci --omit=dev --ignore-scripts
+patch -d node_modules/@ewsjs/xhr -p1 < .yarn/patches/@ewsjs-xhr-npm-2.0.2-77506b0a6c.patch
+cp -a node_modules "$app/node_modules"
+install -Dm755 $pkgfiles/rocketchat-desktop "$pkgdir/usr/bin/rocketchat-desktop"
+install -Dm644 $pkgfiles/rocketchat-desktop.desktop "$pkgdir/usr/share/applications/rocketchat-desktop.desktop"
+install -Dm644 build/icons/512x512.png "$pkgdir/usr/share/icons/hicolor/512x512/apps/rocketchat-desktop.png"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/rocketchat-desktop/LICENSE"
+'''

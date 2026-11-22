@@ -1,0 +1,12 @@
+const fs = require("fs");
+const p = JSON.parse(fs.readFileSync("package.json", "utf8"));
+delete p.packageManager;
+delete p.workspaces;
+delete p.resolutions;
+delete p.scripts.postinstall;
+p.dependencies["@ewsjs/xhr"] = "2.0.2";
+delete p.devDependencies["electron-builder"];
+delete p.devDependencies["@electron/fuses"];
+delete p.devDependencies["electron-notarize"];
+delete p.devDependencies["@kayahr/jest-electron-runner"];
+fs.writeFileSync("package.json", JSON.stringify(p, null, 2) + "\n");

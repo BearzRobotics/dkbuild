@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Rocket.Chat
+GenericName=Rocket.Chat
+Comment=Official Rocket.Chat Desktop Client
+Exec=rocketchat-desktop %U
+Icon=rocketchat-desktop
+Terminal=false
+StartupWMClass=Rocket.Chat
+Categories=GNOME;GTK;Network;InstantMessaging;
+MimeType=x-scheme-handler/rocketchat;x-scheme-handler/callto;x-scheme-handler/tel;
