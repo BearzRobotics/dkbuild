@@ -1,0 +1,39 @@
+# Cataclysm: Dark Days Ahead: turn-based survival roguelike in a post-apocalyptic
+# world (CC-BY-SA-3.0 for the game; its code and data are published under
+# CC-BY-SA 3.0 by upstream). Two front ends are built from the same tree:
+# `cataclysm` (curses, in the terminal) and `cataclysm-tiles` (SDL2 with tiles
+# and sound). Data goes to /usr/share/cataclysm-dda.
+# Patches (Alpine):
+#  - flatbuffers: the bundled flatbuffers headers use glibc-only locale-
+#    independent strto*_l functions and a cata_error include; use plain strtod.
+#  - make: no GNU `cp --no-preserve=ownership` in the install target (the
+#    flag is not portable to all cp implementations).
+#  - pathmax: PATH_MAX is not defined without <limits.h> under musl.
+name = "cataclysm-dda"
+version = "0.I"
+release = 1
+summary = "Turn-based survival game set in a post-apocalyptic world"
+license = "CC-BY-SA-3.0"
+homepage = "https://cataclysmdda.org"
+patches = ["flatbuffers.patch", "make.patch", "pathmax.patch"]
+hostdeps = ["gettext", "pkgconf", "python"]
+builddeps = ["gettext-devel", "ncurses-devel", "sdl2-compat-devel", "sdl2-image-devel", "sdl2-mixer-devel", "sdl2-ttf-devel", "zlib-ng-compat-devel", "freetype-devel", "libx11-devel"]
+options = ["jobs:12", "!check"]  # the tests are not built (TESTS=0)
+
+source = [
+    { url = "https://github.com/CleverRaven/Cataclysm-DDA/archive/0.I.tar.gz", sha256 = "1e4a6e1f70d805d01c97c71294eb45aad47f56f1e895fa783127e20298ee3249" },
+]
+
+build = '''
+COMMON="PREFIX=/usr RELEASE=1 PCH=0 LOCALIZE=1 LANGUAGES=all USE_XDG_DIR=1 BACKTRACE=0 TESTS=0 RUNTESTS=0"
+# curses front end
+%make $COMMON TILES=0 SOUND=0
+# SDL tiles front end (objects go to a different directory)
+%make $COMMON TILES=1 SOUND=1
+'''
+install = '''
+COMMON="PREFIX=/usr RELEASE=1 PCH=0 LOCALIZE=1 LANGUAGES=all USE_XDG_DIR=1 BACKTRACE=0 TESTS=0 RUNTESTS=0"
+make DESTDIR="$pkgdir" $COMMON TILES=0 SOUND=0 install
+make DESTDIR="$pkgdir" $COMMON TILES=1 SOUND=1 install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/cataclysm-dda/LICENSE.txt"
+'''
