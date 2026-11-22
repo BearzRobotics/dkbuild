@@ -1,0 +1,85 @@
+# Mastodon: federated social network (ActivityPub microblogging). Ruby on Rails 8 with PostgreSQL and
+# Valkey/Redis (Elasticsearch/OpenSearch optional), served by Puma, with Sidekiq workers and a Node.js
+# streaming server (three dinit services). Recipe pattern of zammad and openproject.
+# Built as upstream's Dockerfile does: gems from the gem store (`gemdeps`; the git gem `webpush` from
+# GitHub is covered by it), the JavaScript packages (yarn 4, "berry") from the npm store (`npmdeps`):
+# files/yarn.package-lock.json is `dkbuild yarn-lock yarn.lock` (1378 packages; yarn 4 itself, one JS file,
+# is the second source), and the assets compiled with Vite (`rails assets:precompile`).
+# Ruby: the lockfile says ruby 4.0.10, the Gemfile allows >= 3.3, < 4.1; the tree's ruby4.0 is 4.0.9.
+# Native gems build against system libraries: nokogiri (libxml2/libxslt), idn-ruby (libidn), charlock_holmes
+# (ICU), pg (libpq), ffi, hiredis-client, ox, bcrypt, bootsnap...; ruby-vips loads libvips at run time
+# (rundeps: libvips, ffmpeg for video/GIF processing, imagemagick for some formats).
+# Source edits: none. The Rails dummy secrets (SECRET_KEY_BASE_DUMMY) are used by the asset build only.
+# Installed inert: no services enabled, no database, no .env.production, no secrets, no accounts, no site.
+# Home: /opt/mastodon. Setup: /usr/share/doc/mastodon/README.FenrirOS (`rails mastodon:setup` asks for
+# everything interactively and creates the first admin you name).
+name = "mastodon"
+version = "4.7.6"
+release = 1
+summary = "Federated social network server (ActivityPub)"
+license = "AGPL-3.0-only"
+homepage = "https://joinmastodon.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["ruby4.0", "nodejs", "pkgconf", "make", "git", "llvm-libunwind"]
+builddeps = ["ruby4.0-devel", "postgresql-devel", "libyaml-devel", "openssl-devel", "libffi-devel",
+             "zlib-ng-compat-devel", "libxml2-devel", "libxslt-devel", "libidn-devel", "icu-devel",
+             "linux-headers", "jemalloc-devel"]
+rundeps = ["ruby4.0", "nodejs", "nginx", "libvips", "ffmpeg", "imagemagick", "file", "icu-libs"]
+options = ["!check", "!strip", "gemdeps", "npmdeps", "jobs:8"]
+
+source = [
+    { url = "https://github.com/mastodon/mastodon/archive/refs/tags/v4.7.6.tar.gz", sha256 = "28ad1bf5cf4b007c2086b1e011351fd25d96e4d90d192c46b5442b75a3bbe3a1" },
+    { url = "https://repo.yarnpkg.com/4.18.1/packages/yarnpkg-cli/bin/yarn.js", sha256 = "a28ad591febb769f939c11f82f89bacad0b0fac0c884d3b78fa2aaaee970907e", unpack = false },
+]
+
+environment = '''
+export PATH="/usr/lib/ruby4.0/bin:$PATH"
+export NOKOGIRI_USE_SYSTEM_LIBRARIES=1 BUNDLE_BUILD__NOKOGIRI=--use-system-libraries
+export TAR_OPTIONS=--no-same-owner
+export CFLAGS="$CFLAGS -Wno-default-const-init-field-unsafe"
+export RAILS_ENV=production NODE_ENV=production
+export HOME=/tmp/home
+# Rust-based npm addons built for musl link libgcc_s.so.1, which this system lacks: LLVM's libunwind has the
+# same _Unwind_* functions (private link for this build only, as zammad)
+mkdir -p /tmp/gccshim
+ln -sf /usr/lib/libunwind.so.1 /tmp/gccshim/libgcc_s.so.1
+export LD_LIBRARY_PATH="/tmp/gccshim${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+'''
+setup = '''
+bundle config set --local deployment true
+bundle config set --local path vendor/bundle
+bundle config set --local without 'development test'
+bundle install --local --jobs $jobs
+# yarn 4 (the second source) with the npm store served on 127.0.0.1 (dkbuild's YARN_* environment);
+# production=false: NODE_ENV=production would leave out the devDependencies Vite needs
+cp /build/sources/yarn.js /tmp/yarn.js
+export YARN_ENABLE_IMMUTABLE_INSTALLS=true YARN_IGNORE_PATH=1
+node /tmp/yarn.js install --immutable
+'''
+build = '''
+# the asset build needs no database and no real secrets (upstream's Dockerfile does the same)
+SECRET_KEY_BASE_DUMMY=1 OTP_SECRET=precompile_placeholder bundle exec rails assets:precompile
+test -d public/packs || test -d public/assets
+'''
+install = '''
+d="$pkgdir/opt/mastodon"
+mkdir -p "$d"
+cp -a . "$d/"
+# the build's own leftovers and what runs nowhere (upstream's image keeps node_modules only for the streaming server)
+rm -rf "$d/vendor/cache" "$d"/vendor/bundle/ruby/*/cache "$d/tmp"/* "$d/.github" "$d/spec" "$d/.git"
+find "$d/public/packs" "$d/public/assets" -type f -name '*.map' -delete 2>/dev/null || true
+install -Dm755 $pkgfiles/run "$pkgdir/usr/lib/mastodon/run"
+for s in web sidekiq streaming; do install -Dm644 $pkgfiles/mastodon-$s "$pkgdir/etc/dinit.d/mastodon-$s"; done
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/mastodon.conf"
+install -Dm644 /dev/stdin "$pkgdir/usr/lib/tmpfiles.d/mastodon.conf" <<EOF2
+d /etc/mastodon 0750 root mastodon -
+d /var/lib/mastodon 0750 mastodon mastodon -
+Z /opt/mastodon/tmp 0750 mastodon mastodon -
+Z /opt/mastodon/log 0750 mastodon mastodon -
+Z /opt/mastodon/public/system 0755 mastodon mastodon -
+EOF2
+install -Dm644 $pkgfiles/env.production.example "$pkgdir/usr/share/doc/mastodon/env.production.example"
+install -Dm644 $pkgfiles/nginx-mastodon.conf "$pkgdir/usr/share/doc/mastodon/nginx-mastodon.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/mastodon/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/mastodon/LICENSE"
+'''

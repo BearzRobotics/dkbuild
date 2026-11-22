@@ -1,0 +1,9 @@
+# Mastodon background jobs (Sidekiq). Not enabled by default (README.FenrirOS).
+type = process
+command = /usr/lib/mastodon/run bundle exec sidekiq -c 25
+run-as = mastodon
+working-dir = /opt/mastodon
+logfile = /var/log/mastodon-sidekiq.log
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

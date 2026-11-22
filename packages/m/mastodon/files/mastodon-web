@@ -1,0 +1,9 @@
+# Mastodon web (Puma) on 127.0.0.1:3000. Not enabled by default (README.FenrirOS).
+type = process
+command = /usr/lib/mastodon/run bundle exec puma -C config/puma.rb
+run-as = mastodon
+working-dir = /opt/mastodon
+logfile = /var/log/mastodon-web.log
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

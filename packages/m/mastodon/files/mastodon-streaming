@@ -1,0 +1,9 @@
+# Mastodon streaming API (Node.js) on 127.0.0.1:4000. Not enabled by default (README.FenrirOS).
+type = process
+command = /usr/lib/mastodon/run node ./streaming
+run-as = mastodon
+working-dir = /opt/mastodon
+logfile = /var/log/mastodon-streaming.log
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

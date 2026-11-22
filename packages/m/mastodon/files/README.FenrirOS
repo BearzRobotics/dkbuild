@@ -1,0 +1,22 @@
+Mastodon on FenrirOS
+====================
+
+Mastodon lives in /opt/mastodon, owned by the mastodon user. Three dinit
+services, none enabled: mastodon-web (127.0.0.1:3000), mastodon-sidekiq and
+mastodon-streaming (127.0.0.1:4000). Commands run through /usr/lib/mastodon/run
+(it loads /etc/mastodon/env.production). Nothing is set up for you: no
+database, no secrets, no account, no site.
+
+Needs PostgreSQL and Valkey/Redis (Elasticsearch/OpenSearch is optional).
+
+1. PostgreSQL: createuser -d mastodon (or your own role).
+2. As the mastodon user (su -s /bin/sh mastodon):
+       /usr/lib/mastodon/run bundle exec rails mastodon:setup
+   It asks for the domain, database, Redis, SMTP and the admin account, writes
+   /opt/mastodon/.env.production (Rails reads it itself; move it to
+   /etc/mastodon/env.production if you prefer, the run script loads that too)
+   and creates the tables. The assets are already built in the package.
+   Example file: /usr/share/doc/mastodon/env.production.example.
+3. nginx with TLS: /usr/share/doc/mastodon/nginx-mastodon.conf (example).
+4. dinitctl enable mastodon-web mastodon-sidekiq mastodon-streaming
+The domain (LOCAL_DOMAIN) cannot be changed after the first federation.

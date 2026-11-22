@@ -1,0 +1,11 @@
+#!/bin/sh
+# Runs a Mastodon command with its environment (/etc/mastodon/env.production, KEY=value lines)
+cd /opt/mastodon || exit 1
+export RAILS_ENV=production NODE_ENV=production BUNDLE_DEPLOYMENT=true BUNDLE_PATH=/opt/mastodon/vendor/bundle
+export PATH="/usr/lib/ruby4.0/bin:$PATH"
+if [ -f /etc/mastodon/env.production ]; then
+    set -a
+    . /etc/mastodon/env.production
+    set +a
+fi
+exec "$@"
