@@ -1,0 +1,42 @@
+# Helix: a modal terminal editor (Kakoune-inspired) with built-in tree-sitter and LSP support; the
+# binary is `hx`. The source is the release's own source archive, not the git tag: it carries
+# runtime/grammars/sources (the sources of all ~245 tree-sitter grammars), so the grammars are
+# compiled here, offline (`hx --grammar build`), with no git fetch. Crates vendored on the host
+# (cargodeps; Cargo.lock has no git dependencies).
+name = "helix"
+version = "25.07.1"
+release = 1
+summary = "Modal terminal text editor with tree-sitter and LSP support"
+license = "MPL-2.0"
+homepage = "https://helix-editor.com"
+hostdeps = ["rust", "pkgconf"]
+options = ["!check", "cargodeps"]
+
+source = [
+    { url = "https://github.com/helix-editor/helix/releases/download/25.07.1/helix-25.07.1-source.tar.xz", sha256 = "2d0cf264ac77f8c25386a636e2b3a09a23dec555568cc9a5b2927f84322f544e" },
+]
+
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+# where hx looks for its runtime (themes, queries, grammars) once installed
+export HELIX_DEFAULT_RUNTIME=/usr/lib/helix/runtime
+'''
+build = '''
+cargo build --release --frozen --offline -j $jobs
+# the grammars, from runtime/grammars/sources (the archive's) into runtime/grammars/*.so
+HELIX_RUNTIME="$PWD/runtime" target/release/hx --grammar build
+'''
+install = '''
+install -Dm755 target/release/hx "$pkgdir/usr/bin/hx"
+mkdir -p "$pkgdir/usr/lib/helix"
+cp -a runtime "$pkgdir/usr/lib/helix/runtime"
+# the grammars' sources are only build input: the compiled .so stay
+rm -rf "$pkgdir/usr/lib/helix/runtime/grammars/sources"
+install -Dm644 contrib/completion/hx.bash "$pkgdir/usr/share/bash-completion/completions/hx"
+install -Dm644 contrib/completion/hx.zsh "$pkgdir/usr/share/zsh/site-functions/_hx"
+install -Dm644 contrib/completion/hx.fish "$pkgdir/usr/share/fish/vendor_completions.d/hx.fish"
+install -Dm644 contrib/Helix.desktop "$pkgdir/usr/share/applications/Helix.desktop"
+install -Dm644 contrib/Helix.appdata.xml "$pkgdir/usr/share/metainfo/Helix.appdata.xml"
+install -Dm644 contrib/helix.png "$pkgdir/usr/share/icons/hicolor/256x256/apps/helix.png"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/helix/LICENSE"
+'''

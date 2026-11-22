@@ -278,7 +278,9 @@ const dep_prologue =
 ;
 const dep_unpack =
     \\tar -xf '{2s}' -C "$t/src"
-    \\top=$(ls -d "$t"/src/*/ | head -n1)
+    \\# one top directory, or else (the archive has none: Helix's source release) the extraction directory itself
+    \\set -- "$t"/src/*
+    \\if [ $# -eq 1 ] && [ -d "$1" ]; then top="$1"; else top="$t/src"; fi
     \\
 ;
 
