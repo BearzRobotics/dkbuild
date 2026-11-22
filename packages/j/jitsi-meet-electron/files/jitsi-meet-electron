@@ -1,0 +1,3 @@
+#!/bin/sh
+# Jitsi Meet Desktop on the system Electron.
+exec /usr/bin/electron /usr/lib/jitsi-meet-electron "$@"

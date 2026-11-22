@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Jitsi Meet
+GenericName=Video Conference
+Comment=Jitsi Meet Desktop App
+Exec=jitsi-meet-electron %U
+Icon=jitsi-meet-electron
+Terminal=false
+StartupWMClass=Jitsi Meet
+Categories=VideoConference;AudioVideo;Audio;Video;Network;
+MimeType=x-scheme-handler/jitsi-meet;

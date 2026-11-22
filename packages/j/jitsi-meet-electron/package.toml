@@ -1,0 +1,68 @@
+# Jitsi Meet Electron 2026.10.0 on the system Electron (written 2026-11-22; DRAFT, not built, needs electron first).
+# esbuild (node esbuild.js) writes build/ (main, preload, renderer); electron-builder is not used: the app
+# directory is build/ + resources/ + a package.json (main ./build/main.js) + the production node_modules,
+# run by /usr/bin/electron, as for element-desktop. npm packages from the npm store (package-lock.json is in the source).
+# --ignore-scripts for the install; then only the two native modules, @jitsi/electron-sdk (window/screen
+# sharing helpers) and @jitsi/robotjs (remote control), are rebuilt with node-gyp against the Electron
+# headers (/usr/include/electron/node_headers) like code-oss's native modules; esbuild's postinstall is a
+# binary check, run too. patch-package (electron-reload patch) is run by hand.
+# Unsure: whether the two modules compile on musl/libc++ (robotjs is old C), and the type-check step
+# (npm run build runs tsc --noEmit first; the recipe runs esbuild directly to skip it, tsc errors against the
+# system Electron's types are not a reason to fail a package build).
+name = "jitsi-meet-electron"
+version = "2026.10.0"
+release = 1
+summary = "Jitsi Meet desktop application"
+license = "Apache-2.0"
+homepage = "https://jitsi.org/downloads"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["nodejs", "python", "pkgconf"]
+builddeps = ["electron-devel", "libx11-devel", "libxext-devel", "libxi-devel", "libxkbfile-devel", "libxscrnsaver-devel", "libxtst-devel", "libpng-devel"]
+rundeps = ["electron", "hicolor-icon-theme"]
+options = ["!check", "npmdeps"]
+
+source = [
+    { url = "https://github.com/jitsi/jitsi-meet-electron/archive/refs/tags/v2026.10.0.tar.gz", sha256 = "ad76a37adb6c4aa34be59e9cb6e36eed2bbe44b84b823f5ac4371cb46e743f97" },
+]
+
+environment = '''
+export HOME=/tmp/home npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+export ELECTRON_SKIP_BINARY_DOWNLOAD=1 CI=true
+export npm_config_nodedir=/usr/include/electron/node_headers
+export npm_config_build_from_source=true
+export npm_config_target=$(cat /usr/lib/electron/version) npm_config_runtime=electron npm_config_disturl=
+'''
+setup = '''
+npm ci --ignore-scripts
+node node_modules/patch-package/index.js
+npm rebuild @jitsi/electron-sdk @jitsi/robotjs esbuild
+'''
+build = '''
+node ./esbuild.js
+test -f build/main.js
+'''
+install = '''
+app="$pkgdir/usr/lib/jitsi-meet-electron"
+mkdir -p "$app"
+cp -a build resources "$app/"
+node -e '
+const fs = require("fs");
+const p = JSON.parse(fs.readFileSync("package.json", "utf8"));
+delete p.scripts; delete p.devDependencies; delete p.build;
+fs.writeFileSync(process.argv[1], JSON.stringify(p, null, 2));
+' "$app/package.json"
+# runtime dependencies only, native modules rebuilt for Electron kept
+mkdir -p "$app/node_modules"
+for m in @jitsi/electron-sdk @jitsi/robotjs electron-debug electron-reload; do
+    mkdir -p "$app/node_modules/$(dirname $m)"
+    cp -a node_modules/$m "$app/node_modules/$m"
+done
+# electron-sdk's and electron-debug's own dependencies
+npm ls --omit=dev --all --parseable 2>/dev/null | sed -n 's|.*/node_modules/||p' | sort -u | while read -r m; do
+    [ -d "node_modules/$m" ] && [ ! -e "$app/node_modules/$m" ] && { mkdir -p "$app/node_modules/$(dirname $m)"; cp -a "node_modules/$m" "$app/node_modules/$m"; }
+done
+install -Dm755 $pkgfiles/jitsi-meet-electron "$pkgdir/usr/bin/jitsi-meet-electron"
+install -Dm644 $pkgfiles/jitsi-meet-electron.desktop "$pkgdir/usr/share/applications/jitsi-meet-electron.desktop"
+install -Dm644 resources/icons/512x512.png "$pkgdir/usr/share/icons/hicolor/512x512/apps/jitsi-meet-electron.png"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/jitsi-meet-electron/LICENSE"
+'''
