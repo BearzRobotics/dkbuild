@@ -1,0 +1,44 @@
+# After Chimera Linux cports: main/qbittorrent. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# qBittorrent: Qt6 BitTorrent client on libtorrent-rasterbar. Two builds, as
+# Chimera does: the GUI (-> qbittorrent) and the headless daemon with web UI
+# (GUI=OFF -> qbittorrent-nox subpackage). STACKTRACE is off: it uses
+# execinfo/backtrace, which musl does not have.
+# The nox service is installed but not enabled (inert), with a sysusers/tmpfiles
+# pair for its account and data directory.
+name = "qbittorrent"
+version = "5.3.0"
+release = 1
+summary = "Qt-based BitTorrent client"
+license = "GPL-2.0-or-later"
+homepage = "https://www.qbittorrent.org"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools"]
+builddeps = ["boost-devel", "libtorrent-rasterbar-devel", "openssl-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel", "qt6-qttools-devel", "zlib-ng-compat-devel"]
+rundeps = ["qt6-qtsvg"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/qbittorrent/qBittorrent/archive/refs/tags/release-5.3.0.tar.gz", sha256 = "dcb5273496117ebf264fc1fc7936de8707374f07dcee0805228ac5adb403a465" },
+]
+
+setup = '''
+%cmake -DSTACKTRACE=OFF
+# the headless build: no GUI, web UI only
+cmake -B build-nox -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_LIBDIR=lib -DSTACKTRACE=OFF -DGUI=OFF
+'''
+build = '''
+%cmake_build
+cmake --build build-nox
+'''
+install = '''
+%cmake_install
+DESTDIR="$pkgdir" cmake --install build-nox
+install -Dm644 $pkgfiles/qbittorrent-nox "$pkgdir/etc/dinit.d/qbittorrent-nox"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/qbittorrent.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/qbittorrent.conf"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/qbittorrent/COPYING"
+'''
+
+[subpackages.nox]
+summary = "qBittorrent headless daemon with web UI"
+paths = ["/usr/bin/qbittorrent-nox", "/etc/dinit.d", "/usr/lib/sysusers.d", "/usr/lib/tmpfiles.d", "/usr/share/man/man1/qbittorrent-nox.1"]

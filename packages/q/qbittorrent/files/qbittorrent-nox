@@ -1,0 +1,13 @@
+# qBittorrent headless daemon (web UI on port 8080). Not enabled by default:
+# `dinitctl enable qbittorrent-nox`, then browse to http://localhost:8080. The
+# first start prints a temporary WebUI password for the user "admin" in the log.
+# The legal notice must be accepted once (--confirm-legal-notice, below).
+type = process
+command = /usr/bin/qbittorrent-nox --confirm-legal-notice --profile=/var/lib/qbittorrent
+run-as = qbittorrent
+working-dir = /var/lib/qbittorrent
+logfile = /var/log/qbittorrent-nox.log
+smooth-recovery = true
+
+depends-on: rcboot
+waits-for: syslogd
