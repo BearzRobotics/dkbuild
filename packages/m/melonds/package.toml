@@ -1,0 +1,29 @@
+# melonDS: Nintendo DS emulator (GPL-3.0), Qt6 + SDL2 front end with the
+# OpenGL renderer, JIT recompiler on x86-64/aarch64, LAN play over libslirp.
+# It needs the user's own BIOS/firmware files and games (none are shipped;
+# melonDS also runs with the built-in FreeBIOS replacement).
+name = "melonds"
+version = "1.1"
+release = 1
+summary = "Nintendo DS emulator"
+license = "GPL-3.0-or-later"
+homepage = "https://melonds.kuribo64.net"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf"]
+builddeps = ["alsa-lib-devel", "faad2-devel", "libarchive-devel", "libslirp-devel", "libx11-devel", "mesa-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtmultimedia-devel", "qt6-qtsvg-devel", "sdl2-compat-devel", "wayland-devel", "wayland-protocols", "zstd-devel", "libxkbcommon-devel", "libglvnd-devel", "enet-devel"]
+options = ["jobs:12", "!check"]  # there is no test suite
+
+source = [
+    { url = "https://github.com/melonDS-emu/melonDS/archive/refs/tags/1.1.tar.gz", sha256 = "61e339bcb18a68a17485973637d972ea628c5624d7e6b8adf6870f895d5e26fd" },
+]
+
+setup = '''
+%cmake \
+    -DUSE_QT6=ON \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''
