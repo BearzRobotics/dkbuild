@@ -1,0 +1,38 @@
+# After Chimera main/libunwind-nongnu. This is the libunwind.org (nongnu) unwinder that heaptrack
+# and other profilers want. LLVM's libunwind (in the llvm package) owns /usr/lib/libunwind.so and
+# /usr/include/{libunwind.h,unwind.h}, so this one installs its headers to
+# /usr/include/libunwind-nongnu and its libraries to /usr/lib/libunwind-nongnu: no file collides.
+name = "libunwind-nongnu"
+version = "1.8.3"
+release = 1
+summary = "Portable C API for stack unwinding (libunwind.org, not LLVM's)"
+license = "MIT"
+homepage = "https://www.nongnu.org/libunwind"
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf"]
+builddeps = ["libucontext-devel", "linux-headers"]
+# Chimera: a number of the tests fail (and they need ptrace).
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/libunwind/libunwind/releases/download/v1.8.3/libunwind-1.8.3.tar.gz", sha256 = "be30d910e67f58d82e753231f1357f326a1a088acf126b21ff77e60aab19b90b" },
+]
+
+environment = '''
+# musl has no getcontext(): libucontext provides it
+export LDFLAGS="$LDFLAGS -lucontext"
+'''
+setup = '''
+%configure \
+    --includedir=/usr/include/libunwind-nongnu \
+    --libdir=/usr/lib/libunwind-nongnu \
+    --enable-static \
+    --enable-cxx-exceptions \
+    --disable-tests
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libunwind-nongnu/COPYING"
+'''

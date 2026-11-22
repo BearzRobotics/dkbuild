@@ -1,0 +1,35 @@
+# After Chimera main/heaptrack. Heap memory profiler plus heaptrack_gui (KF6 viewer),
+# an optional dependency of KDevelop (Heaptrack plugin).
+name = "heaptrack"
+version = "1.5.0"
+release = 1
+summary = "Heap memory profiler with a KDE GUI (heaptrack_gui)"
+license = "LGPL-2.1-or-later"
+homepage = "https://apps.kde.org/heaptrack"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["boost-devel", "elfutils-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kdiagram-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kitemmodels-devel", "libunwind-nongnu-devel", "linux-headers", "qt6-qtbase-devel", "threadweaver-devel", "zlib-ng-compat-devel", "zstd-devel"]
+rundeps = ["gdb"]
+# Chimera: weird failures; the tests also need ptrace.
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/heaptrack/1.5.0/heaptrack-1.5.0.tar.xz", sha256 = "a278d9d8f91e8bfb8a1c2f5b73eecab47fd45d0693f5dbea637536413cec2ea5" },
+]
+
+setup = '''
+# CMAKE_POLICY_VERSION_MINIMUM: the project asks for CMake < 3.5 compatibility.
+# -Wno-incompatible-pointer-types: configure-time checks written for older C.
+# LIBUNWIND_*: the nongnu libunwind lives in its own directories (see libunwind-nongnu).
+export CFLAGS="$CFLAGS -Wno-incompatible-pointer-types"
+export CMAKE_POLICY_VERSION_MINIMUM=3.5
+%cmake \
+    -DHEAPTRACK_USE_QT6=ON \
+    -DLIBUNWIND_INCLUDE_DIR=/usr/include/libunwind-nongnu \
+    -DLIBUNWIND_LIBRARY=/usr/lib/libunwind-nongnu/libunwind.so
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

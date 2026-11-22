@@ -4,17 +4,18 @@ release = 1
 summary = "KDE IDE for C, C++, Python, PHP and more"
 license = "GPL-2.0-or-later"
 homepage = "https://kdevelop.org"
-hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "kdevelop-pg-qt", "ninja", "pkgconf"]
 # libclang comes from llvm-devel (clang C++ support plugin, required);
 # libksysguard gives "Attach to Process"; qt6-qttools provides Qt6Help (qthelp
 # plugin); qtwebengine is optional (documentation viewer).
-# Not in the tree yet (optional plugins, built automatically once present):
-#   kdevelop-pg-qt (QMake manager plugin), libkomparediff2 (patch review plugin),
-#   astyle (library, formatter plugin), subversion (svn plugin).
+# Optional plugins, found by CMake when installed: kdevelop-pg-qt (QMake manager
+# plugin, parser generator), libkomparediff2 (patch review plugin), astyle (library,
+# formatter plugin), subversion (svn plugin; needs apr/apr-util headers and libsvn),
+# heaptrack (Heaptrack plugin runs `heaptrack` and shows it in `heaptrack_gui`).
 # Okteta is deliberately not wanted: CMakeLists force-disables it ("Qt6 port
 # not yet complete"), so packaging it would change nothing.
-builddeps = ["karchive-devel", "kcmutils-devel", "kconfig-devel", "kcrash-devel", "kdoctools-devel", "kguiaddons-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kitemmodels-devel", "kjobwidgets-devel", "knewstuff-devel", "knotifications-devel", "knotifyconfig-devel", "kparts-devel", "kservice-devel", "ktexteditor-devel", "ktexttemplate-devel", "ktextwidgets-devel", "kwindowsystem-devel", "kxmlgui-devel", "libksysguard-devel", "llvm-devel", "purpose-devel", "qt6-qt5compat-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel", "qt6-qtwebengine-devel", "shared-mime-info", "sonnet-devel", "threadweaver-devel"]
-rundeps = ["cmake", "gdb", "git", "llvm-clang"]
+builddeps = ["apr-devel", "apr-util-devel", "astyle-devel", "karchive-devel", "kcmutils-devel", "kconfig-devel", "kcrash-devel", "kdevelop-pg-qt-devel", "kdoctools-devel", "kguiaddons-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kitemmodels-devel", "kjobwidgets-devel", "knewstuff-devel", "knotifications-devel", "knotifyconfig-devel", "kparts-devel", "kservice-devel", "ktexteditor-devel", "ktexttemplate-devel", "ktextwidgets-devel", "kwindowsystem-devel", "kxmlgui-devel", "libkomparediff2-devel", "libksysguard-devel", "llvm-devel", "purpose-devel", "qt6-qt5compat-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel", "qt6-qtwebengine-devel", "shared-mime-info", "sonnet-devel", "subversion-devel", "threadweaver-devel"]
+rundeps = ["cmake", "gdb", "git", "heaptrack", "llvm-clang", "subversion"]
 # The tests need a display, a D-Bus session and a writable home; the sandbox has none.
 options = ["!check"]
 
