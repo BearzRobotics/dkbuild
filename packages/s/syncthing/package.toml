@@ -13,7 +13,7 @@
 # whole system, so it is the user's choice (copy it to /etc/sysctl.d).
 name = "syncthing"
 version = "2.1.7"
-release = 2
+release = 3
 summary = "Continuous file synchronization program"
 license = "MPL-2.0"
 homepage = "https://syncthing.net"
@@ -40,7 +40,9 @@ for cmd in syncthing stdiscosrv strelaysrv; do
 done
 '''
 check = '''
-go test -tags noupgrade ./lib/... ./cmd/stdiscosrv ./cmd/strelaysrv ./cmd/syncthing
+# r3: TestChownFile (lib/fs) is skipped: it chowns to another uid, which the sandbox's user namespace has
+# not mapped ("lchown: invalid argument"); every other test runs
+go test -tags noupgrade -skip '^TestChownFile$' ./lib/... ./cmd/stdiscosrv ./cmd/strelaysrv ./cmd/syncthing
 '''
 install = '''
 for cmd in syncthing stdiscosrv strelaysrv; do
