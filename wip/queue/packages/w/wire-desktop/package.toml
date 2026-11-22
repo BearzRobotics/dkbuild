@@ -1,0 +1,38 @@
+# Wire Desktop 3.46.0 (the open-source Electron wrapper of Wire's web app). SKELETON, BLOCKED; written
+# 2026-11-22, never checked against a build. Why it is not in packages/:
+#  1. Upstream no longer has a Linux packaging target (bin/build-tools/build-cli.ts builds win/mac only);
+#     the Linux layout would be the `yarn start` one: package.json (main electron/dist/main.js) + electron/ +
+#     wire.json + app-config + node_modules, run by /usr/bin/electron.
+#  2. The runtime configuration (endpoints, certificates) is pulled by `yarn configure` (@wireapp/copy-config)
+#     from the app-config/ package, whose dependencies are git URLs:
+#       wire-web-config-internal  https://github.com/wireapp/wire-web-config-default#v0.34.10
+#       wire-web-config-production https://github.com/wireapp/wire-web-config-wire#v0.34.6
+#       wire-web-config-wire-gov  https://github.com/wireapp/wire-web-config-wire-gov#v0.35.2
+#     They would have to become `{ git, tag }` sources and be copied into app-config/node_modules by hand.
+#  3. yarn 3.3.1 (berry) lock: `dkbuild yarn-lock yarn.lock -o files/yarn.package-lock.json` handles it, but
+#     yarn 3.3.1 itself is needed to run the build (repo.yarnpkg.com has no 3.3.1 bundle at the URL tried);
+#     an npm lock made like rocketchat-electron's is the alternative.
+#  4. electron 43.1.1 is pinned in devDependencies; the tree has 42.
+# Steps once those are solved: yarn build:ts && yarn bundle (webpack), then lay out the app as above.
+name = "wire-desktop"
+version = "3.46.0"
+release = 1
+summary = "Wire secure messenger desktop client"
+license = "GPL-3.0-only"
+homepage = "https://wire.com"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["nodejs", "python"]
+rundeps = ["electron", "hicolor-icon-theme"]
+options = ["!check", "npmdeps"]
+
+source = [
+    { url = "https://github.com/wireapp/wire-desktop/archive/refs/tags/windows/3.46.5382.tar.gz", sha256 = "d05892e5b32e03fa95a0d9a118b5eceb0bf1e0dd1a03fadfda04500896448979" },
+]
+
+build = '''
+echo "wire-desktop: skeleton, see the comments in the recipe" >&2
+exit 1
+'''
+install = '''
+exit 1
+'''

@@ -1,0 +1,36 @@
+# Tuta (Tutanota) desktop client, release 369.261119.0 (tutao/tutanota, GPL-3.0). SKELETON, BLOCKED;
+# written 2026-11-22, never built. Blockers:
+#  1. The build is a custom esbuild/rollup pipeline (`node buildSrc/...`, `npm run build-packages`), not
+#     webpack/electron-builder only; it compiles WebAssembly libraries (liboqs for post-quantum crypto, argon2)
+#     with Emscripten from sources the build downloads (liboqs git checkout, emsdk): needs emscripten and the
+#     liboqs/argon2 sources as `{ git, tag }` / source entries, and a wasm-capable clang (the tree's LLVM has
+#     the WebAssembly target; wasi-libc is absent, see docs/handoff.md).
+#  2. A Rust part (tuta-sdk, built to wasm and to a native node addon with napi-rs) -> cargodeps for its own
+#     Cargo.lock.
+#  3. Native node modules (better-sqlite3 fork with SQLCipher, node-mimimi) against the Electron headers.
+#  4. npm monorepo (package-lock.json at the root and in packages/*): the store reads them all; electron
+#     version pinned to upstream's, the tree has 42.
+#  5. DesktopBuilder runs electron-builder (which downloads an Electron): replace with the app-directory layout
+#     used by element-desktop (build/, package.json, production node_modules, run by /usr/bin/electron).
+name = "tuta"
+version = "369.261119.0"
+release = 1
+summary = "Tuta (Tutanota) encrypted mail and calendar desktop client"
+license = "GPL-3.0-only"
+homepage = "https://tuta.com"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["nodejs", "python", "rust", "emscripten"]
+rundeps = ["electron", "hicolor-icon-theme"]
+options = ["!check", "npmdeps"]
+
+source = [
+    { url = "https://github.com/tutao/tutanota/archive/refs/tags/tutanota-desktop-release-369.261119.0.tar.gz", sha256 = "6e7a3c12954859937d9c430d7d43e3f9a86fe286867f9fe70258016e78e4ba52" },
+]
+
+build = '''
+echo "tuta: skeleton, see the comments in the recipe" >&2
+exit 1
+'''
+install = '''
+exit 1
+'''

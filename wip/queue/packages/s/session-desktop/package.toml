@@ -1,0 +1,35 @@
+# Session Desktop 1.18.5 (Session Technology Foundation). SKELETON, BLOCKED; written 2026-11-22, never built.
+# Blockers:
+#  1. libsession_util_nodejs (the Session protocol core) is a native addon built with cmake-js from a C++
+#     tree with ~15 git submodules / downloaded dependencies (libsession-util, oxen-libquic, ...); none can be
+#     fetched by the npm store. It needs its own recipes for libsession-util and the oxen libraries (and
+#     cargodeps-free vendoring of their git submodules as `{ git, tag }` sources).
+#  2. @signalapp/sqlcipher builds SQLCipher from bundled sources with node-gyp against the Electron headers
+#     (like code-oss's native modules; doable), and `pnpm build:protobuf` plus `tsx build/installAppDeps.ts`
+#     (an electron-builder install-app-deps wrapper) have to be replaced by explicit node-gyp rebuilds.
+#  3. sharp: the npm package ships prebuilt libvips for linuxmusl (@img/sharp-linuxmusl-*), probably fine.
+#  4. engines node 24.22.1, pnpm 10.28.1 (packageManager must be dropped as in element-desktop).
+# The pnpm-lock.yaml is in the source (npmdeps reads it). App layout once built: ts/ (tsc output), the
+# static html/js/css/images/_locales, package.json (main ts/mains/main_node.js) and the production node_modules.
+name = "session-desktop"
+version = "1.18.5"
+release = 1
+summary = "Session private messenger desktop client"
+license = "GPL-3.0-only"
+homepage = "https://getsession.org"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["nodejs", "pnpm", "python", "cmake"]
+rundeps = ["electron", "hicolor-icon-theme"]
+options = ["!check", "npmdeps"]
+
+source = [
+    { url = "https://github.com/session-foundation/session-desktop/archive/refs/tags/v1.18.5.tar.gz", sha256 = "7d517ec90999acfe459229e49433cf8c3f2dc6e72fcc1440118cf4b122a8b7a5" },
+]
+
+build = '''
+echo "session-desktop: skeleton, see the comments in the recipe" >&2
+exit 1
+'''
+install = '''
+exit 1
+'''

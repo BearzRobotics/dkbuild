@@ -1,0 +1,34 @@
+# Mailspring 1.26.2 (Foundry376's Electron mail client). SKELETON, BLOCKED; written 2026-11-22, never built.
+# Blockers:
+#  1. The sync engine, `mailsync`, is a separate C++ program (Foundry376/Mailspring-Sync, a git submodule that
+#     is empty in the release tarball). scripts/postinstall.js downloads a prebuilt binary (glibc) from
+#     GitHub; building it from source needs a MailCore2 fork, libetpan, curl, sqlite, tidy-html5, libsasl2,
+#     ICU, libxml2, ctemplate and a chain of vendored forks: each its own recipe (none exist in the tree), plus
+#     a git source for the submodule (`{ git, tag }`).
+#  2. Native Node modules (better-sqlite3 ^12, keytar-like secret storage, spellchecker, xoauth...) rebuilt with
+#     node-gyp against the Electron headers; npm lockfiles for the root and app/ (the root package.json pins
+#     electron 44.9.1, the tree has 42).
+#  3. Layout once built: app/ (compiled by `npm run build` / grunt tasks) + the mailsync binary in the app's
+#     directory + production node_modules of app/, run by /usr/bin/electron. Licence GPL-3.0-only.
+name = "mailspring"
+version = "1.26.2"
+release = 1
+summary = "Mailspring mail client"
+license = "GPL-3.0-only"
+homepage = "https://getmailspring.com"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["nodejs", "python"]
+rundeps = ["electron", "hicolor-icon-theme"]
+options = ["!check", "npmdeps"]
+
+source = [
+    { url = "https://github.com/Foundry376/Mailspring/archive/refs/tags/1.26.2.tar.gz", sha256 = "84775b061e63582b8f7d236543fcc760a38f61a8ec9b1b1841ef3c1dbbe8c312" },
+]
+
+build = '''
+echo "mailspring: skeleton, see the comments in the recipe" >&2
+exit 1
+'''
+install = '''
+exit 1
+'''
