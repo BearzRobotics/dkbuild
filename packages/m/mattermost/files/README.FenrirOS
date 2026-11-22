@@ -1,0 +1,25 @@
+Mattermost on FenrirOS
+======================
+
+Installed inert: the service is not enabled; there is no configuration, no
+database, no account. This is the Team Edition built from the open-source
+repository (Mattermost's Enterprise features are not part of it).
+
+1. PostgreSQL: create a role and database for it, for example
+       su -s /bin/sh _postgres -c "createuser -P mattermost; createdb -O mattermost mattermost"
+2. /etc/mattermost/environment (read by the service, KEY=value lines):
+       MM_CONFIG=/etc/mattermost/config.json
+       MM_SQLSETTINGS_DRIVERNAME=postgres
+       MM_SQLSETTINGS_DATASOURCE=postgres://mattermost:PASSWORD@localhost/mattermost?sslmode=disable&connect_timeout=10
+       MM_SERVICESETTINGS_SITEURL=https://chat.example.org
+       MM_FILESETTINGS_DIRECTORY=/var/lib/mattermost/data/
+       MM_PLUGINSETTINGS_DIRECTORY=/var/lib/mattermost/plugins
+       MM_PLUGINSETTINGS_CLIENTDIRECTORY=/var/lib/mattermost/client-plugins
+   On first start Mattermost writes a default /etc/mattermost/config.json (own
+   behaviour; the directory is writable by the service user only for that file:
+   chgrp mattermost /etc/mattermost; chmod 770 /etc/mattermost, or create the file
+   yourself with `mattermost config` options).
+3. dinitctl enable mattermost; browse to port 8065. The first account you
+   create becomes the system administrator. Example nginx site (not active):
+   /usr/share/doc/mattermost/nginx-mattermost.conf.example. Command line admin
+   tool: mmctl (local socket mode needs ServiceSettings.EnableLocalMode).

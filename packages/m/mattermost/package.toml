@@ -1,0 +1,79 @@
+# Mattermost: self-hosted team chat (channels, threads, calls, integrations, plugins), the Team Edition
+# build from the open-source repository (no enterprise directory: build tag sourceavailable, as the Makefile
+# chooses without ../../enterprise). Go server (server/) with PostgreSQL, and its web app (webapp/, React,
+# npm workspaces; packages from the store, npmdeps, webapp/package-lock.json is upstream's, copied to files/).
+# Both stores need a source layout the tooling does not expect:
+#  - the repository root has no go.mod (the module is server/, with server/public as a second module): the patch
+#    patches/root-go-mod.patch adds a wrapper go.mod at the top so godeps's `go mod download` fetches
+#    everything; the build then replaces server/public by its directory (`go mod edit -replace`) instead of
+#    the Makefile's go.work (workspace mode refuses GOFLAGS=-mod=mod).
+#  - the npm lock lives in webapp/: setup copies files/package-lock.json there (identical to upstream's).
+# Not included: the "prepackaged plugins" the release tarball from Mattermost's CI bundles (they are
+# downloaded from plugins.mattermost.com by `make package`; none are built here); plugins are installed by
+# the admin from the Marketplace (needs the network at run time, not at build time). The enterprise
+# (E20) features are in a private repository and are not part of the source: that is the reason, not
+# a choice of ours.
+# Installed inert: the dinit service is shipped, not enabled; no config.json, database or account. On first
+# start Mattermost itself writes a default config.json (its documented behaviour, DataSource placeholder);
+# the first user to sign up becomes the system admin. Setup: README.FenrirOS.
+name = "mattermost"
+version = "12.1.0"
+release = 1
+summary = "Open-source team chat and collaboration platform (Team Edition)"
+license = "MIT AND AGPL-3.0-only AND Apache-2.0"
+homepage = "https://mattermost.com"
+patches = ["root-go-mod.patch"]
+hostdeps = ["go", "nodejs", "llvm-libunwind", "make"]
+rundeps = ["postgresql"]
+options = ["!check", "godeps", "npmdeps", "jobs:8"]
+
+source = [
+    { url = "https://github.com/mattermost/mattermost/archive/refs/tags/v12.1.0.tar.gz", sha256 = "534e6550b022a234ad19872a4a1ec8390149a5587d0ebc5fa48dc7fa20484ce4" },
+]
+
+environment = '''
+export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=off
+export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
+export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
+    npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+export NODE_OPTIONS=--max-old-space-size=8192
+# Rust-based npm addons (swc, lightningcss, rollup...) built for musl link libgcc_s.so.1, which this system
+# does not have; LLVM's libunwind has the same _Unwind_* functions (private link, as vikunja)
+mkdir -p /tmp/gccshim
+ln -sf /usr/lib/libunwind.so.1 /tmp/gccshim/libgcc_s.so.1
+export LD_LIBRARY_PATH="/tmp/gccshim${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+'''
+setup = '''
+cd webapp
+cp /dkbuild/files/package-lock.json package-lock.json
+node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
+# package.json asks for node 24.11.1 / npm 11.6.2 exactly (engines); the system node is newer
+npm ci --ignore-scripts --legacy-peer-deps --engine-strict=false
+'''
+build = '''
+( cd webapp && npm run build )
+test -f webapp/channels/dist/root.html
+cd server
+# server/public is the module next door (see the header)
+go mod edit -replace github.com/mattermost/mattermost/server/public=./public
+P=github.com/mattermost/mattermost/server/public/model
+LD="-X $P.BuildNumber=$version -X $P.BuildDate=release-$version -X $P.BuildEnterpriseReady=false"
+mkdir -p bin
+go build -tags sourceavailable -ldflags "$LD" -o bin/mattermost ./cmd/mattermost
+go build -tags sourceavailable -ldflags "$LD" -o bin/mmctl ./cmd/mmctl
+'''
+install = '''
+d="$pkgdir/usr/lib/mattermost"
+install -Dm755 server/bin/mattermost "$d/bin/mattermost"
+install -Dm755 server/bin/mmctl "$pkgdir/usr/bin/mmctl"
+ln -s ../lib/mattermost/bin/mattermost "$pkgdir/usr/bin/mattermost"
+cp -a server/i18n server/templates server/fonts "$d/"
+cp -a webapp/channels/dist "$d/client"
+install -Dm644 $pkgfiles/mattermost "$pkgdir/etc/dinit.d/mattermost"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/mattermost.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/mattermost.conf"
+install -Dm644 $pkgfiles/nginx-mattermost.conf "$pkgdir/usr/share/doc/mattermost/nginx-mattermost.conf.example"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/mattermost/README.FenrirOS"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/mattermost/LICENSE.txt"
+install -Dm644 NOTICE.txt "$pkgdir/usr/share/licenses/mattermost/NOTICE.txt"
+'''

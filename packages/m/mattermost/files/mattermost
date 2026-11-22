@@ -1,0 +1,11 @@
+# Mattermost server. Not enabled by default (README.FenrirOS): it needs a PostgreSQL database and
+# /etc/mattermost/config.json (Mattermost writes a default one on first start if it is missing).
+type = process
+command = /usr/lib/mattermost/bin/mattermost
+env-file = /etc/mattermost/environment
+run-as = mattermost
+working-dir = /usr/lib/mattermost
+logfile = /var/log/mattermost.log
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

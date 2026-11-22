@@ -1,0 +1,18 @@
+Mattermost's Go code lives in server/ (and server/public, a second module); the repository root
+has no go.mod, and dkbuild's godeps fetch runs `go mod download` at the top of the source.
+This wrapper module requires the server module, with both modules replaced by their directories,
+so that one `go mod download` fills the module cache with everything the server build needs
+(server/go.mod pins github.com/mattermost/mattermost/server/public v0.4.3; the build replaces it
+with server/public, see the recipe). The wrapper is not used by the build itself.
+--- /dev/null
++++ b/go.mod
+@@ -0,0 +1,8 @@
++module dkbuild.invalid/mattermost-wrapper
++
++go 1.26
++
++require github.com/mattermost/mattermost/server/v8 v8.0.0
++
++replace github.com/mattermost/mattermost/server/v8 => ./server
++
++replace github.com/mattermost/mattermost/server/public => ./server/public
