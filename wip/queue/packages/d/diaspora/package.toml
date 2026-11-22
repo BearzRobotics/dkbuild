@@ -1,0 +1,19 @@
+# SKELETON, not written. diaspora* 0.10.1 (decentralised social network; Ruby on Rails, PostgreSQL/MySQL, Redis, Sidekiq).
+# Tag v0.10.1 of github.com/diaspora/diaspora. Feasible with the stores the tree has (gemdeps as zammad/mastodon;
+# yarn.lock v1 via npmdeps for its asset pipeline) but not yet attempted: it pins Ruby 3.3 or older (its Gemfile says
+# `ruby "~> 3.2"` territory; the tree has 3.4.12 and 4.0.9; a Gemfile.lock refresh or a ruby3.3 package is needed, and gems
+# such as `unf_ext`, `ffi`, `curb`, `nokogiri`, `bcrypt`, `charlock_holmes`, `eye` pin old versions that may not build against
+# libc++/musl or Ruby 3.4+), plus the bundled JS assets through sprockets and `rake assets:precompile`.
+# Not blocked by anything fundamental; it is a matter of time (estimated a few hours including build failures).
+name = "diaspora"
+version = "0.10.1"
+release = 1
+summary = "Distributed social network (SKELETON)"
+license = "AGPL-3.0-only"
+homepage = "https://diasporafoundation.org"
+options = ["!check"]
+
+install = '''
+echo "diaspora is a skeleton: see the header of this recipe" >&2
+exit 1
+'''

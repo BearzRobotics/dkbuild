@@ -1,0 +1,18 @@
+# SKELETON, not written. Friendica 2026.x (federated social network; PHP, MariaDB/MySQL, composer). Release tarballs on
+# github.com/friendica/friendica. Same situation as pixelfed: composer.lock packages (~60, fewer) as source entries with
+# composer-local.py as in packages/b/bookstack; plus the `addon` repository (github.com/friendica/friendica-addons, a
+# second source) and its bundled vendor/ (the release tarball "friendica-full-X.tar.gz" ships vendor/ already built:
+# prebuilt PHP libraries are allowed by policy, which makes this the cheap route: fetch that archive, no composer).
+# Not blocked; try the friendica-full archive first. Inert: no config/local.config.php, no site, no cron job (example only).
+name = "friendica"
+version = "2026.01"
+release = 1
+summary = "Federated social network (SKELETON)"
+license = "AGPL-3.0-only"
+homepage = "https://friendi.ca"
+options = ["!check"]
+
+install = '''
+echo "friendica is a skeleton: see the header of this recipe" >&2
+exit 1
+'''

@@ -1,0 +1,27 @@
+# SKELETON, not buildable yet. Misskey 2026.11.0 (federated microblogging, ActivityPub; Node.js, pnpm workspace, PostgreSQL,
+# Redis/Valkey). Tag 2026.11.0 of github.com/misskey-dev/misskey; pnpm 12.17 (packageManager), pnpm-lock.yaml v9
+# (supported by npmdeps; vikunja is the template: pnpm settings, libunwind link for the Rust-based npm addons).
+# Blockers:
+#  - Native Node addons built in install scripts (pnpm-workspace.yaml `allowBuilds`): re2 (node-re2: downloads a
+#    prebuilt binary from GitHub releases, or compiles its bundled re2/abseil submodules with node-gyp: needs the
+#    recipe to run `node-gyp rebuild` offline against node headers in the tree and the submodule sources, which
+#    the npm tarball lacks), canvas (node-canvas: prebuilt download for glibc/musl, or cairo/pango builds),
+#    sharp (musl prebuilt is an npm package: fine), msgpackr-extract, bufferutil, utf-8-validate, nice-napi, esbuild
+#    (npm platform package: fine). So the unresolved ones are re2 and canvas: each needs either a source recipe
+#    (python-less node-gyp build) or a `--ignore-scripts` + manual rebuild step, tried at build time.
+#  - The build is `pnpm build` (swc/vite/esbuild across packages/{backend,frontend,sw,misskey-js...}); the frontend
+#    build fetches nothing but needs ~6 GB RAM (jobs:8 and NODE_OPTIONS=--max-old-space-size=8192).
+#  - Runtime: PostgreSQL + Valkey; config in .config/default.yml (the admin's), `pnpm migrate` at first start; the
+#    service must be inert (no config, no accounts: the first account created in the web UI is the admin).
+name = "misskey"
+version = "2026.11.0"
+release = 1
+summary = "Federated microblogging platform (SKELETON)"
+license = "AGPL-3.0-only"
+homepage = "https://misskey-hub.net"
+options = ["!check"]
+
+install = '''
+echo "misskey is a skeleton: see the header of this recipe" >&2
+exit 1
+'''

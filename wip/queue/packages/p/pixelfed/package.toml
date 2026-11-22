@@ -1,0 +1,20 @@
+# SKELETON, not written. Pixelfed 2026.05-1 (federated photo sharing, ActivityPub; Laravel/PHP, MariaDB or PostgreSQL, Redis,
+# ffmpeg, optional libvips/imagick). Tag 2026.05-1 of github.com/pixelfed/pixelfed.
+# The tree has no `composerdeps` store: PHP apps (bookstack, kimai, passbolt) list every composer.lock package as a
+# source entry with a composer-local.py (files/) that points composer at them. Pixelfed's composer.lock has ~170 packages, so
+# the recipe is a long generated source list (a generator script: composer.lock -> `{ url, sha256 }` lines, needs one download per
+# package to compute the sha256) and the front end (Vue + Laravel Mix: package-lock.json is committed: npmdeps works)
+# or the prebuilt public/ assets the release does not ship (the repo only has sources: the build is `npm run production`).
+# Not blocked by anything fundamental; time only. A shared generator for Pixelfed/Friendica would pay off.
+name = "pixelfed"
+version = "2026.05.1"
+release = 1
+summary = "Federated photo sharing platform (SKELETON)"
+license = "AGPL-3.0-only"
+homepage = "https://pixelfed.org"
+options = ["!check"]
+
+install = '''
+echo "pixelfed is a skeleton: see the header of this recipe" >&2
+exit 1
+'''

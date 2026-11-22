@@ -1,0 +1,22 @@
+# SKELETON, not written. Spacebar server (Discord-compatible chat server, TypeScript/Node.js: api, cdn, gateway, webrtc, in one repo
+# spacebarchat/server v0.15.2; PostgreSQL or SQLite via TypeORM, optional RabbitMQ). The web client is a separate repository
+# (spacebarchat/client, Fermi/ Vue... depending on the generation) with its own package-lock.
+# Feasible with npmdeps (package-lock.json is committed; `npm run build` is tsc). Open points before writing it:
+#  - native modules in its tree: `sqlite3` (node-gyp or prebuilt download), `@spacebar/..` image libs (sharp: npm musl package: fine),
+#    `node-fetch`/`msgpack` (JS), mediasoup-style WebRTC deps (`medooze`/`@jitsi`? check) in the webrtc server which need compiled C++ workers
+#    (the webrtc component can be left out at first: document it as not built).
+#  - the server needs its own config via environment (DATABASE, THREADS, PORT): shipped inert, no instance created.
+# Not blocked; time only. Not attempted because the repository layout (monorepo with several packages, git-sourced
+# dependencies in package.json) has to be read first.
+name = "spacebar-server"
+version = "0.15.2"
+release = 1
+summary = "Spacebar chat server (SKELETON)"
+license = "AGPL-3.0-only"
+homepage = "https://spacebar.chat"
+options = ["!check"]
+
+install = '''
+echo "spacebar-server is a skeleton: see the header of this recipe" >&2
+exit 1
+'''

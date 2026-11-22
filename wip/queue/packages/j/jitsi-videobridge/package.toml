@@ -1,0 +1,21 @@
+# SKELETON, not buildable yet. Jitsi Videobridge (JVB): the WebRTC selective forwarding unit of Jitsi Meet
+# (Kotlin/Java, XMPP client of Prosody, ICE/DTLS-SRTP, colibri2). Tag stable/jitsi-meet_11509 of
+# github.com/jitsi/jitsi-videobridge. Pairs with jitsi-meet and jicofo.
+# Blockers: the same as jicofo (Maven + Kotlin plugin closure through `mavendeps`, unproven in the tree; Jitsi's own
+# artifacts jitsi-utils, jicoco, ice4j, jitsi-media-transform, jitsi-srtp, Smack 4.4.8-jitsi-4 with git-describe
+# versions). ice4j and the SRTP implementation use JNI-free Java only (no native code), so nothing musl-specific is
+# known. Runtime layout as Debian's jitsi-videobridge2: /usr/share/jitsi-videobridge/{jvb.sh,jitsi-videobridge.jar,lib},
+# /etc/jitsi/videobridge/{jvb.conf,sip-communicator.properties} (written by the admin), dinit service (not enabled),
+# UDP 10000 and TCP 4443 open in the firewall.
+name = "jitsi-videobridge"
+version = "2.3"
+release = 1
+summary = "Jitsi Videobridge, WebRTC selective forwarding unit (SKELETON)"
+license = "Apache-2.0"
+homepage = "https://github.com/jitsi/jitsi-videobridge"
+options = ["!check"]
+
+install = '''
+echo "jitsi-videobridge is a skeleton: see the header of this recipe" >&2
+exit 1
+'''

@@ -1,0 +1,27 @@
+# SKELETON, not buildable yet. Jicofo (JItsi COnference FOcus): the conference focus of Jitsi Meet (Kotlin/Java,
+# XMPP client of Prosody, allocates the videobridge). Pairs with jitsi-meet (packages/j/jitsi-meet) and
+# jitsi-videobridge. Release: tag stable/jitsi-meet_11509 of github.com/jitsi/jicofo (version 1.1-SNAPSHOT in
+# the pom; Debian's 1.0-1236 style numbers come from the CI).
+# Blockers (what the recipe still needs):
+#  - Maven (`mavendeps`) build with the Kotlin compiler (kotlin.version 2.4.20 in the pom) and ktlint/spotbugs
+#    plugins in the plugin closure: needs the `restore` step (mvn -DskipTests -Dspotbugs.skip -Dktlint.skip
+#    package, with an apache-maven-*-bin.tar.gz source unpack = false); no recipe in the tree uses mavendeps yet,
+#    so that path is unproven; the JDK is in the tree (openjdk).
+#  - Dependencies on Jitsi's own artifacts with git-describe versions (org.jitsi:jitsi-utils 1.0-157-g01961f9,
+#    org.jitsi:jicoco 1.1-183-gfc70624, jitsi-xmpp-extensions, smack 4.4.8-jitsi-4): they are on Maven Central
+#    (jitsi-utils, jicoco) but the Smack fork "4.4.8-jitsi-4" must be checked on Central/jitsi maven repo before the
+#    restore step; a failure there means building those from their repositories (jitsi/jitsi-utils, jitsi/jicoco).
+#  - Runtime layout as Debian's jicofo package: /usr/share/jicofo/jicofo.jar + lib/*.jar, /etc/jitsi/jicofo/
+#    {jicofo.conf,sip-communicator.properties,logging.properties} written by the admin, dinit service (not enabled).
+name = "jicofo"
+version = "1.1"
+release = 1
+summary = "Jitsi Conference Focus (SKELETON)"
+license = "Apache-2.0"
+homepage = "https://github.com/jitsi/jicofo"
+options = ["!check"]
+
+install = '''
+echo "jicofo is a skeleton: see the header of this recipe" >&2
+exit 1
+'''

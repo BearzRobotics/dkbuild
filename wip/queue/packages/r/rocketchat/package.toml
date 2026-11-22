@@ -1,0 +1,24 @@
+# SKELETON, infeasible offline as it stands. Rocket.Chat 9.0.0 (team chat; Meteor application on Node.js with MongoDB).
+# Upstream builds with the Meteor tool (`meteor build`): Meteor itself is a ~1 GB bootstrap that downloads its own
+# Node, MongoDB, and its package catalogue ("atmosphere" packages and the Meteor Isopacket cache) from
+# warehouse.meteor.com at run time; none of that has a lockfile format the dep stores understand (the repo's
+# .meteor/versions pins package versions, the files come from Meteor's servers). On top: a yarn 4 workspace with ~4000
+# packages (apps/meteor, packages/*, ee/) pinned by yarn.lock (yarn-lock can pin it), a MongoDB server (AGPL/SSPL licence:
+# MongoDB 7+ is SSPL: check the tree: it has no mongodb package; FerretDB/Percona would be the open options) and
+# the Enterprise Edition code (ee/) under a source-available licence.
+# Blockers: Meteor tool + package cache (no store), MongoDB (not in the tree; SSPL), Rocket.Chat's own use of
+# `meteor npm`. What would work: the prebuilt bundle (rocket.chat-<ver>.tgz from the release server, policy allows
+# prebuilt web files but this is the whole compiled server: Node 22 + a patched Meteor node) + npm rebuild of its
+# native modules (npm install in programs/server). Not written: needs the user's decision on the prebuilt server bundle.
+name = "rocketchat"
+version = "9.0.0"
+release = 1
+summary = "Rocket.Chat team chat server (SKELETON)"
+license = "MIT"
+homepage = "https://rocket.chat"
+options = ["!check"]
+
+install = '''
+echo "rocketchat is a skeleton: see the header of this recipe" >&2
+exit 1
+'''

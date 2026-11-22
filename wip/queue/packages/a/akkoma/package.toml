@@ -1,0 +1,25 @@
+# SKELETON, not buildable yet. Akkoma 3.20.1 (Pleroma fork, ActivityPub microblogging; Elixir/Phoenix, PostgreSQL).
+# Source: https://akkoma.dev/AkkomaGang/akkoma/archive/v3.20.1.tar.gz. The tree has elixir and erlang (packages/e/elixir,
+# packages/e/erlang). Pleroma itself (git.pleroma.social) is the same shape; one of the two, not both.
+# Blockers:
+#  - Dependencies come from Hex (mix.lock pins ~120 packages with hashes: inner/outer checksums, and some git
+#    deps: e.g. a Majic/Phoenix fork), and there is no `hexdeps` store: `mix deps.get` would need the network. A hex
+#    store (mix.lock -> hex.pm tarballs, laid in deps/ for `mix deps.compile`) is the missing dkbuild feature;
+#    alternatively `mix deps.get` on the host and a "deps/" snapshot tarball like snapshot-*.sh.
+#  - NIF/native deps compiled by mix: majic (libmagic), vix/libvips? (akkoma uses `vix`: libvips through a precompiled
+#    NIF download unless VIX_COMPILATION_MODE=PLATFORM_PROVIDED_LIBVIPS), fast_html (lexbor, CMake), argon2/ssl
+#    (cmake), rustler-based crates (cargodeps needed for each, e.g. fast_html uses C only).
+#  - `mix release` layout and an inert dinit service; /etc/akkoma/config.exs written by `mix pleroma.instance gen`
+#    (the user runs it; creates the first admin on request).
+name = "akkoma"
+version = "3.20.1"
+release = 1
+summary = "Federated microblogging server, Pleroma fork (SKELETON)"
+license = "AGPL-3.0-only"
+homepage = "https://akkoma.social"
+options = ["!check"]
+
+install = '''
+echo "akkoma is a skeleton: see the header of this recipe" >&2
+exit 1
+'''
