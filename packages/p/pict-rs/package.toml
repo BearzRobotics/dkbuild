@@ -17,7 +17,7 @@ rundeps = ["ffmpeg", "imagemagick", "perl-image-exiftool"]
 options = ["!check", "cargodeps"]
 
 source = [
-    { url = "https://git.asonix.dog/asonix/pict-rs/archive/v0.5.25.tar.gz", sha256 = "1c830e22912c0df2c6d47d5f4d9faf7f0a3d34df75185644ce589d3459df811e" },
+    { url = "https://git.asonix.dog/asonix/pict-rs/archive/v0.5.25.tar.gz", sha256 = "7f6bf58d4de8f7962ab3700183f357a77fceecff195f3698ccde0b867c7d2178" },
 ]
 
 environment = '''
