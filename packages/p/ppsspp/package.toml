@@ -1,0 +1,43 @@
+# PPSSPP: PlayStation Portable emulator (GPL-2.0), SDL frontend.
+# The release tarball carries the submodules (glslang, SPIRV-Cross, armips,
+# cpu_features, ...), so nothing is downloaded. The system libraries are used
+# wherever PPSSPP supports it (-DUSE_SYSTEM_*): its tree otherwise ships
+# prebuilt FFmpeg binaries, which are not used here.
+# No Discord rich presence (-DUSE_DISCORD=OFF: proprietary SDK). The Qt5 UI
+# is not built: Qt5 is not in the tree and the SDL UI is the maintained one.
+name = "ppsspp"
+version = "1.19.3"
+release = 1
+summary = "PSP emulator"
+license = "GPL-2.0-or-later"
+homepage = "https://www.ppsspp.org"
+hostdeps = ["cmake", "ninja", "pkgconf", "python"]
+builddeps = ["ffmpeg-devel", "glew-devel", "libpng-devel", "libzip-devel", "mesa-devel", "miniupnpc-devel", "sdl2-compat-devel", "sdl2-ttf-devel", "snappy-devel", "zlib-ng-compat-devel", "zstd-devel", "libx11-devel", "vulkan-headers", "vulkan-loader-devel", "wayland-devel", "fontconfig-devel"]
+options = ["jobs:12", "!check"]  # no tests that run headless
+
+source = [
+    { url = "https://github.com/hrydgard/ppsspp/releases/download/v1.19.3/ppsspp-1.19.3.tar.xz", sha256 = "054401fa7fffbd99b7fd80e98a2951d6f0c3de83cb4b54719899c98bfad99614" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DUSE_DISCORD=OFF \
+    -DUSE_SYSTEM_FFMPEG=ON \
+    -DUSE_SYSTEM_LIBPNG=ON \
+    -DUSE_SYSTEM_LIBSDL2=ON \
+    -DUSE_SYSTEM_LIBZIP=ON \
+    -DUSE_SYSTEM_MINIUPNPC=ON \
+    -DUSE_SYSTEM_SNAPPY=ON \
+    -DUSE_SYSTEM_ZSTD=ON \
+    -DUSING_QT_UI=OFF \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -Wno-dev
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE.TXT "$pkgdir/usr/share/licenses/ppsspp/LICENSE.TXT"
+'''

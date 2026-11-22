@@ -1,0 +1,28 @@
+# X-Moto: 2D motocross platform game with physics (GPL-2.0; levels and art
+# are free licences). Patch (Alpine): add the missing <cstdint> includes that
+# libc++ no longer provides transitively.
+name = "xmoto"
+version = "0.6.3"
+release = 1
+summary = "Challenging 2D motocross platform game"
+license = "GPL-2.0-or-later"
+homepage = "https://xmoto.org"
+patches = ["add-missing-cstdint-includes.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf", "gettext"]
+builddeps = ["bzip2-devel", "curl-devel", "glu-devel", "libjpeg-turbo-devel", "libxdg-basedir-devel", "libxml2-devel", "mesa-devel", "sdl2-compat-devel", "sdl2-mixer-devel", "sdl2-net-devel", "sdl2-ttf-devel", "sqlite-devel", "xz-devel", "zlib-ng-compat-devel", "libpng-devel"]
+options = ["!check"]  # no test suite
+
+source = [
+    { url = "https://github.com/xmoto/xmoto/archive/refs/tags/v0.6.3.tar.gz", sha256 = "64cb29934660456ec82cebdaa0d3d273a862e10760e8ee80443928d317242484" },
+]
+
+setup = '''
+%cmake -DCMAKE_BUILD_TYPE=Release
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xmoto/COPYING"
+'''

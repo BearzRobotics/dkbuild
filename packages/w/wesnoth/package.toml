@@ -1,0 +1,34 @@
+# The Battle for Wesnoth: turn-based fantasy strategy game (GPL-2.0, art and
+# music under GPL/CC-BY-SA). Includes the client, the multiplayer server
+# wesnothd and the campaign server (inert: nothing is started by the package).
+name = "wesnoth"
+version = "1.18.7"
+release = 1
+summary = "Turn-based strategy game in a fantasy world"
+license = "GPL-2.0-only"
+homepage = "https://www.wesnoth.org"
+hostdeps = ["cmake", "ninja", "pkgconf", "gettext"]
+builddeps = ["boost-devel", "cairo-devel", "curl-devel", "dbus-devel", "fontconfig-devel", "libvorbis-devel", "libogg-devel", "openssl-devel", "pango-devel", "readline-devel", "sdl2-compat-devel", "sdl2-image-devel", "sdl2-mixer-devel", "zlib-ng-compat-devel", "fribidi-devel", "mesa-devel", "libx11-devel"]
+rundeps = ["wesnoth-data"]
+options = ["jobs:12", "!check"]  # no unit tests are built by default and the game tests need a display
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/wesnoth/wesnoth-1.18/wesnoth-1.18.7/wesnoth-1.18.7.tar.bz2", sha256 = "d6b50cfdf4388954a1c3da66a61abacdc7643a17aa78a16196e16e720a661fc2" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DCMAKE_BUILD_TYPE=Release
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/wesnoth/COPYING"
+'''
+
+[subpackages.data]
+summary = "Wesnoth campaigns, units, maps, images and sounds"
+paths = ["/usr/share/wesnoth"]

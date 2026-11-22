@@ -1,0 +1,37 @@
+# Endless Sky: 2D space trading and combat game in the spirit of Escape
+# Velocity (GPL-3.0; art and sounds under CC-BY-SA/CC0/CC-BY, see
+# copyright files in the tarball). Builds from the tarball without vcpkg.
+name = "endless-sky"
+version = "0.11.4"
+release = 1
+summary = "Space exploring, trading and combat game"
+license = "GPL-3.0-or-later"
+homepage = "https://endless-sky.github.io"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["glew-devel", "libavif-devel", "libjpeg-turbo-devel", "libmad-devel", "libpng-devel", "minizip-devel", "openal-soft-devel", "sdl2-compat-devel", "mesa-devel", "util-linux-devel", "zlib-ng-compat-devel"]
+options = ["jobs:12", "!check"]  # the unit tests are not built (-DBUILD_TESTING=OFF)
+
+source = [
+    { url = "https://github.com/endless-sky/endless-sky/archive/refs/tags/v0.11.4.tar.gz", sha256 = "971399cc91956171261f5a36429572201a35662db2b1d3615fd6043ee4a38a61" },
+]
+
+setup = '''
+# -DES_USE_VCPKG=OFF: use the system libraries; -DES_BUILD... see CMakeLists
+%cmake \
+    -DES_USE_VCPKG=OFF \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# upstream installs into /usr/games
+if [ -d "$pkgdir/usr/games" ]; then
+    mkdir -p "$pkgdir/usr/bin"
+    mv "$pkgdir"/usr/games/* "$pkgdir/usr/bin/"
+    rmdir "$pkgdir/usr/games"
+fi
+install -Dm644 copyright "$pkgdir/usr/share/licenses/endless-sky/copyright"
+'''

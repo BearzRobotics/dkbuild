@@ -1,0 +1,40 @@
+# Warzone 2100: 3D real-time strategy on a devastated future Earth (GPL-2.0).
+# The art, sounds and music are CC-BY-SA/GPL-compatible and ship in the
+# source tarball (warzone2100_src.tar.xz carries its bundled third-party
+# libraries too). Data goes to the -data subpackage.
+# Options: no Discord rich presence (-DENABLE_DISCORD=OFF: a proprietary
+# SDK/online service), warnings are not errors (clang/libc++ flags new ones).
+name = "warzone2100"
+version = "4.7.0"
+release = 1
+summary = "3D realtime strategy game on a future Earth"
+license = "GPL-2.0-or-later"
+homepage = "https://wz2100.net"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["asciidoctor", "cmake", "gawk", "ninja", "pkgconf", "zip", "unzip"]
+builddeps = ["curl-devel", "fmt-devel", "freetype-devel", "fribidi-devel", "harfbuzz-devel", "libpng-devel", "libsodium-devel", "libtheora-devel", "libvorbis-devel", "libogg-devel", "libzip-devel", "mesa-devel", "miniupnpc-devel", "openal-soft-devel", "ocl-icd-devel", "opus-devel", "physfs-devel", "sdl2-compat-devel", "sqlite-devel", "vulkan-headers", "vulkan-loader-devel", "zstd-devel", "zlib-ng-compat-devel", "libx11-devel"]
+rundeps = ["warzone2100-data"]
+options = ["jobs:12", "!check"]  # no unit tests that run headless
+
+source = [
+    { url = "https://github.com/Warzone2100/warzone2100/releases/download/4.7.0/warzone2100_src.tar.xz", sha256 = "95ee4d5b88680ea1b1cf230b67ea84028e08a2458b84605ac9f7fb9eb97c4e37" },
+]
+
+setup = '''
+%cmake \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DWZ_DISTRIBUTOR="dkbuild" \
+    -DWZ_ENABLE_WARNINGS_AS_ERRORS=OFF \
+    -DENABLE_DISCORD=OFF \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''
+
+[subpackages.data]
+summary = "Warzone 2100 game data"
+paths = ["/usr/share/warzone2100"]

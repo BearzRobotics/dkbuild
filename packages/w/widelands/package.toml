@@ -1,0 +1,45 @@
+# Widelands: real-time strategy game with emphasis on economy and transport,
+# inspired by The Settlers II (GPL-2.0; the game's art and music are free
+# licences, see data/txts/LICENSE and COPYING in the tarball).
+# Patches (Alpine):
+#  - 0001-link-libintl: musl has no libintl in libc; link the gettext one.
+#  - gcc12-no-werror: do not turn warnings into errors (clang/libc++ has
+#    different warnings than the version upstream tests).
+name = "widelands"
+version = "1.3.1"
+release = 1
+summary = "Realtime strategy game with emphasis on economy and transport"
+license = "GPL-2.0-or-later"
+homepage = "https://widelands.org"
+patches = ["0001-link-libintl.patch", "gcc12-no-werror.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf", "gettext", "python", "doxygen", "graphviz"]
+builddeps = ["asio", "boost-devel", "curl-devel", "dbus-devel", "gettext-devel", "glew-devel", "libpng-devel", "mesa-devel", "sdl2-compat-devel", "sdl2-image-devel", "sdl2-mixer-devel", "sdl2-net-devel", "sdl2-ttf-devel", "zlib-ng-compat-devel", "libx11-devel", "icu-devel"]
+rundeps = ["lua", "python", "widelands-data"]
+options = ["jobs:12", "!check"]  # the test target needs a display and the data directory
+
+source = [
+    { url = "https://github.com/widelands/widelands/archive/v1.3.1/widelands-v1.3.1.tar.gz", sha256 = "e6f3e8f4fcafd367962dbacde80e26fc63afad38cfe26fadba9c92d4a01bd687" },
+]
+
+setup = '''
+%cmake \
+    -Wno-dev \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DWL_INSTALL_BASEDIR=/usr \
+    -DWL_INSTALL_DATADIR=/usr/share/widelands
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# upstream installs into /usr/games and puts the text files in /usr
+mv "$pkgdir/usr/games" "$pkgdir/usr/bin"
+install -dm755 "$pkgdir/usr/share/doc/widelands" "$pkgdir/usr/share/licenses/widelands"
+for f in VERSION ChangeLog CREDITS; do mv "$pkgdir/usr/$f" "$pkgdir/usr/share/doc/widelands/"; done
+mv "$pkgdir/usr/COPYING" "$pkgdir/usr/share/licenses/widelands/"
+'''
+
+[subpackages.data]
+summary = "Widelands game data"
+paths = ["/usr/share/widelands"]
