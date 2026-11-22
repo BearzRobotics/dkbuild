@@ -1,0 +1,39 @@
+# Mednafen: multi-system emulator (NES, SNES, Game Boy/GBA, Genesis, PC
+# Engine, PlayStation, Saturn, Lynx, Neo Geo Pocket, WonderSwan, Virtual
+# Boy...), command-line front end with SDL2/OpenGL (GPL-2.0).
+# fixup-autotools-and-flags.patch (Chimera): builds against the system gettext
+# (no bundled intl), adds AC_PROG_RANLIB, drops GCC-only optimizer flag probes.
+# -DMDFN_DISABLE_PICPIE_ERRWARN: the build refuses to run if not PIE-checked.
+# -fno-strict-aliasing: the emulator cores rely on it.
+name = "mednafen"
+version = "1.32.1"
+release = 1
+summary = "Multi-system emulator"
+license = "GPL-2.0-or-later"
+homepage = "https://mednafen.github.io"
+patches = ["fixup-autotools-and-flags.patch"]
+hostdeps = ["automake", "autoconf", "autoconf-archive", "gettext", "pkgconf"]
+builddeps = ["alsa-lib-devel", "flac-devel", "gettext-devel", "glu-devel", "lzo-devel", "sdl2-compat-devel", "zlib-ng-compat-devel", "zstd-devel", "libsndfile-devel", "mesa-devel"]
+options = ["!check"]  # no useful checks without ROMs
+
+source = [
+    { url = "https://mednafen.github.io/releases/files/mednafen-1.32.1.tar.xz", sha256 = "de7eb94ab66212ae7758376524368a8ab208234b33796625ca630547dbc83832" },
+]
+
+environment = '''
+export CFLAGS="${CFLAGS} -DMDFN_DISABLE_PICPIE_ERRWARN -fno-strict-aliasing -fwrapv"
+export CXXFLAGS="${CXXFLAGS} -DMDFN_DISABLE_PICPIE_ERRWARN -fno-strict-aliasing -fwrapv"
+'''
+setup = '''
+autoreconf -if -W none
+%configure \
+    --with-external-libzstd \
+    --with-external-lzo
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/mednafen/COPYING"
+'''
