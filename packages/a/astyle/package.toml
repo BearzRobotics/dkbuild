@@ -1,0 +1,35 @@
+name = "astyle"
+version = "3.6.27"
+release = 1
+summary = "Source code indenter and formatter (binary, shared and static library)"
+license = "MIT"
+homepage = "https://astyle.sourceforge.net"
+hostdeps = ["make"]
+# Built as a library for KDevelop's formatter plugin; the Makefile builds
+# the binary (release), libastyle.so (shared) and libastyle.a (static).
+# The tests need the separate AStyleTest tree and wx.
+options = ["!check"]
+
+source = [
+    { url = "https://gitlab.com/saalen/astyle/-/archive/3.6.27/astyle-3.6.27.tar.bz2", sha256 = "7fff182da6ce93bc1d42cada9b71baaa7048d7fe062565ac1d17e7cf699b45b9" },
+]
+
+build = '''
+cd AStyle/build/gcc
+# The Makefile defaults CXX to g++ and passes CFLAGS to the compiler: give it ours.
+make CXX="${CXX:-c++}" CFLAGS="$CXXFLAGS" release shared static
+'''
+# The upstream `install` target runs `install -o $USER -g $USER` and drops the
+# libraries, so install by hand (Alpine patches the Makefile for the same reason).
+install = '''
+cd AStyle/build/gcc
+install -Dm755 bin/astyle "$pkgdir/usr/bin/astyle"
+install -Dm644 ../../src/astyle.h "$pkgdir/usr/include/astyle.h"
+install -d "$pkgdir/usr/lib"
+cp -P bin/libastyle.so* "$pkgdir/usr/lib/"
+install -m644 bin/libastyle.a "$pkgdir/usr/lib/libastyle.a"
+install -d "$pkgdir/usr/share/doc/astyle/html"
+install -m644 ../../doc/* "$pkgdir/usr/share/doc/astyle/html/"
+install -Dm644 ../../man/astyle.1 "$pkgdir/usr/share/man/man1/astyle.1"
+install -Dm644 ../../LICENSE.md "$pkgdir/usr/share/licenses/astyle/LICENSE.md"
+'''

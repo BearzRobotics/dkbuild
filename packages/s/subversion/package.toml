@@ -1,0 +1,48 @@
+# After Chimera main/subversion (1.14 LTS).
+name = "subversion"
+version = "1.14.5"
+release = 1
+summary = "Centralized version control system"
+license = "Apache-2.0"
+homepage = "https://subversion.apache.org"
+hostdeps = ["gettext", "pkgconf", "python"]
+builddeps = ["apr-devel", "apr-util-devel", "file-devel", "libsasl-devel", "libsecret-devel", "lz4-devel", "serf-devel", "sqlite-devel", "utf8proc-devel", "zlib-ng-compat-devel"]
+rundeps = ["serf"]
+# The svn test suite needs a long run with local servers and a writable /tmp tree.
+options = ["!check"]
+
+source = [
+    { url = "https://archive.apache.org/dist/subversion/subversion-1.14.5.tar.bz2", sha256 = "e78a29e7766b8b7b354497d08f71a55641abc53675ce1875584781aae35644a1" },
+]
+
+setup = '''
+# javahl (Java bindings) and the Apache module mod_dav_svn / mod_authz_svn are not built:
+# no httpd module here (server packages are inert) and no JDK needed by any user.
+./configure \
+    --prefix=/usr \
+    --sysconfdir=/etc \
+    --disable-javahl \
+    --disable-mod-activation \
+    --with-apr=/usr \
+    --with-apr-util=/usr \
+    --with-serf=/usr \
+    --with-sqlite-prefix=/usr \
+    --with-lz4=/usr \
+    --with-utf8proc=/usr \
+    --with-sasl=/usr \
+    --with-editor=vi \
+    --enable-static
+'''
+build = '''
+make
+'''
+install = '''
+make DESTDIR="$pkgdir" install
+make DESTDIR="$pkgdir" install-tools toolsdir=/usr/bin
+# The Perl SWIG bindings (SVN::*) are not built: nothing in the tree uses them.
+# svn's bash completion (needs no bash at run time).
+install -Dm644 tools/client-side/bash_completion "$pkgdir/usr/share/bash-completion/completions/svn"
+# diff, diff3, diff4 from the tools would conflict with diffutils.
+rm -f "$pkgdir"/usr/bin/diff "$pkgdir"/usr/bin/diff3 "$pkgdir"/usr/bin/diff4
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/subversion/LICENSE"
+'''

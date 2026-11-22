@@ -1,0 +1,26 @@
+name = "kdevelop-pg-qt"
+version = "2.4.0"
+release = 1
+summary = "KDevelop parser generator (used by KDevelop's QMake manager plugin)"
+license = "GPL-2.0-or-later"
+homepage = "https://invent.kde.org/kdevelop/kdevelop-pg-qt"
+hostdeps = ["bison", "cmake", "extra-cmake-modules", "flex", "ninja", "pkgconf"]
+builddeps = ["qt6-qtbase-devel"]
+# Installs the kdev-pg-qt generator and its CMake package (KDevelop-PG-Qt), which KDevelop's
+# CMake finds to build the QMake parser. The tests need a display-less Qt but pull in generated parsers; skip.
+options = ["!check"]
+
+source = [
+    { url = "https://invent.kde.org/kdevelop/kdevelop-pg-qt/-/archive/v2.4.0/kdevelop-pg-qt-v2.4.0.tar.gz", sha256 = "2ca54368ec23ca4c90c8014da5653956b12bb6d8b586bca359d0f8811da3e4a8" },
+]
+
+setup = '''
+%cmake -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSES/GPL-2.0-or-later.txt "$pkgdir/usr/share/licenses/kdevelop-pg-qt/GPL-2.0-or-later.txt"
+'''
