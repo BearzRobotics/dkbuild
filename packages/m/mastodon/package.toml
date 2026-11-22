@@ -28,7 +28,7 @@ rundeps = ["ruby4.0", "nodejs", "nginx", "libvips", "ffmpeg", "imagemagick", "fi
 options = ["!check", "!strip", "gemdeps", "npmdeps", "jobs:8"]
 
 source = [
-    { url = "https://github.com/mastodon/mastodon/archive/refs/tags/v4.7.6.tar.gz", sha256 = "28ad1bf5cf4b007c2086b1e011351fd25d96e4d90d192c46b5442b75a3bbe3a1" },
+    { url = "https://github.com/mastodon/mastodon/archive/refs/tags/v4.7.6.tar.gz", sha256 = "5b069da8bf9f281712e99fd1d3e22c11289131bc3632d76965f35759c931e4a7" },
     { url = "https://repo.yarnpkg.com/4.18.1/packages/yarnpkg-cli/bin/yarn.js", sha256 = "a28ad591febb769f939c11f82f89bacad0b0fac0c884d3b78fa2aaaee970907e", unpack = false },
 ]
 
