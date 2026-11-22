@@ -1,0 +1,39 @@
+# Dungeon Crawl Stone Soup: roguelike dungeon crawler (GPL-2.0-or-later; art
+# and sounds CC0/CC-BY/public domain, see LICENSE and licence.txt). This
+# builds the console (curses) game; the tiles/SDL build shares the same name
+# in upstream's Makefile and is left for a separate package.
+# The "full" release tarball includes the contrib sources of lua, sqlite,
+# pcre, zlib and freetype; the build uses the system sqlite and zlib and
+# ncurses, and Crawl's own modified Lua 5.1 (it patches the language), which
+# is why the contribs are kept.
+# crash.cc: the backtrace code is guarded for Android only, but it uses
+# execinfo.h which musl does not have: treat every non-glibc libc like
+# Android (from Void Linux's recipe).
+name = "crawl"
+version = "0.34.1"
+release = 1
+summary = "Dungeon Crawl Stone Soup roguelike adventure"
+license = "GPL-2.0-or-later"
+homepage = "https://crawl.develz.org"
+hostdeps = ["bison", "flex", "perl", "pkgconf", "python", "python-pyyaml", "which"]
+builddeps = ["ncurses-devel", "sqlite-devel", "zlib-ng-compat-devel", "bzip2-devel"]
+options = ["jobs:12", "!check"]  # no unit tests are built
+
+source = [
+    { url = "https://github.com/crawl/crawl/releases/download/0.34.1/stone_soup-0.34.1.tar.xz", sha256 = "473b9cdc16be0b537ac11e43c6c77db4b290000e4a17f72a842eba59c6b7be2a" },
+]
+
+setup = '''
+sed -i 's/defined(__ANDROID__)/& || !defined(__GLIBC__)/' crawl-ref/source/crash.cc
+echo 0.34.1 > crawl-ref/source/util/release_ver
+'''
+build = '''
+cd crawl-ref/source
+%make prefix=/usr bin_prefix=bin NO_TRY_GOLD=1 V=1 EXTERNAL_FLAGS="$CFLAGS" EXTERNAL_LDFLAGS="$LDFLAGS"
+'''
+install = '''
+cd crawl-ref/source
+make prefix=/usr bin_prefix=bin DESTDIR="$pkgdir" EXTERNAL_FLAGS="$CFLAGS" EXTERNAL_LDFLAGS="$LDFLAGS" install
+cd ../..
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/crawl/LICENSE" 2>/dev/null || install -Dm644 crawl-ref/LICENSE "$pkgdir/usr/share/licenses/crawl/LICENSE"
+'''
