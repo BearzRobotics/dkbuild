@@ -1,0 +1,39 @@
+# SuperTuxKart: 3D open-source kart racing game (GPL-3.0). The tracks, karts
+# and music are in supertuxkart-data (a subpackage; the game's art is under
+# free licences, CC-BY-SA/CC0/GPL, per asset).
+name = "supertuxkart"
+version = "1.5"
+release = 1
+summary = "Kart racing game"
+license = "GPL-3.0-or-later"
+homepage = "https://supertuxkart.net"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["bluez-devel", "curl-devel", "freetype-devel", "harfbuzz-devel", "libjpeg-turbo-devel", "libopenglrecorder-devel", "libpng-devel", "libvorbis-devel", "mesa-devel", "openal-soft-devel", "openssl-devel", "sdl2-compat-devel", "shaderc-devel", "sqlite-devel", "zlib-ng-compat-devel"]
+rundeps = ["supertuxkart-data"]
+options = ["jobs:12", "!check"]  # no unit tests upstream
+
+source = [
+    { url = "https://github.com/supertuxkart/stk-code/releases/download/1.5/SuperTuxKart-1.5-src.tar.gz", sha256 = "33cf8841e4ff4082d80b9248014295bbbea61d14683e86dff100e3ab8f7b27cb" },
+]
+
+setup = '''
+# The bundled enet is kept on purpose: the system enet has no IPv6 support,
+# which online play needs.  CMAKE_POLICY_VERSION_MINIMUM: bundled libs
+# declare an old cmake_minimum_required.
+%cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# stray static libs and cmake files of the bundled libraries (angelscript, ...)
+rm -rf "$pkgdir/usr/lib"
+# translation helper scripts, not data
+rm -f "$pkgdir"/usr/share/supertuxkart/data/po/*.py
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/supertuxkart/COPYING"
+'''
+
+[subpackages.data]
+summary = "SuperTuxKart tracks, karts, music and textures"
+paths = ["/usr/share/supertuxkart"]
