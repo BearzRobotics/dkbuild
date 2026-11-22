@@ -1,0 +1,25 @@
+# KDE Games: Mini-golf game (KDE Gear 26.08.2, Qt6/KF6).
+name = "kolf"
+version = "26.08.2"
+release = 1
+summary = "Mini-golf game"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/kolf"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcompletion-devel", "kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "ktextwidgets-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "libkdegames-devel", "qt6-qtbase-devel"]
+rundeps = ["libkdegames"]
+options = ["!check"]  # the tests, where there are any, need a display
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kolf-26.08.2.tar.xz", sha256 = "96d34c3e481be32536535fe01da3c4e14536a29a5ab6d3c4552a17c597a51dc8" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

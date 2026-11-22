@@ -1,0 +1,25 @@
+# KDE Games: Mahjongg solitaire game (KDE Gear 26.08.2, Qt6/KF6).
+name = "kmahjongg"
+version = "26.08.2"
+release = 1
+summary = "Mahjongg solitaire game"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/kmahjongg"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "ki18n-devel", "knewstuff-devel", "kxmlgui-devel", "libkdegames-devel", "libkmahjongg-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel"]
+rundeps = ["libkdegames"]
+options = ["!check"]  # the tests, where there are any, need a display
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kmahjongg-26.08.2.tar.xz", sha256 = "d104bc6517cd459cf671785e618cfb78c156566d43089012d8d8f57459dac3a1" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

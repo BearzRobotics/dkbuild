@@ -1,0 +1,25 @@
+# KDE Games: Bomberman-like arcade game (KDE Gear 26.08.2, Qt6/KF6).
+name = "granatier"
+version = "26.08.2"
+release = 1
+summary = "Bomberman-like arcade game"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/granatier"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "ki18n-devel", "kiconthemes-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "libkdegames-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel"]
+rundeps = ["libkdegames"]
+options = ["!check"]  # the tests, where there are any, need a display
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/granatier-26.08.2.tar.xz", sha256 = "2272c1d649caaf271ac7490ec849d83301e3c46e2751f78165b852dbdacbdac8" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

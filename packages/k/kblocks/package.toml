@@ -1,0 +1,25 @@
+# KDE Games: Falling blocks game (KDE Gear 26.08.2, Qt6/KF6).
+name = "kblocks"
+version = "26.08.2"
+release = 1
+summary = "Falling blocks game"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/kblocks"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "ki18n-devel", "kiconthemes-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "libkdegames-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel"]
+rundeps = ["libkdegames"]
+options = ["!check"]  # the tests, where there are any, need a display
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kblocks-26.08.2.tar.xz", sha256 = "14f0770c2a9955d962b7d5a7f1347e7f33c2694c61d3f4931af7a94e79f78a8f" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,25 @@
+# KDE Games: Breakout-like arcade game (KDE Gear 26.08.2, Qt6/KF6).
+name = "kbreakout"
+version = "26.08.2"
+release = 1
+summary = "Breakout-like arcade game"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/kbreakout"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "ki18n-devel", "kiconthemes-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "libkdegames-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel"]
+rundeps = ["libkdegames"]
+options = ["!check"]  # the tests, where there are any, need a display
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kbreakout-26.08.2.tar.xz", sha256 = "434b78a64b064783d586f803af62352519681cc0b70f1eb7d84806a8e689c1f3" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

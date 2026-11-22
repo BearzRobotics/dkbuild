@@ -1,0 +1,25 @@
+# KDE Games: Space conquest strategy game (KDE Gear 26.08.2, Qt6/KF6).
+name = "konquest"
+version = "26.08.2"
+release = 1
+summary = "Space conquest strategy game"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/konquest"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kcolorscheme-devel", "kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "kguiaddons-devel", "ki18n-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "libkdegames-devel", "qt6-qtbase-devel", "qt6-qtscxml-devel", "qt6-qtsvg-devel"]
+rundeps = ["libkdegames"]
+options = ["!check"]  # the tests, where there are any, need a display
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/konquest-26.08.2.tar.xz", sha256 = "74de272b1778ebf7825bf24111a81e4bf54e16f23b9cd2329144dbd8c3f3d914" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

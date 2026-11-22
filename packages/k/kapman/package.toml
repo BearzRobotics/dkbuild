@@ -1,0 +1,25 @@
+# KDE Games: Pac-Man clone (KDE Gear 26.08.2, Qt6/KF6).
+name = "kapman"
+version = "26.08.2"
+release = 1
+summary = "Pac-Man clone"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/kapman"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "ki18n-devel", "kiconthemes-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "libkdegames-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel"]
+rundeps = ["libkdegames"]
+options = ["!check"]  # the tests, where there are any, need a display
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kapman-26.08.2.tar.xz", sha256 = "bbc6448e7ba0c841faae18682ea07c0f2c68ea70eb48c4b188b581a0e36f434a" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,25 @@
+# KDE Games: Colored marbles puzzle game (KDE Gear 26.08.2, Qt6/KF6).
+name = "klickety"
+version = "26.08.2"
+release = 1
+summary = "Colored marbles puzzle game"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/klickety"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "libkdegames-devel", "qt6-qtbase-devel"]
+rundeps = ["libkdegames"]
+options = ["!check"]  # the tests, where there are any, need a display
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/klickety-26.08.2.tar.xz", sha256 = "714f09c0934cc5d04b07db25734f635a2977b722c4af925420190b4a3107aaa2" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

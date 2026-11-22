@@ -1,0 +1,26 @@
+# KDE Games: Go board game front end (KDE Gear 26.08.2, Qt6/KF6).
+# GNU Go (the engine Kigo drives) is not packaged; Kigo also works with other GTP engines.
+name = "kigo"
+version = "26.08.2"
+release = 1
+summary = "Go board game front end"
+license = "GPL-2.0-only AND GPL-3.0-only"
+homepage = "https://apps.kde.org/kigo"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "knewstuff-devel", "ktextwidgets-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "libkdegames-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel"]
+rundeps = ["libkdegames"]
+options = ["!check"]  # the tests, where there are any, need a display
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kigo-26.08.2.tar.xz", sha256 = "ead40096100a10c564b4800d841bea0eb7914d904cde89677e272612662784c5" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''
