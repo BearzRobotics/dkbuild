@@ -1,0 +1,56 @@
+# Xonotic: fast-paced arena first-person shooter on the DarkPlaces engine
+# (GPL-2.0; art and maps under GPL/CC-BY-SA). This is the engine (GLX, SDL
+# and dedicated server) and d0_blind_id (player id signing); the game data
+# (1.2 GB) is xonotic-data.
+# The engine is built from the source zip's source/darkplaces; the Xonotic
+# build system's own `make` target would try to download the data, so the
+# darkplaces Makefile is called directly (as Chimera does).
+name = "xonotic"
+version = "0.8.6"
+release = 1
+summary = "Free, fast-paced cross-platform first-person shooter"
+license = "GPL-2.0-or-later AND BSD-3-Clause"
+homepage = "https://xonotic.org"
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf"]
+builddeps = ["alsa-lib-devel", "curl-devel", "gmp-devel", "libjpeg-turbo-devel", "libmodplug-devel", "libvorbis-devel", "libxpm-devel", "libxxf86vm-devel", "mesa-devel", "sdl2-compat-devel", "libx11-devel", "libogg-devel"]
+rundeps = ["xonotic-data"]
+options = ["!check"]  # no tests
+
+source = [
+    { url = "https://dl.xonotic.org/xonotic-0.8.6-source.zip", sha256 = "8b92ac781cff4ae89c121a23eacd7dec05a2aabedaccc23a19d1a0958b4012a8" },
+]
+
+setup = '''
+cd source/d0_blind_id
+# d0_blind_id's configure: no rijndael (the key exchange uses the system's gmp)
+./configure --prefix=/usr --disable-rijndael
+'''
+build = '''
+# the floating point flags the DarkPlaces engine needs (Chimera/Alpine)
+FPFLAGS="-fno-math-errno -fno-rounding-math -fno-trapping-math"
+for p in cl sdl sv; do
+    make -C source/darkplaces -j"$jobs" \
+        OPTIM_RELEASE="$CFLAGS $FPFLAGS $LDFLAGS" \
+        "$p-release" \
+        DP_LINK_TO_LIBJPEG=1 \
+        DP_FS_BASEDIR=/usr/share/xonotic/ \
+        CFLAGS_SSE= CFLAGS_SSE2= \
+        CC="$CC"
+done
+make -C source/d0_blind_id -j"$jobs"
+'''
+install = '''
+install -Dm755 source/darkplaces/darkplaces-dedicated "$pkgdir/usr/bin/xonotic-dedicated"
+install -Dm755 source/darkplaces/darkplaces-glx "$pkgdir/usr/bin/xonotic-glx"
+install -Dm755 source/darkplaces/darkplaces-sdl "$pkgdir/usr/bin/xonotic-sdl"
+install -Dm644 /dkbuild/files/xonotic-glx.desktop "$pkgdir/usr/share/applications/xonotic-glx.desktop"
+install -Dm644 /dkbuild/files/xonotic-sdl.desktop "$pkgdir/usr/share/applications/xonotic-sdl.desktop"
+for f in 22 24 32 48 64 128 256 512; do
+    install -Dm644 misc/logos/icons_png/xonotic_$f.png "$pkgdir/usr/share/icons/hicolor/${f}x${f}/apps/xonotic.png"
+done
+install -Dm644 misc/logos/xonotic_icon.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/xonotic.svg"
+make -C source/d0_blind_id DESTDIR="$pkgdir" install
+install -Dm644 source/d0_blind_id/COPYING "$pkgdir/usr/share/licenses/xonotic/COPYING"
+# the d0_blind_id library is private to the game's key tooling: no headers or .so
+rm -rf "$pkgdir/usr/include" "$pkgdir/usr/lib/pkgconfig" "$pkgdir/usr/lib/libd0_blind_id.a" "$pkgdir/usr/lib/libd0_blind_id.so"
+'''

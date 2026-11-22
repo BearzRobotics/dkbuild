@@ -1,0 +1,20 @@
+# Xonotic game data: maps, models, textures, sounds, music (the full release
+# zip is 1.2 GB; the data is GPL-2.0 or CC-BY-SA per asset).
+name = "xonotic-data"
+version = "0.8.6"
+release = 1
+summary = "Xonotic game data"
+license = "GPL-2.0-or-later"
+homepage = "https://xonotic.org"
+options = ["!check", "!strip"]  # data only
+
+source = [
+    { url = "https://dl.xonotic.org/xonotic-0.8.6.zip", sha256 = "50850f8d800e7499722f6ea61e478e96464a375494b5a24da93aa0598cbe964d" },
+]
+
+install = '''
+install -dm755 "$pkgdir/usr/share/xonotic"
+cp -r data "$pkgdir/usr/share/xonotic/"
+install -Dm644 key_0.d0pk "$pkgdir/usr/share/xonotic/key_0.d0pk"
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/xonotic-data/COPYING" 2>/dev/null || install -Dm644 data/xonotic-data.pk3dir/COPYING "$pkgdir/usr/share/licenses/xonotic-data/COPYING" 2>/dev/null || true
+'''
