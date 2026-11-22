@@ -1,0 +1,25 @@
+# KDE Games: Sudoku puzzle game (KDE Gear 26.08.2, Qt6/KF6).
+name = "ksudoku"
+version = "26.08.2"
+release = 1
+summary = "Sudoku puzzle game"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/ksudoku"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["karchive-devel", "kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "kguiaddons-devel", "ki18n-devel", "kio-devel", "kjobwidgets-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "libkdegames-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel"]
+rundeps = ["libkdegames"]
+options = ["!check"]  # the tests, where there are any, need a display
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/ksudoku-26.08.2.tar.xz", sha256 = "2c273747dec718c3a7a09e59f3619c3c3330438a9b828de8d2610820613bda66" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''

@@ -1,0 +1,25 @@
+# KDE Games: 3D Rubik cube puzzle (KDE Gear 26.08.2, Qt6/KF6).
+name = "kubrick"
+version = "26.08.2"
+release = 1
+summary = "3D Rubik cube puzzle"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/kubrick"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "ki18n-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "libkdegames-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel"]
+rundeps = ["libkdegames"]
+options = ["!check"]  # the tests, where there are any, need a display
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kubrick-26.08.2.tar.xz", sha256 = "386ccb5cc3f8b1e672482443189377ff1f8729558a22f846e638826376584e62" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''
