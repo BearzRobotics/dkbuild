@@ -1,0 +1,45 @@
+# UZDoom: feature-rich Doom source port (the maintained continuation of
+# GZDoom; GPL-3.0-or-later for the engine, with the id Software, Build and
+# Raven code under their GPL-compatible licences: see docs/licenses in the
+# source). Plays Doom/Heretic/Hexen/Strife and their mods; needs a WAD:
+# freedoom is the free one.
+# Patches (Chimera): libcpp-reinterpret-nullptr (a NULL macro default that is
+# not valid under libc++'s nullptr), system-absl (use the system abseil-cpp
+# instead of the bundled copy). Chimera's fts patch is not needed: musl-fts
+# provides the pkg-config module the CMake file looks for by default.
+name = "uzdoom"
+version = "5.0.3"
+release = 1
+summary = "Feature-centric Doom source port"
+license = "GPL-3.0-or-later"
+homepage = "https://zdoom.org"
+patches = ["libcpp-reinterpret-nullptr.patch", "system-absl.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf", "python"]
+builddeps = ["abseil-cpp-devel", "alsa-lib-devel", "bzip2-devel", "dbus-devel", "fluidsynth-devel", "glib-devel", "libglvnd-devel", "libsndfile-devel", "libvpx-devel", "libwebp-devel", "libx11-devel", "mpg123-devel", "musl-fts-devel", "openal-soft-devel", "openmp-devel", "sdl2-compat-devel", "vulkan-loader-devel", "zlib-ng-compat-devel", "mesa-devel"]
+rundeps = ["freedoom"]
+options = ["jobs:12", "!check"]  # no tests
+
+source = [
+    { url = "https://github.com/UZDoom/UZDoom/archive/refs/tags/5.0.3.tar.gz", sha256 = "223d7abef2c7a63123824417a2fe5b22e21e7dcb2ac5c840fca43c470794cab7" },
+]
+
+environment = '''
+# -D_GNU_SOURCE: the sources use GNU extensions; Z7_AFFINITY_DISABLE: the
+# bundled 7-zip code's thread affinity call is glibc-only.
+export CFLAGS="${CFLAGS} -D_GNU_SOURCE -DZ7_AFFINITY_DISABLE"
+export CXXFLAGS="${CXXFLAGS} -D_GNU_SOURCE -DZ7_AFFINITY_DISABLE"
+'''
+setup = '''
+# the DYN_* options would dlopen the libraries at runtime; link them instead
+%cmake \
+    -DFORCE_INTERNAL_WEBP=OFF \
+    -DDYN_MPG123=OFF \
+    -DDYN_OPENAL=OFF \
+    -DDYN_SNDFILE=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''
