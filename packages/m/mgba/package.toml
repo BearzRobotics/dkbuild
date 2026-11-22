@@ -1,0 +1,31 @@
+# mGBA: Game Boy Advance (and Game Boy / Game Boy Color) emulator, MPL-2.0.
+# 0.10.5 has a Qt5 GUI only (Qt6 comes with the next release), so this builds
+# the SDL frontend (mgba, mgba-sdl via `mgba`) and the libmgba library; the
+# Qt GUI is switched off with -DBUILD_QT=OFF until the Qt6 release.
+name = "mgba"
+version = "0.10.5"
+release = 1
+summary = "Game Boy Advance emulator"
+license = "MPL-2.0"
+homepage = "https://mgba.io"
+hostdeps = ["cmake", "libzip-progs", "ninja", "pkgconf"]
+builddeps = ["elfutils-devel", "ffmpeg-devel", "libedit-devel", "libepoxy-devel", "libpng-devel", "libzip-devel", "lua-devel", "minizip-devel", "sdl2-compat-devel", "sqlite-devel", "zlib-ng-compat-devel"]
+options = ["!check"]  # the test target needs the ROM test suite, which is not shipped
+
+source = [
+    { url = "https://github.com/mgba-emu/mgba/archive/refs/tags/0.10.5.tar.gz", sha256 = "91d6fbd32abcbdf030d58d3f562de25ebbc9d56040d513ff8e5c19bee9dacf14" },
+]
+
+setup = '''
+# CMAKE_POLICY_VERSION_MINIMUM: cmake_minimum_required is older than cmake 4 accepts
+%cmake \
+    -DBUILD_QT=OFF \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/mgba/LICENSE"
+'''

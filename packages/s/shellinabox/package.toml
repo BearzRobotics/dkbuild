@@ -14,6 +14,12 @@ source = [
 ]
 
 setup = '''
+# musl's <utmp.h> has `#define utmp utmpx`, so launcher.c's childProcess(..., struct Utmp *utmp, ...) gets a
+# parameter named utmpx, and its `struct utmpx utmpx = utmp->utmpx;` then reads the new local variable
+# ("member reference type 'struct utmpx' is not a pointer"). Dropping the macro before that function
+# leaves utmp the parameter's name, as the code means it. (Source edit: sed.)
+sed -i '/^static void childProcess(/i #undef utmp' shellinabox/launcher.c
+test "$(grep -c '^#undef utmp$' shellinabox/launcher.c)" = 1
 autoreconf -fi
 %configure
 '''
