@@ -1,0 +1,44 @@
+# PoDoFo: C++ library to read, write and edit PDF files. Calibre's podofo
+# extension (PDF metadata, merging, outlines, images) is built against it and
+# its build aborts when PoDoFo is missing. 1.1.2 is the version calibre's own
+# builds use (bypy/sources.json, the same sha256), and calibre's sources carry
+# the PoDoFo >= 1.0 code paths.
+# The small header-only libraries it bundles (tcbspan, date, fastfloat, fmt,
+# utf8cpp, utf8proc in 3rdparty/) stay bundled, as upstream builds by default.
+# PODOFO_BUILD_LIB_ONLY: no tests, examples or tools.
+# Two build trees as in libtorrent-rasterbar: PODOFO_BUILD_STATIC selects one kind of
+# library per run, so the shared one is built first and the static one second, whose
+# .a files are installed by hand.
+name = "podofo"
+version = "1.1.2"
+release = 1
+summary = "C++ library for reading and writing PDF files"
+license = "LGPL-2.0-or-later"
+homepage = "https://github.com/podofo/podofo"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["fontconfig-devel", "freetype-devel", "lcms2-devel", "libjpeg-turbo-devel", "libpng-devel", "libtiff-devel", "libxml2-devel", "openssl-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/podofo/podofo/archive/refs/tags/1.1.2.tar.gz", sha256 = "d6ffe6fc173ac6d6e5b00f5cb9db01990cab1bdf7cc03bdeffce3013bc9ec63a" },
+]
+
+setup = '''
+%cmake \
+    -DPODOFO_BUILD_LIB_ONLY=ON \
+    -DPODOFO_BUILD_STATIC=OFF
+cmake -B build-static -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+    -DPODOFO_BUILD_LIB_ONLY=ON -DPODOFO_BUILD_STATIC=ON
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+install = '''
+%cmake_install
+# the static libraries (libpodofo.a and the private/3rdparty archives it needs)
+find build-static -name '*.a' -exec install -Dm644 -t "$pkgdir/usr/lib" {} +
+install -Dm644 COPYING.LGPL "$pkgdir/usr/share/licenses/podofo/COPYING.LGPL"
+install -Dm644 COPYING.MPL "$pkgdir/usr/share/licenses/podofo/COPYING.MPL"
+'''
