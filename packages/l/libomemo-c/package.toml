@@ -1,0 +1,28 @@
+# libomemo-c: OMEMO (XEP-0384) fork of libsignal-protocol-c, used by Dino (written 2026-11-22; not built).
+name = "libomemo-c"
+version = "0.5.1"
+release = 1
+summary = "OMEMO C library (libsignal-protocol-c fork)"
+license = "GPL-3.0-only"
+homepage = "https://github.com/dino/libomemo-c"
+hostdeps = ["meson", "ninja", "pkgconf"]
+builddeps = ["protobuf-c-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/dino/libomemo-c/archive/refs/tags/v0.5.1.tar.gz", sha256 = "d1b65dbf7bccc67523abfd5e429707f540b2532932d128b2982f0246be2b22a0" },
+]
+
+# -Dtests=false: the unit tests pull in the `check` library and a crypto test provider; libs ship static too.
+setup = '''
+%meson \
+    -Dtests=false \
+    -Ddefault_library=both
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libomemo-c/LICENSE"
+'''

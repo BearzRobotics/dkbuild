@@ -1,0 +1,43 @@
+# Dino 0.5.1: GTK4/libadwaita XMPP client in Vala (written 2026-11-22; not built).
+# Plugins: HTTP file upload, ICE (libnice), OMEMO (libomemo-c), OpenPGP (gpgme), RTP calls with
+# VP9/H264/VAAPI/MSDK codec probes (the codecs themselves come from the GStreamer plugin sets at
+# runtime), WebRTC audio processing, notification sounds (libcanberra).
+name = "dino"
+version = "0.5.1"
+release = 1
+summary = "Modern GTK XMPP chat client"
+license = "GPL-3.0-or-later"
+homepage = "https://dino.im"
+hostdeps = ["gettext", "glib-devel", "meson", "ninja", "pkgconf", "vala"]
+builddeps = [
+    "gdk-pixbuf-devel", "glib-devel", "gnutls-devel", "gpgme-devel", "gst-plugins-base-devel", "gstreamer-devel",
+    "gtk4-devel", "icu-devel", "libadwaita-devel", "libcanberra-devel", "libgcrypt-devel", "libgee-devel",
+    "libnice-devel", "libomemo-c-devel", "libsoup-devel", "libsrtp-devel", "qrencode-devel", "sqlite-devel",
+    "vala-devel", "webrtc-audio-processing-devel", "libva-devel",
+]
+rundeps = [
+    "glib-networking", "gst-plugins-base", "gst-plugins-good", "gst-plugins-bad", "libnice", "libsecret",
+    "adwaita-icon-theme", "gpgme",
+]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/dino/dino/releases/download/v0.5.1/dino-0.5.1.tar.gz", sha256 = "0b265ee3551dcddad5b62e188bdcab2cbb61a0d6a7e72107b2518a156b3ed665" },
+]
+
+# !check: the suite needs a session bus and display.
+setup = '''
+%meson \
+    -Dplugin-notification-sound=enabled \
+    -Dplugin-rtp-h264=enabled \
+    -Dplugin-rtp-msdk=enabled \
+    -Dplugin-rtp-vaapi=enabled \
+    -Dplugin-rtp-vp9=enabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/dino/LICENSE"
+'''
