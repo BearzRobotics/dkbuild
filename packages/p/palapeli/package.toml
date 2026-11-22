@@ -1,0 +1,25 @@
+# KDE Games: Jigsaw puzzle game (KDE Gear 26.08.2, Qt6/KF6).
+name = "palapeli"
+version = "26.08.2"
+release = 1
+summary = "Jigsaw puzzle game"
+license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
+homepage = "https://apps.kde.org/palapeli"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = ["karchive-devel", "kcompletion-devel", "kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kitemviews-devel", "knotifications-devel", "kwidgetsaddons-devel", "kxmlgui-devel", "libkdegames-devel", "qt6-qtbase-devel", "qt6-qtsvg-devel"]
+rundeps = ["libkdegames"]
+options = ["!check"]  # the tests, where there are any, need a display
+
+source = [
+    { url = "https://download.kde.org/stable/release-service/26.08.2/src/palapeli-26.08.2.tar.xz", sha256 = "dd9227f194d8f7113ffbbd857e85e120d65467f98fa1b3928b84855a0e335295" },
+]
+
+setup = '''
+%cmake
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''
