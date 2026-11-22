@@ -1,0 +1,33 @@
+name = "plutosvg"
+version = "0.0.8"
+release = 1
+summary = "Tiny SVG rendering library in C (on plutovg); FreeType SVG-glyph hooks"
+license = "MIT"
+homepage = "https://github.com/sammycage/plutosvg"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["freetype-devel", "plutovg-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/sammycage/plutosvg/archive/refs/tags/v0.0.8.tar.gz", sha256 = "49d5cfe772d3aa10cd4879f2f6e189f5083c08e4c8ea01bf3d5b87c97dfca7d2" },
+]
+
+# PLUTOSVG_ENABLE_FREETYPE: the FreeType SVG-in-OpenType (emoji) renderer hooks, which PCSX2 uses.
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DPLUTOSVG_ENABLE_FREETYPE=ON \
+    -DPLUTOSVG_BUILD_EXAMPLES=OFF
+cmake -B build-static -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_LIBDIR=lib -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+    -DPLUTOSVG_ENABLE_FREETYPE=ON -DPLUTOSVG_BUILD_EXAMPLES=OFF
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+install = '''
+%cmake_install
+install -Dm644 "$(find build-static -name libplutosvg.a | head -n 1)" "$pkgdir/usr/lib/libplutosvg.a"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/plutosvg/LICENSE"
+'''

@@ -1,0 +1,38 @@
+name = "rapidyaml"
+version = "0.16.0"
+release = 1
+summary = "Fast YAML/JSON parser and emitter for C++ (ryml)"
+license = "MIT"
+homepage = "https://github.com/biojppm/rapidyaml"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+# The tests download and build googletest-style test data through submodules.
+options = ["!check"]
+
+source = [
+    # the release source archive includes the c4core and cmake-utils submodules
+    { url = "https://github.com/biojppm/rapidyaml/releases/download/v0.16.0/rapidyaml.v0.16.0.src.tgz", sha256 = "a0ce80a8f4211580c8703e57acb813a28ca6ec80908f6eb926be94be8e98d39d" },
+]
+
+setup = '''
+%cmake \
+    -DBUILD_SHARED_LIBS=ON \
+    -DRYML_BUILD_TESTS=OFF \
+    -DRYML_BUILD_TOOLS=OFF \
+    -DRYML_BUILD_BENCHMARKS=OFF
+cmake -B build-static -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_LIBDIR=lib -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+    -DRYML_BUILD_TESTS=OFF -DRYML_BUILD_TOOLS=OFF -DRYML_BUILD_BENCHMARKS=OFF
+'''
+build = '''
+%cmake_build
+cmake --build build-static
+'''
+install = '''
+%cmake_install
+# the static build installs the same headers and CMake package; only its archives are new
+for a in libryml.a libc4core.a; do
+    f=$(find build-static -name "$a" | head -n 1)
+    [ -n "$f" ] && cp "$f" "$pkgdir/usr/lib/$a"
+done
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/rapidyaml/LICENSE.txt"
+'''

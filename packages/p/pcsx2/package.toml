@@ -1,0 +1,66 @@
+# After Alpine testing/pcsx2 (1.7) and PCSX2's own Linux build files (2.x).
+# PCSX2 2.x ships its small bundled libraries in the source tree (3rdparty/: cubeb, fmt, imgui,
+# libchdr, libzip, rcheevos, soundtouch, xbyak, zydis, ...); the big ones come from the system.
+name = "pcsx2"
+version = "2.8.2"
+release = 1
+summary = "PlayStation 2 emulator (Qt6, Vulkan/OpenGL)"
+license = "GPL-3.0-or-later AND LGPL-3.0-or-later"
+homepage = "https://pcsx2.net"
+# x86_64 only here: the recipe is untested on aarch64 (upstream has an AArch64 port).
+archs = ["x86_64"]
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf", "qt6-qttools", "wayland-scanner", "zip"]
+builddeps = ["alsa-lib-devel", "curl-devel", "dbus-devel", "eudev-devel", "extra-cmake-modules", "ffmpeg-devel", "fontconfig-devel", "freetype-devel", "kddockwidgets-devel", "libbacktrace-devel", "libjpeg-turbo-devel", "libpcap-devel", "libpng-devel", "libpulse-devel", "libwebp-devel", "libx11-devel", "libxrandr-devel", "lz4-devel", "mesa-devel", "pipewire-devel", "plutosvg-devel", "plutovg-devel", "qt6-qtbase-devel", "qt6-qttools-devel", "rapidyaml-devel", "sdl3-devel", "shaderc-devel", "vulkan-headers", "vulkan-loader-devel", "wayland-devel", "wayland-protocols", "zlib-ng-compat-devel", "zstd-devel"]
+rundeps = ["vulkan-loader"]
+# ENABLE_TESTS=OFF: the unit tests need game data/BIOS images and a display.
+options = ["!check", "jobs:8"]
+
+source = [
+    { url = "https://github.com/PCSX2/pcsx2/archive/refs/tags/v2.8.2.tar.gz", sha256 = "8d1762d568c92198e61a284064d0e5c0d2c6ab1c5bac60ef1330dd0fe44d10a7" },
+    # Cheat/widescreen patches (.pnach). Upstream ships them as a patches.zip release asset that is
+    # republished under a moving "latest" tag; the repository at a fixed commit is pinned instead
+    # (Alpine does the same) and zipped in the build. Unpacks to /build/pcsx2_patches-<commit>.
+    { url = "https://github.com/PCSX2/pcsx2_patches/archive/b919d7fb5849feeb30b2da07d02f6dc662f28ba5.tar.gz", sha256 = "a8eea448a62878c3ac86e8846117265bd6c29f759b4792cc45df0f4503d68c83" },
+]
+
+setup = '''
+# libc++/clang: PCSX2's tree has deprecated-declaration and macro-redefinition noise (Alpine's flags).
+export CXXFLAGS="$CXXFLAGS -Wno-macro-redefined -Wno-deprecated-declarations"
+# DISABLE_ADVANCE_SIMD: do not require AVX2-only code paths on a generic x86-64 build (Alpine).
+# DISABLE_BUILD_DATE: reproducible. USE_LINKED_FFMPEG: link the system FFmpeg instead of dlopen.
+# USE_VTUNE off: Intel proprietary profiler. ENABLE_SETCAP off: no setcap at install (DEV9 networking
+# needs CAP_NET_RAW; the user grants it with setcap or sudo). X11_API and WAYLAND_API both on.
+%cmake \
+    -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON \
+    -DDISABLE_ADVANCE_SIMD=ON \
+    -DDISABLE_BUILD_DATE=ON \
+    -DENABLE_TESTS=OFF \
+    -DENABLE_SETCAP=OFF \
+    -DUSE_LINKED_FFMPEG=ON \
+    -DUSE_VTUNE=OFF \
+    -DUSE_VULKAN=ON \
+    -DQT_BUILD=ON \
+    -DWAYLAND_API=ON \
+    -DX11_API=ON
+'''
+build = '''
+%cmake_build
+# the cheat patches archive
+(cd ../pcsx2_patches-b919d7fb5849feeb30b2da07d02f6dc662f28ba5/patches && zip -9 -q "$OLDPWD/patches.zip" ./*.pnach)
+'''
+# The build leaves the program and its resources/ (fonts, shaders, icons, game DB) in build/bin;
+# PCSX2 finds resources/ next to the executable, so the whole directory goes to /usr/lib/PCSX2
+# and /usr/bin/pcsx2 is a wrapper (as Alpine).
+install = '''
+install -d "$pkgdir/usr/lib/PCSX2"
+rm -f build/bin/*test*
+cp -a build/bin/. "$pkgdir/usr/lib/PCSX2/"
+install -Dm644 patches.zip "$pkgdir/usr/lib/PCSX2/resources/patches.zip"
+printf '#!/bin/sh\nexec /usr/lib/PCSX2/pcsx2-qt "$@"\n' > pcsx2.sh
+install -Dm755 pcsx2.sh "$pkgdir/usr/bin/pcsx2"
+install -Dm644 bin/resources/icons/AppIconLarge.png "$pkgdir/usr/share/icons/hicolor/256x256/apps/PCSX2.png"
+# upstream's launcher; its Exec is pcsx2-qt, which is not in PATH here: use the wrapper
+sed 's|^Exec=pcsx2-qt|Exec=pcsx2|' .github/workflows/scripts/linux/pcsx2-qt.desktop > PCSX2.desktop
+install -Dm644 PCSX2.desktop "$pkgdir/usr/share/applications/PCSX2.desktop"
+install -Dm644 COPYING.GPLv3 "$pkgdir/usr/share/licenses/pcsx2/COPYING.GPLv3"
+'''

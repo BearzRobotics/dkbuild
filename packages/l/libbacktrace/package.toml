@@ -1,0 +1,27 @@
+# libbacktrace has no releases: a snapshot of the master commit (the Alpine/Arch way).
+name = "libbacktrace"
+version = "0.0.20260903"
+release = 1
+summary = "C library to produce symbolic backtraces (from GCC)"
+license = "BSD-3-Clause"
+homepage = "https://github.com/ianlancetaylor/libbacktrace"
+hostdeps = ["pkgconf"]
+builddeps = ["zlib-ng-compat-devel", "zstd-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/ianlancetaylor/libbacktrace/archive/0b9b49cf4a2c9229fc052d6716e1528b2f23e91a.tar.gz", sha256 = "fabcb6868b3d09734d4c537637dacac0bf8c9aa28e07486de5c6ce2eb749d413" },
+]
+
+setup = '''
+%configure \
+    --enable-shared \
+    --enable-static
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libbacktrace/LICENSE"
+'''
