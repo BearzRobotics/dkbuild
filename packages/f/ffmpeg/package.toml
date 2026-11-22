@@ -18,7 +18,7 @@
 # gone. This is a choice between two backends, not a feature turned off: the same Vulkan filters are built either way.
 name = "ffmpeg"
 version = "8.1.3"
-release = 15
+release = 16
 summary = "Decoding, encoding and streaming software"
 license = "GPL-3.0-or-later"
 homepage = "https://ffmpeg.org"

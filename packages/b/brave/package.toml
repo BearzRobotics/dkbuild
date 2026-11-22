@@ -86,6 +86,8 @@ source = [
 
 environment = '''
 export RUSTC_BOOTSTRAP=1 CARGO_NET_OFFLINE=true
+# pnpm refuses to purge node_modules without a TTY unless in CI mode
+export CI=true
 # Brave's host tools that GN builds with cargo (brave/tools/crates, vendored:
 # wasm-bindgen, wasm-pack, and wasm-opt with binaryen's C++ through the cc
 # crate): linked dynamically (Rust's musl target links statically by

@@ -18,6 +18,8 @@ source = [
 ]
 
 setup = '''
+# libc++ no longer includes <vector>/<cstdlib>/<memory>/<algorithm> transitively and Krita relies on it
+export CXXFLAGS="$CXXFLAGS -include vector -include cstdlib -include memory -include algorithm -include functional"
 %cmake \
     -DALLOW_UNSTABLE=QT6 \
     -DBUILD_WITH_QT6=ON

@@ -86,6 +86,10 @@ esac
 '''
 
 setup = '''
+# the snapshot's LASTCHANGE.committime came out in LASTCHANGE's format (no git history
+# to ask), and compute_build_timestamp.py wants one integer: a fixed commit time
+# (reproducible; it only stamps the build)
+printf '1780000000\n' > build/util/LASTCHANGE.committime
 git init -q .
 # system tools where the build expects its downloaded ones
 mkdir -p buildtools/linux64 third_party/node/linux/node-linux-x64/bin third_party/jdk/current/bin third_party/gperf/cipd/bin

@@ -11,6 +11,7 @@ homepage = "https://gitlab.com/accounts-sso/signond"
 patches = ["qt6.patch"]
 hostdeps = ["doxygen", "pkgconf", "qt6-qtbase"]
 builddeps = ["qt6-qtbase-devel"]
+options = ["!check"]  # the tests need a D-Bus machine-id the sandbox lacks
 checkdeps = ["dbus"]
 
 source = [
