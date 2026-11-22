@@ -24,9 +24,12 @@ summary = "The V programming language"
 license = "MIT"
 homepage = "https://vlang.io"
 archs = ["x86_64", "aarch64"]
-hostdeps = ["make"]
-builddeps = ["gc-devel"]
-rundeps = ["llvm-clang", "llvm-lld", "gc", "gc-devel"]
+# r4: pkgconf and sqlite-devel: V's db.sqlite module links the system SQLite when `$pkgconfig('sqlite3')` finds it and
+# otherwise wants thirdparty/sqlite/sqlite3.c (an amalgamation the source does not ship), which failed the two tools
+# that import it (vsqlite, vbug-report) when building the tools; installed, programs that import db.sqlite need both
+hostdeps = ["make", "pkgconf"]
+builddeps = ["gc-devel", "sqlite-devel"]
+rundeps = ["llvm-clang", "llvm-lld", "gc", "gc-devel", "pkgconf", "sqlite-devel"]
 options = ["!check", "!lto", "!strip"]
 
 source = [
