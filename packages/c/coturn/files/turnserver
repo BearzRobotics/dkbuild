@@ -1,0 +1,10 @@
+# coturn TURN/STUN server. Not enabled by default (README.FenrirOS): it needs
+# /etc/coturn/turnserver.conf (examples in /usr/share/doc/coturn).
+type = process
+command = /usr/bin/turnserver -c /etc/coturn/turnserver.conf --no-daemon
+run-as = coturn
+working-dir = /var/lib/coturn
+logfile = /var/log/turnserver.log
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

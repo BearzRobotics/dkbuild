@@ -1,0 +1,17 @@
+coturn on FenrirOS
+==================
+
+Installed inert: the service is not enabled and there is no configuration,
+no realm, no user and no shared secret. Upstream's sample configuration is in
+/usr/share/doc/coturn (turnserver.conf.default).
+
+    cp /usr/share/doc/coturn/turnserver.conf.default /etc/coturn/turnserver.conf
+    chgrp coturn /etc/coturn/turnserver.conf; chmod 640 /etc/coturn/turnserver.conf
+    $EDITOR /etc/coturn/turnserver.conf   # realm, static-auth-secret (use-auth-secret), cert/pkey, listening ports
+    dinitctl enable turnserver
+
+For Matrix (Synapse turn_shared_secret), Jitsi and Nextcloud Talk use
+use-auth-secret with a secret you generate (`openssl rand -hex 32`) and share
+it with the application. Open 3478 (UDP/TCP), 5349 (TLS) and the relay port
+range (min-port/max-port) in the firewall. The service runs as the coturn
+user in the foreground. Data: /var/lib/coturn; logs: /var/log/turnserver.log.

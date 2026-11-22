@@ -1,0 +1,43 @@
+# coturn: TURN and STUN server (NAT traversal for WebRTC: Matrix, Jitsi, Nextcloud Talk).
+# Built with every database backend upstream supports: SQLite, PostgreSQL, MariaDB/MySQL, Redis (hiredis),
+# and the Prometheus metrics endpoint (libmicrohttpd; upstream vendors the Prometheus client).
+# Source edits: none. After `make install` the example configuration upstream puts in /etc/coturn
+# (turnserver.conf.default etc. - upstream's default has no realm, users or secrets) is kept only as
+# documentation under /usr/share/doc/coturn; no /etc/coturn/turnserver.conf is shipped.
+# Installed inert: the dinit service is shipped, not enabled; no users, no shared secret, no certificates.
+# Setup: README.FenrirOS.
+name = "coturn"
+version = "4.18.0"
+release = 1
+summary = "TURN and STUN server for NAT traversal"
+license = "BSD-3-Clause"
+homepage = "https://github.com/coturn/coturn"
+hostdeps = ["pkgconf"]
+builddeps = ["openssl-devel", "libevent-devel", "linux-headers", "sqlite-devel", "postgresql-devel", "hiredis-devel", "mariadb-devel", "libmicrohttpd-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/coturn/coturn/archive/4.18.0.tar.gz", sha256 = "28d55294ac596fbd129b293a85e7bb1c5dc4bd15b7fb55c500f355149e5f4e28" },
+]
+
+setup = '''
+./configure --prefix=/usr --sysconfdir=/etc/coturn --mandir=/usr/share/man \
+    --localstatedir=/var --disable-rpath --turndbdir=/var/lib/coturn
+'''
+build = '''
+make -j$jobs
+'''
+install = '''
+make install DESTDIR="$pkgdir"
+# the sample configuration is documentation, not /etc (inert-server policy)
+mkdir -p "$pkgdir/usr/share/doc/coturn"
+for f in "$pkgdir"/etc/coturn/*; do
+    [ -e "$f" ] && mv "$f" "$pkgdir/usr/share/doc/coturn/"
+done
+rm -rf "$pkgdir/etc/coturn" "$pkgdir/var/lib/coturn"
+install -Dm644 $pkgfiles/turnserver "$pkgdir/etc/dinit.d/turnserver"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/coturn.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/coturn.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/coturn/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/coturn/LICENSE"
+'''
