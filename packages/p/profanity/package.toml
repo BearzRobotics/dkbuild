@@ -1,0 +1,46 @@
+# Profanity 0.20.0: ncurses XMPP client (written 2026-11-22; not built).
+# OMEMO uses libomemo-c (the libsignal backend needs libsignal-protocol-c, which the tree lacks).
+# Python plugins are gone in this release (Lua only); the Lua plugin API is built against the tree's lua.
+name = "profanity"
+version = "0.20.0"
+release = 1
+summary = "Console-based XMPP client"
+license = "GPL-3.0-or-later"
+homepage = "https://profanity-im.github.io"
+hostdeps = ["meson", "ninja", "pkgconf"]
+builddeps = [
+    "cmocka-devel", "curl-devel", "enchant-devel", "gdk-pixbuf-devel", "glib-devel", "gpgme-devel", "libgcrypt-devel",
+    "libnotify-devel", "libomemo-c-devel", "libotr-devel", "libstrophe-devel", "lua-devel", "ncurses-devel",
+    "qrencode-devel", "readline-devel", "sqlite-devel",
+]
+options = []
+
+source = [
+    { url = "https://github.com/profanity-im/profanity/releases/download/0.20.0/profanity-0.20.0.tar.xz", sha256 = "371f3c987a1800905632dc04b28c980acce8a5783eba55e8b1f9c5ca1df266f4" },
+]
+
+setup = '''
+%meson \
+    -Dnotifications=enabled \
+    -Dplugins=enabled \
+    -Dotr=enabled \
+    -Dpgp=enabled \
+    -Domemo=enabled \
+    -Domemo-backend=libomemo-c \
+    -Dtray=enabled \
+    -Dgdk-pixbuf=enabled \
+    -Domemo-qrcode=enabled \
+    -Dspellcheck=enabled \
+    -Dinstall_desktop=true \
+    -Dtests=true
+'''
+build = '''
+%meson_build
+'''
+check = '''
+meson test -C build --print-errorlogs
+'''
+install = '''
+%meson_install
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/profanity/LICENSE.txt"
+'''

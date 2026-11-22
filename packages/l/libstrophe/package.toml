@@ -1,0 +1,30 @@
+# libstrophe: XMPP client library in C, used by Profanity (written 2026-11-22; not built).
+# TLS through OpenSSL, XML through expat, DNS through c-ares, stream compression through zlib.
+name = "libstrophe"
+version = "0.14.0"
+release = 1
+summary = "Lightweight XMPP client library"
+license = "MIT"
+homepage = "https://strophe.im/libstrophe"
+hostdeps = ["pkgconf"]
+builddeps = ["c-ares-devel", "libexpat-devel", "openssl-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/strophe/libstrophe/releases/download/0.14.0/libstrophe-0.14.0.tar.gz", sha256 = "d079668474d5c3aa4555347c33e77014a1071629603557cc506a6bc6f82e01f5" },
+]
+
+setup = '''
+%configure \
+    --enable-cares \
+    --enable-zlib \
+    --enable-static \
+    --disable-examples
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 MIT-LICENSE.txt "$pkgdir/usr/share/licenses/libstrophe/MIT-LICENSE.txt"
+'''
