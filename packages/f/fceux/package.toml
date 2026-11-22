@@ -1,0 +1,32 @@
+# FCEUX: NES/Famicom emulator and debugger with TAS tools (GPL-2.0), Qt6 GUI.
+# Patches (Chimera): d2ee6351... guards the x86 TSC code behind the Qt driver
+# macro so it compiles on every arch; fix_icon installs the icon into the
+# hicolor theme and makes the .desktop file refer to it by name.
+name = "fceux"
+version = "2.6.6"
+release = 1
+summary = "NES/Famicom emulator"
+license = "GPL-2.0-or-later"
+homepage = "https://fceux.com"
+patches = ["d2ee6351c08518c866bb48d89f58a67bb36931fc.patch", "fix_icon.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["ffmpeg-devel", "libarchive-devel", "lua5.1-devel", "minizip-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "sdl2-compat-devel", "zlib-ng-compat-devel", "mesa-devel"]
+options = ["!check"]  # needs a display and ROMs
+
+source = [
+    { url = "https://github.com/TASEmulators/fceux/archive/refs/tags/v2.6.6.tar.gz", sha256 = "0320241d45c6d609f7aeb6f85fdd9019552047206b0864a7f9fddff15b004daa" },
+]
+
+setup = '''
+%cmake \
+    -DQT6=ON
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# Windows help file and DLLs shipped in the data directory
+rm -f "$pkgdir"/usr/share/fceux/*.chm "$pkgdir"/usr/share/fceux/*.dll
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/fceux/COPYING"
+'''
