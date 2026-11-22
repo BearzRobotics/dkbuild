@@ -8,11 +8,11 @@
 #                                      (/usr/lib/profile.d); remove it to go back to GNU.
 # Package builds never read profile.d, so recipes always use GNU.
 # Licence: GPL-2.0-or-later (upstream's LICENSE).
-# r2: syntax-probe (a 1 MB developer tool upstream builds beside the commands) is not installed.
-# Source: the v0.1.0 tag; its one Zig dependency (regex-zig 0.4.0) is fetched on the host (zigdeps).
+# syntax-probe (a 1 MB developer tool upstream builds beside the commands) is not installed.
+# Source: the v0.2.0 tag; its one Zig dependency (regex-zig 0.4.0) is fetched on the host (zigdeps).
 name = "util-core"
-version = "0.1.0"
-release = 2
+version = "0.2.0"
+release = 1
 summary = "Core utilities in Zig (alternative to GNU coreutils)"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/BearzRobotics/util-core"
@@ -20,7 +20,7 @@ hostdeps = ["zig"]
 options = ["zigdeps", "!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/util-core/archive/refs/tags/v0.1.0.tar.gz", sha256 = "40d9735d8e0816ff0ab25e2c6942b82badb70fc036818c0ab7f7f66547accd7f" },
+    { url = "https://github.com/BearzRobotics/util-core/archive/refs/tags/v0.2.0.tar.gz", sha256 = "ec6e2a886691810c96869e846e1208e36a97bf55d705d0512ba9e1ed5362404d" },
 ]
 
 build = '''
