@@ -14,7 +14,9 @@ source = [
 ]
 
 setup = '''
-%configure
+# its own nginx-style configure: no --sysconfdir/--libdir/--host (%configure's options are "invalid option"),
+# only --prefix (the binaries go to $prefix/sbin)
+./configure --prefix=/usr
 '''
 build = '''
 %make
