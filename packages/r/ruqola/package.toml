@@ -1,0 +1,38 @@
+# Ruqola 2.5.1: KDE Rocket.Chat client (Qt6/KF6). Written 2026-11-22, not built.
+# Risk: 2.5.1 (2025-05) asks for ktextaddons >= 1.5.4 and KF >= 6.8; the tree has ktextaddons 2.1.2,
+# so an API mismatch in the KF6Text* libraries is possible (not checked against a build).
+# E2E (experimental in upstream) is switched on rather than off, as policy says (needs OpenSSL).
+name = "ruqola"
+version = "2.5.1"
+release = 1
+summary = "KDE client for Rocket.Chat"
+license = "GPL-2.0-or-later"
+homepage = "https://apps.kde.org/ruqola"
+hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
+builddeps = [
+    "kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "kdsingleapplication-devel",
+    "kguiaddons-devel", "ki18n-devel", "kiconthemes-devel", "kidletime-devel", "kio-devel", "knotifications-devel",
+    "knotifyconfig-devel", "kstatusnotifieritem-devel", "ktextaddons-devel", "ktextwidgets-devel", "kuserfeedback-devel",
+    "kxmlgui-devel", "networkmanager-qt-devel", "openssl-devel", "plasma-activities-devel", "purpose-devel",
+    "qt6-qtbase-devel", "qt6-qtmultimedia-devel", "qt6-qtnetworkauth-devel", "qt6-qtwebsockets-devel", "qtkeychain-devel",
+    "sonnet-devel", "syntax-highlighting-devel", "kcolorscheme-devel", "kcodecs-devel", "kwidgetsaddons-devel", "kcompletion-devel",
+    "kitemviews-devel", "kwallet-devel",
+]
+options = ["!check"]
+
+source = [
+    { url = "https://download.kde.org/stable/ruqola/2.5.1/ruqola-2.5.1.tar.xz", sha256 = "97d277bb98251a87c03d6f4c3c8ee5b27762c693bf96fbdcd79464c1ae7602d9" },
+]
+
+# !check: the tests need a display and a Rocket.Chat server mock over the network.
+setup = '''
+%cmake \
+    -DOPTION_USE_E2E_SUPPORT=ON \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+'''
