@@ -1,0 +1,36 @@
+# Stockfish: strong UCI chess engine (GPL-3.0). The default NNUE evaluation
+# network is embedded into the binary at build time, so it is a second
+# source (unpack = false: copied to /build/sources) that setup copies into
+# src/ (the build would otherwise download it with `make net`).
+# makefile_cxxflags.patch (Chimera): pass CXXFLAGS on the link line so the
+# distribution's flags (sanitiser/hardening, target) apply to the link too.
+# arch=any, SUPPORTED_ARCH=true: generic build with the distribution's own
+# -march (no CPU detection at build time), runs on any x86-64/aarch64.
+name = "stockfish"
+version = "19"
+release = 1
+summary = "Free UCI chess engine derived from Glaurung"
+license = "GPL-3.0-or-later"
+homepage = "https://stockfishchess.org"
+patches = ["makefile_cxxflags.patch"]
+options = ["!check"]  # no check target upstream
+
+source = [
+    { url = "https://github.com/official-stockfish/Stockfish/archive/sf_19.tar.gz", sha256 = "519b653d0d1ffb96531d982ccbe5c6a19425e8388e0e3c2f70f34b424ab32d76" },
+    { url = "https://tests.stockfishchess.org/api/nn/nn-1a298aa575a0.nnue", unpack = false, name = "nn-1a298aa575a0.nnue", sha256 = "1a298aa575a085434d29027978dc36867fe9c5bcea9376654b7a8eba1e52dfc2" },
+]
+
+environment = '''
+export LDFLAGS="${LDFLAGS} -Wl,-z,stack-size=2097152"
+'''
+setup = '''
+cp /build/sources/nn-1a298aa575a0.nnue src/
+'''
+build = '''
+cd src
+%make build PREFIX=/usr optimize=no SUPPORTED_ARCH=true arch=any
+'''
+install = '''
+install -Dm755 src/stockfish "$pkgdir/usr/bin/stockfish"
+install -Dm644 Copying.txt "$pkgdir/usr/share/licenses/stockfish/Copying.txt"
+'''
