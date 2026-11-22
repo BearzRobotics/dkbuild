@@ -1,0 +1,90 @@
+# Jitsi Meet: the web front end of the Jitsi video conferencing stack (WebRTC, React + webpack), with the
+# Prosody plugins that make Prosody its XMPP server (subpackage jitsi-meet-prosody). The rest of the stack is
+# separate: Jicofo (conference focus) and Jitsi Videobridge (the SFU), both Java/Kotlin: see
+# packages/j/jicofo and jitsi-videobridge (skeleton recipes, blockers listed there); coturn and prosody are
+# in the tree. Without them this package is only the web files.
+# The version is the release number of the tag stable/jitsi-meet_11509 (Debian's 2.0.11509).
+# npm packages from the store (npmdeps): files/package-lock.json is upstream's with six React Native packages
+# removed (react-native-background-timer, -calendar-events, -default-preference, -orientation-locker, -sound,
+# -worklets-core): upstream lists them as git+ssh dependencies of the mobile apps, which the store cannot
+# fetch and the web build never loads. The setup step removes the same six from package.json so that
+# `npm ci` agrees with the lock.
+# Source edits: that package.json edit only.
+# `make` (webpack compile, then the deploy-* targets copy the WASM models, olm, tflite, excalidraw...
+# out of node_modules into libs/) builds the site exactly as upstream's Debian package does.
+# Installed inert: no web server site, no config.js (the sample is in /usr/share/doc/jitsi-meet), no domain.
+# Setup: README.FenrirOS.
+name = "jitsi-meet"
+version = "2.0.11509"
+release = 1
+summary = "Jitsi Meet web front end for video conferencing"
+license = "Apache-2.0"
+homepage = "https://jitsi.org/jitsi-meet/"
+hostdeps = ["nodejs", "make", "llvm-libunwind"]
+rundeps = ["nginx"]
+options = ["!check", "npmdeps", "jobs:8"]
+
+source = [
+    { url = "https://github.com/jitsi/jitsi-meet/archive/refs/tags/stable/jitsi-meet_11509.tar.gz", sha256 = "4252a530d1d24fb2086c597d9921322654cfa99590f5e434e86383db57f46568" },
+]
+
+environment = '''
+export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
+    npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+export NODE_OPTIONS=--max-old-space-size=6144
+# Rust-based npm addons (swc, sass-embedded...) built for musl link libgcc_s.so.1, which this system lacks:
+# LLVM's libunwind has the same _Unwind_* functions (private link, as vikunja)
+mkdir -p /tmp/gccshim
+ln -sf /usr/lib/libunwind.so.1 /tmp/gccshim/libgcc_s.so.1
+export LD_LIBRARY_PATH="/tmp/gccshim${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+'''
+setup = '''
+# see the header: the six git+ssh React Native packages are not part of the web build
+node -e '
+const fs = require("fs");
+const p = JSON.parse(fs.readFileSync("package.json", "utf8"));
+for (const n of ["react-native-background-timer", "react-native-calendar-events", "react-native-default-preference",
+                 "react-native-orientation-locker", "react-native-sound", "react-native-worklets-core"]) {
+  for (const s of ["dependencies", "devDependencies", "optionalDependencies"]) if (p[s]) delete p[s][n];
+}
+fs.writeFileSync("package.json", JSON.stringify(p, null, 2) + "\n");
+'
+cp /dkbuild/files/package-lock.json package-lock.json
+node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
+# upstream's postinstall (patch-package for a few packages) is run by hand after an install without scripts
+npm ci --ignore-scripts --legacy-peer-deps
+if grep -q '"postinstall"' package.json && [ -d patches ]; then ./node_modules/.bin/patch-package || true; fi
+'''
+build = '''
+make
+test -f libs/app.bundle.min.js
+'''
+install = '''
+d="$pkgdir/usr/share/jitsi-meet"
+mkdir -p "$d/css" "$d/scripts"
+cp -a libs static sounds fonts images lang "$d/"
+cp interface_config.js *.html pwa-worker.js manifest.json "$d/"
+cp css/all.css "$d/css/"
+install -Dm644 resources/robots.txt "$d/robots.txt"
+for s in resources/*.sh doc/jaas/move-to-jaas.sh doc/jaas/update-asap-daily.sh; do
+    case "$s" in */build_deb_package.sh|*/update-*.sh|*/lang-sort.sh|*/encode-sound.sh) continue ;; esac
+    install -Dm755 "$s" "$d/scripts/${s##*/}"
+done
+# the sample configuration; the real one is /etc/jitsi/meet/<domain>-config.js, written by the admin
+install -Dm644 config.js "$pkgdir/usr/share/doc/jitsi-meet/config.js.example"
+install -Dm644 doc/debian/jitsi-meet/jitsi-meet.example "$pkgdir/usr/share/doc/jitsi-meet/nginx-jitsi-meet.conf.example"
+install -Dm644 doc/debian/jitsi-meet/jitsi-meet.conf "$pkgdir/usr/share/doc/jitsi-meet/jitsi-meet.conf.example"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/jitsi-meet/README.FenrirOS"
+# Prosody plugins (subpackage jitsi-meet-prosody)
+mkdir -p "$pkgdir/usr/share/jitsi-meet"
+cp -a resources/prosody-plugins "$pkgdir/usr/share/jitsi-meet/prosody-plugins"
+install -Dm644 doc/debian/jitsi-meet-prosody/prosody.cfg.lua-jvb.example "$pkgdir/usr/share/doc/jitsi-meet-prosody/prosody.cfg.lua-jvb.example"
+install -Dm644 doc/debian/jitsi-meet-prosody/jaas.cfg.lua "$pkgdir/usr/share/doc/jitsi-meet-prosody/jaas.cfg.lua"
+install -Dm644 doc/debian/jitsi-meet-prosody/README "$pkgdir/usr/share/doc/jitsi-meet-prosody/README"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/jitsi-meet/LICENSE"
+'''
+
+[subpackages.prosody]
+summary = "Prosody plugins for Jitsi Meet"
+depends = ["prosody"]
+paths = ["/usr/share/jitsi-meet/prosody-plugins", "/usr/share/doc/jitsi-meet-prosody"]

@@ -1,0 +1,21 @@
+Jitsi Meet on FenrirOS
+======================
+
+This package installs the web files in /usr/share/jitsi-meet and nothing else:
+no web server site, no configuration, no domain, no accounts. A working Jitsi
+installation also needs:
+
+  - a web server (nginx) serving /usr/share/jitsi-meet, with TLS
+    (sample: /usr/share/doc/jitsi-meet/nginx-jitsi-meet.conf.example);
+  - Prosody (package prosody, plus jitsi-meet-prosody, the plugins) as the
+    XMPP server, configured for your domain
+    (/usr/share/doc/jitsi-meet-prosody/prosody.cfg.lua-jvb.example);
+  - Jicofo and Jitsi Videobridge (packages jicofo and jitsi-videobridge, if
+    present in the repository: they are the conference focus and the media
+    server; without the videobridge nothing but one-to-one calls works);
+  - optionally coturn for clients behind strict NATs (package coturn).
+
+/etc/jitsi/meet/<your domain>-config.js is your copy of
+/usr/share/doc/jitsi-meet/config.js.example (set hosts.domain, hosts.muc,
+bosh/websocket). The nginx sample includes it by path. Open 443/tcp and
+10000/udp (the videobridge).
