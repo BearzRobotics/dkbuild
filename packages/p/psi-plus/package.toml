@@ -1,0 +1,48 @@
+# Psi+ 1.6 (psi-plus-snapshots tag 1.6_b1.143): Qt XMPP client, built against Qt6 (USE_QT6) with the
+# bundled Iris library on the system QCA/usrsctp/libomemo-c. Written 2026-11-22, not built.
+# Snapshot repository: a flat tree with iris, qite, qhttp and http-parser included (no submodule fetch).
+# Left off: psimedia (needs its own source tree, which is not in the snapshots), aspell/enchant
+# (hunspell is the one spellchecker Psi allows at a time).
+name = "psi-plus"
+# apk versions cannot have "_b1": the snapshot tag 1.6_b1.143 is packaged as 1.6.143.
+version = "1.6.143"
+release = 1
+summary = "Psi+ XMPP client (Qt6)"
+license = "GPL-2.0-or-later"
+homepage = "https://psi-plus.com"
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools"]
+builddeps = [
+    "hunspell-devel", "libidn-devel", "libomemo-c-devel", "libotr-devel", "libx11-devel", "libxcb-devel",
+    "libxscrnsaver-devel", "protobuf-c-devel", "qca-devel", "qt6-qt5compat-devel", "qt6-qtbase-devel",
+    "qt6-qtmultimedia-devel", "qt6-qtsvg-devel", "qt6-qtwebsockets-devel", "qtkeychain-devel", "usrsctp-devel",
+    "zlib-ng-compat-devel", "libgcrypt-devel", "gpgme-devel",
+]
+rundeps = ["hunspell"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/psi-plus/psi-plus-snapshots/archive/refs/tags/1.6_b1.143.tar.gz", sha256 = "e23df58b8a3fdd8a1731ae8b4cdd08156c52b45d64ba1ef3b62905446b019b97" },
+]
+
+# !check: tests need a display.
+setup = '''
+%cmake \
+    -DUSE_QT6=ON \
+    -DPSI_PLUS=ON \
+    -DPRODUCTION=ON \
+    -DENABLE_PLUGINS=ON \
+    -DENABLE_AVCALL=ON \
+    -DENABLE_OMEMO=ON \
+    -DIRIS_BUNDLED_OMEMO_C=OFF \
+    -DUSE_HUNSPELL=ON \
+    -DUSE_KEYCHAIN=ON \
+    -DUSE_CCACHE=OFF \
+    -DBUILD_PSIMEDIA=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/psi-plus/COPYING"
+'''
