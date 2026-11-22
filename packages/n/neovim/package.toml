@@ -13,7 +13,7 @@
 # API is not packaged, and neovim needs exactly wasmtime 36).
 name = "neovim"
 version = "0.12.6"
-release = 2
+release = 3
 summary = "Fork of Vim aiming to improve user experience, plugins and GUIs"
 license = "Apache-2.0 AND Vim"
 homepage = "https://neovim.io"

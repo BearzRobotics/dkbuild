@@ -14,7 +14,7 @@
 # bash scripts, hence bash in rundeps.
 name = "open-iscsi"
 version = "2.1.13"
-release = 2
+release = 3
 summary = "iSCSI initiator: iscsiadm, iscsid and libopeniscsiusr"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://www.open-iscsi.com/"
@@ -34,6 +34,8 @@ build = '''
 %meson_build
 '''
 check = '''
+# r3: the iface and node tests lock /run/lock/iscsi, and the sandbox has no /run/lock
+mkdir -p /run/lock
 meson test -C build --print-errorlogs
 '''
 install = '''

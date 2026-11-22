@@ -5,7 +5,7 @@
 # builds the shared and the static library.
 name = "unibilium"
 version = "2.1.4"
-release = 1
+release = 2
 summary = "Simple, self-contained terminfo library"
 license = "LGPL-3.0-or-later"
 homepage = "https://github.com/neovim/unibilium"
