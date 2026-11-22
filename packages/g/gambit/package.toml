@@ -16,7 +16,7 @@
 # compiles every test through gsc several times and takes hours: not run.
 name = "gambit"
 version = "4.9.8"
-release = 1
+release = 2
 summary = "Gambit Scheme, Scheme to C compiler and interpreter"
 license = "Apache-2.0 OR LGPL-2.1-only"
 homepage = "https://gambitscheme.org"
