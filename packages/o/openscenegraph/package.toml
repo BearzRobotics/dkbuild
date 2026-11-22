@@ -1,0 +1,37 @@
+# OpenSceneGraph: high-performance 3D graphics toolkit (OSGPL, an LGPL-2.1
+# variant with a linking exception), used by OpenMW.
+# Patches (Chimera, all against 3.6.5): 1033 and ptr_fun (std::mem_fun_ref /
+# ptr_fun are removed in C++17), register (the `register` keyword is gone),
+# lfs64 (use stat64 on musl without the glibc feature test), musl-endianess
+# and musl-pthread (use <endian.h> on every Linux; glibc-only pthread
+# include), e085a7d... (upstream: remove the register keyword in more places).
+# No FFmpeg plugin: OSG 3.6.5 is not compatible with ffmpeg 8 (the tree's).
+name = "openscenegraph"
+version = "3.6.5"
+release = 1
+summary = "High-performance real-time graphics toolkit"
+license = "LGPL-2.1-or-later WITH WxWindows-exception-3.1"
+homepage = "https://openscenegraph.com"
+patches = ["1033.patch", "e085a7d68a10be81be23e6b4d68bf82d5d302b91.patch", "lfs64.patch", "musl-endianess.patch", "musl-pthread.patch", "ptr_fun.patch", "register.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf"]
+builddeps = ["collada-dom-devel", "curl-devel", "freetype-devel", "giflib-devel", "gst-plugins-base-devel", "jasper-devel", "libjpeg-turbo-devel", "libpng-devel", "librsvg-devel", "libtiff-devel", "libx11-devel", "libxinerama-devel", "libxrandr-devel", "mesa-devel", "poppler-devel", "sdl2-compat-devel", "zlib-ng-compat-devel", "libxml2-devel"]
+options = ["!check"]  # the unit tests are not built
+
+source = [
+    { url = "https://github.com/openscenegraph/OpenSceneGraph/archive/OpenSceneGraph-3.6.5.tar.gz", sha256 = "aea196550f02974d6d09291c5d83b51ca6a03b3767e234a8c0e21322927d1e12" },
+]
+
+setup = '''
+# LIB_POSTFIX=: no lib64; CMAKE_POLICY_VERSION_MINIMUM: old cmake_minimum_required
+%cmake \
+    -DLIB_POSTFIX= \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 CMakeModules/FindOSG.cmake "$pkgdir/usr/lib/cmake/OSG/FindOSG.cmake"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/openscenegraph/LICENSE.txt"
+'''
