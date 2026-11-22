@@ -1,0 +1,6 @@
+#!/bin/sh
+# Lemmy UI node server. Settings by environment: LEMMY_UI_HOST (default 0.0.0.0 in upstream; set
+# 127.0.0.1 behind a proxy), LEMMY_UI_PORT=1234, LEMMY_UI_LEMMY_INTERNAL_HOST=localhost:8536,
+# LEMMY_UI_LEMMY_EXTERNAL_HOST=<your hostname>, LEMMY_UI_HTTPS=true.
+cd /usr/lib/lemmy-ui || exit 1
+NODE_ENV=production exec node dist/js/server.js

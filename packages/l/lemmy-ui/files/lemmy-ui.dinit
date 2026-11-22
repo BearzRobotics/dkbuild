@@ -1,0 +1,9 @@
+# Lemmy web UI. Not enabled by default (README.FenrirOS). Settings: /etc/lemmy-ui/environment (KEY=value lines).
+type = process
+command = /usr/bin/lemmy-ui
+env-file = /etc/lemmy-ui/environment
+run-as = lemmy-ui
+logfile = /var/log/lemmy-ui.log
+smooth-recovery = true
+depends-on: rcboot
+waits-for: syslogd

@@ -1,0 +1,71 @@
+# Lemmy UI: the web front end of Lemmy (isomorphic Inferno app with its own node server, port 1234).
+# npm packages from the store (npmdeps, pnpm-lock.yaml through dkbuild's local registry; recipe pattern of vikunja).
+# The translations are upstream's git submodule lemmy-translations (git sources are not fetchable):
+# the second source is the tarball of exactly the commit the 0.19.21 tag pins (GitHub API: contents of
+# lemmy-translations at the tag), unpacked next to the UI and moved into place.
+# Source edits: package.json loses its "packageManager" line (pnpm 10.11 would be asked for; the system
+# pnpm runs); the build runs webpack directly instead of `pnpm build:prod` because that script calls
+# `git rev-parse` for COMMIT_HASH (no git repository in a release tarball): the version string is used.
+# The server bundle keeps its npm packages external (webpack-node-externals): node_modules ships with the
+# package, as in upstream's Dockerfile (which removes typescript and two others from it).
+# Installed inert: the dinit service is shipped, not enabled. Setup: README.FenrirOS.
+name = "lemmy-ui"
+version = "0.19.21"
+release = 1
+summary = "Web front end of Lemmy"
+license = "AGPL-3.0-or-later"
+homepage = "https://join-lemmy.org"
+hostdeps = ["nodejs", "pnpm", "llvm-libunwind"]
+rundeps = ["nodejs", "lemmy"]
+options = ["!check", "!strip", "npmdeps"]
+
+source = [
+    { url = "https://github.com/LemmyNet/lemmy-ui/archive/refs/tags/0.19.21.tar.gz", sha256 = "0f335bee04afd9c033d05b96d5898e309fa1e0d15e7f72b53e60e186bdb91434" },
+    { url = "https://github.com/LemmyNet/lemmy-translations/archive/64fe2ac541eddbaa9f6f8a8d7ee100c8def33bf4.tar.gz", sha256 = "96a326ed7c20fb8a158efdc5bf26f7cbad220fc7d6503ad0b2c856b63423bfe7" },
+]
+
+environment = '''
+export HOME=/tmp/home NODE_ENV=development
+export npm_config_manage_package_manager_versions=false npm_config_package_manager_strict=false \
+    npm_config_pm_on_fail=ignore
+# Rust-based npm addons built for musl link libgcc_s.so.1, which this system does not have; LLVM's
+# libunwind has the same _Unwind_* functions (private link for this build only, as vikunja).
+mkdir -p /tmp/gccshim
+ln -sf /usr/lib/libunwind.so.1 /tmp/gccshim/libgcc_s.so.1
+export LD_LIBRARY_PATH="/tmp/gccshim${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+'''
+setup = '''
+# the translations submodule (see the header)
+rmdir lemmy-translations 2>/dev/null || true
+mv ../lemmy-translations-64fe2ac541eddbaa9f6f8a8d7ee100c8def33bf4 lemmy-translations
+# see the header: no pnpm version switching
+sed -i '/^  "packageManager": /d' package.json
+! grep -q '"packageManager"' package.json
+echo 'pm-on-fail=ignore' >> .npmrc
+# offline registry serves tarballs only, no metadata: switch the supply-chain checks off (as vikunja)
+printf '%s\n' 'minimum-release-age=0' 'trust-policy=off' >> .npmrc
+export npm_config_minimum_release_age=0 npm_config_trust_policy=off \
+    pnpm_config_minimum_release_age=0 pnpm_config_trust_policy=off
+# sharp: use its prebuilt musl binary package from the lockfile, not a download or a local libvips build
+export npm_config_sharp_ignore_global_libvips=1
+pnpm install --frozen-lockfile --config.trustLockfile=true
+'''
+build = '''
+export NODE_OPTIONS=--max-old-space-size=4096
+echo "export const VERSION = '$version';" > src/shared/version.ts
+echo "export const BUILD_DATE_ISO8601 = '2026-01-01T00:00:00Z';" > src/shared/build-date.ts
+node generate_translations.js
+pnpm exec webpack --env COMMIT_HASH=$version --mode=production
+test -f dist/js/server.js
+rm -rf node_modules/typescript node_modules/import-sort-parser-typescript node_modules/npm
+'''
+install = '''
+d="$pkgdir/usr/lib/lemmy-ui"
+mkdir -p "$d"
+cp -a dist node_modules "$d/"
+install -Dm755 $pkgfiles/lemmy-ui "$pkgdir/usr/bin/lemmy-ui"
+install -Dm644 $pkgfiles/lemmy-ui.dinit "$pkgdir/etc/dinit.d/lemmy-ui"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/lemmy-ui.conf"
+install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/lemmy-ui/README.FenrirOS"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/lemmy-ui/LICENSE"
+'''

@@ -1,0 +1,17 @@
+Lemmy UI on FenrirOS
+====================
+
+Installed inert: the service is not enabled and nothing is configured. This is
+only the web front end; the server is the package lemmy.
+
+    mkdir -p /etc/lemmy-ui; $EDITOR /etc/lemmy-ui/environment
+    # one KEY=value per line, e.g.
+    #   LEMMY_UI_HOST=127.0.0.1
+    #   LEMMY_UI_PORT=1234
+    #   LEMMY_UI_LEMMY_INTERNAL_HOST=127.0.0.1:8536
+    #   LEMMY_UI_LEMMY_EXTERNAL_HOST=lemmy.example.org
+    #   LEMMY_UI_HTTPS=true
+    touch /var/log/lemmy-ui.log; chown lemmy-ui /var/log/lemmy-ui.log
+    dinitctl enable lemmy-ui
+
+Put nginx in front (example in /usr/share/doc/lemmy/nginx-lemmy.conf.example).
