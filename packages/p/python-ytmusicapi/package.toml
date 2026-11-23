@@ -1,0 +1,22 @@
+# ytmusicapi: an unofficial API for YouTube Music (AudioTube's cmake looks for it: "Could NOT find YTMusicAPI").
+# Pure Python; built from the sdist offline with pip (--no-build-isolation), setuptools + setuptools-scm
+# (the sdist carries PKG-INFO). The tests need the network and a YouTube account: off.
+name = "python-ytmusicapi"
+version = "1.12.4"
+release = 1
+summary = "Unofficial API for YouTube Music"
+license = "MIT"
+homepage = "https://github.com/sigma67/ytmusicapi"
+hostdeps = ["python", "python-setuptools", "python-setuptools-scm"]
+rundeps = ["python", "python-requests"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/1a/32/f43664949ae6f56dc8cae7a66724fbc49eae192488c6acf78f9a673d351f/ytmusicapi-1.12.4.tar.gz", sha256 = "bb9e827aba9f9dac956583c9c9bb6de738a810721d449ab9fd4bb58457fd6d59" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-ytmusicapi/LICENSE"
+'''
