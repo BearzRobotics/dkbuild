@@ -86,6 +86,8 @@ source = [
 
 environment = '''
 export RUSTC_BOOTSTRAP=1 CARGO_NET_OFFLINE=true
+# build/toolchain/linux/unbundle reads CC, CXX, AR, NM and READELF from the environment (electron's libprotobuf_lite.a failed with an empty AR)
+export AR=llvm-ar NM=llvm-nm READELF=llvm-readelf
 # pnpm refuses to purge node_modules without a TTY unless in CI mode
 export CI=true
 # the system esbuild package's JS looks for a platform package (@esbuild/linux-x64, "could not be found") unless told where its binary is

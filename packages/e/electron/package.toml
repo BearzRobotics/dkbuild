@@ -70,6 +70,8 @@ source = [
 
 environment = '''
 export RUSTC_BOOTSTRAP=1
+# build/toolchain/linux/unbundle reads CC, CXX, AR, NM and READELF from the environment; AR was empty ("\"\" -T -S -r -c -D libprotobuf_lite.a": Permission denied, code 127)
+export AR=llvm-ar NM=llvm-nm READELF=llvm-readelf
 # Alpine's: less log noise, reproducible, no debug info (symbol_level=0)
 dkstrip() { printf '%s' "$1" | sed -e "s/$2//"; }   # POSIX: the build script runs under dash, which has no ${VAR/x/}
 export CFLAGS="$(dkstrip "$CFLAGS" -g) -O2 -Wno-builtin-macro-redefined -Wno-deprecated-declarations -Wno-shift-count-overflow -Wno-ignored-attributes"
