@@ -19,6 +19,11 @@ export CFLAGS="${CFLAGS} -DNDEBUG -D_LARGEFILE64_SOURCE"
 export CXXFLAGS="${CXXFLAGS} -DNDEBUG -D_LARGEFILE64_SOURCE"
 '''
 setup = '''
+# OSL 1.15.6 accepts LLVM 14 to 22.9 and the tree's LLVM is 23.1 ("LLVM is outside the required range 14.0...22.9"). Its sources are
+# written against the LLVM API by version (OSL_LLVM_VERSION), and no llvm22 here has a matching clang for the bitcode it compiles, so the
+# range's upper end moves to 23.9 (source edit: sed); LLVM 23 API changes, if any, show at compile time
+sed -i 's/VERSION_MAX 22\.9/VERSION_MAX 23.9/' src/cmake/externalpackages.cmake
+grep -q 'VERSION_MAX 23.9' src/cmake/externalpackages.cmake
 %cmake \
     -DCMAKE_CXX_STANDARD=17
 '''
