@@ -16,7 +16,7 @@ summary = "Open source photography workflow application and raw developer"
 license = "GPL-3.0-or-later"
 homepage = "https://www.darktable.org"
 hostdeps = ["bash", "cmake", "ninja", "intltool", "gettext", "perl-xml-parser", "iso-codes", "libxslt", "libxml2", "pkgconf", "llvm", "perl"]
-builddeps = ["colord-devel", "colord-gtk-devel", "cups-devel", "curl-devel", "exiv2-devel", "graphicsmagick-devel", "gtk+3-devel", "icu-devel", "imath-devel", "json-glib-devel", "lcms2-devel", "lensfun-devel", "libavif-devel", "libgphoto2-devel", "libheif-devel", "libjxl-devel", "libpng-devel", "libraw-devel", "librsvg-devel", "libsecret-devel", "libtiff-devel", "libwebp-devel", "lua-devel", "ncurses-devel", "ocl-icd-devel", "opencl-headers", "openexr-devel", "openjpeg-devel", "openmp-devel", "osm-gps-map-devel", "portmidi-devel", "pugixml-devel", "sdl2-compat-devel", "sqlite-devel", "zlib-ng-compat-devel"]
+builddeps = ["colord-devel", "colord-gtk-devel", "cups-devel", "curl-devel", "exiv2-devel", "graphicsmagick-devel", "gtk+3-devel", "icu-devel", "imath-devel", "json-glib-devel", "lcms2-devel", "lensfun-devel", "libavif-devel", "libgphoto2-devel", "libheif-devel", "libjxl-devel", "libpng-devel", "libraw-devel", "librsvg-devel", "libsecret-devel", "libtiff-devel", "libwebp-devel", "lua-devel", "ncurses-devel", "ocl-icd-devel", "opencl-headers", "openexr-devel", "openjpeg-devel", "openmp-devel", "osm-gps-map-devel", "portmidi-devel", "potrace-devel", "pugixml-devel", "sdl2-compat-devel", "sqlite-devel", "zlib-ng-compat-devel"]
 rundeps = ["hicolor-icon-theme", "adwaita-icon-theme"]
 options = ["!check"]
 
