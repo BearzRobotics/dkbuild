@@ -8,7 +8,9 @@ release = 1
 summary = "AppStream metadata library"
 license = "LGPL-2.1-or-later"
 homepage = "https://people.freedesktop.org/~hughsient/appstream-glib"
-hostdeps = ["curl-devel", "glib-devel", "gobject-introspection", "gperf", "libyaml-devel", "pkgconf", "vala"]
+# docbook-xsl, docbook-xml, libxslt: the man page (appstream-util.1) is made with xsltproc from the DocBook stylesheet, which without the
+# package's XML catalog is fetched from docbook.sourceforge.net ("Attempt to load network entity")
+hostdeps = ["docbook-xml", "docbook-xsl", "libxslt", "curl-devel", "glib-devel", "gobject-introspection", "gperf", "libyaml-devel", "pkgconf", "vala"]
 builddeps = ["curl-devel", "gcab-devel", "glib-devel", "gtk+3-devel", "json-glib-devel", "libarchive-devel", "libyaml-devel"]
 options = ["!cross"]
 
