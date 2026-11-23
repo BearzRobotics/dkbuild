@@ -67,10 +67,13 @@ VERBOSE=1
 EOF2
 '''
 build = '''
-make -j$jobs
+# Make.inc sets FC := gfortran (the environment's FC is overwritten) and asks it for its version: with the tree's
+# versioned driver gfortran-15 only, "Attempting to build OpenBLAS or SuiteSparse without a functioning fortran
+# compiler!". A command-line FC wins over Make.inc's assignment and reaches the dependency builds.
+make -j$jobs FC=gfortran-15
 '''
 install = '''
-make install DESTDIR="$pkgdir" prefix=/usr
+make install DESTDIR="$pkgdir" prefix=/usr FC=gfortran-15
 # Julia's own licence (the bundled libraries' licences are installed by Julia itself)
 
 install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/julia/LICENSE.md"
