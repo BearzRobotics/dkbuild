@@ -9,7 +9,8 @@ summary = "Operating system and container binary deployment and upgrades"
 license = "LGPL-2.0-or-later"
 homepage = "https://ostreedev.github.io/ostree"
 patches = ["remove-gcc-override.patch", "type-redef.patch"]
-hostdeps = ["automake", "bison", "docbook-xsl-nons", "gobject-introspection", "libtool", "libxslt", "pkgconf"]
+# gtk-doc-tools: the autoreconf step runs gtkdocize
+hostdeps = ["gtk-doc-tools", "automake", "bison", "docbook-xsl-nons", "gobject-introspection", "libtool", "libxslt", "pkgconf"]
 builddeps = ["curl-devel", "e2fsprogs-devel", "fuse-devel", "glib-devel", "gpgme-devel", "libarchive-devel", "libgpg-error-devel", "linux-headers", "openssl-devel", "xz-devel"]
 checkdeps = ["attr", "libarchive", "gnupg", "xz"]
 options = ["!check"]
