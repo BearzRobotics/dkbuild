@@ -901,6 +901,8 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         // build cannot change them. Go reads its module cache directly.
         const dest = try std.fmt.allocPrint(arena, "{s}{s}", .{ build_rel, srcdir["/build".len..] });
         var lay: std.ArrayList(u8) = .empty;
+        // the layout script runs on the host, where /dkdeps does not exist: the version comparison reads the store by its host path
+        const cargo_store_abs = try std.fmt.allocPrint(arena, "{s}", .{absPath(arena, io, try std.fs.path.join(arena, &.{ opts.root, "cache" })) catch return error.UnpackFailed});
         if (cargo_list) |cl| {
             const text = Dir.cwd().readFileAlloc(io, cl, arena, .limited(1 << 22)) catch return error.UnpackFailed;
             // with `cargolock=<dir>`: the recipe's Cargo.lock, the crates and the
@@ -914,7 +916,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 var f = std.mem.tokenizeScalar(u8, l, ' ');
                 const n = f.next() orelse continue;
                 const k = f.next() orelse continue;
-                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "if [ -d 'vendor/{1s}' ] && [ ! -L 'vendor/{1s}' ] && [ \"$(sed -n 's/^version = \"\\(.*\\)\"$/\\1/p' 'vendor/{1s}/Cargo.toml' | head -n 1)\" != \"$(sed -n 's/^version = \"\\(.*\\)\"$/\\1/p' '/dkdeps/crates/{0s}/Cargo.toml' | head -n 1)\" ]; then ln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}-dkdeps'; else rm -rf 'vendor/{1s}'; ln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}'; fi\n", .{ k, n }));
+                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "if [ -d 'vendor/{1s}' ] && [ ! -L 'vendor/{1s}' ] && [ \"$(sed -n 's/^version = \"\\(.*\\)\"$/\\1/p' 'vendor/{1s}/Cargo.toml' | head -n 1)\" != \"$(sed -n 's/^version = \"\\(.*\\)\"$/\\1/p' '{2s}/crates/{0s}/Cargo.toml' | head -n 1)\" ]; then ln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}-dkdeps'; else rm -rf 'vendor/{1s}'; ln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}'; fi\n", .{ k, n, cargo_store_abs }));
             }
             if (clock != null) try lay.appendSlice(arena, ")\n");
         }
@@ -927,7 +929,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 var f = std.mem.tokenizeScalar(u8, l, ' ');
                 const n = f.next() orelse continue;
                 const k = f.next() orelse continue;
-                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "if [ -d 'vendor/{1s}' ] && [ ! -L 'vendor/{1s}' ] && [ \"$(sed -n 's/^version = \"\\(.*\\)\"$/\\1/p' 'vendor/{1s}/Cargo.toml' | head -n 1)\" != \"$(sed -n 's/^version = \"\\(.*\\)\"$/\\1/p' '/dkdeps/crates/{0s}/Cargo.toml' | head -n 1)\" ]; then ln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}-dkdeps'; else rm -rf 'vendor/{1s}'; ln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}'; fi\n", .{ k, n }));
+                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "if [ -d 'vendor/{1s}' ] && [ ! -L 'vendor/{1s}' ] && [ \"$(sed -n 's/^version = \"\\(.*\\)\"$/\\1/p' 'vendor/{1s}/Cargo.toml' | head -n 1)\" != \"$(sed -n 's/^version = \"\\(.*\\)\"$/\\1/p' '{2s}/crates/{0s}/Cargo.toml' | head -n 1)\" ]; then ln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}-dkdeps'; else rm -rf 'vendor/{1s}'; ln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}'; fi\n", .{ k, n, cargo_store_abs }));
             }
             try lay.appendSlice(arena, ")\n");
         }
