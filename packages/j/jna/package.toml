@@ -6,7 +6,7 @@
 # (GeoGebra) find /usr/lib/libjnidispatch.so instead. Jars: /usr/share/java.
 name = "jna"
 version = "5.18.1"
-release = 3
+release = 4
 summary = "Java Native Access: Java access to native shared libraries"
 license = "Apache-2.0 OR LGPL-2.1-or-later"
 homepage = "https://github.com/java-native-access/jna"

@@ -8,7 +8,7 @@ license = "MIT"
 homepage = "https://github.com/davatorium/rofi"
 archs = ["x86_64", "aarch64"]
 hostdeps = ["meson", "pkgconf", "bison", "flex", "wayland"]
-builddeps = ["glib-devel", "cairo-devel", "pango-devel", "gdk-pixbuf-devel", "libxkbcommon-devel", "wayland-devel", "wayland-protocols", "libxcb-devel", "xcb-util-devel", "xcb-util-wm-devel", "xcb-util-cursor-devel", "xcb-util-keysyms-devel", "startup-notification-devel", "xcb-imdkit-devel", "libxkbcommon-x11-devel"]
+builddeps = ["glib-devel", "cairo-devel", "pango-devel", "gdk-pixbuf-devel", "libxkbcommon-devel", "wayland-devel", "wayland-protocols", "libxcb-devel", "xcb-util-devel", "xcb-util-wm-devel", "xcb-util-cursor-devel", "xcb-util-keysyms-devel", "startup-notification-devel", "xcb-imdkit-devel"]
 options = ["!check"]
 
 source = [

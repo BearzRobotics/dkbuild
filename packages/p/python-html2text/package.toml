@@ -1,4 +1,4 @@
-# html2text from PyPI, added for ahmia-crawler (requested 2026-11-17). Not built yet (wip/queue).
+# html2text from PyPI, added for ahmia-crawler (requested 2026-11-17) and calibre; moved out of wip/queue for calibre.
 name = "python-html2text"
 version = "2025.4.15"
 release = 1

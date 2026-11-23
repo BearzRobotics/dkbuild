@@ -13,7 +13,7 @@
 # warnings here (the same as Alpine's -Wno-error switches).
 name = "gtk+2"
 version = "2.24.33"
-release = 3
+release = 4
 summary = "Gimp Toolkit version 2"
 license = "LGPL-2.1-or-later"
 homepage = "https://gtk.org"

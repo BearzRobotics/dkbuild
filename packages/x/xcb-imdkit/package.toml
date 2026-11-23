@@ -1,0 +1,28 @@
+# xcb-imdkit: an input method (XIM) server/client protocol implementation for XCB (fcitx's library); rofi's
+# X11 input-method support uses it. CMake with the extra-cmake-modules; uthash from the tree (the library
+# falls back to a bundled copy otherwise).
+name = "xcb-imdkit"
+version = "1.0.9"
+release = 1
+summary = "XIM protocol implementation for XCB"
+license = "LGPL-2.1-only"
+homepage = "https://github.com/fcitx/xcb-imdkit"
+hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf"]
+builddeps = ["libxcb-devel", "xcb-util-devel", "xcb-util-keysyms-devel", "xcb-util-wm-devel", "uthash"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/fcitx/xcb-imdkit/archive/refs/tags/1.0.9.tar.gz", sha256 = "c2f0bbad8a335a64cdc7c19ac7b6ea1f0887dd6300ca9a4fa2e2fec6b9d3f695" },
+]
+
+# tests off: they open an X display
+setup = '''
+%cmake -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 LICENSES/LGPL-2.1-only.txt "$pkgdir/usr/share/licenses/xcb-imdkit/LGPL-2.1-only.txt"
+'''

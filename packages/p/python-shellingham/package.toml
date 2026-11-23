@@ -1,0 +1,20 @@
+# shellingham: detects which shell the current process runs under (pure Python; python-typer needs it).
+name = "python-shellingham"
+version = "1.5.4"
+release = 1
+summary = "Tool to detect the surrounding shell"
+license = "ISC"
+homepage = "https://github.com/sarugaku/shellingham"
+hostdeps = ["python", "python-setuptools", "python-wheel"]
+rundeps = ["python"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/58/15/8b3609fd3830ef7b27b655beb4b4e9c62313a4e8da8c676e142cc210d58e/shellingham-1.5.4.tar.gz", sha256 = "8dbca0739d487e5bd35ab3ca4b36e11c4078f3a234bfce294b0a0291363404de" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-shellingham/LICENSE"
+'''

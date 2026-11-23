@@ -1,7 +1,7 @@
 # needed by: prusaslicer (4.15, the version it pins), ghidra (the Java bindings: com.microsoft.z3.jar and libz3java.so, r2).
 name = "z3"
 version = "4.15.1"
-release = 2
+release = 3
 summary = "Z3 theorem prover (SMT solver) and library"
 license = "MIT"
 homepage = "https://github.com/Z3Prover/z3"

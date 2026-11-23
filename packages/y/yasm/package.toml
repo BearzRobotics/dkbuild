@@ -3,7 +3,7 @@
 # Upstream is finished (1.3.0 is from 2014), so it needs the small fixes below.
 name = "yasm"
 version = "1.3.0"
-release = 1
+release = 2
 summary = "Modular assembler with NASM and GAS syntax"
 license = "BSD-2-Clause AND BSD-3-Clause AND Artistic-1.0"
 homepage = "https://yasm.tortall.net"

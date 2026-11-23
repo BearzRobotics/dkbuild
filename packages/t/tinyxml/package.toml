@@ -1,0 +1,49 @@
+# TinyXML 1: a small C++ XML parser (the original, not tinyxml2). Presage still builds against it.
+# Upstream has no install target and its Makefile makes a static library only, so the shared library
+# (libtinyxml.so.0, as Alpine and Debian name it), the static one, the headers and a pkg-config file
+# are made here. The library is built with TIXML_USE_STL, as the distributions do, and the header
+# defines the same so that programs using it agree (Alpine's enforce-use-stl.patch; a sed here).
+name = "tinyxml"
+version = "2.6.2"
+release = 1
+summary = "Small C++ XML parser (TinyXML 1)"
+license = "Zlib"
+homepage = "https://sourceforge.net/projects/tinyxml"
+options = ["!check"]
+
+source = [
+    { url = "https://downloads.sourceforge.net/project/tinyxml/tinyxml/2.6.2/tinyxml_2_6_2.tar.gz", sha256 = "15bdfdcec58a7da30adc87ac2b078e4417dbe5392f3afb719f9ba6d062645593" },
+]
+
+setup = '''
+# (source edit: sed) the header turns the STL interface on for every user of the library
+sed -i '0,/#ifndef TIXML_INCLUDED/s//#ifndef TIXML_USE_STL\n#define TIXML_USE_STL\n#endif\n\n#ifndef TIXML_INCLUDED/' tinyxml.h
+grep -q '^#define TIXML_USE_STL' tinyxml.h
+'''
+build = '''
+for f in tinystr tinyxml tinyxmlerror tinyxmlparser; do
+    $CXX $CXXFLAGS -fPIC -DTIXML_USE_STL -c $f.cpp -o $f.o
+done
+$CXX $CXXFLAGS $LDFLAGS -shared -Wl,-soname,libtinyxml.so.0 -o libtinyxml.so.0.2.6.2 tinystr.o tinyxml.o tinyxmlerror.o tinyxmlparser.o
+ar rcs libtinyxml.a tinystr.o tinyxml.o tinyxmlerror.o tinyxmlparser.o
+'''
+install = '''
+install -Dm755 libtinyxml.so.0.2.6.2 "$pkgdir/usr/lib/libtinyxml.so.0.2.6.2"
+ln -s libtinyxml.so.0.2.6.2 "$pkgdir/usr/lib/libtinyxml.so.0"
+ln -s libtinyxml.so.0.2.6.2 "$pkgdir/usr/lib/libtinyxml.so"
+install -Dm644 libtinyxml.a "$pkgdir/usr/lib/libtinyxml.a"
+install -Dm644 tinyxml.h tinystr.h -t "$pkgdir/usr/include"
+mkdir -p "$pkgdir/usr/lib/pkgconfig"
+cat > "$pkgdir/usr/lib/pkgconfig/tinyxml.pc" <<EOF2
+prefix=/usr
+libdir=\${prefix}/lib
+includedir=\${prefix}/include
+
+Name: TinyXML
+Description: Small C++ XML parser
+Version: 2.6.2
+Libs: -L\${libdir} -ltinyxml
+Cflags: -I\${includedir} -DTIXML_USE_STL
+EOF2
+install -Dm644 readme.txt "$pkgdir/usr/share/licenses/tinyxml/readme.txt"
+'''

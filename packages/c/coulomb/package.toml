@@ -5,7 +5,7 @@
 # Java 19, not in the tree: built with 21 instead (patches/java-21-toolchain.patch, which also makes the resources task independent of the working directory).
 name = "coulomb"
 version = "0.6.1"
-release = 3
+release = 4
 summary = "Simple electronic circuit simulator (GTK 4)"
 license = "GPL-3.0-only"
 homepage = "https://github.com/hamza-algohary/Coulomb"
