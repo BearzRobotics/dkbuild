@@ -12,9 +12,18 @@ options = ["!check", "jobs:12"]
 
 source = [
     { url = "https://github.com/audacity/audacity/archive/refs/tags/Audacity-4.0.2.tar.gz", sha256 = "2886ad5386b3927cab4314a0453f2976a1c31cd2c639f73eaf82c0a18df6ec49" },
+    # the two git submodules of the tag (the tag archive has them empty): muse (muse_framework) and muse_deps, at the commits the tag pins
+    { url = "https://github.com/musescore/muse_framework/archive/dc29e8c4dde7bb7de379f74f19a71034e889099f.tar.gz", sha256 = "836ec5874ffcc848d3227c1dc9b99bc585739c1901df6505d9e4e2603f0e52af" },
+    { url = "https://github.com/musescore/muse_deps/archive/bf433c8f4f6f9d9897aa78d9fddcb2bbd02e42dc.tar.gz", sha256 = "1ce598b8470437db5cdfcd01fc2ec11d5b2777c6f493bdcc858b56cd34b59a46" },
 ]
 
 setup = '''
+# the submodule directories are empty in the tag archive ("include could not find requested file: .../muse/framework/cmake/MuseDeclareOptions.cmake",
+# and every compiler check after it); the two archives take their places
+rm -rf muse muse_deps
+cp -a ../muse_framework-dc29e8c4dde7bb7de379f74f19a71034e889099f muse
+cp -a ../muse_deps-bf433c8f4f6f9d9897aa78d9fddcb2bbd02e42dc muse_deps
+test -f muse/framework/cmake/MuseDeclareOptions.cmake
 %cmake \
     -Daudacity_conan_enabled=Off \
     -Daudacity_lib_preference=system \
