@@ -173,3 +173,13 @@ boots through greetd on VT 7 with NetworkManager, no base-net, unwanted dhcpcd.
 chains; xavs2/davs2/libdc1394 may not build; VT 7 for greetd and dkde-session as an
 initial_session are unconfirmed; `dkbuild upstream` for brush now follows brush-shell tags.
 Uncommitted on purpose: images/rescue.toml.save (the user's editor backup).
+
+## Recipe script gotchas (2026-11-22)
+
+- The recipe macro expander turns every `%%` into one `%`, wherever it stands (src/macro.zig): shell's longest-suffix removal
+  `${x%%pat}` reaches the build script as the shortest one, `${x%pat}`. The two agree only when the pattern can match once
+  (`${b%%:*}` on `name:js`); with a pattern that can match twice they differ (betterbird's series lines `## patch  ## comment`
+  came out as `## patch  #`). Use `sed` or `cut` in recipes, or `${x%${x#?}}`-style tricks that need no `%%`. `${x##pat}`
+  is not affected.
+- Scripts run under dash: no `${x/a/b}`, no `[[ ]]`, no arrays; quotes inside a variable that is expanded unquoted
+  (`MUOPTS='LD="a b"'`) are literal characters.

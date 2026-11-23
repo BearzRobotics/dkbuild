@@ -56,8 +56,9 @@ q=$bb/153
 # to download: none in this release, and none may be fetched here.
 bbapply() {
     while IFS= read -r line || [ -n "$line" ]; do
-        p=${line%%#*}
-        p=$(printf '%s' "$p" | sed 's/[[:space:]]*$//')
+        # (sed, not ${line%%#*}: the recipe's %% is an escape for one %, so the shell got ${line%#*}, which cuts only the last
+        # "# ..." and left "## misc/37-...patch  #" of a commented-out series line as a patch name)
+        p=$(printf '%s' "$line" | sed -e 's/#.*$//' -e 's/[[:space:]]*$//')
         [ -n "$p" ] || continue
         if [ ! -f "$q/$p" ]; then
             echo "Betterbird patch $p is not in the patch repository (external?)" >&2
