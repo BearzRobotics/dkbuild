@@ -18,7 +18,16 @@ source = [
     { url = "https://freedesktop.org/software/farstream/releases/farstream/farstream-0.2.9.tar.gz", sha256 = "cb7d112433cf7c2e37a8ec918fb24f0ea5cb293cfa1002488e431de26482f47b" },
 ]
 
+# GNU make 4.3+ keeps the backslash of `\#include` inside the function call of enum_headers (and in glib_gen_decl_include), so the generated
+# fs-enumtypes.c began with `\#include "fs-candidate.h"` ("expected identifier or '('") and none of the enum values was declared; the `\#`
+# is the make-escape for a literal # in a variable definition, which works when it stands alone: HASH = \# is defined in each Makefile.in
+# that has the pattern and the uses go through $(HASH) (source edit: sed)
 setup = '''
+for f in $(grep -rl '\\#include' --include=Makefile.in .); do
+    sed -i 's/\\#include/$(HASH)include/g' "$f"
+    printf 'HASH = \\#\n' >> "$f"
+done
+grep -q 'HASH = \\#' farstream/Makefile.in
 %configure \
     --enable-introspection=yes \
     --disable-gtk-doc
