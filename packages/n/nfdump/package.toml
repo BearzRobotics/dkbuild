@@ -7,7 +7,7 @@ summary = "A set of tools to collect and process netflow data."
 license = "BSD-3-Clause"
 homepage = "https://github.com/phaag/nfdump"
 hostdeps = ["make", "pkgconf", "autoconf", "automake", "libtool"]
-builddeps = ["libbsd-devel", "bzip2-devel", "curl-devel", "libpcap-devel", "zlib-ng-compat-devel", "zstd-devel", "linux-headers"]
+builddeps = ["musl-fts-devel", "libbsd-devel", "bzip2-devel", "curl-devel", "libpcap-devel", "zlib-ng-compat-devel", "zstd-devel", "linux-headers"]
 options = ["!check"]
 
 source = [
@@ -15,6 +15,8 @@ source = [
 ]
 
 setup = '''
+# musl has no fts: libnffile uses fts_open/fts_set ("undefined reference: fts_set" at the link), so the musl-fts library is linked
+export LIBS="$LIBS -lfts"
 autoreconf -fi
 %configure
 '''
