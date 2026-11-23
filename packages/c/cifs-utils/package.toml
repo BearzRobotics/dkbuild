@@ -26,6 +26,9 @@ source = [
 ]
 
 setup = '''
+# cifs.upcall.c uses UINT_MAX without <limits.h> (glibc's headers pull it in; musl's do not): "use of undeclared identifier 'UINT_MAX'"
+# (source edit: sed)
+sed -i '1i #include <limits.h>' cifs.upcall.c
 ROOTSBINDIR=/usr/sbin %configure \
     --enable-cifsupcall --enable-cifscreds --enable-cifsidmap --enable-cifsacl \
     --enable-smbinfo --enable-pythontools --enable-pam --enable-man \
