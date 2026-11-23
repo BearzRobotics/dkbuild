@@ -13,7 +13,8 @@
 # Optional (not depended on): powershell (PowerShell lessons), libarchive's
 # bsdtar (Chimera Linux lab), /dev/kvm access (kvm group).
 name = "winlab"
-version = "0.1.0.beta.1"
+# version 0.1.0_beta1: the upstream tag is v0.1.0-beta.1, which apk rejects as a version; the source URL keeps the tag
+version = "0.1.0_beta1"
 release = 1
 summary = "Offline Windows and Linux administration course with hands-on labs"
 license = "GPL-2.0-only"
