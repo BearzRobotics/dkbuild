@@ -1,6 +1,7 @@
 # Library and command line tool to detect SHA collision in a file (BlackArch list, requested 2026-11-16; docs/requests.md). Generated from the sources' build files (make); the build dependencies are guessed from the #includes. Not built yet when written (wip/queue): expect first-build fixes.
 name = "sha1collisiondetection"
-version = "stable-v1.0.3"
+# version is 1.0.3 (apk rejects the tag name stable-v1.0.3); the source URL keeps the tag
+version = "1.0.3"
 release = 1
 summary = "Library and command line tool to detect SHA collision in a file"
 license = "MIT"

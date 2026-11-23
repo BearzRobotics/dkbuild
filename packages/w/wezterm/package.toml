@@ -17,8 +17,10 @@
 # /usr/share/wezterm/shell-integration/ instead of /etc/profile.d, so
 # no shell sources it until the user does (upstream's .deb puts it in
 # /etc/profile.d).
+# version 20240203.110809: the upstream tag is 20240203-110809-5046fc22, which apk rejects as a version (letters and
+# underscores in the middle); the source URL keeps the tag
 name = "wezterm"
-version = "20240203_110809_5046fc22"
+version = "20240203.110809"
 release = 1
 summary = "GPU-accelerated cross-platform terminal emulator and multiplexer"
 license = "MIT"

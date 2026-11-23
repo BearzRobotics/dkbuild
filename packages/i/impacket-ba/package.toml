@@ -1,6 +1,7 @@
 # Collection of classes for working with network protocols. (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (setuptools); not built yet when written (wip/queue): expect first-build fixes.
 name = "impacket-ba"
-version = "impacket_0_13_1"
+# version is 0.13.1 (apk rejects the tag name impacket_0_13_1); the source URL keeps the tag
+version = "0.13.1"
 release = 1
 summary = "Collection of classes for working with network protocols."
 license = "NOASSERTION"
@@ -14,7 +15,7 @@ source = [
 ]
 
 environment = '''
-export SETUPTOOLS_SCM_PRETEND_VERSION=impacket_0_13_1 PDM_BUILD_SCM_VERSION=impacket_0_13_1
+export SETUPTOOLS_SCM_PRETEND_VERSION=0.13.1 PDM_BUILD_SCM_VERSION=0.13.1
 '''
 install = '''
 python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \

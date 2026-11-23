@@ -9,8 +9,9 @@
 #  - make: no GNU `cp --no-preserve=ownership` in the install target (the
 #    flag is not portable to all cp implementations).
 #  - pathmax: PATH_MAX is not defined without <limits.h> under musl.
+# version 0.9: the stable release is named 0.I (the ninth letter, "I"), which apk rejects as a version; the source URL keeps the tag
 name = "cataclysm-dda"
-version = "0.I"
+version = "0.9"
 release = 1
 summary = "Turn-based survival game set in a post-apocalyptic world"
 license = "CC-BY-SA-3.0"
