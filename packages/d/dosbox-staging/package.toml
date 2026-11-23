@@ -16,7 +16,11 @@ source = [
     { url = "https://github.com/dosbox-staging/dosbox-staging/archive/refs/tags/v0.82.2.tar.gz", sha256 = "387c97b373c3164ab5abbbc2b210bf94b5567057abe44ee1e8b4d4e725bd422c" },
 ]
 
+# musl's <langinfo.h> defines ERA as a macro, which breaks the CRT_KNOB enumerator ERA in vga_other.cpp ("expected identifier"):
+# the macro is dropped before the enum (source edit: sed)
 setup = '''
+sed -i '/^enum CRT_KNOB/i #undef ERA' src/hardware/vga_other.cpp
+grep -q '^#undef ERA' src/hardware/vga_other.cpp
 %meson \
     -Duse_zlib_ng=false
 '''
