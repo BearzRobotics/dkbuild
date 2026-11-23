@@ -88,6 +88,8 @@ environment = '''
 export RUSTC_BOOTSTRAP=1 CARGO_NET_OFFLINE=true
 # pnpm refuses to purge node_modules without a TTY unless in CI mode
 export CI=true
+# the system esbuild package's JS looks for a platform package (@esbuild/linux-x64, "could not be found") unless told where its binary is
+export ESBUILD_BINARY_PATH=/usr/bin/esbuild
 # pnpm 11 runs `pnpm install` before every `pnpm run` when it finds node_modules out of date,
 # which hung 7 h on its SQLite store in the offline sandbox: no verification, the tree is as the snapshot made it
 export npm_config_verify_deps_before_run=false pnpm_config_verify_deps_before_run=false
