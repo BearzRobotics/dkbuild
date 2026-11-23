@@ -31,7 +31,20 @@ source = [
 environment = '''
 export LDFLAGS="${LDFLAGS} -lz"
 '''
+# the git submodules the build keeps (the rest come from the system, USE_SYSTEM_LIBS): the tag archive has them empty ("Externals/cubeb/cubeb/
+# Config.cmake.in does not exist"); the archives listed as sources go to the submodule paths of .gitmodules at tag 2609a
 setup = '''
+rm -rf Externals/cubeb/cubeb; cp -a ../cubeb-54217bca3f3e0cd53c073690a23dd25d83557909 Externals/cubeb/cubeb
+rm -rf Externals/tinygltf/tinygltf; cp -a ../tinygltf-c5641f2c22d117da7971504591a8f6a41ece488b Externals/tinygltf/tinygltf
+rm -rf Externals/imgui/imgui; cp -a ../imgui-45acd5e0e82f4c954432533ae9985ff0e1aad6d5 Externals/imgui/imgui
+rm -rf Externals/implot/implot; cp -a ../implot-3da8bd34299965d3b0ab124df743fe3e076fa222 Externals/implot/implot
+rm -rf Externals/rcheevos/rcheevos; cp -a ../rcheevos-926e4608f8dca7989267c787bbefb3ab1c835ac5 Externals/rcheevos/rcheevos
+rm -rf Externals/spirv_cross/SPIRV-Cross; cp -a ../SPIRV-Cross-ebe2aa0cd80f5eb5cd8a605da604cacf72205f3b Externals/spirv_cross/SPIRV-Cross
+rm -rf Externals/VulkanMemoryAllocator; cp -a ../VulkanMemoryAllocator-3bab6924988e5f19bf36586a496156cf72f70d9f Externals/VulkanMemoryAllocator
+rm -rf Externals/mGBA/mgba; cp -a ../mgba-0b40863f64d0940f333fa1c638e75f86f8a26a33 Externals/mGBA/mgba
+rm -rf Externals/cpp-ipc/cpp-ipc; cp -a ../cpp-ipc-b6cbbc940e25ff898f09a40b107781cef6027b13 Externals/cpp-ipc/cpp-ipc
+rm -rf Externals/cpp-optparse/cpp-optparse; cp -a ../cpp-optparse-2265d647232249a53a03b411099863ceca35f0d3 Externals/cpp-optparse/cpp-optparse
+rm -rf Externals/watcher/watcher; cp -a ../watcher-b03bdcfc11549df595b77239cefe2643943a3e2f Externals/watcher/watcher
 %cmake \
     -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DCMAKE_BUILD_TYPE=Release \
