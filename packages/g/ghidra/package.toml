@@ -100,6 +100,12 @@ mkdir -p dependencies/PyGhidra && cp "/build/sources/typing_extensions-4.16.0-py
 mkdir -p dependencies/PyGhidra && cp "/build/sources/jpype1-1.5.2.tar.gz" dependencies/PyGhidra/
 '''
 build = '''
+# fetchDependencies.gradle is an init script with its own classpath (commons-io 2.21.0), which the Gradle store's
+# resolve run does not reach (the store has commons-io 2.19.0, the version the project itself uses): "No cached version
+# of commons-io:commons-io:2.21.0 available for offline mode". The script only uses FileUtils basics.
+# (Source edit: sed.)
+sed -i 's/commons-io:commons-io:2\.21\.0/commons-io:commons-io:2.19.0/' gradle/support/fetchDependencies.gradle
+grep -q 'commons-io:commons-io:2.19.0' gradle/support/fetchDependencies.gradle
 gradle -I gradle/support/fetchDependencies.gradle -Doffline=true -DnoEclipse=true
 gradle -DnoEclipse=true buildGhidra -x ip
 '''
