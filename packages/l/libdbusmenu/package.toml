@@ -9,7 +9,8 @@ summary = "Library for passing menus over DBus"
 license = "GPL-3.0-or-later AND LGPL-3.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://launchpad.net/libdbusmenu"
 patches = ["json-glib.patch", "makefile-werror.patch", "no-tools.patch", "tests-no-gtk.patch", "tests-werror.patch"]
-hostdeps = ["automake", "intltool", "libtool", "pkgconf"]
+# gtk-doc-tools: the autoreconf step runs gtkdocize ("Can't exec \"gtkdocize\"")
+hostdeps = ["automake", "gtk-doc-tools", "intltool", "libtool", "pkgconf"]
 builddeps = ["atkmm-devel", "gettext-devel", "glib-devel", "gobject-introspection", "gtk+3-devel", "json-glib-devel", "vala-devel"]
 checkdeps = ["bash"]
 
