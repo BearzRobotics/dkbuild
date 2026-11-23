@@ -8,12 +8,17 @@ license = "BSD-2-Clause"
 homepage = "https://invent.kde.org/libraries/cxx-rust-cssparser"
 hostdeps = ["rust", "cmake", "corrosion", "extra-cmake-modules", "ninja", "pkgconf", "qt6-qtbase"]
 builddeps = ["qt6-qtbase-devel", "rust"]
-options = ["!check"]
+# cargodeps: Corrosion runs cargo for rust/ (cxx, cssparser, selectors, nom, ...); without the vendored crates it tried crates.io
+# ("Could not resolve host: index.crates.io") in the offline sandbox. The Cargo.lock is rust/Cargo.lock.
+options = ["!check", "cargodeps"]
 
 source = [
     { url = "https://download.kde.org/stable/cxx-rust-cssparser/cxx-rust-cssparser-1.1.0.tar.xz", sha256 = "c88f883f67d132240f7ef5c8b8fe4f743a79c448b98ac88f2be3b68264840358" },
 ]
 
+environment = '''
+export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+'''
 setup = '''
 %cmake
 '''
