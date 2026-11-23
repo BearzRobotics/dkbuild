@@ -8,7 +8,7 @@ license = "LGPL-2.1-or-later AND BSD-2-Clause"
 homepage = "https://webkitgtk.org"
 patches = ["fortify.patch", "le-check.patch", "loong-hwcap.patch", "loongarch-simdutf.patch", "ppc64-simdutf.patch", "reproducible.patch", "riscv64-no-wasm.patch", "silence.patch", "skia-foritfy.patch", "spiel-allow-sandbox.patch"]
 hostdeps = ["bubblewrap", "cmake", "flex", "geoclue", "gettext", "glib-devel", "gobject-introspection", "gperf", "libxml2", "ninja", "perl", "pkgconf", "python", "ruby", "unifdef", "wayland", "xdg-dbus-proxy"]
-# hidapi-devel: manette-0.2.pc requires it, and without it pkgconf cannot resolve manette-0.2 ("Could NOT find Manette (missing: Manette_INCLUDE_DIR)")
+# hidapi-devel: most likely manette-0.2.pc needs it (libmanette builds against hidapi), and without it pkgconf cannot resolve manette-0.2 ("Could NOT find Manette (missing: Manette_INCLUDE_DIR)")
 builddeps = ["at-spi2-core-devel", "enchant-devel", "freetype-devel", "geoclue-devel", "gst-plugins-bad-devel", "gst-plugins-base-devel", "gstreamer-devel", "gtk+3-devel", "harfbuzz-devel", "hyphen-devel", "icu-devel", "lcms2-devel", "libavif-devel", "libdrm-devel", "libgcrypt-devel", "libjpeg-turbo-devel", "libjxl-devel", "hidapi-devel", "libmanette-devel", "libnotify-devel", "libpng-devel", "libpsl-devel", "libseccomp-devel", "libsecret-devel", "libsoup-devel", "libspiel-devel", "libtasn1-devel", "libwebp-devel", "libwpe-devel", "libxkbcommon-devel", "libxml2-devel", "libxslt-devel", "libxt-devel", "linux-headers", "mesa-devel", "openjpeg-devel", "sqlite-devel", "sysprof-capture", "wayland-devel", "wayland-protocols", "woff2-devel", "wpebackend-fdo-devel"]
 rundeps = ["bubblewrap", "gst-plugins-bad", "gst-plugins-good", "xdg-dbus-proxy"]
 options = ["!check", "jobs:12"]
