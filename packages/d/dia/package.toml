@@ -11,9 +11,14 @@ options = ["!check"]
 
 source = [
     { url = "https://gitlab.gnome.org/GNOME/dia/-/archive/ad68cc378b7a187706bc2648c48b44d16fb80819/dia-ad68cc378b7a187706bc2648c48b44d16fb80819.tar.gz", sha256 = "0e00e6b6dcdac7c81b3439b96b4e1c2f7281d54a8b1bf849cad6630ecc8822a0" },
+    # xpm-pixbuf (a tiny GNOME library Dia uses as a meson subproject, from its wrap file: gitlab.gnome.org/ZanderBrown/xpm-pixbuf, main at
+    # this commit): meson may not download wraps here ("Automatic wrap-based subproject downloading is disabled")
+    { url = "https://gitlab.gnome.org/ZanderBrown/xpm-pixbuf/-/archive/d290a0c846687b22d2a8c5aaec83a6689f30e1c3/xpm-pixbuf-d290a0c846687b22d2a8c5aaec83a6689f30e1c3.tar.gz", sha256 = "f45615a60b7d1948f27a44f4d4347405c12fcf71684ed64bcb7b1c10b189b706" },
 ]
 
+# the wrap's directory is put where meson looks first, so the wrap never downloads
 setup = '''
+cp -a ../xpm-pixbuf-d290a0c846687b22d2a8c5aaec83a6689f30e1c3 subprojects/xpm-pixbuf
 %meson \
     -Dtests=false
 '''
