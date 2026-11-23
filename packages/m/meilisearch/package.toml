@@ -9,6 +9,11 @@
 #   against Cargo.toml stays, so it is the same file. (Prebuilt web UI: allowed.)
 # - build-info asks git for the commit (vergen); the tarball has no git directory:
 #   MEILI_NO_VERGEN=1 turns that off, as upstream's own Dockerfile-less builds do.
+# - The lindera crates (Japanese: unidic, Korean: ko-dic) download their MeCab dictionaries in build.rs
+#   (Lindera.dev) and build them into the binary. The two archives are sources here (unpack = false,
+#   the file names and MD5s build.rs checks), and LINDERA_BUILD_DICTIONARY_CACHE_DIR points the build
+#   scripts at a directory that already holds them: <cache>/<crate version>-fmt<dictionary format>/<archive>
+#   (5.3.0 and format 2: lindera-dictionary 5.3's DICTIONARY_FORMAT_VERSION), so nothing is downloaded.
 # - Enterprise Edition code (LICENSE-EE) is in the tree and built, as upstream's default build.
 # Installed inert (docs/requests.md): dinit service shipped, not enabled; no master key
 # (the config is loopback-only, development mode, analytics off); the _meilisearch user
@@ -28,12 +33,19 @@ patches = ["mini-dashboard-local.patch"]
 source = [
     { url = "https://github.com/meilisearch/meilisearch/archive/refs/tags/v1.57.0.tar.gz", sha256 = "efe82a64d647e4959729306c3cee50c0b08f3bcbd72785c67cd55ea189fbd0ad" },
     { url = "https://github.com/meilisearch/mini-dashboard/releases/download/v0.4.2/build.zip", sha256 = "239ad6c1c47544ad5d7bd3d648814f24ea6797466b07ddfcac4a3523659aca6b", unpack = false, name = "mini-dashboard-0.4.2.zip" },
+    { url = "https://Lindera.dev/unidic-mecab-2.1.2.tar.gz", sha256 = "24ac75fe4e44d973b55e65847c35fa4aec2db7a41a07b49ca125146db9fc1189", unpack = false, name = "unidic-mecab-2.1.2.tar.gz" },
+    { url = "https://Lindera.dev/mecab-ko-dic-2.1.1-20180720.tar.gz", sha256 = "702ced21c6167e9d9aebc674ab5ee54af58d4443975f2940d37d0567c020591a", unpack = false, name = "mecab-ko-dic-2.1.1-20180720.tar.gz" },
 ]
 
 environment = '''
 export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
 export MEILI_NO_VERGEN=1 MEILI_DASHBOARD_ZIP=/build/sources/mini-dashboard-0.4.2.zip
 export LIBCLANG_PATH=/usr/lib
+export LINDERA_BUILD_DICTIONARY_CACHE_DIR=/tmp/lindera-cache
+'''
+setup = '''
+mkdir -p /tmp/lindera-cache/5.3.0-fmt2
+cp /build/sources/unidic-mecab-2.1.2.tar.gz /build/sources/mecab-ko-dic-2.1.1-20180720.tar.gz /tmp/lindera-cache/5.3.0-fmt2/
 '''
 build = '''
 test -f "$MEILI_DASHBOARD_ZIP"
