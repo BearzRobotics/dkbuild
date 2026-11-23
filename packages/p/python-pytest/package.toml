@@ -1,0 +1,24 @@
+# pytest: the Python test framework. Many recipes' check steps (glib, fuse, libei, wireshark, ...) name it
+# as a checkdep and the tree had no recipe for it. Pure Python; built from the sdist offline with pip
+# (--no-build-isolation), setuptools + setuptools-scm (the sdist carries PKG-INFO). Its own tests need
+# pytest itself, so they are off. (colorama is Windows only; exceptiongroup and tomli are for Pythons
+# older than 3.11.)
+name = "python-pytest"
+version = "9.2.0"
+release = 1
+summary = "Python test framework"
+license = "MIT"
+homepage = "https://pytest.org"
+hostdeps = ["python", "python-setuptools", "python-setuptools-scm"]
+rundeps = ["python", "python-iniconfig", "python-packaging", "python-pluggy", "python-pygments"]
+options = ["!check"]
+
+source = [
+    { url = "https://files.pythonhosted.org/packages/79/42/bb4641652e58dedeac2ec51abc1f8cae4fee4ec63899a0999016229a0f2a/pytest-9.2.0.tar.gz", sha256 = "97c4f3b1f3c7414aa36465e09b8220f1d03627993bd51b1282e193753c80557b" },
+]
+
+install = '''
+python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
+    --root "$pkgdir" --prefix /usr .
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-pytest/LICENSE"
+'''

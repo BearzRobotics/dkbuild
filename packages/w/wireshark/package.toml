@@ -2,14 +2,14 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "wireshark"
 version = "4.7.2"
-release = 2
+release = 3
 summary = "Network protocol analyzer"
 license = "GPL-2.0-or-later"
 homepage = "https://www.wireshark.org"
 patches = ["dumpcap-group.patch", "no-ads.patch", "precision-loss.patch", "signed-overflow.patch"]
 hostdeps = ["asciidoctor", "cmake", "doxygen", "flex", "gettext-devel", "libcap", "ninja", "perl", "pkgconf", "qt6-qtbase", "qt6-qttools"]
 builddeps = ["c-ares-devel", "glib-devel", "gnutls-devel", "heimdal-devel", "libcap-devel", "libgcrypt-devel", "libnl-devel", "libpcap-devel", "libssh-devel", "libxml2-devel", "lua-devel", "lz4-devel", "minizip-ng-devel", "nghttp2-devel", "nghttp3-devel", "opus-devel", "pcre2-devel", "portaudio-devel", "qt6-qt5compat-devel", "qt6-qtbase-devel", "qt6-qtmultimedia-devel", "qt6-qtsvg-devel", "qt6-qttools-devel", "sbc-devel", "snappy-devel", "spandsp-devel", "speexdsp-devel", "zlib-ng-compat-devel", "zstd-devel"]
-checkdeps = []
+checkdeps = ["python-pytest"]
 
 source = [
     { url = "https://www.wireshark.org/download/src/all-versions/wireshark-4.7.2.tar.xz", sha256 = "f94df4731d9fcb86240950fde44b3db52ffdd04e918b558e613891d0b578dadc" },
