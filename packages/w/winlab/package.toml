@@ -1,0 +1,41 @@
+# WinLab (Dakota's own): the offline-first Windows and Linux administration
+# course with hands-on labs (lesson browser, quizzes, notes, terminal; the labs
+# run QEMU virtual machines). Zig + DVUI.
+# Source: the v0.1.0-beta.1 tag archive from GitHub: the repository commits
+# zig-pkg/ (md, toml, pdf, dvui and its helpers, ADR 0003), so the build needs
+# no zigdeps and no network (%zig_build passes --system zig-pkg).
+# SDL: DVUI builds its own copy from zig-pkg by default; -fsys=sdl3 (README:
+# "A distribution package may use its own libsdl3") uses the tree's sdl3.
+# -Dshare-content=true installs the course, labs, paths, certs and quizzes to
+# /usr/share/winlab (where winlab looks), the desktop entry and the licence.
+# The run-time tools are depended on, not bundled (README, "Required software"):
+# QEMU (system-x86 + qemu-img), OpenSSH client, curl, coreutils (df).
+# Optional (not depended on): powershell (PowerShell lessons), libarchive's
+# bsdtar (Chimera Linux lab), /dev/kvm access (kvm group).
+name = "winlab"
+version = "0.1.0.beta.1"
+release = 1
+summary = "Offline Windows and Linux administration course with hands-on labs"
+license = "GPL-2.0-only"
+homepage = "https://github.com/BearzRobotics/winlab"
+archs = ["x86_64"]
+hostdeps = ["zig", "pkgconf"]
+builddeps = ["sdl3-devel"]
+rundeps = ["qemu-system-x86", "qemu", "openssh", "curl", "coreutils", "sdl3"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/BearzRobotics/winlab/archive/refs/tags/v0.1.0-beta.1.tar.gz", sha256 = "d0aba0b3b6119ffa9183fe147d82bc980f03c936efc5dd49008fc6cc95018d08" },
+]
+
+install = '''
+# zig-pkg's entries may become links into the shared package store (as in
+# dkconsole); copied into the tree so generators that run through ../.. work
+for p in zig-pkg/*; do
+    [ -L "$p" ] || continue
+    t=$(readlink -f "$p"); rm "$p"; cp -a "$t" "$p"
+done
+%zig_build -Dshare-content=true -fsys=sdl3
+rm -f "$pkgdir/usr/share/doc/winlab/LICENSE"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/winlab/LICENSE"
+'''
