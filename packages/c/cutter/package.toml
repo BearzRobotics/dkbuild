@@ -6,7 +6,7 @@ summary = "Reverse engineering GUI (rizin)"
 license = "GPL-3.0-only"
 homepage = "https://cutter.re"
 hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "python"]
-builddeps = ["qt6-qtbase-devel", "qt6-qtsvg-devel", "rizin-devel", "graphviz-devel", "python-devel"]
+builddeps = ["qt6-qtbase-devel", "qt6-qt5compat-devel", "qt6-qtsvg-devel", "rizin-devel", "graphviz-devel", "python-devel"]
 options = ["!check"]
 
 source = [
