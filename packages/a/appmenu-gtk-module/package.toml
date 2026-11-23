@@ -13,9 +13,17 @@ source = [
     { url = "https://gitlab.com/vala-panel-project/vala-panel-appmenu/-/archive/25.04/vala-panel-appmenu-25.04.tar.gz", sha256 = "48d0be87b260056a65a9056a9be7e190b67a508540ebcb1fc18a67349cca0177" },
 ]
 
+# the project's options are features (no -Dgtk): this package is the Gtk+ module only, the rest of vala-panel-appmenu (the Vala,
+# Xfce, MATE and Budgie panel applets, the DBusMenu registrar, the Java support) are separate integrations, off here
 setup = '''
 %meson \
-    -Dgtk=3
+    -Dappmenu-gtk-module=enabled \
+    -Dregistrar=disabled \
+    -Dvalapanel=disabled \
+    -Dxfce=disabled \
+    -Dmate=disabled \
+    -Dbudgie=disabled \
+    -Djayatana=disabled
 '''
 build = '''
 %meson_build
