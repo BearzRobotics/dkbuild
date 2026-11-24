@@ -23,6 +23,8 @@ source = [
 ]
 
 environment = '''
+# librocksdb-sys links the C++ standard library by name, libstdc++ unless CXXSTDLIB says otherwise ("ld.lld: error: unable to find library -lstdc++"); this system has libc++
+export CXXSTDLIB=c++
 export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true LIBCLANG_PATH=/usr/lib
 # jemalloc-sys builds its bundled jemalloc (autoconf, needs make); rocksdb builds with cmake/cc
 '''
