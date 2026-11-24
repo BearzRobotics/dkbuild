@@ -16,6 +16,8 @@ source = [
 
 environment = '''
 export CFLAGS="${CFLAGS} -DNDEBUG"
+# client/SDL uses std::free without <cstdlib> (libc++ no longer includes it transitively): the usual gap headers are force-included for C++ files
+export CXXFLAGS="$CXXFLAGS -include cstdlib -include cstdint -include cstring -include string -include memory"
 '''
 setup = '''
 %cmake \
@@ -43,7 +45,7 @@ setup = '''
     -DWINPR_UTILS_IMAGE_WEBP=ON
 '''
 build = '''
-%cmake_build
+ninja -C build -k 0
 '''
 install = '''
 %cmake_install
