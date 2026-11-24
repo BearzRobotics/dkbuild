@@ -20,7 +20,11 @@ source = [
     { url = "https://github.com/stsp/dj64dev/archive/refs/tags/0.5.tar.gz", sha256 = "d9a35a429d4adda44e2d1d76ef9c9c6c7a515d1e1cc9d3fd09db425008123ac0" },
 ]
 
+# configure.ac gives the 32-bit cross compiler -Wno-error=maybe-uninitialized (a GCC warning name); the i686-linux-gnu-gcc wrappers run clang, which
+# stops on it ("unknown warning option '-Werror=maybe-uninitialized'", with -Werror on): -Wno-unknown-warning-option goes beside it (source edit: sed)
 setup = '''
+sed -i 's/CROSS_GCC_CFLAGS="-Wno-error=maybe-uninitialized"/CROSS_GCC_CFLAGS="-Wno-error=maybe-uninitialized -Wno-unknown-warning-option"/' configure.ac
+grep -q 'CROSS_GCC_CFLAGS="-Wno-error=maybe-uninitialized -Wno-unknown-warning-option"' configure.ac
 ./autogen.sh
 %configure \
     --with-sysroot=/usr/lib/x86_64-pc-dj64 \
