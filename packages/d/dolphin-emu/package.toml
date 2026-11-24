@@ -30,6 +30,9 @@ source = [
 
 environment = '''
 export LDFLAGS="${LDFLAGS} -lz"
+# libc++ no longer includes <vector> and friends transitively ("no template named 'vector' in namespace 'std'", CustomTextureData.h and surely more in
+# a tree this size): the usual set is force-included for every C++ file
+export CXXFLAGS="$CXXFLAGS -include vector -include cstdint -include cstdlib -include cstring -include string -include memory -include algorithm"
 '''
 # the git submodules the build keeps (the rest come from the system, USE_SYSTEM_LIBS): the tag archive has them empty ("Externals/cubeb/cubeb/
 # Config.cmake.in does not exist"); the archives listed as sources go to the submodule paths of .gitmodules at tag 2609a
@@ -58,8 +61,9 @@ rm -rf Externals/watcher/watcher; cp -a ../watcher-b03bdcfc11549df595b77239cefe2
     -DUSE_SYSTEM_LIBMGBA=OFF \
     -DUSE_SYSTEM_CUBEB=OFF
 '''
+# -k 0: one run lists every file that still fails with this libc++, not only the first
 build = '''
-%cmake_build
+ninja -C build -k 0
 '''
 install = '''
 %cmake_install
