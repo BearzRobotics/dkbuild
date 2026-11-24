@@ -12,7 +12,8 @@ release = 1
 summary = "Graphical IRC client"
 license = "GPL-2.0-or-later"
 homepage = "https://hexchat.github.io"
-hostdeps = ["gettext-devel", "glib-devel", "meson", "perl", "pkgconf"]
+# python-cffi: plugins/python/generate_plugin.py (it makes python.c from python.py) imports cffi
+hostdeps = ["python-cffi", "gettext-devel", "glib-devel", "meson", "perl", "pkgconf"]
 builddeps = ["dbus-glib-devel", "gtk+2-devel", "libcanberra-devel", "luajit-devel", "openssl-devel", "pciutils-devel",
              "perl", "python-devel"]
 rundeps = ["adwaita-icon-theme"]
