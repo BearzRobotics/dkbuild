@@ -16,7 +16,12 @@ source = [
     { url = "https://download.kde.org/stable/heaptrack/1.5.0/heaptrack-1.5.0.tar.xz", sha256 = "a278d9d8f91e8bfb8a1c2f5b73eecab47fd45d0693f5dbea637536413cec2ea5" },
 ]
 
+# Boost 1.89 and later have no `system` component (Boost.System is header-only, and BoostConfig then looks for a package "boost_system" that does not
+# exist): it leaves the COMPONENTS lists of both CMakeLists.txt (source edit: sed)
 setup = '''
+sed -i 's/COMPONENTS system filesystem iostreams container/COMPONENTS filesystem iostreams container/' CMakeLists.txt
+sed -i 's/COMPONENTS iostreams program_options system filesystem/COMPONENTS iostreams program_options filesystem/' src/analyze/CMakeLists.txt
+! grep -rq 'COMPONENTS.* system' CMakeLists.txt src/analyze/CMakeLists.txt
 # CMAKE_POLICY_VERSION_MINIMUM: the project asks for CMake < 3.5 compatibility.
 # -Wno-incompatible-pointer-types: configure-time checks written for older C.
 # LIBUNWIND_*: the nongnu libunwind lives in its own directories (see libunwind-nongnu).
