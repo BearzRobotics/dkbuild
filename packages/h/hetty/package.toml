@@ -11,7 +11,7 @@ homepage = "https://github.com/dstotijn/hetty"
 # the store (npmdeps). Upstream locks it with yarn.lock (v1); files/package-lock.json is
 # `npm install --package-lock-only --ignore-scripts --legacy-peer-deps` run in admin/ on the host
 # (npm seeds the versions from yarn.lock; legacy peer deps because react-split-pane wants React 16).
-hostdeps = ["go", "nodejs"]
+hostdeps = ["go", "nodejs", "gcc"]
 options = ["!check", "godeps", "npmdeps"]
 
 source = [
@@ -23,6 +23,9 @@ export GOFLAGS="-mod=mod -trimpath -buildvcs=false" GOTOOLCHAIN=local GOPROXY=of
 export GOCACHE=/tmp/go-cache GOPATH=/tmp/go CGO_ENABLED=0
 export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
     npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false NEXT_TELEMETRY_DISABLED=1
+# Next.js 12's prebuilt SWC binary for musl needs libgcc_s.so.1 ("Error loading shared library libgcc_s.so.1"), which this system only has in the gcc
+# package's directory: the dynamic loader is pointed there for the admin build, as for the Euro-Office web-apps build
+export LD_LIBRARY_PATH=/usr/lib/gcc15/lib
 '''
 setup = '''
 cd admin
