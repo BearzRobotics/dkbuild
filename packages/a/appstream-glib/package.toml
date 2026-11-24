@@ -10,7 +10,7 @@ license = "LGPL-2.1-or-later"
 homepage = "https://people.freedesktop.org/~hughsient/appstream-glib"
 # docbook-xsl, docbook-xml, libxslt: the man page (appstream-util.1) is made with xsltproc from the DocBook stylesheet, which without the
 # package's XML catalog is fetched from docbook.sourceforge.net ("Attempt to load network entity")
-hostdeps = ["docbook-xml", "docbook-xsl", "libxslt", "curl-devel", "glib-devel", "gobject-introspection", "gperf", "libyaml-devel", "pkgconf", "vala"]
+hostdeps = ["docbook-xml", "docbook-xsl-nons", "libxslt", "curl-devel", "glib-devel", "gobject-introspection", "gperf", "libyaml-devel", "pkgconf", "vala"]
 builddeps = ["curl-devel", "gcab-devel", "glib-devel", "gtk+3-devel", "json-glib-devel", "libarchive-devel", "libyaml-devel"]
 options = ["!cross"]
 
@@ -18,6 +18,11 @@ source = [
     { url = "https://people.freedesktop.org/~hughsient/appstream-glib/releases/appstream-glib-0.8.4.tar.xz", sha256 = "132575f3ef2712cd0fc8a7f0c9287ff5c4264d75921953220dd2089911272946" },
 ]
 
+# r2 of this fix: the URL it asks for (docbook.sourceforge.net/release/xsl/current/) is the non-namespaced stylesheet, docbook-xsl-nons, and the
+# tree's catalog for it is /usr/share/xsl-nons/docbook/catalog.xml (rewriting that URL to the local files): XML_CATALOG_FILES points there, as in libsecret
+environment = '''
+export XML_CATALOG_FILES="/usr/share/xsl-nons/docbook/catalog.xml /usr/share/xml/docbook/4.2/catalog /usr/share/xml/docbook/4.5/catalog"
+'''
 setup = '''
 %meson \
     -Dintrospection=true \
