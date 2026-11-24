@@ -12,6 +12,11 @@ source = [
     { url = "https://download.qt.io/official_releases/qt/6.12/6.12.0/submodules/qtquick3d-everywhere-src-6.12.0.tar.xz", sha256 = "6ced6edbd25fb5a632fe770ae820b376bf50233e8d62002c79a69a505a2e429e" },
 ]
 
+# the bundled xatlas.cpp uses realloc and qsort without <cstdlib> (libc++ no longer includes it transitively: "use of undeclared identifier 'realloc'");
+# the usual set is force-included for the whole build, as for the other Qt modules
+environment = '''
+export CXXFLAGS="$CXXFLAGS -include cstdlib -include cstdint -include cstring -include limits"
+'''
 setup = '''
 %cmake
 '''
