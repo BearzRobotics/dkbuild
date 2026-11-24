@@ -17,6 +17,11 @@ source = [
 ]
 
 setup = '''
+# src/engine-eds.cpp: `constexpr std::array<ECalComponentAlarmAction,1> omit = {(ECalComponentAlarmAction)-1}` (the -1 terminator of a list of
+# action types to omit): clang rejects it, -1 is outside the enumeration's range [0, 7] ("constexpr variable 'omit' must be initialized by a constant
+# expression"). A plain const array holds the same value and is used the same way (sed).
+sed -i 's/constexpr std::array<ECalComponentAlarmAction,1> omit/const std::array<ECalComponentAlarmAction,1> omit/' src/engine-eds.cpp
+grep -q 'const std::array<ECalComponentAlarmAction,1> omit' src/engine-eds.cpp
 %cmake \
     -DBUILD_SHARED_LIBS=ON \
     -DENABLE_TESTS=OFF
