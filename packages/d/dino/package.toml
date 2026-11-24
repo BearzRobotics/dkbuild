@@ -26,8 +26,11 @@ source = [
 ]
 
 # !check: the suite needs a session bus and display.
+# -Ddefault_library=shared: under the tree's default_library=both, meson makes libdino.a from the shared build's objects and one of them (the generated
+# version.c) is not there ("ninja: error: 'libdino/libdino.so.0.0.p/meson-generated_.._version.c.o', needed by 'libdino/libdino.a', missing"). Dino's
+# libraries (libdino, xmpp-vala, qlite, crypto-vala) are the application's own, not meant to be linked statically by anyone
 setup = '''
-%meson \
+%meson -Ddefault_library=shared \
     -Dplugin-notification-sound=enabled \
     -Dplugin-rtp-h264=enabled \
     -Dplugin-rtp-msdk=enabled \
