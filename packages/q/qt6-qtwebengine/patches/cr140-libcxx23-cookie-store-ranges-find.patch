@@ -1,0 +1,25 @@
+FenrirOS: libc++ 23 does not accept `&std::unique_ptr<T>::operator*` as the projection of std::ranges::find ("no matching function for call to object
+of type const __find": the projection is ignored and unique_ptr<T> is compared with T). A lambda projection does the same on every libc++.
+
+--- a/src/3rdparty/chromium/content/browser/cookie_store/cookie_store_manager.cc	2026-11-23 21:31:36.409164450 -0500
++++ b/src/3rdparty/chromium/content/browser/cookie_store/cookie_store_manager.cc	2026-11-23 21:31:36.409164450 -0500
+@@ -233,7 +233,8 @@
+ 
+     auto existing_subscription_it = std::ranges::find(
+         subscriptions, *new_subscription,
+-        &std::unique_ptr<CookieChangeSubscription>::operator*);
++        [](const std::unique_ptr<CookieChangeSubscription>& s)
++            -> const CookieChangeSubscription& { return *s; });
+     if (existing_subscription_it == subscriptions.end())
+       subscriptions.push_back(std::move(new_subscription));
+   }
+@@ -331,7 +332,8 @@
+   for (auto& subscription : all_subscriptions) {
+     auto target_subscription_it = std::ranges::find(
+         target_subscriptions, *subscription,
+-        &std::unique_ptr<CookieChangeSubscription>::operator*);
++        [](const std::unique_ptr<CookieChangeSubscription>& s)
++            -> const CookieChangeSubscription& { return *s; });
+     if (target_subscription_it == target_subscriptions.end()) {
+       // The subscription is not marked for deletion.
+       live_subscriptions.push_back(std::move(subscription));
