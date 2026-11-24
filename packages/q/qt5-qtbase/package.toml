@@ -43,7 +43,10 @@ source = [
     { url = "https://dev.alpinelinux.org/archive/qt/qtbase-bebdfd54917e25d1c100e6bd9f5dd53c2e645fd8.tar.xz", sha256 = "799fa2ff319b18da102ca0da40f0c5fee9ef081921598425f0137cff4bf87522" },
 ]
 
+# libc++ no longer includes <exception> transitively: qglobal.cpp's std::terminate() ("no member named 'terminate' in namespace 'std'"), in the
+# bootstrapped qmake. The first of what a Qt 5.15 on libc++ 23 may need; later missing headers are added the same way. (source edit: sed)
 setup = '''
+sed -i '1i #include <exception>' src/corelib/global/qglobal.cpp
 # the clang mkspec: this system's compiler with its target, and its flags (the mkspec's own
 # flags are -O2 and none of ours); no -ccc-gcc-name (an old clang option: g++ is not here)
 sed -i -e "s|^QMAKE_CC .*|QMAKE_CC = clang --target=$target|" \
