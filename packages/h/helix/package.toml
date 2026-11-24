@@ -24,7 +24,11 @@ export HELIX_DEFAULT_RUNTIME=/usr/lib/helix/runtime
 build = '''
 cargo build --release --frozen --offline -j $jobs
 # the grammars, from runtime/grammars/sources (the archive's) into runtime/grammars/*.so
-HELIX_RUNTIME="$PWD/runtime" target/release/hx --grammar build
+# the grammar sources are looked for under the FIRST runtime directory, the user config's ("Failed to read directory /root/.config/helix/runtime/grammars/sources/..."
+# for all 245; HELIX_RUNTIME is a later one): the config directory gets a link to the archive's runtime
+mkdir -p /tmp/hxcfg/helix
+ln -sfn "$PWD/runtime" /tmp/hxcfg/helix/runtime
+XDG_CONFIG_HOME=/tmp/hxcfg HELIX_RUNTIME="$PWD/runtime" target/release/hx --grammar build
 '''
 install = '''
 install -Dm755 target/release/hx "$pkgdir/usr/bin/hx"
