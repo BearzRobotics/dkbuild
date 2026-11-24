@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Zig IDE
+GenericName=Zig Development Environment
+Comment=An independent desktop IDE for the Zig programming language
+Exec=zig-ide %F
+Icon=zig-ide
+Terminal=false
+StartupWMClass=Zig IDE
+Categories=Development;IDE;
+Keywords=zig;zls;
+MimeType=text/x-zig;

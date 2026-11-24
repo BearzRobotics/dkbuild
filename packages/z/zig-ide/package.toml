@@ -1,0 +1,63 @@
+# Zig IDE 1.4.0 (kritarkri/Zig-IDE, MIT; written 2026-11-24 on the user's request; DRAFT, not built, needs electron first).
+# An Electron + React + Monaco app. Upstream ships only Windows installers (release assets) and electron-builder
+# targets; here, as for jitsi-meet-electron, electron-builder is not used: `vite build` (dist/) + tsc (dist-electron/)
+# make the app directory (dist, dist-electron, package.json with main dist-electron/main.js) which /usr/bin/electron
+# runs; all runtime npm packages (react, monaco) are bundled by Vite, so no node_modules ship. The npm packages come
+# from the npm store (package-lock.json is in the source).
+# Zig and ZLS are not bundled: upstream's first-run wizard downloads them into the user's data directory; here the
+# zig and zls packages provide them on PATH, which the app searches (ZIG_EXE/ZLS_EXE, the setting, then PATH).
+# Source edit: @monaco-editor/react loads Monaco from the jsdelivr CDN at run time by default, which would not work
+# offline and fetches code from a third party: files/monaco-local.ts (copied in setup, imported first in
+# src/main.tsx by a sed) points the loader at the bundled monaco-editor package, with its editor worker.
+# The tsc type check is run too (the "build" script); the first run will show whether the Electron types fit.
+# Upstream has no icon file: files/zig-ide.svg is ours (Zig's orange with a "Z").
+name = "zig-ide"
+version = "1.4.0"
+release = 1
+summary = "Independent desktop IDE for the Zig language (Monaco editor, ZLS integration)"
+license = "MIT"
+homepage = "https://github.com/kritarkri/Zig-IDE"
+archs = ["x86_64", "aarch64"]
+hostdeps = ["nodejs"]
+builddeps = ["electron-devel"]
+rundeps = ["electron", "zig", "zls", "hicolor-icon-theme"]
+options = ["!check", "npmdeps"]
+
+source = [
+    { url = "https://github.com/kritarkri/Zig-IDE/archive/refs/tags/v1.4.0.tar.gz", sha256 = "b50b473d188896febfa96cb646d0f694f2c74763e77b3205f3f8c77cdc060ace" },
+]
+
+environment = '''
+export HOME=/tmp/home npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false
+export ELECTRON_SKIP_BINARY_DOWNLOAD=1 CI=true
+'''
+setup = '''
+# electron and electron-builder are devDependencies: their install scripts (binary download) are not run
+npm ci --ignore-scripts
+cp $pkgfiles/monaco-local.ts src/monaco-local.ts
+sed -i "1i import './monaco-local';" src/main.tsx
+grep -q monaco-local src/main.tsx
+'''
+build = '''
+node node_modules/typescript/bin/tsc --noEmit
+node node_modules/vite/bin/vite.js build
+node node_modules/typescript/bin/tsc -p electron/tsconfig.json
+test -f dist-electron/main.js
+test -f dist/index.html
+'''
+install = '''
+app="$pkgdir/usr/lib/zig-ide"
+mkdir -p "$app"
+cp -a dist dist-electron "$app/"
+node -e '
+const fs = require("fs");
+const p = JSON.parse(fs.readFileSync("package.json", "utf8"));
+delete p.scripts; delete p.dependencies; delete p.devDependencies; delete p.build;
+fs.writeFileSync(process.argv[1], JSON.stringify(p, null, 2));
+' "$app/package.json"
+install -Dm755 $pkgfiles/zig-ide "$pkgdir/usr/bin/zig-ide"
+install -Dm644 $pkgfiles/zig-ide.desktop "$pkgdir/usr/share/applications/zig-ide.desktop"
+install -Dm644 $pkgfiles/zig-ide.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/zig-ide.svg"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/zig-ide/LICENSE"
+install -Dm644 THIRD_PARTY_NOTICES.md "$pkgdir/usr/share/licenses/zig-ide/THIRD_PARTY_NOTICES.md"
+'''

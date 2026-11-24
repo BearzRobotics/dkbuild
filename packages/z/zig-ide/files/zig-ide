@@ -1,0 +1,3 @@
+#!/bin/sh
+# Zig IDE on the system Electron. The Zig compiler and ZLS come from the zig and zls packages (on PATH).
+exec /usr/bin/electron /usr/lib/zig-ide "$@"
