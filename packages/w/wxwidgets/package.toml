@@ -15,6 +15,11 @@ source = [
     { url = "https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.8/wxWidgets-3.2.8.tar.bz2", sha256 = "c74784904109d7229e6894c85cfa068f1106a4a07c144afd78af41f373ee0fe6" },
 ]
 
+# libc++ no longer includes <algorithm> (std::fill in the bundled Scintilla) and its neighbours transitively: the usual gap headers are force-included
+# for every C++ file; -k 0 lists every file that still fails in one run
+environment = '''
+export CXXFLAGS="$CXXFLAGS -include algorithm -include vector -include cstdint -include cstdlib -include cstring -include string -include memory"
+'''
 setup = '''
 %cmake \
     -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
@@ -35,7 +40,7 @@ setup = '''
     -DOPENGL_opengl_LIBRARY=/usr/lib/libGL.so
 '''
 build = '''
-%cmake_build
+ninja -C build -k 0
 '''
 install = '''
 %cmake_install
