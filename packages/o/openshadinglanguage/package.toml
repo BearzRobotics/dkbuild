@@ -24,11 +24,15 @@ setup = '''
 # range's upper end moves to 23.9 (source edit: sed); LLVM 23 API changes, if any, show at compile time
 sed -i 's/VERSION_MAX 22\.9/VERSION_MAX 23.9/' src/cmake/externalpackages.cmake
 grep -q 'VERSION_MAX 23.9' src/cmake/externalpackages.cmake
+# llvm_util.cpp includes <llvm/Transforms/Utils/UnifyFunctionExitNodes.h>, which LLVM 23 no longer has, and uses nothing from it (source edit: sed)
+sed -i '/llvm\/Transforms\/Utils\/UnifyFunctionExitNodes\.h/d' src/liboslexec/llvm_util.cpp
+! grep -q UnifyFunctionExitNodes src/liboslexec/llvm_util.cpp
 %cmake \
     -DCMAKE_CXX_STANDARD=17
 '''
+# -k 0: with LLVM 23 under a source written for 14 to 22, one run should list every file that fails, not stop at the first
 build = '''
-%cmake_build
+ninja -C build -k 0
 '''
 install = '''
 %cmake_install
