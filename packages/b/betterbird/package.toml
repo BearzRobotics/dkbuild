@@ -36,6 +36,11 @@ environment = '''
 export MOZBUILD_STATE_PATH="$PWD/.mozbuild" MOZ_MAKE_FLAGS="-j$jobs" AS="$CC"
 export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
 export RUST_TARGET=x86_64-unknown-linux-musl RUSTFLAGS="-C target-feature=-crt-static"
+# The Rust build scripts (bindgen's, for gecko-profiler, pkcs11-bindings, ...) are linked static on musl, and then bindgen cannot dlopen libclang
+# ("Dynamic loading not supported"): every rustc call goes through a wrapper that adds -crt-static (see firefox's recipe: Mozilla gives host
+# edges none of RUSTFLAGS). Build scripts that compile C++ through the `cc` crate link -lstdc++ by default; this system has libc++.
+export RUSTC_WRAPPER=/tmp/rustc-dynamic
+export CXXSTDLIB=c++
 export MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE=system MOZ_NOSPAM=1
 # From Betterbird's mozconfig-Linux.
 export MOZILLA_OFFICIAL=1 MOZ_TELEMETRY_REPORTING= MOZ_REQUIRE_SIGNING=
@@ -48,6 +53,20 @@ export MOZ_APP_REMOTINGNAME=eu.betterbird.Betterbird
 export MOZ_PKG_APPNAME=betterbird
 '''
 setup = '''
+# bindgen 0.72 (vendored) panics on libc++ 23's headers ("Not an item: ItemId(N)" in Type::layout, from a recursive template union):
+# firefox's recipe carries bindgen's own fix (PR 3536), files/bindgen-template-union.patch (the same file), which applies to this copy
+# too; the vendored crate's .cargo-checksum.json then lists no files (cargo checks only the package checksum of the lock file).
+# Source edit: patch (once per real directory: comm/third_party/rust may be a link to the same tree).
+bg_done=""
+for d in third_party/rust/bindgen comm/third_party/rust/bindgen; do
+    [ -d "$d" ] || continue
+    r=$(readlink -f "$d")
+    case " $bg_done " in *" $r "*) continue ;; esac
+    bg_done="$bg_done $r"
+    patch -d "$r" -p1 < $pkgfiles/bindgen-template-union.patch
+    sed -i 's/"files":{[^}]*}/"files":{}/' "$r/.cargo-checksum.json"
+done
+printf '#!/bin/sh\nexec "$@" -C target-feature=-crt-static\n' > /tmp/rustc-dynamic; chmod 755 /tmp/rustc-dynamic
 bb=/build/thunderbird-patches-153.7.0esr-bb13
 q=$bb/153
 # Betterbird's patch queue: each series line is a patch path relative to the
