@@ -17,6 +17,9 @@ source = [
     { url = "https://waf.io/waf-2.0.25", sha256 = "21199cd220ccf60434133e1fd2ab8c8e5217c3799199c82722543970dc8e38d5" },
 ]
 
+# --disable-avcodec: src/io/source_avcodec.c is written for FFmpeg 3 (AVStream->codec, AVCodecContext->channels, avcodec_decode_audio4,
+# av_get_default_channel_layout, ...), all removed in FFmpeg 5 to 8; the tree has FFmpeg 8. Reading media files through FFmpeg is the only
+# thing lost (libsndfile, wavread and the rest stay). In docs/disabled-features.md.
 setup = '''
 # replace the bundled waf
 rm -rf waf waflib
@@ -24,7 +27,8 @@ cp ../sources/waf-2.0.25 waf
 chmod +x waf
 python3 ./waf configure --prefix=/usr --libdir=/usr/lib \
     --enable-fftw3f --enable-fftw3 \
-    --disable-docs --disable-tests --disable-examples
+    --disable-docs --disable-tests --disable-examples \
+    --disable-avcodec
 '''
 build = '''
 python3 ./waf build -j$jobs
