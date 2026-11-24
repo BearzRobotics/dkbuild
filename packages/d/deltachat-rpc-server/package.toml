@@ -22,6 +22,13 @@ environment = '''
 export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
 export OPENSSL_NO_VENDOR=1
 '''
+# With the default "vendored" feature off, rusqlite lacks "modern_sqlite", and the core's sql.rs uses DbConfig::SQLITE_DBCONFIG_DQS_DML/DDL, which
+# rusqlite offers only with it ("no variant ... named SQLITE_DBCONFIG_DQS_DML"). The core's own rusqlite line gets the feature (source edit: sed);
+# it changes no locked version.
+setup = '''
+sed -i 's/rusqlite = { workspace = true, features = \["sqlcipher"\] }/rusqlite = { workspace = true, features = ["sqlcipher", "modern_sqlite"] }/' Cargo.toml
+grep -q 'features = \["sqlcipher", "modern_sqlite"\]' Cargo.toml
+'''
 build = '''
 cargo build --release --frozen --offline --no-default-features -p deltachat-rpc-server -j $jobs
 '''
