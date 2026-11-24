@@ -2,7 +2,7 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "esbuild"
 version = "0.28.0"
-release = 8
+release = 9
 summary = "JavaScript and CSS bundler and minifier"
 license = "MIT"
 homepage = "https://esbuild.github.io"
@@ -26,5 +26,11 @@ install -Dm644 npm/esbuild/package.json "$pkgdir/usr/lib/node_modules/esbuild/pa
 cp -r npm/esbuild/lib "$pkgdir/usr/lib/node_modules/esbuild/"
 mkdir -p "$pkgdir/usr/lib/node_modules/esbuild/bin"
 ln -sf ../../../../bin/esbuild "$pkgdir/usr/lib/node_modules/esbuild/bin/esbuild"
+# r9: the platform package the JS looks for ("The package \"@esbuild/linux-x64\" could not be found, and is needed by esbuild", which made tsx and
+# the rollup plugins of Brave's build fail): npm installs esbuild's binary as @esbuild/<platform>; here the same name is a small package beside
+# esbuild in /usr/lib/node_modules whose bin/esbuild is the binary, found by require.resolve from esbuild's lib/ (musl x64 uses the linux-x64 name)
+mkdir -p "$pkgdir/usr/lib/node_modules/@esbuild/linux-x64/bin"
+printf '{\n  "name": "@esbuild/linux-x64",\n  "version": "%s",\n  "description": "The Linux 64-bit binary for esbuild (this system'"'"'s build)",\n  "license": "MIT",\n  "os": ["linux"],\n  "cpu": ["x64"]\n}\n' "$version" > "$pkgdir/usr/lib/node_modules/@esbuild/linux-x64/package.json"
+ln -sf ../../../../../bin/esbuild "$pkgdir/usr/lib/node_modules/@esbuild/linux-x64/bin/esbuild"
 install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/esbuild/LICENSE.md"
 '''
