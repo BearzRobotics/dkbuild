@@ -2,7 +2,7 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "bind"
 version = "9.20.30"
-release = 5
+release = 6
 summary = "ISC DNS server"
 license = "MPL-2.0"
 homepage = "https://www.isc.org/bind"
@@ -25,9 +25,13 @@ build = '''
 %make
 '''
 check = '''
-# r5: tests/isc/time_test is the one failing test of 47 (no detail kept: make removes the log); the other 46,
-# and the whole of the rest of the suite, run
-%make check XFAIL_TESTS=time_test
+# r6: tests/isc/time_test failed in the 11-22 run and passed in the 11-24 one (XPASS, which automake counts as a failure): it depends on the
+# time it runs at, so it cannot be an expected failure. `make -k check` runs everything; the run fails only if some test other than time_test
+# failed (its .trs files say), and it must have run (at least one PASS)
+make -k check || true
+bad=$(grep -rlE '^:test-result: (FAIL|ERROR|XPASS)' --include=*.trs . | grep -v '/time_test\.trs$' || true)
+[ -z "$bad" ] || { echo "failed tests: $bad"; exit 1; }
+grep -rq '^:test-result: PASS' --include=*.trs .
 '''
 install = '''
 %make_install
