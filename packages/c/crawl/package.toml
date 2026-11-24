@@ -35,6 +35,6 @@ cd source
 install = '''
 cd source
 make prefix=/usr bin_prefix=bin DESTDIR="$pkgdir" EXTERNAL_FLAGS="$CFLAGS" EXTERNAL_LDFLAGS="$LDFLAGS" install
-cd ../..
+cd ..
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/crawl/LICENSE"
 '''
