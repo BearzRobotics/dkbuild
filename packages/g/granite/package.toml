@@ -16,7 +16,8 @@ source = [
 ]
 
 setup = '''
-%meson -Ddocumentation=false -Dintrospection=true
+# -Ddemo=false: granite-demo (a sample application, not the library) needs libshumate, which is not packaged
+%meson -Ddocumentation=false -Dintrospection=true -Ddemo=false
 '''
 build = '''
 %meson_build
