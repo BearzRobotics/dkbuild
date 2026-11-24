@@ -8,7 +8,7 @@ license = "GPL-2.0-or-later"
 homepage = "https://apps.kde.org/audiotube"
 hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
 # python-ytmusicapi (builddeps): the module is imported at configure time and used at run time
-builddeps = ["futuresql-devel", "kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "ki18n-devel", "kiconthemes-devel", "kirigami-addons-devel", "kirigami-devel", "kwindowsystem-devel", "python-devel", "python-pybind11-devel", "qcoro-devel", "qt6-qtdeclarative-devel", "qt6-qtmultimedia-devel", "qt6-qtsvg-devel", "python-ytmusicapi"]
+builddeps = ["futuresql-devel", "kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "ki18n-devel", "kiconthemes-devel", "kirigami-addons-devel", "kirigami-devel", "kwindowsystem-devel", "python-devel", "python-pybind11-devel", "qcoro-devel", "qt6-qtdeclarative-devel", "qt6-qtmultimedia-devel", "qt6-qtsvg-devel", "python-ytmusicapi", "yt-dlp"]
 rundeps = ["python-ytmusicapi", "yt-dlp"]
 options = ["!check"]
 
