@@ -10,7 +10,7 @@ license = "GPL-2.0-or-later"
 homepage = "https://fceux.com"
 patches = ["d2ee6351c08518c866bb48d89f58a67bb36931fc.patch", "fix_icon.patch"]
 hostdeps = ["cmake", "ninja", "pkgconf"]
-builddeps = ["ffmpeg-devel", "libarchive-devel", "lua5.1-devel", "minizip-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "sdl2-compat-devel", "zlib-ng-compat-devel", "mesa-devel"]
+builddeps = ["ffmpeg-devel", "libarchive-devel", "lua5.1-devel", "minizip-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "sdl2-compat-devel", "zlib-ng-compat-devel", "mesa-devel", "libglvnd-devel"]
 options = ["!check"]  # needs a display and ROMs
 
 source = [
