@@ -6,7 +6,7 @@ summary = "Educational games for children aged 2 to 10"
 license = "GPL-3.0-or-later"
 homepage = "https://gcompris.net"
 hostdeps = ["cmake", "ninja", "pkgconf", "extra-cmake-modules", "qt6-qttools", "gettext"]
-builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtmultimedia-devel", "qt6-qtsensors-devel", "qt6-qtsvg-devel", "qt6-qtcharts-devel", "qt6-qt5compat-devel", "qt6-qtshadertools-devel", "ki18n-devel"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtmultimedia-devel", "qt6-qtsensors-devel", "qt6-qtsvg-devel", "qt6-qtcharts-devel", "qt6-qtgraphs-devel", "qt6-qt5compat-devel", "qt6-qtshadertools-devel", "ki18n-devel"]
 options = ["!check"]
 
 source = [
