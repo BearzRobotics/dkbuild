@@ -6,14 +6,20 @@ summary = "Reverse engineering GUI (rizin)"
 license = "GPL-3.0-only"
 homepage = "https://cutter.re"
 hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "python"]
-builddeps = ["qt6-qtbase-devel", "qt6-qt5compat-devel", "qt6-qtsvg-devel", "rizin-devel", "graphviz-devel", "python-devel"]
+builddeps = ["qt6-qtbase-devel", "qt6-qt5compat-devel", "qt6-qtsvg-devel", "rizin-devel", "graphviz-devel", "python-devel", "syntax-highlighting-devel"]
 options = ["!check"]
 
 source = [
     { url = "https://github.com/rizinorg/cutter/releases/download/v2.5.0/Cutter-v2.5.0-src.tar.gz", sha256 = "b524208f2b09fa5edb6720db007f2f8013089d64bebd87aabd147f79bf5f40b9" },
 ]
 
+# Qt 6.12's uic refuses the promoted widget class "AddressableItemList<>" ("Invalid class name": 7 .ui files use the template with its default
+# argument as a class name). A plain alias in the widget's header gives them a real name, and the .ui files use it (source edit: sed)
 setup = '''
+sed -i '$ i using AddressableItemListDefault = AddressableItemList<>;' src/widgets/AddressableItemList.h
+sed -i 's/AddressableItemList&lt;&gt;/AddressableItemListDefault/g' $(grep -rl 'AddressableItemList&lt;&gt;' --include=*.ui src)
+! grep -rq 'AddressableItemList&lt;&gt;' --include=*.ui src
+tail -3 src/widgets/AddressableItemList.h | grep -q '^#endif'
 %cmake \
     -DCUTTER_USE_BUNDLED_RIZIN=OFF \
     -DCUTTER_QT6=ON \
