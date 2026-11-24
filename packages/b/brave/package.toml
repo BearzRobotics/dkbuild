@@ -88,6 +88,19 @@ environment = '''
 export RUSTC_BOOTSTRAP=1 CARGO_NET_OFFLINE=true
 # build/toolchain/linux/unbundle reads CC, CXX, AR, NM and READELF from the environment (electron's libprotobuf_lite.a failed with an empty AR)
 export AR=llvm-ar NM=llvm-nm READELF=llvm-readelf
+# The unbundle toolchain hands CC and CXX to rustc as the host build tools' linker (-Clinker=...), and ours carry the target ("clang++
+# --target=x86_64-fenriros-linux-musl"): rustc looks for a program of that whole name ("linker `clang++ --target=...` not found"). Wrapper
+# scripts with the same command give it a single file name.
+case "$CXX" in
+/tmp/cc-wrap/*) ;;
+*)
+    mkdir -p /tmp/cc-wrap
+    printf '#!/bin/sh\nexec %s "$@"\n' "$CC" > /tmp/cc-wrap/cc
+    printf '#!/bin/sh\nexec %s "$@"\n' "$CXX" > /tmp/cc-wrap/c++
+    chmod 755 /tmp/cc-wrap/cc /tmp/cc-wrap/c++
+    export CC=/tmp/cc-wrap/cc CXX=/tmp/cc-wrap/c++
+    ;;
+esac
 # pnpm refuses to purge node_modules without a TTY unless in CI mode
 export CI=true
 # the system esbuild package's JS looks for a platform package (@esbuild/linux-x64, "could not be found") unless told where its binary is
