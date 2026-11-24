@@ -7,7 +7,8 @@ summary = "Audio editor and recorder"
 license = "GPL-3.0-or-later"
 homepage = "https://www.audacityteam.org"
 hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "gettext"]
-builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "qt6-qt5compat-devel", "qt6-qtshadertools-devel", "libsndfile-devel", "soxr-devel", "lame-devel", "mpg123-devel", "opus-devel", "opusfile-devel", "flac-devel", "libvorbis-devel", "libogg-devel", "wavpack-devel", "twolame-devel", "ffmpeg-devel", "portaudio-devel", "portmidi-devel", "lilv-devel", "suil-devel", "lv2", "vamp-plugin-sdk-devel", "libexpat-devel", "zlib-ng-compat-devel", "sqlite-devel", "alsa-lib-devel", "pipewire-devel", "rapidjson", "libid3tag-devel", "harfbuzz-devel", "freetype-devel"]
+# qt6-qtnetworkauth and qt6-qtwebsockets: muse's SetupQt6.cmake asks for NetworkAuth (always, off wasm) and WebSockets
+builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "qt6-qt5compat-devel", "qt6-qtshadertools-devel", "qt6-qtnetworkauth-devel", "qt6-qtwebsockets-devel", "libsndfile-devel", "soxr-devel", "lame-devel", "mpg123-devel", "opus-devel", "opusfile-devel", "flac-devel", "libvorbis-devel", "libogg-devel", "wavpack-devel", "twolame-devel", "ffmpeg-devel", "portaudio-devel", "portmidi-devel", "lilv-devel", "suil-devel", "lv2", "vamp-plugin-sdk-devel", "libexpat-devel", "zlib-ng-compat-devel", "sqlite-devel", "alsa-lib-devel", "pipewire-devel", "rapidjson", "libid3tag-devel", "harfbuzz-devel", "freetype-devel"]
 options = ["!check", "jobs:12"]
 
 source = [
