@@ -26,6 +26,7 @@ autoreconf -if -W none
     --disable-dumper \
     --disable-static \
     --enable-gtk \
+    --with-gtk=3 \
     --enable-tests
 '''
 build = '''
