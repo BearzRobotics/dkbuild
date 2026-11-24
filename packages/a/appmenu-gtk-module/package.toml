@@ -7,7 +7,7 @@ summary = "GTK module for appmenu"
 license = "LGPL-3.0-only"
 homepage = "https://gitlab.com/vala-panel-project/vala-panel-appmenu"
 hostdeps = ["meson", "pkgconf"]
-builddeps = ["gtk+3-devel"]
+builddeps = ["gtk+3-devel", "libwnck-devel"]
 
 source = [
     { url = "https://gitlab.com/vala-panel-project/vala-panel-appmenu/-/archive/25.04/vala-panel-appmenu-25.04.tar.gz", sha256 = "48d0be87b260056a65a9056a9be7e190b67a508540ebcb1fc18a67349cca0177" },

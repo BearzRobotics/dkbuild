@@ -1,0 +1,29 @@
+# libwnck: the window navigation construction toolkit (GTK 3), used by panels, task lists and appmenu-gtk-module (vala-panel-appmenu's
+# "No backend available (libwnck3 required)"). The library, the GObject introspection data and the wnck tools; Startup notification and the
+# XRes extension are on. No API docs (gtk-doc is off by default). The libwnck GTK 3 series is 43.x (GNOME 43 and on).
+name = "libwnck"
+version = "43.3"
+release = 1
+summary = "Window navigation construction toolkit"
+license = "LGPL-2.0-or-later"
+homepage = "https://gitlab.gnome.org/GNOME/libwnck"
+hostdeps = ["meson", "ninja", "pkgconf", "gettext", "gobject-introspection"]
+builddeps = ["cairo-devel", "glib-devel", "gtk+3-devel", "libx11-devel", "libxi-devel", "libxres-devel", "libxrender-devel", "startup-notification-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://download.gnome.org/sources/libwnck/43/libwnck-43.3.tar.xz", sha256 = "6af8ac41a8f067ade1d3caaed254a83423b5f61ad3f7a460fcacbac2e192bdf7" },
+]
+
+setup = '''
+%meson \
+    -Dstartup_notification=enabled \
+    -Dintrospection=enabled
+'''
+build = '''
+%meson_build
+'''
+install = '''
+%meson_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/libwnck/COPYING"
+'''
