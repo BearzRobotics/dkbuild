@@ -19,7 +19,11 @@ source = [
 # the wrap's directory is put where meson looks first, so the wrap never downloads
 setup = '''
 cp -a ../xpm-pixbuf-d290a0c846687b22d2a8c5aaec83a6689f30e1c3 subprojects/xpm-pixbuf
+# -Ddefault_library=shared: the object plugins are made with library(..., name_suffix: g_module_suffix), so under the tree's default_library=both the
+# static and the shared build of each get the same file name ("Multiple producers for Ninja target objects/libaadl_objects.so"); they are
+# loadable modules, which have no static form
 %meson \
+    -Ddefault_library=shared \
     -Dtests=false
 '''
 build = '''
