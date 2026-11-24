@@ -210,7 +210,19 @@ install -Dm644 LICENSE "$pkgdir/usr/share/licenses/ghc/LICENSE"
 # r6: the build step finished (the resume above worked), and the same haddock gap came back here: binary-dist-dir relinks haddock, an lld crash
 # deletes its output until the single-threaded retry writes it again, and a parallel run hit the gap ("_build/stage1/bin/haddock: createProcess:
 # execvp: does not exist"). The same one resume.
-$hadrian binary-dist-dir || { echo "hadrian binary-dist-dir failed: resuming once" >&2; $hadrian binary-dist-dir; }
+$hadrian binary-dist-dir || { echo "hadrian binary-dist-dir failed: resuming once" >&2; $hadrian binary-dist-dir; } || {
+    # r8: diagnostics for "execvp: does not exist" (r1 to r7 never found the cause: stage1/bin/haddock, then bindist/.../bin/ghc-pkg): which of the
+    # programs exist, what they are, and the interpreter (PT_INTERP) each ELF asks for, which execve reports as ENOENT when the file is missing
+    echo "=== ghc binary-dist-dir diagnostics ===" >&2
+    ls -la _build/bindist/ghc-*/bin _build/stage1/bin 2>&1 | head -60 >&2
+    for f in _build/bindist/ghc-*/bin/* _build/stage1/bin/*; do
+        echo "-- $f: $(ls -lL "$f" 2>&1 | cut -c1-80)" >&2
+        llvm-readelf -l "$f" 2>/dev/null | grep -i "interpreter" >&2 || true
+    done
+    ls -la /lib/ld-musl* /usr/lib/ld-musl* 2>&1 >&2 || true
+    echo "=== end diagnostics ===" >&2
+    exit 1
+}
 cd _build/bindist/ghc-$version-*
 ghc_configure
 make DESTDIR="$pkgdir" install
