@@ -15,6 +15,11 @@ source = [
     { url = "https://gitlab.com/ubports/core/lib-cpp/dbus-cpp/-/archive/5.0.6/dbus-cpp-5.0.6.tar.gz", sha256 = "c325a62d7a041ff998284c2c0c6d6bb83619b93deb71e9f3a46c394c6654031f" },
 ]
 
+# libc++ no longer includes <atomic> transitively (pending_call_impl.h: "no template named 'atomic' in namespace 'std'"), and the project builds with
+# -Werror, which turns clang's newer warnings (-Wunused-private-field, a consequence of that error) into errors
+environment = '''
+export CXXFLAGS="$CXXFLAGS -include atomic -Wno-error"
+'''
 setup = '''
 %cmake \
     -DBUILD_SHARED_LIBS=ON \
