@@ -19,8 +19,11 @@ setup = '''
 %meson \
     -Dtheme_kde=false
 '''
+# one job at a time: hamilton.go failed with "bytevector-u8-ref: Argument 2 out of range: 174915" (and again while printing the backtrace) while
+# other games compiled beside it; many `guile compile` processes share Guile's cache of compiled modules, and a half-written .go file loaded by a
+# neighbour gives exactly that error. A guess from the pattern (one game of ~50, a loader error): if it still fails with -j1 the cause is elsewhere
 build = '''
-%meson_build
+ninja -C build -j1
 '''
 install = '''
 %meson_install
