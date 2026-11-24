@@ -81,12 +81,15 @@ builtin_embree=true
 EOF2
 echo "$godot_arch" > godot-arch
 '''
+# xatlas.cpp (bundled) uses realloc and qsort without <cstdlib> (libc++ no longer includes it transitively): the usual gap headers are force-included
+# for every C++ file; scons -k keeps going past a failing file so that one run lists them all
 build = '''
+CXXFLAGS="$CXXFLAGS -include cstdlib -include cstdint -include cstring -include limits"
 godot_arch=$(cat godot-arch)
 # scons ignores the environment except what is listed here; BUILD_NAME labels the build
 export BUILD_NAME=dkbuild
 for target in editor template_debug template_release; do
-    scons -j$jobs target=$target $(cat scons-flags) \
+    scons -k -j$jobs target=$target $(cat scons-flags) \
         cflags="$CFLAGS" cxxflags="$CXXFLAGS" linkflags="$LDFLAGS"
 done
 '''
