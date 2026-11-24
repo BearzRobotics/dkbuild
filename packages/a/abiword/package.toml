@@ -26,6 +26,10 @@ source = [
 ]
 
 setup = '''
+# configure.ac asks pkg-config for `enchant >= 1.2.0`; the tree has Enchant 2, whose file is enchant-2.pc ("Package 'enchant' not found").
+# AbiWord's spelling code builds against Enchant 2 (source edit: sed)
+sed -i "s/enchant_req='enchant >= 1.2.0'/enchant_req='enchant-2 >= 2.0'/" configure.ac
+grep -q "enchant_req='enchant-2" configure.ac
 ./autogen-common.sh
 autoreconf --force --install
 %configure \
