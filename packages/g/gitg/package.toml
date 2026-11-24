@@ -14,7 +14,11 @@ source = [
     { url = "https://gitlab.gnome.org/GNOME/gitg/-/archive/v50/gitg-v50.tar.gz", sha256 = "73a4953dbfc9b7a9607dfc6b26b1c544d50db9aed8188bdc3eda75da0480f7bf" },
 ]
 
+# valac turns "\u001b" (the ESC character, in gitg-result-dialog.vala) into the same UCN in its C, which clang rejects ("universal character name refers
+# to a control character"); the byte escape means the same (source edit: sed)
 setup = '''
+sed -i 's/\\u001b/\\x1b/g' gitg/gitg-result-dialog.vala
+! grep -q 'u001b' gitg/gitg-result-dialog.vala
 # glade_catalog: Glade is not in the tree. docs off: needs gi-docgen-less manual only.
 %meson \
     -Dglade_catalog=false \
