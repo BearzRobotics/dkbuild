@@ -32,7 +32,11 @@ source = [
     { url = "https://github.com/rkd77/elinks/releases/download/v0.20.0/elinks-0.20.0.tar.xz", sha256 = "75af7ba88af99ff5069ec7b4b7a3241d5920f4089764c7297cff3c8484a9e33f" },
 ]
 
+# meson.build asks conf_data.get('HAVE_EXECINFO_H') without a default, and on musl (no execinfo.h) nothing sets it: "Entry HAVE_EXECINFO_H not in
+# configuration data" (source edit: sed)
 setup = '''
+sed -i "s/conf_data.get('HAVE_EXECINFO_H') == 1/conf_data.get('HAVE_EXECINFO_H', 0) == 1/" meson.build
+grep -q "conf_data.get('HAVE_EXECINFO_H', 0)" meson.build
 %meson \
     -D256-colors=true \
     -Dapidoc=false \
