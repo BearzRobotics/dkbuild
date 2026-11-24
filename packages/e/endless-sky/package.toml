@@ -15,6 +15,11 @@ source = [
     { url = "https://github.com/endless-sky/endless-sky/archive/refs/tags/v0.11.4.tar.gz", sha256 = "971399cc91956171261f5a36429572201a35662db2b1d3615fd6043ee4a38a61" },
 ]
 
+# libc++ no longer includes <istream>, <vector> and the like transitively ("implicit instantiation of undefined template 'std::basic_iostream<char>'",
+# Sound.cpp): the usual set is force-included for every C++ file, and -k 0 lets one run list every file that still fails
+environment = '''
+export CXXFLAGS="$CXXFLAGS -include iostream -include sstream -include fstream -include vector -include cstdint -include cstdlib -include cstring -include string -include memory -include algorithm -include cmath"
+'''
 setup = '''
 # -DES_USE_VCPKG=OFF: use the system libraries; -DES_BUILD... see CMakeLists
 %cmake \
@@ -23,7 +28,7 @@ setup = '''
     -DBUILD_TESTING=OFF
 '''
 build = '''
-%cmake_build
+ninja -C build -k 0
 '''
 install = '''
 %cmake_install
