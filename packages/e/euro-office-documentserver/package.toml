@@ -55,7 +55,7 @@
 # lockfile: statsd uses it only for its syslog backend, which the Metrics service does not configure.
 name = "euro-office-documentserver"
 version = "9.3.7.1"
-release = 6
+release = 7
 summary = "Euro-Office Document Server: online office editors"
 license = "AGPL-3.0-only AND CC-BY-SA-4.0"
 homepage = "https://github.com/Euro-Office/DocumentServer"
@@ -75,7 +75,7 @@ export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
 # native modules: node-gyp against the system Node.js headers, never a download
 export npm_config_nodedir=/usr
 # upstream's version stamp (9.3.7 build 1) and output directory
-export PRODUCT_VERSION=9.3.7 BUILD_NUMBER=1 BUILD_ROOT=$PWD/deploy
+export PRODUCT_VERSION=9.3.7 BUILD_NUMBER=1
 '''
 setup = '''
 # the version 3 lockfiles in place of upstream's version 1 ones (same versions)
@@ -103,7 +103,11 @@ done
 # install script would download a prebuilt libvips)
 (cd server/DocService && npm_config_build_from_source=true npm rebuild sharp)
 '''
+# r7: BUILD_ROOT is set here, in the source directory: in the environment block $PWD is not the source directory yet (it was "/", so the sdkjs build
+# wrote /deploy/sdkjs, "wrote /deploy/sdkjs/develop/..."), and the `test -f deploy/sdkjs/word/sdk-all.js` after it failed without a message, which
+# is the silent end the log showed in r5 and r6
 build = '''
+export BUILD_ROOT=$PWD/deploy
 # sdkjs with the forms addon, as sdkjs.bake.Dockerfile
 (cd sdkjs/build && SDK_ADDONS=$PWD/../../sdkjs-forms npm run build)
 test -f deploy/sdkjs/word/sdk-all.js
