@@ -23,17 +23,18 @@ source = [
     { url = "https://github.com/crawl/crawl/releases/download/0.34.1/stone_soup-0.34.1.tar.xz", sha256 = "473b9cdc16be0b537ac11e43c6c77db4b290000e4a17f72a842eba59c6b7be2a" },
 ]
 
+# the release archive (stone_soup-0.34.1) has source/ at its top; the git tree's crawl-ref/ prefix is not in it ("sed: can't read crawl-ref/source/crash.cc")
 setup = '''
-sed -i 's/defined(__ANDROID__)/& || !defined(__GLIBC__)/' crawl-ref/source/crash.cc
-echo 0.34.1 > crawl-ref/source/util/release_ver
+sed -i 's/defined(__ANDROID__)/& || !defined(__GLIBC__)/' source/crash.cc
+echo 0.34.1 > source/util/release_ver
 '''
 build = '''
-cd crawl-ref/source
+cd source
 %make prefix=/usr bin_prefix=bin NO_TRY_GOLD=1 V=1 EXTERNAL_FLAGS="$CFLAGS" EXTERNAL_LDFLAGS="$LDFLAGS"
 '''
 install = '''
-cd crawl-ref/source
+cd source
 make prefix=/usr bin_prefix=bin DESTDIR="$pkgdir" EXTERNAL_FLAGS="$CFLAGS" EXTERNAL_LDFLAGS="$LDFLAGS" install
 cd ../..
-install -Dm644 LICENSE "$pkgdir/usr/share/licenses/crawl/LICENSE" 2>/dev/null || install -Dm644 crawl-ref/LICENSE "$pkgdir/usr/share/licenses/crawl/LICENSE"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/crawl/LICENSE"
 '''
