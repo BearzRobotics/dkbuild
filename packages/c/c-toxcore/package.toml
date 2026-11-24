@@ -14,9 +14,15 @@ options = ["!check"]
 
 source = [
     { url = "https://github.com/TokTok/c-toxcore/releases/download/v0.2.25/c-toxcore-0.2.25.tar.gz", sha256 = "0f350d34243be4e987b92a76e63a8ab0a5203746f134a4296b873f86f213f460" },
+    # the third_party/cmp git submodule (TokTok/cmp, MessagePack in C), empty in the release archive, at the commit the tag pins
+    { url = "https://github.com/TokTok/cmp/archive/52bfcfa17d2eb4322da2037ad625f5575129cece.tar.gz", sha256 = "4abfd641dd5ccba04b6e0ced04a79755fa70709290b3ba15dbd4b4a2de345ed0" },
 ]
 
+# the cmp submodule's directory is empty in the archive ("Cannot find source file: third_party/cmp/cmp.c"): the archive above takes its place
 setup = '''
+rm -rf third_party/cmp
+cp -a ../cmp-52bfcfa17d2eb4322da2037ad625f5575129cece third_party/cmp
+test -f third_party/cmp/cmp.c
 %cmake \
     -DUNITTEST=OFF \
     -DAUTOTEST=OFF \
