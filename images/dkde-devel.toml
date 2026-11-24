@@ -20,7 +20,9 @@ label    = "FENRIROS_DKDE"
 packages = ["base", "openssh", "openssh-server", "curl", "linux", "live-initramfs", "elogind", "dkinstaller", "firmware-linux-meta", 
 "desktop-dkde", "firewalld", "claude-code", "base-devel", "xserver-xorg", "xserver-xorg-input-libinput", "xinit", "libselinux", 
 "policycoreutils", "selinux-python", "selinux-policy-targeted", "firefox", "ncurses", "iputils", "net-tools", "iproute2", "iw", 
-"traceroute", "vim", "gcc", "dos2unix", "rescue-tools"]
+"traceroute", "vim", "gcc", "dos2unix", "rescue-tools",
+# GRUB's BIOS modules: dkinstaller offers GRUB on a BIOS machine only when /usr/lib/grub/i386-pc is on the live disc (grub itself comes with rescue-tools)
+"grub", "grub-i386-pc"]
 #exclude  = ["*-devel", "*-doc", "*-static"]
 # never installed, even as a dependency (apk stops with a conflict if something needs it)
 unwanted = ["dhcpcd"]
