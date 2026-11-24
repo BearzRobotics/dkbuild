@@ -25,7 +25,8 @@ release = 1
 summary = "Userspace tools for the bcachefs filesystem"
 license = "GPL-2.0-only"
 homepage = "https://bcachefs.org"
-hostdeps = ["rust", "pkgconf", "llvm", "perl"]
+# bindgen: fs/codegen.rs runs the bindgen command line tool for the C bindings ("could not run bindgen")
+hostdeps = ["rust", "bindgen", "pkgconf", "llvm", "perl"]
 builddeps = ["libaio-devel", "util-linux-devel", "userspace-rcu-devel", "libsodium-devel", "zlib-ng-compat-devel", "lz4-devel", "zstd-devel", "eudev-devel", "keyutils-devel", "fuse-devel", "linux-headers"]
 rundeps = ["util-linux"]
 options = ["!check", "cargodeps"]
