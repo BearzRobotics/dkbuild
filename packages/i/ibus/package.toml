@@ -8,7 +8,7 @@ license = "LGPL-2.1-or-later"
 homepage = "https://github.com/ibus/ibus"
 patches = ["gs51-001-5bbe88a1936246185a65f76e58cc85871401e59a.patch", "gs51-002-1a331e695d84fc6bae8f2d11c52d4776df49647b.patch", "tests.patch"]
 hostdeps = ["automake", "dconf", "gettext-devel", "glib-devel", "gobject-introspection", "gtk-doc-tools", "pkgconf", "python", "python-gobject-devel", "libtool", "unicode-character-database", "unicode-cldr-common", "unicode-emoji", "vala", "wayland-protocols"]
-builddeps = ["dconf-devel", "gtk+3-devel", "gtk4-devel", "iso-codes", "json-glib-devel", "libnotify-devel", "libx11-devel", "libxkbcommon-devel", "libxtst-devel", "wayland-devel"]
+builddeps = ["dconf-devel", "libdbusmenu-devel", "gtk+3-devel", "gtk4-devel", "iso-codes", "json-glib-devel", "libnotify-devel", "libx11-devel", "libxkbcommon-devel", "libxtst-devel", "wayland-devel"]
 checkdeps = ["fonts-dejavu", "setxkbmap", "bash"]
 rundeps = ["python-gobject", "iso-codes", "dbus"]
 options = ["!cross", "!check"]
@@ -17,6 +17,8 @@ source = [
     { url = "https://github.com/ibus/ibus/releases/download/1.5.34/ibus-1.5.34.tar.gz", sha256 = "12a72210ce5250f8a66df562a75e034e67b2bce74c4df2983dc86d1154894943" },
 ]
 
+# --enable-appindicator (it was disabled): with it off the tray panel still calls indicator_new and friends, from indicator.vala which is then not
+# built ("ld.lld: error: undefined symbol: indicator_new" at ibus-ui-gtk3); with it on that file is built, against dbusmenu (libdbusmenu)
 setup = '''
 autoreconf -if -W none
 %configure \
@@ -31,7 +33,7 @@ autoreconf -if -W none
     --enable-introspection \
     --enable-vala \
     --enable-setup \
-    --disable-appindicator \
+    --enable-appindicator \
     --disable-gtk2 \
     --disable-schemas-compile \
     --disable-systemd-services
