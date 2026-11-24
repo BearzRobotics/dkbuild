@@ -8,7 +8,7 @@ release = 1
 summary = "SteamOS compositor"
 license = "BSD-2-Clause"
 homepage = "https://github.com/ValveSoftware/gamescope"
-patches = ["32bit.patch", "include-stop_token.patch", "mtx-cpp-20.patch", "skip-failing-test.patch", "system-deps.patch", "system-spirv-headers.patch"]
+patches = ["include-stop_token.patch", "mtx-cpp-20.patch", "skip-failing-test.patch", "system-deps.patch", "system-spirv-headers.patch"]
 hostdeps = ["cmake", "git", "glslang", "libcap", "ninja", "pkgconf", "spirv-headers"]
 builddeps = ["benchmark-devel", "catch2-devel", "glm", "glslang-devel", "hwdata-devel", "libavif-devel", "libcap-devel", "libdisplay-info-devel", "libei-devel", "libinput-devel", "libx11-devel", "libxcomposite-devel", "libxdamage-devel", "libxmu-devel", "libxrender-devel", "libxres-devel", "libxxf86vm-devel", "luajit-devel", "pipewire-devel", "pixman-devel", "sdl2-compat-devel", "stb", "vulkan-headers", "vulkan-loader-devel", "wayland-protocols", "wlroots0.20-devel", "xcb-util-wm-devel", "xwayland-devel"]
 options = ["!cross"]
@@ -24,7 +24,17 @@ source = [
 environment = '''
 export CXXFLAGS="${CXXFLAGS} -DRTLD_DEEPBIND=0"
 '''
+# 32bit.patch is gone from the patch list: it fixes subprojects/libliftoff/layer.c for 32-bit systems, and the archive's libliftoff directory is empty at
+# patch time ("can't find file to patch ... subprojects/libliftoff/layer.c"); this tree builds x86_64 and aarch64. The four extra archives are the
+# git submodules, put where .gitmodules has them (subprojects/openvr, vkroots, libliftoff and src/reshade)
 setup = '''
+for m in openvr-ff87f683f41fe26cc9353dd9d9d7028357fd8e1a:subprojects/openvr \
+         vkroots-20733b938267dcac60f6ac105dbb757f9cc8df9c:subprojects/vkroots \
+         libliftoff-8b08dc1c14fd019cc90ddabe34ad16596b0691f4:subprojects/libliftoff \
+         reshade-696b14cd6006ae9ca174e6164450619ace043283:src/reshade; do
+    src=${m%:*}; dst=${m#*:}
+    rm -rf "$dst"; cp -a "../$src" "$dst"
+done
 %meson \
     -Ddefault_library=static \
     -Davif_screenshots=enabled \
