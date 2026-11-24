@@ -13,6 +13,9 @@ source = [
     { url = "https://vtk.org/files/release/9.7/VTK-9.7.2.tar.gz", sha256 = "fecef55df5caec6298ce190024060a90ce3bb515033c0f18968b9ab5c12bf796" },
 ]
 
+# hdf5 stays VTK's bundled copy (…_hdf5=OFF): with the system HDF5 its configure stops at "Could NOT find HDF5 (missing: HDF5_HL_LIBRARIES)" although
+# the tree's hdf5 ships the high-level library; why FindHDF5 does not see it is not understood yet. To turn the system one back on: find out what
+# FindHDF5 searches for (HDF5_HL_LIBRARIES) in the build root
 setup = '''
 %cmake \
     -DVTK_BUILD_TESTING=OFF \
@@ -20,7 +23,7 @@ setup = '''
     -DVTK_GROUP_ENABLE_Qt=YES \
     -DVTK_QT_VERSION=6 \
     -DVTK_SMP_IMPLEMENTATION_TYPE=TBB \
-    -DVTK_MODULE_USE_EXTERNAL_VTK_hdf5=ON \
+    -DVTK_MODULE_USE_EXTERNAL_VTK_hdf5=OFF \
     -DVTK_MODULE_USE_EXTERNAL_VTK_expat=ON \
     -DVTK_MODULE_USE_EXTERNAL_VTK_freetype=ON \
     -DVTK_MODULE_USE_EXTERNAL_VTK_jpeg=ON \
