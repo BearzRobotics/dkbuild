@@ -32,6 +32,18 @@ source = [
 environment = '''
 export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
 export RUSTFLAGS="-C target-feature=-crt-static"
+# HandBrake's configure looks up the compiler by program name ("find: clang --target=x86_64-fenriros-linux-musl...(fail) not found"), and ours carries
+# the target in CC and CXX: wrapper scripts with the same command give it single file names
+case "$CXX" in
+/tmp/cc-wrap/*) ;;
+*)
+    mkdir -p /tmp/cc-wrap
+    printf '#!/bin/sh\nexec %s "$@"\n' "$CC" > /tmp/cc-wrap/cc
+    printf '#!/bin/sh\nexec %s "$@"\n' "$CXX" > /tmp/cc-wrap/c++
+    chmod 755 /tmp/cc-wrap/cc /tmp/cc-wrap/c++
+    export CC=/tmp/cc-wrap/cc CXX=/tmp/cc-wrap/c++
+    ;;
+esac
 '''
 setup = '''
 mkdir -p download
