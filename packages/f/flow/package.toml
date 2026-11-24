@@ -51,6 +51,12 @@ sed -i \
   -e 's|{ "git", "rev-parse", "--abbrev-ref", "HEAD" }|{"true"}|' \
   -e 's|{ "git", "diff", "--stat", "--patch", "HEAD" }|{"true"}|' build.zig zig-pkg/nightwatch-*/build.zig
 test "$(grep -c '"git", "describe", "--always", "--tags" }' build.zig zig-pkg/nightwatch-*/build.zig | grep -vc ':0$')" = 0
+# r5: with -Dtarget=<linux> build.zig always builds a second program, flow-gui (the GUI window renderer), for x86_64-linux-GNU, which links
+# glibc, X11, Wayland and GL as dynamic system libraries ("unable to find dynamic system library x11 ... searched paths: none"): the one
+# failing step of 1304, while the terminal editor `flow` (musl) built. This recipe is the terminal build, so that gui entry of the target list
+# is dropped (source edit: sed; the line is unique)
+sed -i '/\.abi = \.gnu }, \.gui },/d' build.zig
+! grep -q '\.abi = \.gnu }, \.gui }' build.zig
 # not %zig_build: it passes -Dcpu=, which this build.zig refuses ("invalid option: cpu"; its target is the one option, -Dtarget).
 # The explicit target is the baseline x86-64 CPU (a native default would tune the binary to the build machine).
 DESTDIR="$pkgdir" zig build --release=safe --prefix /usr -Dtarget=x86_64-linux-musl --system zig-pkg -j$jobs
