@@ -43,6 +43,11 @@ source = [
     { url = "https://dev.alpinelinux.org/archive/qt/qtbase-bebdfd54917e25d1c100e6bd9f5dd53c2e645fd8.tar.xz", sha256 = "799fa2ff319b18da102ca0da40f0c5fee9ef081921598425f0137cff4bf87522" },
 ]
 
+# the usual libc++ gaps of Qt 5.15 (headers it relied on getting transitively) are force-included for every C++ file of the build, so that the
+# long qtbase compile does not stop on each of them in turn
+environment = '''
+export CXXFLAGS="$CXXFLAGS -include exception -include limits -include cstdint -include cstdlib -include cstring -include string -include utility -include algorithm -include memory"
+'''
 # libc++ no longer includes <exception> transitively: qglobal.cpp's std::terminate() ("no member named 'terminate' in namespace 'std'"), in the
 # bootstrapped qmake. The first of what a Qt 5.15 on libc++ 23 may need; later missing headers are added the same way. (source edit: sed)
 setup = '''
