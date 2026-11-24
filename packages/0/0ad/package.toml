@@ -30,6 +30,9 @@ export JOBS="-j$jobs"
 export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
 export MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE=none
 export HOME=/tmp/home
+# libraries/source/spidermonkey/build.sh unpacks mozjs with ${TAR:=tar}: as root in the sandbox (one mapped uid) tar tries to restore the archive's
+# owners and ends with "Cannot change ownership to uid 1000, gid 1000: Invalid argument" and exit status 2, which stops the script (set -e)
+export TAR="tar --no-same-owner"
 '''
 setup = '''
 # the bundled libraries, from the archives in libraries/source
