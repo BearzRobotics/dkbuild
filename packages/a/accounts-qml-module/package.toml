@@ -17,9 +17,10 @@ source = [
     { url = "https://gitlab.com/accounts-sso/accounts-qml-module/-/archive/05e79ebbbf3784a87f72b7be571070125c10dfe3.tar.gz", sha256 = "1a53a6d8a3a56694244bc24bdab844d91420483744822d08ae8517ff7df84763" },
 ]
 
+# CONFIG+=no_docs: the install step builds the HTML documentation with qdoc, which the tree does not ship (/usr/lib/qt6/bin/qdoc: No such file; error 127)
 # a qmake project: the Chimera template ran make with no qmake step ("No targets specified and no makefile found"), qmake6 as in signond
 setup = '''
-qmake6 PREFIX=/usr QMAKE_CFLAGS="$CFLAGS" QMAKE_CXXFLAGS="$CXXFLAGS" QMAKE_LFLAGS="$LDFLAGS"
+qmake6 PREFIX=/usr CONFIG+=no_docs QMAKE_CFLAGS="$CFLAGS" QMAKE_CXXFLAGS="$CXXFLAGS" QMAKE_LFLAGS="$LDFLAGS"
 '''
 build = '''
 %make
