@@ -27,6 +27,8 @@ source = [
 ]
 
 environment = '''
+# C++ sys crates link the C++ standard library by name, libstdc++ unless CXXSTDLIB says otherwise ("ld.lld: error: unable to find library -lstdc++"); this system has libc++
+export CXXSTDLIB=c++
 export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
 '''
 build = '''
