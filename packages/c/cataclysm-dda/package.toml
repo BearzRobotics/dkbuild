@@ -25,6 +25,10 @@ source = [
     { url = "https://github.com/CleverRaven/Cataclysm-DDA/archive/0.I.tar.gz", sha256 = "1e4a6e1f70d805d01c97c71294eb45aad47f56f1e895fa783127e20298ee3249" },
 ]
 
+# tools/save/zzip_main.cpp uses std::vector without <vector> (libc++ no longer includes it transitively; the game itself compiled and linked) (source edit: sed)
+setup = '''
+sed -i '1i #include <vector>' tools/save/zzip_main.cpp
+'''
 build = '''
 COMMON="PREFIX=/usr RELEASE=1 PCH=0 LOCALIZE=1 LANGUAGES=all USE_XDG_DIR=1 BACKTRACE=0 TESTS=0 RUNTESTS=0"
 # curses front end
