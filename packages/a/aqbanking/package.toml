@@ -14,7 +14,10 @@ source = [
     { url = "https://www.aquamaniac.de/rdm/attachments/download/654/aqbanking-6.9.2.tar.gz", sha256 = "244b5f7a139f829928f5cdc3f5f7488517b3e8aa63625a92741c3efc1892bb3f" },
 ]
 
+# the tarball's Makefile wants to regenerate aclocal.m4 with automake 1.16 (`aclocal-1.16` is missing: error 127); the tree has a newer automake, so
+# the autotools files are regenerated with it up front
 setup = '''
+autoreconf -fi
 %configure --with-backends="aqhbci aqofxconnect aqnone"
 '''
 build = '''
