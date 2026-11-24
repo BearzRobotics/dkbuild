@@ -15,13 +15,17 @@ source = [
     { url = "https://download.osgeo.org/geos/geos-3.15.0.tar.bz2", sha256 = "d5e5192a686d065eaed082de14dd26244c5c8e02bff16b2c6cce3265f648e00e" },
 ]
 
+# libc++ no longer includes <type_traits> (std::add_const) and its neighbours transitively: the usual gap headers are force-included for every C++ file
+environment = '''
+export CXXFLAGS="$CXXFLAGS -include type_traits -include cstdint -include cstdlib -include cstring -include memory -include algorithm -include vector -include string"
+'''
 setup = '''
 %cmake \
     -DBUILD_SHARED_LIBS=ON \
     -DBUILD_TESTING=OFF
 '''
 build = '''
-%cmake_build
+ninja -C build -k 0
 '''
 install = '''
 %cmake_install
