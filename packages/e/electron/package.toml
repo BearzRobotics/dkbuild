@@ -193,11 +193,16 @@ gn gen out/Release --args="
 '''
 build = '''
 export ELECTRON_OUT_DIR="$PWD/out/Release/"
-# r1 stopped at step 1015: perfetto's protozero/descriptor_diff was compiled before protos/perfetto/common/descriptor.pbzero.h
-# existed ("file not found"). Its BUILD.gn does name common:zero as a dependency, but only that directory's cpp generators had
-# run by then; why the order is not kept is not known. The generator target is built first, on its own.
-ninja -C out/Release -j $jobs third_party/perfetto/protos/perfetto/common:zero
-ninja -C out/Release -j $jobs copy_node_headers electron_dist_zip node_gypi_headers node_version_header
+# Two runs of the first build compiled files before the headers they include had been generated: perfetto's
+# common/descriptor.pbzero.h (step 1015), then, in the next run, base/logging/logger.rs.h and serde_json_lenient's lib.rs.h
+# (step 3035; headers made from Rust cxx bridges). The cause (this gn with ninja not keeping the order?) is not known.
+# Workaround: the first run goes on past errors (-k 0), so that every generator that can run does; the second compiles
+# what failed, and stops at the first error that is a real one.
+targets="copy_node_headers electron_dist_zip node_gypi_headers node_version_header"
+ninja -k 0 -C out/Release -j $jobs $targets || {
+    echo "electron: first ninja run failed; running again with the generated files in place" >&2
+    ninja -C out/Release -j $jobs $targets
+}
 '''
 install = '''
 mkdir -p "$pkgdir/usr/lib/electron" "$pkgdir/usr/bin"
