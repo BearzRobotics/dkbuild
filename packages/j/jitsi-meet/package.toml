@@ -9,7 +9,7 @@
 # -worklets-core): upstream lists them as git+ssh dependencies of the mobile apps, which the store cannot
 # fetch and the web build never loads. The setup step removes the same six from package.json so that
 # `npm ci` agrees with the lock.
-# Source edits: that package.json edit only.
+# Source edits: that package.json edit, and a file declaring the six as untyped modules (setup).
 # `make` (webpack compile, then the deploy-* targets copy the WASM models, olm, tflite, excalidraw...
 # out of node_modules into libs/) builds the site exactly as upstream's Debian package does.
 # Installed inert: no web server site, no config.js (the sample is in /usr/share/doc/jitsi-meet), no domain.
@@ -49,6 +49,12 @@ for (const n of ["react-native-background-timer", "react-native-calendar-events"
 }
 fs.writeFileSync("package.json", JSON.stringify(p, null, 2) + "\n");
 '
+# `make` type-checks the web sources, and one import there reaches a .native.ts file despite tsconfig.web.json's excludes
+# (base/settings/functions.native.ts: "Cannot find module 'react-native-default-preference'"). The removed packages are
+# declared as untyped modules for the type check; the webpack web build does not load them. (Added file.)
+for n in background-timer calendar-events default-preference orientation-locker sound worklets-core; do
+    printf "declare module 'react-native-%s';\n" "$n"
+done > react/features/fenriros-removed-modules.d.ts
 cp /dkbuild/files/package-lock.json package-lock.json
 node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
 # upstream's postinstall (patch-package for a few packages) is run by hand after an install without scripts
