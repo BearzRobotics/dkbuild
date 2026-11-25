@@ -128,6 +128,8 @@ for sz in 16 22 24 32 48 64 128 256; do
 done
 install -Dm644 $bb/metadata/icons/betterbird.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/eu.betterbird.Betterbird.svg"
 # Without MOZ_NO_PIE_COMPAT the program is only "betterbird"; Betterbird's
-# own scripts look for "betterbird-bin".
-ln -s betterbird "$pkgdir$app/betterbird-bin"
+# own scripts look for "betterbird-bin". `mach install` already puts one there ("ln: failed to create symbolic link
+# ...: File exists", after the whole build): the link is only made if it is missing.
+[ -e "$pkgdir$app/betterbird-bin" ] || ln -s betterbird "$pkgdir$app/betterbird-bin"
+test -e "$pkgdir$app/betterbird-bin"
 '''
