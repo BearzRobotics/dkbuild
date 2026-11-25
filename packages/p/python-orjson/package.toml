@@ -18,6 +18,12 @@ source = [
 environment = '''
 export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
 '''
+# The sdist carries its own vendored crates (include/cargo) and a .cargo/config.toml naming them; dkbuild appends its own
+# source replacement to that file, which Cargo rejects ("TOML parse error ... [source.crates-io] duplicate key"). Only
+# dkbuild's is kept: the crates then come from the store, matched to Cargo.lock. (Upstream's file is replaced.)
+setup = '''
+printf '[source.crates-io]\nreplace-with = "vendored-sources"\n\n[source.vendored-sources]\ndirectory = "vendor"\n' > .cargo/config.toml
+'''
 build = '''
 maturin build --release --frozen --offline -i python3 --compatibility linux --out dist -j $jobs
 '''
