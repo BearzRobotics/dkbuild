@@ -50,7 +50,12 @@ out/dkde-devel/dkde-devel.iso is whatever the last image build made.
 
 ## World
 
-    setsid nohup contrib/worldloop.sh >/dev/null 2>&1 &
+    systemd-run --user --unit=dkworld --collect -p OOMPolicy=continue --working-directory="$PWD" \
+        --setenv=PATH="$PATH" "$PWD/contrib/worldloop.sh"
+
+Stop it with `systemctl --user stop dkworld`. It runs outside the terminal on purpose: on 2026-11-25 at 10:31 the OOM
+killer took a 20 GB rustc (30 GB of RAM) and systemd stopped the whole terminal tab: world pass 6 and the Claude
+session with it. The service still ends if the user logs out (lingering is off).
 
 It continues after the highest pass number. Watch `work/worldloop.log` and the newest `work/world<n>.log`. Also watch
 for silent hangs (load under 1 and a quiet log): one `pnpm install` once hung for 7 hours. Build roots are in work/

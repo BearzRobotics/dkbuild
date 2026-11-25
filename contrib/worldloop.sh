@@ -1,7 +1,11 @@
 #!/bin/sh
 # Wait for a running world pass, then run `world --keep-going` passes (prune first) until one has no failures.
-# Start it detached, so that it outlives the terminal or editor session:
-#     setsid nohup contrib/worldloop.sh >/dev/null 2>&1 &
+# Start it as its own systemd user service, from the top of the tree:
+#     systemd-run --user --unit=dkworld --collect -p OOMPolicy=continue --working-directory="$PWD" \
+#         --setenv=PATH="$PATH" "$PWD/contrib/worldloop.sh"
+# (stop: systemctl --user stop dkworld). Not setsid/nohup: that stays in the terminal's cgroup, and when the kernel's
+# OOM killer took one rustc (2026-11-25), systemd stopped the whole terminal tab with the loop and everything else in
+# it. With OOMPolicy=continue only the compiler dies, and that one package fails.
 # Logs: work/world<n>.log, work/prune<n>.log, one summary line per pass in work/worldloop.log.
 # DKBUILD_FAST_WORK (build roots on a faster disk) is taken from the environment; unset, they go in work/.
 cd "$(dirname "$0")/.." || exit 1
