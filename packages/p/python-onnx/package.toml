@@ -1,13 +1,14 @@
 # Open Neural Network Exchange: model format and checker (C++ with Python bindings): the onnxruntime package builds its own copy of the onnx Python extension; this one is the pip package. PyPI sdist onnx 1.23.2 (build backend scikit_build_core.build); Part of the AI/search stack in the queue.
 # Not built (queued, wip/queue): expect first-build fixes (build requirements: scikit-build-core>=0.11, protobuf==6.31.1).
+# Its CMake needs nanobind and, without the installed module, clones it from GitHub ("No module named nanobind", "Could not resolve host").
 name = "python-onnx"
 version = "1.23.2"
 release = 1
 summary = "Open Neural Network Exchange: model format and checker (C++ with Python bindings)"
 license = "Apache-2.0"
 homepage = "https://onnx.ai"
-hostdeps = ["python", "python-setuptools", "python-wheel", "cmake", "ninja", "python-scikit-build-core", "python-numpy"]
-builddeps = ["protobuf-devel", "python-devel", "python-numpy", "python-pybind11-devel"]
+hostdeps = ["python", "python-setuptools", "python-wheel", "cmake", "ninja", "python-scikit-build-core", "python-numpy", "python-nanobind"]
+builddeps = ["python-nanobind", "protobuf-devel", "python-devel", "python-numpy", "python-pybind11-devel"]
 rundeps = ["python", "python-numpy", "python-protobuf", "python-typing-extensions", "python-ml-dtypes"]
 options = ["!check"]
 

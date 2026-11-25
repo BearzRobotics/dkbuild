@@ -21,6 +21,8 @@ source = [
 # av_get_default_channel_layout, ...), all removed in FFmpeg 5 to 8; the tree has FFmpeg 8. Reading media files through FFmpeg is the only
 # thing lost (libsndfile, wavread and the rest stay). In docs/disabled-features.md.
 setup = '''
+# waf runs a test-helper script with "python"; only python3 exists here ("/bin/sh: 1: python: not found")
+mkdir -p /tmp/pybin && ln -sf /usr/bin/python3 /tmp/pybin/python
 # replace the bundled waf
 rm -rf waf waflib
 cp ../sources/waf-2.0.25 waf
@@ -31,6 +33,7 @@ python3 ./waf configure --prefix=/usr --libdir=/usr/lib \
     --disable-avcodec
 '''
 build = '''
+export PATH="/tmp/pybin:$PATH"
 python3 ./waf build -j$jobs
 # waf only builds the shared library: archive the same (PIC) objects as libaubio.a
 # so that the package ships a static library too.

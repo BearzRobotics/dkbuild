@@ -27,6 +27,10 @@ source = [
 
 # tools/save/zzip_main.cpp uses std::vector without <vector> (libc++ no longer includes it transitively; the game itself compiled and linked) (source edit: sed)
 setup = '''
+# The Makefile compiles with -Werror, and this clang warns where upstream's compilers do not (src/sdltiles.cpp: "variable
+# 'need_invalidate_framebuffers' set but not used"). (Source edit: sed.)
+sed -i 's/^  -Werror -Wall -Wextra \\$/  -Wall -Wextra \\/' Makefile
+! grep -q '^  -Werror ' Makefile
 sed -i '1i #include <vector>' tools/save/zzip_main.cpp
 '''
 build = '''

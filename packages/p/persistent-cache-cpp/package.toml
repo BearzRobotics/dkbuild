@@ -17,6 +17,8 @@ source = [
 ]
 
 setup = '''
+# The project compiles with -Werror, and this clang warns about its unqualified std::move calls. (Source edit: sed.)
+grep -rl --include=CMakeLists.txt -- '-Werror' . | xargs sed -i 's/-Werror\([^=a-zA-Z-]\|$\)/\1/g'
 %cmake \
     -DBUILD_SHARED_LIBS=ON
 '''

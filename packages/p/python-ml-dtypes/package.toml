@@ -1,12 +1,13 @@
 # NumPy data types for machine learning (bfloat16, float8): PyPI sdist ml-dtypes 0.6.0 (build backend scikit_build_core.build); Part of the AI/search stack in the queue.
 # Not built (queued, wip/queue): expect first-build fixes (build requirements: scikit-build-core, numpy~=2.0).
+# The build backend is scikit-build-core ("BackendUnavailable: Cannot import 'scikit_build_core.build'").
 name = "python-ml-dtypes"
 version = "0.6.0"
 release = 1
 summary = "NumPy data types for machine learning (bfloat16, float8)"
 license = "Apache-2.0"
 homepage = "https://pypi.org/project/ml-dtypes"
-hostdeps = ["python", "python-setuptools", "python-wheel", "python-numpy"]
+hostdeps = ["python", "python-setuptools", "python-wheel", "python-numpy", "python-scikit-build-core", "cmake", "ninja", "python-pybind11", "pkgconf"]
 builddeps = ["python-devel", "python-numpy"]
 rundeps = ["python", "python-numpy"]
 options = ["!check"]

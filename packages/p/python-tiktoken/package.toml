@@ -1,5 +1,6 @@
 # Fast BPE tokeniser for use with OpenAI models (Rust): PyPI sdist tiktoken 0.14.0 (build backend setuptools.build_meta); crates from cargodeps. Part of the AI/search stack in the queue.
 # Not built (queued, wip/queue): expect first-build fixes (build requirements: setuptools>=62.4, wheel, setuptools-rust>=1.5.2).
+# The sdist has no Cargo.lock: files/Cargo.lock (cargo generate-lockfile on the 0.14.0 sdist) pins the crates.
 name = "python-tiktoken"
 version = "0.14.0"
 release = 1
@@ -9,7 +10,7 @@ homepage = "https://pypi.org/project/tiktoken"
 hostdeps = ["python", "python-setuptools", "python-wheel", "python-setuptools-rust", "rust"]
 builddeps = ["python-devel"]
 rundeps = ["python", "python-regex", "python-requests"]
-options = ["!check", "cargodeps"]
+options = ["!check", "cargodeps", "cargolock=."]
 
 source = [
     { url = "https://files.pythonhosted.org/packages/66/62/167a842aa0429d45f5e797354fd4343a96f6043d67d0513c675c7b8d36e6/tiktoken-0.14.0.tar.gz", sha256 = "231dec90efcdccf1b565a1416107736f1e09b1a08fe736ef9d6363e626d03874" },

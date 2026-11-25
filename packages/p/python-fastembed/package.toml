@@ -18,5 +18,5 @@ source = [
 ]
 
 install = '''
-python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr ../sources/fastembed-0.9.1-py3-none-any.whl
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr /build/sources/fastembed-0.9.1-py3-none-any.whl
 '''

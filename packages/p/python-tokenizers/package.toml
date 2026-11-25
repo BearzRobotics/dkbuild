@@ -17,6 +17,8 @@ source = [
 
 environment = '''
 export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
+# esaxx-rs builds C++ and links the C++ library by name, libstdc++ unless CXXSTDLIB says otherwise ("unable to find library -lstdc++")
+export CXXSTDLIB=c++
 '''
 build = '''
 maturin build --release --frozen --offline -i python3 --compatibility linux --out dist -j $jobs

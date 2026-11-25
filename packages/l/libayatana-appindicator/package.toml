@@ -2,13 +2,14 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
+# r1 had patches/sed.patch (from a BSD-sed system), which adds `-i ""`: our sed takes the "" as the script and the script as a
+# file ("sed: can't read s|#include...: No such file or directory"). Upstream's own command is right here: patch removed.
 name = "libayatana-appindicator"
 version = "0.6.0"
 release = 1
 summary = "Ayatana App Indicators Shared Library"
 license = "GPL-3.0-only AND (LGPL-3.0-only OR LGPL-2.1-only)"
 homepage = "https://github.com/AyatanaIndicators/libayatana-appindicator"
-patches = ["sed.patch"]
 hostdeps = ["cmake", "gobject-introspection", "ninja", "pkgconf", "vala"]
 builddeps = ["glib-devel", "gtk+3-devel", "libayatana-indicator-devel", "libdbusmenu-devel"]
 checkdeps = []
