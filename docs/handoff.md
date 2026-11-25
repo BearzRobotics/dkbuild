@@ -2,6 +2,21 @@
 
 Read this section first. The sections below it are older history.
 
+## Evening update (2026-11-24, after the reboot)
+
+- **/stuff (btrfs) lost its last writes in the reboot** (files went back to about 18:36-18:55; GitHub had the commits).
+  Processes had been stuck waiting for commits, and the kernel logs "BTRFS error: incorrect extent count" (11-20 and
+  11-24). Not diagnosed. Do not trust it with the only copy of anything; no `btrfs check --repair`.
+- **Good ISO:** /mnt/dkbuild/iso/dkde-devel-20261124-2134.iso (also in /mnt/scratch/iso-archive). The 18:56 one does
+  not reach the desktop (elogind and polkit readiness without a newline, D-Bus start race, launch helper not setuid,
+  hidepid on /proc): fixed in elogind r7, polkit r7, dbus r7, dinit-services r8. Tested in QEMU (BIOS, the disc's boot
+  loader, standard VGA and virtio): desktop, login screen, sign-in (X11 session), polkit answers. **Not tested:**
+  VirtualBox, real hardware, installing to a disk, GRUB. The user allowed QEMU for testing this ISO.
+- The login screen preselects "dkde (X11, dkde-wm)", not the Wayland session (dkde's choice; not changed).
+- /mnt/dkbuild is mounted and owned by the user; the move there has not been done. Its /etc/fstab line needs
+  `defaults,noatime,nofail 0 2` (it said `default 0 0`). DKBUILD_FAST_WORK=/mnt/dkbuild/work-fast and the image tree
+  /mnt/dkbuild/imgtree were used for these builds.
+
 ## State right now
 
 - **World is stopped** (stopped on request during pass 6). Nothing of ours should be running; check with

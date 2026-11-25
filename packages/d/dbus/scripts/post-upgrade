@@ -1,0 +1,7 @@
+#!/bin/sh
+# The system bus (user dbus) starts services on demand through this helper, which must run as root and only for dbus.
+helper=/usr/libexec/dbus-daemon-launch-helper
+if [ -x "$helper" ] && chgrp dbus "$helper" 2>/dev/null; then
+    chmod 4750 "$helper"
+fi
+exit 0

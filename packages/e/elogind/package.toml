@@ -11,7 +11,10 @@
 # and Xfce); the system's login and su keep using /etc/shadow directly.
 name = "elogind"
 version = "255.17"
-release = 6
+# r7: the readiness patch wrote "READY=1" without a newline; dinit 0.23 counts the service as ready only when the notification
+# holds one, so it ignored the message, saw the pipe close, logged "readiness pipe not readable" and killed the service
+# (found booting the dkde-devel ISO of 2026-11-24 in QEMU: elogind failed, and greetd with it: no desktop). The patch line now writes "READY=1\n".
+release = 7
 summary = "Standalone version of logind"
 license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
 homepage = "https://github.com/elogind/elogind"

@@ -26,10 +26,9 @@ if [ "$1" = start ]; then
     mountpoint -q /run || mount -n -t tmpfs -o mode=775 tmpfs /run
     mkdir /run/lock /run/udev
     
-    # "hidepid=1" doesn't appear to take effect on first mount of /proc,
-    # so we mount it and then remount:
-    mount -n -t proc -o hidepid=1 proc /proc
-    mount -n -t proc -o remount,hidepid=1 proc /proc
+    # /proc without hidepid: polkitd runs as its own user and reads /proc/<pid> of the process asking for an action; with
+    # hidepid=1 every check failed ("Failed to open file /proc/<pid>/status: Operation not permitted")
+    mount -n -t proc proc /proc
 
 
 

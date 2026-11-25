@@ -17,7 +17,10 @@
 # r4: static libraries too (in polkit-static), for fully static programs on musl.
 name = "polkit"
 version = "128"
-release = 6
+# r7: the readiness patch wrote "READY=1" without a newline; dinit 0.23 counts the service as ready only when the notification
+# holds one, so it ignored the message, saw the pipe close, logged "readiness pipe not readable" and killed the service
+# (found booting the dkde-devel ISO of 2026-11-24 in QEMU: polkitd failed to start). The patch line now writes "READY=1\n".
+release = 7
 summary = "Toolkit for defining and handling authorizations"
 license = "GPL-2.0-or-later"
 homepage = "https://www.freedesktop.org/wiki/Software/polkit"
