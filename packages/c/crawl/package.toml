@@ -6,6 +6,8 @@
 # pcre, zlib and freetype; the build uses the system sqlite and zlib and
 # ncurses, and Crawl's own modified Lua 5.1 (it patches the language), which
 # is why the contribs are kept.
+# The Makefile calls gcc and g++ by name, also for its build-time tile tool ("make[1]: g++: No such file or
+# directory"): FORCE_CC/FORCE_CXX hand it the build's compilers.
 # crash.cc: the backtrace code is guarded for Android only, but it uses
 # execinfo.h which musl does not have: treat every non-glibc libc like
 # Android (from Void Linux's recipe).
@@ -30,11 +32,11 @@ echo 0.34.1 > source/util/release_ver
 '''
 build = '''
 cd source
-%make prefix=/usr bin_prefix=bin NO_TRY_GOLD=1 V=1 EXTERNAL_FLAGS="$CFLAGS" EXTERNAL_LDFLAGS="$LDFLAGS"
+%make prefix=/usr bin_prefix=bin NO_TRY_GOLD=1 V=1 FORCE_CC="$CC" FORCE_CXX="$CXX" EXTERNAL_FLAGS="$CFLAGS" EXTERNAL_LDFLAGS="$LDFLAGS"
 '''
 install = '''
 cd source
-make prefix=/usr bin_prefix=bin DESTDIR="$pkgdir" EXTERNAL_FLAGS="$CFLAGS" EXTERNAL_LDFLAGS="$LDFLAGS" install
+make prefix=/usr bin_prefix=bin DESTDIR="$pkgdir" FORCE_CC="$CC" FORCE_CXX="$CXX" EXTERNAL_FLAGS="$CFLAGS" EXTERNAL_LDFLAGS="$LDFLAGS" install
 cd ..
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/crawl/LICENSE"
 '''
