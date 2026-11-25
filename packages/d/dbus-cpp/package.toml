@@ -24,6 +24,10 @@ setup = '''
 # (deprecated INSTANTIATE_TEST_CASE_P, unused lambda captures). (Source edit: sed.)
 sed -i 's/ -Werror//' CMakeLists.txt
 ! grep -n -- '-Werror' CMakeLists.txt
+# The tests are always built, and bus_test does not link: it needs std::hash<ObjectPath>, which -fvisibility=hidden keeps
+# inside the library ("ld.lld: error: undefined symbol"). They are not run (!check), so they are not built. (Source edit: sed.)
+grep -q '^ *add_subdirectory(tests)' CMakeLists.txt
+sed -i '/^ *add_subdirectory(tests)/d' CMakeLists.txt
 %cmake \
     -DBUILD_SHARED_LIBS=ON \
     -DCMAKE_POLICY_VERSION_MINIMUM=3.5
