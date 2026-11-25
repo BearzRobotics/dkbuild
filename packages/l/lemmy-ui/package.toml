@@ -48,7 +48,10 @@ export npm_config_minimum_release_age=0 npm_config_trust_policy=off \
     pnpm_config_minimum_release_age=0 pnpm_config_trust_policy=off
 # sharp: use its prebuilt musl binary package from the lockfile, not a download or a local libvips build
 export npm_config_sharp_ignore_global_libvips=1
-pnpm install --frozen-lockfile --config.trustLockfile=true
+# pnpm 11 fails the install when it skips dependency build scripts (ERR_PNPM_IGNORED_BUILDS: @parcel/watcher, inferno,
+# sharp). None are needed (watcher and sharp ship prebuilt binary packages in the lockfile; inferno's only prints):
+# they stay skipped, without the error
+pnpm install --frozen-lockfile --config.trustLockfile=true --config.strictDepBuilds=false
 '''
 build = '''
 export NODE_OPTIONS=--max-old-space-size=4096

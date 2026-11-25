@@ -2,7 +2,10 @@
 # its web front end is the separate package lemmy-ui, its image host pict-rs (separate package, see below).
 # Rust crates vendored on the host (cargodeps). PostgreSQL client library (libpq) from the system
 # (pq-sys links it; diesel migrations are embedded in the binary and run at start).
-# Source edits: none. Not enabled: `embed-pictrs` (it compiles the pict-rs server into lemmy_server and needs
+# Source edit: patches/no-toolchain-pin.patch removes rust-toolchain.toml, which pins Rust 1.81. The dependency fetch runs
+# the host's cargo in the source tree, where rustup obeys the pin, and 1.81 cannot read newer crates ("feature
+# `edition2024` is required", moxcms). A patch, because patches apply before the fetch and build steps do not.
+# Not enabled: `embed-pictrs` (it compiles the pict-rs server into lemmy_server and needs
 # its whole tree and ffmpeg/imagemagick at runtime); Lemmy talks to the separate pict-rs service instead,
 # which upstream's own deployment does too.
 # Installed inert: the dinit service is shipped, not enabled; no lemmy.hjson, no database, no admin account.
@@ -14,6 +17,7 @@ release = 1
 summary = "Federated link aggregator and forum (server)"
 license = "AGPL-3.0-only"
 homepage = "https://join-lemmy.org"
+patches = ["no-toolchain-pin.patch"]
 hostdeps = ["rust", "pkgconf", "make"]
 builddeps = ["postgresql-devel", "openssl-devel"]
 rundeps = ["postgresql"]
@@ -29,8 +33,6 @@ export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
 export PQ_LIB_DIR=/usr/lib
 '''
 build = '''
-# upstream pins channel 1.81 in rust-toolchain.toml (rustup syntax): the system rust is used as it is
-rm -f rust-toolchain.toml
 cargo build --release --frozen --offline -j $jobs
 '''
 install = '''
