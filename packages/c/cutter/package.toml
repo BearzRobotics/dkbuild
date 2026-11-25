@@ -15,6 +15,10 @@ source = [
 
 # Qt 6.12's uic refuses the promoted widget class "AddressableItemList<>" ("Invalid class name": 7 .ui files use the template with its default
 # argument as a class name). A plain alias in the widget's header gives them a real name, and the .ui files use it (source edit: sed)
+environment = '''
+# src/widgets/GraphLayout.h uses std::vector without including it; libc++ does not bring it in through the Qt headers
+export CXXFLAGS="$CXXFLAGS -include vector"
+'''
 setup = '''
 sed -i '$ i using AddressableItemListDefault = AddressableItemList<>;' src/widgets/AddressableItemList.h
 sed -i 's/AddressableItemList&lt;&gt;/AddressableItemListDefault/g' $(grep -rl 'AddressableItemList&lt;&gt;' --include=*.ui src)

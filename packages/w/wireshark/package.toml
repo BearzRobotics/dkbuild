@@ -27,6 +27,9 @@ build = '''
 '''
 check = '''
 # extcaps can't work in our container
+# pytest.ini asks for pytest-xdist (-nauto), which is not packaged: the tests run one at a time ("unrecognized
+# arguments: -nauto"). (Edit of a generated file: sed.)
+sed -i 's/ *-nauto//' build/pytest.ini
 pytest -k "not TestExtcaps" build
 '''
 install = '''

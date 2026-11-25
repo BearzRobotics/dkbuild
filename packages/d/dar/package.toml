@@ -31,7 +31,8 @@ source = [
 
 # libc++ no longer includes <new> transitively: crc.hpp, mask.hpp and others use std::nothrow ("no member named 'nothrow' in namespace 'std'")
 environment = '''
-export CXXFLAGS="$CXXFLAGS -include new"
+# hash_fichier.cpp uses errno without <cerrno>
+export CXXFLAGS="$CXXFLAGS -include new -include cerrno"
 '''
 setup = '''
 %configure \

@@ -1,6 +1,7 @@
 # Endless Sky: 2D space trading and combat game in the spirit of Escape
 # Velocity (GPL-3.0; art and sounds under CC-BY-SA/CC0/CC-BY, see
 # copyright files in the tarball). Builds from the tarball without vcpkg.
+# libc++ does not include <thread> for this_thread::yield() (source/main.cpp): force-included with the others.
 name = "endless-sky"
 version = "0.11.4"
 release = 1
@@ -18,7 +19,7 @@ source = [
 # libc++ no longer includes <istream>, <vector> and the like transitively ("implicit instantiation of undefined template 'std::basic_iostream<char>'",
 # Sound.cpp): the usual set is force-included for every C++ file, and -k 0 lets one run list every file that still fails
 environment = '''
-export CXXFLAGS="$CXXFLAGS -include iostream -include sstream -include fstream -include vector -include cstdint -include cstdlib -include cstring -include string -include memory -include algorithm -include cmath"
+export CXXFLAGS="$CXXFLAGS -include iostream -include sstream -include fstream -include vector -include cstdint -include cstdlib -include cstring -include string -include memory -include algorithm -include cmath -include thread"
 '''
 setup = '''
 # -DES_USE_VCPKG=OFF: use the system libraries; -DES_BUILD... see CMakeLists

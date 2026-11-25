@@ -20,6 +20,9 @@ source = [
 ]
 
 setup = '''
+# A git snapshot, not a release archive: the private headers (private/qqmljsast_p.h, ...) are made by syncqt, which qmake
+# runs only in a source tree that has a .git directory ("fatal error: 'private/qtqmlcompilerglobal_p.h' file not found")
+mkdir -p .git
 qmake-qt5
 '''
 build = '''
