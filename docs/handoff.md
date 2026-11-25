@@ -1,3 +1,90 @@
+# Handoff (2026-11-24, before installing new disks)
+
+Read this section first. The sections below it are older history.
+
+## State right now
+
+- **World is stopped** (stopped on request during pass 6). Nothing of ours should be running; check with
+  `pgrep -af 'worldloop|dkbuild'`. Branch `new-build-machine`, about 580 commits ahead of origin: **nothing is pushed**.
+- Pass 4 ended with 178 failures. Pass 5 was stopped after 11 failures, pass 6 early. Many recipe fixes committed since
+  are **untested**. Of 478 recipes added since 2026-11-16, 314 had an apk and 164 did not (75 of those had failed in
+  pass 4 or 5, 89 had not been attempted).
+- **New ISO** (not booted): `out/dkde-devel/dkde-devel.iso`, archived as
+  `/mnt/scratch/iso-archive/dkde-devel-20261124-1856.iso` (read-only, with .sha256; the directory is read-only too:
+  `chmod u+w` it to add a file). SHA-256 c4398db5357a2dce6698a3a29a72d209783901320d07c9d7fddcae4f1b91ff47.
+  It has firefox, grub + grub-i386-pc and dkinstaller 0.0.6. The ISO itself boots with dklilo; GRUB is a choice in
+  the installer. **GRUB r6 has no recorded boot test** (the clang-built one installed fine and did not boot).
+  The user's uncle will use this ISO. The 16 November dkde-devel ISO was replaced and not archived; the
+  20 November one is in the archive.
+
+## Standing orders (also in Claude's memory, project-standing-orders-2026-11-19)
+
+- Keep running `world --keep-going`, fix failures as they come, restart world if it ends or crashes while packages
+  remain. A package that cannot be built goes in docs/unbuildable.md, after real fixes were tried.
+- No QEMU boots; do not push, release or publish; do not touch other repositories, sessions or processes.
+- Upstream sources and build scripts are edited only with `sed` or a `.patch`, each explained in the recipe.
+  Features are switched off only with a reason (recipe and docs/disabled-features.md).
+- Daily-driver apps still pending: brave, code-oss, kdenlive (and electron, which several apps need).
+
+## Starting world again
+
+    setsid nohup contrib/worldloop.sh >/dev/null 2>&1 &
+
+It continues the pass numbering. Watch `work/worldloop.log` and the newest `work/world<n>.log`. Also watch for silent
+hangs (load under 1 and a quiet log): one `pnpm install` once hung for 7 hours. docs/recipe-brief.md is the brief for
+recipe-writing helper agents.
+
+## Image builds
+
+`./zig-out/bin/dkbuild image --verbose images/dkde-devel.toml`. On the saturated /stuff disk it crawled (each fsync
+waited minutes for a btrfs commit). It ran in about 2 minutes from a temporary tree on the SSD,
+`/mnt/scratch/dkbuild/imgtree` (links to images, packages, keys, rootfs, cache and repo; real work/ and out/), run
+from inside that tree. The tree can be deleted. With the whole build tree on the new NVMe it is not needed.
+
+## Open
+
+- **audacity:** configure downloads dependencies (muse_deps). Not fixed. Plan: `-DEXTDEPS_OVERRIDE_ALL=SYSTEM`, and
+  the source-only deps (muse_deps/recipes/*/spec.cmake has URLs and sha256) as sources, placed in the extdeps
+  download cache (`$HOME/.cache/extdeps/downloads/<name>/`).
+- **pc:libpng:** the user asked whether "apk add can't resolve pc:libpng although libpng is in the repo" was fixed.
+  No record of it was found; where it happened is not known yet; not investigated further.
+- **ghc:** diagnostics added in r8, not yet read. **dotnet** r8: NU1109 (Newtonsoft.Json). **euro-office-documentserver**
+  r7: unconfirmed. **emacs** libgccjit: config.log tail added. **qt6-qtwebengine:** may have more libc++ errors.
+- **onnxruntime:** its GitHub repository answered 404 (blocks calibre speech, fastembed, rapidocr, mineru). Recheck.
+- **zig-ide** (new), 0ad, helix, hetty, hexchat, heaptrack, sdbus-cpp, ibus, libdbusmenu,
+  ayatana-indicator-datetime: fixed or written, untested.
+- `zed.toml` in the top directory is an untracked stray (a copy of Zed's Cargo manifest); delete if nobody wants it.
+
+## Disks (before the change)
+
+| Disk | Size and type | Use |
+|---|---|---|
+| nvme0n1 (Samsung 990 EVO Plus) | 1 TB NVMe | / and /boot/efi, 86% full |
+| sda | 500 GB SATA SSD, **ext2** (no journal) | /mnt/scratch: repo, logs, fast work, ISO archive, other data (enwiki 109 GB, ...) |
+| sdb (ST4000DM004) | 4 TB SMR hard disk, btrfs | /stuff: git trees, source cache, work, out |
+
+`repo/x86_64` and `logs/x86_64` are links into `/mnt/scratch/dkbuild/`. Sizes: repo 24 GB, logs 3.8 GB, source
+tarballs 68 GB (the other cache/ stores were not measured), fast work 5.4 GB.
+
+## Moving to the new 2 TB NVMe (proposed, not done)
+
+1. **Before opening the case:** back up the git history (it exists only on /stuff), `~/.config/dkbuild/signing.rsa`
+   (the repository signing key; only keys/*.pub is in the tree) and `~/.claude/projects/-stuff-git-dkbuild/`.
+2. Identify the new disks by size and serial (`lsblk -o NAME,SIZE,MODEL,SERIAL`) before any mkfs: device names can
+   change when disks are added. /etc/fstab uses UUIDs and a label, so existing mounts should not care.
+3. `mkfs.ext4 -L build` on the new NVMe partition; mount with `noatime,nofail` at e.g. /mnt/build; fstrim.timer on.
+4. Move the whole tree (cache, repo, logs, work, rootfs, keys, out, .git), turning the two links back into real
+   directories (`rsync -aHAX`, world stopped). Keep the path /stuff/git/dkbuild working (a bind mount of
+   /mnt/build/dkbuild there): Claude's memory and session are filed under that path, and nothing then needs checking
+   for old absolute paths. The bind mount needs an fstab line ordered after both file systems.
+5. Run with `DKBUILD_FAST_WORK=""` (build roots then live in work/ on the NVMe).
+6. First checks: `zig build test`, `./zig-out/bin/dkbuild check`, `./zig-out/bin/dkbuild outdated` (it must not ask
+   to rebuild everything), one small `dkbuild pkg`, then start the loop.
+7. New 4 TB drive: backups (git, signing key, ISO archive, a copy of repo/ and of cache/sources; some upstream
+   sources disappear, as onnxruntime's did).
+
+---
+
 # Handoff (2026-11-12, before a reboot; updated after the agents finished)
 
 The project roadmap is docs/roadmap.md (rewritten 2026-11-13 to match reality).
