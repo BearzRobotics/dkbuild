@@ -3,9 +3,9 @@
 # Start it detached, so that it outlives the terminal or editor session:
 #     setsid nohup contrib/worldloop.sh >/dev/null 2>&1 &
 # Logs: work/world<n>.log, work/prune<n>.log, one summary line per pass in work/worldloop.log.
-# DKBUILD_FAST_WORK (build roots on a faster disk) is taken from the environment; set it to "" to build in work/.
+# DKBUILD_FAST_WORK (build roots on a faster disk) is taken from the environment; unset, they go in work/.
 cd "$(dirname "$0")/.." || exit 1
-export DKBUILD_FAST_WORK="${DKBUILD_FAST_WORK-/mnt/scratch/dkbuild-work}"
+export DKBUILD_FAST_WORK="${DKBUILD_FAST_WORK-}"
 # repo/x86_64 may be a link to another disk: do not start when it leads nowhere
 [ -d repo/x86_64/ ] || { echo "repo/x86_64 is missing (disk not mounted?)" > work/worldloop.err; exit 1; }
 while pgrep -f "dkbuild world" >/dev/null; do sleep 30; done

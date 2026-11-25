@@ -5,7 +5,7 @@ Read this section first. The sections below it are older history.
 ## State right now
 
 - **World is stopped** (stopped on request during pass 6). Nothing of ours should be running; check with
-  `pgrep -af 'worldloop|dkbuild'`. Branch `new-build-machine`, about 580 commits ahead of origin: **nothing is pushed**.
+  `pgrep -af 'worldloop|dkbuild'`. Branch `new-build-machine`, pushed to origin on 2026-11-24 at the user's request.
 - Pass 4 ended with 178 failures. Pass 5 was stopped after 11 failures, pass 6 early. Many recipe fixes committed since
   are **untested**. Of 478 recipes added since 2026-11-16, 314 had an apk and 164 did not (75 of those had failed in
   pass 4 or 5, 89 had not been attempted).
@@ -14,7 +14,7 @@ Read this section first. The sections below it are older history.
   `chmod u+w` it to add a file). SHA-256 c4398db5357a2dce6698a3a29a72d209783901320d07c9d7fddcae4f1b91ff47.
   It has firefox, grub + grub-i386-pc and dkinstaller 0.0.6. The ISO itself boots with dklilo; GRUB is a choice in
   the installer. **GRUB r6 has no recorded boot test** (the clang-built one installed fine and did not boot).
-  The user's uncle will use this ISO. The 16 November dkde-devel ISO was replaced and not archived; the
+  The 16 November dkde-devel ISO was replaced and not archived; the
   20 November one is in the archive.
 
 ## Standing orders (also in Claude's memory, project-standing-orders-2026-11-19)
@@ -66,21 +66,39 @@ from inside that tree. The tree can be deleted. With the whole build tree on the
 `repo/x86_64` and `logs/x86_64` are links into `/mnt/scratch/dkbuild/`. Sizes: repo 24 GB, logs 3.8 GB, source
 tarballs 68 GB (the other cache/ stores were not measured), fast work 5.4 GB.
 
-## Moving to the new 2 TB NVMe (proposed, not done)
+## Moving to the new disk (decided 2026-11-24, not done)
 
-1. **Before opening the case:** back up the git history (it exists only on /stuff), `~/.config/dkbuild/signing.rsa`
-   (the repository signing key; only keys/*.pub is in the tree) and `~/.claude/projects/-stuff-git-dkbuild/`.
-2. Identify the new disks by size and serial (`lsblk -o NAME,SIZE,MODEL,SERIAL`) before any mkfs: device names can
-   change when disks are added. /etc/fstab uses UUIDs and a label, so existing mounts should not care.
-3. `mkfs.ext4 -L build` on the new NVMe partition; mount with `noatime,nofail` at e.g. /mnt/build; fstrim.timer on.
-4. Move the whole tree (cache, repo, logs, work, rootfs, keys, out, .git), turning the two links back into real
-   directories (`rsync -aHAX`, world stopped). Keep the path /stuff/git/dkbuild working (a bind mount of
-   /mnt/build/dkbuild there): Claude's memory and session are filed under that path, and nothing then needs checking
-   for old absolute paths. The bind mount needs an fstab line ordered after both file systems.
-5. Run with `DKBUILD_FAST_WORK=""` (build roots then live in work/ on the NVMe).
+The user's decision: the **source (git tree) stays in /stuff/git/dkbuild**; the build tree and the repository go on
+the new drive, **mounted at /mnt/dkbuild**. This replaces the earlier idea of moving the whole tree.
+
+On the new drive (links from the source tree, as repo/x86_64 and logs/x86_64 are links now):
+
+| In /stuff/git/dkbuild (link) | Target |
+|---|---|
+| repo/x86_64 | /mnt/dkbuild/repo/x86_64 |
+| logs/x86_64 | /mnt/dkbuild/logs/x86_64 |
+| cache | /mnt/dkbuild/cache |
+| work | /mnt/dkbuild/work |
+| rootfs | /mnt/dkbuild/rootfs |
+| out | /mnt/dkbuild/out |
+
+repo/ itself stays a directory (it holds the tracked .gitkeep). .gitignore covers the links. **dkbuild has run with
+repo/x86_64 and logs/x86_64 as links; cache, work, rootfs and out as links are untested.**
+
+1. **Before opening the case:** have a copy of `~/.config/dkbuild/signing.rsa` (the repository signing key; only the
+   public half is in the tree) and of `~/.claude/projects/-stuff-git-dkbuild/` on another disk.
+2. Identify the new drive by size, model and serial (`lsblk -o NAME,SIZE,MODEL,SERIAL`) before any mkfs: device names
+   can change when disks are added. /etc/fstab uses UUIDs and a label for the existing mounts.
+3. ext4 (`mkfs.ext4 -L dkbuild`), mounted at /mnt/dkbuild with `noatime,nofail`, owned by the build user;
+   fstrim.timer on.
+4. With nothing running (`pgrep -af 'worldloop|dkbuild'`): `rsync -aHAX` each directory in the table to its target
+   (for repo/ and logs/ the sources are /mnt/scratch/dkbuild/repo-x86_64 and logs-x86_64), compare, move the old
+   directory or link aside, make the link. The old ISO folders under /mnt/scratch (imgtree, iso-archive) are
+   separate: keep the archive, imgtree can go.
+5. Build roots then live in work/ on the new drive: contrib/worldloop.sh leaves DKBUILD_FAST_WORK empty unless set.
 6. First checks: `zig build test`, `./zig-out/bin/dkbuild check`, `./zig-out/bin/dkbuild outdated` (it must not ask
-   to rebuild everything), one small `dkbuild pkg`, then start the loop.
-7. New 4 TB drive: backups (git, signing key, ISO archive, a copy of repo/ and of cache/sources; some upstream
+   to rebuild everything), one small `dkbuild pkg`, one image, then start the loop. Keep the old copies until then.
+7. The new 4 TB drive: backups (ISO archive, a copy of repo/ and of cache/sources, the signing key; some upstream
    sources disappear, as onnxruntime's did).
 
 ---

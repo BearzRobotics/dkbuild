@@ -31,3 +31,10 @@ zig-out/
 /out/
 /pw-run.log
 /out-*-image.log
+# the build directories may be links to another disk (docs/handoff.md); the patterns above end in "/" and do not match a link
+/logs
+/cache
+/work
+/rootfs
+/out
+/wip/queue/cache/
