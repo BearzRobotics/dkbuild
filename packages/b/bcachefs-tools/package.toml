@@ -37,6 +37,9 @@ source = [
 
 environment = '''
 export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true LIBCLANG_PATH=/usr/lib
+# The libc crate (0.2.189) declares statx on musl only with this cfg (musl here is 1.2.6): without it src/util.rs
+# fails with "cannot find type `statx` in crate `libc`"
+export RUSTFLAGS="${RUSTFLAGS:-} --cfg libc_unstable_musl_v1_2_3"
 mkdir -p /tmp/pcdir
 printf 'Name: libunwind\nDescription: LLVM libunwind\nVersion: 1.0\nLibs: -lunwind\n' > /tmp/pcdir/libunwind.pc
 export PKG_CONFIG_PATH="/tmp/pcdir${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"

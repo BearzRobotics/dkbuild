@@ -15,12 +15,15 @@ source = [
     { url = "https://gitlab.com/ubports/core/lib-cpp/dbus-cpp/-/archive/5.0.6/dbus-cpp-5.0.6.tar.gz", sha256 = "c325a62d7a041ff998284c2c0c6d6bb83619b93deb71e9f3a46c394c6654031f" },
 ]
 
-# libc++ no longer includes <atomic> transitively (pending_call_impl.h: "no template named 'atomic' in namespace 'std'"), and the project builds with
-# -Werror, which turns clang's newer warnings (-Wunused-private-field, a consequence of that error) into errors
+# libc++ no longer includes <atomic> transitively (pending_call_impl.h: "no template named 'atomic' in namespace 'std'")
 environment = '''
-export CXXFLAGS="$CXXFLAGS -include atomic -Wno-error"
+export CXXFLAGS="$CXXFLAGS -include atomic"
 '''
 setup = '''
+# The project adds -Werror to its own flags, after ours, so -Wno-error in CXXFLAGS has no effect: newer clang and gtest warn about the tests
+# (deprecated INSTANTIATE_TEST_CASE_P, unused lambda captures). (Source edit: sed.)
+sed -i 's/ -Werror//' CMakeLists.txt
+! grep -n -- '-Werror' CMakeLists.txt
 %cmake \
     -DBUILD_SHARED_LIBS=ON \
     -DCMAKE_POLICY_VERSION_MINIMUM=3.5
