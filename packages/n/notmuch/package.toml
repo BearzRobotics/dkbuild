@@ -9,7 +9,7 @@
 # bindings (Chimera does not ship them either; they can be split out later).
 name = "notmuch"
 version = "0.40"
-release = 1
+release = 2
 summary = "Fast, global-search, tag-based email system"
 license = "GPL-3.0-or-later"
 homepage = "https://notmuchmail.org"

@@ -4,7 +4,7 @@
 # so no -devel package exists and the build was skipped ("needs python-numpy-devel, which is not built").
 name = "opencv"
 version = "4.13.0"
-release = 5
+release = 6
 summary = "Computer vision and machine learning libraries"
 license = "Apache-2.0"
 homepage = "https://opencv.org"
