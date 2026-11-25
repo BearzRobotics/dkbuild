@@ -1,6 +1,7 @@
 # Mir: Wayland compositor library for shells (MirAL, miroil; the base of Lomiri): its Rust parts (the Wayland frontend and the evdev input platform) are built by cargo during the CMake build, from vendored crates (cargodeps, Cargo.lock updated by Alpine's rustix patch); tests off. Needed by the Lomiri stack, version 2.28.0. Recipe written after Alpine
 # Linux's testing/mir (MIT-licensed APKBUILD and patches; the software's licence is GPL-2.0-only OR GPL-3.0-only).
 # Not built (queued, wip/queue): expect first-build fixes.
+# python-pillow: examples/example-server-lib runs `from PIL import Image` at configure time ("Python Imaging Library (PIL) not found").
 name = "mir"
 version = "2.28.0"
 release = 1
@@ -8,7 +9,7 @@ summary = "Mir: Wayland compositor library for shells (MirAL, miroil; the base o
 license = "GPL-2.0-only OR GPL-3.0-only"
 homepage = "https://mir-server.io"
 patches = ["gtest-1.18.0.patch", "rustix-1.1.5.patch", "2006_env-opt-to-disable-mir-ssd-drawing.patch"]
-hostdeps = ["cmake", "ninja", "pkgconf", "rust", "lttng-ust"]
+hostdeps = ["cmake", "ninja", "pkgconf", "rust", "lttng-ust", "python-pillow"]
 builddeps = ["boost-devel", "eudev-devel", "freetype-devel", "glib-devel", "glm", "libapparmor-devel", "libdisplay-info-devel", "libdrm-devel", "libepoxy-devel", "libevdev-devel", "libinput-devel", "libxcb-devel", "libxcursor-devel", "libxkbcommon-devel", "libxml++2-devel", "lttng-ust-devel", "mesa-devel", "util-linux-devel", "wayland-devel", "wayland-protocols", "yaml-cpp-devel", "xcb-util-devel"]
 rundeps = ["xkeyboard-config"]
 options = ["!check", "cargodeps"]

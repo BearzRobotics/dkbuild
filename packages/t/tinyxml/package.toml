@@ -17,7 +17,8 @@ source = [
 
 setup = '''
 # (source edit: sed) the header turns the STL interface on for every user of the library
-sed -i '0,/#ifndef TIXML_INCLUDED/s//#ifndef TIXML_USE_STL\n#define TIXML_USE_STL\n#endif\n\n#ifndef TIXML_INCLUDED/' tinyxml.h
+# (r1 used a GNU-only `0,/re/` sed address and the check below failed: the three lines are put at the top instead)
+sed -i -e '1i #ifndef TIXML_USE_STL' -e '1i #define TIXML_USE_STL' -e '1i #endif' tinyxml.h
 grep -q '^#define TIXML_USE_STL' tinyxml.h
 '''
 build = '''

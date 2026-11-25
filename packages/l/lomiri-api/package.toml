@@ -8,7 +8,8 @@ summary = "Lomiri API library: shell, notifications, application and hud interfa
 license = "LGPL-3.0-only"
 homepage = "https://gitlab.com/ubports"
 hostdeps = ["cmake", "ninja", "pkgconf"]
-builddeps = ["cmake-extras"]
+# CMake looks for Qt6 whatever is built ("Could not find a package configuration file provided by Qt6")
+builddeps = ["cmake-extras", "qt6-qtbase-devel", "qt6-qtdeclarative-devel"]
 options = ["!check"]
 
 source = [

@@ -20,7 +20,8 @@ source = [
 ]
 
 install = '''
-cd ../sources
+# the archive has no top directory: its files are already in $srcdir (/build)
+cd "$srcdir"
 mkdir -p unpack && tar -xzf pdfium-linux-musl-x64.tgz -C unpack
 cd unpack
 install -Dm755 lib/libpdfium.so "$pkgdir/usr/lib/libpdfium.so"
