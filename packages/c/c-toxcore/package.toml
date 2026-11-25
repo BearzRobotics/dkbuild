@@ -38,5 +38,5 @@ build = '''
 '''
 install = '''
 %cmake_install
-install -Dm644 COPYING "$pkgdir/usr/share/licenses/c-toxcore/COPYING"
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/c-toxcore/LICENSE"
 '''

@@ -25,6 +25,10 @@ source = [
 setup = '''
 sed -i 's/CROSS_GCC_CFLAGS="-Wno-error=maybe-uninitialized"/CROSS_GCC_CFLAGS="-Wno-error=maybe-uninitialized -Wno-unknown-warning-option"/' configure.ac
 grep -q 'CROSS_GCC_CFLAGS="-Wno-error=maybe-uninitialized -Wno-unknown-warning-option"' configure.ac
+# configure.ac builds its libc with -Werror, and this clang warns about more than the compiler upstream uses
+# (compat/mntent: "variable 'our_mem_base' set but not used" [-Wunused-but-set-global]). (Source edit: sed.)
+sed -i '/^-Werror \\$/d' configure.ac
+! grep -q '^-Werror ' configure.ac
 ./autogen.sh
 %configure \
     --with-sysroot=/usr/lib/x86_64-pc-dj64 \
