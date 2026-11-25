@@ -1,8 +1,10 @@
 # Imported from Chimera Linux cports: main/cmark/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# r2: the static library too. CMake builds one kind per tree (BUILD_SHARED_LIBS), so there are two: only libcmark.a is
+# taken from the static one.
 name = "cmark"
 version = "0.31.2"
-release = 1
+release = 2
 summary = "C implementation of the CommonMark markdown specification"
 license = "BSD-2-Clause"
 homepage = "https://github.com/commonmark/cmark"
@@ -18,13 +20,17 @@ export CFLAGS="${CFLAGS} -DNDEBUG"
 export CXXFLAGS="${CXXFLAGS} -DNDEBUG"
 '''
 setup = '''
+cmake -S . -B build-static -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib \
+    -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_TESTING=OFF
 %cmake \
     -DBUILD_SHARED_LIBS=ON
 '''
 build = '''
+cmake --build build-static -j$jobs
 %cmake_build
 '''
 install = '''
 %cmake_install
+install -Dm644 build-static/src/libcmark.a "$pkgdir/usr/lib/libcmark.a"
 install -Dm644 COPYING "$pkgdir/usr/share/licenses/cmark/COPYING"
 '''
