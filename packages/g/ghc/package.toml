@@ -95,76 +95,38 @@ if [ -x /usr/bin/ghc ] && [ ! -d /usr/lib/ghc-bootstrap ]; then
     bootghc=/usr/bin/ghc
 else
     bootghc=/usr/lib/ghc-bootstrap/usr/bin/ghc
-    # Alpine's GHC calls its C toolchain cc, c++, ld, ar and ranlib (its
-    # settings file): clang and LLVM's tools under those names
-    mkdir -p /tmp/cc-bin
-    # cc and c++ are wrappers, not plain links (r2, r3): configure's ghc-toolchain
-    # describes the build-platform (stage 0) toolchain from the boot GHC's platform and
-    # so gives its C compiler --target=x86_64-unknown-linux (hadrian's hsc2hs
-    # calls) or --target=x86_64-alpine-linux-gnu (configure's checks), which clang reads as
-    # GNU/glibc: hsc2hs then links its helper programs (..._hsc_make) with a glibc dynamic
-    # loader that does not exist here, and running one fails with "posix_spawnp: does not
-    # exist" (r2 mapped only the first triple to a musl one and still failed). This
-    # system's clang already targets musl by default, so the wrappers drop every
-    # --target= argument (stage 0 only; the installed GHC's own target is configured as musl).
-    # r4: hsc2hs does not pass its flags on the command line but in a response file
-    # (cc @file, utils/hsc2hs Common.hs rawSystemL), so r2's and r3's argument filters
-    # never saw the --target= (--cflag=/--lflag= give one per line): the wrappers also
-    # filter the lines of an @file argument (copied to a temporary file, cleaned up after).
-    # r5: the r4 log shows hsc2hs is run as `hsc2hs --cc=clang --cflag=--target=...`
-    # (Hadrian names the compiler clang, from CC), not cc: none of the cc and c++
-    # wrappers were used and the helper program was still linked as glibc. The same
-    # wrappers are therefore also installed under the names clang and clang++ (in
-    # front of /usr/bin in PATH; they call /usr/bin/clang and /usr/bin/clang++ by path).
-    for w in cc:clang c++:clang++ clang:clang clang++:clang++; do
-        cat > /tmp/cc-bin/${w%%:*} <<'WRAP'
-#!/bin/sh
-tmps=
-for a; do
-    shift
-    case $a in
-    --target=*) ;;
-    @*) f=${a#@}
-        if grep -q '^--target=' "$f" 2>/dev/null; then
-            t=$(mktemp /tmp/ccrsp.XXXXXX)
-            grep -v '^--target=' "$f" > "$t"
-            tmps="$tmps $t"
-            set -- "$@" "@$t"
-        else
-            set -- "$@" "$a"
-        fi ;;
-    *) set -- "$@" "$a" ;;
-    esac
+fi
+# GHC takes its platform from the boot GHC: "x86_64-alpine-linux" (also for a ghc package built from Alpine's), with no
+# libc in the name. ghc-toolchain normalises that to x86_64-alpine-linux-gnu and passes it to clang as --target=, so
+# every program was linked for glibc's /lib64/ld-linux-x86-64.so.2, which does not exist here: running one fails with
+# "execvp: does not exist" (hsc2hs helpers in r2-r4; stage1/bin/haddock and bindist ghc-pkg in r5-r7, shown by r7's
+# diagnostics). Removing the argument (r2-r5) did not catch every way it is passed, so the compiler is run through
+# wrappers that add this system's triple as the last --target=, which is the one clang uses. In both bootstrap cases.
+mkdir -p /tmp/cc-bin
+for w in cc:clang c++:clang++ clang:clang clang++:clang++; do
+    printf '#!/bin/sh\nexec /usr/bin/%s "$@" --target=%s\n' "${w##*:}" "$target" > "/tmp/cc-bin/${w%:*}"
+    chmod 755 "/tmp/cc-bin/${w%:*}"
 done
-/usr/bin/@CLANG@ "$@"
-r=$?
-[ -z "$tmps" ] || rm -f $tmps
-exit $r
-WRAP
-        sed -i "s|@CLANG@|${w##*:}|" /tmp/cc-bin/${w%%:*}
-        chmod 755 /tmp/cc-bin/${w%%:*}
-    done
-    # r6: the r5 build got as far as stage 1 and died in `ld.lld' failed in phase `Merge
-    # objects' (Exit code: -11): lld was killed by SIGSEGV merging ghc-prim's objects (-r).
-    # The log does not show the command and the small merge test configure runs passed, so
-    # ld and ld.lld are a wrapper that, if lld is killed by a signal, prints the arguments
-    # to the log and runs it once more with --threads=1 (a threading crash would pass).
-    cat > /tmp/cc-bin/ld.lld <<'WRAP'
+# r6: the r5 build got as far as stage 1 and died in `ld.lld' failed in phase `Merge
+# objects' (Exit code: -11): lld was killed by SIGSEGV merging ghc-prim's objects (-r).
+# The log does not show the command and the small merge test configure runs passed, so
+# ld and ld.lld are a wrapper that, if lld is killed by a signal, prints the arguments
+# to the log and runs it once more with --threads=1 (a threading crash would pass).
+cat > /tmp/cc-bin/ld.lld <<'WRAP'
 #!/bin/sh
 /usr/bin/ld.lld "$@"
 r=$?
 if [ $r -gt 128 ]; then
-    echo "ld.lld killed by signal $((r - 128)); arguments: $*" >&2
-    /usr/bin/ld.lld --threads=1 "$@"
-    r=$?
+echo "ld.lld killed by signal $((r - 128)); arguments: $*" >&2
+/usr/bin/ld.lld --threads=1 "$@"
+r=$?
 fi
 exit $r
 WRAP
-    chmod 755 /tmp/cc-bin/ld.lld
-    ln -sf ld.lld /tmp/cc-bin/ld
-    for t in ar nm ranlib objdump; do ln -sf /usr/bin/llvm-$t /tmp/cc-bin/$t; done
-    export PATH="/tmp/cc-bin:$PATH"
-fi
+chmod 755 /tmp/cc-bin/ld.lld
+ln -sf ld.lld /tmp/cc-bin/ld
+for t in ar nm ranlib objdump; do ln -sf /usr/bin/llvm-$t /tmp/cc-bin/$t; done
+export PATH="/tmp/cc-bin:$PATH"
 # GHC takes its C toolchain from these and records it in its settings; the
 # distribution's default flags are not for it (GHC passes its own)
 export CC=clang CXX=clang++ LD=ld.lld AR=llvm-ar NM=llvm-nm RANLIB=llvm-ranlib OBJDUMP=llvm-objdump
@@ -173,10 +135,7 @@ ghc_configure() {
     ./configure --prefix=/usr --with-system-libffi --enable-numa --disable-ld-override \
         CC=clang CXX=clang++ LD=ld.lld AR=llvm-ar NM=llvm-nm RANLIB=llvm-ranlib "$@"
 }
-# r7: --docs=none, FOR NOW (docs/disabled-features.md). The build step finishes (compiler, libraries and tools, linked), but binary-dist-dir stops twice, with
-# the one resume as well, on "_build/stage1/bin/haddock: createProcess: execvp: does not exist" when it runs haddock to write the libraries' HTML documentation
-# (r5 and r6 of the world run). Without the documentation step haddock is not run; the haddock program itself is still built and installed.
-hadrian="hadrian/bootstrap/_build/bin/hadrian -j$jobs --flavour=release --docs=none"
+hadrian="hadrian/bootstrap/_build/bin/hadrian -j$jobs --flavour=release"
 '''
 setup = '''
 # bootstrap.py's sources tarball (plan-bootstrap.json, each Hackage tarball
@@ -203,6 +162,8 @@ ghc_configure GHC=$bootghc
 # Hadrian resumes from its build state: one more run finishes what was left, and if the failure
 # is not a one-off the second log shows it again, from the start of the failing target.
 $hadrian || { echo "hadrian failed: resuming once" >&2; $hadrian; }
+# the programs must ask for musl's loader (see the wrappers above)
+llvm-readelf -l _build/stage1/bin/ghc | grep 'interpreter: /lib/ld-musl-'
 '''
 install = '''
 # Hadrian's install has no DESTDIR: install the binary distribution it makes
@@ -227,4 +188,12 @@ cd _build/bindist/ghc-$version-*
 ghc_configure
 make DESTDIR="$pkgdir" install
 test -x "$pkgdir/usr/bin/ghc"
+# The installed compiler passes the flags in its settings file to clang: the same glibc --target= (see the wrappers
+# above) would make every program it links unrunnable, and the build's wrapper directory must not be recorded.
+# (Edit of a generated file: sed.)
+settings=$(find "$pkgdir/usr/lib" -path '*/ghc-*/lib/settings' -type f)
+test -n "$settings"
+sed -i -e "s/--target=x86_64-[a-z]*-linux[a-z-]*/--target=$target/g" -e 's|/tmp/cc-bin/|/usr/bin/|g' $settings
+! grep -rn -e '/tmp/cc-bin' -e 'linux-gnu' $settings
+grep -n -e '--target' $settings || true
 '''
