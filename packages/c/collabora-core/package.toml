@@ -124,6 +124,9 @@ source = [
 ]
 
 environment = '''
+# The Makefile refuses to build as root ("Building LibreOffice as root is a very bad idea"), which the build sandbox is
+# (root only inside it). Its check-if-root target skips that when $container is set, its own exception for containers.
+export container=dkbuild
 export CXXFLAGS="${CXXFLAGS} -DGLM_ENABLE_EXPERIMENTAL -DU_USING_ICU_NAMESPACE=1"
 '''
 # --without-system-libfixmath: libfixmath is not packaged (LibreOffice's own recipe uses the bundled copy too): "configure: error: libfixmath/fix16.hpp not found"
