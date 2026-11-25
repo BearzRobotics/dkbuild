@@ -156,7 +156,10 @@ cp -a server/Metrics/config "$ds/server/Metrics/"
 mkdir -p "$ds/server/AdminPanel/server" "$ds/server/AdminPanel/client"
 cp -a server/AdminPanel/server/sources server/AdminPanel/server/node_modules \
     server/AdminPanel/server/package.json "$ds/server/AdminPanel/server/"
-cp -a server/AdminPanel/client/build "$ds/server/AdminPanel/client/"
+# its webpack.config.js writes to $BUILD_ROOT/build when BUILD_ROOT is set, as it is here for sdkjs and web-apps (r7:
+# "cp: cannot stat 'server/AdminPanel/client/build'" after a build that passed)
+test -f deploy/build/index.html
+cp -a deploy/build "$ds/server/AdminPanel/client/build"
 cp -a server/schema server/license server/LICENSE.txt server/3rd-Party.txt "$ds/server/"
 # node-oracledb's prebuilt binaries (thick mode, glibc builds)
 rm -rf "$ds"/server/*/node_modules/oracledb/build
