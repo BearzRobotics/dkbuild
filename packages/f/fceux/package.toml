@@ -17,8 +17,13 @@ source = [
     { url = "https://github.com/TASEmulators/fceux/archive/refs/tags/v2.6.6.tar.gz", sha256 = "0320241d45c6d609f7aeb6f85fdd9019552047206b0864a7f9fddff15b004daa" },
 ]
 
+# diagnostics: r1 stopped at "Could NOT find OpenGL (missing: OPENGL_opengl_LIBRARY OPENGL_glx_LIBRARY)" although the
+# libglvnd-devel in the build root has libGL.so, libOpenGL.so and libGLX.so (checked in the package): CMake's search
+# trace and the files as the build sees them go to the log. Remove once the cause is known.
 setup = '''
+ls -lL /usr/lib/libGL.so /usr/lib/libOpenGL.so /usr/lib/libGLX.so /usr/include/GL/gl.h >&2 || true
 %cmake \
+    --debug-find-pkg=OpenGL \
     -DQT6=ON
 '''
 build = '''
