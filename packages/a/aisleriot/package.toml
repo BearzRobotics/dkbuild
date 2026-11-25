@@ -9,7 +9,8 @@ license = "GPL-3.0-or-later"
 homepage = "https://gitlab.gnome.org/GNOME/aisleriot"
 hostdeps = ["bash", "gettext", "guile", "itstool", "libxml2", "meson", "pkgconf", "glib", "desktop-file-utils"]
 builddeps = ["gtk+3-devel", "guile-devel", "libcanberra-devel", "librsvg-devel"]
-options = ["!lto", "!check"]  # the test suite needs a display and appstream-util
+# !strip: the games are compiled Guile modules (.go, ELF files), which stripping damages (see packages/g/guile r5)
+options = ["!lto", "!check", "!strip"]  # the test suite needs a display and appstream-util
 
 source = [
     { url = "https://gitlab.gnome.org/GNOME/aisleriot/-/archive/3.22.35.tar.gz", sha256 = "27d35055c710d4dd3de9a7a34bdda8461013478f629ae6b4779328884f74a77c" },
@@ -19,11 +20,8 @@ setup = '''
 %meson \
     -Dtheme_kde=false
 '''
-# one job at a time: hamilton.go failed with "bytevector-u8-ref: Argument 2 out of range: 174915" (and again while printing the backtrace) while
-# other games compiled beside it; many `guile compile` processes share Guile's cache of compiled modules, and a half-written .go file loaded by a
-# neighbour gives exactly that error. A guess from the pattern (one game of ~50, a loader error): if it still fails with -j1 the cause is elsewhere
 build = '''
-ninja -C build -j1
+%meson_build
 '''
 install = '''
 %meson_install

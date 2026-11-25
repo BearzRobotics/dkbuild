@@ -4,7 +4,7 @@
 # builds none; no reason given).
 name = "guile"
 version = "3.0.10"
-release = 4
+release = 5
 summary = "GNU Scheme implementation"
 license = "LGPL-3.0-or-later AND GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/guile"
@@ -13,7 +13,10 @@ hostdeps = ["automake", "gettext-devel", "gperf", "libtool", "pkgconf"]
 builddeps = ["gc-devel", "gmp-devel", "libffi-devel", "libunistring-devel", "ncurses-devel", "readline-devel"]
 # r4: tests off: standalone test-ffi fails in the sandbox (the other standalone tests pass); the
 # built guile is unchanged
-options = ["!lto", "!check"]
+# r5: !strip. Guile's compiled modules (.go) are ELF files, so the strip step ran llvm-strip over them and removed the symbol
+# and debug tables Guile reads at run time (likely why aisleriot's compile died in "bytevector-u8-ref: Argument 2 out of
+# range", again while printing the backtrace). The native binaries are stripped in install instead.
+options = ["!lto", "!check", "!strip"]
 
 source = [
     { url = "https://ftp.gnu.org/gnu/guile/guile-3.0.10.tar.gz", sha256 = "2dbdbc97598b2faf31013564efb48e4fed44131d28e996c26abe8a5b23b56c2a" },
@@ -34,4 +37,8 @@ check = '''
 install = '''
 %make_install
 rm -f "$pkgdir"/usr/lib/charset.alias
+# native code only: never the .go files (see options)
+llvm-strip --strip-unneeded "$pkgdir"/usr/bin/guile
+find "$pkgdir"/usr/lib -name '*.so*' -type f -exec llvm-strip --strip-unneeded {} +
+find "$pkgdir"/usr/lib -name '*.a' -type f -exec llvm-strip --strip-debug {} +
 '''
