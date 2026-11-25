@@ -35,7 +35,12 @@ sed -i '/^-Werror \\$/d' configure.ac
     --with-sysroot32=/usr/lib/i386-pc-dj64
 '''
 build = '''
-%make
+%make || {
+    # diagnostics: the 32-bit ncurses configure says only "C compiler cannot create executables"; its config.log has the
+    # compiler's own message
+    sed -n '/checking whether the C compiler works/,/configure: failed program was/p' contrib/ncurses/build32/config.log >&2 || true
+    exit 1
+}
 '''
 install = '''
 %make_install
