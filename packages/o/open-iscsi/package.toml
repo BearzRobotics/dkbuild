@@ -36,6 +36,9 @@ build = '''
 check = '''
 # r3: the iface and node tests lock /run/lock/iscsi, and the sandbox has no /run/lock
 mkdir -p /run/lock
+# The iface test first writes the default interface files (iscsi_default_iface_setup) into the configuration directory,
+# which only an installed open-iscsi has: it printed FAILED and exited 1 with 3 of 4 tests passing
+mkdir -p /etc/iscsi/ifaces /var/lib/iscsi/ifaces
 meson test -C build --print-errorlogs
 '''
 install = '''
