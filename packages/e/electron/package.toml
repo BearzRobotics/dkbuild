@@ -193,6 +193,10 @@ gn gen out/Release --args="
 '''
 build = '''
 export ELECTRON_OUT_DIR="$PWD/out/Release/"
+# r1 stopped at step 1015: perfetto's protozero/descriptor_diff was compiled before protos/perfetto/common/descriptor.pbzero.h
+# existed ("file not found"). Its BUILD.gn does name common:zero as a dependency, but only that directory's cpp generators had
+# run by then; why the order is not kept is not known. The generator target is built first, on its own.
+ninja -C out/Release -j $jobs third_party/perfetto/protos/perfetto/common:zero
 ninja -C out/Release -j $jobs copy_node_headers electron_dist_zip node_gypi_headers node_version_header
 '''
 install = '''
