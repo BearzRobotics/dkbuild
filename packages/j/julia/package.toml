@@ -46,6 +46,11 @@ export FC=gfortran-15 FFLAGS=-O2
 unset CFLAGS CXXFLAGS LDFLAGS CPPFLAGS
 '''
 setup = '''
+# LLVM builds its copy of Google Benchmark by default, and that copy stops this clang: "'__COUNTER__' is a C2y extension
+# [-Werror,-Wc2y-extensions]". The benchmarks are a developer tool, not installed: they are left out. (Source edit: sed;
+# deps/llvm.mk empties LLVM_CMAKE itself, so Make.user cannot add the option.)
+sed -i 's/^LLVM_CMAKE += -DLLVM_BINDINGS_LIST="" .*/& -DLLVM_INCLUDE_BENCHMARKS=OFF/' deps/llvm.mk
+grep -q -- '-DLLVM_INCLUDE_BENCHMARKS=OFF' deps/llvm.mk
 cat > Make.user <<EOF2
 prefix=/usr
 USE_BINARYBUILDER=0
