@@ -215,6 +215,14 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
             \\fi
             \\
         );
+    // yarn 2+ (`yarnberry`, with npmdeps): the two line continuations in the block above are written as
+    // `\\` (these literals are raw), so dash ran `export \` and stopped ("export: \: bad variable name").
+    // Corrected only for the recipes that use yarn: the block is part of every npmdeps script hash.
+    if (contains(r.options, "yarnberry")) {
+        const fixed = try std.mem.replaceOwned(u8, arena, s.items, " \\\\\n        YARN_", " \\\n        YARN_");
+        s.clearRetainingCapacity();
+        try s.appendSlice(arena, fixed);
+    }
     // Gradle (gradledeps): the recipe's Gradle distribution, and `gradle` on
     // PATH always offline with the store as its only repository.
     if (contains(r.options, "gradledeps"))

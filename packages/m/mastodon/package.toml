@@ -25,7 +25,7 @@ builddeps = ["ruby4.0-devel", "postgresql-devel", "libyaml-devel", "openssl-deve
              "zlib-ng-compat-devel", "libxml2-devel", "libxslt-devel", "libidn-devel", "icu-devel",
              "linux-headers", "jemalloc-devel"]
 rundeps = ["ruby4.0", "nodejs", "nginx", "libvips", "ffmpeg", "imagemagick", "file", "icu-libs"]
-options = ["!check", "!strip", "gemdeps", "npmdeps", "jobs:8"]
+options = ["!check", "!strip", "gemdeps", "npmdeps", "yarnberry", "jobs:8"]
 
 source = [
     { url = "https://github.com/mastodon/mastodon/archive/refs/tags/v4.7.6.tar.gz", sha256 = "5b069da8bf9f281712e99fd1d3e22c11289131bc3632d76965f35759c931e4a7" },
