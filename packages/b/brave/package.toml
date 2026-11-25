@@ -194,6 +194,9 @@ mv brave/dkbuild-leo "$leo"
 # vector icons, installer behaviours and the WebUI files it replaces), run
 # with node for a Linux release-channel build (is_brave_release_build: the
 # release logo)
+# config.ts takes Chromium's tree to be a directory named src beside brave's checkout root: ours has the tarball's name, so
+# it looked for /build/src/brave/package.json ("ENOENT"). A link gives it that name.
+[ -e ../src ] || ln -s "$PWD" ../src
 printf 'is_brave_release_build=1\n' > brave/.env
 (cd brave && node --input-type=module -e '
 import config from "./build/commands/lib/config.ts"
