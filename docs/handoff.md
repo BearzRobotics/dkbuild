@@ -1,60 +1,66 @@
-# Handoff (2026-11-24, before installing new disks)
+# Handoff (2026-11-25, build tree on the new drive)
 
 Read this section first. The sections below it are older history.
 
-## Evening update (2026-11-24, after the reboot)
+## Layout now
 
-- **/stuff (btrfs) lost its last writes in the reboot** (files went back to about 18:36-18:55; GitHub had the commits).
-  Processes had been stuck waiting for commits, and the kernel logs "BTRFS error: incorrect extent count" (11-20 and
-  11-24). Not diagnosed. Do not trust it with the only copy of anything; no `btrfs check --repair`.
-- **Good ISO:** /mnt/dkbuild/iso/dkde-devel-20261124-2134.iso (also in /mnt/scratch/iso-archive). The 18:56 one does
-  not reach the desktop (elogind and polkit readiness without a newline, D-Bus start race, launch helper not setuid,
-  hidepid on /proc): fixed in elogind r7, polkit r7, dbus r7, dinit-services r8. Tested in QEMU (BIOS, the disc's boot
-  loader, standard VGA and virtio): desktop, login screen, sign-in (X11 session), polkit answers. **Not tested:**
-  VirtualBox, real hardware, installing to a disk, GRUB. The user allowed QEMU for testing this ISO.
-- The login screen preselects "dkde (X11, dkde-wm)", not the Wayland session (dkde's choice; not changed).
-- /mnt/dkbuild is mounted and owned by the user; the move there has not been done. Its /etc/fstab line needs
-  `defaults,noatime,nofail 0 2` (it said `default 0 0`). DKBUILD_FAST_WORK=/mnt/dkbuild/work-fast and the image tree
-  /mnt/dkbuild/imgtree were used for these builds.
+The source (git tree) is in /stuff/git/dkbuild. The build tree and repository are on the new 2 TB NVMe, ext4, mounted
+at **/mnt/dkbuild**. These are links in the source tree (.gitignore covers them):
+`repo/x86_64`, `logs/x86_64`, `cache`, `work`, `rootfs`, `out` -> `/mnt/dkbuild/...`.
 
-## State right now
+- Checked after the move: all 4595 files in cache/sources match their SHA-256 names; repo and logs matched the old
+  copies by checksum; `zig build test`, `check`, `outdated` (nothing), `pkg sdbus-cpp libdbusmenu`, and an image of
+  dkde-devel (1.5 minutes, run from the source tree) all worked. The other cache/ stores were copied by rsync without
+  a second checksum pass.
+- Not copied: the 86 old subdirectories of work/ (build roots and scratch checkouts), and one unreadable setuid helper
+  in the old rootfs/dkrescue (image builds recreate it). The old directories are still on /stuff as `cache.old`,
+  `work.old`, `rootfs.old` and `out.old` (ignored through .git/info/exclude). **Not deleted:** they can go when the
+  user says so.
+- /mnt/scratch: dkbuild's own folders (dkbuild/, dkbuild-work/) were removed after those checks. The other data there
+  was left alone. iso-archive keeps the 20 November ISO and the good one (the broken 18:56 one was deleted); the
+  directory is read-only (`chmod u+w` to change it).
+- /etc/fstab still has `default,nofail 0 0` for /mnt/dkbuild; `defaults,noatime,nofail 0 2` was advised (needs root).
+- The new 4 TB drive is not set up. Suggested use: backups (ISOs, a copy of repo/ and cache/sources, the signing key).
+  The signing key (`~/.config/dkbuild/signing.rsa`) has **no backup on a second disk**.
 
-- **World is stopped** (stopped on request during pass 6). Nothing of ours should be running; check with
-  `pgrep -af 'worldloop|dkbuild'`. Branch `new-build-machine`, pushed to origin on 2026-11-24 at the user's request.
-- Pass 4 ended with 178 failures. Pass 5 was stopped after 11 failures, pass 6 early. Many recipe fixes committed since
-  are **untested**. Of 478 recipes added since 2026-11-16, 314 had an apk and 164 did not (75 of those had failed in
-  pass 4 or 5, 89 had not been attempted).
-- **New ISO** (not booted): `out/dkde-devel/dkde-devel.iso`, archived as
-  `/mnt/scratch/iso-archive/dkde-devel-20261124-1856.iso` (read-only, with .sha256; the directory is read-only too:
-  `chmod u+w` it to add a file). SHA-256 c4398db5357a2dce6698a3a29a72d209783901320d07c9d7fddcae4f1b91ff47.
-  It has firefox, grub + grub-i386-pc and dkinstaller 0.0.6. The ISO itself boots with dklilo; GRUB is a choice in
-  the installer. **GRUB r6 has no recorded boot test** (the clang-built one installed fine and did not boot).
-  The 16 November dkde-devel ISO was replaced and not archived; the
-  20 November one is in the archive.
+## /stuff
+
+**/stuff (btrfs) lost its last writes in the 11-24 reboot** (files went back to about 18:36-18:55; GitHub had the
+commits). Processes had been stuck waiting for commits, and the kernel logs "BTRFS error: incorrect extent count"
+(11-20 and 11-24). Not diagnosed. Do not trust it with the only copy of anything; no `btrfs check --repair`.
+
+## ISO
+
+**Good ISO:** /mnt/dkbuild/iso/dkde-devel-20261124-2134.iso (also in /mnt/scratch/iso-archive), SHA-256
+6ac1e86caa39f3e7ee98a2517bf37bd68d58ee04f77b12ff86008872d603cdf7. Fixed in elogind r7, polkit r7, dbus r7,
+dinit-services r8. Tested in QEMU (BIOS, the disc's boot loader, standard VGA and virtio): desktop, login screen,
+sign-in (X11 session), polkit answers. **Not tested:** VirtualBox, real hardware, installing to a disk, GRUB (r6 has
+no recorded boot test). The login screen preselects "dkde (X11, dkde-wm)" (dkde's choice; not changed).
+out/dkde-devel/dkde-devel.iso is whatever the last image build made.
 
 ## Standing orders (also in Claude's memory, project-standing-orders-2026-11-19)
 
 - Keep running `world --keep-going`, fix failures as they come, restart world if it ends or crashes while packages
   remain. A package that cannot be built goes in docs/unbuildable.md, after real fixes were tried.
-- No QEMU boots; do not push, release or publish; do not touch other repositories, sessions or processes.
+- No QEMU boots (the user allowed it for testing the 11-24 ISO); do not push, release or publish without being asked;
+  do not touch other repositories, sessions or processes.
 - Upstream sources and build scripts are edited only with `sed` or a `.patch`, each explained in the recipe.
   Features are switched off only with a reason (recipe and docs/disabled-features.md).
 - Daily-driver apps still pending: brave, code-oss, kdenlive (and electron, which several apps need).
 
-## Starting world again
+## World
 
     setsid nohup contrib/worldloop.sh >/dev/null 2>&1 &
 
-It continues the pass numbering. Watch `work/worldloop.log` and the newest `work/world<n>.log`. Also watch for silent
-hangs (load under 1 and a quiet log): one `pnpm install` once hung for 7 hours. docs/recipe-brief.md is the brief for
-recipe-writing helper agents.
+It continues after the highest pass number. Watch `work/worldloop.log` and the newest `work/world<n>.log`. Also watch
+for silent hangs (load under 1 and a quiet log): one `pnpm install` once hung for 7 hours. Build roots are in work/
+(DKBUILD_FAST_WORK is empty unless set). docs/recipe-brief.md is the brief for recipe-writing helper agents.
+
+Pass 4 ended with 178 failures; passes 5 and 6 were stopped early. Many recipe fixes committed since are untested.
 
 ## Image builds
 
-`./zig-out/bin/dkbuild image --verbose images/dkde-devel.toml`. On the saturated /stuff disk it crawled (each fsync
-waited minutes for a btrfs commit). It ran in about 2 minutes from a temporary tree on the SSD,
-`/mnt/scratch/dkbuild/imgtree` (links to images, packages, keys, rootfs, cache and repo; real work/ and out/), run
-from inside that tree. The tree can be deleted. With the whole build tree on the new NVMe it is not needed.
+`./zig-out/bin/dkbuild image --verbose images/dkde-devel.toml`
 
 ## Open
 
@@ -66,55 +72,9 @@ from inside that tree. The tree can be deleted. With the whole build tree on the
 - **ghc:** diagnostics added in r8, not yet read. **dotnet** r8: NU1109 (Newtonsoft.Json). **euro-office-documentserver**
   r7: unconfirmed. **emacs** libgccjit: config.log tail added. **qt6-qtwebengine:** may have more libc++ errors.
 - **onnxruntime:** its GitHub repository answered 404 (blocks calibre speech, fastembed, rapidocr, mineru). Recheck.
-- **zig-ide** (new), 0ad, helix, hetty, hexchat, heaptrack, sdbus-cpp, ibus, libdbusmenu,
-  ayatana-indicator-datetime: fixed or written, untested.
+- **zig-ide** (new), 0ad, helix, hetty, hexchat, heaptrack, ibus, ayatana-indicator-datetime: fixed or written,
+  untested (sdbus-cpp and libdbusmenu built on 11-25).
 - `zed.toml` in the top directory is an untracked stray (a copy of Zed's Cargo manifest); delete if nobody wants it.
-
-## Disks (before the change)
-
-| Disk | Size and type | Use |
-|---|---|---|
-| nvme0n1 (Samsung 990 EVO Plus) | 1 TB NVMe | / and /boot/efi, 86% full |
-| sda | 500 GB SATA SSD, **ext2** (no journal) | /mnt/scratch: repo, logs, fast work, ISO archive, other data (enwiki 109 GB, ...) |
-| sdb (ST4000DM004) | 4 TB SMR hard disk, btrfs | /stuff: git trees, source cache, work, out |
-
-`repo/x86_64` and `logs/x86_64` are links into `/mnt/scratch/dkbuild/`. Sizes: repo 24 GB, logs 3.8 GB, source
-tarballs 68 GB (the other cache/ stores were not measured), fast work 5.4 GB.
-
-## Moving to the new disk (decided 2026-11-24, not done)
-
-The user's decision: the **source (git tree) stays in /stuff/git/dkbuild**; the build tree and the repository go on
-the new drive, **mounted at /mnt/dkbuild**. This replaces the earlier idea of moving the whole tree.
-
-On the new drive (links from the source tree, as repo/x86_64 and logs/x86_64 are links now):
-
-| In /stuff/git/dkbuild (link) | Target |
-|---|---|
-| repo/x86_64 | /mnt/dkbuild/repo/x86_64 |
-| logs/x86_64 | /mnt/dkbuild/logs/x86_64 |
-| cache | /mnt/dkbuild/cache |
-| work | /mnt/dkbuild/work |
-| rootfs | /mnt/dkbuild/rootfs |
-| out | /mnt/dkbuild/out |
-
-repo/ itself stays a directory (it holds the tracked .gitkeep). .gitignore covers the links. **dkbuild has run with
-repo/x86_64 and logs/x86_64 as links; cache, work, rootfs and out as links are untested.**
-
-1. **Before opening the case:** have a copy of `~/.config/dkbuild/signing.rsa` (the repository signing key; only the
-   public half is in the tree) and of `~/.claude/projects/-stuff-git-dkbuild/` on another disk.
-2. Identify the new drive by size, model and serial (`lsblk -o NAME,SIZE,MODEL,SERIAL`) before any mkfs: device names
-   can change when disks are added. /etc/fstab uses UUIDs and a label for the existing mounts.
-3. ext4 (`mkfs.ext4 -L dkbuild`), mounted at /mnt/dkbuild with `noatime,nofail`, owned by the build user;
-   fstrim.timer on.
-4. With nothing running (`pgrep -af 'worldloop|dkbuild'`): `rsync -aHAX` each directory in the table to its target
-   (for repo/ and logs/ the sources are /mnt/scratch/dkbuild/repo-x86_64 and logs-x86_64), compare, move the old
-   directory or link aside, make the link. The old ISO folders under /mnt/scratch (imgtree, iso-archive) are
-   separate: keep the archive, imgtree can go.
-5. Build roots then live in work/ on the new drive: contrib/worldloop.sh leaves DKBUILD_FAST_WORK empty unless set.
-6. First checks: `zig build test`, `./zig-out/bin/dkbuild check`, `./zig-out/bin/dkbuild outdated` (it must not ask
-   to rebuild everything), one small `dkbuild pkg`, one image, then start the loop. Keep the old copies until then.
-7. The new 4 TB drive: backups (ISO archive, a copy of repo/ and of cache/sources, the signing key; some upstream
-   sources disappear, as onnxruntime's did).
 
 ---
 

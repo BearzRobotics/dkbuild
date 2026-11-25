@@ -10,8 +10,14 @@ export DKBUILD_FAST_WORK="${DKBUILD_FAST_WORK-}"
 [ -d repo/x86_64/ ] || { echo "repo/x86_64 is missing (disk not mounted?)" > work/worldloop.err; exit 1; }
 while pgrep -f "dkbuild world" >/dev/null; do sleep 30; done
 # continue the numbering, so that earlier pass logs are kept
+# (after the highest number, not the first free one: a gap would lead into later logs and overwrite them)
 n=1
-while [ -e "work/world$n.log" ]; do n=$((n+1)); done
+for f in work/world[0-9]*.log; do
+    i=${f#work/world}
+    i=${i%.log}
+    case $i in *[!0-9]*) continue ;; esac
+    [ "$i" -ge "$n" ] && n=$((i+1))
+done
 last=$((n+16))
 while [ "$n" -le "$last" ]; do
     ./zig-out/bin/dkbuild prune > "work/prune$n.log" 2>&1
