@@ -10,6 +10,16 @@
 name     = "dkde-devel"
 arch     = "x86_64"
 hostname = "fenriros"
+# what the text consoles show above `login:`, so that the live login is known when the desktop does not start
+issue = """
+FenrirOS \\r (\\l)
+
+Live system login: user  live   (no password: press Enter at the password prompt)
+root is locked: use sudo as live (press Enter at its password prompt too).
+If the desktop or the login screen did not start, see:
+  ~/.local/state/dkde/session.log    /tmp/dkde-greeter-*.log    sudo dinitctl status greetd
+
+"""
 label    = "FENRIROS_DKDE"
 # not base-net: it depends on dhcpcd, and NetworkManager does the DHCP here (two DHCP clients
 # fight); its other parts (OpenSSH, curl) are listed instead
