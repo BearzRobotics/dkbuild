@@ -27,6 +27,11 @@ grep -q 'VERSION_MAX 23.9' src/cmake/externalpackages.cmake
 # llvm_util.cpp includes <llvm/Transforms/Utils/UnifyFunctionExitNodes.h>, which LLVM 23 no longer has, and uses nothing from it (source edit: sed)
 sed -i '/llvm\/Transforms\/Utils\/UnifyFunctionExitNodes\.h/d' src/liboslexec/llvm_util.cpp
 ! grep -q UnifyFunctionExitNodes src/liboslexec/llvm_util.cpp
+# LLVM 23 removed TargetOptions' NoInfsFPMath, NoNaNsFPMath and NoSignedZerosFPMath ("no member named"): as with UnsafeFPMath
+# in LLVM 22, which the source already guards, fast math is set on each instruction. The five assignments are compiled for older
+# LLVM only. Where they asked for no-infs/no-NaNs optimisation, the generated shader code may be less optimised. (Source edit: sed.)
+sed -i 's/^\( *options\.No\(Infs\|NaNs\|SignedZeros\)FPMath .*;\)$/#if OSL_LLVM_VERSION < 230\n\1\n#endif/' src/liboslexec/llvm_util.cpp
+test "$(grep -c '^#if OSL_LLVM_VERSION < 230$' src/liboslexec/llvm_util.cpp)" = 5
 %cmake \
     -DCMAKE_CXX_STANDARD=17
 '''
