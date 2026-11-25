@@ -1,9 +1,12 @@
 # Dia from git (the last release, 0.97.3, is GTK 2): the GTK 3 port.
+# patches/poppler-26.06.patch: upstream's commit 60139a91, "poppler: build with Poppler >= 26.06" (getMediaBox returns a
+# reference now: "no viable conversion from 'const PDFRectangle' to 'const PDFRectangle *'").
 name = "dia"
 version = "0.98_git20260425"
 release = 1
 summary = "Diagram editor (flowcharts, UML, networks)"
 license = "GPL-2.0-or-later"
+patches = ["poppler-26.06.patch"]
 homepage = "https://gitlab.gnome.org/GNOME/dia"
 hostdeps = ["meson", "ninja", "pkgconf", "gettext", "libxslt", "docbook-xsl-nons"]
 builddeps = ["gtk+3-devel", "libxml2-devel", "libxslt-devel", "graphene-devel", "poppler-devel", "python-devel"]
