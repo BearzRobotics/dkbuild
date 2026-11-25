@@ -65,6 +65,10 @@ environment = '''
 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
 '''
 setup = '''
+# org.eclipse.lsp4j.jsonrpc asks for gson as a range ([2.9.1,3.0)). The offline Maven store has the jars but no maven-metadata.xml that
+# lists versions, so a range cannot be resolved ("no versions of com.google.code.gson:gson are available"). It is pinned to 2.13.2, the
+# version the fetch-time resolution chose (the jar in this recipe's dependency list). (Source edit: appended to build.gradle.)
+printf '\nallprojects { configurations.all { resolutionStrategy { force "com.google.code.gson:gson:2.13.2" } } }\n' >> build.gradle
 mkdir -p dependencies/Debugger-agent-dbgeng && cp "/build/sources/dbgmodel.tlb" dependencies/Debugger-agent-dbgeng/
 mkdir -p dependencies/flatRepo && cp "/build/sources/java-sarif-2.1-modified.jar" dependencies/flatRepo/
 mkdir -p dependencies/flatRepo && cp "/build/sources/AXMLPrinter2.jar" dependencies/flatRepo/
