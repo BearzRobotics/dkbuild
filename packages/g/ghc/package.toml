@@ -135,7 +135,9 @@ ghc_configure() {
     ./configure --prefix=/usr --with-system-libffi --enable-numa --disable-ld-override \
         CC=clang CXX=clang++ LD=ld.lld AR=llvm-ar NM=llvm-nm RANLIB=llvm-ranlib "$@"
 }
-hadrian="hadrian/bootstrap/_build/bin/hadrian -j$jobs --flavour=release"
+# no PDFs: there is no LaTeX here ("Non optional builder 'xelatex' is not specified"); the HTML guide, ghc(1) and the
+# libraries' Haddock pages are built
+hadrian="hadrian/bootstrap/_build/bin/hadrian -j$jobs --flavour=release --docs=no-sphinx-pdfs"
 '''
 setup = '''
 # bootstrap.py's sources tarball (plan-bootstrap.json, each Hackage tarball
