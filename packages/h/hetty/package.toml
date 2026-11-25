@@ -32,6 +32,12 @@ cd admin
 cp /dkbuild/files/package-lock.json package-lock.json
 node /dkbuild/npm-offline.js /tmp/npm-cache package-lock.json
 npm ci --ignore-scripts --legacy-peer-deps
+# Next 12 bundles buffer-equal-constant-time, which patches require("buffer").SlowBuffer.prototype at load time. Node 25 removed
+# SlowBuffer ("TypeError: Cannot read properties of undefined (reading 'prototype')" in next/dist/compiled/jsonwebtoken, then
+# "Call retries were exceeded"): Buffer stands in for it. (Edit of a downloaded dependency: sed.)
+f=node_modules/next/dist/compiled/jsonwebtoken/index.js
+sed -i 's/var i=t(300)\.SlowBuffer;/var i=t(300).SlowBuffer||t(300).Buffer;/' $f
+grep -q 'SlowBuffer||t(300).Buffer' $f
 '''
 build = '''
 ( cd admin && NEXT_PUBLIC_VERSION=$version npm run export )
