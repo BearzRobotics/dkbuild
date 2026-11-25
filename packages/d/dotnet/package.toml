@@ -89,6 +89,10 @@ sed -i '/^      gcc_s$/d' src/runtime/src/coreclr/pal/src/CMakeLists.txt
 '''
 build = '''
 ulimit -n 4096 || true
+# r8 stopped at NU1109 with NuGet.Protocol, NuGet.Packaging and Newtonsoft.Json all asked for as 10.0.114, this recipe's version: dkbuild
+# exports name, version and release to every build, and MSBuild reads environment variables as properties (whatever their case),
+# so $(Version), $(Name) and the rest took them. Nothing below needs them.
+unset name version release
 # Source Link needs the repository and commit; the snapshot is a tag archive
 # with no .git and no release manifest (v10.0.114 is commit 0427b9ab...)
 # the previous dotnet's SDK and source-built packages, or (stage 0, none in
