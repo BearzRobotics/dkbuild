@@ -1,14 +1,17 @@
-# Audacity 4 (Qt 6), every library from the system (no Conan downloads), no
+# Audacity 4 (Qt 6), libraries from the system where there is one (no Conan downloads), no
 # update check or crash reporting.
+# Its dependency tool (muse_deps) downloads prebuilt libraries or sources while CMake configures ("Could not resolve
+# hostname", expat). EXTDEPS_OVERRIDE_ALL=SYSTEM takes the system's libraries. The code-only dependencies (and
+# vst3sdk and sbsms, which are not packaged) are built from the pinned sources below.
 name = "audacity"
 version = "4.0.2"
 release = 1
 summary = "Audio editor and recorder"
 license = "GPL-3.0-or-later"
 homepage = "https://www.audacityteam.org"
-hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "gettext"]
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qttools", "gettext", "git"]
 # qt6-qtnetworkauth and qt6-qtwebsockets: muse's SetupQt6.cmake asks for NetworkAuth (always, off wasm) and WebSockets
-builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "qt6-qt5compat-devel", "qt6-qtshadertools-devel", "qt6-qtnetworkauth-devel", "qt6-qtwebsockets-devel", "libsndfile-devel", "soxr-devel", "lame-devel", "mpg123-devel", "opus-devel", "opusfile-devel", "flac-devel", "libvorbis-devel", "libogg-devel", "wavpack-devel", "twolame-devel", "ffmpeg-devel", "portaudio-devel", "portmidi-devel", "lilv-devel", "suil-devel", "lv2", "vamp-plugin-sdk-devel", "libexpat-devel", "zlib-ng-compat-devel", "sqlite-devel", "alsa-lib-devel", "pipewire-devel", "rapidjson", "libid3tag-devel", "harfbuzz-devel", "freetype-devel"]
+builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "qt6-qt5compat-devel", "qt6-qtshadertools-devel", "qt6-qtnetworkauth-devel", "qt6-qtwebsockets-devel", "libsndfile-devel", "soxr-devel", "lame-devel", "mpg123-devel", "opus-devel", "opusfile-devel", "flac-devel", "libvorbis-devel", "libogg-devel", "wavpack-devel", "twolame-devel", "ffmpeg-devel", "portaudio-devel", "portmidi-devel", "lilv-devel", "suil-devel", "lv2", "vamp-plugin-sdk-devel", "libexpat-devel", "zlib-ng-compat-devel", "sqlite-devel", "alsa-lib-devel", "pipewire-devel", "rapidjson", "libid3tag-devel", "harfbuzz-devel", "freetype-devel", "libopusenc-devel", "utfcpp-devel", "pugixml-devel", "wxwidgets-devel", "fdk-aac-devel", "soundtouch-devel", "zix-devel", "serd-devel", "sord-devel", "sratom-devel", "libpng-devel", "curl-devel", "openssl-devel"]
 options = ["!check", "jobs:12"]
 
 source = [
@@ -16,8 +19,24 @@ source = [
     # the two git submodules of the tag (the tag archive has them empty): muse (muse_framework) and muse_deps, at the commits the tag pins
     { url = "https://github.com/musescore/muse_framework/archive/dc29e8c4dde7bb7de379f74f19a71034e889099f.tar.gz", sha256 = "836ec5874ffcc848d3227c1dc9b99bc585739c1901df6505d9e4e2603f0e52af" },
     { url = "https://github.com/musescore/muse_deps/archive/bf433c8f4f6f9d9897aa78d9fddcb2bbd02e42dc.tar.gz", sha256 = "1ce598b8470437db5cdfcd01fc2ec11d5b2777c6f493bdcc858b56cd34b59a46" },
+    # muse_deps' sources that no system library stands in for, with the checksums its recipes pin (recipes/<name>/spec.cmake);
+    # setup puts them where its downloader looks first. nyquist's SourceForge snapshot URL answers 404: the muse_deps
+    # release's own copy of the same file (same checksum).
+    { url = "https://github.com/musescore/KDDockWidgets/archive/662d74a6d3c168dbc31883e56039539d865a316a.tar.gz", sha256 = "df1d9fa956c1e22228b79354feee335ba4f33b690af166749ec06e3ff6b604e2", unpack = false, name = "662d74a6d3c168dbc31883e56039539d865a316a.tar.gz" },
+    { url = "https://github.com/kazuho/picojson/archive/111c9be5188f7350c2eac9ddaedd8cca3d7bf394.tar.gz", sha256 = "671f89832a17e9e71398f80c0a326afa2ebe81f4c26d5a9992e1fcd0888ae151", unpack = false, name = "111c9be5188f7350c2eac9ddaedd8cca3d7bf394.tar.gz" },
+    { url = "https://github.com/saintmatthieu/loop-tempo-estimator/releases/download/v0.0.5/loop-tempo-estimator-v0.0.5.tar.gz", sha256 = "e70f2356bbea1bcec3a77e26dddd87b1dd0d5f24c8aed6351aa9d6ec42a66be0", unpack = false, name = "loop-tempo-estimator-v0.0.5.tar.gz" },
+    { url = "https://github.com/kgramhans/tft/archive/1d96301673ebc05fa09a7bd505eacd82ee0fea33.tar.gz", sha256 = "97049161956685d5c6e475734b9b3c547639a73a04431b2d5fb755317fafee44", unpack = false, name = "1d96301673ebc05fa09a7bd505eacd82ee0fea33.tar.gz" },
+    { url = "https://github.com/musescore/muse_deps/releases/download/deps-20260817-100754/nyquist-r331-src.zip", sha256 = "94bb10ec5189e07a0dc15d8e382aaa468cb0e33dce893633432931fea0113885", unpack = false, name = "nyquist-code-r331-trunk.zip" },
+    { url = "https://bitbucket.org/jpommier/pffft/get/09796885cd5b.tar.gz", sha256 = "fdc80563de8c31d6380886bc1ba0ffb897abde58611707ac94eb8ed8ab850cbb", unpack = false, name = "09796885cd5b.tar.gz" },
+    { url = "https://github.com/steinbergmedia/vst3_base/archive/f0998e7b8424b32ba275cf4218aa56beef29821c.tar.gz", sha256 = "5460f4d09bc65fbbc23315c6900dda33eb96a7a3f1720d1d7387592a69bc24ef", unpack = false, name = "f0998e7b8424b32ba275cf4218aa56beef29821c.tar.gz" },
+    { url = "https://github.com/steinbergmedia/vst3_pluginterfaces/archive/151ecde4d6ee1c457dcce848342b162461944fe6.tar.gz", sha256 = "e7bb5dc1701c2c136d0902d458533ef0fa9cf720c088f176659d017780ffda3a", unpack = false, name = "151ecde4d6ee1c457dcce848342b162461944fe6.tar.gz" },
+    { url = "https://github.com/steinbergmedia/vst3_public_sdk/archive/3fce096d6ee575479753f1aab23033d2e2ffdc6e.tar.gz", sha256 = "2915be92fa70eda43b99ee492957b9334ae7cc6156f26f25bda952fc34248408", unpack = false, name = "3fce096d6ee575479753f1aab23033d2e2ffdc6e.tar.gz" },
+    { url = "https://github.com/claytonotey/libsbsms/archive/refs/tags/2.2.0.tar.gz", sha256 = "29dee2bbce0e6f841bc0153b90677f1ac8b2665b320fbe248b014d21e7140e6c", unpack = false, name = "2.2.0.tar.gz" },
 ]
 
+environment = '''
+export EXTDEPS_CACHE=/tmp/extdeps
+'''
 setup = '''
 # the submodule directories are empty in the tag archive ("include could not find requested file: .../muse/framework/cmake/MuseDeclareOptions.cmake",
 # and every compiler check after it); the two archives take their places
@@ -25,7 +44,19 @@ rm -rf muse muse_deps
 cp -a ../muse_framework-dc29e8c4dde7bb7de379f74f19a71034e889099f muse
 cp -a ../muse_deps-bf433c8f4f6f9d9897aa78d9fddcb2bbd02e42dc muse_deps
 test -f muse/framework/cmake/MuseDeclareOptions.cmake
+# muse_deps' download cache, filled with the pinned sources (see the header)
+mkdir -p /tmp/extdeps/downloads/kddockwidgets && cp /build/sources/662d74a6d3c168dbc31883e56039539d865a316a.tar.gz /tmp/extdeps/downloads/kddockwidgets/
+mkdir -p /tmp/extdeps/downloads/picojson && cp /build/sources/111c9be5188f7350c2eac9ddaedd8cca3d7bf394.tar.gz /tmp/extdeps/downloads/picojson/
+mkdir -p /tmp/extdeps/downloads/loop-tempo-estimator && cp /build/sources/loop-tempo-estimator-v0.0.5.tar.gz /tmp/extdeps/downloads/loop-tempo-estimator/
+mkdir -p /tmp/extdeps/downloads/tft && cp /build/sources/1d96301673ebc05fa09a7bd505eacd82ee0fea33.tar.gz /tmp/extdeps/downloads/tft/
+mkdir -p /tmp/extdeps/downloads/nyquist && cp /build/sources/nyquist-code-r331-trunk.zip /tmp/extdeps/downloads/nyquist/
+mkdir -p /tmp/extdeps/downloads/pffft && cp /build/sources/09796885cd5b.tar.gz /tmp/extdeps/downloads/pffft/
+mkdir -p /tmp/extdeps/downloads/vst3sdk && cp /build/sources/f0998e7b8424b32ba275cf4218aa56beef29821c.tar.gz /build/sources/151ecde4d6ee1c457dcce848342b162461944fe6.tar.gz /build/sources/3fce096d6ee575479753f1aab23033d2e2ffdc6e.tar.gz /tmp/extdeps/downloads/vst3sdk/
+mkdir -p /tmp/extdeps/downloads/sbsms && cp /build/sources/2.2.0.tar.gz /tmp/extdeps/downloads/sbsms/
 %cmake \
+    -DEXTDEPS_OVERRIDE_ALL=SYSTEM \
+    -DEXTDEPS_OVERRIDE_VST3SDK=REBUILD \
+    -DEXTDEPS_OVERRIDE_SBSMS=REBUILD \
     -Daudacity_conan_enabled=Off \
     -Daudacity_lib_preference=system \
     -Daudacity_has_updates_check=Off \
