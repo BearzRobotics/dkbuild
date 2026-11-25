@@ -1,4 +1,5 @@
 # hyprlock: screen locker; its PAM stack (/etc/pam.d/hyprlock) is installed by the project (PAM is system-wide here). The systemd-only parts are removed.
+# Under libc++ it includes <date/tz.h> (libc++ has no time zone database) and names libdate-tz with a linker pragma: howard-hinnant-date.
 name = "hyprlock"
 version = "0.9.7"
 release = 1
@@ -7,7 +8,7 @@ license = "BSD-3-Clause"
 homepage = "https://github.com/hyprwm/hyprlock"
 archs = ["x86_64", "aarch64"]
 hostdeps = ["cmake", "ninja", "pkgconf", "hyprwayland-scanner-devel"]
-builddeps = ["hyprutils-devel", "hyprlang-devel", "hyprgraphics-devel", "hyprland-protocols-devel", "wayland-devel", "wayland-protocols", "mesa-devel", "libxkbcommon-devel", "cairo-devel", "pango-devel", "libdrm-devel", "sdbus-cpp-devel", "linux-pam-devel", "libglvnd-devel"]
+builddeps = ["hyprutils-devel", "hyprlang-devel", "hyprgraphics-devel", "hyprland-protocols-devel", "wayland-devel", "wayland-protocols", "mesa-devel", "libxkbcommon-devel", "cairo-devel", "pango-devel", "libdrm-devel", "sdbus-cpp-devel", "linux-pam-devel", "libglvnd-devel", "howard-hinnant-date-devel"]
 options = ["!check"]
 
 source = [

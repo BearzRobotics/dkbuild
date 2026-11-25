@@ -1,0 +1,32 @@
+# Howard Hinnant's date and time zone library (<date/date.h>, <date/tz.h>, libdate-tz). libc++ has no C++20 time zone
+# database (std::chrono::locate_zone, current_zone), so programs that need it use this one (hyprlock includes <date/tz.h>
+# under libc++). It reads the system's zone files (USE_SYSTEM_TZ_DB, from tzdb) and has no code that downloads them.
+# Shared and static libdate-tz: two builds, the static one first.
+name = "howard-hinnant-date"
+version = "3.0.4"
+release = 1
+summary = "C++ date and time zone library"
+license = "MIT"
+homepage = "https://github.com/HowardHinnant/date"
+hostdeps = ["cmake", "ninja", "pkgconf"]
+rundeps = ["tzdb"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/HowardHinnant/date/archive/refs/tags/v3.0.4.tar.gz", sha256 = "56e05531ee8994124eeb498d0e6a5e1c3b9d4fccbecdf555fe266631368fb55f" },
+]
+
+setup = '''
+cmake -S . -B build-static -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib \
+    -DBUILD_TZ_LIB=ON -DUSE_SYSTEM_TZ_DB=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+%cmake -DBUILD_TZ_LIB=ON -DUSE_SYSTEM_TZ_DB=ON -DBUILD_SHARED_LIBS=ON
+'''
+build = '''
+cmake --build build-static -j$jobs
+%cmake_build
+'''
+install = '''
+%cmake_install
+install -Dm644 build-static/libdate-tz.a "$pkgdir/usr/lib/libdate-tz.a"
+install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/howard-hinnant-date/LICENSE.txt"
+'''
