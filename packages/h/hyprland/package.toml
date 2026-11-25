@@ -7,7 +7,7 @@
 # glaze, which Hyprland would fetch at build time, is the glaze recipe.
 name = "hyprland"
 version = "0.57.1"
-release = 1
+release = 2
 summary = "Dynamic tiling Wayland compositor"
 license = "BSD-3-Clause"
 homepage = "https://hyprland.org"

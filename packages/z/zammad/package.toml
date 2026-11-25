@@ -16,7 +16,7 @@
 # embeds into a real newline and a bare quote ("rake aborted! SyntaxError"): a %q literal now. Checked: the generated Rakefile passes `ruby -c`.
 name = "zammad"
 version = "7.2.3"
-release = 2
+release = 3
 summary = "Web-based help desk and customer support system"
 license = "AGPL-3.0-only"
 homepage = "https://zammad.org"

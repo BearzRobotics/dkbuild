@@ -6,7 +6,7 @@
 # task finds them with the right hash and downloads nothing (offline).
 name = "zaproxy"
 version = "2.17.0"
-release = 3
+release = 4
 summary = "OWASP ZAP web application security scanner"
 license = "Apache-2.0"
 homepage = "https://www.zaproxy.org"
