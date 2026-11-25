@@ -56,7 +56,7 @@ export LDFLAGS="$LDFLAGS -L/usr/lib/gcc15/lib -Wl,-rpath,/usr/lib/gcc15/lib"
 # diagnostics: if configure fails, config.log's tail (which holds the libgccjit test's compiler and run output) goes to the build log; the kept
 # build root has no reason to exist for a failure that only config.log explains
 setup = '''
-trap 'rc=$?; [ $rc -eq 0 ] || { echo "=== config.log (tail) ===" >&2; tail -n 160 config.log >&2; }' EXIT
+trap 'rc=$?; [ $rc -eq 0 ] || { echo "=== config.log (tail) ===" >&2; grep -n -B5 -A60 -m1 "checking.*libgccjit\|gcc_jit_context_acquire" config.log >&2; grep -n -B2 -A12 "gccjit.*rror\|rror.*gccjit\|^libgccjit\|error invoking" config.log | head -80 >&2; }' EXIT
 %configure \
     --with-pgtk \
     --with-x-toolkit=gtk3 \
