@@ -1,0 +1,33 @@
+# wv (wvWare) 1.2.9: library and tools that read Microsoft Word 2000, 97, 95 and 6 documents. AbiWord requires it
+# (configure: "Package 'wv-1.0' not found"). The source is the AbiWord project's tag wv-1-2-9, which has no generated
+# configure script: autoreconf makes it.
+# The code predates C99 (functions used without declarations, integer/pointer mixing), which current clang rejects:
+# those two diagnostics are warnings here.
+name = "wv"
+version = "1.2.9"
+release = 1
+summary = "Library and tools to read Microsoft Word documents"
+license = "GPL-2.0-or-later"
+homepage = "https://github.com/AbiWord/wv"
+hostdeps = ["autoconf", "automake", "libtool", "pkgconf"]
+builddeps = ["libgsf-devel", "glib-devel", "libxml2-devel", "libpng-devel", "zlib-ng-compat-devel"]
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/AbiWord/wv/archive/refs/tags/wv-1-2-9.tar.gz", sha256 = "effe7a2b5b81a3707c60894e7799f7c086fdec76549eb80c1e8fb835b873d2c9" },
+]
+
+environment = '''
+export CFLAGS="$CFLAGS -std=gnu17 -Wno-error=implicit-function-declaration -Wno-error=int-conversion"
+'''
+setup = '''
+autoreconf -fi
+%configure --enable-static --enable-shared
+'''
+build = '''
+%make
+'''
+install = '''
+%make_install
+install -Dm644 COPYING "$pkgdir/usr/share/licenses/wv/COPYING"
+'''

@@ -8,6 +8,7 @@
 # Not built, with the reason: the MS Word plugin (needs libwv, whose upstream site
 # is the same dead host; no package), collab (asio, loudmouth/telepathy not
 # packaged), grammar (link-grammar), gda/gimp/mathview (not packaged).
+# wv-devel: configure requires wv-1.0 (the Word importer).
 name = "abiword"
 version = "3.0.8"
 release = 1
@@ -17,7 +18,7 @@ homepage = "https://gitlab.gnome.org/World/AbiWord"
 # autoconf-archive: configure.ac uses AX_CHECK_COMPILE_FLAG and AX_APPEND_COMPILE_FLAGS (the --with-sanitizer part); without their macros autoreconf
 # stops with "configure.ac:70: error: possibly undefined macro: AC_MSG_ERROR" (the unexpanded macro call carries the AC_MSG_ERROR token)
 hostdeps = ["autoconf", "autoconf-archive", "automake", "libtool", "pkgconf", "gettext", "gobject-introspection"]
-builddeps = ["boost-devel", "enchant-devel", "fribidi-devel", "glib-devel", "goffice-devel", "gtk+3-devel", "libgsf-devel", "libjpeg-turbo-devel", "libpng-devel", "librevenge-devel", "librsvg-devel", "libwpd-devel", "libwpg-devel", "libwps-devel", "libxml2-devel", "libxslt-devel", "pcre2-devel", "poppler-devel", "zlib-ng-compat-devel", "libgcrypt-devel", "popt-devel"]
+builddeps = ["boost-devel", "enchant-devel", "fribidi-devel", "glib-devel", "goffice-devel", "gtk+3-devel", "libgsf-devel", "libjpeg-turbo-devel", "libpng-devel", "librevenge-devel", "librsvg-devel", "libwpd-devel", "libwpg-devel", "libwps-devel", "libxml2-devel", "libxslt-devel", "pcre2-devel", "poppler-devel", "zlib-ng-compat-devel", "libgcrypt-devel", "popt-devel", "wv-devel"]
 rundeps = ["adwaita-icon-theme", "hicolor-icon-theme"]
 options = ["!check"]
 
