@@ -5,8 +5,10 @@
 # ca-certificates curl git tar xz-utils xorriso squashfs-tools util-linux openssl;
 # `dkbuild doctor` checks them.
 set -u
-cd "$(dirname "$0")/.."
-zig build test --summary all 2>&1 | grep -E "Build Summary|error:" || exit 1
+cd "$(dirname "$0")/.." || exit 1
+# zig's own status decides; piping it into grep would report grep's, which succeeds whenever it prints a line
+units=$(zig build test --summary all 2>&1) || { printf '%s\n' "$units"; echo "FAIL: unit tests"; exit 1; }
+printf '%s\n' "$units" | grep "Build Summary"
 zig build || exit 1
 ./zig-out/bin/dkbuild check || exit 1
 python3 -B tests/upstream-rules.py > /dev/null || { python3 -B tests/upstream-rules.py | grep FAIL; exit 1; }
