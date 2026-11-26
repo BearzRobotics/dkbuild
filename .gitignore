@@ -25,6 +25,8 @@ zig-out/
 !/tests/trees/scripts/.gitkeep
 /tests/trees/parallel/*
 !/tests/trees/parallel/.gitkeep
+/tests/trees/signing/*
+!/tests/trees/signing/.gitkeep
 *.iso
 /world-run.log
 /fix-run.log

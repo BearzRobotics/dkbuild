@@ -1347,7 +1347,9 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         out("    {s}-{s}: {d} files\n", .{ r.name, m.name, m.files });
     }
     try siblingPrivate(arena, pkg_list.items, r.version, r.release);
-    try publish(arena, io, r, opts, pub_id, base_root, sb, pkg_list.items, &log);
+    // Packaging and signing get a layer of their own over the base image: the build was root over `sb`, and an
+    // apk, loader or library it replaced there would run with the signing key.
+    try publish(arena, io, r, opts, pub_id, base_root, try sbDirs(arena, io, work, "sign"), pkg_list.items, &log);
     out("    built {s}; log: {s}\n", .{ pub_id, logpath });
     return .{ .produced = produced, .release = r.release, .published = true };
 }
@@ -1401,6 +1403,7 @@ fn withScan(arena: Allocator, io: std.Io, files: []const u8, declared: []const [
     return .{ .name = "", .summary = "", .files = files, .depends = deps.items, .provides = res.provides, .private = res.private };
 }
 
+/// `sb` must be a layer that no recipe code has written to: apk runs in it with the private key.
 fn publish(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options, id: []const u8, base_root: []const u8, sb: SbDirs, pkgs: []const Pkg, log: *std.ArrayList(u8)) BuildError!void {
     _ = id;
     if (opts.key.len == 0) {
