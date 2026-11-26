@@ -1611,17 +1611,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
             sp_depends = sp.depends;
             sp_install_if = sp.install_if;
         };
-        // -devel needs its main package; -static needs -devel (headers to build against).
-        // When the package has a -libs, -devel needs that and not the programs.
-        const has_libs = for (moved) |mm| {
-            if (std.mem.eql(u8, mm.name, "libs")) break true;
-        } else false;
-        const need = if (std.mem.eql(u8, m.name, "devel"))
-            try std.fmt.allocPrint(arena, "{s}{s}={s}", .{ r.name, if (has_libs) "-libs" else "", ver })
-        else if (std.mem.eql(u8, m.name, "static"))
-            try std.fmt.allocPrint(arena, "{s}-devel={s}", .{ r.name, ver })
-        else
-            "";
+        const need = try siblingNeed(arena, r.name, ver, m.name, moved);
         var declared: std.ArrayList([]const u8) = .empty;
         if (need.len > 0) try declared.append(arena, need);
         for (sp_depends) |dep| try declared.append(arena, try builtDep(arena, dep, root_files));
@@ -1638,6 +1628,35 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     try publish(arena, io, r, opts, pub_id, base_root, try sbDirs(arena, io, work, "sign"), pkg_list.items, &log);
     out("    built {s}; log: {s}\n", .{ pub_id, logpath });
     return .{ .produced = produced, .release = r.release, .published = true };
+}
+
+/// What a default subpackage needs of its own recipe's packages: -devel the main package (or -libs, when there is
+/// one, and not the programs), -static the -devel (headers to build against), or what -devel would need when the
+/// build made none.
+fn siblingNeed(arena: Allocator, name: []const u8, ver: []const u8, subpackage: []const u8, moved: []const split.Moved) Allocator.Error![]const u8 {
+    var has_libs = false;
+    var has_devel = false;
+    for (moved) |m| {
+        if (std.mem.eql(u8, m.name, "libs")) has_libs = true;
+        if (std.mem.eql(u8, m.name, "devel")) has_devel = true;
+    }
+    const devel = std.mem.eql(u8, subpackage, "devel");
+    const static = std.mem.eql(u8, subpackage, "static");
+    if (static and has_devel) return std.fmt.allocPrint(arena, "{s}-devel={s}", .{ name, ver });
+    if (devel or static) return std.fmt.allocPrint(arena, "{s}{s}={s}", .{ name, if (has_libs) "-libs" else "", ver });
+    return "";
+}
+
+test "-static needs -devel only when there is one (PKG-07)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const only_static = [_]split.Moved{.{ .name = "static", .files = 1 }};
+    try std.testing.expectEqualStrings("x=1-r1", try siblingNeed(a, "x", "1-r1", "static", &only_static));
+    const both = [_]split.Moved{ .{ .name = "devel", .files = 1 }, .{ .name = "static", .files = 1 }, .{ .name = "libs", .files = 1 } };
+    try std.testing.expectEqualStrings("x-devel=1-r1", try siblingNeed(a, "x", "1-r1", "static", &both));
+    try std.testing.expectEqualStrings("x-libs=1-r1", try siblingNeed(a, "x", "1-r1", "devel", &both));
+    try std.testing.expectEqualStrings("", try siblingNeed(a, "x", "1-r1", "doc", &both));
 }
 
 /// The install script names apk knows (apk-package(5)).

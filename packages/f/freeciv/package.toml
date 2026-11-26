@@ -7,7 +7,7 @@
 # Inert: nothing is started by the package (freeciv-server is run by hand).
 name = "freeciv"
 version = "3.2.6"
-release = 1
+release = 2
 summary = "Empire-building strategy game (server and clients)"
 license = "GPL-2.0-or-later"
 homepage = "https://www.freeciv.org"

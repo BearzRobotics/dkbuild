@@ -28,7 +28,7 @@
 # not packaged): the same keys in one binary keyring.
 name = "pve-manager"
 version = "9.2.27"
-release = 1
+release = 2
 summary = "Proxmox VE manager: API, daemons and web UI"
 license = "AGPL-3.0-or-later"
 homepage = "https://git.proxmox.com/?p=pve-manager.git"
@@ -42,7 +42,7 @@ rundeps = ["perl", "pve-common", "pve-cluster", "pve-access-control", "pve-stora
            "perl-crypt-openssl-bignum", "perl-file-readbackwards", "perl-net-dns", "perl-pod-parser",
            "perl-template-toolkit", "perl-io-multiplex", "perl-libwww", "perl-term-readline-gnu",
            "rrdtool-perl", "cdrkit", "gnupg", "corosync", "libfaketime", "openssh", "openssl", "iproute2",
-           "sqlite", "wget", "cstream", "lvm2", "lxc", "rsync", "zstd", "pigz", "util-linux", "apk-tools",
+           "sqlite", "wget2", "cstream", "lvm2", "lxc", "rsync", "zstd", "pigz", "util-linux", "apk-tools",
            "tzdb", "dinit"]
 options = ["!check", "!strip"]
 

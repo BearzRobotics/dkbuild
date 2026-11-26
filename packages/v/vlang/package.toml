@@ -67,6 +67,9 @@ mkdir -p "$d" "$pkgdir/usr/bin"
 cp -a v v.mod cmd vlib thirdparty "$d/"
 [ -d examples ] && cp -a examples "$d/"
 rm -rf "$d"/cmd/tools/*.tmp 2>/dev/null || true
+# a test's broken .pc file: the scan would record its made-up requirement as the package's
+test -f "$d/vlib/v/pkgconfig/test_samples/dep-resolution-fail.pc"
+rm "$d/vlib/v/pkgconfig/test_samples/dep-resolution-fail.pc"
 ln -s /usr/lib/vlang/v "$pkgdir/usr/bin/v"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/vlang/LICENSE"
 install -Dm644 doc/docs.md "$pkgdir/usr/share/doc/vlang/docs.md"

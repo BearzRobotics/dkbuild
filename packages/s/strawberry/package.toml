@@ -7,7 +7,8 @@ homepage = "https://www.strawberrymusicplayer.org"
 hostdeps = ["cmake", "gettext", "ninja", "pkgconf", "protobuf", "qt6-qttools"]
 builddeps = ["alsa-lib-devel", "boost-devel", "chromaprint-devel", "dbus-devel", "fftw-devel", "gdk-pixbuf-devel", "glib-devel", "gst-plugins-base-devel", "gstreamer-devel", "gtest-devel", "icu-devel", "kdsingleapplication-devel", "libcdio-devel", "libebur128-devel", "libmtp-devel", "libpulse-devel", "libsecret-devel", "openssl-devel", "protobuf-devel", "qt6-qtbase-devel", "qt6-qttools-devel", "sqlite-devel", "taglib-devel", "uchardet-devel"]
 # gst-plugins-good gives the decoders and the sinks (pulsesink, alsasink); gst-plugins-ugly and gst-libav are not in the tree.
-rundeps = ["gst-plugins-base", "gst-plugins-good", "qt6-qtbase-sql"]
+# libQt6Sql is in qt6-qtbase itself
+rundeps = ["gst-plugins-base", "gst-plugins-good", "qt6-qtbase"]
 # Tests need a display and write to $HOME.
 options = ["!check"]
 

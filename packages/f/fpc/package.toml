@@ -32,6 +32,8 @@ hostdeps = ["make", "binutils"]
 builddeps = ["linux-headers"]
 stage0deps = ["fpc-bootstrap"]
 rundeps = ["binutils"]
+# links the dynamic linker by its path, which no package provides as a library name; musl is always there
+noscan = ["usr/lib/libpas2jslib.so"]
 options = ["!check", "!lto", "!strip", "selfhost"]
 
 source = [

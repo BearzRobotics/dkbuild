@@ -3,12 +3,12 @@
 # r2: rebuilt against this tree's bzip2 (soname libbz2.so.1; r1 linked the stage 0 image's libbz2.so.1.0).
 name = "links"
 version = "2.30"
-release = 2
+release = 3
 summary = "Lynx-like text WWW browser"
 license = "GPL-2.0-or-later"
 homepage = "http://links.twibright.com"
 hostdeps = ["pkgconf"]
-builddeps = ["openssl-devel", "zlib-ng-compat-devel"]
+builddeps = ["bzip2-devel", "openssl-devel", "zlib-ng-compat-devel"]
 
 source = [
     { url = "http://links.twibright.com/download/links-2.30.tar.gz", sha256 = "7f0d54f4f7d1f094c25c9cbd657f98bc998311122563b1d757c9aeb1d3423b9e" },

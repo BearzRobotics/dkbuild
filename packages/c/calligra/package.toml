@@ -9,7 +9,8 @@ hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
 # (WordPerfect, Visio, WPG, Pagemaker, ... through the libreoffice-style document libs),
 # okular (the Calligra generator), libgit2 (Plan/Words version control helper).
 builddeps = ["attica-devel", "boost-devel", "eigen-devel", "karchive-devel", "kcmutils-devel", "kcodecs-devel", "kcompletion-devel", "kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "kdbusaddons-devel", "kdiagram-devel", "kdoctools-devel", "kguiaddons-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kitemviews-devel", "kjobwidgets-devel", "knewstuff-devel", "knotifications-devel", "knotifyconfig-devel", "kparts-devel", "ktextwidgets-devel", "kwallet-devel", "kwidgetsaddons-devel", "kwindowsystem-devel", "kxmlgui-devel", "libgit2-devel", "libodfgen-devel", "librevenge-devel", "libvisio-devel", "libwpd-devel", "libwpg-devel", "okular-devel", "poppler-qt6-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "qtkeychain-devel", "sonnet-devel", "threadweaver-devel"]
-rundeps = ["qt6-qtbase-sql"]
+# libQt6Sql is in qt6-qtbase itself
+rundeps = ["qt6-qtbase"]
 # Upstream: the tests are broken (bugs.kde.org 423989) and need a display.
 options = ["!check"]
 

@@ -151,4 +151,8 @@ install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/gdevelop/LICENSE.md"
 # the archive's macOS leftovers, and files it ships writable by everyone
 find "$pkgdir/usr/lib/gdevelop" -name __MACOSX -prune -exec rm -rf {} +
 chmod -R go-w "$pkgdir"
+# steamworks.js ships only prebuilt Windows, macOS and glibc libraries; none can load here, and the glibc one
+# made the package depend on glibc
+test -d "$pkgdir/usr/lib/gdevelop/node_modules/steamworks.js/dist"
+rm -rf "$pkgdir/usr/lib/gdevelop/node_modules/steamworks.js/dist"
 '''

@@ -6,7 +6,7 @@
 # rebuilt against LuaJIT's headers, with the static library added.
 name = "lpeg"
 version = "1.1.0"
-release = 2
+release = 3
 summary = "Pattern-matching library for Lua based on Parsing Expression Grammars"
 license = "MIT"
 homepage = "https://www.inf.puc-rio.br/~roberto/lpeg"

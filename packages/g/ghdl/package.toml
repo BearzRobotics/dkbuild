@@ -6,7 +6,7 @@
 # /usr/lib/gcc15/lib (rpath).
 name = "ghdl"
 version = "6.0.0"
-release = 4
+release = 5
 summary = "VHDL simulator and synthesis front end"
 license = "GPL-2.0-or-later"
 homepage = "https://ghdl.github.io/ghdl/"
@@ -15,6 +15,9 @@ hostdeps = ["gcc", "gcc-ada", "binutils", "make"]
 builddeps = ["zlib-ng-compat-devel"]
 rundeps = ["gcc", "gcc-ada"]
 options = ["!check", "!lto", "gcc"]
+# both link GCC 15's runtime, private to /usr/lib/gcc15: no package provides those names, so the dependencies
+# on gcc and gcc-ada are written out instead
+noscan = ["usr/bin/ghdl", "usr/lib/libghdl-*.so"]
 
 source = [
     { url = "https://github.com/ghdl/ghdl/archive/refs/tags/v6.0.0.tar.gz", sha256 = "2d84fbd0b238a26928e89a0256274072c6b40af1969a4f4c7be57ec3515bc622" },
@@ -35,3 +38,8 @@ install = '''
 make DESTDIR="$pkgdir" install
 install -Dm644 COPYING.md "$pkgdir/usr/share/licenses/ghdl/COPYING.md"
 '''
+
+[subpackages.libs]
+summary = "Shared libraries"
+paths = ["/usr/lib/*.so.*", "/usr/lib/*.so"]
+depends = ["gcc", "gcc-ada"]
