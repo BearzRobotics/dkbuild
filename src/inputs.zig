@@ -318,6 +318,13 @@ pub fn buildRootHash(arena: Allocator, t: tree.Tree, produced: []const ?Produced
         if (produced[m]) |p| h.update(if (is_tool) &p.output else &p.interface) else h.update("none");
         h.update("\n");
     }
+    // A `name=@built` depend names the very version and release in the build root: a new one, even with the same
+    // files, changes the package that pins it. (Only recipes with such a depend get these lines.)
+    for (t.recipes[idx].subpackages) |sp| for (sp.depends) |dep| {
+        if (!std.mem.endsWith(u8, dep, "=@built")) continue;
+        const p = t.provider(dep[0 .. dep.len - "=@built".len]) orelse continue;
+        h.update(try std.fmt.allocPrint(arena, "pin {s} {s}-r{d}\n", .{ t.recipes[p].name, t.recipes[p].version, t.recipes[p].release }));
+    };
     return std.fmt.bytesToHex(h.finalResult(), .lower);
 }
 

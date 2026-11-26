@@ -1525,10 +1525,26 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     var parts: std.ArrayList(inputs.Part) = .empty;
     try parts.append(arena, .{ .name = r.name, .dir = destdir_abs });
     for (moved) |m| try parts.append(arena, .{ .name = try std.fmt.allocPrint(arena, "{s}-{s}", .{ r.name, m.name }), .dir = try std.fs.path.join(arena, &.{ subs_abs, m.name }) });
-    const produced = inputs.outputHash(arena, io, parts.items) catch |err| {
+    var produced = inputs.outputHash(arena, io, parts.items) catch |err| {
         out("error: {s}: hashing what it produced failed: {s}\n", .{ r.name, @errorName(err) });
         return error.BuildFailed;
     };
+    // The versions that `=@built` depends resolve to are in the packages' metadata, not their files: a build with
+    // the same files and another pin is not the same, and must be published.
+    {
+        var h = std.crypto.hash.sha2.Sha256.init(.{});
+        var pinned = false;
+        for (r.subpackages) |sp| for (sp.depends) |dep| {
+            if (!std.mem.endsWith(u8, dep, "=@built")) continue;
+            pinned = true;
+            h.update(try builtDep(arena, dep, root_files));
+            h.update("\n");
+        };
+        if (pinned) { // other recipes' hashes stay as they were
+            h.update(&produced.output);
+            produced.output = std.fmt.bytesToHex(h.finalResult(), .lower);
+        }
+    }
     if (rebuild) |rb| {
         if (std.mem.eql(u8, &rb.previous.output, &produced.output)) {
             out("    rebuilt {s}: identical to the package in repo/, kept as is; log: {s}\n", .{ id, logpath });
