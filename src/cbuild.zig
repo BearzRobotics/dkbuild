@@ -65,6 +65,8 @@ pub const Parser = struct {
     s: []const u8,
     i: usize = 0,
     env: *const Env,
+    /// Expressions inside expressions: bounded, so that a pile of brackets cannot overflow the stack.
+    depth: usize = 0,
 
     fn peek(p: *Parser) ?u8 {
         return if (p.i < p.s.len) p.s[p.i] else null;
@@ -94,7 +96,7 @@ pub const Parser = struct {
         while (p.i < p.s.len) {
             const c = p.s[p.i];
             if (c == '\\') {
-                p.i += 2;
+                p.i = @min(p.i + 2, p.s.len);
                 continue;
             }
             if (c == q) {
@@ -155,6 +157,9 @@ pub const Parser = struct {
     pub fn parseExpr(p: *Parser) Allocator.Error!Value {
         p.skipWs();
         const start = p.i;
+        if (p.depth >= 64) return p.finishUnknown(start);
+        p.depth += 1;
+        defer p.depth -= 1;
         var v = try p.parseAtom();
         while (true) {
             p.skipWs();
@@ -367,10 +372,33 @@ pub const Parser = struct {
                     'r' => try buf.append(p.arena, '\r'),
                     '\\', '\'', '"' => try buf.append(p.arena, n),
                     '\n' => {},
-                    'x' => if (j + 2 <= s.len) {
-                        const v = std.fmt.parseInt(u8, s[j .. j + 2], 16) catch 0;
-                        try buf.append(p.arena, v);
-                        j += 2;
+                    'a' => try buf.append(p.arena, 7),
+                    'b' => try buf.append(p.arena, 8),
+                    'f' => try buf.append(p.arena, 12),
+                    'v' => try buf.append(p.arena, 11),
+                    // \xHH, \uHHHH, \UHHHHHHHH and octal name a character, written out as UTF-8
+                    'x', 'u', 'U' => {
+                        const len: usize = if (n == 'x') 2 else if (n == 'u') 4 else 8;
+                        const code: ?u21 = if (j + len <= s.len) std.fmt.parseInt(u21, s[j .. j + len], 16) catch null else null;
+                        if (code != null and try appendCodepoint(p.arena, buf, code.?)) {
+                            j += len;
+                        } else {
+                            resolved = false;
+                            try buf.appendSlice(p.arena, s[j - 2 .. j]);
+                        }
+                    },
+                    '0'...'7' => {
+                        var code: u21 = n - '0';
+                        var more: usize = 0;
+                        while (more < 2 and j < s.len and s[j] >= '0' and s[j] <= '7') : (more += 1) {
+                            code = code * 8 + (s[j] - '0');
+                            j += 1;
+                        }
+                        _ = try appendCodepoint(p.arena, buf, code);
+                    },
+                    'N' => { // by Unicode name: not looked up
+                        resolved = false;
+                        try buf.appendSlice(p.arena, s[j - 2 .. j]);
                     },
                     else => {
                         try buf.append(p.arena, '\\');
@@ -410,9 +438,14 @@ pub const Parser = struct {
                         else => {},
                     }
                 }
+                if (depth > 0) { // no closing brace
+                    resolved = false;
+                    j = s.len;
+                    break;
+                }
                 const inner = s[j + 1 .. k - 1];
                 j = k;
-                var sub: Parser = .{ .arena = p.arena, .s = inner, .env = p.env };
+                var sub: Parser = .{ .arena = p.arena, .s = inner, .env = p.env, .depth = p.depth };
                 const v = try sub.parseExpr();
                 sub.skipWs();
                 const done = sub.i == sub.s.len;
@@ -441,6 +474,13 @@ pub const Parser = struct {
         return resolved;
     }
 };
+
+fn appendCodepoint(arena: Allocator, buf: *std.ArrayList(u8), code: u21) Allocator.Error!bool {
+    var bytes: [4]u8 = undefined;
+    const n = std.unicode.utf8Encode(code, &bytes) catch return false;
+    try buf.appendSlice(arena, bytes[0..n]);
+    return true;
+}
 
 fn concat(arena: Allocator, a: Value, b: Value) Allocator.Error!?Value {
     switch (a) {
@@ -546,7 +586,13 @@ pub const NoteKind = enum {
     check,
 };
 
-pub const Note = struct { line: usize, kind: NoteKind, text: []const u8 };
+pub const Note = struct {
+    line: usize,
+    kind: NoteKind,
+    text: []const u8,
+    /// Its `TODO(cbuild)` is in a step already; the others are written near the top.
+    marked: bool = false,
+};
 
 pub const Inputs = struct {
     /// Where the template came from, for the header comment.
@@ -554,6 +600,8 @@ pub const Inputs = struct {
     /// File names found in the template's `patches/` directory, sorted.
     patches: []const []const u8 = &.{},
     has_files: bool = false,
+    /// What could not be taken along from `patches/` and `files/`.
+    problems: []const []const u8 = &.{},
 };
 
 pub const Converted = struct {
@@ -688,6 +736,32 @@ fn alignComments(arena: Allocator, body: []const u8) Allocator.Error![]const u8 
 }
 
 /// Removes the indentation of the first line of code from every line.
+/// Which triple quotes, if any, are still open at the end of `line`, given those open at its start.
+fn stringOpenAfter(line: []const u8, start: ?[]const u8) ?[]const u8 {
+    var open = start;
+    var i: usize = 0;
+    while (i < line.len) {
+        const three = i + 3 <= line.len and (std.mem.eql(u8, line[i .. i + 3], "\"\"\"") or std.mem.eql(u8, line[i .. i + 3], "'''"));
+        if (open) |o| {
+            if (three and std.mem.eql(u8, line[i .. i + 3], o)) {
+                open = null;
+                i += 3;
+            } else i += if (line[i] == '\\') 2 else 1;
+        } else if (line[i] == '#') {
+            break;
+        } else if (three) {
+            open = line[i .. i + 3];
+            i += 3;
+        } else if (line[i] == '"' or line[i] == '\'') {
+            const q = line[i];
+            i += 1;
+            while (i < line.len and line[i] != q) i += if (line[i] == '\\') 2 else 1;
+            i += 1;
+        } else i += 1;
+    }
+    return open;
+}
+
 fn dedent(arena: Allocator, text: []const u8) Allocator.Error![]const u8 {
     const body = try alignComments(arena, text);
     var indent: usize = 0;
@@ -701,12 +775,16 @@ fn dedent(arena: Allocator, text: []const u8) Allocator.Error![]const u8 {
     var out: std.ArrayList(u8) = .empty;
     it = std.mem.splitScalar(u8, body, '\n');
     var first = true;
+    var open: ?[]const u8 = null; // the line starts inside a string closed by these quotes
     while (it.next()) |l| {
         if (!first) try out.append(arena, '\n');
         first = false;
         var k: usize = 0;
-        while (k < indent and k < l.len and (l[k] == ' ' or l[k] == '\t')) k += 1;
+        if (open == null) while (k < indent and k < l.len and (l[k] == ' ' or l[k] == '\t')) {
+            k += 1;
+        };
         try out.appendSlice(arena, l[k..]);
+        open = stringOpenAfter(l, open);
     }
     return out.items;
 }
@@ -993,10 +1071,59 @@ fn emitComments(arena: Allocator, out: *std.ArrayList(u8), text: []const u8) All
     }
 }
 
+/// Marks unknown every name the (dedented) body may bind: Python makes such a name local to the whole function,
+/// so the module's value must not stand in for it.
+fn forgetLocals(arena: Allocator, body: []const u8, env: *Env) Allocator.Error!void {
+    var open: ?[]const u8 = null;
+    var lines = std.mem.splitScalar(u8, body, '\n');
+    while (lines.next()) |raw| {
+        const inside = open != null;
+        open = stringOpenAfter(raw, open);
+        const l = std.mem.trim(u8, raw, " \t\r");
+        if (inside or l.len == 0 or l[0] == '#') continue;
+        var targets: []const u8 = "";
+        if (std.mem.startsWith(u8, l, "for ")) {
+            if (std.mem.indexOf(u8, l, " in ")) |k| targets = l[4..k];
+        } else if (std.mem.indexOfScalar(u8, l, '=')) |k| {
+            // `a = x`, `a, b = x`, `a += x`, `(a := x)`; not `==`, `<=`, or a keyword argument inside a call
+            if (!(k + 1 < l.len and l[k + 1] == '=') and k > 0) {
+                var end = k;
+                while (end > 0 and std.mem.indexOfScalar(u8, "+-*/%|&^:@<> \t", l[end - 1]) != null) end -= 1;
+                const lhs = l[0..end];
+                const walrus = l[k - 1] == ':';
+                var plain = lhs.len > 0;
+                for (lhs) |c| if (!(isIdentChar(c) or c == ',' or c == ' ' or c == '*' or (c == '(' and walrus))) {
+                    plain = false;
+                };
+                if (plain) targets = lhs;
+            }
+        }
+        try forgetNames(arena, env, targets);
+        // `with x() as y:`, `except E as e:`
+        if (std.mem.startsWith(u8, l, "with ") or std.mem.startsWith(u8, l, "except ")) {
+            var rest = l;
+            while (std.mem.indexOf(u8, rest, " as ")) |k| {
+                rest = rest[k + 4 ..];
+                var e: usize = 0;
+                while (e < rest.len and isIdentChar(rest[e])) e += 1;
+                try forgetNames(arena, env, rest[0..e]);
+            }
+        }
+    }
+}
+
+fn forgetNames(arena: Allocator, env: *Env, text: []const u8) Allocator.Error!void {
+    var it = std.mem.tokenizeAny(u8, text, ", ()*");
+    while (it.next()) |n| if (isIdentStart(n[0])) try env.put(arena, try arena.dupe(u8, n), .{ .unknown = n });
+}
+
 /// Appends the shell for a function body to `out`. Statements with no plain
 /// translation become `# TODO(cbuild)` comments and a note.
-fn translateBody(arena: Allocator, f: Func, env: *const Env, pkgname: []const u8, notes: *std.ArrayList(Note), out: *std.ArrayList(u8)) Allocator.Error!void {
+fn translateBody(arena: Allocator, f: Func, module_env: *const Env, pkgname: []const u8, notes: *std.ArrayList(Note), out: *std.ArrayList(u8)) Allocator.Error!void {
     const body = try dedent(arena, f.body);
+    var env = try module_env.clone(arena);
+    try forgetLocals(arena, body, &env);
+    var returned = false;
     // Keep comments and blank lines before the first statement.
     var rest_start: usize = 0;
     var lead_lines: usize = 0;
@@ -1022,11 +1149,20 @@ fn translateBody(arena: Allocator, f: Func, env: *const Env, pkgname: []const u8
         if (code.len > 0) {
             var line_out: std.ArrayList(u8) = .empty;
             const first = firstLine(code);
-            const ok = if (std.mem.eql(u8, first, "return") or std.mem.eql(u8, first, "pass")) true else try translateCall(arena, code, env, pkgname, &line_out);
+            const returns = std.mem.eql(u8, first, "return") or std.mem.startsWith(u8, first, "return ");
+            if (returned) {
+                // never runs: kept for the reader, as comments
+                var dead = std.mem.splitScalar(u8, code, '\n');
+                while (dead.next()) |l| try out.print(arena, "# after return: {s}\n", .{std.mem.trimEnd(u8, l, "\r")});
+                try emitComments(arena, out, parts.comments);
+                continue;
+            }
+            if (returns) returned = true;
+            const ok = if (std.mem.eql(u8, first, "return") or std.mem.eql(u8, first, "pass")) true else try translateCall(arena, code, &env, pkgname, &line_out);
             if (ok) {
                 try out.appendSlice(arena, line_out.items);
             } else {
-                try notes.append(arena, .{ .line = f.line + lead_lines + st.line, .kind = .todo, .text = try std.fmt.allocPrint(arena, "in {s}(): {s}", .{ f.name, first }) });
+                try notes.append(arena, .{ .line = f.line + lead_lines + st.line, .kind = .todo, .marked = true, .text = try std.fmt.allocPrint(arena, "in {s}(): {s}", .{ f.name, first }) });
                 var it = std.mem.splitScalar(u8, code, '\n');
                 var k: usize = 0;
                 while (it.next()) |l| : (k += 1) {
@@ -1057,13 +1193,52 @@ fn findFunc(funcs: []const Func, name: []const u8) ?Func {
     return null;
 }
 
-pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Converted {
+/// What follows a `def` header: the lines after it, or what is on the same line after its closing colon.
+fn functionBody(t: []const u8) []const u8 {
+    var depth: usize = 0;
+    var i: usize = 0;
+    while (i < t.len) : (i += 1) switch (t[i]) {
+        '(', '[', '{' => depth += 1,
+        ')', ']', '}' => depth -|= 1,
+        '"', '\'' => {
+            const q = t[i];
+            i += 1;
+            while (i < t.len and t[i] != q) : (i += 1) {
+                if (t[i] == '\\') i += 1;
+            }
+        },
+        '#' => while (i + 1 < t.len and t[i + 1] != '\n') {
+            i += 1;
+        },
+        ':' => if (depth == 0) {
+            const rest = t[i + 1 ..];
+            const line = std.mem.trim(u8, firstLine(rest), " \t\r");
+            if (line.len > 0 and line[0] != '#') return std.mem.trimStart(u8, rest, " \t");
+            const nl = std.mem.indexOfScalar(u8, rest, '\n') orelse return "";
+            return rest[nl + 1 ..];
+        },
+        else => {},
+    };
+    return "";
+}
+
+/// `text` fit for a comment: no control character, so nothing in it can start a line of its own.
+fn commentText(arena: Allocator, text: []const u8) Allocator.Error![]const u8 {
+    const out = try arena.dupe(u8, text);
+    for (out) |*c| if (c.* < 0x20 or c.* == 0x7f) {
+        c.* = ' ';
+    };
+    return out;
+}
+
+pub fn convert(arena: Allocator, crlf_src: []const u8, in: Inputs) Allocator.Error!Converted {
     var notes: std.ArrayList(Note) = .empty;
     var env: Env = .empty;
     var order: std.ArrayList([]const u8) = .empty;
     var lines_of: std.StringHashMapUnmanaged(usize) = .empty;
     var funcs: std.ArrayList(Func) = .empty;
     var decorators: std.ArrayList([]const u8) = .empty;
+    const src = try std.mem.replaceOwned(u8, arena, crlf_src, "\r\n", "\n");
 
     for (try splitStatements(arena, src)) |st| {
         const t = st.text;
@@ -1073,14 +1248,14 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
         }
         if (std.mem.startsWith(u8, t, "def ")) {
             const first = firstLine(t);
-            var i: usize = 4;
+            var i: usize = @min(4, first.len);
             while (i < first.len and isIdentChar(first[i])) i += 1;
-            const nl = std.mem.indexOfScalar(u8, t, '\n');
+            const name_end = i;
             try funcs.append(arena, .{
-                .name = first[4..i],
+                .name = first[@min(4, name_end)..name_end],
                 .line = st.line,
                 .decorators = try arena.dupe([]const u8, decorators.items),
-                .body = if (nl) |k| t[k + 1 ..] else "",
+                .body = functionBody(t),
             });
             decorators.clearRetainingCapacity();
             continue;
@@ -1142,7 +1317,10 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
 
     const name = (try strOf(&env, &consumed, arena, &notes, &lines_of, "pkgname")) orelse "unknown";
     const version = (try strOf(&env, &consumed, arena, &notes, &lines_of, "pkgver")) orelse "0";
-    const pkgrel: i64 = if (env.get("pkgrel")) |v| (if (v == .int) v.int else 0) else 0;
+    const rel_given: i64 = if (env.get("pkgrel")) |v| (if (v == .int) v.int else 0) else 0;
+    const pkgrel: i64 = if (rel_given >= 0 and rel_given < 1_000_000) rel_given else 0;
+    if (pkgrel != rel_given)
+        try notes.append(arena, .{ .line = lines_of.get("pkgrel") orelse 0, .kind = .todo, .text = "`pkgrel` is out of range; release 1 stands in for it" });
     try consumed.put(arena, "pkgrel", {});
     if (env.get("pkgrel")) |v| if (v != .int)
         try notes.append(arena, .{ .line = lines_of.get("pkgrel") orelse 0, .kind = .todo, .text = "`pkgrel` is not a plain number; release 1 stands in for it" });
@@ -1180,8 +1358,11 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
             try archs.append(arena, if (a[0] == '~') try std.fmt.allocPrint(arena, "!{s}", .{bare}) else a);
         } else try notes.append(arena, .{ .line = lines_of.get("archs") orelse 0, .kind = .dropped, .text = try std.fmt.allocPrint(arena, "arch '{s}' is not one of ours", .{a}) });
     }
+    if (archs.items.len == 0) if (env.get("archs")) |_|
+        try notes.append(arena, .{ .line = lines_of.get("archs") orelse 0, .kind = .todo, .text = "none of `archs` is one of ours: the draft builds for every architecture; restrict it if the template did" });
 
-    // Sources: url list and checksums paired by position.
+    // Sources: url list and checksums paired by position. One that cannot be evaluated keeps its place (an empty
+    // string), so that the others stay paired.
     var src_urls: std.ArrayList([]const u8) = .empty;
     var src_shas: std.ArrayList([]const u8) = .empty;
     try consumed.put(arena, "source", {});
@@ -1190,7 +1371,8 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
         switch (sv) {
             .str => |s| try src_urls.append(arena, s),
             .list => |items| for (items) |it| {
-                if (it.asStr()) |s| try src_urls.append(arena, s) else try notes.append(arena, .{ .line = lines_of.get("source") orelse 0, .kind = .todo, .text = "a `source` item is not a plain string (it may use an unresolved f-string)" });
+                try src_urls.append(arena, it.asStr() orelse "");
+                if (it.asStr() == null) try notes.append(arena, .{ .line = lines_of.get("source") orelse 0, .kind = .todo, .text = try std.fmt.allocPrint(arena, "`source` item {d} is not a plain string (it may use an unresolved f-string) and was left out", .{src_urls.items.len}) });
             },
             else => try notes.append(arena, .{ .line = lines_of.get("source") orelse 0, .kind = .todo, .text = try std.fmt.allocPrint(arena, "`source` could not be evaluated: {s}", .{if (sv == .unknown) sv.unknown else "not a string or list"}) }),
         }
@@ -1199,7 +1381,8 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
         switch (hv) {
             .str => |s| try src_shas.append(arena, s),
             .list => |items| for (items) |it| {
-                if (it.asStr()) |s| try src_shas.append(arena, s) else try notes.append(arena, .{ .line = lines_of.get("sha256") orelse 0, .kind = .todo, .text = "a `sha256` item is not a plain string and was skipped" });
+                try src_shas.append(arena, it.asStr() orelse "");
+                if (it.asStr() == null) try notes.append(arena, .{ .line = lines_of.get("sha256") orelse 0, .kind = .todo, .text = try std.fmt.allocPrint(arena, "`sha256` item {d} is not a plain string and was left empty", .{src_shas.items.len}) });
             },
             else => try notes.append(arena, .{ .line = lines_of.get("sha256") orelse 0, .kind = .todo, .text = "`sha256` could not be evaluated" }),
         }
@@ -1271,13 +1454,14 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
     var steps: [4]std.ArrayList(u8) = .{ .empty, .empty, .empty, .empty };
     const phase_names = [_][]const u8{ "configure", "build", "check", "install" };
 
+    var used: ArgsUsed = .{};
     for (phase_names, 0..) |ph, k| {
         const out = &steps[k];
         var buf: [32]u8 = undefined;
         const init_name = std.fmt.bufPrint(&buf, "init_{s}", .{ph}) catch unreachable;
         if (findFunc(funcs.items, init_name)) |f| {
             // init hooks set variables for the phase; none can be translated.
-            try notes.append(arena, .{ .line = f.line, .kind = .todo, .text = try std.fmt.allocPrint(arena, "{s}() sets variables for the {s} phase; port it by hand", .{ init_name, ph }) });
+            try notes.append(arena, .{ .line = f.line, .kind = .todo, .marked = true, .text = try std.fmt.allocPrint(arena, "{s}() sets variables for the {s} phase; port it by hand", .{ init_name, ph }) });
             try out.print(arena, "# TODO(cbuild): {s}() sets variables for this phase (cbuild line {d}); port it by hand\n", .{ init_name, f.line });
         }
         var pre_buf: [32]u8 = undefined;
@@ -1290,7 +1474,7 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
         if (replaces) |f| {
             try translateBody(arena, f, &env, name, &notes, out);
         } else if (style) |st| {
-            try styleStep(arena, out, st, @as(Phase, @enumFromInt(k)), cfg_args, make_build_args, make_install_args, make_check_args, check_target, use_env, configure_gen, no_check);
+            try styleStep(arena, out, st, @as(Phase, @enumFromInt(k)), cfg_args, make_build_args, make_install_args, make_check_args, check_target, use_env, configure_gen, no_check, &used);
         }
         var post_buf: [32]u8 = undefined;
         const post = std.fmt.bufPrint(&post_buf, "post_{s}", .{ph}) catch unreachable;
@@ -1301,6 +1485,15 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
         if (!contains(&known, st))
             try notes.append(arena, .{ .line = lines_of.get("build_style") orelse 0, .kind = .todo, .text = try std.fmt.allocPrint(arena, "build_style '{s}' is not translated; write the steps by hand", .{st}) });
     }
+
+    // arguments no step took (a function of the template's own replaced the step, or the style has no place)
+    for ([_]struct { name: []const u8, args: []const []const u8, used: bool }{
+        .{ .name = "configure_args", .args = cfg_args, .used = used.configure },
+        .{ .name = "make_build_args", .args = make_build_args, .used = used.build },
+        .{ .name = "make_install_args", .args = make_install_args, .used = used.install },
+        .{ .name = "make_check_args", .args = make_check_args, .used = used.check or no_check },
+    }) |l| if (l.args.len > 0 and !l.used)
+        try notes.append(arena, .{ .line = lines_of.get(l.name) orelse 0, .kind = .todo, .text = try std.fmt.allocPrint(arena, "`{s}` is in no step of the draft: {s}", .{ l.name, try std.mem.join(arena, " ", l.args) }) });
 
     // Subpackages and hooks nobody maps.
     for (funcs.items) |f| {
@@ -1320,6 +1513,7 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
         if (consumed.contains(n)) continue;
         try notes.append(arena, .{ .line = lines_of.get(n) orelse 0, .kind = .dropped, .text = try std.fmt.allocPrint(arena, "`{s}` has no equivalent and was dropped", .{n}) });
     }
+    for (in.problems) |text| try notes.append(arena, .{ .line = 0, .kind = .todo, .text = text });
     if (in.has_files) try notes.append(arena, .{ .line = 0, .kind = .check, .text = "the template has a files/ directory; it was copied, check how the steps use it" });
 
     // The TOML.
@@ -1330,19 +1524,43 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
         \\# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
         \\# dependency names (they are Chimera's) before building.
         \\
-    , .{in.origin});
+    , .{try commentText(arena, in.origin)});
     try o.print(arena, "name = {s}\nversion = {s}\nrelease = {d}\nsummary = {s}\nlicense = {s}\n", .{ try tomlString(arena, name), try tomlString(arena, version), pkgrel + 1, try tomlString(arena, summary), try tomlString(arena, license) });
     if (homepage) |h| try o.print(arena, "homepage = {s}\n", .{try tomlString(arena, h)});
     if (in.patches.len > 0) try o.print(arena, "patches = {s}\n", .{try tomlList(arena, in.patches)});
     inline for (.{ .{ "archs", archs.items }, .{ "hostdeps", hostdeps }, .{ "builddeps", builddeps }, .{ "checkdeps", checkdeps }, .{ "rundeps", rundeps }, .{ "options", options.items } }) |kv| {
         if (kv[1].len > 0) try o.print(arena, "{s} = {s}\n", .{ kv[0], try tomlList(arena, kv[1]) });
     }
-    try o.appendSlice(arena, "\nsource = [\n");
+    var entries: std.ArrayList(u8) = .empty;
     for (src_urls.items, 0..) |u, k| {
-        const cut = std.mem.indexOfScalar(u8, u, '>') orelse u.len; // cbuild's `url>filename` renames the download
+        if (u.len == 0) continue;
+        // cbuild's `url>filename` renames the download; `>!filename` also leaves it packed
+        const cut = std.mem.indexOfScalar(u8, u, '>') orelse u.len;
+        var rename = if (cut < u.len) u[cut + 1 ..] else "";
+        if (rename.len > 0 and rename[0] == '!') {
+            rename = rename[1..];
+            try notes.append(arena, .{ .line = lines_of.get("source") orelse 0, .kind = .todo, .text = try std.fmt.allocPrint(arena, "cbuild does not unpack {s}; check what the draft does with it", .{rename}) });
+        }
         const sha = if (k < src_shas.items.len) src_shas.items[k] else "";
-        try o.print(arena, "    {{ url = {s}, sha256 = {s} }},\n", .{ try tomlString(arena, u[0..cut]), try tomlString(arena, sha) });
+        try entries.print(arena, "    {{ url = {s}, sha256 = {s}", .{ try tomlString(arena, u[0..cut]), try tomlString(arena, sha) });
+        if (rename.len > 0) {
+            if (recipe.safeFileName(rename)) {
+                try entries.print(arena, ", name = {s}", .{try tomlString(arena, rename)});
+            } else try notes.append(arena, .{ .line = lines_of.get("source") orelse 0, .kind = .todo, .text = try std.fmt.allocPrint(arena, "the download is renamed to '{s}', which is not a plain file name", .{rename}) });
+        }
+        try entries.appendSlice(arena, " },\n");
     }
+    // what has no marker in a step goes here: the draft must show everything left to do, without the report
+    var marked_any = false;
+    for (notes.items) |n| if (n.kind == .todo and !n.marked) {
+        if (!marked_any) try o.append(arena, '\n');
+        marked_any = true;
+        try o.print(arena, "# TODO(cbuild): {s}", .{try commentText(arena, n.text)});
+        if (n.line > 0) try o.print(arena, " (cbuild line {d})", .{n.line});
+        try o.append(arena, '\n');
+    };
+    try o.appendSlice(arena, "\nsource = [\n");
+    try o.appendSlice(arena, entries.items);
     try o.appendSlice(arena, "]\n\n");
     if (environment.items.len > 0) try tomlScript(arena, &o, "environment", environment.items);
     const keys = [_][]const u8{ "setup", "build", "check", "install" };
@@ -1356,8 +1574,17 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
     return .{ .name = name, .toml = o.items, .notes = notes.items };
 }
 
-fn styleStep(arena: Allocator, out: *std.ArrayList(u8), style: []const u8, phase: Phase, cfg: []const []const u8, mk: []const []const u8, mi: []const []const u8, mc: []const []const u8, check_target: []const u8, use_env: bool, gen: []const []const u8, no_check: bool) Allocator.Error!void {
+const ArgsUsed = struct { configure: bool = false, build: bool = false, check: bool = false, install: bool = false };
+
+fn styleStep(arena: Allocator, out: *std.ArrayList(u8), style: []const u8, phase: Phase, cfg: []const []const u8, mk: []const []const u8, mi: []const []const u8, mc: []const []const u8, check_target: []const u8, use_env: bool, gen: []const []const u8, no_check: bool, used: *ArgsUsed) Allocator.Error!void {
     const eq = std.mem.eql;
+    const known = eq(u8, style, "gnu_configure") or eq(u8, style, "configure") or eq(u8, style, "makefile") or eq(u8, style, "meson") or eq(u8, style, "cmake");
+    if (known) switch (phase) {
+        .configure => used.configure = !eq(u8, style, "makefile"),
+        .build => used.build = true,
+        .check => used.check = !no_check,
+        .install => used.install = !eq(u8, style, "meson"), // `ninja install` takes none of meson's
+    };
     if (eq(u8, style, "gnu_configure")) switch (phase) {
         .configure => {
             // cbuild runs `configure_gen` (default: autoreconf) before configure.
@@ -1412,14 +1639,14 @@ fn styleStep(arena: Allocator, out: *std.ArrayList(u8), style: []const u8, phase
         },
     } else if (eq(u8, style, "meson")) switch (phase) {
         .configure => try macroLine(arena, out, "%meson", cfg),
-        .build => try out.appendSlice(arena, "%meson_build\n"),
-        .check => {},
+        .build => try macroLine(arena, out, "%meson_build", mk),
+        .check => if (!no_check) try macroLine(arena, out, "meson test -C build --no-rebuild --print-errorlogs", mc),
         .install => try out.appendSlice(arena, "%meson_install\n"),
     } else if (eq(u8, style, "cmake")) switch (phase) {
         .configure => try macroLine(arena, out, "%cmake", cfg),
-        .build => try out.appendSlice(arena, "%cmake_build\n"),
-        .check => {},
-        .install => try out.appendSlice(arena, "%cmake_install\n"),
+        .build => try macroLine(arena, out, "%cmake_build", mk),
+        .check => if (!no_check) try macroLine(arena, out, "ctest --test-dir build --output-on-failure", mc),
+        .install => try macroLine(arena, out, "%cmake_install", mi),
     };
 }
 
@@ -1667,6 +1894,86 @@ test "a template's strings stay text: no commands, no expansions, no macros (CB-
     const p: @import("profile.zig").Profile = .{ .arch = "x86_64", .triple = "x86_64-fenriros-linux-musl", .cpu = "x86-64", .zig_target = "x86_64-linux-musl", .zig_cpu = "baseline", .kernel_arch = "x86" };
     const expanded = try macro.expand(a, .{ .target = p, .host = p }, r.install, &bad);
     try std.testing.expect(std.mem.indexOf(u8, expanded, "echo \"\\$ORIGIN\" \"~\" %make \"100%%\"\n") != null);
+}
+
+const test_head = "pkgname = \"t\"\npkgver = \"1\"\npkgrel = 0\npkgdesc = \"x\"\nlicense = \"MIT\"\n";
+
+test "malformed templates give a draft or TODOs, never a crash (CB-15)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const brackets = try a.alloc(u8, 400_000);
+    @memset(brackets, '[');
+    const deep = try std.mem.concat(a, u8, &.{ "x = ", brackets, "\n" });
+    for ([_][]const u8{ "x = f\"{\n", "x = f\"\"\"{", "def \n    pass\n", "x = foo(\"abc\\", "x = f\"{a'\n", "pkgrel = 9223372036854775807\n", "pkgrel = -9223372036854775808\n", "x = \"\\", "x = (((", "def", "@", deep }) |bad| {
+        _ = try convert(a, try std.mem.concat(a, u8, &.{ test_head, bad }), .{ .origin = "t" });
+        _ = try convert(a, bad, .{ .origin = "t" });
+    }
+}
+
+test "CRLF, one-line functions, escapes, return and strings keep their meaning (CB-08, CB-16, CB-17, CB-18, CB-19)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    var diag: recipe.Diagnostic = .{};
+    // CRLF with a blank line inside a function
+    const crlf = try convert(a, try std.mem.replaceOwned(u8, a, test_head ++ "\ndef install(self):\n    self.do(\"one\")\n\n    self.do(\"two\")\n", "\n", "\r\n"), .{ .origin = "t" });
+    try std.testing.expect(std.mem.indexOf(u8, crlf.toml, "one\ntwo\n") != null);
+    // a function on its header's line
+    const one = try convert(a, test_head ++ "build_style = \"makefile\"\ndef build(self): self.do(\"make\", \"special\")\ndef post_install(self): self.install_license(\"LICENSE\")\n", .{ .origin = "t" });
+    try std.testing.expect(std.mem.indexOf(u8, one.toml, "make special") != null and std.mem.indexOf(u8, one.toml, "LICENSE") != null);
+    // Python's escapes
+    const esc = try convert(a, "pkgname = \"t\"\npkgver = \"1\"\npkgrel = 0\nlicense = \"MIT\"\npkgdesc = \"Caf\\u00e9 \\xe9 \\101 \\U0001F600\"\nsource = \"https://x.org/a.tgz\"\nsha256 = \"" ++ @as([64]u8, @splat('a')) ++ "\"\n", .{ .origin = "t" });
+    try std.testing.expectEqualStrings("Café é A 😀", (try recipe.parse(a, try std.mem.concat(a, u8, &.{ esc.toml, "" }), &diag)).summary);
+    // nothing after a return runs
+    const ret = try convert(a, test_head ++ "def install(self):\n    self.do(\"yes\")\n    return\n    self.do(\"never\")\n", .{ .origin = "t" });
+    var lines = std.mem.splitScalar(u8, ret.toml, '\n');
+    while (lines.next()) |l| try std.testing.expect(!std.mem.eql(u8, l, "never"));
+    // indentation inside a multi-line string is part of the string
+    const doc = try convert(a, test_head ++ "def install(self):\n    self.do(\"sh\", \"-c\", \"\"\"cat <<E\n    four spaces\nE\"\"\")\n", .{ .origin = "t" });
+    try std.testing.expect(std.mem.indexOf(u8, doc.toml, "\n    four spaces\n") != null);
+    // a newline in the template's path stays inside the header comment
+    const path = try convert(a, test_head, .{ .origin = "nl\nrelease = 99\n#/template.py" });
+    var l2 = std.mem.splitScalar(u8, path.toml, '\n');
+    while (l2.next()) |l| try std.testing.expect(!std.mem.eql(u8, l, "release = 99"));
+}
+
+fn expectIn(toml: []const u8, want: []const u8) !void {
+    if (std.mem.indexOf(u8, toml, want) == null) {
+        std.debug.print("missing: {s}\nin:\n{s}\n", .{ want, toml });
+        return error.TestExpectedEqual;
+    }
+}
+
+test "a local name is not the module's value (CB-09)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const c = try convert(st.allocator(), test_head ++ "_flag = \"--default\"\n_dir = \"d\"\ndef build(self):\n    _flag = self.profile().arch\n    for _dir in self.things:\n        pass\n    self.do(\"./build.sh\", _flag)\n    self.do(\"ls\", _dir)\n", .{ .origin = "t" });
+    var lines = std.mem.splitScalar(u8, c.toml, '\n');
+    while (lines.next()) |l| if (l.len > 0 and l[0] != '#') {
+        try std.testing.expect(std.mem.indexOf(u8, l, "--default") == null and !std.mem.eql(u8, l, "ls d"));
+    };
+}
+
+test "the draft itself shows what is left to do, keeps sources paired and renames, and keeps checks and arguments (CB-10, CB-11, CB-12, CB-14)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const left = try convert(a, test_head ++ "makedepends = [\"zlib-devel\", f\"{_py}-devel\"]\narchs = [\"sparc\"]\nif x:\n    makedepends += [\"nasm\"]\n", .{ .origin = "t" });
+    try expectIn(left.toml, "# TODO(cbuild): `makedepends` has an item");
+    try expectIn(left.toml, "# TODO(cbuild): statement not understood: if x:");
+    try expectIn(left.toml, "# TODO(cbuild): none of `archs` is one of ours");
+    const sources = try convert(a, test_head ++ "source = [f\"https://x.org/{_arch}.tgz\", \"https://x.org/a/v1.tar.gz>b-1.tar.gz\"]\nsha256 = [\"aaaa\", \"bbbb\"]\n", .{ .origin = "t" });
+    try expectIn(sources.toml, "{ url = \"https://x.org/a/v1.tar.gz\", sha256 = \"bbbb\", name = \"b-1.tar.gz\" },");
+    try std.testing.expect(std.mem.indexOf(u8, sources.toml, "\"aaaa\"") == null);
+    const meson = try convert(a, test_head ++ "build_style = \"meson\"\nmake_check_args = [\"--suite\", \"unit\"]\nmake_install_args = [\"--tags\"]\n", .{ .origin = "t" });
+    try expectIn(meson.toml, "meson test -C build --no-rebuild --print-errorlogs \\\n    --suite \\\n    unit");
+    try expectIn(meson.toml, "# TODO(cbuild): `make_install_args` is in no step");
+    const cmake = try convert(a, test_head ++ "build_style = \"cmake\"\nmake_build_args = [\"--target\", \"special\"]\n", .{ .origin = "t" });
+    try expectIn(cmake.toml, "%cmake_build \\\n    --target \\\n    special");
+    try expectIn(cmake.toml, "ctest --test-dir build");
+    const quiet = try convert(a, test_head ++ "build_style = \"cmake\"\noptions = [\"!check\"]\n", .{ .origin = "t" });
+    try std.testing.expect(std.mem.indexOf(u8, quiet.toml, "ctest") == null);
 }
 
 test "the reader evaluates strings, f-strings, lists, dicts and concatenation" {

@@ -301,7 +301,7 @@ fn contains(haystack: []const []const u8, needle: []const u8) bool {
 }
 
 /// A single file or directory name that is safe in a path and inside shell quotes.
-fn safeFileName(n: []const u8) bool {
+pub fn safeFileName(n: []const u8) bool {
     if (n.len == 0 or n[0] == '.' or n[0] == '-') return false;
     for (n) |c| if (!(std.ascii.isAlphanumeric(c) or c == '-' or c == '_' or c == '+' or c == '.' or c == '~')) return false;
     return true;
