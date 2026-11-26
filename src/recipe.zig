@@ -146,6 +146,8 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
         const key = if (std.mem.startsWith(u8, bare, "jobs:")) "jobs" else bare;
         // cargolock=<dir>: a Cargo.lock in files/ for the Rust project at <dir>
         if (std.mem.startsWith(u8, bare, "cargolock=")) {
+            if (bare.len > "cargolock=".len and !safeRelativeDir(bare["cargolock=".len..]))
+                return cfg.fail(arena, diag, "option '{s}': cargolock=<dir> is a directory inside the source, with no '..' and only letters, digits, '-', '_', '+', '.', '/'", .{o});
             if (bare.len == "cargolock=".len or !contains(r.options, "cargodeps"))
                 return cfg.fail(arena, diag, "option '{s}': cargolock=<dir> needs a directory and the cargodeps option", .{o});
             continue;
@@ -179,6 +181,15 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
         r.source = try parseSources(arena, diag, root);
     }
     r.subpackages = try parseSubpackages(arena, diag, root);
+    // These become file names on the host (logs/, work/, repo/, a subpackage's own directory) and are pasted into
+    // shell lines, so none may hold a path or quoting.
+    if (!safeVersion(r.version)) return cfg.fail(arena, diag, "version '{s}': a letter or digit first, then letters, digits, '.', '_', '+', '~'", .{r.version});
+    for (r.subpackages) |sp| if (!safeFileName(sp.name))
+        return cfg.fail(arena, diag, "subpackage '{s}': only letters, digits, '-', '_', '+', '.', and not starting with '.' or '-'", .{sp.name});
+    for (r.source) |src| if (src == .tarball) if (src.tarball.name) |n| if (!safeFileName(n))
+        return cfg.fail(arena, diag, "source name '{s}' must be a plain file name", .{n});
+    for (r.patches) |pt| if (!safeFileName(pt))
+        return cfg.fail(arena, diag, "patch '{s}' must be a plain file name in patches/", .{pt});
     // gradledeps (SPEC.md 7.4): the Gradle used is a source of the recipe, kept
     // as a file, and unzip unpacks it (the build image has none).
     if (contains(r.options, "gradledeps")) {
@@ -289,8 +300,29 @@ fn contains(haystack: []const []const u8, needle: []const u8) bool {
     return false;
 }
 
+/// A single file or directory name that is safe in a path and inside shell quotes.
+fn safeFileName(n: []const u8) bool {
+    if (n.len == 0 or n[0] == '.' or n[0] == '-') return false;
+    for (n) |c| if (!(std.ascii.isAlphanumeric(c) or c == '-' or c == '_' or c == '+' or c == '.' or c == '~')) return false;
+    return true;
+}
+
+/// As apk writes versions. No '-': it separates the release in a package's file name.
+fn safeVersion(v: []const u8) bool {
+    if (v.len == 0 or !std.ascii.isAlphanumeric(v[0])) return false;
+    for (v) |c| if (!(std.ascii.isAlphanumeric(c) or c == '.' or c == '_' or c == '+' or c == '~')) return false;
+    return true;
+}
+
+fn safeRelativeDir(d: []const u8) bool {
+    if (std.mem.eql(u8, d, ".")) return true;
+    var parts = std.mem.splitScalar(u8, d, '/');
+    while (parts.next()) |p| if (!safeFileName(p)) return false;
+    return true;
+}
+
 fn validName(n: []const u8) bool {
-    if (n.len == 0) return false;
+    if (n.len == 0 or n[0] == '.' or n[0] == '-') return false;
     for (n) |c| switch (c) {
         'a'...'z', '0'...'9', '-', '+', '.' => {},
         else => return false,
@@ -395,6 +427,24 @@ test "bad checksum and bad source shapes are errors" {
 
 test "a TOML syntax error reports line and column" {
     try expectInvalid("name = \"a\"\nversion = \n", "line 2, column 11: expected value");
+}
+
+test "names that become paths or shell words are checked (SS-06, BC-20)" {
+    const head = "name = \"a\"\nrelease = 1\nsummary = \"s\"\nlicense = \"MIT\"\ninstall = \"x\"\nsource = [{ url = \"u\", sha256 = \"" ++ sha ++ "\" }]\n";
+    var arena_state = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena_state.deinit();
+    var diag: Diagnostic = .{};
+    for ([_][]const u8{ "1.0", "2.12_p1", "20260101+git", "1.4.363.0", "10.6_p2", "1.0~rc1" }) |v|
+        _ = try parse(arena_state.allocator(), try std.fmt.allocPrint(arena_state.allocator(), "{s}version = \"{s}\"\n", .{ head, v }), &diag);
+    for ([_][]const u8{ "../../x", "1/2", "1-2", "1 2", "1'; touch p #", "", ".1", "$(x)" }) |v|
+        try std.testing.expectError(error.InvalidRecipe, parse(arena_state.allocator(), try std.fmt.allocPrint(arena_state.allocator(), "{s}version = \"{s}\"\n", .{ head, v }), &diag));
+    const v1 = head ++ "version = \"1\"\n";
+    try std.testing.expectError(error.InvalidRecipe, parse(arena_state.allocator(), v1 ++ "[subpackages.\"../../../tmp/evil\"]\nsummary = \"s\"\n", &diag));
+    try std.testing.expectError(error.InvalidRecipe, parse(arena_state.allocator(), v1 ++ "[subpackages.\"..\"]\nsummary = \"s\"\n", &diag));
+    try std.testing.expectError(error.InvalidRecipe, parse(arena_state.allocator(), v1 ++ "patches = [\"../x.patch\"]\n", &diag));
+    try std.testing.expectError(error.InvalidRecipe, parse(arena_state.allocator(), v1 ++ "options = [\"cargodeps\", \"cargolock=../x\"]\n", &diag));
+    try std.testing.expectError(error.InvalidRecipe, parse(arena_state.allocator(), v1 ++ "options = [\"cargodeps\", \"cargolock=$(x)\"]\n", &diag));
+    _ = try parse(arena_state.allocator(), v1 ++ "options = [\"cargodeps\", \"cargolock=tools/crates/gnrt\"]\n[subpackages.gtk_4-dev]\nsummary = \"s\"\n", &diag);
 }
 
 test "meta packages have no source or steps; subpackages take depends, install_if, empty" {
