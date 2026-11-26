@@ -337,7 +337,7 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | dash | 0.5.12 | POSIX shell (/bin/sh) |
 | dav1d | 1.5.4 | Small and fast AV1 decoder |
 | davs2 | 1.7 | AVS2 video decoder |
-| dbus | 1.16.2 | Message bus system |
+| dbus | 1.16.4 | Message bus system |
 | dbus-cpp | 5.0.6 | D-Bus C++ binding (Lomiri) |
 | dbus-glib | 0.114 | GLib bindings for D-Bus (deprecated upstream; for older programs) |
 | dbus-test-runner | 19.04.0 | Runs a set of programs under a private D-Bus session for tests |
@@ -471,7 +471,7 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | evolution-data-server | 3.62.1 | Centralized access to appointments and contacts |
 | exabgp | 5.0.15 | The BGP swiss army knife of networking. |
 | exfatprogs | 1.4.3 | ExFAT filesystem utilities |
-| exim | 4.100.1 | Message transfer agent |
+| exim | 4.100.2 | Message transfer agent |
 | exiv2 | 0.28.7 | Image metadata manipulation |
 | extjs | 7.0.0.9 | Sencha Ext JS JavaScript framework (GPL edition) |
 | extra-cmake-modules | 6.31.0 | Extra modules and scripts for CMake |
@@ -508,7 +508,7 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | findutils | 4.10.0 | GNU find utilities |
 | fio | 3.43 | Flexible I/O tester |
 | firefly-iii | 6.7.9 | Personal finance manager |
-| firefox | 159.0 | Mozilla Firefox web browser |
+| firefox | 161.0 | Mozilla Firefox web browser |
 | firejail | 0.9.82.2 | SUID sandboxing tool |
 | firewall | 1 | Firewall and router tools |
 | firewalld | 2.5.2 | Dynamic firewall daemon with D-Bus interface (nftables) |
@@ -627,7 +627,7 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | giflib | 5.2.2 | Library to read and write GIF images |
 | gimp | 3.2.6 | GNU Image Manipulation Program |
 | girara | 2026.07.18 | User interface library with a focus on simplicity (zathura's) |
-| git | 2.56.0 | Fast, distributed version control system |
+| git | 2.56.1 | Fast, distributed version control system |
 | git-annex | 10.20261026 | Manage files with git, without checking their contents into git |
 | git-hound | 3.2 | Pinpoints exposed API keys on GitHub. A batch-catching, pattern-matching,... |
 | gitea | 28.3.0 | Self-hosted Git service |
@@ -662,7 +662,7 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | gnuplot | 6.0.6 | Command-line-driven graphing utility |
 | gnustep-base | 1.31.1 | GNUstep Foundation library |
 | gnustep-make | 2.9.3 | GNUstep makefile package |
-| gnutls | 3.8.13 | GNU Transport Layer Security library |
+| gnutls | 3.8.14 | GNU Transport Layer Security library |
 | go | 1.27.3 | Go programming language |
 | go-bootstrap | 1.25.4 | Go toolchain for bootstrapping the go package |
 | go-md2man | 2.0.7 | Markdown to manpage converter |
@@ -737,7 +737,7 @@ software is for, by area, see [software-guide.md](software-guide.md).
 |---|---|---|
 | hakrawler | 2.1 | Simple, fast web crawler designed for easy, quick discovery of endpoints and assets... |
 | handbrake | 1.11.2 | Video transcoder |
-| haproxy | 3.4.7 | TCP/HTTP reverse proxy for high availability environments |
+| haproxy | 3.4.8 | TCP/HTTP reverse proxy for high availability environments |
 | harfbuzz | 14.5.0 | Text shaping engine |
 | hashcat | 7.1.2 | Password recovery tool |
 | hashdeep | 4.4 | Cross-platform tools to message digests for any number of files. |
@@ -763,7 +763,7 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | howard-hinnant-date | 3.0.4 | C++ date and time zone library |
 | hplip | 3.26.6 | Drivers for HP printers and scanners |
 | htop | 3.5.3 | Interactive process viewer |
-| httpd | 2.4.70 | Apache HTTP Server |
+| httpd | 2.4.71 | Apache HTTP Server |
 | httpx | 1.12.0 | A fast and multi-purpose HTTP toolkit allow to run multiple probers using... |
 | hunspell | 1.7.3 | Spell checker and morphological analyzer |
 | hwdata | 0.408 | Hardware identification databases |
@@ -1509,8 +1509,8 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | lightrag-hku | 1.5.7 | LightRAG: simple and fast retrieval-augmented generation with a knowledge graph (HKUDS) |
 | lilv | 0.28.0 | C API for using LV2 plugins |
 | links | 2.30 | Lynx-like text WWW browser |
-| linux | 7.3.4 | The Linux kernel and its modules |
-| linux-headers | 7.3.4 | Linux kernel API headers for userspace |
+| linux | 7.3.6 | The Linux kernel and its modules |
+| linux-headers | 7.3.6 | Linux kernel API headers for userspace |
 | linux-lts | 6.18.63 | The Linux kernel (long-term series) and its modules |
 | linux-pam | 1.7.2 | Pluggable Authentication Modules for Linux |
 | linux-pam-base | 0.111 | Default PAM configuration |
@@ -1757,7 +1757,7 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | nftables | 1.1.7 | Netfilter nftables userspace tools |
 | nghttp2 | 1.70.0 | HTTP/2 C Library |
 | nghttp3 | 1.18.0 | C HTTP/3 library |
-| nginx | 1.30.6 | Advanced load balancer, web server, and reverse proxy |
+| nginx | 1.30.8 | Advanced load balancer, web server, and reverse proxy |
 | ngspice | 47 | Mixed-level circuit simulator (SPICE) |
 | ngtcp2 | 1.25.0 | C IETF QUIC protocol implementation |
 | nikto | 2.6.1 | Web server vulnerability scanner |
@@ -1774,8 +1774,8 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | novnc-pve | 1.7.0 | noVNC HTML5 VNC client, as integrated in Proxmox VE |
 | npth | 1.8 | New portable threads library |
 | nsgenbind | 0.9 | NetSurf JavaScript binding generator |
-| nspr | 4.40 | NetScape Portable Runtime |
-| nss | 3.132 | Mozilla Network Security Services |
+| nspr | 4.41 | NetScape Portable Runtime |
+| nss | 3.134 | Mozilla Network Security Services |
 | ntfs-3g | 2026.7.7 | NTFS FUSE driver and tools |
 | ntfy | 2.37.2 | Send push notifications to your phone or desktop with HTTP PUT/POST |
 | nuclei | 3.7.0 | Web vulnerability scanner |
@@ -1852,7 +1852,7 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | opensmtpd | 7.9.0_p0 | Secure, simple SMTP server from OpenBSD |
 | opensp | 1.5.2 | SGML and XML parser library |
 | openssh | 10.6_p2 | OpenSSH client and server |
-| openssl | 3.6.1 | TLS and cryptography library |
+| openssl | 3.6.5 | TLS and cryptography library |
 | opensubdiv | 3.7.0 | Surface subdivision library |
 | opentimelineio | 0.17.0 | API and interchange format for editorial timeline information |
 | opentofu | 1.13.9 | Tool for building, changing and versioning infrastructure |
@@ -2141,7 +2141,7 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | pwndbg | 2026.10.28 | GDB plugin for exploit development and reverse engineering |
 | pyside6 | 6.12.0 | Qt for Python (PySide6, with shiboken6) |
 | pystring | 1.1.4 | C++ functions matching the interface of Python string methods |
-| python | 3.14.3 | Python programming language |
+| python | 3.14.10 | Python programming language |
 | python-aardwolf | 0.2.17 | Asynchronous RDP protocol implementation |
 | python-acme | 5.8.0 | ACME protocol implementation |
 | python-aesedb | 0.1.8 | NTDS parser toolkit |
@@ -3021,7 +3021,7 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | tg-owt | 0_git20261030 | Telegram Desktop's fork of Google's WebRTC |
 | thin-provisioning-tools | 1.3.4 | Tools for the metadata of device-mapper thin, cache and era targets |
 | threadweaver | 6.31.0 | KDE Multithreading helper library |
-| thunderbird | 159.0 | Thunderbird mail client |
+| thunderbird | 161.0 | Thunderbird mail client |
 | thunk-gen | 1.11 | Thunk generator for dj64 and dosemu2 |
 | tiff | 4.7.2 | TIFF library and tools |
 | timeshift | 26.09.0 | System restore points (rsync or Btrfs snapshots) |
@@ -3154,7 +3154,7 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | waymore | 8.9 | Find way more from the Wayback Machine, Common Crawl, Alien Vault OTX, URLScan &... |
 | wcslib | 8.5 | World Coordinate System library (FITS) |
 | webanalyze | 0.4.6 | Port of Wappalyzer (uncovers technologies used on websites) in go to automate scanning. |
-| webkitgtk | 2.54.2 | GTK port of the WebKit browser engine |
+| webkitgtk | 2.54.3 | GTK port of the WebKit browser engine |
 | webmin | 2.670 | Web-based system administration |
 | webp-pixbuf-loader | 0.2.7 | WebP image loader for gdk-pixbuf |
 | webrtc-audio-processing | 2.1 | WebRTC audio processing: echo cancellation, noise suppression, gain control |

@@ -80,6 +80,24 @@ Distinct failures: pass 4, 182; pass 6, 60 (not finished: OOM); pass 7, 28 (stop
 
 `./zig-out/bin/dkbuild image --verbose images/dkde-devel.toml`
 
+## Security updates of 2026-11-25 (recipes only: NOT built)
+
+openssl 3.6.5, python 3.14.10, nginx 1.30.8, linux and linux-headers 7.3.6, firefox and thunderbird 161.0 (they need
+nss >= 3.133: nss 3.134 and nspr 4.41), httpd 2.4.71, webkitgtk 2.54.3, gnutls 3.8.14, dbus 1.16.4, git 2.56.1,
+exim 4.100.2, haproxy 3.4.8. Sources fetched; every patch of these recipes applies (firefox/thunderbird lfs64.patch
+and gnutls no-mini-dtls-fragments.patch rebased onto changed context). Checksums matched published ones for openssl,
+python, linux, git, firefox, thunderbird, httpd, webkitgtk, haproxy, nss and nspr; nginx and exim had good PGP
+signatures (keys fetched from their own sites); gnutls and dbus were only downloaded over HTTPS. The D-Bus release
+notes were not read (the site blocked the fetch).
+
+- **openssl: for the user to decide.** openssl-library.org lists only 4.1, 4.0 and 3.5 (LTS, to 2030) as supported;
+  the 2026-11-24 advisory names fixes in 4.1.1, 4.0.4 and 3.5.10, not in 3.6 (those had no download tags on 11-25).
+  3.6.5 is the interim step; later: 3.5 LTS (an older series: rebuild what was built against 3.6) or 4.x (major).
+- linux-lts (6.18.63; 6.18.65 is out) was not in this batch.
+- `dkbuild upstream` no longer reports pre-releases without `prerelease = true` in upstream.toml. 4 recipes are on
+  marked pre-releases (libcaca, libmspack, simde, winlab; libmspack's releases are all named alpha) and 46 on git
+  snapshots: for the user to review.
+
 ## Open
 
 - **Failing packages:** the table under "Under investigation" in docs/unbuildable.md has the state of each (ghc,

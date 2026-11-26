@@ -3,8 +3,8 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "nspr"
-version = "4.40"
-release = 6
+version = "4.41"
+release = 1
 summary = "NetScape Portable Runtime"
 license = "MPL-2.0"
 homepage = "https://www.mozilla.org/projects/nspr"
@@ -14,7 +14,7 @@ builddeps = ["zlib-ng-compat-devel"]
 options = ["!cross", "!check"]
 
 source = [
-    { url = "https://ftp.mozilla.org/pub/nspr/releases/v4.40/src/nspr-4.40.tar.gz", sha256 = "c0c1884c627f3db7a783f7c7314c695226b2043696791d15519e7e0578c19bdc" },
+    { url = "https://ftp.mozilla.org/pub/nspr/releases/v4.41/src/nspr-4.41.tar.gz", sha256 = "c562b8ddfe93704b7dc077be013f01448fdc6c124b1821c0f10471a71cb2e9e6" },
 ]
 
 environment = '''

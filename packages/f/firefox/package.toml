@@ -3,8 +3,8 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "firefox"
-version = "159.0"
-release = 12
+version = "161.0"
+release = 1
 summary = "Mozilla Firefox web browser"
 license = "GPL-3.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND MPL-2.0"
 homepage = "https://www.mozilla.org/firefox"
@@ -15,7 +15,7 @@ rundeps = ["ffmpeg", "openh264", "speechd"]
 options = ["jobs:12", "!cross", "!check"]
 
 source = [
-    { url = "https://ftp.mozilla.org/pub/firefox/releases/159.0/source/firefox-159.0.source.tar.xz", sha256 = "3d98df785894057fce60603e845828e758a5411ad79aaaaff2b8230597f500d9" },
+    { url = "https://ftp.mozilla.org/pub/firefox/releases/161.0/source/firefox-161.0.source.tar.xz", sha256 = "c649de11e4dc6266bc905ce4b33eb8672a1947c2e210ec53dce285cb86296a5a" },
 ]
 environment = '''
 export MOZBUILD_STATE_PATH="$PWD/.mozbuild" MOZ_MAKE_FLAGS="-j$jobs" AS="$CC"

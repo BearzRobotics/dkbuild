@@ -3,8 +3,8 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "nss"
-version = "3.132"
-release = 2
+version = "3.134"
+release = 1
 summary = "Mozilla Network Security Services"
 license = "MPL-2.0"
 homepage = "https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS"
@@ -16,7 +16,7 @@ checkdeps = ["bash"]
 options = ["!check"]
 
 source = [
-    { url = "https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_132_RTM/src/nss-3.132.tar.gz", sha256 = "ee9cf4837ba801141a804321c4462ad8f452ff4314275c6d5108a6b05af227ff" },
+    { url = "https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_134_RTM/src/nss-3.134.tar.gz", sha256 = "bb3b300b457f44da9a9486917c3b33bbc5935ae3cdf60aa759a6880889439c50" },
 ]
 environment = '''
 export LIBRUNPATH=''

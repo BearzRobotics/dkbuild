@@ -24,7 +24,7 @@ Stalwart is the all-in-one choice (SMTP, IMAP, JMAP, calendars, contacts). The c
 | [dovecot](https://www.dovecot.org) | 2.4.5 | IMAP and POP3 server | IMAP/POP3 mailboxes (with Pigeonhole for Sieve filters) |
 | [rspamd](https://rspamd.com) | 4.2.3 | Spam filtering system | spam filtering and DKIM signing |
 | [opensmtpd](https://www.opensmtpd.org) | 7.9.0_p0 | Secure, simple SMTP server from OpenBSD | a small alternative SMTP server |
-| [exim](https://www.exim.org) | 4.100.1 | Message transfer agent | another SMTP server, very configurable |
+| [exim](https://www.exim.org) | 4.100.2 | Message transfer agent | another SMTP server, very configurable |
 | [mox](https://www.xmox.nl) | 0.0.17 | Modern full-featured mail server (SMTP, IMAP, webmail) | a complete mail server in one Go program |
 | [clamav](https://www.clamav.net) | 1.5.4 | Antivirus engine and scanner | virus scanning for mail and files |
 | [listmonk](https://listmonk.app) | 6.2.0 | Self-hosted newsletter and mailing list manager | newsletters and mailing lists |
@@ -46,7 +46,7 @@ Stalwart is the all-in-one choice (SMTP, IMAP, JMAP, calendars, contacts). The c
 
 | Package | Version | What it is | Used for |
 |---|---|---|---|
-| [thunderbird](https://www.thunderbird.net) | 159.0 | Thunderbird mail client | the mail client of Mozilla |
+| [thunderbird](https://www.thunderbird.net) | 161.0 | Thunderbird mail client | the mail client of Mozilla |
 | [betterbird](https://www.betterbird.eu) | 153.7.0 | Fine-tuned version of Mozilla Thunderbird | Thunderbird with extra features |
 | [evolution](https://gitlab.gnome.org/GNOME/evolution) | 3.62.1 | Mail, calendar and address book suite | GNOME mail, calendar and contacts |
 | [aerc](https://aerc-mail.org) | 0.22.0 | Terminal email client | mail in the terminal |
@@ -59,10 +59,10 @@ Run an app behind nginx or Caddy; PHP apps use php-fpm.
 
 | Package | Version | What it is | Used for |
 |---|---|---|---|
-| [nginx](https://nginx.org) | 1.30.6 | Advanced load balancer, web server, and reverse proxy | web server and reverse proxy |
+| [nginx](https://nginx.org) | 1.30.8 | Advanced load balancer, web server, and reverse proxy | web server and reverse proxy |
 | [caddy](https://caddyserver.com) | 2.11.7 | Extensible HTTP server with automatic HTTPS | web server with automatic HTTPS |
-| [httpd](https://httpd.apache.org) | 2.4.70 | Apache HTTP Server | the Apache web server |
-| [haproxy](https://www.haproxy.org) | 3.4.7 | TCP/HTTP reverse proxy for high availability environments | load balancer and TCP/HTTP proxy |
+| [httpd](https://httpd.apache.org) | 2.4.71 | Apache HTTP Server | the Apache web server |
+| [haproxy](https://www.haproxy.org) | 3.4.8 | TCP/HTTP reverse proxy for high availability environments | load balancer and TCP/HTTP proxy |
 | [php](https://www.php.net) | 8.4.27 | HTML-embedded scripting language | PHP (the version most PHP apps here run on) |
 | [php8.5](https://www.php.net) | 8.5.12 | HTML-embedded scripting language (PHP 8.5, beside php) | PHP 8.5, beside the main PHP (Firefly III) |
 
@@ -133,7 +133,7 @@ Run an app behind nginx or Caddy; PHP apps use php-fpm.
 | [gitea](https://about.gitea.com) | 28.3.0 | Self-hosted Git service | self-hosted Git service |
 | [forgejo](https://forgejo.org) | 17.0.1 | Self-hosted Git forge (Gitea fork) | self-hosted Git service (Gitea's community fork) |
 | [woodpecker](https://woodpecker-ci.org) | 3.20.1 | Container-based CI engine (server, agent and cli) | continuous integration |
-| [git](https://git-scm.com) | 2.56.0 | Fast, distributed version control system | version control |
+| [git](https://git-scm.com) | 2.56.1 | Fast, distributed version control system | version control |
 
 
 ## Virtualization and containers
@@ -244,7 +244,7 @@ Incus is the container and VM manager here, with Proxmox VE as the full web-mana
 
 | Package | Version | What it is | Used for |
 |---|---|---|---|
-| [firefox](https://www.mozilla.org/firefox) | 159.0 | Mozilla Firefox web browser | web browser |
+| [firefox](https://www.mozilla.org/firefox) | 161.0 | Mozilla Firefox web browser | web browser |
 | [brave](https://brave.com) | 1.99.57 | Brave web browser | web browser |
 | [electron](https://www.electronjs.org) | 42.11.18 | Electron cross-platform desktop toolkit | runtime for desktop web apps |
 | [geogebra](https://www.geogebra.org) | 5.4_git20261111 | GeoGebra Classic 5: dynamic mathematics for graphing, geometry, algebra and 3D | mathematics |

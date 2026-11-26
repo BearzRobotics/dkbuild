@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "thunderbird"
-version = "159.0"
+version = "161.0"
 release = 1
 summary = "Thunderbird mail client"
 license = "GPL-3.0-only AND LGPL-2.1-only AND LGPL-3.0-only AND MPL-2.0"
@@ -14,7 +14,7 @@ builddeps = ["alsa-lib-devel", "dbus-devel", "ffmpeg-devel", "freetype-devel", "
 options = ["jobs:12", "!cross", "!check"]
 
 source = [
-    { url = "https://ftp.mozilla.org/pub/thunderbird/releases/159.0/source/thunderbird-159.0.source.tar.xz", sha256 = "b4cbc4e010deaa66a51a5c647586c8dc41579c136155fe8baa8253f7c8b3927e" },
+    { url = "https://ftp.mozilla.org/pub/thunderbird/releases/161.0/source/thunderbird-161.0.source.tar.xz", sha256 = "8b5c3b7757dd4ca60d1df67b7c3c047d8e171d6756a46c8bb7826aecd2429709" },
 ]
 environment = '''
 export MOZBUILD_STATE_PATH="$PWD/.mozbuild" MOZ_MAKE_FLAGS="-j$jobs" AS="$CC"

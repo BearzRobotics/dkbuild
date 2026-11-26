@@ -19,8 +19,8 @@
 # r10: linux-devel, the build tree out-of-tree modules (ZFS) are built against:
 # /usr/src/linux-<release>, linked from /usr/lib/modules/<release>/build.
 name = "linux"
-version = "7.3.4"
-release = 4
+version = "7.3.6"
+release = 1
 summary = "The Linux kernel and its modules"
 license = "GPL-2.0-only WITH Linux-syscall-note"
 homepage = "https://kernel.org"
@@ -34,7 +34,7 @@ options = ["!check", "!strip"]
 triggers = ["/usr/lib/modules/*/extra"]
 
 source = [
-    { url = "https://cdn.kernel.org/pub/linux/kernel/v7.x/linux-7.3.4.tar.xz", sha256 = "b11b6df8295e8e991ff040b71aaa4994a8b55caa23b6b092907f195b5840fd1f" },
+    { url = "https://cdn.kernel.org/pub/linux/kernel/v7.x/linux-7.3.6.tar.xz", sha256 = "8183d475a76a0faffa92d6cd500af421f589dfd0300a0f1060bb875e11d45723" },
 ]
 
 # r3: hardware.config adds the nftables expressions the base config lacked (log, limit, quota, redirect, tproxy, socket, netdev family, flow offload...), checked below.

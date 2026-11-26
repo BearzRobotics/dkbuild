@@ -1,8 +1,8 @@
 # Follows the DKRescue post's build of python 3.14.3; the importer's draft of
 # Chimera's recipe was not used.
 name = "python"
-version = "3.14.3"
-release = 16
+version = "3.14.10"
+release = 1
 summary = "Python programming language"
 license = "Python-2.0.1"
 homepage = "https://www.python.org"
@@ -10,7 +10,7 @@ builddeps = ["libffi-devel", "libexpat-devel", "openssl-devel", "sqlite-devel", 
 options = ["bootstrap", "!check"]
 
 source = [
-    { url = "https://www.python.org/ftp/python/3.14.3/Python-3.14.3.tar.xz", sha256 = "a97d5549e9ad81fe17159ed02c68774ad5d266c72f8d9a0b5a9c371fe85d902b" },
+    { url = "https://www.python.org/ftp/python/3.14.10/Python-3.14.10.tar.xz", sha256 = "de414a57119abef52784d8993e341d53aed635fc2b05c2607d9f98a2c5b72032" },
 ]
 
 setup = '''

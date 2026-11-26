@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/webkitgtk/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "webkitgtk"
-version = "2.54.2"
+version = "2.54.3"
 release = 1
 summary = "GTK port of the WebKit browser engine"
 license = "LGPL-2.1-or-later AND BSD-2-Clause"
@@ -14,7 +14,7 @@ rundeps = ["bubblewrap", "gst-plugins-bad", "gst-plugins-good", "xdg-dbus-proxy"
 options = ["!check", "jobs:12"]
 
 source = [
-    { url = "https://webkitgtk.org/releases/webkitgtk-2.54.2.tar.xz", sha256 = "a76345b391bef6211fb5ab6cfab2e86b285d18cda17cbb9ade595f1252b86065" },
+    { url = "https://webkitgtk.org/releases/webkitgtk-2.54.3.tar.xz", sha256 = "2779c1b46f88762e8400650271ba14452dc4e30b37059981552d8b562b7d0862" },
 ]
 
 environment = '''
