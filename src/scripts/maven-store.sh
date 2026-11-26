@@ -4,9 +4,10 @@
 # <file>) into the shared Maven-layout store ($2, the one gradledeps fills too),
 # with .sha1 and .sha256 files beside each file. The bookkeeping files of a local
 # repository (_remote.repositories, *.lastUpdated, resolver-status.properties) are
-# left out; a repository's metadata (maven-metadata-<id>.xml: plugin prefixes, the
-# versions of an artifact) is kept as maven-metadata.xml, which is what a repository
-# serves. Writes the store paths it used to $3, one per line.
+# left out. A repository's metadata (maven-metadata-<id>.xml: plugin prefixes, the
+# versions of an artifact) keeps its name here: dkbuild merges the files of all
+# repositories into the maven-metadata.xml the shared store serves, which is what the
+# list names. Writes the store paths used to $3, one per line.
 set -eu
 src=$1 store=$2 list=$3
 : > "$list.part"
@@ -16,10 +17,10 @@ find . -type f ! -name '_remote.repositories' ! -name '*.lastUpdated' ! -name 'r
     ! -name '*.sha1' ! -name '*.sha256' ! -name '*.md5' ! -name '*.part' | while read -r f; do
     f=${f#./}
     rel=$f
+    dest=$store/$f
     case ${f##*/} in
         maven-metadata-*.xml) rel=${f%/*}/maven-metadata.xml; [ "${f%/*}" = "$f" ] && rel=maven-metadata.xml ;;
     esac
-    dest=$store/$rel
     if [ ! -e "$dest" ]; then
         mkdir -p "${dest%/*}"
         cp "$f" "$dest.part"

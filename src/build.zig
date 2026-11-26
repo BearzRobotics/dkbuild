@@ -22,6 +22,7 @@ const gradle_store_sh = @embedFile("scripts/gradle-store.sh");
 const gradle_offline = @embedFile("scripts/gradle-offline.gradle");
 /// mavendeps: copies a restore's local repository into the shared Maven-layout store.
 const maven_store_sh = @embedFile("scripts/maven-store.sh");
+const maven = @import("maven.zig");
 /// nugetdeps: copies a restore's packages into the shared store.
 const nuget_store_sh = @embedFile("scripts/nuget-store.sh");
 const macro = @import("macro.zig");
@@ -416,6 +417,17 @@ fn safeStorePath(p: []const u8) bool {
 /// Adds what a restore step downloaded into its staging store to the shared one, then writes its list at
 /// `list_path`. The step ran upstream code, so only regular files are taken, a file the store has already is never
 /// replaced, and the checksum files are made here from the contents.
+/// A file of the Maven layout with its checksum files, those first: a build never sees one without them.
+fn placeMaven(arena: Allocator, io: std.Io, to: []const u8, data: []const u8) !void {
+    var s1: [20]u8 = undefined;
+    std.crypto.hash.Sha1.hash(data, &s1, .{});
+    var s2: [32]u8 = undefined;
+    std.crypto.hash.sha2.Sha256.hash(data, &s2, .{});
+    try placeFile(arena, io, try std.fmt.allocPrint(arena, "{s}.sha1", .{to}), try std.fmt.allocPrint(arena, "{s}\n", .{&std.fmt.bytesToHex(s1, .lower)}));
+    try placeFile(arena, io, try std.fmt.allocPrint(arena, "{s}.sha256", .{to}), try std.fmt.allocPrint(arena, "{s}\n", .{&std.fmt.bytesToHex(s2, .lower)}));
+    try placeFile(arena, io, to, data);
+}
+
 fn mergeRestored(arena: Allocator, io: std.Io, kind: StoreKind, stage: Stage, store: []const u8, list_path: []const u8, log: *std.ArrayList(u8)) !void {
     const list_name = std.fs.path.basename(list_path);
     var lists = try Dir.cwd().openDir(io, stage.lists, .{});
@@ -436,10 +448,21 @@ fn mergeRestored(arena: Allocator, io: std.Io, kind: StoreKind, stage: Stage, st
         };
         if (!wanted or !safeStorePath(e.path)) continue;
         const from = try std.fs.path.join(arena, &.{ stage.store, e.path });
+        const base_name = std.fs.path.basename(e.path);
+        if (kind == .maven and std.mem.startsWith(u8, base_name, "maven-metadata") and std.mem.endsWith(u8, base_name, ".xml")) {
+            // maven-metadata-<repository>.xml from each repository, all one maven-metadata.xml, which only grows
+            const dir_of = std.fs.path.dirname(e.path);
+            const to_meta = if (dir_of) |d| try std.fs.path.join(arena, &.{ store, d, "maven-metadata.xml" }) else try std.fs.path.join(arena, &.{ store, "maven-metadata.xml" });
+            const had = Dir.cwd().readFileAlloc(io, to_meta, arena, .limited(1 << 24)) catch |err| if (err == error.FileNotFound) "" else return err;
+            const merged = try maven.mergeMetadata(arena, had, try src.readFileAlloc(io, e.path, arena, .limited(1 << 24)));
+            try Dir.cwd().createDirPath(io, std.fs.path.dirname(to_meta) orelse store);
+            try placeMaven(arena, io, to_meta, merged);
+            continue;
+        }
         const to = try std.fs.path.join(arena, &.{ store, e.path });
         if (pathExists(io, to)) {
-            // a repository's metadata differs from one restore to the next; an artifact should not
-            if (!std.mem.eql(u8, std.fs.path.basename(e.path), "maven-metadata.xml")) {
+            // an artifact should not differ from one restore to the next
+            {
                 const a = try fetch.hashFile(io, from);
                 const b = try fetch.hashFile(io, to);
                 if (!std.mem.eql(u8, &a, &b))
@@ -451,15 +474,12 @@ fn mergeRestored(arena: Allocator, io: std.Io, kind: StoreKind, stage: Stage, st
         // its checksums first: a build never sees an artifact without them
         const data = try src.readFileAlloc(io, e.path, std.heap.page_allocator, .limited(1 << 31));
         defer std.heap.page_allocator.free(data);
+        if (kind == .maven) {
+            try placeMaven(arena, io, to, data);
+            continue;
+        }
         switch (kind) {
-            .maven => {
-                var s1: [20]u8 = undefined;
-                std.crypto.hash.Sha1.hash(data, &s1, .{});
-                var s2: [32]u8 = undefined;
-                std.crypto.hash.sha2.Sha256.hash(data, &s2, .{});
-                try placeFile(arena, io, try std.fmt.allocPrint(arena, "{s}.sha1", .{to}), try std.fmt.allocPrint(arena, "{s}\n", .{&std.fmt.bytesToHex(s1, .lower)}));
-                try placeFile(arena, io, try std.fmt.allocPrint(arena, "{s}.sha256", .{to}), try std.fmt.allocPrint(arena, "{s}\n", .{&std.fmt.bytesToHex(s2, .lower)}));
-            },
+            .maven => unreachable,
             .nuget => {
                 var s5: [64]u8 = undefined;
                 std.crypto.hash.sha2.Sha512.hash(data, &s5, .{});

@@ -34,6 +34,10 @@ mkdir -p /tmp/m2-restore/org/new/2.0
 echo new-artifact > /tmp/m2-restore/org/new/2.0/new.jar
 mkdir -p /tmp/m2-restore/org/common/1.0
 echo different-bytes > /tmp/m2-restore/org/common/1.0/common.jar
+# two repositories' lists of one artifact's versions: both join what the store has
+mkdir -p /tmp/m2-restore/org/lib
+echo '<metadata><versioning><versions><version>2.0</version></versions><lastUpdated>2</lastUpdated></versioning></metadata>' > /tmp/m2-restore/org/lib/maven-metadata-central.xml
+echo '<metadata><versioning><versions><version>3.0</version></versions><lastUpdated>3</lastUpdated></versioning></metadata>' > /tmp/m2-restore/org/lib/maven-metadata-other.xml
 # what a hostile one tries
 mkdir -p /dkstore/maven/org/common/1.0
 echo poisoned > /dkstore/maven/org/common/1.0/common.jar || true
@@ -51,6 +55,8 @@ mkdir -p \$pkgdir/usr/share/mvndemo
 echo ok > \$pkgdir/usr/share/mvndemo/ok
 '''
 EOR
+mkdir -p "$S/org/lib"
+echo '<metadata><versioning><versions><version>1.0</version></versions><lastUpdated>1</lastUpdated></versioning></metadata>' > "$S/org/lib/maven-metadata.xml"
 OUT=$(./zig-out/bin/dkbuild --tree "$T" pkg --key "$TEST_KEY" mvndemo 2>&1); RC=$?
 fail=0
 bad() { echo "FAIL: $1"; fail=1; }
@@ -62,6 +68,10 @@ bad() { echo "FAIL: $1"; fail=1; }
 [ "$(cat "$S/org/new/2.0/new.jar" 2>/dev/null)" = new-artifact ] || bad "the downloaded artifact did not reach the store"
 [ "$(cat "$S/org/new/2.0/new.jar.sha256" 2>/dev/null)" = "$(printf 'new-artifact\n' | sha256sum | cut -d' ' -f1)" ] || bad "the new artifact's sha256 is missing or wrong"
 [ "$(cat "$S/org/new/2.0/new.jar.sha1" 2>/dev/null)" = "$(printf 'new-artifact\n' | sha1sum | cut -d' ' -f1)" ] || bad "the new artifact's sha1 is missing or wrong"
+for v in 1.0 2.0 3.0; do grep -q "<version>$v</version>" "$S/org/lib/maven-metadata.xml" || bad "the store's version list lacks $v"; done
+[ "$(cat "$S/org/lib/maven-metadata.xml.sha1" 2>/dev/null)" = "$(sha1sum "$S/org/lib/maven-metadata.xml" | cut -d' ' -f1)" ] || bad "the merged metadata's sha1 is wrong"
+[ ! -e "$S/org/lib/maven-metadata-central.xml" ] || bad "a repository's own metadata file reached the store"
+grep -qx 'org/lib/maven-metadata.xml' "$L/$DEMO_SHA"-????????????????.list 2>/dev/null || bad "the metadata is not in this source's list"
 # named by the source and (as the recipe has a restore step) a hash of what else decides the downloads
 grep -qx 'org/new/2.0/new.jar' "$L/$DEMO_SHA"-????????????????.list 2>/dev/null || bad "this source's list is missing"
 [ $fail = 0 ] && echo "ok: a restore adds to the store and can change nothing in it, nor the build's root"

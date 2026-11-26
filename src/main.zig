@@ -782,6 +782,7 @@ test {
     _ = @import("sandbox.zig");
     _ = @import("doctor.zig");
     _ = @import("cbuild.zig");
+    _ = @import("maven.zig");
     _ = @import("fetch.zig");
     _ = @import("npmdeps.zig");
     _ = @import("gemdeps.zig");
