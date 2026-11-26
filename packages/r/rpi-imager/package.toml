@@ -1,0 +1,59 @@
+# Raspberry Pi Imager: writes Raspberry Pi OS and other images to SD cards and USB drives, and sets them up
+# (user, Wi-Fi, SSH); also boots Compute Modules over USB (rpiboot, fastboot). Qt 6 desktop app, and
+# `rpi-imager --cli`. The 2.0 series: 2.1 is a release candidate.
+#
+# Writing to a drive needs root: upstream's polkit policy is installed, and the program asks for the
+# administrator's password through pkexec when it starts.
+#
+# Source changes:
+# - patches/system-libraries.patch with files/system.cmake: the tree's xz, zstd, zlib, libarchive, curl and
+#   libusb. Upstream clones its own copies (and nghttp2 and bzip2) with git at configure time and links them
+#   statically; with ours, their fixes reach the imager. yescrypt is part of the source and stays.
+# - the version is written in (sed): upstream asks `git describe`, and a release tarball has no history, so
+#   it would call itself 0.0.0-unknown and offer every listed version as an update.
+# - the check for new versions and the telemetry are off by default: apk updates the package, and nothing is
+#   reported unless the user turns it on.
+# - the time zone and Wi-Fi country lists are the ones in the source; upstream downloads newer ones while
+#   building.
+name = "rpi-imager"
+version = "2.0.12"
+release = 1
+summary = "Raspberry Pi Imager: write operating system images to SD cards and USB drives"
+license = "Apache-2.0"
+homepage = "https://github.com/raspberrypi/rpi-imager"
+patches = ["system-libraries.patch"]
+hostdeps = ["cmake", "ninja", "pkgconf", "qt6-qtdeclarative", "qt6-qttools", "util-linux"]
+builddeps = ["curl-devel", "eudev-devel", "gnutls-devel", "libarchive-devel", "libidn2-devel", "liburing-devel", "libusb-devel", "nettle-devel", "qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "qt6-qttools-devel", "xz-devel", "zlib-ng-compat-devel", "zstd-devel", "linux-headers"]
+# what it runs or loads, which the library scan cannot see: lsblk (drives), pkexec, openssl (secure boot), and
+# Qt's SVG and Wayland plugins
+rundeps = ["util-linux", "polkit", "openssl", "qt6-qtdeclarative", "qt6-qtsvg", "qt6-qtwayland"]
+# upstream's tests want Catch2 downloaded, drives and a display
+options = ["!check"]
+
+source = [
+    { url = "https://github.com/raspberrypi/rpi-imager/archive/refs/tags/v2.0.12.tar.gz", sha256 = "333ab9089d63ee514a3142ef70f01315a334acac62040e14a3090f2fd839e293" },
+]
+
+setup = '''
+cp $pkgfiles/system.cmake src/dependencies/system.cmake
+grep -q 'set(VERSION_STR "0.0.0-unknown")' src/cmake/GenerateVersion.cmake
+sed -i "s/set(VERSION_STR \"0.0.0-unknown\")/set(VERSION_STR \"v$version\")/" src/cmake/GenerateVersion.cmake
+%cmake -S src \
+    -DENABLE_CHECK_VERSION=OFF \
+    -DENABLE_TELEMETRY=OFF \
+    -DGENERATE_TIMEZONES_FROM_IANA=OFF \
+    -DGENERATE_COUNTRIES_FROM_REGDB=OFF \
+    -DBUILD_TESTING=OFF
+'''
+build = '''
+%cmake_build
+'''
+install = '''
+%cmake_install
+# the Debian packaging installs these, CMake does not
+install -Dm644 debian/com.raspberrypi.rpi-imager.policy "$pkgdir/usr/share/polkit-1/actions/com.raspberrypi.rpi-imager.policy"
+install -Dm644 debian/com.raspberrypi.rpi-imager-manifest.xml "$pkgdir/usr/share/mime/packages/com.raspberrypi.rpi-imager-manifest.xml"
+install -Dm644 license.txt "$pkgdir/usr/share/licenses/rpi-imager/license.txt"
+test -x "$pkgdir/usr/bin/rpi-imager"
+test -f "$pkgdir/usr/lib/udev/rules.d/99-rpiboot.rules"
+'''
