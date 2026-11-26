@@ -133,7 +133,7 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
     for (img.repositories) |r| if (r.len == 0 or std.mem.indexOfAny(u8, r, "\n\r") != null or std.mem.indexOf(u8, r, "DKREPO_EOF") != null)
         return cfg.fail(arena, diag, "repositories: one non-empty line each, no newlines", .{});
     for (img.unwanted) |u| {
-        if (!safeWord(u)) return cfg.fail(arena, diag, "unwanted '{s}': only letters, digits, '-', '_', '.', '+'", .{u});
+        if (!plainWord(u)) return cfg.fail(arena, diag, "unwanted '{s}': only letters, digits, '-', '_', '.', '+'", .{u});
         if (contains(img.packages, u)) return cfg.fail(arena, diag, "package '{s}' is in both 'packages' and 'unwanted'", .{u});
     }
     for (img.packages) |p| for (img.exclude) |x| if (glob(x, p))
@@ -141,8 +141,8 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
     // out/<name> is deleted and replaced by each successful run: ".." would be the build tree itself.
     for ([_][]const u8{ img.name, img.arch }) |s| if (!safeWord(s) or s[0] == '.' or s[0] == '-')
         return cfg.fail(arena, diag, "'{s}': a name or arch is letters, digits, '-', '_', '.', '+', and does not start with '.' or '-'", .{s});
-    for ([_][]const []const u8{ img.packages, img.services, &.{ img.name, img.hostname, img.label } }) |list| for (list) |s| if (!safeWord(s))
-        return cfg.fail(arena, diag, "'{s}': only letters, digits, '-', '_', '.', '+'", .{s});
+    for ([_][]const []const u8{ img.packages, img.services, &.{ img.name, img.hostname, img.label } }) |list| for (list) |s| if (!plainWord(s))
+        return cfg.fail(arena, diag, "'{s}': only letters, digits, '-', '_', '.', '+', and not starting with '-'", .{s});
 
     if (root.get("users")) |v| {
         const items = switch (v) {
@@ -159,7 +159,7 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
             u.* = .{ .name = try cfg.reqString(arena, diag, t, "name"), .groups = try cfg.optStrings(arena, diag, t, "groups") };
             if (try cfg.optString(arena, diag, t, "password")) |p| u.password = p;
             if (try cfg.optString(arena, diag, t, "shell")) |s| u.shell = s;
-            for ([_][]const []const u8{ &.{u.name}, u.groups }) |list| for (list) |s| if (!safeWord(s))
+            for ([_][]const []const u8{ &.{u.name}, u.groups }) |list| for (list) |s| if (!plainWord(s))
                 return cfg.fail(arena, diag, "user '{s}': '{s}': only letters, digits, '-', '_', '.', '+'", .{ u.name, s });
             if (std.mem.indexOfAny(u8, u.password, "'\n") != null or std.mem.indexOfAny(u8, u.shell, "'\n ") != null)
                 return cfg.fail(arena, diag, "user '{s}': password and shell may not contain quotes, spaces or newlines", .{u.name});
@@ -267,7 +267,8 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
         // tty1-tty5 run dkconsole (tty1 stays agetty when it logs a user in at boot);
         // tty6 and ttyS0 keep agetty as the independent way in
         try s.appendSlice(arena, "echo '==> console (dkconsole)'\n[ -x /target/usr/bin/dkconsole ] || { echo \"error: no /usr/bin/dkconsole (the package did not install it)\" >&2; exit 1; }\n");
-        var n: u8 = if (img.autologin.len > 0) 2 else 1;
+        // (greetd's autologin does not use tty1)
+        var n: u8 = if (img.autologin.len > 0 and !greetd) 2 else 1;
         while (n <= 5) : (n += 1) try w.add(arena, &s,
             \\[ -f /target/etc/dinit.d/tty{0d} ] || {{ echo "error: no /etc/dinit.d/tty{0d} to run dkconsole on (add dinit-services)" >&2; exit 1; }}
             \\sed -i 's|^command = .*|command = /usr/bin/dkconsole --vt {0d}|' /target/etc/dinit.d/tty{0d}
@@ -314,7 +315,7 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
             \\user = "{s}"
             \\EOF
             \\
-        , .{ img.session, img.autologin });
+        , .{ try tomlEscaped(arena, img.session), img.autologin });
     }
     if (img.autologin.len > 0 and !greetd) try w.add(arena, &s,
         \\echo '==> autologin'
@@ -494,6 +495,22 @@ fn contains(hay: []const []const u8, needle: []const u8) bool {
     return false;
 }
 
+/// `s` as the inside of a TOML basic string.
+fn tomlEscaped(arena: Allocator, s: []const u8) Allocator.Error![]const u8 {
+    var out: std.ArrayList(u8) = .empty;
+    for (s) |c| {
+        if (c == '"' or c == '\\') try out.append(arena, '\\');
+        try out.append(arena, c);
+    }
+    return out.items;
+}
+
+/// A word that is given to a command as an argument: never read as an option (a "package" `--allow-untrusted`
+/// would turn signature checking off).
+fn plainWord(s: []const u8) bool {
+    return safeWord(s) and s[0] != '-';
+}
+
 fn safeWord(s: []const u8) bool {
     if (s.len == 0) return false;
     for (s) |c| switch (c) {
@@ -562,6 +579,24 @@ test "an image name that would name another directory is refused (ID-03)" {
         try std.testing.expectError(error.InvalidImage, parse(a, try std.fmt.allocPrint(a, "name = \"{s}\"\npackages = [\"a\"]\noutput = [\"tar\"]\n", .{bad}), &diag));
     try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\narch = \"../..\"\npackages = [\"a\"]\noutput = [\"tar\"]\n", &diag));
     _ = try parse(a, "name = \"dkde-devel.2\"\npackages = [\"a\"]\noutput = [\"tar\"]\n", &diag);
+}
+
+test "image values that reach a command or a config file are checked or escaped (ID-14, ID-15, ID-16)" {
+    var arena_state = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena_state.deinit();
+    var diag: Diagnostic = .{};
+    const a = arena_state.allocator();
+    const head = "name = \"x\"\noutput = [\"tar\"]\n";
+    // a name that is an option: apk would read '--allow-untrusted' and stop checking signatures
+    for ([_][]const u8{ "packages = [\"--allow-untrusted\", \"base\"]", "packages = [\"a\"]\nunwanted = [\"-x\"]", "packages = [\"a\"]\nservices = [\"-q\"]", "packages = [\"a\"]\nhostname = \"-F\"", "packages = [\"a\"]\n[[users]]\nname = \"-o\"", "packages = [\"a\"]\n[[users]]\nname = \"u\"\ngroups = [\"-p\"]", "packages = [\"a\"]\narch = \"x86_64; rm -rf /\"" }) |bad|
+        try std.testing.expectError(error.InvalidImage, parse(a, try std.fmt.allocPrint(a, "{s}{s}\n", .{ head, bad }), &diag));
+    // a session command with quotes stays a valid greetd string
+    const base = head ++ "packages = [\"a\"]\nautologin = \"u\"\nlogin = \"greetd\"\nconsole = \"dkconsole\"\n";
+    const img = try parse(a, base ++ "session = \"sh -c \\\"dkde-session\\\"\"\n[[users]]\nname = \"u\"\n", &diag);
+    const s = try script(a, img);
+    try std.testing.expect(std.mem.indexOf(u8, s, "command = \"sh -c \\\"dkde-session\\\"\"\n") != null);
+    // greetd's autologin does not use tty1, so dkconsole gets it
+    try std.testing.expect(std.mem.indexOf(u8, s, "dkconsole --vt 1|' /target/etc/dinit.d/tty1") != null);
 }
 
 test "an image's issue text is written to /etc/issue" {
