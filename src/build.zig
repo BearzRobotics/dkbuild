@@ -1710,7 +1710,11 @@ fn pruneDeps(arena: Allocator, io: std.Io, opts: Options, t: tree.Tree, dry_run:
             const sha = e.name[0..64];
             if (wanted.contains(sha)) {
                 if (!std.mem.endsWith(u8, e.name, ".list")) continue;
-                const text = d.readFileAlloc(io, e.name, arena, .limited(1 << 22)) catch continue;
+                // without this list its store entries would count as unused: stop, having removed none
+                const text = d.readFileAlloc(io, e.name, arena, .limited(1 << 22)) catch |err| {
+                    out("error: cannot read {s}/{s}: {s}; nothing removed from {s}\n", .{ k.dir, e.name, @errorName(err), k.store orelse k.dir });
+                    return error.PrepareFailed;
+                };
                 var lines = std.mem.tokenizeScalar(u8, text, '\n');
                 while (lines.next()) |l| {
                     var f = std.mem.tokenizeScalar(u8, l, ' ');

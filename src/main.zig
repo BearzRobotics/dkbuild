@@ -598,6 +598,13 @@ pub fn main(init: std.process.Init) !void {
             } else return die(usage);
         }
         var t = try tree.load(arena, init.io, root, &problems);
+        // A recipe that does not load is missing from the tree: its vendored dependencies would count as unused
+        // and be deleted, and they may not be downloadable again.
+        if (problems.items.len > 0) {
+            report(problems.items);
+            std.debug.print("prune: nothing removed; fix these first (dkbuild check)\n", .{});
+            std.process.exit(1);
+        }
         t.allow_external = true;
         opts.tree = t;
         build.prune(arena, init.io, opts, dry_run) catch |err| switch (err) {
