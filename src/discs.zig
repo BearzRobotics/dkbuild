@@ -193,6 +193,9 @@ fn sourceStores(arena: Allocator, io: std.Io, root: []const u8) ![]const []const
 pub const Options = struct {
     root: []const u8,
     key: []const u8 = "",
+    /// A further private key no disc may carry: the default one, when another
+    /// was given with `--key`.
+    other_key: []const u8 = "",
 };
 
 fn say(comptime fmt: []const u8, args: anytype) void {
@@ -527,12 +530,17 @@ pub fn make(arena: Allocator, io: std.Io, t: tree.Tree, set: Set, opts: Options)
     const piece_sha = try arena.alloc([]const u8, pieces.len);
     const item_sha = try arena.alloc([]const u8, items.items.len);
     try hashAll(arena, io, items.items, pieces, piece_sha, item_sha);
-    // The private signing key never goes on a disc, under any name: no file may
-    // have its contents (checked before anything is written).
-    if (have_key) {
-        const key = Dir.cwd().readFileAlloc(io, opts.key, arena, .limited(1 << 16)) catch |err| {
-            say("error: {s}: {s}\n", .{ opts.key, @errorName(err) });
-            return error.PrepareFailed;
+    // A private signing key never goes on a disc, under any name: no file may
+    // have the contents of the one in use, or of the default one when another
+    // was given (checked before anything is written).
+    for ([_][]const u8{ opts.key, opts.other_key }) |private| {
+        if (private.len == 0) continue;
+        const key = Dir.cwd().readFileAlloc(io, private, arena, .limited(1 << 16)) catch |err| switch (err) {
+            error.FileNotFound => continue,
+            else => {
+                say("error: {s}: {s}\n", .{ private, @errorName(err) });
+                return error.PrepareFailed;
+            },
         };
         var h = Sha256.init(.{});
         h.update(key);
@@ -540,7 +548,7 @@ pub fn make(arena: Allocator, io: std.Io, t: tree.Tree, set: Set, opts: Options)
         for (pieces, piece_sha) |p, ps| {
             const whole = if (p.parts == 0) ps else item_sha[p.item];
             if (std.mem.eql(u8, whole, &key_sha)) {
-                say("error: {s} is a copy of the private signing key; it does not go on a disc\n", .{items.items[p.item].path});
+                say("error: {s} is a copy of the private key {s}; it does not go on a disc\n", .{ items.items[p.item].path, private });
                 return error.PrepareFailed;
             }
         }

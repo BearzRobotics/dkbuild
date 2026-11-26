@@ -18,7 +18,7 @@ dkbuild world [-j N] [-P N] [--key FILE] [--keep-root] [--no-check] [--keep-goin
 
 dkbuild image [-v | --verbose] FILE.toml
 
-dkbuild discs [--media M] FILE.toml
+dkbuild discs [--media M] [--key FILE] FILE.toml
 
 dkbuild prune [--dry-run] [--key FILE]
 
@@ -107,7 +107,7 @@ pkg and world
 : When a build fails, keep building what does not need it, and list the failed and skipped recipes at the end. A recipe changed without a release bump is listed too instead of stopping the run. The same lists are written to **logs/ARCH/last-run.txt**, with or without this option.
 
 --key FILE
-: RSA key used to sign packages. Default: **~/.config/dkbuild/signing.rsa**. Also accepted by **prune**.
+: RSA key used to sign packages. Default: **~/.config/dkbuild/signing.rsa**. Also accepted by **prune** and **discs**.
 
 --keep-root
 : Keep the build root under **work/NAME/** after the build, for inspection.
@@ -128,6 +128,9 @@ image
 discs
 --media M
 : Override the file's medium: **usb** (one image), **cd**, **dvd**, **dvd-dl**, **bd25**, **bd50** or **bd100**.
+
+--key FILE
+: The private key that signs the disc set (the index of a repository set, and the MANIFEST). Its public half must be in **keys/**. A file that does not exist is an error. No disc may carry this key or the default one. Without the option the default is used; a source set is made unsigned if that is missing.
 
 prune
 --dry-run

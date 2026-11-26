@@ -33,7 +33,7 @@ const usage =
     \\                             directory in out/<name>/); see SPEC.md 8. --verbose
     \\                             lists the packages asked for and shows each package
     \\                             apk installs (and the rest of the run) as it happens
-    \\  discs [--media M] <file.toml>
+    \\  discs [--media M] [--key FILE] <file.toml>
     \\                             the repository (kind = "repo") or the sources ("source")
     \\                             as ISO images in out/<name>/: one image (media usb) or a
     \\                             set for discs (cd, dvd, dvd-dl, bd25, bd50, bd100)
@@ -517,11 +517,15 @@ pub fn main(init: std.process.Init) !void {
     } else if (std.mem.eql(u8, cmd, "discs")) {
         var media: ?[]const u8 = null;
         var file: ?[]const u8 = null;
+        var key: ?[]const u8 = null;
         var k: usize = 0;
         while (k < rest.len) : (k += 1) {
             if (std.mem.eql(u8, rest[k], "--media") and k + 1 < rest.len) {
                 k += 1;
                 media = rest[k];
+            } else if (std.mem.eql(u8, rest[k], "--key") and k + 1 < rest.len) {
+                k += 1;
+                key = rest[k];
             } else if (file == null and rest[k].len > 0 and rest[k][0] != '-') {
                 file = rest[k];
             } else return die(usage);
@@ -551,6 +555,17 @@ pub fn main(init: std.process.Init) !void {
         var dopts: discs.Options = .{ .root = root };
         if (init.environ_map.get("HOME")) |home|
             dopts.key = try std.fs.path.join(arena, &.{ home, ".config", "dkbuild", "signing.rsa" });
+        if (key) |given| {
+            // a key that was asked for must be there: without this a mistyped
+            // path would make an unsigned source set
+            _ = std.Io.Dir.cwd().statFile(init.io, given, .{}) catch |err| {
+                std.debug.print("--key {s}: {s}\n", .{ given, @errorName(err) });
+                std.process.exit(1);
+            };
+            // the usual key stays guarded: it must not go on a disc either
+            dopts.other_key = dopts.key;
+            dopts.key = given;
+        }
         discs.make(arena, init.io, t, set, dopts) catch |err| switch (err) {
             error.OutOfMemory => return err,
             else => std.process.exit(1),

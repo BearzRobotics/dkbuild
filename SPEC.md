@@ -1454,7 +1454,7 @@ inside a namespace the installed root runs `apk --version`, `sh`, `ls` and
 | `--tree DIR` | Before the command: use the recipe tree at `DIR` instead of the current directory |
 | `-j N` | Parallel jobs per build (default: the number of CPUs) |
 | `-P N` | Builds at once (default 1) |
-| `--key FILE` | `pkg`, `world`, `prune`: the private signing key (default `~/.config/dkbuild/signing.rsa`) |
+| `--key FILE` | `pkg`, `world`, `prune`, `discs`: the private signing key (default `~/.config/dkbuild/signing.rsa`); for `discs` a file that is not there is an error, and no disc may carry this key or the default one |
 | `--keep-root` | Keeps the build root after the build |
 | `--no-check` | Skips every recipe's `check` step |
 | `--keep-going` | A failure does not stop the run: what depends on it is skipped, the rest builds, and a recipe changed without a `release` bump is listed instead of stopping it (5.5) |
