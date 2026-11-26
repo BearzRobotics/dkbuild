@@ -83,7 +83,8 @@ pub fn run(arena: Allocator, io: std.Io, root: []const u8, path_var: []const u8,
         say("  {s:<11} {s}", .{ t.name, if (found) "ok" else if (t.required) "MISSING" else "absent" });
         if (!found) say("   ({s})", .{t.why});
         say("\n", .{});
-        if (!found and (t.required or std.mem.eql(u8, t.name, "openssl") or std.mem.eql(u8, t.name, "git"))) {
+        // openssl, git and uidmap (newuidmap: any image with users, so every shipped live image) are suggested too
+        if (!found and (t.required or std.mem.eql(u8, t.name, "openssl") or std.mem.eql(u8, t.name, "git") or std.mem.eql(u8, t.apt, "uidmap"))) {
             try missing.append(arena, t);
             if (t.required) problems += 1;
         }

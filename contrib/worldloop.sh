@@ -12,7 +12,14 @@ cd "$(dirname "$0")/.." || exit 1
 export DKBUILD_FAST_WORK="${DKBUILD_FAST_WORK-}"
 # repo/x86_64 may be a link to another disk: do not start when it leads nowhere
 [ -d repo/x86_64/ ] || { echo "repo/x86_64 is missing (disk not mounted?)" > work/worldloop.err; exit 1; }
-while pgrep -f "dkbuild world" >/dev/null; do sleep 30; done
+# Wait for whatever builds or prunes in this tree: dkbuild holds this lock while it does. (A search of the process
+# list matched other trees and mere mentions of the words, and missed pkg and 'dkbuild --tree DIR world'.) A running
+# fetch is left alone: prune refuses to run beside one.
+mkdir -p work
+if ! flock -n work/dkbuild.lock true; then
+    echo "waiting for the dkbuild that is working in this tree" >> work/worldloop.log
+    flock work/dkbuild.lock true
+fi
 # continue the numbering, so that earlier pass logs are kept
 # (after the highest number, not the first free one: a gap would lead into later logs and overwrite them)
 n=1
