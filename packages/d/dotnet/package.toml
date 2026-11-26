@@ -23,6 +23,10 @@
 # r7: hostdeps dotnet-bootstrap-gcc-runtime (it was only a stage0 dependency). Once dotnet itself is in repo/ the seed is the installed
 # /usr/lib/dotnet (below), which runs on the GCC runtime libraries: without them it died at its first command ("Segmentation fault
 # ... build-server shutdown --msbuild", seed version ''), r6 of the world run, 2026-11-16.
+# r8: the snapshot pins commits and the checksums of what it downloads and runs (FV-06). When updating, set all
+# of them: `git ls-remote <url> 'refs/tags/<tag>^{}'` for commits; pnpm's "dist.integrity" from
+# registry.npmjs.org/pnpm/<version>; the SDK's sha512 from Microsoft's releases.json; sha256sum of the .NET
+# archive https://github.com/dotnet/dotnet/archive/<commit>.tar.gz.
 name = "dotnet"
 version = "10.0.114"
 release = 8
@@ -37,7 +41,7 @@ rundeps = ["icu", "openssl", "heimdal-libs", "lttng-ust"]
 options = ["!check", "!strip", "jobs:12", "selfhost"]
 
 source = [
-    { url = "snapshot:dotnet v10.0.114 10.0.112", sha256 = "9b4a5b419f57b92762113325fa69ae1cd780d77d3871aae83ea174a831db20eb" },
+    { url = "snapshot:dotnet v10.0.114 10.0.112 0427b9abbead3fa64c6655eb4290c537397131fa 7c89490904ad48189156cbb16e657d67d1f5dd891aebc9cf9e927e4e4044752c 505fa3625ef76ded4ffa125c56c42a8e1502ed18b262af0a8f5c08a1a12876c893e5fb345913c0afe60db92167a4ce1921935fb9110894aff07aa6af54a7d10d", sha256 = "9b4a5b419f57b92762113325fa69ae1cd780d77d3871aae83ea174a831db20eb" },
 ]
 
 environment = '''

@@ -2,12 +2,16 @@
 # dkbuild snapshot (SPEC.md 5.3): Electron and the Chromium it pins, checked
 # out with depot_tools' gclient and made into one source tarball, so the build
 # needs no network. Runs on the host at fetch time, for a source
-#   { url = "snapshot:electron <electron tag> <chromium version> <depot_tools commit>", sha256 = ... }
+#   { url = "snapshot:electron <electron tag> <chromium version> <depot_tools commit> <electron commit>
+#     <chromium commit>", sha256 = ... }   (one line)
+# Electron, Chromium and depot_tools are fetched by commit, and checked to be at it before any of their scripts
+# runs (a tag can be moved); the rest is pinned by those commits (DEPS, lockfiles).
 #
 #   $1  the tarball to write (zstd-compressed tar)
 #   $2  a work directory (kept between runs: a failed or repeated sync resumes)
 #   $3  Electron's tag (v43.8.3)    $4  Chromium's version (150.0.7871.250)
 #   $5  the depot_tools commit
+#   $6  the commit Electron's tag names    $7  the commit Chromium's tag names
 #
 # What goes in: the gclient checkout with Electron's patches applied; Electron's
 # node_modules (yarn, from the yarn release in its tree) and third_party/node's
@@ -17,12 +21,20 @@
 # the same pins give the same sha256.
 set -eu
 out=$1 work=$2 etag=$3 cver=$4 dtools=$5
+[ $# -ge 7 ] || { echo "snapshot: electron needs <tag> <chromium version> <depot_tools commit> <electron commit> <chromium commit>" >&2; exit 1; }
+ecommit=$6 ccommit=$7
 name=electron-$etag-$cver
 mkdir -p "$work"
 cd "$work"
 log() { echo "snapshot: $*" >&2; }
 
-if [ ! -d depot_tools/.git ]; then
+# at DIR COMMIT: stop unless the checkout is at exactly that commit
+at() {
+    _head=$(git -C "$1" rev-parse HEAD)
+    [ "$_head" = "$2" ] || { log "$1 is at $_head, pinned $2: refusing it"; exit 1; }
+}
+
+if [ "$(git -C depot_tools rev-parse HEAD 2>/dev/null)" != "$dtools" ]; then
     log "depot_tools $dtools"
     rm -rf depot_tools
     git init -q depot_tools
@@ -35,22 +47,10 @@ export DEPOT_TOOLS_UPDATE=0 DEPOT_TOOLS_METRICS=0 GCLIENT_SUPPRESS_GIT_VERSION_W
 export VPYTHON_BYPASS="manually managed python not supported by chrome operations"
 export CHROMIUM_BUILDTOOLS_PATH="$work/src/buildtools"
 
-# On a re-run (an interrupted or failed sync), gclient fetches a repository's
-# whole history (tens of GB for Chromium) for any revision given as a tag;
-# given a commit it already has, it fetches nothing. So: fetch the two tags
-# shallowly in the existing checkouts and pin the commits they point to.
-src_rev=$cver
-e_rev=$etag
-if [ -d src/.git ]; then
-    log "shallow fetch of tag $cver in src"
-    git -C src fetch -q --depth 1 origin "+refs/tags/$cver:refs/tags/$cver" &&
-        src_rev=$(git -C src rev-parse "refs/tags/$cver^{commit}") || true
-fi
-if [ -d src/electron/.git ]; then
-    log "shallow fetch of tag $etag in src/electron"
-    git -C src/electron fetch -q --depth 1 origin "+refs/tags/$etag:refs/tags/$etag" &&
-        e_rev=$(git -C src/electron rev-parse "refs/tags/$etag^{commit}") || true
-fi
+at depot_tools "$dtools"
+# gclient is given commits: for a tag, a re-run fetches a repository's whole history (tens of GB for Chromium).
+src_rev=$ccommit
+e_rev=$ecommit
 cat > .gclient <<EOF
 solutions = [{
     "name": "src/electron",
@@ -73,6 +73,9 @@ log "gclient sync (Electron $etag, Chromium $cver): a large download"
 # --ignore-dep-type: no Cloud Storage or CIPD downloads at all (non_git_source
 # above covers most; a few test-data entries have no condition)
 python3 depot_tools/gclient.py sync --no-history --nohooks --force --reset --ignore-dep-type=gcs --ignore-dep-type=cipd
+
+at src "$ccommit"
+at src/electron "$ecommit"
 
 log "generated version headers"
 python3 src/build/util/lastchange.py -m DAWN_COMMIT_HASH -s src/third_party/dawn \

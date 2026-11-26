@@ -5,13 +5,17 @@
 # not in it: the recipe takes Google's release tarball of the Chromium version
 # brave-core's package.json pins, and applies Brave's patches to it itself.
 # Runs on the host at fetch time, for
-#   { url = "snapshot:brave <brave-core tag> <pnpm version>", sha256 = ... }
+#   { url = "snapshot:brave <brave-core tag> <pnpm version> <brave-core commit> <pnpm integrity>", sha256 = ... }
+# brave-core is fetched by commit (a tag can be moved), and pnpm, which then runs on this machine, is checked
+# against the integrity the npm registry publishes for it before it is unpacked.
 #
 #   $1  the tarball to write (zstd-compressed tar)
 #   $2  a work directory (kept between runs: a failed run resumes)
 #   $3  brave-core's tag (v1.99.57)
 #   $4  the pnpm release to install the JavaScript packages with (11.25.0, the
 #       one brave-core's third_party/node/package.json pins)
+#   $5  the commit the tag names
+#   $6  pnpm's integrity (sha512-..., from registry.npmjs.org/pnpm/<version>)
 #
 # What goes in:
 #   - brave-core at the tag (top directory brave-core-<tag>; the recipe moves
@@ -44,6 +48,8 @@
 # the lockfiles' hashes).
 set -eu
 out=$1 work=$2 tag=$3 pnpmver=$4
+[ $# -ge 6 ] || { echo "snapshot: brave needs <tag> <pnpm version> <commit> <pnpm integrity>" >&2; exit 1; }
+commit=$5 pnpmint=$6
 # every fetch below is https: no ext::, file:: or ssh helper, whatever a URL says
 export GIT_ALLOW_PROTOCOL=https
 name=brave-core-$tag
@@ -53,7 +59,7 @@ log() { echo "snapshot: $*" >&2; }
 
 # shallow checkout of one commit (or tag) into a directory
 checkout() { # dir url rev
-    if [ -f "$1/.dkdone" ]; then return 0; fi
+    if [ "$(cat "$1/.dkdone" 2>/dev/null)" = "$3" ]; then return 0; fi
     rm -rf "$1"
     git init -q "$1"
     log "$2 at $3"
@@ -67,10 +73,10 @@ checkout() { # dir url rev
         sleep 10
     done
     git -C "$1" checkout -q FETCH_HEAD
-    touch "$1/.dkdone"
+    echo "$3" > "$1/.dkdone"
 }
 
-checkout src https://github.com/brave/brave-core.git "refs/tags/$tag"
+checkout src https://github.com/brave/brave-core.git "$commit"
 
 # The DEPS entries a Linux build checks out (use_relative_paths: each is
 # relative to brave-core's top directory).
@@ -119,11 +125,17 @@ printf 'LASTCHANGE=%s-refs/tags/%s\n' "$rev" "$tag" > src/LASTCHANGE.dkbuild
 git -C src log -1 --format=%ct HEAD > src/LASTCHANGE.committime.dkbuild
 
 # pnpm itself, the npm package (bundled JavaScript), run with the host's node
-if [ ! -f pnpm/package/bin/pnpm.mjs ]; then
+# (.verified is written last: a partly unpacked, or another, pnpm is never run)
+if [ "$(cat pnpm/.verified 2>/dev/null)" != "$pnpmint" ]; then
     log "pnpm $pnpmver"
-    rm -rf pnpm
+    rm -rf pnpm pnpm.tgz
+    curl -fsSL --proto =https --proto-redir =https -o pnpm.tgz "https://registry.npmjs.org/pnpm/-/pnpm-$pnpmver.tgz"
+    got=$(python3 -I -c 'import base64, hashlib, sys; print("sha512-" + base64.b64encode(hashlib.sha512(open(sys.argv[1], "rb").read()).digest()).decode())' pnpm.tgz)
+    [ "$got" = "$pnpmint" ] || { rm -f pnpm.tgz; log "pnpm: integrity $got, pinned $pnpmint: refusing it"; exit 1; }
     mkdir pnpm
-    curl -fsSL "https://registry.npmjs.org/pnpm/-/pnpm-$pnpmver.tgz" | tar -xzf - -C pnpm
+    tar -xzf pnpm.tgz -C pnpm
+    rm -f pnpm.tgz
+    echo "$pnpmint" > pnpm/.verified
 fi
 # --ignore-scripts: nothing from a package runs here. The platform: musl
 # x64, whatever the host is. The store and the copies are private to this

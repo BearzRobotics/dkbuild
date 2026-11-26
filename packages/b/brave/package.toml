@@ -52,6 +52,10 @@
 # (packages update it), and update notifications are off.
 #
 # Not built yet.
+# r1: the snapshot pins commits and the checksums of what it downloads and runs (FV-06). When updating, set all
+# of them: `git ls-remote <url> 'refs/tags/<tag>^{}'` for commits; pnpm's "dist.integrity" from
+# registry.npmjs.org/pnpm/<version>; the SDK's sha512 from Microsoft's releases.json; sha256sum of the .NET
+# archive https://github.com/dotnet/dotnet/archive/<commit>.tar.gz.
 name = "brave"
 version = "1.99.57"
 release = 1
@@ -81,7 +85,7 @@ options = ["!check", "jobs:12", "cargodeps", "cargolock=tools/crates/gnrt"]
 source = [
     { url = "https://commondatastorage.googleapis.com/chromium-browser-official/chromium-157.0.8103.79.tar.xz", sha256 = "256b77d82104799a2d3aa0a389cddc1af706ee2037205233566d7d3f1cfbb17b" },
     { url = "https://github.com/google/crubit/archive/40fbac34597084a0863256d633889eac2c23b91b/crubit-40fbac34597084a0863256d633889eac2c23b91b.tar.gz", sha256 = "07b57fedcffc8c1e8df4875fc314c2290c8cd50ab8d04340b12c945e9c331f5a" },
-    { url = "snapshot:brave v1.99.57 11.25.0", sha256 = "cbc2cca71a3979212cba846f861a73a3117b89708a1fb99d67b04243b53b6010" },
+    { url = "snapshot:brave v1.99.57 11.25.0 52886f99c599c22139930531da30c7c8be9f38a1 sha512-XN6SW08HX3Jetx+64YpC/+eEUkeJ8ZthxzHLhyHsKKruFg4BqNWvT+2ypCzb8wDv4j2zVrDUoXtNY+EfirfJVg==", sha256 = "cbc2cca71a3979212cba846f861a73a3117b89708a1fb99d67b04243b53b6010" },
 ]
 
 environment = '''

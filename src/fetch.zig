@@ -193,6 +193,14 @@ fn makeSnapshot(arena: Allocator, io: std.Io, cache: []const u8, spec: []const u
     for (id.items) |*c| if (c.* == '/' or c.* == ':') {
         c.* = '_';
     };
+    // Pinned checksums make some argument lists longer than a file name may be: those names are cut, and told
+    // apart by a hash of the whole list.
+    if (id.items.len > 180) {
+        var h: [32]u8 = undefined;
+        std.crypto.hash.sha2.Sha256.hash(spec, &h, .{});
+        id.shrinkRetainingCapacity(100);
+        try id.appendSlice(arena, try std.fmt.allocPrint(arena, "-{s}", .{std.fmt.bytesToHex(h, .lower)[0..16]}));
+    }
     const dir = try std.fs.path.join(arena, &.{ cache, "snapshots" });
     std.Io.Dir.cwd().createDirPath(io, dir) catch |err| {
         message.* = try std.fmt.allocPrint(arena, "cannot create {s}: {s}", .{ dir, @errorName(err) });
