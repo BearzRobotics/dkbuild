@@ -867,6 +867,11 @@ fn translateCall(arena: Allocator, code: []const u8, env: *const Env, pkgname: [
         try words.append(arena, t);
     }
     const w = words.items;
+    // a `mode=` or `name=` that cannot be used must not become the default one: the call is left as a TODO
+    for (call.kwargs) |k| {
+        if (std.mem.eql(u8, k.key, "mode") and k.value != .int) return false;
+        if (std.mem.eql(u8, k.key, "name") and k.value != .str) return false;
+    }
 
     if (std.mem.eql(u8, method, "do")) {
         if (w.len == 0 or call.kwargs.len != 0) return false;
@@ -1072,13 +1077,16 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
 
     var consumed: std.StringHashMapUnmanaged(void) = .empty;
     const strOf = struct {
-        fn get(e: *const Env, c: *std.StringHashMapUnmanaged(void), a: Allocator, key: []const u8) Allocator.Error!?[]const u8 {
+        fn get(e: *const Env, c: *std.StringHashMapUnmanaged(void), a: Allocator, ns: *std.ArrayList(Note), lines: *const std.StringHashMapUnmanaged(usize), key: []const u8) Allocator.Error!?[]const u8 {
             try c.put(a, key, {});
             const v = e.get(key) orelse return null;
             return switch (v) {
                 .str => |s| s,
                 .int => |n| try std.fmt.allocPrint(a, "{d}", .{n}),
-                else => null,
+                else => blk: {
+                    try ns.append(a, .{ .line = lines.get(key) orelse 0, .kind = .todo, .text = try std.fmt.allocPrint(a, "`{s}` could not be evaluated; a default stands in for it, or it is left out", .{key}) });
+                    break :blk null;
+                },
             };
         }
     }.get;
@@ -1108,17 +1116,19 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
         }
     }.get;
 
-    const name = (try strOf(&env, &consumed, arena, "pkgname")) orelse "unknown";
-    const version = (try strOf(&env, &consumed, arena, "pkgver")) orelse "0";
+    const name = (try strOf(&env, &consumed, arena, &notes, &lines_of, "pkgname")) orelse "unknown";
+    const version = (try strOf(&env, &consumed, arena, &notes, &lines_of, "pkgver")) orelse "0";
     const pkgrel: i64 = if (env.get("pkgrel")) |v| (if (v == .int) v.int else 0) else 0;
     try consumed.put(arena, "pkgrel", {});
+    if (env.get("pkgrel")) |v| if (v != .int)
+        try notes.append(arena, .{ .line = lines_of.get("pkgrel") orelse 0, .kind = .todo, .text = "`pkgrel` is not a plain number; release 1 stands in for it" });
     if (env.get("pkgname") == null or env.get("pkgname").? != .str)
         try notes.append(arena, .{ .line = 0, .kind = .todo, .text = "`pkgname` is missing or not a plain string" });
     if (env.get("pkgver") == null or env.get("pkgver").? != .str)
         try notes.append(arena, .{ .line = 0, .kind = .todo, .text = "`pkgver` is missing or not a plain string" });
-    const summary = (try strOf(&env, &consumed, arena, "pkgdesc")) orelse "TODO";
-    const license = (try strOf(&env, &consumed, arena, "license")) orelse "TODO";
-    const homepage = try strOf(&env, &consumed, arena, "url");
+    const summary = (try strOf(&env, &consumed, arena, &notes, &lines_of, "pkgdesc")) orelse "TODO";
+    const license = (try strOf(&env, &consumed, arena, &notes, &lines_of, "license")) orelse "TODO";
+    const homepage = try strOf(&env, &consumed, arena, &notes, &lines_of, "url");
 
     const hostdeps = try listOf(&env, &consumed, arena, &notes, &lines_of, "hostmakedepends");
     const builddeps = try listOf(&env, &consumed, arena, &notes, &lines_of, "makedepends");
@@ -1165,9 +1175,9 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
         switch (hv) {
             .str => |s| try src_shas.append(arena, s),
             .list => |items| for (items) |it| {
-                if (it.asStr()) |s| try src_shas.append(arena, s);
+                if (it.asStr()) |s| try src_shas.append(arena, s) else try notes.append(arena, .{ .line = lines_of.get("sha256") orelse 0, .kind = .todo, .text = "a `sha256` item is not a plain string and was skipped" });
             },
-            else => {},
+            else => try notes.append(arena, .{ .line = lines_of.get("sha256") orelse 0, .kind = .todo, .text = "`sha256` could not be evaluated" }),
         }
     }
     if (src_urls.items.len != src_shas.items.len)
@@ -1193,17 +1203,24 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
         for (v.dict) |e| {
             if (std.mem.eql(u8, key, "tool_flags")) {
                 var flags: std.ArrayList([]const u8) = .empty;
-                if (e.value == .list) for (e.value.list) |f| if (f.asStr()) |s| try flags.append(arena, s);
+                const skipped = Note{ .line = lines_of.get(key) orelse 0, .kind = .todo, .text = try std.fmt.allocPrint(arena, "`tool_flags` {s}: a flag is not a plain string and was skipped", .{e.key}) };
+                switch (e.value) {
+                    .list => |items| for (items) |f| {
+                        if (f.asStr()) |s| try flags.append(arena, s) else try notes.append(arena, skipped);
+                    },
+                    .str => |s| try flags.append(arena, s),
+                    else => try notes.append(arena, skipped),
+                }
                 if (flags.items.len == 0) continue;
                 try environment.print(arena, "export {s}=\"${{{s}}} {s}\"\n", .{ e.key, e.key, try std.mem.join(arena, " ", flags.items) });
-            } else if (e.value.asStr()) |s| {
+            } else if (try argText(arena, e.value)) |s| {
                 try environment.print(arena, "export {s}={s}\n", .{ e.key, try shellWord(arena, s) });
-            }
+            } else try notes.append(arena, .{ .line = lines_of.get(key) orelse 0, .kind = .todo, .text = try std.fmt.allocPrint(arena, "`env` {s} could not be evaluated and was skipped", .{e.key}) });
         }
     }
 
     // Build style and the steps.
-    const style = try strOf(&env, &consumed, arena, "build_style");
+    const style = try strOf(&env, &consumed, arena, &notes, &lines_of, "build_style");
     const cfg_args = try listOf(&env, &consumed, arena, &notes, &lines_of, "configure_args");
     const make_build_args = try listOf(&env, &consumed, arena, &notes, &lines_of, "make_build_args");
     const make_install_args = try listOf(&env, &consumed, arena, &notes, &lines_of, "make_install_args");
@@ -1216,7 +1233,9 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
         &.{ "autoreconf", "-if", "-W", "none" };
     const use_env = if (env.get("make_use_env")) |v| (v == .boolean and v.boolean) else false;
     try consumed.put(arena, "make_use_env", {});
-    const check_target = (try strOf(&env, &consumed, arena, "make_check_target")) orelse "check";
+    if (env.get("make_use_env")) |v| if (v != .boolean)
+        try notes.append(arena, .{ .line = lines_of.get("make_use_env") orelse 0, .kind = .todo, .text = "`make_use_env` is not True or False; taken as False" });
+    const check_target = (try strOf(&env, &consumed, arena, &notes, &lines_of, "make_check_target")) orelse "check";
 
     var steps: [4]std.ArrayList(u8) = .{ .empty, .empty, .empty, .empty };
     const phase_names = [_][]const u8{ "configure", "build", "check", "install" };
@@ -1525,6 +1544,47 @@ test "comments indented unlike the code neither unindent it nor hide it (CB-02)"
     // comments in the middle of a body, at any depth, change nothing either
     const mid = try convert(a, head ++ "    self.do(\"make\", \"a\")\n# at the margin\n            # far in\n    self.do(\"make\", \"b\")\n", .{ .origin = "c" });
     try std.testing.expect(std.mem.indexOf(u8, mid.toml, "make a\n") != null and std.mem.indexOf(u8, mid.toml, "make b\n") != null);
+}
+
+test "every value that cannot be used is noted, never silently replaced (CB-03)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const c = try convert(a,
+        \\pkgname = "n"
+        \\pkgver = "1"
+        \\pkgrel = _rel
+        \\pkgdesc = f"{_what} library"
+        \\license = _lic
+        \\url = f"https://x.org/{_what}"
+        \\build_style = _style
+        \\make_check_target = f"check-{_what}"
+        \\make_use_env = _flag
+        \\source = "https://x.org/n.tgz"
+        \\sha256 = [_sum]
+        \\env = {"CC": self.get_tool("CC"), "V": 1}
+        \\tool_flags = {"CFLAGS": ["-O2", f"-I{_root}/x"], "LDFLAGS": "-lfoo", "CXXFLAGS": 3}
+        \\
+        \\def install(self):
+        \\    self.install_file("a", "etc", mode=_m.mode)
+        \\    self.install_file("b", "etc", name=_m.arch + ".conf")
+        \\    self.install_dir("etc/d", mode=_m.mode)
+        \\
+    , .{ .origin = "n" });
+    for ([_][]const u8{ "pkgrel", "pkgdesc", "license", "url", "build_style", "make_check_target", "make_use_env", "sha256", "CC", "CFLAGS", "CXXFLAGS", "mode=_m.mode", "name=_m.arch", "install_dir" }) |want| {
+        var noted = false;
+        for (c.notes) |n| if (n.kind == .todo and std.mem.indexOf(u8, n.text, want) != null) {
+            noted = true;
+        };
+        if (!noted) std.debug.print("no note about {s}\n", .{want});
+        try std.testing.expect(noted);
+    }
+    // what can be used still is: an integer in env, a flag string
+    try std.testing.expect(std.mem.indexOf(u8, c.toml, "export V=1") != null);
+    try std.testing.expect(std.mem.indexOf(u8, c.toml, "-lfoo") != null);
+    // and no file is installed with a mode or name the template did not give
+    try std.testing.expect(std.mem.indexOf(u8, c.toml, "install -Dm644 a ") == null);
+    try std.testing.expect(std.mem.indexOf(u8, c.toml, "-dm755") == null);
 }
 
 test "the reader evaluates strings, f-strings, lists, dicts and concatenation" {
