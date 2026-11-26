@@ -339,6 +339,10 @@ the `*deps` options.
 files in `/run` or `/var/run` (a tmpfs made at boot: empty directories there
 are dropped with a note, and `tmpfiles.d` makes them at boot).
 
+Before those checks, `/usr/share/info/dir` and `/usr/lib/charset.alias` are
+removed: many installs make them, and no package can own them, as a second
+package with its own copy could not be installed beside it.
+
 ### 5.5 Macros
 
 Macros expand to the commands every recipe would otherwise repeat. They

@@ -349,6 +349,48 @@ fn dropEmptyTree(arena: Allocator, io: std.Io, destdir: []const u8, sub: []const
     return true;
 }
 
+/// Files many installs make that belong to no package, since a second package with its own copy cannot be installed
+/// beside the first: the Info index (usr/share/info/dir, in 67 -doc packages), and gettext's old charset.alias.
+const shared_files = [_][]const u8{ "usr/share/info/dir", "usr/lib/charset.alias" };
+
+/// Removes them from what an install left. No link on the way is followed: the tree is the build's.
+fn dropSharedFiles(io: std.Io, destdir: []const u8) void {
+    for (shared_files) |path| {
+        var dir = Dir.cwd().openDir(io, destdir, .{}) catch return;
+        var rest: []const u8 = path;
+        while (std.mem.indexOfScalar(u8, rest, '/')) |slash| {
+            const next = dir.openDir(io, rest[0..slash], .{ .follow_symlinks = false }) catch break;
+            dir.close(io);
+            dir = next;
+            rest = rest[slash + 1 ..];
+        } else dir.deleteFile(io, rest) catch {};
+        dir.close(io);
+    }
+}
+
+test "shared files are dropped, never through a link (PKG-05)" {
+    const io = std.testing.io;
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const base = try tmp.dir.realPathFileAlloc(io, ".", st.allocator());
+    try tmp.dir.createDirPath(io, "d/usr/share/info");
+    try tmp.dir.createDirPath(io, "d/usr/lib");
+    try tmp.dir.writeFile(io, .{ .sub_path = "d/usr/share/info/dir", .data = "x" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "d/usr/share/info/a.info", .data = "x" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "d/usr/lib/charset.alias", .data = "x" });
+    try tmp.dir.createDirPath(io, "outside/info");
+    try tmp.dir.writeFile(io, .{ .sub_path = "outside/info/dir", .data = "keep" });
+    try tmp.dir.createDirPath(io, "e/usr");
+    try tmp.dir.symLink(io, "../../outside", "e/usr/share", .{});
+    for ([_][]const u8{ "d", "e" }) |d| dropSharedFiles(io, try std.fs.path.join(st.allocator(), &.{ base, d }));
+    try std.testing.expectError(error.FileNotFound, tmp.dir.access(io, "d/usr/share/info/dir", .{}));
+    try std.testing.expectError(error.FileNotFound, tmp.dir.access(io, "d/usr/lib/charset.alias", .{}));
+    try tmp.dir.access(io, "d/usr/share/info/a.info", .{});
+    try tmp.dir.access(io, "outside/info/dir", .{});
+}
+
 /// Everything under `destdir` must sit in an allowed top-level directory,
 /// and nothing may be in /usr/local.
 pub fn checkPolicy(arena: Allocator, io: std.Io, destdir: []const u8, problems: *std.ArrayList([]const u8)) !void {
@@ -1519,6 +1561,8 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
             return error.BuildFailed;
         }
     }
+
+    dropSharedFiles(io, try std.fs.path.join(arena, &.{ root_rel, "destdir" }));
 
     // 5. Policy
     var problems: std.ArrayList([]const u8) = .empty;
