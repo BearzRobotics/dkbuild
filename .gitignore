@@ -31,6 +31,8 @@ zig-out/
 !/tests/trees/vendor/.gitkeep
 /tests/trees/fetch-cargo/*
 !/tests/trees/fetch-cargo/.gitkeep
+/tests/trees/restore/*
+!/tests/trees/restore/.gitkeep
 /tests/trees/prune/*
 !/tests/trees/prune/.gitkeep
 /tests/trees/fetch-zig/*

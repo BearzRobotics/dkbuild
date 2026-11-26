@@ -377,6 +377,106 @@ pub fn checkPolicy(arena: Allocator, io: std.Io, destdir: []const u8, problems: 
     try problems.append(arena, "installs into /usr/local");
 }
 
+const StoreKind = enum { maven, nuget };
+const Stage = struct { store: []const u8, lists: []const u8 };
+
+/// Empty directories for one restore step to write into: its store and its dependency list.
+fn restoreStage(arena: Allocator, io: std.Io, work: []const u8, name: []const u8) BuildError!Stage {
+    var dirs: [2][]const u8 = undefined;
+    for ([_][]const u8{ "store", "lists" }, &dirs) |sub, *d| {
+        const rel = try std.fs.path.join(arena, &.{ work, try std.fmt.allocPrint(arena, "stage-{s}", .{name}), sub });
+        Dir.cwd().createDirPath(io, rel) catch return error.PrepareFailed;
+        d.* = absPath(arena, io, rel) catch return error.PrepareFailed;
+    }
+    return .{ .store = dirs[0], .lists = dirs[1] };
+}
+
+/// A line of a restore's list: a plain relative path.
+fn safeStorePath(p: []const u8) bool {
+    if (p.len == 0 or p[0] == '/') return false;
+    for (p) |c| if (c < ' ' or c == 0x7f) return false;
+    var parts = std.mem.splitScalar(u8, p, '/');
+    while (parts.next()) |part| if (part.len == 0 or std.mem.eql(u8, part, ".") or std.mem.eql(u8, part, "..")) return false;
+    return true;
+}
+
+/// Adds what a restore step downloaded into its staging store to the shared one, then writes its list at
+/// `list_path`. The step ran upstream code, so only regular files are taken, a file the store has already is never
+/// replaced, and the checksum files are made here from the contents.
+fn mergeRestored(arena: Allocator, io: std.Io, kind: StoreKind, stage: Stage, store: []const u8, list_path: []const u8, log: *std.ArrayList(u8)) !void {
+    const list_name = std.fs.path.basename(list_path);
+    var lists = try Dir.cwd().openDir(io, stage.lists, .{});
+    defer lists.close(io);
+    const st = try lists.statFile(io, list_name, .{ .follow_symlinks = false });
+    if (st.kind != .file) return error.BadRestoreList;
+    const list = try lists.readFileAlloc(io, list_name, arena, .limited(1 << 24));
+
+    var src = try Dir.cwd().openDir(io, stage.store, .{ .iterate = true });
+    defer src.close(io);
+    var w = try src.walk(arena);
+    defer w.deinit();
+    while (try w.next(io)) |e| {
+        if (e.kind != .file) continue;
+        const wanted = switch (kind) {
+            .maven => !std.mem.endsWith(u8, e.path, ".sha1") and !std.mem.endsWith(u8, e.path, ".sha256") and !std.mem.endsWith(u8, e.path, ".part"),
+            .nuget => std.mem.endsWith(u8, e.path, ".nupkg"),
+        };
+        if (!wanted or !safeStorePath(e.path)) continue;
+        const from = try std.fs.path.join(arena, &.{ stage.store, e.path });
+        const to = try std.fs.path.join(arena, &.{ store, e.path });
+        if (pathExists(io, to)) {
+            // a repository's metadata differs from one restore to the next; an artifact should not
+            if (!std.mem.eql(u8, std.fs.path.basename(e.path), "maven-metadata.xml")) {
+                const a = try fetch.hashFile(io, from);
+                const b = try fetch.hashFile(io, to);
+                if (!std.mem.eql(u8, &a, &b))
+                    try log.appendSlice(arena, try std.fmt.allocPrint(arena, "warning: {s} downloaded with other contents than the store's; the store's is kept\n", .{e.path}));
+            }
+            continue;
+        }
+        try Dir.cwd().createDirPath(io, std.fs.path.dirname(to) orelse store);
+        // its checksums first: a build never sees an artifact without them
+        const data = try src.readFileAlloc(io, e.path, std.heap.page_allocator, .limited(1 << 31));
+        defer std.heap.page_allocator.free(data);
+        switch (kind) {
+            .maven => {
+                var s1: [20]u8 = undefined;
+                std.crypto.hash.Sha1.hash(data, &s1, .{});
+                var s2: [32]u8 = undefined;
+                std.crypto.hash.sha2.Sha256.hash(data, &s2, .{});
+                try placeFile(arena, io, try std.fmt.allocPrint(arena, "{s}.sha1", .{to}), try std.fmt.allocPrint(arena, "{s}\n", .{&std.fmt.bytesToHex(s1, .lower)}));
+                try placeFile(arena, io, try std.fmt.allocPrint(arena, "{s}.sha256", .{to}), try std.fmt.allocPrint(arena, "{s}\n", .{&std.fmt.bytesToHex(s2, .lower)}));
+            },
+            .nuget => {
+                var s5: [64]u8 = undefined;
+                std.crypto.hash.sha2.Sha512.hash(data, &s5, .{});
+                var b64: [std.base64.standard.Encoder.calcSize(64)]u8 = undefined;
+                try placeFile(arena, io, try std.fmt.allocPrint(arena, "{s}.sha512", .{to}), std.base64.standard.Encoder.encode(&b64, &s5));
+            },
+        }
+        try placeFile(arena, io, to, data);
+    }
+
+    var kept: std.ArrayList(u8) = .empty;
+    var lines = std.mem.tokenizeScalar(u8, list, '\n');
+    while (lines.next()) |l| if (safeStorePath(l)) {
+        try kept.appendSlice(arena, l);
+        try kept.append(arena, '\n');
+    };
+    try placeFile(arena, io, list_path, kept.items);
+}
+
+/// Writes a file under a name of this process's own, then renames it into place: it is whole or not there, also
+/// when two restores add the same artifact at once.
+fn placeFile(arena: Allocator, io: std.Io, path: []const u8, data: []const u8) !void {
+    var rnd: [8]u8 = undefined;
+    io.random(&rnd);
+    const tmp = try std.fmt.allocPrint(arena, "{s}.dk-{x}.part", .{ path, &rnd });
+    errdefer Dir.cwd().deleteFile(io, tmp) catch {};
+    try Dir.cwd().writeFile(io, .{ .sub_path = tmp, .data = data });
+    try Dir.cwd().rename(tmp, Dir.cwd(), path, io);
+}
+
 /// A path under `cache` as the layout script's sandbox sees it, under /dkcache.
 fn inLay(arena: Allocator, cache: []const u8, path: []const u8) BuildError![]const u8 {
     if (!std.mem.startsWith(u8, path, cache) or path.len <= cache.len or path[cache.len] != '/') return error.UnpackFailed;
@@ -947,20 +1047,11 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         const files = try inTreeFiles(arena, io, opts, r, local_abs);
         root_files = files;
         out("    preparing build root ({d} package(s) from repo/ on top of the base image)\n", .{files.len});
-        if (files.len > 0) {
-            var binds: std.ArrayList(sandbox.Bind) = .empty;
-            try binds.append(arena, .{ .src = local_abs.?, .dst = "/dkrepo", .read_only = true });
-            if (keys_dir) |kd| try binds.append(arena, .{ .src = kd, .dst = "/dkkeys", .read_only = true });
-            var argv: std.ArrayList([]const u8) = .empty;
-            try argv.appendSlice(arena, &.{ "/usr/bin/apk", "--force-overwrite", "--keys-dir", "/dkkeys", "extract", "--destination", "/" });
-            for (files) |f| try argv.append(arena, try std.fmt.allocPrint(arena, "/dkrepo/{s}", .{f}));
-            const ok = runTool(arena, io, base_root, sb, binds.items, argv.items, &log) catch false;
-            if (!ok) {
-                out("error: unpacking packages from repo/ failed; see {s}\n", .{logpath});
-                return error.PrepareFailed;
-            }
-        }
+        try unpackDeps(arena, io, base_root, sb, files, local_abs, keys_dir, &log, logpath);
     }
+    // The networked restore steps (below) run upstream code, so they get a root of their own, made the same way:
+    // what they change in it stays out of the build's.
+    var restore_layer: ?SbDirs = null;
 
     // 3. Unpack
     var srcdir: []const u8 = "/build";
@@ -1176,18 +1267,25 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 \\"$g" --no-daemon --continue -g /tmp/ghome -I /dkbuild/gradle-resolve.gradle dkbuildResolveAll
                 \\sh /dkbuild/gradle-store.sh /tmp/ghome /dkstore/maven /dkstore/gradledeps/{s}.list
             , .{ genv, srcdir, gpatches.items, first_sha });
+            if (restore_layer == null) {
+                restore_layer = try sbDirs(arena, io, work, "restore");
+                try unpackDeps(arena, io, base_root, restore_layer.?, root_files, local_abs, keys_dir, &log, logpath);
+            }
+            const rsb = restore_layer.?;
+            const stage = try restoreStage(arena, io, work, "gradle");
             const ok = sandbox.run(arena, io, .{
                 .lower = base_root,
-                .upper = sb.upper,
-                .work = sb.work,
-                .merged = sb.merged,
+                .upper = rsb.upper,
+                .work = rsb.work,
+                .merged = rsb.merged,
                 .net = true,
                 .binds = &.{
                     .{ .src = try std.fs.path.join(arena, &.{ root_abs, "build" }), .dst = "/build" },
                     // read-only: the host writes more files here afterwards, and would follow a link left there
                     .{ .src = try std.fs.path.join(arena, &.{ root_abs, "dkbuild" }), .dst = "/dkbuild", .read_only = true },
-                    .{ .src = absPath(arena, io, maven_rel) catch return error.PrepareFailed, .dst = "/dkstore/maven" },
-                    .{ .src = absPath(arena, io, glists_rel) catch return error.PrepareFailed, .dst = "/dkstore/gradledeps" },
+                    // empty ones: the store and the other lists are out of its reach
+                    .{ .src = stage.store, .dst = "/dkstore/maven" },
+                    .{ .src = stage.lists, .dst = "/dkstore/gradledeps" },
                     .{ .src = "/etc/resolv.conf", .dst = "/etc/resolv.conf", .read_only = true },
                 },
                 .env = &.{ "PATH=/usr/bin:/bin", "HOME=/tmp" },
@@ -1197,6 +1295,10 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 out("error: {s}: resolving its Gradle dependencies failed; log: {s}\n", .{ r.name, logpath });
                 return error.PrepareFailed;
             }
+            mergeRestored(arena, io, .maven, stage, maven_rel, glist, &log) catch |err| {
+                out("error: {s}: cannot add the downloaded dependencies to the store: {s}\n", .{ r.name, @errorName(err) });
+                return error.PrepareFailed;
+            };
         }
     }
 
@@ -1224,18 +1326,25 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 \\{s}
                 \\sh /dkbuild/nuget-store.sh /tmp/nuget-restore /dkstore/nuget /dkstore/nugetdeps/{s}.list
             , .{ srcdir, r.restore.?, first_sha });
+            if (restore_layer == null) {
+                restore_layer = try sbDirs(arena, io, work, "restore");
+                try unpackDeps(arena, io, base_root, restore_layer.?, root_files, local_abs, keys_dir, &log, logpath);
+            }
+            const rsb = restore_layer.?;
+            const stage = try restoreStage(arena, io, work, "nuget");
             const ok = sandbox.run(arena, io, .{
                 .lower = base_root,
-                .upper = sb.upper,
-                .work = sb.work,
-                .merged = sb.merged,
+                .upper = rsb.upper,
+                .work = rsb.work,
+                .merged = rsb.merged,
                 .net = true,
                 .binds = &.{
                     .{ .src = try std.fs.path.join(arena, &.{ root_abs, "build" }), .dst = "/build" },
                     // read-only: the host writes more files here afterwards, and would follow a link left there
                     .{ .src = try std.fs.path.join(arena, &.{ root_abs, "dkbuild" }), .dst = "/dkbuild", .read_only = true },
-                    .{ .src = absPath(arena, io, store_rel) catch return error.PrepareFailed, .dst = "/dkstore/nuget" },
-                    .{ .src = absPath(arena, io, lists_rel) catch return error.PrepareFailed, .dst = "/dkstore/nugetdeps" },
+                    // empty ones: the store and the other lists are out of its reach
+                    .{ .src = stage.store, .dst = "/dkstore/nuget" },
+                    .{ .src = stage.lists, .dst = "/dkstore/nugetdeps" },
                     .{ .src = "/etc/resolv.conf", .dst = "/etc/resolv.conf", .read_only = true },
                 },
                 .env = &.{ "PATH=/usr/bin:/bin", "HOME=/tmp" },
@@ -1245,6 +1354,10 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 out("error: {s}: restoring its NuGet packages failed; log: {s}\n", .{ r.name, logpath });
                 return error.PrepareFailed;
             }
+            mergeRestored(arena, io, .nuget, stage, store_rel, nlist, &log) catch |err| {
+                out("error: {s}: cannot add the downloaded dependencies to the store: {s}\n", .{ r.name, @errorName(err) });
+                return error.PrepareFailed;
+            };
         }
     }
 
@@ -1281,18 +1394,25 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 \\{s}
                 \\sh /dkbuild/maven-store.sh /tmp/m2-restore /dkstore/maven /dkstore/mavendeps/{s}.list
             , .{ menv, srcdir, mpatches.items, r.restore.?, first_sha });
+            if (restore_layer == null) {
+                restore_layer = try sbDirs(arena, io, work, "restore");
+                try unpackDeps(arena, io, base_root, restore_layer.?, root_files, local_abs, keys_dir, &log, logpath);
+            }
+            const rsb = restore_layer.?;
+            const stage = try restoreStage(arena, io, work, "maven");
             const ok = sandbox.run(arena, io, .{
                 .lower = base_root,
-                .upper = sb.upper,
-                .work = sb.work,
-                .merged = sb.merged,
+                .upper = rsb.upper,
+                .work = rsb.work,
+                .merged = rsb.merged,
                 .net = true,
                 .binds = &.{
                     .{ .src = try std.fs.path.join(arena, &.{ root_abs, "build" }), .dst = "/build" },
                     // read-only: the host writes more files here afterwards, and would follow a link left there
                     .{ .src = try std.fs.path.join(arena, &.{ root_abs, "dkbuild" }), .dst = "/dkbuild", .read_only = true },
-                    .{ .src = absPath(arena, io, maven_rel) catch return error.PrepareFailed, .dst = "/dkstore/maven" },
-                    .{ .src = absPath(arena, io, mlists_rel) catch return error.PrepareFailed, .dst = "/dkstore/mavendeps" },
+                    // empty ones: the store and the other lists are out of its reach
+                    .{ .src = stage.store, .dst = "/dkstore/maven" },
+                    .{ .src = stage.lists, .dst = "/dkstore/mavendeps" },
                     .{ .src = "/etc/resolv.conf", .dst = "/etc/resolv.conf", .read_only = true },
                 },
                 .env = &.{ "PATH=/usr/bin:/bin", "HOME=/tmp" },
@@ -1302,6 +1422,10 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 out("error: {s}: restoring its Maven dependencies failed; log: {s}\n", .{ r.name, logpath });
                 return error.PrepareFailed;
             }
+            mergeRestored(arena, io, .maven, stage, maven_rel, mlist, &log) catch |err| {
+                out("error: {s}: cannot add the downloaded dependencies to the store: {s}\n", .{ r.name, @errorName(err) });
+                return error.PrepareFailed;
+            };
         }
     }
 
@@ -1499,6 +1623,22 @@ fn withScan(arena: Allocator, io: std.Io, files: []const u8, declared: []const [
     try deps.appendSlice(arena, declared);
     for (res.depends) |d| if (!contains(deps.items, d)) try deps.append(arena, d);
     return .{ .name = "", .summary = "", .files = files, .depends = deps.items, .provides = res.provides, .private = res.private };
+}
+
+/// Lays the packages from repo/ a build needs over the base image in the layer `sb`.
+fn unpackDeps(arena: Allocator, io: std.Io, base_root: []const u8, sb: SbDirs, files: []const []const u8, local_abs: ?[]const u8, keys_dir: ?[]const u8, log: *std.ArrayList(u8), logpath: []const u8) BuildError!void {
+    if (files.len == 0) return;
+    var binds: std.ArrayList(sandbox.Bind) = .empty;
+    try binds.append(arena, .{ .src = local_abs.?, .dst = "/dkrepo", .read_only = true });
+    if (keys_dir) |kd| try binds.append(arena, .{ .src = kd, .dst = "/dkkeys", .read_only = true });
+    var argv: std.ArrayList([]const u8) = .empty;
+    try argv.appendSlice(arena, &.{ "/usr/bin/apk", "--force-overwrite", "--keys-dir", "/dkkeys", "extract", "--destination", "/" });
+    for (files) |f| try argv.append(arena, try std.fmt.allocPrint(arena, "/dkrepo/{s}", .{f}));
+    const ok = runTool(arena, io, base_root, sb, binds.items, argv.items, log) catch false;
+    if (!ok) {
+        out("error: unpacking packages from repo/ failed; see {s}\n", .{logpath});
+        return error.PrepareFailed;
+    }
 }
 
 /// `sb` must be a layer that no recipe code has written to: apk runs in it with the private key.
