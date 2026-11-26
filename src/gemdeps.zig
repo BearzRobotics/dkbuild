@@ -33,6 +33,13 @@ fn splitPlatform(v: []const u8) []const u8 {
     return v;
 }
 
+/// A full or abbreviated commit id, as Bundler writes it.
+fn isRevision(s: []const u8) bool {
+    if (s.len < 12 or s.len > 64) return false;
+    for (s) |c| if (!std.ascii.isHex(c)) return false;
+    return true;
+}
+
 /// The gems of one Gemfile.lock: the specs of its GEM sections (4-space
 /// entries), with sha256 from CHECKSUMS when present. GIT sections are
 /// reported; PATH sections are the source's own gems.
@@ -124,6 +131,15 @@ pub fn fetchGemDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha
         message.* = no_lockfile;
         return error.DownloadFailed;
     }
+    // Names and versions become file names in the store and parts of URLs.
+    for (gems.items) |g| if (!fetch.safeName(g.name) or !fetch.safeName(g.version) or (g.sha256 != null and !fetch.validSha256(g.sha256.?))) {
+        message.* = try std.fmt.allocPrint(arena, "gems: unusable name, version or checksum in a Gemfile.lock: {s} {s}", .{ g.name, g.version });
+        return error.DownloadFailed;
+    };
+    for (gits.items) |g| if (!fetch.safeName(g.name) or !isRevision(g.revision) or !fetch.safeUrl(g.remote)) {
+        message.* = try std.fmt.allocPrint(arena, "gems: unusable git gem in a Gemfile.lock: {s} at {s}", .{ g.name, g.revision });
+        return error.DownloadFailed;
+    };
     // Unique gems the store lacks; checksums the lockfile does not give come
     // from rubygems.org's API (fetched in parallel first).
     const store = try std.fmt.allocPrint(arena, "{s}/gems", .{cache});
@@ -151,16 +167,20 @@ pub fn fetchGemDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha
     if (todo.items.len > 0) {
         var cfg: std.ArrayList(u8) = .empty;
         for (todo.items) |t| {
-            try cfg.appendSlice(arena, try std.fmt.allocPrint(arena, "url = \"{s}\"\noutput = \"{s}\"\n", .{ t.url, t.part }));
+            fetch.curlEntry(arena, &cfg, t.url, t.part) catch |e| {
+            message.* = try std.fmt.allocPrint(arena, "gems: unusable URL in the lock: {s}", .{t.url});
+            return if (e == error.OutOfMemory) error.OutOfMemory else error.DownloadFailed;
+        };
             if (t.sha == null) {
                 const nv = t.file[0 .. t.file.len - 4];
                 const dash = std.mem.lastIndexOfScalar(u8, nv, '-').?;
-                try cfg.appendSlice(arena, try std.fmt.allocPrint(arena, "url = \"https://rubygems.org/api/v2/rubygems/{s}/versions/{s}.json?platform=ruby\"\noutput = \"{s}\"\n", .{ nv[0..dash], nv[dash + 1 ..], t.api }));
+                const api = try std.fmt.allocPrint(arena, "https://rubygems.org/api/v2/rubygems/{s}/versions/{s}.json?platform=ruby", .{ nv[0..dash], nv[dash + 1 ..] });
+                fetch.curlEntry(arena, &cfg, api, t.api) catch return error.DownloadFailed;
             }
         }
         const cfgp = try std.fmt.allocPrint(arena, "{s}/curl.cfg", .{tmp});
         std.Io.Dir.cwd().writeFile(io, .{ .sub_path = cfgp, .data = cfg.items }) catch return error.DownloadFailed;
-        const r2 = std.process.run(arena, io, .{ .argv = &.{ "curl", "--fail", "--location", "--silent", "--show-error", "--retry", "4", "--retry-delay", "3", "--parallel", "--parallel-max", "12", "-K", cfgp } }) catch return error.DownloadFailed;
+        const r2 = std.process.run(arena, io, .{ .argv = &(fetch.curl_list_args ++ .{cfgp}) }) catch return error.DownloadFailed;
         if (!(r2.term == .exited and r2.term.exited == 0)) {
             message.* = try std.fmt.allocPrint(arena, "gems: downloads failed: {s}", .{std.mem.trim(u8, r2.stderr, "\n ")});
             return error.DownloadFailed;

@@ -131,6 +131,11 @@ fn fromLocks(arena: Allocator, io: std.Io, cache: []const u8, tmp: []const u8, o
     }
     const store = try std.fmt.allocPrint(arena, "{s}/pub", .{cache});
     std.Io.Dir.cwd().createDirPath(io, store) catch return error.DownloadFailed;
+    // Names and versions become file names in the store and parts of URLs.
+    for (pkgs.items) |p| if (!fetch.safeName(p.name) or !fetch.safeName(p.version) or !fetch.validSha256(p.sha256)) {
+        message.* = try std.fmt.allocPrint(arena, "pub: unusable name, version or checksum in a pubspec.lock: {s} {s}", .{ p.name, p.version });
+        return error.DownloadFailed;
+    };
     var seen: std.StringHashMapUnmanaged(void) = .empty;
     var list: std.ArrayList(u8) = .empty;
     const Todo = struct { file: []const u8, url: []const u8, part: []const u8, sha: []const u8 };
@@ -150,10 +155,13 @@ fn fromLocks(arena: Allocator, io: std.Io, cache: []const u8, tmp: []const u8, o
     }
     if (todo.items.len > 0) {
         var cfg: std.ArrayList(u8) = .empty;
-        for (todo.items) |t| try cfg.appendSlice(arena, try std.fmt.allocPrint(arena, "url = \"{s}\"\noutput = \"{s}\"\n", .{ t.url, t.part }));
+        for (todo.items) |t| fetch.curlEntry(arena, &cfg, t.url, t.part) catch |e| {
+            message.* = try std.fmt.allocPrint(arena, "pub: unusable URL in the lock: {s}", .{t.url});
+            return if (e == error.OutOfMemory) error.OutOfMemory else error.DownloadFailed;
+        };
         const cfgp = try std.fmt.allocPrint(arena, "{s}/curl.cfg", .{tmp});
         std.Io.Dir.cwd().writeFile(io, .{ .sub_path = cfgp, .data = cfg.items }) catch return error.DownloadFailed;
-        const r2 = std.process.run(arena, io, .{ .argv = &.{ "curl", "--fail", "--location", "--silent", "--show-error", "--retry", "4", "--retry-delay", "3", "--parallel", "--parallel-max", "12", "-K", cfgp } }) catch return error.DownloadFailed;
+        const r2 = std.process.run(arena, io, .{ .argv = &(fetch.curl_list_args ++ .{cfgp}) }) catch return error.DownloadFailed;
         if (!(r2.term == .exited and r2.term.exited == 0)) {
             message.* = try std.fmt.allocPrint(arena, "pub: downloads failed: {s}", .{std.mem.trim(u8, r2.stderr, "\n ")});
             return error.DownloadFailed;

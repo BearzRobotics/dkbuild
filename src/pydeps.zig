@@ -111,10 +111,13 @@ pub fn fetchLock(arena: Allocator, io: std.Io, cache: []const u8, lock_path: []c
     }
     if (todo.items.len > 0) {
         var cfg: std.ArrayList(u8) = .empty;
-        for (todo.items) |t| try cfg.appendSlice(arena, try std.fmt.allocPrint(arena, "url = \"{s}\"\noutput = \"{s}\"\n", .{ t.url, t.part }));
+        for (todo.items) |t| fetch.curlEntry(arena, &cfg, t.url, t.part) catch |e| {
+            message.* = try std.fmt.allocPrint(arena, "python: unusable URL in the lock: {s}", .{t.url});
+            return if (e == error.OutOfMemory) error.OutOfMemory else error.DownloadFailed;
+        };
         const cfgp = try std.fmt.allocPrint(arena, "{s}/curl.cfg", .{tmp});
         std.Io.Dir.cwd().writeFile(io, .{ .sub_path = cfgp, .data = cfg.items }) catch return error.DownloadFailed;
-        const r = std.process.run(arena, io, .{ .argv = &.{ "curl", "--fail", "--location", "--silent", "--show-error", "--retry", "4", "--retry-delay", "3", "--parallel", "--parallel-max", "8", "-K", cfgp } }) catch return error.DownloadFailed;
+        const r = std.process.run(arena, io, .{ .argv = &(fetch.curl_list_args ++ .{cfgp}) }) catch return error.DownloadFailed;
         if (!(r.term == .exited and r.term.exited == 0)) {
             message.* = try std.fmt.allocPrint(arena, "python: downloads failed: {s}", .{std.mem.trim(u8, r.stderr, "\n ")});
             return error.DownloadFailed;

@@ -316,12 +316,15 @@ fn fromLocks(arena: Allocator, io: std.Io, cache: []const u8, tmp: []const u8, o
         if (std.Io.Dir.cwd().access(io, full, .{})) |_| continue else |_| {}
         const part = try std.fmt.allocPrint(arena, "{s}/dl-{d}", .{ tmp, todo.items.len });
         try todo.append(arena, .{ .d = d, .rel = rel, .part = part });
-        try cfg.appendSlice(arena, try std.fmt.allocPrint(arena, "url = \"{s}\"\noutput = \"{s}\"\n", .{ p.url, part }));
+        fetch.curlEntry(arena, &cfg, p.url, part) catch |e| {
+            message.* = try std.fmt.allocPrint(arena, "npm: unusable URL in the lock: {s}", .{p.url});
+            return if (e == error.OutOfMemory) error.OutOfMemory else error.DownloadFailed;
+        };
     }
     if (todo.items.len > 0) {
         const cfgp = try std.fmt.allocPrint(arena, "{s}/curl.cfg", .{tmp});
         std.Io.Dir.cwd().writeFile(io, .{ .sub_path = cfgp, .data = cfg.items }) catch return error.DownloadFailed;
-        const r2 = std.process.run(arena, io, .{ .argv = &.{ "curl", "--fail", "--location", "--silent", "--show-error", "--retry", "4", "--retry-delay", "3", "--parallel", "--parallel-max", "16", "-K", cfgp } }) catch return error.DownloadFailed;
+        const r2 = std.process.run(arena, io, .{ .argv = &(fetch.curl_list_args ++ .{cfgp}) }) catch return error.DownloadFailed;
         if (!(r2.term == .exited and r2.term.exited == 0)) {
             message.* = try std.fmt.allocPrint(arena, "npm: downloads failed: {s}", .{std.mem.trim(u8, r2.stderr, "\n ")});
             return error.DownloadFailed;
@@ -354,4 +357,23 @@ test "integrity: sha512 is chosen and laid out like npm's cache" {
     try std.testing.expectEqualStrings("sha512", d.algo);
     const rel = try storeRel(a, d);
     try std.testing.expectEqualStrings("content-v2/sha512/cf/83/e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e", rel);
+}
+
+test "a lock file's URL cannot add curl options (FV-01)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const base = try tmp.dir.realPathFileAlloc(io, ".", a);
+    try tmp.dir.writeFile(io, .{ .sub_path = "secret", .data = "SECRET" });
+    // the URL ends curl's quoted value and adds a transfer of its own: a local file, copied elsewhere
+    const lock = try std.fmt.allocPrint(a,
+        \\{{"lockfileVersion":3,"packages":{{"node_modules/x":{{"resolved":"http://127.0.0.1:1/a\"\noutput = \"{0s}/ignored\"\nurl = \"file://{0s}/secret\"\noutput = \"{0s}/INJECTED","integrity":"sha512-z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg=="}}}}}}
+    , .{base});
+    try tmp.dir.writeFile(io, .{ .sub_path = "package-lock.json", .data = lock });
+    var msg: []const u8 = "";
+    try std.testing.expectError(error.DownloadFailed, fetchNpmLockFile(a, io, try std.fmt.allocPrint(a, "{s}/cache", .{base}), try std.fmt.allocPrint(a, "{s}/package-lock.json", .{base}), &msg));
+    try std.testing.expectError(error.FileNotFound, tmp.dir.access(io, "INJECTED", .{}));
 }

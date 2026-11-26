@@ -37,6 +37,49 @@ pub fn validSha256(s: []const u8) bool {
     return true;
 }
 
+/// Whether a URL taken from a lock file, which upstream wrote, may be given to curl: http(s), and only visible
+/// ASCII without quotes or backslashes, so it cannot end its quoted value in a curl config and add options.
+pub fn safeUrl(url: []const u8) bool {
+    if (!std.mem.startsWith(u8, url, "https://") and !std.mem.startsWith(u8, url, "http://")) return false;
+    for (url) |c| if (c <= ' ' or c >= 0x7f or c == '"' or c == '\\') return false;
+    return true;
+}
+
+/// Whether a package name or version from a lock file may be part of a file name in a store (and of a URL):
+/// no '/', no quotes, not hidden and not read as an option.
+pub fn safeName(s: []const u8) bool {
+    if (s.len == 0 or s[0] == '.' or s[0] == '-') return false;
+    for (s) |c| if (!(std.ascii.isAlphanumeric(c) or c == '-' or c == '.' or c == '_' or c == '+')) return false;
+    return true;
+}
+
+/// Adds one download to a curl config (`curl -K`). Every list made from a lock file goes through here, and is
+/// run with `curl_list_args`. Plain http is asked for over https.
+pub fn curlEntry(arena: Allocator, cfg: *std.ArrayList(u8), url: []const u8, output: []const u8) !void {
+    if (!safeUrl(url)) return error.UnsafeUrl;
+    const rest = url[(std.mem.indexOf(u8, url, "://").?)..];
+    try cfg.appendSlice(arena, try std.fmt.allocPrint(arena, "url = \"https{s}\"\noutput = \"{s}\"\n", .{ rest, output }));
+}
+
+/// The curl command for such a config (its path follows): https only, redirects too, and no globbing, so
+/// braces and brackets in a URL are themselves.
+pub const curl_list_args = [_][]const u8{ "curl", "--fail", "--location", "--silent", "--show-error", "--retry", "4", "--retry-delay", "3", "--globoff", "--proto", "=https", "--proto-redir", "=https", "--parallel", "--parallel-max", "12", "-K" };
+
+test "safeUrl, safeName and curlEntry" {
+    try std.testing.expect(safeUrl("https://registry.npmjs.org/@a/b/-/b-1.0.0+x.tgz?q=1&r=%20"));
+    try std.testing.expect(!safeUrl("https://e.org/a\"\noutput = \"x"));
+    try std.testing.expect(!safeUrl("https://e.org/a b"));
+    try std.testing.expect(!safeUrl("https://e.org/a\\b"));
+    try std.testing.expect(!safeUrl("file:///etc/passwd"));
+    try std.testing.expect(safeName("rake") and safeName("13.0.6") and safeName("a_b-c.d+e"));
+    for ([_][]const u8{ "", ".hidden", "-o", "a/b", "../x", "a'b", "a b", "a#b" }) |bad| try std.testing.expect(!safeName(bad));
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    var cfg: std.ArrayList(u8) = .empty;
+    try curlEntry(st.allocator(), &cfg, "http://e.org/x.tgz", "/tmp/dl-0");
+    try std.testing.expectEqualStrings("url = \"https://e.org/x.tgz\"\noutput = \"/tmp/dl-0\"\n", cfg.items);
+}
+
 /// Path of the cached file for `sha256`.
 pub fn cachePath(arena: Allocator, cache: []const u8, sha256: []const u8) ![]const u8 {
     return std.fs.path.join(arena, &.{ cache, "sources", sha256 });
