@@ -3,7 +3,7 @@
 # and bsdcpio. needed by: tesseract, mesa (and later many others).
 name = "libarchive"
 version = "3.8.10"
-release = 1
+release = 2
 summary = "Library to read and write many archive formats"
 license = "BSD-2-Clause"
 homepage = "https://www.libarchive.org"
