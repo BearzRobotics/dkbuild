@@ -220,7 +220,7 @@ fn sharedLibInterface(arena: Allocator, io: std.Io, path: []const u8) !?[]const 
 fn elfInterface(arena: Allocator, data: []const u8) Allocator.Error!?[]const u8 {
     const rd = struct {
         fn int(comptime T: type, d: []const u8, off: usize) ?T {
-            if (off + @sizeOf(T) > d.len) return null;
+            if (off > d.len or d.len - off < @sizeOf(T)) return null;
             return std.mem.readInt(T, d[off..][0..@sizeOf(T)], .little);
         }
         fn cstr(d: []const u8, off: usize) ?[]const u8 {
@@ -240,21 +240,21 @@ fn elfInterface(arena: Allocator, data: []const u8) Allocator.Error!?[]const u8 
     var found_dynsym = false;
     var k: usize = 0;
     while (k < shnum) : (k += 1) {
-        const sh = shoff + k * shentsize;
-        const typ = rd.int(u32, data, sh + 4) orelse return null;
+        const sh = shoff +| @as(u64, k) * shentsize; // saturating, as below: the file chose these
+        const typ = rd.int(u32, data, sh +| 4) orelse return null;
         if (typ != 11 and typ != 6) continue; // SHT_DYNSYM, SHT_DYNAMIC
-        const off = rd.int(u64, data, sh + 0x18) orelse return null;
-        const size = rd.int(u64, data, sh + 0x20) orelse return null;
-        const link = rd.int(u32, data, sh + 0x28) orelse return null;
-        const strsh = shoff + @as(u64, link) * shentsize;
-        const stroff = rd.int(u64, data, strsh + 0x18) orelse return null;
-        if (off + size > data.len) return null;
+        const off = rd.int(u64, data, sh +| 0x18) orelse return null;
+        const size = rd.int(u64, data, sh +| 0x20) orelse return null;
+        const link = rd.int(u32, data, sh +| 0x28) orelse return null;
+        const strsh = shoff +| @as(u64, link) * shentsize;
+        const stroff = rd.int(u64, data, strsh +| 0x18) orelse return null;
+        if (off > data.len or size > data.len - off) return null;
         if (typ == 6) {
             var e: u64 = 0;
             while (e + 16 <= size) : (e += 16) {
                 const tag = rd.int(i64, data, off + e) orelse break;
                 if (tag == 0) break;
-                if (tag == 14) soname = rd.cstr(data, stroff + (rd.int(u64, data, off + e + 8) orelse 0)) orelse ""; // DT_SONAME
+                if (tag == 14) soname = rd.cstr(data, stroff +| (rd.int(u64, data, off + e + 8) orelse 0)) orelse ""; // DT_SONAME
             }
             continue;
         }
@@ -271,7 +271,7 @@ fn elfInterface(arena: Allocator, data: []const u8) Allocator.Error!?[]const u8 
             if (shndx == 0) continue; // undefined: imported, not exported
             if (bind != 1 and bind != 2 and bind != 10) continue; // GLOBAL, WEAK, GNU_UNIQUE
             if (vis != 0 and vis != 3) continue; // DEFAULT, PROTECTED
-            const name = rd.cstr(data, stroff + (rd.int(u32, data, y) orelse 0)) orelse continue;
+            const name = rd.cstr(data, stroff +| (rd.int(u32, data, y) orelse 0)) orelse continue;
             const ssize = rd.int(u64, data, y + 16) orelse 0;
             try syms.append(arena, if (styp == 1 or styp == 6)
                 try std.fmt.allocPrint(arena, "{s} {d} {d}", .{ name, styp, ssize }) // data, TLS: size matters
@@ -399,6 +399,25 @@ test "buildRootHash: a tool counts by its whole output" {
     const before = [_]?Produced{ null, .{ .output = hx('a'), .interface = hx('i') } };
     const after = [_]?Produced{ null, .{ .output = hx('b'), .interface = hx('i') } };
     try std.testing.expect(!std.mem.eql(u8, &(try buildRootHash(a, t, &before, 0)), &(try buildRootHash(a, t, &after, 0))));
+}
+
+test "a broken shared library counts whole instead of crashing (BC-14, SS-21)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const huge = std.math.maxInt(u64);
+    // a header with one section: the section table's offset, then that section's offset, size and string link
+    for ([_][4]u64{ .{ huge - 8, 11, 0, 0 }, .{ 64, 11, huge - 2, 48 }, .{ 64, 11, 32, huge }, .{ 64, 6, huge - 15, 64 } }) |c| {
+        var d: [256]u8 = @splat(0);
+        @memcpy(d[0..6], "\x7fELF\x02\x01");
+        std.mem.writeInt(u16, d[16..18], 3, .little);
+        std.mem.writeInt(u64, d[0x28..0x30], c[0], .little);
+        std.mem.writeInt(u16, d[0x3A..0x3C], 64, .little);
+        std.mem.writeInt(u16, d[0x3C..0x3E], 1, .little);
+        std.mem.writeInt(u32, d[68..72], @intCast(c[1]), .little);
+        std.mem.writeInt(u64, d[64 + 0x18 ..][0..8], c[2], .little);
+        std.mem.writeInt(u64, d[64 + 0x20 ..][0..8], c[3], .little);
+        _ = try elfInterface(st.allocator(), &d);
+    }
 }
 
 test "elfInterface: not ELF, or not a shared object, counts whole" {

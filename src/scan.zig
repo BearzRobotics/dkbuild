@@ -52,7 +52,7 @@ pub fn parseElf(arena: Allocator, src: anytype) Allocator.Error!?Elf {
     var i: usize = 0;
     while (i < phnum) : (i += 1) {
         var ph: [56]u8 = undefined;
-        if (src.readAt(&ph, phoff + i * phentsize) < 56) return null;
+        if (src.readAt(&ph, phoff +| @as(u64, i) * phentsize) < 56) return null;
         const seg: Seg = .{ .offset = rd(u64, &ph, 8), .vaddr = rd(u64, &ph, 16), .filesz = rd(u64, &ph, 32) };
         switch (rd(u32, &ph, 0)) {
             pt_load => try loads.append(arena, seg),
@@ -69,7 +69,7 @@ pub fn parseElf(arena: Allocator, src: anytype) Allocator.Error!?Elf {
     var n: usize = 0;
     while (n < dyn.filesz / 16 and n < 4096) : (n += 1) {
         var d: [16]u8 = undefined;
-        if (src.readAt(&d, dyn.offset + n * 16) < 16) return null;
+        if (src.readAt(&d, dyn.offset +| n * 16) < 16) return null;
         const tag = rd(i64, &d, 0);
         const val = rd(u64, &d, 8);
         if (tag == dt_null) break;
@@ -82,7 +82,7 @@ pub fn parseElf(arena: Allocator, src: anytype) Allocator.Error!?Elf {
     }
     const saddr = strtab_addr orelse return null;
     const strtab_file = for (loads.items) |l| {
-        if (saddr >= l.vaddr and saddr < l.vaddr + l.filesz) break l.offset + (saddr - l.vaddr);
+        if (saddr >= l.vaddr and saddr - l.vaddr < l.filesz) break l.offset +| (saddr - l.vaddr);
     } else return null;
 
     const names = struct {
@@ -95,9 +95,9 @@ pub fn parseElf(arena: Allocator, src: anytype) Allocator.Error!?Elf {
     };
     var out: Elf = .{};
     var list: std.ArrayList([]const u8) = .empty;
-    for (needed_offs.items) |o| if (try names.at(arena, src, strtab_file + o)) |nm| try list.append(arena, nm);
+    for (needed_offs.items) |o| if (try names.at(arena, src, strtab_file +| o)) |nm| try list.append(arena, nm);
     out.needed = list.items;
-    if (soname_off) |o| out.soname = try names.at(arena, src, strtab_file + o);
+    if (soname_off) |o| out.soname = try names.at(arena, src, strtab_file +| o);
     return out;
 }
 
@@ -147,6 +147,8 @@ const FileSource = struct {
     file: std.Io.File,
     io: std.Io,
     pub fn readAt(s: FileSource, buf: []u8, off: u64) usize {
+        // The file chose the offset. Past what the kernel takes (a negative off_t), the read would panic.
+        if (off > std.math.maxInt(i64) - buf.len) return 0;
         return s.file.readPositionalAll(s.io, buf, off) catch 0;
     }
 };
@@ -273,6 +275,28 @@ const SliceSource = struct {
         return n;
     }
 };
+
+test "broken ELF files are rejected, not a crash (BC-14, SS-21)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const huge = std.math.maxInt(u64);
+    var buf: [512]u8 = undefined;
+    // each offset and size that is added or multiplied: phoff, the load segment's address and size,
+    // the dynamic segment's offset, and a name's offset past the string table
+    for ([_][2]u64{ .{ 32, huge - 8 }, .{ 64 + 16, huge - 4 }, .{ 64 + 32, huge }, .{ 120 + 8, huge - 2 }, .{ 64 + 8, huge - 2 }, .{ 176 + 16 + 8, huge - 2 }, .{ 32, 1 << 63 } }) |at| {
+        _ = fixtureElf(&buf);
+        std.mem.writeInt(u64, buf[at[0]..][0..8], at[1], .little);
+        _ = try parseElf(a, SliceSource{ .bytes = &buf });
+        // and from a real file, where a read at such an offset must not be attempted
+        var tmp = std.testing.tmpDir(.{});
+        defer tmp.cleanup();
+        try tmp.dir.writeFile(std.testing.io, .{ .sub_path = "x", .data = &buf });
+        var f = try tmp.dir.openFile(std.testing.io, "x", .{});
+        defer f.close(std.testing.io);
+        _ = try parseElf(a, FileSource{ .file = f, .io = std.testing.io });
+    }
+}
 
 /// A minimal ELF64 shared object: one PT_LOAD covering the file, one
 /// PT_DYNAMIC, a string table "\0libc.so\0libz.so.1\0libfoo.so.2\0".
