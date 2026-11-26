@@ -21,7 +21,10 @@ at **/mnt/dkbuild**. These are links in the source tree (.gitignore covers them)
   directory is read-only (`chmod u+w` to change it).
 - /etc/fstab still has `default,nofail 0 0` for /mnt/dkbuild; `defaults,noatime,nofail 0 2` was advised (needs root).
 - The new 4 TB drive is not set up. Suggested use: backups (ISOs, a copy of repo/ and cache/sources, the signing key).
-  The signing key (`~/.config/dkbuild/signing.rsa`) has **no backup on a second disk**. A key kept elsewhere can be
+  Signing key backups, made 2026-11-25 (unencrypted; directory 0700, file 0600): `/mnt/dkbuild/dkbuild-key-backup/`
+  and `/mnt/scratch/dkbuild-key-backup/`. Not on the 4 TB drive yet (root owns its file system) and deliberately not
+  on /stuff (Samba shares it read-write, as the build user). All copies are in one machine: an encrypted copy on a
+  drive kept offline is still wanted. A key kept elsewhere can be
   given with `--key FILE` (`discs` got it on 11-25; docs/setup-ubuntu.md, 8).
 
 ## /stuff
@@ -54,6 +57,8 @@ out/dkde-devel/dkde-devel.iso is whatever the last image build made.
 - Daily-driver apps still pending: brave, code-oss, kdenlive (and electron, which several apps need).
 
 ## World
+
+**The user is busy fixing bugs in other projects (util-core among them) and will come back to building after that.**
 
 **Stopped on 2026-11-25 (about 19:00) at the user's request, during pass 7 (it was building firefox). Do not start it
 again until the user asks.** The repo was pruned afterwards (no stale packages; 27 packages that no recipe provides
@@ -139,7 +144,8 @@ notes were not read (the site blocked the fetch).
 - **Never built:** zig-ide, 0ad, cmark-gfm, wv, howard-hinnant-date, and cmark r2.
 - **ISO:** the user will test it in VirtualBox; GRUB on BIOS has never been tested (an offer to test it in QEMU was
   not answered).
-- **Old build directories** `cache.old`, `work.old`, `rootfs.old`, `out.old` on /stuff: delete when the user says so.
+- **Old directories:** work.old, rootfs.old and out.old were deleted on 2026-11-25; `cache.old` on /stuff is kept
+  as a second copy of the downloaded sources until there is a real backup.
 - Local commits are not pushed (`git log origin/new-build-machine..HEAD`).
 
 ---
