@@ -136,7 +136,7 @@ mark_now; send 'exit'
 sleep 2
 
 # --- ssh to localhost, right and wrong password
-check "start sshd" "^SSHD-START-DONE" 40 'sudo dinitctl start sshd; echo SSHD-START-DONE'
+check "start sshd" "^SSHD-START-DONE" 40 'sudo dinitctl start sshd && echo SSHD-START-DONE'
 sleep 3
 mark_now; send 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null tester@127.0.0.1 id -un'
 answer "assword" 'Pw-123456' || true

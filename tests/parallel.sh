@@ -52,6 +52,10 @@ for p in dkdemo usedemo usedemo-static slow-a slow-b heavy; do
 done
 echo "$OUT" | grep -Eq '^--> .*\(([2-9]) running\)$' || fail "no two builds ran at once"
 echo "$OUT" | grep -q '^--> heavy-1-r1: started, alone (1 running)$' || fail "the heavy build did not run alone"
+# ... and nothing else started before it was done
+during=$(echo "$OUT" | sed -n '/^--> heavy-1-r1: started/,/built heavy-1-r1/p')
+echo "$during" | grep -q 'built heavy-1-r1' || fail "no line says the heavy build finished"
+[ "$(echo "$during" | grep -c '^--> .*: started')" = 1 ] || fail "another build started while the heavy one ran"
 # usedemo starts only after dkdemo is built.
 b=$(echo "$OUT" | grep -n 'built dkdemo-1-r1' | cut -d: -f1)
 s=$(echo "$OUT" | grep -n '^--> usedemo-1-r1: started' | cut -d: -f1)

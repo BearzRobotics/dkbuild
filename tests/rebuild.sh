@@ -59,5 +59,5 @@ echo "$OUT" | grep -q 'usedemo-1-r2: up to date' || fail "usedemo r2 was not up 
 
 # --force rebuilds an up-to-date package.
 OUT=$(./zig-out/bin/dkbuild --tree "$T" pkg --key "$TEST_KEY" --force usedemo 2>&1) || fail "--force build"
-echo "$OUT" | grep -q 'preparing build root' || fail "--force did not rebuild"
+echo "$OUT" | grep -q 'built usedemo-1-r2' || fail "--force did not rebuild usedemo"
 echo "ok: skipped when unchanged; error for a changed recipe at the same release; an identical rebuild stops the cascade; a dependent that comes out the same is kept, one that comes out different is published with its release bumped; --force rebuilds"

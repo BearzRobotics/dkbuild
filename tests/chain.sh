@@ -13,7 +13,9 @@ user_recipe "$T" usedemo dkdemo-devel
 user_recipe "$T" usedemo-static dkdemo-static static
 
 OUT=$(./zig-out/bin/dkbuild --tree "$T" pkg --key "$TEST_KEY" usedemo usedemo-static 2>&1) || { echo "$OUT" | tail -15; echo "FAIL: chain build"; exit 1; }
-echo "$OUT" | grep -q '^==> dkdemo-1-r1$' || { echo "FAIL: dkdemo was not built first"; exit 1; }
+at() { echo "$OUT" | grep -n "$1" | head -n 1 | cut -d: -f1; }
+first=$(at '^==> dkdemo-1-r1$'); user=$(at '^==> usedemo-1-r1$')
+[ -n "$first" ] && [ -n "$user" ] && [ "$first" -lt "$user" ] || { echo "FAIL: dkdemo was not built first"; exit 1; }
 echo "$OUT" | grep -q '^==> usedemo-1-r1$' || { echo "FAIL: usedemo was not built"; exit 1; }
 echo "$OUT" | grep -q '^==> usedemo-static-1-r1$' || { echo "FAIL: usedemo-static was not built"; exit 1; }
 
@@ -26,7 +28,9 @@ INFO=$(dump usedemo-1-r1.apk)
 echo "$INFO" | grep -q 'so:libdkdemo.so.1' || { echo "FAIL: usedemo does not depend on so:libdkdemo.so.1"; exit 1; }
 echo "$INFO" | grep -q 'so:libc.so' || { echo "FAIL: usedemo does not depend on so:libc.so"; exit 1; }
 echo "$INFO" | grep -q 'cmd:usedemo' || { echo "FAIL: usedemo does not provide cmd:usedemo"; exit 1; }
-dump usedemo-static-1-r1.apk | grep -q 'so:' && { echo "FAIL: the static program depends on a shared library"; exit 1; }
+INFO=$(dump usedemo-static-1-r1.apk)
+echo "$INFO" | grep -q 'name: usedemo-static$' || { echo "$INFO" | tail -5; echo "FAIL: cannot read usedemo-static's package"; exit 1; }   # else the next line proves nothing
+echo "$INFO" | grep -q 'so:' && { echo "FAIL: the static program depends on a shared library"; exit 1; }
 
 # What a stage 1 build does with these packages: unpack them over the DKRescue
 # image (checking each signature), then run the result against libdkdemo.

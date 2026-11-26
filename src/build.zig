@@ -2011,7 +2011,7 @@ test "script runs setup, build, check, install in order with macros expanded" {
     const p: profile.Profile = .{ .arch = "x86_64", .triple = "x86_64-fenriros-linux-musl", .cpu = "x86-64", .zig_target = "x86_64-linux-musl", .zig_cpu = "baseline", .kernel_arch = "x86" };
     const r: recipe.Recipe = .{
         .name = "t", .version = "1", .release = 1, .summary = "s", .license = "MIT",
-        .source = &.{}, .build = "%make", .install = "%make_install",
+        .source = &.{}, .setup = "echo the-setup", .build = "%make", .check = "echo the-check", .install = "%make_install",
     };
     var bad: []const u8 = "";
     const s = try script(a, r, .{ .target = p, .host = p }, "/build/t-1", .{ .root = ".", .jobs = 4 }, &bad);
@@ -2019,8 +2019,9 @@ test "script runs setup, build, check, install in order with macros expanded" {
     try std.testing.expect(std.mem.indexOf(u8, s, "--target=x86_64-fenriros-linux-musl") != null);
     const b = std.mem.indexOf(u8, s, "==> build").?;
     const i = std.mem.indexOf(u8, s, "==> install").?;
-    try std.testing.expect(b < i);
-    try std.testing.expect(std.mem.indexOf(u8, s, "==> setup") == null);
+    const su = std.mem.indexOf(u8, s, "==> setup").?;
+    const c = std.mem.indexOf(u8, s, "==> check").?;
+    try std.testing.expect(su < b and b < c and c < i);
     try std.testing.expect(std.mem.indexOf(u8, s, "DESTDIR=$pkgdir install") != null);
     try std.testing.expect(std.mem.indexOf(u8, s, "==> patch") == null);
 }
