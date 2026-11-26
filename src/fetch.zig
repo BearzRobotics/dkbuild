@@ -272,6 +272,99 @@ test "validSha256" {
 // last: its presence means the fetch is complete. The build reads the stores
 // read-only (SPEC 9.4).
 
+/// The name of a dependency list: the source tarball's sha256, followed, when more than the source decides what
+/// is downloaded, by a hash of that too (the recipe's patches, which are applied first, and `extra`: a lock the
+/// recipe keeps, its restore step). By the source alone, an edited patch or lock was never fetched again, and two
+/// recipes with one source shared one list.
+pub fn depsKey(arena: Allocator, io: std.Io, tarball_sha256: []const u8, patch_dir: []const u8, patches: []const []const u8, extra: []const []const u8) ![]const u8 {
+    if (patches.len == 0 and extra.len == 0) return tarball_sha256;
+    var h = std.crypto.hash.sha2.Sha256.init(.{});
+    // each part with its length, so that parts cannot run into each other
+    const add = struct {
+        fn f(x: *std.crypto.hash.sha2.Sha256, part: []const u8) void {
+            var len: [8]u8 = undefined;
+            std.mem.writeInt(u64, &len, part.len, .little);
+            x.update(&len);
+            x.update(part);
+        }
+    }.f;
+    for (patches) |p| {
+        add(&h, p);
+        add(&h, try std.Io.Dir.cwd().readFileAlloc(io, try std.fs.path.join(arena, &.{ patch_dir, p }), arena, .limited(1 << 26)));
+    }
+    add(&h, "extra");
+    for (extra) |x| add(&h, x);
+    return std.fmt.allocPrint(arena, "{s}-{s}", .{ tarball_sha256, std.fmt.bytesToHex(h.finalResult(), .lower)[0..16] });
+}
+
+/// A cache filled before lists had such names holds only `<sha256>.list`. The first recipe with extra inputs to
+/// ask for its own takes a copy, so nothing is downloaded again; `<sha256>.adopted` records that, so that after a
+/// later edit the new name is fetched. A recipe without extra inputs does not use a list another has taken.
+pub fn adoptList(arena: Allocator, io: std.Io, cache: []const u8, dir: []const u8, tarball_sha256: []const u8, key: []const u8) !void {
+    const cwd = std.Io.Dir.cwd();
+    const at = struct {
+        fn f(a: Allocator, c: []const u8, d: []const u8, name: []const u8, ext: []const u8) ![]const u8 {
+            return std.fmt.allocPrint(a, "{s}/{s}/{s}{s}", .{ c, d, name, ext });
+        }
+    }.f;
+    const marker = try at(arena, cache, dir, tarball_sha256, ".adopted");
+    const taken = if (cwd.access(io, marker, .{})) |_| true else |_| false;
+    if (std.mem.eql(u8, key, tarball_sha256)) {
+        // its list was another recipe's: fetch this one's own
+        if (taken) {
+            cwd.deleteFile(io, try at(arena, cache, dir, tarball_sha256, ".list")) catch {};
+            cwd.deleteFile(io, marker) catch {};
+        }
+        return;
+    }
+    if (taken) return;
+    if (cwd.access(io, try at(arena, cache, dir, key, ".list"), .{})) |_| return else |_| {}
+    const list = cwd.readFileAlloc(io, try at(arena, cache, dir, tarball_sha256, ".list"), arena, .limited(1 << 24)) catch return;
+    if (cwd.readFileAlloc(io, try at(arena, cache, dir, tarball_sha256, ".config.toml"), arena, .limited(1 << 22))) |cfg_text| {
+        try cwd.writeFile(io, .{ .sub_path = try at(arena, cache, dir, key, ".config.toml"), .data = cfg_text });
+    } else |_| {}
+    try cwd.writeFile(io, .{ .sub_path = try at(arena, cache, dir, key, ".list"), .data = list });
+    try cwd.writeFile(io, .{ .sub_path = marker, .data = key });
+}
+
+test "depsKey and adoptList: lists follow what decides them, and an old cache is taken over once" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const base = try tmp.dir.realPathFileAlloc(io, ".", a);
+    const sha: *const [64]u8 = &@as([64]u8, @splat('a'));
+    try tmp.dir.createDirPath(io, "cargodeps");
+    try tmp.dir.writeFile(io, .{ .sub_path = "a.patch", .data = "one" });
+    try std.testing.expectEqualStrings(sha, try depsKey(a, io, sha, base, &.{}, &.{}));
+    const k1 = try depsKey(a, io, sha, base, &.{"a.patch"}, &.{});
+    const locked = try depsKey(a, io, sha, base, &.{}, &.{ "cargolock", "sub", "lockfile" });
+    try std.testing.expect(!std.mem.eql(u8, k1, sha) and !std.mem.eql(u8, k1, locked));
+    try tmp.dir.writeFile(io, .{ .sub_path = "cargodeps/" ++ sha ++ ".list", .data = "old list" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "cargodeps/" ++ sha ++ ".config.toml", .data = "old config" });
+    // the first recipe with a patch takes the old list over
+    try adoptList(a, io, base, "cargodeps", sha, k1);
+    try std.testing.expectEqualStrings("old list", try tmp.dir.readFileAlloc(io, try std.fmt.allocPrint(a, "cargodeps/{s}.list", .{k1}), a, .limited(100)));
+    try std.testing.expectEqualStrings("old config", try tmp.dir.readFileAlloc(io, try std.fmt.allocPrint(a, "cargodeps/{s}.config.toml", .{k1}), a, .limited(100)));
+    // the patch edited: a new name, and no old list to be had for it
+    try tmp.dir.writeFile(io, .{ .sub_path = "a.patch", .data = "two" });
+    const k2 = try depsKey(a, io, sha, base, &.{"a.patch"}, &.{});
+    try std.testing.expect(!std.mem.eql(u8, k1, k2));
+    try adoptList(a, io, base, "cargodeps", sha, k2);
+    try std.testing.expectError(error.FileNotFound, tmp.dir.access(io, try std.fmt.allocPrint(a, "cargodeps/{s}.list", .{k2}), .{}));
+    // a recipe without extra inputs does not use the list that was taken
+    try adoptList(a, io, base, "cargodeps", sha, sha);
+    try std.testing.expectError(error.FileNotFound, tmp.dir.access(io, "cargodeps/" ++ sha ++ ".list", .{}));
+}
+
+/// The crates' list name for a recipe's source: see depsKey.
+pub fn cargoDepsKey(arena: Allocator, io: std.Io, tarball_sha256: []const u8, patch_dir: []const u8, patches: []const []const u8, lock: ?CargoLock) ![]const u8 {
+    const extra: []const []const u8 = if (lock) |l| try arena.dupe([]const u8, &.{ "cargolock", l.dir, try std.Io.Dir.cwd().readFileAlloc(io, l.file, arena, .limited(1 << 24)) }) else &.{};
+    return depsKey(arena, io, tarball_sha256, patch_dir, patches, extra);
+}
+
 /// The list of a source tarball's Go modules (`module@version` lines).
 pub fn goDepsPath(arena: Allocator, cache: []const u8, tarball_sha256: []const u8) ![]const u8 {
     return std.fmt.allocPrint(arena, "{s}/godeps/{s}.list", .{ cache, tarball_sha256 });
@@ -332,9 +425,11 @@ const dep_unpack =
 /// host's PATH (GOTOOLCHAIN=auto fetches the Go version the module asks for),
 /// and list them. The build uses the cache read-only, with GOPROXY=off.
 pub fn fetchGoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, patch_dir: []const u8, patches: []const []const u8, message: *[]const u8) Error!Status {
-    const out_path = try goDepsPath(arena, cache, tarball_sha256);
+    const key = depsKey(arena, io, tarball_sha256, patch_dir, patches, &.{}) catch return error.DownloadFailed;
+    adoptList(arena, io, cache, "godeps", tarball_sha256, key) catch return error.DownloadFailed;
+    const out_path = try goDepsPath(arena, cache, key);
     if (std.Io.Dir.cwd().access(io, out_path, .{})) |_| return .cached else |_| {}
-    const tmp = try std.fmt.allocPrint(arena, "{s}/godeps/tmp-{s}", .{ cache, tarball_sha256 });
+    const tmp = try std.fmt.allocPrint(arena, "{s}/godeps/tmp-{s}", .{ cache, key });
     const tarball = try cachePath(arena, cache, tarball_sha256);
     const old = try std.fmt.allocPrint(arena, "{s}/godeps/{s}.tar", .{ cache, tarball_sha256 });
     // The recipe's patches first, as the build applies them: one that changes
@@ -538,12 +633,14 @@ const cargo_guard =
 ;
 
 pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, patch_dir: []const u8, patches: []const []const u8, lock: ?CargoLock, message: *[]const u8) Error!Status {
-    const out_path = try cargoDepsPath(arena, cache, tarball_sha256);
+    const key = cargoDepsKey(arena, io, tarball_sha256, patch_dir, patches, lock) catch return error.DownloadFailed;
+    adoptList(arena, io, cache, "cargodeps", tarball_sha256, key) catch return error.DownloadFailed;
+    const out_path = try cargoDepsPath(arena, cache, key);
     if (std.Io.Dir.cwd().access(io, out_path, .{})) |_| return .cached else |_| {}
-    const tmp = try std.fmt.allocPrint(arena, "{s}/cargodeps/tmp-{s}", .{ cache, tarball_sha256 });
+    const tmp = try std.fmt.allocPrint(arena, "{s}/cargodeps/tmp-{s}", .{ cache, key });
     const tarball = try cachePath(arena, cache, tarball_sha256);
     const old = try std.fmt.allocPrint(arena, "{s}/cargodeps/{s}.tar", .{ cache, tarball_sha256 });
-    const config = try std.fmt.allocPrint(arena, "{s}/cargodeps/{s}.config.toml", .{ cache, tarball_sha256 });
+    const config = try std.fmt.allocPrint(arena, "{s}/cargodeps/{s}.config.toml", .{ cache, key });
     // The recipe's patches first, as the build applies them: one that changes
     // Cargo.lock (libopenraw's newer libc, for musl without open64) changes
     // the crates to vendor.

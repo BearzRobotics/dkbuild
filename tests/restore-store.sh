@@ -62,6 +62,7 @@ bad() { echo "FAIL: $1"; fail=1; }
 [ "$(cat "$S/org/new/2.0/new.jar" 2>/dev/null)" = new-artifact ] || bad "the downloaded artifact did not reach the store"
 [ "$(cat "$S/org/new/2.0/new.jar.sha256" 2>/dev/null)" = "$(printf 'new-artifact\n' | sha256sum | cut -d' ' -f1)" ] || bad "the new artifact's sha256 is missing or wrong"
 [ "$(cat "$S/org/new/2.0/new.jar.sha1" 2>/dev/null)" = "$(printf 'new-artifact\n' | sha1sum | cut -d' ' -f1)" ] || bad "the new artifact's sha1 is missing or wrong"
-grep -qx 'org/new/2.0/new.jar' "$L/$DEMO_SHA.list" 2>/dev/null || bad "this source's list is missing"
+# named by the source and (as the recipe has a restore step) a hash of what else decides the downloads
+grep -qx 'org/new/2.0/new.jar' "$L/$DEMO_SHA"-????????????????.list 2>/dev/null || bad "this source's list is missing"
 [ $fail = 0 ] && echo "ok: a restore adds to the store and can change nothing in it, nor the build's root"
 exit $fail

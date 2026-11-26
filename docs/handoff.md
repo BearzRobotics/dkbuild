@@ -8,6 +8,14 @@ there the tests take under a minute. `/stuff/git/dkbuild` is behind `origin/new-
 holds an uncommitted copy of the first fix, now committed: `git checkout src/sandbox.zig && rm tests/isolation.sh`
 before pulling). The bug reports (`docs/bugs/`, ignored by git) are current in the clone only.
 
+## After the bug fixes: one thing to do by hand in the real cache
+
+`wallet-engine` and `uniffi-bindgen-cpp` share a source, and the cache's list for it is uniffi-bindgen-cpp's (BC-06,
+fixed: lists are now named by everything that decides them). wallet-engine keeps the plain name, so before it is
+built delete that list once (uniffi-bindgen-cpp then fetches or has already taken its own copy):
+
+    rm /mnt/dkbuild/cache/cargodeps/45d22ed481dc4fab07390abfa811c095c424e11c745e87b9d0d27b40efa17da2.list
+
 ## Links removed while the bug fixes are made
 
 So that fixing and testing cannot touch the repository or the built packages, these six links were replaced by

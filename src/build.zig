@@ -377,6 +377,19 @@ pub fn checkPolicy(arena: Allocator, io: std.Io, destdir: []const u8, problems: 
     try problems.append(arena, "installs into /usr/local");
 }
 
+/// The name of a restore step's list: its source, and what else decides what it downloads (the recipe's patches,
+/// the restore step itself, its environment).
+fn restoreKey(arena: Allocator, io: std.Io, opts: Options, r: recipe.Recipe, cache: []const u8, kind: []const u8, sha: []const u8) BuildError![]const u8 {
+    var extra: std.ArrayList([]const u8) = .empty;
+    if (r.restore) |x| try extra.appendSlice(arena, &.{ "restore", x });
+    if (r.environment) |x| try extra.appendSlice(arena, &.{ "environment", x });
+    const patch_dir = try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, opts.root, r.name), "patches" });
+    const key = fetch.depsKey(arena, io, sha, patch_dir, r.patches, extra.items) catch return error.PrepareFailed;
+    Dir.cwd().createDirPath(io, try std.fs.path.join(arena, &.{ cache, kind })) catch return error.PrepareFailed;
+    fetch.adoptList(arena, io, cache, kind, sha, key) catch return error.PrepareFailed;
+    return key;
+}
+
 const StoreKind = enum { maven, nuget };
 const Stage = struct { store: []const u8, lists: []const u8 };
 
@@ -928,8 +941,10 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                         out("error: {s}: {s}\n", .{ r.name, if (msg.len > 0) msg else @errorName(err) });
                         return error.PrepareFailed;
                     };
-                    cargo_list = try fetch.cargoDepsPath(arena, cache, src.tarball.sha256);
-                    cargo_config = try std.fmt.allocPrint(arena, "{s}/cargodeps/{s}.config.toml", .{ cache, src.tarball.sha256 });
+                    const rdir = try recipe.dirPath(arena, opts.root, r.name);
+                    const key = fetch.cargoDepsKey(arena, io, src.tarball.sha256, try std.fs.path.join(arena, &.{ rdir, "patches" }), r.patches, try fetch.recipeCargoLock(arena, r.options, rdir)) catch return error.PrepareFailed;
+                    cargo_list = try fetch.cargoDepsPath(arena, cache, key);
+                    cargo_config = try std.fmt.allocPrint(arena, "{s}/cargodeps/{s}.config.toml", .{ cache, key });
                 }
 
                 if (contains(r.options, "godeps")) {
@@ -1235,7 +1250,8 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     // Maven-layout store (SPEC.md 7.4); everything after runs offline.
     const uses_gradle = contains(r.options, "gradledeps") and first_tarball != null;
     if (uses_gradle) {
-        const first_sha = std.fs.path.basename(first_tarball.?);
+        // the list's name: what decides what the restore downloads
+        const first_sha = try restoreKey(arena, io, opts, r, cache, "gradledeps", std.fs.path.basename(first_tarball.?));
         const maven_rel = try std.fs.path.join(arena, &.{ cache, "maven" });
         const glists_rel = try std.fs.path.join(arena, &.{ cache, "gradledeps" });
         Dir.cwd().createDirPath(io, maven_rel) catch return error.PrepareFailed;
@@ -1308,7 +1324,8 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     // shared store; every build restores offline from it.
     const uses_nuget = contains(r.options, "nugetdeps") and first_tarball != null;
     if (uses_nuget) {
-        const first_sha = std.fs.path.basename(first_tarball.?);
+        // the list's name: what decides what the restore downloads
+        const first_sha = try restoreKey(arena, io, opts, r, cache, "nugetdeps", std.fs.path.basename(first_tarball.?));
         const store_rel = try std.fs.path.join(arena, &.{ cache, "nuget" });
         const lists_rel = try std.fs.path.join(arena, &.{ cache, "nugetdeps" });
         Dir.cwd().createDirPath(io, store_rel) catch return error.PrepareFailed;
@@ -1365,7 +1382,8 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     // build root, with the recipe's own Maven and a private local repository; what it downloaded goes into the shared Maven-layout store.
     const uses_maven = contains(r.options, "mavendeps") and first_tarball != null;
     if (uses_maven) {
-        const first_sha = std.fs.path.basename(first_tarball.?);
+        // the list's name: what decides what the restore downloads
+        const first_sha = try restoreKey(arena, io, opts, r, cache, "mavendeps", std.fs.path.basename(first_tarball.?));
         const maven_rel = try std.fs.path.join(arena, &.{ cache, "maven" });
         const mlists_rel = try std.fs.path.join(arena, &.{ cache, "mavendeps" });
         Dir.cwd().createDirPath(io, maven_rel) catch return error.PrepareFailed;
