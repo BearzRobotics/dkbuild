@@ -214,9 +214,14 @@ pub fn scanTreeExcept(arena: Allocator, io: std.Io, root: []const u8, noscan: []
         if (e.kind == .sym_link and (std.mem.eql(u8, dirname, "usr/lib") or std.mem.eql(u8, dirname, "lib")) and
             std.mem.startsWith(u8, e.basename, "libc.musl-") and std.mem.endsWith(u8, e.basename, ".so.1"))
             try addUnique(arena, &provides, try std.fmt.allocPrint(arena, "so:{s}", .{e.basename}));
+        // A .pc file's name is a name pkg-config finds, whether the file is a link or not (libpng.pc is a link
+        // to libpng16.pc, libsystemd.pc to elogind's).
+        const is_pc = std.mem.endsWith(u8, e.path, ".pc") and std.mem.indexOf(u8, e.path, "pkgconfig/") != null;
+        if (is_pc and e.kind == .sym_link)
+            try addUnique(arena, &provides, try std.fmt.allocPrint(arena, "pc:{s}", .{e.basename[0 .. e.basename.len - 3]}));
         if (e.kind != .file) continue;
 
-        if (std.mem.endsWith(u8, e.path, ".pc") and std.mem.indexOf(u8, e.path, "pkgconfig/") != null) {
+        if (is_pc) {
             const name = e.basename[0 .. e.basename.len - 3];
             try addUnique(arena, &provides, try std.fmt.allocPrint(arena, "pc:{s}", .{name}));
             const text = d.readFileAlloc(io, e.path, arena, .limited(1 << 20)) catch continue;
@@ -296,6 +301,24 @@ test "broken ELF files are rejected, not a crash (BC-14, SS-21)" {
         defer f.close(std.testing.io);
         _ = try parseElf(a, FileSource{ .file = f, .io = std.testing.io });
     }
+}
+
+test "a .pc that is a link is provided too (BC-07, PKG-04)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    try tmp.dir.createDirPath(io, "usr/lib/pkgconfig");
+    try tmp.dir.createDirPath(io, "usr/share/pkgconfig");
+    try tmp.dir.writeFile(io, .{ .sub_path = "usr/lib/pkgconfig/libpng16.pc", .data = "Name: png\nRequires: zlib\n" });
+    try tmp.dir.symLink(io, "libpng16.pc", "usr/lib/pkgconfig/libpng.pc", .{});
+    const r = try scanTreeExcept(a, io, try tmp.dir.realPathFileAlloc(io, ".", a), &.{});
+    try std.testing.expectEqual(@as(usize, 2), r.provides.len);
+    try std.testing.expectEqualStrings("pc:libpng", r.provides[0]);
+    try std.testing.expectEqualStrings("pc:libpng16", r.provides[1]);
+    try std.testing.expectEqual(@as(usize, 1), r.depends.len);
 }
 
 /// A minimal ELF64 shared object: one PT_LOAD covering the file, one
