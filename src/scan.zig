@@ -255,7 +255,7 @@ pub fn scanTreeExcept(arena: Allocator, io: std.Io, root: []const u8, noscan: []
         // programs ask for.
         if (info.soname == null and (std.mem.eql(u8, e.path, "usr/lib/libc.so") or std.mem.eql(u8, e.path, "lib/libc.so")))
             try addUnique(arena, &provides, "so:libc.so");
-        for (info.needed) |nd| try addUnique(arena, &needs, try std.fmt.allocPrint(arena, "so:{s}", .{nd}));
+        for (info.needed) |nd| try addUnique(arena, &needs, try std.fmt.allocPrint(arena, "so:{s}", .{neededName(nd)}));
     }
 
     var deps: std.ArrayList([]const u8) = .empty;
@@ -267,6 +267,16 @@ pub fn scanTreeExcept(arena: Allocator, io: std.Io, root: []const u8, noscan: []
     std.mem.sort([]const u8, deps.items, {}, lessThan);
     std.mem.sort([]const u8, provides.items, {}, lessThan);
     return .{ .provides = provides.items, .depends = deps.items, .private = private.items };
+}
+
+/// The name a DT_NEEDED entry is provided by. A library without a soname that was linked by its full path is
+/// needed as that path, but provided by its file name; the musl loader is the C library.
+fn neededName(nd: []const u8) []const u8 {
+    const dir = std.fs.path.dirnamePosix(nd) orelse return nd;
+    if (!std.mem.eql(u8, dir, "/usr/lib") and !std.mem.eql(u8, dir, "/lib")) return nd;
+    const base = std.fs.path.basenamePosix(nd);
+    if (std.mem.startsWith(u8, base, "ld-musl-")) return "libc.so";
+    return base;
 }
 
 fn lessThan(_: void, a: []const u8, b: []const u8) bool {
@@ -344,6 +354,15 @@ test "only .pc files where pkg-config looks are provided or required (BC-08)" {
     try std.testing.expectEqualStrings("pc:real", r.provides[1]);
     try std.testing.expectEqual(@as(usize, 1), r.depends.len);
     try std.testing.expectEqualStrings("pc:zlib", r.depends[0]);
+}
+
+test "a library linked by its full path is needed by name (BC-09)" {
+    try std.testing.expectEqualStrings("libmujs.so", neededName("/usr/lib/libmujs.so"));
+    try std.testing.expectEqualStrings("libz.so.1", neededName("/lib/libz.so.1"));
+    try std.testing.expectEqualStrings("libc.so", neededName("/lib/ld-musl-x86_64.so.1"));
+    try std.testing.expectEqualStrings("libc.so", neededName("/usr/lib/ld-musl-aarch64.so.1"));
+    try std.testing.expectEqualStrings("/usr/lib/private/libx.so", neededName("/usr/lib/private/libx.so"));
+    try std.testing.expectEqualStrings("libz.so.1", neededName("libz.so.1"));
 }
 
 /// A minimal ELF64 shared object: one PT_LOAD covering the file, one
