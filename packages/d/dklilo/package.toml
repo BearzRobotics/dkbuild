@@ -1,8 +1,9 @@
 # needed by: base (boot loader), the live image
 # 0.0.4 (2026-11-20): the two fixes the installer needs (install-bios with a BIOS boot partition at 1 MiB; check/config finding the device
 # from /proc/self/mountinfo) and the manual pages in the dkman layout, now in a release (it was pinned to commit 380a5b3 since 0.0.3).
+# 0.0.5 (2026-11-26): new upstream release.
 name = "dklilo"
-version = "0.0.4"
+version = "0.0.5"
 release = 1
 summary = "A modern LILO: BIOS and UEFI boot loader that reads filesystems itself"
 license = "MIT"
@@ -12,7 +13,7 @@ hostdeps = ["zig"]
 options = ["!check"]  # zig builds static executables itself
 
 source = [
-    { url = "https://github.com/BearzRobotics/dklilo/releases/download/v0.0.4/dklilo-0.0.4.tar.gz", sha256 = "d6b02e198fe6cd2dff2b4b8ceacdb9650601e531965e28d7aed041afeae99231" },
+    { url = "https://github.com/BearzRobotics/dklilo/releases/download/v0.0.5/dklilo-0.0.5.tar.gz", sha256 = "c594cd77e826ebe06d13f7df91c70406a2c91b2943e8e9f5848da09b0e3840e0" },
 ]
 
 install = '''
