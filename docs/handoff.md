@@ -84,6 +84,10 @@ Distinct failures: pass 4, 182; pass 6, 60 (not finished: OOM); pass 7, 28 (stop
 - **Failing packages:** the table under "Under investigation" in docs/unbuildable.md has the state of each (ghc,
   dotnet, euro-office-documentserver, electron, brave, dj64dev, emacs, fceux, lomiri-url-dispatcher, mattermost,
   pdfcraft). audacity, abiword (new package wv), aisleriot (guile r5), dia and others have fixes committed and untried.
+- **Source discs are incomplete (found in the 11-25 docs audit; code not changed):** `source_stores` in src/discs.zig
+  leaves out cache/maven, gradledeps, mavendeps, nugetdeps, hackage, hackagedeps, python and pydeps, so a source disc
+  alone cannot rebuild the recipes that use them. (nugetdeps and mavendeps as reported by the audit; cache/ here has
+  no such directories to compare.) `dkbuild doctor` also does not check for python3, go, cargo, zig or patch.
 - **onnxruntime:** its GitHub repository answered 404 (blocks calibre speech, fastembed, rapidocr, mineru). Recheck.
 - **NTFS drive not shown in dkde-file:** packaging looked complete from the build logs; not tested on a running
   system (see docs/requests.md). The dkde side is being looked at separately.
