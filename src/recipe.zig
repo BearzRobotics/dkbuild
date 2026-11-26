@@ -155,7 +155,7 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
         if (!std.mem.eql(u8, key, "jobs") and !contains(&known_options, key))
             return cfg.fail(arena, diag, "unknown option '{s}'", .{o});
         if (std.mem.eql(u8, key, "jobs") and
-            (std.fmt.parseInt(u32, bare["jobs:".len..], 10) catch 0) == 0)
+            (!std.mem.startsWith(u8, bare, "jobs:") or (std.fmt.parseInt(u32, bare["jobs:".len..], 10) catch 0) == 0))
             return cfg.fail(arena, diag, "option '{s}': jobs:N needs a positive number", .{o});
     }
 
@@ -393,6 +393,10 @@ test "git sources, lists, subpackages and [[source]] tables" {
 
 test "unknown key is an error" {
     try expectInvalid("name = \"a\"\nversoin = 1\n", "unknown key 'versoin'");
+}
+
+test "a bare 'jobs' option is an error, not a crash (SS-20)" {
+    try expectInvalid(minimal ++ "options = [\"jobs\"]\n", "option 'jobs': jobs:N needs a positive number");
 }
 
 test "types are checked" {
