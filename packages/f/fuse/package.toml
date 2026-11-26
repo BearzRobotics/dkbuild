@@ -3,9 +3,10 @@
 # needed by: ntfs-3g, e2fsprogs (fuse2fs), and later flatpak and sshfs. fusermount3
 # is setuid root, as upstream installs it.
 # r2: static libraries too (in fuse-static), for fully static programs on musl.
+# r3: fusermount3 is setuid root (PKG-02): normal users could not make FUSE mounts.
 name = "fuse"
 version = "3.18.3"
-release = 2
+release = 3
 summary = "Filesystem in USErspace"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://github.com/libfuse/libfuse"
@@ -38,4 +39,6 @@ mkdir -p "$pkgdir/usr/share/man/man1"
 ln -sf fusermount3.1 "$pkgdir/usr/share/man/man1/fusermount.1"
 mkdir -p "$pkgdir/usr/share/man/man8"
 ln -sf mount.fuse3.8 "$pkgdir/usr/share/man/man8/mount.fuse.8"
+# setuid root, as upstream installs it: without it only root can mount (useroot=false stops meson setting it)
+chmod 4755 "$pkgdir/usr/bin/fusermount3"
 '''
