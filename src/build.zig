@@ -342,6 +342,12 @@ pub fn checkPolicy(arena: Allocator, io: std.Io, destdir: []const u8, problems: 
     try problems.append(arena, "installs into /usr/local");
 }
 
+/// A path under `cache` as the layout script's sandbox sees it, under /dkcache.
+fn inLay(arena: Allocator, cache: []const u8, path: []const u8) BuildError![]const u8 {
+    if (!std.mem.startsWith(u8, path, cache) or path.len <= cache.len or path[cache.len] != '/') return error.UnpackFailed;
+    return std.fmt.allocPrint(arena, "/dkcache{s}", .{path[cache.len..]});
+}
+
 /// Deletes a build's work directory, including a sandbox's overlay layers.
 /// Works on leftovers of an earlier build too.
 /// Returns whether nothing is left. A build may leave directories without owner permission anywhere (Go's
@@ -914,9 +920,15 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 const zip = isZipArchive(src.tarball.url);
                 if (!src.tarball.unpack or src.tarball.name != null or (!isTarArchive(src.tarball.url) and !zip)) {
                     const sdir = try std.fs.path.join(arena, &.{ build_rel, "sources" });
-                    Dir.cwd().createDirPath(io, sdir) catch return error.UnpackFailed;
+                    // An earlier archive may have made `sources`, or a name in it, a link to anywhere.
+                    if (Dir.cwd().statFile(io, sdir, .{ .follow_symlinks = false })) |st| {
+                        if (st.kind != .directory) {
+                            out("error: {s}: a source archive has a 'sources' that is not a directory\n", .{r.name});
+                            return error.UnpackFailed;
+                        }
+                    } else |_| Dir.cwd().createDirPath(io, sdir) catch return error.UnpackFailed;
                     const base = src.tarball.name orelse std.fs.path.basename(src.tarball.url);
-                    const ok = runLogged(arena, io, &.{ "cp", file, try std.fs.path.join(arena, &.{ sdir, base }) }, &log) catch false;
+                    const ok = runLogged(arena, io, &.{ "cp", "--remove-destination", file, try std.fs.path.join(arena, &.{ sdir, base }) }, &log) catch false;
                     if (!ok) return error.UnpackFailed;
                     first = false;
                     continue;
@@ -948,37 +960,40 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         // Crates and Zig packages from the shared stores: symbolic links to
         // where the build sees the stores (read-only, bound at /dkdeps), so a
         // build cannot change them. Go reads its module cache directly.
-        const dest = try std.fmt.allocPrint(arena, "{s}{s}", .{ build_rel, srcdir["/build".len..] });
         var lay: std.ArrayList(u8) = .empty;
-        // the layout script runs on the host, where /dkdeps does not exist: the version comparison reads the store by its host path
-        const cargo_store_abs = try std.fmt.allocPrint(arena, "{s}", .{absPath(arena, io, try std.fs.path.join(arena, &.{ opts.root, "cache" })) catch return error.UnpackFailed});
+        // The layout script runs in a sandbox of its own (below): the unpacked source is untrusted, full of
+        // whatever links and names its archive chose. It sees the cache at /dkcache, read-only.
+        var cargo_lock_bind: ?sandbox.Bind = null;
         if (cargo_list) |cl| {
             const text = Dir.cwd().readFileAlloc(io, cl, arena, .limited(1 << 22)) catch return error.UnpackFailed;
             // with `cargolock=<dir>`: the recipe's Cargo.lock, the crates and the
             // config in that project's directory (a subshell keeps the rest at the top)
             const clock = try fetch.recipeCargoLock(arena, r.options, try recipe.dirPath(arena, opts.root, r.name));
-            if (clock) |l| try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "(\ncd '{s}'\ncp '{s}' Cargo.lock\n", .{ l.dir, absPath(arena, io, l.file) catch return error.UnpackFailed }));
+            if (clock) |l| {
+                cargo_lock_bind = .{ .src = absPath(arena, io, l.file) catch return error.UnpackFailed, .dst = "/dkcargolock", .read_only = true };
+                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "(\ncd '{s}'\ncp /dkcargolock Cargo.lock\n", .{l.dir}));
+            }
             try lay.appendSlice(arena, "mkdir -p vendor .cargo\n");
-            try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "cp '{s}' .cargo/config.toml\n", .{absPath(arena, io, cargo_config.?) catch return error.UnpackFailed}));
+            try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "cp '{s}' .cargo/config.toml\n", .{try inLay(arena, cache, cargo_config.?)}));
             var lines = std.mem.tokenizeScalar(u8, text, '\n');
             while (lines.next()) |l| {
                 var f = std.mem.tokenizeScalar(u8, l, ' ');
                 const n = f.next() orelse continue;
                 const k = f.next() orelse continue;
-                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "if [ -d 'vendor/{1s}' ] && [ ! -L 'vendor/{1s}' ] && [ \"$(sed -n 's/^version = \"\\(.*\\)\"$/\\1/p' 'vendor/{1s}/Cargo.toml' | head -n 1)\" != \"$(sed -n 's/^version = \"\\(.*\\)\"$/\\1/p' '{2s}/crates/{0s}/Cargo.toml' | head -n 1)\" ]; then ln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}-dkdeps'; else rm -rf 'vendor/{1s}'; ln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}'; fi\n", .{ k, n, cargo_store_abs }));
+                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "if [ -d 'vendor/{1s}' ] && [ ! -L 'vendor/{1s}' ] && [ \"$(sed -n 's/^version = \"\\(.*\\)\"$/\\1/p' 'vendor/{1s}/Cargo.toml' | head -n 1)\" != \"$(sed -n 's/^version = \"\\(.*\\)\"$/\\1/p' '{2s}/crates/{0s}/Cargo.toml' | head -n 1)\" ]; then ln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}-dkdeps'; else rm -rf 'vendor/{1s}'; ln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}'; fi\n", .{ k, n, "/dkcache" }));
             }
             if (clock != null) try lay.appendSlice(arena, ")\n");
         }
         // further sources' crates, in their own directories (next to this one)
         for (extra_cargo.items) |ec| {
             const text = Dir.cwd().readFileAlloc(io, ec[1], arena, .limited(1 << 22)) catch return error.UnpackFailed;
-            try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "(\nd=$(tar -tf '{s}' | head -n1 | sed 's|^\\./||' | cut -d/ -f1)\ncd \"../$d\"\nmkdir -p vendor .cargo\ncp '{s}' .cargo/config.toml\n", .{ absPath(arena, io, ec[0]) catch return error.UnpackFailed, absPath(arena, io, ec[2]) catch return error.UnpackFailed }));
+            try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "(\nd=$(tar -tf '{s}' | head -n1 | sed 's|^\\./||' | cut -d/ -f1)\ncd \"../$d\"\nmkdir -p vendor .cargo\ncp '{s}' .cargo/config.toml\n", .{ try inLay(arena, cache, ec[0]), try inLay(arena, cache, ec[2]) }));
             var lines = std.mem.tokenizeScalar(u8, text, '\n');
             while (lines.next()) |l| {
                 var f = std.mem.tokenizeScalar(u8, l, ' ');
                 const n = f.next() orelse continue;
                 const k = f.next() orelse continue;
-                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "if [ -d 'vendor/{1s}' ] && [ ! -L 'vendor/{1s}' ] && [ \"$(sed -n 's/^version = \"\\(.*\\)\"$/\\1/p' 'vendor/{1s}/Cargo.toml' | head -n 1)\" != \"$(sed -n 's/^version = \"\\(.*\\)\"$/\\1/p' '{2s}/crates/{0s}/Cargo.toml' | head -n 1)\" ]; then ln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}-dkdeps'; else rm -rf 'vendor/{1s}'; ln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}'; fi\n", .{ k, n, cargo_store_abs }));
+                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "if [ -d 'vendor/{1s}' ] && [ ! -L 'vendor/{1s}' ] && [ \"$(sed -n 's/^version = \"\\(.*\\)\"$/\\1/p' 'vendor/{1s}/Cargo.toml' | head -n 1)\" != \"$(sed -n 's/^version = \"\\(.*\\)\"$/\\1/p' '{2s}/crates/{0s}/Cargo.toml' | head -n 1)\" ]; then ln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}-dkdeps'; else rm -rf 'vendor/{1s}'; ln -sfn '/dkdeps/crates/{0s}' 'vendor/{1s}'; fi\n", .{ k, n, "/dkcache" }));
             }
             try lay.appendSlice(arena, ")\n");
         }
@@ -994,19 +1009,16 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                     var parts = std.mem.tokenizeScalar(u8, f, ' ');
                     const arc = parts.next() orelse continue;
                     const gdir = parts.next() orelse continue;
-                    // unpacked now, on the host, so from the store's host path
-                    // (/dkdeps exists only inside the build sandbox)
-                    const gem_store = absPath(arena, io, try std.fs.path.join(arena, &.{ cache, "gems" })) catch return error.UnpackFailed;
-                    try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "mkdir -p 'vendor/cache/{1s}' && tar -xzf '{2s}/{0s}' -C 'vendor/cache/{1s}' --strip-components=1 && touch 'vendor/cache/{1s}/.bundlecache'\n", .{ arc, gdir, gem_store }));
+                    // unpacked now, by the layout script
+                    try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "mkdir -p 'vendor/cache/{1s}' && tar -xzf '{2s}/{0s}' -C 'vendor/cache/{1s}' --strip-components=1 && touch 'vendor/cache/{1s}/.bundlecache'\n", .{ arc, gdir, "/dkcache/gems" }));
                 } else try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "ln -sfn '/dkdeps/gems/{s}' 'vendor/cache/{s}'\n", .{ f, f }));
             }
         }
         // Dart packages: unpacked into .dkpub as pub's own cache lays them
         // out (hosted/pub.dev/<name>-<version>, and the archive's sha256 in
-        // hosted-hashes), from the store's host path
+        // hosted-hashes)
         for (pub_lists.items) |pl| {
             const text = Dir.cwd().readFileAlloc(io, pl, arena, .limited(1 << 22)) catch return error.UnpackFailed;
-            const pub_store = absPath(arena, io, try std.fs.path.join(arena, &.{ cache, "pub" })) catch return error.UnpackFailed;
             try lay.appendSlice(arena, "mkdir -p .dkpub/hosted/pub.dev .dkpub/hosted-hashes/pub.dev\n");
             var pl_lines = std.mem.tokenizeScalar(u8, text, '\n');
             while (pl_lines.next()) |l| {
@@ -1014,7 +1026,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 const n = f.next() orelse continue;
                 const v = f.next() orelse continue;
                 const h = f.next() orelse continue;
-                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "mkdir -p '.dkpub/hosted/pub.dev/{0s}-{1s}' && tar -xzf '{3s}/{0s}-{1s}.tar.gz' -C '.dkpub/hosted/pub.dev/{0s}-{1s}' && printf '%s' '{2s}' > '.dkpub/hosted-hashes/pub.dev/{0s}-{1s}.sha256'\n", .{ n, v, h, pub_store }));
+                try lay.appendSlice(arena, try std.fmt.allocPrint(arena, "mkdir -p '.dkpub/hosted/pub.dev/{0s}-{1s}' && tar -xzf '{3s}/{0s}-{1s}.tar.gz' -C '.dkpub/hosted/pub.dev/{0s}-{1s}' && printf '%s' '{2s}' > '.dkpub/hosted-hashes/pub.dev/{0s}-{1s}.sha256'\n", .{ n, v, h, "/dkcache/pub" }));
             }
         }
         // Haskell packages: .dkhackage, a cabal file+noindex repository of
@@ -1031,12 +1043,23 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         if (lay.items.len > 0) {
             // The script goes through a file: a large crate list (cargo-c has 410)
             // makes it longer than one argument may be (128 KiB).
-            const lay_dir = try std.fs.path.join(arena, &.{ root_rel, "dkbuild" });
-            Dir.cwd().createDirPath(io, lay_dir) catch return error.UnpackFailed;
-            const lay_file = try std.fs.path.join(arena, &.{ lay_dir, "lay.sh" });
-            Dir.cwd().writeFile(io, .{ .sub_path = lay_file, .data = try std.fmt.allocPrint(arena, "cd '{s}'\n{s}", .{ dest, lay.items }) }) catch return error.UnpackFailed;
-            const lay_abs = absPath(arena, io, lay_file) catch return error.UnpackFailed;
-            const ok = runLogged(arena, io, &.{ "sh", "-e", lay_abs }, &log) catch false;
+            const dk_rel = try std.fs.path.join(arena, &.{ root_rel, "dkbuild" });
+            Dir.cwd().createDirPath(io, dk_rel) catch return error.UnpackFailed;
+            const lay_file = try std.fs.path.join(arena, &.{ dk_rel, "lay.sh" });
+            Dir.cwd().writeFile(io, .{ .sub_path = lay_file, .data = try std.fmt.allocPrint(arena, "cd '{s}'\n{s}", .{ srcdir, lay.items }) }) catch return error.UnpackFailed;
+            var binds: std.ArrayList(sandbox.Bind) = .empty;
+            try binds.appendSlice(arena, &.{
+                .{ .src = try std.fs.path.join(arena, &.{ root_abs, "build" }), .dst = "/build" },
+                .{ .src = try std.fs.path.join(arena, &.{ root_abs, "dkbuild" }), .dst = "/dkbuild", .read_only = true },
+            });
+            // each of the cache's directories by itself, so that one that is a link to another disk works
+            for ([_][]const u8{ "sources", "cargodeps", "crates", "gems", "pub" }) |sub| {
+                const abs = absPath(arena, io, try std.fs.path.join(arena, &.{ cache, sub })) catch continue;
+                try binds.append(arena, .{ .src = abs, .dst = try std.fmt.allocPrint(arena, "/dkcache/{s}", .{sub}), .read_only = true });
+            }
+            if (cargo_lock_bind) |b| try binds.append(arena, b);
+            // a layer of its own over the base image: no network, and nothing of it reaches the build's
+            const ok = runTool(arena, io, base_root, try sbDirs(arena, io, work, "lay"), binds.items, &.{ "/usr/bin/sh", "-e", "/dkbuild/lay.sh" }, &log) catch false;
             if (!ok) {
                 out("error: cannot lay out the vendored dependencies of {s}\n", .{r.name});
                 return error.UnpackFailed;
@@ -1089,7 +1112,8 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 .net = true,
                 .binds = &.{
                     .{ .src = try std.fs.path.join(arena, &.{ root_abs, "build" }), .dst = "/build" },
-                    .{ .src = try std.fs.path.join(arena, &.{ root_abs, "dkbuild" }), .dst = "/dkbuild" },
+                    // read-only: the host writes more files here afterwards, and would follow a link left there
+                    .{ .src = try std.fs.path.join(arena, &.{ root_abs, "dkbuild" }), .dst = "/dkbuild", .read_only = true },
                     .{ .src = absPath(arena, io, maven_rel) catch return error.PrepareFailed, .dst = "/dkstore/maven" },
                     .{ .src = absPath(arena, io, glists_rel) catch return error.PrepareFailed, .dst = "/dkstore/gradledeps" },
                     .{ .src = "/etc/resolv.conf", .dst = "/etc/resolv.conf", .read_only = true },
@@ -1136,7 +1160,8 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 .net = true,
                 .binds = &.{
                     .{ .src = try std.fs.path.join(arena, &.{ root_abs, "build" }), .dst = "/build" },
-                    .{ .src = try std.fs.path.join(arena, &.{ root_abs, "dkbuild" }), .dst = "/dkbuild" },
+                    // read-only: the host writes more files here afterwards, and would follow a link left there
+                    .{ .src = try std.fs.path.join(arena, &.{ root_abs, "dkbuild" }), .dst = "/dkbuild", .read_only = true },
                     .{ .src = absPath(arena, io, store_rel) catch return error.PrepareFailed, .dst = "/dkstore/nuget" },
                     .{ .src = absPath(arena, io, lists_rel) catch return error.PrepareFailed, .dst = "/dkstore/nugetdeps" },
                     .{ .src = "/etc/resolv.conf", .dst = "/etc/resolv.conf", .read_only = true },
@@ -1192,7 +1217,8 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                 .net = true,
                 .binds = &.{
                     .{ .src = try std.fs.path.join(arena, &.{ root_abs, "build" }), .dst = "/build" },
-                    .{ .src = try std.fs.path.join(arena, &.{ root_abs, "dkbuild" }), .dst = "/dkbuild" },
+                    // read-only: the host writes more files here afterwards, and would follow a link left there
+                    .{ .src = try std.fs.path.join(arena, &.{ root_abs, "dkbuild" }), .dst = "/dkbuild", .read_only = true },
                     .{ .src = absPath(arena, io, maven_rel) catch return error.PrepareFailed, .dst = "/dkstore/maven" },
                     .{ .src = absPath(arena, io, mlists_rel) catch return error.PrepareFailed, .dst = "/dkstore/mavendeps" },
                     .{ .src = "/etc/resolv.conf", .dst = "/etc/resolv.conf", .read_only = true },
