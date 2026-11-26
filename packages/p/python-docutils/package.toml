@@ -3,7 +3,7 @@
 # r2: actually installs the module (r1 had only its license).
 name = "python-docutils"
 version = "0.23"
-release = 2
+release = 3
 summary = "Python documentation utilities"
 license = "custom:none AND BSD-2-Clause AND GPL-3.0-or-later AND Python-2.0"
 homepage = "http://docutils.sourceforge.net"

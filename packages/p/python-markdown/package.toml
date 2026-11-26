@@ -1,7 +1,7 @@
 # Markdown in Python. needed by: gobject-introspection (its doc tool).
 name = "python-markdown"
 version = "3.11.3"
-release = 1
+release = 2
 summary = "Python implementation of Markdown"
 license = "BSD-3-Clause"
 homepage = "https://python-markdown.github.io"
