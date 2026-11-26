@@ -1,9 +1,9 @@
-# Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/passt/template.py
+# Imported from Chimera Linux cports: main/passt/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
-# DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
-# dependency names (they are Chimera's) before building.
+# Version: upstream releases are dated tags (2026_10_02.cba3570): the date is the version (it was "0" as imported); the
+# commit that follows it is only in the download's name. upstream.toml tells the update check how to read the tags.
 name = "passt"
-version = "0"
+version = "2026.10.02"
 release = 1
 summary = "User-mode network translation layer between Layer 2 and 4"
 license = "BSD-3-Clause AND GPL-2.0-or-later"
@@ -13,7 +13,7 @@ builddeps = ["linux-headers"]
 options = ["!check"]
 
 source = [
-    { url = "https://passt.top/passt/snapshot/passt-2026_09_25.df90211.tar.zst", sha256 = "8285146defc9b89b853142eee813135064bd518a76eabf8fb0f673fc74fc9231" },
+    { url = "https://passt.top/passt/snapshot/passt-2026_10_02.cba3570.tar.zst", sha256 = "e56b9695239eae3675ba461a4d70bdf3840599f82e5cefe0f1a1fe185f1f128d" },
 ]
 
 environment = '''

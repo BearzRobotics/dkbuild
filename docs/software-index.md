@@ -1897,7 +1897,7 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | partitionmanager | 26.08.2 | KDE drive management utility |
 | passbolt | 5.17.0 | Open-source password manager for teams (server) |
 | passivedns | 2.0.2 | A network sniffer that logs all DNS server replies for use in a passive DNS setup. |
-| passt | 0 | User-mode network translation layer between Layer 2 and 4 |
+| passt | 2026.10.02 | User-mode network translation layer between Layer 2 and 4 |
 | patch | 2.7.6 | Apply a diff to files |
 | patchelf | 0.19.1 | Utility to modify the dynamic linker and RPATH of ELF executables |
 | pavucontrol | 6.2 | PulseAudio volume control |

@@ -48,3 +48,8 @@ regex = "libmspack-([0-9.]+)alpha"   # every release is named "<n>alpha"
 
 [brush]
 regex = "brush-shell-v([0-9.]+)"   # the repository also tags its library crates (brush-core-v0.5.0 is not a shell release)
+
+[passt]
+url = "https://passt.top/passt"       # releases are tags named <date>.<commit>
+git = true
+regex = "^(2\\d{3}_\\d\\d_\\d\\d)\\.[0-9a-f]+$"
