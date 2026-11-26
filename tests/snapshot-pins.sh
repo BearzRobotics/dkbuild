@@ -82,6 +82,7 @@ run dart 1.0 $D 5555555555555555555555555555555555555555 '' && bad "dart: a chec
 [ ! -e "$RAN" ] || bad "dart: a script from an unverified checkout ran: $(cat "$RAN")"
 
 # --- scratch-media: asset names come from the package's lists; one with a path must not reach rm or curl
+rm "$W/bin/python3"   # the real one from here: it reads the asset lists
 lib="$W/work-scratch-media/gui/package/src/lib/libraries"
 mkdir -p "$lib" && touch "$W/work-scratch-media/gui/.done"
 echo keep > "$W/victim"
