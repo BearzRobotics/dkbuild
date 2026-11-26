@@ -12,8 +12,8 @@
 //!
 //!   repo    DIR/apks/<arch>/ is a signed apk repository (Packages.adb and
 //!           every current package of a recipe without `!repo-iso`)
-//!   source  DIR/cache/ (every source tarball the recipes name and the
-//!           vendored Go, Rust, Zig, npm, NuGet and Ruby stores),
+//!   source  DIR/cache/ (every source tarball the recipes name and every
+//!           dependency store and list, see `source_skip`),
 //!           DIR/dkbuild.bundle (the git tree, `git clone` it) and
 //!           DIR/dkrescue.iso (the build machine): a rebuild with no network
 //!
@@ -156,11 +156,39 @@ pub fn plan(arena: Allocator, sizes: []const u64, usable: u64) Allocator.Error![
     return out.items;
 }
 
-/// Directories of cache/ that a rebuild needs besides the source tarballs:
-/// the vendored stores and the lists of what each package uses from them.
-/// Not cargo-home or zig-global (download caches) nor snapshots (work
-/// directories; the snapshots themselves are tarballs in cache/sources).
-const source_stores = [_][]const u8{ "crates", "cargodeps", "godeps", "gomod", "npm", "npmdeps", "zigpkg", "zigdeps", "gems", "gemdeps", "gemsums", "nuget", "pub", "pubdeps" };
+/// What in cache/ does not go on a source disc. Everything else there does: the
+/// dependency stores and the lists of what each package uses from them. Naming
+/// what is left out, not what goes on, so that a new store cannot be forgotten
+/// (a list of stores lacked the Gradle, Maven, Python and Haskell ones). Left
+/// out: sources (taken file by file, the ones the recipes name), cargo-home and
+/// zig-global (download caches) and snapshots (work directories; the snapshots
+/// themselves are tarballs in cache/sources).
+const source_skip = [_][]const u8{ "sources", "cargo-home", "zig-global", "snapshots" };
+
+/// The directories of <root>/cache that go on a source disc, sorted.
+fn sourceStores(arena: Allocator, io: std.Io, root: []const u8) ![]const []const u8 {
+    const rel = try std.fs.path.join(arena, &.{ root, "cache" });
+    var d = Dir.cwd().openDir(io, rel, .{ .iterate = true }) catch |err| {
+        say("error: {s}: {s}\n", .{ rel, @errorName(err) });
+        return error.PrepareFailed;
+    };
+    defer d.close(io);
+    var out: std.ArrayList([]const u8) = .empty;
+    var it = d.iterate();
+    next: while (try it.next(io)) |e| {
+        // a link to a store counts; plain files at the top are not stores
+        if (e.kind != .directory and e.kind != .sym_link) continue;
+        if (std.mem.startsWith(u8, e.name, "tmp-")) continue;
+        for (source_skip) |skip| if (std.mem.eql(u8, e.name, skip)) continue :next;
+        try out.append(arena, try arena.dupe(u8, e.name));
+    }
+    std.mem.sort([]const u8, out.items, {}, struct {
+        fn lt(_: void, x: []const u8, y: []const u8) bool {
+            return std.mem.lessThan(u8, x, y);
+        }
+    }.lt);
+    return out.items;
+}
 
 pub const Options = struct {
     root: []const u8,
@@ -171,8 +199,43 @@ fn say(comptime fmt: []const u8, args: anytype) void {
     std.debug.print(fmt, args);
 }
 
+/// A path the tab-separated MANIFEST (and sha256sum's check lists) cannot hold.
 fn badPath(p: []const u8) bool {
-    return std.mem.indexOfAny(u8, p, "\t\n\r'\\") != null or p.len == 0;
+    return std.mem.indexOfAny(u8, p, "\t\n\r\\") != null or p.len == 0;
+}
+
+/// `s` for use between single quotes in an xorriso command file, whose quoting
+/// is the shell's: a quote ends the string, goes in double quotes, and starts it
+/// again (a Zig package has files named "Puppet's Master").
+fn inQuotes(arena: Allocator, s: []const u8) ![]const u8 {
+    return std.mem.replaceOwned(u8, arena, s, "'", "'\"'\"'");
+}
+
+/// A file named like the signing key. Other names say nothing: the stores hold
+/// dependencies' test keys (*.rsa) and sources named signing.rs. The key's
+/// contents are checked as well, under whatever name (see `make`).
+fn namedLikeKey(path: []const u8) bool {
+    const base = std.fs.path.basename(path);
+    return std.mem.startsWith(u8, base, "signing.rsa") and !std.mem.endsWith(u8, base, ".pub");
+}
+
+/// Where the disc sandbox sees the file `src`. cache/, repo/<arch>/ and
+/// dkrescue.iso get binds of their own: they may be links to another disk, which
+/// the bind of the tree at /tree would not follow.
+fn sandboxPath(arena: Allocator, root: []const u8, arch: []const u8, work_rel: []const u8, src: []const u8) ![]const u8 {
+    const cache = try std.fs.path.join(arena, &.{ root, "cache" });
+    const repo = try std.fs.path.join(arena, &.{ root, "repo", arch });
+    const iso = try std.fs.path.join(arena, &.{ root, "dkrescue.iso" });
+    if (under(src, work_rel)) |rest| return std.fmt.allocPrint(arena, "/work/{s}", .{rest});
+    if (under(src, cache)) |rest| return std.fmt.allocPrint(arena, "/dkcache/{s}", .{rest});
+    if (under(src, repo)) |rest| return std.fmt.allocPrint(arena, "/dkrepo/{s}", .{rest});
+    if (std.mem.eql(u8, src, iso)) return "/dkrescue.iso";
+    return std.fmt.allocPrint(arena, "/tree/{s}", .{relTo(root, src)});
+}
+
+fn under(p: []const u8, dir: []const u8) ?[]const u8 {
+    if (std.mem.startsWith(u8, p, dir) and p.len > dir.len and p[dir.len] == '/') return p[dir.len + 1 ..];
+    return null;
 }
 
 fn addFile(arena: Allocator, io: std.Io, items: *std.ArrayList(Item), path: []const u8, src: []const u8, sha: ?[]const u8) !void {
@@ -286,7 +349,7 @@ fn sourceItems(arena: Allocator, io: std.Io, t: tree.Tree, opts: Options, work_r
         .git => {},
     };
     if (missing > 0) say("note: {d} source(s) not in the cache are not on the discs\n", .{missing});
-    for (source_stores) |s| try walkInto(arena, io, items, opts.root, try std.fmt.allocPrint(arena, "cache/{s}", .{s}));
+    for (try sourceStores(arena, io, opts.root)) |s| try walkInto(arena, io, items, opts.root, try std.fmt.allocPrint(arena, "cache/{s}", .{s}));
 
     // The tree as git has it: the committed state (HEAD and every branch).
     const bundle = try std.fmt.allocPrint(arena, "{s}/dkbuild.bundle", .{work_rel});
@@ -436,8 +499,8 @@ pub fn make(arena: Allocator, io: std.Io, t: tree.Tree, set: Set, opts: Options)
             return error.PrepareFailed;
         }
         // Never a private key, whatever a store holds.
-        if (std.mem.endsWith(u8, it.path, ".rsa") or std.mem.indexOf(u8, it.path, "signing.") != null and !std.mem.endsWith(u8, it.path, ".pub")) {
-            say("error: {s} looks like a private key; it does not go on a disc\n", .{it.path});
+        if (namedLikeKey(it.path)) {
+            say("error: {s} is named like the private signing key; it does not go on a disc\n", .{it.path});
             return error.PrepareFailed;
         }
         total += it.size;
@@ -464,6 +527,24 @@ pub fn make(arena: Allocator, io: std.Io, t: tree.Tree, set: Set, opts: Options)
     const piece_sha = try arena.alloc([]const u8, pieces.len);
     const item_sha = try arena.alloc([]const u8, items.items.len);
     try hashAll(arena, io, items.items, pieces, piece_sha, item_sha);
+    // The private signing key never goes on a disc, under any name: no file may
+    // have its contents (checked before anything is written).
+    if (have_key) {
+        const key = Dir.cwd().readFileAlloc(io, opts.key, arena, .limited(1 << 16)) catch |err| {
+            say("error: {s}: {s}\n", .{ opts.key, @errorName(err) });
+            return error.PrepareFailed;
+        };
+        var h = Sha256.init(.{});
+        h.update(key);
+        const key_sha = std.fmt.bytesToHex(h.finalResult(), .lower);
+        for (pieces, piece_sha) |p, ps| {
+            const whole = if (p.parts == 0) ps else item_sha[p.item];
+            if (std.mem.eql(u8, whole, &key_sha)) {
+                say("error: {s} is a copy of the private signing key; it does not go on a disc\n", .{items.items[p.item].path});
+                return error.PrepareFailed;
+            }
+        }
+    }
 
     const set_id = blk: {
         const res = std.process.run(arena, io, .{ .argv = &.{ "date", "-u", "+%Y%m%d-%H%M" } }) catch break :blk set.name;
@@ -513,11 +594,12 @@ pub fn make(arena: Allocator, io: std.Io, t: tree.Tree, set: Set, opts: Options)
         while (pi < pieces.len and pieces[pi].disc == k) : (pi += 1) {
             const p = pieces[pi];
             const it = items.items[p.item];
-            const src = if (std.mem.startsWith(u8, it.src, work_rel)) try std.fmt.allocPrint(arena, "/work{s}", .{it.src[work_rel.len..]}) else try std.fmt.allocPrint(arena, "/tree/{s}", .{relTo(opts.root, it.src)});
+            const src = try inQuotes(arena, try sandboxPath(arena, opts.root, set.arch, work_rel, it.src));
+            const dst = try inQuotes(arena, it.path);
             if (p.parts == 0) {
-                try x.print(arena, "-map '{s}' '/data/{s}'\n", .{ src, it.path });
+                try x.print(arena, "-map '{s}' '/data/{s}'\n", .{ src, dst });
             } else {
-                try x.print(arena, "-cut_out '{s}' {d} {d} '/data/{s}.dkpart.{d:0>3}'\n", .{ src, p.offset, p.len, it.path, p.part });
+                try x.print(arena, "-cut_out '{s}' {d} {d} '/data/{s}.dkpart.{d:0>3}'\n", .{ src, p.offset, p.len, dst, p.part });
             }
         }
         try x.print(arena, "-commit\n-end\n", .{});
@@ -530,7 +612,7 @@ pub fn make(arena: Allocator, io: std.Io, t: tree.Tree, set: Set, opts: Options)
     if (set.kind == .repo) {
         // One call with every package (mkndx writes the index of what it is given).
         var list: std.ArrayList(u8) = .empty;
-        for (items.items) |it| try list.print(arena, "/tree/{s}\n", .{relTo(opts.root, it.src)});
+        for (items.items) |it| try list.print(arena, "{s}\n", .{try sandboxPath(arena, opts.root, set.arch, work_rel, it.src)});
         try writeWork(arena, io, work_rel, "apks.list", list.items);
         try s.appendSlice(arena, "echo '==> index'\n/usr/bin/apk --keys-dir /dkkeys mkndx --sign-key /dkkey --output /work/Packages.adb $(cat /work/apks.list)\n");
         try s.print(arena, "printf 'F\\t%s\\t%s\\t0\\t%s\\n' \"$(sha256sum /work/Packages.adb | cut -d' ' -f1)\" \"$(stat -c %s /work/Packages.adb)\" 'apks/{s}/Packages.adb' >> /work/MANIFEST\n", .{set.arch});
@@ -568,6 +650,16 @@ pub fn make(arena: Allocator, io: std.Io, t: tree.Tree, set: Set, opts: Options)
         .{ .src = try Dir.cwd().realPathFileAlloc(io, keys_rel, arena), .dst = "/dkkeys", .read_only = true },
     });
     if (have_key) try binds.append(arena, .{ .src = try Dir.cwd().realPathFileAlloc(io, opts.key, arena), .dst = "/dkkey", .read_only = true });
+    // what may be a link to another disk (see sandboxPath), where it exists
+    for ([_][2][]const u8{
+        .{ "cache", "/dkcache" },
+        .{ try std.fmt.allocPrint(arena, "repo/{s}", .{set.arch}), "/dkrepo" },
+        .{ "dkrescue.iso", "/dkrescue.iso" },
+    }) |b| {
+        const rel = try std.fs.path.join(arena, &.{ opts.root, b[0] });
+        const abs = Dir.cwd().realPathFileAlloc(io, rel, arena) catch continue;
+        try binds.append(arena, .{ .src = abs, .dst = b[1], .read_only = true });
+    }
     var log: std.ArrayList(u8) = .empty;
     const ok = sandbox.run(arena, io, .{
         .lower = lower_abs,
@@ -720,4 +812,38 @@ test "parse a set" {
 test "apkName" {
     try std.testing.expectEqualStrings("gvfs-backends", apkName("gvfs-backends-1.60.0-r1.apk").?);
     try std.testing.expectEqualStrings("openssh", apkName("openssh-10.6_p2-r4.apk").?);
+}
+
+test "sourceStores: every directory of cache/ but the ones named as left out" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    for ([_][]const u8{ "python", "maven", "a-store-added-later", "sources", "cargo-home", "zig-global", "snapshots", "tmp-half" }) |d|
+        try tmp.dir.createDirPath(io, try std.fmt.allocPrint(a, "t/cache/{s}", .{d}));
+    try tmp.dir.writeFile(io, .{ .sub_path = "t/cache/stray-file", .data = "x" });
+    const got = try sourceStores(a, io, try tmp.dir.realPathFileAlloc(io, "t", a));
+    try std.testing.expectEqual(@as(usize, 3), got.len);
+    for ([_][]const u8{ "a-store-added-later", "maven", "python" }, got) |want, have| try std.testing.expectEqualStrings(want, have);
+}
+
+test "disc paths: quoting, key names, sandbox paths" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    try std.testing.expectEqualStrings("Puppet'\"'\"'s Master", try inQuotes(a, "Puppet's Master"));
+    try std.testing.expect(!badPath("cache/zigpkg/x/Puppet's Master"));
+    try std.testing.expect(badPath("a\tb"));
+    try std.testing.expect(badPath("a\\b"));
+    try std.testing.expect(namedLikeKey("cache/python/signing.rsa"));
+    try std.testing.expect(!namedLikeKey("keys/signing.rsa.pub"));
+    try std.testing.expect(!namedLikeKey("cache/crates/x/tests/end.rsa"));
+    try std.testing.expect(!namedLikeKey("cache/crates/x/src/signing.rs"));
+    try std.testing.expectEqualStrings("/dkcache/maven/a.jar", try sandboxPath(a, "/t", "x86_64", "/t/work/discs-s", "/t/cache/maven/a.jar"));
+    try std.testing.expectEqualStrings("/dkrepo/a.apk", try sandboxPath(a, "/t", "x86_64", "/t/work/discs-s", "/t/repo/x86_64/a.apk"));
+    try std.testing.expectEqualStrings("/work/dkbuild.bundle", try sandboxPath(a, "/t", "x86_64", "/t/work/discs-s", "/t/work/discs-s/dkbuild.bundle"));
+    try std.testing.expectEqualStrings("/dkrescue.iso", try sandboxPath(a, "/t", "x86_64", "/t/work/discs-s", "/t/dkrescue.iso"));
+    try std.testing.expectEqualStrings("/tree/keys/a.pub", try sandboxPath(a, "/t", "x86_64", "/t/work/discs-s", "/t/keys/a.pub"));
 }

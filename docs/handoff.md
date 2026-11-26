@@ -84,10 +84,13 @@ Distinct failures: pass 4, 182; pass 6, 60 (not finished: OOM); pass 7, 28 (stop
 - **Failing packages:** the table under "Under investigation" in docs/unbuildable.md has the state of each (ghc,
   dotnet, euro-office-documentserver, electron, brave, dj64dev, emacs, fceux, lomiri-url-dispatcher, mattermost,
   pdfcraft). audacity, abiword (new package wv), aisleriot (guile r5), dia and others have fixes committed and untried.
-- **Source discs are incomplete (found in the 11-25 docs audit; code not changed):** `source_stores` in src/discs.zig
-  leaves out cache/maven, gradledeps, mavendeps, nugetdeps, hackage, hackagedeps, python and pydeps, so a source disc
-  alone cannot rebuild the recipes that use them. (nugetdeps and mavendeps as reported by the audit; cache/ here has
-  no such directories to compare.) `dkbuild doctor` also does not check for python3, go, cargo, zig or patch.
+- **Source discs (fixed 2026-11-25, src/discs.zig):** they now carry every dependency store; creating them no longer
+  fails on harmless file names (the private-key check now compares contents with the signing key, plus the name
+  signing.rsa), on apostrophes, or on cache/ and repo/ being links (that also affected repository discs). Tested on a
+  tiny throwaway tree (source and repo disc, import.sh, key guard). **Not tested:** the real tree (about 1.75
+  million store files, 58 GiB, plus 64 GiB of sources): one xorriso -map line per file and a MANIFEST of some
+  hundreds of MB on every disc may be too slow or large; and no offline rebuild from a disc has been tried.
+  `dkbuild doctor` still does not check for python3, go, cargo, zig or patch.
 - **Other problems the docs audit found (nothing changed in code):**
   - src/image.zig writes the commented repository line `#@cdrom /mnt/cdrom/apks/<arch>/Packages.adb`, but
     src/discs.zig puts a disc's index under `/data/apks/<arch>/` (a unit test expects the image.zig form too).

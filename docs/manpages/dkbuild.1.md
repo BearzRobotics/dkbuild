@@ -65,7 +65,7 @@ image
 Makes an image from **repo/** as described by FILE.toml (**images/**): a root directory, tarball, squashfs or live ISO in **out/NAME/**. A failed run leaves the old **out/NAME/** in place. See SPEC.md 8 for the file's keys.
 
 discs
-Writes the repository or the sources, as described by FILE.toml (**kind** = "repo" or "source"), as ISO images in **out/NAME/**. A source set does not yet carry every dependency store (SPEC.md 8).
+Writes the repository or the sources, as described by FILE.toml (**kind** = "repo" or "source"), as ISO images in **out/NAME/**. A source set carries the named source tarballs and every dependency store in **cache/** (SPEC.md 8). A file with the contents of the private signing key stops either kind.
 
 prune
 Removes packages from **repo/** that their recipe no longer builds, once its present version is built, and rebuilds the index. Packages no recipe provides are reported and left. Also prunes the Rust, Zig, Go and gem dependency lists and stores, and cargo's extracted copies. Do not run it while a fetch or build is running.

@@ -88,7 +88,7 @@ particular:
   bundles, toolchains) becomes a pinned, checksummed source of the recipe
   instead (ollama's llama.cpp, Hyprland's glaze). The aim is that `cache/` and
   the stage 0 build image are enough to rebuild the whole distribution with no
-  network (8: the source ISO, which does not carry every store yet).
+  network (8: the source ISO).
 - **Baseline CPUs:** each architecture has a baseline (`x86-64`,
   `armv8-a`, `rv64gc`), set by the target profile (6.1), never
   `-march=native`.
@@ -1192,15 +1192,18 @@ described by a file with `kind`, `name`, `arch`, `media` and `label` into
 ISO** of every current package, as `apks/<arch>/` with the signed
 `Packages.adb` and the public key, the way Alpine's install media carry
 theirs; `kind = "source"` (`images/source.toml`) is a **source ISO**:
-every source tarball in the cache that a recipe names and vendored dependency
-stores from `cache/`, the dkbuild tree as a git bundle of what is committed, and
+every source tarball in the cache that a recipe names, every dependency store
+and list in `cache/`, the dkbuild tree as a git bundle of what is committed, and
 the stage 0 image (`dkrescue.iso` in the tree's root): meant to be enough to
 rebuild the whole distribution offline, even after upstream downloads
-disappear. **Not complete yet:** only the Rust, Go, Zig, npm, Ruby, Dart and
-NuGet stores are copied (the list in `src/discs.zig`). The Gradle and Maven,
-Python and Haskell stores, and the `gradledeps`, `mavendeps`, `nugetdeps`,
-`pydeps` and `hackagedeps` lists, are not, so a source disc alone cannot yet
-rebuild the recipes that use them offline. `media` is `usb` (one image, for a stick or
+disappear. Everything in `cache/` goes on except `sources/` (taken file by file,
+as above), the download caches `cargo-home/` and `zig-global/`, and the
+`snapshots/` work directories: what is left out is named, not what goes on, so a
+new store cannot be forgotten (`source_skip`, `src/discs.zig`). It holds only
+what has been fetched; the Gradle, Maven and NuGet stores are filled by a
+recipe's first build. `cache/`, `repo/<arch>/` and `dkrescue.iso` may be links
+to another disk. **Not tested:** a source disc of the whole tree, and an offline
+rebuild from one. `media` is `usb` (one image, for a stick or
 Ventoy) or `cd`, `dvd`, `dvd-dl`, `bd25`, `bd50`, `bd100` (a numbered set of
 discs of that size); `--media` overrides it. Every disc carries a `MANIFEST`
 (signed with the repository key; a repository set needs the key), the public
@@ -1208,7 +1211,7 @@ keys and `import.sh`, which copies one disc into a directory and checks it; a
 file too large for the space left is cut across discs and joined there. A recipe with the option
 `!repo-iso` (5.4) is left out of a repository set, and a package that
 depends on a left-out one is an error. A machine mounts a repository disc and
-adds `<mount>/apks/<arch>/Packages.adb` to `/etc/apk/repositories` (tagged,
+adds `<mount>/data/apks/<arch>/Packages.adb` to `/etc/apk/repositories` (tagged,
 `@cdrom ...`, to use it only on request); a newer disc and `apk upgrade`
 update it, and rebuilt packages are seen because rebuilds bump the release
 (7.2). It also restores any installed system. **The private signing key is on
