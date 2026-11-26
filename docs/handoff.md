@@ -1,5 +1,13 @@
 # Handoff (2026-11-25, bug fixing: the build directories are local for now)
 
+## Work is in ~/dkbuild-bugfix for now
+
+/stuff (a shingled desktop drive, btrfs) stalled while testing the fixes: sandboxes sat for 10 to 25 minutes flushing
+to it. **The bug fixes are made in a clone, `~/dkbuild-bugfix` (home NVMe), with its own real build directories**;
+there the tests take under a minute. `/stuff/git/dkbuild` is behind `origin/new-build-machine` until it is pulled (it
+holds an uncommitted copy of the first fix, now committed: `git checkout src/sandbox.zig && rm tests/isolation.sh`
+before pulling). The bug reports (`docs/bugs/`, ignored by git) are current in the clone only.
+
 ## Links removed while the bug fixes are made
 
 So that fixing and testing cannot touch the repository or the built packages, these six links were replaced by
