@@ -4,7 +4,7 @@
 # image's until they are recipes.
 name = "python-vcs-versioning"
 version = "2.6.0"
-release = 1
+release = 2
 summary = "the blessed package to manage your versions by vcs metadata"
 license = "MIT"
 homepage = "https://github.com/pypa/setuptools-scm"

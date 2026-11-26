@@ -1,7 +1,7 @@
 # Cython: C extensions from Python-like code. needed by: python-lxml, python-uharfbuzz.
 name = "python-cython"
 version = "3.3.1"
-release = 1
+release = 2
 summary = "cython for Python"
 license = "Apache-2.0"
 homepage = "https://pypi.org/project/cython"
