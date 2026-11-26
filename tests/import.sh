@@ -4,7 +4,7 @@
 set -u
 cd "$(dirname "$0")/.."
 mkdir -p work
-W=$(mktemp -d "$PWD/work/import.XXXXXX"); trap 'rm -rf "$W"' EXIT
+W=$(mktemp -d "$PWD/work/import.XXXXXX") || exit 1; trap 'rm -rf "$W"' EXIT
 mkdir -p "$W/in/hello/patches" "$W/in/hello/files"
 cat > "$W/in/hello/template.py" <<'PY'
 pkgname = "hello"

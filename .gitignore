@@ -33,6 +33,8 @@ zig-out/
 !/tests/trees/fetch-cargo/.gitkeep
 /tests/trees/restore/*
 !/tests/trees/restore/.gitkeep
+/tests/trees/base/*
+/tests/trees/repo-install/*
 /tests/trees/pins/*
 !/tests/trees/pins/.gitkeep
 /tests/trees/prune/*

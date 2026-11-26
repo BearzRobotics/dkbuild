@@ -1,22 +1,20 @@
 #!/bin/sh
-# The musl and linux-headers packages in repo/ work: install only those into an
+# The musl and linux-headers recipes work: install only those into an
 # empty sysroot, link a program against it with the DKRescue toolchain, and run
 # it through our own loader (dynamic) and on its own (static). Needs both built
-# into repo/ (built here if they are not).
+# in a test tree from the current recipes.
 set -u
 cd "$(dirname "$0")/.."
 . tests/lib.sh
-ls repo/x86_64/musl-static-*.apk repo/x86_64/linux-headers-*.apk >/dev/null 2>&1 || {
-    ./zig-out/bin/dkbuild pkg musl >/dev/null 2>&1 || { echo "FAIL: building musl into repo/"; exit 1; }
-}
+basetree || exit 1
 mkdir -p work
-W=$(mktemp -d "$PWD/work/musl.XXXXXX"); trap 'rm -rf "$W"' EXIT
+W=$(mktemp -d "$PWD/work/musl.XXXXXX") || exit 1; trap 'rm -rf "$W"' EXIT
 SR=$W/sr
 mkdir -p "$SR/etc/apk/keys"
-cp keys/*.pub "$SR/etc/apk/keys/"
+cp "$BASE"/keys/*.pub "$SR/etc/apk/keys/"
 
-# 1. Install our musl and linux-headers into an empty root, from repo/ alone.
-sbrun --bind "$SR" /mnt --robind "$PWD/repo/x86_64" /tmp/repo -- /usr/bin/apk --root /mnt --initdb \
+# 1. Install our musl and linux-headers into an empty root, from that repository alone.
+sbrun --bind "$SR" /mnt --robind "$PWD/$BASE/repo/x86_64" /tmp/repo -- /usr/bin/apk --root /mnt --initdb \
     --keys-dir /mnt/etc/apk/keys --repository /tmp/repo/Packages.adb --no-network --no-interactive \
     add musl musl-devel musl-static linux-headers >/dev/null 2>&1 \
     || { echo "FAIL: installing musl and linux-headers from repo/"; exit 1; }

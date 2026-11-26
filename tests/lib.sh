@@ -6,7 +6,7 @@
 sbrun() {
     [ -d rootfs/dkrescue ] || { echo "rootfs/dkrescue is missing: run 'dkbuild bootstrap-root <dkrescue.iso>'"; return 99; }
     mkdir -p work
-    _sb=$(mktemp -d "$PWD/work/sb.XXXXXX")
+    _sb=$(mktemp -d "$PWD/work/sb.XXXXXX") || return 99   # empty, the paths below would be in /
     mkdir "$_sb/u" "$_sb/w" "$_sb/m"
     ./zig-out/bin/dkbuild sandbox-child --lower "$PWD/rootfs/dkrescue" --upper "$_sb/u" --work "$_sb/w" \
         --merged "$_sb/m" --env PATH=/usr/bin:/bin --env HOME=/root "$@"
@@ -86,6 +86,33 @@ mkdir -p \$pkgdir/usr/bin
 cp t \$pkgdir/usr/bin/$2
 '''
 EOF
+}
+
+# realtree TREE NAME...: a tree holding the project's own recipes NAME..., so that a test builds the current
+# recipes with the current dkbuild, signed with the tree's own key, and leaves the project's repo/ alone. Sources
+# come from the project's cache/ where it has them (downloaded there otherwise, once).
+realtree() {
+    _t=$1; shift
+    newtree "$_t"
+    mkdir -p cache/sources "$_t/cache"
+    ln -s ../../../../cache/sources "$_t/cache/sources"
+    for _n in "$@"; do
+        _l=$(printf %.1s "$_n")
+        mkdir -p "$_t/packages/$_l"
+        cp -r "packages/$_l/$_n" "$_t/packages/$_l/$_n"
+    done
+}
+
+# basetree: tests/trees/base with musl and linux-headers built from the current recipes (kept between the tests
+# of one run: a second call finds them up to date). Sets BASE.
+basetree() {
+    BASE=tests/trees/base
+    if [ ! -e "$BASE/signing.rsa" ] || ! cmp -s packages/m/musl/package.toml "$BASE/packages/m/musl/package.toml"; then
+        realtree "$BASE" musl linux-headers
+    fi
+    TEST_KEY="$PWD/$BASE/signing.rsa"
+    _out=$(./zig-out/bin/dkbuild --tree "$BASE" pkg --key "$TEST_KEY" musl 2>&1) \
+        || { echo "$_out" | tail -15; echo "FAIL: building musl in $BASE"; return 1; }
 }
 
 # testkey TREE: a signing key pair of this run's own, for TREE only: its private half in TREE/signing.rsa, its
