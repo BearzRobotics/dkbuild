@@ -70,6 +70,10 @@ pub fn main(init: std.process.Init) !void {
     const arena = init.arena.allocator();
     const args = try init.minimal.args.toSlice(arena);
 
+    // The caller's umask would decide the modes of what is unpacked, installed and so packaged: with 077,
+    // /usr ships readable by root alone. This covers the sandbox too, which is this program run again.
+    _ = std.os.linux.syscall1(.umask, 0o022);
+
     // The sandbox runs in a copy of this program (sandbox.zig).
     if (args.len > 1 and std.mem.eql(u8, args[1], sandbox.subcommand)) sandbox.childMain(args[2..]);
 

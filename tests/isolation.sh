@@ -83,5 +83,10 @@ OUT=$(sbrun -- /usr/bin/sh -c 'uname -n; cat /proc/sys/kernel/domainname' 2>&1)
 [ "$OUT" = "dkbuild
 (none)" ] || fail "the host name or domain name inside is not the fixed one: $(echo "$OUT" | wc -l) line(s)"
 
+# --- the caller's umask does not decide the modes of what is made inside
+mkdir "$W/um"
+OUT=$(umask 077; sbrun -- /usr/bin/sh -c 'umask; mkdir /destdir-t; echo x > /destdir-t/f; stat -c %a / /destdir-t /destdir-t/f' 2>&1)
+[ "$(echo "$OUT" | tr '\n' ' ')" = "0022 755 755 644 " ] || fail "with the caller's umask 077, inside: $(echo "$OUT" | tr '\n' ' ')"
+
 [ "$fails" -eq 0 ] || { echo "FAIL: $fails isolation check(s) failed"; exit 1; }
 echo "ok: read-only binds stay read-only; signals and the terminal stay outside; killing the sandbox kills all in it"

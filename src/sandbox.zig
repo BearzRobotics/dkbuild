@@ -412,6 +412,8 @@ pub fn childMain(args: []const [:0]const u8) noreturn {
     sys(linux.mount(null, "/", null, linux.MS.REC | linux.MS.PRIVATE, 0), "make private", "/");
 
     mkdirAll(merged);
+    // The root's mode is the upper directory's, which the caller made, possibly under another umask.
+    sys(linux.chmod(dupeZ(upper), 0o755), "chmod", upper);
     const opts = z("lowerdir={s},upperdir={s},workdir={s},userxattr", .{ lower, upper, work });
     mountFs("overlay", dupeZ(merged), "overlay", 0, opts);
 
