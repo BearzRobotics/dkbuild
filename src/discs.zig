@@ -49,6 +49,9 @@ pub const Set = struct {
     /// The volume label (a disc of several gets "_<k>"); default: the name
     /// in capitals.
     label: []const u8 = "",
+    /// Repository sets: what to do when a recipe's present version is not built and only older packages of it are
+    /// in repo/ (they are not put on a disc). `stop` (the default) names them; `skip` makes the disc without them.
+    unbuilt: enum { stop, skip } = .stop,
 };
 
 pub const Diagnostic = cfg.Diagnostic;
@@ -71,7 +74,7 @@ pub fn parse(arena: Allocator, text: []const u8, diag: *Diagnostic) Error!Set {
 
 fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error!Set {
     const root = try cfg.parse(arena, text, diag);
-    try cfg.onlyKeys(arena, diag, root, &.{ "name", "kind", "arch", "media", "label" }, "");
+    try cfg.onlyKeys(arena, diag, root, &.{ "name", "kind", "arch", "media", "label", "unbuilt" }, "");
     const kind_s = try cfg.reqString(arena, diag, root, "kind");
     var set: Set = .{
         .name = try cfg.reqString(arena, diag, root, "name"),
@@ -79,6 +82,8 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
     };
     if (try cfg.optString(arena, diag, root, "arch")) |a| set.arch = a;
     if (try cfg.optString(arena, diag, root, "media")) |m| set.media = m;
+    if (try cfg.optString(arena, diag, root, "unbuilt")) |u| set.unbuilt = std.meta.stringToEnum(@TypeOf(set.unbuilt), u) orelse
+        return cfg.fail(arena, diag, "unbuilt '{s}': give stop or skip", .{u});
     if (try cfg.optString(arena, diag, root, "label")) |l| set.label = l else {
         const up = try arena.dupe(u8, set.name);
         for (up) |*c| c.* = if (c.* == '-') '_' else std.ascii.toUpper(c.*);
@@ -245,7 +250,9 @@ fn under(p: []const u8, dir: []const u8) ?[]const u8 {
 }
 
 fn addFile(arena: Allocator, io: std.Io, items: *std.ArrayList(Item), path: []const u8, src: []const u8, sha: ?[]const u8) !void {
-    const st = Dir.cwd().statFile(io, src, .{ .follow_symlinks = false }) catch |err| {
+    // Following links: what goes on the disc is the file (dkrescue.iso may be a link to another disk, and the
+    // disc is given its target's contents). Stores and repo/ are listed by their regular files only.
+    const st = Dir.cwd().statFile(io, src, .{}) catch |err| {
         say("error: {s}: {s}\n", .{ src, @errorName(err) });
         return error.PrepareFailed;
     };
@@ -291,6 +298,11 @@ fn excluded(r: recipe.Recipe) bool {
 
 /// repo/<arch>/'s current packages of recipes without `!repo-iso`, as
 /// apks/<arch>/<file>. Fails when one of them depends on a left-out package.
+fn contains(hay: []const []const u8, needle: []const u8) bool {
+    for (hay) |h| if (std.mem.eql(u8, h, needle)) return true;
+    return false;
+}
+
 fn repoItems(arena: Allocator, io: std.Io, t: tree.Tree, set: Set, root: []const u8, items: *std.ArrayList(Item)) !void {
     const repo_rel = try std.fmt.allocPrint(arena, "{s}/repo/{s}", .{ root, set.arch });
     var d = Dir.cwd().openDir(io, repo_rel, .{ .iterate = true }) catch {
@@ -300,11 +312,21 @@ fn repoItems(arena: Allocator, io: std.Io, t: tree.Tree, set: Set, root: []const
     defer d.close(io);
     var it = d.iterate();
     var stale: usize = 0;
+    var missing: std.ArrayList([]const u8) = .empty; // recipes with older packages here, none of the present one
     var left_out: std.ArrayList([]const u8) = .empty;
     while (try it.next(io)) |e| {
         if (e.kind != .file or !std.mem.endsWith(u8, e.name, ".apk")) continue;
-        if (build.classify(t, e.name) != .current) {
+        const kind = build.classify(t, e.name);
+        if (kind != .current) {
             stale += 1;
+            if (kind != .stale) continue;
+            // is the recipe's present version built at all? (else this old file is a leftover, such as of a
+            // subpackage it no longer makes)
+            const old_pkg = apkName(e.name) orelse continue;
+            const r = t.recipes[t.provider(old_pkg) orelse continue];
+            if (excluded(r) or contains(missing.items, r.name)) continue;
+            d.access(io, try std.fmt.allocPrint(arena, "{s}-{s}-r{d}.apk", .{ r.name, r.version, r.release }), .{}) catch
+                try missing.append(arena, r.name);
             continue;
         }
         const pkg = apkName(e.name) orelse continue;
@@ -332,7 +354,19 @@ fn repoItems(arena: Allocator, io: std.Io, t: tree.Tree, set: Set, root: []const
         }
     }
     if (bad) return error.PrepareFailed;
-    if (stale > 0) say("note: {d} older package file(s) in {s} left out (`dkbuild prune` removes them)\n", .{ stale, repo_rel });
+    if (missing.items.len > 0) {
+        std.mem.sort([]const u8, missing.items, {}, struct {
+            fn lt(_: void, a: []const u8, b: []const u8) bool {
+                return std.mem.lessThan(u8, a, b);
+            }
+        }.lt);
+        say("{s}: {d} recipe(s) have only older packages in {s}, so they would be missing from the disc: {s}\n", .{ if (set.unbuilt == .stop) "error" else "warning", missing.items.len, repo_rel, try std.mem.join(arena, " ", missing.items) });
+        if (set.unbuilt == .stop) {
+            say("build them, or set unbuilt = \"skip\" in the set's file to make the disc without them\n", .{});
+            return error.PrepareFailed;
+        }
+    }
+    if (stale > 0) say("note: {d} older package file(s) in {s} left out\n", .{ stale, repo_rel });
     if (left_out.items.len > 0) say("note: left out (!repo-iso): {s}\n", .{try std.mem.join(arena, " ", left_out.items)});
 }
 
@@ -829,6 +863,54 @@ test "a disc set name that would name another directory is refused (ID-03)" {
         try std.testing.expectError(error.InvalidSet, parse(a, try std.fmt.allocPrint(a, "name = \"{s}\"\nkind = \"repo\"\nlabel = \"L\"\n", .{bad}), &diag));
         try std.testing.expectError(error.InvalidSet, parse(a, try std.fmt.allocPrint(a, "name = \"x\"\nkind = \"repo\"\narch = \"{s}\"\n", .{bad}), &diag));
     }
+}
+
+test "a linked source file counts with its target's size (ID-01)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const data: [5000]u8 = @splat('x');
+    try tmp.dir.writeFile(io, .{ .sub_path = "big.iso", .data = &data });
+    try tmp.dir.symLink(io, "big.iso", "dkrescue.iso", .{});
+    var items: std.ArrayList(Item) = .empty;
+    try addFile(a, io, &items, "dkrescue.iso", try std.fs.path.join(a, &.{ try tmp.dir.realPathFileAlloc(io, ".", a), "dkrescue.iso" }), null);
+    try std.testing.expectEqual(@as(u64, 5000), items.items[0].size);
+}
+
+test "a repository disc does not silently lose packages that are not built at their recipe's version (ID-02)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    try tmp.dir.createDirPath(io, "repo/x86_64");
+    // git's recipe is newer than its build; zlib is current, with an old file and a dropped subpackage beside it
+    for ([_][]const u8{ "git-1-r1.apk", "zlib-2-r1.apk", "zlib-1-r1.apk", "zlib-gone-1-r1.apk" }) |f|
+        try tmp.dir.writeFile(io, .{ .sub_path = try std.fmt.allocPrint(a, "repo/x86_64/{s}", .{f}), .data = "x" });
+    const mk = struct {
+        fn f(name: []const u8, version: []const u8) recipe.Recipe {
+            return .{ .name = name, .version = version, .release = 1, .summary = "s", .license = "MIT", .source = &.{}, .install = "x" };
+        }
+    }.f;
+    const t: tree.Tree = .{ .recipes = &.{ mk("git", "2"), mk("zlib", "2") } };
+    const root = try tmp.dir.realPathFileAlloc(io, ".", a);
+    var items: std.ArrayList(Item) = .empty;
+    var set: Set = .{ .name = "r", .kind = .repo };
+    try std.testing.expectError(error.PrepareFailed, repoItems(a, io, t, set, root, &items));
+    items.clearRetainingCapacity();
+    set.unbuilt = .skip;
+    try repoItems(a, io, t, set, root, &items);
+    try std.testing.expectEqual(@as(usize, 1), items.items.len);
+    // with git built, nothing is missing; the leftovers of zlib are simply left out
+    try tmp.dir.writeFile(io, .{ .sub_path = "repo/x86_64/git-2-r1.apk", .data = "x" });
+    items.clearRetainingCapacity();
+    set.unbuilt = .stop;
+    try repoItems(a, io, t, set, root, &items);
+    try std.testing.expectEqual(@as(usize, 2), items.items.len);
 }
 
 test "apkName" {
