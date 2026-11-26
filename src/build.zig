@@ -563,6 +563,36 @@ fn inLay(arena: Allocator, cache: []const u8, path: []const u8) BuildError![]con
 /// Returns whether nothing is left. A build may leave directories without owner permission anywhere (Go's
 /// read-only module trees, a `chmod 555` in a test, each overlay's `work/work` of mode 000), which a delete
 /// cannot enter: `chmod -R` first, which does not follow the links it meets.
+/// Moves what is in `from` into `to`: directories both have are merged, a file or link replaces the one of its
+/// name, and no link in `to` is ever followed.
+fn mergeUnpacked(arena: Allocator, io: std.Io, from: []const u8, to: []const u8) !void {
+    var src = try Dir.cwd().openDir(io, from, .{ .iterate = true, .follow_symlinks = false });
+    defer src.close(io);
+    var dst = try Dir.cwd().openDir(io, to, .{ .follow_symlinks = false });
+    defer dst.close(io);
+    var names: std.ArrayList([]const u8) = .empty; // first, then moved: not while iterating
+    var it = src.iterate();
+    while (try it.next(io)) |e| try names.append(arena, try arena.dupe(u8, e.name));
+    for (names.items) |name| {
+        const there = dst.statFile(io, name, .{ .follow_symlinks = false }) catch |err| switch (err) {
+            error.FileNotFound => {
+                try src.rename(name, dst, name, io);
+                continue;
+            },
+            else => return err,
+        };
+        const here = try src.statFile(io, name, .{ .follow_symlinks = false });
+        if (here.kind == .directory) {
+            if (there.kind != .directory) return error.SourceCollision;
+            try mergeUnpacked(arena, io, try std.fs.path.join(arena, &.{ from, name }), try std.fs.path.join(arena, &.{ to, name }));
+        } else {
+            if (there.kind == .directory) return error.SourceCollision;
+            try dst.deleteFile(io, name);
+            try src.rename(name, dst, name, io);
+        }
+    }
+}
+
 pub fn removeBuildDir(arena: Allocator, io: std.Io, work: []const u8) bool {
     if (!pathExists(io, work)) return true;
     _ = std.process.run(arena, io, .{ .argv = &.{ "chmod", "-R", "u+rwX", "--", work } }) catch {};
@@ -1175,14 +1205,29 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
                     first = false;
                     continue;
                 }
+                // A later archive is unpacked into an empty directory and moved over from there: unpacked over the
+                // first, it would write through any link that one made (unzip does; so does an unpatched tar).
+                var into = build_rel;
+                if (!first) {
+                    into = try std.fs.path.join(arena, &.{ root_rel, "unpack" });
+                    if (!removeBuildDir(arena, io, into)) return error.UnpackFailed;
+                    Dir.cwd().createDirPath(io, into) catch return error.UnpackFailed;
+                }
                 // zips with the host's unzip (tar does not read them)
                 const ok = if (zip)
-                    runLogged(arena, io, &.{ "unzip", "-q", "-o", file, "-d", build_rel }, &log) catch false
+                    runLogged(arena, io, &.{ "unzip", "-q", "-o", file, "-d", into }, &log) catch false
                 else
-                    runLogged(arena, io, &.{ "tar", "-xf", file, "-C", build_rel, "--no-same-owner" }, &log) catch false;
+                    runLogged(arena, io, &.{ "tar", "-xf", file, "-C", into, "--no-same-owner" }, &log) catch false;
                 if (!ok) {
                     out("error: cannot unpack {s}\n", .{file});
                     return error.UnpackFailed;
+                }
+                if (!first) {
+                    mergeUnpacked(arena, io, into, build_rel) catch |err| {
+                        out("error: {s}: cannot lay {s} over the sources before it: {s}\n", .{ r.name, std.fs.path.basename(src.tarball.url), if (err == error.SourceCollision) "it needs a directory where an earlier archive put a link or a file" else @errorName(err) });
+                        return error.UnpackFailed;
+                    };
+                    if (!removeBuildDir(arena, io, into)) return error.UnpackFailed;
                 }
                 if (first) {
                     first = false;

@@ -7,7 +7,7 @@ cd "$(dirname "$0")/.." || exit 1
 . tests/lib.sh
 T=tests/trees/vendor
 newtree "$T"
-rm -rf "$T/src" "$T/victim" "$T/victim-file" "$T/marker"   # what an earlier run left
+rm -rf "$T/src" "$T/victim" "$T/victim5" "$T/victim-file" "$T/marker"   # what an earlier run left
 mkdir -p "$T/src" "$T/cache/python"
 ABS=$PWD/$T
 printf 'a pretend wheel\n' > "$T/cache/python/dkwheel-1-py3-none-any.whl"
@@ -71,4 +71,23 @@ OUT=$(dk planted)
 RC=$?
 [ "$(cat "$ABS/victim-file")" = original ] || { echo "FAIL: copying a source followed a link and overwrote a file outside the build"; exit 1; }
 [ $RC = 0 ] || { echo "$OUT" | tail -15; echo "FAIL: the planted link should have been replaced by the source"; exit 1; }
+# 5. A first archive has a link out; a second (a zip, which unzip would unpack through it) has a file under it.
+mkdir -p "$ABS/victim5" "$W/five-1"
+ln -s "$ABS/victim5" "$W/five-1/link"
+pack five-1.tar.gz five-1
+python3 -I -c 'import sys, zipfile; z = zipfile.ZipFile(sys.argv[1], "w"); z.writestr("five-1/link/evil", "x"); z.close()' "$T/src/five-2.zip"
+BUILD='true'
+mkrecipe through five-1.tar.gz five-2.zip
+OUT=$(dk through)
+[ -z "$(ls -A "$ABS/victim5")" ] || { echo "FAIL: a second archive wrote through the first one's link, outside the build"; exit 1; }
+
+# 6. An honest second archive: into the first one's directories, replacing a file, and beside them.
+mkdir -p "$W/six-1/sub"; echo one > "$W/six-1/sub/a"; echo old > "$W/six-1/sub/b"
+pack six-1.tar.gz six-1
+mkdir -p "$W/second/six-1/sub" "$W/second/beside"
+echo new > "$W/second/six-1/sub/b"; echo c > "$W/second/six-1/sub/c"; echo d > "$W/second/beside/d"
+tar -C "$W/second" -czf "$T/src/six-2.tar.gz" six-1 beside
+BUILD='test "$(cat sub/a sub/b sub/c ../beside/d | tr "\n" " ")" = "one new c d "'
+mkrecipe merged six-1.tar.gz six-2.tar.gz
+OUT=$(dk merged) || { echo "$OUT" | tail -15; echo "FAIL: a second archive was not laid over the first"; exit 1; }
 echo "ok: dependencies are laid out for the build, and hostile source archives reach nothing outside it"
