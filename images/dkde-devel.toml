@@ -10,14 +10,29 @@
 name     = "dkde-devel"
 arch     = "x86_64"
 hostname = "fenriros"
-# what the text consoles show above `login:`, so that the live login is known when the desktop does not start
+# what the text consoles show above `login:`: what this is, how to log in and what to do next. dkinstaller replaces it with a plain
+# greeting on a system installed from this image.
 issue = """
-FenrirOS \\r (\\l)
 
-Live system login: user  live   (no password: press Enter at the password prompt)
-root is locked: use sudo as live (press Enter at its password prompt too).
-If the desktop or the login screen did not start, see:
-  ~/.local/state/dkde/session.log    /tmp/dkde-greeter-*.log    sudo dinitctl status greetd
+FenrirOS \\r (\\l): desktop system. This is a text console.
+The desktop is on console 7: Ctrl+Alt+F7. Text consoles: Ctrl+Alt+F1 to F6.
+
+LOG IN
+  Live disc:  user  live    password: none (press Enter)
+              root is locked. Use  sudo <command>  (press Enter if asked).
+
+AFTER LOGGING IN
+  sudo dkinstall             install FenrirOS onto a disk (live disc only)
+  nmtui                      set up the network (wired or Wi-Fi)
+  dkde-session --x11         start the desktop by hand (X11)
+  dkde-session               start the desktop by hand (Wayland)
+  man NAME                   read the manual for a command
+  sudo reboot                restart
+  sudo poweroff              shut down
+
+IF THE DESKTOP DID NOT START, look at
+  ~/.local/state/dkde/session.log    /tmp/dkde-greeter-*.log
+  sudo dinitctl status greetd
 
 """
 label    = "FENRIROS_DKDE"

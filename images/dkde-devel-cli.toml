@@ -4,13 +4,29 @@
 name     = "dkde-devel-cli"
 arch     = "x86_64"
 hostname = "fenriros"
-# what the text consoles show above `login:`, so that the live login is known when the desktop does not start
+# what the consoles show before the login: what this is, how to log in and what to do next. dkinstaller KEEPS this text on a system
+# installed from this image (it replaces it only for a graphical autologin), so it must be true there too.
 issue = """
-FenrirOS \\r (\\l)
 
-Live system login: user  live   (no password: press Enter at the password prompt)
-root is locked: use sudo as live (press Enter at its password prompt too).
-This image starts on the command line. Install with: sudo dkinstall
+FenrirOS \\r (\\l): command-line system (no desktop at boot).
+
+LOG IN
+  Live disc:         user  live    password: none (press Enter)
+                     root is locked. Use  sudo <command>  (Enter if asked).
+  Installed system:  the user name and password you chose when installing.
+                     There is no live user there.
+
+AFTER LOGGING IN
+  sudo dkinstall             install FenrirOS onto a disk (live disc only)
+  nmtui                      set up the network (wired or Wi-Fi)
+  dkde-session --x11         start the desktop (X11)
+  dkde-session               start the desktop (Wayland)
+  man NAME                   read the manual for a command
+  sudo dinitctl list         list the services and their state
+  sudo reboot                restart
+  sudo poweroff              shut down
+
+More consoles: Alt+F1 to Alt+F6.
 
 """
 label    = "FENRIROS_CLI"
