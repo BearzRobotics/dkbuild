@@ -1,4 +1,4 @@
 type = scripted
 command = /usr/lib/nftables-start /etc/nftables.conf
-stop-command = /usr/bin/nft flush ruleset
+stop-command = /usr/sbin/nft flush ruleset
 depends-on: early-filesystems

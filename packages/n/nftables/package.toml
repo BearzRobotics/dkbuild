@@ -1,8 +1,10 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/nftables/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# r6 (2026-11-26): the start script and the service's stop command ran /usr/bin/nft; nft is installed in /usr/sbin. With an
+# /etc/nftables.conf the service failed ("/usr/bin/nft: not found"); without one it started and did nothing, which hid it.
 name = "nftables"
 version = "1.1.7"
-release = 5
+release = 6
 summary = "Netfilter nftables userspace tools"
 license = "GPL-2.0-only AND GPL-2.0-or-later"
 homepage = "http://netfilter.org/projects/nftables"
