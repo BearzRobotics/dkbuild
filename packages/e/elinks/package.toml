@@ -14,9 +14,10 @@
 #    two are alternatives) and 88 colours (256 colours is the alternative)
 #  - manual.pdf and the API manual: they need FOP/dblatex and Doxygen output
 #    that no user reads; the man pages and the HTML manual are built.
+# r2: rescan: needs so:libmujs.so, not the path nothing provides (BC-09).
 name = "elinks"
 version = "0.20.0"
-release = 1
+release = 2
 summary = "Terminal web browser"
 license = "GPL-2.0-only"
 homepage = "https://github.com/rkd77/elinks"

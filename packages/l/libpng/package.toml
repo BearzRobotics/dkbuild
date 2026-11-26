@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r2: static libraries too (in libpng-static), for fully static programs on musl.
+# r3: rescan: libpng.pc is a link, and pc:libpng had no provider (BC-07).
 name = "libpng"
 version = "1.6.59"
-release = 2
+release = 3
 summary = "Library for manipulating PNG images"
 license = "Libpng"
 homepage = "https://www.libpng.org/pub/png/libpng.html"

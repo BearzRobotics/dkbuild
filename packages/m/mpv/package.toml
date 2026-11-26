@@ -1,8 +1,9 @@
 # Imported from Chimera Linux cports: main/mpv/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# r6: rescan: needs so:libmujs.so, not the path nothing provides (BC-09).
 name = "mpv"
 version = "0.41.0"
-release = 5
+release = 6
 summary = "Video player based on mplayer2"
 license = "GPL-2.0-or-later"
 homepage = "https://mpv.io"

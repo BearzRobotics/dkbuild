@@ -20,9 +20,10 @@
 # The installed /etc/fpc.cfg is made with fpcmkcfg (basepath
 # /usr/lib/fpc/$fpcversion), as `samplecfg` would on the user's machine.
 # Not done: the documentation (needs TeX), the test suite.
+# r4: rescan: needs so:libc.so, not the loader's path (BC-09).
 name = "fpc"
 version = "3.2.4"
-release = 3
+release = 4
 summary = "Free Pascal compiler"
 license = "GPL-2.0-or-later WITH Linking-exception"
 homepage = "https://www.freepascal.org"

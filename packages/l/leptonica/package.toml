@@ -1,8 +1,9 @@
 # After Chimera Linux cports: main/leptonica. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Image processing library. needed by: tesseract.
+# r5: rescan: lept.pc is a link, and pc:lept had no provider (BC-07).
 name = "leptonica"
 version = "1.85.0"
-release = 4
+release = 5
 summary = "Image processing and analysis library"
 license = "BSD-2-Clause"
 homepage = "http://www.leptonica.org"
