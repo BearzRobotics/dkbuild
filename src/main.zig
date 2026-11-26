@@ -130,6 +130,7 @@ pub fn main(init: std.process.Init) !void {
             // Until the tree builds its own toolchain (SPEC.md 9), dependencies
             // it doesn't provide are assumed to be in the base image (SPEC.md 7.3).
             t.allow_external = true;
+            if (rest.len == 0) try t.collisions(arena, &problems);
             checked += if (rest.len == 0) t.recipes.len else names.items.len;
             for (names.items) |n| {
                 if (t.find(n) == null and !hasProblem(problems.items, n))

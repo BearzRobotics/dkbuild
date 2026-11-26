@@ -1521,6 +1521,14 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         out("error: {s}: splitting subpackages failed: {s}\n", .{ r.name, @errorName(err) });
         return error.BuildFailed;
     };
+    // A subpackage that got files must not take another recipe's name: both would publish the same file.
+    if (opts.tree) |t| for (moved) |m| {
+        const full = try std.fmt.allocPrint(arena, "{s}-{s}", .{ r.name, m.name });
+        if (t.find(full) != null) {
+            out("error: {s}: its subpackage {s} has files, but {s} is also a recipe of its own\n", .{ r.name, m.name, full });
+            return error.BuildFailed;
+        }
+    };
     // What this build produced, before anything names a release: an identical
     // rebuild is not published, and a different one is published as the next
     // release, which the packages' metadata below must carry.

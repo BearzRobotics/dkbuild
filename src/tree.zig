@@ -45,6 +45,21 @@ pub const Tree = struct {
         return t.needsOf(arena, i, &.{ t.recipes[i].hostdeps, t.recipes[i].builddeps });
     }
 
+    /// Declared names that two recipes would both publish: a recipe's own, or `<name>-<subpackage>`. Their
+    /// files in the repository would overwrite each other. (A default `-devel` or the like is only a package when
+    /// a build gives it files; the build checks those.)
+    pub fn collisions(t: Tree, arena: Allocator, problems: *std.ArrayList(Problem)) Allocator.Error!void {
+        var owners: std.StringHashMapUnmanaged([]const u8) = .empty;
+        for (t.recipes) |r| try owners.put(arena, r.name, r.name);
+        for (t.recipes) |r| for (r.subpackages) |sp| {
+            const full = try std.fmt.allocPrint(arena, "{s}-{s}", .{ r.name, sp.name });
+            const had = try owners.getOrPut(arena, full);
+            if (had.found_existing) {
+                try problems.append(arena, .{ .where = r.name, .message = try std.fmt.allocPrint(arena, "its subpackage '{s}' would be published as '{s}', which is also {s}'s", .{ sp.name, full, had.value_ptr.* }) });
+            } else had.value_ptr.* = r.name;
+        };
+    }
+
     /// What the subpackage `name` of recipe `i` itself depends on, if `name` is one it declares.
     pub fn subpackageDepends(t: Tree, i: usize, name: []const u8) []const []const u8 {
         const r = t.recipes[i];
@@ -314,6 +329,22 @@ test "a subpackage's own depends is part of what a build root holds (BC-21, SS-1
     try std.testing.expectEqual(@as(usize, 0), problems.items.len);
     // plain asks only for lib: the -devel's own depends is followed only when -devel itself is asked for
     try std.testing.expectEqualSlices(usize, &.{1}, try tt.needs(a, 3));
+}
+
+test "two recipes publishing one package name are reported (BC-20)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    var one = rc("a", &.{}, &.{});
+    one.subpackages = &.{.{ .name = "b-c", .summary = "s", .paths = &.{} }};
+    var two = rc("a-b", &.{}, &.{});
+    two.subpackages = &.{.{ .name = "c", .summary = "s", .paths = &.{} }};
+    var three = rc("x", &.{}, &.{});
+    three.subpackages = &.{.{ .name = "tools", .summary = "s", .paths = &.{} }};
+    const t: Tree = .{ .recipes = &.{ one, two, three, rc("x-tools", &.{}, &.{}), rc("base", &.{}, &.{}), rc("base-devel", &.{}, &.{}) } };
+    var problems: std.ArrayList(Problem) = .empty;
+    try t.collisions(a, &problems);
+    try std.testing.expectEqual(@as(usize, 2), problems.items.len);
 }
 
 test "closeOverNeeds adds what the build roots of the jobs hold, however deep" {
