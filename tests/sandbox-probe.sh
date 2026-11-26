@@ -4,8 +4,10 @@
 fail=0
 bad() { echo "VIOLATION: $*"; fail=1; }
 
-# Network: a new network namespace has only the loopback interface.
-if [ -r /proc/net/dev ] && grep -E '^ *[A-Za-z0-9._-]+:' /proc/net/dev | grep -v -E '^ *lo:' >/dev/null; then
+# Network: a new network namespace has only the loopback interface. A check that cannot look is a violation too.
+if [ ! -r /proc/net/dev ]; then
+    bad "cannot read /proc/net/dev"
+elif grep -E '^ *[A-Za-z0-9._-]+:' /proc/net/dev | grep -v -E '^ *lo:' >/dev/null; then
     bad "network interface other than lo is visible"
 fi
 # And an actual connection attempt must fail (needs a compiler; skipped without one).
@@ -21,7 +23,13 @@ int main(void) {
     return connect(s, (struct sockaddr *)&a, sizeof a) == 0 ? 1 : 0;
 }
 C
-    clang /tmp/conn.c -o /tmp/conn 2>/dev/null && { /tmp/conn || bad "connected to 1.1.1.1:53"; }
+    if clang /tmp/conn.c -o /tmp/conn 2>/dev/null; then
+        /tmp/conn || bad "connected to 1.1.1.1:53"
+    else
+        bad "cannot compile the connect test"
+    fi
+else
+    echo "skipped: no clang, so no connection was attempted"
 fi
 # The host user's home directory is not visible. (The image may have /home of
 # its own; the test substitutes the host's real path for the placeholder. Run
@@ -31,9 +39,12 @@ case "$HOST_HOME" in @*) HOST_HOME=$HOME ;; esac
 [ ! -e "$HOST_HOME" ] || bad "the host home directory $HOST_HOME is visible"
 # Its processes are not visible: only the few in this PID namespace.
 n=$(ls /proc | grep -c '^[0-9][0-9]*$')
-[ "$n" -le 12 ] || bad "$n processes visible in /proc"
+if [ "$n" -lt 1 ]; then bad "no process visible in /proc: cannot look"
+elif [ "$n" -gt 12 ]; then bad "$n processes visible in /proc"
+fi
 # Root inside, with a clean environment.
 [ "$(id -u)" = 0 ] || bad "not uid 0 inside"
 [ "$HOME" = /root ] || bad "HOME is $HOME"
-[ -z "${SSH_AUTH_SOCK:-}${DISPLAY:-}${WSL_DISTRO_NAME:-}" ] || bad "host environment leaked"
+# DKTEST_LEAK is set by the test around dkbuild, so that this checks something on any machine
+[ -z "${DKTEST_LEAK:-}${SSH_AUTH_SOCK:-}${DISPLAY:-}${WSL_DISTRO_NAME:-}" ] || bad "host environment leaked"
 exit $fail
