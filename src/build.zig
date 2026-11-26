@@ -342,11 +342,21 @@ pub fn checkPolicy(arena: Allocator, io: std.Io, destdir: []const u8, problems: 
     try problems.append(arena, "installs into /usr/local");
 }
 
-/// Deletes a build's work directory, including a sandbox's overlay layers
-/// (see `sandbox.makeRemovable`). Works on leftovers of an earlier build too.
-fn removeBuildDir(arena: Allocator, io: std.Io, work: []const u8) void {
-    if (std.fs.path.join(arena, &.{ work, "sb", "work" })) |ow| sandbox.makeRemovable(io, ow) else |_| {}
+/// Deletes a build's work directory, including a sandbox's overlay layers.
+/// Works on leftovers of an earlier build too.
+/// Returns whether nothing is left. A build may leave directories without owner permission anywhere (Go's
+/// read-only module trees, a `chmod 555` in a test, each overlay's `work/work` of mode 000), which a delete
+/// cannot enter: `chmod -R` first, which does not follow the links it meets.
+fn removeBuildDir(arena: Allocator, io: std.Io, work: []const u8) bool {
+    if (!pathExists(io, work)) return true;
+    _ = std.process.run(arena, io, .{ .argv = &.{ "chmod", "-R", "u+rwX", "--", work } }) catch {};
     Dir.cwd().deleteTree(io, work) catch {};
+    return !pathExists(io, work);
+}
+
+fn pathExists(io: std.Io, path: []const u8) bool {
+    _ = Dir.cwd().statFile(io, path, .{ .follow_symlinks = false }) catch |err| return err != error.FileNotFound;
+    return true;
 }
 
 /// The `.apk` files (names inside repo/<arch>) a build needs on top of the base
@@ -371,6 +381,33 @@ fn isTarArchive(url: []const u8) bool {
     for (exts) |e| if (std.mem.endsWith(u8, u, e)) return true;
     // GitHub and GitLab archive links without an extension in the path.
     return std.mem.indexOf(u8, u, "/archive/") != null and !std.mem.endsWith(u8, u, ".zip");
+}
+
+test "removeBuildDir removes read-only and mode-000 directories and follows no link out" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    try tmp.dir.createDirPath(io, "w/destdir/ro");
+    try tmp.dir.writeFile(io, .{ .sub_path = "w/destdir/ro/f", .data = "old" });
+    try tmp.dir.createDirPath(io, "w/sign/work/work");
+    try tmp.dir.createDirPath(io, "outside/ro");
+    try tmp.dir.writeFile(io, .{ .sub_path = "outside/ro/keep", .data = "keep" });
+    try tmp.dir.symLink(io, "../../outside", "w/destdir/out", .{});
+    try tmp.dir.setFilePermissions(io, "w/destdir/ro", .fromMode(0o555), .{});
+    try tmp.dir.setFilePermissions(io, "w/sign/work/work", .fromMode(0), .{});
+    try tmp.dir.setFilePermissions(io, "outside/ro", .fromMode(0o555), .{});
+    defer tmp.dir.setFilePermissions(io, "outside/ro", .fromMode(0o755), .{}) catch {};
+    const base = try tmp.dir.realPathFileAlloc(io, ".", a);
+    const w = try std.fs.path.join(a, &.{ base, "w" });
+    try std.testing.expect(removeBuildDir(a, io, w));
+    try std.testing.expect(!pathExists(io, w));
+    try std.testing.expect(removeBuildDir(a, io, w)); // nothing there is fine too
+    const kept = try tmp.dir.statFile(io, "outside/ro", .{});
+    try std.testing.expectEqual(@as(u32, 0o555), @as(u32, kept.permissions.toMode()) & 0o777);
+    try tmp.dir.access(io, "outside/ro/keep", .{});
 }
 
 test "isTarArchive" {
@@ -793,7 +830,11 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     // 2. Build root: in <root>/work, or in DKBUILD_FAST_WORK (a faster disk)
     // for recipes that are not heavy (`jobs:N`), while it has 30 GB free.
     const work = try buildWorkDir(arena, io, opts, r);
-    removeBuildDir(arena, io, work);
+    // Never build on top of an earlier build's leftovers: they would be packaged and signed with the new files.
+    if (!removeBuildDir(arena, io, work)) {
+        out("error: cannot remove the old build directory {s}; remove it by hand\n", .{work});
+        return error.PrepareFailed;
+    }
     const root_rel = try std.fs.path.join(arena, &.{ work, "root" });
     Dir.cwd().createDirPath(io, root_rel) catch return error.PrepareFailed;
     const root_abs = absPath(arena, io, root_rel) catch return error.PrepareFailed;
@@ -804,7 +845,7 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     // The writable layer of the build root; the prepare and
     // build steps share it, so what the first installs the second sees.
     const sb = try sbDirs(arena, io, work, "sb");
-    defer if (!opts.keep_root) removeBuildDir(arena, io, work);
+    defer if (!opts.keep_root and !removeBuildDir(arena, io, work)) out("    warning: cannot remove {s}\n", .{work});
 
     var log: std.ArrayList(u8) = .empty;
     const logdir = try std.fs.path.join(arena, &.{ opts.root, "logs", opts.arch });
@@ -1653,8 +1694,11 @@ pub fn prune(arena: Allocator, io: std.Io, opts: Options, dry_run: bool) BuildEr
     // an index that lists files which are gone.
     const base_root = absPath(arena, io, try std.fs.path.join(arena, &.{ opts.root, "rootfs", "dkrescue" })) catch return error.PrepareFailed;
     const work = try std.fs.path.join(arena, &.{ opts.root, "work", "prune" });
-    removeBuildDir(arena, io, work);
-    defer removeBuildDir(arena, io, work);
+    if (!removeBuildDir(arena, io, work)) {
+        out("error: cannot remove the old directory {s}; remove it by hand\n", .{work});
+        return error.PrepareFailed;
+    }
+    defer _ = removeBuildDir(arena, io, work);
     const sb = try sbDirs(arena, io, work, "sb");
     var log: std.ArrayList(u8) = .empty;
     reindex(arena, io, opts, base_root, sb, &log) catch |err| {
