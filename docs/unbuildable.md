@@ -20,9 +20,21 @@ failure: the recipe is fixed first (docs/disabled-features.md is for single feat
 
 ## Under investigation (failing, not yet given up)
 
-| Package | Failure | Next step |
+State at the end of world pass 7 (stopped 2026-11-25). "Fix committed" means **not yet built with the fix**.
+
+| Package | State | Next step |
 |---|---|---|
-| ghc 9.14.1 | `binary-dist-dir`: `_build/bindist/.../bin/ghc-pkg: createProcess: execvp: does not exist`, r1 to r7; builds everything else; blocks the Haskell chain (shellcheck, simplex-chat, ...) | kept-root run (`--keep-root`): is the file there, what does hadrian execute and from which directory |
-| dotnet 10.0.114 r8 | restore of the source-build tasks: `NU1109: Detected package downgrade: Newtonsoft.Json ... centrally defined 10.0.114`, in the second (self-hosted) stage; r6 is built and in the repo | look at the source-build version props for NewtonsoftJson in the self-hosted stage |
-| euro-office-documentserver 9.3.7.1 r7 | the silent exit after the sdkjs build (r5, r6) had a cause, found 2026-11-24: BUILD_ROOT=$PWD/deploy sat in the environment block, where $PWD was "/", so sdkjs wrote to /deploy and `test -f deploy/sdkjs/...` failed without a message; BUILD_ROOT is now set in the build step | confirm in the next pass |
-| brave, electron, code-oss | Chromium-family builds; fixed after earlier failures (dash bashisms, LASTCHANGE, rustfmt, pnpm), none has completed yet | the next run |
+| ghc 9.14.1 | The cause of r1-r7's "execvp: does not exist" was found: every program was linked for glibc's loader, because the platform name taken from the boot GHC has no libc in it. With that fixed the whole build passed on 11-25 and the programs ask for musl's loader. It then stopped in packaging on PDF documentation (no LaTeX); fix committed (`--docs=no-sphinx-pdfs`). Blocks the Haskell chain until built | next world pass |
+| dotnet 10.0.114 r8 | `NU1109 ... NuGet.Packaging 10.0.114`. Inferred, not confirmed: the source-built packages of r6 in the repo carry this recipe's version, leaked into MSBuild through dkbuild's `version` variable. Fix committed: the variable is unset, and such packages are not used as the seed | next world pass |
+| euro-office-documentserver 9.3.7.1 r7 | the whole build passed on 11-25; install looked for the admin panel in the wrong directory; fix committed | next world pass |
+| electron 42 | two runs compiled files before their generated headers existed; cause unknown. Workaround committed (a second ninja run) | next world pass; code-oss and other Electron apps wait for it |
+| brave 1.99.57 | stopped in setup (Brave's tools expect a directory named `src`); fix committed | next world pass; has never reached the compile step |
+| dj64dev 0.5 (blocks dosemu2) | the 64-bit library builds; the bundled 32-bit ncurses: "C compiler cannot create executables"; diagnostics committed | read config.log from the next failure |
+| emacs 31.1 | configure: the libgccjit test program fails; diagnostics committed | next failure shows the compiler's message |
+| fceux 2.6.6 | CMake does not find OpenGL although libglvnd-devel has the libraries; diagnostics committed | read the search trace |
+| lomiri-url-dispatcher | needs lomiri-app-launch, which has no recipe | package it |
+| mattermost, mattermost-desktop | `npm ci` asks for a package that is not in the offline store (ENOTCACHED, jsdom) | look at the lock file |
+| pdfcraft | Cargo cannot load the dependency `ecolor` | not looked into |
+
+Many other recipes failed in pass 6 or 7 and have fixes committed that no build has tried; see the git log of
+2026-11-25.

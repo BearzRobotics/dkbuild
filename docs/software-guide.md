@@ -245,13 +245,31 @@ Incus is the container and VM manager here, with Proxmox VE as the full web-mana
 | Package | Version | What it is | Used for |
 |---|---|---|---|
 | [firefox](https://www.mozilla.org/firefox) | 159.0 | Mozilla Firefox web browser | web browser |
-| [chromium](https://www.chromium.org) | 157.0.8103.38 | Web browser | web browser |
 | [brave](https://brave.com) | 1.99.57 | Brave web browser | web browser |
 | [electron](https://www.electronjs.org) | 42.11.18 | Electron cross-platform desktop toolkit | runtime for desktop web apps |
-| [code-oss](https://github.com/microsoft/vscode) | 1.138.0 | Code - OSS, the open-source build of Visual Studio Code | code editor |
 | [geogebra](https://www.geogebra.org) | 5.4_git20261111 | GeoGebra Classic 5: dynamic mathematics for graphing, geometry, algebra and 3D | mathematics |
 | [remmina](https://remmina.org) | 1.4.43 | Remote desktop client (RDP, VNC, SPICE, SSH, ...) | remote desktop client |
 | [dosemu2](https://github.com/dosemu2/dosemu2) | 2.0_git20261025 | DOS emulator for Linux (with FreeDOS kernel and DJGPP-64 support) | run DOS programs |
+
+
+## Editors and writing
+
+
+| Package | Version | What it is | Used for |
+|---|---|---|---|
+| [vim](https://www.vim.org) | 9.2.1302 | Vi-style text editor | the vim editor |
+| [neovim](https://neovim.io) | 0.12.6 | Fork of Vim aiming to improve user experience, plugins and GUIs | the Neovim editor |
+| [helix](https://helix-editor.com) | 25.07.1 | Modal terminal text editor with tree-sitter and LSP support | modal editor |
+| [micro](https://micro-editor.github.io) | 2.0.15 | Modern and intuitive terminal-based text editor | easy terminal editor |
+| [ttt](https://github.com/eugenioenko/ttt) | 1.11.0 | Terminal text editor that feels like a GUI | terminal text editor |
+| [kate](https://apps.kde.org/kate) | 26.08.2 | KDE Advanced Text Editor | KDE's editor |
+| [zed](https://zed.dev) | 1.29.3 | High-performance, multiplayer code editor (GPUI, Rust) | the Zed editor |
+| [code-oss](https://github.com/microsoft/vscode) | 1.138.0 | Code - OSS, the open-source build of Visual Studio Code | the open build of VS Code |
+| [zig-ide](https://github.com/kritarkri/Zig-IDE) | 1.4.0 | Independent desktop IDE for the Zig language (Monaco editor, ZLS integration) | IDE for Zig |
+| [zls](https://github.com/zigtools/zls) | 0.17.0 | Zig language server | Zig language server |
+| [abiword](https://gitlab.gnome.org/World/AbiWord) | 3.0.8 | Word processor | word processor |
+| [cmark](https://github.com/commonmark/cmark) | 0.31.2 | C implementation of the CommonMark markdown specification | CommonMark parser |
+| [cmark-gfm](https://github.com/github/cmark-gfm) | 0.29.0.14 | CommonMark parser with the GitHub Flavored Markdown extensions | CommonMark with GitHub's extensions |
 
 
 ## Desktops

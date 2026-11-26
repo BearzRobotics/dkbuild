@@ -141,13 +141,26 @@ Incus is the container and VM manager here, with Proxmox VE as the full web-mana
 
 ## Browsers and apps
 - firefox | web browser
-- chromium | web browser
 - brave | web browser
 - electron | runtime for desktop web apps
-- code-oss | code editor
 - geogebra | mathematics
 - remmina | remote desktop client
 - dosemu2 | run DOS programs
+
+## Editors and writing
+- vim | the vim editor
+- neovim | the Neovim editor
+- helix | modal editor
+- micro | easy terminal editor
+- ttt | terminal text editor
+- kate | KDE's editor
+- zed | the Zed editor
+- code-oss | the open build of VS Code
+- zig-ide | IDE for Zig
+- zls | Zig language server
+- abiword | word processor
+- cmark | CommonMark parser
+- cmark-gfm | CommonMark with GitHub's extensions
 
 ## Desktops
 - desktop-dkde | the DKDE desktop (default image)

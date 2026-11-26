@@ -1,9 +1,8 @@
 # Roadmap
 
-Status as of 2026-11-13. Numbers are approximate (taken from file names in
-`repo/`, not from a build log). Per-package requests and their status live in
-`docs/requests.md`; the design is in `SPEC.md`; the newest session state is in
-`docs/handoff.md`.
+Status as of 2026-11-25. "Built" means the repository holds an apk of the recipe's current version and release; it
+does not mean the program was run or tested. Per-package requests are in `docs/requests.md`, current failures in
+`docs/unbuildable.md`, the design in `SPEC.md`, the newest session state in `docs/handoff.md`.
 
 Goal: a package set you define builds an image (ISO, disk image, rootfs). The
 first target, rebuilding everything on the DKRescue boot disk
@@ -12,20 +11,16 @@ much more than the disk ever had.
 
 ## Where we are
 
-- About 2300 recipes in `packages/`; `repo/x86_64` holds about 4850 apks
-  (about 4400 distinct names; older releases stay until `dkbuild prune`).
-  Roughly 700 recipes were not yet built on 2026-11-13.
-- History: 2026-11-06 to 2026-11-13, about 690 commits. Nothing pushed.
-- World runs: run 1 had 45 failures, run 2 had 28 (libcamera blocked 654
-  packages), run 3 (started 2026-11-13 16:14, `--keep-going`) was still running
-  at 20:24 with about 22 failures logged so far. Every fix since run 1 is
-  untested until run 4, which has not been started (the user starts builds).
-- Three live ISOs (base, rescue, dkde) boot to a login or the desktop in QEMU on
-  UEFI and BIOS (logs in `work/qemu-*.log`, script `tests/qemu-iso.sh`). Only
-  `out/dkde/dkde.iso` is on disk now; the base and rescue ISOs were not rebuilt
-  after the later package changes (unverified that they still build).
-- Only x86_64 is built. `profiles/aarch64.toml` and `riscv64.toml` exist, nothing
-  more.
+- 3188 recipes in `packages/`: 2809 built, 5 built only at an older version or release, 374 with no main package
+  (many never reached, or waiting for one that fails). `repo/x86_64` holds 6852 apk files. 50 more recipes wait in
+  `wip/queue`.
+- World runs repeat with `--keep-going` (`contrib/worldloop.sh`). Distinct failures: pass 4, 182; pass 6, 60
+  (stopped by running out of memory); pass 7, 28 (stopped on request on 2026-11-25). Many fixes are not yet built.
+- The work is on branch `new-build-machine`, on GitHub; the newest commits may be unpushed.
+- Live ISOs: `images/dkde-devel.toml` was rebuilt on 2026-11-24 and tested in QEMU (BIOS, the disc's boot loader):
+  the desktop, the login screen, an X11 sign-in and polkit worked. It was not tested on UEFI, VirtualBox or
+  hardware. The other live images were last boot-tested around 2026-11-13 and not since the later package changes.
+- Only x86_64 is built. `profiles/aarch64.toml` and `riscv64.toml` exist, nothing more.
 
 ## Done milestones
 
@@ -33,7 +28,7 @@ much more than the disk ever had.
 - **B1**: native builds in the unprivileged sandbox, signed apks, signed index,
   dependency scanning (`so:`/`cmd:`/`pc:`), world builds with `-P N`,
   `--keep-going`, a fast work cache (`DKBUILD_FAST_WORK`).
-- **Stage 0 replaced**: LLVM 22, musl, zig, base, kernel, dklilo, dksh, dkde,
+- **Stage 0 replaced**: LLVM, musl, zig, base, kernel, dklilo, dksh, dkde,
   rescue tools, installer and initramfs are all built from recipes.
 - **ISO output**: `dkbuild image` makes tar, squashfs, directory and hybrid
   BIOS+UEFI ISO (dklilo). Live ISOs use `live-initramfs`.
@@ -43,16 +38,15 @@ much more than the disk ever had.
 
 - **B2, stage 2** (roots filled from `repo/` only, a comparison with stage 1, and
   the forgotten-dependency test): not implemented. `tests/forgotten-dep.sh`
-  exists but is skipped until stage 2. `base-devel` is written, not yet built; the
-  rescue image installing it from `repo/` will exercise the `apk add base` half.
+  exists but is skipped until stage 2. `base-devel` is built.
 - **B3, images**: partly done. The live ISOs boot; the installed-system image
   (`images/fenriros.toml`) still outputs only a tar, and the checks SPEC 13
   attributes to DKRescue's `CONSTRAINTS.md` cannot be run because that file is
   not in this repository (verified: absent).
 - **B4 aarch64, B5 riscv64**: profiles only; no cross base set, repo, image or
   boot test. aarch64 is the next large item (zig cc aarch64 cross-builds work).
-- **qemu-user and binfmt_misc** (SPEC 14 item 5): open. `qemu` is a recipe but
-  has no separate qemu-user package and is not built.
+- **qemu-user and binfmt_misc** (SPEC 14 item 5): open. `qemu` (11.0.1-r2) is not
+  built.
 - Small: ncurses' C++ binding (`libncurses++w`) is off; turn it on with `-lc++`
   when a package needs it.
 
@@ -60,10 +54,11 @@ much more than the disk ever had.
 
 | Item | Status |
 |---|---|
-| Live ISOs: base (CLI), rescue (DKRescue's successor, with rescue-tools and base-devel), dkde (desktop through greetd) | done, boot in QEMU on UEFI and BIOS |
-| `dkinstaller` 0.0.2 on the live ISOs | written, built; not verified end to end on hardware |
-| Installed system on UEFI: systemd-boot, ext4 root, no initramfs | done (docs/install.md, manual) |
-| Installed system on BIOS (dklilo or GRUB) | documented in docs/install.md (2026-11-20); the dklilo steps are the installer's own, GRUB's are standard; neither is verified on FenrirOS yet |
+| Live ISOs: base (CLI), rescue (DKRescue's successor, with rescue-tools and base-devel), dkde (desktop through greetd) | written; booted in QEMU on UEFI and BIOS around 2026-11-13, not retested since |
+| dkde-devel live ISO (with Firefox, GRUB for BIOS, the installer) | 2026-11-24 build tested in QEMU, BIOS only |
+| `dkinstaller` 0.0.6 on the live ISOs | built; installation not verified end to end |
+| Installed system on UEFI: systemd-boot, ext4 root, no initramfs | documented in docs/install.md (manual) |
+| Installed system on BIOS (dklilo or GRUB) | documented in docs/install.md; neither is verified on FenrirOS; grub 2.12-r6 has no recorded boot test |
 | Other root file systems (btrfs, XFS) for installs | open: they are modules; design for an installed-system initramfs, and for building them in, is in docs/initramfs.md (not implemented) |
 | Containers: `images/container.toml`, `container-build.toml` | written |
 | Packages on the install and rescue ISOs (`iso_repo`) | open: no image sets it yet |
@@ -75,12 +70,10 @@ Image keys: `packages`, `exclude`, `unwanted` (apk `!name`), `services`, `users`
 
 ## Toolchains
 
-- Built: llvm22 (22.1.8, every backend), zig 0.17.1 from source, rust 1.99.1 from
-  source against llvm22 (seed `rust-bootstrap`; rust-wasm, rust-src and rustc-dev
-  included; rustup built), go 1.27 (seed `go-bootstrap`), openjdk 17/21/25,
-  musl with mimalloc, nodejs, ruby 3.4 and 4.0, php 8.4 and 8.5, perl, python.
-- Written, not built or not confirmed: dotnet 10 (self-hosted), dart, ghc 9.14
-  (stage 0 on Alpine's GHC), emscripten.
+- Built: LLVM 23.1.5 (the system toolchain), llvm22 (22.1.8, which the Rust build uses), zig 0.17.1, rust 1.99.1
+  from source (seed `rust-bootstrap`), go 1.27, nodejs 26, openjdk, musl 1.2.6, gcc 15.2.0, dart 3.10.3,
+  emscripten 6.0.3.
+- Not built at the current release: dotnet 10 (an older release is built), ghc 9.14.1 (see docs/unbuildable.md).
 - **GCC 15 is opt-in**: `/usr/lib/gcc15`, versioned drivers, all languages that
   do not conflict with LLVM's; a recipe asks for it with `options = ["gcc"]` (GNU
   binutils and GCC instead of clang). Stage 0 of GCC itself is built on Alpine's
@@ -97,55 +90,44 @@ Image keys: `packages`, `exclude`, `unwanted` (apk `!name`), `services`, `users`
 
 ## Desktops
 
-- **dkde** (default): dkde 0.2.0, dkconsole 0.2.0, dkman 0.5.0 (as `man`), greetd,
-  NetworkManager (DHCP; `base-net` is not used on the dkde image), gvfs and
-  GNOME Online Accounts. `desktop-dkde` pulls in dkde's optional dependencies.
-  Built; the ISO boots to the desktop. VT 7 for greetd and `dkde-session` as the
-  initial session are still unconfirmed on hardware.
-- **Hyprland** 0.57 and its libraries (`desktop-hyprland`): built. Dotfile configs
-  (ML4W, dionysus) are only an idea: no recipes; dionysus has no licence.
-- **labwc**, wayland, mesa, xwayland, Qt 6 (6.12), GTK 3/4: built.
-- **Plasma 6.8** (Frameworks, Gear, PIM, SDDM), **LXQt**: written
-  (imported from Chimera), not built.
-- **X server**: written as `xserver-xorg` 21.1.24 plus
-  `xserver-xorg-input-libinput`, not built. XLibre is not packaged (verified:
-  there is no xlibre recipe). **Phoenix** (a Zig X server) is not packaged
-  either (verified: no recipe).
+- **dkde** (default): dkde 0.3.5, dkconsole 0.2.0, dkman 0.6.0 (as `man`), greetd, NetworkManager, gvfs,
+  firewalld, PAM and elogind; `desktop-dkde` pulls in the optional dependencies, `desktop-dkde-core` is the rescue
+  set. Built; the live ISO reaches the desktop in QEMU. The login screen preselects the X11 session (dkde-wm).
+- **Hyprland** 0.57 (`desktop-hyprland`), **labwc**, wayland, mesa, Xorg (`xserver-xorg` 21.1.24), Qt 6, GTK 3/4:
+  built.
+- **LXQt** (lxqt-panel 2.4.1) and **SDDM**: built. **Plasma 6.8**: written, plasma-workspace and plasma-desktop not
+  built. **Xfce**: removed on 2026-11-16.
+- **Lomiri**: recipes in `packages/` (moved from the queue); lomiri, mir and qtmir not built.
+- XLibre and Phoenix are not packaged.
 
 ## Applications
 
 Status words: built, written (not built), failing (last world run), blocked.
 Details and per-package notes: `docs/requests.md` and `wip/`.
 
-| Group | Status |
-|---|---|
-| Shells and CLI: zsh, fish, nushell, vim, gh, msedit | built |
-| AI: llama.cpp, ollama, aimgr, claude-code | built; whisper.cpp written |
-| Web servers and PHP: nginx, caddy, php 8.4 | built |
-| Virtualization: ZFS (prebuilt per kernel flavor), Incus, libvirt, qemu, Docker/podman | zfs, incus, libvirt built; qemu, Docker written |
-| Proxmox VE 9.2 (about 130 recipes) | written, partly failing (pve-rs) |
-| Browsers: Firefox (patches in `packages/f/firefox/patches`), Thunderbird, Chromium | written, not built |
-| Electron family: electron, Code - OSS, Brave | written, not built (after Chromium) |
-| Office: LibreOffice, Euro-Office + Libera Suite, OCR (tesseract, ocrmypdf), printing | OCR built; the rest written |
-| Media and graphics: ffmpeg (24 extra codec libraries), mpv, GStreamer, GIMP, Inkscape, Krita, Kdenlive, Blender | ffmpeg stack written (built before the extra libraries); apps written, not built |
-| Games and emulators: wine, MAME, dolphin-emu, ScummVM, RetroArch | written, not built |
-| dosemu2 (requested 2026-11-15; needs fdpp first, KVM or its CPU emulator) | queued, not written (see `docs/requests.md`) |
-| Electronics and CAD: KiCad, FreeCAD, avr-gcc, OpenOCD, ImHex | avr-gcc and ImHex built; the rest written |
-| Security tools | written (metasploit built) |
-| Server web apps (help desks, ERP, mail, project management, finance) | written, inert, not built; some failing |
-| Flatpak (+ builder), Flathub as default remote | written, not built |
-| SELinux (requested 2026-11-15, for Red Hat family users such as Alma): libsepol, libselinux, libsemanage, checkpolicy, policycoreutils, setools, a policy, kernel options, SELinux-aware coreutils, openssh and others, dinit hooks | queued, not written (see `docs/requests.md`) |
-| snapd (requested 2026-11-15) | dropped: needs systemd (docs/decisions/0003-no-snapd.md); use Flatpak |
-| Document search and AI stack (requested 2026-11-15; priorities 1-4 in `docs/requests.md`): OCR and PDF tools; sqlite-vec, pgvector, tantivy, qdrant; onnxruntime, fastembed, sentence-transformers, huggingface-hub; docling, apache-tika, llama-index, haystack, langchain | priority 1 and sqlite/postgresql/llama.cpp/ollama in the tree; the rest queued, not written (PyTorch not packaged: decide CPU or Vulkan first) |
-| RAG projects (requested 2026-11-15): docling, MinerU, danswer/Onyx, Verba, kotaemon, RAG-Anything; legal RAG repos (Legal-RAG, legalRAG, legal-rag-hy, legal-rag-router, legal-rag-bench) | queued; repositories not yet inspected (see `docs/requests.md`) |
+| Group | Built | Not built (recipe present unless said) |
+|---|---|---|
+| Shells, CLI, editors | zsh, fish, nushell, vim, gh, msedit, Kate, Zed, Helix, Micro, ttt | emacs, KDevelop, Zig IDE |
+| AI | llama-cpp, ollama, whisper.cpp, claude-code, python-docling | llama-index; PyTorch recipe present, state not checked here |
+| Web servers and PHP | nginx, caddy, PHP 8.4, Nextcloud, Forgejo, Gitea | |
+| Virtualization and containers | ZFS (prebuilt per kernel), Incus, libvirt, moby (Docker), Proxmox VE (`proxmox-ve`, `pve-manager`) | qemu, podman |
+| Browsers and mail | Firefox | Thunderbird, Betterbird, Brave; plain Chromium moved to `wip/queue` |
+| Electron | | electron, Code - OSS |
+| Office and OCR | Euro-Office core, Libera Suite, tesseract, ocrmypdf | LibreOffice, Euro-Office document server, Collabora core |
+| Media and graphics | ffmpeg, mpv, OBS, GIMP, Inkscape, Krita | Kdenlive, Blender, Audacity |
+| Games and emulators | Wine, dolphin-emu, fdpp | MAME, ScummVM, RetroArch, 0 A.D., dosemu2 (waits for dj64dev) |
+| Electronics and CAD | avr-gcc, OpenOCD, ImHex | KiCad, FreeCAD |
+| Security | metasploit, SELinux userspace and Red Hat's targeted policy (not tested on a running system) | ufw and SearXNG are only in `wip/queue` |
+| Flatpak | flatpak | flatpak-builder |
+| snapd | dropped: needs systemd (docs/decisions/0003-no-snapd.md) | |
 
 ## dkbuild features
 
 - Dependency stores so that builds stay offline: Go, Rust (`cargodeps`), Zig, npm
-  (`npmdeps`, yarn 2+ through `yarn-lock`, pnpm), Python (`pydeps`, `python-lock`),
+  (`npmdeps`, yarn 2+ through `yarn-lock` with the `yarnberry` option, pnpm), Python (`pydeps`, `python-lock`),
   Gradle, NuGet, gems, Dart pub, Haskell (`hackagedeps`, `hackage-lock`).
-- Snapshots (`src/snapshot-*.sh`) for projects whose checkout downloads as it
-  builds: electron, brave, dart, dotnet, euro-office. `snapshot-android-ndk` is
+- Snapshots (`src/scripts/snapshot-*.sh`) for projects whose checkout downloads as it
+  builds: electron, brave, dart, dotnet, euro-office and others. `snapshot-android-ndk` is
   planned.
 - `selfhost` and `stage0deps` (a toolchain built with a seed, then with itself);
   `noscan`, `!repo-iso`, `@built` subpackage dependencies, `options = ["gcc"]`.
@@ -158,17 +140,20 @@ Details and per-package notes: `docs/requests.md` and `wip/`.
 - `import-cbuild` converts Chimera templates. A Solus `package.yml` importer was
   dropped: recipes come from Chimera's templates and Alpine's packaging.
 - `image --verbose`, `world --keep-going`, `--tree DIR`.
-- Tests: `tests/run-all.sh`, `tests/qemu-iso.sh`, `work/pipeline.sh`.
+- Tests: `tests/run-all.sh`, `tests/qemu-iso.sh`.
+- The build tree and repository can live on another disk through links (the build machine uses `/mnt/dkbuild`);
+  `contrib/worldloop.sh` runs world passes as a systemd user unit.
+- Open: dkbuild takes no lock on the repository, so two builds at once can damage its index.
 
 ## Blocked and unwritten
 
 - Blocked or not written: Netdata, Cockpit (needs systemd). Paperless-ngx, Mayan EDMS, Taiga, ERPNext, Twenty and
   Joplin are unblocked by `pydeps` and `yarn-lock` but not yet written.
-- Unwritten special cases (reasons in `wip/README.md`): PDFium, Frida, Anki,
+- Unwritten special cases (reasons in `wip/README.md`; PDFium now has a recipe that packages a prebuilt library): Frida, Anki,
   OpenKiosk, Bitwarden desktop, Issie, RustDesk client (Flutter is glibc-only),
   KeePass 2 and gbrainy (Mono), epson escpr2 (source RPM), MatterControl.
 - Not planned: Frappe Books and Maybe Finance (archived).
-- Not packaged: qt5ct (no Qt 5), hfsprogs, waylock, gtklock.
+- Not packaged: qt5ct (Qt 5 itself is in the tree now), hfsprogs, waylock, gtklock.
 - Unfinished helper work is in `git stash list` ("unfinished agent work
   2026-11-13"): Brave keys and Leo licence, Euro-Office unbundling, legacy OVMF,
   ifupdown2/FRR, PBS client, Erlang/Elixir/RabbitMQ, grpc and Zabbix APM.
@@ -188,9 +173,9 @@ Details and per-package notes: `docs/requests.md` and `wip/`.
 - **Offline builds**: network only at fetch time; vendor or pin anything a build
   would download.
 - **Documented source edits**: `sed` or a `.patch`, but every change is explained
-  in the recipe. A recipe edit (even a comment) needs a `release` bump.
-- **The user runs builds**: nothing here starts `world` or `pkg`; recipes are
-  written and checked, logs are read afterwards.
+  in the recipe. Editing a built recipe, even a comment, marks it as changed (`dkbuild outdated`).
+- **Builds**: Claude runs world and repairs failures when the user asks for that (standing orders in
+  docs/handoff.md); since the evening of 2026-11-25 building is stopped until the user asks.
 - **GCC exception**: LLVM is the toolchain; GCC only where a recipe opts in.
 - **Rust**: a seed compiler is enough (the mrustc chain is out of scope); the
   system `rust` and `zig` are for building packages, users get rustup.

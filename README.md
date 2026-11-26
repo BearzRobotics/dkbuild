@@ -24,15 +24,15 @@ echo 'kernel.apparmor_restrict_unprivileged_userns = 0' | sudo tee /etc/sysctl.d
 **Zig 0.17.1** builds dkbuild (it is not on apt): `zvm install 0.17.1`, or download it from
 <https://ziglang.org/download/> and put `zig` on your `PATH`.
 
-dkbuild depends on the sibling `toml-zig` library, so clone the two **side by side**:
-
 ```sh
-git clone https://github.com/BearzRobotics/toml-zig.git
 git clone https://github.com/BearzRobotics/dkbuild.git
 cd dkbuild
 zig build                      # -> zig-out/bin/dkbuild
 ./zig-out/bin/dkbuild doctor   # checks this machine, prints the fix for anything missing
 ```
+
+The one dependency, [`toml-zig`](https://github.com/BearzRobotics/toml-zig), is pinned by URL and hash in
+`build.zig.zon`, and a copy is committed under `zig-pkg/`.
 
 Then:
 
@@ -100,8 +100,12 @@ dependency chains; rebuilds; installing from the repository. They run once for e
 
 ## Status
 
-About 2300 recipes in `packages/` and about 4850 apks in `repo/x86_64` (approximate, 2026-11-13). LLVM 22, zig, Rust (from
-source), the base system, the kernel, dklilo, dkde and Hyprland are built. `dkbuild image` makes three live ISOs (base, rescue, dkde) that boot in QEMU on UEFI
-and BIOS; `dkinstaller` is on them. Not done: stage 2 (roots filled from `repo/` only, which also catches forgotten
-dependencies), aarch64 and riscv64 (profiles only) and the rest of the world build (see docs/roadmap.md and docs/handoff.md). The cbuild importer (SPEC 5.9) writes draft recipes with
+As of 2026-11-25, x86_64 only: 3188 recipes in `packages/`; 2809 have their main package built at the recipe's
+current version and release, 5 only at an older one, and 374 have none (many were never reached or are blocked by
+another that fails). `repo/x86_64` holds 6852 apk files. The base system, LLVM 23, Zig, Rust (from source), Go,
+the kernel (7.3), dklilo, dkde, Hyprland, Firefox and many desktop applications are built. Not built yet include
+Brave, Electron, Code - OSS, LibreOffice, Thunderbird, Plasma and Kdenlive. The newest live ISO
+(`images/dkde-devel.toml`, 2026-11-24) was tested in QEMU with BIOS only; not on real hardware, and installing from
+it was not tested. aarch64 and riscv64 are profiles only. Current state: `docs/handoff.md`; plan:
+`docs/roadmap.md`; failures: `docs/unbuildable.md`. The cbuild importer (SPEC 5.9) writes draft recipes with
 `TODO(cbuild)` markers; there is no Solus `package.yml` importer (dropped: recipes come from Chimera and Alpine).

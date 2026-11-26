@@ -14,3 +14,16 @@ for now: it is written here with the reason, and in the recipe, so it can be bro
 | aubio | reading media through FFmpeg (`--disable-avcodec`) | 2026-11-24 | `src/io/source_avcodec.c` uses the FFmpeg 3 API (AVStream->codec, AVCodecContext->channels, avcodec_decode_audio4, av_get_default_channel_layout), removed in FFmpeg 5 to 8; the tree has FFmpeg 8 | port source_avcodec.c to the AVCodecParameters / AVChannelLayout API (Debian and Alpine carry a patch for FFmpeg 5) and turn it on |
 | vtk | the system HDF5 (`-DVTK_MODULE_USE_EXTERNAL_VTK_hdf5=OFF`: VTK's bundled copy is used) | 2026-11-24 | configure stops at "Could NOT find HDF5 (missing: HDF5_HL_LIBRARIES)" although the tree's hdf5 ships libhdf5_hl; the cause is not found yet | find what FindHDF5 searches for in the build root (kept-root run), then set it to ON |
 | granite | the granite-demo sample application (`-Ddemo=false`) | 2026-11-24 | its map view needs libshumate-1.0, which is not packaged; the library, its introspection data and the Granite widgets are built | package libshumate, then turn the demo on |
+
+## Tests and developer parts left out
+
+Not features of the installed software (except the last row's optimisation); listed so that nothing is left out
+unrecorded. Each recipe explains its own.
+
+| Package | Left out | Since | Why |
+|---|---|---|---|
+| julia | LLVM's bundled benchmarks (`-DLLVM_INCLUDE_BENCHMARKS=OFF`): a developer tool, not installed | 2026-11-25 | they stop this clang (`-Werror`, a C2y extension) |
+| dbus-cpp | building its test programs (they were not run) | 2026-11-25 | one does not link (a symbol hidden by `-fvisibility=hidden`) |
+| cmark-gfm | one example of the upstream test file ("Footnote reference labels are href escaped"); the other tests run | 2026-11-25 | the release's parser does not give the expected output; cause not traced |
+| bibletime | link-time optimisation | 2026-11-25 | the thin-LTO link crashes; the recipe already said `!lto`, the project turned it back on |
+| openshadinglanguage | five fast-math settings on LLVM 23 | 2026-11-25 | LLVM 23 removed them; generated shader code may be less optimised |

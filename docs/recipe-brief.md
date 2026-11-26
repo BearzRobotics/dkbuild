@@ -3,7 +3,7 @@
 You write package recipes (`packages/<letter>/<name>/package.toml`, plus `patches/`, `files/` when needed). You do NOT build.
 
 ## Hard rules
-- Do NOT run `dkbuild pkg`, `dkbuild world`, or `dkbuild prune`: a `dkbuild world` run is in progress and owns repo/, logs/, work/. Do not touch those, other sessions' processes, or `git push`.
+- Do NOT run `dkbuild pkg`, `dkbuild world`, or `dkbuild prune`: repo/, logs/ and work/ belong to the main session's builds (dkbuild has no lock on the repository, so two builds can damage its index; whether builds are allowed at all: top of docs/handoff.md). Do not touch those, other sessions' processes, or `git push`.
 - Allowed: `./zig-out/bin/dkbuild check <name>` (validate), `./zig-out/bin/dkbuild fetch <name>` (downloads sources and vendors deps; network is allowed at fetch time only; if a fetch is huge (> ~5 GB) or looks infeasible, say so in your report instead of looping).
 - Commit only your own recipe files: `git add packages/<l>/<name> && git commit -m "<name>: <what>" -m "Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"`. Other uncommitted changes in the tree are not yours: never `git add -A`, never `git commit -a`.
 - Never invent a sha256: compute it from the downloaded file (`curl -sL URL | sha256sum`).
@@ -24,3 +24,6 @@ You write package recipes (`packages/<letter>/<name>/package.toml`, plus `patche
 
 ## Report (under 250 words)
 For each package: path, version, whether `check` and `fetch` passed, fetch size if big, what you expect to break on musl/libc++, optional deps you could not package, anything unsure. No claims about builds: nothing was built.
+- Editing a recipe that is already built, even a comment, marks it as changed (`dkbuild outdated`): bump `release` only for a real change, and leave comments of built recipes alone otherwise.
+- The embedded helper scripts (snapshots, lock generators, store helpers) are in `src/scripts/`.
+

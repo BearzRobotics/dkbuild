@@ -384,3 +384,30 @@ Network interface names 2026-11-17 (user: want eth0, wlan0 ... but still predict
   -march=native for NEON on aarch64), with every optional compression library; bzip3 1.5.5 packaged for its .bz3 support (packages/b/bzip3).
   Not built yet.
 - dkman 0.5.1 (https://github.com/BearzRobotics/dkman/releases/tag/v0.5.1) 2026-11-20: recipe updated (regex-zig 0.3.0).
+
+## Requests and decisions, 2026-11-19 to 2026-11-25 (added 2026-11-25)
+
+State words: built (an apk of the current recipe is in the repo), not built.
+
+- **World:** keep running `world --keep-going` and fix failures; what really cannot be built goes in
+  `docs/unbuildable.md`. On the evening of 2026-11-25 the user stopped the build: do not restart it unasked.
+- **Daily-driver applications:** Brave, Code - OSS and Kdenlive (with Electron) first; none built yet. The separate
+  Chromium build was moved to `wip/queue` (the user uses Brave and Firefox).
+- **Editors:** Kate, Zed, Helix, Micro and ttt built; KDevelop not built.
+- **Zig IDE** 1.4.0 (https://github.com/kritarkri/Zig-IDE) with zls: `zls` built; `zig-ide` written, not built
+  (needs Electron).
+- **0 A.D.:** recipe present, not built.
+- **Lomiri:** moved from the queue into `packages/`; not built.
+- **Package removals:** the book and document bundles coding-books, programming-ebooks,
+  free-programming-books-pdf and tpn-pdfs were removed; reverse-engineering stays.
+- **dkde-devel ISO:** with Firefox; **GRUB** for BIOS machines added (`grub`, `grub-i386-pc`; for a temporary
+  system for a relative). Installing with GRUB has not been tested. The live login is shown on the console
+  (`issue` in the image file).
+- **NTFS drive not shown in dkde-file** (2026-11-25): the ISO has the NTFS3 kernel driver, ntfs-3g, udisks, eudev
+  with blkid and libblockdev's file-system plugin (checked in the build logs and recipes, not on a running system).
+  Which side is at fault is not settled; the dkde side is being looked at separately.
+- **cmark and cmark-gfm** (2026-11-25): cmark was already packaged (r2 adds the static library); cmark-gfm
+  written. Neither new release is built.
+- **Build disk** (2026-11-25): source stays in `/stuff/git/dkbuild`; build tree and repository on `/mnt/dkbuild`.
+- **dkbuild itself** (2026-11-25): toml-zig 0.3.0; the embedded scripts moved to `src/scripts/`.
+

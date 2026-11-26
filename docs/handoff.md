@@ -40,8 +40,10 @@ out/dkde-devel/dkde-devel.iso is whatever the last image build made.
 
 ## Standing orders (also in Claude's memory, project-standing-orders-2026-11-19)
 
-- Keep running `world --keep-going`, fix failures as they come, restart world if it ends or crashes while packages
-  remain. A package that cannot be built goes in docs/unbuildable.md, after real fixes were tried.
+- **World is stopped at the user's request; this overrides the next point until they ask for builds again.**
+- When world is wanted: keep running `world --keep-going`, fix failures as they come, restart it if it ends or
+  crashes while packages remain. A package that cannot be built goes in docs/unbuildable.md, after real fixes were
+  tried.
 - No QEMU boots (the user allowed it for testing the 11-24 ISO); do not push, release or publish without being asked;
   do not touch other repositories, sessions or processes.
 - Upstream sources and build scripts are edited only with `sed` or a `.patch`, each explained in the recipe.
@@ -52,20 +54,26 @@ out/dkde-devel/dkde-devel.iso is whatever the last image build made.
 
 **Stopped on 2026-11-25 (about 19:00) at the user's request, during pass 7 (it was building firefox). Do not start it
 again until the user asks.** The repo was pruned afterwards (no stale packages; 27 packages that no recipe provides
-were left in place). Many fixes committed while pass 7 ran have not been built.
+were left in place: mostly the removed Xfce and old libopenraw and libgtop files, but also `rustc-dev`, `zfs-kmod` and
+`postgresql-client-libs`, which should be understood before anyone deletes them; brave lists rustc-dev as a build
+dependency).
+
+How to start it, when asked:
 
     systemd-run --user --unit=dkworld --collect -p OOMPolicy=continue --working-directory="$PWD" \
         --setenv=PATH="$PATH" "$PWD/contrib/worldloop.sh"
 
 Stop it with `systemctl --user stop dkworld`. It runs outside the terminal on purpose: on 2026-11-25 at 10:31 the OOM
 killer took a 20 GB rustc (30 GB of RAM) and systemd stopped the whole terminal tab: world pass 6 and the Claude
-session with it. The service still ends if the user logs out (lingering is off).
+session with it. The service still ends if the user logs out (lingering is off). firefox's gkrust needs the most
+memory seen so far.
 
 It continues after the highest pass number. Watch `work/worldloop.log` and the newest `work/world<n>.log`. Also watch
 for silent hangs (load under 1 and a quiet log): one `pnpm install` once hung for 7 hours. Build roots are in work/
 (DKBUILD_FAST_WORK is empty unless set). docs/recipe-brief.md is the brief for recipe-writing helper agents.
 
-Pass 4 ended with 178 failures; passes 5 and 6 were stopped early. Many recipe fixes committed since are untested.
+Distinct failures: pass 4, 182; pass 6, 60 (not finished: OOM); pass 7, 28 (stopped). Most recipe fixes committed on
+11-25 have **not been built**: pass 7 read the recipes when it started.
 
 ## Image builds
 
@@ -73,17 +81,19 @@ Pass 4 ended with 178 failures; passes 5 and 6 were stopped early. Many recipe f
 
 ## Open
 
-- **audacity:** configure downloads dependencies (muse_deps). Not fixed. Plan: `-DEXTDEPS_OVERRIDE_ALL=SYSTEM`, and
-  the source-only deps (muse_deps/recipes/*/spec.cmake has URLs and sha256) as sources, placed in the extdeps
-  download cache (`$HOME/.cache/extdeps/downloads/<name>/`).
-- **pc:libpng:** the user asked whether "apk add can't resolve pc:libpng although libpng is in the repo" was fixed.
-  No record of it was found; where it happened is not known yet; not investigated further.
-- **ghc:** diagnostics added in r8, not yet read. **dotnet** r8: NU1109 (Newtonsoft.Json). **euro-office-documentserver**
-  r7: unconfirmed. **emacs** libgccjit: config.log tail added. **qt6-qtwebengine:** may have more libc++ errors.
+- **Failing packages:** the table under "Under investigation" in docs/unbuildable.md has the state of each (ghc,
+  dotnet, euro-office-documentserver, electron, brave, dj64dev, emacs, fceux, lomiri-url-dispatcher, mattermost,
+  pdfcraft). audacity, abiword (new package wv), aisleriot (guile r5), dia and others have fixes committed and untried.
 - **onnxruntime:** its GitHub repository answered 404 (blocks calibre speech, fastembed, rapidocr, mineru). Recheck.
-- **zig-ide** (new), 0ad, helix, hetty, hexchat, heaptrack, ibus, ayatana-indicator-datetime: fixed or written,
-  untested (sdbus-cpp and libdbusmenu built on 11-25).
-- `zed.toml` in the top directory is an untracked stray (a copy of Zed's Cargo manifest); delete if nobody wants it.
+- **NTFS drive not shown in dkde-file:** packaging looked complete from the build logs; not tested on a running
+  system (see docs/requests.md). The dkde side is being looked at separately.
+- **pc:libpng:** the user asked whether "apk add can't resolve pc:libpng although libpng is in the repo" was fixed.
+  No record of it was found; where it happened is not known; not investigated further.
+- **Never built:** zig-ide, 0ad, cmark-gfm, wv, howard-hinnant-date, and cmark r2.
+- **ISO:** the user will test it in VirtualBox; GRUB on BIOS has never been tested (an offer to test it in QEMU was
+  not answered).
+- **Old build directories** `cache.old`, `work.old`, `rootfs.old`, `out.old` on /stuff: delete when the user says so.
+- Local commits are not pushed (`git log origin/new-build-machine..HEAD`).
 
 ---
 
