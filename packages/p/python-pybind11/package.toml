@@ -7,7 +7,7 @@
 # opencolorio, and everything behind it (gpgme, poppler, sane-backends, colord, gtk+3 ...), was skipped.
 name = "python-pybind11"
 version = "3.1.0"
-release = 2
+release = 3
 summary = "pybind11 for Python"
 license = "BSD-3-Clause"
 homepage = "https://pypi.org/project/pybind11"
