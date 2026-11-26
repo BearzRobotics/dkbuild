@@ -1,4 +1,28 @@
-# Handoff (2026-11-25, build tree on the new drive)
+# Handoff (2026-11-25, bug fixing: the build directories are local for now)
+
+## Links removed while the bug fixes are made
+
+So that fixing and testing cannot touch the repository or the built packages, these six links were replaced by
+**real, local directories** on 2026-11-25. Nothing under /mnt/dkbuild was changed or removed.
+
+| In the source tree | Was a link to |
+|---|---|
+| `repo/x86_64` | `/mnt/dkbuild/repo/x86_64` |
+| `logs/x86_64` | `/mnt/dkbuild/logs/x86_64` |
+| `cache` | `/mnt/dkbuild/cache` |
+| `work` | `/mnt/dkbuild/work` |
+| `rootfs` | `/mnt/dkbuild/rootfs` |
+| `out` | `/mnt/dkbuild/out` |
+
+The local `rootfs/dkrescue` was unpacked from `./dkrescue.iso`; everything else started empty. **To put the links
+back** when the fixes are done (this deletes only the local, throwaway directories; check `ls -ld` shows real
+directories first, and never add a trailing slash to a name that is already a link):
+
+    for l in repo/x86_64 logs/x86_64 cache work rootfs out; do
+        [ -L "$l" ] || { chmod -R u+rwX "$l"; rm -rf -- "$l"; ln -s "/mnt/dkbuild/$l" "$l"; }
+    done
+
+## Handoff (2026-11-25, build tree on the new drive)
 
 Read this section first. The sections below it are older history.
 
