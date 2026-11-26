@@ -647,6 +647,10 @@ pub fn make(arena: Allocator, io: std.Io, t: tree.Tree, set: Set, opts: Options)
                 try x.print(arena, "-cut_out '{s}' {d} {d} '/data/{s}.dkpart.{d:0>3}'\n", .{ src, p.offset, p.len, dst, p.part });
             }
         }
+        // The modes come from the cache, where some files are private (0600) and Go's module directories are
+        // read-only: everything on the disc is readable by whoever mounts it, and directories can be written
+        // into once copied. (The private key is never mapped.)
+        try x.print(arena, "-chmod_r a+r,u+w / --\n-find / -type d -exec chmod a+rx --\n", .{});
         try x.print(arena, "-commit\n-end\n", .{});
         try writeWork(arena, io, work_rel, try std.fmt.allocPrint(arena, "disc-{d}.xorriso", .{k}), x.items);
     }
