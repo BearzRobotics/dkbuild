@@ -13,6 +13,7 @@ printf '%s\n' "$units" | grep "Build Summary"
 zig build || exit 1
 ./zig-out/bin/dkbuild check || exit 1
 python3 -B tests/upstream-rules.py > /dev/null || { python3 -B tests/upstream-rules.py | grep FAIL; exit 1; }
+python3 -B tests/python-lock.py > /dev/null || { python3 -B tests/python-lock.py | grep FAIL; exit 1; }
 [ -d rootfs/dkrescue ] || { echo "no build machine: run 'dkbuild bootstrap-root <dkrescue.iso>' first"; exit 1; }
 status=0
 for t in forgotten-dep isolation sandbox signing vendor-layout fetch-cargo fetch-zig restore-store prune snapshot-deps snapshot-pins chain rebuild pins scripts repo-install musl import parallel; do

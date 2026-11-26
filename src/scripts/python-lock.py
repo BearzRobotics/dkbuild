@@ -86,6 +86,11 @@ def from_uv(text):
     return out
 
 
+def foreign(marker):
+    """Whether an environment marker is only for another system than Linux."""
+    return bool(marker) and bool(FOREIGN.search(marker)) and "linux" not in marker
+
+
 def from_pylock(text):
     data = tomllib.loads(text)
     out = []
@@ -93,7 +98,7 @@ def from_pylock(text):
         if "version" not in p:
             continue
         marker = p.get("marker", "")
-        if marker and FOREIGN.search(marker) and "linux" not in marker:
+        if foreign(marker):
             continue
         sd = p.get("sdist")
         sdist = (sd["url"], sd["hashes"]["sha256"]) if sd and sd.get("url") else None
@@ -108,8 +113,12 @@ def from_requirements(text):
         line = raw.split("#", 1)[0].strip()
         if not line or line.startswith("-"):
             continue
+        # the hashes the project pins (pip-compile --generate-hashes): only such a file may go into the lock
+        pinned = set(re.findall(r"--hash[= ]sha256:([0-9a-fA-F]{64})", line))
+        line = re.sub(r"\s--hash[= ]\S+", "", line).strip()
         req, _, marker = line.partition(";")
-        if marker and FOREIGN.search(marker):
+        if foreign(marker):
+            print(f"python-lock: left out (not for Linux): {line}", file=sys.stderr)
             continue
         m = re.match(r"([A-Za-z0-9][A-Za-z0-9._-]*)(\[[^\]]*\])?\s*==\s*([^\s;]+)", req.strip())
         if not m:
@@ -124,8 +133,28 @@ def from_requirements(text):
                 sdist = (f["url"], f["digests"]["sha256"])
             elif f["packagetype"] == "bdist_wheel":
                 wheels.append((f["url"], f["digests"]["sha256"]))
+        if pinned:
+            want = {h.lower() for h in pinned}
+            sdist = sdist if sdist and sdist[1] in want else None
+            wheels = [w for w in wheels if w[1] in want]
+            if not sdist and not wheels:
+                sys.exit(f"python-lock: {name} {ver}: PyPI has no file with a hash the requirements file pins")
         out.append((name, ver, sdist, wheels))
     return out
+
+
+def build_comment(data, fname):
+    """The comment line under an sdist's lock entry. What it says comes from the package: it stays one comment."""
+    reqs = build_requires(data, fname)
+    text = ", ".join(str(r) for r in reqs) if isinstance(reqs, list) else repr(reqs)
+    return "#   sdist; build-system: " + "".join(c if c.isprintable() else " " for c in text)
+
+
+def field(what, value):
+    """One word of a lock line: nothing that would start another word, a comment or another line."""
+    if not isinstance(value, str) or not value or "#" in value or any(c.isspace() or not c.isprintable() for c in value):
+        sys.exit(f"python-lock: unusable {what}: {value!r}")
+    return value
 
 
 def build_requires(data, fname):
@@ -198,9 +227,9 @@ def main():
             with open(path + ".part", "wb") as f:
                 f.write(data)
             os.replace(path + ".part", path)
-        lines.append(f"{norm(name)} {ver} {sha} {url}")
+        lines.append(f"{field('name', norm(name))} {field('version', ver)} {field('sha256', sha)} {field('url', url)}")
         if not fname.endswith(".whl"):
-            lines.append("#   sdist; build-system: " + ", ".join(build_requires(data, fname)))
+            lines.append(build_comment(data, fname))
         print(f"{name} {ver}: {fname}", file=sys.stderr)
     text = "\n".join(lines) + "\n"
     if out_path:
