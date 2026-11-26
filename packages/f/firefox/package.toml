@@ -35,14 +35,9 @@ export CXXSTDLIB=c++
 export MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE=system MOZ_NOSPAM=1
 '''
 setup = '''
-# r9: every bindgen run of the build (gecko-profiler, style, ...) panicked in the vendored bindgen 0.73.1: "Not an item: ItemId(N)" in Type::layout,
-# on libc++ 23's headers (std::aligned_union, a recursive template union). Not the fault of one crate's options: found by running the build scripts by
-# hand in the kept build root, where the `bindgen` package's command-line tool succeeded on the same headers: that package carries bindgen's own
-# fix (PR 3536, after 0.73.2), files/bindgen-template-union.patch (the same file), and it applies to Firefox's vendored copy. Tried and not
-# enough: bindgen 0.73.2 instead of 0.73.1, every std:: type opaque. Source edit: patch the vendored crate; its .cargo-checksum.json then lists no files
-# (cargo checks only the package checksum of the lock file).
-patch -d third_party/rust/bindgen -p1 < $pkgfiles/bindgen-template-union.patch
-sed -i 's/"files":{[^}]*}/"files":{}/' third_party/rust/bindgen/.cargo-checksum.json
+# 161.0: no bindgen patch any more. 159.0 needed files/bindgen-template-union.patch (bindgen's PR 3536) on the vendored bindgen 0.73.1,
+# which panicked ("Not an item: ItemId(N)") on libc++ 23's std::aligned_union; the bindgen vendored in 161.0, still numbered 0.73.1,
+# already has both changes, so the patch no longer applied (the `bindgen` package keeps its own copy of the fix).
 printf '#!/bin/sh\nexec "$@" -C target-feature=-crt-static\n' > /tmp/rustc-dynamic; chmod 755 /tmp/rustc-dynamic
 # Chimera's breakpad header (musl has no stab.h).
 cp $pkgfiles/stab.h toolkit/crashreporter/google-breakpad/src/
