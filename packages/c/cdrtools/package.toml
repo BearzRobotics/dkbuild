@@ -3,7 +3,7 @@
 # its own programs, so the two exclude each other (`!` dependencies).
 name = "cdrtools"
 version = "2024.03.21"
-release = 2
+release = 3
 summary = "cdrecord, mkisofs, readcd, cdda2wav (Schily's original cdrtools)"
 license = "CDDL-1.0 AND GPL-2.0-only"
 homepage = "https://codeberg.org/schilytools/schilytools"
@@ -23,6 +23,15 @@ install = '''
 for d in cdrecord cdda2wav readcd mkisofs scgcheck; do
     make -C $d -j1 CCOM=clang INS_BASE=/usr INS_RBASE=/ DEFINSUSR=root DEFINSGRP=root DESTDIR="$pkgdir" install
 done
+# upstream installs these setuid root; they parse device data and command lines, and the cdrom group can use the
+# drive without it
+chmod 755 "$pkgdir/usr/bin/cdrecord" "$pkgdir/usr/bin/readcd" "$pkgdir/usr/bin/cdda2wav"
 rm -rf "$pkgdir/usr/include" "$pkgdir/usr/lib/"*.a "$pkgdir/usr/lib/profiled"
 install -Dm644 CDDL.Schily.txt "$pkgdir/usr/share/licenses/cdrtools/CDDL.Schily.txt"
 '''
+
+# its manual pages have the names cdrkit-doc's have
+[subpackages.doc]
+summary = "Manual pages and documentation"
+paths = ["/usr/share/man", "/usr/share/doc", "/usr/share/info"]
+depends = ["!cdrkit-doc"]

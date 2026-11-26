@@ -35,6 +35,12 @@ source = [
     { url = "https://github.com/polkit-org/polkit/archive/refs/tags/128.tar.gz", sha256 = "6edb06bf1448e49e428f9597a97af6a05d62146dd0b58f86eeaebcee3f5ecfaa" },
 ]
 
+environment = '''
+# setuid programs here (SPEC.md 5.4: the profile has no hardening flags yet): a stack protector, and relocations
+# resolved and made read-only before main runs
+export CFLAGS="${CFLAGS} -fstack-protector-strong" CXXFLAGS="${CXXFLAGS} -fstack-protector-strong"
+export LDFLAGS="${LDFLAGS} -Wl,-z,relro,-z,now"
+'''
 setup = '''
 %meson \
     -Dsession_tracking=elogind \

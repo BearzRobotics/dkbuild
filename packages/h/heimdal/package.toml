@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "heimdal"
 version = "7.8.0"
-release = 4
+release = 5
 summary = "Implementation of the Kerberos authentication protocol"
 license = "BSD-3-Clause"
 homepage = "https://heimdal.software"
@@ -47,6 +47,8 @@ rm -rf "$pkgdir/usr/bin/bsearch"
 rm -rf "$pkgdir/usr/bin/idn-lookup"
 rm -rf "$pkgdir/usr/share/man/man1/bsearch.1"
 mv "$pkgdir/usr/bin/su" "$pkgdir/usr/bin/ksu"
+# upstream installs it setuid root; an administrator who wants Kerberos su sets that
+chmod 755 "$pkgdir/usr/bin/ksu"
 mv "$pkgdir/usr/bin/pagsh" "$pkgdir/usr/bin/kpagsh"
 mv "$pkgdir/usr/share/man/man1/su.1" "$pkgdir/usr/share/man/man1/ksu.1"
 mv "$pkgdir/usr/share/man/man1/pagsh.1" "$pkgdir/usr/share/man/man1/kpagsh.1"

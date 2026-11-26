@@ -11,7 +11,7 @@ version = "1.16.4"
 # r7: scripts/post-install and post-upgrade make dbus-daemon-launch-helper root:dbus 4750. It shipped 0755, so the system bus
 # could not start any service on demand ("The permission of the setuid helper is not correct"). A script, because the recipe
 # cannot give a packaged file a group.
-release = 1
+release = 2
 summary = "Message bus system"
 license = "GPL-2.0-or-later"
 homepage = "https://dbus.freedesktop.org"
@@ -23,6 +23,12 @@ source = [
     { url = "https://dbus.freedesktop.org/releases/dbus/dbus-1.16.4.tar.xz", sha256 = "d08b05526c2cb7966a5fb79210d6112b1aca3d135f315c1b302e14b4b0297dac" },
 ]
 
+environment = '''
+# setuid programs here (SPEC.md 5.4: the profile has no hardening flags yet): a stack protector, and relocations
+# resolved and made read-only before main runs
+export CFLAGS="${CFLAGS} -fstack-protector-strong" CXXFLAGS="${CXXFLAGS} -fstack-protector-strong"
+export LDFLAGS="${LDFLAGS} -Wl,-z,relro,-z,now"
+'''
 setup = '''
 %meson \
     -Dasserts=false \

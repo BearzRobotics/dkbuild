@@ -5,7 +5,7 @@
 # through run-parts (debianutils).
 name = "cronie"
 version = "1.7.2"
-release = 2
+release = 3
 summary = "Cron daemon with anacron"
 license = "ISC AND BSD-2-Clause AND BSD-3-Clause AND GPL-2.0-or-later"
 homepage = "https://github.com/cronie-crond/cronie"
@@ -20,6 +20,10 @@ source = [
 
 environment = '''
 export LDFLAGS="${LDFLAGS} -lobstack"
+# setuid programs here (SPEC.md 5.4: the profile has no hardening flags yet): a stack protector, and relocations
+# resolved and made read-only before main runs
+export CFLAGS="${CFLAGS} -fstack-protector-strong" CXXFLAGS="${CXXFLAGS} -fstack-protector-strong"
+export LDFLAGS="${LDFLAGS} -Wl,-z,relro,-z,now"
 '''
 setup = '''
 autoreconf -if -W none

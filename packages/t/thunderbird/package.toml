@@ -49,7 +49,6 @@ cp $pkgfiles/stab.h toolkit/crashreporter/google-breakpad/src/
     --disable-bootstrap \
     --disable-install-strip --disable-strip \
     --enable-linker=lld --enable-optimize --enable-release \
-    --disable-hardening \
     --with-system-ffi --with-system-icu --with-system-jpeg --with-system-libevent \
     --with-system-libvpx --with-system-nspr --with-system-nss --with-system-pixman \
     --with-system-webp --with-system-zlib --without-system-png \

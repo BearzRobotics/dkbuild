@@ -8,6 +8,7 @@ homepage = "https://httpd.apache.org"
 hostdeps = ["pkgconf", "perl"]
 builddeps = ["apr-devel", "apr-util-devel", "pcre2-devel", "openssl-devel", "zlib-ng-compat-devel", "libxml2-devel", "nghttp2-devel", "brotli-devel", "lua-devel", "curl-devel", "jansson-devel"]
 options = ["!check"]
+rundeps = ["sd-tools"]
 
 source = [
     { url = "https://dlcdn.apache.org/httpd/httpd-2.4.71.tar.bz2", sha256 = "2bc5da5a33c247341de082717d4ebcb5cb49e8b73a05b7fddf7d5d6dc2f8de62" },
@@ -26,7 +27,8 @@ setup = '''
     --enable-mpms-shared=all \
     --with-apr=/usr/bin/apr-1-config \
     --with-apr-util=/usr/bin/apu-1-config \
-    --with-pcre=/usr/bin/pcre2-config
+    --with-pcre=/usr/bin/pcre2-config \
+    --with-suexec-caller=_http
 '''
 build = '''
 %make
@@ -37,5 +39,10 @@ install -Dm644 $pkgfiles/httpd "$pkgdir/etc/dinit.d/httpd"
 install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/httpd.conf"
 # Apache runs as the _http system user (sysusers.d), not daemon
 sed -i -e 's/^User daemon/User _http/' -e 's/^Group daemon/Group _http/' "$pkgdir/etc/httpd/conf/httpd.conf" 2>/dev/null || true
+# suexec is upstream's setuid root, and runs only for the user Apache runs as (--with-suexec-caller): shipped plain,
+# and made setuid for that user's group alone by tmpfiles.d
+test -f "$pkgdir/usr/sbin/suexec"
+chmod 755 "$pkgdir/usr/sbin/suexec"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/httpd.conf"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/httpd/LICENSE"
 '''

@@ -7,7 +7,7 @@
 # setuid unix_chkpwd).
 name = "linux-pam"
 version = "1.7.2"
-release = 4
+release = 5
 summary = "Pluggable Authentication Modules for Linux"
 license = "BSD-3-Clause"
 homepage = "https://github.com/linux-pam/linux-pam"
@@ -32,6 +32,10 @@ cat > /tmp/xml/catalog <<'EOF2'
 </catalog>
 EOF2
 export XML_CATALOG_FILES=/tmp/xml/catalog
+# setuid programs here (SPEC.md 5.4: the profile has no hardening flags yet): a stack protector, and relocations
+# resolved and made read-only before main runs
+export CFLAGS="${CFLAGS} -fstack-protector-strong" CXXFLAGS="${CXXFLAGS} -fstack-protector-strong"
+export LDFLAGS="${LDFLAGS} -Wl,-z,relro,-z,now"
 '''
 setup = '''
 %meson \
