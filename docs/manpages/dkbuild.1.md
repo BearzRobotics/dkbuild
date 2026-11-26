@@ -1,6 +1,6 @@
 % DKBUILD(1) Version 0.1 | dkbuild Manual
 % Dakota Keeler and contributors
-% 2026-11-25
+% 2026-11-26
 
 NAME
 dkbuild - build apk packages from TOML recipes inside an unprivileged sandbox
@@ -34,7 +34,7 @@ dkbuild upstream [--all] [--refresh] [--notify] [NAME]...
 
 dkbuild graph NAME...
 
-dkbuild import-cbuild [--out DIR] TEMPLATE.py | DIR...
+dkbuild import-cbuild [--out DIR] [--force] TEMPLATE.py | DIR...
 
 dkbuild doctor
 
@@ -50,13 +50,13 @@ Bold is literal. Upper case is a value you supply. [item] is optional, item... r
 
 COMMANDS
 check
-Validates recipes: required fields, known keys, checksums present, patches exist, no dependency cycles, a recipe lives in **packages/LETTER/NAME/**. A dependency that no recipe provides is not an error. With no argument, all recipes. A name or a **.toml** path may be given; a file given by path is only parsed.
+Validates recipes: required fields, known keys, safe names and versions, checksums present, patches exist, no dependency cycles, a recipe lives in **packages/LETTER/NAME/**, and (with no argument) no package name published by two recipes. A dependency that no recipe provides is not an error. With no argument, all recipes. A name or a **.toml** path may be given; a file given by path is only parsed.
 
 fetch
-Downloads the named recipes' sources (all if none) into **cache/sources/**, named by SHA-256, and verifies them. Makes **snapshot:** sources and vendors the dependency stores in **cache/** (SPEC.md 5.3, 7.4). The Gradle, Maven and NuGet stores are not filled here: a build fills them, once per source.
+Downloads the named recipes' sources (all if none) into **cache/sources/**, named by SHA-256, and verifies them. Makes **snapshot:** sources and vendors the dependency stores in **cache/** (SPEC.md 5.3, 7.4). A snapshot script runs in the sandbox on **rootfs/dkrescue/**, with the network; those for Brave and Electron also need **nodejs** built in **repo/**. The Gradle, Maven and NuGet stores are not filled here: a build fills them, once per source.
 
 pkg
-Builds the named packages, their run-time dependencies, and any build dependencies that are missing or out of date. Up-to-date packages are skipped. One package builds at a time unless **-P** is given.
+Builds the named packages, their run-time dependencies, and any build dependencies that are missing or out of date, with whatever else goes into the build root of anything it builds. Up-to-date packages are skipped. One package builds at a time unless **-P** is given.
 
 world
 Builds every recipe in the tree that is out of date.
@@ -65,10 +65,10 @@ image
 Makes an image from **repo/** as described by FILE.toml (**images/**): a root directory, tarball, squashfs or live ISO in **out/NAME/**. A failed run leaves the old **out/NAME/** in place. See SPEC.md 8 for the file's keys.
 
 discs
-Writes the repository or the sources, as described by FILE.toml (**kind** = "repo" or "source"), as ISO images in **out/NAME/**. A source set carries the named source tarballs and every dependency store in **cache/** (SPEC.md 8). A file with the contents of the private signing key stops either kind.
+Writes the repository or the sources, as described by FILE.toml (**kind** = "repo" or "source"), as ISO images in **out/NAME/**. A source set carries the named source tarballs and every dependency store in **cache/** (SPEC.md 8). A file with the contents of the private signing key stops either kind. A repository set also stops when a recipe has only older packages in **repo/**, unless the file says **unbuilt = "skip"**.
 
 prune
-Removes packages from **repo/** that their recipe no longer builds, once its present version is built, and rebuilds the index. Packages no recipe provides are reported and left. Also prunes the Rust, Zig, Go and gem dependency lists and stores, and cargo's extracted copies. Do not run it while a fetch or build is running.
+Removes packages from **repo/** that their recipe no longer builds, once its present version is built, and rebuilds the index. Packages no recipe provides are reported and left. Also prunes the Rust, Zig, Go and gem dependency lists and stores, and cargo's extracted copies. It refuses to run while a fetch or build does, and removes nothing while a recipe fails to load.
 
 outdated
 Lists recipes whose recipe, patches, files or scripts changed since they were built, with the same version and release.
@@ -85,7 +85,7 @@ graph
 Prints the build order for the named packages. A dependency that no recipe provides is an error.
 
 import-cbuild
-Converts Chimera Linux **cbuild** templates (**template.py**) into draft recipes with a list of what needs review. Output goes to **imported/** unless **--out** is given. Drafts are not placed in **packages/** automatically.
+Converts Chimera Linux **cbuild** templates (**template.py**) into draft recipes with a list of what needs review. Output goes to **imported/** unless **--out** (or **--out=DIR**) is given. A draft that is there already is replaced only with **--force**. Linked patches and files are taken from inside the template tree only; what is left out is a TODO in the draft. Drafts are not placed in **packages/** automatically.
 
 doctor
 Checks the host: programs, user namespaces, overlayfs, disk space, signing key. Prints the fix for each failure.
@@ -160,6 +160,9 @@ import-cbuild
 --out DIR
 : Where drafts are written. Default: **imported/**.
 
+--force
+: Replace a draft that is there already.
+
 bootstrap-root
 --dest DIR
 : Unpack into DIR instead of **rootfs/dkrescue/**.
@@ -196,6 +199,9 @@ packages/LETTER/NAME/package.toml
 
 profiles/ARCH.toml
 : Per-architecture build settings (triple, CPU, Zig target).
+
+cache/locks/, work/dkbuild.lock
+: Locks between dkbuild processes.
 
 repo/ARCH/
 : Built packages, the signed index, and a **NAME.dkhash** rebuild record for each recipe built.
@@ -237,10 +243,10 @@ DIAGNOSTICS
 Recipe problems print as **NAME: message**. A failed build prints the log path, **logs/ARCH/NAME-VERSION-rN.log**; the log holds the output of every step. An earlier log of the same name is kept as **NAME-VERSION-rN.1.log**, and so on.
 
 SECURITY CONSIDERATIONS
-Builds run unprivileged in namespaces with no network and no access to the host's **/home**. The exception is the once-per-source restore run of **gradledeps**, **mavendeps** and **nugetdeps** recipes, which has the network. Sources are verified by SHA-256 before use. The signing key is bound read-only only into the sandbox runs that sign (packaging, the index, disc sets), never into a recipe's build steps. Some fetch work (applying patches to vendor dependencies, laying out the vendored stores, snapshot scripts) runs on the host, outside the sandbox. Recipes are code: read third-party recipes before building them.
+Builds run unprivileged in namespaces with no network, no access to the host's **/home**, their own session and no way to the caller's terminal. Two steps have the network, both sandboxed: the once-per-source restore run of **gradledeps**, **mavendeps** and **nugetdeps** recipes, which writes into an empty staging directory (dkbuild adds from it what the shared store lacks and changes nothing there), and the **snapshot:** scripts, which see only their work directory, log and result. Laying vendored dependencies into a source and packaging run in sandboxes of their own; the signing key is bound read-only only into the layer that signs, which no build wrote to. Further source archives are unpacked apart and moved in without following links. On the host, downloads and vendoring accept only https URLs and plain names from lock files, and run nothing a source names. Sources are verified by SHA-256 before use. Some downloads upstream tools make during a snapshot or restore are not pinned by dkbuild (.NET's source-build preparation, for one). Recipes are code: read third-party recipes before building them.
 
 CONCURRENCY AND ATOMICITY
-One package is built at a time by default; **-P** builds several. New packages are written under a temporary name and renamed into place, and one build at a time rebuilds the index. Do not run two dkbuild processes that build or prune on the same tree.
+One package is built at a time by default; **-P** builds several. One **pkg**, **world** or **prune** works in a tree at a time (**work/dkbuild.lock**); downloads and vendoring have locks per source, so **fetch** may run beside a build. A build's packages are staged and put in place together, its record last; a recipe edited while it builds is not recorded as built.
 
 COMPATIBILITY
 Linux 5.11 or newer (unprivileged overlayfs). x86_64 is built; aarch64 and riscv64 profiles exist but are unverified.

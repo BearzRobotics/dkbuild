@@ -1,4 +1,57 @@
-# Handoff (2026-11-25, bug fixing: the build directories are local for now)
+# Handoff (2026-11-26, the audit's bugs are fixed)
+
+Read this section first.
+
+## What changed
+
+An audit of dkbuild, its tests and the recipes found about 124 distinct problems; all are fixed on
+`new-build-machine`, one commit or small group at a time (`docs/bugs/`, ignored by git, has the reports and
+`PROGRESS.md` what each fix was checked with). SPEC.md, the manpage and docs/install.md describe the new behaviour.
+
+Behaviour that is new:
+- `pkg` builds more: whatever goes into the build root of anything it builds.
+- One `pkg`, `world` or `prune` per tree at a time. `prune` refuses while anything fetches or builds, or when a
+  recipe does not load.
+- A repository disc stops on recipes with only older packages (`unbuilt = "skip"`); `import.sh` wants a trusted key.
+- `import-cbuild` replaces a draft only with `--force`.
+- Snapshot scripts run in the sandbox (Brave's and Electron's need `nodejs` built first).
+- Library interfaces include symbol versions; input hashes include links and executable bits. Old records are still
+  accepted.
+- Snapshot pins of brave, electron, dotnet and dart name full commits and checksums: update them with the version.
+
+## Not verified
+
+- **Most changed recipes are not built.** A test build in a scratch tree built the packages for fusermount3's setuid
+  bit, the new pc: provides, cglm, links, openvpn, screen, mandoc, cpio, dialog, lpeg, cronie, dbus, shadow,
+  policycoreutils, nethack and ggrep (their contents were not inspected one by one). `bsd-games` failed there; its
+  fix has not been built. `rpi-imager` (new) is not built. Firefox, thunderbird and betterbird no longer pass
+  `--disable-hardening`: if one of them now fails, look there first.
+- No real disc set was made or imported. No real Gradle, Maven or NuGet restore ran.
+- Of the snapshots, only git ones were remade (six, all matching); brave, dart, dotnet, electron, euro-office and
+  scratch-media were not. .NET's `prep-source-build` still downloads things dkbuild does not pin.
+- `contrib/worldloop.sh` was not run. Entries already in the crate, Zig, Maven and NuGet stores are not re-checked.
+
+## Next
+
+1. **Full rebuild from an empty repository** (planned): back up `repo/` first, no `--force`. Before it,
+   `dkbuild upstream --refresh` and bring in updates: security first, no pre-releases, hold major toolchain and
+   language versions, OpenSSL stays on 3.5 LTS, linux-headers follows the kernel.
+2. Profile-wide hardening flags (stack protector, full RELRO) rebuild everything, so the full rebuild is the time to
+   decide on them. So far only the packages with setuid programs have them.
+3. After the release: a base image generated from our own repository, then stage 2 build roots (docs/roadmap.md).
+
+## The checkout on /stuff
+
+The other session's commits (grub, dklilo, dkinstaller, images, rebuild bumps, icu, firefox) up to 6d598830 are on
+`origin/new-build-machine`, replayed, so their hashes differ. When that session is finished, bring over any later
+commits before moving that checkout to origin's branch (`git pull --rebase` drops commits already applied; check
+`git log origin/new-build-machine..HEAD` first). One recipe alone can be taken without moving it:
+
+    git fetch origin && git checkout origin/new-build-machine -- packages/r/rpi-imager
+
+Before `wallet-engine` is built with the new code, delete its old dependency list once (below).
+
+# Earlier: Handoff (2026-11-25, bug fixing: the build directories are local for now)
 
 ## Work is in ~/dkbuild-bugfix for now
 

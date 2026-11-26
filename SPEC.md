@@ -606,12 +606,18 @@ separate step. Design record: `docs/decisions/0002-cbuild-importer.md`.
 directly:
 
 ```
-dkbuild import-cbuild [--out DIR] <template.py | package dir>...
+dkbuild import-cbuild [--out DIR] [--force] <template.py | package dir>...
 ```
 
 writes a **draft** `DIR/<name>/package.toml` (default `imported/`), copies the
 template's `patches/` and `files/`, prints a report, and says whether the draft
 passes the recipe check. It reads the template as *text* and never runs it.
+A draft that is there already may have been finished by hand: it is replaced
+only with `--force`. `patches/` and `files/` are copied file by file; a link is
+followed only to a file inside the template tree (its category, or a whole cports
+checkout), no link is made or written through, and whatever is left out is a
+`TODO(cbuild)`. Every TODO of the report is in the draft too. An unknown option
+or an `--out` without a directory stops before anything is converted.
 
 - **Declarative variables map onto fields** (5.2): `pkgname`, `pkgver`,
   `pkgrel` (+1: cbuild counts from 0), `pkgdesc`, `license`, `url`, `source`
@@ -822,13 +828,23 @@ system calls directly:
   PID namespace takes every process with its first. Nothing is left running or
   mounted (`tests/sandbox.sh` checks both from outside).
 
+One `pkg`, `world` or `prune` works in a tree at a time (`work/dkbuild.lock`; a
+second stops at once). Downloads and each source's vendoring have locks of their
+own (`cache/locks/`), so `fetch` may run beside a build. What the host does with
+files a source or a build made is done in a sandbox too, or without following
+any link: laying vendored dependencies into the source, unpacking a second
+source over the first, packaging and signing (a layer the build never wrote to).
+
 ### 7.2 Rebuilds
 
 Next to each built package dkbuild writes `repo/<arch>/<name>.dkhash`:
 
 - `version`: the `version-release` it was built as;
 - `inputs`: a hash of the recipe's **own inputs** (`package.toml`, everything
-  under `patches/`, `files/` and `scripts/`, and the architecture profile);
+  under `patches/`, `files/` and `scripts/` with their symbolic links and
+  executable bits, and the architecture profile). `scheme: 2` in the record says
+  links and modes are counted; an older record is compared the old way, so the
+  change rebuilt nothing;
 - `deps`: a hash of its **build root**: the in-tree packages laid into it from
   `repo/` (`tree.needs`: its `hostdeps` and `builddeps`, and what those need to
   build and run), each by name and by what it produced (`output` for the tools
@@ -873,7 +889,8 @@ the packages a build *links against* count by interface, and the *tools* it
 runs (its `hostdeps`, and what they need) by their whole output, since a
 changed compiler changes what it makes. So a fix inside a library's code
 rebuilds the library and nothing that links against it; a new export, a
-changed header or a new compiler rebuilds the dependents.
+changed header or a new compiler rebuilds the dependents. A symbol's version
+(`name@@VERSION`) is part of it.
 
 **Release bumps.** A package rebuilt because its build root changed is
 compared with what its last build produced, before it is published. If it
@@ -885,7 +902,11 @@ dkbuild writes the next `release` into the recipe (`release = 3` becomes
 `release = 4`), as Alpine and Chimera bump `pkgrel` for a rebuild, publishes
 the package as that release, and says so; the bump is committed like any
 other change, so the history shows which packages changed and why. The old
-package files stay in `repo/` until `dkbuild prune`.
+package files stay in `repo/` until `dkbuild prune`. Only the recipe's own
+`release` line changes, and only if the recipe, patches and files are as they
+were when the build started: edited meanwhile, the run reports it instead of
+recording the edit as built. A package's files are put in place together, with
+its record written last.
 
 ### 7.3 Build roots, stage 0 and `repo/`
 
@@ -1068,6 +1089,16 @@ every crate against its `.cargo-checksum.json` as it builds. Which entries a
 package uses doesn't feed the rebuild hashes: they follow from the source
 tarball (its lock files), whose checksum does.
 
+A dependency list is named by the source tarball's sha256 and, when more than
+the source decides what is downloaded (the recipe's patches, a lock it keeps,
+its `restore` step), a hash of that too: editing one fetches again. Vendoring
+runs nothing the source names (cargo gets only the source's settings that choose
+crates), accepts only https URLs, plain names and paths from lock files, and
+files a crate or Zig package in the shared store under a name its whole contents
+give. A `restore` step, which runs upstream code with the network, writes into an
+empty staging directory: dkbuild adds from it what the store lacks, changes
+nothing the store has, and merges Maven's metadata.
+
 `dkbuild prune` removes the Rust, Zig, Go and gem lists of source tarballs no
 recipe uses any more and then every crate, Zig package and gem no remaining
 list names. It also empties
@@ -1075,8 +1106,9 @@ cargo's regenerable copies in `cache/cargo-home/` (`registry/src`, `git/checkout
 hundreds of thousands of small files that cargo extracts again from the `.crate`
 archives and `git/db` when a vendor needs them). Go's module
 cache is not pruned (`go clean -modcache` empties it), and neither are the npm,
-Maven, NuGet, Dart, Haskell and Python stores. It must not run
-while a fetch does. A Rust or Zig dependency tarball made by an older dkbuild
+Maven, NuGet, Dart, Haskell and Python stores. It refuses to run
+while a fetch or a build does, and removes nothing while any recipe fails to
+load. A Rust or Zig dependency tarball made by an older dkbuild
 (`<sha256>.tar`) is moved into the stores at the next fetch, offline.
 
 ## 8. Images
@@ -1214,9 +1246,14 @@ recipe's first build. `cache/`, `repo/<arch>/` and `dkrescue.iso` may be links
 to another disk. **Not tested:** a source disc of the whole tree, and an offline
 rebuild from one. `media` is `usb` (one image, for a stick or
 Ventoy) or `cd`, `dvd`, `dvd-dl`, `bd25`, `bd50`, `bd100` (a numbered set of
-discs of that size); `--media` overrides it. Every disc carries a `MANIFEST`
+discs of that size); `--media` overrides it. A repository set stops when a
+recipe has only older packages in `repo/`, and so would be missing from it;
+`unbuilt = "skip"` in the set's file makes it without them, naming them. Every disc carries a `MANIFEST`
 (signed with the repository key; a repository set needs the key), the public
-keys and `import.sh`, which copies one disc into a directory and checks it; a
+keys and `import.sh`, which copies one disc into a directory and checks it. It
+accepts a set only if the `MANIFEST` is signed by a key the machine already
+trusts (`/etc/apk/keys`, or `DKBUILD_TRUSTED_KEYS`): the keys on a disc show
+only that it is undamaged, as whoever made it chose them. A
 file too large for the space left is cut across discs and joined there. A recipe with the option
 `!repo-iso` (5.4) is left out of a repository set, and a package that
 depends on a left-out one is an error. A machine mounts a repository disc and
@@ -1444,14 +1481,14 @@ inside a namespace the installed root runs `apk --version`, `sh`, `ls` and
 
 | Command | Does |
 |---|---|
-| `dkbuild pkg <name>...` | Builds packages and their missing or out-of-date dependencies; also the named packages' `rundeps` and subpackage `depends`, transitively. There is no `--arch`: it builds for `x86_64` (6) |
+| `dkbuild pkg <name>...` | Builds packages and their missing or out-of-date dependencies; also the named packages' `rundeps` and subpackage `depends`, transitively, and whatever else goes into the build root of anything it builds (what a build dependency needs to run). There is no `--arch`: it builds for `x86_64` (6) |
 | `dkbuild world` | Builds every recipe that's out of date |
 | `dkbuild fetch [<name>...]` | Only downloads and checks sources, vendors the dependency stores (7.4) and makes the snapshots (5.3) |
-| `dkbuild check [<name>\|<file.toml>...]` | Checks recipes (all of them with no argument): fields, checksums present, patches exist, no unknown keys, no dependency cycles. A dependency no recipe provides is allowed. A `.toml` file named directly is only parsed |
+| `dkbuild check [<name>\|<file.toml>...]` | Checks recipes (all of them with no argument): fields, checksums present, patches exist, no unknown keys, no dependency cycles, and (all of them only) no two declared subpackages or recipes publishing one name. A dependency no recipe provides is allowed. A `.toml` file named directly is only parsed |
 | `dkbuild graph <name>...` | Prints the build order for the packages. A dependency no recipe provides is an error here |
-| `dkbuild outdated [--bump]` | Lists recipes whose own inputs changed since their last build without a new `release`; `--bump` raises it (7.2) |
+| `dkbuild outdated [--bump]` | Lists recipes whose own inputs changed since their last build without a new `release`; `--bump` raises it, changing that line alone (7.2) |
 | `dkbuild discs [--media M] <file.toml>` | Writes a repository or source set as ISO images in `out/<name>/` (8) |
-| `dkbuild import-cbuild [--out DIR] <template.py\|dir>...` | Converts Chimera cbuild templates into draft recipes (5.9) |
+| `dkbuild import-cbuild [--out DIR] [--force] <template.py\|dir>...` | Converts Chimera cbuild templates into draft recipes (5.9); `--force` replaces drafts |
 | `dkbuild doctor` | Checks the host (programs, namespaces, overlayfs, disk, key) and prints the fixes (3.1) |
 | `dkbuild hackage-lock <freeze> [-o FILE]` | Writes a `hackagedeps` lock from a cabal freeze file (7.4) |
 | `dkbuild python-lock <uv.lock\|pylock.toml\|requirements> [-o FILE]` | Writes a `pydeps` lock (7.4) |

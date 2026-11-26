@@ -342,7 +342,10 @@ A system copied from a live medium keeps that medium's services.
 There is no repository server; packages come on a **repository ISO** set (all
 packages, signed), made with `dkbuild discs images/repo.toml`. Each disc has an
 `import.sh` that copies a set into one directory. Mount it, or the USB stick it
-is on, and add it. On a disc or a one-disc image the repository is under
+is on, and add it. `import.sh` checks each disc's signed `MANIFEST` against the
+keys in `/etc/apk/keys`; on a machine that does not have the repository's key
+yet, put a copy you trust (not the disc's own) in a directory and name it in
+`DKBUILD_TRUSTED_KEYS`. On a disc or a one-disc image the repository is under
 `data/apks/`; in a directory filled by `import.sh` it is under `apks/`:
 
 ```sh
