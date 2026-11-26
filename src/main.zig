@@ -359,6 +359,8 @@ pub fn main(init: std.process.Init) !void {
                 };
             }
         }
+        // ... and what goes into the build roots on the way (world has every recipe already).
+        if (!is_world) try t.closeOverNeeds(arena, &names);
         const order = try t.order(arena, names.items, &problems);
         if (problems.items.len > 0) {
             report(problems.items);

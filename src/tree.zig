@@ -65,6 +65,30 @@ pub const Tree = struct {
         return out.items;
     }
 
+    /// Adds to `names` (what `pkg` was given, and what those run with) every recipe that goes into the build root
+    /// of anything to be built, until nothing is new. `order` follows build dependencies only, but a build root
+    /// also holds what those need to run: left out of the jobs, such a package is never built or checked for
+    /// being out of date, and the build goes on without it, or with an old one.
+    pub fn closeOverNeeds(t: Tree, arena: Allocator, names: *std.ArrayList([]const u8)) Allocator.Error!void {
+        var ignored: std.ArrayList(Problem) = .empty; // the caller's own call to `order` reports them
+        var have = try arena.alloc(bool, t.recipes.len);
+        @memset(have, false);
+        for (names.items) |n| if (t.provider(n)) |i| {
+            have[i] = true;
+        };
+        while (true) {
+            var added = false;
+            ignored.clearRetainingCapacity();
+            for (try t.order(arena, names.items, &ignored)) |i| for (try t.needs(arena, i)) |n| {
+                if (have[n]) continue;
+                have[n] = true;
+                added = true;
+                try names.append(arena, t.recipes[n].name);
+            };
+            if (!added) return;
+        }
+    }
+
     /// Build order for `roots` and everything they need: dependencies first.
     /// Needs are `hostdeps` and `builddeps`; `checkdeps` and `rundeps` don't
     /// have to exist before a package builds.
@@ -245,6 +269,27 @@ test "needs follows build deps, then the deps' build and run deps, not the recip
     try std.testing.expectEqualStrings("lib", names.items[1]);
     try std.testing.expectEqualStrings("tool", names.items[2]);
     try std.testing.expectEqualStrings("zlib", names.items[3]);
+}
+
+test "closeOverNeeds adds what the build roots of the jobs hold, however deep" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    // app builds against lib; lib runs with helper; helper builds with a tool that runs with data.
+    var lib = rc("lib", &.{}, &.{});
+    lib.rundeps = &.{"helper"};
+    var tool = rc("tool", &.{}, &.{});
+    tool.rundeps = &.{"data"};
+    const t: Tree = .{ .recipes = &.{ rc("app", &.{}, &.{"lib"}), lib, rc("helper", &.{"tool"}, &.{}), tool, rc("data", &.{}, &.{}), rc("unrelated", &.{}, &.{}) } };
+    var names: std.ArrayList([]const u8) = .empty;
+    try names.append(a, "app");
+    try t.closeOverNeeds(a, &names);
+    var problems: std.ArrayList(Problem) = .empty;
+    const o = try t.order(a, names.items, &problems);
+    try std.testing.expectEqual(@as(usize, 0), problems.items.len);
+    var got: [6]bool = @splat(false);
+    for (o) |i| got[i] = true;
+    try std.testing.expectEqualSlices(bool, &.{ true, true, true, true, true, false }, &got);
 }
 
 test "provider knows the default subpackages, including -static" {
