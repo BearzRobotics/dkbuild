@@ -151,15 +151,38 @@ pub fn run(arena: Allocator, io: std.Io, destdir: []const u8, out: []const u8, s
     const counts = try arena.alloc(usize, subs.len);
     @memset(counts, 0);
     const split_libs = hasPrograms(files.items);
+    // The directories made in a subpackage, with the package's own: given their modes afterwards (one without
+    // owner write could not be moved into).
+    var made = std.StringHashMap([]const u8).init(arena); // new directory -> the one in destdir
     for (files.items, regular.items) |f, is_regular| {
         const idx = owner(subs, f, is_regular) orelse continue;
         if (!split_libs and std.mem.eql(u8, subs[idx].name, "libs")) continue;
         const dest = try std.fs.path.join(arena, &.{ out, subs[idx].name, f });
         if (std.fs.path.dirname(dest)) |parent| try Dir.cwd().createDirPath(io, parent);
+        try made.put(try std.fs.path.join(arena, &.{ out, subs[idx].name }), "");
+        var above = std.fs.path.dirname(f);
+        while (above) |p| : (above = std.fs.path.dirname(p)) try made.put(try std.fs.path.join(arena, &.{ out, subs[idx].name, p }), p);
         try d.rename(f, Dir.cwd(), dest, io);
         counts[idx] += 1;
         var parent = std.fs.path.dirname(f);
         while (parent) |p| : (parent = std.fs.path.dirname(p)) try emptied.put(p, {});
+    }
+
+    // Each gets the mode the package gave that directory, before the emptied ones go; deepest first.
+    {
+        var names: std.ArrayList([]const u8) = .empty;
+        var it = made.keyIterator();
+        while (it.next()) |k| try names.append(arena, k.*);
+        std.mem.sort([]const u8, names.items, {}, struct {
+            fn longer(_: void, a: []const u8, b: []const u8) bool {
+                return a.len > b.len;
+            }
+        }.longer);
+        for (names.items) |n| {
+            const from = made.get(n).?;
+            const st = try d.statFile(io, if (from.len == 0) "." else from, .{});
+            try Dir.cwd().setFilePermissions(io, n, st.permissions, .{});
+        }
     }
 
     // Remove the directories the moves emptied, deepest first.
@@ -259,4 +282,25 @@ test "run removes only the directories moves emptied; empty ones a package made 
     // ... but the empty directories the package installed on purpose stay.
     try tmp.dir.access(io, "dest/sys", .{});
     try tmp.dir.access(io, "dest/var/empty", .{});
+}
+
+test "folders made in a subpackage keep the modes the package gave them (BC-12)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    try tmp.dir.createDirPath(io, "dest/etc/secret");
+    try tmp.dir.createDirPath(io, "out");
+    try tmp.dir.writeFile(io, .{ .sub_path = "dest/etc/secret/key.conf", .data = "k" });
+    try tmp.dir.setFilePermissions(io, "dest/etc/secret", .fromMode(0o700), .{});
+    try tmp.dir.setFilePermissions(io, "dest/etc", .fromMode(0o750), .{});
+    const base = try tmp.dir.realPathFileAlloc(io, ".", a);
+    const subs = [_]recipe.Subpackage{.{ .name = "conf", .summary = "c", .paths = &.{"/etc/secret"} }};
+    _ = try run(a, io, try std.fs.path.join(a, &.{ base, "dest" }), try std.fs.path.join(a, &.{ base, "out" }), &subs);
+    for ([_]struct { p: []const u8, mode: u32 }{ .{ .p = "out/conf/etc", .mode = 0o750 }, .{ .p = "out/conf/etc/secret", .mode = 0o700 } }) |want| {
+        const s = try tmp.dir.statFile(io, want.p, .{});
+        try std.testing.expectEqual(want.mode, @as(u32, s.permissions.toMode()) & 0o7777);
+    }
 }
