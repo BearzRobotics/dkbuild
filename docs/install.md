@@ -354,8 +354,8 @@ apk update && apk add <package>
 
 An image made by `dkbuild image` has a commented-out `#@cdrom` line in
 `/etc/apk/repositories`. To use it, mount the disc at `/mnt/cdrom`, uncomment
-it and check its path (a disc needs `/mnt/cdrom/data/apks/x86_64/Packages.adb`;
-the line as written has no `data/`). With the `@cdrom` tag, packages are added as
+it and run `apk update`. (An image made before 2026-11-26 has the line without
+`data/`: add it.) With the `@cdrom` tag, packages are added as
 `apk add <package>@cdrom`.
 
 A newer disc and `apk upgrade` bring updates. The packages are signed with the

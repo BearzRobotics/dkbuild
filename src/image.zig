@@ -219,11 +219,12 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
         \\#
         \\#     mkdir -p /mnt/cdrom && mount -o ro /dev/sr0 /mnt/cdrom
         \\#
-        \\# (a one-image USB set keeps it under /mnt/cdrom/data/apks/{0s}/Packages.adb).
+        \\# (Every disc keeps it under data/; a directory filled by a disc's import.sh has apks/ without it.
+        \\# One disc of a set of several has the whole index but only some of the packages.)
         \\# The @cdrom tag keeps the disc to packages you ask for with `apk add name@cdrom`;
         \\# remove the tag to make it an ordinary source for every package.
         \\#
-        \\#@cdrom /mnt/cdrom/apks/{0s}/Packages.adb
+        \\#@cdrom /mnt/cdrom/data/apks/{0s}/Packages.adb
         \\DKREPO_EOF
         \\
     , .{img.arch});
@@ -646,6 +647,6 @@ test "the image writes /etc/apk/repositories with the repository disc commented 
     const img = try parse(a, "name = \"x\"\npackages = [\"a\"]\nrepositories = [\"https://example.org/x86_64/Packages.adb\"]\noutput = [\"tar\"]\n", &diag);
     const s = try script(a, img);
     try std.testing.expect(std.mem.indexOf(u8, s, "cat > /target/etc/apk/repositories <<'DKREPO_EOF'\nhttps://example.org/x86_64/Packages.adb\n# apk package repositories") != null);
-    try std.testing.expect(std.mem.indexOf(u8, s, "\n#@cdrom /mnt/cdrom/apks/x86_64/Packages.adb\nDKREPO_EOF\n") != null);
+    try std.testing.expect(std.mem.indexOf(u8, s, "\n#@cdrom /mnt/cdrom/data/apks/x86_64/Packages.adb\nDKREPO_EOF\n") != null);
     try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\npackages = [\"a\"]\nrepositories = [\"a\\nb\"]\noutput = [\"tar\"]\n", &diag));
 }

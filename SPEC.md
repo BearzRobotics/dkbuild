@@ -1119,7 +1119,7 @@ The images in `images/` today:
 
 Every image gets `/etc/apk/repositories`: the lines of its optional `repositories = [...]` key
 (a path to a `Packages.adb` or a URL, active), then a comment block that explains how to use
-a repository disc, ending in a commented-out `#@cdrom /mnt/cdrom/apks/<arch>/Packages.adb`
+a repository disc, ending in a commented-out `#@cdrom /mnt/cdrom/data/apks/<arch>/Packages.adb`
 (mount the disc at `/mnt/cdrom`, uncomment, `apk update`; the `@cdrom` tag keeps the disc to
 `apk add name@cdrom`, removing it makes the disc an ordinary source).
 
