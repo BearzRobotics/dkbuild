@@ -377,6 +377,63 @@ pub fn hasTopCargoLock(arena: Allocator, io: std.Io, tarball: []const u8) bool {
     return r.term == .exited and r.term.exited == 0;
 }
 
+/// Run before cargo, which runs on the host: shell, in the fetch script ($t the work directory, $top the project).
+const cargo_guard =
+    \\    # The source is untrusted and cargo runs on the host. First: the project's directory is really inside the work
+    \\    # directory (an archive's top "directory" may be a link to anywhere).
+    \\    here=$(cd "$t" && pwd -P)
+    \\    top=$(cd "$top" && pwd -P)
+    \\    case $top/ in
+    \\        "$here"/src/*) ;;
+    \\        *) echo "the source's project directory is outside the source: $top" >&2; exit 1 ;;
+    \\    esac
+    \\    # The build gets the project's own cargo config as it is (it runs in the sandbox); keep it before cutting it down.
+    \\    : > "$t/orig-config.toml"
+    \\    if [ ! -L "$top/.cargo" ] && [ -f "$top/.cargo/config.toml" ]; then
+    \\        case $(readlink -f -- "$top/.cargo/config.toml") in
+    \\            "$here"/src/*) cp "$top/.cargo/config.toml" "$t/orig-config.toml" ;;
+    \\        esac
+    \\    fi
+    \\    # For vendoring, every config cargo will read (this directory's and those above it, inside the source) keeps only
+    \\    # what chooses the crates: [patch], [source], [registries], [resolver]. The others can name programs for cargo
+    \\    # to run (build.rustc, wrappers, credential providers, aliases). A TOML table lasts until the next header, so
+    \\    # nothing printed here can belong to another table.
+    \\    d=$top
+    \\    while :; do
+    \\        if [ -L "$d/.cargo" ]; then rm -f -- "$d/.cargo"; fi
+    \\        for f in "$d/.cargo/config.toml" "$d/.cargo/config"; do
+    \\            [ -e "$f" ] || [ -L "$f" ] || continue
+    \\            : > "$t/safe-config.toml"
+    \\            case $(readlink -f -- "$f") in
+    \\                "$here"/src/*)
+    \\                    awk '
+    \\                        /^[ \t]*\[/ { h = $0; sub(/^[ \t]*\[+[ \t]*/, "", h); sub(/[]. \t].*/, "", h); gsub(/["\047]/, "", h)
+    \\                                      keep = (h == "patch" || h == "source" || h == "registries" || h == "resolver") }
+    \\                        keep && !(h == "registries" && /credential/) { print }
+    \\                    ' "$f" > "$t/safe-config.toml" ;;
+    \\            esac
+    \\            rm -f -- "$f"
+    \\            cp "$t/safe-config.toml" "$f"
+    \\        done
+    \\        [ "$d" != "$here/src" ] || break
+    \\        d=$(dirname -- "$d")
+    \\    done
+    \\    # rustup's toolchain file may name a directory of programs ("path"): a plain version or channel is honoured,
+    \\    # anything else gets the host's own toolchain. The variable overrides the file.
+    \\    if command -v rustup >/dev/null 2>&1; then
+    \\        ch=
+    \\        if [ -f "$top/rust-toolchain.toml" ]; then ch=$(sed -n "s/^[ \t]*channel[ \t]*=[ \t]*[\"']\([^\"']*\)[\"'].*/\1/p" "$top/rust-toolchain.toml" | head -n 1)
+    \\        elif [ -f "$top/rust-toolchain" ]; then
+    \\            ch=$(sed -n "s/^[ \t]*channel[ \t]*=[ \t]*[\"']\([^\"']*\)[\"'].*/\1/p" "$top/rust-toolchain" | head -n 1)
+    \\            [ -n "$ch" ] || ch=$(head -n 1 "$top/rust-toolchain" | tr -d ' \t\r')
+    \\        fi
+    \\        printf '%s\n' "$ch" | grep -Eqx 'stable|beta|nightly(-[0-9]{4}-[0-9]{2}-[0-9]{2})?|[0-9]+\.[0-9]+(\.[0-9]+)?' \
+    \\            || ch=$(cd "$t" && rustup show active-toolchain | cut -d' ' -f1)
+    \\        export RUSTUP_TOOLCHAIN="$ch"
+    \\    fi
+    \\
+;
+
 pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, patch_dir: []const u8, patches: []const []const u8, lock: ?CargoLock, message: *[]const u8) Error!Status {
     const out_path = try cargoDepsPath(arena, cache, tarball_sha256);
     if (std.Io.Dir.cwd().access(io, out_path, .{})) |_| return .cached else |_| {}
@@ -398,7 +455,7 @@ pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_s
         \\    cp "$top/.cargo/config.toml" "$t/config.toml"
         \\else
         \\
-    ++ dep_unpack ++ "{6s}" ++
+    ++ dep_unpack ++ "{6s}{7s}" ++
         \\    export CARGO_HOME="$cache/cargo-home"
         \\    # the Cargo project at the top, or else the first one below it (hashcat's
         \\    # is in Rust/generic_hash); vendor/ and .cargo/ stay at the top, where
@@ -406,7 +463,7 @@ pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_s
         \\    m=Cargo.toml
         \\    [ -f "$top/Cargo.lock" ] || m=$(cd "$top" && find . -name Cargo.lock -not -path './vendor/*' | sort | head -n1 | sed 's|Cargo.lock$|Cargo.toml|')
         \\    ( cd "$top" && RUSTC_BOOTSTRAP=1 timeout 1800 cargo vendor --locked --manifest-path "${{m:-Cargo.toml}}" vendor > "$t/vendor.toml" )
-        \\    {{ if [ -f "$top/.cargo/config.toml" ]; then cat "$top/.cargo/config.toml"; printf '\n'; fi; cat "$t/vendor.toml"; }} > "$t/config.toml"
+        \\    {{ if [ -s "$t/orig-config.toml" ]; then cat "$t/orig-config.toml"; printf '\n'; fi; cat "$t/vendor.toml"; }} > "$t/config.toml"
         \\fi
         \\store="$cache/crates"; mkdir -p "$store"
         \\: > "$t/list"
@@ -423,7 +480,7 @@ pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_s
         \\mv "$t/list" '{3s}.part'; mv '{3s}.part' '{3s}'
         \\rm -f '{4s}'
         \\rm -rf "$t"
-    , .{ tmp, cache, tarball, out_path, old, config, apply.items });
+    , .{ tmp, cache, tarball, out_path, old, config, apply.items, cargo_guard });
     return runDepScript(arena, io, cache, "cargodeps", script, "crate (needs `cargo` on PATH)", message);
 }
 
