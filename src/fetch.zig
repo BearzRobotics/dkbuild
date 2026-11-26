@@ -676,6 +676,7 @@ pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_s
         \\store="$cache/crates"; mkdir -p "$store"
         \\: > "$t/list"
         \\for d in "$top"/vendor/*/; do
+        \\    [ -d "$d" ] || continue   # nothing to vendor: the pattern stays as written
         \\    n=$(basename "$d")
         \\    # a crate the project carries in its own vendor/ (a [patch] path copy) has no checksum file, which cargo's vendored source
         \\    # needs: an empty one, as `cargo vendor` writes for a crate with no checked files
@@ -735,6 +736,7 @@ pub fn fetchZigDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha
         \\: > "$t/list"
         \\if [ -d "$top/zig-pkg" ]; then
         \\    for d in "$top"/zig-pkg/*/; do
+        \\        [ -d "$d" ] || continue
         \\        n=$(basename "$d")
         \\        [ -e "$store/$n" ] || mv -T "$d" "$store/$n" 2>/dev/null || [ -e "$store/$n" ]
         \\        echo "$n" >> "$t/list"

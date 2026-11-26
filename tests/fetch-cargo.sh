@@ -81,6 +81,9 @@ rm -rf "$W/linked"; ln -s "$A/outside" "$W/linked"; pack linked
 ./zig-out/bin/dkbuild --tree "$T" fetch linked >/dev/null 2>&1 && { echo "FAIL: a source whose top directory is a link was vendored"; fail=1; }
 { [ "$(cat "$A/outside/.cargo/config.toml")" = '[build]' ] && [ ! -e "$A/outside/vendor" ]; } || { echo "FAIL: vendoring changed a directory outside the source"; fail=1; }
 [ "${fail:-0}" = 0 ] || exit 1
+# 5. A project with no external crates: nothing in vendor/, which is not an error.
+crate "$W/nodeps" nodeps 1.0.0; lock nodeps; pack nodeps
+OUT=$(./zig-out/bin/dkbuild --tree "$T" fetch nodeps 2>&1) || { echo "$OUT" | tail -5; echo "FAIL: a project without dependencies cannot be vendored"; exit 1; }
 # what the build gets still has the project's own settings, then cargo vendor's
 cfg=$(cat "$T"/cache/cargodeps/"$(sha256sum "$A/src/patched.tar.gz" | cut -d' ' -f1)".config.toml)
 for want in local-dkdep 'jobs = 1' vendored-sources; do
