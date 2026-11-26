@@ -33,7 +33,17 @@ packages = ["base", "openssh", "openssh-server", "curl", "linux", "live-initramf
 "traceroute", "vim", "gcc", "dos2unix", "rescue-tools",
 # GRUB's BIOS and 64-bit EFI modules: dkinstaller offers GRUB on a BIOS machine only when /usr/lib/grub/i386-pc is on the live disc; the
 # EFI modules are for GRUB on UEFI (grub itself comes with rescue-tools)
-"grub", "grub-i386-pc", "grub-x86_64-efi"]
+"grub", "grub-i386-pc", "grub-x86_64-efi",
+# the manual pages and documentation of grub and of the tools in rescue-tools (about 3 MB; a new tool there needs its -doc here too).
+# No -doc package: nvme-cli, btrfs-progs, chntpw.
+"grub-doc", "ddrescue-doc", "testdisk-doc", "fsarchiver-doc", "nwipe-doc", "smartmontools-doc", "hdparm-doc",
+"parted-doc", "gptfdisk-doc", "util-linux-doc", "e2fsprogs-doc", "xfsprogs-doc", "dosfstools-doc", "exfatprogs-doc",
+"ntfs-3g-doc", "cryptsetup-doc", "lvm2-doc", "mdadm-doc", "efibootmgr-doc", "dklilo-doc", "dmidecode-doc",
+"pciutils-doc", "usbutils-doc", "squashfs-tools-doc", "xorriso-doc", "openssh-doc", "curl-doc", "rsync-doc",
+"f2fs-tools-doc", "jfsutils-doc", "reiserfsprogs-doc", "nilfs-utils-doc", "tmux-doc", "strace-doc", "partclone-doc",
+"safecopy-doc", "foremost-doc", "gpart-doc", "sg3-utils-doc", "lsscsi-doc", "lshw-doc", "kpartx-doc", "memtester-doc",
+"stress-ng-doc", "fio-doc", "pv-doc", "lsof-doc", "ncdu-doc", "mc-doc", "screen-doc", "dialog-doc", "lftp-doc",
+"mbuffer-doc", "par2cmdline-doc"]
 #exclude  = ["*-devel", "*-doc", "*-static"]
 # never installed, even as a dependency (apk stops with a conflict if something needs it)
 unwanted = ["dhcpcd"]
