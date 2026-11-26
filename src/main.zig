@@ -55,7 +55,7 @@ const usage =
     \\                             SourceForge, GNOME, KDE, PyPI, crates.io, CPAN, directory
     \\                             listings); overrides in upstream.toml; changes nothing
     \\  graph <name>...            print the build order for packages
-    \\  import-cbuild [--out DIR] <template.py|dir>...
+    \\  import-cbuild [--out DIR] [--force] <template.py|dir>...
     \\                             convert Chimera cbuild templates into draft recipes
     \\                             (default DIR: imported/); see docs/decisions/0002
     \\  doctor                     check this machine can run dkbuild; print the fixes
@@ -672,9 +672,12 @@ pub fn main(init: std.process.Init) !void {
     } else if (std.mem.eql(u8, cmd, "import-cbuild")) {
         var out_dir: []const u8 = try std.fs.path.join(arena, &.{ root, "imported" });
         var inputs_list: std.ArrayList([]const u8) = .empty;
+        var overwrite = false;
         var k: usize = 0;
         while (k < rest.len) : (k += 1) {
-            if (std.mem.eql(u8, rest[k], "--out") and k + 1 < rest.len) {
+            if (std.mem.eql(u8, rest[k], "--force")) {
+                overwrite = true;
+            } else if (std.mem.eql(u8, rest[k], "--out") and k + 1 < rest.len) {
                 k += 1;
                 out_dir = rest[k];
             } else try inputs_list.append(arena, rest[k]);
@@ -682,8 +685,12 @@ pub fn main(init: std.process.Init) !void {
         if (inputs_list.items.len == 0) return die(usage);
         var failed = false;
         for (inputs_list.items) |path| {
-            const res = cbuild.importPath(arena, init.io, path, out_dir) catch |err| {
-                std.debug.print("{s}: {s}\n", .{ path, @errorName(err) });
+            const res = cbuild.importPath(arena, init.io, path, out_dir, overwrite) catch |err| {
+                std.debug.print("{s}: {s}\n", .{ path, switch (err) {
+                    error.BadPackageName => "its pkgname is not a usable package name (or could not be read); nothing written",
+                    error.DraftExists => "a draft for this package is there already; not overwritten (--force replaces it)",
+                    else => @errorName(err),
+                } });
                 failed = true;
                 continue;
             };

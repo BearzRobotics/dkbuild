@@ -321,6 +321,11 @@ fn safeRelativeDir(d: []const u8) bool {
     return true;
 }
 
+/// A recipe's name, as `parse` requires it.
+pub fn validPackageName(n: []const u8) bool {
+    return validName(n);
+}
+
 fn validName(n: []const u8) bool {
     if (n.len == 0 or n[0] == '.' or n[0] == '-') return false;
     for (n) |c| switch (c) {

@@ -1346,7 +1346,8 @@ fn say(comptime fmt: []const u8, args: anytype) void {
 
 /// Reads `path` (a `template.py`, or the package directory holding one) and
 /// writes `<out_root>/<name>/package.toml`, copying `patches/` and `files/`.
-pub fn importPath(arena: Allocator, io: std.Io, path: []const u8, out_root: []const u8) !Result {
+/// `overwrite`: replace a draft that is there already (`--force`).
+pub fn importPath(arena: Allocator, io: std.Io, path: []const u8, out_root: []const u8, overwrite: bool) !Result {
     var tpl = path;
     if (!std.mem.endsWith(u8, path, ".py")) tpl = try std.fs.path.join(arena, &.{ path, "template.py" });
     const src = try Dir.cwd().readFileAlloc(io, tpl, arena, .limited(4 << 20));
@@ -1373,9 +1374,14 @@ pub fn importPath(arena: Allocator, io: std.Io, path: []const u8, out_root: []co
     const has_files = if (Dir.cwd().access(io, files_dir, .{})) |_| true else |_| false;
 
     const conv = try convert(arena, src, .{ .origin = tpl, .patches = patches.items, .has_files = has_files });
+    // The name is the draft's directory: before anything is written, it must be a package name.
+    if (!recipe.validPackageName(conv.name)) return error.BadPackageName;
     const out_dir = try std.fs.path.join(arena, &.{ out_root, conv.name });
+    const draft = try std.fs.path.join(arena, &.{ out_dir, "package.toml" });
+    // a draft there may have been finished by hand
+    if (!overwrite) if (Dir.cwd().statFile(io, draft, .{ .follow_symlinks = false })) |_| return error.DraftExists else |_| {};
     try Dir.cwd().createDirPath(io, out_dir);
-    try Dir.cwd().writeFile(io, .{ .sub_path = try std.fs.path.join(arena, &.{ out_dir, "package.toml" }), .data = conv.toml });
+    try Dir.cwd().writeFile(io, .{ .sub_path = draft, .data = conv.toml });
     for ([_]struct { from: []const u8, name: []const u8, copy: bool }{
         .{ .from = patches_dir, .name = "patches", .copy = patches.items.len > 0 },
         .{ .from = files_dir, .name = "files", .copy = has_files },
@@ -1425,6 +1431,36 @@ pub fn printResult(r: Result) void {
 fn evalExpr(arena: Allocator, env: *const Env, text: []const u8) !Value {
     var p: Parser = .{ .arena = arena, .s = text, .env = env };
     return p.parseExpr();
+}
+
+test "import: a package name that is a path writes nothing, and a draft is not overwritten (CB-01, CB-06)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const base = try tmp.dir.realPathFileAlloc(io, ".", a);
+    const out = try std.fs.path.join(a, &.{ base, "a", "out" });
+    try tmp.dir.createDirPath(io, "victim");
+    try tmp.dir.writeFile(io, .{ .sub_path = "victim/package.toml", .data = "ORIGINAL" });
+    const head = "pkgver = \"1\"\npkgrel = 0\npkgdesc = \"x\"\nlicense = \"MIT\"\n";
+    for ([_][]const u8{ "../../victim", "..", ".", "", "a/b", "-x", ".hidden" }) |bad| {
+        try tmp.dir.createDirPath(io, "t");
+        try tmp.dir.writeFile(io, .{ .sub_path = "t/template.py", .data = try std.fmt.allocPrint(a, "pkgname = \"{s}\"\n{s}", .{ bad, head }) });
+        try std.testing.expectError(error.BadPackageName, importPath(a, io, try std.fs.path.join(a, &.{ base, "t" }), out, false));
+    }
+    try std.testing.expectError(error.FileNotFound, tmp.dir.access(io, "a", .{}));
+    try std.testing.expectEqualStrings("ORIGINAL", try tmp.dir.readFileAlloc(io, "victim/package.toml", a, .limited(100)));
+
+    try tmp.dir.writeFile(io, .{ .sub_path = "t/template.py", .data = "pkgname = \"hello\"\n" ++ head });
+    const tpl = try std.fs.path.join(a, &.{ base, "t" });
+    _ = try importPath(a, io, tpl, out, false);
+    try tmp.dir.writeFile(io, .{ .sub_path = "a/out/hello/package.toml", .data = "# HAND EDITED" });
+    try std.testing.expectError(error.DraftExists, importPath(a, io, tpl, out, false));
+    try std.testing.expectEqualStrings("# HAND EDITED", try tmp.dir.readFileAlloc(io, "a/out/hello/package.toml", a, .limited(100)));
+    _ = try importPath(a, io, tpl, out, true);
+    try std.testing.expect(!std.mem.eql(u8, "# HAND EDITED", try tmp.dir.readFileAlloc(io, "a/out/hello/package.toml", a, .limited(1 << 20))));
 }
 
 test "the reader evaluates strings, f-strings, lists, dicts and concatenation" {
