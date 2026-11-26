@@ -14,7 +14,7 @@
 # r4: static libraries too (in shadow-static), for fully static programs on musl.
 name = "shadow"
 version = "4.17.2"
-release = 7
+release = 8
 summary = "Shadow password file utilities"
 license = "BSD-3-Clause"
 homepage = "https://github.com/shadow-maint/shadow"
@@ -63,5 +63,8 @@ rm -rf "$pkgdir/etc/pam.d"
 for f in "$pkgfiles"/pam.d/*; do
     install -Dm644 "$f" "$pkgdir/usr/lib/pam.d/$(basename "$f")"
 done
+# many packages' accounts name /usr/bin/nologin as their shell (their sysusers.d and scripts)
+mkdir -p "$pkgdir/usr/bin"
+ln -s ../sbin/nologin "$pkgdir/usr/bin/nologin"
 install -Dm644 $pkgfiles/LICENSE "$pkgdir/usr/share/licenses/shadow/LICENSE"
 '''

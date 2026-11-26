@@ -13,7 +13,7 @@
 # in /usr/share/doc/openvpn/sample). update-resolv-conf is an example script.
 name = "openvpn"
 version = "2.7.9"
-release = 2
+release = 3
 summary = "Open source VPN daemon"
 license = "GPL-2.0-only WITH openvpn-openssl-exception"
 homepage = "https://openvpn.net"

@@ -3,11 +3,11 @@
 # Not built (queued, wip/queue): expect first-build fixes.
 name = "policycoreutils"
 version = "3.11"
-release = 2
+release = 3
 summary = "SELinux policy core utilities: setfiles, restorecon, load_policy, semodule, sestatus, setsebool, newrole, run_init, secon"
 license = "GPL-2.0-only"
 homepage = "https://github.com/SELinuxProject/selinux"
-patches = ["0002-hack-around-GLOB-BRACE-TILDE.patch", "0003-fix-pam-rules.patch", "duplicate-symlink.patch"]
+patches = ["0002-hack-around-GLOB-BRACE-TILDE.patch", "duplicate-symlink.patch"]
 hostdeps = ["make", "pkgconf", "gawk", "gettext"]
 builddeps = ["audit-devel", "gettext-devel", "libcap-ng-devel", "libselinux-devel", "libsemanage-devel", "libsepol-devel", "linux-pam-devel", "musl-fts-devel"]
 rundeps = ["linux-pam-base"]

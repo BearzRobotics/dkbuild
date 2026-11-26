@@ -22,6 +22,7 @@ RESOLVCONF=/usr/bin/resolvconf
 case $script_type in
 
 up)
+    set -f # what the server pushes is split into words, never expanded as file names
     IFS='
 '
     for option in $(env | grep "foreign_option_" | sed "s/\w\+=//"); do
@@ -38,6 +39,7 @@ up)
             fi
         fi
     done
+    unset IFS # the lists are space-separated: with only newlines, all servers went on one line
     R=""
     if [ "$IF_DNS_SEARCH" ]; then
         R="search "

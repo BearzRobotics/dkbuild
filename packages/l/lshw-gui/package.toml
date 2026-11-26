@@ -9,7 +9,7 @@
 # `all` first (the build step below does).
 name = "lshw-gui"
 version = "02.20"
-release = 1
+release = 2
 summary = "GTK front end for lshw"
 license = "GPL-2.0-only"
 homepage = "https://ezix.org/project/wiki/HardwareLiSter"
@@ -41,5 +41,8 @@ install = '''
     VERSION=02.20 \
     NO_VERSION_CHECK=1 \
     ZLIB=1
+# upstream's PAM service uses pam_stack.so, which Linux-PAM no longer has: ours replaces it
+test -f "$pkgdir/usr/lib/pam.d/gtk-lshw"
+install -Dm644 $pkgfiles/gtk-lshw.pam "$pkgdir/usr/lib/pam.d/gtk-lshw"
 install -Dm644 COPYING "$pkgdir/usr/share/licenses/lshw-gui/COPYING"
 '''

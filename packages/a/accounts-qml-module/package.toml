@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "accounts-qml-module"
 version = "0.7_git20231028"
-release = 2
+release = 3
 summary = "QML bindings for signond/libaccounts-qt"
 license = "LGPL-2.1-only"
 homepage = "https://gitlab.com/accounts-sso/accounts-qml-module"
@@ -12,6 +12,7 @@ patches = ["wltests.patch"]
 hostdeps = ["pkgconf", "qt6-qtbase"]
 builddeps = ["libaccounts-qt-devel", "qt6-qtdeclarative-devel", "signond-devel"]
 checkdeps = []
+options = ["!check"]
 
 source = [
     { url = "https://gitlab.com/accounts-sso/accounts-qml-module/-/archive/05e79ebbbf3784a87f72b7be571070125c10dfe3.tar.gz", sha256 = "1a53a6d8a3a56694244bc24bdab844d91420483744822d08ae8517ff7df84763" },
@@ -26,9 +27,6 @@ build = '''
 %make
 '''
 # tests off: they run against a signond over D-Bus, which the sandbox has no session for
-check = '''
-true
-'''
 install = '''
 make INSTALL_ROOT="$pkgdir" install \
     STRIP=true \

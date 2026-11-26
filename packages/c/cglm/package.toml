@@ -1,7 +1,7 @@
 # cglm: optimized OpenGL math library for C (MIT), used by Taisei.
 name = "cglm"
 version = "0.9.6"
-release = 1
+release = 2
 summary = "Graphics math library for C"
 license = "MIT"
 homepage = "https://github.com/recp/cglm"
@@ -19,7 +19,8 @@ build = '''
 %cmake_build
 '''
 check = '''
-cd build && ctest --output-on-failure 2>/dev/null || ./test_runner 2>/dev/null || true
+# --no-tests=error: a build that registers no test must not pass for tested
+ctest --test-dir build --output-on-failure --no-tests=error
 '''
 install = '''
 %cmake_install

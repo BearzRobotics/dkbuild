@@ -23,7 +23,7 @@
 # no site, no database roles, no credentials; the README says how to set it up.
 name = "ledgersmb"
 version = "1.13.9"
-release = 3
+release = 4
 summary = "Double-entry accounting and ERP"
 license = "GPL-2.0-or-later"
 homepage = "https://ledgersmb.org"
@@ -307,10 +307,15 @@ grep -v '^#' $pkgfiles/cpan-order.txt | while read -r t; do
     rm -rf /tmp/cpan/src && mkdir -p /tmp/cpan/src
     tar -xzf "/build/sources/$t" -C /tmp/cpan/src --no-same-owner
     cd /tmp/cpan/src/*/
+    # one command a line: in an `a && b && c` chain, set -e lets a failure of a or b pass
     if [ -f Makefile.PL ]; then
-        perl Makefile.PL INSTALL_BASE=/tmp/lperl && make -j$jobs && make install
+        perl Makefile.PL INSTALL_BASE=/tmp/lperl
+        make -j$jobs
+        make install
     else
-        perl Build.PL --install_base /tmp/lperl && ./Build && ./Build install
+        perl Build.PL --install_base /tmp/lperl
+        ./Build
+        ./Build install
     fi
     cd /build
 done

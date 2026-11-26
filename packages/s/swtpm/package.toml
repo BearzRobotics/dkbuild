@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "swtpm"
 version = "0.10.1"
-release = 2
+release = 3
 summary = "TPM emulator with socket, character device, and Linux CUSE interface"
 license = "BSD-3-Clause"
 homepage = "https://github.com/stefanberger/swtpm"
@@ -12,7 +12,7 @@ patches = ["failing-tests.patch", "fix-tests.patch", "no-expect.patch", "tss-use
 hostdeps = ["automake", "bash", "gawk", "gnutls", "libtool", "pkgconf", "socat", "iproute2"]
 builddeps = ["gnutls-devel", "json-glib-devel", "libseccomp-devel", "libtasn1-devel", "libtpms-devel", "linux-headers", "openssl-devel"]
 checkdeps = ["iproute2"]
-rundeps = ["gnutls"]
+rundeps = ["gnutls", "sd-tools"]
 
 source = [
     { url = "https://github.com/stefanberger/swtpm/archive/refs/tags/v0.10.1.tar.gz", sha256 = "f8da11cadfed27e26d26c5f58a7b8f2d14d684e691927348906b5891f525c684" },
@@ -35,4 +35,7 @@ install = '''
 %make_install
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/swtpm/LICENSE"
 rm -rf "$pkgdir/usr/lib/installed-tests"
+# the tss user and its directory (sd-tools applies both)
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/swtpm.conf"
+install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/swtpm.conf"
 '''

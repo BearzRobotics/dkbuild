@@ -12,6 +12,7 @@ if [ "$1" != "stop" ]; then
   
   # empty utmp, create needed directories
   : > /var/run/utmp
+  chmod 0644 /var/run/utmp # for who, w and users; the umask above made it root's alone
 
   # Users, groups, directories and files packages declare (sysusers.d,
   # tmpfiles.d): /run is new at every boot. sd-tools is in base.

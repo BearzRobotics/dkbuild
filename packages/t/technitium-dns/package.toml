@@ -74,7 +74,8 @@ install = '''
 install -d "$pkgdir/usr/lib/technitium-dns" "$pkgdir/usr/bin"
 cp -r out/server/. "$pkgdir/usr/lib/technitium-dns/"
 # only the Linux start scripts are of use; the unit files are for other init systems
-rm -f "$pkgdir"/usr/lib/technitium-dns/{start.bat,systemd.service,openrc.service}
+# one by one: dash has no {a,b} expansion
+for f in start.bat systemd.service openrc.service; do rm -f "$pkgdir/usr/lib/technitium-dns/$f"; done
 install -Dm755 $pkgfiles/technitium-dns "$pkgdir/usr/bin/technitium-dns"
 install -d "$pkgdir/usr/share/technitium-dns/apps"
 install -m644 out/apps/*.zip "$pkgdir/usr/share/technitium-dns/apps/"

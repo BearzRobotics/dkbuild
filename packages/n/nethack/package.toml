@@ -2,12 +2,13 @@
 # Lua; that tarball is the recipe's second source instead.
 name = "nethack"
 version = "5.0.0"
-release = 2
+release = 3
 summary = "Exploring the Dungeons of Doom (terminal roguelike)"
 license = "custom:NGPL"
 homepage = "https://www.nethack.org"
 hostdeps = ["bison", "flex", "pkgconf"]
 builddeps = ["ncurses-devel"]
+rundeps = ["sd-tools"]
 options = ["!check"]
 
 source = [
@@ -30,6 +31,9 @@ install = '''
 make PREFIX=/usr HACKDIR=/usr/lib/nethack VARDIR=/var/games/nethack SHELLDIR=/usr/bin INSTDIR="$pkgdir/usr/lib/nethack" \
     VARDIR="$pkgdir/var/games/nethack" SHELLDIR="$pkgdir/usr/bin" CHOWN=true CHGRP=true install
 install -Dm644 doc/nethack.6 "$pkgdir/usr/share/man/man6/nethack.6"
+install -Dm644 $pkgfiles/sysusers.conf "$pkgdir/usr/lib/sysusers.d/nethack.conf"
 install -Dm644 $pkgfiles/tmpfiles.conf "$pkgdir/usr/lib/tmpfiles.d/nethack.conf"
+# the path tmpfiles.conf makes setgid
+test -f "$pkgdir/usr/lib/nethack/nethack"
 install -Dm644 dat/license "$pkgdir/usr/share/licenses/nethack/license"
 '''

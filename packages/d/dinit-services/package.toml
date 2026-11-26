@@ -19,7 +19,7 @@ version = "1"
 # system bus: No such file or directory".
 # r8: /proc is mounted without hidepid=1, which broke every polkit check (admin prompts, NetworkManager and power actions).
 # Any user can now see other users' processes, as on most distributions.
-release = 8
+release = 9
 summary = "dinit service definitions and boot scripts for FenrirOS"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"
