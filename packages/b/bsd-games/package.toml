@@ -37,6 +37,9 @@ grep -q 'sigsuspend(&o_)' hunt/hunt/otto.c
 # branch for Linux without glibc means the old libc5's size_t
 sed -i 's/^#if defined(__linux__) \&\& !defined(__GLIBC__)$/#if 0 \/* libc5 *\//' mille/varpush.c mille/mille.h
 test "$(grep -c '^#if 0 /\* libc5 \*/$' mille/varpush.c mille/mille.h | awk -F: '{s+=$2} END {print s}')" -ge 2
+# the lex library is the tree's libfl.a, by path: -lfl (configure's answer) found the build image's libfl.so,
+# which no package provides
+test -f /usr/lib/libfl.a
 cat > config.params <<'EOF2'
 bsd_games_cfg_non_interactive=y
 bsd_games_cfg_install_prefix="$pkgdir"
@@ -51,15 +54,13 @@ bsd_games_cfg_sharedir=/usr/share/games
 bsd_games_cfg_varlibdir=/var/games
 bsd_games_cfg_do_chown=n
 bsd_games_cfg_no_build_dirs="dm fortune factor"
+bsd_games_cfg_lex_lib=/usr/lib/libfl.a
 bsd_games_cfg_cc="$CC"
 bsd_games_cfg_cxx="$CXX"
 bsd_games_cfg_optimize_flags="$CFLAGS -D_DEFAULT_SOURCE -include sys/types.h -include fcntl.h -include $PWD/include/sys/cdefs.h"
 bsd_games_cfg_other_ldflags="$LDFLAGS"
 EOF2
 ./configure
-# libfl.a by path: -lfl found the build image's libfl.so, which no package provides
-test -f /usr/lib/libfl.a
-grep -rlw -e -lfl --include=GNUmakefile --include=Makefrag --include=MCONFIG . | xargs sed -i 's|-lfl\b|/usr/lib/libfl.a|g'
 '''
 build = '''
 make
