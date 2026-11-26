@@ -66,5 +66,13 @@ sleep 4
 [ ! -e "$W/flag/survived" ] || fail "killing dkbuild's sandbox process left the command running"
 chmod -R u+rwx "$W/sw" 2>/dev/null
 
+# --- no file descriptor of the caller's reaches the command
+mkdir "$W/held"; echo from-the-host > "$W/held/secret"
+exec 7< "$W/held"
+OUT=$(sbrun -- /usr/bin/sh -c 'cat /proc/self/fd/7/secret 2>/dev/null; echo RAN' 2>&1)
+exec 7<&-
+echo "$OUT" | grep -q '^RAN$' || fail "the descriptor check did not run"
+echo "$OUT" | grep -q from-the-host && fail "a directory the caller had open was readable inside"
+
 [ "$fails" -eq 0 ] || { echo "FAIL: $fails isolation check(s) failed"; exit 1; }
 echo "ok: read-only binds stay read-only; signals and the terminal stay outside; killing the sandbox kills all in it"

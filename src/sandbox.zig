@@ -464,6 +464,9 @@ pub fn childMain(args: []const [:0]const u8) noreturn {
     // other builds and the shell that ran it, and the build would hold the user's terminal. Stopping dkbuild
     // still stops everything here: PR_SET_PDEATHSIG, not the terminal's signals.
     sys(linux.setsid(), "setsid", "");
+    // Only stdin, stdout and stderr go on: a directory dkbuild's caller had open (a CI runner, a terminal tool)
+    // would reach the host's tree through /proc/self/fd, past pivot_root.
+    sys(linux.close_range(3, std.math.maxInt(i32), .{ .UNSHARE = false, .CLOEXEC = false }), "close_range", "");
 
     // Run the command with exactly the environment it was given.
     if (cmd[0][0] != '/') die("the command must be an absolute path: {s}", .{cmd[0]});
