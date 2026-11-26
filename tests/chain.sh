@@ -12,7 +12,7 @@ demo_recipe "$T" 1
 user_recipe "$T" usedemo dkdemo-devel
 user_recipe "$T" usedemo-static dkdemo-static static
 
-OUT=$(./zig-out/bin/dkbuild --tree "$T" pkg usedemo usedemo-static 2>&1) || { echo "$OUT" | tail -15; echo "FAIL: chain build"; exit 1; }
+OUT=$(./zig-out/bin/dkbuild --tree "$T" pkg --key "$TEST_KEY" usedemo usedemo-static 2>&1) || { echo "$OUT" | tail -15; echo "FAIL: chain build"; exit 1; }
 echo "$OUT" | grep -q '^==> dkdemo-1-r1$' || { echo "FAIL: dkdemo was not built first"; exit 1; }
 echo "$OUT" | grep -q '^==> usedemo-1-r1$' || { echo "FAIL: usedemo was not built"; exit 1; }
 echo "$OUT" | grep -q '^==> usedemo-static-1-r1$' || { echo "FAIL: usedemo-static was not built"; exit 1; }
@@ -30,7 +30,7 @@ dump usedemo-static-1-r1.apk | grep -q 'so:' && { echo "FAIL: the static program
 
 # What a stage 1 build does with these packages: unpack them over the DKRescue
 # image (checking each signature), then run the result against libdkdemo.
-OUT=$(sbrun --robind "$PWD/$T/repo/x86_64" /dkrepo --robind "$PWD/keys" /dkkeys -- /usr/bin/sh -c '
+OUT=$(sbrun --robind "$PWD/$T/repo/x86_64" /dkrepo --robind "$PWD/$T/keys" /dkkeys -- /usr/bin/sh -c '
 apk --force-overwrite --keys-dir /dkkeys extract --destination / /dkrepo/dkdemo-1-r1.apk /dkrepo/usedemo-1-r1.apk >/dev/null 2>&1 \
     || { echo "FAIL: unpacking dkdemo and usedemo from repo/"; exit 1; }
 [ -e /usr/lib/libdkdemo.so.1 ] || { echo "FAIL: libdkdemo was not unpacked"; exit 1; }

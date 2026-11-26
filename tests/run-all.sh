@@ -1,7 +1,8 @@
 #!/bin/sh
 # Unit tests, the recipe check, then every end-to-end script. They build in the
 # real sandbox on rootfs/dkrescue (`dkbuild bootstrap-root <dkrescue.iso>`) and
-# sign with ~/.config/dkbuild/signing.rsa. Host tools (Ubuntu): sudo apt install
+# sign their test packages with a key made for the run (lib.sh testkey); repo-install and
+# musl may also build into repo/, with ~/.config/dkbuild/signing.rsa. Host tools (Ubuntu): sudo apt install
 # ca-certificates curl git tar xz-utils xorriso squashfs-tools util-linux openssl;
 # `dkbuild doctor` checks them.
 set -u

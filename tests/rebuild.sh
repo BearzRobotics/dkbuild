@@ -10,7 +10,7 @@ newtree "$T"
 mkdemo "$T/src"
 demo_recipe "$T" 1
 user_recipe "$T" usedemo dkdemo-devel
-run() { ./zig-out/bin/dkbuild --tree "$T" pkg usedemo 2>&1; }
+run() { ./zig-out/bin/dkbuild --tree "$T" pkg --key "$TEST_KEY" usedemo 2>&1; }
 fail() { echo "$OUT" | tail -8; echo "FAIL: $1"; exit 1; }
 
 OUT=$(run) || fail "first build"
@@ -58,6 +58,6 @@ OUT=$(run) || fail "run after the bump"
 echo "$OUT" | grep -q 'usedemo-1-r2: up to date' || fail "usedemo r2 was not up to date on the next run"
 
 # --force rebuilds an up-to-date package.
-OUT=$(./zig-out/bin/dkbuild --tree "$T" pkg --force usedemo 2>&1) || fail "--force build"
+OUT=$(./zig-out/bin/dkbuild --tree "$T" pkg --key "$TEST_KEY" --force usedemo 2>&1) || fail "--force build"
 echo "$OUT" | grep -q 'preparing build root' || fail "--force did not rebuild"
 echo "ok: skipped when unchanged; error for a changed recipe at the same release; an identical rebuild stops the cascade; a dependent that comes out the same is kept, one that comes out different is published with its release bumped; --force rebuilds"

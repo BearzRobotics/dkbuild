@@ -39,11 +39,11 @@ cp t \$pkgdir/usr/bin/
 EOF
 }
 recipe ""
-if ./zig-out/bin/dkbuild --tree $T pkg usezlib >/dev/null 2>&1; then
+if ./zig-out/bin/dkbuild --tree $T pkg --key "$TEST_KEY" usezlib >/dev/null 2>&1; then
     echo "FAIL: built without declaring zlib"; exit 1
 fi
 recipe 'builddeps = ["zlib-ng-compat-devel"]'
-if ! ./zig-out/bin/dkbuild --tree $T pkg usezlib >/dev/null 2>&1; then
+if ! ./zig-out/bin/dkbuild --tree $T pkg --key "$TEST_KEY" usezlib >/dev/null 2>&1; then
     echo "FAIL: did not build with zlib declared"; exit 1
 fi
 echo "ok: forgotten dependency fails, declared dependency builds"

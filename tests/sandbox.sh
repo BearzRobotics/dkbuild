@@ -37,7 +37,7 @@ echo ok > \$pkgdir/usr/share/probe/ok
 '''
 EOF
 
-OUT=$(./zig-out/bin/dkbuild --tree "$T" pkg probe 2>&1) || { echo "$OUT" | tail -20; echo "FAIL: the build sandbox is not isolated"; exit 1; }
+OUT=$(./zig-out/bin/dkbuild --tree "$T" pkg --key "$TEST_KEY" probe 2>&1) || { echo "$OUT" | tail -20; echo "FAIL: the build sandbox is not isolated"; exit 1; }
 
 # Match on the command name, so this script's own command line can't match.
 LEFT=$(ps -eo pid=,comm=,args= | awk '$2 == "sleep" && $3 == "sleep" && $4 == "7777" { print $1 }')

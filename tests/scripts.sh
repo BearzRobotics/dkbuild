@@ -12,10 +12,10 @@ mkdir -p "$T/packages/d/dkdemo/scripts"
 printf '#!/bin/sh\necho pre > /pre-ran\n' > "$T/packages/d/dkdemo/scripts/pre-install"
 printf '#!/bin/sh\necho post > /post-ran\n' > "$T/packages/d/dkdemo/scripts/post-install"
 chmod +x "$T/packages/d/dkdemo/scripts/"*
-OUT=$(./zig-out/bin/dkbuild --tree "$T" pkg dkdemo 2>&1) || { echo "$OUT" | tail -8; echo "FAIL: build"; exit 1; }
+OUT=$(./zig-out/bin/dkbuild --tree "$T" pkg --key "$TEST_KEY" dkdemo 2>&1) || { echo "$OUT" | tail -8; echo "FAIL: build"; exit 1; }
 R=$(mktemp -d "$PWD/work/sc.XXXXXX")
 trap 'rm -rf "$R"' EXIT
-mkdir -p "$R/etc/apk/keys"; cp keys/*.pub "$R/etc/apk/keys/"
+mkdir -p "$R/etc/apk/keys"; cp keys/*.pub "$T"/keys/*.pub "$R/etc/apk/keys/"
 # The scripts run inside the target root, which needs a shell: the image's static dash.
 mkdir -p "$R/bin"; cp rootfs/dkrescue/usr/bin/dash "$R/bin/sh"
 sbrun --bind "$R" /mnt --robind "$PWD/$T/repo/x86_64" /tmp/repo --robind "$PWD/repo/x86_64" /tmp/real -- /usr/bin/apk --root /mnt --initdb \

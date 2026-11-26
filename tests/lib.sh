@@ -88,11 +88,23 @@ cp t \$pkgdir/usr/bin/$2
 EOF
 }
 
-# newtree TREE: an empty tree that shares the rootfs, keys and profiles.
+# testkey TREE: a signing key pair of this run's own, for TREE only: its private half in TREE/signing.rsa, its
+# public half the one key in TREE/keys. Sets TEST_KEY. Test packages (some with install scripts, which run as
+# root) are never signed with the distribution's key, which installed systems trust.
+testkey() {
+    rm -rf "$1/keys" "$1/signing.rsa"
+    mkdir -p "$1/keys"
+    ( umask 077 && openssl genrsa -out "$1/signing.rsa" 2048 ) >/dev/null 2>&1 \
+        && openssl rsa -in "$1/signing.rsa" -pubout -out "$1/keys/dkbuild-test.rsa.pub" >/dev/null 2>&1 \
+        || { echo "FAIL: cannot make a test signing key (openssl)"; exit 1; }
+    TEST_KEY="$PWD/$1/signing.rsa"
+}
+
+# newtree TREE: an empty tree with its own keys, sharing the rootfs and profiles.
 newtree() {
     rm -rf "$1/packages" "$1/repo" "$1/logs" "$1/work" "$1/cache" "$1/profiles"
     mkdir -p "$1/packages"
     cp -r profiles "$1/profiles"
     ln -sfn ../../../rootfs "$1/rootfs"
-    ln -sfn ../../../keys "$1/keys"
+    testkey "$1"
 }

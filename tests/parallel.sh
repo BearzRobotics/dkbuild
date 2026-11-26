@@ -46,7 +46,7 @@ slow slow-a
 slow slow-b
 slow heavy '["jobs:2", "!check"]' 'sleep 1'
 
-OUT=$($DK --tree "$T" pkg -P 3 usedemo usedemo-static slow-a slow-b heavy 2>&1) || fail "parallel build"
+OUT=$($DK --tree "$T" pkg --key "$TEST_KEY" -P 3 usedemo usedemo-static slow-a slow-b heavy 2>&1) || fail "parallel build"
 for p in dkdemo usedemo usedemo-static slow-a slow-b heavy; do
     [ -e "$T/repo/x86_64/$p-1-r1.apk" ] || fail "$p was not built"
 done
@@ -66,7 +66,7 @@ done
 slow broken '["!check"]' 'exit 1'
 slow needs-broken '["!check"]' 'true' broken
 slow slow-c
-OUT=$($DK --tree "$T" world -P 3 --keep-going 2>&1) && fail "world succeeded with a broken recipe"
+OUT=$($DK --tree "$T" world --key "$TEST_KEY" -P 3 --keep-going 2>&1) && fail "world succeeded with a broken recipe"
 echo "$OUT" | grep -q '^1 failed: broken$' || fail "broken was not the one failure"
 echo "$OUT" | grep -q '^1 skipped: needs-broken$' || fail "needs-broken was not skipped"
 [ -e "$T/repo/x86_64/slow-c-1-r1.apk" ] || fail "slow-c was not built beside the failure"
