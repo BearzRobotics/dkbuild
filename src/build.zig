@@ -1704,7 +1704,9 @@ fn publish(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options, id: []
     // Mount points live under /tmp (a tmpfs) so the rootfs stays untouched.
     const out_bind = sandbox.Bind{ .src = repo_abs, .dst = "/tmp/out" };
 
-    // mkpkg, once per package
+    // mkpkg, once per package, all under .part names: they reach repo/ together, or (when one fails) not at all
+    var staged: std.ArrayList([]const u8) = .empty; // the final names
+    errdefer for (staged.items) |f| Dir.cwd().deleteFile(io, std.fmt.allocPrint(arena, "{s}/{s}.part", .{ repo_rel, f }) catch continue) catch {};
     for (pkgs) |pk| {
         var argv: std.ArrayList([]const u8) = .empty;
         const binds = [_]sandbox.Bind{ out_bind, .{ .src = pk.files, .dst = "/tmp/files" }, .{ .src = key_abs, .dst = "/tmp/key", .read_only = true } };
@@ -1769,10 +1771,37 @@ fn publish(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options, id: []
             out("error: apk mkpkg failed for {s}\n", .{pk.name});
             return error.BuildFailed;
         }
+        try staged.append(arena, file);
+    }
+    // The record goes first: were this interrupted between the renames, the next run must build again rather
+    // than call a half-replaced set up to date.
+    Dir.cwd().deleteFile(io, try std.fmt.allocPrint(arena, "{s}/{s}.dkhash", .{ repo_rel, r.name })) catch {};
+    for (staged.items) |file| {
+        const part = try std.fmt.allocPrint(arena, "{s}/{s}.part", .{ repo_rel, file });
         Dir.cwd().rename(part, Dir.cwd(), try std.fmt.allocPrint(arena, "{s}/{s}", .{ repo_rel, file }), io) catch {
             out("error: cannot move {s} into place\n", .{part});
             return error.BuildFailed;
         };
+    }
+    // At a version built before (--force), a subpackage that is no longer made must not stay beside the new ones.
+    const ver_now = try std.fmt.allocPrint(arena, "{s}-r{d}", .{ r.version, r.release });
+    var existing = Dir.cwd().openDir(io, repo_rel, .{ .iterate = true }) catch return error.PrepareFailed;
+    defer existing.close(io);
+    var gone: std.ArrayList([]const u8) = .empty;
+    var files_in_repo = existing.iterate();
+    const tail = try std.fmt.allocPrint(arena, "-{s}.apk", .{ver_now});
+    while (files_in_repo.next(io) catch null) |e| {
+        if (!std.mem.endsWith(u8, e.name, tail) or contains(staged.items, e.name)) continue;
+        const pkg = e.name[0 .. e.name.len - tail.len];
+        // one of this recipe's subpackage names, and not another recipe's own name (base-devel beside base's -devel)
+        if (!std.mem.startsWith(u8, pkg, r.name) or pkg.len <= r.name.len or pkg[r.name.len] != '-') continue;
+        if (opts.tree) |t| if (t.find(pkg) != null) continue;
+        if (opts.tree) |t| if (t.provider(pkg)) |other| if (!std.mem.eql(u8, t.recipes[other].name, r.name)) continue;
+        try gone.append(arena, try arena.dupe(u8, e.name));
+    }
+    for (gone.items) |f| {
+        out("    removing {s}: this build no longer makes it\n", .{f});
+        existing.deleteFile(io, f) catch {};
     }
 
     try reindex(arena, io, opts, base_root, sb, log);
