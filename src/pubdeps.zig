@@ -145,7 +145,14 @@ fn fromLocks(arena: Allocator, io: std.Io, cache: []const u8, tmp: []const u8, o
         if (seen.contains(file)) continue;
         try seen.put(arena, file, {});
         try list.appendSlice(arena, try std.fmt.allocPrint(arena, "{s} {s} {s}\n", .{ p.name, p.version, p.sha256 }));
-        if (std.Io.Dir.cwd().access(io, try std.fs.path.join(arena, &.{ store, file }), .{})) |_| continue else |_| {}
+        const stored = try std.fs.path.join(arena, &.{ store, file });
+        if (std.Io.Dir.cwd().access(io, stored, .{})) |_| {
+            // there already, but is it what this lock demands? (it is also recorded for Dart as such)
+            const got = fetch.hashFile(io, stored) catch return error.DownloadFailed;
+            if (std.mem.eql(u8, &got, p.sha256)) continue;
+            message.* = try std.fmt.allocPrint(arena, "pub: {s} in the store does not match the lock (lock {s}, store {s})", .{ file, p.sha256, &got });
+            return error.BadChecksum;
+        } else |_| {}
         try todo.append(arena, .{
             .file = file,
             .url = try std.fmt.allocPrint(arena, "https://pub.dev/api/archives/{s}", .{file}),

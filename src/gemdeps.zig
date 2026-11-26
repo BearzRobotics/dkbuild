@@ -19,7 +19,8 @@ pub fn listPath(arena: Allocator, cache: []const u8, tarball_sha256: []const u8)
 
 pub const no_lockfile = "gems: the source has no Gemfile.lock";
 
-const Gem = struct { name: []const u8, version: []const u8, sha256: ?[]const u8 = null };
+const Gem = struct { name: []const u8, version: []const u8, sha256: ?[]const u8 = null, remote: []const u8 = rubygems };
+const rubygems = "https://rubygems.org/";
 /// A gem from a GIT section (GitHub only: its archive of the revision).
 const GitGem = struct { name: []const u8, remote: []const u8, revision: []const u8 };
 
@@ -49,6 +50,7 @@ fn collect(arena: Allocator, text: []const u8, out: *std.ArrayList(Gem), gits: *
     var revision: []const u8 = "";
     var git_specs = false;
     var in_specs = false;
+    var gem_remote: []const u8 = rubygems; // of the GEM section being read
     var sums: std.StringHashMapUnmanaged([]const u8) = .empty;
     var lines = std.mem.splitScalar(u8, text, '\n');
     while (lines.next()) |raw| {
@@ -84,6 +86,10 @@ fn collect(arena: Allocator, text: []const u8, out: *std.ArrayList(Gem), gits: *
             continue;
         }
         if (!std.mem.eql(u8, section, "GEM")) continue;
+        {
+            const t = std.mem.trim(u8, line, " ");
+            if (std.mem.startsWith(u8, t, "remote: ")) gem_remote = t["remote: ".len..];
+        }
         if (std.mem.eql(u8, std.mem.trim(u8, line, " "), "specs:")) {
             in_specs = true;
             continue;
@@ -93,11 +99,27 @@ fn collect(arena: Allocator, text: []const u8, out: *std.ArrayList(Gem), gits: *
         const t = line[4..];
         const sp = std.mem.indexOf(u8, t, " (") orelse continue;
         const close = std.mem.lastIndexOfScalar(u8, t, ')') orelse continue;
-        try out.append(arena, .{ .name = t[0..sp], .version = splitPlatform(t[sp + 2 .. close]) });
+        try out.append(arena, .{ .name = t[0..sp], .version = splitPlatform(t[sp + 2 .. close]), .remote = gem_remote });
     }
     for (out.items) |*g| if (g.sha256 == null) {
         g.sha256 = sums.get(try std.fmt.allocPrint(arena, "{s}-{s}", .{ g.name, g.version }));
     };
+}
+
+/// cache/gemsums/<file>.sha256 keeps what a gem was when first fetched, for the locks that give no checksum
+/// (Bundler before 2.6) and for git gems (GitHub publishes none). It lives outside the store, which prune cleans.
+fn recordedSum(arena: Allocator, io: std.Io, cache: []const u8, file: []const u8) ?[]const u8 {
+    const path = std.fmt.allocPrint(arena, "{s}/gemsums/{s}.sha256", .{ cache, file }) catch return null;
+    const text = std.Io.Dir.cwd().readFileAlloc(io, path, arena, .limited(256)) catch return null;
+    const t = std.mem.trim(u8, text, "\n ");
+    return if (fetch.validSha256(t)) t else null;
+}
+
+fn recordSum(arena: Allocator, io: std.Io, cache: []const u8, file: []const u8, sum: []const u8) !void {
+    if (recordedSum(arena, io, cache, file) != null) return;
+    const dir = try std.fmt.allocPrint(arena, "{s}/gemsums", .{cache});
+    try std.Io.Dir.cwd().createDirPath(io, dir);
+    try std.Io.Dir.cwd().writeFile(io, .{ .sub_path = try std.fmt.allocPrint(arena, "{s}/{s}.sha256", .{ dir, file }), .data = sum });
 }
 
 /// For recipes with the `gemdeps` option: every gem of every Gemfile.lock in
@@ -154,14 +176,31 @@ pub fn fetchGemDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha
         try seen.put(arena, file, {});
         try list.appendSlice(arena, file);
         try list.append(arena, '\n');
-        if (std.Io.Dir.cwd().access(io, try std.fs.path.join(arena, &.{ store, file }), .{})) |_| continue else |_| {}
+        // Gems are all taken from rubygems.org. One a lock takes from elsewhere is only the same gem if the lock
+        // says what its bytes are; without that, rubygems.org's gem of that name would silently replace it.
+        if (g.sha256 == null and !std.mem.eql(u8, std.mem.trimEnd(u8, g.remote, "/"), std.mem.trimEnd(u8, rubygems, "/"))) {
+            message.* = try std.fmt.allocPrint(arena, "gems: {s} comes from {s} and the lock gives no checksum; only rubygems.org gems can be taken without one", .{ file, g.remote });
+            return error.DownloadFailed;
+        }
+        // what the file must be: the lock's checksum, else the one recorded when it was first fetched
+        const want: ?[]const u8 = g.sha256 orelse recordedSum(arena, io, cache, file);
+        const stored = try std.fs.path.join(arena, &.{ store, file });
+        if (std.Io.Dir.cwd().access(io, stored, .{})) |_| {
+            const got = fetch.hashFile(io, stored) catch return error.DownloadFailed;
+            if (want) |w| if (!std.mem.eql(u8, &got, w)) {
+                message.* = try std.fmt.allocPrint(arena, "gems: {s} in the store does not match its checksum", .{file});
+                return error.BadChecksum;
+            };
+            recordSum(arena, io, cache, file, &got) catch return error.DownloadFailed;
+            continue;
+        } else |_| {}
         const n = todo.items.len;
         try todo.append(arena, .{
             .file = file,
             .url = try std.fmt.allocPrint(arena, "https://rubygems.org/gems/{s}", .{file}),
             .part = try std.fmt.allocPrint(arena, "{s}/dl-{d}", .{ tmp, n }),
             .api = try std.fmt.allocPrint(arena, "{s}/api-{d}", .{ tmp, n }),
-            .sha = g.sha256,
+            .sha = want,
         });
     }
     if (todo.items.len > 0) {
@@ -201,6 +240,7 @@ pub fn fetchGemDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha
                 message.* = try std.fmt.allocPrint(arena, "gems: {s} does not match its checksum", .{t.file});
                 return error.BadChecksum;
             }
+            recordSum(arena, io, cache, t.file, &got) catch return error.DownloadFailed;
             std.Io.Dir.cwd().rename(t.part, std.Io.Dir.cwd(), try std.fs.path.join(arena, &.{ store, t.file }), io) catch return error.DownloadFailed;
         }
     }
@@ -225,7 +265,16 @@ pub fn fetchGemDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha
         const sums_dir = try std.fmt.allocPrint(arena, "{s}/gemsums", .{cache});
         std.Io.Dir.cwd().createDirPath(io, sums_dir) catch return error.DownloadFailed;
         const sumf = try std.fmt.allocPrint(arena, "{s}/{s}.sha256", .{ sums_dir, file });
-        if (std.Io.Dir.cwd().access(io, full, .{})) |_| continue else |_| {}
+        if (std.Io.Dir.cwd().access(io, full, .{})) |_| {
+            const have = fetch.hashFile(io, full) catch return error.DownloadFailed;
+            if (std.Io.Dir.cwd().readFileAlloc(io, sumf, arena, .limited(256))) |want| {
+                if (!std.mem.eql(u8, &have, std.mem.trim(u8, want, "\n "))) {
+                    message.* = try std.fmt.allocPrint(arena, "gems: {s} in the store differs from the archive first fetched", .{file});
+                    return error.BadChecksum;
+                }
+            } else |_| std.Io.Dir.cwd().writeFile(io, .{ .sub_path = sumf, .data = &have }) catch return error.DownloadFailed;
+            continue;
+        } else |_| {}
         const part_g = try std.fmt.allocPrint(arena, "{s}/git-{s}", .{ tmp, g.name });
         const url = try std.fmt.allocPrint(arena, "{s}/archive/{s}.tar.gz", .{ repo, g.revision });
         const rg = std.process.run(arena, io, .{ .argv = &.{ "curl", "--fail", "--location", "--silent", "--show-error", "--retry", "4", "-o", part_g, url } }) catch return error.DownloadFailed;
@@ -282,4 +331,46 @@ test "collect" {
     try std.testing.expect(out.items[2].sha256 != null);
     try std.testing.expectEqual(@as(usize, 1), gits.items.len);
     try std.testing.expectEqualStrings("license_finder", gits.items[0].name);
+}
+
+test "a file already in the store must match what is known of it (FV-10, FV-11)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const base = try tmp.dir.realPathFileAlloc(io, ".", a);
+    const sha: *const [64]u8 = &@as([64]u8, @splat('b'));
+    const zeros_c = "0000000000000000000000000000000000000000000000000000000000000000";
+    const ones_c = "1111111111111111111111111111111111111111111111111111111111111111";
+    try tmp.dir.createDirPath(io, "src");
+    try tmp.dir.createDirPath(io, "cache/sources");
+    try tmp.dir.createDirPath(io, "cache/gems");
+    try tmp.dir.createDirPath(io, "cache/pub");
+    // a source with one gem (its checksum in the lock) and one pub package
+    try tmp.dir.writeFile(io, .{ .sub_path = "src/Gemfile.lock", .data = "GEM\n  remote: https://rubygems.org/\n  specs:\n    rake (13.0.6)\n\nCHECKSUMS\n  rake (13.0.6) sha256=" ++ zeros_c ++ "\n" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "src/pubspec.lock", .data = "packages:\n  args:\n    description:\n      name: args\n      sha256: \"" ++ ones_c ++ "\"\n    source: hosted\n    version: \"2.7.0\"\n" });
+    const tar = try std.process.run(a, io, .{ .argv = &.{ "tar", "-C", try std.fs.path.join(a, &.{ base, "src" }), "-cf", try std.fs.path.join(a, &.{ base, "cache/sources", sha }), "." } });
+    try std.testing.expect(tar.term == .exited and tar.term.exited == 0);
+    try tmp.dir.writeFile(io, .{ .sub_path = "cache/gems/rake-13.0.6.gem", .data = "not that file" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "cache/pub/args-2.7.0.tar.gz", .data = "not that file" });
+    const cache = try std.fs.path.join(a, &.{ base, "cache" });
+    var msg: []const u8 = "";
+    try std.testing.expectError(error.BadChecksum, fetchGemDeps(a, io, cache, sha, &msg));
+    try std.testing.expectError(error.BadChecksum, @import("pubdeps.zig").fetchPubDeps(a, io, cache, sha, &msg));
+    // a lock without checksums: what is there is recorded at first use, and held to afterwards
+    try tmp.dir.writeFile(io, .{ .sub_path = "src/Gemfile.lock", .data = "GEM\n  remote: https://rubygems.org/\n  specs:\n    rake (13.0.6)\n" });
+    const tar2 = try std.process.run(a, io, .{ .argv = &.{ "tar", "-C", try std.fs.path.join(a, &.{ base, "src" }), "-cf", try std.fs.path.join(a, &.{ base, "cache/sources", sha }), "." } });
+    try std.testing.expect(tar2.term == .exited and tar2.term.exited == 0);
+    _ = try fetchGemDeps(a, io, cache, sha, &msg);
+    try tmp.dir.deleteTree(io, "cache/gemdeps");
+    try tmp.dir.writeFile(io, .{ .sub_path = "cache/gems/rake-13.0.6.gem", .data = "changed since" });
+    try std.testing.expectError(error.BadChecksum, fetchGemDeps(a, io, cache, sha, &msg));
+    // a gem from elsewhere, with no checksum to tell it from rubygems.org's of that name, is refused
+    try tmp.dir.deleteTree(io, "cache/gemdeps");
+    try tmp.dir.writeFile(io, .{ .sub_path = "src/Gemfile.lock", .data = "GEM\n  remote: https://gems.example.invalid/\n  specs:\n    private-thing (1.0.0)\n" });
+    const tar3 = try std.process.run(a, io, .{ .argv = &.{ "tar", "-C", try std.fs.path.join(a, &.{ base, "src" }), "-cf", try std.fs.path.join(a, &.{ base, "cache/sources", sha }), "." } });
+    try std.testing.expect(tar3.term == .exited and tar3.term.exited == 0);
+    try std.testing.expectError(error.DownloadFailed, fetchGemDeps(a, io, cache, sha, &msg));
 }

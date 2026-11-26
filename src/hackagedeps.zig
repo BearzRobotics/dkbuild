@@ -120,7 +120,13 @@ pub fn fetchLock(arena: Allocator, io: std.Io, cache: []const u8, lock_path: []c
         };
         for (files) |maybe| {
             const f = maybe orelse continue;
-            if (std.Io.Dir.cwd().access(io, try std.fs.path.join(arena, &.{ store, f.file }), .{})) |_| continue else |_| {}
+            const stored = try std.fs.path.join(arena, &.{ store, f.file });
+            if (std.Io.Dir.cwd().access(io, stored, .{})) |_| {
+                const got = fetch.hashFile(io, stored) catch return error.DownloadFailed;
+                if (std.mem.eql(u8, &got, f.sha)) continue;
+                message.* = try std.fmt.allocPrint(arena, "hackage: {s} in the store does not match the lock (lock {s}, store {s})", .{ f.file, f.sha, &got });
+                return error.BadChecksum;
+            } else |_| {}
             try todo.append(arena, .{ .file = f.file, .url = f.url, .part = try std.fmt.allocPrint(arena, "{s}/dl-{d}", .{ tmp, todo.items.len }), .sha = f.sha });
         }
     }
