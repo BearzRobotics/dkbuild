@@ -206,6 +206,8 @@ fn digestOf(algo: []const u8, data: []const u8, buf: []u8) []const u8 {
 pub const no_lockfile = "npm: the source has no package-lock.json or pnpm-lock.yaml";
 
 pub fn fetchNpmDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, message: *[]const u8) fetch.Error!fetch.Status {
+    const held = fetch.keyLock(arena, io, cache, "npm", tarball_sha256) catch return error.DownloadFailed;
+    defer held.release(io);
     const out_path = try listPath(arena, cache, tarball_sha256);
     if (std.Io.Dir.cwd().access(io, out_path, .{})) |_| return .cached else |_| {}
     const dir = try std.fmt.allocPrint(arena, "{s}/npmdeps", .{cache});
@@ -232,6 +234,8 @@ pub fn fetchNpmDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha
 /// yarn.lock: the package-lock.json made from it once, then pinned there). Its
 /// list is keyed by the lockfile's own sha256, so editing it refetches.
 pub fn fetchNpmLockFile(arena: Allocator, io: std.Io, cache: []const u8, lock_path: []const u8, message: *[]const u8) fetch.Error!fetch.Status {
+    const held = fetch.keyLock(arena, io, cache, "npm", lock_path) catch return error.DownloadFailed;
+    defer held.release(io);
     const data = std.Io.Dir.cwd().readFileAlloc(io, lock_path, arena, .limited(1 << 28)) catch {
         message.* = try std.fmt.allocPrint(arena, "npm: cannot read {s}", .{lock_path});
         return error.DownloadFailed;

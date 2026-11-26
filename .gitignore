@@ -37,6 +37,8 @@ zig-out/
 /tests/trees/repo-install/*
 /tests/trees/pins/*
 !/tests/trees/pins/.gitkeep
+/tests/trees/locks/*
+!/tests/trees/locks/.gitkeep
 /tests/trees/prune/*
 !/tests/trees/prune/.gitkeep
 /tests/trees/fetch-zig/*

@@ -66,6 +66,17 @@ const usage =
     \\
 ;
 
+/// One build or prune per tree at a time: a second would delete the first's build directories and share its
+/// half-written packages, and prune would delete what a build is using. The lock goes when the process does.
+fn lockTree(arena: std.mem.Allocator, io: std.Io, root: []const u8) !std.Io.File {
+    const dir = try std.fs.path.join(arena, &.{ root, "work" });
+    std.Io.Dir.cwd().createDirPath(io, dir) catch {};
+    return try fetch.tryExclusive(io, try std.fs.path.join(arena, &.{ dir, "dkbuild.lock" })) orelse {
+        std.debug.print("error: another dkbuild (pkg, world or prune) is working in this tree; wait for it, or stop it\n", .{});
+        std.process.exit(1);
+    };
+}
+
 pub fn main(init: std.process.Init) !void {
     const arena = init.arena.allocator();
     const args = try init.minimal.args.toSlice(arena);
@@ -337,6 +348,8 @@ pub fn main(init: std.process.Init) !void {
         term.setup(init.io, color_mode, init.environ_map.get("NO_COLOR") != null);
         if (names.items.len == 0 and !is_world) return die(usage);
         if (names.items.len > 0 and is_world) return die(usage);
+        const tree_lock = try lockTree(arena, init.io, root);
+        defer tree_lock.close(init.io);
         var t = try tree.load(arena, init.io, root, &problems);
         t.allow_external = true;
         opts.tree = t;
@@ -607,6 +620,16 @@ pub fn main(init: std.process.Init) !void {
         }
         t.allow_external = true;
         opts.tree = t;
+        const tree_lock = try lockTree(arena, init.io, root);
+        defer tree_lock.close(init.io);
+        // nor while anything is being fetched into the cache prune cleans
+        const locks_dir = try std.fs.path.join(arena, &.{ root, "cache", "locks" });
+        std.Io.Dir.cwd().createDirPath(init.io, locks_dir) catch {};
+        const fetch_lock = try fetch.tryExclusive(init.io, try std.fs.path.join(arena, &.{ locks_dir, "prune.lock" })) orelse {
+            std.debug.print("prune: a dkbuild fetch is running; try again when it is done\n", .{});
+            std.process.exit(1);
+        };
+        defer fetch_lock.close(init.io);
         build.prune(arena, init.io, opts, dry_run) catch |err| switch (err) {
             error.OutOfMemory => return err,
             else => std.process.exit(1),

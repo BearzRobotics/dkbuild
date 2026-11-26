@@ -125,6 +125,8 @@ fn recordSum(arena: Allocator, io: std.Io, cache: []const u8, file: []const u8, 
 /// For recipes with the `gemdeps` option: every gem of every Gemfile.lock in
 /// the source, downloaded into the store unless it is there, each checked.
 pub fn fetchGemDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, message: *[]const u8) fetch.Error!fetch.Status {
+    const held = fetch.keyLock(arena, io, cache, "gem", tarball_sha256) catch return error.DownloadFailed;
+    defer held.release(io);
     const out_path = try listPath(arena, cache, tarball_sha256);
     if (std.Io.Dir.cwd().access(io, out_path, .{})) |_| return .cached else |_| {}
     const dir = try std.fmt.allocPrint(arena, "{s}/gemdeps", .{cache});

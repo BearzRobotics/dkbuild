@@ -56,7 +56,8 @@ fi
 if grep -l "$PWD/$T/work/" /proc/[0-9]*/mountinfo 2>/dev/null | grep -q .; then
     echo "FAIL: a process still has a mount from the build"; exit 1
 fi
-if [ -n "$(ls -A "$T/work" 2>/dev/null)" ]; then
-    echo "FAIL: the build left its work directory behind: $(ls "$T/work")"; exit 1
+LEFTDIRS=$(find "$T/work" -mindepth 1 -maxdepth 1 ! -name dkbuild.lock 2>/dev/null)
+if [ -n "$LEFTDIRS" ]; then
+    echo "FAIL: the build left its work directory behind: $LEFTDIRS"; exit 1
 fi
 echo "ok: no network, no /home, no host processes, uid 0 with a clean environment; nothing left behind"

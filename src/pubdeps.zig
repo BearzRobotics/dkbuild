@@ -68,6 +68,8 @@ pub fn collect(arena: Allocator, text: []const u8, out: *std.ArrayList(Pkg), mis
 /// each checked against its sha256; their list to cache/pubdeps/<sha>.list
 /// ("<name> <version> <sha256>" lines).
 pub fn fetchPubDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, message: *[]const u8) fetch.Error!fetch.Status {
+    const held = fetch.keyLock(arena, io, cache, "pub", tarball_sha256) catch return error.DownloadFailed;
+    defer held.release(io);
     const out_path = try listPath(arena, cache, tarball_sha256);
     if (std.Io.Dir.cwd().access(io, out_path, .{})) |_| return .cached else |_| {}
     const dir = try std.fmt.allocPrint(arena, "{s}/pubdeps", .{cache});
@@ -90,6 +92,8 @@ pub fn fetchPubDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha
 /// one): its list is keyed by the lockfile's own sha256, so editing it
 /// refetches.
 pub fn fetchPubLockFile(arena: Allocator, io: std.Io, cache: []const u8, lock_path: []const u8, message: *[]const u8) fetch.Error!fetch.Status {
+    const held = fetch.keyLock(arena, io, cache, "pub", lock_path) catch return error.DownloadFailed;
+    defer held.release(io);
     const data = std.Io.Dir.cwd().readFileAlloc(io, lock_path, arena, .limited(1 << 24)) catch {
         message.* = try std.fmt.allocPrint(arena, "pub: cannot read {s}", .{lock_path});
         return error.DownloadFailed;

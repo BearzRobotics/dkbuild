@@ -80,6 +80,41 @@ test "safeUrl, safeName and curlEntry" {
     try std.testing.expectEqualStrings("url = \"https://e.org/x.tgz\"\noutput = \"/tmp/dl-0\"\n", cfg.items);
 }
 
+/// Locks held against other dkbuild processes while one thing is fetched (a `dkbuild fetch` beside a `world` is
+/// an ordinary use). Without them two fetches of the same thing shared work directories and part files: one could
+/// delete the other's tree, or rewrite a download the other had just checked.
+pub const Held = struct {
+    prune: std.Io.File,
+    own: std.Io.File,
+    pub fn release(h: Held, io: std.Io) void {
+        h.own.close(io);
+        h.prune.close(io);
+    }
+};
+
+/// Waits for `what` (a kind and what is fetched) to be free in `cache`. Fetches share cache/locks/prune.lock, which
+/// `prune` takes alone.
+pub fn keyLock(arena: Allocator, io: std.Io, cache: []const u8, kind: []const u8, what: []const u8) !Held {
+    const dir = try std.fmt.allocPrint(arena, "{s}/locks", .{cache});
+    // (createDirPath refuses a last component that is a link to a directory)
+    std.Io.Dir.cwd().createDirPath(io, cache) catch {};
+    std.Io.Dir.cwd().createDirPath(io, dir) catch {};
+    var h: [32]u8 = undefined;
+    std.crypto.hash.sha2.Sha256.hash(what, &h, .{});
+    const prune = try std.Io.Dir.cwd().createFile(io, try std.fmt.allocPrint(arena, "{s}/prune.lock", .{dir}), .{ .truncate = false, .lock = .shared });
+    errdefer prune.close(io);
+    const own = try std.Io.Dir.cwd().createFile(io, try std.fmt.allocPrint(arena, "{s}/{s}-{s}.lock", .{ dir, kind, std.fmt.bytesToHex(h, .lower)[0..32] }), .{ .truncate = false, .lock = .exclusive });
+    return .{ .prune = prune, .own = own };
+}
+
+/// The lock at `path`, taken without waiting; null while another process holds it.
+pub fn tryExclusive(io: std.Io, path: []const u8) !?std.Io.File {
+    return std.Io.Dir.cwd().createFile(io, path, .{ .truncate = false, .lock = .exclusive, .lock_nonblocking = true }) catch |err| switch (err) {
+        error.WouldBlock => null,
+        else => err,
+    };
+}
+
 /// Path of the cached file for `sha256`.
 pub fn cachePath(arena: Allocator, cache: []const u8, sha256: []const u8) ![]const u8 {
     return std.fs.path.join(arena, &.{ cache, "sources", sha256 });
@@ -94,6 +129,8 @@ pub fn fetchOne(arena: Allocator, io: std.Io, cache: []const u8, src: recipe.Sou
             return error.Unsupported;
         },
         .tarball => |t| {
+            const held = keyLock(arena, io, cache, "source", t.sha256) catch return error.DownloadFailed;
+            defer held.release(io);
             if (!validSha256(t.sha256)) {
                 message.* = try std.fmt.allocPrint(arena, "'{s}': not a lowercase sha256", .{t.sha256});
                 return error.InvalidChecksum;
@@ -210,7 +247,8 @@ fn makeSnapshot(arena: Allocator, io: std.Io, cache: []const u8, spec: []const u
         message.* = try std.fmt.allocPrint(arena, "cannot resolve {s}: {s}", .{ dir, @errorName(err) });
         return error.DownloadFailed;
     };
-    const sh_path = try std.fmt.allocPrint(arena, "{s}/snapshot-{s}.sh", .{ adir, kind });
+    // its own copy: one file per kind was rewritten while another snapshot's shell might be reading it
+    const sh_path = try std.fmt.allocPrint(arena, "{s}/{s}.sh", .{ adir, id.items });
     std.Io.Dir.cwd().writeFile(io, .{ .sub_path = sh_path, .data = script }) catch |err| {
         message.* = try std.fmt.allocPrint(arena, "cannot write {s}: {s}", .{ sh_path, @errorName(err) });
         return error.DownloadFailed;
@@ -433,6 +471,8 @@ const dep_unpack =
 /// host's PATH (GOTOOLCHAIN=auto fetches the Go version the module asks for),
 /// and list them. The build uses the cache read-only, with GOPROXY=off.
 pub fn fetchGoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, patch_dir: []const u8, patches: []const []const u8, message: *[]const u8) Error!Status {
+    const held = keyLock(arena, io, cache, "go", tarball_sha256) catch return error.DownloadFailed;
+    defer held.release(io);
     const key = depsKey(arena, io, tarball_sha256, patch_dir, patches, &.{}) catch return error.DownloadFailed;
     adoptList(arena, io, cache, "godeps", tarball_sha256, key) catch return error.DownloadFailed;
     const out_path = try goDepsPath(arena, cache, key);
@@ -641,6 +681,8 @@ const cargo_guard =
 ;
 
 pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, patch_dir: []const u8, patches: []const []const u8, lock: ?CargoLock, message: *[]const u8) Error!Status {
+    const held = keyLock(arena, io, cache, "cargo", tarball_sha256) catch return error.DownloadFailed;
+    defer held.release(io);
     const key = cargoDepsKey(arena, io, tarball_sha256, patch_dir, patches, lock) catch return error.DownloadFailed;
     adoptList(arena, io, cache, "cargodeps", tarball_sha256, key) catch return error.DownloadFailed;
     const out_path = try cargoDepsPath(arena, cache, key);
@@ -702,6 +744,8 @@ pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_s
 /// zig-pkg/ back for `zig build --system zig-pkg` (SPEC 9.4 item 3). A tarball
 /// made by an older dkbuild (<sha256>.tar) is converted without the network.
 pub fn fetchZigDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha256: []const u8, message: *[]const u8) Error!Status {
+    const held = keyLock(arena, io, cache, "zig", tarball_sha256) catch return error.DownloadFailed;
+    defer held.release(io);
     const out_path = try zigDepsPath(arena, cache, tarball_sha256);
     if (std.Io.Dir.cwd().access(io, out_path, .{})) |_| return .cached else |_| {}
     const tmp = try std.fmt.allocPrint(arena, "{s}/zigdeps/tmp-{s}", .{ cache, tarball_sha256 });

@@ -81,6 +81,8 @@ pub fn lockKey(arena: Allocator, data: []const u8) ![]const u8 {
 /// file against the lock, then writes cache/pydeps/<key>.list (a copy of the
 /// lock; its presence means the fetch is complete).
 pub fn fetchLock(arena: Allocator, io: std.Io, cache: []const u8, lock_path: []const u8, message: *[]const u8) fetch.Error!fetch.Status {
+    const held = fetch.keyLock(arena, io, cache, "python", lock_path) catch return error.DownloadFailed;
+    defer held.release(io);
     const data = std.Io.Dir.cwd().readFileAlloc(io, lock_path, arena, .limited(1 << 22)) catch {
         message.* = try std.fmt.allocPrint(arena, "python: cannot read {s}", .{lock_path});
         return error.DownloadFailed;

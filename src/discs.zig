@@ -171,7 +171,7 @@ pub fn plan(arena: Allocator, sizes: []const u64, usable: u64) Allocator.Error![
 /// out: sources (taken file by file, the ones the recipes name), cargo-home and
 /// zig-global (download caches) and snapshots (work directories; the snapshots
 /// themselves are tarballs in cache/sources).
-const source_skip = [_][]const u8{ "sources", "cargo-home", "zig-global", "snapshots" };
+const source_skip = [_][]const u8{ "sources", "cargo-home", "zig-global", "snapshots", "locks" };
 
 /// The directories of <root>/cache that go on a source disc, sorted.
 fn sourceStores(arena: Allocator, io: std.Io, root: []const u8) ![]const []const u8 {
@@ -925,7 +925,7 @@ test "sourceStores: every directory of cache/ but the ones named as left out" {
     const io = std.testing.io;
     var tmp = std.testing.tmpDir(.{});
     defer tmp.cleanup();
-    for ([_][]const u8{ "python", "maven", "a-store-added-later", "sources", "cargo-home", "zig-global", "snapshots", "tmp-half" }) |d|
+    for ([_][]const u8{ "python", "maven", "a-store-added-later", "sources", "cargo-home", "zig-global", "snapshots", "locks", "tmp-half" }) |d|
         try tmp.dir.createDirPath(io, try std.fmt.allocPrint(a, "t/cache/{s}", .{d}));
     try tmp.dir.writeFile(io, .{ .sub_path = "t/cache/stray-file", .data = "x" });
     const got = try sourceStores(a, io, try tmp.dir.realPathFileAlloc(io, "t", a));
