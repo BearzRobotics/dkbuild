@@ -93,6 +93,9 @@ pub fn check(arena: Allocator, diag: *Diagnostic, set: Set) cfg.Error!void {
     if (capacity(set.media) == null) return cfg.fail(arena, diag, "media '{s}': give one of usb, cd, dvd, dvd-dl, bd25, bd50, bd100", .{set.media});
     // "_NN" for a disc of several
     if (set.label.len == 0 or set.label.len > 29) return cfg.fail(arena, diag, "label '{s}': 1 to 29 characters", .{set.label});
+    // These name directories that are deleted and replaced (out/<name>): ".." would be the build tree itself.
+    for ([_][]const u8{ set.name, set.label, set.arch }) |s| if (s.len == 0 or s[0] == '.' or s[0] == '-')
+        return cfg.fail(arena, diag, "'{s}': a name may not be empty or start with '.' or '-'", .{s});
     for ([_][]const u8{ set.name, set.label, set.arch }) |s| for (s) |c| {
         if (!std.ascii.isAlphanumeric(c) and c != '-' and c != '_' and c != '.')
             return cfg.fail(arena, diag, "'{s}': only letters, digits, '-', '_', '.'", .{s});
@@ -815,6 +818,17 @@ test "parse a set" {
     try std.testing.expectEqual(Kind.repo, s.kind);
     try std.testing.expectEqualStrings("FENRIROS_REPO", s.label);
     try std.testing.expectError(error.InvalidSet, parse(st.allocator(), "name = \"x\"\nkind = \"repo\"\nmedia = \"floppy\"\n", &diag));
+}
+
+test "a disc set name that would name another directory is refused (ID-03)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    var diag: Diagnostic = .{};
+    const a = st.allocator();
+    for ([_][]const u8{ "..", ".", ".hidden", "-rf", "" }) |bad| {
+        try std.testing.expectError(error.InvalidSet, parse(a, try std.fmt.allocPrint(a, "name = \"{s}\"\nkind = \"repo\"\nlabel = \"L\"\n", .{bad}), &diag));
+        try std.testing.expectError(error.InvalidSet, parse(a, try std.fmt.allocPrint(a, "name = \"x\"\nkind = \"repo\"\narch = \"{s}\"\n", .{bad}), &diag));
+    }
 }
 
 test "apkName" {

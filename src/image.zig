@@ -138,6 +138,9 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
     }
     for (img.packages) |p| for (img.exclude) |x| if (glob(x, p))
         return cfg.fail(arena, diag, "package '{s}' matches exclude pattern '{s}'", .{ p, x });
+    // out/<name> is deleted and replaced by each successful run: ".." would be the build tree itself.
+    for ([_][]const u8{ img.name, img.arch }) |s| if (!safeWord(s) or s[0] == '.' or s[0] == '-')
+        return cfg.fail(arena, diag, "'{s}': a name or arch is letters, digits, '-', '_', '.', '+', and does not start with '.' or '-'", .{s});
     for ([_][]const []const u8{ img.packages, img.services, &.{ img.name, img.hostname, img.label } }) |list| for (list) |s| if (!safeWord(s))
         return cfg.fail(arena, diag, "'{s}': only letters, digits, '-', '_', '.', '+'", .{s});
 
@@ -546,6 +549,18 @@ test "image files parse; bad outputs, excluded packages and odd names are refuse
     try std.testing.expect(std.mem.indexOf(u8, s, "useradd -R /target -m -s '/bin/bash' -G 'wheel,video' 'fenrir'") != null);
     try std.testing.expect(std.mem.indexOf(u8, s, "fenriros.tar.zst") != null);
     try std.testing.expect(std.mem.indexOf(u8, s, "mksquashfs") == null);
+}
+
+test "an image name that would name another directory is refused (ID-03)" {
+    var arena_state = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena_state.deinit();
+    var diag: Diagnostic = .{};
+    const a = arena_state.allocator();
+    // out/<name> is deleted when an image succeeds: ".." is the build tree itself
+    for ([_][]const u8{ "..", ".", ".hidden", "-rf" }) |bad|
+        try std.testing.expectError(error.InvalidImage, parse(a, try std.fmt.allocPrint(a, "name = \"{s}\"\npackages = [\"a\"]\noutput = [\"tar\"]\n", .{bad}), &diag));
+    try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\narch = \"../..\"\npackages = [\"a\"]\noutput = [\"tar\"]\n", &diag));
+    _ = try parse(a, "name = \"dkde-devel.2\"\npackages = [\"a\"]\noutput = [\"tar\"]\n", &diag);
 }
 
 test "an image's issue text is written to /etc/issue" {
