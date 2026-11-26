@@ -39,6 +39,17 @@ much more than the disk ever had.
 - **B2, stage 2** (roots filled from `repo/` only, a comparison with stage 1, and
   the forgotten-dependency test): not implemented. `tests/forgotten-dep.sh`
   exists but is skipped until stage 2. `base-devel` is built.
+  Agreed 2026-11-26, to be started after the audit bug fixes and the next release, once the packages that cannot
+  be installed are fixed. In two steps:
+  1. **A base image made from `repo/`.** `images/container-build.toml` and `bootstrap-root <tar>` look like the
+     two halves; neither has been tried for this. Make them work reliably (perhaps as one command), in a separate
+     tree so the working DKRescue root is not replaced. This finds many undeclared dependencies, but not those
+     that `base-devel` already includes.
+  2. **Stage 2 itself:** each build installs its declared dependencies from `repo/` with `apk add` (checked
+     dependencies, install scripts run) instead of unpacking files over the base image.
+  Expect many recipes to fail until their dependencies are declared. Keep DKRescue as the fallback and the first
+  bootstrap. Decide whether the base image's version is recorded with each package (changing it rebuilds nothing
+  today). Fits before the planned rebuild from an empty repository.
 - **B3, images**: partly done. The live ISOs boot; the installed-system image
   (`images/fenriros.toml`) still outputs only a tar, and the checks SPEC 13
   attributes to DKRescue's `CONSTRAINTS.md` cannot be run because that file is
