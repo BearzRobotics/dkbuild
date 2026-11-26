@@ -3,9 +3,12 @@
 # Qt, LibreOffice, Firefox/Thunderbird, Boost... Chimera's patches: the data
 # directory, pkg-config Requires, and VTIMEZONE output Thunderbird's calendar
 # needs.
+# r2 (2026-11-26): icu-libs depends on icu. The data is a separate file (--with-data-packaging=archive: /usr/share/icu/<version>/icudt*.dat)
+# that stays in the main package, and a program that needs only the libraries got icu-libs alone: no data (Firefox 159 crashed at start
+# on the dkde-devel image's file set). The two packages depend on each other (icu's tools need the libraries).
 name = "icu"
 version = "78.3"
-release = 1
+release = 2
 summary = "Unicode and globalization libraries (ICU)"
 license = "ICU"
 homepage = "https://icu.unicode.org"
@@ -32,3 +35,10 @@ cd source
 %make_install
 install -Dm644 ../LICENSE "$pkgdir/usr/share/licenses/icu/LICENSE"
 '''
+
+# the default -libs, plus the dependency on the data (see r2 above). Declared subpackages are matched before -devel, so this one must not
+# list /usr/lib/*.so: it would take the development links.
+[subpackages.libs]
+summary = "Shared libraries"
+paths   = ["/usr/lib/*.so.*"]
+depends = ["icu"]
