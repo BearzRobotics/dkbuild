@@ -1667,6 +1667,81 @@ fn say(comptime fmt: []const u8, args: anytype) void {
     std.debug.print(fmt, args);
 }
 
+/// Removes the file or link at `path`, never what a link points at. A directory stays.
+fn removeUnlessDirectory(io: std.Io, path: []const u8) !void {
+    const st = Dir.cwd().statFile(io, path, .{ .follow_symlinks = false }) catch |err| switch (err) {
+        error.FileNotFound => return,
+        else => return err,
+    };
+    if (st.kind != .directory) try Dir.cwd().deleteFile(io, path);
+}
+
+/// What a template's links may point into: its category (`main/`), and in a cports checkout the whole of it,
+/// where templates share patches across categories.
+fn templateTree(arena: Allocator, io: std.Io, dir: []const u8) ![]const u8 {
+    const real: []const u8 = try Dir.cwd().realPathFileAlloc(io, dir, arena);
+    const category = std.fs.path.dirname(real) orelse return real;
+    const base = std.fs.path.basename(category);
+    for ([_][]const u8{ "main", "user", "contrib" }) |c| if (std.mem.eql(u8, base, c)) return std.fs.path.dirname(category) orelse category;
+    return category;
+}
+
+/// The files to copy into a draft, and what is left out and why.
+const Plan = struct {
+    arena: Allocator,
+    io: std.Io,
+    inside: []const u8,
+    copies: std.ArrayList(struct { from: []const u8, to: []const u8 }) = .empty,
+    problems: std.ArrayList([]const u8) = .empty,
+
+    fn problem(p: *Plan, rel: []const u8, why: []const u8) !void {
+        try p.problems.append(p.arena, try std.fmt.allocPrint(p.arena, "{s} {s}; it was not copied", .{ rel, why }));
+    }
+
+    fn walk(p: *Plan, from: []const u8, rel: []const u8, kind: enum { patches, files }) !void {
+        var d = Dir.cwd().openDir(p.io, from, .{ .iterate = true }) catch |err| switch (err) {
+            error.FileNotFound => return,
+            error.NotDir => return p.problem(rel, "is not a directory"),
+            else => return err,
+        };
+        defer d.close(p.io);
+        var it = d.iterate();
+        while (try it.next(p.io)) |e| {
+            const path = try std.fs.path.join(p.arena, &.{ from, e.name });
+            const to = try std.fs.path.join(p.arena, &.{ rel, e.name });
+            const st = Dir.cwd().statFile(p.io, path, .{ .follow_symlinks = false }) catch |err| return err;
+            var kind_there = st.kind;
+            var source: []const u8 = path;
+            if (st.kind == .sym_link) {
+                // its contents are taken, if it leads to a file of the templates themselves
+                const real: []const u8 = Dir.cwd().realPathFileAlloc(p.io, path, p.arena) catch {
+                    try p.problem(to, "is a link to nothing");
+                    continue;
+                };
+                if (!(std.mem.startsWith(u8, real, p.inside) and real.len > p.inside.len and real[p.inside.len] == '/')) {
+                    try p.problem(to, "is a link out of the template tree");
+                    continue;
+                }
+                kind_there = (try Dir.cwd().statFile(p.io, real, .{})).kind;
+                if (kind_there != .file) {
+                    try p.problem(to, "is a link to something that is not a file");
+                    continue;
+                }
+                source = real;
+            }
+            if (kind == .patches and !(std.mem.endsWith(u8, e.name, ".patch") or std.mem.endsWith(u8, e.name, ".diff"))) {
+                try p.problem(to, "is not a .patch or .diff file");
+                continue;
+            }
+            if (kind_there == .directory and kind == .files) {
+                try p.walk(path, to, kind);
+            } else if (kind_there == .file) {
+                try p.copies.append(p.arena, .{ .from = source, .to = to });
+            } else try p.problem(to, "is not a plain file");
+        }
+    }
+};
+
 /// Reads `path` (a `template.py`, or the package directory holding one) and
 /// writes `<out_root>/<name>/package.toml`, copying `patches/` and `files/`.
 /// `overwrite`: replace a draft that is there already (`--force`).
@@ -1676,27 +1751,30 @@ pub fn importPath(arena: Allocator, io: std.Io, path: []const u8, out_root: []co
     const src = try Dir.cwd().readFileAlloc(io, tpl, arena, .limited(4 << 20));
     const dir = std.fs.path.dirname(tpl) orelse ".";
 
-    // patches/ (sorted) and files/ next to the template.
-    var patches: std.ArrayList([]const u8) = .empty;
+    // patches/ (sorted) and files/ next to the template. What is copied is decided first, so that the draft can
+    // say what could not be taken.
+    var plan: Plan = .{ .arena = arena, .io = io, .inside = try templateTree(arena, io, dir) };
     const patches_dir = try std.fs.path.join(arena, &.{ dir, "patches" });
-    if (Dir.cwd().openDir(io, patches_dir, .{ .iterate = true })) |d_const| {
-        var d = d_const;
-        defer d.close(io);
-        var it = d.iterate();
-        while (try it.next(io)) |e| {
-            if (e.kind == .file and (std.mem.endsWith(u8, e.name, ".patch") or std.mem.endsWith(u8, e.name, ".diff")))
-                try patches.append(arena, try arena.dupe(u8, e.name));
-        }
-        std.mem.sort([]const u8, patches.items, {}, struct {
-            fn lt(_: void, a: []const u8, b: []const u8) bool {
-                return std.mem.lessThan(u8, a, b);
-            }
-        }.lt);
-    } else |_| {}
+    try plan.walk(patches_dir, "patches", .patches);
     const files_dir = try std.fs.path.join(arena, &.{ dir, "files" });
-    const has_files = if (Dir.cwd().access(io, files_dir, .{})) |_| true else |_| false;
+    try plan.walk(files_dir, "files", .files);
+    var patches: std.ArrayList([]const u8) = .empty;
+    var has_files = false;
+    for (plan.copies.items) |c| {
+        if (std.mem.startsWith(u8, c.to, "patches/")) try patches.append(arena, c.to["patches/".len..]) else has_files = true;
+    }
+    std.mem.sort([]const u8, patches.items, {}, struct {
+        fn lt(_: void, x: []const u8, y: []const u8) bool {
+            return std.mem.lessThan(u8, x, y);
+        }
+    }.lt);
+    std.mem.sort([]const u8, plan.problems.items, {}, struct {
+        fn lt(_: void, x: []const u8, y: []const u8) bool {
+            return std.mem.lessThan(u8, x, y);
+        }
+    }.lt);
 
-    const conv = try convert(arena, src, .{ .origin = tpl, .patches = patches.items, .has_files = has_files });
+    const conv = try convert(arena, src, .{ .origin = tpl, .patches = patches.items, .has_files = has_files, .problems = plan.problems.items });
     // The name is the draft's directory: before anything is written, it must be a package name.
     if (!recipe.validPackageName(conv.name)) return error.BadPackageName;
     const out_dir = try std.fs.path.join(arena, &.{ out_root, conv.name });
@@ -1704,21 +1782,19 @@ pub fn importPath(arena: Allocator, io: std.Io, path: []const u8, out_root: []co
     // a draft there may have been finished by hand
     if (!overwrite) if (Dir.cwd().statFile(io, draft, .{ .follow_symlinks = false })) |_| return error.DraftExists else |_| {};
     try Dir.cwd().createDirPath(io, out_dir);
+    // Whatever is where something is to be written goes first, so that no write can follow a link out of the draft.
+    try removeUnlessDirectory(io, draft);
     try Dir.cwd().writeFile(io, .{ .sub_path = draft, .data = conv.toml });
-    for ([_]struct { from: []const u8, name: []const u8, copy: bool }{
-        .{ .from = patches_dir, .name = "patches", .copy = patches.items.len > 0 },
-        .{ .from = files_dir, .name = "files", .copy = has_files },
-    }) |c| {
-        if (!c.copy) continue;
-        // "from/." copies the contents, so converting the same template twice (a
-        // cports subpackage symlink points back at it) can't nest files/files.
-        const dest = try std.fs.path.join(arena, &.{ out_dir, c.name });
-        try Dir.cwd().createDirPath(io, dest);
-        const res = try std.process.run(arena, io, .{ .argv = &.{ "cp", "-r", try std.fmt.allocPrint(arena, "{s}/.", .{c.from}), dest } });
-        switch (res.term) {
-            .exited => |code| if (code != 0) return error.CopyFailed,
-            else => return error.CopyFailed,
+    for (plan.copies.items) |c| {
+        var end: usize = 0;
+        while (std.mem.indexOfScalarPos(u8, c.to, end, '/')) |slash| : (end = slash + 1) {
+            const parent = try std.fs.path.join(arena, &.{ out_dir, c.to[0..slash] });
+            try removeUnlessDirectory(io, parent);
+            Dir.cwd().createDir(io, parent, .default_dir) catch |err| if (err != error.PathAlreadyExists) return err;
         }
+        const dest = try std.fs.path.join(arena, &.{ out_dir, c.to });
+        try removeUnlessDirectory(io, dest);
+        try Dir.cwd().copyFile(c.from, Dir.cwd(), dest, io, .{});
     }
 
     var diag: recipe.Diagnostic = .{};

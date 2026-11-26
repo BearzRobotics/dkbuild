@@ -693,13 +693,21 @@ pub fn main(init: std.process.Init) !void {
         var inputs_list: std.ArrayList([]const u8) = .empty;
         var overwrite = false;
         var k: usize = 0;
+        var paths_only = false;
+        // every argument is read before anything is converted: a mistyped --out must not become the default one
         while (k < rest.len) : (k += 1) {
-            if (std.mem.eql(u8, rest[k], "--force")) {
+            if (paths_only or !std.mem.startsWith(u8, rest[k], "-")) {
+                try inputs_list.append(arena, rest[k]);
+            } else if (std.mem.eql(u8, rest[k], "--")) {
+                paths_only = true;
+            } else if (std.mem.eql(u8, rest[k], "--force")) {
                 overwrite = true;
-            } else if (std.mem.eql(u8, rest[k], "--out") and k + 1 < rest.len) {
+            } else if (std.mem.eql(u8, rest[k], "--out") and k + 1 < rest.len and !std.mem.startsWith(u8, rest[k + 1], "-")) {
                 k += 1;
                 out_dir = rest[k];
-            } else try inputs_list.append(arena, rest[k]);
+            } else if (std.mem.startsWith(u8, rest[k], "--out=") and rest[k].len > "--out=".len) {
+                out_dir = rest[k]["--out=".len..];
+            } else return die(usage);
         }
         if (inputs_list.items.len == 0) return die(usage);
         var failed = false;
