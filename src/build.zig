@@ -14,16 +14,16 @@ const pubdeps = @import("pubdeps.zig");
 const hackagedeps = @import("hackagedeps.zig");
 const pydeps = @import("pydeps.zig");
 /// Sets up npm's cache from the npm store in a build (npmdeps).
-const npm_offline_js = @embedFile("npm-offline.js");
-const pnpm_registry_js = @embedFile("pnpm-registry.js");
+const npm_offline_js = @embedFile("scripts/npm-offline.js");
+const pnpm_registry_js = @embedFile("scripts/pnpm-registry.js");
 /// gradledeps: the resolve step's init script, the store copier, and the build's init script.
-const gradle_resolve = @embedFile("gradle-resolve.gradle");
-const gradle_store_sh = @embedFile("gradle-store.sh");
-const gradle_offline = @embedFile("gradle-offline.gradle");
+const gradle_resolve = @embedFile("scripts/gradle-resolve.gradle");
+const gradle_store_sh = @embedFile("scripts/gradle-store.sh");
+const gradle_offline = @embedFile("scripts/gradle-offline.gradle");
 /// mavendeps: copies a restore's local repository into the shared Maven-layout store.
-const maven_store_sh = @embedFile("maven-store.sh");
+const maven_store_sh = @embedFile("scripts/maven-store.sh");
 /// nugetdeps: copies a restore's packages into the shared store.
-const nuget_store_sh = @embedFile("nuget-store.sh");
+const nuget_store_sh = @embedFile("scripts/nuget-store.sh");
 const macro = @import("macro.zig");
 const profile = @import("profile.zig");
 const tree = @import("tree.zig");

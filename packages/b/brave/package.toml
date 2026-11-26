@@ -8,7 +8,7 @@
 #     some test files that the -lite and chromium-linux-tarballs ones leave
 #     out).
 #   - crubit, as packages/c/chromium (its crates vendored at fetch time).
-#   - Brave: a snapshot (SPEC.md 5.3, src/snapshot-brave.sh): brave-core at
+#   - Brave: a snapshot (SPEC.md 5.3, src/scripts/snapshot-brave.sh): brave-core at
 #     the tag, the repositories its DEPS pins for Linux, and its JavaScript
 #     packages (pnpm, --ignore-scripts, musl) installed at fetch time, so the
 #     build is offline. Brave's own checkout (gclient and hooks) is replaced by

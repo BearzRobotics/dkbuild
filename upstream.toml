@@ -1,4 +1,4 @@
-# dkbuild upstream: per-package overrides for the release check (src/upstream.py).
+# dkbuild upstream: per-package overrides for the release check (src/scripts/upstream.py).
 #   series = "8.6."     only versions starting with this (stay on a major series)
 #   url = "..."         check this repository or page instead of the first source
 #   regex = "..."       group 1 is the version, matched against tags or page text

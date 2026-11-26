@@ -577,11 +577,11 @@ pub fn main(init: std.process.Init) !void {
             else => std.process.exit(1),
         };
     } else if (std.mem.eql(u8, cmd, "hackage-lock") or std.mem.eql(u8, cmd, "python-lock") or std.mem.eql(u8, cmd, "yarn-lock")) {
-        // src/hackage-lock.py, src/python-lock.py (embedded): download into
+        // src/scripts/hackage-lock.py, src/scripts/python-lock.py (embedded): download into
         // cache/hackage/ or cache/python/ and write the lock.
         if (rest.len == 0) return die(usage);
         const kind = cmd[0 .. cmd.len - "-lock".len];
-        const data = if (std.mem.eql(u8, kind, "hackage")) @embedFile("hackage-lock.py") else if (std.mem.eql(u8, kind, "python")) @embedFile("python-lock.py") else @embedFile("yarn-lock.py");
+        const data = if (std.mem.eql(u8, kind, "hackage")) @embedFile("scripts/hackage-lock.py") else if (std.mem.eql(u8, kind, "python")) @embedFile("scripts/python-lock.py") else @embedFile("scripts/yarn-lock.py");
         const dir = try std.fs.path.join(arena, &.{ root, "work", kind });
         try std.Io.Dir.cwd().createDirPath(init.io, dir);
         const script = try std.fs.path.join(arena, &.{ dir, try std.fmt.allocPrint(arena, "{s}.py", .{cmd}) });
@@ -601,12 +601,12 @@ pub fn main(init: std.process.Init) !void {
             else => std.process.exit(1),
         }
     } else if (std.mem.eql(u8, cmd, "upstream")) {
-        // The checker is Python (src/upstream.py, embedded): it reads the
+        // The checker is Python (src/scripts/upstream.py, embedded): it reads the
         // recipes with tomllib and asks each source's host for its releases.
         const dir = try std.fs.path.join(arena, &.{ root, "work", "upstream" });
         try std.Io.Dir.cwd().createDirPath(init.io, dir);
         const script = try std.fs.path.join(arena, &.{ dir, "upstream.py" });
-        try std.Io.Dir.cwd().writeFile(init.io, .{ .sub_path = script, .data = @embedFile("upstream.py") });
+        try std.Io.Dir.cwd().writeFile(init.io, .{ .sub_path = script, .data = @embedFile("scripts/upstream.py") });
         var argv: std.ArrayList([]const u8) = .empty;
         try argv.appendSlice(arena, &.{ "python3", "-I", script, root });
         for (rest) |a| {

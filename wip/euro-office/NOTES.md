@@ -10,7 +10,7 @@ report):
 - packages/e/euro-office-v8 (V8 8.9.45 static, snapshot:euro-office)
 - packages/e/euro-office-core (x2t and tools, snapshot:git + 9 pinned sources)
 - packages/e/euro-office-documentserver (sdkjs, web-apps, server, fonts, ...)
-- src/snapshot-euro-office.sh + its entry in src/fetch.zig
+- src/scripts/snapshot-euro-office.sh + its entry in src/fetch.zig
 - packages/l/libera-suite (the desktop app, 3b) + python-pywebview,
   python-proxy-tools, python-bottle
 
@@ -108,7 +108,7 @@ arm64 fixes). Nothing x86-only found in the native build.
   clang (clang_base_path), use_custom_libcxx=false, use_sysroot=false. Plus
   two patches, two stub BUILD.gn (gmock, cppgc) and four enum-bitfield
   narrowings for clang >= 20.
-- Here: `snapshot:euro-office v8 8.9.45 281ba2c…` (src/snapshot-euro-office.sh):
+- Here: `snapshot:euro-office v8 8.9.45 281ba2c…` (src/scripts/snapshot-euro-office.sh):
   V8 + only the DEPS entries a monolith reads (build, buildtools,
   base/trace_event/common, googletest, icu, jinja2, markupsafe, zlib,
   tools/clang) at DEPS's commits, read from DEPS with Python's ast (nothing
@@ -349,7 +349,7 @@ Two new snapshots fetched at the same time (each recipe still at the
 placeholder sha256 of 64 zeros) share one temporary file,
 `cache/sources/0000…0000.part`: the DocumentServer snapshot was stored under
 a sha256 whose content was another agent's pve-qemu snapshot. The
-DocumentServer tarball was then packed by hand with src/snapshot-git.sh to a
+DocumentServer tarball was then packed by hand with src/scripts/snapshot-git.sh to a
 private path and put in cache/sources under its own sha256 (69ccd4b…). The
 same run had also left four submodules (dictionaries, document-formats,
 document-templates, sdkjs-forms) registered but not checked out after

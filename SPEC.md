@@ -1456,7 +1456,7 @@ ai/AGENTS.md      notes for coding agents
 | `fetch.zig`, `inputs.zig`, `npmdeps.zig`, `pydeps.zig`, `hackagedeps.zig`, `gemdeps.zig`, `pubdeps.zig` | the fetch step and the dependency stores (7.4); the rebuild records and hashes (7.2) |
 | `build.zig`, `sandbox.zig`, `scan.zig`, `split.zig`, `sched.zig` | the steps of 7, the sandbox (7.1), the scans (5.6), subpackage splitting (5.7), the scheduler (`-P`) |
 | `image.zig`, `discs.zig`, `bootstrap.zig`, `doctor.zig`, `cbuild.zig`, `term.zig` | images (8) and discs, `bootstrap-root` (9.2), `doctor` (3.1), the Chimera importer (5.9), terminal colors |
-| scripts embedded in the binary | `npm-offline.js`, `pnpm-registry.js`, `gradle-*.gradle`, `gradle-store.sh`, `nuget-store.sh`, `snapshot-*.sh` (5.3), `python-lock.py`, `hackage-lock.py`, `yarn-lock.py`, `upstream.py`, `discs-import.sh` |
+| scripts embedded in the binary (all in `src/scripts/`) | `npm-offline.js`, `pnpm-registry.js`, `gradle-*.gradle`, `gradle-store.sh`, `nuget-store.sh`, `snapshot-*.sh` (5.3), `python-lock.py`, `hackage-lock.py`, `yarn-lock.py`, `upstream.py`, `discs-import.sh` |
 
 apk is not wrapped in a module: `apk mkpkg`, `mkndx` and `add` are run as
 programs.

@@ -2,7 +2,7 @@
 # desktop app, on the system Electron (3.32.0 is built for Electron 42, as
 # FenrirOS's). npm packages from the npm store (`npmdeps`); the media library
 # (costumes, sprites, sounds, backdrops), which its build downloads with
-# `npm run fetch`, is a snapshot made at fetch time (src/snapshot-scratch-media.sh,
+# `npm run fetch`, is a snapshot made at fetch time (src/scripts/snapshot-scratch-media.sh,
 # each asset checked against the MD5 it is named by), for the scratch-gui
 # version package-lock.json pins.
 # Packaging with electron-builder downloads an Electron: instead webpack

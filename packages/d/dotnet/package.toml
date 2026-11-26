@@ -1,6 +1,6 @@
 # .NET 10 (SDK 10.0.114, runtime and ASP.NET Core 10.0.14), built from source
 # with upstream's offline "source-only" build, as Fedora and Alpine do.
-# The source is a snapshot (src/snapshot-dotnet.sh): the VMR (dotnet/dotnet),
+# The source is a snapshot (src/scripts/snapshot-dotnet.sh): the VMR (dotnet/dotnet),
 # the previously source-built artifacts with linux-musl-x64 packages
 # (prep-source-build.sh --bootstrap-rid), and the seed: Microsoft's own
 # linux-musl-x64 SDK, which the build runs on (as Go, Rust and Java start from

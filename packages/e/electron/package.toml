@@ -1,7 +1,7 @@
 # Electron 42, for Code - OSS 1.138.0 (built for Electron 42.10.0), and the
 # first Chromium FenrirOS builds itself (Brave follows). Electron 43 and the
 # newest Code - OSS come after this one builds.
-# The source is a snapshot (SPEC.md 5.3, src/snapshot-electron.sh): Electron's
+# The source is a snapshot (SPEC.md 5.3, src/scripts/snapshot-electron.sh): Electron's
 # gclient checkout with its pinned Chromium (148.0.7778.280, as its DEPS has
 # it), Electron's patches applied, and its node_modules (Electron's own yarn
 # release) and third_party/node's (npm ci) installed at fetch time, so the

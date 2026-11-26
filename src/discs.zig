@@ -375,7 +375,7 @@ fn hashAll(arena: Allocator, io: std.Io, items: []const Item, pieces: []const Pi
     }
 }
 
-const import_sh = @embedFile("discs-import.sh");
+const import_sh = @embedFile("scripts/discs-import.sh");
 
 pub fn make(arena: Allocator, io: std.Io, t: tree.Tree, set: Set, opts: Options) !void {
     const out_final = try std.fs.path.join(arena, &.{ opts.root, "out", set.name });
