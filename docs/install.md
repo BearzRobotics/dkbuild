@@ -1,9 +1,12 @@
 # Installing FenrirOS by hand
 
-`dkinstaller` (on the base, rescue and dkde live ISOs) does this for you. This
-page is the manual way: it is what the installer does step by step, with the
-choices the installer does not offer yet (the boot loader, the root file system).
-Use it when you want a different layout, when the installer is not on your
+`dkinstaller` (`sudo dkinstall`, on the base, rescue, dkde, dkde-devel and
+hyprland live ISOs) does this for you. This page is the manual way: it follows
+what the installer does, step by step, but is not an exact copy of it. Since
+0.0.6 the installer also lets you choose the root file system (ext4, ext3, ext2,
+btrfs or XFS; XFS not with dklilo) and the boot loader (dklilo, GRUB or
+systemd-boot), as far as the live disc has the tools. Use this page when you want
+something the installer does not offer, when the installer is not on your
 medium, or to understand what the installer does.
 
 **This erases the disk you choose.** Check the device name twice (`lsblk`).
@@ -12,29 +15,58 @@ medium, or to understand what the installer does.
 
 | Part | Status |
 |---|---|
-| UEFI, GPT, ext4 root, systemd-boot, system unpacked from `fenriros.tar.zst` | done and tested (QEMU) |
-| dklilo on BIOS or UEFI (what `dkinstaller` runs) | steps below are the installer's own; the installer is not yet verified end to end on hardware |
-| GRUB on BIOS or UEFI | the steps are GRUB's standard ones; not yet run on FenrirOS |
+| UEFI, GPT, ext4 root, systemd-boot, system unpacked from `fenriros.tar.zst` | recorded earlier as tested (QEMU). The `root=PARTUUID` setting in 6c was added to this page later and is not tested by hand |
+| dklilo on BIOS or UEFI (the installer's default) | steps below follow the installer's; the installer is not yet verified end to end on hardware, and installing to a disk was not tested with the 2026-11-24 `dkde-devel` ISO |
+| GRUB on BIOS or UEFI | these steps are not tested by hand. A GRUB built with Clang (r3) installed in QEMU but did not boot; r6 (built with GCC) has no recorded boot test |
 | Copying the live medium's `rootfs.sfs` instead of a tar | the steps are the installer's own; not yet run by hand |
-| btrfs or XFS as the root file system | built into the kernel from linux r4 (the next kernel build); until then they are modules and need an initramfs (`docs/initramfs.md`). XFS needs a separate `/boot` for dklilo. Not yet run on FenrirOS |
+| btrfs or XFS as the root file system | built into the kernel from linux r4 and linux-lts r4 (both built); with an older kernel they are modules and need an initramfs (`docs/initramfs.md`). XFS needs a separate `/boot` for dklilo. These steps are not tested |
 | ZFS as the root file system | needs the installed-system initramfs with ZFS: not available yet |
 
 Where a step says "unverified", treat it as the plan and read the result.
 
 ## 0. What you need
 
-- A live ISO (`images/base.toml`, `rescue.toml` or `dkde.toml`) written to a USB
-  stick or a disc, booted in the firmware mode you want to install for (UEFI or
-  BIOS/CSM). Secure Boot off.
+- A live ISO (`images/base.toml`, `rescue.toml`, `dkde.toml` or
+  `dkde-devel.toml`) written to a USB stick or a disc, booted in the firmware mode
+  you want to install for (UEFI or BIOS/CSM). Secure Boot off. How to log in is
+  below.
 - The system to install, either:
   - **a.** `out/fenriros/fenriros.tar.zst`, made on the build machine with
     `dkbuild image images/fenriros.toml` (copy it to a stick or fetch it over the
     network), or
   - **b.** the live medium itself: `/run/live/medium/live/rootfs.sfs`, the live
     system's file system image. This is what `dkinstaller` copies.
-- The tools the live ISOs carry (`rescue-tools`): `sgdisk` or `sfdisk`, `mkfs.*`,
-  `unsquashfs`, `blkid`, `chroot`, and a boot loader (`dklilo` on all of them;
-  `grub` on the rescue ISO).
+- The tools. All of these ISOs have `sfdisk`, `blkid`, `mkfs.ext4`, `mkfs.vfat`,
+  `unsquashfs`, `zstd`, `chroot` and `dklilo`. The rest differs:
+
+  | Tool | `base` | `rescue` | `dkde` | `dkde-devel` |
+  |---|---|---|---|---|
+  | `sgdisk` (in `rescue-tools`) | no | yes | no | yes |
+  | `mkfs.btrfs`, `mkfs.xfs` | no | yes | yes | yes |
+  | `grub` | no | yes, without the platform modules | no | yes, with `grub-i386-pc` (BIOS) only |
+
+  Without `sgdisk`, make the same layout with `sfdisk` or another partitioning
+  tool. None of these four has `grub-x86_64-efi` or `systemd-boot`.
+
+### Logging in to the live system
+
+On each of these the live user has no password (press Enter if asked), is in
+`wheel`, and uses `sudo` for root (press Enter at its password prompt too). The
+images set no root password: root is locked.
+
+| Image | User | How it starts |
+|---|---|---|
+| `base` | `live` | text console; logged in by itself on tty1 |
+| `rescue` | `rescue` | logged in by itself on tty1, which starts the DKDE desktop; tty2-tty6 and serial give a text login |
+| `dkde` | `live` | greetd starts the DKDE desktop as `live`; after a logout, the greeter accepts the empty password; text consoles on tty1-tty6, greetd on tty7 |
+| `dkde-devel` | `live` | as `dkde` (with elogind instead of seatd); the text consoles say how to log in, and which logs to read if the desktop or login screen did not start: `~/.local/state/dkde/session.log`, `/tmp/dkde-greeter-*.log`, `sudo dinitctl status greetd` |
+| `hyprland` | `live` | greetd starts `ml4w-session` (Hyprland) |
+
+This table is what the image files ask for. Of the current live images, only the
+`dkde-devel` ISO of 2026-11-24 has a recorded desktop test: in QEMU (BIOS, the
+disc's boot loader, standard VGA and virtio) the desktop, the login screen, an
+X11 sign-in (the login screen preselects "dkde (X11, dkde-wm)") and polkit
+worked. VirtualBox, real hardware, installing to a disk and GRUB were not tested.
 
 ## 1. Choose firmware and boot loader
 
@@ -168,7 +200,15 @@ unsquashfs -f -d /mnt /run/live/medium/live/rootfs.sfs
 This copies the *live* system, so it has the live user and live settings that
 the tar does not. After the chroot step below, remove the live user
 (`userdel -r <name>`, the first login with uid 1000 or more; check
-`/etc/passwd`) and create your own.
+`/etc/passwd`) and create your own (`useradd -m -G wheel,video,render
+-s /bin/bash <name>`). Also remove the live login settings, whichever are there:
+
+- `--autologin <name>` on the `command =` line of `/etc/dinit.d/tty1`;
+- the `[initial_session]` block at the end of `/etc/greetd/config.toml`;
+- ` nullok` on the `auth` line of `/etc/pam.d/greetd`;
+- the live login text in `/etc/issue`;
+- on `rescue`, check `/etc/skel/.profile` (copied into new users' homes): its
+  last lines start the desktop on tty1.
 
 ## 5. Configure, inside the new system
 
@@ -194,28 +234,37 @@ In the chroot:
 ```sh
 passwd <user>                # the image's user starts locked; root stays locked
 ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime     # your zone
-ls /boot                     # note the kernel name: vmlinuz-<version>-dkrescue
+ls /boot                     # note the kernel name: vmlinuz-<series>-dkrescue (for example 7.3)
 ```
 
 ## 6. Install the boot loader
 
 Pick one.
 
+Installed systems have no initramfs, so the kernel finds its root only by
+`root=/dev/...` or `root=PARTUUID=...`, not `root=UUID=...`. Get the root
+partition's PARTUUID with `blkid -s PARTUUID -o value <root partition>` (outside
+the chroot, where `$ROOT` is set).
+
+The `fenriros` image has `systemd-boot` but neither `dklilo` nor `grub`: for 6a
+or 6b on it, add the package first (see "Packages after installing").
+
 ### 6a. dklilo (BIOS or UEFI)
 
-`/boot/dklilo.conf` (this is what the installer writes; `root=` is the root
-partition's PARTUUID, from `blkid -s PARTUUID -o value "$ROOT"`):
+`/boot/dklilo.conf` (modelled on what the installer writes, which names its
+entries `dkrescue` and `dkrescue-safe`; `root=` is the root partition's
+PARTUUID):
 
 ```
 timeout = 50
 default = fenriros
 
-image = /boot/vmlinuz-<version>-dkrescue
+image = /boot/vmlinuz-<series>-dkrescue
     label = fenriros
     root = PARTUUID=<partuuid>
     append = "ro quiet"
 
-image = /boot/vmlinuz-<version>-dkrescue
+image = /boot/vmlinuz-<series>-dkrescue
     label = fenriros-safe
     root = PARTUUID=<partuuid>
     append = "ro nomodeset"
@@ -232,7 +281,8 @@ dklilo install-uefi --yes --removable /boot/efi    # if the firmware's boot list
 ```
 
 dklilo shows every write first and refuses to overwrite a boot loader or data it
-does not recognise. After a kernel update, edit the `image =` lines by hand (it
+does not recognise. A kernel update within the same series keeps the file name.
+When the name changes (a new series), edit the `image =` lines by hand (dklilo
 needs no re-install, only the new name in the config); there is no kernel hook
 for dklilo yet.
 
@@ -242,6 +292,11 @@ If the platform packages are not installed yet: `apk add grub grub-i386-pc`
 (BIOS) or `apk add grub grub-x86_64-efi` (UEFI).
 
 ```sh
+# no initramfs: boot by PARTUUID (the installer writes the same two settings)
+mkdir -p /etc/default/grub.d
+printf 'GRUB_DISABLE_LINUX_UUID=true\nGRUB_DISABLE_LINUX_PARTUUID=false\n' \
+    > /etc/default/grub.d/50-partuuid.cfg
+
 # BIOS (GPT with the BIOS boot partition, or MBR):
 grub-install --target=i386-pc "$DISK"
 
@@ -260,12 +315,14 @@ exists). Kernel options go in `GRUB_CMDLINE_LINUX_DEFAULT` in `/etc/default/grub
 
 ```sh
 bootctl install                  # systemd-boot onto the ESP, and a UEFI boot entry
+# gen-systemd-boot writes root=UUID=..., which needs an initramfs; the last root= wins
+echo 'SD_BOOT_CMDLINE="root=PARTUUID=<partuuid>"' > /etc/default/systemd-boot
 gen-systemd-boot                 # entries for the installed kernel(s)
 ```
 
 Later kernels: installing the `linux` package runs `gen-systemd-boot`, which
 rewrites the entries from the kernels in `/boot`. Extra kernel options go in
-`/etc/default/systemd-boot` as `SD_BOOT_CMDLINE="..."`.
+`SD_BOOT_CMDLINE="..."` in `/etc/default/systemd-boot`, after the `root=`.
 
 ## 7. Reboot
 
@@ -275,25 +332,31 @@ umount -R /mnt
 reboot
 ```
 
-Log in on the console, then start the desktop with `dkde-session` (the default
-desktop), or `Hyprland`. This image has no greetd; the dkde live ISO logs in
-through greetd by itself.
+For a system from the `fenriros` tar: log in on the console, then start the
+desktop with `dkde-session` (the default desktop), or `Hyprland`. greetd is
+installed (it comes with the desktop) but the image does not enable its service.
+A system copied from a live medium keeps that medium's services.
 
 ## Packages after installing
 
 There is no repository server; packages come on a **repository ISO** set (all
 packages, signed), made with `dkbuild discs images/repo.toml`. Each disc has an
 `import.sh` that copies a set into one directory. Mount it, or the USB stick it
-is on, and add it:
+is on, and add it. On a disc or a one-disc image the repository is under
+`data/apks/`; in a directory filled by `import.sh` it is under `apks/`:
 
 ```sh
 mkdir -p /mnt/repo
 mount -o ro,loop /path/to/fenriros-repo.iso /mnt/repo   # a file; for a disc or stick: mount -o ro /dev/sr0 /mnt/repo
-echo /mnt/repo/apks/x86_64/Packages.adb >> /etc/apk/repositories   # or, on an image made by dkbuild image:
-                                                                    # uncomment the #@cdrom line in /etc/apk/repositories
-                                                                    # and mount the disc at /mnt/cdrom
+echo /mnt/repo/data/apks/x86_64/Packages.adb >> /etc/apk/repositories
 apk update && apk add <package>
 ```
+
+An image made by `dkbuild image` has a commented-out `#@cdrom` line in
+`/etc/apk/repositories`. To use it, mount the disc at `/mnt/cdrom`, uncomment
+it and check its path (a disc needs `/mnt/cdrom/data/apks/x86_64/Packages.adb`;
+the line as written has no `data/`). With the `@cdrom` tag, packages are added as
+`apk add <package>@cdrom`.
 
 A newer disc and `apk upgrade` bring updates. The packages are signed with the
 key in `/etc/apk/keys`, whatever they come from.

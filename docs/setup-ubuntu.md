@@ -1,8 +1,8 @@
 # Setting up dkbuild on Ubuntu
 
 This takes a bare Ubuntu machine (24.04 is the one this was tested against) to a signed apk repository you built
-yourself. Nothing here needs root except installing packages and one kernel setting. FenrirOS does not exist yet, so
-Ubuntu is the first host.
+yourself. Nothing here needs root except installing packages and one kernel setting. FenrirOS is not yet a build host,
+so Ubuntu is the first one.
 
 What you will have at the end: `repo/x86_64/` with `.apk` files and a signed `Packages.adb` index, built from the
 recipes in `packages/` inside a sandbox on top of the DKRescue image.
@@ -11,15 +11,15 @@ recipes in `packages/` inside a sandbox on top of the DKRescue image.
 
 | | |
 |---|---|
-| Disk | about 20 GB free where the project lives (the unpacked image is 4.2 GB, plus sources, build trees, packages) |
-| RAM | 8 GB is enough for what is in the tree now; LLVM, later, is what needs it |
+| Disk | at least 20 GB free where the project lives, which is what `doctor` checks (the unpacked image is 4.2 GB, plus sources, build trees, packages). The whole tree needs far more: on the build machine on 2026-11-25, `cache/` was about 139 GB and `repo/` 24 GB, not counting build trees |
+| RAM | 8 GB is enough for small sets of packages; use at least 16 GB for the whole tree (LLVM, Rust and other large builds; a 20 GB `rustc` was once killed on a 30 GB machine) |
 | Kernel | Linux 5.11 or newer with user namespaces and overlayfs (every current Ubuntu has both) |
 | CPU | x86_64 (the only architecture built so far) |
 
 ## 2. Host packages
 
 ```sh
-sudo apt install ca-certificates curl git tar xz-utils lzip xorriso squashfs-tools util-linux uidmap openssl golang-go
+sudo apt install ca-certificates curl git tar unzip xz-utils lzip xorriso squashfs-tools util-linux uidmap openssl golang-go
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh     # cargo, for recipes with Rust dependencies
 ```
 
@@ -27,11 +27,12 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh     # cargo, for 
 |---|---|
 | `curl`, `ca-certificates` | downloading sources: the only step that uses the network |
 | `golang-go` (any version), `cargo` (rustup's is fine) | vendoring the Go modules and Rust crates of recipes with `godeps` or `cargodeps`, at fetch time; `GOTOOLCHAIN=auto` fetches whatever newer Go a module asks for |
-| `tar`, `xz-utils` | source tarballs |
+| `tar`, `xz-utils`, `unzip` | source tarballs and `.zip` sources |
 | `xorriso`, `squashfs-tools` | reading the DKRescue ISO and unpacking its root |
 | `util-linux` | `unshare`, used by `doctor` and `bootstrap-root` to test namespaces |
+| `uidmap` | `dkbuild image` with users (your ranges in `/etc/subuid` and `/etc/subgid`) |
 | `openssl` | making the repository signing key |
-| `git` | cloning this project and `toml-zig` |
+| `git` | cloning this project |
 
 ## 3. Let Ubuntu run the sandbox
 
@@ -59,18 +60,16 @@ your `PATH`. Check with `zig version`.
 
 ## 5. Get the code
 
-dkbuild depends on the `toml-zig` library, which it finds **next to it**, so clone the two side by side:
-
 ```sh
 mkdir -p ~/de && cd ~/de
-git clone https://github.com/BearzRobotics/toml-zig.git
 git clone https://github.com/BearzRobotics/dkbuild.git
 cd dkbuild
 zig build                                  # -> zig-out/bin/dkbuild
 ```
 
-Both repositories are private: sign in first (`gh auth login`, or use a token or SSH key). If the clone of
-`dkbuild` sits anywhere other than next to `toml-zig`, the build fails with a missing `../toml-zig`.
+The repository is public. dkbuild's one library,
+`toml-zig`, needs no clone of its own: `build.zig.zon` pins its v0.3.0 release by URL and hash, and the copy is
+committed under `zig-pkg/`.
 
 ## 6. Check the machine
 
@@ -129,21 +128,22 @@ private key and `keys/*.pub` do not match, the index step fails; that is the thi
 
 ```sh
 ./zig-out/bin/dkbuild check          # every recipe in packages/ is valid
-./zig-out/bin/dkbuild world          # build every recipe that is out of date
+./zig-out/bin/dkbuild pkg zstd       # a first, small build
+./zig-out/bin/dkbuild world --keep-going   # every recipe that is out of date
 ls repo/x86_64/                      # the packages and Packages.adb
 ```
 
-What to expect: the first run downloads the sources (kept in `cache/`) and builds in dependency order; the 12
-packages currently in the tree (35 `.apk` files with their `-devel`, `-doc` and `-static` parts) took about
-3 minutes from a clean clone, downloads included, and about 2 once the sources were cached. Each package prints
+What to expect: the first run downloads the sources (kept in `cache/`) and builds in dependency order. The tree has
+about 3,200 recipes, so building all of it takes a very long time and a lot of disk, and not every recipe builds
+(see `docs/handoff.md` and `docs/unbuildable.md`); `--keep-going` carries on past failures. Each package prints
 `built <name>` and where its log is (`logs/x86_64/`). Run it again and it says `up to date` for everything,
 because a package is rebuilt only when its recipe, patches, files, the architecture profile or something it
 builds against changes. `dkbuild pkg <name>...` builds just those and what they need.
 
 Things that look like errors and are not:
 
-- `note: 'x' is assumed to be in the base image` — a dependency the tree does not build; the DKRescue image has
-  it. (Stage 1 does not check this; stage 2 will.)
+- `note: taken from the base image (no recipe provides them): ...` — dependencies the tree does not build; they
+  are expected to be in the DKRescue image. (Stage 1 does not check this; stage 2 will.)
 - `error: <name>: its recipe, patches or files changed but the release is still rN` — you edited a recipe without
   bumping its `release`. Bump it, or pass `--force`. After you change something every recipe depends on, such as
   `profiles/x86_64.toml`, use `dkbuild world --force` once.
@@ -161,9 +161,9 @@ echo http://host/x86_64/Packages.adb >> /etc/apk/repositories
 apk update && apk add zstd
 ```
 
-(A line whose URL ends in `.adb` is an index; see `apk-repositories(5)`.) Packages built by dkbuild have been
-unpacked and run with `apk extract` in the tests; installing them into a running system with `apk add` is for stage 2
-and the images, which are not built yet.
+(A line whose URL ends in `.adb` is an index; see `apk-repositories(5)`.) `dkbuild image` installs these packages
+with `apk add` into the images it makes (`images/*.toml`), and `tests/repo-install.sh` checks an `apk add` from the
+repository. `docs/install.md` covers installing a system and using a repository disc.
 
 ## 11. The tests
 
@@ -173,8 +173,9 @@ and the images, which are not built yet.
 
 Unit tests, the recipe check, then end-to-end scripts that build small test packages in the real sandbox: no
 network, no host files visible, nothing left behind; dependency chains; rebuild decisions; installing from the
-repository; linking a program against the musl package; the Chimera importer. All should print `ok:` (the
-forgotten-dependency one says `skipped`, by design).
+repository; linking a program against the musl package; the Chimera importer; parallel builds. All should print `ok:`
+(the forgotten-dependency one says `skipped`, by design). `tests/qemu-iso.sh` and `tests/qemu-pam.sh` boot a built
+ISO in QEMU; `run-all.sh` does not run them.
 
 ## 12. Bringing in a Chimera recipe
 
@@ -203,12 +204,18 @@ keeps the attribution.
 | `keys/` | public signing key(s) | yes |
 | `docs/`, `SPEC.md` | design | yes |
 | `rootfs/dkrescue/` | the unpacked build machine (4.2 GB) | no |
-| `cache/` | downloaded sources, named by checksum, and the shared Go, Rust and Zig dependency stores (SPEC.md 7.4) | no |
+| `cache/` | downloaded sources, named by checksum, and the shared dependency stores (Go, Rust, Zig and others; SPEC.md 7.4) | no |
 | `work/` | build trees; removed when each build ends | no |
 | `logs/x86_64/` | one log per build | no |
 | `repo/x86_64/` | **the repository you built** | no |
+| `out/` | images and disc sets (`dkbuild image`, `dkbuild discs`) | no |
+| `zig-pkg/` | the pinned copy of `toml-zig` | yes |
 
-To start over: delete `repo/`, `work/`, `logs/` (and `cache/` to download again). Unpack the image again with
+Optional: to keep the large directories on another disk, make `repo/x86_64`, `logs/x86_64`, `cache`, `work`,
+`rootfs` and `out` symbolic links to directories there (the build machine uses a second disk mounted at
+`/mnt/dkbuild`). `repo/` itself stays a directory. `.gitignore` covers the links.
+
+To start over: delete the contents of `repo/x86_64/`, `work/` and `logs/` (and of `cache/` to download again). Unpack the image again with
 `bootstrap-root --force` if `rootfs/dkrescue/` is damaged.
 
 ## 14. When something goes wrong
@@ -221,8 +228,7 @@ To start over: delete `repo/`, `work/`, `logs/` (and `cache/` to download again)
 | `no signing key` / `signing key ... not found` | step 8 |
 | `apk mkndx failed` after a key change | `keys/*.pub` does not match `~/.config/dkbuild/signing.rsa` |
 | `download of ... failed: ... 404` | the upstream moved the file; the recipe's URL (or checksum) needs updating |
-| `No space left on device` | free 20 GB; also `df -h /tmp` (nothing here uses `/tmp` for big files, but other tools do) |
-| `failed to open ../toml-zig` while building dkbuild | clone `toml-zig` next to `dkbuild` (step 5) |
+| `No space left on device` | free more space (see section 1); also `df -h /tmp` (nothing here uses `/tmp` for big files, but other tools do) |
 
 A failed build prints the end of its log; the whole log is in `logs/x86_64/<name>-<version>-r<release>.log`.
 `dkbuild pkg --keep-root <name>` keeps the build tree under `work/<name>/` for a look.
@@ -231,7 +237,7 @@ A failed build prints the end of its log; the whole log is in `logs/x86_64/<name
 
 - Only **stage 1**: builds run on the DKRescue image, so a dependency a recipe forgot to declare can still build
   (the image has it). Stage 2 will fill build roots from declared packages only and catch that.
-- No LLVM, no images, no cross-compiling; only x86_64.
+- No cross-compiling; only x86_64.
 - Recipes can be imported from Chimera (step 12); a Solus `package.yml` importer was dropped (recipes come from Chimera and Alpine).
 
 The design, with the reasoning, is in `SPEC.md` and `docs/decisions/`.
@@ -247,7 +253,7 @@ Everything the build needs that is not in git:
 | `zig` 0.17.1 | on the PATH | Builds dkbuild, and fetches Zig dependencies for recipes with the `zigdeps` option. |
 | `go`, `cargo` | on the PATH | Vendor Go modules and Rust crates for recipes with `godeps` and `cargodeps` (fetch time only). |
 | `cache/` (optional) | the project's `cache/` | Copy it over (or from a source ISO, when there is one) and nothing is downloaded again: every source tarball and vendored dependency is in it, named by checksum. |
-| `lzip` and the other host tools | `apt install` | `dkbuild doctor` lists what is missing. |
+| `lzip` and the other host tools | `apt install` | See section 2. `dkbuild doctor` lists most of what is missing (it does not check for `lzip`, `go` or `cargo`). |
 
 Then:
 

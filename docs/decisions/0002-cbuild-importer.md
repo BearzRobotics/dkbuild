@@ -1,5 +1,8 @@
 # 0002: Importing Chimera cbuild templates
 
+> Note, 2026-11-25: the importer now translates more calls than point 4 lists (also
+> `install_man` and `install_dir`). SPEC.md 5.9 describes its current behaviour.
+
 Status: implemented (`src/cbuild.zig`, `dkbuild import-cbuild`), tested on fixtures and on
 the real cports templates zstd, dinit, lvm2 and curl.
 

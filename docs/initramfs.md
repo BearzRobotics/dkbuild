@@ -1,6 +1,6 @@
 # The initramfs for installed systems
 
-Status: **design, not implemented** (2026-11-20). btrfs and XFS are built into the kernel from linux r4 / linux-lts r4 (decided 2026-11-20; takes effect with the next kernel build), so a single-disk btrfs or XFS root already boots without it; the initramfs is for what has to be assembled first. The live ISOs already have an
+Status: **design, not implemented** (2026-11-20). btrfs and XFS are built into the kernel from linux r4 / linux-lts r4 (decided 2026-11-20; both kernels have since been built; booting from a btrfs or XFS root is not tested), so a single-disk btrfs or XFS root already boots without it; the initramfs is for what has to be assembled first. The live ISOs already have an
 initramfs (`live-initramfs`); installed systems have none, and boot because the
 kernel has ext4, NVMe, SATA (AHCI), USB storage and virtio built in.
 
@@ -11,23 +11,26 @@ modules (`=m`). In the current config (`packages/l/linux/files/config`):
 
 | Built in | Modules |
 |---|---|
-| ext4, vfat, exFAT, NTFS3, ISO 9660, squashfs, overlayfs, UDF | **btrfs, XFS, f2fs** |
-| device-mapper core, MD core | **dm-crypt**, dm-thin, **MD RAID1/4/5/6** |
+| ext4, btrfs, XFS, vfat, exFAT, NTFS3, ISO 9660, squashfs, overlayfs, UDF | **f2fs** |
+| device-mapper core, MD core | **dm-crypt**, dm-thin, **MD RAID0/1/10/4/5/6** |
 | NVMe, AHCI, USB storage, virtio-blk, loop | |
 | AES, XTS, zstd initramfs decompression, CPU microcode support | the kernel crypto user API |
 
 A root file system on a module cannot be mounted by the kernel before init runs,
-so btrfs, XFS, f2fs, LUKS, LVM and RAID roots need an initramfs that loads the
+so f2fs, LUKS, LVM and RAID roots need an initramfs that loads the
 module, assembles the devices and mounts the root. The kernel also cannot turn
 `root=UUID=...` or `root=LABEL=...` into a device without help (only
 `root=/dev/...` and `root=PARTUUID=...` work), which an initramfs fixes too.
+Until then, boot loader settings must give `root=PARTUUID=`: `gen-systemd-boot`
+and GRUB's defaults use `root=UUID=` (the overrides are in `docs/install.md`, 6b
+and 6c; `dkinstaller` writes them itself).
 
 ## Two ways, and we want both
 
 1. **Built in** (done in linux r4 and linux-lts r4: `CONFIG_BTRFS_FS=y`, `CONFIG_XFS_FS=y`, with XFS quota and POSIX ACL;
    a few hundred kilobytes each). A single-disk btrfs or XFS root then boots with no
    initramfs, like ext4 does today. Cheap, and the simple case stays simple.
-   Costs a kernel rebuild (it can wait for the next world run).
+   It cost a kernel rebuild, which has been done.
 2. **An initramfs for installed systems**, for everything that has to be
    assembled first (LUKS, LVM, RAID, multi-device btrfs), for `root=UUID=` and
    `root=LABEL=`, and so for dklilo's `root=PARTUUID=` too.
@@ -86,7 +89,7 @@ module, assembles the devices and mounts the root. The kernel also cannot turn
 
 Yes, the initramfs is where a ZFS root belongs: ZFS is not in the kernel (its
 licence), so it is an out-of-tree module that is prebuilt per kernel flavor
-(the `zfs` packages, for linux-lts only today) and has to be loaded, and the pool
+(the `zfs` recipes, for linux-lts only today) and has to be loaded, and the pool
 imported, before the root can mount. The initramfs needs:
 
 - the **`zfs` module for exactly that kernel** (and `spl`/dependencies) and the
@@ -104,14 +107,14 @@ imported, before the root can mount. The initramfs needs:
 Limits: dklilo cannot read ZFS, so `/boot` is a separate partition (ext4 or
 FAT); GRUB can read a pool only if it was made with `-o compatibility=grub2`
 (and not with newer feature flags). The live disc must run linux-lts with the
-module to create the pool. ZFS is therefore the last in the priority list below,
-after the pieces it shares with LUKS (prompts, keymap) exist.
+module to create the pool. ZFS is therefore last in the priority list above
+("Later"), after the pieces it shares with LUKS (prompts, keymap) exist.
 
 ## Also needed outside the initramfs
 
 - **The installer** (`dkinstaller`) only made an ext4 root: since 0.0.6 it
-  offers ext2/3/4, btrfs and XFS and shows each one's missing tools or reason
-  (dkinstaller SPEC 5.3.4); ZFS is listed but unavailable until this initramfs
+  offers ext2/3/4, btrfs and XFS (XFS only with GRUB or systemd-boot) and shows
+  each one's missing tools or reason (dkinstaller SPEC 5.3.4); ZFS is listed but unavailable until this initramfs
   exists. Still to do there: a btrfs subvolume layout (`@`, `@home`) with
   `rootflags=subvol=@` in the loader config.
 - **dklilo** reads btrfs but not XFS: with an XFS root, `/boot` must be a

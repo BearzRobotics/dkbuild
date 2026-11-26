@@ -88,6 +88,15 @@ Distinct failures: pass 4, 182; pass 6, 60 (not finished: OOM); pass 7, 28 (stop
   leaves out cache/maven, gradledeps, mavendeps, nugetdeps, hackage, hackagedeps, python and pydeps, so a source disc
   alone cannot rebuild the recipes that use them. (nugetdeps and mavendeps as reported by the audit; cache/ here has
   no such directories to compare.) `dkbuild doctor` also does not check for python3, go, cargo, zig or patch.
+- **Other problems the docs audit found (nothing changed in code):**
+  - src/image.zig writes the commented repository line `#@cdrom /mnt/cdrom/apks/<arch>/Packages.adb`, but
+    src/discs.zig puts a disc's index under `/data/apks/<arch>/` (a unit test expects the image.zig form too).
+  - packages/s/systemd-boot's gen-systemd-boot writes `root=UUID=`, which needs an initramfs; without one it boots
+    only if `SD_BOOT_CMDLINE` gives `root=PARTUUID=` (docs/install.md says how). Not boot-tested.
+  - Reported from the dkinstaller 0.0.6 release source (not tested; that repository was not touched): it removes the
+    tty1 autologin, but nothing was found that removes greetd's `initial_session`, the `nullok` in
+    /etc/pam.d/greetd or the live /etc/issue, so an installed dkde system would probably keep them (a password-less
+    automatic login). **Check this before relying on an installed system.**
 - **onnxruntime:** its GitHub repository answered 404 (blocks calibre speech, fastembed, rapidocr, mineru). Recheck.
 - **NTFS drive not shown in dkde-file:** packaging looked complete from the build logs; not tested on a running
   system (see docs/requests.md). The dkde side is being looked at separately.

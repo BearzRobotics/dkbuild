@@ -2,6 +2,13 @@
 
 Status: proposed. Not yet approved or implemented.
 
+> Note, 2026-11-25: since implemented. Recipes (`packages/<letter>/<name>/package.toml`) and
+> profiles are TOML, and `src/yaml.zig` is gone. `toml-zig` is no longer a path dependency:
+> `build.zig.zon` pins its v0.3.0 release by URL and hash, and the copy is committed under
+> `zig-pkg/`. The `yaml-zig` importer for Solus recipes mentioned below was dropped. Old
+> `package.yml` files are still in the tree beside `package.toml` for `linux-headers`, `lvm2`,
+> `musl`, `seatd` and `zstd`. The text below is the proposal as written.
+
 ## Problem
 
 Recipes (`packages/<name>/package.yml`) and target profiles

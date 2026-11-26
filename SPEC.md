@@ -121,7 +121,7 @@ sudo apt install ca-certificates curl git tar unzip xz-utils xorriso squashfs-to
 | `go`, `cargo`, `zig`, `patch` | vendoring for `godeps`, `cargodeps` and `zigdeps` at fetch time, with the recipe's patches applied (7.4; not checked by `doctor`) |
 | Zig 0.17.1 | building dkbuild itself (`zig build`); not on apt, see the README |
 | a Linux kernel 5.11 or newer with user namespaces and overlayfs | the sandbox (7.1) |
-| about 20 GB free, 8 GB of RAM | the unpacked image is 4.2 GB; LLVM needs the RAM |
+| at least 20 GB free and 8 GB of RAM for small sets; far more for the whole tree (`docs/setup-ubuntu.md`) | the unpacked image is 4.2 GB; LLVM needs the RAM |
 
 **Ubuntu 23.10 and later restrict unprivileged user namespaces** with
 AppArmor, and the sandbox cannot start until that is relaxed:
@@ -681,8 +681,8 @@ package runs it after each install or upgrade (docs/install.md).
 **Live ISOs:** dklilo (packaged, 0.0.4) is the bootloader of the live ISOs, a
 hybrid image that boots on BIOS and on UEFI (8). GRUB is also packaged (built
 with GNU binutils through the `gcc` option). **Still OPEN:** installed BIOS
-machines (docs/install.md covers UEFI only) and the bootloader of `aarch64`
-and `riscv64`.
+machines (docs/install.md describes them; none has been verified) and the
+bootloader of `aarch64` and `riscv64`.
 
 ### 6.2 Cross-compiling
 

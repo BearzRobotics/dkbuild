@@ -12,6 +12,16 @@ not exist (default.useradd now names 999, shadow r7); the base image has no `gre
 
     tests/qemu-pam.sh out/base/base.iso uefi
 
+**Note, 2026-11-25:** the rest of this page is the plan as written before that run; the release
+numbers and commands in it are of that date. Since then: polkit, cronie, cups and samba have
+been built (packages in `repo/`), and shadow is at r7. The `dkde-devel` ISO of 2026-11-24
+(polkit r7, elogind r7, dbus r7, dinit-services r8) was tested in QEMU (BIOS, the disc's boot
+loader, standard VGA and virtio): the login screen (greetd), an X11 sign-in and polkit worked.
+That does not cover cronie, cups, samba or `passwd` as a normal user, for which no test is
+recorded; SDDM was not tested. `base` now includes `grep`. Whether `tests/qemu-pam.sh` passes
+on a current ISO is not recorded. A world run is now started only on request, as described in
+`docs/handoff.md`, not with the command in section 6.
+
 PAM is adopted system-wide (memory/docs: shadow, sudo, openssh, polkit, cronie, cups,
 samba switched; commit d05cb1a). Nothing had been built or booted with it. This is the
 plan to prove login works before anyone relies on it. A mistake in a PAM stack locks
