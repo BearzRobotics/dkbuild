@@ -14,9 +14,10 @@
 # /usr/share/doc/zammad/README.FenrirOS.
 # r2: files/sass-embedded-system.sh wrote the sass-embedded Rakefile with an interpolating heredoc, which turned the \\n and \\" of the wrapper script it
 # embeds into a real newline and a bare quote ("rake aborted! SyntaxError"): a %q literal now. Checked: the generated Rakefile passes `ruby -c`.
+# r4: nothing installed is group- or world-writable (PKG-01).
 name = "zammad"
 version = "7.2.3"
-release = 3
+release = 4
 summary = "Web-based help desk and customer support system"
 license = "AGPL-3.0-only"
 homepage = "https://zammad.org"
@@ -86,4 +87,7 @@ install -Dm644 $pkgfiles/nginx-zammad.conf "$pkgdir/usr/share/doc/zammad/nginx-z
 install -Dm644 $pkgfiles/README.FenrirOS "$pkgdir/usr/share/doc/zammad/README.FenrirOS"
 install -Dm644 LICENSE-3RD-PARTY.txt "$pkgdir/usr/share/licenses/zammad/LICENSE-3RD-PARTY.txt"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/zammad/LICENSE"
+# nothing here is for group or others to write: the copied build tree can hold world-writable directories
+# (bundle install --jobs), which would let any user replace code that the service, or root, runs
+chmod -R go-w "$pkgdir"
 '''

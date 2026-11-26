@@ -16,9 +16,10 @@
 # as upstream's app-build.js does; electron-builder packaging is skipped
 # (it downloads an Electron), the app directory runs on /usr/lib/electron.
 # DRAFT, not built: needs electron and emscripten.
+# r8: nothing installed is world-writable, and no __MACOSX leftovers (PKG-01).
 name = "gdevelop"
 version = "5.6.287"
-release = 7
+release = 8
 summary = "Open-source game engine and editor, no-code and with JavaScript"
 license = "MIT"
 homepage = "https://gdevelop.io"
@@ -147,4 +148,7 @@ install -Dm755 $pkgfiles/gdevelop "$pkgdir/usr/bin/gdevelop"
 install -Dm644 $pkgfiles/gdevelop.desktop "$pkgdir/usr/share/applications/gdevelop.desktop"
 install -Dm644 newIDE/app/public/android-chrome-512x512.png "$pkgdir/usr/share/icons/hicolor/512x512/apps/gdevelop.png"
 install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/gdevelop/LICENSE.md"
+# the archive's macOS leftovers, and files it ships writable by everyone
+find "$pkgdir/usr/lib/gdevelop" -name __MACOSX -prune -exec rm -rf {} +
+chmod -R go-w "$pkgdir"
 '''

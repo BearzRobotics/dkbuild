@@ -8,9 +8,10 @@
 # a dozen other CPUs) are programs for the target systems, not for this one:
 # `noscan` keeps them out of the dependency scan, which otherwise made the
 # package need glibc and foreign libraries and so not installable.
+# r6: nothing installed is group- or world-writable (PKG-01).
 name = "metasploit"
 version = "6.5.9"
-release = 5
+release = 6
 summary = "Penetration testing framework"
 license = "BSD-3-Clause"
 homepage = "https://www.metasploit.com"
@@ -58,4 +59,7 @@ EOF2
     chmod 755 "$pkgdir/usr/bin/$c"
 done
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/metasploit/LICENSE"
+# nothing here is for group or others to write: the copied build tree can hold world-writable directories
+# (bundle install --jobs), which would let any user replace code that the service, or root, runs
+chmod -R go-w "$pkgdir"
 '''
