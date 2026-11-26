@@ -35,7 +35,9 @@ commits). Processes had been stuck waiting for commits, and the kernel logs "BTR
 **Good ISO:** /mnt/dkbuild/iso/dkde-devel-20261124-2134.iso (also in /mnt/scratch/iso-archive), SHA-256
 6ac1e86caa39f3e7ee98a2517bf37bd68d58ee04f77b12ff86008872d603cdf7. Fixed in elogind r7, polkit r7, dbus r7,
 dinit-services r8. Tested in QEMU (BIOS, the disc's boot loader, standard VGA and virtio): desktop, login screen,
-sign-in (X11 session), polkit answers. **Not tested:** VirtualBox, real hardware, installing to a disk, GRUB (r6 has
+sign-in (X11 session), polkit answers. **2026-11-25: the user reports it booting on real hardware** (the machine and
+what was tried on it are not recorded). Its live/rootfs.sfs unpacks completely with unsquashfs 4.7.5 (a "no valid
+squashfs superblock" report: unsquashfs given the whole .iso prints exactly that). **Not tested:** VirtualBox, installing to a disk, GRUB (r6 has
 no recorded boot test). The login screen preselects "dkde (X11, dkde-wm)" (dkde's choice; not changed).
 out/dkde-devel/dkde-devel.iso is whatever the last image build made.
 

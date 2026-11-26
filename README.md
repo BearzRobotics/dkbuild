@@ -106,7 +106,7 @@ current version and release, 5 only at an older one, and 374 have none (many wer
 another that fails). `repo/x86_64` holds 6852 apk files. The base system, LLVM 23, Zig, Rust (from source), Go,
 the kernel (7.3), dklilo, dkde, Hyprland, Firefox and many desktop applications are built. Not built yet include
 Brave, Electron, Code - OSS, LibreOffice, Thunderbird, Plasma and Kdenlive. The newest live ISO
-(`images/dkde-devel.toml`, 2026-11-24) was tested in QEMU with BIOS only; not on real hardware, and installing from
+(`images/dkde-devel.toml`, 2026-11-24) was tested in QEMU with BIOS only; the user reports it booting on real hardware. Installing from
 it was not tested. aarch64 and riscv64 are profiles only. Current state: `docs/handoff.md`; plan:
 `docs/roadmap.md`; failures: `docs/unbuildable.md`. The cbuild importer (SPEC 5.9) writes draft recipes with
 `TODO(cbuild)` markers; there is no Solus `package.yml` importer (dropped: recipes come from Chimera and Alpine).
