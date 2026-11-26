@@ -126,7 +126,29 @@ pub const Options = struct {
     force: bool = false,
 };
 
-/// Unpacks `image` into `dest` and checks the result.
+/// Deletes a tree that may hold directories without owner permission, and says whether it is gone.
+fn removeTree(arena: Allocator, io: std.Io, path: []const u8) bool {
+    if (Dir.cwd().statFile(io, path, .{ .follow_symlinks = false })) |_| {} else |_| return true;
+    _ = std.process.run(arena, io, .{ .argv = &.{ "chmod", "-R", "u+rwX", "--", path } }) catch {};
+    Dir.cwd().deleteTree(io, path) catch return false;
+    return true;
+}
+
+/// What `--force` may replace: an unpacked root, or nothing at all. Not just any directory named with --dest.
+fn replaceable(io: std.Io, dest: []const u8) bool {
+    var d = Dir.cwd().openDir(io, dest, .{ .iterate = true }) catch return false;
+    defer d.close(io);
+    if (d.openDir(io, "usr/bin", .{})) |bin| {
+        var b = bin;
+        b.close(io);
+        return true;
+    } else |_| {}
+    var it = d.iterate();
+    return (it.next(io) catch return false) == null;
+}
+
+/// Unpacks `image` into `dest` and checks the result. A root that is there is replaced only once the new one has
+/// been unpacked and checked beside it.
 pub fn bootstrapRoot(arena: Allocator, io: std.Io, image: []const u8, dest: []const u8, opts: Options) Error!void {
     const kind = detect(io, image) catch |err| {
         say("error: cannot read the image {s}\n", .{image});
@@ -139,8 +161,17 @@ pub fn bootstrapRoot(arena: Allocator, io: std.Io, image: []const u8, dest: []co
             say("error: {s} already exists (--force replaces it)\n", .{dest});
             return error.Exists;
         }
-        Dir.cwd().deleteTree(io, dest) catch {};
+        if (!replaceable(io, dest)) {
+            say("error: {s} is neither an unpacked build root nor an empty directory; not replacing it\n", .{dest});
+            return error.Exists;
+        }
     } else |_| {}
+    const fresh = try std.fmt.allocPrint(arena, "{s}.new", .{std.mem.trimEnd(u8, dest, "/")});
+    if (!removeTree(arena, io, fresh)) {
+        say("error: cannot remove {s}, left by an earlier run\n", .{fresh});
+        return error.ToolFailed;
+    }
+    errdefer _ = removeTree(arena, io, fresh);
     Dir.cwd().createDirPath(io, opts.work_dir) catch return error.BadImage;
     // unsquashfs creates the destination itself but not its parents (rootfs/
     // does not exist in a fresh checkout).
@@ -157,19 +188,41 @@ pub fn bootstrapRoot(arena: Allocator, io: std.Io, image: []const u8, dest: []co
             say("reading /live/rootfs.sfs from the ISO\n", .{});
             try run(arena, io, &.{ "xorriso", "-osirrox", "on", "-indev", image, "-extract", "/live/rootfs.sfs", sfs });
             say("unpacking into {s}\n", .{dest});
-            try run(arena, io, &.{ "unsquashfs", "-no-xattrs", "-f", "-d", dest, sfs });
+            try run(arena, io, &.{ "unsquashfs", "-no-xattrs", "-f", "-d", fresh, sfs });
         },
         .squashfs => {
             say("unpacking into {s}\n", .{dest});
-            try run(arena, io, &.{ "unsquashfs", "-no-xattrs", "-f", "-d", dest, image });
+            try run(arena, io, &.{ "unsquashfs", "-no-xattrs", "-f", "-d", fresh, image });
         },
         .tarball => {
-            Dir.cwd().createDirPath(io, dest) catch return error.BadImage;
+            Dir.cwd().createDirPath(io, fresh) catch return error.BadImage;
             say("unpacking into {s}\n", .{dest});
-            try run(arena, io, &.{ "tar", "-xpf", image, "-C", dest, "--no-same-owner" });
+            try run(arena, io, &.{ "tar", "-xpf", image, "-C", fresh, "--no-same-owner" });
         },
     }
-    try check(arena, io, dest);
+    // No setuid or setgid bits (SPEC 9.2): tar keeps them, and unpacked by the builder such a program would run
+    // as the builder, whose signing key that is, for anyone who can reach it.
+    try run(arena, io, &.{ "find", fresh, "-type", "f", "-perm", "/6000", "-exec", "chmod", "ug-s", "{}", "+" });
+    try check(arena, io, fresh);
+    const old = try std.fmt.allocPrint(arena, "{s}.old", .{std.mem.trimEnd(u8, dest, "/")});
+    if (!removeTree(arena, io, old)) {
+        say("error: cannot remove {s}\n", .{old});
+        return error.ToolFailed;
+    }
+    const had_one = if (Dir.cwd().rename(dest, Dir.cwd(), old, io)) |_| true else |err| switch (err) {
+        error.FileNotFound => false,
+        else => {
+            say("error: cannot move the old {s} aside: {s}\n", .{ dest, @errorName(err) });
+            return error.ToolFailed;
+        },
+    };
+    Dir.cwd().rename(fresh, Dir.cwd(), dest, io) catch |err| {
+        if (had_one) Dir.cwd().rename(old, Dir.cwd(), dest, io) catch {};
+        say("error: cannot move the new root to {s}: {s}\n", .{ dest, @errorName(err) });
+        return error.ToolFailed;
+    };
+    if (had_one and !removeTree(arena, io, old)) say("warning: the previous root is left at {s}\n", .{old});
+    say("unpacked at {s}\n", .{dest});
 }
 
 /// Checks an unpacked root; prints one line per tool and the functional check.
@@ -189,7 +242,7 @@ pub fn check(arena: Allocator, io: std.Io, root: []const u8) Error!void {
     // which is how every build runs.
     const abs = Dir.cwd().realPathFileAlloc(io, root, arena) catch return error.Incomplete;
     const res = std.process.run(arena, io, .{ .argv = &.{
-        "unshare", "--user", "--map-root-user", "chroot", abs, "/bin/sh", "-c", "apk --version; clang -dumpmachine",
+        "unshare", "--user", "--map-root-user", "chroot", abs, "/bin/sh", "-c", "apk --version && clang -dumpmachine", // both must run: the status of "a; b" is b's alone
     } }) catch |err| {
         say("error: cannot run the root in a user namespace ({s}); is 'unshare' installed?\n", .{@errorName(err)});
         return error.ToolMissing;
@@ -205,7 +258,7 @@ pub fn check(arena: Allocator, io: std.Io, root: []const u8) Error!void {
     }
     var lines = std.mem.splitScalar(u8, std.mem.trim(u8, res.stdout, "\n"), '\n');
     while (lines.next()) |l| say("  runs: {s}\n", .{l});
-    say("ok: {s} is a usable build machine\n", .{root});
+    say("ok: a usable build machine\n", .{});
 }
 
 test "classify tells squashfs, ISO and tarball apart" {
