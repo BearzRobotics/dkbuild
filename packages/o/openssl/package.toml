@@ -3,7 +3,12 @@
 # r11: the static libraries too (openssl-static), as every library ships them;
 # r10 and earlier removed them from the install (no reason recorded).
 name = "openssl"
-version = "3.6.5"
+# The 3.5 series is the long-term one (supported to 2030-04-08). The tree moved down to it from 3.6 on 2026-11-25, when
+# openssl-library.org no longer listed 3.6 as supported. 3.6 added 23 functions to libcrypto and removed none; of the
+# 261 built packages that link OpenSSL only osslsigncode used one (it is rebuilt with the rest). Installed 3.6 systems
+# do not move down by a plain `apk upgrade` (`apk upgrade --available`). Next: a 4.x long-term release (upstream plans
+# one each April of an odd year). upstream.toml keeps the update check on 3.5.
+version = "3.5.9"
 release = 1
 summary = "TLS and cryptography library"
 license = "Apache-2.0"
@@ -12,7 +17,7 @@ builddeps = ["zlib-ng-compat-devel"]
 options = ["bootstrap", "!check"]
 
 source = [
-    { url = "https://github.com/openssl/openssl/releases/download/openssl-3.6.5/openssl-3.6.5.tar.gz", sha256 = "a2157c2830efdec3788939b00c9b0638306d3f0bbb76dc4832ee503bb397df98" },
+    { url = "https://github.com/openssl/openssl/releases/download/openssl-3.5.9/openssl-3.5.9.tar.gz", sha256 = "603f5602e2eef00d77fbd429d34dcd5822bb301757a1bc9cdb24c670f1eb859a" },
 ]
 
 setup = '''

@@ -20,8 +20,8 @@
 # r4 (2026-11-20): btrfs and XFS built in (=y), as in linux r4: a single-disk btrfs or XFS root boots with no initramfs.
 # The kernel rebuild is left for the next world run. (The ZFS module is built against this kernel; ZFS stays a module.)
 name = "linux-lts"
-version = "6.18.63"
-release = 4
+version = "6.18.65"
+release = 1
 summary = "The Linux kernel (long-term series) and its modules"
 license = "GPL-2.0-only WITH Linux-syscall-note"
 homepage = "https://kernel.org"
@@ -35,7 +35,7 @@ options = ["!check", "!strip"]
 triggers = ["/usr/lib/modules/*/extra"]
 
 source = [
-    { url = "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.63.tar.xz", sha256 = "81764a545072d160748beff4d9de2e7d95aa9f16e8261110288f067a2cc61d71" },
+    { url = "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.65.tar.xz", sha256 = "c92606f956f09dc50b5a0e2af9e86763fce27ada1647de97f8d1ac8cfc95801d" },
 ]
 
 # r3: files/hardware.config is merged over the base config (VM-oriented: it had no PINCTRL, no I2C DesignWare controller, no Bluetooth, no HDA codecs, no

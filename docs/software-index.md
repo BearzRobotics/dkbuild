@@ -1511,7 +1511,7 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | links | 2.30 | Lynx-like text WWW browser |
 | linux | 7.3.6 | The Linux kernel and its modules |
 | linux-headers | 7.3.6 | Linux kernel API headers for userspace |
-| linux-lts | 6.18.63 | The Linux kernel (long-term series) and its modules |
+| linux-lts | 6.18.65 | The Linux kernel (long-term series) and its modules |
 | linux-pam | 1.7.2 | Pluggable Authentication Modules for Linux |
 | linux-pam-base | 0.111 | Default PAM configuration |
 | listmonk | 6.2.0 | Self-hosted newsletter and mailing list manager |
@@ -1852,7 +1852,7 @@ software is for, by area, see [software-guide.md](software-guide.md).
 | opensmtpd | 7.9.0_p0 | Secure, simple SMTP server from OpenBSD |
 | opensp | 1.5.2 | SGML and XML parser library |
 | openssh | 10.6_p2 | OpenSSH client and server |
-| openssl | 3.6.5 | TLS and cryptography library |
+| openssl | 3.5.9 | TLS and cryptography library |
 | opensubdiv | 3.7.0 | Surface subdivision library |
 | opentimelineio | 0.17.0 | API and interchange format for editorial timeline information |
 | opentofu | 1.13.9 | Tool for building, changing and versioning infrastructure |

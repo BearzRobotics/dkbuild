@@ -8,6 +8,22 @@
 #                       pre-release only where that was chosen on purpose.
 # Adding an entry here never changes a recipe's build hash.
 
+[linux-lts]
+series = "6.18."    # the long-term series this package follows; later numbers are not long-term releases
+
+[openssl]
+series = "3.5."     # the long-term series (to 2030); moving to a 4.x long-term release is planned, not automatic
+
+# Kept on pre-releases by the user's decision (2026-11-25), so newer ones are reported for these:
+[libcaca]
+prerelease = true   # 0.99 has only ever had betas
+
+[simde]
+prerelease = true
+
+[winlab]
+prerelease = true
+
 [pcsx2]
 ignore = "^2\\.9\\."     # 2.9.x are the nightly builds of the next release; nothing in the number says so
 
@@ -27,6 +43,7 @@ series = "8.6."
 series = "3.24."    # GTK 3's last series; 3.9x was GTK 4's development series
 
 [libmspack]
+prerelease = true   # kept by the user's decision (2026-11-25)
 regex = "libmspack-([0-9.]+)alpha"   # every release is named "<n>alpha"
 
 [brush]

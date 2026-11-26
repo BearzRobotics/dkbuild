@@ -90,13 +90,23 @@ python, linux, git, firefox, thunderbird, httpd, webkitgtk, haproxy, nss and nsp
 signatures (keys fetched from their own sites); gnutls and dbus were only downloaded over HTTPS. The D-Bus release
 notes were not read (the site blocked the fetch).
 
-- **openssl: for the user to decide.** openssl-library.org lists only 4.1, 4.0 and 3.5 (LTS, to 2030) as supported;
-  the 2026-11-24 advisory names fixes in 4.1.1, 4.0.4 and 3.5.10, not in 3.6 (those had no download tags on 11-25).
-  3.6.5 is the interim step; later: 3.5 LTS (an older series: rebuild what was built against 3.6) or 4.x (major).
-- linux-lts (6.18.63; 6.18.65 is out) was not in this batch.
-- `dkbuild upstream` no longer reports pre-releases without `prerelease = true` in upstream.toml. 4 recipes are on
-  marked pre-releases (libcaca, libmspack, simde, winlab; libmspack's releases are all named alpha) and 46 on git
-  snapshots: for the user to review.
+- **openssl: decided 2026-11-25, now 3.5.9 (long-term, to 2030)**, not 3.6.5. Evidence: 3.6 added 23 libcrypto
+  functions and removed none; a scan of the newest build of every package (261 link libcrypto/libssl) found only
+  osslsigncode using one. In the build image only OpenSSL's own files do (and its loader_attic engine, which an
+  openssl package laid over the image does not replace). Build roots take the recipe's exact version, so the lower
+  number is safe there; **after building openssl, run `dkbuild prune` before making an image**, since apk would
+  prefer the older-built, higher-numbered 3.6.1 still in repo/. A 24 Nov advisory (Low) names 3.5.10, which had no
+  download tag on 11-25: update to it when it is out (the check is held to 3.5).
+- **Toward OpenSSL 4:** the same scan against 4.1.0 (257 libcrypto and 19 libssl functions removed, mostly the
+  ENGINE API) found 31 of the 261 packages using one in their current builds, among them curl, nginx, httpd, python,
+  nodejs, postgresql libs, openvpn, wpa-supplicant, tor, cmake, python-cryptography, ruby. That is not a count of
+  what would break (many projects leave ENGINE out when built against 4), and it misses source changes (ASN1_STRING
+  opaque, const changes). Suggested route: aim for the next 4.x long-term release (April 2027 by upstream's
+  schedule), after test-building those 31 against 4.x.
+- linux-lts 6.18.65 was added to the batch (checksum matched kernel.org's); zfs and virtualbox modules follow it.
+- `dkbuild upstream` no longer reports pre-releases without `prerelease = true` in upstream.toml. **The user chose
+  to keep all current ones** (2026-11-25): libcaca, libmspack, simde, winlab (opted in there) and the 46 recipes on
+  git snapshots (they stay on their commits; the check reports releases newer than them).
 
 ## Open
 
