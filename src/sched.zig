@@ -83,10 +83,13 @@ const Bump = struct {
     idx: usize,
     root: []const u8,
     io: Io,
+    arch: []const u8,
+    own_before: inputs.Hex,
+    own_after: inputs.Hex = undefined,
 
     fn call(ctx: *anyopaque) anyerror!u32 {
         const b: *Bump = @ptrCast(@alignCast(ctx));
-        return bumpRelease(b.io, b.t, b.idx, b.root);
+        return bumpRelease(b.io, b.t, b.idx, b.root, b.arch, b.own_before, &b.own_after);
     }
 };
 
@@ -230,7 +233,7 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
                 }
                 workers[j] = .{ .shared = &shared, .io = io, .job = j, .r = t.recipes[jobs[j].idx], .opts = opts, .buffered = buffered };
                 if (!jobs[j].certain) if (outputs[jobs[j].idx]) |prev| {
-                    workers[j].bump = .{ .t = t, .idx = jobs[j].idx, .root = opts.root, .io = io };
+                    workers[j].bump = .{ .t = t, .idx = jobs[j].idx, .root = opts.root, .io = io, .arch = opts.arch, .own_before = jobs[j].own };
                     workers[j].rebuild = .{ .previous = prev, .bump = Bump.call, .ctx = &workers[j].bump };
                 };
                 workers[j].thread = std.Thread.spawn(.{}, workerMain, .{&workers[j]}) catch |err| {
@@ -287,14 +290,14 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
                 // Bumped: the record is for the new release and the edited recipe.
                 jobs[j].version = try std.fmt.allocPrint(arena, "{s}-r{d}", .{ r_now.version, w.result.release });
                 jobs[j].id = try std.fmt.allocPrint(arena, "{s}-{s}", .{ r_now.name, jobs[j].version });
-                jobs[j].own = try inputs.ownHash(arena, io, opts.root, r_now.name, opts.arch);
+                jobs[j].own = w.bump.own_after;
                 // The script exports `release`, so its hash changes with the bump
                 // too: recorded for the old release, every later run would see
                 // "macros changed" and rebuild (and bump) again.
                 jobs[j].script = build.scriptHash(arena, io, r_now, opts) catch jobs[j].script;
             }
             const record = try inputs.format(arena, .{ .version = jobs[j].version, .inputs = jobs[j].own, .deps = roots[j], .output = w.result.produced.output, .interface = w.result.produced.interface, .script = jobs[j].script });
-            std.Io.Dir.cwd().writeFile(io, .{ .sub_path = jobs[j].rec_path, .data = record }) catch |err| {
+            replaceFile(arena, io, jobs[j].rec_path, record) catch |err| {
                 term.print("warning: cannot write {s}: {s}\n", .{ jobs[j].rec_path, @errorName(err) });
             };
         }
@@ -304,18 +307,21 @@ pub fn run(arena: Allocator, io: Io, t: tree.Tree, jobs: []Job, outputs: []?inpu
 
 /// `release = N` becomes `N + 1` in the recipe's package.toml and in the
 /// tree's copy of the recipe. Runs in the worker that built it.
-fn bumpRelease(io: Io, t: tree.Tree, idx: usize, root: []const u8) !u32 {
+fn bumpRelease(io: Io, t: tree.Tree, idx: usize, root: []const u8, arch: []const u8, own_before: inputs.Hex, own_after: *inputs.Hex) !u32 {
     var st = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer st.deinit();
     const arena = st.allocator();
     const recipes = @constCast(t.recipes);
     const r = &recipes[idx];
     const path = try std.fs.path.join(arena, &.{ try recipe.dirPath(arena, root, r.name), "package.toml" });
-    const text = try std.Io.Dir.cwd().readFileAlloc(io, path, arena, .limited(1 << 20));
-    const span = releaseValue(text) orelse return error.NoReleaseLine;
+    // The record for the new release says these inputs are built. If the recipe, a patch or a file was edited
+    // while this build ran, they are not: refuse, rather than record the edit as built.
+    const now = try inputs.ownHash(arena, io, root, r.name, arch);
+    if (!std.mem.eql(u8, &now, &own_before)) return error.RecipeChangedDuringBuild;
     const next = r.release + 1;
-    const new_text = try std.fmt.allocPrint(arena, "{s}{d}{s}", .{ text[0..span[0]], next, text[span[1]..] });
-    try std.Io.Dir.cwd().writeFile(io, .{ .sub_path = path, .data = new_text });
+    try setRelease(arena, io, path, r.release, next);
+    // taken at once, from what was just written
+    own_after.* = try inputs.ownHash(arena, io, root, r.name, arch);
     r.release = next;
     return next;
 }
@@ -323,9 +329,31 @@ fn bumpRelease(io: Io, t: tree.Tree, idx: usize, root: []const u8) !u32 {
 /// Where the number of the top-level `release = N` line is: [start, end).
 fn releaseValue(text: []const u8) ?[2]usize {
     var start: usize = 0;
+    var open: ?[]const u8 = null; // inside a multi-line string, closed by these quotes
     while (start < text.len) {
         const end = std.mem.indexOfScalarPos(u8, text, start, '\n') orelse text.len;
         const line = text[start..end];
+        const inside = open != null;
+        var k: usize = 0;
+        while (k + 3 <= line.len) {
+            const q = line[k .. k + 3];
+            if (open) |o| {
+                if (std.mem.eql(u8, q, o)) {
+                    open = null;
+                    k += 3;
+                    continue;
+                }
+            } else if (std.mem.eql(u8, q, "\"\"\"") or std.mem.eql(u8, q, "'''")) {
+                open = q;
+                k += 3;
+                continue;
+            } else if (q[0] == '#') break;
+            k += 1;
+        }
+        if (inside) {
+            start = end + 1;
+            continue;
+        }
         // Subpackage tables come after every top-level key (SPEC.md 5.1).
         if (line.len > 0 and line[0] == '[') return null;
         if (std.mem.startsWith(u8, line, "release")) {
@@ -342,6 +370,42 @@ fn releaseValue(text: []const u8) ?[2]usize {
         start = end + 1;
     }
     return null;
+}
+
+/// Changes a recipe's release from `from` to `to`: that number alone, only if the file still says `from`, and
+/// through a new file, so that a full disk or an interrupted run cannot leave package.toml cut short.
+pub fn setRelease(arena: std.mem.Allocator, io: Io, path: []const u8, from: u32, to: u32) !void {
+    const text = try std.Io.Dir.cwd().readFileAlloc(io, path, arena, .limited(1 << 22));
+    const span = releaseValue(text) orelse return error.NoReleaseLine;
+    if ((std.fmt.parseInt(u32, text[span[0]..span[1]], 10) catch 0) != from) return error.ReleaseChanged;
+    try replaceFile(arena, io, path, try std.fmt.allocPrint(arena, "{s}{d}{s}", .{ text[0..span[0]], to, text[span[1]..] }));
+}
+
+/// Writes `path` whole or not at all.
+pub fn replaceFile(arena: std.mem.Allocator, io: Io, path: []const u8, data: []const u8) !void {
+    const part = try std.fmt.allocPrint(arena, "{s}.part", .{path});
+    errdefer std.Io.Dir.cwd().deleteFile(io, part) catch {};
+    try std.Io.Dir.cwd().writeFile(io, .{ .sub_path = part, .data = data });
+    try std.Io.Dir.cwd().rename(part, std.Io.Dir.cwd(), path, io);
+}
+
+test "the release line is found past build scripts, and only it is changed (SS-23, BC-23)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const io = std.testing.io;
+    // before the real key: a multi-line string holding what looks like it, and a line starting with '['
+    const text = "name = \"a\"\ndescription = \"\"\"\nrelease = 3\n[not a table]\n\"\"\"\nrelease = 3\ninstall = '''\ncat <<E\nrelease = 3\nE\n'''\n";
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    try tmp.dir.writeFile(io, .{ .sub_path = "package.toml", .data = text });
+    const path = try std.fs.path.join(a, &.{ try tmp.dir.realPathFileAlloc(io, ".", a), "package.toml" });
+    try setRelease(a, io, path, 3, 4);
+    const got = try tmp.dir.readFileAlloc(io, "package.toml", a, .limited(4096));
+    try std.testing.expectEqualStrings("name = \"a\"\ndescription = \"\"\"\nrelease = 3\n[not a table]\n\"\"\"\nrelease = 4\ninstall = '''\ncat <<E\nrelease = 3\nE\n'''\n", got);
+    // changed by hand meanwhile: not overwritten
+    try std.testing.expectError(error.ReleaseChanged, setRelease(a, io, path, 3, 4));
+    try std.testing.expectError(error.FileNotFound, tmp.dir.access(io, "package.toml.part", .{}));
 }
 
 test "releaseValue finds the top-level release, however it is spaced" {

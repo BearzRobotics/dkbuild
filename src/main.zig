@@ -440,7 +440,7 @@ pub fn main(init: std.process.Init) !void {
         const res = try sched.run(arena, init.io, t, jobs.items, outputs, opts, parallel, keep_going);
         const failed_names = res.failed;
         const skipped_names = res.skipped;
-        writeRunSummary(arena, init.io, root, opts.arch, t, if (is_world) "world" else "pkg", jobs.items.len, failed_names, unbumped.items, skipped_names);
+        writeRunSummary(arena, init.io, root, opts.arch, t, if (is_world) "world" else "pkg", jobs.items, failed_names, unbumped.items, skipped_names);
         // What the builds took from the base image (dependencies no recipe
         // provides; stage 1 does not check them, SPEC.md 7.3): once, not per build.
         {
@@ -500,16 +500,10 @@ pub fn main(init: std.process.Init) !void {
                 continue;
             }
             const path = try std.fmt.allocPrint(arena, "{s}/package.toml", .{try recipe.dirPath(arena, root, r.name)});
-            const text = try std.Io.Dir.cwd().readFileAlloc(init.io, path, arena, .limited(1 << 22));
-            const needle = try std.fmt.allocPrint(arena, "release = {d}\n", .{r.release});
-            const needle2 = try std.fmt.allocPrint(arena, "release   = {d}\n", .{r.release});
-            const which = if (std.mem.indexOf(u8, text, needle) != null) needle else if (std.mem.indexOf(u8, text, needle2) != null) needle2 else {
-                std.debug.print("{s}: changed at r{d}, but its release line is not plain; bump it by hand\n", .{ r.name, r.release });
+            sched.setRelease(arena, init.io, path, r.release, r.release + 1) catch |err| {
+                std.debug.print("{s}: changed at r{d}, but its release line could not be changed ({s}); bump it by hand\n", .{ r.name, r.release, @errorName(err) });
                 continue;
             };
-            const repl = try std.fmt.allocPrint(arena, "{s}{d}\n", .{ which[0 .. which.len - 1 - std.fmt.count("{d}", .{r.release})], r.release + 1 });
-            const out = try std.mem.replaceOwned(u8, arena, text, which, repl);
-            try std.Io.Dir.cwd().writeFile(init.io, .{ .sub_path = path, .data = out });
             std.debug.print("{s}: r{d} -> r{d}\n", .{ r.name, r.release, r.release + 1 });
         }
         if (n == 0) std.debug.print("nothing changed without a release bump\n", .{});
@@ -796,7 +790,7 @@ test {
 /// logs/<arch>/runs/, listing what failed (with each build log), what was not
 /// built because its recipe changed without a release bump, and what was
 /// skipped because something it needs failed. Read it instead of scrolling.
-fn writeRunSummary(arena: std.mem.Allocator, io: std.Io, root: []const u8, arch: []const u8, t: tree.Tree, what: []const u8, considered: usize, failed: []const []const u8, unbumped: []const []const u8, skipped: []const []const u8) void {
+fn writeRunSummary(arena: std.mem.Allocator, io: std.Io, root: []const u8, arch: []const u8, t: tree.Tree, what: []const u8, jobs: []const sched.Job, failed: []const []const u8, unbumped: []const []const u8, skipped: []const []const u8) void {
     var b: std.ArrayList(u8) = .empty;
     const stamp = blk: {
         const res = std.process.run(arena, io, .{ .argv = &.{ "date", "+%F %T" } }) catch break :blk "?";
@@ -809,14 +803,14 @@ fn writeRunSummary(arena: std.mem.Allocator, io: std.Io, root: []const u8, arch:
         }
     };
     w.line(arena, &b, "dkbuild {s} ({s}), finished {s}\n", .{ what, arch, stamp });
-    w.line(arena, &b, "{d} package(s) considered; {d} failed, {d} changed without a release bump, {d} skipped\n\n", .{ considered, failed.len, unbumped.len, skipped.len });
+    w.line(arena, &b, "{d} package(s) considered; {d} failed, {d} changed without a release bump, {d} skipped\n\n", .{ jobs.len, failed.len, unbumped.len, skipped.len });
     w.line(arena, &b, "failed ({d}):\n", .{failed.len});
     for (failed) |n| {
-        const pi = t.provider(n);
-        if (pi) |i| {
-            const r = t.recipes[i];
-            w.line(arena, &b, "  {s}  logs/{s}/{s}-{s}-r{d}.log\n", .{ n, arch, r.name, r.version, r.release });
-        } else w.line(arena, &b, "  {s}\n", .{n});
+        // the log is named for the release the build started as (a failed bumped rebuild's tree copy says the next)
+        const id: ?[]const u8 = for (jobs) |j| {
+            if (std.mem.eql(u8, t.recipes[j.idx].name, n)) break j.id;
+        } else null;
+        if (id) |i| w.line(arena, &b, "  {s}  logs/{s}/{s}.log\n", .{ n, arch, i }) else w.line(arena, &b, "  {s}\n", .{n});
     }
     w.line(arena, &b, "\nchanged without a release bump, not built ({d}):\n", .{unbumped.len});
     for (unbumped) |n| w.line(arena, &b, "  {s}\n", .{n});
