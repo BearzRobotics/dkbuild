@@ -5,7 +5,7 @@
 # tools' man pages (xmlto/DocBook) and the Doxygen API docs.
 name = "rabbitmq-c"
 version = "0.15.0"
-release = 1
+release = 2
 summary = "RabbitMQ C client"
 license = "MIT"
 homepage = "https://github.com/alanxz/rabbitmq-c"
