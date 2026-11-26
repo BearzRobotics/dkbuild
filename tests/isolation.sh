@@ -74,5 +74,9 @@ exec 7<&-
 echo "$OUT" | grep -q '^RAN$' || fail "the descriptor check did not run"
 echo "$OUT" | grep -q from-the-host && fail "a directory the caller had open was readable inside"
 
+# --- signals are at their defaults, whatever the caller ignored
+OUT=$(trap '' HUP INT QUIT; sbrun -- /usr/bin/grep -E '^Sig(Ign|Blk):' /proc/self/status 2>&1)
+[ "$(echo "$OUT" | grep -c '0000000000000000$')" = 2 ] || fail "signals ignored or blocked inside: $OUT"
+
 [ "$fails" -eq 0 ] || { echo "FAIL: $fails isolation check(s) failed"; exit 1; }
 echo "ok: read-only binds stay read-only; signals and the terminal stay outside; killing the sandbox kills all in it"

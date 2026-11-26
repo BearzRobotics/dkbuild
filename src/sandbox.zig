@@ -464,6 +464,7 @@ pub fn childMain(args: []const [:0]const u8) noreturn {
     // other builds and the shell that ran it, and the build would hold the user's terminal. Stopping dkbuild
     // still stops everything here: PR_SET_PDEATHSIG, not the terminal's signals.
     sys(linux.setsid(), "setsid", "");
+    defaultSignals();
     // Only stdin, stdout and stderr go on: a directory dkbuild's caller had open (a CI runner, a terminal tool)
     // would reach the host's tree through /proc/self/fd, past pivot_root.
     sys(linux.close_range(3, std.math.maxInt(i32), .{ .UNSHARE = false, .CLOEXEC = false }), "close_range", "");
@@ -478,6 +479,20 @@ pub fn childMain(args: []const [:0]const u8) noreturn {
     envp[env.items.len] = null;
     const rc = linux.execve(cmd[0], @ptrCast(argv_c.ptr), @ptrCast(envp.ptr));
     die("exec {s}: {s}", .{ cmd[0], @tagName(linux.errno(rc)) });
+}
+
+/// Ignored signals and the blocked mask survive `execve`: under nohup, or as a background job, builds would run
+/// with HUP, INT or QUIT ignored, and test suites that send them behave differently or hang.
+fn defaultSignals() void {
+    const act: linux.Sigaction = .{ .handler = .{ .handler = linux.SIG.DFL }, .mask = linux.sigemptyset(), .flags = 0 };
+    var n: u32 = 1;
+    while (n < linux.NSIG) : (n += 1) {
+        const sig: linux.SIG = @fromBackingInt(@intCast(n));
+        if (sig == .KILL or sig == .STOP) continue;
+        _ = linux.sigaction(sig, &act, null);
+    }
+    const none = linux.sigemptyset();
+    _ = linux.sigprocmask(linux.SIG.SETMASK, &none, null);
 }
 
 /// Waits for `pid` and exits as it did.
