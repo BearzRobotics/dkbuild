@@ -1,4 +1,4 @@
-//! toml-zig: a TOML 1.0.0 parser and writer.
+//! toml-zig: a TOML 1.1.0 (and 1.0.0) parser and writer.
 //!
 //! ```zig
 //! var diag: toml.Diagnostic = .{};
@@ -28,6 +28,14 @@ pub const Diagnostic = @import("parser.zig").Diagnostic;
 pub const ParseReaderError = ParseError || error{ReadFailed};
 pub const WriteError = @import("writer.zig").Error;
 
+/// The last element of a non-empty array of tables, if it really is a table.
+fn lastTable(a: *@import("value.zig").Array) ?*Table {
+    return switch (a.items.items[a.items.items.len - 1]) {
+        .table => |t| t,
+        else => null,
+    };
+}
+
 /// A parsed document. Owns an arena holding every string, table and array
 /// reachable from `root`; `deinit` frees all of it at once.
 pub const Document = struct {
@@ -43,10 +51,19 @@ pub const Document = struct {
         return .{ .arena = arena, .root = root };
     }
 
+    /// `init` for the parse functions, which must also report running out of
+    /// memory before the parser starts.
+    fn initFor(gpa: Allocator, diag: ?*Diagnostic) Allocator.Error!Document {
+        return init(gpa) catch |e| {
+            if (diag) |d| d.* = .{ .line = 1, .column = 1, .message = "out of memory" };
+            return e;
+        };
+    }
+
     /// Parses `source` (UTF-8). `source` is not retained. On failure the
     /// optional `diag` receives a 1-based line and column.
     pub fn parse(gpa: Allocator, source: []const u8, options: Options, diag: ?*Diagnostic) ParseError!Document {
-        var doc = try init(gpa);
+        var doc = try initFor(gpa, diag);
         errdefer doc.deinit();
         var r: std.Io.Reader = .fixed(source);
         @import("parser.zig").parse(gpa, doc.arena.allocator(), doc.root, &r, options, diag) catch |e| switch (e) {
@@ -61,7 +78,7 @@ pub const Document = struct {
     /// `options.max_bytes` have been consumed, and with `error.ReadFailed` if
     /// `r` does.
     pub fn parseReader(gpa: Allocator, r: *std.Io.Reader, options: Options, diag: ?*Diagnostic) ParseReaderError!Document {
-        var doc = try init(gpa);
+        var doc = try initFor(gpa, diag);
         errdefer doc.deinit();
         try @import("parser.zig").parse(gpa, doc.arena.allocator(), doc.root, r, options, diag);
         return doc;
@@ -103,24 +120,29 @@ pub const Document = struct {
                 cur = t;
             }
         }
-        try cur.put(a, try self.dupe(path[path.len - 1]), v);
+        const last = path[path.len - 1];
+        // `put` keeps the key already there, so only a new one needs a copy.
+        try cur.put(a, cur.entries.getKey(last) orelse try self.dupe(last), v);
     }
 
     /// Attaches comments to the item at `path`: its `key = value` line, or its
     /// `[header]` line if it is a table written as a section. For an array of
     /// tables, the header of its last element. Strings in `c` are copied. Fails
-    /// with `error.NotFound` if there is no such item and `error.InvalidComment`
-    /// if a line is not empty or `#...`.
-    pub fn setComments(self: *Document, path: []const []const u8, c: Comments) (Allocator.Error || error{ NotFound, InvalidComment })!void {
+    /// with `error.NotFound` if there is no such item, `error.InvalidComment`
+    /// if a line is not empty or `#...`, and `error.CommentsNotSupported` if
+    /// the item is inside an inline table, which is written on one line.
+    pub fn setComments(self: *Document, path: []const []const u8, c: Comments) (Allocator.Error || error{ NotFound, InvalidComment, CommentsNotSupported })!void {
         std.debug.assert(path.len > 0);
         try @import("value.zig").checkComments(c);
         var cur = self.root;
+        var in_inline = false;
         for (path[0 .. path.len - 1]) |seg| {
+            defer in_inline = in_inline or cur.kind == .inline_table;
             switch (cur.get(seg) orelse return error.NotFound) {
                 .table => |t| cur = t,
                 .array => |a| {
                     if (!a.is_table_array or a.items.items.len == 0) return error.NotFound;
-                    cur = a.items.items[a.items.items.len - 1].table;
+                    cur = lastTable(a) orelse return error.NotFound;
                 },
                 else => return error.NotFound,
             }
@@ -136,13 +158,18 @@ pub const Document = struct {
             .after = if (c.after) |x| try a.dupe(u8, x) else null,
         };
         const v = cur.get(last) orelse return error.NotFound;
+        if (in_inline and !own.isEmpty()) return error.CommentsNotSupported;
         switch (v) {
             .table => |t| if (t.kind != .inline_table) {
                 t.header = own;
+                // Comments carried on the key would otherwise reappear.
+                _ = cur.key_comments.orderedRemove(last);
                 return;
             },
             .array => |arr| if (arr.is_table_array and arr.items.items.len > 0) {
-                arr.items.items[arr.items.items.len - 1].table.header = own;
+                const t = lastTable(arr) orelse return error.NotFound;
+                t.header = own;
+                _ = cur.key_comments.orderedRemove(last);
                 return;
             },
             else => {},
@@ -167,4 +194,7 @@ pub const Document = struct {
 test {
     _ = @import("tests.zig");
     _ = @import("io_tests.zig");
+    _ = @import("api_examples.zig");
+    _ = @import("test_util.zig");
+    _ = @import("fuzz_tests.zig");
 }

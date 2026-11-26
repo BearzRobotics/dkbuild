@@ -1,6 +1,11 @@
-# Writing TOML
+# NAME
+
+toml-syntax - the TOML 1.0 / 1.1 syntax accepted and written by toml-zig
+
+# DESCRIPTION
 
 A quick guide to the syntax this library reads and writes. The authoritative
+
 text is the official specification; read it when anything here is unclear:
 
 - **Specification, 1.1.0:** <https://toml.io/en/v1.1.0>
@@ -9,13 +14,17 @@ text is the official specification; read it when anything here is unclear:
 - **Changelog (1.0 → 1.1):** <https://github.com/toml-lang/toml/blob/main/CHANGELOG.md>
 
 This page is our own summary, not a copy of the specification. Every example
+
 below is parsed by `zig build test` (see `src/guide_tests.zig`), so the code
+
 blocks are known to be valid.
 
 ## The shape of a file
 
 A TOML file is a set of `key = value` pairs, grouped under `[table]` headers.
+
 Keys are case-sensitive. A `#` starts a comment. Whitespace around `=` and
+
 between tokens is free; each pair sits on its own line.
 
 ```toml
@@ -58,6 +67,7 @@ no escapes at all.'''
 ```
 
 Escapes in basic strings: `\b \t \n \f \r \" \\`, `\uHHHH`, `\UHHHHHHHH`, and,
+
 **new in 1.1**, `\xHH` (code points up to 255) and `\e` (escape, U+001B).
 
 ## Numbers, booleans
@@ -74,6 +84,7 @@ no = false
 ```
 
 Leading zeros (`007`) are not allowed on decimal numbers, and underscores
+
 must sit between digits. Integers are 64-bit signed.
 
 ## Dates and times
@@ -87,6 +98,7 @@ local_time = 07:32:00
 ```
 
 **New in 1.1:** the seconds may be left out, and are then zero:
+
 `07:32`, `1979-05-27 07:32Z`. A fraction needs seconds (`07:32.5` is invalid).
 
 ## Arrays
@@ -120,6 +132,7 @@ name = "grace"
 ```
 
 **New in 1.1:** inline tables may span lines, contain comments, and end with
+
 a comma:
 
 ```toml
@@ -130,6 +143,7 @@ colors = {
 ```
 
 Under 1.0 that form is an error: inline tables must be on one line with no
+
 trailing comma. (Use a normal `[table]` for anything large.)
 
 ## Choosing a version in this library
@@ -143,6 +157,7 @@ var doc10 = try toml.Document.parse(gpa, text, .{ .version = .v1_0 }, &diag);
 ```
 
 TOML 1.1 only *adds* syntax: every valid 1.0 document is valid 1.1 and means
+
 the same thing. The writer's output is valid under both versions.
 
 ## Common mistakes
@@ -151,4 +166,61 @@ the same thing. The writer's output is valid under both versions.
 - A bare value that is not a number, boolean or date: `name = ada` must be `name = "ada"`.
 - Adding keys to an inline table after the fact (`point.z = 3`) or reopening it with `[point]`.
 - Mixing `[[x]]` and `[x]` for the same name.
-- Expecting comments to survive a save: this library's writer does not keep them.
+- Expecting every comment to survive a save. Comments above a key or header, a trailing comment on its line, and comments after the last item are kept; comments *inside* an array or an inline table are dropped. See **toml-zig**(3), LIMITATIONS.
+- Writing an element's own keys after one of its sub-table headers: every key after a header belongs to that header, so they land in the sub-table.
+
+# EXAMPLES
+
+A complete configuration file using most of the syntax above:
+
+```toml
+# Panel configuration
+title = "DKDE"
+
+[panel]
+position = "bottom"      # top|bottom
+height = 32
+opacity = 0.9
+margins = [4, 4, 0, 0]
+started = 2026-11-10T09:30:00-05:00
+
+[panel.clock]
+format = "%H:%M"
+tooltip = { show = true, delay_ms = 250 }
+
+[[panel.widget]]
+name = "launcher"
+
+[[panel.widget]]
+name = "tray"
+icon_size = 16
+```
+
+# DIAGNOSTICS
+
+A failed parse reports a 1-based `line:column` and a short message, for
+
+example `2:1: duplicate key`. Only the first error is reported. The error set
+
+is `Syntax`, `InvalidUtf8`, `LimitExceeded` and `OutOfMemory`; see
+
+**toml-zig**(3).
+
+# COMPATIBILITY
+
+Accepts TOML 1.1.0 by default and TOML 1.0.0 with `Options.version = .v1_0`.
+
+Input must be UTF-8; a leading byte-order mark is skipped. Integers are 64-bit
+
+signed; a literal outside that range is an error, as is a float too large for
+
+64 bits (write `inf` for infinity). Datetime fractions beyond
+
+nanoseconds are truncated. The decoder cases of the official `toml-test` suite
+
+pass (see `ai/SPEC.md`).
+
+# SEE ALSO
+
+**toml-zig**(3), **toml-parse**(1), <https://toml.io/en/v1.1.0>
+

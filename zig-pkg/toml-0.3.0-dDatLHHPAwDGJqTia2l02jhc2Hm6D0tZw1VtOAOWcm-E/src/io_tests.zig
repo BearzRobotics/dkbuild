@@ -7,6 +7,7 @@ const std = @import("std");
 const toml = @import("root.zig");
 const testing = std.testing;
 const Io = std.Io;
+const expectSameTree = @import("test_util.zig").expectSameTree;
 
 const sample =
     \\title = "café"
@@ -100,9 +101,41 @@ test "parseReader gives the same result for every chunk size" {
         var tr = TrickleReader.init(sample, chunk, null);
         var doc = try toml.Document.parseReader(gpa, &tr.interface, .{}, null);
         defer doc.deinit();
+        try expectSameTree(ref.root, doc.root);
         const got = try doc.toOwnedString(gpa);
         defer gpa.free(got);
         try testing.expectEqualStrings(want, got);
+    }
+}
+
+// `parse` wraps a reader that has no buffer, so the tests above never refill a
+// caller's own buffer, which is how a file reader is used. These do: every
+// small buffer size against every small chunk size.
+test "parseReader refills a caller's buffered reader" {
+    const gpa = testing.allocator;
+    const src = "\xEF\xBB\xBF# \xf0\x9f\x98\x80\r\n" ++
+        "a = 1979-05-27 07:32:00Z\r\n" ++
+        "b = \"\"\"\r\nx \\\r\n  y\"\"\"\"\"\n" ++
+        "[[t.u]]\nc = ''''z''''\n" ++
+        "d = [true, 0x1F, 6.5e-3, \"\\U0001F600 \xc3\xa9\"]\n";
+    var ref = try toml.Document.parse(gpa, src, .{}, null);
+    defer ref.deinit();
+    const want = try ref.toOwnedString(gpa);
+    defer gpa.free(want);
+
+    var buf: [64]u8 = undefined;
+    for (1..buf.len + 1) |buffer_len| {
+        for (1..9) |chunk| {
+            errdefer std.debug.print("buffer {d}, chunk {d}\n", .{ buffer_len, chunk });
+            var tr = TrickleReader.init(src, chunk, null);
+            tr.interface.buffer = buf[0..buffer_len];
+            var doc = try toml.Document.parseReader(gpa, &tr.interface, .{}, null);
+            defer doc.deinit();
+            try expectSameTree(ref.root, doc.root);
+            const got = try doc.toOwnedString(gpa);
+            defer gpa.free(got);
+            try testing.expectEqualStrings(want, got);
+        }
     }
 }
 
@@ -162,6 +195,13 @@ test "invalid UTF-8 is rejected, however the bytes arrive" {
     const bad = [_][]const u8{
         "a = \"\xff\"",
         "a = \"\xc0\x80\"", // overlong
+        "a = \"\xe0\x80\x80\"", // overlong, three bytes
+        "a = \"\xe0\x9f\xbf\"",
+        "a = \"\xf0\x80\x80\x80\"", // overlong, four bytes
+        "a = \"\xf0\x8f\xbf\xbf\"",
+        "a = \"\xc1\xbf\"",
+        "a = \"\x80\"", // a continuation byte on its own
+        "a = \"\xf5\x80\x80\x80\"",
         "a = \"\xed\xa0\x80\"", // surrogate
         "a = \"\xf4\x90\x80\x80\"", // above U+10FFFF
         "a = \"\xe2\x82\"", // truncated, then closing quote
@@ -176,6 +216,14 @@ test "invalid UTF-8 is rejected, however the bytes arrive" {
     }
 }
 
+test "the first and last code point of each UTF-8 range is accepted" {
+    const text = "\xc2\x80 \xdf\xbf \xe0\xa0\x80 \xed\x9f\xbf \xee\x80\x80 \xef\xbf\xbf " ++
+        "\xf0\x90\x80\x80 \xf4\x8f\xbf\xbf";
+    var doc = try toml.Document.parse(testing.allocator, "k = \"" ++ text ++ "\"", .{}, null);
+    defer doc.deinit();
+    try testing.expectEqualStrings(text, doc.root.getString("k").?);
+}
+
 test "valid multi-byte text and a BOM survive one-byte reads" {
     const gpa = testing.allocator;
     const src = "\xEF\xBB\xBFk = \"\\u00e9 \xc3\xa9 \xe2\x82\xac \xf0\x9f\x98\x80\"\n";
@@ -186,18 +234,25 @@ test "valid multi-byte text and a BOM survive one-byte reads" {
 }
 
 test "empty and tiny inputs" {
-    for ([_][]const u8{ "", "\n", "a", "a=1", "#" }) |src| {
+    const gpa = testing.allocator;
+    for ([_][]const u8{ "", "\n", "a", "a=", "a=1", "#", "[", "[a]", "\xEF", "\xEF\xBB\xBF" }) |src| {
+        errdefer std.debug.print("input: {s}\n", .{src});
         var tr = TrickleReader.init(src, 1, null);
-        const via_reader = toml.Document.parseReader(testing.allocator, &tr.interface, .{}, null);
-        const via_slice = toml.Document.parse(testing.allocator, src, .{}, null);
-        try testing.expectEqual(std.meta.isError(via_slice), std.meta.isError(via_reader));
-        if (via_reader) |d| {
-            var dd = d;
-            dd.deinit();
-        } else |_| {}
-        if (via_slice) |d| {
-            var dd = d;
-            dd.deinit();
-        } else |_| {}
+        var d1: toml.Diagnostic = .{};
+        var d2: toml.Diagnostic = .{};
+        const via_reader = toml.Document.parseReader(gpa, &tr.interface, .{}, &d1);
+        const via_slice = toml.Document.parse(gpa, src, .{}, &d2);
+        if (via_slice) |slice_doc| {
+            var a = slice_doc;
+            defer a.deinit();
+            var b = try via_reader;
+            defer b.deinit();
+            try expectSameTree(a.root, b.root);
+        } else |e| {
+            try testing.expectError(e, via_reader);
+            try testing.expectEqual(d2.line, d1.line);
+            try testing.expectEqual(d2.column, d1.column);
+            try testing.expectEqualStrings(d2.message, d1.message);
+        }
     }
 }

@@ -1,6 +1,7 @@
 # 0001: Parse from a std.Io.Reader instead of a byte slice
 
-Status: implemented on branch `streaming-io`; design approved by the maintainer. Merge pending.
+Status: implemented; design approved by the maintainer. Merged to `master`
+(commit 4e3b7c4).
 
 ## Problem
 

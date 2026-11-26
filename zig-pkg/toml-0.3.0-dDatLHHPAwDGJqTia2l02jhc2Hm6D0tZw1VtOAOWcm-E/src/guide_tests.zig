@@ -1,4 +1,4 @@
-//! Keeps docs/writing-toml.md honest: every ```toml block in it must parse.
+//! Keeps docs/manpages/toml-syntax.5.md honest: every ```toml block in it must parse.
 //! Built as its own test module (see build.zig) because the guide lives
 //! outside src/ and is handed in as an anonymous import.
 
@@ -6,7 +6,7 @@ const std = @import("std");
 const toml = @import("toml");
 const testing = std.testing;
 
-const guide = @embedFile("writing-toml.md");
+const guide = @embedFile("toml-syntax.5.md");
 
 fn parses(version: toml.Version, src: []const u8) bool {
     var diag: toml.Diagnostic = .{};
@@ -31,7 +31,8 @@ test "every toml block in the guide parses; only the 1.1-only block fails under 
         try testing.expect(parses(.v1_1, block));
         if (!parses(.v1_0, block)) {
             only11 += 1;
-            try testing.expect(std.mem.indexOf(u8, block, "bg = ") != null);
+            // The one 1.1 feature shown as a block: a multi-line inline table.
+            try testing.expect(std.mem.indexOf(u8, block, "colors = {\n") != null);
         }
     }
     try testing.expect(blocks >= 8);

@@ -1,5 +1,5 @@
-//! TOML 1.0.0 parser. Reference: https://toml.io/en/v1.0.0 (ABNF in the
-//! toml-lang/toml repository, toml.abnf at tag v1.0.0).
+//! TOML 1.1.0 and 1.0.0 parser. References: https://toml.io/en/v1.1.0 and
+//! https://toml.io/en/v1.0.0 (ABNF: toml.abnf in the toml-lang/toml repository).
 //!
 //! The parser pulls bytes from a `std.Io.Reader` through `Source`, which
 //! offers a few bytes of lookahead and tracks line, column, input size and
@@ -45,6 +45,12 @@ pub const Options = struct {
     version: Version = .v1_1,
     /// Maximum nesting of arrays plus inline tables. Bounds recursion depth.
     max_depth: u32 = 64,
+    /// Maximum number of key segments on the way from the root to a value,
+    /// counting `[header]` segments and dotted keys, also those inside inline
+    /// tables. Every segment but the last is a table, and `Document.write`
+    /// recurses once per table. The writer refuses trees nested more than
+    /// `writer.max_nesting` levels, whatever is allowed here.
+    max_key_depth: u32 = 128,
     /// Maximum input size in bytes.
     max_bytes: usize = 16 * 1024 * 1024,
 };
@@ -91,12 +97,19 @@ pub fn parse(gpa: Allocator, arena: Allocator, root: *Table, r: *Io.Reader, opti
     };
     defer p.scratch.deinit(gpa);
     defer p.pending.deinit(gpa);
-    if (try p.s.peekAt(0) == 0xEF and try p.s.peekAt(1) == 0xBB and try p.s.peekAt(2) == 0xBF) {
-        for (0..3) |_| try p.s.bump();
-    }
-    root.kind = .explicit;
-    try p.document();
-    try p.s.finish();
+    if (diag) |d| d.* = .{};
+    p.input() catch |e| {
+        // Every other error records its own message where it is found.
+        const message: ?[]const u8 = switch (e) {
+            error.OutOfMemory => "out of memory",
+            error.ReadFailed => "read failed",
+            else => null,
+        };
+        if (diag) |d| if (message) |m| {
+            d.* = .{ .line = p.s.line, .column = p.s.col, .message = m };
+        };
+        return e;
+    };
 }
 
 /// Byte source over a `Reader`: lookahead, consumption, and bookkeeping.
@@ -193,6 +206,26 @@ const Source = struct {
         self.col += 1; // one column per code point
     }
 
+    /// For the error path: the grammar can reject a byte without consuming
+    /// it, so `bump` has not validated it. Fails with `InvalidUtf8` if the
+    /// character at the current position is not well-formed UTF-8.
+    fn checkNext(self: *Source) ReadError!void {
+        const at = self.loc();
+        const first = (try self.peek()) orelse return self.finish();
+        if (self.need > 0) {
+            if (first < self.lo or first > self.hi) return self.fail(at, "invalid UTF-8", error.InvalidUtf8);
+            return;
+        }
+        if (first < 0x80) return;
+        const len = std.unicode.utf8ByteSequenceLength(first) catch
+            return self.fail(at, "invalid UTF-8", error.InvalidUtf8);
+        var buf: [max_lookahead]u8 = undefined;
+        for (0..len) |i| {
+            buf[i] = (try self.peekAt(i)) orelse return self.fail(at, "invalid UTF-8", error.InvalidUtf8);
+        }
+        if (!std.unicode.utf8ValidateSlice(buf[0..len])) return self.fail(at, "invalid UTF-8", error.InvalidUtf8);
+    }
+
     /// Call once the input is exhausted: a multi-byte sequence must not be cut short.
     fn finish(self: *Source) Error!void {
         if (self.need != 0) return self.fail(self.loc(), "invalid UTF-8", error.InvalidUtf8);
@@ -209,6 +242,8 @@ const Parser = struct {
     /// Text being assembled: bare keys, string bodies, scalar tokens.
     scratch: std.ArrayList(u8) = .empty,
     depth: u32 = 0,
+    /// Key segments between the root and the table now receiving keys.
+    key_depth: usize = 0,
     /// Comment and blank lines seen since the last item; they become the
     /// `before` of the next one. Lines are arena-owned, the list is not.
     pending: std.ArrayList([]const u8) = .empty,
@@ -217,7 +252,9 @@ const Parser = struct {
     /// Has any item been parsed yet? Blank lines before the first one are dropped.
     seen_item: bool = false,
 
-    fn err(self: *Parser, msg: []const u8) Error {
+    /// A syntax error at the current position.
+    fn err(self: *Parser, msg: []const u8) ReadError {
+        self.s.checkNext() catch |e| return e;
         return self.s.fail(self.s.loc(), msg, error.Syntax);
     }
 
@@ -240,6 +277,17 @@ const Parser = struct {
     /// Are the next three bytes all `c`?
     fn peekTriple(self: *Parser, c: u8) ReadError!bool {
         return (try self.s.peek()) == c and (try self.s.peekAt(1)) == c and (try self.s.peekAt(2)) == c;
+    }
+
+    /// The whole input: an optional byte-order mark, then the document.
+    fn input(self: *Parser) ReadError!void {
+        if (try self.s.peekAt(0) == 0xEF and try self.s.peekAt(1) == 0xBB and try self.s.peekAt(2) == 0xBF) {
+            for (0..3) |_| try self.s.bump();
+            self.s.col = 1; // editors give the mark no column
+        }
+        self.root.kind = .explicit;
+        try self.document();
+        try self.s.finish();
     }
 
     // ---- lexical helpers -------------------------------------------------
@@ -369,6 +417,8 @@ const Parser = struct {
         const keys = try self.key();
         try self.skipWs();
         if (!try self.eat(']')) return self.err("expected ']'");
+        try self.checkKeyDepth(keys.len, start);
+        self.key_depth = keys.len;
 
         const parent = try self.walk(self.root, keys[0 .. keys.len - 1], start);
         const last = keys[keys.len - 1];
@@ -396,6 +446,8 @@ const Parser = struct {
         const keys = try self.key();
         try self.skipWs();
         if (!try self.eat(']') or !try self.eat(']')) return self.err("expected ']]'");
+        try self.checkKeyDepth(keys.len, start);
+        self.key_depth = keys.len;
 
         const parent = try self.walk(self.root, keys[0 .. keys.len - 1], start);
         const last = keys[keys.len - 1];
@@ -452,6 +504,12 @@ const Parser = struct {
 
     // ---- keys and values -------------------------------------------------
 
+    fn checkKeyDepth(self: *Parser, depth: usize, at: Loc) Error!void {
+        if (depth > self.options.max_key_depth) {
+            return self.s.fail(at, "key nesting too deep", error.LimitExceeded);
+        }
+    }
+
     /// key = value, where key may be dotted. Inserts into `table`.
     fn keyValue(self: *Parser, table: *Table) ReadError!struct { table: *Table, key: []const u8 } {
         const start = self.s.loc();
@@ -459,6 +517,12 @@ const Parser = struct {
         try self.skipWs();
         if (!try self.eat('=')) return self.err("expected '=' after key");
         try self.skipWs();
+
+        // Keys inside the value (an inline table) start below this one.
+        const outer_depth = self.key_depth;
+        try self.checkKeyDepth(outer_depth + keys.len, start);
+        self.key_depth = outer_depth + keys.len;
+        defer self.key_depth = outer_depth;
 
         // Dotted keys create tables that only dotted keys may extend.
         var cur = table;
@@ -827,7 +891,7 @@ const Parser = struct {
                 'o' => 8,
                 else => 2,
             };
-            const body = self.stripUnderscores(s[2..], base, start) orelse return self.errAt(start, "invalid integer");
+            const body = try self.stripUnderscores(s[2..], base) orelse return self.errAt(start, "invalid integer");
             const u = std.fmt.parseInt(u63, body, base) catch return self.errAt(start, "integer out of range");
             return .{ .integer = u };
         }
@@ -839,7 +903,7 @@ const Parser = struct {
         if (!is_float) {
             if (s.len == 0) return self.errAt(start, "invalid number");
             if (s.len > 1 and s[0] == '0') return self.errAt(start, "leading zeros are not allowed");
-            const body = self.stripUnderscores(s, 10, start) orelse return self.errAt(start, "invalid integer");
+            const body = try self.stripUnderscores(s, 10) orelse return self.errAt(start, "invalid integer");
             const buf = try self.arena.alloc(u8, body.len + 1);
             buf[0] = if (neg) '-' else '+';
             @memcpy(buf[1..], body);
@@ -867,18 +931,23 @@ const Parser = struct {
             i = exp_end;
         }
         if (i != s.len) return self.errAt(start, "invalid float");
-        const clean = self.stripUnderscores(s, 0, start) orelse return self.errAt(start, "invalid float");
+        const clean = try self.stripUnderscores(s, 0) orelse return self.errAt(start, "invalid float");
         const f = std.fmt.parseFloat(f64, clean) catch return self.errAt(start, "invalid float");
+        // `inf` itself was handled above, so this is a number too large for
+        // f64. Loading it as infinity would change the file when saved.
+        if (std.math.isInf(f)) return self.errAt(start, "float out of range");
         return .{ .float = if (neg) -f else f };
     }
 
     /// Validates underscore placement (only between digits) and returns the
     /// digits without them. `base == 0` means "a float body": '.', 'e', 'E',
     /// '+' and '-' count as non-digit separators that underscores may not touch.
-    fn stripUnderscores(self: *Parser, s: []const u8, base: u8, start: Loc) ?[]const u8 {
-        _ = start;
+    /// Null means `s` is malformed. The result may be `s` itself.
+    fn stripUnderscores(self: *Parser, s: []const u8, base: u8) Allocator.Error!?[]const u8 {
         if (s.len == 0) return null;
-        const out = self.arena.alloc(u8, s.len) catch return null;
+        // Most numbers have no underscore and need no copy.
+        const copy = std.mem.indexOfScalar(u8, s, '_') != null;
+        const out: []u8 = if (copy) try self.arena.alloc(u8, s.len) else &.{};
         var n: usize = 0;
         for (s, 0..) |c, idx| {
             if (c == '_') {
@@ -887,10 +956,10 @@ const Parser = struct {
                 continue;
             }
             if (base != 0 and !isDigitOf(c, base)) return null;
-            out[n] = c;
+            if (copy) out[n] = c;
             n += 1;
         }
-        return out[0..n];
+        return if (copy) out[0..n] else s;
     }
 };
 
@@ -951,14 +1020,6 @@ fn digits(s: []const u8, comptime n: usize) ?u32 {
     return v;
 }
 
-fn daysInMonth(year: u32, month: u32) u32 {
-    return switch (month) {
-        1, 3, 5, 7, 8, 10, 12 => 31,
-        4, 6, 9, 11 => 30,
-        else => if ((year % 4 == 0 and year % 100 != 0) or year % 400 == 0) 29 else 28,
-    };
-}
-
 /// `HH:MM:SS[.frac]`; with `optional_seconds` (TOML 1.1) also `HH:MM`.
 fn parseTime(s: []const u8, optional_seconds: bool, out_len: *usize) ?value.Time {
     const h = digits(s, 2) orelse return null;
@@ -996,7 +1057,7 @@ fn parseDatetime(tok: []const u8, optional_seconds: bool) ?Datetime {
         const y = digits(tok, 4) orelse return null;
         const mo = digits(tok[5..], 2) orelse return null;
         const d = digits(tok[8..], 2) orelse return null;
-        if (mo < 1 or mo > 12 or d < 1 or d > daysInMonth(y, mo)) return null;
+        if (mo < 1 or mo > 12 or d < 1 or d > value.daysInMonth(y, mo)) return null;
         dt.date = .{ .year = @intCast(y), .month = @intCast(mo), .day = @intCast(d) };
         rest = tok[10..];
         if (rest.len == 0) return dt;

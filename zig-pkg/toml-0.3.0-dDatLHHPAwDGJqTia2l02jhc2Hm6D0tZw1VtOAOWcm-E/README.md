@@ -17,9 +17,10 @@ var doc3 = try toml.Document.parse(gpa, text, .{ .version = .v1_0 }, &diag);
 ```
 
 - Comments: `# ...` lines above a key or header, a trailing `# ...` on its line, blank lines between them and a closing footer are kept through parse → edit → write (`Table.key_comments`, `Table.header`, `Table.footer`). Set them with `doc.setComments(&.{"panel","position"}, .{ .before = &.{"# where it sits"}, .after = "# top|bottom" })`.
-- `docs/writing-toml.md` — a short guide to the syntax, with links to the official specification.
+- `docs/api.md` — a tutorial for reading, editing and writing TOML in code.
+- `docs/manpages/` — `toml-zig(3)` (library reference), `toml-syntax(5)` (the syntax, with links to the specification) and `toml-parse(1)`. Render with `pandoc -s -t man FILE.md -o FILE`.
 - `docs/decisions/` — design decisions (e.g. why the parser is streaming).
 - `zig build bench` — parse/write timings (ReleaseFast).
 - `zig build cli` — builds `zig-out/bin/toml-parse` (`gen <bytes>`, `slice|reader <file>`) for whole-process comparisons of two builds with [poop](https://github.com/andrewrk/poop): `poop 'old/toml-parse slice f.toml' 'new/toml-parse slice f.toml'`.
 
-`zig build test` runs the tests.
+`zig build test` runs the tests. `zig build conformance -Dsuite=PATH/toml-test/tests` runs the official [toml-test](https://github.com/toml-lang/toml-test) decoder cases from a local checkout.
