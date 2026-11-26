@@ -304,6 +304,8 @@ pub fn scriptHash(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options)
     const ctx: macro.Context = .{ .target = prof, .host = prof, .static = contains(r.options, "static") };
     var fixed = opts;
     fixed.jobs = 1;
+    // a way of running a build, not a change to it: records keep the hash of the script with its check
+    fixed.no_check = false;
     var bad: []const u8 = "";
     const text = try script(arena, r, ctx, "/build/src", fixed, &bad);
     var h = std.crypto.hash.sha2.Sha256.init(.{});
@@ -1773,6 +1775,17 @@ test "script runs setup, build, check, install in order with macros expanded" {
     try std.testing.expect(std.mem.indexOf(u8, s, "==> setup") == null);
     try std.testing.expect(std.mem.indexOf(u8, s, "DESTDIR=$pkgdir install") != null);
     try std.testing.expect(std.mem.indexOf(u8, s, "==> patch") == null);
+}
+
+test "the script hash does not depend on --no-check" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const r: recipe.Recipe = .{ .name = "t", .version = "1", .release = 1, .summary = "s", .license = "MIT", .source = &.{}, .install = "x", .check = "make check" };
+    // the tree this test is run from has the profiles
+    const with = try scriptHash(a, std.testing.io, r, .{ .root = ".", .jobs = 4 });
+    const without = try scriptHash(a, std.testing.io, r, .{ .root = ".", .jobs = 4, .no_check = true });
+    try std.testing.expectEqualStrings(&with, &without);
 }
 
 test "patches are applied in order before setup" {
