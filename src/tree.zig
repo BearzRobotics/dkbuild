@@ -45,6 +45,16 @@ pub const Tree = struct {
         return t.needsOf(arena, i, &.{ t.recipes[i].hostdeps, t.recipes[i].builddeps });
     }
 
+    /// What the subpackage `name` of recipe `i` itself depends on, if `name` is one it declares.
+    pub fn subpackageDepends(t: Tree, i: usize, name: []const u8) []const []const u8 {
+        const r = t.recipes[i];
+        for (r.subpackages) |sp| {
+            if (name.len == r.name.len + 1 + sp.name.len and std.mem.startsWith(u8, name, r.name) and
+                name[r.name.len] == '-' and std.mem.eql(u8, name[r.name.len + 1 ..], sp.name)) return sp.depends;
+        }
+        return &.{};
+    }
+
     /// `needs`, starting from the given dependency lists of recipe `i` only:
     /// with just its `hostdeps`, the tools a build runs and what they need.
     pub fn needsOf(t: Tree, arena: Allocator, i: usize, start: []const []const []const u8) Allocator.Error![]const usize {
@@ -55,8 +65,12 @@ pub const Tree = struct {
         var out: std.ArrayList(usize) = .empty;
         for (start) |deps| try names.appendSlice(arena, deps);
         var k: usize = 0;
+        var asked: std.StringHashMapUnmanaged(void) = .empty; // subpackages whose depends are in `names`
         while (k < names.items.len) : (k += 1) {
             const p = t.provider(names.items[k]) orelse continue;
+            // A subpackage asked for by name brings its own `depends` into the root (build.inTreeFiles).
+            if (!(try asked.getOrPut(arena, names.items[k])).found_existing)
+                try names.appendSlice(arena, t.subpackageDepends(p, names.items[k]));
             if (seen[p]) continue;
             seen[p] = true;
             try out.append(arena, p);
@@ -132,7 +146,12 @@ pub const Tree = struct {
         const r = t.recipes[i];
         // stage0deps order too: a first build, with no earlier package of a
         // selfhost recipe in repo/, uses them
-        for ([_][]const []const u8{ r.hostdeps, r.builddeps, r.stage0deps }) |deps| {
+        // (and what a subpackage asked for by name depends on: it goes into the build root with it)
+        var via_subpackages: std.ArrayList([]const u8) = .empty;
+        for ([_][]const []const u8{ r.hostdeps, r.builddeps }) |deps| for (deps) |d| if (t.provider(d)) |p| {
+            for (t.subpackageDepends(p, d)) |sd| if (t.provider(sd)) |sp| if (sp != p and sp != i) try via_subpackages.append(arena, sd);
+        };
+        for ([_][]const []const u8{ r.hostdeps, r.builddeps, r.stage0deps, via_subpackages.items }) |deps| {
             for (deps) |d| {
                 const p = t.provider(d) orelse {
                     if (t.allow_external) continue;
@@ -269,6 +288,32 @@ test "needs follows build deps, then the deps' build and run deps, not the recip
     try std.testing.expectEqualStrings("lib", names.items[1]);
     try std.testing.expectEqualStrings("tool", names.items[2]);
     try std.testing.expectEqualStrings("zlib", names.items[3]);
+}
+
+test "a subpackage's own depends is part of what a build root holds (BC-21, SS-10)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    var lib = rc("lib", &.{}, &.{});
+    lib.subpackages = &.{.{ .name = "devel", .summary = "d", .paths = &.{}, .depends = &.{"extra-data"} }};
+    const t: Tree = .{ .recipes = &.{ rc("app", &.{}, &.{"lib-devel"}), lib, rc("extra", &.{}, &.{}), rc("plain", &.{}, &.{"lib"}) } };
+    var tt = t;
+    const e: Recipe = blk: {
+        var x = rc("extra", &.{}, &.{});
+        x.subpackages = &.{.{ .name = "data", .summary = "d", .paths = &.{} }};
+        break :blk x;
+    };
+    tt.recipes = &.{ t.recipes[0], t.recipes[1], e, t.recipes[3] };
+    // app asks for lib-devel, so extra is in its root, built first, and waited for
+    try std.testing.expectEqualSlices(usize, &.{ 1, 2 }, try tt.needs(a, 0));
+    var problems: std.ArrayList(Problem) = .empty;
+    // both before app (lib does not need extra itself, so either may come first)
+    const o = try tt.order(a, &.{"app"}, &problems);
+    try std.testing.expectEqual(@as(usize, 3), o.len);
+    try std.testing.expectEqual(@as(usize, 0), o[2]);
+    try std.testing.expectEqual(@as(usize, 0), problems.items.len);
+    // plain asks only for lib: the -devel's own depends is followed only when -devel itself is asked for
+    try std.testing.expectEqualSlices(usize, &.{1}, try tt.needs(a, 3));
 }
 
 test "closeOverNeeds adds what the build roots of the jobs hold, however deep" {

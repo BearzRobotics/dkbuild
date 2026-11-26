@@ -701,7 +701,9 @@ fn inTreeFiles(arena: Allocator, io: std.Io, opts: Options, r: recipe.Recipe, re
         const devel_name = if (std.mem.eql(u8, d, pr.name)) try std.fmt.allocPrint(arena, "{s}-devel", .{pr.name}) else libs_name;
         for ([_][]const u8{ d, pr.name, libs_name, devel_name, static_name }) |want| {
             const file = try std.fmt.allocPrint(arena, "{s}-{s}-r{d}.apk", .{ want, pr.version, pr.release });
-            const optional = std.mem.eql(u8, want, libs_name) or std.mem.eql(u8, want, static_name) or std.mem.eql(u8, want, devel_name);
+            // the extras are optional; what the recipe itself named is not, even when that name ends in -libs
+            const optional = !std.mem.eql(u8, want, d) and !std.mem.eql(u8, want, pr.name) and
+                (std.mem.eql(u8, want, libs_name) or std.mem.eql(u8, want, static_name) or std.mem.eql(u8, want, devel_name));
             if (contains(files.items, file)) continue;
             const present = if (repo_abs) |ra| blk: {
                 const path = try std.fs.path.join(arena, &.{ ra, file });

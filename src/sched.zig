@@ -122,7 +122,13 @@ fn waitLists(arena: Allocator, t: tree.Tree, jobs: []const Job) Allocator.Error!
         x.* = .empty;
     }
     for (jobs, 0..) |jb, j| {
-        for (try t.needs(arena, jb.idx)) |p| if (job_of[p]) |pj| {
+        var needed: std.ArrayList(usize) = .empty;
+        try needed.appendSlice(arena, try t.needs(arena, jb.idx));
+        // a selfhost recipe with no earlier package is built with its stage0deps, and with an earlier one runs
+        // with its own rundeps: both go into its root
+        const own = t.recipes[jb.idx];
+        if (own.stage0deps.len > 0) try needed.appendSlice(arena, try t.needsOf(arena, jb.idx, &.{ own.stage0deps, own.rundeps }));
+        for (needed.items) |p| if (job_of[p]) |pj| {
             if (pj < j) try lists[j].append(arena, pj) else if (pj != j) try later[j].append(arena, pj);
         };
     }
