@@ -460,6 +460,11 @@ pub fn childMain(args: []const [:0]const u8) noreturn {
     lockMounts(ids, net);
     sys(linux.chdir(dupeZ(cwd)), "chdir", cwd);
 
+    // A session of its own. In the caller's, `kill 0` in a build (a common clean-up) would signal dkbuild, its
+    // other builds and the shell that ran it, and the build would hold the user's terminal. Stopping dkbuild
+    // still stops everything here: PR_SET_PDEATHSIG, not the terminal's signals.
+    sys(linux.setsid(), "setsid", "");
+
     // Run the command with exactly the environment it was given.
     if (cmd[0][0] != '/') die("the command must be an absolute path: {s}", .{cmd[0]});
     const argv_c = page.alloc(?[*:0]const u8, cmd.len + 1) catch die("out of memory", .{});
