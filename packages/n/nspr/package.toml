@@ -2,13 +2,16 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
+# 4.41 (2026-11-26): upstream's _linux.h now selects _PR_HAVE_LARGE_OFF_T on a C library that is not glibc (musl: off_t is 64-bit,
+# so the plain open, mmap, stat and lseek). The recipe forced -D_PR_HAVE_OFF64_T, which wins over it and makes unix.c use open64,
+# mmap64, stat64 ... that musl does not declare. The flag is gone, and with it lfs64.patch, which only changed that branch's types.
 name = "nspr"
 version = "4.41"
 release = 1
 summary = "NetScape Portable Runtime"
 license = "MPL-2.0"
 homepage = "https://www.mozilla.org/projects/nspr"
-patches = ["lfs64.patch", "ppc64-default-stack-size.patch"]
+patches = ["ppc64-default-stack-size.patch"]
 hostdeps = ["pkgconf"]
 builddeps = ["zlib-ng-compat-devel"]
 options = ["!cross", "!check"]
@@ -18,7 +21,7 @@ source = [
 ]
 
 environment = '''
-export CFLAGS="${CFLAGS} -D_PR_POLL_AVAILABLE -D_PR_HAVE_OFF64_T -D_PR_INET6 -D_PR_HAVE_INET_NTOP -D_PR_HAVE_GETHOSTBYNAME2 -D_PR_HAVE_GETADDRINFO -D_PR_INET6_PROBE"
+export CFLAGS="${CFLAGS} -D_PR_POLL_AVAILABLE -D_PR_INET6 -D_PR_HAVE_INET_NTOP -D_PR_HAVE_GETHOSTBYNAME2 -D_PR_HAVE_GETADDRINFO -D_PR_INET6_PROBE"
 '''
 setup = '''
 cd nspr
