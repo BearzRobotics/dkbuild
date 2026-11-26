@@ -2,6 +2,7 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
+# 3.134 (2026-11-26): upstream no longer has the signtool program (nss/cmd/signtool is gone); files/install.sh does not install it.
 name = "nss"
 version = "3.134"
 release = 1
