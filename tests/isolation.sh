@@ -78,5 +78,10 @@ echo "$OUT" | grep -q from-the-host && fail "a directory the caller had open was
 OUT=$(trap '' HUP INT QUIT; sbrun -- /usr/bin/grep -E '^Sig(Ign|Blk):' /proc/self/status 2>&1)
 [ "$(echo "$OUT" | grep -c '0000000000000000$')" = 2 ] || fail "signals ignored or blocked inside: $OUT"
 
+# --- the machine's names stay outside
+OUT=$(sbrun -- /usr/bin/sh -c 'uname -n; cat /proc/sys/kernel/domainname' 2>&1)
+[ "$OUT" = "dkbuild
+(none)" ] || fail "the host name or domain name inside is not the fixed one: $(echo "$OUT" | wc -l) line(s)"
+
 [ "$fails" -eq 0 ] || { echo "FAIL: $fails isolation check(s) failed"; exit 1; }
 echo "ok: read-only binds stay read-only; signals and the terminal stay outside; killing the sandbox kills all in it"

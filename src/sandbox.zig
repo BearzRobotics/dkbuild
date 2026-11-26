@@ -548,6 +548,9 @@ fn lockMounts(ids: ?[]const [:0]const u8, net: bool) void {
         writeFile("/proc/self/gid_map", "0 0 1\n");
     }
     if (!net) loopbackUp();
+    // A new UTS namespace starts with the host's names, which builds record (and so differ between machines).
+    for ([_]struct { nr: linux.SYS, name: []const u8 }{ .{ .nr = .sethostname, .name = "dkbuild" }, .{ .nr = .setdomainname, .name = "(none)" } }) |u|
+        sys(linux.syscall2(u.nr, @intFromPtr(u.name.ptr), u.name.len), "set", "the sandbox's host name");
     const pid_rc = linux.fork();
     sys(pid_rc, "fork", "");
     if (pid_rc != 0) waitAndExit(@intCast(pid_rc));
