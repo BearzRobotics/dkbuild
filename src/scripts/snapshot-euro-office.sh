@@ -24,6 +24,8 @@
 # times and owners.
 set -eu
 out=$1 work=$2 what=$3
+# every fetch below is https: no ext::, file:: or ssh helper, whatever a URL says
+export GIT_ALLOW_PROTOCOL=https
 log() { echo "snapshot: $*" >&2; }
 [ "$what" = v8 ] || { log "unknown euro-office snapshot '$what'"; exit 1; }
 tag=$4 gn=$5
@@ -37,9 +39,9 @@ checkout() { # dir url rev
     rm -rf "$1"
     git init -q "$1"
     log "$2 at $3"
-    if ! git -C "$1" fetch -q --depth 1 "$2" "$3"; then
+    if ! git -C "$1" fetch -q --depth 1 -- "$2" "$3"; then
         # a server that refuses to fetch a commit by id: the whole history
-        git -C "$1" fetch -q "$2"
+        git -C "$1" fetch -q -- "$2"
     fi
     if git -C "$1" rev-parse -q --verify "$3^{commit}" >/dev/null 2>&1; then
         git -C "$1" checkout -q "$3"
@@ -55,10 +57,18 @@ checkout src/gn https://gn.googlesource.com/gn "$gn"
 # The DEPS entries a v8_monolith build reads (V8's DEPS sets
 # use_relative_paths, so each is relative to V8's top directory).
 python3 -I - src/v8/DEPS > deps.txt <<'EOF'
-import ast, sys
+import ast, re, sys
 want = ["build", "buildtools", "base/trace_event/common", "third_party/googletest/src",
         "third_party/icu", "third_party/jinja2", "third_party/markupsafe",
         "third_party/zlib", "tools/clang"]
+# What DEPS says reaches `git fetch` and the file system on the host: a URL read as an option (--upload-pack=...)
+# runs a command. So: https URLs, revisions that cannot be options, paths that stay inside the checkout.
+def checked(path, url, rev):
+    ok = (re.fullmatch(r'https://[!#-\[\]-~]+', url) and re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._/+-]*', rev)
+          and all(re.fullmatch(r'[A-Za-z0-9_+.][A-Za-z0-9._+-]*', c) and c not in ('.', '..') for c in path.split('/')))
+    if not ok:
+        sys.exit("snapshot: DEPS: refusing %r at %r, revision %r" % (url, path, rev))
+    print(path, url, rev)
 tree = ast.parse(open(sys.argv[1]).read())
 env = {}
 def val(n):
@@ -76,7 +86,7 @@ for p in want:
     d = env["deps"][p]
     url = d["url"] if isinstance(d, dict) else d
     u, rev = url.rsplit("@", 1)
-    print(p, u, rev)
+    checked(p, u, rev)
 EOF
 while read -r path url rev; do
     checkout "src/v8/$path" "$url" "$rev"

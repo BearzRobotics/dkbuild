@@ -44,6 +44,8 @@
 # the lockfiles' hashes).
 set -eu
 out=$1 work=$2 tag=$3 pnpmver=$4
+# every fetch below is https: no ext::, file:: or ssh helper, whatever a URL says
+export GIT_ALLOW_PROTOCOL=https
 name=brave-core-$tag
 mkdir -p "$work"
 cd "$work"
@@ -58,7 +60,7 @@ checkout() { # dir url rev
     # a few tries: brave-core alone is a large download, which a dropped
     # connection would otherwise fail
     n=0
-    until git -C "$1" -c http.version=HTTP/1.1 fetch -q --depth 1 "$2" "$3"; do
+    until git -C "$1" -c http.version=HTTP/1.1 fetch -q --depth 1 -- "$2" "$3"; do
         n=$((n + 1))
         [ $n -lt 4 ] || return 1
         log "retrying $2 ($n)"
@@ -73,8 +75,16 @@ checkout src https://github.com/brave/brave-core.git "refs/tags/$tag"
 # The DEPS entries a Linux build checks out (use_relative_paths: each is
 # relative to brave-core's top directory).
 python3 -I - src/DEPS > deps.txt <<'EOF'
-import ast, sys
+import ast, re, sys
 skip = {"third_party/reclient_configs/src"}
+# What DEPS says reaches `git fetch` and the file system on the host: a URL read as an option (--upload-pack=...)
+# runs a command. So: https URLs, revisions that cannot be options, paths that stay inside the checkout.
+def checked(path, url, rev):
+    ok = (re.fullmatch(r'https://[!#-\[\]-~]+', url) and re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._/+-]*', rev)
+          and all(re.fullmatch(r'[A-Za-z0-9_+.][A-Za-z0-9._+-]*', c) and c not in ('.', '..') for c in path.split('/')))
+    if not ok:
+        sys.exit("snapshot: DEPS: refusing %r at %r, revision %r" % (url, path, rev))
+    print(path, url, rev)
 tree = ast.parse(open(sys.argv[1]).read())
 env = {}
 def val(n):
@@ -96,7 +106,7 @@ for p, d in sorted(env["deps"].items()):
         if c and "checkout_linux" not in c: continue
         d = d["url"]
     u, rev = d.rsplit("@", 1)
-    print(p, u, rev)
+    checked(p, u, rev)
 EOF
 while read -r p u rev; do
     checkout "src/$p" "$u" "$rev"

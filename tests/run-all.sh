@@ -15,7 +15,7 @@ zig build || exit 1
 python3 -B tests/upstream-rules.py > /dev/null || { python3 -B tests/upstream-rules.py | grep FAIL; exit 1; }
 [ -d rootfs/dkrescue ] || { echo "no build machine: run 'dkbuild bootstrap-root <dkrescue.iso>' first"; exit 1; }
 status=0
-for t in forgotten-dep isolation sandbox signing vendor-layout fetch-cargo fetch-zig restore-store prune chain rebuild scripts repo-install musl import parallel; do
+for t in forgotten-dep isolation sandbox signing vendor-layout fetch-cargo fetch-zig restore-store prune snapshot-deps chain rebuild scripts repo-install musl import parallel; do
     ./tests/$t.sh || status=1
 done
 exit $status
