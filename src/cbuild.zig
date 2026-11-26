@@ -713,34 +713,58 @@ fn dedent(arena: Allocator, text: []const u8) Allocator.Error![]const u8 {
 
 // ---- shell and TOML text -----------------------------------------------------------
 
-/// One word for a shell. `$name` is left to expand (it came from `make_jobs`
-/// and `destdir`); anything else unusual is double-quoted.
+/// Whether the `$` at `s[i]` starts one of the three variables the importer itself puts into strings (for
+/// `self.make_jobs`, `self.destdir` and `self.files_path`). cbuild runs no shell, so any other `$` in a template
+/// is just that character.
+fn ownVariable(s: []const u8, i: usize) bool {
+    for ([_][]const u8{ "$jobs", "$pkgdir", "$pkgfiles" }) |v| {
+        if (!std.mem.startsWith(u8, s[i..], v)) continue;
+        if (i + v.len == s.len or !(std.ascii.isAlphanumeric(s[i + v.len]) or s[i + v.len] == '_')) return true;
+    }
+    return false;
+}
+
+/// Whether the `%` at `s[i]` would be read as dkbuild's (a macro, or half of `%%`) and so must be doubled.
+fn macroPercent(s: []const u8, i: usize) bool {
+    if ((i + 1 < s.len and s[i + 1] == '%') or (i > 0 and s[i - 1] == '%')) return true;
+    if (i > 0 and !std.ascii.isWhitespace(s[i - 1])) return false;
+    return i + 1 < s.len and (std.ascii.isLower(s[i + 1]) or s[i + 1] == '_');
+}
+
+/// `s` as the inside of a double-quoted shell word in a recipe step: nothing of the template's expands or ends
+/// the quotes.
+fn quoted(arena: Allocator, s: []const u8) Allocator.Error![]const u8 {
+    var out: std.ArrayList(u8) = .empty;
+    for (s, 0..) |c, i| {
+        switch (c) {
+            '"', '\\', '`' => try out.append(arena, '\\'),
+            '$' => if (!ownVariable(s, i)) try out.append(arena, '\\'),
+            '%' => if (macroPercent(s, i)) try out.append(arena, '%'),
+            else => {},
+        }
+        try out.append(arena, c);
+    }
+    return out.items;
+}
+
+/// One word for a shell, double-quoted when it has anything but plain characters.
 fn shellWord(arena: Allocator, s: []const u8) Allocator.Error![]const u8 {
     if (s.len == 0) return "''";
-    var plain = true;
+    var plain = s[0] != '~';
     for (s, 0..) |c, i| {
-        const ok = std.ascii.isAlphanumeric(c) or std.mem.indexOfScalar(u8, "_@%+=:,./-~", c) != null or
-            (c == '$' and i + 1 < s.len and (isIdentStart(s[i + 1]) or s[i + 1] == '{'));
+        const ok = std.ascii.isAlphanumeric(c) or std.mem.indexOfScalar(u8, "_@+=:,./-~", c) != null or
+            (c == '%' and !macroPercent(s, i)) or (c == '$' and ownVariable(s, i));
         if (!ok) plain = false;
     }
     if (plain) return s;
-    var out: std.ArrayList(u8) = .empty;
-    try out.append(arena, '"');
-    for (s, 0..) |c, i| {
-        switch (c) {
-            '"', '\\', '`' => {
-                try out.append(arena, '\\');
-                try out.append(arena, c);
-            },
-            '$' => {
-                if (!(i + 1 < s.len and (isIdentStart(s[i + 1]) or s[i + 1] == '{'))) try out.append(arena, '\\');
-                try out.append(arena, c);
-            },
-            else => try out.append(arena, c),
-        }
+    // a lone leading %word: doubled outside quotes, where a macro would be read
+    if (s[0] == '%') {
+        const rest_plain = for (s[1..]) |c| {
+            if (!(std.ascii.isAlphanumeric(c) or std.mem.indexOfScalar(u8, "_@+=:,./-", c) != null)) break false;
+        } else true;
+        if (rest_plain) return std.mem.concat(arena, u8, &.{ "%", s });
     }
-    try out.append(arena, '"');
-    return out.items;
+    return std.mem.concat(arena, u8, &.{ "\"", try quoted(arena, s), "\"" });
 }
 
 fn tomlString(arena: Allocator, s: []const u8) Allocator.Error![]const u8 {
@@ -884,7 +908,7 @@ fn translateCall(arena: Allocator, code: []const u8, env: *const Env, pkgname: [
     }
     if (std.mem.eql(u8, method, "install_license")) {
         if (w.len != 1 or call.kwargs.len != 0) return false;
-        try out.print(arena, "install -Dm644 {s} \"$pkgdir/usr/share/licenses/{s}/{s}\"\n", .{ try shellWord(arena, w[0]), pkgname, std.fs.path.basename(w[0]) });
+        try out.print(arena, "install -Dm644 {s} \"$pkgdir/usr/share/licenses/{s}/{s}\"\n", .{ try shellWord(arena, w[0]), try quoted(arena, pkgname), try quoted(arena, std.fs.path.basename(w[0])) });
         return true;
     }
     if (std.mem.eql(u8, method, "install_file")) {
@@ -892,12 +916,12 @@ fn translateCall(arena: Allocator, code: []const u8, env: *const Env, pkgname: [
         const mode = kwInt(call, "mode") orelse 0o644;
         const name = kwStr(call, "name") orelse std.fs.path.basename(w[0]);
         const dest = std.mem.trim(u8, w[1], "/");
-        try out.print(arena, "install -Dm{o} {s} \"$pkgdir/{s}/{s}\"\n", .{ mode, try shellWord(arena, w[0]), dest, name });
+        try out.print(arena, "install -Dm{o} {s} \"$pkgdir/{s}/{s}\"\n", .{ mode, try shellWord(arena, w[0]), try quoted(arena, dest), try quoted(arena, name) });
         return true;
     }
     if (std.mem.eql(u8, method, "install_bin")) {
         if (w.len != 1 or call.kwargs.len != 0) return false;
-        try out.print(arena, "install -Dm755 {s} \"$pkgdir/usr/bin/{s}\"\n", .{ try shellWord(arena, w[0]), std.fs.path.basename(w[0]) });
+        try out.print(arena, "install -Dm755 {s} \"$pkgdir/usr/bin/{s}\"\n", .{ try shellWord(arena, w[0]), try quoted(arena, std.fs.path.basename(w[0])) });
         return true;
     }
     if (std.mem.eql(u8, method, "install_man")) {
@@ -905,31 +929,31 @@ fn translateCall(arena: Allocator, code: []const u8, env: *const Env, pkgname: [
         const base = std.fs.path.basename(w[0]);
         const ext = std.fs.path.extension(base);
         if (ext.len != 2 or !std.ascii.isDigit(ext[1])) return false;
-        try out.print(arena, "install -Dm644 {s} \"$pkgdir/usr/share/man/man{c}/{s}\"\n", .{ try shellWord(arena, w[0]), ext[1], base });
+        try out.print(arena, "install -Dm644 {s} \"$pkgdir/usr/share/man/man{c}/{s}\"\n", .{ try shellWord(arena, w[0]), ext[1], try quoted(arena, base) });
         return true;
     }
     if (std.mem.eql(u8, method, "install_link")) {
         // install_link(path, target): a symlink at `path` (inside the destdir) to `target`.
         if (w.len != 2 or call.kwargs.len != 0) return false;
         const dest = std.mem.trim(u8, w[0], "/");
-        if (std.fs.path.dirname(dest)) |parent| try out.print(arena, "mkdir -p \"$pkgdir/{s}\"\n", .{parent});
-        try out.print(arena, "ln -sf {s} \"$pkgdir/{s}\"\n", .{ try shellWord(arena, w[1]), dest });
+        if (std.fs.path.dirname(dest)) |parent| try out.print(arena, "mkdir -p \"$pkgdir/{s}\"\n", .{try quoted(arena, parent)});
+        try out.print(arena, "ln -sf {s} \"$pkgdir/{s}\"\n", .{ try shellWord(arena, w[1]), try quoted(arena, dest) });
         return true;
     }
     if (std.mem.eql(u8, method, "install_lib")) {
         if (w.len != 1 or call.kwargs.len != 0) return false;
-        try out.print(arena, "install -Dm755 {s} \"$pkgdir/usr/lib/{s}\"\n", .{ try shellWord(arena, w[0]), std.fs.path.basename(w[0]) });
+        try out.print(arena, "install -Dm755 {s} \"$pkgdir/usr/lib/{s}\"\n", .{ try shellWord(arena, w[0]), try quoted(arena, std.fs.path.basename(w[0])) });
         return true;
     }
     if (std.mem.eql(u8, method, "install_dir")) {
         if (w.len != 1 or !onlyKwargs(call, &.{"mode"})) return false;
-        try out.print(arena, "install -dm{o} \"$pkgdir/{s}\"\n", .{ kwInt(call, "mode") orelse 0o755, std.mem.trim(u8, w[0], "/") });
+        try out.print(arena, "install -dm{o} \"$pkgdir/{s}\"\n", .{ kwInt(call, "mode") orelse 0o755, try quoted(arena, std.mem.trim(u8, w[0], "/")) });
         return true;
     }
     if (std.mem.eql(u8, method, "uninstall")) {
         if (w.len != 1 or call.kwargs.len != 0) return false;
         // cbuild's uninstall removes a file or a whole directory.
-        try out.print(arena, "rm -rf \"$pkgdir/{s}\"\n", .{std.mem.trim(u8, w[0], "/")});
+        try out.print(arena, "rm -rf \"$pkgdir/{s}\"\n", .{try quoted(arena, std.mem.trim(u8, w[0], "/"))});
         return true;
     }
     return false;
@@ -1201,6 +1225,13 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
             continue;
         }
         for (v.dict) |e| {
+            const identifier = e.key.len > 0 and isIdentStart(e.key[0]) and for (e.key) |c| {
+                if (!isIdentChar(c)) break false;
+            } else true;
+            if (!identifier) {
+                try notes.append(arena, .{ .line = lines_of.get(key) orelse 0, .kind = .todo, .text = try std.fmt.allocPrint(arena, "`{s}` has a name that is not a variable name, and it was skipped", .{key}) });
+                continue;
+            }
             if (std.mem.eql(u8, key, "tool_flags")) {
                 var flags: std.ArrayList([]const u8) = .empty;
                 const skipped = Note{ .line = lines_of.get(key) orelse 0, .kind = .todo, .text = try std.fmt.allocPrint(arena, "`tool_flags` {s}: a flag is not a plain string and was skipped", .{e.key}) };
@@ -1212,7 +1243,7 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
                     else => try notes.append(arena, skipped),
                 }
                 if (flags.items.len == 0) continue;
-                try environment.print(arena, "export {s}=\"${{{s}}} {s}\"\n", .{ e.key, e.key, try std.mem.join(arena, " ", flags.items) });
+                try environment.print(arena, "export {s}=\"${{{s}}} {s}\"\n", .{ e.key, e.key, try quoted(arena, try std.mem.join(arena, " ", flags.items)) });
             } else if (try argText(arena, e.value)) |s| {
                 try environment.print(arena, "export {s}={s}\n", .{ e.key, try shellWord(arena, s) });
             } else try notes.append(arena, .{ .line = lines_of.get(key) orelse 0, .kind = .todo, .text = try std.fmt.allocPrint(arena, "`env` {s} could not be evaluated and was skipped", .{e.key}) });
@@ -1235,7 +1266,7 @@ pub fn convert(arena: Allocator, src: []const u8, in: Inputs) Allocator.Error!Co
     try consumed.put(arena, "make_use_env", {});
     if (env.get("make_use_env")) |v| if (v != .boolean)
         try notes.append(arena, .{ .line = lines_of.get("make_use_env") orelse 0, .kind = .todo, .text = "`make_use_env` is not True or False; taken as False" });
-    const check_target = (try strOf(&env, &consumed, arena, &notes, &lines_of, "make_check_target")) orelse "check";
+    const check_target = try shellWord(arena, (try strOf(&env, &consumed, arena, &notes, &lines_of, "make_check_target")) orelse "check");
 
     var steps: [4]std.ArrayList(u8) = .{ .empty, .empty, .empty, .empty };
     const phase_names = [_][]const u8{ "configure", "build", "check", "install" };
@@ -1585,6 +1616,57 @@ test "every value that cannot be used is noted, never silently replaced (CB-03)"
     // and no file is installed with a mode or name the template did not give
     try std.testing.expect(std.mem.indexOf(u8, c.toml, "install -Dm644 a ") == null);
     try std.testing.expect(std.mem.indexOf(u8, c.toml, "-dm755") == null);
+}
+
+test "a template's strings stay text: no commands, no expansions, no macros (CB-04, CB-05)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const c = try convert(a,
+        \\pkgname = "s"
+        \\pkgver = "1"
+        \\pkgrel = 0
+        \\pkgdesc = "x"
+        \\license = "MIT"
+        \\source = "https://x.org/s.tgz"
+        \\sha256 = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+        \\build_style = "makefile"
+        \\make_check_target = "check; echo INJECTED"
+        \\tool_flags = {"LDFLAGS": ["-Wl,-rpath,$ORIGIN", "-DV=\"a b\"", "$(echo INJECTED)"], "X; echo INJECTED; Y": ["1"]}
+        \\env = {"A B": "1"}
+        \\
+        \\def post_install(self):
+        \\    self.install_file("a", "usr/share/$(echo INJECTED)")
+        \\    self.install_file("a", "usr/share", name="x\"; echo INJECTED; \"")
+        \\    self.uninstall("usr/`echo INJECTED`")
+        \\    self.install_bin("tools/$(id)")
+        \\    self.do("echo", "$ORIGIN", "~", "%make", "100%%")
+        \\
+    , .{ .origin = "s" });
+    var diag: recipe.Diagnostic = .{};
+    const r = try recipe.parse(a, c.toml, &diag);
+    const steps = try std.mem.concat(a, u8, &.{ r.environment orelse "", "\n", r.setup orelse "", "\n", r.build orelse "", "\n", r.check orelse "", "\n", r.install });
+    // no $ or backquote of the template's is live
+    var i: usize = 0;
+    while (std.mem.indexOfAnyPos(u8, steps, i, "$`")) |at| : (i = at + 1) {
+        const escaped = at > 0 and steps[at - 1] == '\\';
+        const ours = for ([_][]const u8{ "$jobs", "$pkgdir", "$pkgfiles", "${LDFLAGS}", "$version", "$name", "$srcdir" }) |v| {
+            if (std.mem.startsWith(u8, steps[at..], v)) break true;
+        } else false;
+        if (!escaped and !ours) {
+            std.debug.print("live: {s}\n", .{steps[at..@min(at + 30, steps.len)]});
+            return error.TestUnexpectedResult;
+        }
+    }
+    try std.testing.expect(std.mem.indexOf(u8, steps, "%make \"check; echo INJECTED\"") != null or std.mem.indexOf(u8, steps, "\"check; echo INJECTED\"") != null);
+    try std.testing.expect(std.mem.indexOf(u8, steps, "X; echo INJECTED") == null);
+    try std.testing.expect(std.mem.indexOf(u8, steps, "export A B") == null);
+    // after dkbuild's macros the literals are as written, and a leading ~ is quoted
+    var bad: []const u8 = "";
+    const macro = @import("macro.zig");
+    const p: @import("profile.zig").Profile = .{ .arch = "x86_64", .triple = "x86_64-fenriros-linux-musl", .cpu = "x86-64", .zig_target = "x86_64-linux-musl", .zig_cpu = "baseline", .kernel_arch = "x86" };
+    const expanded = try macro.expand(a, .{ .target = p, .host = p }, r.install, &bad);
+    try std.testing.expect(std.mem.indexOf(u8, expanded, "echo \"\\$ORIGIN\" \"~\" %make \"100%%\"\n") != null);
 }
 
 test "the reader evaluates strings, f-strings, lists, dicts and concatenation" {
