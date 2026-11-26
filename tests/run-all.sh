@@ -9,6 +9,7 @@ cd "$(dirname "$0")/.."
 zig build test --summary all 2>&1 | grep -E "Build Summary|error:" || exit 1
 zig build || exit 1
 ./zig-out/bin/dkbuild check || exit 1
+python3 -B tests/upstream-rules.py > /dev/null || { python3 -B tests/upstream-rules.py | grep FAIL; exit 1; }
 [ -d rootfs/dkrescue ] || { echo "no build machine: run 'dkbuild bootstrap-root <dkrescue.iso>' first"; exit 1; }
 status=0
 for t in forgotten-dep sandbox chain rebuild scripts repo-install musl import parallel; do

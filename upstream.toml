@@ -4,7 +4,18 @@
 #   regex = "..."       group 1 is the version, matched against tags or page text
 #   ignore = "..."      versions matching this regex are never reported
 #   skip = "reason"     not checked
+#   prerelease = true   report pre-releases too. Without it none is ever reported: the tree ships releases, and a
+#                       pre-release only where that was chosen on purpose.
 # Adding an entry here never changes a recipe's build hash.
+
+[pcsx2]
+ignore = "^2\\.9\\."     # 2.9.x are the nightly builds of the next release; nothing in the number says so
+
+[msedit]
+prerelease = true   # opted in: the editor is built from its git main branch on purpose
+
+["gtk+2"]
+series = "2.24."    # GTK 2's last series; 3.89-3.99 were GTK 4's development releases
 
 [tcl]
 series = "8.6."     # Tcl 9 is not source-compatible; the tree's users want 8.6

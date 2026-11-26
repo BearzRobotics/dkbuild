@@ -79,6 +79,8 @@ Write the pinned lock files of the **hackagedeps** and **pydeps** options, and t
 upstream
 Reports recipes that have a newer upstream release. It changes no recipe. **upstream.toml** holds per-package overrides.
 
+Pre-releases are never reported unless a package has **prerelease = true** there. They are recognised by words (alpha, beta, rc, dev, pre, preview, snapshot, nightly, test, canary) and, for git tags, directory listings, SourceForge and GNOME, by numbers: a part after the first that is 90-99 or 900-999 with no release among the nine numbers below it (2.4.99 after 2.4.4), unless the recipe's version is already numbered that way. A pre-release that only a forge's release page marks as one is not recognised: use **ignore**.
+
 graph
 Prints the build order for the named packages. A dependency that no recipe provides is an error.
 

@@ -12,8 +12,17 @@
 #   anything else      the HTTP directory listing the file is in (and the
 #                      versioned directories above it: KDE, X.org, Xfce, GNU, ...)
 # A tag or file name matches when it contains a version the way the recipe's
-# own source names its version (prefix/suffix learned from that), pre-releases
-# (alpha, beta, rc, dev, pre, preview, snapshot) skipped.
+# own source names its version (prefix/suffix learned from that).
+# Pre-releases are never reported unless upstream.toml opts a package in:
+#   - versions marked in words (alpha, beta, rc, dev, pre, preview, snapshot,
+#     nightly, test, canary);
+#   - on git tags, directory listings, SourceForge and GNOME, versions marked in
+#     numbers: a part after the first that is 90-99 or 900-999 with no release
+#     among the nine numbers below it (2.4.99 after 2.4.4, 1.90, 26.0.99.904).
+#     A series that really counts that far (5.10.99 after 5.10.98) is kept, as
+#     is one the recipe is already on (tcpdump 4.99.x), and PyPI, crates.io and npm, which mark pre-releases in words, are not touched.
+# A tag marked as a pre-release only on a forge's release page, not in its name
+# or number, cannot be told apart here: use "ignore".
 #
 # upstream.toml at the tree root overrides that per package:
 #   [gcc]                        # stay on the 15 series
@@ -22,6 +31,7 @@
 #   url = "https://github.com/x/foo"     # check this instead of the source
 #   regex = "foo-([0-9.]+)\\.tar"        # tags/page text; group 1 = version
 #   ignore = "^2\\.99"                   # versions never to report
+#   prerelease = true                    # opt in: report pre-releases too
 #   skip = "reason"                      # don't check (vendored, pinned, ...)
 #
 # Results are cached in work/upstream/cache.json for 12 hours (--refresh
@@ -42,14 +52,30 @@ import urllib.request
 UA = "dkbuild-upstream-check/1 (+https://github.com/BearzRobotics/dkbuild)"
 TTL = 12 * 3600
 PRE = re.compile(r"(alpha|beta|rc|dev|pre|preview|snapshot|nightly|test|canary)", re.I)
+# A pre-release word right after a version in a name ("1.2.0-rc1", "2.0_beta").
+PRE_AFTER = re.compile(r"[-_.~+]?(?:alpha|beta|rc|dev|pre|preview|snapshot|nightly|test|canary)(?![a-z])", re.I)
+# How releases sort among pre-releases of the same version (opted-in packages).
+PRE_RANK = {"dev": 0, "snapshot": 0, "nightly": 0, "canary": 0, "test": 0, "alpha": 1, "beta": 2,
+            "pre": 3, "preview": 3, "rc": 4}
+# Bumped when the matching rules change, so that cached answers are not reused.
+RULES = 3
 ARCH_EXT = r"(?:\.tar\.(?:gz|xz|bz2|zst|lz|lzma)|\.tgz|\.tbz2?|\.txz|\.zip|\.tar)"
 
 
 # ---------------------------------------------------------------- versions
 def vkey(v):
-    """Sort key: numeric components compare as numbers, letters after."""
-    parts = re.findall(r"\d+|[a-zA-Z]+", v)
-    return [(0, int(p), "") if p.isdigit() else (1, 0, p.lower()) for p in parts]
+    """Sort key: numeric components compare as numbers, letters after; a
+    pre-release word sorts before the same version without it (1.0rc1 < 1.0)."""
+    key = []
+    for p in re.findall(r"\d+|[a-zA-Z]+", v):
+        if p.isdigit():
+            key.append((2, int(p), ""))
+        elif p.lower() in PRE_RANK:
+            key.append((0, PRE_RANK[p.lower()], ""))
+        else:
+            key.append((3, 0, p.lower()))
+    key.append((1, 0, ""))  # the end of the version
+    return key
 
 
 def newer(a, b):
@@ -62,8 +88,33 @@ def norm(v):
     return re.sub(r"(?<=\d)[-_](?=\d)", ".", v)
 
 
-def plausible(v):
-    return bool(re.fullmatch(r"\d+(\.\d+)*[a-z]?(\.\d+)*", v)) and not PRE.search(v)
+def plausible(v, pre=False):
+    if re.fullmatch(r"\d+(\.\d+)*[a-z]?(\.\d+)*", v) and not PRE.search(v):
+        return True
+    # opted in: also 1.2.0rc1, 1.2.0-rc.1, 2.0_beta2
+    return pre and bool(re.fullmatch(r"\d+(\.\d+)*[-_.~]?(?:%s)[-_.]?\d*" % PRE.pattern[1:-1], v, re.I))
+
+
+def numbered_prereleases(versions, current=""):
+    """The versions that mark a pre-release in their numbers: a part after the
+    first that is 90-99 or 900-999, with no release among the nine numbers below
+    it in the same series. Needs all of a project's versions to tell. A series
+    the recipe's own version is already in is the project's way of counting
+    (tcpdump's releases are 4.99.x)."""
+    cur = [int(x) for x in re.findall(r"\d+", current)]
+    nums = {v: [int(x) for x in re.findall(r"\d+", v)] for v in versions if not PRE.search(v)}
+    out = set()
+    for v, n in nums.items():
+        for k in range(1, len(n)):
+            if not (90 <= n[k] <= 99 or 900 <= n[k] <= 999):
+                continue
+            if len(cur) > k and cur[:k + 1] == n[:k + 1]:
+                continue
+            counted_up = any(len(m) > k and m[:k] == n[:k] and n[k] - 9 <= m[k] < n[k] for m in nums.values())
+            if not counted_up:
+                out.add(v)
+                break
+    return out
 
 
 # ------------------------------------------------------------------- http
@@ -99,7 +150,7 @@ def git_tags(repo):
 
 
 # ------------------------------------------------- matching names to versions
-def learn(names, current):
+def learn(names, current, pre_ok=False):
     """From names (tags, files), the versions in them, shaped like the one
     that carries `current`: same prefix and suffix around the version."""
     cur_n = norm(current)
@@ -124,6 +175,7 @@ def learn(names, current):
             shape = (pre, suf)
             break
     out = []
+    want_pre = pre_ok
     for n in names:
         if shape:
             pre, suf = shape
@@ -135,14 +187,23 @@ def learn(names, current):
             if not m:
                 continue
             raw = m.group(0)
+            tail = PRE_AFTER.match(n, m.end())
+            if tail:  # "foo-1.2.0-rc1": not the release 1.2.0
+                if not want_pre:
+                    continue
+                raw = n[m.start():]
         v = norm(raw)
-        if plausible(v):
+        if plausible(v, want_pre):
             out.append(v)
     return out, shape is not None or cur_n in out
 
 
-def best(versions, current, ov):
-    cand = [v for v in set(versions) if plausible(v)]
+def best(versions, current, ov, numbered=True):
+    pre = bool(ov.get("prerelease"))
+    cand = [v for v in set(versions) if plausible(v, pre)]
+    if numbered and not pre:
+        marked = numbered_prereleases(set(versions) | {norm(current)}, norm(current))
+        cand = [v for v in cand if v not in marked]
     if ov.get("series"):
         cand = [v for v in cand if v.startswith(ov["series"])]
     if ov.get("ignore"):
@@ -190,7 +251,7 @@ def from_git(repo, current, ov):
         vs = [m.group(1) for t in tags for m in [re.search(ov["regex"], t)] if m]
         vs = [norm(v) for v in vs]
     else:
-        vs, _ = learn(tags, current)
+        vs, _ = learn(tags, current, bool(ov.get("prerelease")))
     return best(vs, current, ov)
 
 
@@ -212,19 +273,19 @@ def from_pypi(url, current, ov):
     m = re.match(r"(.+?)-" + re.escape(current) + ARCH_EXT + "$", fn) or re.match(r"(.+?)-\d", fn)
     name = m.group(1)
     data = json.loads(get(f"https://pypi.org/pypi/{name}/json"))
-    return best(list(data["releases"].keys()), current, ov)
+    return best(list(data["releases"].keys()), current, ov, numbered=False)
 
 
 def from_crates(url, current, ov):
     name = urllib.parse.urlparse(url).path.split("/")[2]
     data = json.loads(get(f"https://crates.io/api/v1/crates/{name}"))
-    return best([v["num"] for v in data["versions"] if not v.get("yanked")], current, ov)
+    return best([v["num"] for v in data["versions"] if not v.get("yanked")], current, ov, numbered=False)
 
 
 def from_npm(url, current, ov):
     p = urllib.parse.urlparse(url).path.split("/-/")[0].strip("/")
     data = json.loads(get(f"https://registry.npmjs.org/{p}"))
-    return best(list(data.get("versions", {}).keys()), current, ov)
+    return best(list(data.get("versions", {}).keys()), current, ov, numbered=False)
 
 
 def from_cpan(url, current, ov):
@@ -237,7 +298,7 @@ def from_cpan(url, current, ov):
     m = re.fullmatch(r"(\d+)\.(\d{3})(\d{3})", v)
     if m and current.count(".") == 2:
         v = f"{int(m.group(1))}.{int(m.group(2))}.{int(m.group(3))}"
-    return best([v], current, ov)
+    return best([v], current, ov, numbered=False)
 
 
 def from_sourceforge(url, current, ov):
@@ -256,7 +317,7 @@ def from_names(names, current_file, current, ov):
         return best(vs, current, ov)
     i = current_file.find(current)
     if i < 0:
-        vs, _ = learn(names, current)
+        vs, _ = learn(names, current, bool(ov.get("prerelease")))
         return best(vs, current, ov)
     pre = current_file[:i]
     # What follows the version, without the archive extension (tcl's "-src").
@@ -296,7 +357,7 @@ def from_directory(url, current, ov):
     sub = [d for d in listing(parent) if re.fullmatch(r"v?\d+(\.\d+)*[a-z]?", d)]
     old = dirs[i]
     same_depth = len(norm(old).split("."))
-    sub = [d for d in sub if len(norm(d).split(".")) == same_depth and plausible(norm(d))]
+    sub = [d for d in sub if len(norm(d).split(".")) == same_depth and plausible(norm(d), bool(ov.get("prerelease")))]
     if ov.get("series"):
         sub = [d for d in sub if norm(d).startswith(ov["series"]) or ov["series"].startswith(norm(d) + ".")]
     if not sub:
@@ -394,7 +455,7 @@ def main():
             return p, None, "skipped: " + str(p["ov"]["skip"]), None
         if not p["url"]:
             return p, None, "", "no source url"
-        key = json.dumps([p["url"], p["version"], p["ov"]], sort_keys=True)
+        key = json.dumps([RULES, p["url"], p["version"], p["ov"]], sort_keys=True)
         c = cache.get(key)
         if c and not refresh and now - c["t"] < TTL:
             return p, c["v"], c["how"], c.get("err")
