@@ -643,12 +643,58 @@ fn assignment(t: []const u8) ?struct { name: []const u8, rhs: []const u8 } {
     return .{ .name = name, .rhs = t[i + 1 ..] };
 }
 
-/// Removes the indentation of the first non-blank line from every line.
-fn dedent(arena: Allocator, body: []const u8) Allocator.Error![]const u8 {
+/// Python ignores how a comment is indented, so each comment line is given the indentation of the code line after
+/// it. (Left as written, a deeper comment first in a body took that much off every line, so that conditional
+/// commands became unconditional, and one at the margin hid the whole body.) Lines inside a triple-quoted string
+/// stay as they are.
+fn alignComments(arena: Allocator, body: []const u8) Allocator.Error![]const u8 {
+    var lines: std.ArrayList([]const u8) = .empty;
+    var comment: std.ArrayList(bool) = .empty;
+    var it = std.mem.splitScalar(u8, body, '\n');
+    var open: ?[]const u8 = null; // the quotes of the string we are in
+    while (it.next()) |l| {
+        const t = std.mem.trimStart(u8, l, " \t");
+        try lines.append(arena, l);
+        try comment.append(arena, open == null and t.len > 0 and t[0] == '#');
+        if (open == null and t.len > 0 and t[0] == '#') continue;
+        var i: usize = 0;
+        while (i + 3 <= l.len) {
+            const q = l[i .. i + 3];
+            if (open) |o| {
+                if (std.mem.eql(u8, q, o)) {
+                    open = null;
+                    i += 3;
+                    continue;
+                }
+            } else if (std.mem.eql(u8, q, "\"\"\"") or std.mem.eql(u8, q, "'''")) {
+                open = q;
+                i += 3;
+                continue;
+            }
+            i += 1;
+        }
+    }
+    var code_indent: ?[]const u8 = null; // of the next code line, found walking backwards
+    var k = lines.items.len;
+    while (k > 0) {
+        k -= 1;
+        const l = lines.items[k];
+        const t = std.mem.trimStart(u8, l, " \t");
+        if (comment.items[k]) {
+            if (code_indent) |ci| lines.items[k] = try std.mem.concat(arena, u8, &.{ ci, t });
+        } else if (std.mem.trim(u8, l, " \t\r").len > 0) code_indent = l[0 .. l.len - t.len];
+    }
+    return std.mem.join(arena, "\n", lines.items);
+}
+
+/// Removes the indentation of the first line of code from every line.
+fn dedent(arena: Allocator, text: []const u8) Allocator.Error![]const u8 {
+    const body = try alignComments(arena, text);
     var indent: usize = 0;
     var it = std.mem.splitScalar(u8, body, '\n');
     while (it.next()) |l| {
-        if (std.mem.trim(u8, l, " \t\r").len == 0) continue;
+        const t = std.mem.trim(u8, l, " \t\r");
+        if (t.len == 0 or t[0] == '#') continue;
         while (indent < l.len and (l[indent] == ' ' or l[indent] == '\t')) indent += 1;
         break;
     }
@@ -1461,6 +1507,24 @@ test "import: a package name that is a path writes nothing, and a draft is not o
     try std.testing.expectEqualStrings("# HAND EDITED", try tmp.dir.readFileAlloc(io, "a/out/hello/package.toml", a, .limited(100)));
     _ = try importPath(a, io, tpl, out, true);
     try std.testing.expect(!std.mem.eql(u8, "# HAND EDITED", try tmp.dir.readFileAlloc(io, "a/out/hello/package.toml", a, .limited(1 << 20))));
+}
+
+test "comments indented unlike the code neither unindent it nor hide it (CB-02)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const head = "pkgname = \"c\"\npkgver = \"1\"\npkgrel = 0\npkgdesc = \"x\"\nlicense = \"MIT\"\n\ndef build(self):\n";
+    // deeper than the code: the rm stays under its condition (a TODO, all of it a comment)
+    const deep = try convert(a, head ++ "        # only when cross compiling\n    if self.profile().cross:\n        self.do(\"rm\", \"-rf\", \"tests\")\n", .{ .origin = "c" });
+    var live = std.mem.splitScalar(u8, deep.toml, '\n');
+    while (live.next()) |l| try std.testing.expect(!std.mem.startsWith(u8, std.mem.trimStart(u8, l, " "), "rm "));
+    try std.testing.expect(std.mem.indexOf(u8, deep.toml, "# TODO(cbuild): if self.profile().cross:") != null);
+    // at column 0: the code is still there
+    const col0 = try convert(a, head ++ "# note\n    self.do(\"make\", \"all\")\n", .{ .origin = "c" });
+    try std.testing.expect(std.mem.indexOf(u8, col0.toml, "\nmake all\n") != null);
+    // comments in the middle of a body, at any depth, change nothing either
+    const mid = try convert(a, head ++ "    self.do(\"make\", \"a\")\n# at the margin\n            # far in\n    self.do(\"make\", \"b\")\n", .{ .origin = "c" });
+    try std.testing.expect(std.mem.indexOf(u8, mid.toml, "make a\n") != null and std.mem.indexOf(u8, mid.toml, "make b\n") != null);
 }
 
 test "the reader evaluates strings, f-strings, lists, dicts and concatenation" {
