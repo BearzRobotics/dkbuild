@@ -1,5 +1,6 @@
 #!/bin/sh
+# an account that cannot be made fails the script, so that apk says so
+set -e
 # users and groups (sysusers.conf)
 grep -q "^_chrony:" /etc/group || groupadd -r _chrony
 grep -q "^_chrony:" /etc/passwd || useradd -r -g _chrony -d /var/lib/chrony -s /usr/bin/nologin -c 'chrony user' _chrony
-exit 0

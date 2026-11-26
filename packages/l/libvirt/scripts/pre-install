@@ -1,8 +1,9 @@
 #!/bin/sh
+# an account that cannot be made fails the script, so that apk says so
+set -e
 # users and groups (sysusers.conf)
 grep -q "^_libvirt-qemu:" /etc/group || groupadd -r _libvirt-qemu
 grep -q "^_libvirt-qemu:" /etc/passwd || useradd -r -g _libvirt-qemu -d /var/lib/libvirt -s /usr/bin/nologin -c 'libvirt-qemu user' _libvirt-qemu
 grep -q "^kvm:" /etc/group || groupadd -r kvm
 usermod -a -G kvm _libvirt-qemu 2>/dev/null || true
 grep -q "^libvirt:" /etc/group || groupadd -r libvirt
-exit 0

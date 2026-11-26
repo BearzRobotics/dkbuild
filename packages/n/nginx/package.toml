@@ -12,6 +12,9 @@ hostdeps = ["libgd-devel", "libxml2-devel", "libxslt-devel", "linux-headers", "o
 checkdeps = ["ca-certificates", "ffmpeg", "libgd", "perl-io-socket-ssl", "perl-net-ssleay"]
 options = ["!cross"]
 
+# groupadd and useradd (shadow) and the files they edit (base-files) must be there before pre-install runs
+rundeps = ["base-files", "shadow"]
+
 source = [
     { url = "https://nginx.org/download/nginx-1.30.8.tar.gz", sha256 = "f867314ada32e717b949930859656c48a72dc6657aec598db58af2f98a40e1c1" },
     { url = "https://github.com/nginx/nginx-tests/archive/4d1de3f357.tar.gz", sha256 = "e6008f0883a98eb30d84b2ab5d69c19aed2dea8a2eb368402a526e1d3fd16636" },

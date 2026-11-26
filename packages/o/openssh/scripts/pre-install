@@ -1,7 +1,8 @@
 #!/bin/sh
+# an account that cannot be made fails the script, so that apk says so
+set -e
 # sshd drops its privileges to this user in an empty directory. Host keys are
 # not made here: the sshd-keys service creates them on first start.
 getent group sshd >/dev/null 2>&1 || grep -q '^sshd:' /etc/group || addgroup -S sshd 2>/dev/null || groupadd -r sshd
 getent passwd sshd >/dev/null 2>&1 || grep -q '^sshd:' /etc/passwd || \
     useradd -r -g sshd -d /var/empty -s /usr/bin/nologin -c "sshd privilege separation" sshd
-exit 0

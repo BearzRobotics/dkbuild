@@ -5,3 +5,4 @@ run-as = cool
 logfile = /var/log/coolwsd.log
 restart = true
 depends-on: rcboot
+depends-on: coolwsd-keys

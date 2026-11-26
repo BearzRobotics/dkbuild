@@ -1,4 +1,5 @@
 #!/bin/sh
+# an account that cannot be made fails the script, so that apk says so
+set -e
 grep -q "^lpadmin:" /etc/group || groupadd -r lpadmin
 grep -q "^cups:" /etc/passwd || useradd -r -g lp -d /var/spool/cups -s /usr/bin/nologin -c "CUPS" cups
-exit 0

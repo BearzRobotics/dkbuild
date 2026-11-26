@@ -1,4 +1,5 @@
 #!/bin/sh
+# an account that cannot be made fails the script, so that apk says so
+set -e
 grep -q "^avahi:" /etc/group || groupadd -r avahi
 grep -q "^avahi:" /etc/passwd || useradd -r -g avahi -d /var/empty -s /usr/bin/nologin -c "Avahi mDNS daemon" avahi
-exit 0

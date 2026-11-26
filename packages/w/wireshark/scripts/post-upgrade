@@ -1,0 +1,7 @@
+#!/bin/sh
+# capturing without being root: dumpcap, for members of _wireshark only
+set -e
+chgrp _wireshark /usr/bin/dumpcap
+chmod 0750 /usr/bin/dumpcap
+# some file systems (and image builds) cannot hold capabilities; the rest of the installation stands
+setcap cap_net_raw,cap_net_admin=ep /usr/bin/dumpcap || echo "wireshark: dumpcap has no capabilities here; capturing needs root" >&2

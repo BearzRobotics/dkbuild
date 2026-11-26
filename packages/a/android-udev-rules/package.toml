@@ -4,10 +4,13 @@
 # dependency names (they are Chimera's) before building.
 name = "android-udev-rules"
 version = "20260922"
-release = 1
+release = 2
 summary = "Comprehensive Android udev rules collection"
 license = "GPL-3.0-or-later"
 homepage = "https://github.com/M0Rf30/android-udev-rules"
+
+# groupadd and useradd (shadow) and the files they edit (base-files) must be there before pre-install runs
+rundeps = ["base-files", "shadow"]
 
 source = [
     { url = "https://github.com/M0Rf30/android-udev-rules/archive/refs/tags/20260922.tar.gz", sha256 = "3cc14f34142e71837eb073cc10b09eb48a9f7282b7c9ade9259e7809eec5062e" },

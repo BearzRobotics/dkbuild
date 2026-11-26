@@ -11,14 +11,4 @@ setcap cap_fowner,cap_chown,cap_sys_chroot=ep /usr/bin/coolforkit-caps 2>/dev/nu
 setcap cap_sys_admin=ep /usr/bin/coolmount 2>/dev/null || true
 rm -rf /opt/cool/systemplate
 coolwsd-systemplate-setup /opt/cool/systemplate /opt/collaboraoffice/lib/libreoffice > /dev/null 2>&1 || true
-[ -e /etc/coolwsd/proof_key ] || su -s /bin/sh cool -c "coolconfig generate-proof-key" > /dev/null 2>&1 || true
-# TLS is on by default: a self-signed certificate until a real one replaces it
-# (/etc/coolwsd/{cert,key,ca-chain}.pem), or ssl.enable=false behind a proxy.
-if [ ! -e /etc/coolwsd/cert.pem ]; then
-    openssl req -x509 -newkey rsa:3072 -nodes -days 3650 -subj "/CN=$(cat /etc/hostname 2>/dev/null || echo localhost)" \
-        -keyout /etc/coolwsd/key.pem -out /etc/coolwsd/cert.pem > /dev/null 2>&1 &&
-        cp /etc/coolwsd/cert.pem /etc/coolwsd/ca-chain.cert.pem &&
-        chown cool:cool /etc/coolwsd/key.pem /etc/coolwsd/cert.pem /etc/coolwsd/ca-chain.cert.pem &&
-        chmod 600 /etc/coolwsd/key.pem
-fi
 exit 0

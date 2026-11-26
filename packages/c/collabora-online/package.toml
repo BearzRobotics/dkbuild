@@ -53,6 +53,8 @@ build = '''
 install = '''
 %make_install
 install -Dm644 $pkgfiles/coolwsd "$pkgdir/etc/dinit.d/coolwsd"
+install -Dm644 $pkgfiles/coolwsd-keys "$pkgdir/etc/dinit.d/coolwsd-keys"
+install -Dm755 $pkgfiles/coolwsd-keys.sh "$pkgdir/usr/lib/collabora-online/coolwsd-keys"
 install -Dm644 COPYING "$pkgdir/usr/share/licenses/collabora-online/COPYING"
 rm -rf "$pkgdir/usr/lib/systemd" "$pkgdir/etc/apparmor.d"
 '''

@@ -2,14 +2,15 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "libvirt"
 version = "12.8.0"
-release = 5
+release = 6
 summary = "API, daemon, and management tool for virtualization"
 license = "LGPL-2.1-only"
 homepage = "https://libvirt.org"
 hostdeps = ["gettext", "libxml2", "libxslt", "perl", "pkgconf", "python-docutils"]
 builddeps = ["acl-devel", "attr-devel", "bash-completion", "curl-devel", "fuse-devel", "glib-devel", "gnutls-devel", "json-c-devel", "libcap-ng-devel", "libiscsi-devel", "libnl-devel", "libpcap-devel", "libpciaccess-devel", "libsasl-devel", "libssh-devel", "libssh2-devel", "libtirpc-devel", "libxml2-devel", "linux-headers", "lvm2-devel", "numactl-devel", "parted-devel", "polkit-devel", "readline-devel", "eudev-devel"]
 checkdeps = []
-rundeps = ["dbus", "dnsmasq"]
+# groupadd and useradd (shadow) and the files they edit (base-files) must be there before pre-install runs
+rundeps = ["base-files", "shadow", "dbus", "dnsmasq"]
 
 source = [
     { url = "https://download.libvirt.org/libvirt-12.8.0.tar.xz", sha256 = "0cd46a8f3a2b9b63c35c6e6f42a6c2989183ef3b3d1499ee92b4876db35e6fe9" },

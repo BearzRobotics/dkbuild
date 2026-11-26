@@ -1,0 +1,6 @@
+# Makes this machine's Collabora Online keys, if it has none yet.
+type = scripted
+command = /usr/lib/collabora-online/coolwsd-keys
+logfile = /var/log/coolwsd-keys.log
+restart = false
+depends-on: rcboot

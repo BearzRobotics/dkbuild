@@ -19,6 +19,9 @@ hostdeps = ["bash", "bison", "bzip2", "flex", "gettext", "ninja", "perl", "pkgco
 builddeps = ["bzip2-devel", "capstone-devel", "curl-devel", "dtc-devel", "elfutils-devel", "fuse-devel", "glib-devel", "gnutls-devel", "gtk+3-devel", "keyutils-devel", "libaio-devel", "libbpf-devel", "libcacard-devel", "libcap-ng-devel", "libcbor-devel", "libdrm-devel", "libiscsi-devel", "libjpeg-turbo-devel", "libnfs-devel", "libpulse-devel", "libsasl-devel", "libseccomp-devel", "libslirp-devel", "libssh-devel", "liburing-devel", "libusb-devel", "linux-headers", "lzo-devel", "ncurses-devel", "nss-devel", "numactl-devel", "pcsc-lite-devel", "pipewire-devel", "pixman-devel", "sdl2-compat-devel", "sdl2-image-devel", "snappy-devel", "usbredir-devel", "virglrenderer-devel", "vte-devel", "zlib-ng-compat-devel", "zstd-devel"]
 options = ["!cross", "!check"]
 
+# groupadd and useradd (shadow) and the files they edit (base-files) must be there before pre-install runs
+rundeps = ["base-files", "shadow"]
+
 source = [
     { url = "https://download.qemu.org/qemu-11.0.1.tar.xz", sha256 = "0d235f5820278d914a3155ec27af8e4258d697ea892895570807d69c0cb8cd64" },
 ]

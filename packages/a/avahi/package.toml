@@ -7,14 +7,15 @@
 # yet); manual pages need xmltoman.
 name = "avahi"
 version = "0.8"
-release = 1
+release = 2
 summary = "Multicast DNS service discovery"
 license = "LGPL-2.1-or-later"
 homepage = "https://avahi.org"
 patches = ["libevent.patch"]
 hostdeps = ["automake", "gettext-devel", "glib-devel", "libtool", "pkgconf"]
 builddeps = ["dbus-devel", "libexpat-devel", "glib-devel", "libcap-devel", "libdaemon-devel", "libevent-devel"]
-rundeps = ["dbus"]
+# groupadd and useradd (shadow) and the files they edit (base-files) must be there before pre-install runs
+rundeps = ["base-files", "shadow", "dbus"]
 options = ["!check"]
 
 source = [

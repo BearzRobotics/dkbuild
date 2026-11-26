@@ -2,13 +2,16 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "gamemode"
 version = "1.8.2"
-release = 1
+release = 2
 summary = "Optimise Linux system performance on demand"
 license = "BSD-3-Clause"
 homepage = "https://github.com/FeralInteractive/gamemode"
 patches = ["dbus.patch", "posix.patch", "tangle.patch"]
 hostdeps = ["cmake", "git", "meson", "ninja", "pkgconf"]
 builddeps = ["dbus-devel", "dbus", "inih-devel", "linux-headers", "tangle-devel"]
+
+# groupadd and useradd (shadow) and the files they edit (base-files) must be there before pre-install runs
+rundeps = ["base-files", "shadow"]
 
 source = [
     { url = "https://github.com/FeralInteractive/gamemode/archive/refs/tags/1.8.2.tar.gz", sha256 = "2b4a20894822caf04767af6a1601130d6b718fc30b8a77895607341b1674740f" },

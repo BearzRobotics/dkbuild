@@ -1,4 +1,5 @@
 #!/bin/sh
+# an account that cannot be made fails the script, so that apk says so
+set -e
 grep -q "^polkitd:" /etc/group || groupadd -r polkitd
 grep -q "^polkitd:" /etc/passwd || useradd -r -g polkitd -d /var/empty -s /usr/bin/nologin -c "polkit daemon" polkitd
-exit 0

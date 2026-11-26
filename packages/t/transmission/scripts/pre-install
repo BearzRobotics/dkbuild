@@ -1,7 +1,8 @@
 #!/bin/sh
+# an account that cannot be made fails the script, so that apk says so
+set -e
 grep -q "^transmission:" /etc/group || groupadd -r transmission
 grep -q "^transmission:" /etc/passwd || useradd -r -g transmission -d /var/lib/transmission -s /usr/bin/nologin -c "Transmission daemon" transmission
 mkdir -p /var/lib/transmission
 chown transmission:transmission /var/lib/transmission
 chmod 750 /var/lib/transmission
-exit 0

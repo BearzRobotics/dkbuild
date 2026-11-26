@@ -1,4 +1,5 @@
 #!/bin/sh
+# an account that cannot be made fails the script, so that apk says so
+set -e
 # users and groups (adbusers.conf)
 grep -q "^adbusers:" /etc/group || groupadd -r adbusers
-exit 0

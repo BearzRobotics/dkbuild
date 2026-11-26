@@ -5,7 +5,7 @@
 # (cameras) and v4l (webcams) backends.
 name = "sane-backends"
 version = "1.3.1"
-release = 3
+release = 4
 summary = "Scanner Access Now Easy: scanner drivers"
 license = "GPL-2.0-or-later WITH SANE-exception"
 homepage = "http://www.sane-project.org"
@@ -13,6 +13,9 @@ patches = ["fix-test-data.patch", "fix-tests-build.patch", "newref.patch", "sane
 hostdeps = ["automake", "gettext-devel", "libtool", "pkgconf", "python"]
 builddeps = ["avahi-devel", "curl-devel", "libjpeg-turbo-devel", "libpng-devel", "libtiff-devel", "libusb-devel", "libxml2-devel", "linux-headers", "net-snmp-devel", "openssl-devel", "poppler-devel", "libgphoto2-devel", "v4l-utils-devel"]
 options = ["!check", "!lto"]
+
+# groupadd and useradd (shadow) and the files they edit (base-files) must be there before pre-install runs
+rundeps = ["base-files", "shadow"]
 
 source = [
     { url = "https://gitlab.com/sane-project/backends/uploads/83bdbb6c9a115184c2d48f1fdc6847db/sane-backends-1.3.1.tar.gz", sha256 = "aa82f76f409b88f8ea9793d4771fce01254d9b6549ec84d6295b8f59a3879a0c" },

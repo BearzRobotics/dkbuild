@@ -6,13 +6,14 @@
 # dependency names (they are Chimera's) before building.
 name = "caddy"
 version = "2.11.7"
-release = 3
+release = 4
 summary = "Extensible HTTP server with automatic HTTPS"
 license = "Apache-2.0"
 homepage = "https://caddyserver.com"
 hostdeps = ["go"]
 builddeps = []
-rundeps = ["shared-mime-info"]
+# groupadd and useradd (shadow) and the files they edit (base-files) must be there before pre-install runs
+rundeps = ["base-files", "shadow", "shared-mime-info"]
 options = ["!check", "godeps"]
 
 source = [

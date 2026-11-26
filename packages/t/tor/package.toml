@@ -2,7 +2,7 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "tor"
 version = "0.4.9.14"
-release = 1
+release = 2
 summary = "Anonymizing overlay network"
 license = "BSD-3-Clause"
 homepage = "https://gitlab.com/torproject/tor"
@@ -10,6 +10,9 @@ patches = ["no-practracker-test.patch"]
 hostdeps = ["asciidoc", "automake", "pkgconf", "docbook-xsl", "libxslt"]
 builddeps = ["libevent-devel", "linux-headers", "openssl-devel", "xz-devel", "zlib-ng-compat-devel", "zstd-devel"]
 checkdeps = ["bash"]
+
+# groupadd and useradd (shadow) and the files they edit (base-files) must be there before pre-install runs
+rundeps = ["base-files", "shadow"]
 
 source = [
     { url = "https://gitlab.com/torproject/tor/-/archive/tor-0.4.9.14/tor-tor-0.4.9.14.tar.gz", sha256 = "1eca189920bc14316e2f2c5e662916e4fc90eae898705d1374af870bde7d8d5d" },

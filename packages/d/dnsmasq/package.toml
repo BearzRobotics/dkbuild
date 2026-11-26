@@ -4,14 +4,15 @@
 # dependency names (they are Chimera's) before building.
 name = "dnsmasq"
 version = "2.93"
-release = 1
+release = 2
 summary = "DNS, DHCP, RA, TFTP and PXE server"
 license = "GPL-2.0-or-later"
 homepage = "https://www.thekelleys.org.uk/dnsmasq/doc.html"
 patches = ["conf.patch", "copts.patch", "user.patch"]
 hostdeps = ["pkgconf"]
 builddeps = ["dbus-devel", "dbus", "libidn2-devel", "libnetfilter-conntrack-devel", "linux-headers", "nettle-devel"]
-rundeps = ["dbus"]
+# groupadd and useradd (shadow) and the files they edit (base-files) must be there before pre-install runs
+rundeps = ["base-files", "shadow", "dbus"]
 options = ["!check"]
 
 source = [

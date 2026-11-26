@@ -4,13 +4,16 @@
 # dependency names (they are Chimera's) before building.
 name = "rpcbind"
 version = "1.2.7"
-release = 2
+release = 3
 summary = "Universal addresses to RPC program number mapper"
 license = "BSD-3-Clause"
 homepage = "https://linux-nfs.org"
 hostdeps = ["automake", "pkgconf"]
 builddeps = ["libtirpc-devel", "musl-bsd-headers"]
 options = ["!check"]
+
+# groupadd and useradd (shadow) and the files they edit (base-files) must be there before pre-install runs
+rundeps = ["base-files", "shadow"]
 
 source = [
     { url = "https://sourceforge.net/projects/rpcbind/files/rpcbind/1.2.7/rpcbind-1.2.7.tar.bz2", sha256 = "f6edf8cdf562aedd5d53b8bf93962d61623292bfc4d47eedd3f427d84d06f37e" },
