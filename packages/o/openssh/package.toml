@@ -9,7 +9,7 @@
 #     server (sshd, sftp-server, its dinit services) is openssh-server.
 name = "openssh"
 version = "10.6_p2"
-release = 5
+release = 6
 summary = "OpenSSH client and server"
 license = "SSH-OpenSSH"
 homepage = "https://www.openssh.com"
