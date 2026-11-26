@@ -390,6 +390,46 @@ pub const Options = struct {
     verbose: bool = false,
 };
 
+/// Deletes an image's directory and says whether it is gone. In a `rootfs` output, users' homes and service
+/// accounts' files belong to the caller's sub-ids, which the caller cannot remove: what is left after an ordinary
+/// delete is emptied by a sandbox with the same ids mapped, given that one directory.
+fn removeImageDir(arena: Allocator, io: std.Io, root: []const u8, path: []const u8, ids: ?sandbox.Ids) bool {
+    const st = Dir.cwd().statFile(io, path, .{ .follow_symlinks = false }) catch return true;
+    if (st.kind != .directory) { // a link here is removed, never followed
+        Dir.cwd().deleteFile(io, path) catch return false;
+        return true;
+    }
+    _ = std.process.run(arena, io, .{ .argv = &.{ "chmod", "-R", "u+rwX", "--", path } }) catch {};
+    Dir.cwd().deleteTree(io, path) catch {};
+    _ = Dir.cwd().statFile(io, path, .{ .follow_symlinks = false }) catch return true;
+    const map = ids orelse return false;
+    const lower = Dir.cwd().realPathFileAlloc(io, std.fs.path.join(arena, &.{ root, "rootfs", "dkrescue" }) catch return false, arena) catch return false;
+    const victim = Dir.cwd().realPathFileAlloc(io, path, arena) catch return false;
+    const scratch = std.fs.path.join(arena, &.{ root, "work", "image-remove" }) catch return false;
+    var sb: [3][]const u8 = undefined;
+    for ([_][]const u8{ "upper", "work", "merged" }, &sb) |name, *d| {
+        const rel = std.fs.path.join(arena, &.{ scratch, name }) catch return false;
+        Dir.cwd().createDirPath(io, rel) catch return false;
+        d.* = Dir.cwd().realPathFileAlloc(io, rel, arena) catch return false;
+    }
+    var log: std.ArrayList(u8) = .empty;
+    _ = sandbox.run(arena, io, .{
+        .lower = lower,
+        .upper = sb[0],
+        .work = sb[1],
+        .merged = sb[2],
+        .binds = &.{.{ .src = victim, .dst = "/victim" }},
+        .env = &.{"PATH=/usr/bin:/bin"},
+        .argv = &.{ "/usr/bin/find", "/victim", "-mindepth", "1", "-delete" },
+        .ids = map,
+    }, &log) catch {};
+    sandbox.makeRemovable(io, sb[1]);
+    Dir.cwd().deleteTree(io, scratch) catch {};
+    Dir.cwd().deleteTree(io, path) catch {};
+    _ = Dir.cwd().statFile(io, path, .{ .follow_symlinks = false }) catch return true;
+    return false;
+}
+
 pub fn build(arena: Allocator, io: std.Io, img: Image, opts: Options) !void {
     // The image is made in out/.<name>.new and replaces out/<name> only when it
     // succeeds: a failed run leaves the last good ISO where it was.
@@ -397,11 +437,14 @@ pub fn build(arena: Allocator, io: std.Io, img: Image, opts: Options) !void {
     const out_rel = try std.fs.path.join(arena, &.{ opts.root, "out", try std.fmt.allocPrint(arena, ".{s}.new", .{img.name}) });
     const target_rel = try std.fs.path.join(arena, &.{ out_rel, "rootfs" });
     const work = try std.fs.path.join(arena, &.{ opts.root, "work", try std.fmt.allocPrint(arena, "image-{s}", .{img.name}) });
+    // the previous image, once the new one has taken its place
+    const old_rel = try std.fs.path.join(arena, &.{ opts.root, "out", try std.fmt.allocPrint(arena, ".{s}.old", .{img.name}) });
+    const may_own = sandbox.subIds(arena, io);
     // Start from nothing: an unfinished earlier attempt is removed.
-    for ([_][]const u8{ out_rel, work }) |d| {
-        _ = std.process.run(arena, io, .{ .argv = &.{ "chmod", "-R", "u+rwX", d } }) catch {};
-        Dir.cwd().deleteTree(io, d) catch {};
-    }
+    for ([_][]const u8{ out_rel, work, old_rel }) |d| if (!removeImageDir(arena, io, opts.root, d, may_own)) {
+        std.debug.print("error: cannot remove {s}, left by an earlier run\n", .{d});
+        return error.PrepareFailed;
+    };
     Dir.cwd().createDirPath(io, target_rel) catch return error.PrepareFailed;
     var abs: [6][]const u8 = undefined;
     const rels = [_][]const u8{
@@ -460,25 +503,29 @@ pub fn build(arena: Allocator, io: std.Io, img: Image, opts: Options) !void {
         // The log goes beside the old image, which stays.
         const logpath = try std.fmt.allocPrint(arena, "{s}-failed.log", .{final_rel});
         Dir.cwd().writeFile(io, .{ .sub_path = logpath, .data = log.items }) catch {};
-        _ = std.process.run(arena, io, .{ .argv = &.{ "chmod", "-R", "u+rwX", out_rel } }) catch {};
-        Dir.cwd().deleteTree(io, out_rel) catch {};
+        _ = removeImageDir(arena, io, opts.root, out_rel, ids);
         const tail_start = if (log.items.len > 2000) log.items.len - 2000 else 0;
         std.debug.print("{s}\nerror: image {s} failed; log: {s} (out/{s}/ is unchanged)\n", .{ log.items[tail_start..], img.name, logpath, img.name });
         return error.BuildFailed;
     }
     const logpath = try std.fmt.allocPrint(arena, "{s}/image.log", .{out_rel});
     Dir.cwd().writeFile(io, .{ .sub_path = logpath, .data = log.items }) catch {};
-    if (!contains(img.output, "rootfs")) {
-        _ = std.process.run(arena, io, .{ .argv = &.{ "chmod", "-R", "u+rwX", target_rel } }) catch {};
-        Dir.cwd().deleteTree(io, target_rel) catch {};
-    }
-    // Succeeded: the new image replaces the old one.
-    _ = std.process.run(arena, io, .{ .argv = &.{ "chmod", "-R", "u+rwX", final_rel } }) catch {};
-    Dir.cwd().deleteTree(io, final_rel) catch {};
+    if (!contains(img.output, "rootfs")) _ = removeImageDir(arena, io, opts.root, target_rel, ids);
+    // Succeeded: the new image replaces the old one. The old one is moved aside first and removed afterwards, so
+    // that nothing of it is lost unless the new one is in place.
+    const had_one = if (Dir.cwd().rename(final_rel, Dir.cwd(), old_rel, io)) |_| true else |err| switch (err) {
+        error.FileNotFound => false,
+        else => {
+            std.debug.print("error: cannot move the old {s} aside: {s}\n", .{ final_rel, @errorName(err) });
+            return error.BuildFailed;
+        },
+    };
     Dir.cwd().rename(out_rel, Dir.cwd(), final_rel, io) catch |err| {
+        if (had_one) Dir.cwd().rename(old_rel, Dir.cwd(), final_rel, io) catch {};
         std.debug.print("error: cannot move {s} to {s}: {s}\n", .{ out_rel, final_rel, @errorName(err) });
         return error.BuildFailed;
     };
+    if (had_one and !removeImageDir(arena, io, opts.root, old_rel, ids)) std.debug.print("warning: the previous image is left at {s}\n", .{old_rel});
     Dir.cwd().deleteFile(io, try std.fmt.allocPrint(arena, "{s}-failed.log", .{final_rel})) catch {};
     std.debug.print("    made", .{});
     for (img.output) |o| {
