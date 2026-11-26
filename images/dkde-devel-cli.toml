@@ -1,0 +1,54 @@
+# The dkde-devel image that boots to the command line only: the same packages (the desktop is installed but nothing graphical
+# starts), a text console with the live user logged in on tty1, no greetd. A system installed from it starts the same way.
+# KEEP THE PACKAGE LIST IN STEP WITH dkde-devel.toml: image files cannot include one another.
+name     = "dkde-devel-cli"
+arch     = "x86_64"
+hostname = "fenriros"
+# what the text consoles show above `login:`, so that the live login is known when the desktop does not start
+issue = """
+FenrirOS \\r (\\l)
+
+Live system login: user  live   (no password: press Enter at the password prompt)
+root is locked: use sudo as live (press Enter at its password prompt too).
+This image starts on the command line. Install with: sudo dkinstall
+
+"""
+label    = "FENRIROS_CLI"
+# not base-net: it depends on dhcpcd, and NetworkManager does the DHCP here (two DHCP clients
+# fight); its other parts (OpenSSH, curl) are listed instead
+# firewalld: the firewall of this image (nftables backend; its recipe is in the tree since 2026-11-15). Not
+# firewalld-gui: dkde has its own front end for it.
+
+# "claude-code" Is added for now So I can spin up an instance to help debug on the running system.
+packages = ["base", "openssh", "openssh-server", "curl", "linux", "live-initramfs", "elogind", "dkinstaller", "firmware-linux-meta", 
+"desktop-dkde", "firewalld", "claude-code", "base-devel", "xserver-xorg", "xserver-xorg-input-libinput", "xinit", "libselinux", 
+"policycoreutils", "selinux-python", "selinux-policy-targeted", "firefox", "ncurses", "iputils", "net-tools", "iproute2", "iw", 
+"traceroute", "vim", "gcc", "dos2unix", "rescue-tools",
+# GRUB's BIOS and 64-bit EFI modules: dkinstaller offers GRUB on a BIOS machine only when /usr/lib/grub/i386-pc is on the live disc; the
+# EFI modules are for GRUB on UEFI (grub itself comes with rescue-tools)
+"grub", "grub-i386-pc", "grub-x86_64-efi",
+# the manual pages and documentation of grub and of the tools in rescue-tools (about 3 MB; a new tool there needs its -doc here too).
+# No -doc package: nvme-cli, btrfs-progs, chntpw.
+"grub-doc", "ddrescue-doc", "testdisk-doc", "fsarchiver-doc", "nwipe-doc", "smartmontools-doc", "hdparm-doc",
+"parted-doc", "gptfdisk-doc", "util-linux-doc", "e2fsprogs-doc", "xfsprogs-doc", "dosfstools-doc", "exfatprogs-doc",
+"ntfs-3g-doc", "cryptsetup-doc", "lvm2-doc", "mdadm-doc", "efibootmgr-doc", "dklilo-doc", "dmidecode-doc",
+"pciutils-doc", "usbutils-doc", "squashfs-tools-doc", "xorriso-doc", "openssh-doc", "curl-doc", "rsync-doc",
+"f2fs-tools-doc", "jfsutils-doc", "reiserfsprogs-doc", "nilfs-utils-doc", "tmux-doc", "strace-doc", "partclone-doc",
+"safecopy-doc", "foremost-doc", "gpart-doc", "sg3-utils-doc", "lsscsi-doc", "lshw-doc", "kpartx-doc", "memtester-doc",
+"stress-ng-doc", "fio-doc", "pv-doc", "lsof-doc", "ncdu-doc", "mc-doc", "screen-doc", "dialog-doc", "lftp-doc",
+"mbuffer-doc", "par2cmdline-doc"]
+#exclude  = ["*-devel", "*-doc", "*-static"]
+# never installed, even as a dependency (apk stops with a conflict if something needs it)
+unwanted = ["dhcpcd"]
+services = ["udevd", "udev-trigger", "udev-settle", "modules", "syslogd", "elogind", "dbus", "networkmanager", "firewalld", "dkinstall-auto"]
+output   = ["iso"]
+# command line only: agetty logs the live user in on tty1 and nothing graphical is started
+login     = "console"
+# elogind, not seatd: it registers the session, so shutting down needs no password
+seat      = "elogind"
+autologin = "live"
+
+[[users]]
+name     = "live"
+groups   = ["wheel", "video", "render", "audio", "input", "plugdev"]
+password = "empty"
