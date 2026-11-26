@@ -19,9 +19,10 @@
 # /usr/src/linux-<release>, linked from /usr/lib/modules/<release>/build.
 # r4 (2026-11-20): btrfs and XFS built in (=y), as in linux r4: a single-disk btrfs or XFS root boots with no initramfs.
 # The kernel rebuild is left for the next world run. (The ZFS module is built against this kernel; ZFS stays a module.)
+# r2: the kernel's local version is -FenrirOS (was -dkrescue); files/config sets it and the /boot names follow it.
 name = "linux-lts"
 version = "6.18.65"
-release = 1
+release = 2
 summary = "The Linux kernel (long-term series) and its modules"
 license = "GPL-2.0-only WITH Linux-syscall-note"
 homepage = "https://kernel.org"
@@ -55,10 +56,13 @@ nice -n 10 make LLVM=1 -j$jobs
 install = '''
 make LLVM=1 INSTALL_MOD_PATH=$pkgdir/usr INSTALL_MOD_STRIP=1 modules_install
 # /boot names carry the series (6.18 from 6.18.63), so two kernels coexist
+# and end in CONFIG_LOCALVERSION, which files/config sets: the one place for it
 kv=${version%.*}
-install -Dm644 arch/x86/boot/bzImage "$pkgdir/boot/vmlinuz-$kv-dkrescue"
-install -Dm644 System.map "$pkgdir/boot/System.map-$kv-dkrescue"
-install -Dm644 .config "$pkgdir/boot/config-$kv-dkrescue"
+lv=$(sed -n 's/^CONFIG_LOCALVERSION="\(.*\)"$/\1/p' .config)
+test -n "$lv" || { echo "kernel config: CONFIG_LOCALVERSION is empty"; exit 1; }
+install -Dm644 arch/x86/boot/bzImage "$pkgdir/boot/vmlinuz-$kv$lv"
+install -Dm644 System.map "$pkgdir/boot/System.map-$kv$lv"
+install -Dm644 .config "$pkgdir/boot/config-$kv$lv"
 # build and source links point into the build tree
 rm -f "$pkgdir"/usr/lib/modules/*/build "$pkgdir"/usr/lib/modules/*/source
 # the build tree for out-of-tree modules (linux-devel): what `make -C <it>

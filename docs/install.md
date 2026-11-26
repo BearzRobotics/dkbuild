@@ -234,7 +234,7 @@ In the chroot:
 ```sh
 passwd <user>                # the image's user starts locked; root stays locked
 ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime     # your zone
-ls /boot                     # note the kernel name: vmlinuz-<series>-dkrescue (for example 7.3)
+ls /boot                     # note the kernel name: vmlinuz-<series>-FenrirOS (for example 7.3)
 ```
 
 ## 6. Install the boot loader
@@ -259,12 +259,12 @@ PARTUUID):
 timeout = 50
 default = fenriros
 
-image = /boot/vmlinuz-<series>-dkrescue
+image = /boot/vmlinuz-<series>-FenrirOS
     label = fenriros
     root = PARTUUID=<partuuid>
     append = "ro quiet"
 
-image = /boot/vmlinuz-<series>-dkrescue
+image = /boot/vmlinuz-<series>-FenrirOS
     label = fenriros-safe
     root = PARTUUID=<partuuid>
     append = "ro nomodeset"
