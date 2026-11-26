@@ -67,4 +67,7 @@ make
 install = '''
 make install
 install -Dm644 COPYING "$pkgdir/usr/share/licenses/bsd-games/COPYING"
+# mono's class browser is monop; the board game is monopoly here
+mv "$pkgdir/usr/bin/monop" "$pkgdir/usr/bin/monopoly"
+for m in "$pkgdir"/usr/share/man/man6/monop.6*; do mv "$m" "$(dirname "$m")/monopoly.6${m##*monop.6}"; done
 '''

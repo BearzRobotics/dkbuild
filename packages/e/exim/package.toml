@@ -26,7 +26,8 @@ hostdeps = ["pkgconf", "perl"]
 builddeps = ["perl", "openssl-devel", "pcre2-devel", "linux-pam-devel", "libidn-devel", "libidn2-devel", "libsasl-devel",
              "heimdal-devel", "tdb-devel", "openldap-devel", "mariadb-devel", "postgresql-devel", "sqlite-devel",
              "lmdb-devel", "hiredis-devel", "jansson-devel", "libpsl-devel"]
-rundeps = ["linux-pam-base"]
+# one mail server: each has sendmail, mailq and newaliases
+rundeps = ["linux-pam-base", "!opensmtpd", "!postfix"]
 
 source = [
     { url = "https://downloads.exim.org/exim4/exim-4.100.2.tar.xz", sha256 = "04c9958bf15e7e3d518fb55f8b343cba4789447212bc699a9be2b1d11c1016f6" },

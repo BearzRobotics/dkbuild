@@ -7,7 +7,7 @@
 # dependency names (they are Chimera's) before building.
 name = "openjdk17"
 version = "17.0.21.0.3_p1"
-release = 6
+release = 7
 summary = "OpenJDK 17 (Java development kit and runtime)"
 license = "GPL-2.0-only WITH Classpath-exception-2.0"
 homepage = "https://openjdk.org"
@@ -15,7 +15,8 @@ patches = ["FixNullPtrCast.patch", "ppc64le.patch"]
 archs = ["x86_64", "aarch64"]
 hostdeps = ["autoconf", "automake", "bash", "file", "libtool", "linux-headers", "openjdk17-bootstrap", "openssl", "pkgconf", "zip", "unzip", "zlib-ng-compat-devel"]
 builddeps = ["alsa-lib-devel", "cups-devel", "fontconfig-devel", "freetype-devel", "giflib-devel", "lcms2-devel", "libjpeg-turbo-devel", "libxrandr-devel", "libxrender-devel", "libxt-devel", "libxtst-devel", "linux-headers"]
-rundeps = ["java-common"]
+# the same paths as the build seed, which is only for building it
+rundeps = ["java-common", "!openjdk17-bootstrap"]
 options = ["!check", "jobs:12"]
 
 source = [

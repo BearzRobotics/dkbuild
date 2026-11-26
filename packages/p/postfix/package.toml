@@ -17,13 +17,16 @@
 # them can be installed.
 name = "postfix"
 version = "3.11.7"
-release = 1
+release = 2
 summary = "Fast, secure and flexible mail transfer agent"
 license = "IPL-1.0 OR EPL-2.0"
 homepage = "https://www.postfix.org"
 hostdeps = ["pkgconf", "m4", "perl"]
 builddeps = ["openssl-devel", "icu-devel", "libsasl-devel", "openldap-devel", "postgresql-devel", "mariadb-devel", "sqlite-devel", "lmdb-devel", "pcre2-devel"]
 options = ["!check"]
+
+# one mail server: each has sendmail, mailq and newaliases
+rundeps = ["!exim", "!opensmtpd"]
 
 source = [
     { url = "https://archive.mgm51.com/mirrors/postfix-source/official/postfix-3.11.7.tar.gz", sha256 = "a2f3242345753448072177fae83c322a403c9263696996406201145dab8e8625" },

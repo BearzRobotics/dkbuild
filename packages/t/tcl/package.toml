@@ -5,7 +5,7 @@
 # r2: rebuilt so tcl-libs provides so:libtcl8.6.so (a library in /usr/lib without a soname now provides its file name).
 name = "tcl"
 version = "8.6.16"
-release = 2
+release = 3
 summary = "TCL scripting language"
 license = "TCL"
 homepage = "http://www.tcl.tk"
@@ -47,4 +47,6 @@ ln -sf tclsh8.6 "$pkgdir/usr/bin/tclsh"
 install -Dm644 ../license.terms "$pkgdir/usr/share/licenses/tcl/license.terms"
 ln -sf tclsh8.6 "$pkgdir/usr/bin/tclsh"
 install -Dm644 ../license.terms "$pkgdir/usr/share/licenses/tcl/license.terms"
+# perl's Thread.3 has this name
+if [ -e "$pkgdir/usr/share/man/man3/Thread.3" ]; then mv "$pkgdir/usr/share/man/man3/Thread.3" "$pkgdir/usr/share/man/man3/tcl-Thread.3"; fi
 '''

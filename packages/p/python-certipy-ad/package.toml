@@ -1,7 +1,7 @@
 # Certipy as NetExec uses it (Pennyw0rth's fork, git of 2026-10-14).
 name = "python-certipy-ad"
 version = "5.0.4_git20261014"
-release = 1
+release = 2
 summary = "Active Directory Certificate Services enumeration and abuse"
 license = "MIT"
 homepage = "https://github.com/Pennyw0rth/Certipy"
@@ -20,4 +20,6 @@ install = '''
 python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \
     --root "$pkgdir" --prefix /usr .
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/python-certipy-ad/LICENSE"
+# /usr/bin/certipy is the certipy package's (upstream's tool); this fork's command is certipy-nxc
+if [ -e "$pkgdir/usr/bin/certipy" ]; then mv "$pkgdir/usr/bin/certipy" "$pkgdir/usr/bin/certipy-nxc"; fi
 '''

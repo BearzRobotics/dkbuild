@@ -5,13 +5,13 @@
 # (its getweb script downloads it from the vendors).
 name = "foo2zjs"
 version = "20200505_git20260819"
-release = 5
+release = 6
 summary = "Drivers for ZjStream and similar printers"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/OpenPrinting/foo2zjs"
 hostdeps = ["bc", "ghostscript"]
-builddeps = ["cups-devel"]
-rundeps = ["bc", "ghostscript", "cups-filters"]
+builddeps = ["cups-devel", "foomatic-db"]
+rundeps = ["bc", "ghostscript", "cups-filters", "foomatic-db"]
 options = ["!check"]
 
 source = [
@@ -34,4 +34,8 @@ mkdir -p "$pkgdir/usr/share/ppd" "$pkgdir/usr/share/foomatic/db/source"
 make PREFIX="$pkgdir/usr" DESTDIR="$pkgdir" FOODB="$pkgdir/usr/share/foomatic/db/source" LPuid= LPgid= \
     install-prog install-extra install-crd install-foo install-ppd install-filter install-man
 install -Dm644 COPYING "$pkgdir/usr/share/licenses/foo2zjs/COPYING"
+# foomatic-db has these already; two packages cannot own one file
+(cd "$pkgdir" && find usr/share/foomatic/db/source -type f) | while read -r f; do
+    if [ -e "/$f" ]; then rm "$pkgdir/$f"; fi
+done
 '''

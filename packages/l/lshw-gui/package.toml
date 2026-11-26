@@ -45,4 +45,9 @@ install = '''
 test -f "$pkgdir/usr/lib/pam.d/gtk-lshw"
 install -Dm644 $pkgfiles/gtk-lshw.pam "$pkgdir/usr/lib/pam.d/gtk-lshw"
 install -Dm644 COPYING "$pkgdir/usr/share/licenses/lshw-gui/COPYING"
+# the program, its data, translations and manual are lshw's (a runtime dependency)
+test -f "$pkgdir/usr/bin/lshw"
+rm "$pkgdir/usr/bin/lshw"
+rm -rf "$pkgdir/usr/share/locale" "$pkgdir/usr/share/man/man1/lshw.1"
+rm -f "$pkgdir"/usr/share/lshw/*.gz "$pkgdir"/usr/share/lshw/*.ids "$pkgdir"/usr/share/lshw/*.txt
 '''

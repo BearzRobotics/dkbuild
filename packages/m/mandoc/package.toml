@@ -5,7 +5,7 @@
 # r9: `man` is dkman; mandoc keeps its formatter, apropos, whatis and makewhatis.
 name = "mandoc"
 version = "1.14.6"
-release = 9
+release = 10
 summary = "UNIX manpage compiler toolset"
 license = "ISC"
 homepage = "https://mandoc.bsd.lv"
@@ -33,6 +33,11 @@ UTF8_LOCALE=C.UTF-8
 BINM_PAGER=less
 MANPATH_DEFAULT="/usr/local/share/man:/usr/share/man"
 MANPATH_BASE="/usr/share/man"
+# the names dkman, groff and their manuals have are theirs
+BINM_APROPOS=mapropos
+BINM_WHATIS=mwhatis
+BINM_SOELIM=msoelim
+MANM_ROFF=mandoc_roff
 EOF
 ./configure
 '''

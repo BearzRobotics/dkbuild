@@ -8,15 +8,18 @@
 # Not built (queued, wip/queue): expect first-build fixes (the `dkbuild fetch haystack-ai` fills cache/python first).
 name = "haystack-ai"
 version = "3.5.0"
-release = 1
+release = 2
 summary = "Haystack: LLM orchestration framework for RAG pipelines and agents (deepset)"
 license = "Apache-2.0"
 homepage = "https://haystack.deepset.ai"
 hostdeps = ["python", "python-setuptools", "python-wheel"]
-builddeps = ["python-devel", "python-numpy", "python-pydantic", "python-pydantic-core", "python-pyyaml", "python-markupsafe", "python-jiter", "python-rpds-py"]
-rundeps = ["python", "python-numpy", "python-pydantic", "python-pydantic-core", "python-pyyaml", "python-markupsafe", "python-jiter", "python-rpds-py"]
+builddeps = ["python-devel", "python-numpy", "python-pydantic", "python-pydantic-core", "python-pyyaml", "python-markupsafe", "python-jiter", "python-rpds-py", "python-annotated-types", "python-anyio", "python-attrs", "python-certifi", "python-charset-normalizer", "python-distro", "python-filetype", "python-h11", "python-httpcore", "python-httpcore2", "python-httpx", "python-httpx2", "python-idna", "python-jinja2", "python-jsonschema", "python-jsonschema-specifications", "python-more-itertools", "python-networkx", "python-dateutil", "python-referencing", "python-requests", "python-sniffio", "python-tqdm", "python-truststore", "python-typing-extensions", "python-typing-inspection", "python-tzdata", "python-urllib3"]
+rundeps = ["python", "python-numpy", "python-pydantic", "python-pydantic-core", "python-pyyaml", "python-markupsafe", "python-jiter", "python-rpds-py", "python-annotated-types", "python-anyio", "python-attrs", "python-certifi", "python-charset-normalizer", "python-distro", "python-filetype", "python-h11", "python-httpcore", "python-httpcore2", "python-httpx", "python-httpx2", "python-idna", "python-jinja2", "python-jsonschema", "python-jsonschema-specifications", "python-more-itertools", "python-networkx", "python-dateutil", "python-referencing", "python-requests", "python-sniffio", "python-tqdm", "python-truststore", "python-typing-extensions", "python-typing-inspection", "python-tzdata", "python-urllib3"]
 options = ["!check", "pydeps"]
 
 install = '''
-python3 -m pip install --no-build-isolation --no-compile --root "$pkgdir" --prefix /usr haystack-ai==3.5.0
+# --no-deps, and only what the tree does not package: a full install put some 25 python-* packages' files here too
+python3 -m pip install --no-deps --no-build-isolation --no-compile --root "$pkgdir" --prefix /usr \
+    backoff==2.2.1 docstring-parser==0.18.0 lazy-imports==1.2.0 openai==3.51.0 posthog==7.91.1 tenacity==9.2.1 \
+    haystack-ai==3.5.0
 '''

@@ -3,7 +3,7 @@
 # `cpio -p`).
 name = "cpio"
 version = "2.15"
-release = 1
+release = 2
 summary = "Copy files to and from archives"
 license = "GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/cpio"
@@ -25,4 +25,6 @@ install = '''
 # mt is tar's (or mt-st's); rmt goes with tar
 rm -f "$pkgdir/usr/bin/mt" "$pkgdir/usr/share/man/man1/mt.1"
 rm -rf "$pkgdir/usr/libexec"
+# rmt's manual is tar's
+rm -f "$pkgdir/usr/share/man/man8/rmt.8"
 '''

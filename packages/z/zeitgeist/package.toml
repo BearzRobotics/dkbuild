@@ -8,7 +8,7 @@ summary = "Zeitgeist: the activity log service (libzeitgeist for the Lomiri app 
 license = "LGPL-2.1-or-later"
 homepage = "https://gitlab.freedesktop.org/zeitgeist/zeitgeist"
 patches = ["fix-xapian-2.0.0.patch"]
-hostdeps = ["make", "pkgconf", "autoconf", "automake", "libtool", "gettext", "vala", "python", "python-rdflib", "raptor2", "git"]
+hostdeps = ["make", "pkgconf", "autoconf", "automake", "libtool", "gettext", "vala", "python", "python-rdflib", "raptor", "git"]
 builddeps = ["gobject-introspection-devel", "gtk+3-devel", "json-glib-devel", "sqlite-devel", "telepathy-glib-devel", "xapian-core-devel"]
 options = ["!check"]
 

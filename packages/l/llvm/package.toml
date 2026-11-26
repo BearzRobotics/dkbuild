@@ -15,7 +15,7 @@
 #     component library, so find_package(LLVM) failed without them (clang-tools-extra).
 name = "llvm"
 version = "23.1.5"
-release = 7
+release = 8
 summary = "LLVM libraries and tools"
 description = "LLVM with Clang, LLD, compiler-rt, libunwind, libc++abi and libc++ (X86 and AMDGPU targets)."
 license = "Apache-2.0 WITH LLVM-exception"
@@ -95,6 +95,8 @@ nice -n 10 ninja -C build -j$jobs
 install = '''
 DESTDIR=$pkgdir cmake --install build --strip
 install -Dm644 llvm/LICENSE.TXT "$pkgdir/usr/share/licenses/llvm/LICENSE.TXT"
+# elfutils' debuginfod has these names; LLVM's tools remain as llvm-debuginfod and llvm-debuginfod-find
+rm -f "$pkgdir/usr/bin/debuginfod" "$pkgdir/usr/bin/debuginfod-find"
 '''
 
 # What is left in `llvm` after these: libLLVM, libLTO, libRemarks and the
