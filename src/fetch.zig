@@ -377,6 +377,109 @@ pub fn hasTopCargoLock(arena: Allocator, io: std.Io, tarball: []const u8) bool {
     return r.term == .exited and r.term.exited == 0;
 }
 
+/// The second half of a vendored crate's name in the shared store (`<dir>-<key>`), under which every later
+/// package that locks that crate finds it, so it must describe the directory's contents. The first 16 hex
+/// digits of the sha256 of .cargo-checksum.json do when that file lists every file with its hash and the
+/// directory agrees (cargo vendor's own work). Otherwise (a crate the project carries itself, with no list; or
+/// one whose list does not match it) the key is `t` and a hash of everything in the directory: with the list's
+/// hash alone, one project's code would be stored, and later used, under another's name.
+pub fn crateKey(arena: Allocator, io: std.Io, dir: []const u8) ![]const u8 {
+    var d = try std.Io.Dir.cwd().openDir(io, dir, .{ .iterate = true });
+    defer d.close(io);
+    const list_name = ".cargo-checksum.json";
+    const list = try d.readFileAlloc(io, list_name, arena, .limited(1 << 26));
+    const files: ?std.json.ObjectMap = blk: {
+        const v = std.json.parseFromSliceLeaky(std.json.Value, arena, list, .{}) catch break :blk null;
+        if (v != .object) break :blk null;
+        const f = v.object.get("files") orelse break :blk null;
+        break :blk if (f == .object) f.object else null;
+    };
+
+    const Entry = struct { path: []const u8, kind: std.Io.File.Kind };
+    var entries: std.ArrayList(Entry) = .empty;
+    var w = try d.walk(arena);
+    defer w.deinit();
+    while (try w.next(io)) |e| try entries.append(arena, .{ .path = try arena.dupe(u8, e.path), .kind = e.kind });
+    std.mem.sort(Entry, entries.items, {}, struct {
+        fn lt(_: void, a: Entry, b: Entry) bool {
+            return std.mem.lessThan(u8, a.path, b.path);
+        }
+    }.lt);
+
+    var tree_hash = std.crypto.hash.sha2.Sha256.init(.{});
+    var listed: usize = 0;
+    var agrees = files != null and files.?.count() > 0;
+    for (entries.items) |e| {
+        if (e.kind == .directory) continue;
+        var line: []const u8 = undefined;
+        switch (e.kind) {
+            .file => {
+                const st = try d.statFile(io, e.path, .{ .follow_symlinks = false });
+                const sum = try hashFile(io, try std.fs.path.join(arena, &.{ dir, e.path }));
+                line = try std.fmt.allocPrint(arena, "f{s}{s}", .{ if (st.permissions.toMode() & 0o111 != 0) "x" else "-", &sum });
+                if (agrees and !std.mem.eql(u8, e.path, list_name)) {
+                    const want = files.?.get(e.path);
+                    if (want != null and want.? == .string and std.mem.eql(u8, want.?.string, &sum)) listed += 1 else agrees = false;
+                }
+            },
+            .sym_link => {
+                var buf: [std.fs.max_path_bytes]u8 = undefined;
+                line = try std.fmt.allocPrint(arena, "l{s}", .{buf[0..try d.readLink(io, e.path, &buf)]});
+                agrees = false; // cargo's list has files only
+            },
+            else => return error.UnexpectedFileKind,
+        }
+        // NUL cannot be in a path or a link's target, so the entries cannot run into each other
+        for ([_][]const u8{ e.path, line }) |part| {
+            tree_hash.update(part);
+            tree_hash.update(&.{0});
+        }
+    }
+    if (agrees and listed == files.?.count()) {
+        var h: [32]u8 = undefined;
+        std.crypto.hash.sha2.Sha256.hash(list, &h, .{});
+        return arena.dupe(u8, std.fmt.bytesToHex(h, .lower)[0..16]);
+    }
+    return std.fmt.allocPrint(arena, "t{s}", .{std.fmt.bytesToHex(tree_hash.finalResult(), .lower)[0..16]});
+}
+
+test "crateKey: the list's hash only for a directory that agrees with its list" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const base = try tmp.dir.realPathFileAlloc(io, ".", a);
+    const S = struct {
+        fn make(dir: std.Io.Dir, io_: std.Io, a_: Allocator, root: []const u8, name: []const u8, code: []const u8, list: []const u8) ![]const u8 {
+            try dir.createDirPath(io_, try std.fmt.allocPrint(a_, "{s}/src", .{name}));
+            try dir.writeFile(io_, .{ .sub_path = try std.fmt.allocPrint(a_, "{s}/src/lib.rs", .{name}), .data = code });
+            try dir.writeFile(io_, .{ .sub_path = try std.fmt.allocPrint(a_, "{s}/.cargo-checksum.json", .{name}), .data = list });
+            return crateKey(a_, io_, try std.fs.path.join(a_, &.{ root, name }));
+        }
+    };
+    var h: [32]u8 = undefined;
+    std.crypto.hash.sha2.Sha256.hash("genuine", &h, .{});
+    const list = try std.fmt.allocPrint(a, "{{\"files\":{{\"src/lib.rs\":\"{s}\"}},\"package\":\"x\"}}", .{&std.fmt.bytesToHex(h, .lower)});
+    var lh: [32]u8 = undefined;
+    std.crypto.hash.sha2.Sha256.hash(list, &lh, .{});
+    const genuine = try S.make(tmp.dir, io, a, base, "genuine", "genuine", list);
+    try std.testing.expectEqualStrings(std.fmt.bytesToHex(lh, .lower)[0..16], genuine); // as before this check
+    // the genuine list beside other code, or beside one file more, gets a key of its own
+    const altered = try S.make(tmp.dir, io, a, base, "altered", "altered", list);
+    try std.testing.expect(altered[0] == 't' and !std.mem.eql(u8, altered, genuine));
+    try tmp.dir.writeFile(io, .{ .sub_path = "genuine/build.rs", .data = "extra" });
+    try std.testing.expect((try crateKey(a, io, try std.fs.path.join(a, &.{ base, "genuine" })))[0] == 't');
+    // crates a project carries, with no list: told apart by their contents, and stable
+    const empty = "{\"files\":{},\"package\":null}";
+    const one = try S.make(tmp.dir, io, a, base, "one", "project one", empty);
+    const two = try S.make(tmp.dir, io, a, base, "two", "project two", empty);
+    const again = try S.make(tmp.dir, io, a, base, "again", "project one", empty);
+    try std.testing.expect(!std.mem.eql(u8, one, two));
+    try std.testing.expectEqualStrings(one, again);
+}
+
 /// Run before cargo, which runs on the host: shell, in the fetch script ($t the work directory, $top the project).
 const cargo_guard =
     \\    # The source is untrusted and cargo runs on the host. First: the project's directory is really inside the work
@@ -472,7 +575,9 @@ pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_s
         \\    # a crate the project carries in its own vendor/ (a [patch] path copy) has no checksum file, which cargo's vendored source
         \\    # needs: an empty one, as `cargo vendor` writes for a crate with no checked files
         \\    [ -f "$d/.cargo-checksum.json" ] || printf '{{"files":{{}},"package":null}}' > "$d/.cargo-checksum.json"
-        \\    k="$n-$(sha256sum "$d/.cargo-checksum.json" | cut -c1-16)"
+        \\    # the key describes the directory's contents (crateKey); not read through a pipe, whose status would be lost
+        \\    key=$('{8s}' crate-key "$d")
+        \\    k="$n-$key"
         \\    [ -e "$store/$k" ] || mv -T "$d" "$store/$k" 2>/dev/null || [ -e "$store/$k" ]
         \\    echo "$n $k" >> "$t/list"
         \\done
@@ -480,7 +585,7 @@ pub fn fetchCargoDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_s
         \\mv "$t/list" '{3s}.part'; mv '{3s}.part' '{3s}'
         \\rm -f '{4s}'
         \\rm -rf "$t"
-    , .{ tmp, cache, tarball, out_path, old, config, apply.items, cargo_guard });
+    , .{ tmp, cache, tarball, out_path, old, config, apply.items, cargo_guard, std.process.executablePathAlloc(io, arena) catch return error.DownloadFailed });
     return runDepScript(arena, io, cache, "cargodeps", script, "crate (needs `cargo` on PATH)", message);
 }
 
@@ -505,6 +610,20 @@ pub fn fetchZigDeps(arena: Allocator, io: std.Io, cache: []const u8, tarball_sha
         \\    # --fetch=all also fetches the lazy dependencies of other platforms and of options the
         \\    # build does not use (flow's freetype for its GUI), which can be unreachable or stale:
         \\    # if that fails, fetch what the default build needs (--fetch=needed, zig's default)
+        \\    # zig takes a directory zig-pkg/<hash>/ on trust, and these go into the store every package shares. So
+        \\    # one the source ships is kept only if its contents hash to its name, and then as zig's own copy of it,
+        \\    # which has just the files the hash covers; the others are fetched.
+        \\    ( cd "$top"
+        \\      if [ -L zig-pkg ]; then rm -f zig-pkg; fi
+        \\      for d in zig-pkg/*; do
+        \\          [ -e "$d" ] || [ -L "$d" ] || continue
+        \\          n=${{d##*/}}
+        \\          h=
+        \\          if [ ! -L "$d" ]; then h=$(ZIG_GLOBAL_CACHE_DIR="$t/verify" timeout 600 zig fetch "./$d" | tail -n 1) || h=; fi
+        \\          rm -rf -- "$d"
+        \\          if [ "$h" = "$n" ] && [ -f "$t/verify/p/$n.tar.gz" ]; then tar -xzf "$t/verify/p/$n.tar.gz" -C zig-pkg
+        \\          else echo "zig: the source's zig-pkg/$n does not hash to its name; fetching it" >&2; fi
+        \\      done )
         \\    ( cd "$top" && export ZIG_GLOBAL_CACHE_DIR="$cache/zig-global" && {{ timeout 1800 zig build --fetch=all || {{ echo "zig: --fetch=all failed, fetching what the default build needs" >&2; timeout 1800 zig build --fetch=needed; }}; }} )
         \\fi
         \\store="$cache/zigpkg"; mkdir -p "$store"

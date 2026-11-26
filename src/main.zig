@@ -70,6 +70,13 @@ pub fn main(init: std.process.Init) !void {
     const arena = init.arena.allocator();
     const args = try init.minimal.args.toSlice(arena);
 
+    // Used by the cargo vendoring script (fetch.zig): the store key of one vendored crate.
+    if (args.len == 3 and std.mem.eql(u8, args[1], "crate-key")) {
+        const key = try fetch.crateKey(arena, init.io, args[2]);
+        try std.Io.File.stdout().writeStreamingAll(init.io, try std.fmt.allocPrint(arena, "{s}\n", .{key}));
+        return;
+    }
+
     // The caller's umask would decide the modes of what is unpacked, installed and so packaged: with 077,
     // /usr ships readable by root alone. This covers the sandbox too, which is this program run again.
     _ = std.os.linux.syscall1(.umask, 0o022);
