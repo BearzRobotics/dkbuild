@@ -17,7 +17,7 @@ cat > "$W/bin/curl" <<'EOS'
 #!/bin/sh
 out= url=
 while [ $# -gt 0 ]; do
-    case $1 in -o) out=$2; shift ;; https://*) url=$1 ;; --proto|--proto-redir|--retry) shift ;; esac
+    case $1 in -o) out=$2; shift ;; https://*) url=${1%/} ;; --proto|--proto-redir|--retry) shift ;; esac
     shift
 done
 if [ -n "$out" ]; then cp "$SERVE/${url##*/}" "$out"; else cat "$SERVE/${url##*/}"; fi
@@ -80,6 +80,21 @@ grep -q 'pinned' "$W/log" || { cat "$W/log"; bad "electron: it did not say why i
 mkdir -p "$W/work-dart"
 run dart 1.0 $D 5555555555555555555555555555555555555555 '' && bad "dart: a checkout at another commit was accepted"
 [ ! -e "$RAN" ] || bad "dart: a script from an unverified checkout ran: $(cat "$RAN")"
+
+# --- scratch-media: asset names come from the package's lists; one with a path must not reach rm or curl
+lib="$W/work-scratch-media/gui/package/src/lib/libraries"
+mkdir -p "$lib" && touch "$W/work-scratch-media/gui/.done"
+echo keep > "$W/victim"
+for f in backdrops sounds sprites; do echo '[]' > "$lib/$f.json"; done
+echo '[{"md5ext": "../../victim"}]' > "$lib/costumes.json"
+PATH="$W/bin:$PATH" sh "$ROOT/src/scripts/snapshot-scratch-media.sh" "$W/out.tar.zst" "$W/work-scratch-media" 1.0 > "$W/log" 2>&1 \
+    && bad "scratch-media: an asset name with a path was accepted"
+[ "$(cat "$W/victim" 2>/dev/null)" = keep ] || bad "scratch-media: an asset name deleted a file outside the work directory"
+# an honest name still works as far as the download (the stand-in curl has nothing to serve)
+echo '[{"md5ext": "d41d8cd98f00b204e9800998ecf8427e.svg"}]' > "$lib/costumes.json"
+: > "$SERVE/get"
+PATH="$W/bin:$PATH" sh "$ROOT/src/scripts/snapshot-scratch-media.sh" "$W/out2.tar.zst" "$W/work-scratch-media" 1.0 > "$W/log" 2>&1
+grep -q 'refusing' "$W/log" && bad "scratch-media: an honest asset name was refused"
 
 # --- too few arguments are an error, not a fetch by tag
 run brave v1 9.9.9 '' '' && bad "brave: ran without pins"

@@ -30,7 +30,7 @@ fi
 
 # the asset names, as fetchMediaLibraryAssets.js collects them
 python3 -I - gui/package/src/lib/libraries > list.txt <<'PY'
-import json, sys, os
+import json, re, sys, os
 d = sys.argv[1]
 names = set()
 def simple(items):
@@ -44,6 +44,9 @@ for s in json.load(open(os.path.join(d, "sprites.json"))):
     simple(s.get("costumes", []))
     simple(s.get("sounds", []))
 for n in sorted(names):
+    # these become file names (and a failed one is deleted): only an MD5 and an extension, nothing with a path
+    if not (isinstance(n, str) and re.fullmatch(r"[0-9a-f]{32}\.[a-z0-9]+", n)):
+        sys.exit("snapshot: refusing the asset name %r" % (n,))
     print(n)
 PY
 log "$(wc -l < list.txt) assets"
@@ -52,7 +55,7 @@ fetch_one() {
     a=$1
     f="assets/$a"
     if [ ! -f "$f" ]; then
-        curl -sSfL --retry 3 -o "$f.tmp" "https://cdn.assets.scratch.mit.edu/internalapi/asset/$a/get/"
+        curl -sSfL --proto =https --proto-redir =https --retry 3 -o "$f.tmp" "https://cdn.assets.scratch.mit.edu/internalapi/asset/$a/get/"
         mv "$f.tmp" "$f"
     fi
     sum=$(md5sum "$f" | cut -d' ' -f1)
