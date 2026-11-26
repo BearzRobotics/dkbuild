@@ -2,11 +2,12 @@
 # dkbuild snapshot (SPEC.md 5.3): the Dart SDK and the repositories its DEPS
 # pins, checked out with depot_tools' gclient and made into one source
 # tarball, so the build needs no network. Runs on the host at fetch time, for
-#   { url = "snapshot:dart <Dart version tag> <depot_tools commit>", sha256 = ... }
+#   { url = "snapshot:dart <Dart version tag> <depot_tools commit> <SDK commit>", sha256 = ... }
 #
 #   $1  the tarball to write (zstd-compressed tar)
 #   $2  a work directory (kept between runs: a failed or repeated sync resumes)
 #   $3  Dart's tag (3.10.3)    $4  the depot_tools commit
+#   $5  the commit the tag names
 #
 # As Alpine's dart snapshot: the checkout for x64 and arm64, then no VCS data
 # and no ELF files (prebuilt toolchains, gn, ninja and Dart SDKs for glibc; the
@@ -16,12 +17,21 @@
 # and owners.
 set -eu
 out=$1 work=$2 tag=$3 dtools=$4
+[ $# -ge 5 ] || { echo "snapshot: dart needs <tag> <depot_tools commit> <sdk commit>" >&2; exit 1; }
+# the commit the tag names (a tag can be moved): checked before anything of the checkout is used
+sdkcommit=$5
 name=dart-sdk-$tag
 mkdir -p "$work"
 cd "$work"
 log() { echo "snapshot: $*" >&2; }
 
-if [ ! -d depot_tools/.git ]; then
+# at DIR COMMIT: stop unless the checkout is at exactly that commit
+at() {
+    _head=$(git -C "$1" rev-parse HEAD)
+    [ "$_head" = "$2" ] || { log "$1 is at $_head, pinned $2: refusing it"; exit 1; }
+}
+
+if [ "$(git -C depot_tools rev-parse HEAD 2>/dev/null)" != "$dtools" ]; then
     log "depot_tools $dtools"
     rm -rf depot_tools
     git init -q depot_tools
@@ -32,14 +42,9 @@ export PATH="$work/depot_tools:$PATH"
 export DEPOT_TOOLS_UPDATE=0 DEPOT_TOOLS_METRICS=0 GCLIENT_SUPPRESS_GIT_VERSION_WARNING=1
 export VPYTHON_BYPASS="manually managed python not supported by chrome operations"
 
-# A re-run fetches the tag shallowly and pins its commit: gclient fetches a
-# repository's whole history for a tag revision, nothing for a commit it has.
-rev=$tag
-if [ -d sdk/.git ]; then
-    log "shallow fetch of tag $tag in sdk"
-    git -C sdk fetch -q --depth 1 origin "+refs/tags/$tag:refs/tags/$tag" &&
-        rev=$(git -C sdk rev-parse "refs/tags/$tag^{commit}") || true
-fi
+at depot_tools "$dtools"
+# gclient is given the commit: for a tag, a re-run fetches a repository's whole history.
+rev=$sdkcommit
 cat > .gclient <<EOF
 solutions = [{
     "name": "sdk",
@@ -54,6 +59,7 @@ target_cpu_only = True
 EOF
 log "gclient sync (Dart $tag): a large download"
 python3 depot_tools/gclient.py sync --no-history --nohooks --force --reset --ignore-dep-type=gcs
+at sdk "$sdkcommit"
 
 log "packing $name"
 rm -rf "$name"

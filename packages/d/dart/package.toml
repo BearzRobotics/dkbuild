@@ -9,9 +9,10 @@
 # dotnet-bootstrap-gcc-runtime); every later one the previous dart package
 # (selfhost). Dart's "gcc" toolchain is given clang under those names.
 # Not built yet.
+# r7: the snapshot names the commit the tag points at too (set both when updating).
 name = "dart"
 version = "3.10.3"
-release = 6
+release = 7
 summary = "Dart programming language SDK"
 license = "BSD-3-Clause"
 homepage = "https://dart.dev"
@@ -24,7 +25,7 @@ stage0deps = ["dart-bootstrap", "dotnet-bootstrap-gcc-runtime"]
 options = ["!check", "selfhost", "!lto"]
 
 source = [
-    { url = "snapshot:dart 3.10.3 1afcf0756e47f3a6ee82d7736b9fcda2d57b268e", sha256 = "d14138778feb908256e556412a5881c2750b3588b17381e7005616f6917414f8" },
+    { url = "snapshot:dart 3.10.3 1afcf0756e47f3a6ee82d7736b9fcda2d57b268e 55d746718c14bd0a82147d1b5e2de5a5f22b1d5e", sha256 = "d14138778feb908256e556412a5881c2750b3588b17381e7005616f6917414f8" },
 ]
 
 environment = '''

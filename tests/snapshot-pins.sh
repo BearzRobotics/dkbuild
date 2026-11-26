@@ -76,6 +76,11 @@ run electron v1 1.2.3 $D 4444444444444444444444444444444444444444 55555555555555
 [ ! -e "$RAN" ] || bad "electron: a script from an unverified checkout ran: $(cat "$RAN")"
 grep -q 'pinned' "$W/log" || { cat "$W/log"; bad "electron: it did not say why it stopped"; }
 
+# --- dart: the same
+mkdir -p "$W/work-dart"
+run dart 1.0 $D 5555555555555555555555555555555555555555 '' && bad "dart: a checkout at another commit was accepted"
+[ ! -e "$RAN" ] || bad "dart: a script from an unverified checkout ran: $(cat "$RAN")"
+
 # --- too few arguments are an error, not a fetch by tag
 run brave v1 9.9.9 '' '' && bad "brave: ran without pins"
 grep -q 'refs/tags' "$ROOT/src/scripts/snapshot-electron.sh" "$ROOT/src/scripts/snapshot-brave.sh" | grep -q fetch && bad "a tag is still fetched"
