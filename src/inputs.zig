@@ -34,6 +34,8 @@ pub const Record = struct {
     /// The build script with dkbuild's macros expanded (build.scriptHash): a
     /// change to a macro (`%configure`) rebuilds what uses it.
     script: ?Hex = null,
+    /// Which `ownHash` `inputs` is: 1, before links and executable bits counted; 2 since.
+    scheme: u8 = 2,
 };
 
 /// What a build produced, two ways (outputHash).
@@ -59,7 +61,7 @@ pub fn decide(rec: ?Record, version: []const u8, inputs: Hex, deps: Hex, package
 }
 
 pub fn format(arena: Allocator, r: Record) Allocator.Error![]const u8 {
-    const base = try std.fmt.allocPrint(arena, "version: {s}\ninputs: {s}\ndeps: {s}\n", .{ r.version, &r.inputs, &r.deps });
+    const base = try std.fmt.allocPrint(arena, "version: {s}\ninputs: {s}\ndeps: {s}\nscheme: {d}\n", .{ r.version, &r.inputs, &r.deps, r.scheme });
     const o = r.output orelse return base;
     const with_output = try std.fmt.allocPrint(arena, "{s}output: {s}\n", .{ base, &o });
     const i = r.interface orelse return with_output;
@@ -75,6 +77,7 @@ pub fn parse(arena: Allocator, text: []const u8) Allocator.Error!?Record {
     var output: ?Hex = null;
     var interface: ?Hex = null;
     var script: ?Hex = null;
+    var scheme: u8 = 1; // records from before it have no line
     var lines = std.mem.splitScalar(u8, text, '\n');
     while (lines.next()) |line| {
         const colon = std.mem.indexOf(u8, line, ": ") orelse continue;
@@ -86,8 +89,9 @@ pub fn parse(arena: Allocator, text: []const u8) Allocator.Error!?Record {
         if (std.mem.eql(u8, key, "output") and val.len == 64) output = val[0..64].*;
         if (std.mem.eql(u8, key, "interface") and val.len == 64) interface = val[0..64].*;
         if (std.mem.eql(u8, key, "script") and val.len == 64) script = val[0..64].*;
+        if (std.mem.eql(u8, key, "scheme")) scheme = std.fmt.parseInt(u8, val, 10) catch 1;
     }
-    return .{ .version = version orelse return null, .inputs = inputs orelse return null, .deps = deps orelse return null, .output = output, .interface = interface, .script = script };
+    return .{ .version = version orelse return null, .inputs = inputs orelse return null, .deps = deps orelse return null, .output = output, .interface = interface, .script = script, .scheme = scheme };
 }
 
 fn hashFileInto(h: *Sha256, arena: Allocator, io: std.Io, path: []const u8, label: []const u8) !void {
@@ -106,7 +110,26 @@ fn hashFileInto(h: *Sha256, arena: Allocator, io: std.Io, path: []const u8, labe
 
 /// Hash of a recipe's own inputs: package.toml, everything under patches/ and
 /// files/ (names and contents, sorted), and the architecture profile.
+/// Symbolic links (with their targets) and executable bits count too: both change what is built. A recipe with
+/// neither hashes as it did before they counted.
 pub fn ownHash(arena: Allocator, io: std.Io, root: []const u8, name: []const u8, arch: []const u8) !Hex {
+    return ownHashAs(arena, io, root, name, arch, true);
+}
+
+/// The hash as records of scheme 1 hold it.
+fn ownHashWithout(arena: Allocator, io: std.Io, root: []const u8, name: []const u8, arch: []const u8) !Hex {
+    return ownHashAs(arena, io, root, name, arch, false);
+}
+
+/// A record made before links and modes counted is compared the old way: if that matches, its `inputs` become
+/// today's `own`, so that nothing is rebuilt or called edited just for the change of scheme.
+pub fn adopt(arena: Allocator, io: std.Io, root: []const u8, name: []const u8, arch: []const u8, own: Hex, rec: *Record) !void {
+    if (rec.scheme >= 2) return;
+    const old = try ownHashWithout(arena, io, root, name, arch);
+    if (std.mem.eql(u8, &old, &rec.inputs)) rec.inputs = own;
+}
+
+fn ownHashAs(arena: Allocator, io: std.Io, root: []const u8, name: []const u8, arch: []const u8, with_modes: bool) !Hex {
     var h = Sha256.init(.{});
     const base = try recipe.dirPath(arena, root, name);
     try hashFileInto(&h, arena, io, try std.fs.path.join(arena, &.{ base, "package.toml" }), "package.toml");
@@ -119,8 +142,26 @@ pub fn ownHash(arena: Allocator, io: std.Io, root: []const u8, name: []const u8,
         var names: std.ArrayList([]const u8) = .empty;
         var w = try d.walk(arena);
         defer w.deinit();
+        var links: std.ArrayList([]const u8) = .empty;
         while (try w.next(io)) |e| {
             if (e.kind == .file) try names.append(arena, try arena.dupe(u8, e.path));
+            if (e.kind == .sym_link) try links.append(arena, try arena.dupe(u8, e.path));
+        }
+        if (with_modes) {
+            std.mem.sort([]const u8, links.items, {}, struct {
+                fn lt(_: void, a: []const u8, b: []const u8) bool {
+                    return std.mem.lessThan(u8, a, b);
+                }
+            }.lt);
+            for (links.items) |n| {
+                var buf: [std.fs.max_path_bytes]u8 = undefined;
+                const len = try d.readLink(io, n, &buf);
+                // NUL cannot be in a path or a target, so these cannot run into one another
+                for ([_][]const u8{ "link", sub, n, buf[0..len] }) |part| {
+                    h.update(part);
+                    h.update("\x00");
+                }
+            }
         }
         std.mem.sort([]const u8, names.items, {}, struct {
             fn lt(_: void, a: []const u8, b: []const u8) bool {
@@ -129,6 +170,12 @@ pub fn ownHash(arena: Allocator, io: std.Io, root: []const u8, name: []const u8,
         }.lt);
         for (names.items) |n| {
             try hashFileInto(&h, arena, io, try std.fs.path.join(arena, &.{ dir_path, n }), try std.fmt.allocPrint(arena, "{s}/{s}", .{ sub, n }));
+            if (with_modes and (try d.statFile(io, n, .{ .follow_symlinks = false })).permissions.toMode() & 0o111 != 0) {
+                for ([_][]const u8{ "executable", sub, n }) |part| {
+                    h.update(part);
+                    h.update("\x00");
+                }
+            }
         }
     }
     return std.fmt.bytesToHex(h.finalResult(), .lower);
@@ -464,4 +511,48 @@ test "elfInterface reads a real shared library's soname and exports (when the ho
     const data = Dir.cwd().readFileAlloc(io, "/usr/lib/x86_64-linux-gnu/libz.so.1", a, .limited(1 << 24)) catch return error.SkipZigTest;
     const got = (try elfInterface(a, data)) orelse return error.TestUnexpectedResult;
     try std.testing.expect(std.mem.startsWith(u8, got, "libz.so.1 "));
+}
+
+test "links and executable bits are inputs; records from before still match (SS-11)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    try tmp.dir.createDirPath(io, "packages/x/x/files");
+    try tmp.dir.createDirPath(io, "profiles");
+    try tmp.dir.writeFile(io, .{ .sub_path = "profiles/x86_64.toml", .data = "p" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "packages/x/x/package.toml", .data = "r" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "packages/x/x/files/run.sh", .data = "#!/bin/sh\n" });
+    const root = try tmp.dir.realPathFileAlloc(io, ".", a);
+    const plain = try ownHash(a, io, root, "x", "x86_64");
+    // with neither, the hash is what it always was
+    try std.testing.expectEqualSlices(u8, &plain, &(try ownHashWithout(a, io, root, "x", "x86_64")));
+    try tmp.dir.setFilePermissions(io, "packages/x/x/files/run.sh", .fromMode(0o755), .{});
+    const executable = try ownHash(a, io, root, "x", "x86_64");
+    try std.testing.expect(!std.mem.eql(u8, &plain, &executable));
+    try tmp.dir.symLink(io, "run.sh", "packages/x/x/files/active", .{});
+    const linked = try ownHash(a, io, root, "x", "x86_64");
+    try std.testing.expect(!std.mem.eql(u8, &executable, &linked));
+    try tmp.dir.deleteFile(io, "packages/x/x/files/active");
+    try tmp.dir.symLink(io, "other", "packages/x/x/files/active", .{});
+    try std.testing.expect(!std.mem.eql(u8, &linked, &(try ownHash(a, io, root, "x", "x86_64"))));
+    // a record from before (no scheme line) that matches the old way is taken as up to date
+    const old_way = try ownHashWithout(a, io, root, "x", "x86_64");
+    const old_text = try std.fmt.allocPrint(a, "version: 1-r1\ninputs: {s}\ndeps: {s}\n", .{ &old_way, &old_way });
+    var rec = (try parse(a, old_text)).?;
+    const now = try ownHash(a, io, root, "x", "x86_64");
+    try adopt(a, io, root, "x", "x86_64", now, &rec);
+    try std.testing.expectEqualSlices(u8, &now, &rec.inputs);
+    // a new record is not: its hash already covers modes
+    var new = (try parse(a, try format(a, .{ .version = "1-r1", .inputs = old_way, .deps = old_way }))).?;
+    try adopt(a, io, root, "x", "x86_64", now, &new);
+    try std.testing.expect(!std.mem.eql(u8, &now, &new.inputs));
+    // and an old record of a recipe whose files changed since still differs
+    try tmp.dir.writeFile(io, .{ .sub_path = "packages/x/x/files/run.sh", .data = "#!/bin/sh\nedited\n" });
+    var stale = (try parse(a, old_text)).?;
+    const after = try ownHash(a, io, root, "x", "x86_64");
+    try adopt(a, io, root, "x", "x86_64", after, &stale);
+    try std.testing.expect(!std.mem.eql(u8, &after, &stale.inputs));
 }

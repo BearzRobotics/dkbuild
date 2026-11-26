@@ -404,7 +404,8 @@ pub fn main(init: std.process.Init) !void {
             const rec_path = try std.fmt.allocPrint(arena, "{s}/repo/{s}/{s}.dkhash", .{ root, opts.arch, r.name });
             const pkg_path = try std.fmt.allocPrint(arena, "{s}/repo/{s}/{s}-{s}.apk", .{ root, opts.arch, r.name, ver });
             const rec_text = std.Io.Dir.cwd().readFileAlloc(init.io, rec_path, arena, .limited(1 << 16)) catch null;
-            const rec = if (rec_text) |txt| try inputs.parse(arena, txt) else null;
+            var rec = if (rec_text) |txt| try inputs.parse(arena, txt) else null;
+            if (rec) |*known| try inputs.adopt(arena, init.io, root, r.name, opts.arch, own[idx], known);
             const exists = if (std.Io.Dir.cwd().access(init.io, pkg_path, .{})) |_| true else |_| false;
             var job: sched.Job = .{
                 .idx = idx,
@@ -490,9 +491,10 @@ pub fn main(init: std.process.Init) !void {
             const ver = try std.fmt.allocPrint(arena, "{s}-r{d}", .{ r.version, r.release });
             const rec_path = try std.fmt.allocPrint(arena, "{s}/repo/{s}/{s}.dkhash", .{ root, arch, r.name });
             const txt = std.Io.Dir.cwd().readFileAlloc(init.io, rec_path, arena, .limited(1 << 16)) catch continue;
-            const rec = (try inputs.parse(arena, txt)) orelse continue;
+            var rec = (try inputs.parse(arena, txt)) orelse continue;
             if (!std.mem.eql(u8, rec.version, ver) or rec.output == null) continue;
             const own = try inputs.ownHash(arena, init.io, root, r.name, arch);
+            try inputs.adopt(arena, init.io, root, r.name, arch, own, &rec);
             if (std.mem.eql(u8, &rec.inputs, &own)) continue;
             n += 1;
             if (!bump) {
