@@ -124,6 +124,27 @@ trusts. Without it you cannot sign more packages for systems that already trust 
 them would have to be told to trust a new key. If the
 private key and `keys/*.pub` do not match, the index step fails; that is the thing to check first.
 
+### A key kept somewhere else: `--key`
+
+`pkg`, `world`, `prune` and `discs` take `--key FILE` when the private key is not at the default path, for
+example on a drive that is only plugged in when something is signed:
+
+```sh
+./zig-out/bin/dkbuild world --keep-going --key /media/usb/signing.rsa
+./zig-out/bin/dkbuild discs --key /media/usb/signing.rsa --media usb images/source.toml
+```
+
+- Its public half must be in `keys/`.
+- Give it the key file itself: a `gpg -c` backup has to be decrypted first. A key with a passphrase has not been
+  tried.
+- `discs` stops if the file given does not exist. Without `--key` and without a key at the default path, a source
+  set is made **unsigned**; a repository set is refused. No disc may carry a copy of the key given or of the one
+  at the default path: `discs` compares the contents of every file with both.
+- `contrib/worldloop.sh` passes no `--key`: world passes started by it use the default path.
+
+If the key lives only on a removable drive, that drive is its only copy until you make another: **keep a second
+backup**, on a different drive.
+
 ## 9. Build the repository
 
 ```sh
@@ -248,7 +269,7 @@ Everything the build needs that is not in git:
 
 | What | Where it goes | Notes |
 |---|---|---|
-| The signing key | `~/.config/dkbuild/signing.rsa` | Private; copy it over a safe channel. Its public half is `keys/dkbuild-signing.rsa.pub` (in git). |
+| The signing key | `~/.config/dkbuild/signing.rsa`, or anywhere with `--key FILE` (step 8) | Private; copy it over a safe channel. Its public half is `keys/dkbuild-signing.rsa.pub` (in git). |
 | The DKRescue ISO | anywhere, e.g. `~/dkrescue.iso` | `dkbuild bootstrap-root ~/dkrescue.iso` unpacks it into `rootfs/dkrescue/`. The current build is the one that boots to a desktop on real hardware. |
 | `zig` 0.17.1 | on the PATH | Builds dkbuild, and fetches Zig dependencies for recipes with the `zigdeps` option. |
 | `go`, `cargo` | on the PATH | Vendor Go modules and Rust crates for recipes with `godeps` and `cargodeps` (fetch time only). |

@@ -40,7 +40,8 @@ Then:
 # 1. The build machine: unpack the DKRescue image (1 minute, 4.2 GB). Needs no root.
 ./zig-out/bin/dkbuild bootstrap-root /path/to/dkrescue.iso
 
-# 2. A signing key for the repository (keep it private and backed up).
+# 2. A signing key for the repository (keep it private and backed up). Kept somewhere else, point to it with
+#    --key FILE (pkg, world, prune, discs; docs/setup-ubuntu.md, 8).
 mkdir -p ~/.config/dkbuild && openssl genrsa -out ~/.config/dkbuild/signing.rsa 4096
 openssl rsa -in ~/.config/dkbuild/signing.rsa -pubout -out keys/dkbuild-signing.rsa.pub
 
@@ -85,14 +86,14 @@ dependency chains; rebuilds; installing from the repository. They run once for e
 | `dkbuild bootstrap-root <iso\|sfs\|tar>` | unpacks the build machine into `rootfs/dkrescue` and checks it |
 | `dkbuild check [name]...` | validates recipes |
 | `dkbuild image [-v] <file.toml>` | makes an image from repo/: tar, squashfs, directory or a live ISO (BIOS and UEFI); `--verbose` shows each package; see docs/install.md |
-| `dkbuild discs [--media M] <file.toml>` | the repository or the sources as ISO images (one for usb, or a set for cd, dvd, bd25, bd50, bd100) |
-| `dkbuild prune [--dry-run]` | removes older versions of packages from repo/ and rebuilds the index |
+| `dkbuild discs [--media M] [--key FILE] <file.toml>` | the repository or the sources as ISO images (one for usb, or a set for cd, dvd, bd25, bd50, bd100) |
+| `dkbuild prune [--dry-run] [--key FILE]` | removes older versions of packages from repo/ and rebuilds the index |
 | `dkbuild outdated [--bump]` | recipes changed since their last build without a new release |
 | `dkbuild upstream [--all] [--refresh] [name]...` | which recipes have a newer upstream release (changes nothing) |
 | `dkbuild graph <name>...` | prints the build order |
 | `dkbuild fetch [name]...` | downloads sources and checks their checksums |
-| `dkbuild world [--force] [-P N] [--keep-going] [--no-check]` | builds every recipe that is out of date (`-P N`: N builds at once) |
-| `dkbuild pkg [--force] <name>...` | builds packages and their in-tree dependencies |
+| `dkbuild world [--force] [-P N] [--keep-going] [--no-check] [--key FILE]` | builds every recipe that is out of date (`-P N`: N builds at once) |
+| `dkbuild pkg [--force] [--key FILE] <name>...` | builds packages and their in-tree dependencies |
 | `dkbuild import-cbuild [--out DIR] <template.py\|dir>...` | converts Chimera cbuild templates into draft recipes (`imported/`) |
 | `dkbuild hackage-lock`, `python-lock`, `yarn-lock` | write dependency lock files for the Haskell, Python and yarn stores |
 

@@ -21,7 +21,8 @@ at **/mnt/dkbuild**. These are links in the source tree (.gitignore covers them)
   directory is read-only (`chmod u+w` to change it).
 - /etc/fstab still has `default,nofail 0 0` for /mnt/dkbuild; `defaults,noatime,nofail 0 2` was advised (needs root).
 - The new 4 TB drive is not set up. Suggested use: backups (ISOs, a copy of repo/ and cache/sources, the signing key).
-  The signing key (`~/.config/dkbuild/signing.rsa`) has **no backup on a second disk**.
+  The signing key (`~/.config/dkbuild/signing.rsa`) has **no backup on a second disk**. A key kept elsewhere can be
+  given with `--key FILE` (`discs` got it on 11-25; docs/setup-ubuntu.md, 8).
 
 ## /stuff
 
