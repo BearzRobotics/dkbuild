@@ -134,6 +134,8 @@ pub fn pcRequires(arena: Allocator, text_in: []const u8) Allocator.Error![]const
                     continue;
                 }
                 try out.append(arena, try arena.dupe(u8, t[0..at]));
+                // "foo>= 1.0": the version is the next word, not a package
+                skip_next = std.mem.indexOfNone(u8, t[at..], "<>=!") == null;
                 continue;
             }
             if (t[0] == '$') continue;
@@ -363,6 +365,14 @@ test "a library linked by its full path is needed by name (BC-09)" {
     try std.testing.expectEqualStrings("libc.so", neededName("/usr/lib/ld-musl-aarch64.so.1"));
     try std.testing.expectEqualStrings("/usr/lib/private/libx.so", neededName("/usr/lib/private/libx.so"));
     try std.testing.expectEqualStrings("libz.so.1", neededName("libz.so.1"));
+}
+
+test "pcRequires: a version after an operator stuck to the name is not a name (BC-18)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const r = try pcRequires(st.allocator(), "Requires: foo>= 1.0, bar >=2 baz=3 qux < 4 end\n");
+    try std.testing.expectEqual(@as(usize, 5), r.len);
+    for ([_][]const u8{ "foo", "bar", "baz", "qux", "end" }, r) |want, got| try std.testing.expectEqualStrings(want, got);
 }
 
 /// A minimal ELF64 shared object: one PT_LOAD covering the file, one
