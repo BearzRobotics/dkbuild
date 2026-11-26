@@ -31,6 +31,8 @@ fn parseIntegrity(arena: Allocator, integrity: []const u8) !?Digest {
         const b64 = part[dash + 1 ..];
         const dec = std.base64.standard.Decoder;
         const n = dec.calcSizeForSlice(b64) catch continue;
+        // exactly a digest of that algorithm: the store's paths are cut out of its hex
+        if (n != @as(usize, if (std.mem.eql(u8, algo, "sha512")) 64 else if (std.mem.eql(u8, algo, "sha256")) 32 else 20)) continue;
         const raw = try arena.alloc(u8, n);
         dec.decode(raw, b64) catch continue;
         const hex = try arena.alloc(u8, n * 2);
@@ -347,6 +349,14 @@ fn fromLocks(arena: Allocator, io: std.Io, cache: []const u8, tmp: []const u8, o
     std.Io.Dir.cwd().writeFile(io, .{ .sub_path = part, .data = list.items }) catch return error.DownloadFailed;
     std.Io.Dir.cwd().rename(part, std.Io.Dir.cwd(), out_path, io) catch return error.DownloadFailed;
     return .downloaded;
+}
+
+test "an integrity value of the wrong length is unusable, not a crash (FV-17)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    for ([_][]const u8{ "sha512-", "sha512-AA==", "sha256-AAAA", "sha1-AA==", "sha512-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=" }) |bad|
+        try std.testing.expect((try parseIntegrity(a, bad)) == null);
 }
 
 test "integrity: sha512 is chosen and laid out like npm's cache" {
