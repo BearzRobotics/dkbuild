@@ -18,6 +18,10 @@ source = [
     { url = "https://ftp.mozilla.org/pub/firefox/releases/161.0/source/firefox-161.0.source.tar.xz", sha256 = "c649de11e4dc6266bc905ce4b33eb8672a1947c2e210ec53dce285cb86296a5a" },
 ]
 environment = '''
+# Firefox's libraries are in /usr/lib/firefox, which is not on the loader's search path, and libxul.so needs libmozsandbox.so from there.
+# Firefox loads its libraries by full path first, and on musl that evidently does not satisfy it: 159.0 stopped with "Couldn't load XPCOM"
+# (2026-11-26). So every binary gets the directory as its run path. Tested by adding it to 159.0's binaries with patchelf.
+export LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/lib/firefox"
 export MOZBUILD_STATE_PATH="$PWD/.mozbuild" MOZ_MAKE_FLAGS="-j$jobs" AS="$CC"
 export CARGO_HOME=/tmp/cargo-home CARGO_NET_OFFLINE=true
 export RUST_TARGET=x86_64-unknown-linux-musl RUSTFLAGS="-C target-feature=-crt-static"
