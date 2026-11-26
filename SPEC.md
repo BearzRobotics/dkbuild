@@ -2,7 +2,7 @@
 
 > **Name.** `dkbuild` is the final name.
 
-Status: **Living document, last audited 2026-11-13** against the code in
+Status: **Living document, last audited 2026-11-25** against the code in
 `src/`, the recipe tree and the tests. Anything marked **OPEN** is an undecided
 question: resolve it here before writing code that depends on it. Anything
 marked **Planned, not implemented** is a design that has no code yet; the text
@@ -31,7 +31,9 @@ Three things make it trustworthy, and this spec exists to enforce them:
 
 1. **Every build runs in a clean, isolated root** that holds only the
    recipe's declared dependencies, with no network. A forgotten dependency
-   fails the build instead of working by accident.
+   fails the build instead of working by accident. (The dependency half is
+   **Planned, not implemented:** today's stage 1 builds on the DKRescue root,
+   7.3. The sandbox and the lack of network are implemented.)
 2. **Every source is checksummed** in its recipe.
 3. **Packages are apk packages,** installed by apk-tools, the package
    manager Chimera Linux uses, so installed systems can be upgraded and
@@ -81,18 +83,18 @@ particular:
   every source, and vendors what a language's package manager would download
   (Zig, Go, Rust, npm, Gradle, NuGet, Ruby, Dart, Haskell and Python
   dependencies, on the host: the `*deps` options of 5.4, stores in 7.4), into
-  `cache/`, named by checksum. Anything an upstream build
+  `cache/` (7.4). Anything an upstream build
   would download for itself (CMake FetchContent, git submodules, prebuilt web
   bundles, toolchains) becomes a pinned, checksummed source of the recipe
-  instead (ollama's llama.cpp, Hyprland's glaze). With `cache/` and the stage 0
-  build image, the whole distribution rebuilds with no network (8: the source
-  ISO).
+  instead (ollama's llama.cpp, Hyprland's glaze). The aim is that `cache/` and
+  the stage 0 build image are enough to rebuild the whole distribution with no
+  network (8: the source ISO, which does not carry every store yet).
 - **Baseline CPUs:** each architecture has a baseline (`x86-64`,
   `armv8-a`, `rv64gc`), set by the target profile (6.1), never
   `-march=native`.
 - **Static where it matters:** recipes can ask for static linking (5.4), and
   FenrirOS's critical early-boot and recovery programs do (today `bash`,
-  `dash` and `which` carry the `static` option, and `dinit` links with
+  `busybox`, `dash` and `which` carry the `static` option, and `dinit` links with
   `-static` in its own recipe). Every library also ships its `-static` archives
   in a `-static` subpackage (5.7).
 
@@ -114,7 +116,9 @@ sudo apt install ca-certificates curl git tar unzip xz-utils xorriso squashfs-to
 | `util-linux` (`unshare`) | `bootstrap-root` and `doctor` test user namespaces |
 | `uidmap` (`newuidmap`; optional) | `dkbuild image` with users: the sub-ids in `/etc/subuid` and `/etc/subgid` are mapped so files keep their owners (7.1) |
 | `openssl` (optional) | creating the repository signing key |
-| `git` (optional) | `snapshot:git` and similar sources; recipes with `{ git }` sources are not supported (5.3) |
+| `git` (optional) | `snapshot:git` and similar sources, and the git bundle of a source disc (8); recipes with `{ git }` sources are not supported (5.3) |
+| `python3` | `dkbuild upstream` and the `*-lock` commands (10), and some snapshot scripts (not checked by `doctor`) |
+| `go`, `cargo`, `zig`, `patch` | vendoring for `godeps`, `cargodeps` and `zigdeps` at fetch time, with the recipe's patches applied (7.4; not checked by `doctor`) |
 | Zig 0.17.1 | building dkbuild itself (`zig build`); not on apt, see the README |
 | a Linux kernel 5.11 or newer with user namespaces and overlayfs | the sandbox (7.1) |
 | about 20 GB free, 8 GB of RAM | the unpacked image is 4.2 GB; LLVM needs the RAM |
@@ -132,11 +136,11 @@ echo 'kernel.apparmor_restrict_unprivileged_userns = 0' | sudo tee /etc/sysctl.d
 | Layer | Choice | Notes |
 |---|---|---|
 | Language | **Zig 0.17.1** | Pinned in `build.zig.zon` (`minimum_zig_version`), as in dkde and dklilo. |
-| Recipe format | **TOML** (5.1) | `toml-zig` (TOML 1.1, `std.Io`), a path dependency until it is pinned by hash. YAML survives only as an import format (5.9). |
+| Recipe format | **TOML** (5.1) | `toml-zig` (TOML 1.1, `std.Io`) 0.3.0, pinned by URL and hash in `build.zig.zon`; its copy is committed under `zig-pkg/`. There is no YAML (5.9). |
 | Packages | **apk-tools v3** (`apk mkpkg`, `apk mkndx`, `apk add`) | The same tool and package format as Chimera. Pinned to an exact version. |
 | Sandbox | **Linux namespaces** (user, mount, PID, network, UTS, IPC) and an overlay root | `src/sandbox.zig`, through the system calls directly. No bubblewrap, no util-linux. |
-| Fetching | Zig's `std.http` | Only in the fetch step. |
-| Stripping and ELF scans | **llvm-strip**, **llvm-readelf** or an ELF reader in Zig | From the LLVM toolchain already in every build root. |
+| Fetching | the host's `curl` | Only in the fetch step (and the `restore` runs of 7). The dependency stores also use the host's tools (7.4). |
+| Stripping and ELF scans | **llvm-strip**, and an ELF reader in Zig (`src/scan.zig`) | `llvm-strip` is from the LLVM toolchain already in every build root. |
 | Build | `zig build` | |
 
 apk-tools is C. It's built with Clang like everything else, and it's the
@@ -222,7 +226,7 @@ guide to the rest of the syntax.
 | `replaces` | no | Packages whose files the main package may take over (apk `replaces`), for a package that supersedes another |
 | `options` | no | List from 5.4 |
 | `environment` | no | Shell lines, macro-expanded, run once before the steps, after the exports the options make (5.5) |
-| `restore` | no | With `nugetdeps` only: the `dotnet restore` commands that fill the NuGet store; run once per source, with the network (7, 7.4) |
+| `restore` | with `nugetdeps` or `mavendeps` | The commands that fill the store (`dotnet restore`, or `mvn`); run once per source, with the network (7, 7.4). Read only with those two options |
 | `setup`, `build`, `check`, `install` | `install` yes (not for `meta`) | Shell steps, with macros (5.5). Order: `patch`, `setup`, `build`, `check`, `install`, then the strip (5.5) |
 | `subpackages` | no | 5.7 |
 
@@ -249,12 +253,12 @@ release, or a `snapshot:git` source (below), which is a checksummed tarball.
   `package.lock` next to the recipe, so later builds use exactly that commit.
   **Planned, not implemented:** there is no `package.lock` and no clone code.
 - Two optional keys on a `{ url, sha256 }` entry: `unpack = false` copies the
-  file as it is to `/build/sources/<name>` instead of unpacking it (39 recipes:
+  file as it is to `/build/sources/<name>` instead of unpacking it (72 recipes:
   jars, wheels, binaries), and `name = "<file>"` sets that file name (a plain
   name, for URLs that all end in `/download`, as crates.io's do). Any source
   that is not a tar archive or a `.zip` is copied the same way.
 - A `{ url = "snapshot:<kind> <args>", sha256 }` entry is made, not
-  downloaded: at fetch time an embedded script (`src/snapshot-<kind>.sh`)
+  downloaded: at fetch time an embedded script (`src/scripts/snapshot-<kind>.sh`)
   builds a reproducible tarball on the host from pinned upstream checkouts,
   for sources no release tarball covers. `electron` (Electron tag, Chromium
   version, depot_tools commit) runs gclient, applies Electron's patches and
@@ -291,7 +295,7 @@ release, or a `snapshot:git` source (below), which is a checksummed tarball.
 | `!check` | Don't run `check` (tests that need hardware or network) |
 | `!cross` | Can't be cross-compiled; built only natively (6.3). **Inert:** accepted, never read: there are no cross builds yet (6.2) |
 | `!strip` | Don't strip binaries |
-| `!lto` | Turn off link-time optimization (when it's on by default). **Reserved, no effect yet:** accepted and never read, because no build turns LTO on (about 50 recipes already carry it, marking where LTO breaks). It is kept on purpose: LTO and other optimization and hardening flags (CFI, stack protection, `_FORTIFY_SOURCE`, PIE, RELRO) are planned as profile-level defaults that `!lto` and similar `!`-options opt a recipe out of; `lto` itself is accepted the same way |
+| `!lto` | Turn off link-time optimization (when it's on by default). **Reserved, no effect yet:** accepted and never read, because no build turns LTO on (about 95 recipes already carry it, marking where LTO breaks). It is kept on purpose: LTO and other optimization and hardening flags (CFI, stack protection, `_FORTIFY_SOURCE`, PIE, RELRO) are planned as profile-level defaults that `!lto` and similar `!`-options opt a recipe out of; `lto` itself is accepted the same way |
 | `static` | Link programs statically (rescue-critical tools): adds `-static` to `LDFLAGS`. Never on a recipe that ships a shared library: `-shared -static` links without a warning and gives a library that crashes its users (zstd 1.5.7-r1 crashed lld that way) |
 | `bootstrap` | Part of the bootstrap set (9); built in stage 0. **Inert:** accepted, never read (about 24 recipes carry it); stage 1 builds whatever the tree asks for (7.3) |
 | `selfhost` | A compiler built with itself (dotnet): the build root also gets the newest package of this recipe in `repo/`, of any version, with that build's declared subpackages (all of them, or the build does not count). With none, the first build uses `stage0deps` (a seed such as a vendor binary and what it needs). Not part of the build-root hash, so a new build does not trigger another |
@@ -300,19 +304,19 @@ release, or a `snapshot:git` source (below), which is a checksummed tarball.
 | `zigdeps` | Zig dependencies fetched on the host into the shared `cache/zigpkg/` and laid in the source tree as `zig-pkg/` (7.4) |
 | `godeps` | Go modules downloaded on the host (`go mod download`, needs `go`) into the shared module cache `cache/gomod/`; the build gets `GOMODCACHE`, `GOPROXY=off`, `GOFLAGS=-mod=mod` (7.4) |
 | `npmdeps` | npm packages of every `package-lock.json` in the recipe's unpacked sources (any of them), fetched into the shared `cache/npm/` (each checked against its lockfile integrity hash); the build installs offline with `npm ci` (7.4) |
-| `yarnberry` | with `npmdeps`, for a recipe that installs with yarn 2+: corrects the line continuations of the yarn settings in the build script (a separate option so that no other recipe's script changes) |
+| `yarnberry` | With `npmdeps`, for a recipe that installs with yarn 2+: corrects the line continuations of the `YARN_*` export in the build script (without it dash stops with `export: \: bad variable name`). A separate option so that no other recipe's script hash changes |
 | `gradledeps` | Gradle dependencies resolved once per source, in the build root with the network, into the shared Maven-layout `cache/maven/`; then the build runs Gradle offline against it. Needs a `gradle-<version>-bin.zip` source and `unzip` in `hostdeps` (7.4) |
 | `mavendeps` | Apache Maven projects: the first build of a source runs the recipe's `restore` step (the `mvn` commands that make Maven fetch everything the build needs: plugins and dependencies) once with the network, with the recipe's own Maven (an `apache-maven-<version>-bin.tar.gz` source, `unpack = false`) and a private local repository; what it downloaded goes into the shared Maven-layout `cache/maven/` (the store gradledeps fills too) and `cache/mavendeps/<sha256>.list` lists it. Builds get `mvn` on PATH with the store (a `file://` repository) as the mirror of every repository (7.4) |
 | `nugetdeps` | NuGet packages: the recipe's `restore` step (its `dotnet restore` commands) runs once per source with the network, in the build root, and the packages go into the shared `cache/nuget/` (a local NuGet feed); every build has `$DKBUILD_NUGET` (the store, read-only) and restores with `--source $DKBUILD_NUGET` offline (7.4) |
 | `gemdeps` | Ruby gems of every `Gemfile.lock` in the recipe's unpacked sources, fetched into the shared `cache/gems/` (checked against the lockfile's CHECKSUMS, or rubygems.org's sha256), always the ruby-platform gem; laid into `vendor/cache` for `bundle install --local` (7.4) |
-| `cargodeps` | Rust crates vendored on the host (`cargo vendor`, needs `cargo`) into the shared `cache/crates/`, laid in as `vendor/` with a `.cargo/config.toml` pointing at it; build with `--offline` (7.4). The Cargo project is the one at the top of the source, or else the first `Cargo.lock` below it; `vendor/` and `.cargo/` stay at the top either way |
+| `cargodeps` | Rust crates vendored on the host (`cargo vendor`, needs `cargo`) into the shared `cache/crates/`, laid in as `vendor/` with a `.cargo/config.toml` pointing at it; build with `--offline` (7.4). The Cargo project is the one at the top of the source, or else the first `Cargo.lock` below it; `vendor/` and `.cargo/` stay at the top either way. A further unpacked source with a `Cargo.lock` at its top is vendored too, in its own directory |
 | `pubdeps` | Dart packages of every `pubspec.lock` in the recipe's unpacked sources, fetched from pub.dev into the shared `cache/pub/` (each checked against the lockfile's sha256); unpacked into a pub cache in the source tree (`$PUB_CACHE`, `.dkpub`) for `dart pub get --offline --enforce-lockfile` |
 | `hackagedeps` | Haskell packages pinned in the recipe's `files/hackage.lock` (tarball and `.cabal` revision sha256s), fetched from Hackage into the shared `cache/hackage/`; in the build, `.dkhackage/` is a cabal `file+noindex` repository and `CABAL_DIR`'s only one, offline (7.4) |
 | `pydeps` | Python packages pinned in the recipe's `files/python.lock` (pure-Python wheels, else source distributions, with sha256s), fetched from PyPI into the shared `cache/python/`; in the build, `.dkpython/` is pip's and uv's only source, offline, without build isolation (7.4) |
 | `meta` | A meta-package: no source and no steps, only `rundeps` (`base`, `desktop-hyprland`) |
 | `rootlayout` | May install outside `/usr /etc /var /opt /boot` (base-files: `/dev`, `/proc`, the usr-merge links); waives the top-level directory check of the policy checks (below) |
 | `!repo-iso` | Keep the package off the repository discs of `dkbuild discs` (8): for packages whose licence or size forbids shipping them. A package on the disc may not depend on one left out |
-| `cargolock=<dir>` | With `cargodeps`: the Rust project at `<dir>` of the source ships no `Cargo.lock`, so the recipe keeps one in `files/Cargo.lock` and the fetch vendors with it (a directory and `cargodeps` are required) |
+| `cargolock=<dir>` | With `cargodeps`: the Rust project at `<dir>` of the source ships no `Cargo.lock`, so the recipe keeps one in `files/Cargo.lock` and the fetch vendors with it (a directory and `cargodeps` are required). The build copies the lock into `<dir>` and puts `vendor/` and `.cargo/` there instead of at the top |
 
 Options may be written with a `!` in front, and dkbuild strips it before
 looking the name up, for any option; the `!` is a convention for a switch that
@@ -320,7 +324,8 @@ turns a default off. Only `!check` and `!strip` change what a build does, and
 `!repo-iso` what a disc holds; the build never reads `!cross` or `!lto`. An
 option that is not in this table, and not `jobs:N` or `cargolock=<dir>`, is an
 error. What a build actually reads is `!check`, `!strip`, `static`, `gcc`,
-`selfhost`, `jobs:N`, `meta`, `rootlayout` and the `*deps` options.
+`selfhost`, `jobs:N`, `meta`, `rootlayout`, `yarnberry`, `cargolock=<dir>` and
+the `*deps` options.
 
 **Policy checks.** After `install` and before packaging, a build fails if
 `$pkgdir` has a top-level directory outside `/usr /etc /var /opt /boot` (unless
@@ -355,17 +360,19 @@ error, and a misspelled one fails in the build as "command not found".
 A step runs in this order: `patch` (the recipe's `patches`, in `$srcdir`),
 `setup`, `build`, `check` (skipped by `!check`, and by `--no-check` on `pkg` and
 `world`), `install`, then the strip (5.7). Each starts in `$srcdir`. A recipe
-with `nugetdeps` also has `restore`, which runs earlier, once per source,
-with the network (7).
+with `nugetdeps` or `mavendeps` also has `restore`, which runs earlier, once
+per source, with the network (7).
 
 Before the first step the script exports, in this order: the variables below
-and the default flags; for `gcc`, GCC's environment (3); what each `*deps`
-option needs; then the recipe's `environment`; then `$pkgfiles`. The per-option
-exports are `GOMODCACHE`, `GOPROXY=off`, `GOFLAGS=-mod=mod` for `godeps`;
+and the default flags (with `RUSTFLAGS` where it applies, below); for `gcc`,
+GCC's environment (3); what each `*deps` option needs; then the recipe's `environment`; then `$pkgfiles`. The per-option
+exports are `GOMODCACHE`, `GOPROXY=off`, `GOSUMDB=off`, `GOTOOLCHAIN=local`,
+`GOFLAGS=-mod=mod` for `godeps`;
 for `npmdeps` an offline npm cache and, for pnpm and yarn 2+ lockfiles, a
 loopback registry on `127.0.0.1:4873` served from the store (the sandbox's `lo`
 is up) with the `YARN_*` and `pnpm` settings; `PATH` with an always-offline
-`gradle` wrapper (native integration off) for `gradledeps`; `NUGET_PACKAGES`,
+`gradle` wrapper (native integration off) for `gradledeps`; `PATH` with an
+`mvn` wrapper that uses the store for `mavendeps`; `NUGET_PACKAGES`,
 `DKBUILD_NUGET`, `HOME=/tmp` and the .NET telemetry switches for `nugetdeps`;
 `BUNDLE_*` and `GEM_HOME` for `gemdeps`; `PUB_CACHE` for `pubdeps`; cabal's and
 `$DKBUILD_HACKAGE` for `hackagedeps`; pip's, uv's and `$DKBUILD_PYTHON` for
@@ -410,14 +417,14 @@ targets link static by default, which cannot use the system's shared libraries
 (a program given `/usr/lib/libcap.so`, or `libfreetype.a` without the libraries
 it needs), so Rust programs link dynamic against the system's musl, as in Alpine
 and Chimera. Only for those recipes because the line is part of the script hash
-(7.x): in every recipe it rebuilt the whole tree. The `rust` recipe itself has no
+(7.2): in every recipe it rebuilt the whole tree. The `rust` recipe itself has no
 `rust` in its `hostdeps` and manages its own flags.
 
 Every build step also gets `SOURCE_DATE_EPOCH=1767225600` (2026-01-01 UTC) in its
 environment, not in the script (so it is not part of the script hash): a build
 date or file time that a package embeds (OpenSSL's "built on", Python's `.pyc`
 and documentation dates) is then the same in every build, a rebuild comes out
-identical, and the early cutoff (7.x) stops the cascade there.
+identical, and the early cutoff (7.2) stops the cascade there.
 
 ### 5.6 Dependencies found automatically
 
@@ -483,7 +490,13 @@ finds) and `install_if` (apk installs it automatically once all of those are
 installed). firmware-linux uses both: `firmware-linux-amdgpu` has
 `install_if = ["firmware-linux-gpu"]`, so a system gets either just the
 firmware it names, or a whole group. A `*.so` pattern matches only symlinks (the development link), so a real `libfoo-1.2.so` is never taken into `-devel`. A package that is only a library has no `-libs`: its libraries stay in the main package. When `-libs` exists, `-devel` depends on it.
-Empty directories are dropped.
+Directories that the split leaves empty are removed; empty directories the
+package installed itself stay.
+
+An entry of a subpackage's `depends` written `<name>=@built` is replaced with
+`<name>=<version>-r<release>`, the version of `<name>` (or of `<name>-devel`)
+that was in the build root; the build fails if neither was. zfs uses it to pin
+its kernel modules to the kernel they were built for.
 
 Static libraries are a first-class product, not an afterthought: musl makes
 fully static programs practical, which is why `-static` is its own package.
@@ -665,7 +678,7 @@ so it needs no systemd as init. The EFI system partition is mounted at `/boot`
 and holds the kernels; `gen-systemd-boot` writes Boot Loader Specification
 entries (normal and recovery) for every `/boot/vmlinuz-*`, and the `linux`
 package runs it after each install or upgrade (docs/install.md).
-**Live ISOs:** dklilo (packaged, 0.0.3) is the bootloader of the live ISOs, a
+**Live ISOs:** dklilo (packaged, 0.0.4) is the bootloader of the live ISOs, a
 hybrid image that boots on BIOS and on UEFI (8). GRUB is also packaged (built
 with GNU binutils through the `gcc` option). **Still OPEN:** installed BIOS
 machines (docs/install.md covers UEFI only) and the bootloader of `aarch64`
@@ -733,7 +746,8 @@ For each recipe, in dependency order:
    check their checksums, make `snapshot:` sources (5.3), and vendor the
    dependencies of recipes that ask for it (`zigdeps`, `godeps`, `cargodeps`,
    `npmdeps`, `gemdeps`, `pubdeps`, `hackagedeps`, `pydeps`), on the host, into
-   the shared stores of 7.4. `dkbuild fetch` does only this step.
+   the shared stores of 7.4. `dkbuild fetch` does only this step. (The stores of
+   `gradledeps`, `mavendeps` and `nugetdeps` are filled in step 3, by a build.)
 2. **Prepare the build root:** a new directory in `work/`. Stage 1, the only
    path implemented: the DKRescue root (`rootfs/dkrescue`) is the lower layer
    of an overlay and the in-tree packages the recipe needs are laid over it
@@ -742,23 +756,26 @@ For each recipe, in dependency order:
    implemented:** apk-tools installing `hostdeps`, the toolchain and the base
    build set into it, plus the sysroot for cross builds (6.2). Nothing from
    previous builds is reused except through packages.
-3. **Restore** (`nugetdeps` and `gradledeps` only; the only other step with
-   network): once per source, in the build root with the network, the recipe's
-   `restore` commands (NuGet) or Gradle's own resolution run and fill the
-   store (7.4); then the network is off again.
+3. **Restore** (`gradledeps`, `nugetdeps` and `mavendeps` only; the only other
+   step with network): once per source, in the build root with the network, the
+   recipe's `restore` commands (NuGet, Maven) or Gradle's own resolution run and
+   fill the store (7.4); then the network is off again.
 4. **Enter the sandbox** (7.1) and run `patch`, `setup`, `build`, `check`
    (unless `!check` or `--no-check`) and `install` (5.5).
-5. **Finish:** strip (unless `!strip`), split subpackages (5.7), scan
-   dependencies (5.6), and apply the policy checks of 5.4: no files outside
-   `/usr`, `/etc`, `/var`, `/opt` and `/boot`, nothing in `/usr/lib64` or
-   `/usr/local`, no files in `/run`.
+5. **Finish:** (the strip, unless `!strip`, is the end of the sandbox script.)
+   Apply the policy checks of 5.4 (no files outside `/usr`, `/etc`, `/var`,
+   `/opt` and `/boot`, unless `rootlayout`; nothing in `/usr/lib64` or
+   `/usr/local`; no files in `/run`), split subpackages (5.7) and scan
+   dependencies (5.6).
 6. **Package:** `apk mkpkg --compression zstd:19` (about half the size of apk's
    default deflate, and faster to unpack) for each package, into
    `repo/<arch>/`; then `apk mkndx` updates and signs that architecture's
    index.
 7. **Remove the build root** (kept with `--keep-root`, for debugging).
 
-The log of every step goes to `logs/<arch>/<name>-<version>-r<release>.log`.
+The log of every step goes to `logs/<arch>/<name>-<version>-r<release>.log`;
+the log of an earlier build of the same version and release is kept beside it
+as `<name>-<version>-r<release>.1.log`, `.2.log`, ... (oldest first).
 Packages whose recipe sets `selfhost` (a compiler built with itself) also get
 their own newest package from `repo/` in the build root; the first build uses
 `stage0deps` instead (5.4).
@@ -781,13 +798,15 @@ system calls directly:
   needs from the host (`/build`, `/destdir`, `/dkbuild`, the repository, the
   keys) are bind mounts, read-only where they can be. `pivot_root` then makes
   the overlay the root and detaches the host's tree.
-- **No network:** the network namespace has only `lo`.
+- **No network:** the network namespace has only `lo` (brought up). The one
+  exception is the `restore` step (7, step 3).
 - **Its own `/proc`, `/dev`** (a tmpfs with `null`, `zero`, `full`, `random`,
-  `urandom` and `tty` bound from the host, and `/dev/shm`), **`/tmp` and
-  `/run`.** No `devpts` or `ptmx` yet: mounting `devpts` in a user namespace
-  needs the host's `tty` group mapped, and no build has needed a pty.
-- **The environment is exactly `PATH` and `HOME`**; nothing leaks from the
-  host.
+  `urandom` and `tty` bound from the host, `/dev/shm`, a private `devpts`
+  instance with `/dev/ptmx` for programs that need a pseudo-terminal, and the
+  `/dev/fd`, `stdin`, `stdout` and `stderr` links), **`/tmp` and `/run`.**
+- **The environment is only what dkbuild gives it:** `PATH` and `HOME`, plus
+  `SOURCE_DATE_EPOCH` in the build and packaging runs (5.5); nothing leaks from
+  the host.
 - **When the build ends, the kernel ends every process in it and removes
   every mount.** The sandbox runs in a re-executed copy of dkbuild
   (`sandbox-child`), is killed if dkbuild dies (`PR_SET_PDEATHSIG`), and the
@@ -877,7 +896,12 @@ build, and 7 step 2 describes it.
   (`--keys-dir keys/`: every signature is checked, dependencies are not, and
   files of the image are replaced, which is the point). Those are the packages
   providing the recipe's dependencies and what they need to build and run (their
-  own `builddeps` and `rundeps`). *Tried first and dropped:* describing the image
+  own `builddeps` and `rundeps`, and the `depends` of a subpackage that is
+  asked for by name). Of each, the package's `-libs`, `-static` and, for a
+  dependency on the bare name, `-devel` are laid too where they exist.
+  `checkdeps` are added when the check runs. A direct dependency that has a
+  recipe but is not in `repo/` makes the recipe "skipped". *Tried first and
+  dropped:* describing the image
   to apk as one package that provides its `so:`/`cmd:` names, then `apk add`.
   A versioned provide makes a package the only owner of that name, and an
   unversioned one still conflicts with a package that provides it versioned
@@ -904,7 +928,7 @@ the build under `/dkdeps/`:
 | `cache/zigpkg/` | `zigdeps` | `/dkdeps/zig` |
 | `cache/gomod/` | `godeps` | `/dkdeps/go` |
 | `cache/npm/` | `npmdeps` | `/dkdeps/npm` |
-| `cache/maven/` | `gradledeps` | `/dkdeps/maven` |
+| `cache/maven/` | `gradledeps`, `mavendeps` | `/dkdeps/maven` |
 | `cache/nuget/` | `nugetdeps` | `/dkdeps/nuget` |
 | `cache/gems/` | `gemdeps` | `/dkdeps/gems` |
 | `cache/hackage/` | `hackagedeps` | `/dkdeps/hackage` |
@@ -918,18 +942,22 @@ the build under `/dkdeps/`:
 | `cache/crates/<dir>-<hash>/` | one vendored crate: `cargo vendor`'s directory, named by the first 16 hex digits of the sha256 of its `.cargo-checksum.json` (which lists every file's checksum) |
 | `cache/zigpkg/<name>/` | one Zig package, under the hash name Zig gives it |
 | `cache/gomod/` | Go's module cache (`GOMODCACHE`): the module zips, checked against `go.sum` when downloaded, and their unpacked trees |
-| `cache/{cargodeps,zigdeps,godeps}/<sha256>.list` | what one source tarball uses; written last, so its presence means the fetch is complete. `cargodeps/<sha256>.config.toml` is the `.cargo/config.toml` for it |
+| `cache/{cargodeps,zigdeps,godeps}/<sha256>.list` | what one source tarball uses; written last, so its presence means the fetch is complete. `cargodeps/<sha256>.config.toml` is the `.cargo/config.toml` for it. The other options keep lists the same way, in `cache/<option>/` |
+| `cache/gemsums/` | the sha256 recorded at the first fetch of a gem that comes from a GitHub revision; later fetches must match it |
 
 npm packages (`npmdeps`) are kept in npm's own cache layout,
 `cache/npm/content-v2/<algorithm>/<hex>`, named by the integrity hash of
 the lockfiles that use them, and `cache/npmdeps/<sha256>.list` lists them.
-The fetch reads every `package-lock.json` outside `node_modules` as JSON
+The fetch reads every `package-lock.json` outside `node_modules` in the
+unpacked sources, and any `files/package-lock.json` or
+`files/*.package-lock.json` of the recipe, as JSON
 (nothing from a package runs), downloads what the store lacks and checks
 each tarball against its hash. In the build, `npm-offline.js` (embedded in
 dkbuild) gives a private npm cache the store as its content and an index
 entry for each tarball URL, as npm's fetcher looks them up; `npm ci` then
-installs with `npm_config_offline`, checking every tarball again. Lockfiles
-without integrity hashes and yarn are not handled yet. pnpm-lock.yaml (lockfile v9)
+installs with `npm_config_offline`, checking every tarball again. A lockfile
+entry with a URL and no integrity hash is an error, and a `yarn.lock` is not
+read directly (below). pnpm-lock.yaml (lockfile v9)
 files are read too: their packages go into the same store, and the build
 serves the store to pnpm as a registry on 127.0.0.1 (`pnpm-registry.js`;
 the sandbox's loopback interface is up), so `pnpm install --frozen-lockfile`
@@ -945,7 +973,8 @@ URL resolutions refused). The fetch fills the npm store from it like any
 recipe lockfile; in the build the store is served on 127.0.0.1 as for pnpm,
 and the `YARN_*` environment points yarn 2+ at it (private cache, no
 telemetry, zip checksums not compared since the tarballs were checked at
-fetch), so `yarn install --immutable` works offline.
+fetch), for an offline `yarn install --immutable`. Such a recipe also needs the
+`yarnberry` option (5.4).
 
 Haskell (`hackagedeps`): Haskell projects keep no lockfile with checksums,
 and Hackage lets authors revise a released package's `.cabal`, so the recipe
@@ -1004,8 +1033,8 @@ PATH as a wrapper that always runs `--offline` with `gradle-offline.gradle`,
 which replaces every repository of the build and its plugins with the
 read-only store. Tested outside dkbuild with Gradle 9.9.0 (a project with
 Maven Central and plugin-portal dependencies built offline from the
-store. `openjdk` 17, 21 and 25 are packaged, and a Gradle recipe
-(geogebra) is written; it has not been built in this option yet.
+store). `openjdk` 17, 21 and 25 are packaged, and recipes with this option
+have been built (geogebra among them).
 
 Maven (`mavendeps`): the recipe's `restore` step is whatever makes Maven
 download what the build will need, typically the build itself with the tests off
@@ -1020,7 +1049,7 @@ metadata `maven-metadata-<id>.xml` is kept as `maven-metadata.xml`). The build's
 `mvn` wrapper uses a settings file whose only mirror (of `*`) is
 `file:///dkdeps/maven`, so every plugin, parent POM and dependency comes from the
 store, and a build that needs something the restore did not fetch fails instead of
-reaching the network. Not tested against a real project yet when written.
+reaching the network. No recipe in the tree uses `mavendeps` yet.
 
 The build binds the stores read-only into the sandbox (the table above) and lays `vendor/`
 (for Rust, and `vendor/cache` for gems), `zig-pkg/`, `.dkpub`, `.dkhackage` and `.dkpython` into the source
@@ -1030,14 +1059,15 @@ every crate against its `.cargo-checksum.json` as it builds. Which entries a
 package uses doesn't feed the rebuild hashes: they follow from the source
 tarball (its lock files), whose checksum does.
 
-`dkbuild prune` removes the lists of source tarballs no recipe uses any more
-and then every crate, Zig package and gem no remaining list names. It also empties
+`dkbuild prune` removes the Rust, Zig, Go and gem lists of source tarballs no
+recipe uses any more and then every crate, Zig package and gem no remaining
+list names. It also empties
 cargo's regenerable copies in `cache/cargo-home/` (`registry/src`, `git/checkouts`:
 hundreds of thousands of small files that cargo extracts again from the `.crate`
 archives and `git/db` when a vendor needs them). Go's module
 cache is not pruned (`go clean -modcache` empties it), and neither are the npm,
 Maven, NuGet, Dart, Haskell and Python stores. It must not run
-while a fetch does. A dependency tarball made by an older dkbuild
+while a fetch does. A Rust or Zig dependency tarball made by an older dkbuild
 (`<sha256>.tar`) is moved into the stores at the next fetch, offline.
 
 ## 8. Images
@@ -1064,25 +1094,28 @@ groups   = ["wheel", "video", "render", "audio", "input"]
 password = "locked"
 ```
 
-Keys: `name`, `arch`, `packages`, `output` (the rest are optional): `exclude`,
-`unwanted`, `services`, `[[users]]` (`name`, `groups`, `password`, `shell`,
-default `/bin/bash`), `hostname` (default `fenriros`), `label`, `autologin`,
-`session`, `issue`, `console`, `login`. Any other key is an error. Names are
-checked to be plain words, `autologin` must name one of the `[[users]]`, and
-`login = "greetd"` with `autologin` needs a `session`.
+Keys: `name`, `packages` and `output` are required. Optional: `arch` (default
+`x86_64`), `exclude`, `unwanted`, `repositories`, `services`, `[[users]]`
+(`name`, `groups`, `password`, `shell`, default `/bin/bash`), `hostname`
+(default `fenriros`), `label`, `autologin`, `session`, `issue`, `console`,
+`login`, `seat`. Any other key is an error. Names are checked to be plain
+words, `autologin` must name one of the `[[users]]`, `login = "greetd"` with
+`autologin` needs a `session`, and the `iso` output needs `live-initramfs` in
+`packages`.
 
 The images in `images/` today:
 
 | File | Makes |
 |---|---|
 | `fenriros.toml` | the build machine's own system, as a root tarball (`tar`); the example above |
-| `base.toml` | `iso`: a command-line live system for any x86_64 PC, BIOS or UEFI, every firmware group included |
+| `base.toml` | `iso` and `tar`: a command-line live system for any x86_64 PC, BIOS or UEFI, every firmware group included |
 | `dkde.toml` | `iso`: a live system that boots to the DKDE desktop through greetd (`login = "greetd"`) |
 | `rescue.toml` | `iso`: FenrirOS Rescue, DKRescue's successor, for repairing, imaging and recovering disks |
+| `dkde-devel.toml` | `iso`: the DKDE live system with `base-devel`, the rescue tools and other debugging tools added (`seat = "elogind"`) |
+| `hyprland.toml` | `iso`: a live system that boots to Hyprland with the ML4W dotfiles through greetd |
+| `dkinstall-test.toml` | `iso`: a small live system for testing dkinstaller in QEMU; not for users |
 | `container.toml`, `container-build.toml` | a root tarball for `podman import`, `docker import` or nspawn; the second with a toolchain |
 | `repo.toml`, `source.toml` | not images: sets for `dkbuild discs` (below) |
-
-(`rescue.toml.save` in the directory is a stray editor copy.)
 
 Every image gets `/etc/apk/repositories`: the lines of its optional `repositories = [...]` key
 (a path to a `Packages.adb` or a URL, active), then a comment block that explains how to use
@@ -1115,17 +1148,25 @@ user's password is `"empty"` the image writes `/etc/pam.d/greetd` from the
 package's `/usr/lib/pam.d/greetd` with `nullok` on the pam_unix auth line, so
 that user can log in with nothing typed (the package's file has no `nullok`).
 The image still lists the `greetd` service (and `networkmanager`, `dbus`,
-`seatd`) in `services`; greetd uses vt 7, so the tty1-tty6 gettys stay.
+`seatd` or `elogind`) in `services`; greetd uses vt 7, so the tty1-tty6 gettys
+stay.
+
+`seat = "seatd"` (default) or `"elogind"`. With `elogind` and `login =
+"greetd"`, the image's greetd service depends on elogind instead of seatd and
+greetd's PAM file gets `pam_elogind`, which registers the login session. The
+`elogind` package and service still have to be listed.
 
 `dkbuild image images/fenriros.toml` (src/image.zig), in the sandbox on the
-build machine, as uid 0 of a user namespace, writing only `out/<name>/`:
+build machine, as uid 0 of a user namespace. The image is made in
+`out/.<name>.new/` and replaces `out/<name>/` only when it succeeds; after a
+failed run the old one stays and the log is `out/<name>-failed.log`:
 
 1. `apk add --root <rootfs> --arch <arch> --initdb` with the package list
    from the local repository (`repo/<arch>/Packages.adb`, trusting `keys/`).
    No package in the list may match an `exclude` pattern; what they depend on
    is installed whatever its name.
-2. Writes `/etc/hostname`, enables the services listed (links in
-   `/etc/dinit.d/boot.d`) and creates the users (`useradd -R`). A user's
+2. Writes `/etc/hostname` and `/etc/apk/repositories`, enables the services
+   listed (links in `/etc/dinit.d/boot.d`) and creates the users (`useradd -R`). A user's
    `password` is `"locked"` (the default: set it when installing), `"empty"`,
    or a crypt(3) hash.
 3. Produces what `output` asks for: `rootfs` (the directory), `tar`
@@ -1151,12 +1192,20 @@ described by a file with `kind`, `name`, `arch`, `media` and `label` into
 ISO** of every current package, as `apks/<arch>/` with the signed
 `Packages.adb` and the public key, the way Alpine's install media carry
 theirs; `kind = "source"` (`images/source.toml`) is a **source ISO**:
-every source tarball and vendored dependency store (`cache/`), the dkbuild tree
-as a git bundle of what is committed, and the stage 0 image
-(`dkrescue.iso`): enough to rebuild the whole distribution offline, even after
-upstream downloads disappear. `media` is `usb` (one image, for a stick or
+every source tarball in the cache that a recipe names and vendored dependency
+stores from `cache/`, the dkbuild tree as a git bundle of what is committed, and
+the stage 0 image (`dkrescue.iso` in the tree's root): meant to be enough to
+rebuild the whole distribution offline, even after upstream downloads
+disappear. **Not complete yet:** only the Rust, Go, Zig, npm, Ruby, Dart and
+NuGet stores are copied (the list in `src/discs.zig`). The Gradle and Maven,
+Python and Haskell stores, and the `gradledeps`, `mavendeps`, `nugetdeps`,
+`pydeps` and `hackagedeps` lists, are not, so a source disc alone cannot yet
+rebuild the recipes that use them offline. `media` is `usb` (one image, for a stick or
 Ventoy) or `cd`, `dvd`, `dvd-dl`, `bd25`, `bd50`, `bd100` (a numbered set of
-discs of that size); `--media` overrides it. A recipe with the option
+discs of that size); `--media` overrides it. Every disc carries a `MANIFEST`
+(signed with the repository key; a repository set needs the key), the public
+keys and `import.sh`, which copies one disc into a directory and checks it; a
+file too large for the space left is cut across discs and joined there. A recipe with the option
 `!repo-iso` (5.4) is left out of a repository set, and a package that
 depends on a left-out one is an error. A machine mounts a repository disc and
 adds `<mount>/apks/<arch>/Packages.adb` to `/etc/apk/repositories` (tagged,
@@ -1371,8 +1420,8 @@ Found by reading the DKRescue posts against what exists:
 4. Stage 2, and the comparison (**Planned, not implemented**).
 
 Status at the audit: steps 1 to 3 are done in stage 1 (the repository holds
-the toolchain, `base`, `base-net` and the desktops); `base-devel` is written
-and not built yet; step 4 has no code.
+the toolchain, `base`, `base-devel`, `base-net` and the desktops); step 4 has no
+code.
 
 **B2 is done when:** stage 1 and stage 2 of `base` and `base-devel` build on
 x86_64; `apk add base` into an empty directory works from `repo/` alone; and
@@ -1383,11 +1432,11 @@ inside a namespace the installed root runs `apk --version`, `sh`, `ls` and
 
 | Command | Does |
 |---|---|
-| `dkbuild pkg <name>...` | Builds packages and their missing dependencies. There is no `--arch`: it builds for `x86_64` (6) |
+| `dkbuild pkg <name>...` | Builds packages and their missing or out-of-date dependencies; also the named packages' `rundeps` and subpackage `depends`, transitively. There is no `--arch`: it builds for `x86_64` (6) |
 | `dkbuild world` | Builds every recipe that's out of date |
 | `dkbuild fetch [<name>...]` | Only downloads and checks sources, vendors the dependency stores (7.4) and makes the snapshots (5.3) |
-| `dkbuild check [<name>\|<file.toml>...]` | Checks recipes (all of them with no argument): fields, checksums present, patches exist, no unknown keys |
-| `dkbuild graph <name>...` | Prints the build order for the packages |
+| `dkbuild check [<name>\|<file.toml>...]` | Checks recipes (all of them with no argument): fields, checksums present, patches exist, no unknown keys, no dependency cycles. A dependency no recipe provides is allowed. A `.toml` file named directly is only parsed |
+| `dkbuild graph <name>...` | Prints the build order for the packages. A dependency no recipe provides is an error here |
 | `dkbuild outdated [--bump]` | Lists recipes whose own inputs changed since their last build without a new `release`; `--bump` raises it (7.2) |
 | `dkbuild discs [--media M] <file.toml>` | Writes a repository or source set as ISO images in `out/<name>/` (8) |
 | `dkbuild import-cbuild [--out DIR] <template.py\|dir>...` | Converts Chimera cbuild templates into draft recipes (5.9) |
@@ -1396,7 +1445,7 @@ inside a namespace the installed root runs `apk --version`, `sh`, `ls` and
 | `dkbuild python-lock <uv.lock\|pylock.toml\|requirements> [-o FILE]` | Writes a `pydeps` lock (7.4) |
 | `dkbuild yarn-lock <yarn.lock> [-o FILE]` | Pins a yarn lockfile's packages for `npmdeps` (7.4) |
 | `dkbuild upstream [--all] [--refresh] [--notify] [<name>...]` | Reports recipes with a newer upstream release, from each recipe's first source: `git ls-remote` tags for git hosts (GitHub, GitLab, Codeberg, kernel.org, ...), GNOME's cache.json, PyPI, crates.io, npm, MetaCPAN, SourceForge's RSS, and otherwise the HTTP directory listing (and versioned directories above it: KDE, X.org, GNU, ...). Pre-releases are skipped. `upstream.toml` at the tree root pins a series, gives another URL or regex, ignores versions, or skips a package, without touching recipes. Results are cached 12 hours in `work/upstream/`; `--all` lists what could not be checked; `--notify` sends a desktop notification (contrib/systemd has a daily user timer). Changes nothing |
-| `dkbuild image [--verbose] <file>` | Builds an image (8); `--verbose` (`-v`) lists the packages asked for and shows the run as it happens (apk's `Installing <package>` lines, services, users, outputs); without it the run's output is only in `out/<name>/image.log` |
+| `dkbuild image [-v\|--verbose] <file>` | Builds an image (8); `--verbose` (`-v`) lists the packages asked for and shows the run as it happens (apk's `Installing <package>` lines, services, users, outputs); without it the run's output is only in `out/<name>/image.log` |
 | `dkbuild bootstrap-root [--force] [--dest DIR] <image>` | Unpacks the stage 0 build machine and checks it (9.2) |
 | `dkbuild prune [--dry-run] [--key FILE]` | Removes packages from `repo/` that their recipe no longer builds (older versions, dropped subpackages), once the recipe's present version is built, and rebuilds the index (signed with the key); also prunes the dependency stores (7.4). Packages no recipe provides are reported, not removed |
 | `--tree DIR` | Before the command: use the recipe tree at `DIR` instead of the current directory |
@@ -1408,6 +1457,7 @@ inside a namespace the installed root runs `apk --version`, `sh`, `ls` and
 | `--keep-going` | A failure does not stop the run: what depends on it is skipped, the rest builds, and a recipe changed without a `release` bump is listed instead of stopping it (5.5) |
 | `--force` | Builds a recipe whose own inputs changed without a `release` bump (7.2) |
 | `--color=auto\|always\|never` | Colors in the progress lines (5.5) |
+| `DKBUILD_FAST_WORK` | Environment: another directory for build roots, on a faster disk (5.5) |
 
 `dkbuild shell <name>` (a shell in a prepared build root) is not implemented;
 `--keep-root` keeps the root for a look afterwards.
@@ -1418,8 +1468,13 @@ suits an 8 GB machine better than several builds side by side. With `-P N`
 unpacks from repo/ is built, each build gets the full `-j`, and a recipe with
 `jobs:N` (the large ones: LLVM, Zig) runs alone. New packages are written
 under a temporary name and renamed into place, and one build at a time rebuilds
-the index, so no build sees half a package or half an index. Every rebuild
-decision (7.2) is made before the first build starts. **Later:** a real memory
+the index, so no build sees half a package or half an index. What can be
+decided up front (a new package or version, `--force`, a recipe changed without
+a `release` bump) is settled before the first build starts; whether a changed
+build root means a rebuild is decided when the package's turn comes (7.2).
+`contrib/worldloop.sh` repeats `prune` and `world --keep-going` until a pass has
+no failures (at most 17 passes); it is run as a systemd user unit (see its
+header). **Later:** a real memory
 budget instead of "heavy builds run alone".
 
 ## 11. Repository layout
@@ -1432,22 +1487,26 @@ build other trees too, but they are not kept in a separate repository.
 build.zig
 build.zig.zon
 SPEC.md  README.md  LICENSE
-src/              the tool: flat, one file per concern, no subdirectories
+src/              the tool: one file per concern; src/scripts/ holds the embedded scripts
 packages/<character>/<name>/package.toml, patches/, files/, scripts/
 profiles/x86_64.toml, aarch64.toml, riscv64.toml
-images/           image files (8): fenriros, base, dkde, rescue, container,
-                  container-build; repo and source for `dkbuild discs`
+images/           image files (8): fenriros, base, dkde, dkde-devel, hyprland,
+                  rescue, container, container-build, dkinstall-test; repo and
+                  source for `dkbuild discs`
+zig-pkg/          the committed copy of the toml-zig dependency
 keys/             public signing keys (private keys never in the repository)
 upstream.toml     overrides for `dkbuild upstream` (10)
 tests/            end-to-end scripts, helper scripts and test trees (12)
 docs/             roadmap.md, install.md, setup-ubuntu.md, handoff.md,
-                  requests.md, decisions/ (design records), manpages/
-contrib/systemd/  the user units that run `dkbuild upstream --notify` daily
+                  requests.md, other notes, decisions/ (design records), manpages/
+tools/            gen-software-docs.sh (the software pages in docs/)
+contrib/          worldloop.sh (10); systemd/, the user units that run
+                  `dkbuild upstream --notify` daily
 ai/AGENTS.md      notes for coding agents
 ```
 
 `packages/` has one directory per first character of a package name: letters
-`a` to `z` and the digits `0` and `7`. `src/` holds:
+`a` to `z` and the digits `0`, `3` and `7`. `src/` holds:
 
 | Files | Does |
 |---|---|
@@ -1456,7 +1515,7 @@ ai/AGENTS.md      notes for coding agents
 | `fetch.zig`, `inputs.zig`, `npmdeps.zig`, `pydeps.zig`, `hackagedeps.zig`, `gemdeps.zig`, `pubdeps.zig` | the fetch step and the dependency stores (7.4); the rebuild records and hashes (7.2) |
 | `build.zig`, `sandbox.zig`, `scan.zig`, `split.zig`, `sched.zig` | the steps of 7, the sandbox (7.1), the scans (5.6), subpackage splitting (5.7), the scheduler (`-P`) |
 | `image.zig`, `discs.zig`, `bootstrap.zig`, `doctor.zig`, `cbuild.zig`, `term.zig` | images (8) and discs, `bootstrap-root` (9.2), `doctor` (3.1), the Chimera importer (5.9), terminal colors |
-| scripts embedded in the binary (all in `src/scripts/`) | `npm-offline.js`, `pnpm-registry.js`, `gradle-*.gradle`, `gradle-store.sh`, `nuget-store.sh`, `snapshot-*.sh` (5.3), `python-lock.py`, `hackage-lock.py`, `yarn-lock.py`, `upstream.py`, `discs-import.sh` |
+| scripts embedded in the binary (all in `src/scripts/`) | `npm-offline.js`, `pnpm-registry.js`, `gradle-*.gradle`, `gradle-store.sh`, `maven-store.sh`, `nuget-store.sh`, `snapshot-*.sh` (5.3), `python-lock.py`, `hackage-lock.py`, `yarn-lock.py`, `upstream.py`, `discs-import.sh` |
 
 apk is not wrapped in a module: `apk mkpkg`, `mkndx` and `add` are run as
 programs.
@@ -1464,13 +1523,15 @@ programs.
 Not in git (working directories): `cache/` (sources and dependency stores),
 `repo/` (the packages and the index; there is one repository, `repo/<arch>/`),
 `rootfs/` (the stage 0 root), `logs/`, `out/` (images and discs), `work/`
-(build roots), `zig-pkg/`, `imported/` (the default output of
+(build roots), `imported/` (the default output of
 `import-cbuild`), and the author's `drafts/`, `wip/`, `dknotes/` and
-`dkrescue.iso`.
+`dkrescue.iso`. `repo/<arch>/`, `logs/<arch>/`, `cache/`, `work/`, `rootfs/` and
+`out/` may be symbolic links to another disk (on the build machine they point
+into `/mnt/dkbuild`; docs/handoff.md).
 
 ## 12. Testing
 
-- **Unit tests:** `zig build test` (84 `test` blocks): recipe and profile validation
+- **Unit tests:** `zig build test` (86 `test` blocks): recipe and profile validation
   (wrong types, unknown keys, bad checksums), macro expansion for each target,
   the generated cross and toolchain files, subpackage splitting, the ELF and
   pkg-config scans against fixture files, and also image and disc parsing, the
@@ -1501,7 +1562,8 @@ Not in git (working directories): `cache/` (sources and dependency stores),
   not implemented**) can fail it.
 - **Booting an image:** `tests/qemu-iso.sh` boots a built live ISO in QEMU,
   on BIOS (SeaBIOS) and UEFI (OVMF), and waits for the login. It is not part
-  of `run-all.sh`.
+  of `run-all.sh`, and neither is `tests/qemu-pam.sh`, which exercises PAM on a
+  booted live ISO.
 - **The FenrirOS tree:** there is no automated script for `dkbuild world`,
   then `dkbuild image`, then the boot test; they are run by hand, and the live ISOs `base`, `rescue` and
   `dkde` have booted in QEMU.
@@ -1510,10 +1572,11 @@ Not in git (working directories): `cache/` (sources and dependency stores),
 
 ## 13. Milestones
 
-Status as of 2026-11-13: about 2300 recipes are written and about 4400
-distinct packages built for `x86_64` (a world run is still fixing the last few
-dozen failures); three live ISOs (`base`, `rescue`, `dkde`) have been built
-and booted in QEMU on BIOS and UEFI.
+Status as of 2026-11-25: 3188 recipes pass `dkbuild check`, and `repo/x86_64/`
+holds about 6850 `.apk` files (subpackages counted). Not every recipe builds
+yet (docs/handoff.md, docs/unbuildable.md). Three live ISOs (`base`, `rescue`,
+`dkde`) have been built and booted in QEMU on BIOS and UEFI, and `dkde-devel`
+on BIOS (docs/handoff.md).
 
 ### B0 — Recipes
 
@@ -1548,10 +1611,9 @@ the forgotten-dependency half is not met.
 - Section 9: `base`, `base-devel` and `base-net`, built in two stages.
 - **Done when:** stage 1 and stage 2 of `base` and `base-devel` build on
   x86_64, and `apk add base` into an empty root works from `repo/` alone
-  (9.5). The desktop is a later milestone. Met so far: `base` and `base-net`
-  build in stage 1, and the live ISOs install `base` from `repo/` with `apk
-  add`. Not met: stage 2 and the stage comparison (not implemented), and
-  `base-devel` is written but not built.
+  (9.5). The desktop is a later milestone. Met so far: `base`, `base-devel` and
+  `base-net` build in stage 1, and the live ISOs install `base` from `repo/` with
+  `apk add`. Not met: stage 2 and the stage comparison (not implemented).
 
 ### B3 — Images
 
@@ -1588,8 +1650,8 @@ built.
    record `docs/decisions/0001-toml-recipes.md`). Earlier it was a YAML subset
    read by our own `src/yaml.zig` (zig-yaml had been tried and dropped: it
    needed patches for Zig 0.17.0 and had no `|` block scalars; the file no
-   longer exists). YAML remains
-   only as an import format (5.9, planned). Semantic errors (unknown key, wrong type)
+   longer exists). Nothing reads
+   YAML now (5.9: the Solus importer was dropped). Semantic errors (unknown key, wrong type)
    name the key but not the line, because `toml-zig` does not record key
    positions; syntax errors keep line and column. (The decision record's
    own status line still says "proposed"; it was implemented.)
@@ -1619,8 +1681,8 @@ built.
 8. ~~Stage 1 lower layer (7.3, 9.4 item 1).~~ **Decided:** an overlay in the
    user namespace. Stage 1 cannot catch a forgotten dependency; stage 2 does.
 9. ~~Triple vendor (6.1, 9.2).~~ **Decided:** `fenriros`; DKRescue's LLVM
-   builds and runs programs with any vendor (tested, 9.2). The profiles switch
-   when builds move to the DKRescue root.
+   builds and runs programs with any vendor (tested, 9.2). The profiles use
+   it.
 10. ~~The importer (5.9).~~ **Decided:** inside dkbuild (`src/cbuild.zig`); it
     translates only trivial calls and marks everything else for a person. Split
     it out only if something else needs the Python reader.
