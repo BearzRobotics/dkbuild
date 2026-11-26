@@ -88,5 +88,17 @@ mkdir "$W/um"
 OUT=$(umask 077; sbrun -- /usr/bin/sh -c 'umask; mkdir /destdir-t; echo x > /destdir-t/f; stat -c %a / /destdir-t /destdir-t/f' 2>&1)
 [ "$(echo "$OUT" | tr '\n' ' ')" = "0022 755 755 644 " ] || fail "with the caller's umask 077, inside: $(echo "$OUT" | tr '\n' ' ')"
 
+# --- links left in the writable layer by an earlier step do not lead the next sandbox's mounts out of its root
+mkdir "$W/lu" "$W/lw" "$W/lm" "$W/hostside"; echo bound > "$W/bindfile"
+again() { # the same writable layer every time, as the build steps of one package use it
+    ./zig-out/bin/dkbuild sandbox-child --lower "$PWD/rootfs/dkrescue" --upper "$W/lu" --work "$W/lw" --merged "$W/lm" \
+        --env PATH=/usr/bin:/bin "$@" 2>&1
+}
+again -- /usr/bin/sh -c "ln -s '$W/hostside/made-file' /etc/dk-bind-file && ln -s '$W/hostside/made-dir' /dk-bind-dir" >/dev/null
+OUT=$(again --robind "$W/bindfile" /etc/dk-bind-file --robind "$W/ro" /dk-bind-dir/sub -- /usr/bin/sh -c 'cat /etc/dk-bind-file /dk-bind-dir/sub/file')
+[ -z "$(ls -A "$W/hostside")" ] || fail "a bind destination followed a link out of the sandbox's root: $(ls "$W/hostside")"
+[ "$(echo "$OUT" | tr '\n' ' ')" = "bound original " ] || fail "binds over links are not visible inside: $OUT"
+chmod -R u+rwx "$W/lw" 2>/dev/null
+
 [ "$fails" -eq 0 ] || { echo "FAIL: $fails isolation check(s) failed"; exit 1; }
 echo "ok: read-only binds stay read-only; signals and the terminal stay outside; killing the sandbox kills all in it"

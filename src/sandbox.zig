@@ -250,9 +250,42 @@ fn mountFs(source: [:0]const u8, target: [:0]const u8, fstype: [:0]const u8, fla
     sys(linux.mount(source, target, fstype, flags, @intFromPtr(data.ptr)), "mount", target);
 }
 
+/// `path` under the root at `merged`, with every link on the way (the last name too) followed as it will be
+/// inside, where `merged` is `/`. Before pivot_root, a link in the lower image or left in the writable layer by
+/// an earlier step would otherwise lead to the host's paths, and files and mounts would be made there.
+fn inside(merged: []const u8, path: []const u8) [:0]const u8 {
+    var done: std.ArrayList(u8) = .empty; // resolved so far: "" or "/a/b"
+    var rest: []const u8 = path;
+    var links: u32 = 0;
+    var buf: [std.fs.max_path_bytes]u8 = undefined;
+    while (rest.len > 0) {
+        const slash = std.mem.indexOfScalar(u8, rest, '/') orelse rest.len;
+        const name = rest[0..slash];
+        rest = if (slash < rest.len) rest[slash + 1 ..] else "";
+        if (name.len == 0 or std.mem.eql(u8, name, ".")) continue;
+        if (std.mem.eql(u8, name, "..")) {
+            done.shrinkRetainingCapacity(std.mem.lastIndexOfScalar(u8, done.items, '/') orelse 0);
+            continue;
+        }
+        const here = z("{s}{s}/{s}", .{ merged, done.items, name });
+        const n = linux.readlink(here, &buf, buf.len);
+        if (linux.errno(n) != .SUCCESS) { // not a link, or not there yet
+            done.append(page, '/') catch die("out of memory", .{});
+            done.appendSlice(page, name) catch die("out of memory", .{});
+            continue;
+        }
+        links += 1;
+        if (links > 40) die("too many links in {s}", .{path});
+        const target = buf[0..n];
+        if (target.len > 0 and target[0] == '/') done.clearRetainingCapacity();
+        rest = std.mem.concat(page, u8, &.{ target, "/", rest }) catch die("out of memory", .{});
+    }
+    return z("{s}{s}", .{ merged, done.items });
+}
+
 fn bindMount(src: []const u8, dst_inside: []const u8, merged: []const u8, read_only: bool) void {
     const s = dupeZ(src);
-    const dst_path = z("{s}{s}", .{ merged, dst_inside });
+    const dst_path = inside(merged, dst_inside);
     if (isDir(s)) {
         mkdirAll(dst_path);
     } else {
@@ -419,13 +452,13 @@ pub fn childMain(args: []const [:0]const u8) noreturn {
 
     // /proc of the new PID namespace.
     {
-        const p = z("{s}/proc", .{merged});
+        const p = inside(merged, "/proc");
         mkdirAll(p);
         mountFs("proc", p, "proc", linux.MS.NOSUID | linux.MS.NODEV | linux.MS.NOEXEC, "");
     }
     // A small /dev: a tmpfs with the harmless device nodes bound from the host.
     {
-        const d = z("{s}/dev", .{merged});
+        const d = inside(merged, "/dev");
         mkdirAll(d);
         mountFs("tmpfs", d, "tmpfs", linux.MS.NOSUID, "mode=755,size=1m");
         for (dev_nodes) |n| {
@@ -447,18 +480,18 @@ pub fn childMain(args: []const [:0]const u8) noreturn {
         sys(linux.symlink("/proc/self/fd/2", z("{s}/dev/stderr", .{merged})), "symlink", "/dev/stderr");
     }
     for ([_][]const u8{ "tmp", "run" }) |name| {
-        const p = z("{s}/{s}", .{ merged, name });
+        const p = inside(merged, name);
         mkdirAll(p);
         mountFs("tmpfs", p, "tmpfs", linux.MS.NOSUID | linux.MS.NODEV, "mode=1777");
     }
     for (binds.items) |b| bindMount(b.src, b.dst, merged, b.read_only);
 
     // Make the overlay the root and drop the host's tree.
-    const old = z("{s}/.oldroot", .{merged});
+    const old = inside(merged, "/.oldroot");
     mkdirAll(old);
     sys(linux.pivot_root(dupeZ(merged), old), "pivot_root", merged);
     sys(linux.chdir("/"), "chdir", "/");
-    sys(linux.umount2("/.oldroot", linux.MNT.DETACH), "umount", "/.oldroot");
+    sys(linux.umount2(dupeZ(old[merged.len..]), linux.MNT.DETACH), "umount", old);
     lockMounts(ids, net);
     sys(linux.chdir(dupeZ(cwd)), "chdir", cwd);
 
