@@ -123,16 +123,16 @@ pub const gcc_prefix = "/usr/lib/gcc15";
 /// `--target` and `-fuse-ld=lld` do not exist in it. Programs built this way may
 /// need GCC's runtime, so they find it through an rpath. A recipe's own
 /// `environment` runs after this and can change any of it.
-pub fn gccEnv(p: Profile, arena: Allocator) Allocator.Error![]const u8 {
+pub fn gccEnv(p: Profile, arena: Allocator, static: bool) Allocator.Error![]const u8 {
     return std.fmt.allocPrint(arena,
         \\mkdir -p /tmp/gnu-bin
         \\for t in as ar nm ranlib objcopy objdump strip readelf; do if [ -e /usr/bin/g$t ]; then ln -sf /usr/bin/g$t /tmp/gnu-bin/$t; fi; done
         \\if [ -e /usr/bin/ld.bfd ]; then ln -sf /usr/bin/ld.bfd /tmp/gnu-bin/ld; fi
         \\export PATH="/tmp/gnu-bin:{[g]s}/bin:$PATH"
         \\export CC={[g]s}/bin/gcc CXX={[g]s}/bin/g++ CPP={[g]s}/bin/cpp AR=ar RANLIB=ranlib NM=nm
-        \\export CFLAGS="-O2 -march={[c]s}" CXXFLAGS="-O2 -march={[c]s}" LDFLAGS="-Wl,-rpath,{[g]s}/lib"
+        \\export CFLAGS="-O2 -march={[c]s}" CXXFLAGS="-O2 -march={[c]s}" LDFLAGS="-Wl,-rpath,{[g]s}/lib{[s]s}"
         \\
-    , .{ .g = gcc_prefix, .c = p.cpu });
+    , .{ .g = gcc_prefix, .c = p.cpu, .s = if (static) " -static" else "" });
 }
 
 pub fn parse(arena: Allocator, text: []const u8, diag: *Diagnostic) (error{InvalidProfile} || Allocator.Error)!Profile {
@@ -237,7 +237,10 @@ test "gccEnv uses GCC's compilers and flags, not clang's" {
     defer arena_state.deinit();
     const a = arena_state.allocator();
     const p: Profile = .{ .arch = "x86_64", .triple = "x86_64-fenriros-linux-musl", .cpu = "x86-64", .zig_target = "x86_64-linux-musl", .zig_cpu = "baseline", .kernel_arch = "x86" };
-    const e = try gccEnv(p, a);
+    const e = try gccEnv(p, a, false);
+    try std.testing.expect(std.mem.indexOf(u8, e, "-static") == null);
+    // `options = ["gcc", "static"]` links statically too (SS-25): these LDFLAGS replace the ones that said so
+    try std.testing.expect(std.mem.indexOf(u8, try gccEnv(p, a, true), "lib -static\"\n") != null);
     try std.testing.expect(std.mem.indexOf(u8, e, "export CC=/usr/lib/gcc15/bin/gcc ") != null);
     try std.testing.expect(std.mem.indexOf(u8, e, "-march=x86-64") != null);
     try std.testing.expect(std.mem.indexOf(u8, e, "--target") == null);

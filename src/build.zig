@@ -177,7 +177,7 @@ pub fn script(arena: Allocator, r: recipe.Recipe, ctx: macro.Context, srcdir: []
     // package: the line is part of the script hash, so on every recipe it would rebuild the tree.
     // (The rust recipe itself has no rust in its hostdeps and manages its own flags.)
     if (contains(r.hostdeps, "rust")) try s.appendSlice(arena, profile.Profile.rustEnv(contains(r.options, "static")));
-    if (contains(r.options, "gcc")) try s.appendSlice(arena, try profile.gccEnv(ctx.target, arena));
+    if (contains(r.options, "gcc")) try s.appendSlice(arena, try profile.gccEnv(ctx.target, arena, ctx.static));
     // Go builds offline from the shared module cache (fetch.zig), checked
     // against go.sum when it was filled.
     // npm installs offline from the shared store (npmdeps.zig): npm-offline.js
