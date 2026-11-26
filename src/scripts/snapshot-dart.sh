@@ -1,7 +1,7 @@
 #!/bin/sh
 # dkbuild snapshot (SPEC.md 5.3): the Dart SDK and the repositories its DEPS
 # pins, checked out with depot_tools' gclient and made into one source
-# tarball, so the build needs no network. Runs on the host at fetch time, for
+# tarball, so the build needs no network. Runs at fetch time, in the sandbox, for
 #   { url = "snapshot:dart <Dart version tag> <depot_tools commit> <SDK commit>", sha256 = ... }
 #
 #   $1  the tarball to write (zstd-compressed tar)

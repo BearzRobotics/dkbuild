@@ -1,7 +1,7 @@
 #!/bin/sh
 # dkbuild snapshot (SPEC.md 5.3): Electron and the Chromium it pins, checked
 # out with depot_tools' gclient and made into one source tarball, so the build
-# needs no network. Runs on the host at fetch time, for a source
+# needs no network. Runs at fetch time, in the sandbox, for a source
 #   { url = "snapshot:electron <electron tag> <chromium version> <depot_tools commit> <electron commit>
 #     <chromium commit>", sha256 = ... }   (one line)
 # Electron, Chromium and depot_tools are fetched by commit, and checked to be at it before any of their scripts

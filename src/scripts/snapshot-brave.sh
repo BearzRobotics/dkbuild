@@ -4,7 +4,7 @@
 # on Linux, as one source tarball, so the build needs no network. Chromium is
 # not in it: the recipe takes Google's release tarball of the Chromium version
 # brave-core's package.json pins, and applies Brave's patches to it itself.
-# Runs on the host at fetch time, for
+# Runs at fetch time, in the sandbox, for
 #   { url = "snapshot:brave <brave-core tag> <pnpm version> <brave-core commit> <pnpm integrity>", sha256 = ... }
 # brave-core is fetched by commit (a tag can be moved), and pnpm, which then runs on this machine, is checked
 # against the integrity the npm registry publishes for it before it is unpacked.
@@ -27,7 +27,7 @@
 #     build service only);
 #   - the JavaScript packages: brave-core's (pnpm-lock.yaml) and
 #     web-discovery-project's, installed by pnpm with --ignore-scripts (no
-#     package's install script runs on the host) and for linux/x64/musl, so
+#     package's install script runs) and for linux/x64/musl, so
 #     that packages with per-platform builds pick the musl ones; and
 #     @brave/leo (Brave's design system, a git-hosted package that has to be
 #     built: its `prepare` script) as source again in dkbuild-leo/, with the
@@ -83,7 +83,7 @@ checkout src https://github.com/brave/brave-core.git "$commit"
 python3 -I - src/DEPS > deps.txt <<'EOF'
 import ast, re, sys
 skip = {"third_party/reclient_configs/src"}
-# What DEPS says reaches `git fetch` and the file system on the host: a URL read as an option (--upload-pack=...)
+# What DEPS says reaches `git fetch` and the file system: a URL read as an option (--upload-pack=...)
 # runs a command. So: https URLs, revisions that cannot be options, paths that stay inside the checkout.
 def checked(path, url, rev):
     ok = (re.fullmatch(r'https://[!#-\[\]-~]+', url) and re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._/+-]*', rev)

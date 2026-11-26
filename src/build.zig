@@ -521,7 +521,7 @@ fn inLay(arena: Allocator, cache: []const u8, path: []const u8) BuildError![]con
 /// Returns whether nothing is left. A build may leave directories without owner permission anywhere (Go's
 /// read-only module trees, a `chmod 555` in a test, each overlay's `work/work` of mode 000), which a delete
 /// cannot enter: `chmod -R` first, which does not follow the links it meets.
-fn removeBuildDir(arena: Allocator, io: std.Io, work: []const u8) bool {
+pub fn removeBuildDir(arena: Allocator, io: std.Io, work: []const u8) bool {
     if (!pathExists(io, work)) return true;
     _ = std.process.run(arena, io, .{ .argv = &.{ "chmod", "-R", "u+rwX", "--", work } }) catch {};
     Dir.cwd().deleteTree(io, work) catch {};
@@ -794,10 +794,10 @@ test "isOwnPackage: the recipe's main package of any version, not its subpackage
     try std.testing.expect(!isOwnPackage("dotnet", "dotnet.dkhash"));
 }
 
-const SbDirs = struct { upper: []const u8, work: []const u8, merged: []const u8 };
+pub const SbDirs = struct { upper: []const u8, work: []const u8, merged: []const u8 };
 
 /// Fresh upper, work and mount-point directories for one sandbox, under `parent`.
-fn sbDirs(arena: Allocator, io: std.Io, parent: []const u8, name: []const u8) BuildError!SbDirs {
+pub fn sbDirs(arena: Allocator, io: std.Io, parent: []const u8, name: []const u8) BuildError!SbDirs {
     var out_dirs: [3][]const u8 = undefined;
     for ([_][]const u8{ "upper", "work", "merged" }, 0..) |sub, k| {
         const rel = try std.fs.path.join(arena, &.{ parent, name, sub });
@@ -1703,6 +1703,20 @@ fn unpackDeps(arena: Allocator, io: std.Io, base_root: []const u8, sb: SbDirs, f
         out("error: unpacking packages from repo/ failed; see {s}\n", .{logpath});
         return error.PrepareFailed;
     }
+}
+
+/// Unpacks `packages` from the tree's repo/, with what they need to run, into the layer `sb` over `base_root`:
+/// the tools a snapshot needs that the build machine's image does not have.
+pub fn unpackTools(arena: Allocator, io: std.Io, root: []const u8, arch: []const u8, packages: []const []const u8, base_root: []const u8, sb: SbDirs, log: *std.ArrayList(u8), logpath: []const u8) !void {
+    var problems: std.ArrayList(tree.Problem) = .empty;
+    var t = try tree.load(arena, io, root, &problems);
+    t.allow_external = true;
+    const repo_abs: []const u8 = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(arena, &.{ root, "repo", arch }), arena);
+    const keys_abs: []const u8 = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(arena, &.{ root, "keys" }), arena);
+    const wanted: recipe.Recipe = .{ .name = "snapshot-tools", .version = "0", .release = 1, .summary = "s", .license = "MIT", .source = &.{}, .install = "", .hostdeps = packages };
+    const files = try inTreeFiles(arena, io, .{ .root = root, .arch = arch, .tree = t, .no_check = true }, wanted, repo_abs);
+    if (files.len == 0) return error.MissingDependency;
+    try unpackDeps(arena, io, base_root, sb, files, repo_abs, keys_abs, log, logpath);
 }
 
 /// `sb` must be a layer that no recipe code has written to: apk runs in it with the private key.

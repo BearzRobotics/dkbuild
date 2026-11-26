@@ -2,7 +2,7 @@
 # dkbuild snapshot (SPEC.md 5.3): the V8 that Euro-Office's document engine
 # (core's doctrenderer) links statically, with the repositories V8's DEPS pins
 # that a v8_monolith build reads, and the GN that Euro-Office builds it with,
-# in one source tarball, so the build needs no network. Runs on the host at
+# in one source tarball, so the build needs no network. Runs, in the sandbox, at
 # fetch time, for
 #   { url = "snapshot:euro-office v8 <V8 tag> <GN commit>", sha256 = ... }
 #
@@ -61,7 +61,7 @@ import ast, re, sys
 want = ["build", "buildtools", "base/trace_event/common", "third_party/googletest/src",
         "third_party/icu", "third_party/jinja2", "third_party/markupsafe",
         "third_party/zlib", "tools/clang"]
-# What DEPS says reaches `git fetch` and the file system on the host: a URL read as an option (--upload-pack=...)
+# What DEPS says reaches `git fetch` and the file system: a URL read as an option (--upload-pack=...)
 # runs a command. So: https URLs, revisions that cannot be options, paths that stay inside the checkout.
 def checked(path, url, rev):
     ok = (re.fullmatch(r'https://[!#-\[\]-~]+', url) and re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._/+-]*', rev)

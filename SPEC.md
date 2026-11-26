@@ -259,8 +259,13 @@ release, or a `snapshot:git` source (below), which is a checksummed tarball.
   that is not a tar archive or a `.zip` is copied the same way.
 - A `{ url = "snapshot:<kind> <args>", sha256 }` entry is made, not
   downloaded: at fetch time an embedded script (`src/scripts/snapshot-<kind>.sh`)
-  builds a reproducible tarball on the host from pinned upstream checkouts,
-  for sources no release tarball covers. `electron` (Electron tag, Chromium
+  builds a reproducible tarball from pinned upstream checkouts,
+  for sources no release tarball covers. The script runs in the sandbox, in
+  the build machine's root, with the network: of the host it sees only its
+  work directory, its log and a directory for the result. Brave's and
+  Electron's also get `nodejs` from `repo/`, so that must be built first.
+  The shell's umask is set to 002, whatever dkbuild's or the user's is: the
+  modes are part of the tarball, and so of the recipe's checksum. `electron` (Electron tag, Chromium
   version, depot_tools commit) runs gclient, applies Electron's patches and
   installs its yarn and npm packages, so the build itself stays offline. Its
   work directory and log are in `cache/snapshots/`. A new snapshot's checksum

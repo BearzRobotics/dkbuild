@@ -1,5 +1,5 @@
 #!/bin/sh
-# The dotnet, brave and electron snapshots run downloaded code on the host. With a pinned checksum or commit that
+# The dotnet, brave and electron snapshots run downloaded code. With a pinned checksum or commit that
 # does not match, none of it may run; with matching ones, the script goes on. curl, git and node are stand-ins on
 # PATH: nothing is downloaded.
 set -u

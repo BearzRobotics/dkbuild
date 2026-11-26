@@ -3,11 +3,13 @@
 //! Tarballs are downloaded once into `<cache>/sources/<sha256>` and the
 //! checksum is verified before the file gets that name. `git|` sources are
 //! not handled yet. A `snapshot:<kind> <args>` URL is made, not downloaded: a
-//! script (snapshot-<kind>.sh) builds a reproducible tarball on the host from
+//! script (snapshot-<kind>.sh) builds a reproducible tarball, in the sandbox, from
 //! pinned upstream checkouts, and it is checked like a download.
 
 const std = @import("std");
 const recipe = @import("recipe.zig");
+const sandbox = @import("sandbox.zig");
+const build = @import("build.zig");
 const Allocator = std.mem.Allocator;
 const Sha256 = std.crypto.hash.sha2.Sha256;
 
@@ -205,9 +207,20 @@ const snapshot_scripts = [_][2][]const u8{
     .{ "euro-office", @embedFile("scripts/snapshot-euro-office.sh") },
 };
 
+/// Snapshot kinds whose scripts run Node.js, which the build machine's image does not have: it is unpacked into
+/// the snapshot's own layer from the tree's repo/.
+const snapshot_tools = [_]struct { kind: []const u8, packages: []const []const u8 }{
+    .{ .kind = "brave", .packages = &.{"nodejs"} },
+    .{ .kind = "electron", .packages = &.{"nodejs"} },
+};
+
 /// Make the tarball of a `snapshot:` source into `tmp`. The script's output
 /// goes to `<cache>/snapshots/<kind>-<args>.log`; its work directory
 /// (`<cache>/snapshots/<kind>-<args>/`) is kept, so a failed run resumes.
+///
+/// The scripts run code they download, so they run in the sandbox, in the build machine's root, with the network:
+/// of the host they see their work directory, their log and an empty directory for the result, at the paths those
+/// have outside (so that work begun before still resumes).
 fn makeSnapshot(arena: Allocator, io: std.Io, cache: []const u8, spec: []const u8, tmp: []const u8, message: *[]const u8) Error!void {
     var words = std.mem.tokenizeScalar(u8, spec, ' ');
     const kind = words.next() orelse "";
@@ -262,33 +275,84 @@ fn makeSnapshot(arena: Allocator, io: std.Io, cache: []const u8, spec: []const u
     var argv: std.ArrayList([]const u8) = .empty;
     // One maker per snapshot at a time (a world's build and a separate
     // `dkbuild fetch` would otherwise share the work directory, the log and
-    // the .part file): flock on <work>.lock, without waiting; held, it exits
-    // 75 before anything runs.
-    const lock = try std.fmt.allocPrint(arena, "{s}.lock", .{work});
-    try argv.appendSlice(arena, &.{ "flock", "-n", "-E", "75", lock, "sh", "-c", "log=$1; shift; exec sh \"$@\" > \"$log\" 2>&1", "sh", log, sh_path, atmp, work });
-    try argv.appendSlice(arena, args.items);
-    const res = std.process.run(arena, io, .{ .argv = argv.items }) catch |err| {
-        message.* = try std.fmt.allocPrint(arena, "cannot run the {s} snapshot: {s}", .{ kind, @errorName(err) });
+    // the .part file).
+    const lock_path = try std.fmt.allocPrint(arena, "{s}.lock", .{work});
+    const held = (tryExclusive(io, lock_path) catch |err| {
+        message.* = try std.fmt.allocPrint(arena, "cannot lock {s}: {s}", .{ lock_path, @errorName(err) });
         return error.DownloadFailed;
-    };
-    const ok = switch (res.term) {
-        .exited => |c| c == 0,
-        else => false,
-    };
-    const busy = switch (res.term) {
-        .exited => |c| c == 75,
-        else => false,
-    };
-    if (busy) {
+    }) orelse {
         // another fetch is making it: leave its files alone
-        message.* = try std.fmt.allocPrint(arena, "the {s} snapshot is being made by another fetch (lock {s}); try again when it is done", .{ kind, lock });
+        message.* = try std.fmt.allocPrint(arena, "the {s} snapshot is being made by another fetch (lock {s}); try again when it is done", .{ kind, lock_path });
         return error.DownloadFailed;
+    };
+    defer held.close(io);
+    // umask 002, set here so that nobody's own decides: the modes go into the tarball, and the checksums in the
+    // recipes were made with it (dkbuild's own 022 gave every snapshot made anew another one)
+    try argv.appendSlice(arena, &.{ "/usr/bin/sh", "-c", "umask 002; log=$1; shift; exec sh \"$@\" > \"$log\" 2>&1", "sh", log });
+    // the tree the cache belongs to: its build machine, packages and keys
+    const root = std.fs.path.dirname(cache) orelse ".";
+    snapshotSandbox(arena, io, root, kind, sh_path, log, work, argv.items, args.items, atmp) catch |err| {
+        if (err == error.OutOfMemory) return error.OutOfMemory;
+        message.* = switch (err) {
+            error.NoBuildRoot => try std.fmt.allocPrint(arena, "the {s} snapshot runs in the build machine's root, and {s}/rootfs/dkrescue is not there (dkbuild bootstrap-root)", .{ kind, root }),
+            error.NoTools => try std.fmt.allocPrint(arena, "the {s} snapshot needs packages from {s}/repo that are not built yet (nodejs and what it runs with): build them first", .{ kind, root }),
+            error.SnapshotFailed => try std.fmt.allocPrint(arena, "the {s} snapshot failed; log: {s}", .{ kind, log }),
+            else => try std.fmt.allocPrint(arena, "cannot run the {s} snapshot: {s}", .{ kind, @errorName(err) }),
+        };
+        return error.DownloadFailed;
+    };
+}
+
+fn snapshotSandbox(arena: Allocator, io: std.Io, root: []const u8, kind: []const u8, sh_path: []const u8, log: []const u8, work: []const u8, shell: []const []const u8, args: []const []const u8, atmp: []const u8) !void {
+    const base_root: []const u8 = std.Io.Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(arena, &.{ root, "rootfs", "dkrescue" }), arena) catch return error.NoBuildRoot;
+    // the layer and the result's directory are made anew each time; only the work directory is kept
+    const scratch = try std.fmt.allocPrint(arena, "{s}.sandbox", .{work});
+    if (!build.removeBuildDir(arena, io, scratch)) return error.CannotRemoveOldLayer;
+    defer _ = build.removeBuildDir(arena, io, scratch);
+    const layer = try build.sbDirs(arena, io, scratch, "layer");
+    const outdir = try std.fs.path.join(arena, &.{ scratch, "out" });
+    try std.Io.Dir.cwd().createDirPath(io, outdir);
+    try std.Io.Dir.cwd().createDirPath(io, work);
+    try std.Io.Dir.cwd().writeFile(io, .{ .sub_path = log, .data = "" });
+    var output: std.ArrayList(u8) = .empty;
+    for (snapshot_tools) |tool| {
+        if (!std.mem.eql(u8, tool.kind, kind)) continue;
+        build.unpackTools(arena, io, root, "x86_64", tool.packages, base_root, layer, &output, log) catch return error.NoTools;
     }
+    const made = try std.fs.path.join(arena, &.{ outdir, "snapshot" });
+    var argv: std.ArrayList([]const u8) = .empty;
+    try argv.appendSlice(arena, shell);
+    try argv.appendSlice(arena, &.{ sh_path, made, work });
+    try argv.appendSlice(arena, args);
+    const ok = try sandbox.run(arena, io, .{
+        .lower = base_root,
+        .upper = layer.upper,
+        .work = layer.work,
+        .merged = layer.merged,
+        .net = true,
+        .binds = &.{
+            .{ .src = sh_path, .dst = sh_path, .read_only = true },
+            .{ .src = work, .dst = work },
+            .{ .src = log, .dst = log },
+            .{ .src = outdir, .dst = outdir },
+            .{ .src = "/etc/resolv.conf", .dst = "/etc/resolv.conf", .read_only = true },
+        },
+        // tar as root would otherwise give files the owners an archive names, which a sandbox cannot
+        .env = &.{ "PATH=/usr/bin:/bin", "HOME=/tmp", "TAR_OPTIONS=--no-same-owner", "LANG=C.UTF-8" },
+        .argv = argv.items,
+    }, &output);
     if (!ok) {
-        message.* = try std.fmt.allocPrint(arena, "the {s} snapshot failed; log: {s}", .{ kind, log });
-        std.Io.Dir.cwd().deleteFile(io, atmp) catch {};
-        return error.DownloadFailed;
+        // what the sandbox itself said (the script's own output is in the log already)
+        if (output.items.len > 0) {
+            const had = std.Io.Dir.cwd().readFileAlloc(io, log, arena, .limited(1 << 26)) catch "";
+            if (had.len == 0) std.Io.Dir.cwd().writeFile(io, .{ .sub_path = log, .data = output.items }) catch {};
+        }
+        return error.SnapshotFailed;
     }
+    // a plain file the script wrote, never a link to one of the host's
+    const st = std.Io.Dir.cwd().statFile(io, made, .{ .follow_symlinks = false }) catch return error.SnapshotFailed;
+    if (st.kind != .file) return error.SnapshotFailed;
+    try std.Io.Dir.cwd().rename(made, std.Io.Dir.cwd(), atmp, io);
 }
 
 test "validSha256" {
