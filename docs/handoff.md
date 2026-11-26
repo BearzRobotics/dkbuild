@@ -50,6 +50,10 @@ out/dkde-devel/dkde-devel.iso is whatever the last image build made.
 
 ## World
 
+**Stopped on 2026-11-25 (about 19:00) at the user's request, during pass 7 (it was building firefox). Do not start it
+again until the user asks.** The repo was pruned afterwards (no stale packages; 27 packages that no recipe provides
+were left in place). Many fixes committed while pass 7 ran have not been built.
+
     systemd-run --user --unit=dkworld --collect -p OOMPolicy=continue --working-directory="$PWD" \
         --setenv=PATH="$PATH" "$PWD/contrib/worldloop.sh"
 
