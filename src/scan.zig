@@ -155,7 +155,19 @@ const FileSource = struct {
     }
 };
 
+/// These entries come from the names of files a build made and from inside them, and are given to apk as one
+/// space-separated list with versions added: a name with white space or a version operator would become other
+/// entries (a file `usr/bin/x musl` made its package provide musl). Such a name is left out.
+fn entryName(item: []const u8) bool {
+    for (item) |c| if (c <= ' ' or c == 0x7f or c == '<' or c == '>' or c == '=' or c == '~' or c == '!') return false;
+    return true;
+}
+
 fn addUnique(arena: Allocator, list: *std.ArrayList([]const u8), item: []const u8) Allocator.Error!void {
+    if (!entryName(item)) {
+        std.debug.print("    warning: not a usable dependency name, left out: '{f}'\n", .{std.zig.fmtString(item)});
+        return;
+    }
     for (list.items) |x| if (std.mem.eql(u8, x, item)) return;
     try list.append(arena, try arena.dupe(u8, item));
 }
@@ -373,6 +385,24 @@ test "pcRequires: a version after an operator stuck to the name is not a name (B
     const r = try pcRequires(st.allocator(), "Requires: foo>= 1.0, bar >=2 baz=3 qux < 4 end\n");
     try std.testing.expectEqual(@as(usize, 5), r.len);
     for ([_][]const u8{ "foo", "bar", "baz", "qux", "end" }, r) |want, got| try std.testing.expectEqualStrings(want, got);
+}
+
+test "a file name cannot add a dependency or provide entry of its own (BC-19)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    try tmp.dir.createDirPath(io, "usr/bin");
+    try tmp.dir.createDirPath(io, "usr/lib/pkgconfig");
+    for ([_][]const u8{ "usr/bin/x musl", "usr/bin/y=9", "usr/bin/[", "usr/bin/g++", "usr/bin/z\tcmd:sh" }) |f| try tmp.dir.writeFile(io, .{ .sub_path = f, .data = "#!/bin/sh\n" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "usr/lib/pkgconfig/a b.pc", .data = "Requires: ok-1.0\n" });
+    const r = try scanTreeExcept(a, io, try tmp.dir.realPathFileAlloc(io, ".", a), &.{});
+    try std.testing.expectEqual(@as(usize, 2), r.provides.len);
+    try std.testing.expectEqualStrings("cmd:[", r.provides[0]);
+    try std.testing.expectEqualStrings("cmd:g++", r.provides[1]);
+    try std.testing.expectEqual(@as(usize, 1), r.depends.len);
 }
 
 /// A minimal ELF64 shared object: one PT_LOAD covering the file, one
