@@ -260,7 +260,11 @@ fn addFile(arena: Allocator, io: std.Io, items: *std.ArrayList(Item), path: []co
 }
 
 fn walkInto(arena: Allocator, io: std.Io, items: *std.ArrayList(Item), root: []const u8, rel: []const u8) !void {
-    var d = Dir.cwd().openDir(io, try std.fs.path.join(arena, &.{ root, rel }), .{ .iterate = true }) catch return;
+    // a store that cannot be read (its disk not mounted, a permission) must not be left out without a word
+    var d = Dir.cwd().openDir(io, try std.fs.path.join(arena, &.{ root, rel }), .{ .iterate = true }) catch |err| {
+        say("error: cannot read {s}/{s}: {s}\n", .{ root, rel, @errorName(err) });
+        return error.PrepareFailed;
+    };
     defer d.close(io);
     var w = try d.walk(arena);
     defer w.deinit();
@@ -393,7 +397,7 @@ fn sourceItems(arena: Allocator, io: std.Io, t: tree.Tree, opts: Options, work_r
 
     // The tree as git has it: the committed state (HEAD and every branch).
     const bundle = try std.fmt.allocPrint(arena, "{s}/dkbuild.bundle", .{work_rel});
-    const res = std.process.run(arena, io, .{ .argv = &.{ "git", "-C", opts.root, "bundle", "create", try absFrom(arena, io, bundle), "--all" } }) catch |err| {
+    const res = std.process.run(arena, io, .{ .argv = &.{ "git", "-C", opts.root, "bundle", "create", try absFrom(arena, io, bundle), "HEAD", "--branches", "--tags" } }) catch |err| {
         say("error: cannot run git: {s}\n", .{@errorName(err)});
         return error.PrepareFailed;
     };
@@ -439,12 +443,6 @@ fn hashAll(arena: Allocator, io: std.Io, items: []const Item, pieces: []const Pi
             for (first..k) |j| piece_sha[j] = "-";
             continue;
         }
-        if (it.sha != null and mine.len == 1) {
-            item_sha[i] = it.sha.?;
-            piece_sha[first] = it.sha.?;
-            done += it.size;
-            continue;
-        }
         const file = Dir.cwd().openFile(io, it.src, .{}) catch |err| {
             say("error: {s}: {s}\n", .{ it.src, @errorName(err) });
             return error.PrepareFailed;
@@ -470,6 +468,11 @@ fn hashAll(arena: Allocator, io: std.Io, items: []const Item, pieces: []const Pi
             piece_sha[j] = try arena.dupe(u8, &std.fmt.bytesToHex(part.finalResult(), .lower));
         }
         item_sha[i] = try arena.dupe(u8, &std.fmt.bytesToHex(whole.finalResult(), .lower));
+        // the cache's copy must be what its recipe says: found now, while another copy may still be had
+        if (it.sha) |want| if (!std.mem.eql(u8, want, item_sha[i])) {
+            say("error: {s} is damaged: its sha256 is {s}, the recipe says {s}\n", .{ it.src, item_sha[i], want });
+            return error.PrepareFailed;
+        };
         done += it.size;
         if (done >= next_report) {
             say("    checksums: {d} of {d} MiB\n", .{ done >> 20, total >> 20 });
@@ -666,7 +669,11 @@ pub fn make(arena: Allocator, io: std.Io, t: tree.Tree, set: Set, opts: Options)
         try s.appendSlice(arena, "echo '==> index'\n/usr/bin/apk --keys-dir /dkkeys mkndx --sign-key /dkkey --output /work/Packages.adb $(cat /work/apks.list)\n");
         try s.print(arena, "printf 'F\\t%s\\t%s\\t0\\t%s\\n' \"$(sha256sum /work/Packages.adb | cut -d' ' -f1)\" \"$(stat -c %s /work/Packages.adb)\" 'apks/{s}/Packages.adb' >> /work/MANIFEST\n", .{set.arch});
     }
-    if (have_key) try s.appendSlice(arena, "openssl dgst -sha256 -sign /dkkey -out /work/MANIFEST.sig /work/MANIFEST\n");
+    // The signature must be one the set's own keys/ verify: signed with a key whose public half is not there
+    // (--key), the discs would be rejected on import, and the index trusted by no system.
+    if (have_key) try s.appendSlice(arena, "openssl dgst -sha256 -sign /dkkey -out /work/MANIFEST.sig /work/MANIFEST\n" ++
+        "ok=no; for k in /dkkeys/*.pub; do if openssl dgst -sha256 -verify \"$k\" -signature /work/MANIFEST.sig /work/MANIFEST >/dev/null 2>&1; then ok=yes; fi; done\n" ++
+        "[ $ok = yes ] || { echo 'error: the signing key matches no public key in keys/' >&2; exit 1; }\n");
     k = 1;
     while (k <= discs) : (k += 1) try s.print(arena, "echo '==> disc {d} of {d}: {s}'\nxorriso -no_rc -options_from_file /work/disc-{d}.xorriso\n", .{ k, discs, isos.items[k - 1], k });
     try s.appendSlice(arena, "cd /out && sha256sum *.iso > SHA256SUMS\ncp /work/MANIFEST /work/README.txt /work/import.sh /out/\n");
@@ -709,6 +716,14 @@ pub fn make(arena: Allocator, io: std.Io, t: tree.Tree, set: Set, opts: Options)
         const abs = Dir.cwd().realPathFileAlloc(io, rel, arena) catch continue;
         try binds.append(arena, .{ .src = abs, .dst = b[1], .read_only = true });
     }
+    // a store that is itself a link out of cache/ (moved to another disk) would lead nowhere in there
+    if (set.kind == .source) for (try sourceStores(arena, io, opts.root)) |store| {
+        const rel = try std.fs.path.join(arena, &.{ opts.root, "cache", store });
+        const st = Dir.cwd().statFile(io, rel, .{ .follow_symlinks = false }) catch continue;
+        if (st.kind != .sym_link) continue;
+        const abs = Dir.cwd().realPathFileAlloc(io, rel, arena) catch continue; // walkInto has failed on it
+        try binds.append(arena, .{ .src = abs, .dst = try std.fmt.allocPrint(arena, "/dkcache/{s}", .{store}), .read_only = true });
+    };
     var log: std.ArrayList(u8) = .empty;
     const ok = sandbox.run(arena, io, .{
         .lower = lower_abs,
@@ -915,6 +930,26 @@ test "a repository disc does not silently lose packages that are not built at th
     set.unbuilt = .stop;
     try repoItems(a, io, t, set, root, &items);
     try std.testing.expectEqual(@as(usize, 2), items.items.len);
+}
+
+test "a damaged source is found while the set is made, not by whoever imports it (ID-11)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    try tmp.dir.writeFile(io, .{ .sub_path = "src.tar", .data = "damaged" });
+    const src = try tmp.dir.realPathFileAlloc(io, "src.tar", a);
+    const recipe_says: []const u8 = "0000000000000000000000000000000000000000000000000000000000000000";
+    const items = [_]Item{.{ .path = "sources/x", .src = src, .size = 7, .sha = recipe_says }};
+    const pieces = try plan(a, &.{7}, std.math.maxInt(u64));
+    var piece_sha: [1][]const u8 = undefined;
+    var item_sha: [1][]const u8 = undefined;
+    try std.testing.expectError(error.PrepareFailed, hashAll(a, io, &items, pieces, &piece_sha, &item_sha));
+    const good = [_]Item{.{ .path = "sources/x", .src = src, .size = 7, .sha = null }};
+    try hashAll(a, io, &good, pieces, &piece_sha, &item_sha);
+    try std.testing.expectEqual(@as(usize, 64), item_sha[0].len);
 }
 
 test "apkName" {
