@@ -282,6 +282,32 @@ fn elfInterface(arena: Allocator, data: []const u8) Allocator.Error!?[]const u8 
     const shentsize = rd.int(u16, data, 0x3A) orelse return null;
     const shnum = rd.int(u16, data, 0x3C) orelse return null;
     if (shentsize < 64) return null;
+    // Symbol versions, where the library has them: which version each dynamic symbol is, and their names.
+    var versym: ?u64 = null;
+    var versions: std.AutoHashMapUnmanaged(u16, []const u8) = .empty;
+    {
+        var k2: usize = 0;
+        while (k2 < shnum) : (k2 += 1) {
+            const sh = shoff +| @as(u64, k2) * shentsize;
+            const typ = rd.int(u32, data, sh +| 4) orelse return null;
+            const off = rd.int(u64, data, sh +| 0x18) orelse return null;
+            if (typ == 0x6fffffff) versym = off; // SHT_GNU_versym
+            if (typ != 0x6ffffffd) continue; // SHT_GNU_verdef
+            const link = rd.int(u32, data, sh +| 0x28) orelse return null;
+            const stroff = rd.int(u64, data, (shoff +| @as(u64, link) * shentsize) +| 0x18) orelse return null;
+            var at = off;
+            var n: usize = 0;
+            while (n < 4096) : (n += 1) {
+                const ndx = rd.int(u16, data, at +| 4) orelse break;
+                const aux = rd.int(u32, data, at +| 12) orelse break;
+                const name_off = rd.int(u32, data, at +| aux) orelse break;
+                try versions.put(arena, ndx, rd.cstr(data, stroff +| name_off) orelse "");
+                const next = rd.int(u32, data, at +| 16) orelse break;
+                if (next == 0) break;
+                at +|= next;
+            }
+        }
+    }
     var syms: std.ArrayList([]const u8) = .empty;
     var soname: []const u8 = "";
     var found_dynsym = false;
@@ -320,10 +346,16 @@ fn elfInterface(arena: Allocator, data: []const u8) Allocator.Error!?[]const u8 
             if (vis != 0 and vis != 3) continue; // DEFAULT, PROTECTED
             const name = rd.cstr(data, stroff +| (rd.int(u32, data, y) orelse 0)) orelse continue;
             const ssize = rd.int(u64, data, y + 16) orelse 0;
+            // "@@V" for the version programs link against, "@V" for one kept for old programs; nothing for an
+            // unversioned symbol, so that libraries without versions have the interface they had
+            var version: []const u8 = "";
+            if (versym) |vs| if (rd.int(u16, data, vs +| ((s / 24) * 2))) |v| if (versions.get(v & 0x7fff)) |vn| if (v & 0x7fff >= 2) {
+                version = try std.fmt.allocPrint(arena, " {s}{s}", .{ if (v & 0x8000 != 0) "@" else "@@", vn });
+            };
             try syms.append(arena, if (styp == 1 or styp == 6)
-                try std.fmt.allocPrint(arena, "{s} {d} {d}", .{ name, styp, ssize }) // data, TLS: size matters
+                try std.fmt.allocPrint(arena, "{s} {d} {d}{s}", .{ name, styp, ssize, version }) // data, TLS: size matters
             else
-                try std.fmt.allocPrint(arena, "{s} {d}", .{ name, styp }));
+                try std.fmt.allocPrint(arena, "{s} {d}{s}", .{ name, styp, version }));
         }
     }
     if (!found_dynsym) return null;
@@ -555,4 +587,37 @@ test "links and executable bits are inputs; records from before still match (SS-
     const after = try ownHash(a, io, root, "x", "x86_64");
     try adopt(a, io, root, "x", "x86_64", after, &stale);
     try std.testing.expect(!std.mem.eql(u8, &after, &stale.inputs));
+}
+
+test "a symbol's version is part of a library's interface (BC-22)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const base = try tmp.dir.realPathFileAlloc(io, ".", a);
+    try tmp.dir.writeFile(io, .{ .sub_path = "l.c", .data = "int dk_symbol(void) { return 1; }\n" });
+    const S = struct {
+        fn build(arena: Allocator, io_: std.Io, dir: []const u8, name: []const u8, script_text: ?[]const u8) !?[]const u8 {
+            var argv: std.ArrayList([]const u8) = .empty;
+            try argv.appendSlice(arena, &.{ "zig", "cc", "-target", "x86_64-linux-musl", "-shared", "-fPIC", "-nostdlib", "-Wl,-soname,libdk.so.1", "-o", try std.fs.path.join(arena, &.{ dir, name }), try std.fs.path.join(arena, &.{ dir, "l.c" }) });
+            if (script_text) |t| {
+                const map = try std.fs.path.join(arena, &.{ dir, try std.fmt.allocPrint(arena, "{s}.map", .{name}) });
+                try std.Io.Dir.cwd().writeFile(io_, .{ .sub_path = map, .data = t });
+                try argv.append(arena, try std.fmt.allocPrint(arena, "-Wl,--version-script={s}", .{map}));
+            }
+            const r = std.process.run(arena, io_, .{ .argv = argv.items }) catch return null;
+            if (!(r.term == .exited and r.term.exited == 0)) return null;
+            const data = try std.Io.Dir.cwd().readFileAlloc(io_, try std.fs.path.join(arena, &.{ dir, name }), arena, .limited(1 << 24));
+            return try elfInterface(arena, data);
+        }
+    };
+    const v1 = (try S.build(a, io, base, "v1.so", "V1 { global: dk_symbol; local: *; };\n")) orelse return error.SkipZigTest;
+    const v1_again = (try S.build(a, io, base, "again.so", "V1 { global: dk_symbol; local: *; };\n")).?;
+    const v2 = (try S.build(a, io, base, "v2.so", "V2 { global: dk_symbol; local: *; };\n")).?;
+    const plain = (try S.build(a, io, base, "plain.so", null)).?;
+    try std.testing.expectEqualStrings(v1, v1_again);
+    try std.testing.expect(!std.mem.eql(u8, v1, v2)); // the same name under another version is another interface
+    try std.testing.expect(!std.mem.eql(u8, v1, plain));
 }
