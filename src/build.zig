@@ -313,6 +313,41 @@ pub fn scriptHash(arena: Allocator, io: std.Io, r: recipe.Recipe, opts: Options)
     return std.fmt.bytesToHex(h.finalResult(), .lower);
 }
 
+/// Removes `destdir`/`sub` if it is a tree of nothing but directories, and says whether it did. `destdir` is
+/// what an untrusted build left: no link is followed on the way or inside (a `var` that is a link would
+/// otherwise lead to the host's directories), and only empty directories are removed, never a file.
+fn dropEmptyTree(arena: Allocator, io: std.Io, destdir: []const u8, sub: []const u8) !bool {
+    var parent = Dir.cwd().openDir(io, destdir, .{}) catch return false;
+    defer parent.close(io);
+    var rest = sub;
+    while (std.mem.indexOfScalar(u8, rest, '/')) |slash| {
+        const next = parent.openDir(io, rest[0..slash], .{ .follow_symlinks = false }) catch return false;
+        parent.close(io);
+        parent = next;
+        rest = rest[slash + 1 ..];
+    }
+    var dirs: std.ArrayList([]const u8) = .empty;
+    {
+        var top = parent.openDir(io, rest, .{ .iterate = true, .follow_symlinks = false }) catch return false;
+        defer top.close(io);
+        var w = try top.walk(arena);
+        defer w.deinit();
+        while (w.next(io) catch return false) |e| {
+            if (e.kind != .directory) return false;
+            try dirs.append(arena, try std.fs.path.join(arena, &.{ rest, e.path }));
+        }
+    }
+    // deepest first (a longer path is never the parent of a shorter one)
+    std.mem.sort([]const u8, dirs.items, {}, struct {
+        fn longer(_: void, a: []const u8, b: []const u8) bool {
+            return a.len > b.len;
+        }
+    }.longer);
+    for (dirs.items) |d| parent.deleteDir(io, d) catch return false;
+    parent.deleteDir(io, rest) catch return false;
+    return true;
+}
+
 /// Everything under `destdir` must sit in an allowed top-level directory,
 /// and nothing may be in /usr/local.
 pub fn checkPolicy(arena: Allocator, io: std.Io, destdir: []const u8, problems: *std.ArrayList([]const u8)) !void {
@@ -320,9 +355,7 @@ pub fn checkPolicy(arena: Allocator, io: std.Io, destdir: []const u8, problems: 
     // create empty directories there, which are dropped (tmpfiles.d makes
     // them at boot). Files there are still an error.
     for ([_][]const u8{ "run", "var/run" }) |sub| {
-        const path = try std.fs.path.join(arena, &.{ destdir, sub });
-        const res = std.process.run(arena, io, .{ .argv = &.{ "sh", "-c", "[ -d \"$1\" ] && [ ! -L \"$1\" ] && [ -z \"$(find \"$1\" ! -type d | head -n1)\" ] && rm -rf \"$1\" && echo removed", "sh", path } }) catch continue;
-        if (std.mem.startsWith(u8, res.stdout, "removed"))
+        if (try dropEmptyTree(arena, io, destdir, sub))
             out("    note: dropped the empty /{s} the install made (a tmpfs at boot; use tmpfiles.d)\n", .{sub});
     }
     var d = try Dir.cwd().openDir(io, destdir, .{ .iterate = true });
@@ -416,6 +449,43 @@ test "removeBuildDir removes read-only and mode-000 directories and follows no l
     const kept = try tmp.dir.statFile(io, "outside/ro", .{});
     try std.testing.expectEqual(@as(u32, 0o555), @as(u32, kept.permissions.toMode()) & 0o777);
     try tmp.dir.access(io, "outside/ro/keep", .{});
+}
+
+test "checkPolicy drops empty /run trees and follows no link out of destdir (BC-11, SS-17)" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const base = try tmp.dir.realPathFileAlloc(io, ".", a);
+    const at = struct {
+        fn path(arena: Allocator, b: []const u8, p: []const u8) ![]const u8 {
+            return std.fs.path.join(arena, &.{ b, p });
+        }
+    }.path;
+    try tmp.dir.createDirPath(io, "victim/run/keep/deeper");
+    // the build made var, or run itself, a link to a directory outside
+    try tmp.dir.createDirPath(io, "d1");
+    try tmp.dir.symLink(io, "../victim", "d1/var", .{});
+    try std.testing.expect(!try dropEmptyTree(a, io, try at(a, base, "d1"), "var/run"));
+    try tmp.dir.createDirPath(io, "d2");
+    try tmp.dir.symLink(io, "../victim/run", "d2/run", .{});
+    try std.testing.expect(!try dropEmptyTree(a, io, try at(a, base, "d2"), "run"));
+    try tmp.dir.access(io, "victim/run/keep/deeper", .{});
+    // an honest empty tree goes; one with a file, or a link, stays
+    try tmp.dir.createDirPath(io, "d3/var/run/a/b");
+    try std.testing.expect(try dropEmptyTree(a, io, try at(a, base, "d3"), "var/run"));
+    try std.testing.expectError(error.FileNotFound, tmp.dir.access(io, "d3/var/run", .{}));
+    try tmp.dir.access(io, "d3/var", .{});
+    try tmp.dir.createDirPath(io, "d4/run/a");
+    try tmp.dir.writeFile(io, .{ .sub_path = "d4/run/a/pid", .data = "1" });
+    try std.testing.expect(!try dropEmptyTree(a, io, try at(a, base, "d4"), "run"));
+    try tmp.dir.access(io, "d4/run/a/pid", .{});
+    try tmp.dir.createDirPath(io, "d5/run");
+    try tmp.dir.symLink(io, "../../victim", "d5/run/l", .{});
+    try std.testing.expect(!try dropEmptyTree(a, io, try at(a, base, "d5"), "run"));
+    try std.testing.expect(!try dropEmptyTree(a, io, try at(a, base, "d5"), "var/run"));
 }
 
 test "isTarArchive" {
