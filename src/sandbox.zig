@@ -11,6 +11,8 @@
 //!   - /proc for its own PID namespace, a small tmpfs /dev (null, zero, full,
 //!     random, urandom, tty), and tmpfs /tmp and /run.
 //!   - the directories it was given with `binds`, and nothing else of the host.
+//!     The command runs one user namespace further in than the one that made the
+//!     mounts, so it cannot make a read-only one writable (`lockMounts`).
 //!
 //! The work is done by a re-executed copy of this program (`sandbox-child`),
 //! because it must `fork` after `unshare`, and the main program may have
@@ -401,18 +403,7 @@ pub fn childMain(args: []const [:0]const u8) noreturn {
     // stays outside it and passes on the exit status.
     const pid_rc = linux.fork();
     sys(pid_rc, "fork", "");
-    if (pid_rc != 0) {
-        var status: i32 = 0;
-        while (true) {
-            const rc = linux.waitpid(@intCast(pid_rc), &status, 0);
-            if (linux.errno(rc) == .INTR) continue;
-            sys(rc, "waitpid", "");
-            break;
-        }
-        const s: u32 = @bitCast(status);
-        if (s & 0x7f == 0) linux.exit_group(@intCast((s >> 8) & 0xff));
-        linux.exit_group(@intCast(128 + (s & 0x7f)));
-    }
+    if (pid_rc != 0) waitAndExit(@intCast(pid_rc));
 
     // ---- PID 1 of the sandbox ----
     _ = linux.prctl(@intFromEnum(linux.PR.SET_PDEATHSIG), @intFromEnum(linux.SIG.KILL), 0, 0, 0);
@@ -466,6 +457,7 @@ pub fn childMain(args: []const [:0]const u8) noreturn {
     sys(linux.pivot_root(dupeZ(merged), old), "pivot_root", merged);
     sys(linux.chdir("/"), "chdir", "/");
     sys(linux.umount2("/.oldroot", linux.MNT.DETACH), "umount", "/.oldroot");
+    lockMounts(ids, net);
     sys(linux.chdir(dupeZ(cwd)), "chdir", cwd);
 
     // Run the command with exactly the environment it was given.
@@ -478,6 +470,67 @@ pub fn childMain(args: []const [:0]const u8) noreturn {
     envp[env.items.len] = null;
     const rc = linux.execve(cmd[0], @ptrCast(argv_c.ptr), @ptrCast(envp.ptr));
     die("exec {s}: {s}", .{ cmd[0], @tagName(linux.errno(rc)) });
+}
+
+/// Waits for `pid` and exits as it did.
+fn waitAndExit(pid: i32) noreturn {
+    var status: i32 = 0;
+    while (true) {
+        const rc = linux.waitpid(pid, &status, 0);
+        if (linux.errno(rc) == .INTR) continue;
+        sys(rc, "waitpid", "");
+        break;
+    }
+    const s: u32 = @bitCast(status);
+    if (s & 0x7f == 0) linux.exit_group(@intCast((s >> 8) & 0xff));
+    linux.exit_group(@intCast(128 + (s & 0x7f)));
+}
+
+/// Moves into a second, nested set of namespaces, which locks every mount made
+/// so far. The command runs as root with all capabilities; in the namespaces
+/// that made the mounts it could `mount -o remount,bind,rw` a read-only bind and
+/// write to the host through it. A mount copied into a mount namespace owned by
+/// a *less* privileged user namespace cannot be made writable, moved or
+/// unmounted. The command keeps all capabilities over the new namespaces (it can
+/// still mount things of its own), which is why all of them are made anew, and
+/// ids map to themselves. Returns in the new PID namespace's PID 1.
+fn lockMounts(ids: ?[]const [:0]const u8, net: bool) void {
+    var flags: usize = linux.CLONE.NEWUSER | linux.CLONE.NEWNS | linux.CLONE.NEWPID | linux.CLONE.NEWUTS | linux.CLONE.NEWIPC;
+    if (!net) flags |= linux.CLONE.NEWNET;
+    if (ids) |m| {
+        // A whole range may only be written from the parent namespace, by a
+        // process with CAP_SETUID there: a helper forked before unshare.
+        var fds: [2]i32 = undefined;
+        sys(linux.pipe2(&fds, .{ .CLOEXEC = true }), "pipe", "");
+        const me = linux.getpid();
+        const h = linux.fork();
+        sys(h, "fork", "");
+        if (h == 0) {
+            _ = linux.close(fds[1]);
+            var b: [1]u8 = undefined;
+            if (linux.read(fds[0], &b, 1) != 1) linux.exit_group(1);
+            writeFile(z("/proc/{d}/uid_map", .{me}), z("0 0 1\n1 1 {s}\n", .{m[3]}));
+            writeFile(z("/proc/{d}/gid_map", .{me}), z("0 0 1\n1 1 {s}\n", .{m[5]}));
+            linux.exit_group(0);
+        }
+        _ = linux.close(fds[0]);
+        sys(linux.unshare(flags), "unshare", "nested namespaces");
+        sys(linux.write(fds[1], "x", 1), "write", "pipe");
+        _ = linux.close(fds[1]);
+        if (!waitOk(@intCast(h))) die("could not map the ids of the nested namespace", .{});
+    } else {
+        // setgroups stays denied, inherited from the outer namespace.
+        sys(linux.unshare(flags), "unshare", "nested namespaces");
+        writeFile("/proc/self/uid_map", "0 0 1\n");
+        writeFile("/proc/self/gid_map", "0 0 1\n");
+    }
+    if (!net) loopbackUp();
+    const pid_rc = linux.fork();
+    sys(pid_rc, "fork", "");
+    if (pid_rc != 0) waitAndExit(@intCast(pid_rc));
+    _ = linux.prctl(@intFromEnum(linux.PR.SET_PDEATHSIG), @intFromEnum(linux.SIG.KILL), 0, 0, 0);
+    // /proc of this PID namespace, over the outer one.
+    mountFs("proc", "/proc", "proc", linux.MS.NOSUID | linux.MS.NODEV | linux.MS.NOEXEC, "");
 }
 
 /// Sets `lo` up in the current network namespace (SIOCSIFFLAGS); a failure
