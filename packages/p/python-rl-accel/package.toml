@@ -1,7 +1,7 @@
 # Accelerators for ReportLab: PyPI sdist rl-accel 0.9.1 (build backend setuptools.build_meta); Part of the AI/search stack in the queue.
 # Not built (queued, wip/queue): expect first-build fixes (build requirements: setuptools, wheel).
 name = "python-rl-accel"
-version = "0.9.1"
+version = "0.9.3"
 release = 1
 summary = "Accelerators for ReportLab"
 license = "BSD-3-Clause"
@@ -12,7 +12,7 @@ rundeps = ["python"]
 options = ["!check"]
 
 source = [
-    { url = "https://files.pythonhosted.org/packages/4e/5c/846d1eb4a64ba851e4a41c5185a6767e446e918d9d6fffef11755dbb3ebf/rl_accel-0.9.1.tar.gz", sha256 = "1b37a479bf07c726f2b419d630ac6efb5f22e6c88801ac596ac37779deb827e0" },
+    { url = "https://files.pythonhosted.org/packages/50/9a/c33dbbf17b569a5cc9a8726fb2c9433bed53cc80a7b633bda5d73e404bbc/rl_accel-0.9.3.tar.gz", sha256 = "1f0f8fe2e3a0e4303fb2a56848bd70963357bc7a626f6f26382b354b95eff409" },
 ]
 
 install = '''

@@ -1,6 +1,6 @@
 # platformdirs from PyPI.
 name = "python-platformdirs"
-version = "4.14.5"
+version = "4.14.8"
 release = 1
 summary = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
 license = "MIT"
@@ -10,7 +10,7 @@ rundeps = ["python"]
 options = ["!check"]
 
 source = [
-    { url = "https://files.pythonhosted.org/packages/d7/9a/8475be631fb33ca1466915e70fd594c42a4e84b512db650eaa14f90fe75d/platformdirs-4.14.5.tar.gz", sha256 = "32e9921db7385aa8169bee4fe9501923e5715ba9fb7ea3b9c69b0d8e0639f7a1" },
+    { url = "https://files.pythonhosted.org/packages/71/18/0b0d99f5bf164f04a7a9534c3dbdbe4d5fd2b382667685ad40c192c4d3d1/platformdirs-4.14.8.tar.gz", sha256 = "96893d686e84e9e6f358a9ea41a8de544df66dbf2ba6cda250e7dc73acf85b9b" },
 ]
 
 environment = '''

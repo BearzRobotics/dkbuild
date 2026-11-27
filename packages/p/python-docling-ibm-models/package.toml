@@ -1,7 +1,7 @@
 # Docling IBM models: layout analysis and table structure models (PyTorch): PyPI sdist docling-ibm-models 4.0.4 (build backend setuptools.build_meta); Part of the AI/search stack in the queue.
 # Not built (queued, wip/queue): expect first-build fixes (build requirements: none declared).
 name = "python-docling-ibm-models"
-version = "4.0.4"
+version = "4.0.5"
 release = 1
 summary = "Docling IBM models: layout analysis and table structure models (PyTorch)"
 license = "MIT"
@@ -12,7 +12,7 @@ rundeps = ["python", "pytorch", "python-torchvision", "python-docling-core", "py
 options = ["!check"]
 
 source = [
-    { url = "https://files.pythonhosted.org/packages/d6/12/e4bc8e9c5304187b7adfca37deabda3f1a27f3a7834dd7d4d15f5c00de97/docling_ibm_models-4.0.4.tar.gz", sha256 = "f10cbcd2986ab3f55ac87890bda04353c10d312074433f1c8885cc33b33c3c13" },
+    { url = "https://files.pythonhosted.org/packages/21/a9/577d90acf8de70df96cb2624c92838e1e49e979330a8efdcdc8bab396b92/docling_ibm_models-4.0.5.tar.gz", sha256 = "7fbeb513e2a8d59b03e799711d90ab2f7821c8c07b7415bf5a61542d50b31bed" },
 ]
 
 install = '''

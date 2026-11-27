@@ -1,6 +1,6 @@
 # wcwidth from PyPI.
 name = "python-wcwidth"
-version = "0.9.4"
+version = "0.9.5"
 release = 1
 summary = "Measures the displayed width of unicode strings in a terminal"
 license = "custom"
@@ -10,7 +10,7 @@ rundeps = ["python"]
 options = ["!check"]
 
 source = [
-    { url = "https://files.pythonhosted.org/packages/ea/01/e5ac23733628a6bbb91913a765fcf55ee8070d8d991bc88fdaaf805052c7/wcwidth-0.9.4.tar.gz", sha256 = "fd8d57d3cdfe570e3265c8fab1885c24e34ef40889c0759c0c304a19e9835954" },
+    { url = "https://files.pythonhosted.org/packages/8e/da/d59374b2c893ae70a41fdb064637ccef218f25df8c67e5431a96708235d9/wcwidth-0.9.5.tar.gz", sha256 = "713534e2ecb16e0fc39f19e0a5dda997da76d010953e9e8f803e7971f8accd80" },
 ]
 
 environment = '''

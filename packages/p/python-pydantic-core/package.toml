@@ -3,8 +3,8 @@
 # offline and pip installs it. Linked dynamically against musl (-crt-static off)
 # so Python can load it.
 name = "python-pydantic-core"
-version = "2.50.4"
-release = 8
+version = "2.50.5"
+release = 1
 summary = "Core functionality for Pydantic validation and serialization"
 license = "MIT"
 homepage = "https://github.com/pydantic/pydantic-core"
@@ -14,7 +14,7 @@ rundeps = ["python", "python-typing-extensions"]
 options = ["!check", "cargodeps"]
 
 source = [
-    { url = "https://files.pythonhosted.org/packages/9c/0f/34f9ce4ba701dd0b815033ef94d99b56f66200e578ee6052aa3ac26f064e/pydantic_core-2.50.4.tar.gz", sha256 = "aead3b74b68396bf0feab5d57e050b730ded7df55853c1e048a87e00aaf033c6" },
+    { url = "https://files.pythonhosted.org/packages/fb/63/0ceb815a7762576027ce388544c573d440574f95afb1302a2496b96db548/pydantic_core-2.50.5.tar.gz", sha256 = "1e740886083ff95530d694e6a3f09ed914bcf92a496d16acd307c6c3484fc36d" },
 ]
 
 environment = '''

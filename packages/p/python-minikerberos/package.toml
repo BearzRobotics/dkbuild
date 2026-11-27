@@ -1,6 +1,6 @@
 # minikerberos from PyPI.
 name = "python-minikerberos"
-version = "0.4.12"
+version = "0.4.13"
 release = 1
 summary = "Kerberos manipulation library in pure Python"
 license = "custom"
@@ -10,7 +10,7 @@ rundeps = ["python", "python-asn1crypto", "python-oscrypto", "python-asysocks", 
 options = ["!check"]
 
 source = [
-    { url = "https://files.pythonhosted.org/packages/e6/6b/3fe5bba950ea9c5f802cadf43f590757c014f9261cdab9f422f4f3c3f1d7/minikerberos-0.4.12.tar.gz", sha256 = "607498d430042d6ba53f390a5a11e0a29cb1d3744bbb130ef2e7bf2f5e86b06c" },
+    { url = "https://files.pythonhosted.org/packages/ef/83/ce83b623a55e91eedd0b3d4d6a98a48730a8982b366d3e970f066208e0fd/minikerberos-0.4.13.tar.gz", sha256 = "05b9a6b8a7aaad8c3655dcff4d9f731ea2ef1faeee279c5a39787183a0f3e97f" },
 ]
 
 environment = '''

@@ -1,6 +1,6 @@
 # watchdog from PyPI.
 name = "python-watchdog"
-version = "7.1.0"
+version = "7.1.1"
 release = 1
 summary = "Filesystem events monitoring"
 license = "Apache-2.0"
@@ -10,7 +10,7 @@ rundeps = ["python"]
 options = ["!check"]
 
 source = [
-    { url = "https://files.pythonhosted.org/packages/e2/55/087e45c2a3ed8223bc9f30d6b65f051de35513cfc30c989c2b1a14bf862e/watchdog-7.1.0.tar.gz", sha256 = "d3861e255416f49a1384474cb2efa097de165fb330d4c5432ce6708b509ed922" },
+    { url = "https://files.pythonhosted.org/packages/33/d3/38e18c9559b96fca53df98979e72cafcd498aba41b57f0830fc31008ffc2/watchdog-7.1.1.tar.gz", sha256 = "d7dc3bf0c3417c002ee976e958479c54d8ca18cbb3532fadbe69511fa389da15" },
 ]
 
 environment = '''

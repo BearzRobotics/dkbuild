@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/python-snowballstemmer/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "python-snowballstemmer"
-version = "3.1.0"
+version = "3.1.1"
 release = 1
 summary = "Snowball stemming library collection for Python"
 license = "BSD-3-Clause"
@@ -11,7 +11,7 @@ rundeps = ["python"]
 options = ["!check"]
 
 source = [
-    { url = "https://files.pythonhosted.org/packages/source/s/snowballstemmer/snowballstemmer-3.1.0.tar.gz", sha256 = "fd9e34526b23340cd23ffea6c9f9760974ecc2c2ac9e1d81401443ccdb2a801f" },
+    { url = "https://files.pythonhosted.org/packages/source/s/snowballstemmer/snowballstemmer-3.1.1.tar.gz", sha256 = "e07bbc54a0d798fe6010a12398422e62a8bfbba95c394fd0956ef58cb4d3e260" },
 ]
 
 install = '''

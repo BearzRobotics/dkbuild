@@ -1,6 +1,6 @@
 # regex from PyPI.
 name = "python-regex"
-version = "2026.11.9"
+version = "2026.11.25"
 release = 1
 summary = "Alternative regular expression module, to replace re."
 license = "Apache-2.0 AND CNRI-Python"
@@ -10,7 +10,7 @@ rundeps = ["python"]
 options = ["!check"]
 
 source = [
-    { url = "https://files.pythonhosted.org/packages/61/27/a5afeb952577b84ee5fe48b8b9ce47ae662dbb69cc5b76c28eff98f83b1e/regex-2026.11.9.tar.gz", sha256 = "316a70fbd70e999c9664681cb0eb5b4982b2cc0f623c7c86a8a112e1bd4c6277" },
+    { url = "https://files.pythonhosted.org/packages/fa/b8/61d96601b737305a04161da340499cbb3299029d4ea0f9c717bc35977c2b/regex-2026.11.25.tar.gz", sha256 = "d3ea8d9698f13f3fd08c65f9bed0bb07bcfff80b61dfa14d86b8cc398f886588" },
 ]
 
 environment = '''

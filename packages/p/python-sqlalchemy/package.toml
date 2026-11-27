@@ -1,6 +1,6 @@
 # SQLAlchemy from PyPI.
 name = "python-sqlalchemy"
-version = "2.1.8"
+version = "2.1.9"
 release = 1
 summary = "Database Abstraction Library"
 license = "MIT"
@@ -10,7 +10,7 @@ rundeps = ["python", "python-typing-extensions"]
 options = ["!check"]
 
 source = [
-    { url = "https://files.pythonhosted.org/packages/9c/e7/2855174facf54a83b4fa3eddcece3631c6bdae43605dacd69cc3b6794319/sqlalchemy-2.1.8.tar.gz", sha256 = "8bc4081dd7c17c073f2384ad0f5ee968e63b43507b2e024a3523c000a06d70da" },
+    { url = "https://files.pythonhosted.org/packages/3f/69/b87a540f6888ebc1f63a6e6138e8dc0827331a9be7c5eb15e3bd40a76281/sqlalchemy-2.1.9.tar.gz", sha256 = "d700a8b2edfb26282a470333d6bc4a454c4acda4d201a3bea7b72fa76c217d28" },
 ]
 
 environment = '''

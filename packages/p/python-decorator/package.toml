@@ -1,6 +1,6 @@
 # decorator from PyPI.
 name = "python-decorator"
-version = "5.3.1"
+version = "5.3.2"
 release = 1
 summary = "Decorators for Humans"
 license = "BSD-2-Clause"
@@ -10,7 +10,7 @@ rundeps = ["python"]
 options = ["!check"]
 
 source = [
-    { url = "https://files.pythonhosted.org/packages/60/8b/32f9823da46cde7df2087faa08cd98d01b908f8dcab982cdba9c84e85355/decorator-5.3.1.tar.gz", sha256 = "4cbcdd55a6efadb9dbea26b858f4fb3264567b52d69ca0d25b721b553f60ea82" },
+    { url = "https://files.pythonhosted.org/packages/4e/a2/dc08c667e7e51cb035ffab38ae98d7d0f249092591130db4f67dc26b0021/decorator-5.3.2.tar.gz", sha256 = "d9883f1b8259e3bfc42565d0bc6fdc760012008552aa449f75efd2d48319b82b" },
 ]
 
 environment = '''

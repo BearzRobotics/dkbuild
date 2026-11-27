@@ -1,6 +1,6 @@
 # jwcrypto from PyPI (pure Python; a dependency of the BlackArch tools, requested 2026-11-16). Generated; not built yet when written (wip/queue).
 name = "python-jwcrypto"
-version = "1.6.1"
+version = "1.6.2"
 release = 1
 summary = "Implementation of JOSE Web standards"
 license = "LGPL-3.0-or-later"
@@ -10,7 +10,7 @@ rundeps = ["python", "python-cryptography", "python-typing-extensions"]
 options = ["!check"]
 
 source = [
-    { url = "https://files.pythonhosted.org/packages/13/8f/e802d77957903483129813ce6fa01a72a906f9cdd454039d1ec1e6d1e44a/jwcrypto-1.6.1.tar.gz", sha256 = "a1e1570da5c2e35dbcd375ec1d2891a24de8eb35ee2c1fe8e91978efb72cfe90" },
+    { url = "https://files.pythonhosted.org/packages/56/94/039f7ec559e6028a4136c9b11505495baf2d3b627c06e8af7f0e23b8bb12/jwcrypto-1.6.2.tar.gz", sha256 = "47f3a880a0321ceefaab3e24c7b79e8c661beeaa47bdedc2ce686e9d9e440d8f" },
 ]
 
 install = '''

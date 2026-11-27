@@ -2,7 +2,7 @@
 # Built offline with the image's pip and setuptools; the C speedups module is
 # built too.
 name = "python-markupsafe"
-version = "3.0.3"
+version = "3.0.4"
 release = 1
 summary = "Safely add untrusted strings to HTML/XML markup"
 license = "BSD-3-Clause"
@@ -13,7 +13,7 @@ rundeps = ["python"]
 options = ["!check"]
 
 source = [
-    { url = "https://files.pythonhosted.org/packages/source/M/MarkupSafe/markupsafe-3.0.3.tar.gz", sha256 = "722695808f4b6457b320fdc131280796bdceb04ab50fe1795cd540799ebe1698" },
+    { url = "https://files.pythonhosted.org/packages/source/M/MarkupSafe/markupsafe-3.0.4.tar.gz", sha256 = "2e9ad7dd851bf45fab9f75cbff4cb493fee9979e8d8c7c9c3ee119022518edd6" },
 ]
 
 install = '''

@@ -2,8 +2,8 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # r4: actually installs the module (r3 had only its license).
 name = "python-pyyaml"
-version = "6.0.2"
-release = 4
+version = "6.0.4"
+release = 1
 summary = "YAML parser and emitter for Python"
 license = "MIT"
 homepage = "http://pyyaml.org/wiki/PyYAML"
@@ -13,7 +13,7 @@ checkdeps = []
 rundeps = ["python"]
 
 source = [
-    { url = "https://files.pythonhosted.org/packages/source/p/pyyaml/pyyaml-6.0.2.tar.gz", sha256 = "d584d9ec91ad65861cc08d42e834324ef890a082e591037abe114850ff7bbc3e" },
+    { url = "https://files.pythonhosted.org/packages/source/p/pyyaml/pyyaml-6.0.4.tar.gz", sha256 = "e24bf71af8a432d7808fabff134d38dfe16d3cbb41f2873bb4b1e42422de0a1a" },
 ]
 
 install = '''

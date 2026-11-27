@@ -1,6 +1,6 @@
 # Read and write PDFs with qpdf. needed by: ocrmypdf, python-img2pdf.
 name = "python-pikepdf"
-version = "10.18.0"
+version = "10.18.3"
 release = 1
 summary = "pikepdf for Python"
 license = "MPL-2.0"
@@ -11,7 +11,7 @@ rundeps = ["python", "python-pillow", "python-lxml", "python-packaging"]
 options = ["!check"]
 
 source = [
-    { url = "https://files.pythonhosted.org/packages/2e/5c/db56403f493bae2e35a0d5d2c9ad358b011f142b760282698a9f2732941e/pikepdf-10.18.0.tar.gz", sha256 = "cb555ebff93482e8a6eb55881488b469bbb2b5675161c1b93a0510a8642d98d0" },
+    { url = "https://files.pythonhosted.org/packages/53/72/c24b3ec06ffee46759d35dbcb4e0db1bdf6107cd81d7f19affbaa0c1d0f6/pikepdf-10.18.3.tar.gz", sha256 = "c62ffdbbbfe8739272fe1158e9f13c403acb53e468425a479fc925781c11f63a" },
 ]
 
 install = '''

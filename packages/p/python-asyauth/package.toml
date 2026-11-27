@@ -1,6 +1,6 @@
 # asyauth from PyPI.
 name = "python-asyauth"
-version = "0.0.25"
+version = "0.0.26"
 release = 1
 summary = "Unified authentication library"
 license = "custom"
@@ -10,7 +10,7 @@ rundeps = ["python", "python-asn1crypto", "python-asysocks", "python-minikerbero
 options = ["!check"]
 
 source = [
-    { url = "https://files.pythonhosted.org/packages/27/14/ef80b4933cd3a2bbfce17831d05f12daaaffe15f2f425a24ab67a7dc7e44/asyauth-0.0.25.tar.gz", sha256 = "6326599e7951bdf9fd1dfee20811dbbef41f5fdd591dbccb8d8af6d4edc36775" },
+    { url = "https://files.pythonhosted.org/packages/c2/19/7135d40e2b6402e56fb07ee2ccad9ef1e7de799c7a1da0f8961925699b3f/asyauth-0.0.26.tar.gz", sha256 = "4c0df27e9ba1a69cd59e37551181698ba77f503e4ecd9966b0a508f4c472f4d2" },
 ]
 
 environment = '''
