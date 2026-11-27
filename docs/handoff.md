@@ -181,6 +181,14 @@ sat for 10 to 25 minutes flushing to disk (2026-11-25): the test suite may be sl
   server's database is upgraded for good on first start; lxd-to-incus is gone. incus-ui is still 0.22.1: not
   checked against 7.7.
 
+## 2026-11-27: ffmpeg stays on 8.x (held, the user's decision; 9.0 not taken)
+
+- None of the seven CVEs Alpine lists as fixed in 9.0.2 is open in our 8.1.3: ffmpeg.org/security lists
+  CVE-2026-30999 as fixed in 8.1.2, and the fix commits it names for the other six (listed under 9.0) reverse-apply
+  cleanly to the 8.1.3 source, so their changes are in it. Only those seven were looked at.
+- ffmpeg builds against samba (`--enable-libsmbclient`), not the other way round; samba went to 4.23.13 on this day,
+  so the rebuild is the first test of that pair. The user: ffmpeg was a pain to get built with it.
+
 ## `wallet-engine`'s cached dependency list: nothing to do
 
 An earlier note asked for `cache/cargodeps/45d22ed4...da2.list` to be deleted by hand: it was uniffi-bindgen-cpp's
