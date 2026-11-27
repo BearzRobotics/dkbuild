@@ -3,17 +3,17 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "libraw"
-version = "0.21.4"
+version = "0.22.3"
 release = 1
 summary = "Raw image decoder library"
 license = "LGPL-2.1-only OR CDDL-1.0"
 homepage = "https://libraw.org"
-patches = ["fix-endian.patch"]
+# 0.22.3: fix-endian.patch is gone: upstream now asks __LITTLE_ENDIAN__ and __BYTE_ORDER__ before anything else
 hostdeps = ["pkgconf", "automake", "libtool"]
 builddeps = ["jasper-devel", "lcms2-devel", "libjpeg-turbo-devel", "zlib-ng-compat-devel"]
 
 source = [
-    { url = "https://libraw.org/data/LibRaw-0.21.4.tar.gz", sha256 = "6be43f19397e43214ff56aab056bf3ff4925ca14012ce5a1538a172406a09e63" },
+    { url = "https://libraw.org/data/LibRaw-0.22.3.tar.gz", sha256 = "789f3c33466210a1a0907f747a97c715d21bbf4af712f257fcbbd90111b227e4" },
 ]
 
 setup = '''

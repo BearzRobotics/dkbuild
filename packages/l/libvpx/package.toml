@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "libvpx"
-version = "1.15.2"
+version = "1.16.0"
 release = 1
 summary = "VP8 and VP9 codec implementation"
 license = "BSD-3-Clause"
@@ -14,7 +14,7 @@ builddeps = ["linux-headers"]
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/webmproject/libvpx/archive/v1.15.2.tar.gz", sha256 = "26fcd3db88045dee380e581862a6ef106f49b74b6396ee95c2993a260b4636aa" },
+    { url = "https://github.com/webmproject/libvpx/archive/v1.16.0.tar.gz", sha256 = "7a479a3c66b9f5d5542a4c6a1b7d3768a983b1e5c14c60a9396edc9b649e015c" },
 ]
 
 setup = '''
