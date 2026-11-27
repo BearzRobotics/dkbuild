@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "libgphoto2"
-version = "2.5.32"
+version = "2.5.34"
 release = 1
 summary = "Digital camera access library"
 license = "LGPL-2.1-or-later"
@@ -12,7 +12,7 @@ hostdeps = ["automake", "gettext-devel", "libtool", "pkgconf"]
 builddeps = ["libexif-devel", "libgd-devel", "libtool-devel", "libusb-devel", "libxml2-devel"]
 
 source = [
-    { url = "https://github.com/gphoto/libgphoto2/releases/download/v2.5.32/libgphoto2-2.5.32.tar.xz", sha256 = "495a347be21b8f970607a81e739aa91513a8479cbd73b79454a339c73e2b860e" },
+    { url = "https://github.com/gphoto/libgphoto2/releases/download/v2.5.34/libgphoto2-2.5.34.tar.xz", sha256 = "51993f5d9bfb6b4e5925cbbe5883085791bff6f81bcacb8ffe1b783ce76d586a" },
 ]
 
 setup = '''

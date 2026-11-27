@@ -6,8 +6,8 @@
 # manager compiles plugins with git and a toolchain on the user's machine).
 # glaze, which Hyprland would fetch at build time, is the glaze recipe.
 name = "hyprland"
-version = "0.57.1"
-release = 2
+version = "0.57.2"
+release = 1
 summary = "Dynamic tiling Wayland compositor"
 license = "BSD-3-Clause"
 homepage = "https://hyprland.org"
@@ -17,7 +17,7 @@ rundeps = ["aquamarine", "hyprcursor", "hyprgraphics", "hyprlang", "hyprutils"]
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/hyprwm/Hyprland/releases/download/v0.57.1/source-v0.57.1.tar.gz", sha256 = "24e7428f83115e58e5fc81f100f6b73691dcaaf7a503087391e44327a71c43ab" },
+    { url = "https://github.com/hyprwm/Hyprland/releases/download/v0.57.2/source-v0.57.2.tar.gz", sha256 = "34dbec0738ab88c8228caf89385662688ab1601ea58fbe5c60a6b6ab383db46d" },
 ]
 
 setup = '''

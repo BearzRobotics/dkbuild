@@ -12,7 +12,7 @@
 # /usr/share/doc/headscale/config-example.yaml; the service fails to start
 # until the administrator writes one); no user, key or node is created.
 name = "headscale"
-version = "0.29.7"
+version = "0.29.8"
 release = 1
 summary = "Open source, self-hosted Tailscale control server"
 license = "BSD-3-Clause"
@@ -21,7 +21,7 @@ hostdeps = ["go"]
 options = ["!check", "godeps"]
 
 source = [
-    { url = "https://github.com/juanfont/headscale/archive/refs/tags/v0.29.7.tar.gz", sha256 = "625e8f877ddcbacd0936dcd9bb191ea7b8914ef9f653b3e1a3b5fa6c611a36c8" },
+    { url = "https://github.com/juanfont/headscale/archive/refs/tags/v0.29.8.tar.gz", sha256 = "77dcadd5e9f6620a20152508af38d65e61aef2c9977bdc031d76db3355e54300" },
 ]
 
 environment = '''

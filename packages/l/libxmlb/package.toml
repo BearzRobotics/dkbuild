@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "libxmlb"
-version = "0.3.29"
+version = "0.3.30"
 release = 1
 summary = "Library to help create and query binary XML blobs"
 license = "LGPL-2.1-or-later"
@@ -15,7 +15,7 @@ rundeps = ["shared-mime-info"]
 options = ["!cross"]
 
 source = [
-    { url = "https://github.com/hughsie/libxmlb/releases/download/0.3.29/libxmlb-0.3.29.tar.xz", sha256 = "448294be33bfae62f00fa66e506f1cae80237ce71b7ab6530aefa75005eeb08a" },
+    { url = "https://github.com/hughsie/libxmlb/releases/download/0.3.30/libxmlb-0.3.30.tar.xz", sha256 = "2cb894b873aac5fc9e9b6228d4e795f7236d16e429ed2de8f95179a131be3a68" },
 ]
 
 setup = '''

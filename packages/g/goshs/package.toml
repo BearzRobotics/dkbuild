@@ -1,7 +1,7 @@
 # A single-binary file server for pentesters and sysadmins with HTTP/S, WebDAV, SFTP,... (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
 # Go module, dependencies fetched on the host (godeps). Main package: ..
 name = "goshs"
-version = "2.1.7"
+version = "2.1.8"
 release = 1
 summary = "A single-binary file server for pentesters and sysadmins with HTTP/S, WebDAV, SFTP,..."
 license = "MIT"
@@ -10,7 +10,7 @@ hostdeps = ["go"]
 options = ["!check", "godeps"]
 
 source = [
-    { url = "https://github.com/goshs-labs/goshs/archive/refs/tags/v2.1.7.tar.gz", sha256 = "7426eb37f6b5e773c1c256c30d76b797c61ee4ba7fd9bd7781f5e3b464af3fdd" },
+    { url = "https://github.com/goshs-labs/goshs/archive/refs/tags/v2.1.8.tar.gz", sha256 = "3d1e4ab15d7b6f5fba7d1e793fbb803dc085f6cc66d3c39d9f8a818ae4d55346" },
 ]
 
 environment = '''

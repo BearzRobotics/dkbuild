@@ -5,7 +5,7 @@
 # r1 had patches/sed.patch (from a BSD-sed system), which adds `-i ""`: our sed takes the "" as the script and the script as a
 # file ("sed: can't read s|#include...: No such file or directory"). Upstream's own command is right here: patch removed.
 name = "libayatana-appindicator"
-version = "0.6.0"
+version = "0.6.1"
 release = 1
 summary = "Ayatana App Indicators Shared Library"
 license = "GPL-3.0-only AND (LGPL-3.0-only OR LGPL-2.1-only)"
@@ -16,7 +16,7 @@ checkdeps = []
 options = ["!cross"]
 
 source = [
-    { url = "https://github.com/AyatanaIndicators/libayatana-appindicator/archive/refs/tags/0.6.0.tar.gz", sha256 = "23be92ad8eb9625ce93b23b14f82f3cf88a4970c31d48581945ddfbac0441d06" },
+    { url = "https://github.com/AyatanaIndicators/libayatana-appindicator/archive/refs/tags/0.6.1.tar.gz", sha256 = "56c0b938ffaa3e17b10c38d3e54c16d316f41f0da61949eda028adbf19ee767f" },
 ]
 
 setup = '''

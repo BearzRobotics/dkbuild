@@ -8,7 +8,7 @@
 # Installed inert (docs/requests.md): no service enabled, no site, no cron
 # job, no credentials; the README says how to set it up.
 name = "glpi"
-version = "12.0.1"
+version = "12.0.2"
 release = 1
 summary = "IT asset management and service desk"
 license = "GPL-3.0-or-later"
@@ -18,7 +18,7 @@ rundeps = ["php", "php-fpm", "nginx"]
 options = ["!check", "!strip"]
 
 source = [
-    { url = "https://github.com/glpi-project/glpi/releases/download/12.0.1/glpi-12.0.1.tgz", sha256 = "bf89a1be40ea76e4e7a6a5cea8fd24c9d822fab83e4e90519ff0c8d062f13291" },
+    { url = "https://github.com/glpi-project/glpi/releases/download/12.0.2/glpi-12.0.2.tgz", sha256 = "028d9d275cf747600bbbefe072fd0724c1d4e7eee18378e696fea60a73d50359" },
 ]
 
 install = '''

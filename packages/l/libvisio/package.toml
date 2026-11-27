@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "libvisio"
-version = "0.1.11"
+version = "0.1.12"
 release = 1
 summary = "Library for reading and converting MS Visio diagrams"
 license = "MPL-2.0"
@@ -12,7 +12,7 @@ hostdeps = ["automake", "gperf", "perl", "pkgconf", "libtool"]
 builddeps = ["boost-devel", "icu-devel", "librevenge-devel", "libxml2-devel"]
 
 source = [
-    { url = "http://dev-www.libreoffice.org/src/libvisio-0.1.11.tar.xz", sha256 = "2a6efd40b6d9dbcb70fba3be53112366882ba97b57151df3698dfa478c8d8dd3" },
+    { url = "https://dev-www.libreoffice.org/src/libvisio-0.1.12.tar.xz", sha256 = "f59fa2e3baf95475256fe84ea0aa1214f43940bae94424f4026b2d633933df01" },
 ]
 
 setup = '''

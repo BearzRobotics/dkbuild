@@ -6,7 +6,7 @@
 # --with-gsfontdir/--with-fontdir/--with-gsfontmap: font locations the build
 # bakes in; the Ghostscript Fontmap path is the one Alpine uses.
 name = "libwmf"
-version = "0.2.15"
+version = "0.2.17"
 release = 1
 summary = "Library for reading Windows Metafile (WMF) vector images"
 license = "LGPL-2.0-or-later"
@@ -16,7 +16,7 @@ builddeps = ["freetype-devel", "libexpat-devel", "libjpeg-turbo-devel", "libpng-
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/caolanm/libwmf/archive/v0.2.15.tar.gz", sha256 = "379ae041dd53ab35f55c9b73a78a31f1ce530e925023c31607b05f2199d867e6" },
+    { url = "https://github.com/caolanm/libwmf/archive/v0.2.17.tar.gz", sha256 = "b4ba7d95297f26341fcdd2595532eaf88026a251630985a3ab2e0443f4ee8d13" },
 ]
 
 setup = '''

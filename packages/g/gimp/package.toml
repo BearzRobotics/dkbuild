@@ -6,8 +6,8 @@
 # r2: glib-networking is required (meson.build: "Test for glib-networking failed. This is required."): the build runs a test that needs its TLS
 # module, and GIMP needs it at run time for the remote help pages and for opening https:// files. A build and run dependency.
 name = "gimp"
-version = "3.2.6"
-release = 2
+version = "3.2.8"
+release = 1
 summary = "GNU Image Manipulation Program"
 license = "GPL-3.0-only"
 homepage = "https://www.gimp.org"
@@ -19,7 +19,7 @@ rundeps = ["glib-networking", "iso-codes", "mypaint-brushes", "python-gobject"]
 options = ["!cross", "!check"]
 
 source = [
-    { url = "https://download.gimp.org/pub/gimp/v3.2/gimp-3.2.6.tar.xz", sha256 = "40b15e90ad0c0c631b76da3c467ea9847fa5c24f37413ac5b492804860a28cd8" },
+    { url = "https://download.gimp.org/pub/gimp/v3.2/gimp-3.2.8.tar.xz", sha256 = "16a2696cadc9e03a2ef97ccb895e062f654cb2b8211fb57074db85f26646c847" },
 ]
 
 setup = '''

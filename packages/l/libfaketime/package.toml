@@ -6,7 +6,7 @@
 # preload shim only works as a shared object, and upstream builds none.
 # The time64 variant is glibc-only (musl's time_t is always 64-bit).
 name = "libfaketime"
-version = "0.9.13"
+version = "0.9.14"
 release = 1
 summary = "Report a faked system time to programs (faketime)"
 license = "GPL-2.0-or-later"
@@ -18,7 +18,7 @@ checkdeps = ["bash"]
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/wolfcw/libfaketime/archive/refs/tags/v0.9.13.tar.gz", sha256 = "8e56deeb805682b025107e095f1d94a6ea677472f05824cd475f5c5e6e1a5ddf" },
+    { url = "https://github.com/wolfcw/libfaketime/archive/refs/tags/v0.9.14.tar.gz", sha256 = "d6468957b11bae8e541524ad43f2cdf91e5d87c8996183897c0499856024c90c" },
 ]
 
 build = '''

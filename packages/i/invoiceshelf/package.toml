@@ -13,7 +13,7 @@
 # Installed inert (docs/requests.md): no service enabled, no site, no cron
 # job, no credentials; the README says how to set it up.
 name = "invoiceshelf"
-version = "2.4.7"
+version = "2.4.8"
 release = 1
 summary = "Self-hosted invoicing and expense tracking"
 license = "AGPL-3.0-only"
@@ -23,7 +23,7 @@ rundeps = ["php", "php-fpm", "nginx"]
 options = ["!check", "!strip"]
 
 source = [
-    { url = "https://github.com/InvoiceShelf/InvoiceShelf/releases/download/2.4.7/InvoiceShelf.zip", sha256 = "047ddcedc556c634c9cc3029560fa3f3cb81099e3f6cb1ee2147a8fc7c098ca9" },
+    { url = "https://github.com/InvoiceShelf/InvoiceShelf/releases/download/2.4.8/InvoiceShelf.zip", sha256 = "b9b7c9300e1d0e291d3d0a5b6a010eb4f4fa918c82a63b73efb41aff024c47e8" },
 ]
 
 install = '''

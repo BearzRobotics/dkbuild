@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/libharu/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "libharu"
-version = "2.4.5"
+version = "2.4.6"
 release = 1
 summary = "C library for generating pdfs"
 license = "Zlib"
@@ -10,7 +10,7 @@ hostdeps = ["cmake", "ninja"]
 builddeps = ["libpng-devel", "zlib-ng-compat-devel"]
 
 source = [
-    { url = "https://github.com/libharu/libharu/archive/refs/tags/v2.4.5.tar.gz", sha256 = "0ed3eacf3ceee18e40b6adffbc433f1afbe3c93500291cd95f1477bffe6f24fc" },
+    { url = "https://github.com/libharu/libharu/archive/refs/tags/v2.4.6.tar.gz", sha256 = "ec8f327520d1d354ce58b5d2af75b64f380cddc522437c169463b39760921348" },
 ]
 
 setup = '''

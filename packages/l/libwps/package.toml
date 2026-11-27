@@ -3,8 +3,8 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "libwps"
-version = "0.4.14"
-release = 10
+version = "0.4.15"
+release = 1
 summary = "Library for importing Microsoft Works documents"
 license = "MPL-2.0 OR LGPL-2.1-or-later"
 homepage = "https://sourceforge.net/p/libwps/wiki/Home"
@@ -12,7 +12,7 @@ hostdeps = ["pkgconf", "automake", "libtool"]
 builddeps = ["librevenge-devel", "boost-devel"]
 
 source = [
-    { url = "https://downloads.sourceforge.net/sourceforge/libwps/libwps-0.4.14.tar.xz", sha256 = "365b968e270e85a8469c6b160aa6af5619a4e6c995dbb04c1ecc1b4dd13e80de" },
+    { url = "https://downloads.sourceforge.net/sourceforge/libwps/libwps-0.4.15.tar.xz", sha256 = "5b29f1ccd5a0f0737d0f8ff49a1f1c01f5988833c028e7882525136c40674ccc" },
 ]
 
 setup = '''

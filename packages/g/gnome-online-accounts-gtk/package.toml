@@ -3,7 +3,7 @@
 # Linux Mint's), NOT part of gnome-online-accounts (3.58 has no UI) and not
 # gnome-control-center. 3.50.x is the current series; it needs goa >= 3.50.
 name = "gnome-online-accounts-gtk"
-version = "3.50.11"
+version = "3.50.13"
 release = 1
 summary = "GTK frontend for GNOME Online Accounts"
 license = "GPL-3.0-or-later"
@@ -14,7 +14,7 @@ rundeps = ["gnome-online-accounts"]
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/xapp-project/gnome-online-accounts-gtk/archive/refs/tags/3.50.11.tar.gz", sha256 = "c4c14a9d7b06d3323a32f7835dde7a75070b7d5e62609223ee46b26545cf03ac" },
+    { url = "https://github.com/xapp-project/gnome-online-accounts-gtk/archive/refs/tags/3.50.13.tar.gz", sha256 = "fa11c5db202515220aee861c57966e89777556f31636967c2c63fab6abafc591" },
 ]
 
 setup = '''

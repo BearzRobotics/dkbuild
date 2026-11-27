@@ -1,8 +1,8 @@
 # After Chimera Linux cports: main/libid3tag. cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # ID3 tags (the Tenacity team's maintained libid3tag). needed by: sox_ng.
 name = "libid3tag"
-version = "0.16.3"
-release = 2
+version = "0.16.4"
+release = 1
 summary = "ID3 tag manipulation library"
 license = "GPL-2.0-or-later"
 homepage = "https://codeberg.org/tenacityteam/libid3tag"
@@ -10,7 +10,7 @@ hostdeps = ["cmake", "ninja", "pkgconf"]
 builddeps = ["zlib-ng-compat-devel"]
 
 source = [
-    { url = "https://codeberg.org/tenacityteam/libid3tag/archive/0.16.3.tar.gz", sha256 = "0561009778513a95d91dac33cee8418d6622f710450a7cb56a74636d53b588cb" },
+    { url = "https://codeberg.org/tenacityteam/libid3tag/archive/0.16.4.tar.gz", sha256 = "2e9058af51e5f3881c13c55a9790abb9870812cc0f5917b6f3e825c6ae9b9f39" },
 ]
 
 setup = '''

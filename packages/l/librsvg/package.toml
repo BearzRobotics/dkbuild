@@ -7,8 +7,8 @@
 # r3: static libraries too (in librsvg-static), for fully static programs on musl.
 # 2026-11-11: the gdk-pixbuf SVG loader (SVG icons in GTK), introspection, Vala, AVIF.
 name = "librsvg"
-version = "2.63.2"
-release = 9
+version = "2.63.4"
+release = 1
 summary = "SVG library for GNOME"
 license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
 homepage = "https://wiki.gnome.org/Projects/LibRsvg"
@@ -17,7 +17,7 @@ builddeps = ["cairo-devel", "freetype-devel", "gdk-pixbuf-devel", "glib-devel", 
 options = ["!check", "cargodeps"]
 
 source = [
-    { url = "https://download.gnome.org/sources/librsvg/2.63/librsvg-2.63.2.tar.xz", sha256 = "852b18e1a00b8605528825a27dc7748bff2a5dd254028f59dc22a34ea57e81b6" },
+    { url = "https://download.gnome.org/sources/librsvg/2.63/librsvg-2.63.4.tar.xz", sha256 = "31f07d9350dad3f8964fd613c31309ac160fdef13dfac59df6fd082de78d6e8f" },
 ]
 
 environment = '''

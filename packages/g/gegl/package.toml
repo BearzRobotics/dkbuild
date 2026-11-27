@@ -3,8 +3,8 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "gegl"
-version = "0.4.70"
-release = 2
+version = "0.4.72"
+release = 1
 summary = "Graph-based image processing framework"
 license = "GPL-3.0-only AND LGPL-3.0-only"
 homepage = "https://gegl.org"
@@ -13,7 +13,7 @@ hostdeps = ["gettext", "glib-devel", "gobject-introspection", "pkgconf", "python
 builddeps = ["babl-devel", "exiv2-devel", "ffmpeg-devel", "gexiv2-devel", "jasper-devel", "json-glib-devel", "lensfun-devel", "libraw-devel", "librsvg-devel", "libspiro-devel", "libwebp-devel", "openexr-devel", "pango-devel", "poppler-devel", "v4l-utils-devel", "vala-devel"]
 
 source = [
-    { url = "https://download.gimp.org/pub/gegl/0.4/gegl-0.4.70.tar.xz", sha256 = "47f50d9c3aecd375deb48c11ebfead52d162e4fc162a4b3d44618277f1faec02" },
+    { url = "https://download.gimp.org/pub/gegl/0.4/gegl-0.4.72.tar.xz", sha256 = "ccbb8cdd1db56ecd4ece5dbabae0118ab2c46b5b3439c94f3cec467798ce956d" },
 ]
 
 setup = '''

@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "librist"
-version = "0.2.11"
+version = "0.2.20"
 release = 1
 summary = "Reliable Internet Stream Transport"
 license = "BSD-2-Clause"
@@ -13,7 +13,7 @@ builddeps = ["cjson-devel", "cmocka-devel", "linux-headers", "mbedtls-devel"]
 options = ["!check"]
 
 source = [
-    { url = "https://code.videolan.org/rist/librist/-/archive/v0.2.11/librist-v0.2.11.tar.bz2", sha256 = "f254842900a9dd20fb477b05ea0cce3ec1a8004d85177eef2408eefddca68b86" },
+    { url = "https://code.videolan.org/rist/librist/-/archive/v0.2.20/librist-v0.2.20.tar.bz2", sha256 = "20a5cdce88ccaeab11cd8860c82c565472f21572705d9a476265c5148bf4aeb1" },
 ]
 
 setup = '''

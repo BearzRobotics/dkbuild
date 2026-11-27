@@ -2,7 +2,7 @@
 # Linux's testing/geos (MIT-licensed APKBUILD and patches; the software's licence is LGPL-2.1-or-later).
 # Not built (queued, wip/queue): expect first-build fixes.
 name = "geos"
-version = "3.15.0"
+version = "3.15.1"
 release = 1
 summary = "GEOS: geometry engine (Java Topology Suite port) for GIS: the library under Shapely and PostGIS"
 license = "LGPL-2.1-or-later"
@@ -12,7 +12,7 @@ builddeps = []
 options = ["!check"]
 
 source = [
-    { url = "https://download.osgeo.org/geos/geos-3.15.0.tar.bz2", sha256 = "d5e5192a686d065eaed082de14dd26244c5c8e02bff16b2c6cce3265f648e00e" },
+    { url = "https://download.osgeo.org/geos/geos-3.15.1.tar.bz2", sha256 = "8eb6dc2ea78b00c2f5109c6b0dba9e028c60bad42d7b1b0cc9952b12dc71f571" },
 ]
 
 # libc++ no longer includes <type_traits> (std::add_const) and its neighbours transitively: the usual gap headers are force-included for every C++ file

@@ -3,8 +3,8 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "libseccomp"
-version = "2.6.1"
-release = 2
+version = "2.6.2"
+release = 1
 summary = "High level interface to seccomp"
 license = "LGPL-2.1-or-later"
 homepage = "https://github.com/seccomp/libseccomp"
@@ -13,7 +13,7 @@ hostdeps = ["automake", "bash", "gperf", "sed", "pkgconf", "libtool"]
 builddeps = ["linux-headers"]
 
 source = [
-    { url = "https://github.com/seccomp/libseccomp/archive/v2.6.1.tar.gz", sha256 = "f9a13e4c633d319a9240189760ca348caa0837c0ebe2a09b17061da8ceaf60f0" },
+    { url = "https://github.com/seccomp/libseccomp/archive/v2.6.2.tar.gz", sha256 = "4e3dfa94dfc4c2aa21e5e707e5bfebc87063f2461b1d22f84e9d1ed507db7e4b" },
 ]
 
 setup = '''

@@ -1,8 +1,8 @@
 # Imported from Chimera Linux cports: main/libgsf/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "libgsf"
-version = "1.14.53"
-release = 2
+version = "1.14.61"
+release = 1
 summary = "Structured File Library"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://gitlab.gnome.org/GNOME/libgsf"
@@ -11,7 +11,7 @@ builddeps = ["gdk-pixbuf-devel", "libxml2-devel"]
 checkdeps = ["perl-xml-parser", "unzip"]
 
 source = [
-    { url = "https://download.gnome.org/sources/libgsf/1.14/libgsf-1.14.53.tar.xz", sha256 = "0eb59a86e0c50f97ac9cfe4d8cc1969f623f2ae8c5296f2414571ff0a9e8bcba" },
+    { url = "https://download.gnome.org/sources/libgsf/1.14/libgsf-1.14.61.tar.xz", sha256 = "59698b8fdf3db2dae03bb492826168dd9073ff762ccc11e980306aabe97087aa" },
 ]
 
 setup = '''

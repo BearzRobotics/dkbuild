@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/iceauth/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "iceauth"
-version = "1.0.10"
+version = "1.0.11"
 release = 1
 summary = "ICE protocol utility"
 license = "MIT"
@@ -10,7 +10,7 @@ hostdeps = ["automake", "pkgconf", "xorg-util-macros"]
 builddeps = ["xorgproto", "libice-devel"]
 
 source = [
-    { url = "https://www.x.org/releases/individual/app/iceauth-1.0.10.tar.gz", sha256 = "f17f373c6e7bfef9cfa4c688f165dfebec7642ad7c6304c5bb3c9bc2bfcde747" },
+    { url = "https://www.x.org/releases/individual/app/iceauth-1.0.11.tar.gz", sha256 = "db417cae6d966e67892ebc3034ec92238af9733c53b5986e56cc8be7db540b3a" },
 ]
 
 setup = '''

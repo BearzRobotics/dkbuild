@@ -5,8 +5,8 @@
 # r3: static libraries too (in labwc-static), for fully static programs on musl.
 # r4: Xwayland support (the xwayland package is optional; desktop-dkde brings it); labwc starts Xwayland when the first X11 program connects.
 name = "labwc"
-version = "0.20.2"
-release = 5
+version = "0.20.3"
+release = 1
 summary = "Stacking wayland compositor"
 license = "GPL-2.0-only"
 homepage = "https://github.com/labwc/labwc"
@@ -15,7 +15,7 @@ builddeps = ["cairo-devel", "glib-devel", "libdrm-devel", "librsvg-devel", "libs
 rundeps = []
 
 source = [
-    { url = "https://github.com/labwc/labwc/archive/refs/tags/0.20.2.tar.gz", sha256 = "fae023b6fe022f7057556707a17cdb2d98e0138c5dffaedaa1dade975699f9e8" },
+    { url = "https://github.com/labwc/labwc/archive/refs/tags/0.20.3.tar.gz", sha256 = "1e70a5b74f149c5b47da76063dbdf967c44b2d7b6e94d3fdf65f70fc252f65c9" },
 ]
 
 setup = '''

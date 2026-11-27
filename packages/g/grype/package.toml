@@ -1,7 +1,7 @@
 # A vulnerability scanner for container images and filesystems. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
 # Go module, dependencies fetched on the host (godeps). Main package: cmd/grype. CGO is on (libpcap or SQLite in go.mod).
 name = "grype"
-version = "0.122.0"
+version = "0.122.1"
 release = 1
 summary = "A vulnerability scanner for container images and filesystems."
 license = "Apache-2.0"
@@ -11,7 +11,7 @@ builddeps = ["libpcap-devel"]
 options = ["!check", "godeps"]
 
 source = [
-    { url = "https://github.com/anchore/grype/archive/refs/tags/v0.122.0.tar.gz", sha256 = "0dd01b59d92287b080258a7fb2cd905f8de88ea07d95d747ec062cd8b96c021d" },
+    { url = "https://github.com/anchore/grype/archive/refs/tags/v0.122.1.tar.gz", sha256 = "d801d084d24d19cd916a3cb4aaa1e12b26833f50698cd968c9ff815a0e7839b4" },
 ]
 
 environment = '''

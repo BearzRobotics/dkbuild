@@ -2,7 +2,7 @@
 # templates (the 3D models are kicad-packages3d). From Alpine's
 # community/kicad-library, plus the templates.
 name = "kicad-library"
-version = "10.0.7"
+version = "10.0.8"
 release = 1
 summary = "KiCad symbol, footprint and template libraries"
 license = "CC-BY-SA-4.0 WITH KiCad-libraries-exception"
@@ -13,9 +13,9 @@ rundeps = ["kicad"]
 options = ["!check", "!strip"]
 
 source = [
-    { url = "https://gitlab.com/kicad/libraries/kicad-symbols/-/archive/10.0.7/kicad-symbols-10.0.7.tar.gz", sha256 = "951f1392d3de6a258eea9b67fccce7d0bfd5af3e768e85c445a2240e19138c98" },
-    { url = "https://gitlab.com/kicad/libraries/kicad-footprints/-/archive/10.0.7/kicad-footprints-10.0.7.tar.gz", sha256 = "dcbe41c2ceb28c5a7a2a2b0c51c258ff1cb086c8516d7fcbd01cfd82861c37c7" },
-    { url = "https://gitlab.com/kicad/libraries/kicad-templates/-/archive/10.0.7/kicad-templates-10.0.7.tar.gz", sha256 = "c60aebcb9872282d3f240a0874a847d7f28c23ddd0f4a3bb7c56c4b6ef1319a5" },
+    { url = "https://gitlab.com/kicad/libraries/kicad-symbols/-/archive/10.0.8/kicad-symbols-10.0.8.tar.gz", sha256 = "f7fc4be38bd21ff97fa7532dd61b98600981d66986a7958d5a7c274bc435250c" },
+    { url = "https://gitlab.com/kicad/libraries/kicad-footprints/-/archive/10.0.8/kicad-footprints-10.0.8.tar.gz", sha256 = "94d712756d3129df9886fd005a69669973a31865827eadf762722eeefcdb1763" },
+    { url = "https://gitlab.com/kicad/libraries/kicad-templates/-/archive/10.0.8/kicad-templates-10.0.8.tar.gz", sha256 = "4e5b6fe99e532a5aa88afc2fa0c935674a5bf2b873491dbf15ac0c1212756eb9" },
 ]
 
 build = '''

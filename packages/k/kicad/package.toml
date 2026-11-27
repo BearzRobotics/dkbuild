@@ -5,7 +5,7 @@
 # QA tests are not built (Alpine's two patches only fix tests). Alpine pins
 # Boost 1.84; this builds against the system Boost.
 name = "kicad"
-version = "10.0.7"
+version = "10.0.8"
 release = 1
 summary = "Electronics design automation suite (schematic and PCB)"
 license = "GPL-3.0-or-later"
@@ -21,7 +21,7 @@ rundeps = ["python", "python-wxpython", "python-cairosvg", "ngspice"]
 options = ["!check"]
 
 source = [
-    { url = "https://gitlab.com/kicad/code/kicad/-/archive/10.0.7/kicad-10.0.7.tar.gz", sha256 = "f0592c1348851e3e4917270f72443404fbc3a9a0daa60b2ed80419ce7ef45993" },
+    { url = "https://gitlab.com/kicad/code/kicad/-/archive/10.0.8/kicad-10.0.8.tar.gz", sha256 = "0723fedd82522fcd33cb9d8ad53979a35f6e4d3ec627c4e2e2708dfcba360574" },
 ]
 
 setup = '''

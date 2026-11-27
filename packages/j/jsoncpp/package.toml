@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "jsoncpp"
-version = "1.9.6"
+version = "1.9.8"
 release = 1
 summary = "C++ library for interacting with JSON"
 license = "MIT"
@@ -11,7 +11,7 @@ homepage = "https://github.com/open-source-parsers/jsoncpp"
 hostdeps = ["pkgconf"]
 
 source = [
-    { url = "https://github.com/open-source-parsers/jsoncpp/archive/refs/tags/1.9.6.tar.gz", sha256 = "f93b6dd7ce796b13d02c108bc9f79812245a82e577581c4c9aabe57075c90ea2" },
+    { url = "https://github.com/open-source-parsers/jsoncpp/archive/refs/tags/1.9.8.tar.gz", sha256 = "51828cf3574281d2b79ec2a1c56a9e4c20cc1103711321ea96384cffb8d2d904" },
 ]
 
 setup = '''
