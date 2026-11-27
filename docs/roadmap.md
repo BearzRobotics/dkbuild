@@ -47,9 +47,25 @@ much more than the disk ever had.
      that `base-devel` already includes.
   2. **Stage 2 itself:** each build installs its declared dependencies from `repo/` with `apk add` (checked
      dependencies, install scripts run) instead of unpacking files over the base image.
+  Step 1 was tried on 2026-11-27: both commands work, and found gaps in `base-devel` and the toolchain packages,
+  fixed in the recipes and to be tried again once they are rebuilt (docs/handoff.md).
   Expect many recipes to fail until their dependencies are declared. Keep DKRescue as the fallback and the first
   bootstrap. Decide whether the base image's version is recorded with each package (changing it rebuilds nothing
   today). Fits before the planned rebuild from an empty repository.
+- **UEFI, to sort out after the world rebuild** (the user, 2026-11-27; the uncle uses BIOS). Seen in QEMU with OVMF
+  on the ISOs made that day:
+  1. **dklilo sometimes cannot read the ISO.** `/boot/initrd.img: IoError` or `/boot/vmlinuz: IoError`, or no login
+     prompt in 120 s: with the desktop ISO, the first full boot failed, a retry booted, and of 8 repeats 4 booted, 2
+     gave IoError and 2 timed out. The ISO's checksum and boot files were right. The CLI ISO booted in its one full
+     run; it and the older ISOs were not repeated. The host was heavily loaded (load about 17), not ruled out. The
+     loader on an ISO is the **DKRescue image's** dklilo (`dklilo mkiso-images` runs there), not the repository's.
+     The error comes from the firmware's BlockIo read (`src/uefi/main.zig`).
+  2. **No RTC interrupt** under UEFI on both QEMU machine types (`HPET_emulated: no`, none counted on IRQ 8). The
+     `hwclock` service gets by with `--directisa`; the cause is open, and not only UEFI's: the uncle's BIOS machine
+     times out the same way. q35 under SeaBIOS worked. A lead, not confirmed: on i440fx under SeaBIOS (kernel loaded
+     by QEMU, `-kernel`) the clock worked with `rtc_cmos.use_acpi_alarm=0` and with `hpet=disable`, and timed out
+     with `rtc_cmos.use_acpi_alarm=1`. No option was tried under UEFI. RTC wake alarms may be affected too (not
+     tried).
 - **B3, images**: partly done. The live ISOs boot; the installed-system image
   (`images/fenriros.toml`) still outputs only a tar, and the checks SPEC 13
   attributes to DKRescue's `CONSTRAINTS.md` cannot be run because that file is

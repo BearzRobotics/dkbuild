@@ -74,6 +74,60 @@ sat for 10 to 25 minutes flushing to disk (2026-11-25): the test suite may be sl
   `import.sh`, `apk update` and adding the five packages above worked. Today's recipes would leave 94 recipes out.
 - The `useradd` warning about /usr/bin/nologin in image logs: shadow r7 lacks the link; r8 has it (not built).
 
+## 2026-11-27: the development toolchain, and stage 2 step 1
+
+- Compile tests in the unpacked `out/dkde-devel-cli` ISO (not booted; the desktop ISO's log lists the same missing
+  packages): zig and a plain C program with `gcc-15` worked. clang, clang++, CMake, rustc, cargo, static links and
+  anything linking `-lm` failed (`g++-15` too). `base-devel` lacked llvm-libcxx-devel; musl's empty `libm.a` and
+  the like were in musl-static; libc++.a and libunwind.a in llvm-static; there was no `cc` or `c++`; `rust` did not
+  depend on `rust-libs`, which held the one link rustc loads its library by.
+- Fixed in the recipes, **none built**: `base-devel` r3 lists musl-static, llvm-libcxx-devel and the new
+  llvm-libcxx-static; musl r6 has the empty archives in musl-devel; llvm (r8) has `cc` and `c++` in llvm-clang;
+  rust r8 `replaces` rust-libs. dkbuild: a link no longer goes into `-libs` without the file it leads to (only
+  rust was affected, of 580), and a build root gets what a `-static` depends on. The ISOs need rebuilding after
+  the packages.
+- On a system installed from the old images: `apk add llvm-libcxx-devel musl-static llvm-static rust-libs`, then
+  `ln -s clang /usr/bin/cc` and `ln -s clang++ /usr/bin/c++` (tried in the unpacked ISO). `g++-15` programs need
+  `-static` or `-Wl,-rpath,/usr/lib/gcc15/lib`, as the gcc recipe says. With dummy packages: after the rebuild,
+  an upgrade that left an old musl-static in place beside the new musl-devel stopped on a file conflict; upgrading
+  both worked. So upgrade the whole system.
+- Stage 2 step 1: `dkbuild image images/container-build.toml` and `bootstrap-root --dest` work unchanged, tried in
+  `/mnt/dkbuild/stage2-tree` (its `repo/` and `rootfs/dkrescue` are links to the real ones). The root made from
+  today's packages passes `bootstrap-root`'s check, runs zig and takes `apk add` over it, but cannot compile C
+  until the packages above are rebuilt. It also lacks `file`, `unzip`, `bzip2`, `ps`, `getconf` and `ld`: not yet
+  decided which belong in `base-devel`.
+
+## 2026-11-27: the dkde-devel ISOs made again "for now"; the uncle's boot problems
+
+- Both `out/dkde-devel*/*.iso` (made 09:24 and 09:26; sha256 `e7df778c...52bf` desktop, `2b78d8d8...7c1f` cli): every
+  main package whose -libs is there, the toolchain packages above, and tree (new recipe, built by the user). Checked
+  unpacked, **not booted**: the compilers (cc, c++, gcc-15, rustc, cargo, zig, CMake), tree, the boot files,
+  `dinit-check`, no -libs without its main package. The 2026-11-26 ISOs are kept in `/mnt/dkbuild/iso/*-final.iso`.
+- **The tree's dkbuild does not make the same images:** they were made with a one-off copy
+  (`/mnt/dkbuild/stage2-tree/dkbuild-cclinks`, only `src/image.zig` differs) that links `cc` and `c++` to clang and
+  writes dinit-services r9's `early-filesystems.sh`, `auxfscheck` and `filesystems` over r8's. The temporary lines in
+  the two image files, and the one-off, go once the packages are rebuilt (`rust-libs` will then not exist).
+- Reported by the uncle, fixed in dinit-services r9 (not built): the boot fsck checked noauto and mounted entries
+  (reproduced with `fsck -N`); early boot mounted without looking, and `/dev` under another source name than fstab's
+  (`mount -a` then mounts again: reproduced with `mount -f`). `/run/dinitctl` missing: **cause not confirmed**; dinit
+  only looks again after a `starts-rwfs` service, so `filesystems` has that option now. On a running system
+  `kill -USR1 1` remakes the socket (from dinit's source, not tried). Wanted from him: `findmnt`, `/etc/fstab`,
+  `ls -l /run/dinitctl`.
+- `hwclock -s` times out on the uncle's BIOS machine too. dinit-services r9 and the one-off now run `hwclock.sh`,
+  which tries `--directisa` after a failure. The uncle uses BIOS; **the UEFI problems found in QEMU wait until after
+  the world rebuild** (docs/roadmap.md). The boot test scripts are in `/mnt/dkbuild/stage2-tree/qemu`.
+- The ISOs were made again with that (09:55, 09:57; sha256 `b0920b8c...d92c` desktop, `cc8d9b25...02e8` cli; these
+  replace the ones above). BIOS boots in QEMU: both ISOs, the cli also on q35: nothing mounted twice, /run/dinitctl
+  there, no failed service, the desktop's programs run. The `--directisa` fallback was seen to work and set the time
+  (i440fx, `rtc_cmos.use_acpi_alarm=1`, which reproduces the timeout). Installing was not tried. The full test suite
+  passed before the later boot script and tree changes (24 ok, forgotten-dep skipped by design).
+- Asked the uncle to try `rtc_cmos.use_acpi_alarm=0` once from the boot menu (a lead, not confirmed).
+- He reinstalls from the new ISO. To update it later: a repository (disc, folder or server) of the rebuilt packages,
+  `apk update`, `apk upgrade --available --simulate` first; then `apk del rust-libs`.
+- Updates, agreed order: security fixes, then patch releases and the KDE sets, then GCC and chosen others, the rest
+  after the rebuild. **LLVM is not to be updated now** (nor flang, clang-tools-extra and the others that share its
+  version). `dkbuild upstream --refresh` gave 1129 results (work/upstream/report.txt); no recipe updated yet.
+
 ## `wallet-engine`'s cached dependency list: nothing to do
 
 An earlier note asked for `cache/cargodeps/45d22ed4...da2.list` to be deleted by hand: it was uniffi-bindgen-cpp's
