@@ -28,11 +28,13 @@ const usage =
     \\  world [-j N] [-P N] [--key FILE] [--keep-root] [--no-check] [--keep-going] [--force] [--color=auto|always|never]
     \\                             build every recipe in the tree that is out of date
     \\                             (-j: jobs per build; -P: builds at once, default 1)
-    \\  image [-v|--verbose] <file.toml>
+    \\  image [-v|--verbose] [--date] <file.toml>
     \\                             make a root filesystem from repo/ (tarball, squashfs or
     \\                             directory in out/<name>/); see SPEC.md 8. --verbose
     \\                             lists the packages asked for and shows each package
-    \\                             apk installs (and the rest of the run) as it happens
+    \\                             apk installs (and the rest of the run) as it happens.
+    \\                             --date also keeps the ISO as
+    \\                             out/archive/<name>-YYYYMMDD-HHMM.iso
     \\  discs [--media M] [--key FILE] <file.toml>
     \\                             the repository (kind = "repo") or the sources ("source")
     \\                             as ISO images in out/<name>/: one image (media usb) or a
@@ -512,10 +514,13 @@ pub fn main(init: std.process.Init) !void {
         if (n == 0) std.debug.print("nothing changed without a release bump\n", .{});
     } else if (std.mem.eql(u8, cmd, "image")) {
         var verbose = false;
+        var dated = false;
         var file: ?[]const u8 = null;
         for (rest) |a| {
             if (std.mem.eql(u8, a, "-v") or std.mem.eql(u8, a, "--verbose")) {
                 verbose = true;
+            } else if (std.mem.eql(u8, a, "--date")) {
+                dated = true;
             } else if (file == null and !std.mem.startsWith(u8, a, "-")) {
                 file = a;
             } else return die(usage);
@@ -533,7 +538,7 @@ pub fn main(init: std.process.Init) !void {
             },
             else => return err,
         };
-        imagefile.build(arena, init.io, img, .{ .root = root, .verbose = verbose }) catch |err| switch (err) {
+        imagefile.build(arena, init.io, img, .{ .root = root, .verbose = verbose, .dated = dated }) catch |err| switch (err) {
             error.OutOfMemory => return err,
             else => std.process.exit(1),
         };

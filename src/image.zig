@@ -129,6 +129,7 @@ fn parseChecked(arena: Allocator, text: []const u8, diag: *Diagnostic) cfg.Error
         return cfg.fail(arena, diag, "unknown output '{s}'; give any of rootfs, tar, squashfs, iso", .{o});
     if (contains(img.output, "iso") and !contains(img.packages, "live-initramfs"))
         return cfg.fail(arena, diag, "the iso output needs 'live-initramfs' in packages (the live system's initramfs)", .{});
+    if (std.mem.eql(u8, img.name, "archive")) return cfg.fail(arena, diag, "name 'archive' is taken: out/archive/ keeps dated ISOs", .{});
     if (img.label.len > 32) return cfg.fail(arena, diag, "label '{s}' is longer than an ISO volume label (32)", .{img.label});
     for (img.repositories) |r| if (r.len == 0 or std.mem.indexOfAny(u8, r, "\n\r") != null or std.mem.indexOf(u8, r, "DKREPO_EOF") != null)
         return cfg.fail(arena, diag, "repositories: one non-empty line each, no newlines", .{});
@@ -346,6 +347,10 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
                 \\# image that came with its kernel, never another ISO's that happens to be on some drive.
                 \\buildid=$(cat /proc/sys/kernel/random/uuid)
                 \\echo "$buildid" > "$t/live/build.id"
+                \\# Which image this is, in the system (/etc/fenriros-image) and on the disc, so that a report of a
+                \\# problem can name the exact ISO, whatever the file or USB stick is called.
+                \\printf 'IMAGE={0s}\nBUILT=%s\nBUILD_ID=%s\n' "$DKIMAGE_STAMP" "$buildid" > /target/etc/fenriros-image
+                \\cp /target/etc/fenriros-image "$t/live/image.info"
                 \\mksquashfs /target "$t/live/rootfs.sfs" -comp zstd -noappend -quiet
                 \\# The image's own dklilo: its boot loader goes onto the disc. The build machine's is
                 \\# whatever its image was made with (DKRescue's 0.0.1 had no keyboard at a BIOS menu).
@@ -402,7 +407,52 @@ pub const Options = struct {
     /// Show the image script's output (apk's "Installing <package>" lines,
     /// services, users, outputs) while it runs, not only in the log.
     verbose: bool = false,
+    /// Also keep the ISO under a dated name in out/archive/ (see `keepDated`).
+    dated: bool = false,
 };
+
+/// The time an image is made, YYYYMMDD-HHMM in the build machine's time zone: in the ISO (/etc/fenriros-image,
+/// live/image.info) and, with `--date`, in the kept copy's name.
+fn timeStamp(arena: Allocator, io: std.Io) ![]const u8 {
+    const r = std.process.run(arena, io, .{ .argv = &.{ "date", "+%Y%m%d-%H%M" } }) catch return error.PrepareFailed;
+    const s = std.mem.trim(u8, r.stdout, " \n");
+    if (r.term != .exited or r.term.exited != 0 or s.len != 13 or !safeWord(s)) return error.PrepareFailed;
+    return s;
+}
+
+/// Keeps out/<name>/<name>.iso as out/archive/<name>-<stamp>.iso, with its .sha256 and the image's log beside it,
+/// so that one exact ISO can still be named after later builds have replaced out/<name>/. A hard link, so it costs
+/// no space while out/<name>/ holds the same ISO (a copy where links do not work). Nothing is ever written over: a
+/// second ISO of the same minute gets "-2". Returns the kept ISO's path.
+fn keepDated(arena: Allocator, io: std.Io, root: []const u8, name: []const u8, stamp: []const u8) ![]const u8 {
+    const dir = try std.fs.path.join(arena, &.{ root, "out", "archive" });
+    Dir.cwd().createDirPath(io, dir) catch return error.ArchiveFailed;
+    const made = try std.fmt.allocPrint(arena, "{s}/out/{s}/{s}.iso", .{ root, name, name });
+    var n: u8 = 1;
+    const base, const iso = while (n < 100) : (n += 1) {
+        const base = if (n == 1) try std.fmt.allocPrint(arena, "{s}-{s}", .{ name, stamp }) else try std.fmt.allocPrint(arena, "{s}-{s}-{d}", .{ name, stamp, n });
+        const iso = try std.fmt.allocPrint(arena, "{s}/{s}.iso", .{ dir, base });
+        _ = Dir.cwd().statFile(io, iso, .{ .follow_symlinks = false }) catch |err| switch (err) {
+            error.FileNotFound => break .{ base, iso },
+            else => return error.ArchiveFailed,
+        };
+    } else return error.ArchiveFailed;
+    if (!runs(arena, io, &.{ "ln", "--", made, iso }) and !runs(arena, io, &.{ "cp", "--", made, iso })) return error.ArchiveFailed;
+    const sum = std.process.run(arena, io, .{ .argv = &.{ "sha256sum", "--", iso } }) catch return error.ArchiveFailed;
+    if (sum.term != .exited or sum.term.exited != 0 or sum.stdout.len < 64) return error.ArchiveFailed;
+    // the line `sha256sum -c` reads, naming the file without its directory
+    Dir.cwd().writeFile(io, .{
+        .sub_path = try std.fmt.allocPrint(arena, "{s}.sha256", .{iso}),
+        .data = try std.fmt.allocPrint(arena, "{s}  {s}.iso\n", .{ sum.stdout[0..64], base }),
+    }) catch return error.ArchiveFailed;
+    if (!runs(arena, io, &.{ "cp", "--", try std.fmt.allocPrint(arena, "{s}/out/{s}/image.log", .{ root, name }), try std.fmt.allocPrint(arena, "{s}/{s}.log", .{ dir, base }) })) return error.ArchiveFailed;
+    return iso;
+}
+
+fn runs(arena: Allocator, io: std.Io, argv: []const []const u8) bool {
+    const r = std.process.run(arena, io, .{ .argv = argv }) catch return false;
+    return r.term == .exited and r.term.exited == 0;
+}
 
 /// Deletes an image's directory and says whether it is gone. In a `rootfs` output, users' homes and service
 /// accounts' files belong to the caller's sub-ids, which the caller cannot remove: what is left after an ordinary
@@ -480,6 +530,14 @@ pub fn build(arena: Allocator, io: std.Io, img: Image, opts: Options) !void {
         Dir.cwd().createDirPath(io, rel) catch return error.PrepareFailed;
         p.* = Dir.cwd().realPathFileAlloc(io, rel, arena) catch return error.PrepareFailed;
     }
+    if (opts.dated and !contains(img.output, "iso")) {
+        std.debug.print("error: --date is for an ISO, and image {s} makes none\n", .{img.name});
+        return error.PrepareFailed;
+    }
+    const stamp = timeStamp(arena, io) catch {
+        std.debug.print("error: cannot read the time with `date`\n", .{});
+        return error.PrepareFailed;
+    };
     const text = try script(arena, img);
     const script_path = try std.fs.path.join(arena, &.{ abs[5], "image.sh" });
     Dir.cwd().writeFile(io, .{ .sub_path = script_path, .data = text }) catch return error.PrepareFailed;
@@ -506,7 +564,7 @@ pub fn build(arena: Allocator, io: std.Io, img: Image, opts: Options) !void {
             .{ .src = abs[3], .dst = "/dkkeys", .read_only = true },
             .{ .src = script_path, .dst = "/image.sh", .read_only = true },
         },
-        .env = &.{ "PATH=/usr/bin:/usr/sbin:/bin:/sbin", "HOME=/root" },
+        .env = &.{ "PATH=/usr/bin:/usr/sbin:/bin:/sbin", "HOME=/root", try std.fmt.allocPrint(arena, "DKIMAGE_STAMP={s}", .{stamp}) },
         .argv = &.{ "/usr/bin/sh", "/image.sh" },
         .ids = ids,
         .echo = opts.verbose,
@@ -549,6 +607,16 @@ pub fn build(arena: Allocator, io: std.Io, img: Image, opts: Options) !void {
         if (std.mem.eql(u8, o, "iso")) std.debug.print(" {s}/{s}.iso", .{ final_rel, img.name });
     }
     std.debug.print("; log: {s}/image.log\n", .{final_rel});
+    if (opts.dated) {
+        const kept = keepDated(arena, io, opts.root, img.name, stamp) catch |err| switch (err) {
+            error.OutOfMemory => return err,
+            else => {
+                std.debug.print("error: the image was made, but its dated copy could not be kept in {s}/out/archive/\n", .{opts.root});
+                return error.BuildFailed;
+            },
+        };
+        std.debug.print("    kept as {s}\n", .{kept});
+    }
 }
 
 fn contains(hay: []const []const u8, needle: []const u8) bool {
@@ -632,6 +700,9 @@ test "image files parse; bad outputs, excluded packages and odd names are refuse
     try std.testing.expect(std.mem.indexOf(u8, ls, "\necho \"$buildid\" > \"$t/live/build.id\"\n") != null);
     try std.testing.expectEqual(@as(usize, 4), std.mem.count(u8, ls, " fenriros.build=@BUILDID@\"\n"));
     try std.testing.expect(std.mem.indexOf(u8, ls, "\nsed -i \"s/@BUILDID@/$buildid/g\" \"$t/boot/dklilo.conf\"\n") != null);
+    // the system and the disc say which build they are, with the same ID as the boot entries
+    try std.testing.expect(std.mem.indexOf(u8, ls, "\nprintf 'IMAGE=base\\nBUILT=%s\\nBUILD_ID=%s\\n' \"$DKIMAGE_STAMP\" \"$buildid\" > /target/etc/fenriros-image\ncp /target/etc/fenriros-image \"$t/live/image.info\"\n") != null);
+    try std.testing.expect(std.mem.indexOf(u8, ls, "> /target/etc/fenriros-image\n").? < std.mem.indexOf(u8, ls, "\nmksquashfs /target \"$t/live/rootfs.sfs\"").?);
     try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\npackages = [\"a-devel\"]\nexclude = [\"*-devel\"]\noutput = [\"tar\"]\n", &diag));
     try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\npackages = [\"a;rm\"]\noutput = [\"tar\"]\n", &diag));
     const s = try script(a, img);
@@ -640,6 +711,35 @@ test "image files parse; bad outputs, excluded packages and odd names are refuse
     try std.testing.expect(std.mem.indexOf(u8, s, "useradd -R /target -m -s '/bin/bash' -G 'wheel,video' 'fenrir'") != null);
     try std.testing.expect(std.mem.indexOf(u8, s, "fenriros.tar.zst") != null);
     try std.testing.expect(std.mem.indexOf(u8, s, "mksquashfs") == null);
+}
+
+test "a dated ISO is kept in out/archive/, is never written over and outlives its out/<name>/" {
+    var arena_state = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena_state.deinit();
+    const a = arena_state.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const root = try std.fmt.allocPrint(a, ".zig-cache/tmp/{s}", .{tmp.sub_path});
+    try tmp.dir.createDirPath(io, "out/x");
+    try tmp.dir.writeFile(io, .{ .sub_path = "out/x/x.iso", .data = "first" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "out/x/image.log", .data = "log" });
+    const first = try keepDated(a, io, root, "x", "20261127-1530");
+    try std.testing.expect(std.mem.endsWith(u8, first, "/out/archive/x-20261127-1530.iso"));
+    // what a later image run does: the old directory goes, a new ISO takes its place, here in the same minute
+    try tmp.dir.deleteTree(io, "out/x");
+    try tmp.dir.createDirPath(io, "out/x");
+    try tmp.dir.writeFile(io, .{ .sub_path = "out/x/x.iso", .data = "second" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "out/x/image.log", .data = "log" });
+    const second = try keepDated(a, io, root, "x", "20261127-1530");
+    try std.testing.expect(std.mem.endsWith(u8, second, "/out/archive/x-20261127-1530-2.iso"));
+    try std.testing.expectEqualStrings("first", try Dir.cwd().readFileAlloc(io, first, a, .limited(64)));
+    try std.testing.expectEqualStrings("second", try Dir.cwd().readFileAlloc(io, second, a, .limited(64)));
+    // sha256 of "first", in the form `sha256sum -c` reads
+    try std.testing.expectEqualStrings("a7937b64b8caa58f03721bb6bacf5c78cb235febe0e70b1b84cd99541461a08e  x-20261127-1530.iso\n", try tmp.dir.readFileAlloc(io, "out/archive/x-20261127-1530.iso.sha256", a, .limited(256)));
+    try std.testing.expectEqualStrings("log", try tmp.dir.readFileAlloc(io, "out/archive/x-20261127-1530.log", a, .limited(64)));
+    var diag: Diagnostic = .{};
+    try std.testing.expectError(error.InvalidImage, parse(a, "name = \"archive\"\npackages = [\"a\"]\noutput = [\"tar\"]\n", &diag));
 }
 
 test "an image name that would name another directory is refused (ID-03)" {

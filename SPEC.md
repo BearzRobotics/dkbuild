@@ -1246,6 +1246,15 @@ The boot menu has four entries: the default, `-safe` (`nomodeset`), `-toram`
 (the system image is copied into RAM and the medium let go; with too little
 free memory, or a failed copy, it boots from the medium as usual) and
 `-serial`. It needs
+Every ISO says which build it is, whatever its file or USB stick is called: `/etc/fenriros-image` in the live system
+and `live/image.info` on the disc hold the image's name, the build time (`BUILT=YYYYMMDD-HHMM`, the build machine's
+time zone) and the build ID (below). To report a problem, give that file (`cat /etc/fenriros-image`).
+
+With `--date`, once the image has succeeded, its ISO is also kept as `out/archive/<name>-<BUILT>.iso`, with
+`.sha256` and the image's log beside it. Later builds replace `out/<name>/` and leave `out/archive/` alone. The kept
+ISO is a hard link (a copy where links do not work), nothing there is written over (a second one of the same minute
+gets `-2`), and nothing there is ever removed by dkbuild: delete old ones by hand. No image may be named `archive`.
+
 Each ISO gets a new random ID, in `live/build.id` and as `fenriros.build=` on
 every boot entry. The live init boots only a system image with that ID: from a
 disc with the label, or, if none has appeared after 15 seconds, from an `.iso`
@@ -1528,7 +1537,7 @@ inside a namespace the installed root runs `apk --version`, `sh`, `ls` and
 | `dkbuild python-lock <uv.lock\|pylock.toml\|requirements> [-o FILE]` | Writes a `pydeps` lock (7.4) |
 | `dkbuild yarn-lock <yarn.lock> [-o FILE]` | Pins a yarn lockfile's packages for `npmdeps` (7.4) |
 | `dkbuild upstream [--all] [--refresh] [--notify] [<name>...]` | Reports recipes with a newer upstream release, from each recipe's first source: `git ls-remote` tags for git hosts (GitHub, GitLab, Codeberg, kernel.org, ...), GNOME's cache.json, PyPI, crates.io, npm, MetaCPAN, SourceForge's RSS, and otherwise the HTTP directory listing (and versioned directories above it: KDE, X.org, GNU, ...). **Pre-releases are never reported** (the tree ships releases) unless `upstream.toml` opts a package in with `prerelease = true`: marked in words (alpha, beta, rc, dev, pre, preview, snapshot, nightly, test, canary), or, on git tags, listings, SourceForge and GNOME, in numbers (a part after the first that is 90-99 or 900-999 with no release among the nine below it, such as 2.4.99 after 2.4.4; not a series the recipe is already on, such as tcpdump 4.99.x). A pre-release flagged only on a forge's release page is not recognised (`ignore`). `upstream.toml` at the tree root also pins a series, gives another URL or regex, ignores versions, or skips a package, without touching recipes. `tests/upstream-rules.py` checks the version rules. Results are cached 12 hours in `work/upstream/`; `--all` lists what could not be checked; `--notify` sends a desktop notification (contrib/systemd has a daily user timer). Changes nothing |
-| `dkbuild image [-v\|--verbose] <file>` | Builds an image (8); `--verbose` (`-v`) lists the packages asked for and shows the run as it happens (apk's `Installing <package>` lines, services, users, outputs); without it the run's output is only in `out/<name>/image.log` |
+| `dkbuild image [-v\|--verbose] [--date] <file>` | Builds an image (8); `--verbose` (`-v`) lists the packages asked for and shows the run as it happens (apk's `Installing <package>` lines, services, users, outputs); without it the run's output is only in `out/<name>/image.log`. `--date` (ISO images) also keeps the ISO as `out/archive/<name>-YYYYMMDD-HHMM.iso` with `.sha256` and `.log` (8) |
 | `dkbuild bootstrap-root [--force] [--dest DIR] <image>` | Unpacks the stage 0 build machine and checks it (9.2) |
 | `dkbuild prune [--dry-run] [--key FILE]` | Removes packages from `repo/` that their recipe no longer builds (older versions, dropped subpackages), once the recipe's present version is built, and rebuilds the index (signed with the key); also prunes the dependency stores (7.4). Packages no recipe provides are reported, not removed |
 | `--tree DIR` | Before the command: use the recipe tree at `DIR` instead of the current directory |

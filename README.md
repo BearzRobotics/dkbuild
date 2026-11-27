@@ -87,7 +87,7 @@ dependency chains; rebuilds; installing from the repository. They run once for e
 | `dkbuild doctor` | checks the host and prints the fixes |
 | `dkbuild bootstrap-root <iso\|sfs\|tar>` | unpacks the build machine into `rootfs/dkrescue` and checks it |
 | `dkbuild check [name]...` | validates recipes |
-| `dkbuild image [-v] <file.toml>` | makes an image from repo/: tar, squashfs, directory or a live ISO (BIOS and UEFI); `--verbose` shows each package; see docs/install.md |
+| `dkbuild image [-v] [--date] <file.toml>` | makes an image from repo/: tar, squashfs, directory or a live ISO (BIOS and UEFI); `--verbose` shows each package; `--date` also keeps the ISO under a dated name in `out/archive/`; see docs/install.md |
 | `dkbuild discs [--media M] [--key FILE] <file.toml>` | the repository or the sources as ISO images (one for usb, or a set for cd, dvd, bd25, bd50, bd100) |
 | `dkbuild prune [--dry-run] [--key FILE]` | removes older versions of packages from repo/ and rebuilds the index |
 | `dkbuild outdated [--bump]` | recipes changed since their last build without a new release |

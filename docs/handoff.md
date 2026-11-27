@@ -289,6 +289,9 @@ first), and the temporary lines in both dkde-devel image files go (`rust-libs` w
   Fixed in dinit r2 (`reset-sigpipe.patch`; applies strictly, **not compiled**). In the booted image check, in a login
   shell and in a desktop terminal: `grep SigIgn /proc/$$/status` has bit 0x1000 clear, and `seq 100000 | grep . |
   head -n1` is quiet. On an old image: `exec env --default-signal=PIPE bash` (a shell cannot reset it with trap).
+- [ ] **Dated ISOs** (2026-11-27): make every ISO that is handed out with `dkbuild image --date`, hand out the copy in
+  `out/archive/`, and run `tests/iso-check.sh` on that file. In the booted image `cat /etc/fenriros-image` names the
+  same build; ask for it in every problem report. Needs a rebuilt zig-out/bin/dkbuild.
 - [ ] Open, not fixed by a rebuild: **Ctrl+Alt+F1..F12 in the Wayland desktop** (dkde-compositor keeps no wlr_session
   and handles no VT keys; a prompt was given for the dkde session: needs a new dkde and its recipe here); **the
   uncle's CLI image "boots to the desktop"** and the flashing console (he added `video=`; waiting for its value and

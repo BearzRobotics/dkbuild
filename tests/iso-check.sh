@@ -59,6 +59,16 @@ has() { awk -v p="$1" '{ if ($2 == p) { found = 1; exit } } END { exit !found }'
 # fetch PATH...: those files, into $W/r
 fetch() { unsquashfs -no-xattrs -q -n -f -p 2 -d "$W/r" "$W/rootfs.sfs" "$@" >/dev/null 2>&1; chmod -R u+rwX "$W/r" 2>/dev/null; }
 
+# which build this is, as the disc says it (dkbuild image writes live/image.info)
+built_stamp=
+info_id=
+if xorriso -osirrox on -indev "$iso" -extract /live/image.info "$W/image.info" >/dev/null 2>&1 && [ -s "$W/image.info" ]; then
+    built_stamp=$(sed -n 's/^BUILT=//p' "$W/image.info")
+    info_id=$(sed -n 's/^BUILD_ID=//p' "$W/image.info")
+    say "stamp  $built_stamp (build ID $info_id)"
+    say ""
+fi
+
 # ---- 1. which image this is: the name, the label and what it starts ----------------------------------------------
 base=$(basename "$iso" .iso)
 want=
@@ -87,6 +97,15 @@ entries=$(grep -c 'append = "root=live:' "$W/boot/dklilo.conf")
 if [ -n "$id" ] && [ "$(grep 'append = "root=live:' "$W/boot/dklilo.conf" | grep -c "fenriros\.build=${id}[ \"]")" = "$entries" ]; then
     ok "the disc has a build ID, and all $entries boot entries ask for it"
 else bad "no build ID on the disc and its boot entries: another ISO's system on some drive could be booted instead"; fi
+# the same build is named by the disc, by the system itself and, if it has a date, by the file's name
+fetch /etc/fenriros-image
+if [ -z "$built_stamp" ] || [ "$info_id" != "$id" ] || ! cmp -s "$W/image.info" "$W/r/etc/fenriros-image"; then
+    bad "live/image.info and /etc/fenriros-image are missing or disagree: a problem report cannot name this ISO"
+else
+    named=$(basename "$iso" .iso | sed -n 's/.*-\([0-9]\{8\}-[0-9]\{4\}\)\(-[0-9]*\)\{0,1\}$/\1/p')
+    if [ -z "$named" ] || [ "$named" = "$built_stamp" ]; then ok "the ISO says which build it is: $built_stamp"
+    else bad "the file is dated $named, but the ISO inside says $built_stamp"; fi
+fi
 # the live system's startup script is this tree's, and the menu offers to run from RAM
 if grep -Eq 'root=live:LABEL=[^ "]+ toram[ "]' "$W/boot/dklilo.conf"; then ok "the boot menu has the toram entry (run from RAM)"
 else bad "the boot menu has no toram entry"; fi
