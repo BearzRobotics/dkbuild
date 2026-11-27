@@ -171,6 +171,16 @@ sat for 10 to 25 minutes flushing to disk (2026-11-25): the test suite may be sl
   CVE-2022-0529, -0530 (Alpine's patches do not apply after ours), and its CVE-2015-7696, -7697 not looked at;
   qt6-qtwebengine's list (not looked at); giflib's two fixed only in 6.x.
 
+## 2026-11-27: Incus 7.7.0, for its security fixes (not built)
+
+- The user: upgrade where the security problems are major; hold ffmpeg 9. GitHub's published advisories for lxc/incus
+  read that day: 116, every one with 7.7.0 or earlier among its fixed versions; most are fixed only in 7.x. No 6.x
+  release that fixes them all was found.
+- Needs Linux 6.12, LXC 6.0, QEMU 8.2, nftables 1.0, dnsmasq 2.90 (met). The recipe now makes the translation
+  catalogs first (7.x embeds them; the tarball has none) and leaves the generate-* developer tools out. A 6.x
+  server's database is upgraded for good on first start; lxd-to-incus is gone. incus-ui is still 0.22.1: not
+  checked against 7.7.
+
 ## `wallet-engine`'s cached dependency list: nothing to do
 
 An earlier note asked for `cache/cargodeps/45d22ed4...da2.list` to be deleted by hand: it was uniffi-bindgen-cpp's
