@@ -2,7 +2,7 @@
 # does for pure-Python wheels) is installed as it is: its sdist needs a build backend that is not packaged here.
 # Not built (queued, wip/queue).
 name = "python-typer"
-version = "0.29.1"
+version = "0.29.3"
 release = 1
 summary = "Build command line interfaces from Python type hints"
 license = "MIT"
@@ -12,9 +12,9 @@ rundeps = ["python", "python-click", "python-typing-extensions", "python-rich", 
 options = ["!check"]
 
 source = [
-    { url = "https://files.pythonhosted.org/packages/05/ff/51969745f31cea6bcd12151e668febcf979656316e67a7755942267c1273/typer-0.29.1-py3-none-any.whl", sha256 = "00dbc549c13428bec1be55fe1f4d0fb8c6637a310e4f178ef14abe9534ee7b58", unpack = false },
+    { url = "https://files.pythonhosted.org/packages/d9/43/a3e7ce867dc4fa852f4223ada99d29bc9ba5faf32496b63ec587cd10a0d7/typer-0.29.3-py3-none-any.whl", sha256 = "1fd37275046faecc86caa2e0e313978c10db71533fc0fe1a48f4e03a60efc23c", unpack = false },
 ]
 
 install = '''
-python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr /build/sources/typer-0.29.1-py3-none-any.whl
+python3 -m pip install --no-deps --no-index --no-compile --root "$pkgdir" --prefix /usr /build/sources/typer-0.29.3-py3-none-any.whl
 '''

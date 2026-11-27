@@ -3,12 +3,13 @@
 # GnuCash's report engine and scripting. With its static library (Chimera
 # builds none; no reason given).
 name = "guile"
-version = "3.0.10"
-release = 5
+version = "3.0.11"
+release = 1
 summary = "GNU Scheme implementation"
 license = "LGPL-3.0-or-later AND GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/guile"
-patches = ["0002-Mark-mutex-with-owner-not-retained-threads-test-as-u.patch", "aarch64.patch", "disable-broken.patch", "failing-encoding-test.patch", "failing-filesys-test.patch", "posix.patch"]
+# 3.0.11: upstream now has posix.patch, removed
+patches = ["0002-Mark-mutex-with-owner-not-retained-threads-test-as-u.patch", "aarch64.patch", "disable-broken.patch", "failing-encoding-test.patch", "failing-filesys-test.patch"]
 hostdeps = ["automake", "gettext-devel", "gperf", "libtool", "pkgconf"]
 builddeps = ["gc-devel", "gmp-devel", "libffi-devel", "libunistring-devel", "ncurses-devel", "readline-devel"]
 # r4: tests off: standalone test-ffi fails in the sandbox (the other standalone tests pass); the
@@ -19,7 +20,7 @@ builddeps = ["gc-devel", "gmp-devel", "libffi-devel", "libunistring-devel", "ncu
 options = ["!lto", "!check", "!strip"]
 
 source = [
-    { url = "https://ftp.gnu.org/gnu/guile/guile-3.0.10.tar.gz", sha256 = "2dbdbc97598b2faf31013564efb48e4fed44131d28e996c26abe8a5b23b56c2a" },
+    { url = "https://ftp.gnu.org/gnu/guile/guile-3.0.11.tar.gz", sha256 = "3c9c16972a73bb792752f2e4f1cce7212d7638d5494b5f7e8e19f3819dbf3a19" },
 ]
 
 setup = '''

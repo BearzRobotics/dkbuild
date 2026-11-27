@@ -1,6 +1,6 @@
 # Check email address and username availability on online platforms. (BlackArch list, requested 2026-11-16; docs/requests.md). Python application installed with pip from the source tarball, its dependencies are packages of the tree. Generated from pyproject/setup.py (setuptools.build_meta:__legacy__); not built yet when written (wip/queue): expect first-build fixes.
 name = "socialscan"
-version = "2.0.0"
+version = "2.0.1"
 release = 1
 summary = "Check email address and username availability on online platforms."
 license = "MPL-2.0"
@@ -12,11 +12,11 @@ rundeps = ["python"]
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/iojw/socialscan/archive/refs/tags/v2.0.0.tar.gz", sha256 = "c6bbb73e1a0464ed8567c35e97ce3eee3e41547575c5bdbee525f100058aa2d9" },
+    { url = "https://github.com/iojw/socialscan/archive/refs/tags/v2.0.1.tar.gz", sha256 = "72d0c551df09b0a234cce611d94fe23eb8fc67c96c662b0344f41133092f4502" },
 ]
 
 environment = '''
-export SETUPTOOLS_SCM_PRETEND_VERSION=2.0.0 PDM_BUILD_SCM_VERSION=2.0.0
+export SETUPTOOLS_SCM_PRETEND_VERSION=2.0.1 PDM_BUILD_SCM_VERSION=2.0.1
 '''
 install = '''
 python3 -m pip install --no-deps --no-build-isolation --no-index --no-compile \

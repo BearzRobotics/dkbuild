@@ -9,7 +9,7 @@
 # the binary is installed by hand (the CMake install/deploy rules copy Qt into the prefix).
 # UNVERIFIED: first build.
 name = "proton-bridge-gui"
-version = "3.27.1"
+version = "3.27.2"
 release = 1
 summary = "Proton Mail Bridge graphical front end (Qt 6)"
 license = "GPL-3.0-or-later"
@@ -20,7 +20,7 @@ builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "
 rundeps = ["proton-bridge", "qt6-qtdeclarative", "qt6-qtsvg"]
 
 source = [
-    { url = "https://github.com/ProtonMail/proton-bridge/archive/refs/tags/v3.27.1.tar.gz", sha256 = "57191e08f5f3204d414aabe54972ea18d9e1dd76d7f71d21a1456a280aa52605" },
+    { url = "https://github.com/ProtonMail/proton-bridge/archive/refs/tags/v3.27.2.tar.gz", sha256 = "720ced16f25b6f92758f2117edc9ccd7511c66202097ba6b1630ab29d6b097b6" },
 ]
 
 setup = '''
@@ -31,10 +31,10 @@ chmod 755 extern/vcpkg/vcpkg
 cd internal/frontend/bridge-gui
 cmake -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib \
     -DCMAKE_BUILD_TYPE=Release \
-    -DBRIDGE_APP_VERSION=3.27.1 \
+    -DBRIDGE_APP_VERSION=3.27.2 \
     -DBRIDGE_APP_FULL_NAME="Proton Mail Bridge" \
     -DBRIDGE_VENDOR="Proton AG" \
-    -DBRIDGE_REVISION=v3.27.1 -DBRIDGE_TAG=v3.27.1 \
+    -DBRIDGE_REVISION=v3.27.2 -DBRIDGE_TAG=v3.27.2 \
     -DBRIDGE_BUILD_TIME=2026-11-06T00:00:00+0000 \
     -DBRIDGE_BUILD_ENV=prod -DBRIDGE_DSN_SENTRY= \
     -S .

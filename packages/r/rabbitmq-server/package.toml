@@ -23,7 +23,7 @@
 # Setup: /usr/share/doc/rabbitmq-server/README.FenrirOS.
 # No tests (they need a running broker cluster and Docker).
 name = "rabbitmq-server"
-version = "4.4.0"
+version = "4.4.1"
 release = 1
 summary = "RabbitMQ message broker"
 license = "MPL-2.0 AND Apache-2.0 AND MIT AND ISC AND BSD-3-Clause AND BSD-2-Clause"
@@ -33,11 +33,11 @@ rundeps = ["erlang", "shadow"]
 options = ["!check", "!strip"]
 
 source = [
-    { url = "https://github.com/rabbitmq/rabbitmq-server/releases/download/v4.4.0/rabbitmq-server-4.4.0.tar.xz", sha256 = "e6fb6eb6b0d26d96efe7e726f694d19a9c1cd89bbe9344a8bfd4c020095a6278" },
+    { url = "https://github.com/rabbitmq/rabbitmq-server/releases/download/v4.4.1/rabbitmq-server-4.4.1.tar.xz", sha256 = "dbe50d6e29a9e3842f42baa780814e0218a5e77cf2175fd46ca731f3f68acf9d" },
 ]
 
 environment = '''
-export HOME=/tmp/home LANG=C.UTF-8 LC_ALL=C.UTF-8 RABBITMQ_VERSION=4.4.0
+export HOME=/tmp/home LANG=C.UTF-8 LC_ALL=C.UTF-8 RABBITMQ_VERSION=4.4.1
 rmq_dirs="PREFIX=/usr RMQ_ROOTDIR=/usr/lib/rabbitmq MANDIR=/usr/share/man"
 '''
 build = '''

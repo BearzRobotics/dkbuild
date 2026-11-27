@@ -3,18 +3,18 @@
 # defines std::char_traits for non-character types, so the UString code
 # points become char32_t/char16_t.
 name = "mygui"
-version = "3.4.3"
+version = "3.4.4"
 release = 1
 summary = "Fast, flexible and simple GUI"
 license = "MIT"
 homepage = "https://github.com/MyGUI/mygui"
-patches = ["char-traits.patch"]
+# 3.4.4: upstream now has char-traits.patch, removed
 hostdeps = ["cmake", "ninja", "pkgconf", "doxygen"]
 builddeps = ["boost-devel", "freetype-devel", "libx11-devel", "mesa-devel", "sdl2-compat-devel", "zlib-ng-compat-devel"]
 options = ["!check"]  # no test suite is built
 
 source = [
-    { url = "https://github.com/MyGUI/mygui/archive/MyGUI3.4.3.tar.gz", sha256 = "33c91b531993047e77cace36d6fea73634b8c17bd0ed193d4cd12ac7c6328abd" },
+    { url = "https://github.com/MyGUI/mygui/archive/MyGUI3.4.4.tar.gz", sha256 = "2b4b87c5c04cd9a33413d0ccebc1aa03b56c72873901633c85be2652ceb6785b" },
 ]
 
 setup = '''

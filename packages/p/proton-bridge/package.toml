@@ -15,7 +15,7 @@
 # The `bridge` program goes to /usr/lib/proton-bridge/ because bridge-gui looks for it in its
 # own directory.
 name = "proton-bridge"
-version = "3.27.1"
+version = "3.27.2"
 release = 1
 summary = "Proton Mail Bridge: local IMAP/SMTP gateway for Proton Mail"
 license = "GPL-3.0-or-later"
@@ -27,7 +27,7 @@ rundeps = ["libsecret"]
 options = ["godeps", "!check"]
 
 source = [
-    { url = "https://github.com/ProtonMail/proton-bridge/archive/refs/tags/v3.27.1.tar.gz", sha256 = "57191e08f5f3204d414aabe54972ea18d9e1dd76d7f71d21a1456a280aa52605" },
+    { url = "https://github.com/ProtonMail/proton-bridge/archive/refs/tags/v3.27.2.tar.gz", sha256 = "720ced16f25b6f92758f2117edc9ccd7511c66202097ba6b1630ab29d6b097b6" },
 ]
 
 environment = '''
@@ -39,7 +39,7 @@ build = '''
 # credits.go (the dependency list shown in About) is generated from go.mod by a bash script.
 ( cd utils && bash ./credits.sh bridge )
 c=github.com/ProtonMail/proton-bridge/v3/internal/constants
-go build -tags= -ldflags "-X $c.Version=3.27.1 -X $c.Revision=v3.27.1 -X $c.Tag=v3.27.1 \
+go build -tags= -ldflags "-X $c.Version=3.27.2 -X $c.Revision=v3.27.2 -X $c.Tag=v3.27.2 \
   -X $c.BuildTime=2026-11-06T00:00:00+0000 -X \"$c.FullAppName=Proton Mail Bridge\" -X $c.BuildEnv=prod" \
   -o bridge ./cmd/Desktop-Bridge/
 '''
