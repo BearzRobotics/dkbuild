@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/breeze-gtk/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "breeze-gtk"
-version = "6.8.2"
+version = "6.8.3"
 release = 1
 summary = "KDE Breeze widget theme for GTK"
 license = "CC0-1.0"
@@ -10,7 +10,7 @@ hostdeps = ["breeze", "cmake", "extra-cmake-modules", "gettext", "ninja", "pytho
 builddeps = ["breeze-devel", "qt6-qtbase-devel"]
 
 source = [
-    { url = "https://download.kde.org/stable/plasma/6.8.2/breeze-gtk-6.8.2.tar.xz", sha256 = "662337b96be3fb67f5ecf903bbd685b894b6b899464822e09311f652a98bc4dd" },
+    { url = "https://download.kde.org/stable/plasma/6.8.3/breeze-gtk-6.8.3.tar.xz", sha256 = "9b96db2c0dd1a6ca018f9bb1cea4ed0947f140cd30f2106d9652448202e47c50" },
 ]
 
 setup = '''

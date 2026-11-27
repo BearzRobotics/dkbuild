@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/plasma-disks/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "plasma-disks"
-version = "6.8.2"
+version = "6.8.3"
 release = 1
 summary = "KDE disk failure monitor"
 license = "GPL-2.0-only OR GPL-3.0-only"
@@ -12,7 +12,7 @@ checkdeps = []
 rundeps = ["smartmontools"]
 
 source = [
-    { url = "https://download.kde.org/stable/plasma/6.8.2/plasma-disks-6.8.2.tar.xz", sha256 = "3432198413c86745e0fdf551361c55b26684b580ce5116a05d9cf973beb92a28" },
+    { url = "https://download.kde.org/stable/plasma/6.8.3/plasma-disks-6.8.3.tar.xz", sha256 = "56b112d35776a76fb42ab6fd7ad54328eacf5ed396e7342f2bc08744144b6d90" },
 ]
 
 setup = '''

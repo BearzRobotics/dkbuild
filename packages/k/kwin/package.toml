@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/kwin/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "kwin"
-version = "6.8.2"
+version = "6.8.3"
 release = 1
 summary = "KDE Wayland compositor"
 license = "GPL-2.0-or-later AND (GPL-2.0-only OR GPL-3.0-only) AND LGPL-2.1-only"
@@ -13,7 +13,7 @@ rundeps = ["aurorae", "hwdata", "milou", "qt6-qtmultimedia", "xwayland"]
 options = ["!check"]
 
 source = [
-    { url = "https://download.kde.org/stable/plasma/6.8.2/kwin-6.8.2.tar.xz", sha256 = "ea5e68d957c7d70abed97222a592d4445fda29129e20942658badd224ee138b4" },
+    { url = "https://download.kde.org/stable/plasma/6.8.3/kwin-6.8.3.tar.xz", sha256 = "fd5cb783f220ea4526a9afee2f72b582c3e87ef7f91b19bc5c7a6662ffe7fbdc" },
 ]
 
 setup = '''

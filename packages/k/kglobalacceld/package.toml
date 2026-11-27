@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/kglobalacceld/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "kglobalacceld"
-version = "6.8.2"
+version = "6.8.3"
 release = 1
 summary = "KDE Daemon for global keyboard shortcut functionality"
 license = "LGPL-2.0-or-later"
@@ -11,7 +11,7 @@ builddeps = ["kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-
 checkdeps = ["dbus"]
 
 source = [
-    { url = "https://download.kde.org/stable/plasma/6.8.2/kglobalacceld-6.8.2.tar.xz", sha256 = "aeedd8546b25e3907497eebb041f1ad3ca5044d9893b5cc654100a0312ecc3f6" },
+    { url = "https://download.kde.org/stable/plasma/6.8.3/kglobalacceld-6.8.3.tar.xz", sha256 = "e0fa8b3d951e85d1713e92f4d5c0622a5b0cd441a50383b8b26ac25cceab45c6" },
 ]
 
 setup = '''

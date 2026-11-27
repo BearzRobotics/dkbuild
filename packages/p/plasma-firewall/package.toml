@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/plasma-firewall/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "plasma-firewall"
-version = "6.8.2"
+version = "6.8.3"
 release = 1
 summary = "KDE control panel for the system firewall"
 license = "GPL-3.0-only"
@@ -11,7 +11,7 @@ builddeps = ["kauth-devel", "kcmutils-devel", "kconfig-devel", "ki18n-devel", "l
 checkdeps = []
 
 source = [
-    { url = "https://download.kde.org/stable/plasma/6.8.2/plasma-firewall-6.8.2.tar.xz", sha256 = "f6e55ac4bbd06b11f79b5eae162930cd9ed335ac5168cadec54808bdb33c15a7" },
+    { url = "https://download.kde.org/stable/plasma/6.8.3/plasma-firewall-6.8.3.tar.xz", sha256 = "de78d3c92f8808c7765f072e361037351dc5f9b62f02db8c6f23f06f2d873230" },
 ]
 
 setup = '''

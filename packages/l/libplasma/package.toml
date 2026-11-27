@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/libplasma/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "libplasma"
-version = "6.8.2"
+version = "6.8.3"
 release = 1
 summary = "Foundational libraries, components, and tools for Plasma workspaces"
 license = "LGPL-2.1-or-later AND GPL-2.0-or-later"
@@ -11,7 +11,7 @@ builddeps = ["karchive-devel", "kcmutils-devel", "kconfig-devel", "kconfigwidget
 checkdeps = []
 
 source = [
-    { url = "https://download.kde.org/stable/plasma/6.8.2/libplasma-6.8.2.tar.xz", sha256 = "d63a270b5aaba6144c1ddd215d509ff3b350d3d7a0ac08e539d58a043b061b29" },
+    { url = "https://download.kde.org/stable/plasma/6.8.3/libplasma-6.8.3.tar.xz", sha256 = "76f081f2d96c7dccf1f29fa0a301572d0115b0c5bec1b32ede0fea4a45c254c4" },
 ]
 
 setup = '''

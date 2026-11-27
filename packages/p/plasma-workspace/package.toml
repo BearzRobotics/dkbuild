@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/plasma-workspace/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "plasma-workspace"
-version = "6.8.2"
+version = "6.8.3"
 release = 1
 summary = "KDE Plasma Workspace"
 license = "MIT AND GPL-3.0-only AND LGPL-3.0-only"
@@ -13,7 +13,7 @@ checkdeps = ["dbus", "python-gobject"]
 rundeps = ["appmenu-gtk-module", "iso-codes", "kio-extras", "kio-fuse", "kirigami-addons", "kquickcharts", "kwin", "milou", "xwayland"]
 
 source = [
-    { url = "https://download.kde.org/stable/plasma/6.8.2/plasma-workspace-6.8.2.tar.xz", sha256 = "52bee29adbac15d0e2f8db98e6440d4ae042fc38340423ed736ac20189778b64" },
+    { url = "https://download.kde.org/stable/plasma/6.8.3/plasma-workspace-6.8.3.tar.xz", sha256 = "3f984e2d960c252ee6353ef639807379c7d1bb2777fecedd047943209c52ffcb" },
 ]
 
 setup = '''

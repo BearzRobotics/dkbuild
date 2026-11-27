@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/kwallet-pam/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "kwallet-pam"
-version = "6.8.2"
+version = "6.8.3"
 release = 1
 summary = "KDE KWallet PAM plugin"
 license = "LGPL-2.1-or-later"
@@ -11,7 +11,7 @@ builddeps = ["kwallet-devel", "libgcrypt-devel", "qt6-qtdeclarative-devel", "lin
 rundeps = ["socat"]
 
 source = [
-    { url = "https://download.kde.org/stable/plasma/6.8.2/kwallet-pam-6.8.2.tar.xz", sha256 = "858025e222ba1cce66591d3a0cf4d41d60917e7b55418840422712910a853022" },
+    { url = "https://download.kde.org/stable/plasma/6.8.3/kwallet-pam-6.8.3.tar.xz", sha256 = "c72d451babc36b0b784ba8e2bad02dd52e416f21a89b7372444ec28afc772ea7" },
 ]
 
 setup = '''

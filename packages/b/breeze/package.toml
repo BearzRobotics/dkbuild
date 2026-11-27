@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/breeze/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "breeze"
-version = "6.8.2"
+version = "6.8.3"
 release = 1
 summary = "Breeze visual style for the KDE Plasma Desktop"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ builddeps = ["frameworkintegration-devel", "kcmutils-devel", "kcolorscheme-devel
 rundeps = ["breeze-icons", "frameworkintegration"]
 
 source = [
-    { url = "https://download.kde.org/stable/plasma/6.8.2/breeze-6.8.2.tar.xz", sha256 = "d6493c5abbcb27b6b1bc42e2e561d64218133ecd2ed56bfc42b1e25d97e216bc" },
+    { url = "https://download.kde.org/stable/plasma/6.8.3/breeze-6.8.3.tar.xz", sha256 = "1d47a61f9f397f212d7a23d7ed7a7289b026757a050610304bb945dc067937e2" },
 ]
 
 setup = '''

@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/powerdevil/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "powerdevil"
-version = "6.8.2"
+version = "6.8.3"
 release = 1
 summary = "KDE Plasma shell power consumption settings manager"
 license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
@@ -12,7 +12,7 @@ checkdeps = ["bash"]
 rundeps = ["upower"]
 
 source = [
-    { url = "https://download.kde.org/stable/plasma/6.8.2/powerdevil-6.8.2.tar.xz", sha256 = "c663355adcfdfafe9824f48aa15881679fd71b0b16863a603a62ec0bce628d4a" },
+    { url = "https://download.kde.org/stable/plasma/6.8.3/powerdevil-6.8.3.tar.xz", sha256 = "c197615be2f1b203ed715ea038e0bafd09d88f7faf3e7cdb5423a519fcfdfe6e" },
 ]
 
 setup = '''

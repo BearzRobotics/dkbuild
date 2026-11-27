@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/kdecoration/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "kdecoration"
-version = "6.8.2"
+version = "6.8.3"
 release = 1
 summary = "KDE Plugin based library to create window decorations"
 license = "LGPL-2.1-only OR LGPL-3.0-only"
@@ -10,7 +10,7 @@ hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja"]
 builddeps = ["ki18n-devel", "qt6-qtbase-devel"]
 
 source = [
-    { url = "https://download.kde.org/stable/plasma/6.8.2/kdecoration-6.8.2.tar.xz", sha256 = "9f88bed244082444787fda9c08b4c733796da3d75861abde0c25fe69b5216b35" },
+    { url = "https://download.kde.org/stable/plasma/6.8.3/kdecoration-6.8.3.tar.xz", sha256 = "77435cc9dda43ff14e6b99cfb08498ace7730f995fc4ab4c21d6be2d1a6c73a1" },
 ]
 
 setup = '''

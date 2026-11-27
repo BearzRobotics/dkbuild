@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/plasma-activities-stats/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "plasma-activities-stats"
-version = "6.8.2"
+version = "6.8.3"
 release = 1
 summary = "Library to access KDE activity manager statistics data"
 license = "LGPL-2.1-only OR LGPL-3.0-only"
@@ -11,7 +11,7 @@ builddeps = ["boost-devel", "kconfig-devel", "kcoreaddons-devel", "plasma-activi
 checkdeps = ["dbus", "kactivitymanagerd"]
 
 source = [
-    { url = "https://download.kde.org/stable/plasma/6.8.2/plasma-activities-stats-6.8.2.tar.xz", sha256 = "6c641f2faa08c777239513a5a6c05900b5f6e237350c9e57af42825ce26098ce" },
+    { url = "https://download.kde.org/stable/plasma/6.8.3/plasma-activities-stats-6.8.3.tar.xz", sha256 = "88681ff26460d3498b966aa3d16f4b9ba60e5571408af6341b46f6da35ec141f" },
 ]
 
 setup = '''

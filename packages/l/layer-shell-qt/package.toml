@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/layer-shell-qt/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "layer-shell-qt"
-version = "6.8.2"
+version = "6.8.3"
 release = 1
 summary = "Qt6 component exposing Wayland wl-layer-shell protocol"
 license = "GPL-2.0-or-later AND (GPL-2.0-only OR GPL-3.0-only)"
@@ -10,7 +10,7 @@ hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf"]
 builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtwayland-devel", "wayland-protocols"]
 
 source = [
-    { url = "https://download.kde.org/stable/plasma/6.8.2/layer-shell-qt-6.8.2.tar.xz", sha256 = "8866504834e4727e30ca3674207781dc9a3ac50c8f042bbbc8d8cfdf2ece32a1" },
+    { url = "https://download.kde.org/stable/plasma/6.8.3/layer-shell-qt-6.8.3.tar.xz", sha256 = "af3e56be10eb95a5993600449d6c811a08d491f7905c40a1203040b5baf98f9e" },
 ]
 
 setup = '''

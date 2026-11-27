@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/kdeplasma-addons/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "kdeplasma-addons"
-version = "6.8.2"
+version = "6.8.3"
 release = 1
 summary = "KDE Plasma addons"
 license = "GPL-3.0-only AND CC0-1.0 AND LGPL-3.0-or-later"
@@ -12,7 +12,7 @@ checkdeps = []
 rundeps = ["kirigami-addons", "kitemmodels", "purpose", "qt6-qtquick3d"]
 
 source = [
-    { url = "https://download.kde.org/stable/plasma/6.8.2/kdeplasma-addons-6.8.2.tar.xz", sha256 = "89458bb18c2d055f582467d920c413712aa5b639404a36d37643475b22bbf364" },
+    { url = "https://download.kde.org/stable/plasma/6.8.3/kdeplasma-addons-6.8.3.tar.xz", sha256 = "16c03d8e9116b2419a2d183b828cb858a80b5b5a4415b41b7389cadadbd012fa" },
 ]
 
 setup = '''

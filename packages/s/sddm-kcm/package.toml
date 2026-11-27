@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/sddm-kcm/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "sddm-kcm"
-version = "6.8.2"
+version = "6.8.3"
 release = 1
 summary = "KDE Login Screen (SDDM) KCM"
 license = "GPL-2.0-or-later"
@@ -12,7 +12,7 @@ builddeps = ["karchive-devel", "kauth-devel", "kcmutils-devel", "kcoreaddons-dev
 rundeps = ["sddm"]
 
 source = [
-    { url = "https://download.kde.org/stable/plasma/6.8.2/sddm-kcm-6.8.2.tar.xz", sha256 = "dcd2cdf1210e12eaad78f88819d36a21e05573939f1765552c4f57477d10003e" },
+    { url = "https://download.kde.org/stable/plasma/6.8.3/sddm-kcm-6.8.3.tar.xz", sha256 = "e7a069bb70f00af9fc0a4f65ddab9d28d55c209e84431f7dc3e9a444d4543186" },
 ]
 
 setup = '''
