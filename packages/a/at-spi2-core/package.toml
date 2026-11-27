@@ -7,8 +7,8 @@
 # 2026-11-11: GObject introspection on (gspell, libpeas, PyGObject apps need
 # the .gir files), and its X11 bridge (Xfce and other X11 desktops).
 name = "at-spi2-core"
-version = "2.62.1"
-release = 4
+version = "2.62.2"
+release = 1
 summary = "Assistive Technology Service Provider Interface"
 license = "GPL-2.0-or-later"
 homepage = "https://gitlab.gnome.org/GNOME/at-spi2-core"
@@ -18,7 +18,7 @@ rundeps = ["dbus"]
 options = ["!check"]
 
 source = [
-    { url = "https://download.gnome.org/sources/at-spi2-core/2.62/at-spi2-core-2.62.1.tar.xz", sha256 = "cca6b6a86e4389d89b370288761ce2385ddeceb10c4412da78689bc30c88af2d" },
+    { url = "https://download.gnome.org/sources/at-spi2-core/2.62/at-spi2-core-2.62.2.tar.xz", sha256 = "7ce81820ddf873b8d930177e0790f730f60d22d8e0acee9ba8f75d8202598de3" },
 ]
 
 setup = '''

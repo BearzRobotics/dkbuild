@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "aspell"
-version = "0.60.8.2"
+version = "0.60.8.3"
 release = 1
 summary = "Spell checker with good multi-language support"
 license = "LGPL-2.1-only"
@@ -11,7 +11,7 @@ homepage = "http://aspell.net"
 hostdeps = ["automake", "gettext-devel", "libtool"]
 
 source = [
-    { url = "https://ftp.gnu.org/gnu/aspell/aspell-0.60.8.2.tar.gz", sha256 = "57fe4863eae6048f72245a8575b44b718fb85ca14b9f8c0afc41b254dfd76919" },
+    { url = "https://ftp.gnu.org/gnu/aspell/aspell-0.60.8.3.tar.gz", sha256 = "0534eae11132405120d11e46bf595bd5dd189bc124ba77a5dd6aae861b48a162" },
 ]
 
 setup = '''

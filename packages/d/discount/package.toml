@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/discount/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "discount"
-version = "3.0.1.2"
+version = "3.0.2.0"
 release = 1
 summary = "Markdown to HTML translator"
 license = "BSD-3-Clause"
@@ -10,7 +10,7 @@ patches = ["configure.inc.patch"]
 hostdeps = ["pkgconf"]
 
 source = [
-    { url = "https://github.com/Orc/discount/archive/refs/tags/v3.0.1.2.tar.gz", sha256 = "4ea6cc8782c6508b3051c469ed7a1b6ca20b023c2a0c26ccd9c83bc7e61dfc16" },
+    { url = "https://github.com/Orc/discount/archive/refs/tags/v3.0.2.0.tar.gz", sha256 = "99f6db36d3fff6c99acd21d4c6096176d4ac8785eab319d0faf77ad995b8b7c5" },
 ]
 
 environment = '''

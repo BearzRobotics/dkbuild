@@ -1,5 +1,5 @@
 name = "astyle"
-version = "3.6.27"
+version = "3.6.28"
 release = 1
 summary = "Source code indenter and formatter (binary, shared and static library)"
 license = "MIT"
@@ -11,7 +11,7 @@ hostdeps = ["make"]
 options = ["!check"]
 
 source = [
-    { url = "https://gitlab.com/saalen/astyle/-/archive/3.6.27/astyle-3.6.27.tar.bz2", sha256 = "7fff182da6ce93bc1d42cada9b71baaa7048d7fe062565ac1d17e7cf699b45b9" },
+    { url = "https://gitlab.com/saalen/astyle/-/archive/3.6.28/astyle-3.6.28.tar.bz2", sha256 = "cbfa8549ae4b6a878fd66eaf1650bb7f77a66035b1a1eb705f03a394f1869efa" },
 ]
 
 build = '''

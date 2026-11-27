@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/c-blosc/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "c-blosc"
-version = "1.21.6"
+version = "1.21.7"
 release = 1
 summary = "Library optimised for binary data compression"
 license = "BSD-3-Clause"
@@ -10,7 +10,7 @@ hostdeps = ["cmake", "ninja", "pkgconf"]
 builddeps = ["lz4-devel", "zlib-ng-compat-devel", "zstd-devel"]
 
 source = [
-    { url = "https://github.com/Blosc/c-blosc/archive/refs/tags/v1.21.6.tar.gz", sha256 = "9fcd60301aae28f97f1301b735f966cc19e7c49b6b4321b839b4579a0c156f38" },
+    { url = "https://github.com/Blosc/c-blosc/archive/refs/tags/v1.21.7.tar.gz", sha256 = "3c81252accfeeabd236fa219a8bf564c4feed9feb7a3291c227b03a00adb976f" },
 ]
 
 setup = '''

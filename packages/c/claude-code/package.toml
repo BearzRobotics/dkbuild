@@ -13,7 +13,7 @@
 # (sha256 df8840b5a1d68c79140bf33c4947dc2ed8341eae2e06c1f9291e3088879f1683),
 # once a recipe can have per-architecture sources.
 name = "claude-code"
-version = "2.1.322"
+version = "2.1.332"
 release = 1
 summary = "Claude Code, Anthropic's agentic coding tool for the terminal"
 license = "custom:anthropic"
@@ -24,7 +24,7 @@ rundeps = ["git", "bash"]
 options = ["!check", "!strip"]
 
 source = [
-    { url = "https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64-musl/-/claude-code-linux-x64-musl-2.1.322.tgz", sha256 = "de01a18b42b579ac598620985b688bae4d714781af4b2f3686719fed0168172f" },
+    { url = "https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64-musl/-/claude-code-linux-x64-musl-2.1.332.tgz", sha256 = "58665225171bf037406decce027e97242741136c58b53411da8de3647ab47eb3" },
 ]
 
 install = '''

@@ -3,14 +3,14 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "font-alias"
-version = "1.0.5"
+version = "1.0.6"
 release = 1
 summary = "Standard aliases for X11 PCF fonts"
 license = "MIT"
 homepage = "https://xorg.freedesktop.org"
 
 source = [
-    { url = "https://www.x.org/releases/individual/font/font-alias-1.0.5.tar.gz", sha256 = "f8e0ca6537003f11fcaf36c598f7de9c0428f8ed587388a8a37ff18ccc597730" },
+    { url = "https://www.x.org/releases/individual/font/font-alias-1.0.6.tar.gz", sha256 = "cd392ece2e569fb276c4a825bf61078f603e97c1c71b23cd690e0678b117dfcb" },
 ]
 
 setup = '''

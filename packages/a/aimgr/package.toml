@@ -5,7 +5,7 @@
 # packages; `aimgr abliterate setup` makes its own Python environment (it
 # downloads PyTorch and friends then, not at build time).
 name = "aimgr"
-version = "0.2.0"
+version = "0.2.1"
 release = 1
 summary = "Local AI model manager for Ollama and llama.cpp"
 license = "GPL-2.0-only"
@@ -15,7 +15,7 @@ rundeps = ["ollama", "llama-cpp", "python"]
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/aimgr/releases/download/v0.2.0/aimgr-0.2.0-src.tar.gz", sha256 = "c5263290ba050f348d4433034cc4fd1bd91ca6649c3bc08e24f3cfe85fb2b2c2" },
+    { url = "https://github.com/BearzRobotics/aimgr/releases/download/v0.2.1/aimgr-0.2.1-src.tar.gz", sha256 = "acb344be85a9ec8255310ddf3a8ba1927be5bfc34ba4bb0fc44bfe5b2bd7c048" },
 ]
 
 install = '''

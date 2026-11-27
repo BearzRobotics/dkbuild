@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "appstream"
-version = "1.2.1"
+version = "1.2.3"
 release = 1
 summary = "Tools and libraries to work with AppStream metadata"
 license = "LGPL-2.1-or-later"
@@ -14,7 +14,7 @@ rundeps = ["shared-mime-info"]
 options = ["!cross"]
 
 source = [
-    { url = "https://github.com/ximion/appstream/archive/refs/tags/v1.2.1.tar.gz", sha256 = "2bc53d1d63ae28e7409a15747d4ae23a557409249461aab87a7947640402d1bd" },
+    { url = "https://github.com/ximion/appstream/archive/refs/tags/v1.2.3.tar.gz", sha256 = "12f01e127081c485a3e3056b6d30f54d003101689ff815adac6f1ef2b19af6ab" },
 ]
 
 setup = '''

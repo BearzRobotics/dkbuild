@@ -8,7 +8,7 @@
 # in the source. Source: Arch Linux's mirror of the release tarball (upstream's
 # links expire on purpose).
 name = "fzssh"
-version = "1.5.1"
+version = "1.5.2"
 release = 1
 summary = "SSH/SFTP client library based on libfilezilla"
 license = "AGPL-3.0-or-later"
@@ -19,7 +19,7 @@ builddeps = ["argon2-devel", "gmp-devel", "libfilezilla-devel", "nettle-devel"]
 options = ["!check"]
 
 source = [
-    { url = "https://sources.archlinux.org/other/packages/fzssh/fzssh-1.5.1.tar.xz", sha256 = "b5467eb648f5a5e35a20dcd4b428a51be59d6d0375327f746d153ffe912ac17c" },
+    { url = "https://sources.archlinux.org/other/packages/fzssh/fzssh-1.5.2.tar.xz", sha256 = "cd6cb4547124b4477fee0dd4d2726c2a059dd50a4668018445c5d2729ec0a845" },
 ]
 
 setup = '''

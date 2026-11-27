@@ -3,8 +3,8 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "chromaprint"
-version = "1.6.1"
-release = 2
+version = "1.6.2"
+release = 1
 summary = "Library that extracts fingerprints from any audio source"
 license = "MIT AND LGPL-2.1-only"
 homepage = "https://acoustid.org/chromaprint"
@@ -12,7 +12,7 @@ hostdeps = ["cmake", "ninja", "pkgconf"]
 builddeps = ["fftw-devel", "ffmpeg-devel"]
 
 source = [
-    { url = "https://github.com/acoustid/chromaprint/releases/download/v1.6.1/chromaprint-1.6.1.tar.gz", sha256 = "3368805af0ee47b9df74df10b5001a44569e01df2844dab520031720dde9ad23" },
+    { url = "https://github.com/acoustid/chromaprint/releases/download/v1.6.2/chromaprint-1.6.2.tar.gz", sha256 = "d54ada62c16b2db396d3251ec54fc7a58909c163131a1cfcf7fa6407dbc14360" },
 ]
 
 setup = '''

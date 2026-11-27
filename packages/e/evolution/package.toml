@@ -11,7 +11,7 @@
 # libchamplain and clutter-gtk are unmaintained and not in the tree), the
 # Glade catalog (for UI designers), the Unity launcher integration.
 name = "evolution"
-version = "3.62.1"
+version = "3.62.2"
 release = 1
 summary = "Mail, calendar and address book suite"
 license = "LGPL-2.1-or-later"
@@ -28,7 +28,7 @@ rundeps = ["highlight"]
 options = ["!check"]
 
 source = [
-    { url = "https://download.gnome.org/sources/evolution/3.62/evolution-3.62.1.tar.xz", sha256 = "b974cdd0392c167ea9fc2f9f2f8fab8ab7782c3c839db9a281ae9b635dc1a53c" },
+    { url = "https://download.gnome.org/sources/evolution/3.62/evolution-3.62.2.tar.xz", sha256 = "7940f3e465574e65ce8e3235a29d53c0e549341e16a6a82174f255e33d18cfa7" },
 ]
 
 setup = '''

@@ -4,8 +4,8 @@
 # r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 # r3: static libraries too (in exfatprogs-static), for fully static programs on musl.
 name = "exfatprogs"
-version = "1.4.3"
-release = 4
+version = "1.4.5"
+release = 1
 summary = "ExFAT filesystem utilities"
 license = "GPL-2.0-only"
 homepage = "https://github.com/exfatprogs/exfatprogs"
@@ -13,7 +13,7 @@ hostdeps = ["automake", "pkgconf", "libtool"]
 builddeps = ["linux-headers", "util-linux-devel"]
 
 source = [
-    { url = "https://github.com/exfatprogs/exfatprogs/archive/refs/tags/1.4.3.tar.gz", sha256 = "d745a0e7f97e1c36fad97148062ba4c496724e212d6075ff3129355d9054e218" },
+    { url = "https://github.com/exfatprogs/exfatprogs/archive/refs/tags/1.4.5.tar.gz", sha256 = "7f2c8aa42e8c416326573e3b77f4c9984917d037a2158d24123f88d412956680" },
 ]
 
 setup = '''

@@ -1,7 +1,7 @@
 # Brute-Forcing from Nmap output - Automatically attempts default creds on found services. (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
 # Go module, dependencies fetched on the host (godeps). Main package: ..
 name = "brutespray"
-version = "2.7.6"
+version = "2.7.8"
 release = 1
 summary = "Brute-Forcing from Nmap output - Automatically attempts default creds on found services."
 license = "MIT"
@@ -10,7 +10,7 @@ hostdeps = ["go"]
 options = ["!check", "godeps"]
 
 source = [
-    { url = "https://github.com/x90skysn3k/brutespray/archive/refs/tags/v2.7.6.tar.gz", sha256 = "3541e1fd691a429989747556b37c354e45aeeb6776fb14ce825e6db90b958191" },
+    { url = "https://github.com/x90skysn3k/brutespray/archive/refs/tags/v2.7.8.tar.gz", sha256 = "aa65a26d3ee3822df467eaefeda953f708fc9fa58fcc6704e6ab41307580af46" },
 ]
 
 environment = '''

@@ -1,8 +1,8 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/esbuild/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "esbuild"
-version = "0.28.0"
-release = 9
+version = "0.28.2"
+release = 1
 summary = "JavaScript and CSS bundler and minifier"
 license = "MIT"
 homepage = "https://esbuild.github.io"
@@ -10,7 +10,7 @@ hostdeps = ["go", "nodejs"]
 options = ["godeps"]
 
 source = [
-    { url = "https://github.com/evanw/esbuild/archive/v0.28.0.tar.gz", sha256 = "7aae83b197db3fd695e6f378d30fd6cbddeb93e4b1057b2c41d36ecb1dfebbc2" },
+    { url = "https://github.com/evanw/esbuild/archive/v0.28.2.tar.gz", sha256 = "300162f899361d9f0263065f8728ef9086dcfc1a3d36bcbc4e0abe5de9c58bf8" },
 ]
 
 build = '''

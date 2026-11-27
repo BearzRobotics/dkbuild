@@ -13,7 +13,7 @@
 # Installed inert (docs/requests.md): no service enabled, no site, no cron
 # job, no credentials; the README says how to set it up.
 name = "firefly-iii"
-version = "6.7.9"
+version = "6.7.12"
 release = 1
 summary = "Personal finance manager"
 license = "AGPL-3.0-or-later"
@@ -23,7 +23,7 @@ rundeps = ["php8.5", "php8.5-fpm", "nginx"]
 options = ["!check", "!strip"]
 
 source = [
-    { url = "https://github.com/firefly-iii/firefly-iii/releases/download/v6.7.9/FireflyIII-v6.7.9.tar.gz", sha256 = "f905729c3be6e66d5333c22992281224ef1dc7e21cea13f4ef09af643d09b825" },
+    { url = "https://github.com/firefly-iii/firefly-iii/releases/download/v6.7.12/FireflyIII-v6.7.12.tar.gz", sha256 = "78968730e46c12c27ccedf10d1f29a3eaba77e0ef26bbfa7c81894e30a2e360a" },
 ]
 
 install = '''

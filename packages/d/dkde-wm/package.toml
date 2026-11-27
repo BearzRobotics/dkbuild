@@ -3,7 +3,7 @@
 # dkde-compositor. A separate Zig package inside the dkde tarball (src/xwm), built against the tarball's vendored
 # dependencies (offline: --system). `dkde-session --x11` starts an X11 session with it (it needs an X server: Xorg or Xvfb).
 name = "dkde-wm"
-version = "0.3.3"
+version = "0.3.5"
 release = 1
 summary = "DKDE's X11 window manager (experimental)"
 license = "MIT"
@@ -15,7 +15,7 @@ rundeps = ["dkde"]
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/dkde/releases/download/v0.3.3/dkde-v0.3.3.tar.gz", sha256 = "bd9a436bbe8f6796ecfca1a018b4c4700097bbf7899b858626bf0ce5ea9c097f" },
+    { url = "https://github.com/BearzRobotics/dkde/releases/download/v0.3.5/dkde-v0.3.5.tar.gz", sha256 = "02451443cb3b7f6e2c579d08ac50d49819b72cae1f89a60691645c13723cd9e7" },
 ]
 
 build = '''

@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/fwupd/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "fwupd"
-version = "2.1.8"
+version = "2.1.10"
 release = 1
 summary = "Firmware updater"
 license = "LGPL-2.1-or-later"
@@ -12,7 +12,7 @@ rundeps = ["hwdata", "polkit", "shared-mime-info", "udisks"]
 options = ["!cross"]
 
 source = [
-    { url = "https://github.com/fwupd/fwupd/archive/2.1.8.tar.gz", sha256 = "29ce4c6d7c5211f487474219474b422132b58f03adedf826816b9c8cce129274" },
+    { url = "https://github.com/fwupd/fwupd/archive/2.1.10.tar.gz", sha256 = "0b0b6196dd8a292ffe752254a5d19f438cd1d026f223a73efbd10aa3e117f7d5" },
 ]
 
 setup = '''

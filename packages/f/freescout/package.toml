@@ -8,7 +8,7 @@
 # Installed inert (docs/requests.md): no service enabled, no site, no cron
 # job, no credentials; the README says how to set it up.
 name = "freescout"
-version = "1.8.250"
+version = "1.8.252"
 release = 1
 summary = "Lightweight help desk and shared mailbox"
 license = "AGPL-3.0-only"
@@ -18,7 +18,7 @@ rundeps = ["php", "php-fpm", "nginx"]
 options = ["!check", "!strip"]
 
 source = [
-    { url = "https://github.com/freescout-help-desk/freescout/archive/refs/tags/1.8.250.tar.gz", sha256 = "6d2c49355d7bd0093962556982dcae7de8fcf7e64a30610191d26fe17363c30f" },
+    { url = "https://github.com/freescout-help-desk/freescout/archive/refs/tags/1.8.252.tar.gz", sha256 = "62479918d52dbb0175b9e786e9013f746e78eead61f0d203000099cd21d09ba7" },
 ]
 
 install = '''

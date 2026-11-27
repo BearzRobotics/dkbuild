@@ -14,7 +14,7 @@
 # Installed inert (docs/requests.md): no service enabled, no site, no cron
 # job, no credentials; the README says how to set it up.
 name = "dolibarr"
-version = "24.0.3"
+version = "24.0.4"
 release = 1
 summary = "Modular ERP and CRM for small and medium businesses"
 license = "GPL-3.0-or-later"
@@ -24,7 +24,7 @@ rundeps = ["php", "php-fpm", "nginx"]
 options = ["!check", "!strip"]
 
 source = [
-    { url = "https://github.com/Dolibarr/dolibarr/archive/refs/tags/24.0.3.tar.gz", sha256 = "dee8e8283cf87cf2be39900d909b65f61a947f397841af4146f384a6ae89e548" },
+    { url = "https://github.com/Dolibarr/dolibarr/archive/refs/tags/24.0.4.tar.gz", sha256 = "6f421cee2420c4dd0046cde69631fc3f1911c12051e1929542fe23dd6c8b7b96" },
 ]
 
 install = '''

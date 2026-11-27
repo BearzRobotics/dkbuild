@@ -17,8 +17,8 @@
 # - Static libraries: the CMake build makes only shared libraries (its
 #   backends and modules are loaded at run time).
 name = "evolution-data-server"
-version = "3.62.1"
-release = 2
+version = "3.62.2"
+release = 1
 summary = "Centralized access to appointments and contacts"
 license = "LGPL-2.0-or-later"
 homepage = "https://gitlab.gnome.org/GNOME/evolution-data-server"
@@ -34,7 +34,7 @@ checkdeps = ["dbus"]
 options = ["!cross"]
 
 source = [
-    { url = "https://download.gnome.org/sources/evolution-data-server/3.62/evolution-data-server-3.62.1.tar.xz", sha256 = "b75c823445d7d30bca797eee929809e8d389abbb8d471f68ae2af60972779f26" },
+    { url = "https://download.gnome.org/sources/evolution-data-server/3.62/evolution-data-server-3.62.2.tar.xz", sha256 = "7872fc206b682e8fd8899bb251ad8790704f7b84f3bade48700051333573253d" },
 ]
 
 setup = '''

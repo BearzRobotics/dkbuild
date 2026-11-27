@@ -2,8 +2,8 @@
 # protocols). Ported from Chimera's main/chafa. fastfetch draws image logos
 # with it.
 name = "chafa"
-version = "1.18.2"
-release = 4
+version = "1.18.3"
+release = 1
 summary = "Character art facsimile generator"
 license = "LGPL-3.0-or-later AND GPL-3.0-or-later"
 homepage = "https://hpjansson.org/chafa"
@@ -11,7 +11,7 @@ hostdeps = ["automake", "docbook-xsl-nons", "m4", "libtool", "libxml2", "libxslt
 builddeps = ["freetype-devel", "glib-devel", "libavif-devel", "libjpeg-turbo-devel", "librsvg-devel", "libtiff-devel", "libwebp-devel"]
 
 source = [
-    { url = "https://github.com/hpjansson/chafa/archive/refs/tags/1.18.2.tar.gz", sha256 = "9bdeba46446ac64ed61704fc54b5458cf0dca08b44031b26fbda7b78591984b8" },
+    { url = "https://github.com/hpjansson/chafa/archive/refs/tags/1.18.3.tar.gz", sha256 = "677f48671d75b82875ade32a2a1ff971c3f44088e6a158beecca51260e0e616e" },
 ]
 
 setup = '''

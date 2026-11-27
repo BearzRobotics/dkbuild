@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/distrobox/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "distrobox"
-version = "1.8.2.5"
+version = "1.8.2.6"
 release = 1
 summary = "Use any Linux distribution inside your terminal"
 license = "GPL-3.0-only"
@@ -10,7 +10,7 @@ patches = ["rootful-export-pkexec.patch", "rootless-stop-SIGKILL.patch"]
 rundeps = ["curl", "podman", "polkit"]
 
 source = [
-    { url = "https://github.com/89luca89/distrobox/archive/1.8.2.5.tar.gz", sha256 = "0c3bc4785ee3be3b89f93abb7cc0a9f60e56989e81319af140a4b60403b18f80" },
+    { url = "https://github.com/89luca89/distrobox/archive/1.8.2.6.tar.gz", sha256 = "693c85f44720f9c2be8691141eaa1dc2773ee37e63ae02fff8b838dcf54c413e" },
 ]
 
 install = '''

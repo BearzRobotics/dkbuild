@@ -2,7 +2,7 @@
 # Linux's testing/freetds (MIT-licensed APKBUILD and patches; the software's licence is GPL-2.0-or-later OR LGPL-2.0-or-later).
 # Not built (queued, wip/queue): expect first-build fixes.
 name = "freetds"
-version = "1.5.14"
+version = "1.5.22"
 release = 1
 summary = "FreeTDS: Sybase and Microsoft SQL Server client libraries (db-lib, ct-lib, ODBC driver)"
 license = "GPL-2.0-or-later OR LGPL-2.0-or-later"
@@ -12,7 +12,7 @@ builddeps = ["openssl-devel", "linux-headers", "readline-devel", "unixodbc-devel
 options = ["!check"]
 
 source = [
-    { url = "https://www.freetds.org/files/stable/freetds-1.5.14.tar.bz2", sha256 = "2422a04d6fb546f168e69dd4a8289d13ac9f53ef86fc852ab11f5e0de249207f" },
+    { url = "https://www.freetds.org/files/stable/freetds-1.5.22.tar.bz2", sha256 = "b31cbc50f9e2ad4adf8dd3958807e4e7b8f4e588b080f8dbddbe465ceefb9231" },
 ]
 
 setup = '''

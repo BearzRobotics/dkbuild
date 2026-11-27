@@ -14,7 +14,7 @@
 # cryptsetup (encrypted images), parted/gptfdisk/sfdisk (partition tables),
 # fsarchiver, pv, kpartx, lvm2/mdadm (LVM and software RAID).
 name = "clonezilla"
-version = "5.20.17"
+version = "5.20.24"
 release = 1
 summary = "Disk and partition imaging and cloning (text interface)"
 license = "GPL-2.0-or-later"
@@ -29,7 +29,7 @@ rundeps = [
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/stevenshiau/clonezilla/archive/refs/tags/v5.20.17.tar.gz", sha256 = "1c648e869ab17bdf5e0eb1cd1c45504d56f44b3c24c9179731dcf634338ed867" },
+    { url = "https://github.com/stevenshiau/clonezilla/archive/refs/tags/v5.20.24.tar.gz", sha256 = "f06e1f5ca0b0c299741308824d8001ec47df455666c350d03ae8fb15bf850671" },
 ]
 
 build = '''

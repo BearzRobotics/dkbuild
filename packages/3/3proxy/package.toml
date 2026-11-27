@@ -1,6 +1,6 @@
 # Tiny free proxy server. (BlackArch list, requested 2026-11-16; docs/requests.md). Generated from the sources' build files (cmake); the build dependencies are guessed from the #includes. Not built yet when written (wip/queue): expect first-build fixes.
 name = "3proxy"
-version = "1.0.3"
+version = "1.0.4"
 release = 1
 summary = "Tiny free proxy server."
 license = "Apache-2.0 OR BSD-3-Clause OR GPL-2.0-or-later OR LGPL-2.1-or-later"
@@ -10,7 +10,7 @@ builddeps = ["openssl-devel", "pcre2-devel", "linux-headers"]
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/3proxy/3proxy/archive/refs/tags/1.0.3.tar.gz", sha256 = "464553674be2b6d4f36c007604fb547df7841a8277f8282a3e3cda88134e0708" },
+    { url = "https://github.com/3proxy/3proxy/archive/refs/tags/1.0.4.tar.gz", sha256 = "b6a4ee624216d83be6dbadb64e2d5ccc7fbd19c96704bb6dc319d489d14c4cc5" },
 ]
 
 setup = '''

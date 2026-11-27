@@ -12,7 +12,7 @@
 # receiver (no integrations, no credentials), and there is no /etc config, so
 # the service fails to start until the administrator writes one.
 name = "alertmanager"
-version = "0.35.0"
+version = "0.35.1"
 release = 1
 summary = "Prometheus alert router and notification manager"
 license = "Apache-2.0"
@@ -21,8 +21,8 @@ hostdeps = ["go"]
 options = ["!check", "godeps"]
 
 source = [
-    { url = "https://github.com/prometheus/alertmanager/archive/refs/tags/v0.35.0.tar.gz", sha256 = "4c4355655ee6d303991fba6e10ca2357978ca9ca0fb47ce925482d685aa34ff7" },
-    { url = "https://github.com/prometheus/alertmanager/releases/download/v0.35.0/alertmanager-web-ui-0.35.0.tar.gz", sha256 = "c6af197ce7dbd85be0ac62b50e031eb17945385f782d12039d37f71b752b63db", unpack = false, name = "alertmanager-web-ui.tar.gz" },
+    { url = "https://github.com/prometheus/alertmanager/archive/refs/tags/v0.35.1.tar.gz", sha256 = "6522f9e6966114e8018ac0c2f2f7d9ccdfc955ed1d263af9e38016409419309e" },
+    { url = "https://github.com/prometheus/alertmanager/releases/download/v0.35.1/alertmanager-web-ui-0.35.1.tar.gz", sha256 = "c1d5fc13bcfe8acac52993ce77378f60507c04a933182feb99524f948d6b1dd4", unpack = false, name = "alertmanager-web-ui.tar.gz" },
 ]
 
 environment = '''

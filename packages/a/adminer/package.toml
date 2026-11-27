@@ -11,7 +11,7 @@
 # the database server's own accounts; it refuses empty passwords). An example
 # nginx location is in /usr/share/doc/adminer/README.FenrirOS.
 name = "adminer"
-version = "6.3.0"
+version = "6.3.1"
 release = 1
 summary = "Database management in a single PHP file"
 license = "Apache-2.0 OR GPL-2.0-only"
@@ -20,8 +20,8 @@ rundeps = ["php"]
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/vrana/adminer/releases/download/v6.3.0/adminer-6.3.0.php", sha256 = "641e1a31e8cc333a309e202ef9446e1fd38c2069ed5f9ee509b80d70089d0503", unpack = false, name = "adminer.php" },
-    { url = "https://github.com/vrana/adminer/releases/download/v6.3.0/editor-6.3.0.php", sha256 = "8073d4cc14a7a0952221e25814578f667a4367ec7aca00fe7d20d5be2d6c5ad3", unpack = false, name = "editor.php" },
+    { url = "https://github.com/vrana/adminer/releases/download/v6.3.1/adminer-6.3.1.php", sha256 = "a9aed04e4e68c4e46283804a69ee70cad4fbf23203b46470b760868b2fd9bd76", unpack = false, name = "adminer.php" },
+    { url = "https://github.com/vrana/adminer/releases/download/v6.3.1/editor-6.3.1.php", sha256 = "e392b474908a08b858afe7fd29504f6a818f9e5b9af6d4c15665e17c733e00b3", unpack = false, name = "editor.php" },
 ]
 
 install = '''

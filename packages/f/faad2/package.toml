@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/faad2/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "faad2"
-version = "2.11.2"
+version = "2.11.4"
 release = 1
 summary = "Free AAC decoder"
 license = "GPL-2.0-or-later"
@@ -9,7 +9,7 @@ homepage = "https://sourceforge.net/projects/faac"
 hostdeps = ["cmake", "ninja", "pkgconf"]
 
 source = [
-    { url = "https://github.com/knik0/faad2/archive/refs/tags/2.11.2.tar.gz", sha256 = "3fcbd305e4abd34768c62050e18ca0986f7d9c5eca343fb98275418013065c0e" },
+    { url = "https://github.com/knik0/faad2/archive/refs/tags/2.11.4.tar.gz", sha256 = "ee479ccbae4a8387ab696e6f21a481bd83fe3881471cafa81b4ae59d7d3aed43" },
 ]
 
 setup = '''
