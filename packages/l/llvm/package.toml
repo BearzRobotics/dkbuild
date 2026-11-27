@@ -98,6 +98,9 @@ DESTDIR=$pkgdir cmake --install build --strip
 install -Dm644 llvm/LICENSE.TXT "$pkgdir/usr/share/licenses/llvm/LICENSE.TXT"
 # elfutils' debuginfod has these names; LLVM's tools remain as llvm-debuginfod and llvm-debuginfod-find
 rm -f "$pkgdir/usr/bin/debuginfod" "$pkgdir/usr/bin/debuginfod-find"
+# clang is the system compiler: cc and c++ are what makefiles, rustc and cargo ask for
+ln -s clang "$pkgdir/usr/bin/cc"
+ln -s clang++ "$pkgdir/usr/bin/c++"
 '''
 
 # What is left in `llvm` after these: libLLVM, libLTO, libRemarks and the
@@ -106,7 +109,7 @@ rm -f "$pkgdir/usr/bin/debuginfod" "$pkgdir/usr/bin/debuginfod-find"
 # with clang, which cannot link without it.
 [subpackages.clang]
 summary = "C and C++ compiler"
-paths   = ["/usr/bin/clang*", "/usr/lib/libclang*", "/usr/lib/clang", "/usr/libexec", "/usr/share/clang", "/usr/share/man/man1/clang.1"]
+paths   = ["/usr/bin/clang*", "/usr/bin/cc", "/usr/bin/c++", "/usr/lib/libclang*", "/usr/lib/clang", "/usr/libexec", "/usr/share/clang", "/usr/share/man/man1/clang.1"]
 
 [subpackages.lld]
 summary = "LLVM linker"
@@ -123,6 +126,20 @@ paths   = ["/usr/lib/libunwind.so.*"]
 [subpackages.libcxx-devel]
 summary = "libc++ and libunwind headers and unversioned libraries"
 paths   = ["/usr/include/c++", "/usr/include/unwind.h", "/usr/include/__unwind_*.h", "/usr/include/libunwind.h", "/usr/include/mach-o", "/usr/lib/libc++.so", "/usr/lib/libc++abi.so", "/usr/lib/libunwind.so", "/usr/share/libc++"]
+
+# What a static program built with clang links besides libc: apart from llvm-static,
+# whose LLVM libraries (some 350 MB installed) only a build against LLVM itself needs,
+# so that base-devel can have these.
+[subpackages.libcxx-static]
+summary = "Static libc++ and libunwind"
+paths   = ["/usr/lib/libc++.a", "/usr/lib/libc++abi.a", "/usr/lib/libc++experimental.a", "/usr/lib/libunwind.a"]
+depends = ["llvm-libcxx-devel"]
+
+# The default static package, plus the one above, which held part of it.
+[subpackages.static]
+summary = "Static libraries"
+paths   = ["/usr/lib/*.a"]
+depends = ["llvm-libcxx-static"]
 
 # The default development package, plus llvm-static: LLVMExports.cmake
 # names every libLLVM*.a, and CMake refuses an export with missing files.

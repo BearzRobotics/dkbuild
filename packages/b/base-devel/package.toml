@@ -7,7 +7,7 @@
 # Not packaged yet, so not listed: ccache, mold, valgrind, pahole (dwarves).
 name = "base-devel"
 version = "1"
-release = 2
+release = 3
 summary = "FenrirOS build tools: LLVM, zig, Rust, make, cmake, autotools, nasm"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkbuild"
@@ -16,8 +16,8 @@ rundeps = [
     # compilers and linker
     "llvm", "llvm-clang", "llvm-lld", "zig", "rust", "rust-src", "bindgen", "cbindgen",
     "binutils", "nasm", "yasm",
-    # headers and C library development files
-    "musl-devel", "linux-headers",
+    # headers and C and C++ library development files; the static libc, libc++ and libunwind
+    "musl-devel", "linux-headers", "musl-static", "llvm-libcxx-devel", "llvm-libcxx-static",
     # build systems
     "make", "cmake", "ninja", "meson", "scons", "autoconf", "automake", "libtool", "m4", "pkgconf",
     # generators and text tools builds expect

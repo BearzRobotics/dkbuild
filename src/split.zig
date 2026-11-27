@@ -161,6 +161,26 @@ pub fn neededByLibraries(arena: Allocator, io: std.Io, destdir: []const u8) !?[]
     return first;
 }
 
+/// Does the link at `path` lead, through links in the tree, to a regular file no subpackage claims, one that stays
+/// in the main package? A link into -libs goes where what it names goes (rust's usr/lib/librustc_driver-*.so, a
+/// link into usr/lib/rustlib): taken away, the main package's programs would not find their library, and the scan,
+/// which sees the library in the main package, would not make it depend on -libs. A link out of the tree, to nothing,
+/// or through a link to a directory is not one.
+fn pointsIntoMain(arena: Allocator, io: std.Io, d: Dir, files: *const std.StringHashMap(bool), subs: []const recipe.Subpackage, path: []const u8) !bool {
+    var cur = path;
+    var hops: usize = 0;
+    while (hops < 40) : (hops += 1) {
+        var buf: [std.fs.max_path_bytes]u8 = undefined;
+        const target = buf[0..try d.readLink(io, cur, &buf)];
+        // within the tree: an absolute target is under it, a relative one starts where the link is
+        const dir = if (std.fs.path.isAbsolutePosix(target)) "/" else try std.fmt.allocPrint(arena, "/{s}", .{std.fs.path.dirnamePosix(cur) orelse ""});
+        cur = (try std.fs.path.resolvePosix(arena, &.{ dir, target }))[1..];
+        const is_regular = files.get(cur) orelse return false;
+        if (is_regular) return owner(subs, cur, true) == null;
+    }
+    return false;
+}
+
 pub const Moved = struct { name: []const u8, files: usize };
 
 /// Moves files out of `destdir` into `<out>/<sub.name>/`. Returns how many
@@ -195,9 +215,18 @@ pub fn run(arena: Allocator, io: std.Io, destdir: []const u8, out: []const u8, s
     // The directories made in a subpackage, with the package's own: given their modes afterwards (one without
     // owner write could not be moved into).
     var made = std.StringHashMap([]const u8).init(arena); // new directory -> the one in destdir
-    for (files.items, regular.items) |f, is_regular| {
-        const idx = owner(subs, f, is_regular) orelse continue;
-        if (!split_libs and std.mem.eql(u8, subs[idx].name, "libs")) continue;
+    // Who gets what is settled before anything moves: links are followed while the tree is whole.
+    var by_path = std.StringHashMap(bool).init(arena); // path -> is it a regular file
+    for (files.items, regular.items) |f, is_regular| try by_path.put(f, is_regular);
+    const owners = try arena.alloc(?usize, files.items.len);
+    for (files.items, regular.items, owners) |f, is_regular, *o| {
+        o.* = owner(subs, f, is_regular);
+        const i = o.* orelse continue;
+        if (!std.mem.eql(u8, subs[i].name, "libs")) continue;
+        if (!split_libs or (!is_regular and try pointsIntoMain(arena, io, d, &by_path, subs, f))) o.* = null;
+    }
+    for (files.items, owners) |f, o| {
+        const idx = o orelse continue;
         const dest = try std.fs.path.join(arena, &.{ out, subs[idx].name, f });
         if (std.fs.path.dirname(dest)) |parent| try Dir.cwd().createDirPath(io, parent);
         try made.put(try std.fs.path.join(arena, &.{ out, subs[idx].name }), "");
@@ -378,4 +407,39 @@ test "neededByLibraries looks at files and links, not at empty folders" {
     try tmp.dir.symLink(io, "../../bin/x", "d/usr/share/x/z", .{});
     try tmp.dir.writeFile(io, .{ .sub_path = "d/usr/share/x/b", .data = "x" });
     try std.testing.expectEqualStrings("usr/share/x/b", (try neededByLibraries(a, io, dest)).?);
+}
+
+test "a link into -libs stays with a file that stays in the main package" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    try tmp.dir.createDirPath(io, "dest/usr/bin");
+    try tmp.dir.createDirPath(io, "dest/usr/lib/own/lib");
+    try tmp.dir.createDirPath(io, "out");
+    for ([_][]const u8{ "dest/usr/bin/tool", "dest/usr/lib/own/lib/libdriver-1.so", "dest/usr/lib/libz.so.1.2" }) |p|
+        try tmp.dir.writeFile(io, .{ .sub_path = p, .data = "x" });
+    // to a library kept in the main package: relative, absolute, and by way of another link
+    try tmp.dir.symLink(io, "own/lib/libdriver-1.so", "dest/usr/lib/libdriver-1.so", .{});
+    try tmp.dir.symLink(io, "/usr/lib/own/lib/libdriver-1.so", "dest/usr/lib/libabs.so.1", .{});
+    try tmp.dir.symLink(io, "libdriver-1.so", "dest/usr/lib/libchain.so.1", .{});
+    // to a library that moves to -libs, to another package's, and to itself
+    try tmp.dir.symLink(io, "libz.so.1.2", "dest/usr/lib/libz.so.1", .{});
+    try tmp.dir.symLink(io, "libother.so.2", "dest/usr/lib/libgone.so.1", .{});
+    try tmp.dir.symLink(io, "libloop.so.1", "dest/usr/lib/libloop.so.1", .{});
+    const dest = try tmp.dir.realPathFileAlloc(io, "dest", a);
+    const out = try tmp.dir.realPathFileAlloc(io, "out", a);
+    // libs alone: -devel would claim the unversioned links first
+    const subs = [_]recipe.Subpackage{defaults[3]};
+    const moved = try run(a, io, dest, out, &subs);
+    try std.testing.expectEqual(@as(usize, 1), moved.len);
+    try std.testing.expectEqual(@as(usize, 4), moved[0].files);
+    var buf: [std.fs.max_path_bytes]u8 = undefined;
+    for ([_][]const u8{ "libdriver-1.so", "libabs.so.1", "libchain.so.1" }) |n|
+        _ = try tmp.dir.readLink(io, try std.fmt.allocPrint(a, "dest/usr/lib/{s}", .{n}), &buf);
+    for ([_][]const u8{ "libz.so.1", "libgone.so.1", "libloop.so.1" }) |n|
+        _ = try tmp.dir.readLink(io, try std.fmt.allocPrint(a, "out/libs/usr/lib/{s}", .{n}), &buf);
+    try tmp.dir.access(io, "out/libs/usr/lib/libz.so.1.2", .{});
 }

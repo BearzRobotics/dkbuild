@@ -24,7 +24,7 @@
 # it so recipes can keep asking for that name.
 name = "rust"
 version = "1.99.1"
-release = 7
+release = 8
 summary = "Rust programming language: rustc, cargo and the standard library"
 license = "MIT OR Apache-2.0"
 homepage = "https://www.rust-lang.org"
@@ -33,6 +33,9 @@ stage0deps = ["rust-bootstrap"]
 builddeps = ["llvm22", "llvm-libcxx-devel", "llvm-libunwind-devel", "zlib-ng-compat-devel", "zlib-ng-compat-static",
              "zstd-devel", "zstd-static", "openssl-devel", "curl-devel", "libssh2-devel"]
 rundeps = ["llvm-clang", "llvm-lld", "musl-devel", "llvm-libunwind"]
+# rust-libs, up to 1.99.1-r7, held only the link /usr/lib/librustc_driver-*.so, which is back in rust (SPEC 5.7);
+# a system that has it can still upgrade
+replaces = ["rust-libs"]
 options = ["!check", "!strip", "!lto", "selfhost", "jobs:8"]
 patches = [
     "0002-remove-a-bunch-of-unused-junk.patch",

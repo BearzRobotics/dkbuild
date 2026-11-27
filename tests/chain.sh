@@ -40,4 +40,31 @@ apk --force-overwrite --keys-dir /dkkeys extract --destination / /dkrepo/dkdemo-
 [ -e /usr/lib/libdkdemo.so.1 ] || { echo "FAIL: libdkdemo was not unpacked"; exit 1; }
 /usr/bin/usedemo || { echo "FAIL: usedemo does not run against the unpacked libdkdemo"; exit 1; }
 ' 2>&1) || { echo "$OUT"; exit 1; }
+
+# A -static that keeps part of its archives in another package it depends on (llvm-static and llvm-libcxx-static):
+# a build that gets the -static only as an extra of the -devel it asked for gets that package too. The image has no
+# libdkdemo, so the static link fails without it.
+S=tests/trees/chain-split
+newtree "$S"
+mkdemo "$S/src"
+demo_recipe "$S" 1
+user_recipe "$S" usedemo-static dkdemo-devel static
+R=$S/packages/d/dkdemo/package.toml
+sed -i 's|^cp dkdemo.h .*|&\ncp libdkdemo.a $pkgdir/usr/lib/libdkother.a|' "$R"
+cat >> "$R" <<'EOF'
+
+[subpackages.core-static]
+summary = "The archive the program needs"
+paths   = ["/usr/lib/libdkdemo.a"]
+
+[subpackages.static]
+summary = "The other static libraries"
+paths   = ["/usr/lib/*.a"]
+depends = ["dkdemo-core-static"]
+EOF
+OUT=$(./zig-out/bin/dkbuild --tree "$S" pkg --key "$TEST_KEY" usedemo-static 2>&1) \
+    || { echo "$OUT" | tail -15; echo "FAIL: a build did not get what the -static that came along depends on"; exit 1; }
+for f in dkdemo-core-static dkdemo-static usedemo-static; do
+    [ -f "$S/repo/x86_64/$f-1-r1.apk" ] || { echo "FAIL: no $f package"; exit 1; }
+done
 echo "ok: dkdemo built first; dynamic and static users built against it; scan results right; unpacks and runs"

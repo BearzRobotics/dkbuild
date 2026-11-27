@@ -499,7 +499,7 @@ subpackage can also list `depends` (packages it needs besides what the scan
 finds) and `install_if` (apk installs it automatically once all of those are
 installed). firmware-linux uses both: `firmware-linux-amdgpu` has
 `install_if = ["firmware-linux-gpu"]`, so a system gets either just the
-firmware it names, or a whole group. A `*.so` pattern matches only symlinks (the development link), so a real `libfoo-1.2.so` is never taken into `-devel`. A package that is only a library has no `-libs`: its libraries stay in the main package. When `-libs` exists, `-devel` depends on it.
+firmware it names, or a whole group. A `*.so` pattern matches only symlinks (the development link), so a real `libfoo-1.2.so` is never taken into `-devel`. A package that is only a library has no `-libs`: its libraries stay in the main package. Nor does `-libs` take a symlink that leads to a file staying in the main package (rust's `/usr/lib/librustc_driver-*.so`, a link into `/usr/lib/rustlib`): the link stays too. When `-libs` exists, `-devel` depends on it.
 Directories that the split leaves empty are removed; empty directories the
 package installed itself stay.
 
@@ -948,7 +948,9 @@ build, and 7 step 2 describes it.
   providing the recipe's dependencies and what they need to build and run (their
   own `builddeps` and `rundeps`, and the `depends` of a subpackage that is
   asked for by name). Of each, the package's `-libs`, `-static` and, for a
-  dependency on the bare name, `-devel` are laid too where they exist.
+  dependency on the bare name, `-devel` are laid too where they exist, and
+  what such a `-static` lists in its `depends` (llvm-static: `libunwind.a` is
+  in llvm-libcxx-static).
   `checkdeps` are added when the check runs. A direct dependency that has a
   recipe but is not in `repo/` makes the recipe "skipped". *Tried first and
   dropped:* describing the image

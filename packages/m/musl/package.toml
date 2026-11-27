@@ -6,7 +6,7 @@
 #     the same libc with the stock allocator, for those who want it.
 name      = "musl"
 version   = "1.2.6"
-release   = 5
+release   = 6
 summary   = "The C standard library"
 license   = "MIT"
 homepage  = "https://musl.libc.org/"
@@ -70,4 +70,8 @@ rm -f $pkgdir/usr/bin/musl-gcc $pkgdir/usr/lib/musl-gcc.specs
 # devel split (which takes /usr/lib/*.so) would move it out of the main package.
 [subpackages.devel]
 summary = "Headers and startup files"
-paths   = ["/usr/include", "/usr/lib/*.o"]
+# With them the empty archives musl installs for -lm, -lpthread and the rest (their
+# code is in libc): a dynamic link asks for those too. libc.a stays in musl-static.
+paths   = ["/usr/include", "/usr/lib/*.o", "/usr/lib/libcrypt.a", "/usr/lib/libdl.a", "/usr/lib/libm.a",
+           "/usr/lib/libpthread.a", "/usr/lib/libresolv.a", "/usr/lib/librt.a", "/usr/lib/libutil.a",
+           "/usr/lib/libxnet.a"]

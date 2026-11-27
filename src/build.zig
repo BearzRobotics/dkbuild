@@ -812,6 +812,14 @@ fn inTreeFiles(arena: Allocator, io: std.Io, opts: Options, r: recipe.Recipe, re
             }
             try files.append(arena, file);
         }
+        // A -static that came along may keep part of its libraries in another package it depends on (llvm-static:
+        // libunwind.a is in llvm-libcxx-static). Without that, a static link would find the image's copy.
+        if (std.mem.endsWith(u8, static_name, "-static")) {
+            const file = try std.fmt.allocPrint(arena, "{s}-{s}-r{d}.apk", .{ static_name, pr.version, pr.release });
+            if (contains(files.items, file)) for (pr.subpackages) |sp| {
+                if (std.mem.eql(u8, sp.name, "static")) try work.appendSlice(arena, sp.depends);
+            };
+        }
         // What the provider needs once installed (not its build tools).
         for ([_][]const []const u8{ pr.builddeps, pr.rundeps }) |deps| try work.appendSlice(arena, deps);
         // A subpackage's own `depends` (llvm-devel needs llvm-static: LLVM's
