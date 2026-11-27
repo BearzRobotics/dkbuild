@@ -22,7 +22,7 @@ version = "1"
 # r9 also: the boot check skips what is mounted or marked noauto, and the early boot mounts nothing twice (/dev was
 # mounted again over the kernel's, and once more by `mount -a`). After `mount -a`, dinit checks for its control socket
 # again and remakes it if something was mounted over /run. hwclock tries --directisa when the clock's interrupt does
-# not arrive.
+# not arrive. The mounts use --onlyonce; late-filesystems leaves what is mounted alone (no fsck, no second mount).
 release = 9
 summary = "dinit service definitions and boot scripts for FenrirOS"
 license = "MIT"

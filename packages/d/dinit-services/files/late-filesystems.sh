@@ -12,10 +12,15 @@ if [ "$1" = start ]; then
     
     if [ ! -z "$LATE_FILESYSTEMS" ]; then
         for FS in $LATE_FILESYSTEMS; do
-            fsck -a "$FS"
+            # already mounted (FS is a device or a mount point): not checked, and not mounted a second time
+            if findmnt -rn "$FS" >/dev/null; then
+                echo "$FS is already mounted"
+                continue
+            fi
+            fsck -M -a "$FS"
             fsckresult=$?
             if [ $(( $fsckresult & ~(1 + 32) )) -eq 0 ]; then
-                mount "$FS"
+                mount --onlyonce "$FS"
                 mntresult=$?
                 if [ $mntresult -ne 0 ]; then
                     RESULT=$mntresult

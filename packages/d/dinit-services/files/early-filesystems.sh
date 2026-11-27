@@ -11,7 +11,7 @@ if [ "$1" = start ]; then
     # again stacks a second one on top, hiding what is below. The source names are /etc/fstab's, so that the later
     # `mount -a` (filesystems.sh) sees these as mounted: it compares source and mount point.
     once() { # once TYPE OPTIONS SOURCE TARGET
-        mountpoint -q "$4" || mount -n -t "$1" -o "$2" "$3" "$4"
+        mountpoint -q "$4" || mount --onlyonce -n -t "$1" -o "$2" "$3" "$4"
     }
 
     # /proc first: mountpoint(1) reads the list of mounts from it. Without hidepid: polkitd runs as its own user and
