@@ -8,11 +8,13 @@
 # restarts, from Chimera) still applies, with line offsets.
 name = "dinit"
 version = "0.23.0"
-release = 1
+release = 2
 summary = "Service manager and init system"
 license = "Apache-2.0"
 homepage = "https://davmac.org/projects/dinit"
-patches = ["restart-interval.patch"]
+# reset-sigpipe.patch (r2): dinit ignores SIGPIPE and passed that on to every service, so every shell from a getty or a
+# login manager had it ignored: pipelines such as `grep x file | head` ended in "grep: write error: Broken pipe".
+patches = ["restart-interval.patch", "reset-sigpipe.patch"]
 builddeps = ["libcap-devel"]
 
 source = [

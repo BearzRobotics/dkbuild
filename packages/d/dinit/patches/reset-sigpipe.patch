@@ -1,0 +1,16 @@
+services: give SIGPIPE its default action back before exec (dinit ignores it for itself, and that is inherited)
+
+--- a/src/run-child-proc.cc
++++ b/src/run-child-proc.cc
+@@ -494,6 +494,11 @@
+         sigprocmask(SIG_SETMASK, &sigwait_set, nullptr);
+     }
+ 
++    // dinit ignores SIGPIPE for itself, and an ignored signal stays ignored across exec: every service, and so every
++    // login shell, would get write errors ("grep: write error: Broken pipe") where a pipe's reader has gone, instead
++    // of ending quietly.
++    signal(SIGPIPE, SIG_DFL);
++
+     err.stage = exec_stage::DO_EXEC;
+     // (on linux we could use execvpe, but it's not POSIX and not in eg FreeBSD).
+     bp_sys::environ = const_cast<char **>(proc_env_map.env_list.data());
