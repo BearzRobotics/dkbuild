@@ -343,7 +343,11 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
                 \\# The installer's minimum disk size: what the root takes, unpacked.
                 \\du -sb /target | cut -f1 > "$t/live/rootfs.size"
                 \\mksquashfs /target "$t/live/rootfs.sfs" -comp zstd -noappend -quiet
-                \\dklilo mkiso-images "$img"
+                \\# The image's own dklilo: its boot loader goes onto the disc. The build machine's is
+                \\# whatever its image was made with (DKRescue's 0.0.1 had no keyboard at a BIOS menu).
+                \\dklilo=/target/usr/sbin/dklilo
+                \\[ -x "$dklilo" ] || {{ echo "error: no /usr/sbin/dklilo in the image (add 'dklilo' to packages)" >&2; exit 1; }}
+                \\"$dklilo" mkiso-images "$img"
                 \\cp "$img/eltorito.bin" "$img/efiboot.img" "$t/boot/dklilo/"
                 \\cat > "$t/boot/dklilo.conf" <<'EOF'
                 \\timeout = 50
@@ -371,7 +375,7 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
                 \\    -eltorito-alt-boot -e boot/dklilo/efiboot.img -no-emul-boot \
                 \\    -append_partition 2 0xEF "$img/efiboot.img" -appended_part_as_gpt \
                 \\    "$t"
-                \\dklilo isohybrid /out/{0s}.iso
+                \\"$dklilo" isohybrid /out/{0s}.iso
                 \\rm -rf "$t" "$img"
                 \\
             , .{ img.name, img.label });
@@ -606,6 +610,11 @@ test "image files parse; bad outputs, excluded packages and odd names are refuse
     const ls = try script(a, live);
     try std.testing.expect(std.mem.indexOf(u8, ls, "root=live:LABEL=BASE quiet") != null);
     try std.testing.expect(std.mem.indexOf(u8, ls, "-V BASE -o /out/base.iso") != null);
+    // the boot loader written to the disc is the image's, never the build machine's (a bare `dklilo`)
+    try std.testing.expect(std.mem.indexOf(u8, ls, "\ndklilo=/target/usr/sbin/dklilo\n") != null);
+    try std.testing.expect(std.mem.indexOf(u8, ls, "\n\"$dklilo\" mkiso-images ") != null);
+    try std.testing.expect(std.mem.indexOf(u8, ls, "\n\"$dklilo\" isohybrid /out/base.iso\n") != null);
+    try std.testing.expect(std.mem.indexOf(u8, ls, "\ndklilo ") == null);
     try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\npackages = [\"a-devel\"]\nexclude = [\"*-devel\"]\noutput = [\"tar\"]\n", &diag));
     try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\npackages = [\"a;rm\"]\noutput = [\"tar\"]\n", &diag));
     const s = try script(a, img);

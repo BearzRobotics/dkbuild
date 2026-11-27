@@ -1242,7 +1242,9 @@ failed run the old one stays and the log is `out/<name>-failed.log`:
 booted by dklilo, made with `xorriso`: the kernel and an initramfs in the
 ISO 9660 part, the root as a squashfs (`live/rootfs.sfs`, with `rootfs.size`
 for the installer) that the live init mounts under a RAM overlay. It needs
-`live-initramfs` (the live init's initramfs) in `packages`, and a kernel;
+`live-initramfs` (the live init's initramfs) in `packages`, a kernel, and
+`dklilo` among what gets installed: the boot loader written to the disc is
+the **image's own** `/usr/sbin/dklilo`, never the build machine's;
 `label` (default: the name in capitals, at most 32 characters) is the volume
 label the live init looks for on the kernel command line. The live images
 carry `dkinstaller` (the installer). `tests/qemu-iso.sh` boots a built ISO in
