@@ -3,9 +3,13 @@
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r5: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 # r6: static libraries too (in shared-mime-info-static), for fully static programs on musl.
+# r8 (2026-11-26): the file type database (/usr/share/mime/mime.cache) was never made: the build leaves it out (-Dupdate-mimedb=false) and nothing made it at
+# install. Without it GTK cannot tell what an SVG is, and Firefox 161 aborted on the desktop loading an SVG icon.
 name = "shared-mime-info"
 version = "2.4"
-release = 7
+release = 8
+# scripts/post-install and scripts/trigger (the trigger watches these directories)
+triggers = ["/usr/share/mime/packages"]
 summary = "Core database of common types"
 license = "GPL-2.0-or-later"
 homepage = "https://freedesktop.org/wiki/Software/shared-mime-info"

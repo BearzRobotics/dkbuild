@@ -1,0 +1,3 @@
+#!/bin/sh
+/usr/bin/update-desktop-database -q /usr/share/applications || :
+exit 0

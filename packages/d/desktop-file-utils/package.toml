@@ -1,8 +1,11 @@
 # From Chimera Linux cports (main/desktop-file-utils; BSD-2-Clause, Copyright (c) Chimera Linux contributors).
 # needed by: gvfs.
+# r2 (2026-11-26): mimeinfo.cache (which program opens which type) was never made at install.
 name = "desktop-file-utils"
 version = "0.28"
-release = 1
+release = 2
+# scripts/post-install and scripts/trigger (the trigger watches these directories)
+triggers = ["/usr/share/applications"]
 summary = "Utilities to manage desktop entries"
 license = "GPL-2.0-or-later"
 homepage = "https://freedesktop.org/wiki/Software/desktop-file-utils"
