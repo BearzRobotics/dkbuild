@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "capstone"
-version = "5.0.6"
+version = "5.0.9"
 release = 1
 summary = "Ultimate Disassembler"
 license = "BSD-3-Clause-Clear"
@@ -11,7 +11,7 @@ homepage = "https://www.capstone-engine.org"
 hostdeps = ["bash", "cmake", "ninja", "pkgconf"]
 
 source = [
-    { url = "https://github.com/capstone-engine/capstone/archive/refs/tags/5.0.6.tar.gz", sha256 = "240ebc834c51aae41ca9215d3190cc372fd132b9c5c8aa2d5f19ca0c325e28f9" },
+    { url = "https://github.com/capstone-engine/capstone/archive/refs/tags/5.0.9.tar.gz", sha256 = "0619da31af08152600af95c481527ef6d756c0a8404fca7544a4fdf6dfc2c0f9" },
 ]
 
 setup = '''

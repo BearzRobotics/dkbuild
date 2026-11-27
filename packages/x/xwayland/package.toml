@@ -2,7 +2,7 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "xwayland"
 # Runs xkbcomp for keymaps (rundep), with the layouts from xkeyboard-config.
-version = "24.1.14"
+version = "24.1.15"
 release = 1
 summary = "Xwayland X server"
 license = "MIT"
@@ -14,7 +14,7 @@ rundeps = ["xserver-xorg-protocol", "xkbcomp", "xkeyboard-config"]
 options = ["!check"]
 
 source = [
-    { url = "https://gitlab.freedesktop.org/xorg/xserver/-/archive/xwayland-24.1.14/xserver-xwayland-24.1.14.tar.gz", sha256 = "3dd28ecde16a240e7d621539585b6dd11429a582699ba328a68f5a307056b68d" },
+    { url = "https://gitlab.freedesktop.org/xorg/xserver/-/archive/xwayland-24.1.15/xserver-xwayland-24.1.15.tar.gz", sha256 = "6b2ae147becce7c5ae291b00593e73b4a0f2031f06b11c4d6b8c365019222e01" },
 ]
 
 setup = '''

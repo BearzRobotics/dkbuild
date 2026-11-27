@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "libfontenc"
-version = "1.1.8"
+version = "1.1.10"
 release = 1
 summary = "Fontenc Library from X.org"
 license = "MIT"
@@ -12,7 +12,7 @@ hostdeps = ["pkgconf"]
 builddeps = ["xorgproto", "zlib-ng-compat-devel"]
 
 source = [
-    { url = "https://www.x.org/releases/individual/lib/libfontenc-1.1.8.tar.xz", sha256 = "7b02c3d405236e0d86806b1de9d6868fe60c313628b38350b032914aa4fd14c6" },
+    { url = "https://www.x.org/releases/individual/lib/libfontenc-1.1.10.tar.xz", sha256 = "daa186a49e3cc2b6fc585ca09971351e6f010f618abc6a164eda82e42e4aa4d6" },
 ]
 
 setup = '''

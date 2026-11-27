@@ -5,7 +5,7 @@
 # ytnef and ytnefprint tools. The ytnefprocess mail filter script needs Perl's
 # MIME-tools and MailTools, which are not packaged here yet.
 name = "ytnef"
-version = "2.1.2"
+version = "2.1.5"
 release = 1
 summary = "Yerase's TNEF stream reader"
 license = "GPL-2.0-or-later"
@@ -13,7 +13,7 @@ homepage = "https://github.com/Yeraze/ytnef"
 hostdeps = ["autoconf", "automake", "libtool", "pkgconf"]
 
 source = [
-    { url = "https://github.com/Yeraze/ytnef/archive/refs/tags/v2.1.2.tar.gz", sha256 = "340f03f495884611209e9c0bc943fad06ce920e8c79655aa228d5ca7418dc360" },
+    { url = "https://github.com/Yeraze/ytnef/archive/refs/tags/v2.1.5.tar.gz", sha256 = "656388b7472c040fa4b816ab35c33f3236c1a0467a7da0d5b20862023fba46fc" },
 ]
 
 setup = '''

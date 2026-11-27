@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/7zip/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "7zip"
-version = "26.03"
+version = "26.04"
 release = 1
 summary = "File archiver with a high compression ratio"
 license = "LGPL-2.0-only AND BSD-3-Clause AND custom:unrar"
@@ -9,7 +9,7 @@ homepage = "https://7-zip.org"
 patches = ["7-zip-flags.patch"]
 
 source = [
-    { url = "https://7-zip.org/a/7z2603-src.tar.xz", sha256 = "9cbde5099c6deb73691b0579063da5827522ccbbcba3f0020fd04e8c8c16c0d4" },
+    { url = "https://7-zip.org/a/7z2604-src.tar.xz", sha256 = "9691944c0fe0d01bb49373a704fb983fd33bc98b1738695179dfbf99ac1734f6" },
 ]
 
 build = '''

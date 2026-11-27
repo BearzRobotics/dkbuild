@@ -3,8 +3,8 @@
 # needed by: libxcursor (Hyprland's cursor themes).
 # r2: static libraries too (in libx11-static), for fully static programs on musl.
 name = "libx11"
-version = "1.8.13"
-release = 2
+version = "1.8.14"
+release = 1
 summary = "Base X libraries from Xorg"
 license = "MIT"
 homepage = "https://xorg.freedesktop.org"
@@ -13,7 +13,7 @@ hostdeps = ["pkgconf", "xorg-util-macros-devel"]
 builddeps = ["xorgproto-devel", "xtrans-devel", "libxcb-devel"]
 
 source = [
-    { url = "https://www.x.org/releases/individual/lib/libX11-1.8.13.tar.gz", sha256 = "acf0e7cd7541110e6330ecb539441a2d53061f386ec7be6906dfde0de2598470" },
+    { url = "https://www.x.org/releases/individual/lib/libX11-1.8.14.tar.gz", sha256 = "ebb8a58549ddde50aa2e742b3b256557f451053d173be8dbfc2e8ac078eee1d6" },
 ]
 
 environment = '''

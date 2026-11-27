@@ -6,8 +6,8 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "openjdk21"
-version = "21.0.13.0.3_p1"
-release = 6
+version = "21.0.13.1_p2"
+release = 1
 summary = "OpenJDK 21 (Java development kit and runtime)"
 license = "GPL-2.0-only WITH Classpath-exception-2.0"
 homepage = "https://openjdk.org"
@@ -20,7 +20,7 @@ rundeps = ["java-common", "!openjdk21-bootstrap"]
 options = ["!check", "jobs:12"]
 
 source = [
-    { url = "https://github.com/openjdk/jdk21u/archive/jdk-21.0.13.0.3+1.tar.gz", sha256 = "860df2bacc8fb971712b67493a78c9440ac4a37bb4b52f28107fd761e1a7bf08" },
+    { url = "https://github.com/openjdk/jdk21u/archive/jdk-21.0.13.1+2.tar.gz", sha256 = "2f00670ffe781881c6fdb60f49ecdfd12a6c0f5e2943b94d17b1f4bc714397f9" },
 ]
 environment = '''
 export LD_LIBRARY_PATH=/usr/lib/jvm/java-21-openjdk/lib:/usr/lib/jvm/java-21-openjdk/lib/server
@@ -58,7 +58,7 @@ CC=clang CXX=clang++ bash ./configure \
     --with-native-debug-symbols=none \
     --with-toolchain-type=clang \
     --with-version-pre= \
-    --with-version-build=1 \
+    --with-version-build=2 \
     --with-version-opt=fenriros \
     --with-vendor-name=FenrirOS \
     --with-vendor-url=https://github.com/BearzRobotics/dkbuild \

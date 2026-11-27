@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "libxpm"
-version = "3.5.17"
+version = "3.5.20"
 release = 1
 summary = "X PixMap library"
 license = "MIT"
@@ -12,7 +12,7 @@ hostdeps = ["automake", "gettext", "pkgconf", "libtool", "xorg-util-macros"]
 builddeps = ["xorgproto", "libsm-devel", "libxext-devel", "libxt-devel"]
 
 source = [
-    { url = "https://www.x.org/releases/individual/lib/libXpm-3.5.17.tar.gz", sha256 = "959466c7dfcfcaa8a65055bfc311f74d4c43d9257900f85ab042604d286df0c6" },
+    { url = "https://www.x.org/releases/individual/lib/libXpm-3.5.20.tar.gz", sha256 = "736704d843459abbf769560ff8e443a5de4e6023082e7086c9d195253ada17ff" },
 ]
 
 setup = '''

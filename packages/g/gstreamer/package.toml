@@ -3,8 +3,8 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "gstreamer"
-version = "1.28.7"
-release = 3
+version = "1.28.9"
+release = 1
 summary = "Core GStreamer libraries and elements"
 license = "LGPL-2.1-or-later"
 homepage = "https://gstreamer.freedesktop.org"
@@ -14,7 +14,7 @@ builddeps = ["bash-completion", "glib-devel", "libcap-devel", "libxml2-devel", "
 options = ["!cross"]
 
 source = [
-    { url = "https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.28.7.tar.xz", sha256 = "787329b2c5758e228a71d926a6dcf960bceaacca3cadd63874ba665dfcda013e" },
+    { url = "https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.28.9.tar.xz", sha256 = "6dbf744f583131a34845cc641e803843766a9ba80ce00378a9043fd6d8d5fb38" },
 ]
 
 environment = '''

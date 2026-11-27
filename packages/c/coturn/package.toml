@@ -7,7 +7,7 @@
 # Installed inert: the dinit service is shipped, not enabled; no users, no shared secret, no certificates.
 # Setup: README.FenrirOS.
 name = "coturn"
-version = "4.18.0"
+version = "4.19.2"
 release = 1
 summary = "TURN and STUN server for NAT traversal"
 license = "BSD-3-Clause"
@@ -17,7 +17,7 @@ builddeps = ["openssl-devel", "libevent-devel", "linux-headers", "sqlite-devel",
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/coturn/coturn/archive/4.18.0.tar.gz", sha256 = "28d55294ac596fbd129b293a85e7bb1c5dc4bd15b7fb55c500f355149e5f4e28" },
+    { url = "https://github.com/coturn/coturn/archive/4.19.2.tar.gz", sha256 = "2c80e4dffd0eb410951ba469f5cf8bd9b4a0658afc72d816f5c519c0c988d75c" },
 ]
 
 setup = '''

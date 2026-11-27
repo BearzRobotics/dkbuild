@@ -3,8 +3,8 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "gst-plugins-good"
-version = "1.28.7"
-release = 2
+version = "1.28.9"
+release = 1
 summary = "GStreamer good plugins"
 license = "LGPL-2.1-or-later"
 homepage = "https://gstreamer.freedesktop.org"
@@ -15,7 +15,7 @@ checkdeps = []
 rundeps = ["gst-plugins-base"]
 
 source = [
-    { url = "https://gstreamer.freedesktop.org/src/gst-plugins-good/gst-plugins-good-1.28.7.tar.xz", sha256 = "87256969c82cf3bc8574301f3e7044a90de0ac500a5a27d8ba38c4dde894dd8b" },
+    { url = "https://gstreamer.freedesktop.org/src/gst-plugins-good/gst-plugins-good-1.28.9.tar.xz", sha256 = "e518cd97483706a252e95e60312a22d23dec6f5e7673af6f5bde719c3a9ca7f4" },
 ]
 
 setup = '''

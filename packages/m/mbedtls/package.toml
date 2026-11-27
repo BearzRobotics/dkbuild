@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "mbedtls"
-version = "3.6.4"
+version = "3.6.8"
 release = 1
 summary = "Light-weight cryptographic and SSL/TLS library"
 license = "Apache-2.0 OR GPL-2.0-or-later"
@@ -13,7 +13,7 @@ hostdeps = ["cmake", "ninja", "pkgconf", "python"]
 builddeps = ["linux-headers"]
 
 source = [
-    { url = "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.4/mbedtls-3.6.4.tar.bz2", sha256 = "ec35b18a6c593cf98c3e30db8b98ff93e8940a8c4e690e66b41dfc011d678110" },
+    { url = "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.8/mbedtls-3.6.8.tar.bz2", sha256 = "bc54b818e87f49c0b3281dd85d24adaede0e63b4e822e3fbd49c005a38b9595b" },
 ]
 
 setup = '''

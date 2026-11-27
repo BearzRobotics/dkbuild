@@ -3,8 +3,8 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "gst-plugins-bad"
-version = "1.28.7"
-release = 4
+version = "1.28.9"
+release = 1
 summary = "GStreamer bad plugins"
 license = "LGPL-2.1-or-later"
 homepage = "https://gstreamer.freedesktop.org"
@@ -14,7 +14,7 @@ rundeps = ["gst-plugins-base"]
 options = ["!check", "!cross"]
 
 source = [
-    { url = "https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-1.28.7.tar.xz", sha256 = "dc525383c18b2c265bbe6a43d498656cd918aaa130aa4e3abeabcdaa741c3ffe" },
+    { url = "https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-1.28.9.tar.xz", sha256 = "4a4e0b7bf84f868378c48f143a7ac3a98923b488a5b74f1a35ba46bc3c43f6b1" },
 ]
 
 # r4: ninja runs several g-ir-scanner jobs at once (GstVulkan, GstHip, ...), and they share one cache directory.

@@ -3,20 +3,20 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "crun"
-version = "1.30.1"
-release = 2
+version = "1.31"
+release = 1
 summary = "Fast and lightweight OCI runtime"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://github.com/containers/crun"
 # r2: tests off. The unit tests pass (15/15), but the Python integration tests (hostname, domainname,
 # pid, devices) start containers with new namespaces, which the build sandbox does not allow.
 options = ["!check"]
-patches = ["skip-test_crun_path_exists.patch"]
+# 1.31: the patch that skipped one unit test (/proc/sysrq-trigger) no longer applies and is gone: tests are off
 hostdeps = ["autoconf", "automake", "go-md2man", "pkgconf", "python", "libtool"]
 builddeps = ["argp-standalone", "blake3-devel", "json-c-devel", "libcap-devel", "libseccomp-devel"]
 
 source = [
-    { url = "https://github.com/containers/crun/releases/download/1.30.1/crun-1.30.1.tar.zst", sha256 = "d62b89a82520a553edf63fd3ae11275be6f16ec86ed90d8ef7b113d06b239fa2" },
+    { url = "https://github.com/containers/crun/releases/download/1.31/crun-1.31.tar.zst", sha256 = "cb76a7951438205466725307e4061da6d1dfdc202bdf675cf209c7037b94002b" },
 ]
 
 setup = '''

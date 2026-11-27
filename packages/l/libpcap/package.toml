@@ -3,8 +3,8 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "libpcap"
-version = "1.10.6"
-release = 2
+version = "1.10.7"
+release = 1
 summary = "System-independent interface for user-level packet capture"
 license = "BSD-3-Clause"
 homepage = "https://www.tcpdump.org"
@@ -13,7 +13,7 @@ builddeps = ["libnl-devel", "libusb-devel", "linux-headers"]
 options = ["!check"]
 
 source = [
-    { url = "https://www.tcpdump.org/release/libpcap-1.10.6.tar.gz", sha256 = "872dd11337fe1ab02ad9d4fee047c9da244d695c6ddf34e2ebb733efd4ed8aa9" },
+    { url = "https://www.tcpdump.org/release/libpcap-1.10.7.tar.gz", sha256 = "0b394ac90dbc0a9838ff97468e05c9c9a3e873dec2514cd58db65d859d296e31" },
 ]
 
 setup = '''

@@ -3,8 +3,8 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "gst-plugins-base"
-version = "1.28.7"
-release = 3
+version = "1.28.9"
+release = 1
 summary = "GStreamer base plugins"
 license = "LGPL-2.1-or-later"
 homepage = "https://gstreamer.freedesktop.org"
@@ -15,7 +15,7 @@ rundeps = ["gstreamer", "libvisual-plugins", "orc"]
 options = ["!cross"]
 
 source = [
-    { url = "https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-1.28.7.tar.xz", sha256 = "ed6e5410f496d171818763af2265e7977154bc7f9b827e98acf8c5bed21dd5a7" },
+    { url = "https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-1.28.9.tar.xz", sha256 = "c1fda668b520e6aef763c0eb962c032c9fe52bce322e8b00c69b4e9e847bddc1" },
 ]
 
 setup = '''

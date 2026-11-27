@@ -2,7 +2,7 @@
 # Packaged for Proxmox VE (a dependency of Proxmox VE's Perl stack). Its tests are not run (!check): several need
 # test-only CPAN modules or the network.
 name = "perl-convert-asn1"
-version = "0.36"
+version = "0.37"
 release = 1
 summary = "Convert between perl data structures and ASN.1 encoded packets"
 license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
@@ -12,7 +12,7 @@ builddeps = ["perl"]
 options = ["!check"]
 
 source = [
-    { url = "https://cpan.metacpan.org/authors/id/T/TI/TIMLEGGE/Convert-ASN1-0.36.tar.gz", sha256 = "50439aedff4b403f24c9373eefd3c25770e33a9190d93a331e7a744f8b4e7cd3" },
+    { url = "https://cpan.metacpan.org/authors/id/T/TI/TIMLEGGE/Convert-ASN1-0.37.tar.gz", sha256 = "012b90bbb931e049340a114dbc510f845309d9ca76cc6c4fad751d317b4bf0fa" },
 ]
 
 build = '''

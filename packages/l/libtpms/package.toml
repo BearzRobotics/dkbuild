@@ -3,12 +3,12 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "libtpms"
-version = "0.10.0"
-release = 3
+version = "0.10.2"
+release = 1
 summary = "Software emulation of a Trusted Platform Module"
 license = "BSD-3-Clause"
 homepage = "https://github.com/stefanberger/libtpms"
-patches = ["10-fix-nvram_offsets-32bit-test.patch", "fix-tests.patch"]
+# 0.10.2: the 32-bit padding patch is upstream; the tests/common one (BSD stat) is gone, the tree has GNU stat
 hostdeps = ["automake", "pkgconf", "libtool"]
 # r3: tests off: 6 of the 10 (the tpm2_*.sh emulator runs: selftest, pcr_read, createprimary, setprofile and
 # the two CVE checks) fail in the sandbox, the same r2 passed them; make removes the log, so no detail.
@@ -18,7 +18,7 @@ builddeps = ["openssl-devel"]
 checkdeps = ["bash"]
 
 source = [
-    { url = "https://github.com/stefanberger/libtpms/archive/refs/tags/v0.10.0.tar.gz", sha256 = "6da9a527b3afa7b1470acd4cd17157b8646c31a2c7ff3ba2dfc50c81ba413426" },
+    { url = "https://github.com/stefanberger/libtpms/archive/refs/tags/v0.10.2.tar.gz", sha256 = "edac03680f8a4a1c5c1d609a10e3f41e1a129e38ff5158f0c8deaedc719fb127" },
 ]
 
 setup = '''

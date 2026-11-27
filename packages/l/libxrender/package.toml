@@ -3,8 +3,8 @@
 # needed by: libxcursor.
 # r2: static libraries too (in libxrender-static), for fully static programs on musl.
 name = "libxrender"
-version = "0.9.12"
-release = 2
+version = "0.9.13"
+release = 1
 summary = "X Render library"
 license = "MIT"
 homepage = "https://xorg.freedesktop.org"
@@ -12,7 +12,7 @@ hostdeps = ["automake", "pkgconf", "libtool", "xorg-util-macros-devel"]
 builddeps = ["xorgproto-devel", "libx11-devel"]
 
 source = [
-    { url = "https://www.x.org/releases/individual/lib/libXrender-0.9.12.tar.gz", sha256 = "0fff64125819c02d1102b6236f3d7d861a07b5216d8eea336c3811d31494ecf7" },
+    { url = "https://www.x.org/releases/individual/lib/libXrender-0.9.13.tar.gz", sha256 = "bf264b683d1e49ff9a6bc03af13baa430a556d943731a2b1ac2439dae4fea205" },
 ]
 
 setup = '''

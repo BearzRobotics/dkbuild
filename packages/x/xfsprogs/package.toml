@@ -5,8 +5,8 @@
 # r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 # r3: static libraries too (in xfsprogs-static), for fully static programs on musl.
 name = "xfsprogs"
-version = "7.2.1"
-release = 3
+version = "7.3.0"
+release = 1
 summary = "XFS file system utilities"
 license = "LGPL-2.1-or-later"
 homepage = "http://xfs.org/index.php/Main_Page"
@@ -16,7 +16,7 @@ builddeps = ["attr-devel", "gettext-devel", "inih-devel", "libedit-devel", "linu
 options = ["!check"]
 
 source = [
-    { url = "https://www.kernel.org/pub/linux/utils/fs/xfs/xfsprogs/xfsprogs-7.2.1.tar.xz", sha256 = "c45f5fd81fdebcdae61938fcfdff86c9960b39fc89a06df633730d93876cd27d" },
+    { url = "https://www.kernel.org/pub/linux/utils/fs/xfs/xfsprogs/xfsprogs-7.3.0.tar.xz", sha256 = "310c11e9e1d336064921cc123de5c84a331d5abe3c3b82aeadb89a191d34b449" },
 ]
 
 environment = '''

@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "libslirp"
-version = "4.9.0"
+version = "4.9.7"
 release = 1
 summary = "General purpose TCP-IP emulator"
 license = "BSD-3-Clause"
@@ -12,7 +12,7 @@ hostdeps = ["pkgconf"]
 builddeps = ["glib-devel", "linux-headers"]
 
 source = [
-    { url = "https://gitlab.freedesktop.org/slirp/libslirp/-/archive/v4.9.0/libslirp-v4.9.0.tar.gz", sha256 = "e744a32767668fe80e3cb3bd75d10d501f981e98c26a1f318154a97e99cdac22" },
+    { url = "https://gitlab.freedesktop.org/slirp/libslirp/-/archive/v4.9.7/libslirp-v4.9.7.tar.gz", sha256 = "d2567fa06a6357c7755d61c67293b2c0bf069b3f2173bde6b76cf768529a1938" },
 ]
 
 setup = '''
@@ -23,5 +23,6 @@ build = '''
 '''
 install = '''
 %meson_install
-install -Dm644 COPYRIGHT "$pkgdir/usr/share/licenses/libslirp/COPYRIGHT"
+# 4.9.7 moved the text into LICENSE; COPYRIGHT only points there
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/libslirp/LICENSE"
 '''

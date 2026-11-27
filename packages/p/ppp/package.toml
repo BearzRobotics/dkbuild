@@ -1,18 +1,20 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/ppp/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "ppp"
-version = "2.5.2"
-release = 3
+version = "2.5.5"
+release = 1
 summary = "PPP (Point-to-Point Protocol) daemon"
 license = "BSD-3-Clause AND LGPL-2.0-or-later AND GPL-2.0-or-later"
 homepage = "https://ppp.samba.org"
-patches = ["fix-sigill.patch", "musl-fix-headers.patch", "musl.patch"]
+# 2.5.5: musl-fix-headers.patch is gone: it removed a branch musl never took (__GLIBC__ is not defined there, so the
+# first branch, the kernel headers it kept, is the one compiled)
+patches = ["fix-sigill.patch", "musl.patch"]
 hostdeps = ["automake", "libtool", "pkgconf"]
 builddeps = ["libpcap-devel", "openssl-devel", "linux-headers"]
 options = ["!check"]
 
 source = [
-    { url = "https://ftp.samba.org/pub/ppp/ppp-2.5.2.tar.gz", sha256 = "47da358de54a10cb10bf6ff2cf9b1c03c0d3555518f6182e8f701b8e55733cb2" },
+    { url = "https://ftp.samba.org/pub/ppp/ppp-2.5.5.tar.gz", sha256 = "0ebbcfef906d16cfbb9cbdd19c0d92aa3df2fd8fdd29731f614c58d16a279aa5" },
 ]
 
 setup = '''

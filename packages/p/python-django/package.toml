@@ -1,6 +1,6 @@
 # django from PyPI, added for ahmia-site (requested 2026-11-17). Not built yet (wip/queue).
 name = "python-django"
-version = "5.2.16"
+version = "5.2.19"
 release = 1
 summary = "A high-level Python web framework (5.2 LTS)"
 license = "BSD-3-Clause"
@@ -10,7 +10,7 @@ rundeps = ["python", "python-asgiref", "python-sqlparse"]
 options = ["!check"]
 
 source = [
-    { url = "https://files.pythonhosted.org/packages/a9/26/889449d521ae508b26de715954faecd8bcf3f740affb81b2d146a83b42a5/django-5.2.16.tar.gz", sha256 = "59ea02020c3136fce14bef0bbece21a10a4febef5eed1c51c22ae468efa22200" },
+    { url = "https://files.pythonhosted.org/packages/02/29/a487a108caa76430c8b616aa90a6d09cf431306112c14093e6f0a7454e17/django-5.2.19.tar.gz", sha256 = "ad03d8abc51dbff95ebf34b27123cf0c26a3b62db7ba0cd520783686362533d1" },
 ]
 
 install = '''

@@ -1,11 +1,11 @@
 --- a/test/testxlate.c
 +++ b/test/testxlate.c
-@@ -126,7 +126,7 @@ abts_suite *testxlate(abts_suite *suite)
+@@ -153,7 +153,7 @@
  {
      suite = ADD_SUITE(suite);
  
 -#if APR_HAS_XLATE
 +#if 0
-     abts_run_test(suite, test_transformation, NULL);
- #endif
+     /* 1. Identity transformation: UTF-8 -> UTF-8 */
+     abts_run_test(suite, test_transformation, &test_params_utf8_utf8);
  

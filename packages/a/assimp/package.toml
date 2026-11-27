@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/assimp/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "assimp"
-version = "6.0.2"
+version = "6.0.6"
 release = 1
 summary = "Open asset importing library"
 license = "BSD-3-Clause"
@@ -10,7 +10,7 @@ hostdeps = ["cmake", "ninja", "pkgconf"]
 builddeps = ["minizip-devel", "zlib-ng-compat-devel"]
 
 source = [
-    { url = "https://github.com/assimp/assimp/archive/refs/tags/v6.0.2.tar.gz", sha256 = "d1822d9a19c9205d6e8bc533bf897174ddb360ce504680f294170cc1d6319751" },
+    { url = "https://github.com/assimp/assimp/archive/refs/tags/v6.0.6.tar.gz", sha256 = "5f7ed412b76575621df0525a762b31da5874afff352b3a890c6308db4ac7204c" },
 ]
 
 environment = '''

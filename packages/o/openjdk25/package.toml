@@ -6,8 +6,8 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "openjdk25"
-version = "25.0.5.0.3_p1"
-release = 7
+version = "25.0.5.1_p2"
+release = 1
 summary = "OpenJDK 25 (Java development kit and runtime)"
 license = "GPL-2.0-only WITH Classpath-exception-2.0"
 homepage = "https://openjdk.org"
@@ -20,7 +20,7 @@ rundeps = ["java-common", "!openjdk25-bootstrap"]
 options = ["!check", "jobs:12"]
 
 source = [
-    { url = "https://github.com/openjdk/jdk25u/archive/jdk-25.0.5.0.3+1.tar.gz", sha256 = "957a4712571f8000851e5331a1b1510fe814771e05492b32ac828e5f55e6b4a6" },
+    { url = "https://github.com/openjdk/jdk25u/archive/jdk-25.0.5.1+2.tar.gz", sha256 = "b3ecd75437342ee932f71792bbbdd09cd336659324f94ad0e81e527af74d8c5c" },
 ]
 environment = '''
 export LD_LIBRARY_PATH=/usr/lib/jvm/java-25-openjdk/lib:/usr/lib/jvm/java-25-openjdk/lib/server
@@ -58,7 +58,7 @@ CC=clang CXX=clang++ bash ./configure \
     --with-native-debug-symbols=none \
     --with-toolchain-type=clang \
     --with-version-pre= \
-    --with-version-build=1 \
+    --with-version-build=2 \
     --with-version-opt=fenriros-r$release \
     --with-vendor-name=FenrirOS \
     --with-vendor-url=https://github.com/BearzRobotics/dkbuild \
