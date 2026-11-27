@@ -15,7 +15,8 @@ hostname = "fenriros"
 issue = """
 
 FenrirOS \\r (\\l): desktop system. This is a text console.
-The desktop is on console 7: Ctrl+Alt+F7. Text consoles: Ctrl+Alt+F1 to F6.
+The desktop is on console 7: press Alt+F7. Text consoles: Alt+F1 to F6.
+From the desktop, get here with  sudo chvt 1  in a terminal.
 
 LOG IN
   Live disc:  user  live    password: none (press Enter)
