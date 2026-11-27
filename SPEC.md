@@ -58,7 +58,7 @@ Three things make it trustworthy, and this spec exists to enforce them:
 ### Non-goals (v1)
 
 - A package manager of our own. apk-tools is the package manager.
-- Building with GCC by default. The toolchain is LLVM/Clang, as everywhere in FenrirOS; GCC is an explicit opt-in per recipe (`options = ["gcc"]`, section 3). GCC itself is also a package (`gcc` 15, installed in `/usr/lib/gcc15`, with GCC cross suites for bare-metal targets), so users can install it.
+- Building with GCC by default. The toolchain is LLVM/Clang, as everywhere in FenrirOS; GCC is an explicit opt-in per recipe (`options = ["gcc"]`, section 3). GCC itself is also a package (`gcc` 15, installed in `/usr/lib/gcc16`, with GCC cross suites for bare-metal targets), so users can install it.
 - Building directly from other distributions' recipe formats. They are
   **converted** to our TOML first (5.9); the build only ever sees TOML.
 - A binary cache server. Repositories are plain directories, served by any
@@ -72,7 +72,7 @@ particular:
 - **No GCC or GNU binutils** in any build root, unless a recipe explicitly
   opts in with `options = ["gcc"]`, for the few that need it (GRUB 2, GHDL).
   The option adds `gcc` and `binutils` to the recipe's hostdeps and exports
-  GCC from `/usr/lib/gcc15` as CC/CXX/CPP, GNU binutils under their plain names
+  GCC from `/usr/lib/gcc16` as CC/CXX/CPP, GNU binutils under their plain names
   first on PATH (`ld` is `ld.bfd`), GCC's flags and an rpath to its runtime
   (profile.zig `gccEnv`); the recipe's `environment` runs after and can change
   any of it. LLVM is the toolchain everywhere else.
@@ -304,7 +304,7 @@ release, or a `snapshot:git` source (below), which is a checksummed tarball.
 | `static` | Link programs statically (rescue-critical tools): adds `-static` to `LDFLAGS`. Never on a recipe that ships a shared library: `-shared -static` links without a warning and gives a library that crashes its users (zstd 1.5.7-r1 crashed lld that way) |
 | `bootstrap` | Part of the bootstrap set (9); built in stage 0. **Inert:** accepted, never read (about 24 recipes carry it); stage 1 builds whatever the tree asks for (7.3) |
 | `selfhost` | A compiler built with itself (dotnet): the build root also gets the newest package of this recipe in `repo/`, of any version, with that build's declared subpackages (all of them, or the build does not count). With none, the first build uses `stage0deps` (a seed such as a vendor binary and what it needs). Not part of the build-root hash, so a new build does not trigger another |
-| `gcc` | Build with GCC 15 and GNU binutils instead of clang (GRUB 2, GHDL): `gcc` and `binutils` join the hostdeps, and the environment gets GCC's compilers and flags, GNU tools on PATH and an rpath to `/usr/lib/gcc15/lib` (3). The recipe's `environment` can override any of it |
+| `gcc` | Build with GCC 16 and GNU binutils instead of clang (GRUB 2, GHDL): `gcc` and `binutils` join the hostdeps, and the environment gets GCC's compilers and flags, GNU tools on PATH and an rpath to `/usr/lib/gcc16/lib` (3). The recipe's `environment` can override any of it |
 | `jobs:N` | At most N parallel jobs for this recipe (LLVM: `jobs:10`). Also marks it heavy: with `-P`, it builds alone (10) |
 | `zigdeps` | Zig dependencies fetched on the host into the shared `cache/zigpkg/` and laid in the source tree as `zig-pkg/` (7.4) |
 | `godeps` | Go modules downloaded on the host (`go mod download`, needs `go`) into the shared module cache `cache/gomod/`; the build gets `GOMODCACHE`, `GOPROXY=off`, `GOFLAGS=-mod=mod` (7.4) |

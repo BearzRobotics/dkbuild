@@ -3,7 +3,7 @@
 # lld, libc++), not GCC; zig and Rust are here too (the kernel's Rust support
 # needs rustc, the standard library source, bindgen and clang). Not in base:
 # a machine that only runs software has no use for them. GCC is a choice (it
-# lives in /usr/lib/gcc15 and does not replace clang), so it is not listed.
+# lives in /usr/lib/gcc16 and does not replace clang), so it is not listed.
 # Not packaged yet, so not listed: ccache, mold, valgrind, pahole (dwarves).
 name = "base-devel"
 version = "1"

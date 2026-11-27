@@ -25,7 +25,7 @@ export HOME=/tmp/home npm_config_cache=/tmp/npm-cache npm_config_offline=true \
     npm_config_audit=false npm_config_fund=false npm_config_update_notifier=false NEXT_TELEMETRY_DISABLED=1
 # Next.js 12's prebuilt SWC binary for musl needs libgcc_s.so.1 ("Error loading shared library libgcc_s.so.1"), which this system only has in the gcc
 # package's directory: the dynamic loader is pointed there for the admin build, as for the Euro-Office web-apps build
-export LD_LIBRARY_PATH=/usr/lib/gcc15/lib
+export LD_LIBRARY_PATH=/usr/lib/gcc16/lib
 '''
 setup = '''
 cd admin

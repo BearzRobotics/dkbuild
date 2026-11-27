@@ -15,9 +15,9 @@
 # libgit2, mbedtls, libunwind, OpenBLAS with 64-bit integers and the _64_ symbol
 # suffix (Julia's LinearAlgebra calls that interface; the tree's OpenBLAS is the
 # 32-bit one), LAPACK, SuiteSparse, dSFMT, openlibm, p7zip, libwhich.
-# Fortran: the bundled OpenBLAS builds LAPACK from Fortran: gfortran-15 from the gcc
+# Fortran: the bundled OpenBLAS builds LAPACK from Fortran: gfortran-16 from the gcc
 # package; libgfortran is found at run time through the rpath
-# /usr/lib/gcc15/lib (Julia's own libdir has rpath $ORIGIN).
+# /usr/lib/gcc16/lib (Julia's own libdir has rpath $ORIGIN).
 # musl: Julia supports musl (Alpine) as a partial platform: the full test suite
 # has failures (the REPL's terminal tests, some libc-specific ones) and
 # upstream's binary releases are glibc only. Not tested here at all.
@@ -42,7 +42,7 @@ source = [
 
 environment = '''
 export HOME=/tmp LANG=C.UTF-8 LC_ALL=C.UTF-8
-export FC=gfortran-15 FFLAGS=-O2
+export FC=gfortran-16 FFLAGS=-O2
 unset CFLAGS CXXFLAGS LDFLAGS CPPFLAGS
 '''
 setup = '''
@@ -66,19 +66,19 @@ USE_SYSTEM_PATCHELF=1
 # the generic multi-versioned system image
 JULIA_CPU_TARGET=generic;sandybridge,-xsaveopt,clone_all;haswell,-rdrnd,base(1)
 MARCH=x86-64
-# Fortran runtime for the bundled OpenBLAS/LAPACK (gfortran-15's libgfortran)
-LDFLAGS=-Wl,-rpath,/usr/lib/gcc15/lib
+# Fortran runtime for the bundled OpenBLAS/LAPACK (gfortran-16's libgfortran)
+LDFLAGS=-Wl,-rpath,/usr/lib/gcc16/lib
 VERBOSE=1
 EOF2
 '''
 build = '''
 # Make.inc sets FC := gfortran (the environment's FC is overwritten) and asks it for its version: with the tree's
-# versioned driver gfortran-15 only, "Attempting to build OpenBLAS or SuiteSparse without a functioning fortran
+# versioned driver gfortran-16 only, "Attempting to build OpenBLAS or SuiteSparse without a functioning fortran
 # compiler!". A command-line FC wins over Make.inc's assignment and reaches the dependency builds.
-make -j$jobs FC=gfortran-15
+make -j$jobs FC=gfortran-16
 '''
 install = '''
-make install DESTDIR="$pkgdir" prefix=/usr FC=gfortran-15
+make install DESTDIR="$pkgdir" prefix=/usr FC=gfortran-16
 # Julia's own licence (the bundled libraries' licences are installed by Julia itself)
 
 install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/julia/LICENSE.md"

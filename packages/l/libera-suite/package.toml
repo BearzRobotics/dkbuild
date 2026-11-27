@@ -48,7 +48,7 @@
 # Not built yet.
 name = "libera-suite"
 version = "0.7.0"
-release = 10
+release = 11
 summary = "Desktop office suite built on Euro-Office's editors (GTK, WebKitGTK)"
 license = "Apache-2.0 AND AGPL-3.0-only AND CC-BY-SA-4.0"
 homepage = "https://docs.liberasuite.eu"
@@ -239,11 +239,11 @@ test -x $bin/x2t && test -x $bin/libera-sign
 (cd $sdkjs/build && BUILD_ROOT=$P SDK_PLATFORM=desktop node scripts/build-pipeline.cjs)
 # r9: sharp's prebuilt musl binary (@img/sharp-linuxmusl-x64, used by the web-apps build's image step: "deploy-common failed: Could not load the sharp module ...
 # Error loading shared library libstdc++.so.6") needs GCC's C++ runtime; this system's own C++ library is libc++. The `gcc` package (builddep) keeps libstdc++
-# in /usr/lib/gcc15/lib, which is put on the library path for that one command only.
+# in /usr/lib/gcc16/lib, which is put on the library path for that one command only.
 # r10: build-pipeline.js's Phase 1 starts six webpack builds and four mobile builds at once (each a few GB of Node heap) and this build ended there with no message at all
 # (the log stops at the mobile install's npm warnings; not an error from any task). files/limit-pipeline.py adds an optional cap (PIPELINE_JOBS), set to 3.
 python3 $pkgfiles/limit-pipeline.py $webapps/build/scripts/build-pipeline.js
-(cd $webapps/build && PIPELINE_JOBS=3 LD_LIBRARY_PATH=/usr/lib/gcc15/lib BUILD_ROOT=$P THEME=euro-office node scripts/build-pipeline.js)
+(cd $webapps/build && PIPELINE_JOBS=3 LD_LIBRARY_PATH=/usr/lib/gcc16/lib BUILD_ROOT=$P THEME=euro-office node scripts/build-pipeline.js)
 # payload.sh: English for the strings a translation lacks
 python3 -I - $P/web-apps/apps/*/main/locale <<'FILL'
 import json, pathlib, sys

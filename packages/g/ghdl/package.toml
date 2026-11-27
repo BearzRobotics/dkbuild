@@ -1,9 +1,9 @@
 # GHDL: VHDL simulator and synthesis front end (VHDL-87 to VHDL-2019), with
 # libghdl (for language servers and pyGHDL) and synthesis (ghdl --synth, and
 # the Yosys plugin's base). Written in Ada: built with GCC's GNAT (gcc, in
-# /usr/lib/gcc15), the mcode backend (generates x86_64 code in memory; no
+# /usr/lib/gcc16), the mcode backend (generates x86_64 code in memory; no
 # LLVM or GCC sources needed). Programs link GNAT's runtime from
-# /usr/lib/gcc15/lib (rpath).
+# /usr/lib/gcc16/lib (rpath).
 name = "ghdl"
 version = "6.0.0"
 release = 5
@@ -15,7 +15,7 @@ hostdeps = ["gcc", "gcc-ada", "binutils", "make"]
 builddeps = ["zlib-ng-compat-devel"]
 rundeps = ["gcc", "gcc-ada"]
 options = ["!check", "!lto", "gcc"]
-# both link GCC 15's runtime, private to /usr/lib/gcc15: no package provides those names, so the dependencies
+# both link GCC 16's runtime, private to /usr/lib/gcc16: no package provides those names, so the dependencies
 # on gcc and gcc-ada are written out instead
 noscan = ["usr/bin/ghdl", "usr/lib/libghdl-*.so"]
 
@@ -25,7 +25,7 @@ source = [
 
 environment = '''
 # options = ["gcc"] sets GCC, GNU binutils and the rpath; GNAT's builder too
-export GNATMAKE=/usr/lib/gcc15/bin/gnatmake
+export GNATMAKE=/usr/lib/gcc16/bin/gnatmake
 unset CPPFLAGS
 '''
 setup = '''

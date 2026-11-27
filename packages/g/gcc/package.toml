@@ -1,16 +1,22 @@
-# GCC 15, the GNU Compiler Collection, as an exception beside FenrirOS's LLVM
+# GCC 16, the GNU Compiler Collection, as an exception beside FenrirOS's LLVM
 # toolchain (the user's decision, 2026-11-11): for what only GCC compiles (GHDL
 # is written in Ada) and for its other languages. Languages: C, C++, Ada
 # (GNAT), Fortran, D, Go, Objective-C/C++, Modula-2, COBOL and Rust (gccrs,
 # experimental), plus libgccjit (a second, host-shared build, as Alpine's).
 # It does not take over the system's compilers: everything is in its own
-# prefix, /usr/lib/gcc15; /usr/bin gets the drivers only under versioned
-# names (gcc-15, g++-15, gfortran-15, gdc-15, gccgo-15, gm2-15, gcobol-15,
-# gccrs-15) and
+# prefix, /usr/lib/gcc16; /usr/bin gets the drivers only under versioned
+# names (gcc-16, g++-16, gfortran-16, gdc-16, gccgo-16, gm2-16, gcobol-16,
+# gccrs-16) and
 # the gnat* tools (which nothing else provides), so cc/c++ stay clang,
 # Fortran's default stays flang, and go/gofmt stay Go's. Programs it builds
-# find its runtime libraries through /usr/lib/gcc15/lib (link with
-# -Wl,-rpath,/usr/lib/gcc15/lib, or statically).
+# find its runtime libraries through /usr/lib/gcc16/lib (link with
+# -Wl,-rpath,/usr/lib/gcc16/lib, or statically).
+# 16.2.0 (2026-11-27, the user's choice; GCC 15.2.0 before). The patches are still Alpine's GCC 15 set, Alpine having
+# none for 16 yet: dropped as already in GCC 16: 0029 (libatomic is linked by itself), 0034 (time_t's size is now
+# measured), 0039 and tree-object-size (both upstream), 0035 (druntime's musl mmap is already plain: with fuzz the
+# patch edited uClibc's instead); dropped as LoongArch only: 0037 and the LoongArch patch; 0028 lost the one hunk
+# that only moved an #include. 0003, 0038 and 9001 apply with fuzz; their added and removed lines are exactly right.
+# The stage 0 seed stays Alpine's GCC 15.2 (gcc-bootstrap). Not built.
 # Patches: Alpine's (musl, hardening defaults, Ada runtime on musl), less
 # 0018 (FenrirOS's musl has no libssp_nonshared.a).
 # Bootstrapping: Ada's and D's front ends are written in Ada and D. The first
@@ -25,13 +31,13 @@
 # before. A path that matches nothing in a build just leaves the file in `gcc`: check the lists
 # against the first build's file list.
 name = "gcc"
-version = "15.2.0"
-release = 7
+version = "16.2.0"
+release = 1
 summary = "GNU Compiler Collection 15 (C and C++; the other languages are gcc-<language> packages)"
 license = "GPL-3.0-or-later AND GPL-3.0-or-later WITH GCC-exception-3.1"
 homepage = "https://gcc.gnu.org"
 archs = ["x86_64"]
-patches = ["0001-posix_memalign.patch", "0002-gcc-poison-system-directories.patch", "0003-specs-turn-on-Wl-z-now-by-default.patch", "0004-Turn-on-D_FORTIFY_SOURCE-2-by-default-for-C-C-ObjC-O.patch", "0005-On-linux-targets-pass-as-needed-by-default-to-the-li.patch", "0006-Enable-Wformat-and-Wformat-security-by-default.patch", "0007-Enable-Wtrampolines-by-default.patch", "0008-gcc-disable-SSP-on-ffreestanding-nostdlib-and-nodefa.patch", "0009-gcc-params-set-default-ssp-buffer-size-to-4.patch", "0010-Ensure-that-msgfmt-doesn-t-encounter-problems-during.patch", "0011-Don-t-declare-asprintf-if-defined-as-a-macro.patch", "0012-libiberty-copy-PIC-objects-during-build-process.patch", "0013-libgcc_s.patch", "0014-nopie.patch", "0015-ada-fix-shared-linking.patch", "0016-build-fix-CXXFLAGS_FOR_BUILD-passing.patch", "0017-add-fortify-headers-paths.patch", "0019-DP-Use-push-state-pop-state-for-gold-as-well-when-li.patch", "0020-aarch64-disable-multilib-support.patch", "0021-s390x-disable-multilib-support.patch", "0022-ppc64-le-disable-multilib-support.patch", "0023-x86_64-disable-multilib-support.patch", "0024-riscv-disable-multilib-support.patch", "0025-always-build-libgcc_eh.a.patch", "0026-ada-libgnarl-remove-use-of-glibc-specific-pthread_rw.patch", "0027-ada-libgnarl-use-posix_openpt-instead-of-glibc-speci.patch", "0028-ada-libgnarl-adaint-fix-sched.h-inclusion-for-musl.patch", "0029-configure-Add-enable-autolink-libatomic-use-in-LINK_.patch", "0030-configure-fix-detection-of-atomic-builtins-in-libato.patch", "0031-libstdc-do-not-throw-exceptions-for-non-C-locales-on.patch", "0032-gdc-unconditionally-link-libgphobos-against-libucont.patch", "0033-druntime-link-against-libucontext-on-all-platforms.patch", "0034-libgnat-time_t-is-always-64-bit-on-musl-libc.patch", "0035-libphobos-do-not-use-LFS64-symbols.patch", "0036-libgo-fix-lfs64-use.patch", "0037-loongarch-disable-multilib-support.patch", "0038-static-PIE-ensure-static-reaches-the-linker.patch", "0039-except-Don-t-use-the-cached-value-of-the-gcc_except_.patch", "0040-ada-libgnat-use-stub-symbolic-module-name-functions.patch", "0041-ada-libgnat-recognize-linux-musleabi-and-linux-muslg.patch", "0001-tree-object-size.cc-Fix-assert-constant-offset-in-ch.patch", "0001-LoongArch-Only-allow-valid-binary-op-when-optimize-c.patch", "9001-libgcobol-no-execinfo.patch"]
+patches = ["0001-posix_memalign.patch", "0002-gcc-poison-system-directories.patch", "0003-specs-turn-on-Wl-z-now-by-default.patch", "0004-Turn-on-D_FORTIFY_SOURCE-2-by-default-for-C-C-ObjC-O.patch", "0005-On-linux-targets-pass-as-needed-by-default-to-the-li.patch", "0006-Enable-Wformat-and-Wformat-security-by-default.patch", "0007-Enable-Wtrampolines-by-default.patch", "0008-gcc-disable-SSP-on-ffreestanding-nostdlib-and-nodefa.patch", "0009-gcc-params-set-default-ssp-buffer-size-to-4.patch", "0010-Ensure-that-msgfmt-doesn-t-encounter-problems-during.patch", "0011-Don-t-declare-asprintf-if-defined-as-a-macro.patch", "0012-libiberty-copy-PIC-objects-during-build-process.patch", "0013-libgcc_s.patch", "0014-nopie.patch", "0015-ada-fix-shared-linking.patch", "0016-build-fix-CXXFLAGS_FOR_BUILD-passing.patch", "0017-add-fortify-headers-paths.patch", "0019-DP-Use-push-state-pop-state-for-gold-as-well-when-li.patch", "0020-aarch64-disable-multilib-support.patch", "0021-s390x-disable-multilib-support.patch", "0022-ppc64-le-disable-multilib-support.patch", "0023-x86_64-disable-multilib-support.patch", "0024-riscv-disable-multilib-support.patch", "0025-always-build-libgcc_eh.a.patch", "0026-ada-libgnarl-remove-use-of-glibc-specific-pthread_rw.patch", "0027-ada-libgnarl-use-posix_openpt-instead-of-glibc-speci.patch", "0028-ada-libgnarl-adaint-fix-sched.h-inclusion-for-musl.patch", "0030-configure-fix-detection-of-atomic-builtins-in-libato.patch", "0031-libstdc-do-not-throw-exceptions-for-non-C-locales-on.patch", "0032-gdc-unconditionally-link-libgphobos-against-libucont.patch", "0033-druntime-link-against-libucontext-on-all-platforms.patch", "0036-libgo-fix-lfs64-use.patch", "0038-static-PIE-ensure-static-reaches-the-linker.patch", "0040-ada-libgnat-use-stub-symbolic-module-name-functions.patch", "0041-ada-libgnat-recognize-linux-musleabi-and-linux-muslg.patch", "9001-libgcobol-no-execinfo.patch"]
 hostdeps = ["binutils", "bison", "flex", "gawk", "make", "perl", "python", "texinfo", "findutils", "rust"]
 builddeps = ["gmp-devel", "mpfr-devel", "mpc-devel", "isl-devel", "zlib-ng-compat-devel", "zstd-devel",
              "libucontext-devel", "linux-headers", "gcc-bootstrap"]
@@ -40,7 +46,7 @@ rundeps = ["binutils"]
 options = ["!check", "selfhost", "jobs:12"]
 
 source = [
-    { url = "https://gcc.gnu.org/pub/gcc/releases/gcc-15.2.0/gcc-15.2.0.tar.xz", sha256 = "438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e" },
+    { url = "https://gcc.gnu.org/pub/gcc/releases/gcc-16.2.0/gcc-16.2.0.tar.xz", sha256 = "e6738e29597f733270731aa90600f37ffdc045079dfc27ec7e8192cc81085c3e" },
 ]
 
 environment = '''
@@ -67,7 +73,7 @@ export libat_cv_have_ifunc=no
 # static helper __stack_chk_fail_local that Alpine builds into its musl and
 # FenrirOS's musl does not have ("cannot find -lssp_nonshared" made the seed
 # fail configure's first test). Built here with the compiler at hand, found
-# through LIBRARY_PATH, and installed in GCC 15's own library directory below.
+# through LIBRARY_PATH, and installed in GCC's own library directory below.
 mkdir -p /tmp/ssp
 if [ ! -f /tmp/ssp/libssp_nonshared.a ]; then
     printf 'extern void __stack_chk_fail(void);\n__attribute__((visibility("hidden"))) void __stack_chk_fail_local(void) { __stack_chk_fail(); }\n' > /tmp/ssp/ssp.c
@@ -81,7 +87,7 @@ echo $version > gcc/BASE-VER
 mkdir -p build build-jit
 cd build
 gcc_configure() { ../configure \
-    --prefix=/usr/lib/gcc15 \
+    --prefix=/usr/lib/gcc16 \
     --build=x86_64-fenriros-linux-musl --host=x86_64-fenriros-linux-musl --target=x86_64-fenriros-linux-musl \
     --with-as=/usr/bin/gas --with-ld=/usr/bin/ld.bfd \
     --enable-checking=release --disable-cet --disable-fixed-point --disable-libstdcxx-pch \
@@ -103,11 +109,11 @@ install = '''
 make -C build-jit/gcc DESTDIR="$pkgdir" jit.install-common
 cd build
 make DESTDIR="$pkgdir" install
-p=/usr/lib/gcc15
+p=/usr/lib/gcc16
 # the drivers under versioned names only, next to the system compilers
 mkdir -p "$pkgdir/usr/bin"
 for t in gcc g++ gfortran gdc gccgo gm2 gcobol gccrs cpp; do
-    [ -e "$pkgdir$p/bin/$t" ] && ln -s $p/bin/$t "$pkgdir/usr/bin/$t-15"
+    [ -e "$pkgdir$p/bin/$t" ] && ln -s $p/bin/$t "$pkgdir/usr/bin/$t-16"
 done
 # the GNAT tools find gcc through PATH: wrappers that put this GCC first
 for t in "$pkgdir$p"/bin/gnat*; do
@@ -119,7 +125,7 @@ done
 # the build root (only under $pkgdir), so `test -e` was false and the script ended here with no
 # message (the log's visible tail, libtool's ldconfig and "the.host.compiler.should.not.be.needed"
 # lines, is only stderr noise from the Ada runtime install and libtool; those are harmless)
-test -x "$pkgdir/usr/bin/gnatmake" && test -L "$pkgdir/usr/bin/gcc-15" && test -x "$pkgdir$p/bin/gcc"
+test -x "$pkgdir/usr/bin/gnatmake" && test -L "$pkgdir/usr/bin/gcc-16" && test -x "$pkgdir$p/bin/gcc"
 # libssp_nonshared.a (see environment) where this GCC's driver finds it
 install -m644 /tmp/ssp/libssp_nonshared.a "$pkgdir$p/lib/gcc/x86_64-fenriros-linux-musl/$version/"
 # libtool archives and info pages' directory index
@@ -132,102 +138,102 @@ install -Dm644 ../COPYING.RUNTIME "$pkgdir/usr/share/licenses/gcc/COPYING.RUNTIM
 [subpackages.ada]
 summary = "GNAT, GCC's Ada compiler and runtime"
 paths   = ["/usr/bin/gnat*",
-         "/usr/lib/gcc15/bin/gnat*",
-         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/gnat1",
-         "/usr/lib/gcc15/lib/gcc/x86_64-fenriros-linux-musl/15.2.0/adainclude",
-         "/usr/lib/gcc15/lib/gcc/x86_64-fenriros-linux-musl/15.2.0/adalib",
-         "/usr/lib/gcc15/lib/gcc/x86_64-fenriros-linux-musl/15.2.0/ada_target_properties",
-         "/usr/lib/gcc15/lib/libgnat*",
-         "/usr/lib/gcc15/lib/libgnarl*",
-         "/usr/lib/gcc15/share/man/man1/gnat*",
-         "/usr/lib/gcc15/share/info/gnat*"]
+         "/usr/lib/gcc16/bin/gnat*",
+         "/usr/lib/gcc16/libexec/gcc/x86_64-fenriros-linux-musl/16.2.0/gnat1",
+         "/usr/lib/gcc16/lib/gcc/x86_64-fenriros-linux-musl/16.2.0/adainclude",
+         "/usr/lib/gcc16/lib/gcc/x86_64-fenriros-linux-musl/16.2.0/adalib",
+         "/usr/lib/gcc16/lib/gcc/x86_64-fenriros-linux-musl/16.2.0/ada_target_properties",
+         "/usr/lib/gcc16/lib/libgnat*",
+         "/usr/lib/gcc16/lib/libgnarl*",
+         "/usr/lib/gcc16/share/man/man1/gnat*",
+         "/usr/lib/gcc16/share/info/gnat*"]
 depends = ["gcc"]
 
 [subpackages.fortran]
 summary = "GNU Fortran and its runtime (libgfortran)"
-paths   = ["/usr/bin/gfortran-15",
-         "/usr/lib/gcc15/bin/gfortran",
-         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/f951",
-         "/usr/lib/gcc15/lib/gcc/x86_64-fenriros-linux-musl/15.2.0/finclude",
-         "/usr/lib/gcc15/lib/gcc/x86_64-fenriros-linux-musl/15.2.0/include/ISO_Fortran_binding.h",
-         "/usr/lib/gcc15/lib/libgfortran*",
-         "/usr/lib/gcc15/share/man/man1/gfortran.1",
-         "/usr/lib/gcc15/share/info/gfortran.info"]
+paths   = ["/usr/bin/gfortran-16",
+         "/usr/lib/gcc16/bin/gfortran",
+         "/usr/lib/gcc16/libexec/gcc/x86_64-fenriros-linux-musl/16.2.0/f951",
+         "/usr/lib/gcc16/lib/gcc/x86_64-fenriros-linux-musl/16.2.0/finclude",
+         "/usr/lib/gcc16/lib/gcc/x86_64-fenriros-linux-musl/16.2.0/include/ISO_Fortran_binding.h",
+         "/usr/lib/gcc16/lib/libgfortran*",
+         "/usr/lib/gcc16/share/man/man1/gfortran.1",
+         "/usr/lib/gcc16/share/info/gfortran.info"]
 depends = ["gcc"]
 
 [subpackages.d]
 summary = "GDC, GCC's D compiler, with druntime and phobos"
-paths   = ["/usr/bin/gdc-15",
-         "/usr/lib/gcc15/bin/gdc",
-         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/d21",
-         "/usr/lib/gcc15/lib/libgphobos*",
-         "/usr/lib/gcc15/lib/libgdruntime*",
-         "/usr/lib/gcc15/include/d",
-         "/usr/lib/gcc15/share/man/man1/gdc.1",
-         "/usr/lib/gcc15/share/info/gdc.info"]
+paths   = ["/usr/bin/gdc-16",
+         "/usr/lib/gcc16/bin/gdc",
+         "/usr/lib/gcc16/libexec/gcc/x86_64-fenriros-linux-musl/16.2.0/d21",
+         "/usr/lib/gcc16/lib/libgphobos*",
+         "/usr/lib/gcc16/lib/libgdruntime*",
+         "/usr/lib/gcc16/include/d",
+         "/usr/lib/gcc16/share/man/man1/gdc.1",
+         "/usr/lib/gcc16/share/info/gdc.info"]
 depends = ["gcc"]
 
 [subpackages.go]
 summary = "gccgo, GCC's Go compiler and runtime"
-paths   = ["/usr/bin/gccgo-15",
-         "/usr/lib/gcc15/bin/gccgo",
-         "/usr/lib/gcc15/bin/go",
-         "/usr/lib/gcc15/bin/gofmt",
-         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/go1",
-         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/cgo",
-         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/buildid",
-         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/test2json",
-         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/vet",
-         "/usr/lib/gcc15/lib/libgo*",
-         "/usr/lib/gcc15/lib/go",
-         "/usr/lib/gcc15/share/man/man1/gccgo.1",
-         "/usr/lib/gcc15/share/man/man1/go.1",
-         "/usr/lib/gcc15/share/man/man1/gofmt.1",
-         "/usr/lib/gcc15/share/info/gccgo.info"]
+paths   = ["/usr/bin/gccgo-16",
+         "/usr/lib/gcc16/bin/gccgo",
+         "/usr/lib/gcc16/bin/go",
+         "/usr/lib/gcc16/bin/gofmt",
+         "/usr/lib/gcc16/libexec/gcc/x86_64-fenriros-linux-musl/16.2.0/go1",
+         "/usr/lib/gcc16/libexec/gcc/x86_64-fenriros-linux-musl/16.2.0/cgo",
+         "/usr/lib/gcc16/libexec/gcc/x86_64-fenriros-linux-musl/16.2.0/buildid",
+         "/usr/lib/gcc16/libexec/gcc/x86_64-fenriros-linux-musl/16.2.0/test2json",
+         "/usr/lib/gcc16/libexec/gcc/x86_64-fenriros-linux-musl/16.2.0/vet",
+         "/usr/lib/gcc16/lib/libgo*",
+         "/usr/lib/gcc16/lib/go",
+         "/usr/lib/gcc16/share/man/man1/gccgo.1",
+         "/usr/lib/gcc16/share/man/man1/go.1",
+         "/usr/lib/gcc16/share/man/man1/gofmt.1",
+         "/usr/lib/gcc16/share/info/gccgo.info"]
 depends = ["gcc"]
 
 [subpackages.objc]
 summary = "Objective-C and Objective-C++ compilers and runtime"
-paths   = ["/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/cc1obj",
-         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/cc1objplus",
-         "/usr/lib/gcc15/lib/libobjc*",
-         "/usr/lib/gcc15/lib/gcc/x86_64-fenriros-linux-musl/15.2.0/include/objc"]
+paths   = ["/usr/lib/gcc16/libexec/gcc/x86_64-fenriros-linux-musl/16.2.0/cc1obj",
+         "/usr/lib/gcc16/libexec/gcc/x86_64-fenriros-linux-musl/16.2.0/cc1objplus",
+         "/usr/lib/gcc16/lib/libobjc*",
+         "/usr/lib/gcc16/lib/gcc/x86_64-fenriros-linux-musl/16.2.0/include/objc"]
 depends = ["gcc"]
 
 [subpackages.m2]
 summary = "GNU Modula-2"
-paths   = ["/usr/bin/gm2-15",
-         "/usr/lib/gcc15/bin/gm2",
-         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/cc1gm2",
-         "/usr/lib/gcc15/lib/libm2*",
-         "/usr/lib/gcc15/lib/gcc/x86_64-fenriros-linux-musl/15.2.0/m2",
-         "/usr/lib/gcc15/share/man/man1/gm2.1",
-         "/usr/lib/gcc15/share/info/gm2.info"]
+paths   = ["/usr/bin/gm2-16",
+         "/usr/lib/gcc16/bin/gm2",
+         "/usr/lib/gcc16/libexec/gcc/x86_64-fenriros-linux-musl/16.2.0/cc1gm2",
+         "/usr/lib/gcc16/lib/libm2*",
+         "/usr/lib/gcc16/lib/gcc/x86_64-fenriros-linux-musl/16.2.0/m2",
+         "/usr/lib/gcc16/share/man/man1/gm2.1",
+         "/usr/lib/gcc16/share/info/gm2.info"]
 depends = ["gcc"]
 
 [subpackages.cobol]
 summary = "GnuCOBOL front end for GCC (gcobol) and its runtime"
-paths   = ["/usr/bin/gcobol-15",
-         "/usr/lib/gcc15/bin/gcobol",
-         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/cobol1",
-         "/usr/lib/gcc15/lib/libgcobol*",
-         "/usr/lib/gcc15/share/man/man1/gcobol.1",
-         "/usr/lib/gcc15/share/info/gcobol.info"]
+paths   = ["/usr/bin/gcobol-16",
+         "/usr/lib/gcc16/bin/gcobol",
+         "/usr/lib/gcc16/libexec/gcc/x86_64-fenriros-linux-musl/16.2.0/cobol1",
+         "/usr/lib/gcc16/lib/libgcobol*",
+         "/usr/lib/gcc16/share/man/man1/gcobol.1",
+         "/usr/lib/gcc16/share/info/gcobol.info"]
 depends = ["gcc"]
 
 [subpackages.rust]
 summary = "gccrs, GCC's Rust front end (experimental)"
-paths   = ["/usr/bin/gccrs-15",
-         "/usr/lib/gcc15/bin/gccrs",
-         "/usr/lib/gcc15/libexec/gcc/x86_64-fenriros-linux-musl/15.2.0/crab1",
-         "/usr/lib/gcc15/share/man/man1/gccrs.1"]
+paths   = ["/usr/bin/gccrs-16",
+         "/usr/lib/gcc16/bin/gccrs",
+         "/usr/lib/gcc16/libexec/gcc/x86_64-fenriros-linux-musl/16.2.0/crab1",
+         "/usr/lib/gcc16/share/man/man1/gccrs.1"]
 depends = ["gcc"]
 
 [subpackages.jit]
 summary = "libgccjit, GCC as a library (Emacs native compilation)"
-paths   = ["/usr/lib/gcc15/lib/libgccjit*",
-         "/usr/lib/gcc15/include/libgccjit*.h",
-         "/usr/lib/gcc15/share/info/libgccjit.info"]
+paths   = ["/usr/lib/gcc16/lib/libgccjit*",
+         "/usr/lib/gcc16/include/libgccjit*.h",
+         "/usr/lib/gcc16/share/info/libgccjit.info"]
 depends = ["gcc"]
 
 [subpackages.all]

@@ -5,11 +5,11 @@
 # SQLite, librsvg, lcms2, libxml2, harfbuzz, cairo, WebP/JPEG/TIFF/
 # PNG/GIF, D-Bus, ALSA sound, gpm and ACLs. It also runs in a terminal
 # (emacs -nw) and as a daemon.
-# NATIVE COMPILATION: libgccjit comes from this tree's gcc package (GCC 15's
-# jit build, installed in /usr/lib/gcc15/lib with libgccjit.h in
-# /usr/lib/gcc15/include; no pkg-config file). --with-native-compilation=aot
+# NATIVE COMPILATION: libgccjit comes from this tree's gcc package (GCC 16's
+# jit build, installed in /usr/lib/gcc16/lib with libgccjit.h in
+# /usr/lib/gcc16/include; no pkg-config file). --with-native-compilation=aot
 # compiles all of Emacs's own Lisp ahead of time at build time. libgccjit
-# runs the GCC driver, which here exists only as /usr/lib/gcc15/bin/gcc
+# runs the GCC driver, which here exists only as /usr/lib/gcc16/bin/gcc
 # (the system "gcc" does not exist, cc is clang), so the build puts a "gcc"
 # link on PATH; at run time JIT compilation of packages needs the same:
 # `gcc` on PATH (the gcc package, a runtime dependency) -- not tested.
@@ -42,7 +42,7 @@ source = [
 environment = '''
 # libgccjit and its driver (see the header)
 mkdir -p /tmp/gccbin
-ln -sf /usr/lib/gcc15/bin/gcc /tmp/gccbin/gcc
+ln -sf /usr/lib/gcc16/bin/gcc /tmp/gccbin/gcc
 # libgccjit's test program (and the AOT compilation of Emacs's Lisp) assembles and links through the GCC driver, which looks for GNU as and ld
 # under those names ("The installed libgccjit failed to compile and run a test program"); here they are gas and ld.bfd (the GNU binutils
 # package), linked as as/ld in a directory the driver's PATH has, as the `gcc` option does for the recipes that use it
@@ -50,8 +50,8 @@ mkdir -p /tmp/gnu-bin
 ln -sf /usr/bin/gas /tmp/gnu-bin/as
 ln -sf /usr/bin/ld.bfd /tmp/gnu-bin/ld
 export PATH="/tmp/gccbin:/tmp/gnu-bin:$PATH"
-export CFLAGS="$CFLAGS -I/usr/lib/gcc15/include"
-export LDFLAGS="$LDFLAGS -L/usr/lib/gcc15/lib -Wl,-rpath,/usr/lib/gcc15/lib"
+export CFLAGS="$CFLAGS -I/usr/lib/gcc16/include"
+export LDFLAGS="$LDFLAGS -L/usr/lib/gcc16/lib -Wl,-rpath,/usr/lib/gcc16/lib"
 '''
 # diagnostics: if configure fails, config.log's tail (which holds the libgccjit test's compiler and run output) goes to the build log; the kept
 # build root has no reason to exist for a failure that only config.log explains

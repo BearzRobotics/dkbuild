@@ -114,7 +114,7 @@ pub const Profile = struct {
 };
 
 /// The prefix GCC is installed under (packages/g/gcc).
-pub const gcc_prefix = "/usr/lib/gcc15";
+pub const gcc_prefix = "/usr/lib/gcc16";
 
 /// The `export` lines for a recipe with `options = ["gcc"]`, after `buildEnv`
 /// (SPEC 3): GCC from its own prefix instead of clang, and GNU binutils under
@@ -241,7 +241,7 @@ test "gccEnv uses GCC's compilers and flags, not clang's" {
     try std.testing.expect(std.mem.indexOf(u8, e, "-static") == null);
     // `options = ["gcc", "static"]` links statically too (SS-25): these LDFLAGS replace the ones that said so
     try std.testing.expect(std.mem.indexOf(u8, try gccEnv(p, a, true), "lib -static\"\n") != null);
-    try std.testing.expect(std.mem.indexOf(u8, e, "export CC=/usr/lib/gcc15/bin/gcc ") != null);
+    try std.testing.expect(std.mem.indexOf(u8, e, "export CC=/usr/lib/gcc16/bin/gcc ") != null);
     try std.testing.expect(std.mem.indexOf(u8, e, "-march=x86-64") != null);
     try std.testing.expect(std.mem.indexOf(u8, e, "--target") == null);
     try std.testing.expect(std.mem.indexOf(u8, e, "fuse-ld=lld") == null);
