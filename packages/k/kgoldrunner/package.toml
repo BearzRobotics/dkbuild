@@ -1,6 +1,6 @@
 # KDE Games: Run-and-collect-gold arcade puzzle game (KDE Gear 26.08.2, Qt6/KF6).
 name = "kgoldrunner"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Run-and-collect-gold arcade puzzle game"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kgoldrunner-26.08.2.tar.xz", sha256 = "aeb7e82d3163915e0493af4d9cf8045e1f5e5cb98a433ef13697be374b2462d5" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kgoldrunner-26.08.3.tar.xz", sha256 = "87d9a0fb9b71af64acbe5e09c6147cd7990c1ea0b0ecc91a9d16070431dd9a73" },
 ]
 
 setup = '''

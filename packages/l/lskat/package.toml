@@ -1,6 +1,6 @@
 # KDE Games: Skat-like card game (KDE Gear 26.08.2, Qt6/KF6).
 name = "lskat"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Skat-like card game"
 license = "LGPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/lskat-26.08.2.tar.xz", sha256 = "157101e69d4c1356129419b4bb820258db2b77eeedb8beb63d79f5bd35a5a73e" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/lskat-26.08.3.tar.xz", sha256 = "c559acab7e1898a98954d8b28ce690547051557828c972afad0d490e713f3134" },
 ]
 
 setup = '''

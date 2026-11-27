@@ -1,6 +1,6 @@
 # KDE Games: Nonogram logic puzzle game (KDE Gear 26.08.2, Qt6/KF6).
 name = "picmi"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Nonogram logic puzzle game"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/picmi-26.08.2.tar.xz", sha256 = "1d065cacafd9105ae24941e25be07bbd4b29414e5a2321dc71291f295fc03231" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/picmi-26.08.3.tar.xz", sha256 = "cad62833ffc8abc5ce0420e3df6ff36367f8251da16b9e47bdaf57bf5f2b7ef2" },
 ]
 
 setup = '''

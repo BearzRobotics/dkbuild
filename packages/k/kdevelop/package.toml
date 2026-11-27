@@ -1,5 +1,5 @@
 name = "kdevelop"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE IDE for C, C++, Python, PHP and more"
 license = "GPL-2.0-or-later"
@@ -20,7 +20,7 @@ rundeps = ["cmake", "gdb", "git", "heaptrack", "llvm-clang", "subversion"]
 options = ["!check"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kdevelop-26.08.2.tar.xz", sha256 = "f17a064dd6cb8cbbd5345b3c0eccdff102c57f7ae4484affcdb172c9cace5dea" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kdevelop-26.08.3.tar.xz", sha256 = "30909673241fa5fd7cce31d7c28d8747c2de73874e9041efc518764ffc337267" },
 ]
 
 setup = '''

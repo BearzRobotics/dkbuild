@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/skanlite/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "skanlite"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE scanning application for images"
 license = "GPL-2.0-only OR GPL-3.0-only"
@@ -10,7 +10,7 @@ hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
 builddeps = ["kcoreaddons-devel", "kcrash-devel", "kdoctools-devel", "ki18n-devel", "kio-devel", "kxmlgui-devel", "libksane-devel", "qt6-qtdeclarative-devel"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/skanlite-26.08.2.tar.xz", sha256 = "57789835a9bc488e7e8b204e77a636cf5316659229427e357654c85c221df5c2" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/skanlite-26.08.3.tar.xz", sha256 = "0216bdcf517ed5ee9e170cbbb5d43120329499796896f4cfc0740bf7f3508270" },
 ]
 
 setup = '''

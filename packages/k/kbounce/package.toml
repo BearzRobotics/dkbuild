@@ -1,6 +1,6 @@
 # KDE Games: Ball-bouncing arcade game, build walls to trap balls (KDE Gear 26.08.2, Qt6/KF6).
 name = "kbounce"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Ball-bouncing arcade game, build walls to trap balls"
 license = "LGPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kbounce-26.08.2.tar.xz", sha256 = "09a7a6aaa5624475da706a4de0d5162f9a05df14b971730e03f4e6fce89424df" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kbounce-26.08.3.tar.xz", sha256 = "c1c8a28c72e743345b8ab88eb219d3dd4a4f480185a298680db2b9b2a4afcb3c" },
 ]
 
 setup = '''

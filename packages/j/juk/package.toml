@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/juk/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "juk"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE music player and manager"
 license = "GPL-2.0-only"
@@ -10,7 +10,7 @@ hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
 builddeps = ["kcompletion-devel", "kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "kglobalaccel-devel", "ki18n-devel", "kiconthemes-devel", "kio-devel", "kjobwidgets-devel", "knotifications-devel", "kstatusnotifieritem-devel", "ktextwidgets-devel", "kwallet-devel", "kwidgetsaddons-devel", "kwindowsystem-devel", "kxmlgui-devel", "phonon-devel", "qt6-qtbase-devel", "qt6-qtmultimedia-devel", "qt6-qtsvg-devel", "taglib-devel"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/juk-26.08.2.tar.xz", sha256 = "a96650739b5192e6d767ee0dab558257d2d0a59543e6b29cb4eceb9d924eeb8a" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/juk-26.08.3.tar.xz", sha256 = "bcbd3ad5dd961f6df9db1699905a85b667e7f8156835fe9611b31043d94f39d8" },
 ]
 
 setup = '''

@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/kmail/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "kmail"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE Mail Client"
 license = "LGPL-2.0-or-later AND GPL-2.0-only"
@@ -11,7 +11,7 @@ builddeps = ["akonadi-contacts-devel", "akonadi-devel", "akonadi-mime-devel", "a
 rundeps = ["kdepim-runtime", "kmail-account-wizard"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kmail-26.08.2.tar.xz", sha256 = "107c5b3a4c605250f76073c01e0e8eb73cfac969bd853d2e1fddd011c94f4e78" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kmail-26.08.3.tar.xz", sha256 = "b67d3d47ab772a28916a1633302e0901ced65d36638a5806cf0c7134b6570436" },
 ]
 
 setup = '''

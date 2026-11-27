@@ -1,6 +1,6 @@
 # KDE Games: Three-in-a-row diamond puzzle game (KDE Gear 26.08.2, Qt6/KF6).
 name = "kdiamond"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Three-in-a-row diamond puzzle game"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kdiamond-26.08.2.tar.xz", sha256 = "c6a73eb6d101623c9cd7d3ac0ea9155c6e256b0c6db7de4a2c809310add27109" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kdiamond-26.08.3.tar.xz", sha256 = "6f97316d74a8d9e8e2d8cdc9412d8300ec87af3dd88972e001ba0653a10a5fce" },
 ]
 
 setup = '''

@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/gwenview/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "gwenview"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE image viewer"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ builddeps = ["baloo-devel", "exiv2-devel", "kcrash-devel", "kdoctools-devel", "k
 options = ["!cross"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/gwenview-26.08.2.tar.xz", sha256 = "bc6eb96196daeb5879e3551b834e65e296409d2252804ee26fedcbb376826a72" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/gwenview-26.08.3.tar.xz", sha256 = "14cd907c8290e49450e2e26dd894854eaed3a7d5dc383c744ab7cc4728ea2bee" },
 ]
 
 environment = '''

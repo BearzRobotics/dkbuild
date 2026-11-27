@@ -1,6 +1,6 @@
 # KDE Games: Snake race game (KDE Gear 26.08.2, Qt6/KF6).
 name = "ksnakeduel"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Snake race game"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/ksnakeduel-26.08.2.tar.xz", sha256 = "656b8796b798f73d77e84097fdaa8f1572f36c8e2ef57d0b4d743eb2cf0e82ee" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/ksnakeduel-26.08.3.tar.xz", sha256 = "fb81248a0b08d0b160424296854b243eeaabfaaa64945c36c7b47e58702cfc22" },
 ]
 
 setup = '''

@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/kio-zeroconf/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "kio-zeroconf"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE KIO zeroconf support"
 license = "GPL-2.0-or-later AND LGPL-2.0-only"
@@ -10,7 +10,7 @@ hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
 builddeps = ["kdbusaddons-devel", "kdnssd-devel", "ki18n-devel", "kio-devel", "qt6-qtdeclarative-devel"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kio-zeroconf-26.08.2.tar.xz", sha256 = "bdd749cfa7d4fca112413cf844c9619f031adb025bd4d48f9f575d5afad53aa2" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kio-zeroconf-26.08.3.tar.xz", sha256 = "fc5fb3a3a9efc79d411d4962416e434a24db03cf03976105fa82fd7e7be60e9b" },
 ]
 
 setup = '''

@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "kdenlive"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE video editor"
 license = "GPL-2.0-or-later"
@@ -14,7 +14,7 @@ rundeps = ["ffmpeg", "frei0r"]
 options = ["!cross", "!check"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kdenlive-26.08.2.tar.xz", sha256 = "1019cda23429a526e3a2dbdd2ec93406fef0c89ca243af16dfa16ac9ae8a6bf8" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kdenlive-26.08.3.tar.xz", sha256 = "4bfa3dc856ecabd1f1b3283741591350e33fd0141f878bcf6331450ee4adcaee" },
 ]
 
 environment = '''

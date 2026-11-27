@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/grantlee-editor/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "grantlee-editor"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE editor for Grantlee themes"
 license = "GPL-2.0-or-later"
@@ -10,7 +10,7 @@ hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
 builddeps = ["akonadi-contacts-devel", "grantleetheme-devel", "karchive-devel", "kcrash-devel", "kdbusaddons-devel", "kdoctools-devel", "kimap-devel", "kio-devel", "kmime-devel", "ktextaddons-devel", "kxmlgui-devel", "messagelib-devel", "pimcommon-devel", "qt6-qtbase-devel", "qt6-qtwebengine-devel", "syntax-highlighting-devel"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/grantlee-editor-26.08.2.tar.xz", sha256 = "dadb8a1227ce7a30119b426a82fba0eab18cf08eea1ec20c09dc105ffd830ecc" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/grantlee-editor-26.08.3.tar.xz", sha256 = "f673977c5401cfddee9590036b64254c49e964bbf1136ad4dd85e752b827bac3" },
 ]
 
 setup = '''

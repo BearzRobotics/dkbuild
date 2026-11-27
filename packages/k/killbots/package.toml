@@ -1,6 +1,6 @@
 # KDE Games: Strategy game of dodging killer robots (KDE Gear 26.08.2, Qt6/KF6).
 name = "killbots"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Strategy game of dodging killer robots"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/killbots-26.08.2.tar.xz", sha256 = "c77f3b010d8d3b11ab02bea21887371f7091caa515c8ac0d2e3399cca30d8f85" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/killbots-26.08.3.tar.xz", sha256 = "d99ca0066f5950f0d2123daf9edf9d7d3d3a7a5441070512fc965814cf25a4b2" },
 ]
 
 setup = '''

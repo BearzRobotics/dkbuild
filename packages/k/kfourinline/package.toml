@@ -1,6 +1,6 @@
 # KDE Games: Four-in-a-row board game (KDE Gear 26.08.2, Qt6/KF6).
 name = "kfourinline"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Four-in-a-row board game"
 license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kfourinline-26.08.2.tar.xz", sha256 = "36d6b691b7c9d45200a725faa70f2dabe3b2ae53f2993677de3fda0e445b1cb4" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kfourinline-26.08.3.tar.xz", sha256 = "2219440461cdeb4b656be1d54c82b7355da8cc6f6ee3d5554b6df9a9a2d519d6" },
 ]
 
 setup = '''

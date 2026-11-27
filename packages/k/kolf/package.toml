@@ -1,6 +1,6 @@
 # KDE Games: Mini-golf game (KDE Gear 26.08.2, Qt6/KF6).
 name = "kolf"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Mini-golf game"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kolf-26.08.2.tar.xz", sha256 = "96d34c3e481be32536535fe01da3c4e14536a29a5ab6d3c4552a17c597a51dc8" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kolf-26.08.3.tar.xz", sha256 = "f5465c6803e7de55196c30942cfe584a873dd2b5b48eea735ef045a66d305b22" },
 ]
 
 setup = '''

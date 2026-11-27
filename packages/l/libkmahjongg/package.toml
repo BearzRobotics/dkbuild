@@ -1,7 +1,7 @@
 # libkmahjongg: shared library with the Mahjongg tile sets and backgrounds
 # used by KMahjongg and KShisen (KDE Gear 26.08.2, Qt6/KF6).
 name = "libkmahjongg"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Common code and data for KDE Mahjongg games"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ builddeps = ["kconfig-devel", "kconfigwidgets-devel", "kcoreaddons-devel", "ki18
 options = ["!check"]  # no tests
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/libkmahjongg-26.08.2.tar.xz", sha256 = "5f5b592e54a3a2029307a3080ea98c9dad43f9ee45a356daf64965970eab91f1" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/libkmahjongg-26.08.3.tar.xz", sha256 = "d13c7184dfee6596c23ad4f3b72d4c2fd9b0671383a7bdc7c0c9b657be2db267" },
 ]
 
 setup = '''

@@ -1,5 +1,5 @@
 name = "calligra"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE office and graphic art suite (Words, Sheets, Stage, Karbon, Plan, Author)"
 license = "GPL-2.0-or-later AND LGPL-2.0-only"
@@ -15,7 +15,7 @@ rundeps = ["qt6-qtbase"]
 options = ["!check"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/calligra-26.08.2.tar.xz", sha256 = "f4b9c11f5957798face6cf29834695d76506c5e28049e21abcb62884ce9cc96c" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/calligra-26.08.3.tar.xz", sha256 = "4338a27722d23be7f96cb0cb6fbc0fd523510597cbf28897b47ecfa81e944ab4" },
 ]
 
 setup = '''

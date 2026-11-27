@@ -1,6 +1,6 @@
 # KDE Games: Reversi (Othello) board game (KDE Gear 26.08.2, Qt6/KF6).
 name = "kreversi"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Reversi (Othello) board game"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kreversi-26.08.2.tar.xz", sha256 = "dc62f5021ff9df8dece66689101af3d1a9b14dfa04576f21bc502176ffff45b1" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kreversi-26.08.3.tar.xz", sha256 = "c8be16b49c5fc701f8977fc180ce50c81f51bc7c5cc26815dcc215eaf1b2c532" },
 ]
 
 setup = '''

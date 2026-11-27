@@ -1,6 +1,6 @@
 # KDE Games: Jigsaw puzzle game (KDE Gear 26.08.2, Qt6/KF6).
 name = "palapeli"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Jigsaw puzzle game"
 license = "GPL-2.0-or-later AND LGPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/palapeli-26.08.2.tar.xz", sha256 = "dd9227f194d8f7113ffbbd857e85e120d65467f98fa1b3928b84855a0e335295" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/palapeli-26.08.3.tar.xz", sha256 = "71d84b1faa2f5f91e7ce20c5c7a125af1839f075709b5dd634ab8815490e9cd4" },
 ]
 
 setup = '''

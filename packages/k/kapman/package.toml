@@ -1,6 +1,6 @@
 # KDE Games: Pac-Man clone (KDE Gear 26.08.2, Qt6/KF6).
 name = "kapman"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Pac-Man clone"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kapman-26.08.2.tar.xz", sha256 = "bbc6448e7ba0c841faae18682ea07c0f2c68ea70eb48c4b188b581a0e36f434a" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kapman-26.08.3.tar.xz", sha256 = "dd7a45cf90779b05f226481b5c492dc325de3186fb7db8a4c04d7d2d509f58f5" },
 ]
 
 setup = '''

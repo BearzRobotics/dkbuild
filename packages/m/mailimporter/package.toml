@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/mailimporter/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "mailimporter"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE PIM library for importing mail"
 license = "LGPL-2.0-or-later AND GPL-2.0-only"
@@ -11,7 +11,7 @@ builddeps = ["akonadi-devel", "akonadi-mime-devel", "karchive-devel", "kconfig-d
 checkdeps = []
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/mailimporter-26.08.2.tar.xz", sha256 = "7badf1e23f8a3660f20d9e36397bc6015dc70c0ba51825fd6f47ed405a55853c" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/mailimporter-26.08.3.tar.xz", sha256 = "fd9dfee4e15a922f284575a68bdfb2e45613f207bdaeda07907d7562936d7f32" },
 ]
 
 setup = '''

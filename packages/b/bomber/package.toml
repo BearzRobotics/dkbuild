@@ -1,6 +1,6 @@
 # KDE Games: Arcade bombing game (KDE Gear 26.08.2, Qt6/KF6).
 name = "bomber"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Arcade bombing game"
 license = "LGPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/bomber-26.08.2.tar.xz", sha256 = "d902525fcae153c261a34b8846e0a7b15fc589d8a6a3c8787660930da4ff7cfe" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/bomber-26.08.3.tar.xz", sha256 = "24cfd59c5c7335f53cab0d18d62296751ebe6e9229d32aed27360318cd835821" },
 ]
 
 setup = '''

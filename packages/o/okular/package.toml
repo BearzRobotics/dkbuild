@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/okular/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "okular"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE document viewer"
 license = "GPL-2.0-or-later"
@@ -12,7 +12,7 @@ checkdeps = ["dbus"]
 options = ["!cross"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/okular-26.08.2.tar.xz", sha256 = "f9b39abcb7c6c3ace5d7acf669fa7ed47cf3aa7b932a8b6abe2abbd8075fc9f5" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/okular-26.08.3.tar.xz", sha256 = "8db527297b4e6aa17b3063739f8e1a4fe206691428ffc4ff544053e111187412" },
 ]
 
 environment = '''

@@ -1,6 +1,6 @@
 # KDE Games: Breakout-like arcade game (KDE Gear 26.08.2, Qt6/KF6).
 name = "kbreakout"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Breakout-like arcade game"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kbreakout-26.08.2.tar.xz", sha256 = "434b78a64b064783d586f803af62352519681cc0b70f1eb7d84806a8e689c1f3" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kbreakout-26.08.3.tar.xz", sha256 = "131e29bb34da1de649451d9702dfa4091c759c9e320b4635d4be19e9fe07df8e" },
 ]
 
 setup = '''

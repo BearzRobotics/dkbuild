@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/libksieve/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "libksieve"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE Sieve scripting library"
 license = "LGPL-2.0-or-later AND GPL-2.0-or-later"
@@ -11,7 +11,7 @@ builddeps = ["karchive-devel", "kcoreaddons-devel", "kdoctools-devel", "ki18n-de
 checkdeps = []
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/libksieve-26.08.2.tar.xz", sha256 = "24dd338c7215cc2031df011edba818a1bfb158189f71f17e6e4286534b716c54" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/libksieve-26.08.3.tar.xz", sha256 = "c83f0b8b91057d10dd54b81e81b081a5bea860730d47a4233246edd6ad73dfb2" },
 ]
 
 setup = '''

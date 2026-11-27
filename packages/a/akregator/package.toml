@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/akregator/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "akregator"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE RSS feed reader"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ builddeps = ["akonadi-devel", "grantleetheme-devel", "kcmutils-devel", "kcodecs-
 checkdeps = []
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/akregator-26.08.2.tar.xz", sha256 = "d819df8e453e45167ed90c3bf99073017f325f792832b97ce9df5445f844deed" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/akregator-26.08.3.tar.xz", sha256 = "44fa1959e3dc8e72cf02d88249c6d4ee1a6ae6305e9921ea19237003c29cbdcd" },
 ]
 
 setup = '''

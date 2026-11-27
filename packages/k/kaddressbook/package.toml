@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/kaddressbook/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "kaddressbook"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE address book"
 license = "LGPL-2.0-or-later AND GPL-2.0-or-later"
@@ -11,7 +11,7 @@ builddeps = ["akonadi-contacts-devel", "akonadi-devel", "akonadi-search-devel", 
 rundeps = ["kdepim-runtime"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kaddressbook-26.08.2.tar.xz", sha256 = "8d593ad344471cc9a7b0d3ef9d7a57d5299745c5adedd0676b9dc70d3e432376" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kaddressbook-26.08.3.tar.xz", sha256 = "c9d00b8ad1b5fff4cd51d82b85e169447f681b1d8f52ec34ec85730cdc84322b" },
 ]
 
 setup = '''

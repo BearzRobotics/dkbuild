@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/zanshin/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "zanshin"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE time management assistant"
 license = "GPL-2.0-only OR GPL-3.0-only"
@@ -11,7 +11,7 @@ builddeps = ["akonadi-calendar-devel", "akonadi-devel", "boost-devel", "kcalenda
 checkdeps = ["dbus", "kdepim-runtime"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/zanshin-26.08.2.tar.xz", sha256 = "51457e05d0e45de98ffebb9bd1f9c74c4b7ed29ee9917928dd5d1dddab67244c" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/zanshin-26.08.3.tar.xz", sha256 = "d4d87564e1e97262204e958ac10b4ee302a6058e17b4d743b59cc369b1aa2279" },
 ]
 
 setup = '''

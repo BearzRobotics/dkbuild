@@ -1,6 +1,6 @@
 # KDE Games: Potato-head creative game for children (KDE Gear 26.08.2, Qt6/KF6).
 name = "ktuberling"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Potato-head creative game for children"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/ktuberling-26.08.2.tar.xz", sha256 = "d5b45e7f861d9c22b25877603ac269e630237e29f0a7727894af56a47c41706e" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/ktuberling-26.08.3.tar.xz", sha256 = "d00cbbe1d50f9729640652b757fd7cab7f5d1e12be42953d3af395c37a2c3318" },
 ]
 
 setup = '''

@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "signon-kwallet-extension"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KWallet integration for signond"
 license = "LGPL-2.0-or-later"
@@ -12,7 +12,7 @@ hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf"]
 builddeps = ["kwallet-devel", "signond-devel"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/signon-kwallet-extension-26.08.2.tar.xz", sha256 = "bc5cd2cc79683cee25e7f8ad5b405e00494cfebc97f543c3e1185b8caf1d88f1" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/signon-kwallet-extension-26.08.3.tar.xz", sha256 = "e80090087eddc7f823ac5647e290288e890bd6d2372aaeaa24ff17cecd0480a9" },
 ]
 
 setup = '''

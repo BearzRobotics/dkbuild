@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/kdeconnect/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "kdeconnect"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE plugin for communicating with a smartphone device"
 license = "GPL-2.0-only OR GPL-3.0-only"
@@ -11,7 +11,7 @@ builddeps = ["kcmutils-devel", "kconfigwidgets-devel", "kcrash-devel", "kdbusadd
 rundeps = ["kirigami-addons", "sshfs"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kdeconnect-kde-26.08.2.tar.xz", sha256 = "efd9d58deea6857f18d0c77c8bc68192839a83e4d4a518fc829a725459a3dba5" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kdeconnect-kde-26.08.3.tar.xz", sha256 = "f554a190cc15039f12af14b1f4ccdb3754a308327623a750bc3f4f59b59239fd" },
 ]
 
 setup = '''

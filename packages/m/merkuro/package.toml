@@ -1,8 +1,8 @@
 # Imported from Chimera Linux cports: main/merkuro/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "merkuro"
-version = "26.08.2"
-release = 2
+version = "26.08.3"
+release = 1
 summary = "KDE calendar with cloud sync"
 license = "LGPL-3.0-only AND GPL-3.0-or-later"
 homepage = "https://apps.kde.org/merkuro.calendar"
@@ -12,7 +12,7 @@ checkdeps = []
 rundeps = ["kdepim-runtime", "kirigami-addons", "qt6-qt5compat", "qt6-qtlocation"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/merkuro-26.08.2.tar.xz", sha256 = "ca036db50a0e3daaac96be9e1da48f1e8d73ce5dfb942bcbaedf3785cb66a91f" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/merkuro-26.08.3.tar.xz", sha256 = "a32e7fff37d16e200ab05146a6256e5ac0bfef9a1dce4b9b40f377c7c30b73a0" },
 ]
 
 setup = '''

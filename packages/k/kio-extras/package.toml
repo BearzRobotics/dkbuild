@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/kio-extras/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "kio-extras"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE KIO additional plugins"
 license = "LGPL-3.0-or-later"
@@ -12,7 +12,7 @@ checkdeps = []
 options = ["!cross"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kio-extras-26.08.2.tar.xz", sha256 = "b5fc98552eea1f9279fb1f03c7e3ffb36a46ffddd0bf0bba9868331d8c461e6e" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kio-extras-26.08.3.tar.xz", sha256 = "5ff1e1091b162cd02c226880a6af93e6908ab32993b420fbe8fc10718e168780" },
 ]
 
 setup = '''

@@ -1,6 +1,6 @@
 # KDE Games: Battleship board game (KDE Gear 26.08.2, Qt6/KF6).
 name = "knavalbattle"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Battleship board game"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/knavalbattle-26.08.2.tar.xz", sha256 = "418caa4eeb3f69c8a935aa45d91fa681303f591fd1443aa645bb33786e5a0e0f" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/knavalbattle-26.08.3.tar.xz", sha256 = "e8f73902eca3b38aeca15ba8b68f0df0975327608a46d916da6f00aaa4ce9fee" },
 ]
 
 setup = '''

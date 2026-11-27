@@ -1,6 +1,6 @@
 # KDE Games: Territory conquest dice game (KDE Gear 26.08.2, Qt6/KF6).
 name = "kjumpingcube"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Territory conquest dice game"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kjumpingcube-26.08.2.tar.xz", sha256 = "6470cc49e80d4f343b25e401d54af84de00138525659fcd6bf6b75d105dc8d76" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kjumpingcube-26.08.3.tar.xz", sha256 = "a68f4dbd4921766727a7cebfe1b0016acb9008bfaab9906392bf8c2e6b6d4c13" },
 ]
 
 setup = '''

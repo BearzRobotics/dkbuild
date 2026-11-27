@@ -1,6 +1,6 @@
 # KDE Games: Dodge-the-balls arcade game (KDE Gear 26.08.2, Qt6/KF6).
 name = "kollision"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Dodge-the-balls arcade game"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kollision-26.08.2.tar.xz", sha256 = "2696b1ac3e8d42f2d4bb229bd9ac398d46a97d948c6b18a8941a5b2875a534fe" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kollision-26.08.3.tar.xz", sha256 = "a75afeb7ef6f0660fa63d3287b3bb340092f4e0813dca6740656c34252c891e6" },
 ]
 
 setup = '''

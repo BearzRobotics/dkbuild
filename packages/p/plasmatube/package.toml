@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/plasmatube/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "plasmatube"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE Youtube player"
 license = "GPL-3.0-or-later"
@@ -11,7 +11,7 @@ builddeps = ["kconfig-devel", "kcoreaddons-devel", "kdbusaddons-devel", "ki18n-d
 rundeps = ["kdeclarative", "kirigami-addons", "kitemmodels", "purpose", "yt-dlp"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/plasmatube-26.08.2.tar.xz", sha256 = "1c950892b09098040fd03d60d13a029947d647d662d3489bfdee6f2ef30bf16e" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/plasmatube-26.08.3.tar.xz", sha256 = "7f36fbccca378f59c38d3a2e8aa22ae017222693efe0c19cb19f994e50089ae9" },
 ]
 
 setup = '''

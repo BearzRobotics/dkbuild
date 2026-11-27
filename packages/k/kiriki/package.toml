@@ -1,6 +1,6 @@
 # KDE Games: Yahtzee-like dice game (KDE Gear 26.08.2, Qt6/KF6).
 name = "kiriki"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Yahtzee-like dice game"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kiriki-26.08.2.tar.xz", sha256 = "00028717af2dbcbda6ed3d9558aa1e013d811a5c96bcc2d0a681465df1602c1b" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kiriki-26.08.3.tar.xz", sha256 = "65afb698a262498766952ae2b9d0c2d3544f8017582e7d58e987c82d84da9eb0" },
 ]
 
 setup = '''

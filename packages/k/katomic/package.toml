@@ -1,6 +1,6 @@
 # KDE Games: Educational puzzle game based on molecules (KDE Gear 26.08.2, Qt6/KF6).
 name = "katomic"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Educational puzzle game based on molecules"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/katomic-26.08.2.tar.xz", sha256 = "d0be5b5f3eff7098f837b900ee1fbea696d6d50df401882f76d849504fc624b6" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/katomic-26.08.3.tar.xz", sha256 = "88383961526121fd1a53548f253ff3e9ac759d18a8ada12590cf113046e1d8b5" },
 ]
 
 setup = '''

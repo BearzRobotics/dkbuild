@@ -1,6 +1,6 @@
 # KDE Games: Five-in-a-line puzzle game (KDE Gear 26.08.2, Qt6/KF6).
 name = "klines"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Five-in-a-line puzzle game"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/klines-26.08.2.tar.xz", sha256 = "c4171b323690b61f6daee9d4b934f370b28d899505c9a55ffdd785e53ef4e3dd" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/klines-26.08.3.tar.xz", sha256 = "90553b54fec04a54959c75b2cf57b232e76ecf5c044bce1438cb7fcc20cfa38a" },
 ]
 
 setup = '''

@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/kdepim-addons/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "kdepim-addons"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE PIM application addons"
 license = "LGPL-2.0-or-later AND GPL-2.0-or-later"
@@ -13,7 +13,7 @@ rundeps = ["kirigami-addons"]
 options = ["!check", "cargodeps"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kdepim-addons-26.08.2.tar.xz", sha256 = "d01ea99b6e7938f05f0d3b6332c60e1a4148a14883f1b48acd69951d95c39dc2" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kdepim-addons-26.08.3.tar.xz", sha256 = "42fa0193267cfdb57f1db43e3365fe42c4a90ba1bb0119d85beb1ef0d5152aa1" },
 ]
 
 environment = '''

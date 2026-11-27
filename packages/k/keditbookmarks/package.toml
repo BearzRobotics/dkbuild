@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/keditbookmarks/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "keditbookmarks"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE bookmarks editor"
 license = "GPL-2.0-only"
@@ -11,7 +11,7 @@ builddeps = ["kbookmarks-devel", "kcodecs-devel", "kconfigwidgets-devel", "kcore
 checkdeps = []
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/keditbookmarks-26.08.2.tar.xz", sha256 = "54c34c25296767d7e783596e4de333c83fd2a1f3ca04af70aa1fb987bd77e319" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/keditbookmarks-26.08.3.tar.xz", sha256 = "20897d43157deb6d7baa46cac3ea85757b685e25d97b0e2063e18c466bcfdf4a" },
 ]
 
 setup = '''

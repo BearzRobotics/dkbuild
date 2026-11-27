@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/kdialog/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "kdialog"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE dialog displayer"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ builddeps = ["kdbusaddons-devel", "kguiaddons-devel", "kiconthemes-devel", "kio-
 options = ["!cross"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kdialog-26.08.2.tar.xz", sha256 = "ed4a6fde2832d2c0265c855b2a871a6b2bb5a22a1949edaed67f44dbda84bf20" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kdialog-26.08.3.tar.xz", sha256 = "64cbdf30d29f26c0535d66494a3032860e700922deb44b3839e2ab171e639a66" },
 ]
 
 setup = '''

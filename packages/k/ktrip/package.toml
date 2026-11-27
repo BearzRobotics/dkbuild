@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/ktrip/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "ktrip"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE trip planner"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ builddeps = ["kconfig-devel", "kcoreaddons-devel", "kcrash-devel", "ki18n-devel"
 rundeps = ["kirigami-addons"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/ktrip-26.08.2.tar.xz", sha256 = "563afe833e8826c2ec04a3067cbb30d4512813993e4f079a47225f94cea99b00" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/ktrip-26.08.3.tar.xz", sha256 = "620addbb2b4f9246ba68234fc9ec5e8ec1acb4d9c897b43b40bc451a5cdf98bf" },
 ]
 
 setup = '''

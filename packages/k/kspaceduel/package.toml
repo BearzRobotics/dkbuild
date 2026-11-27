@@ -1,6 +1,6 @@
 # KDE Games: Two-player space combat game (KDE Gear 26.08.2, Qt6/KF6).
 name = "kspaceduel"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "Two-player space combat game"
 license = "GPL-2.0-or-later"
@@ -11,7 +11,7 @@ rundeps = ["libkdegames"]
 options = ["!check"]  # the tests, where there are any, need a display
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/kspaceduel-26.08.2.tar.xz", sha256 = "90dcd2aaa34bc66ff350ff958d60a4034e7ca7359bc83ede963edf472a4100de" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/kspaceduel-26.08.3.tar.xz", sha256 = "8cc13ba4c8b62e252ce2b9a626b3112ba12d0ebd70f29fe78f3aa95834c97f41" },
 ]
 
 setup = '''

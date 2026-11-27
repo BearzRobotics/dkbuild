@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/itinerary/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "itinerary"
-version = "26.08.2"
+version = "26.08.3"
 release = 1
 summary = "KDE digital travel assistant"
 license = "LGPL-2.0-or-later"
@@ -11,7 +11,7 @@ builddeps = ["kcalendarcore-devel", "kcontacts-devel", "kcoreaddons-devel", "kcr
 rundeps = ["kirigami-addons", "kitemmodels", "kopeninghours", "prison", "qt6-qtlocation"]
 
 source = [
-    { url = "https://download.kde.org/stable/release-service/26.08.2/src/itinerary-26.08.2.tar.xz", sha256 = "3a7562ef290bed88b87208aa5485f10f77885f096d976c09a1745f800e057a57" },
+    { url = "https://download.kde.org/stable/release-service/26.08.3/src/itinerary-26.08.3.tar.xz", sha256 = "3e7a04b039f937b38e71fae0eba6fe574fe2854652236a933ee38c87196a7cc0" },
 ]
 
 setup = '''
