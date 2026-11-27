@@ -6,9 +6,10 @@
 # makes it setuid root, the recipe resets it to 0755 (utmp updates are then
 # skipped, which is Chimera's choice too).
 # r2 (2026-11-26): no usr/share/info/dir in -doc (it conflicted with other -doc packages).
+# r3 (2026-11-27): the merge of two changes that each made an r2: the audit's files/screen.conf fix and the -doc fix above.
 name = "screen"
 version = "5.0.2"
-release = 2
+release = 3
 summary = "GNU screen"
 license = "GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/screen"
