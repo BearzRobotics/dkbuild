@@ -107,6 +107,16 @@ Image keys: `packages`, `exclude`, `unwanted` (apk `!name`), `services`, `users`
   GCC. GCC cross suites (arm-none-eabi, aarch64-none-elf, riscv64-unknown-elf,
   avr) are written. GRUB uses `options = ["gcc"]`. Nothing else builds with GCC
   unless it opts in; C++ from GCC keeps its own libstdc++ apart from libc++.
+- **Faster GCC upgrades** (planned, 2026-11-27; not started). Every build of gcc starts from Alpine's GCC and does the
+  three-stage bootstrap, even when the repository has our own gcc. That is a workaround of ours, not a GCC rule: with
+  the previous package as the seed, an Ada tool built during the build did not start (`Error relocating ./xsnamest:
+  interfaces__c___elabs: symbol not found`, 2026-11-16, the recipe's r4). Probably a libgnat that does not match the
+  tool, **not diagnosed**. The automatic `-libs` splitting is not involved: it came later, and gcc has no `-libs`
+  package (libgnat is in gcc-ada).
+  - First: reproduce the failure and find which libgnat is loaded; fix it.
+  - Normal rebuilds and minor updates: our previous gcc as the seed. For the same version try `--disable-bootstrap`,
+    testing Ada both ways. This drops the stage 2/3 comparison, so test the built compiler by other means.
+  - Major upgrades, and a rebuild from an empty repository (Alpine's seed again): keep the full bootstrap.
 - **Missing: WASI.** No `wasi-libc` package, so Rust's WASI targets do not work and
   Firefox's RLBox libraries are not wasm-sandboxed.
 - **Android NDK from source**: planned, not started in code. Survey and steps are
