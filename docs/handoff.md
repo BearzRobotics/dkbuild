@@ -272,6 +272,23 @@ first), and the temporary lines in both dkde-devel image files go (`rust-libs` w
 - [ ] Login text: commands and headings are coloured (agetty `\e{...}`; rendered with agetty, not booted). The
   uncle saw it "all on one line": the image files and agetty keep the lines, where he saw it is not known.
 
+- [ ] **Boot menu `-toram` entry** (asked 2026-11-27): dkbuild's image writes it, live-initramfs r6 does the copy.
+  The copy code was run with the repo's BusyBox in a sandbox (copy, too little memory, failed copy); **not booted**.
+  To boot test: the system comes up, the disc can be removed, the installer still finds the image. With toram the
+  installer no longer knows which disk the live medium came from, so it does not protect it.
+- [ ] **The live init booted other ISOs** (found 2026-11-27 from the uncle's report that his ext2 drive was mounted):
+  after 3 s without a volume of its label it took the first `.iso` with `live/rootfs.sfs` on any partition, label
+  unchecked, and kept that partition mounted. Reproduced with fake drives: a CLI stick that appears after 6 s boots an
+  old desktop ISO. That would explain his new kernel with dkrescue modules and /boot, empty lsmod, no x86_64 grub, a
+  CLI boot reaching a desktop and the busy ext2 drive (**not confirmed on his machine**: ask for `findmnt
+  /run/live/medium`, `losetup -a`, `findmnt | grep /run/live/host`). Fixed (live-initramfs r6 + dkbuild: build ID,
+  label check, 15 s wait). Boot test: real stick, a data disk holding an older ISO. Every ISO made before this has it.
+  This probably also changes what "open" below still is.
+- [ ] **`grep: write error: Broken pipe`** (the uncle, 2026-11-27): dinit ignores SIGPIPE and did not reset it before
+  exec, so every service and every shell below one had it ignored. Reproduced with the repository's dinit-0.23.0-r1.
+  Fixed in dinit r2 (`reset-sigpipe.patch`; applies strictly, **not compiled**). In the booted image check, in a login
+  shell and in a desktop terminal: `grep SigIgn /proc/$$/status` has bit 0x1000 clear, and `seq 100000 | grep . |
+  head -n1` is quiet. On an old image: `exec env --default-signal=PIPE bash` (a shell cannot reset it with trap).
 - [ ] Open, not fixed by a rebuild: **Ctrl+Alt+F1..F12 in the Wayland desktop** (dkde-compositor keeps no wlr_session
   and handles no VT keys; a prompt was given for the dkde session: needs a new dkde and its recipe here); **the
   uncle's CLI image "boots to the desktop"** and the flashing console (he added `video=`; waiting for its value and
