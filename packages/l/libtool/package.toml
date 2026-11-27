@@ -1,13 +1,14 @@
 # Follows the DKRescue post's build of libtool 2.5.4; the importer's draft of
 # Chimera's recipe was not used.
 # r2: static libraries too (in libtool-static), for fully static programs on musl.
+# !libs-main (2026-11-27, SPEC.md 5.7): libltdl needs none of what is left in the main package (libtoolize's templates).
 name = "libtool"
 version = "2.5.4"
-release = 2
+release = 3
 summary = "Generic library support script"
 license = "GPL-2.0-or-later"
 homepage = "https://www.gnu.org/software/libtool"
-options = ["bootstrap", "!check"]
+options = ["!libs-main", "bootstrap", "!check"]
 
 source = [
     { url = "https://ftp.gnu.org/gnu/libtool/libtool-2.5.4.tar.xz", sha256 = "f81f5860666b0bc7d84baddefa60d1cb9fa6fceb2398cc3baca6afaa60266675" },

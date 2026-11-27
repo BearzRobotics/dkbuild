@@ -5,9 +5,10 @@
 # The cluster lives in /var/lib/postgresql (owned by _postgres): create it with
 #   su -s /bin/sh _postgres -c 'initdb -D /var/lib/postgresql'
 # then enable the postgresql service.
+# !libs-main (2026-11-27, SPEC.md 5.7): libpq does not need the server and its extensions.
 name = "postgresql"
 version = "16.15"
-release = 3
+release = 4
 summary = "Sophisticated object-relational database system"
 license = "PostgreSQL"
 homepage = "https://www.postgresql.org"
@@ -15,7 +16,7 @@ patches = ["disable-html-docs.patch", "dont-use-locale-a-on-musl.patch", "initdb
 hostdeps = ["pkgconf"]
 builddeps = ["e2fsprogs-devel", "icu-devel", "libxml2-devel", "linux-headers", "lz4-devel", "openssl-devel", "perl", "python-devel", "readline-devel", "tcl-devel", "zlib-ng-compat-devel", "zstd-devel"]
 rundeps = ["tzdb"]
-options = ["!check"]
+options = ["!libs-main", "!check"]
 
 source = [
     { url = "https://ftp.postgresql.org/pub/source/v16.15/postgresql-16.15.tar.bz2", sha256 = "c1575341fa7bd40f5274ea465b34390f4dc64cdd0770af327005caaeb9f6b7ed" },

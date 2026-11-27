@@ -1,10 +1,12 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/unbound/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
+# !libs-main (2026-11-27, SPEC.md 5.7): what is left in the main package is the server's configuration; libunbound does not read it.
 name = "unbound"
 version = "1.26.2"
 release = 3
 summary = "Validating, recursive, and caching DNS resolver"
 license = "BSD-3-Clause"
+options = ["!libs-main"]
 homepage = "https://nlnetlabs.nl/projects/unbound/about"
 hostdeps = ["automake", "libtool", "pkgconf", "protobuf-c-devel"]
 builddeps = ["hiredis-devel", "libevent-devel", "libexpat-devel", "libsodium-devel", "nghttp2-devel", "openssl-devel", "protobuf-c-devel"]

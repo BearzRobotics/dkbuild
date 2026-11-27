@@ -70,7 +70,9 @@ packages = ["base", "openssh", "openssh-server", "curl", "linux", "live-initramf
 "libcanberra", "libgpg-error", "libgphoto2", "libgusb", "libidn", "libinput", "libjxl", "libnice", "libnl",
 "libpaper", "libsasl", "libsecret", "libwacom", "libxkbcommon", "libxslt", "lilv", "lksctp-tools", "lm-sensors",
 "modemmanager", "mpg123", "ndctl", "newt", "opencolorio", "openldap", "p11-kit", "pango", "pcsc-lite", "qt6-qtbase",
-"qt6-qtdeclarative", "rubberband", "samba", "sndio", "talloc-python", "tslib", "unbound", "v4l-utils", "wayland"]
+"qt6-qtdeclarative", "rubberband", "samba", "sndio", "talloc-python", "tslib", "unbound", "v4l-utils", "wayland",
+# five the list above missed (2026-11-27): scanner drivers, libheif's dav1d plugin, the mobile broadband proxies, OpenAL's data
+"sane-backends", "libheif", "libmbim", "libqmi", "openal-soft"]
 #exclude  = ["*-devel", "*-doc", "*-static"]
 # never installed, even as a dependency (apk stops with a conflict if something needs it)
 unwanted = ["dhcpcd"]

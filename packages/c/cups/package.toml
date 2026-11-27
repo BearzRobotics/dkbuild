@@ -4,6 +4,7 @@
 # OpenSSL; network printers found through Avahi. Administrators are root and
 # the lpadmin and wheel groups. With PAM (r2, 2026-11-15: the system adopts PAM all the way): the
 # web interface authenticates through the `cups` service (files/cups.pam, system-auth).
+# !libs-main (2026-11-27, SPEC.md 5.7): libcups is a client library; what is left in the main package is the print server.
 name = "cups"
 version = "2.4.20"
 release = 4
@@ -17,7 +18,7 @@ builddeps = ["acl-devel", "avahi-devel", "dbus-devel", "libpaper-devel", "libpng
 # ("could not load dependency": enabling cupsd stopped the boot of an image without avahi). Found by the installer's QEMU tests.
 # groupadd and useradd (shadow) and the files they edit (base-files) must be there before pre-install runs
 rundeps = ["base-files", "shadow", "avahi"]
-options = ["!check", "!lto"]
+options = ["!libs-main", "!check", "!lto"]
 
 source = [
     { url = "https://github.com/OpenPrinting/cups/releases/download/v2.4.20/cups-2.4.20-source.tar.gz", sha256 = "ab4d9cd7f3e58060091d2b24972223d6401675f11c49b65abf4f6ef31dea22ff" },

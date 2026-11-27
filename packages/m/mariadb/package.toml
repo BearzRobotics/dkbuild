@@ -1,14 +1,15 @@
 # MariaDB with its usual engines (InnoDB, Aria, MyRocks off, Spider); create the
 # database with `mariadb-install-db --user=_mysql`, then enable the service.
+# !libs-main (2026-11-27, SPEC.md 5.7): the client library does not need the server and its test suite.
 name = "mariadb"
 version = "13.0.2"
-release = 3
+release = 4
 summary = "MariaDB database server and client"
 license = "GPL-2.0-only"
 homepage = "https://mariadb.org"
 hostdeps = ["cmake", "ninja", "pkgconf", "bison", "perl"]
 builddeps = ["ncurses-devel", "openssl-devel", "zlib-ng-compat-devel", "libxml2-devel", "pcre2-devel", "lz4-devel", "zstd-devel", "xz-devel", "bzip2-devel", "snappy-devel", "liburing-devel", "curl-devel", "linux-headers", "heimdal-devel", "libedit-devel", "jemalloc-devel", "cracklib-devel", "fmt-devel", "linux-pam-devel"]
-options = ["!check", "jobs:12"]
+options = ["!libs-main", "!check", "jobs:12"]
 
 source = [
     { url = "https://archive.mariadb.org/mariadb-13.0.2/source/mariadb-13.0.2.tar.gz", sha256 = "8ee8d955530faedcea344535de85495afb5b98128bbf660e56893e93e21ee8f7" },

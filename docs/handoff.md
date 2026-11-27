@@ -55,8 +55,24 @@ tree (one test skipped by design); `check` passed; `outdated` against the built 
 
 The fixes were made in a temporary clone on the home drive, deleted on 2026-11-27; work from `/stuff/git/dkbuild`.
 The build directories are links to /mnt/dkbuild again, but `tests/` writes its trees on /stuff, where sandboxes once
-sat for 10 to 25 minutes flushing to disk (2026-11-25): the test suite may be slow or seem stuck there. The suite had
-not been run from /stuff after the move when this was written.
+sat for 10 to 25 minutes flushing to disk (2026-11-25): the test suite may be slow or seem stuck there. Run from
+/stuff on 2026-11-27 it passed, in 31 minutes.
+
+## 2026-11-27: `-libs` depends on its main package; repository ISO tried
+
+- New in dkbuild (SPEC.md 5.7): `-libs` depends on the main package when that holds files the libraries could need.
+  `!libs-main` opts out (llvm, libtool, ffmpeg, cups, unbound, mariadb, postgresql). By a survey of the repo, 301 of
+  580 packages with a `-libs` gain it (before the opt-outs), **only once rebuilt**. `tests/libs-main.sh`; the full
+  suite passed before the opt-out recipe edits (31 minutes from /stuff).
+- Both dkde-devel images also list sane-backends, libheif, libmbim, libqmi and openal-soft. Keep the long list of
+  main packages there until an image of rebuilt packages works without it, then trim it.
+- A rebuild from an empty repository can publish changed packages under the same release. Tried with dummy packages:
+  `apk upgrade` skips those; `apk upgrade --available` takes them and their new dependencies (it can also downgrade:
+  `--simulate` first; not tried with real rebuilt packages or an incomplete repository).
+- `out/fenriros-repo-test/fenriros-repo-test.iso`: a repository disc made from the recipes of 82c91d37 (they match
+  the builds), without 13 recipes never rebuilt at their version. On an unpacked dkde-devel system (not booted):
+  `import.sh`, `apk update` and adding the five packages above worked. Today's recipes would leave 94 recipes out.
+- The `useradd` warning about /usr/bin/nologin in image logs: shadow r7 lacks the link; r8 has it (not built).
 
 ## `wallet-engine`'s cached dependency list: nothing to do
 

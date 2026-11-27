@@ -320,15 +320,16 @@ release, or a `snapshot:git` source (below), which is a checksummed tarball.
 | `pydeps` | Python packages pinned in the recipe's `files/python.lock` (pure-Python wheels, else source distributions, with sha256s), fetched from PyPI into the shared `cache/python/`; in the build, `.dkpython/` is pip's and uv's only source, offline, without build isolation (7.4) |
 | `meta` | A meta-package: no source and no steps, only `rundeps` (`base`, `desktop-hyprland`) |
 | `rootlayout` | May install outside `/usr /etc /var /opt /boot` (base-files: `/dev`, `/proc`, the usr-merge links); waives the top-level directory check of the policy checks (below) |
+| `!libs-main` | Do not make `-libs` depend on the main package (5.7): for a library that works without the files left there |
 | `!repo-iso` | Keep the package off the repository discs of `dkbuild discs` (8): for packages whose licence or size forbids shipping them. A package on the disc may not depend on one left out |
 | `cargolock=<dir>` | With `cargodeps`: the Rust project at `<dir>` of the source ships no `Cargo.lock`, so the recipe keeps one in `files/Cargo.lock` and the fetch vendors with it (a directory and `cargodeps` are required). The build copies the lock into `<dir>` and puts `vendor/` and `.cargo/` there instead of at the top |
 
 Options may be written with a `!` in front, and dkbuild strips it before
 looking the name up, for any option; the `!` is a convention for a switch that
-turns a default off. Only `!check` and `!strip` change what a build does, and
+turns a default off. Only `!check`, `!strip` and `!libs-main` change what a build does, and
 `!repo-iso` what a disc holds; the build never reads `!cross` or `!lto`. An
 option that is not in this table, and not `jobs:N` or `cargolock=<dir>`, is an
-error. What a build actually reads is `!check`, `!strip`, `static`, `gcc`,
+error. What a build actually reads is `!check`, `!strip`, `!libs-main`, `static`, `gcc`,
 `selfhost`, `jobs:N`, `meta`, `rootlayout`, `yarnberry`, `cargolock=<dir>` and
 the `*deps` options.
 
@@ -506,6 +507,25 @@ An entry of a subpackage's `depends` written `<name>=@built` is replaced with
 `<name>=<version>-r<release>`, the version of `<name>` (or of `<name>-devel`)
 that was in the build root; the build fails if neither was. zfs uses it to pin
 its kernel modules to the kernel they were built for.
+
+**`-libs` and its main package.** Programs that link a library depend (through
+its `so:` name) on `-libs` alone, so `-libs` depends on the main package, at
+the same version, when that holds a file the libraries could need when they
+run: GSettings schemas and other data, configuration, plugins, type libraries,
+helper programs. These do not count: programs in `bin` and `sbin`; headers,
+`.a` and `.la` files and other things only a build uses; documentation,
+translations, shell completion, desktop entries and application icons; service,
+PAM, cron, logrotate, sysusers and tmpfiles files; and modules for Python
+(`site-packages`), Perl (`vendor_perl`) and Ruby (`vendor_ruby`). The list is
+`not_for_libraries` in `src/split.zig`. The build prints the first file that
+made the dependency. It goes by where a file is, so it can be wrong either way:
+`!libs-main` (5.4) leaves the dependency out, and `[subpackages.libs]` with
+`depends` adds one by hand (a `-libs` that already names the main package
+there is left as it is). The dependency counts as part of what a build
+produced, so a rebuild with the same files that gains it is published as the
+next release. It changes nothing in build roots, which hold the main package
+anyway. A package already in the repository gains it only when it is built
+again, and an installed system only when its version or release goes up.
 
 Static libraries are a first-class product, not an afterthought: musl makes
 fully static programs practical, which is why `-static` is its own package.

@@ -1664,6 +1664,23 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
             produced.output = std.fmt.bytesToHex(h.finalResult(), .lower);
         }
     }
+    // -libs depends on the main package when that holds files the libraries could need when they run (SPEC 5.7):
+    // programs link to -libs alone, and would otherwise get the library without its schemas, data or plugins.
+    const libs_main: ?[]const u8 = if (try wantsMain(arena, r, moved))
+        split.neededByLibraries(arena, io, destdir_abs) catch |err| {
+            out("error: {s}: looking through what is left in the main package failed: {s}\n", .{ r.name, @errorName(err) });
+            return error.BuildFailed;
+        }
+    else
+        null;
+    // Like a pin, the dependency is in the metadata only: without this, a rebuild with the same files would be
+    // taken for the same package, and it would never be published.
+    if (libs_main != null) {
+        var h = std.crypto.hash.sha2.Sha256.init(.{});
+        h.update(&produced.output);
+        h.update("libs-main\n");
+        produced.output = std.fmt.bytesToHex(h.finalResult(), .lower);
+    }
     if (rebuild) |rb| {
         if (std.mem.eql(u8, &rb.previous.output, &produced.output)) {
             out("    rebuilt {s}: identical to the package in repo/, kept as is; log: {s}\n", .{ id, logpath });
@@ -1703,6 +1720,10 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
         const need = try siblingNeed(arena, r.name, ver, m.name, moved);
         var declared: std.ArrayList([]const u8) = .empty;
         if (need.len > 0) try declared.append(arena, need);
+        if (libs_main) |because| if (std.mem.eql(u8, m.name, "libs")) {
+            try declared.append(arena, try std.fmt.allocPrint(arena, "{s}={s}", .{ r.name, ver }));
+            out("    {s}-libs depends on {s} (for /{s}, among others)\n", .{ r.name, r.name, because });
+        };
         for (sp_depends) |dep| try declared.append(arena, try builtDep(arena, dep, root_files));
         var sub = try withScan(arena, io, try std.fs.path.join(arena, &.{ subs_abs, m.name }), declared.items, r.noscan);
         sub.name = try std.fmt.allocPrint(arena, "{s}-{s}", .{ r.name, m.name });
@@ -1717,6 +1738,24 @@ pub fn buildOne(arena: Allocator, io: std.Io, r_in: recipe.Recipe, opts: Options
     try publish(arena, io, r, opts, pub_id, base_root, try sbDirs(arena, io, work, "sign"), pkg_list.items, &log);
     out("    built {s}; log: {s}\n", .{ pub_id, logpath });
     return .{ .produced = produced, .release = r.release, .published = true };
+}
+
+/// Is it a question whether -libs should depend on the main package? Not when there is no -libs, when the recipe
+/// says `!libs-main`, or when it already names the main package in what its -libs depends on.
+fn wantsMain(arena: Allocator, r: recipe.Recipe, moved: []const split.Moved) Allocator.Error!bool {
+    if (contains(r.options, "!libs-main")) return false;
+    for (moved) |m| {
+        if (!std.mem.eql(u8, m.name, "libs")) continue;
+        for (try split.merge(arena, r.subpackages)) |sp| {
+            if (!std.mem.eql(u8, sp.name, "libs")) continue;
+            for (sp.depends) |dep| {
+                const name = dep[0 .. std.mem.indexOfAny(u8, dep, "=<>~") orelse dep.len];
+                if (std.mem.eql(u8, name, r.name)) return false;
+            }
+        }
+        return true;
+    }
+    return false;
 }
 
 /// What a default subpackage needs of its own recipe's packages: -devel the main package (or -libs, when there is

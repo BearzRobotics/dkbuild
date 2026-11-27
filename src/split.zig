@@ -120,6 +120,47 @@ fn hasPrograms(files: []const []const u8) bool {
     return false;
 }
 
+/// What stays in a main package and is nothing its libraries read when they run: programs, documentation, what
+/// only a build against it uses, shell completion and desktop entries, the files of its services, and modules for
+/// scripting languages (a binding built on the library, not part of it).
+const not_for_libraries = [_][]const u8{
+    "usr/bin",                  "usr/sbin",                "bin",                      "sbin",
+    "usr/include",              "usr/share/aclocal",       "usr/share/gir-1.0",        "usr/share/vala",
+    "usr/lib/cmake",            "usr/lib/pkgconfig",       "usr/share/pkgconfig",      "usr/share/licenses",
+    "usr/share/man",            "usr/share/doc",           "usr/share/info",           "usr/share/gtk-doc",
+    "usr/share/examples",       "usr/share/locale",        "usr/share/bash-completion", "usr/share/zsh",
+    "usr/share/fish",           "etc/bash_completion.d",   "usr/share/applications",   "usr/share/metainfo",
+    "usr/share/appdata",        "usr/share/pixmaps",       "usr/share/icons/hicolor",  "etc/dinit.d",
+    "usr/lib/dinit.d",          "etc/init.d",              "usr/lib/systemd",          "etc/logrotate.d",
+    "etc/cron*",                "etc/pam.d",               "usr/lib/pam.d",            "etc/sysusers.d",
+    "usr/lib/sysusers.d",       "etc/tmpfiles.d",          "usr/lib/tmpfiles.d",       "usr/lib/python3*/site-packages",
+    "usr/lib/perl5/vendor_perl", "usr/lib/ruby*/vendor_ruby",
+};
+
+/// Could the libraries of a package need the file at `path` (no leading '/') when they run? Everything that is not
+/// in `not_for_libraries`: schemas and other data, configuration, plugins, type libraries, helper programs.
+pub fn forLibraries(path: []const u8) bool {
+    // libtool's archives, and static libraries and headers a recipe left outside the usual places
+    for ([_][]const u8{ ".la", ".a", ".h" }) |end| if (std.mem.endsWith(u8, path, end)) return false;
+    for (not_for_libraries) |pat| if (covers(pat, path)) return false;
+    return true;
+}
+
+/// The first (by name) file or link under `destdir`, a main package after the split, that its libraries could need;
+/// null when there is none. A package whose -libs is split off then has no need of it.
+pub fn neededByLibraries(arena: Allocator, io: std.Io, destdir: []const u8) !?[]const u8 {
+    var d = try Dir.cwd().openDir(io, destdir, .{ .iterate = true });
+    defer d.close(io);
+    var w = try d.walk(arena);
+    defer w.deinit();
+    var first: ?[]const u8 = null;
+    while (try w.next(io)) |e| {
+        if (e.kind == .directory or !forLibraries(e.path)) continue;
+        if (first == null or std.mem.lessThan(u8, e.path, first.?)) first = try arena.dupe(u8, e.path);
+    }
+    return first;
+}
+
 pub const Moved = struct { name: []const u8, files: usize };
 
 /// Moves files out of `destdir` into `<out>/<sub.name>/`. Returns how many
@@ -303,4 +344,38 @@ test "folders made in a subpackage keep the modes the package gave them (BC-12)"
         const s = try tmp.dir.statFile(io, want.p, .{});
         try std.testing.expectEqual(want.mode, @as(u32, s.permissions.toMode()) & 0o7777);
     }
+}
+
+test "what a library could need from its main package" {
+    for ([_][]const u8{
+        "usr/share/glib-2.0/schemas/org.gtk.Settings.gschema.xml", "usr/lib/sane/libsane-x.so.1",
+        "usr/lib/girepository-1.0/Gtk-4.0.typelib",                "usr/libexec/qmi-proxy",
+        "etc/sane.d/dll.conf",                                     "usr/lib/udev/rules.d/49-sane.rules",
+        "usr/share/openal/hrtf/Default HRTF.mhr",                  "usr/share/terminfo/x/xterm",
+        "usr/lib/python3.14/encodings/__init__.py",                "usr/share/icons/Adwaita/index.theme",
+    }) |p| try std.testing.expect(forLibraries(p));
+    for ([_][]const u8{
+        "usr/bin/tool",                       "usr/sbin/daemon",                                 "usr/share/licenses/x/COPYING",
+        "usr/lib/libx.la",                    "usr/share/gir-1.0/X-1.0.gir",                     "usr/share/applications/x.desktop",
+        "etc/dinit.d/saned",                  "usr/lib/tmpfiles.d/x.conf",                       "etc/cron.d/x",
+        "usr/lib/python3.14/site-packages/x.py", "usr/share/locale/de/LC_MESSAGES/x.mo",        "usr/share/icons/hicolor/48x48/apps/x.png",
+    }) |p| try std.testing.expect(!forLibraries(p));
+}
+
+test "neededByLibraries looks at files and links, not at empty folders" {
+    var st = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer st.deinit();
+    const a = st.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    try tmp.dir.createDirPath(io, "d/usr/bin");
+    try tmp.dir.createDirPath(io, "d/var/lib/x");
+    try tmp.dir.writeFile(io, .{ .sub_path = "d/usr/bin/x", .data = "x" });
+    const dest = try tmp.dir.realPathFileAlloc(io, "d", a);
+    try std.testing.expectEqual(@as(?[]const u8, null), try neededByLibraries(a, io, dest));
+    try tmp.dir.createDirPath(io, "d/usr/share/x");
+    try tmp.dir.symLink(io, "../../bin/x", "d/usr/share/x/z", .{});
+    try tmp.dir.writeFile(io, .{ .sub_path = "d/usr/share/x/b", .data = "x" });
+    try std.testing.expectEqualStrings("usr/share/x/b", (try neededByLibraries(a, io, dest)).?);
 }

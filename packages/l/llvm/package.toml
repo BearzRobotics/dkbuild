@@ -13,6 +13,7 @@
 #     and other LLVM users need it (Mesa: "LLVM was built without RTTI").
 # r4: llvm-devel depends on llvm-static: LLVM's CMake files name every static
 #     component library, so find_package(LLVM) failed without them (clang-tools-extra).
+# !libs-main (2026-11-27, SPEC.md 5.7): what is left in the main package is clang's scan-build tools and the module list for building, nothing the libraries load.
 name = "llvm"
 version = "23.1.5"
 release = 8
@@ -27,7 +28,7 @@ builddeps = ["zlib-ng-compat-devel", "zstd-devel", "linux-headers"]
 # (never more, whatever -j says), one link job (LLVM_PARALLEL_LINK_JOBS in
 # setup; a link of libLLVM or clang needs several GB) and a lowered CPU
 # priority. This also keeps an 8 GB machine from running out of memory.
-options = ["bootstrap", "jobs:4", "!check"]
+options = ["!libs-main", "bootstrap", "jobs:4", "!check"]
 
 source = [
     { url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-23.1.5/llvm-project-23.1.5.src.tar.xz", sha256 = "fb50b1eac93ddeb3aa8dab4cfe324dff74f4a9c2bdee6160c9e36188f8d06a6e" },
