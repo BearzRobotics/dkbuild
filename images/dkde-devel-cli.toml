@@ -52,7 +52,18 @@ packages = ["base", "openssh", "openssh-server", "curl", "linux", "live-initramf
 "f2fs-tools-doc", "jfsutils-doc", "reiserfsprogs-doc", "nilfs-utils-doc", "tmux-doc", "strace-doc", "partclone-doc",
 "safecopy-doc", "foremost-doc", "gpart-doc", "sg3-utils-doc", "lsscsi-doc", "lshw-doc", "kpartx-doc", "memtester-doc",
 "stress-ng-doc", "fio-doc", "pv-doc", "lsof-doc", "ncdu-doc", "mc-doc", "screen-doc", "dialog-doc", "lftp-doc",
-"mbuffer-doc", "par2cmdline-doc"]
+"mbuffer-doc", "par2cmdline-doc",
+# THE MAIN PACKAGES OF LIBRARIES (2026-11-26): programs pull in only <name>-libs, but these main packages hold files the libraries need
+# when they run (GTK and Qt modules and schemas, ALSA's configuration, GStreamer plugins, device databases ...): without gtk+3,
+# Firefox's file dialog aborted ("Settings schema org.gtk.Settings.FileChooser is not installed"). A workaround in this list; the
+# fix in the packages is for -libs to depend on its main package (icu does since r2). Services in them are not enabled.
+"alsa-lib", "aspell", "attr", "audit", "cairo", "colord", "espeak-ng", "gcr", "gnutls", "gpgme", "gpm", "graphite2",
+"gst-plugins-bad", "gst-plugins-base", "gstreamer", "gtk+3", "gtk4", "harfbuzz", "heimdal", "iptables", "json-glib",
+"kconfig", "keyutils", "kguiaddons", "kiconthemes", "libadwaita", "libblockdev", "libbytesize", "libcamera",
+"libcanberra", "libgpg-error", "libgphoto2", "libgusb", "libidn", "libinput", "libjxl", "libnice", "libnl",
+"libpaper", "libsasl", "libsecret", "libwacom", "libxkbcommon", "libxslt", "lilv", "lksctp-tools", "lm-sensors",
+"modemmanager", "mpg123", "ndctl", "newt", "opencolorio", "openldap", "p11-kit", "pango", "pcsc-lite", "qt6-qtbase",
+"qt6-qtdeclarative", "rubberband", "samba", "sndio", "talloc-python", "tslib", "unbound", "v4l-utils", "wayland"]
 #exclude  = ["*-devel", "*-doc", "*-static"]
 # never installed, even as a dependency (apk stops with a conflict if something needs it)
 unwanted = ["dhcpcd"]
