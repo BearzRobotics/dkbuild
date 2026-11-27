@@ -35,6 +35,9 @@ export CXXSTDLIB=c++
 export MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE=system MOZ_NOSPAM=1
 '''
 setup = '''
+# 161.0: patches/musl-prctl.patch also covers the crash reporter's crash_generation_client.cc: it includes <linux/prctl.h> and <sys/prctl.h>,
+# which on musl both define struct prctl_mm_map (a search of the 161.0 source found this include there and in the WebRTC file only).
+# It needs only PR_SET_PTRACER, which musl's header has.
 # 161.0: no bindgen patch any more. 159.0 needed files/bindgen-template-union.patch (bindgen's PR 3536) on the vendored bindgen 0.73.1,
 # which panicked ("Not an item: ItemId(N)") on libc++ 23's std::aligned_union; the bindgen vendored in 161.0, still numbered 0.73.1,
 # already has both changes, so the patch no longer applied (the `bindgen` package keeps its own copy of the fix).
