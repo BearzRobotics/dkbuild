@@ -224,6 +224,17 @@ they had one. Nothing here is built.
   - the new source's address was not found or did not download: clojure, collabora-online, dash, dialog, exabgp,
     fortune-mod, freebasic, imagemagick, libreoffice, libstatgrab, r-base, xorriso
 
+## 2026-11-27: dash 0.5.13.6 and GCC 16.2.0 (not built)
+
+- dash: with Alpine's unsigned char fix; the tarball came over HTTP and matched Gentoo's sha512 (fetched over HTTPS).
+- **GCC 16.2.0** (the user: the latest). Now `/usr/lib/gcc16` and `gcc-16`, `g++-16`, ...; `profile.zig`, SPEC.md,
+  emacs, euro-office, ghdl, hetty, julia, libera-suite and r-base follow. Seed unchanged (Alpine's GCC 15.2). The
+  patches are Alpine's GCC 15 set (the recipe says what was dropped and why). **Watch in the build:** the GCC build
+  itself (Ada and D bootstrap from 15, patches never built on 16), the subpackage path lists (check against the first
+  build's files), ghdl with GNAT 16, and every recipe with `options = ["gcc"]`.
+- **Found while doing it:** patch 0035 "applied" with fuzz to the wrong block (uClibc's instead of musl's). The earlier
+  update scripts tried patches with fuzz allowed: re-checked strictly next.
+
 ## `wallet-engine`'s cached dependency list: nothing to do
 
 An earlier note asked for `cache/cargodeps/45d22ed4...da2.list` to be deleted by hand: it was uniffi-bindgen-cpp's
