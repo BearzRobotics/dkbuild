@@ -3,9 +3,10 @@
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r2: dependencies on this tree's packages, not Chimera's names (built against the image's copies before).
 # r3: static libraries too (in parted-static), for fully static programs on musl.
+# r4 (2026-11-26): no usr/share/info/dir in -doc (it conflicted with other -doc packages).
 name = "parted"
 version = "3.8"
-release = 3
+release = 4
 summary = "GNU parted"
 license = "GPL-3.0-or-later"
 homepage = "http://www.gnu.org/software/parted"
@@ -26,4 +27,6 @@ build = '''
 '''
 install = '''
 %make_install
+# the info index lists what is installed, so no package may ship it: apk refuses two packages that both do (dkde-devel with the docs)
+rm -f "$pkgdir/usr/share/info/dir"
 '''

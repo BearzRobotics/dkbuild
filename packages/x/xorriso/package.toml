@@ -2,9 +2,10 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 # Imported draft, untested: dependency names are Chimera's and resolve from the stage 0 image until they are recipes.
 # r4: static libraries too (in xorriso-static), for fully static programs on musl.
+# r6 (2026-11-26): no usr/share/info/dir in -doc (it conflicted with other -doc packages).
 name = "xorriso"
 version = "1.5.6.2"
-release = 5
+release = 6
 summary = "ISO 9660 Rock Ridge Filesystem Manipulator"
 license = "GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/xorriso"
@@ -31,4 +32,6 @@ check = '''
 '''
 install = '''
 %make_install
+# the info index lists what is installed, so no package may ship it: apk refuses two packages that both do (dkde-devel with the docs)
+rm -f "$pkgdir/usr/share/info/dir"
 '''

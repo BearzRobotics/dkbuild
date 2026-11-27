@@ -13,9 +13,10 @@
 # r4, the first GCC build, stopped in the tools build ("cpp: fatal error: too many input files": GCC's `cpp` takes one input file and
 # the grub_fstest.pp rule gives it four), so that make gets CPP="$CC -E", which takes several.
 # (the platform build directories run the same grub_fstest.pp rule: the CPP override goes on their make lines too)
+# r8 (2026-11-26): no usr/share/info/dir in -doc (it conflicted with other -doc packages).
 name = "grub"
 version = "2.12"
-release = 7
+release = 8
 summary = "GRand Unified Bootloader version 2"
 license = "GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/grub"
@@ -70,6 +71,8 @@ mv "$pkgdir/etc/bash_completion.d" "$pkgdir/usr/share/bash-completion/completion
 # unused tools
 rm -rf "$pkgdir/usr/bin/grub-ofpathname"
 rm -rf "$pkgdir/usr/bin/grub-sparc64-setup"
+# the info index lists what is installed, so no package may ship it: apk refuses two packages that both do (dkde-devel with the docs)
+rm -f "$pkgdir/usr/share/info/dir"
 '''
 
 [subpackages.i386-pc]

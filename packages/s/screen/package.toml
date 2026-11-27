@@ -5,6 +5,7 @@
 # sockets live in a per-user subdirectory it creates). Not setuid: the install
 # makes it setuid root, the recipe resets it to 0755 (utmp updates are then
 # skipped, which is Chimera's choice too).
+# r2 (2026-11-26): no usr/share/info/dir in -doc (it conflicted with other -doc packages).
 name = "screen"
 version = "5.0.2"
 release = 2
@@ -44,4 +45,6 @@ install -Dm644 $pkgfiles/screen.conf "$pkgdir/usr/lib/tmpfiles.d/screen.conf"
 # not setuid
 chmod 755 "$pkgdir"/usr/bin/screen*
 install -Dm644 COPYING "$pkgdir/usr/share/licenses/screen/COPYING"
+# the info index lists what is installed, so no package may ship it: apk refuses two packages that both do (dkde-devel with the docs)
+rm -f "$pkgdir/usr/share/info/dir"
 '''
