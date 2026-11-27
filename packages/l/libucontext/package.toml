@@ -4,7 +4,7 @@
 # r2: static libraries too (in libucontext-static), for fully static programs on musl.
 name = "libucontext"
 version = "1.3.2"
-release = 2
+release = 3
 summary = "Implementation of ucontext featuring glibc-compatible ABI"
 license = "ISC"
 homepage = "https://github.com/kaniini/libucontext"

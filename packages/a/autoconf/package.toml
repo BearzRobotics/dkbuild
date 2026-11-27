@@ -5,7 +5,7 @@
 # r2: static libraries too (in autoconf-static), for fully static programs on musl.
 name = "autoconf"
 version = "2.73"
-release = 4
+release = 5
 summary = "Generates automatic source code configuration scripts"
 license = "GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/autoconf"

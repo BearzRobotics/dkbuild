@@ -4,7 +4,7 @@
 # r2: static libraries too (in popt-static), for fully static programs on musl.
 name = "popt"
 version = "1.19"
-release = 2
+release = 3
 summary = "Command line option parsing library"
 license = "MIT"
 homepage = "https://rpm.org"

@@ -4,7 +4,7 @@
 # r3: static libraries too (in bison-static), for fully static programs on musl.
 name = "bison"
 version = "3.8.2"
-release = 3
+release = 4
 summary = "GNU yacc(1) replacement"
 license = "GPL-3.0-or-later"
 homepage = "http://www.gnu.org/software/bison"

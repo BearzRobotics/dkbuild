@@ -4,7 +4,7 @@
 # r3: 2026-11-15: installed under its plain name. Chimera prefixes GNU tools with g because its base tools are BSD; this system has no BSD tools, so the base image had no find or xargs at all (a live ISO boot found `grep: command not found`). gfind and gxargs stay as links.
 name = "findutils"
 version = "4.10.0"
-release = 4
+release = 5
 summary = "GNU find utilities"
 license = "GPL-3.0-or-later"
 homepage = "http://www.gnu.org/software/findutils"

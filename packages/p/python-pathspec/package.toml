@@ -4,7 +4,7 @@
 # image's until they are recipes.
 name = "python-pathspec"
 version = "1.1.1"
-release = 1
+release = 2
 summary = "Utility library for gitignore style pattern matching of file paths."
 license = "MPL-2.0"
 homepage = "https://pypi.org/project/pathspec"

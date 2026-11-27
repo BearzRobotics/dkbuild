@@ -6,7 +6,7 @@
 #     xorgproto-devel is empty and depends on it, for the recipes that name -devel.
 name = "xorgproto"
 version = "2024.1"
-release = 3
+release = 4
 summary = "Combined X.Org X11 protocol headers"
 license = "MIT"
 homepage = "https://xorg.freedesktop.org"

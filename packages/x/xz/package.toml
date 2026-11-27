@@ -4,7 +4,7 @@
 # r2: static libraries too (in xz-static), for fully static programs on musl.
 name = "xz"
 version = "5.8.4"
-release = 2
+release = 3
 summary = "XZ compression utilities"
 license = "0BSD"
 homepage = "https://tukaani.org/xz"

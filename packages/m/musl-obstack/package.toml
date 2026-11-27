@@ -4,7 +4,7 @@
 # r2: static libraries too (in musl-obstack-static), for fully static programs on musl.
 name = "musl-obstack"
 version = "1.2.3"
-release = 2
+release = 3
 summary = "Implementation of obstack for musl"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/void-linux/musl-obstack"

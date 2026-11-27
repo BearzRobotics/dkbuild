@@ -4,7 +4,7 @@
 # r2: static libraries too (in freetype-static), for fully static programs on musl.
 name = "freetype"
 version = "2.14.3"
-release = 2
+release = 3
 summary = "Font rendering engine"
 license = "FTL OR GPL-2.0-or-later"
 homepage = "https://freetype.org"

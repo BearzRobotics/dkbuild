@@ -8,7 +8,7 @@
 # r2: static libraries too (in elfutils-static), for fully static programs on musl.
 name = "elfutils"
 version = "0.193"
-release = 4
+release = 5
 summary = "Utilities and libraries to handle ELF files and DWARF data"
 license = "GPL-3.0-or-later AND (GPL-2.0-or-later OR LGPL-3.0-or-later)"
 homepage = "https://sourceware.org/elfutils"

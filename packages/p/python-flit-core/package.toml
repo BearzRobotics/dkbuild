@@ -4,7 +4,7 @@
 # were the build image's until they had recipes).
 name = "python-flit-core"
 version = "4.2.0"
-release = 1
+release = 2
 summary = "Distribution-building parts of Flit. See flit package for more information"
 license = "BSD-3-Clause"
 homepage = "https://github.com/pypa/flit"

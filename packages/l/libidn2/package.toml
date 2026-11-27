@@ -5,7 +5,7 @@
 # r2: static libraries too (in libidn2-static), for fully static programs on musl.
 name = "libidn2"
 version = "2.3.8"
-release = 2
+release = 3
 summary = "Internationalized domain name handling library"
 license = "LGPL-3.0-or-later AND GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/libidn#libidn2"

@@ -5,7 +5,7 @@
 # r2: static libraries too (in texinfo-static), for fully static programs on musl.
 name = "texinfo"
 version = "7.2"
-release = 3
+release = 4
 summary = "GNU Documentation System"
 license = "GPL-3.0-or-later"
 homepage = "http://www.gnu.org/software/texinfo"

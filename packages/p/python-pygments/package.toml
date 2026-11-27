@@ -1,7 +1,7 @@
 # Syntax highlighter. needed by: python-rich.
 name = "python-pygments"
 version = "2.21.0"
-release = 2
+release = 3
 summary = "pygments for Python"
 license = "BSD-2-Clause"
 homepage = "https://pypi.org/project/pygments"

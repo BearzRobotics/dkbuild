@@ -4,7 +4,7 @@
 # were the build image's until they had recipes).
 name = "python-setuptools"
 version = "84.2.1"
-release = 1
+release = 2
 summary = "Most extensible Python build backend with support for C/C++ extension modules"
 license = "MIT"
 homepage = "https://github.com/pypa/setuptools"

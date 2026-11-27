@@ -6,7 +6,7 @@
 # the .gir files), and cairo, ICU and graphite2 (already build dependencies).
 name = "harfbuzz"
 version = "14.5.0"
-release = 4
+release = 5
 summary = "Text shaping engine"
 license = "MIT"
 homepage = "https://harfbuzz.github.io"

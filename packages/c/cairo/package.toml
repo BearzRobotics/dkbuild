@@ -6,7 +6,7 @@
 # 2026-11-11: the Xlib and XCB backends (GTK 3's X11 backend draws through them).
 name = "cairo"
 version = "1.18.6"
-release = 4
+release = 5
 summary = "Vector graphics library with cross-device output support"
 license = "LGPL-2.1-or-later OR MPL-1.1"
 homepage = "https://cairographics.org"

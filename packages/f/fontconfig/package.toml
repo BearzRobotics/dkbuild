@@ -6,7 +6,7 @@
 # r5: fontconfig-libs depends on fontconfig: the library reads /etc/fonts/fonts.conf from the main package; without it no fonts are configured.
 name = "fontconfig"
 version = "2.18.3"
-release = 5
+release = 6
 summary = "Library for configuring and customizing font access"
 license = "MIT"
 homepage = "https://www.fontconfig.org"

@@ -4,7 +4,7 @@
 # r2: static libraries too (in pcre2-static), for fully static programs on musl.
 name = "pcre2"
 version = "10.49"
-release = 2
+release = 3
 summary = "Perl Compatible Regular Expressions v2"
 license = "BSD-3-Clause"
 homepage = "https://www.pcre.org"

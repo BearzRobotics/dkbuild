@@ -4,7 +4,7 @@
 # r2: rebuilt with libraries in /usr/lib (the %cmake macro set no libdir; they went to /usr/lib64).
 name = "json-c"
 version = "0.19"
-release = 2
+release = 3
 summary = "JSON implementation in C"
 license = "MIT"
 homepage = "https://json-c.github.io/json-c"

@@ -4,7 +4,7 @@
 # were the build image's until they had recipes).
 name = "python-packaging"
 version = "26.3"
-release = 1
+release = 2
 summary = "Core utilities for Python packages"
 license = "Apache-2.0 OR BSD-2-Clause"
 homepage = "https://github.com/pypa/packaging"

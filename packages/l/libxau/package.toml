@@ -4,7 +4,7 @@
 # r2: static libraries too (in libxau-static), for fully static programs on musl.
 name = "libxau"
 version = "1.0.12"
-release = 2
+release = 3
 summary = "Authorization Protocol for X"
 license = "MIT"
 homepage = "https://xorg.freedesktop.org"

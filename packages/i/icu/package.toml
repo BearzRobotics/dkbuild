@@ -8,7 +8,7 @@
 # on the dkde-devel image's file set). The two packages depend on each other (icu's tools need the libraries).
 name = "icu"
 version = "78.3"
-release = 2
+release = 3
 summary = "Unicode and globalization libraries (ICU)"
 license = "ICU"
 homepage = "https://icu.unicode.org"

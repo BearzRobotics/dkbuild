@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "ngtcp2"
 version = "1.25.0"
-release = 1
+release = 2
 summary = "C IETF QUIC protocol implementation"
 license = "MIT"
 homepage = "https://github.com/ngtcp2/ngtcp2"

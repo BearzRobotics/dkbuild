@@ -1,7 +1,7 @@
 # Mako templates. needed by: gobject-introspection (its scanner), mesa.
 name = "python-mako"
 version = "1.4.3"
-release = 2
+release = 3
 summary = "Mako templates for Python"
 license = "MIT"
 homepage = "https://www.makotemplates.org"

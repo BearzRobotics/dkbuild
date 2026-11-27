@@ -4,7 +4,7 @@
 # r2: static libraries too (in libxcb-static), for fully static programs on musl.
 name = "libxcb"
 version = "1.17.0"
-release = 2
+release = 3
 summary = "X protocol C language binding"
 license = "MIT"
 homepage = "https://xcb.freedesktop.org"
