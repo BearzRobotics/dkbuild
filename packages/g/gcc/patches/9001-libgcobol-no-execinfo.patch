@@ -1,13 +1,34 @@
-FenrirOS: libgcobol.cc includes <execinfo.h> (glibc's backtrace API) but uses
-nothing from it; musl has no such header. The include is dropped.
+FenrirOS: libgcobol includes <execinfo.h> (glibc's backtrace API) but uses
+nothing from it; musl has no such header. The include is dropped (three files in
+GCC 16; only libgcobol.cc had it in GCC 15).
 
---- a/libgcobol/libgcobol.cc	2026-11-12 10:42:10.456784502 -0500
-+++ b/libgcobol/libgcobol.cc	2026-11-12 10:42:10.458857758 -0500
-@@ -70,7 +70,6 @@
+--- a/libgcobol/inspect.cc
++++ b/libgcobol/inspect.cc
+@@ -73,7 +73,6 @@
  #include <sys/stat.h>
  #include <sys/types.h>
  #include <sys/time.h>
 -#include <execinfo.h>
  #include "exceptl.h"
+ #include "stringbin.h"
  
- /* BSD extension.  */
+--- a/libgcobol/libgcobol.cc
++++ b/libgcobol/libgcobol.cc
+@@ -73,7 +73,6 @@
+ #include <sys/stat.h>
+ #include <sys/types.h>
+ #include <sys/time.h>
+-#include <execinfo.h>
+ #include "exceptl.h"
+ #include "stringbin.h"
+ 
+--- a/libgcobol/stringbin.cc
++++ b/libgcobol/stringbin.cc
+@@ -71,7 +71,6 @@
+ #include <sys/stat.h>
+ #include <sys/types.h>
+ #include <sys/time.h>
+-#include <execinfo.h>
+ #include "exceptl.h"
+ #include "stringbin.h"
+ 

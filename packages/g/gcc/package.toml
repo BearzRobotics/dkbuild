@@ -16,7 +16,10 @@
 # measured), 0039 and tree-object-size (both upstream), 0035 (druntime's musl mmap is already plain: with fuzz the
 # patch edited uClibc's instead); dropped as LoongArch only: 0037 and the LoongArch patch; 0028 lost the one hunk
 # that only moved an #include. 0003, 0038 and 9001 apply with fuzz; their added and removed lines are exactly right.
-# The stage 0 seed stays Alpine's GCC 15.2 (gcc-bootstrap). Not built.
+# The stage 0 seed stays Alpine's GCC 15.2 (gcc-bootstrap).
+# First 16.2.0 build (2026-11-27): the three stages compared equal, then libgcobol stopped: GCC 16 includes <execinfo.h>
+# in two more files (9001 now covers all three), and its new XML PARSE support always builds against libxml2
+# (builddeps; seen in its Makefile.am, not reached by that build). Not built since.
 # Patches: Alpine's (musl, hardening defaults, Ada runtime on musl), less
 # 0018 (FenrirOS's musl has no libssp_nonshared.a).
 # Bootstrapping: Ada's and D's front ends are written in Ada and D. The first
@@ -40,7 +43,7 @@ archs = ["x86_64"]
 patches = ["0001-posix_memalign.patch", "0002-gcc-poison-system-directories.patch", "0003-specs-turn-on-Wl-z-now-by-default.patch", "0004-Turn-on-D_FORTIFY_SOURCE-2-by-default-for-C-C-ObjC-O.patch", "0005-On-linux-targets-pass-as-needed-by-default-to-the-li.patch", "0006-Enable-Wformat-and-Wformat-security-by-default.patch", "0007-Enable-Wtrampolines-by-default.patch", "0008-gcc-disable-SSP-on-ffreestanding-nostdlib-and-nodefa.patch", "0009-gcc-params-set-default-ssp-buffer-size-to-4.patch", "0010-Ensure-that-msgfmt-doesn-t-encounter-problems-during.patch", "0011-Don-t-declare-asprintf-if-defined-as-a-macro.patch", "0012-libiberty-copy-PIC-objects-during-build-process.patch", "0013-libgcc_s.patch", "0014-nopie.patch", "0015-ada-fix-shared-linking.patch", "0016-build-fix-CXXFLAGS_FOR_BUILD-passing.patch", "0017-add-fortify-headers-paths.patch", "0019-DP-Use-push-state-pop-state-for-gold-as-well-when-li.patch", "0020-aarch64-disable-multilib-support.patch", "0021-s390x-disable-multilib-support.patch", "0022-ppc64-le-disable-multilib-support.patch", "0023-x86_64-disable-multilib-support.patch", "0024-riscv-disable-multilib-support.patch", "0025-always-build-libgcc_eh.a.patch", "0026-ada-libgnarl-remove-use-of-glibc-specific-pthread_rw.patch", "0027-ada-libgnarl-use-posix_openpt-instead-of-glibc-speci.patch", "0028-ada-libgnarl-adaint-fix-sched.h-inclusion-for-musl.patch", "0030-configure-fix-detection-of-atomic-builtins-in-libato.patch", "0031-libstdc-do-not-throw-exceptions-for-non-C-locales-on.patch", "0032-gdc-unconditionally-link-libgphobos-against-libucont.patch", "0033-druntime-link-against-libucontext-on-all-platforms.patch", "0036-libgo-fix-lfs64-use.patch", "0038-static-PIE-ensure-static-reaches-the-linker.patch", "0040-ada-libgnat-use-stub-symbolic-module-name-functions.patch", "0041-ada-libgnat-recognize-linux-musleabi-and-linux-muslg.patch", "9001-libgcobol-no-execinfo.patch"]
 hostdeps = ["binutils", "bison", "flex", "gawk", "make", "perl", "python", "texinfo", "findutils", "rust"]
 builddeps = ["gmp-devel", "mpfr-devel", "mpc-devel", "isl-devel", "zlib-ng-compat-devel", "zstd-devel",
-             "libucontext-devel", "linux-headers", "gcc-bootstrap"]
+             "libucontext-devel", "linux-headers", "libxml2-devel", "gcc-bootstrap"]
 stage0deps = ["gcc-bootstrap"]
 rundeps = ["binutils"]
 options = ["!check", "selfhost", "jobs:12"]
