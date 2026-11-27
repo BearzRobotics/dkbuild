@@ -247,6 +247,36 @@ they had one. Nothing here is built.
 - **Next in the agreed order:** the user builds the toolchain on DKRescue, a new base image from repo/ is tried, then
   stage 2, then the full rebuild from an empty repository (back repo/ up first).
 
+## Checklist for the new ISOs (after the world build)
+
+The user, 2026-11-27: these have to be in the next ISOs. Build with the tree's own dkbuild; the one-off in
+`/mnt/dkbuild/stage2-tree` is then not needed (check that dinit-services and llvm-clang built at the versions below
+first), and the temporary lines in both dkde-devel image files go (`rust-libs` will not exist).
+
+- [ ] dinit-services r9: boot fsck skips mounted and noauto; nothing mounted twice; **mounts use `--onlyonce`**,
+  late-filesystems skips what is mounted; control socket remade after `mount -a`; hwclock falls back to `--directisa`.
+- [ ] **mount helpers in /usr/sbin** (found 2026-11-27: the uncle could only mount NTFS with `-t ntfs3`): ntfs-3g r4,
+  zfs r4 (`--with-mounthelperdir=/usr/sbin`), fuse r3, bcachefs-tools r2, rclone r2. libmount searches only /sbin,
+  /sbin/fs.d, /sbin/fs (/sbin -> usr/sbin); checked with a stand-in helper. To test on the new image: `mount` an NTFS
+  disk without `-t`, and `zfs mount`.
+- [ ] Toolchain: base-devel r3, llvm r8 (cc, c++, llvm-libcxx-static), musl r6, rust r8; compile C, C++, static,
+  -lm, Rust, Zig in the image. `tree` and `tree-doc` in the lists. shadow r8 (the useradd nologin warning).
+- [ ] The boot loader is the image's dklilo (dkbuild, done): check the BIOS menu keys.
+- [ ] **`tests/iso-check.sh <iso>` passes** (new 2026-11-27; the user: every ISO from now on has to be good). It
+  reads the ISO only: name, label and greetd agree; one kernel, the same file on the disc and in the root, the tree's version, and its modules; boot files equal to the tree's; mount helpers
+  in /usr/sbin; the boot loader is the image's; compilers and static libraries present; no -libs without its main.
+  Report beside the ISO. Seen to fail on the 11-26 final ISO (old loader, 121 libs) and a misnamed desktop ISO; on
+  the 11-27 10:52 cli ISO: boot files, mount helpers, nologin. **Still to write, after the build:** the boot stage
+  (BIOS boot and menu keys, services, mounts, hwclock, lsmod, NTFS/ext2/ext4 virtual disks, compiling, desktop vs
+  console); the scripts to start from are in `/mnt/dkbuild/stage2-tree/qemu`.
+- [ ] Login text: commands and headings are coloured (agetty `\e{...}`; rendered with agetty, not booted). The
+  uncle saw it "all on one line": the image files and agetty keep the lines, where he saw it is not known.
+
+- [ ] Open, not fixed by a rebuild: **Ctrl+Alt+F1..F12 in the Wayland desktop** (dkde-compositor keeps no wlr_session
+  and handles no VT keys; a prompt was given for the dkde session: needs a new dkde and its recipe here); **the
+  uncle's CLI image "boots to the desktop"** and the flashing console (he added `video=`; waiting for its value and
+  `/proc/cmdline`, `/etc/issue`, greetd state, `~/.profile`, the ISO's sha256).
+
 ## `wallet-engine`'s cached dependency list: nothing to do
 
 An earlier note asked for `cache/cargodeps/45d22ed4...da2.list` to be deleted by hand: it was uniffi-bindgen-cpp's

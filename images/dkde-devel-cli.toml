@@ -6,25 +6,26 @@ arch     = "x86_64"
 hostname = "fenriros"
 # what the consoles show before the login: what this is, how to log in and what to do next. dkinstaller KEEPS this text on a system
 # installed from this image (it replaces it only for a graphical autologin), so it must be true there too.
+# \e{...} are agetty's colour escapes (agetty(8), "issue files"); a backslash is written twice here.
 issue = """
 
 FenrirOS \\r (\\l): command-line system (no desktop at boot).
 
-LOG IN
+\\e{yellow}LOG IN\\e{reset}
   Live disc:         user  live    password: none (press Enter)
-                     root is locked. Use  sudo <command>  (Enter if asked).
+                     root is locked. Use  \\e{lightcyan}sudo <command>\\e{reset}  (Enter if asked).
   Installed system:  the user name and password you chose when installing.
                      There is no live user there.
 
-AFTER LOGGING IN
-  sudo dkinstall             install FenrirOS onto a disk (live disc only)
-  nmtui                      set up the network (wired or Wi-Fi)
-  dkde-session --x11         start the desktop (X11)
-  dkde-session               start the desktop (Wayland)
-  man NAME                   read the manual for a command
-  sudo dinitctl list         list the services and their state
-  sudo reboot                restart
-  sudo poweroff              shut down
+\\e{yellow}AFTER LOGGING IN\\e{reset}
+  \\e{lightcyan}sudo dkinstall\\e{reset}             install FenrirOS onto a disk (live disc only)
+  \\e{lightcyan}nmtui\\e{reset}                      set up the network (wired or Wi-Fi)
+  \\e{lightcyan}dkde-session --x11\\e{reset}         start the desktop (X11)
+  \\e{lightcyan}dkde-session\\e{reset}               start the desktop (Wayland)
+  \\e{lightcyan}man NAME\\e{reset}                   read the manual for a command
+  \\e{lightcyan}sudo dinitctl list\\e{reset}         list the services and their state
+  \\e{lightcyan}sudo reboot\\e{reset}                restart
+  \\e{lightcyan}sudo poweroff\\e{reset}              shut down
 
 More consoles: Alt+F1 to Alt+F6.
 

@@ -12,28 +12,29 @@ arch     = "x86_64"
 hostname = "fenriros"
 # what the text consoles show above `login:`: what this is, how to log in and what to do next. dkinstaller replaces it with a plain
 # greeting on a system installed from this image.
+# \e{...} are agetty's colour escapes (agetty(8), "issue files"); a backslash is written twice here.
 issue = """
 
 FenrirOS \\r (\\l): desktop system. This is a text console.
 The desktop is on console 7: press Alt+F7. Text consoles: Alt+F1 to F6.
-From the desktop, get here with  sudo chvt 1  in a terminal.
+From the desktop, get here with  \\e{lightcyan}sudo chvt 1\\e{reset}  in a terminal.
 
-LOG IN
+\\e{yellow}LOG IN\\e{reset}
   Live disc:  user  live    password: none (press Enter)
-              root is locked. Use  sudo <command>  (press Enter if asked).
+              root is locked. Use  \\e{lightcyan}sudo <command>\\e{reset}  (press Enter if asked).
 
-AFTER LOGGING IN
-  sudo dkinstall             install FenrirOS onto a disk (live disc only)
-  nmtui                      set up the network (wired or Wi-Fi)
-  dkde-session --x11         start the desktop by hand (X11)
-  dkde-session               start the desktop by hand (Wayland)
-  man NAME                   read the manual for a command
-  sudo reboot                restart
-  sudo poweroff              shut down
+\\e{yellow}AFTER LOGGING IN\\e{reset}
+  \\e{lightcyan}sudo dkinstall\\e{reset}             install FenrirOS onto a disk (live disc only)
+  \\e{lightcyan}nmtui\\e{reset}                      set up the network (wired or Wi-Fi)
+  \\e{lightcyan}dkde-session --x11\\e{reset}         start the desktop by hand (X11)
+  \\e{lightcyan}dkde-session\\e{reset}               start the desktop by hand (Wayland)
+  \\e{lightcyan}man NAME\\e{reset}                   read the manual for a command
+  \\e{lightcyan}sudo reboot\\e{reset}                restart
+  \\e{lightcyan}sudo poweroff\\e{reset}              shut down
 
-IF THE DESKTOP DID NOT START, look at
+\\e{yellow}IF THE DESKTOP DID NOT START\\e{reset}, look at
   ~/.local/state/dkde/session.log    /tmp/dkde-greeter-*.log
-  sudo dinitctl status greetd
+  \\e{lightcyan}sudo dinitctl status greetd\\e{reset}
 
 """
 label    = "FENRIROS_DKDE"
