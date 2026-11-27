@@ -8,7 +8,9 @@ release = 1
 summary = "Optimized BLAS library"
 license = "BSD-3-Clause"
 homepage = "https://www.openblas.net"
-patches = ["5365.patch", "riscv64-detect.patch"]
+# 0.3.34 sets HAVE_SME for ARMV9SME (and VORTEXM4) itself: 5365.patch is gone (with fuzz it added a second,
+# later copy)
+patches = ["riscv64-detect.patch"]
 archs = ["aarch64", "riscv64", "x86_64"]
 hostdeps = ["cmake", "ninja", "pkgconf"]
 builddeps = ["linux-headers"]

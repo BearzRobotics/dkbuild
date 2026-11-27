@@ -233,7 +233,11 @@ they had one. Nothing here is built.
   itself (Ada and D bootstrap from 15, patches never built on 16), the subpackage path lists (check against the first
   build's files), ghdl with GNAT 16, and every recipe with `options = ["gcc"]`.
 - **Found while doing it:** patch 0035 "applied" with fuzz to the wrong block (uClibc's instead of musl's). The earlier
-  update scripts tried patches with fuzz allowed: re-checked strictly next.
+  update scripts tried patches with fuzz allowed. **Re-checked** all 91 updated recipes with patches (255): four
+  patches in openblas, ruby4.0 and wireshark need fuzz. wireshark's lands right (read), ruby4.0's did so before the
+  update, openblas's riscv64 one lands right; openblas's 5365.patch is upstream in 0.3.34 and is removed. A search
+  of 77 recipes' kept patches for code newly present upstream found none; it misses a fix upstream wrote differently,
+  as openblas's was. **For next time:** `patch --fuzz=0`, and read where a fuzzy one lands.
 
 ## `wallet-engine`'s cached dependency list: nothing to do
 
