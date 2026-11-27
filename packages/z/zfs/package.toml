@@ -13,7 +13,7 @@
 # strftime patch.
 name = "zfs"
 version = "2.4.4"
-release = 3
+release = 4
 summary = "OpenZFS filesystem and volume manager"
 license = "CDDL-1.0"
 homepage = "https://openzfs.github.io/openzfs-docs"
@@ -39,7 +39,7 @@ test -n "$krel"
 %configure \
     --with-config=all \
     --with-linux=/usr/src/linux-$krel \
-    --with-mounthelperdir=/usr/bin \
+    --with-mounthelperdir=/usr/sbin \
     --with-udevdir=/usr/lib/udev \
     --with-udevruledir=/usr/lib/udev/rules.d \
     --with-tirpc \
@@ -53,6 +53,8 @@ build = '''
 '''
 install = '''
 %make_install
+# mount.zfs must be where mount(8) looks (/sbin, here /usr/sbin): configure puts it there (--with-mounthelperdir)
+test -e "$pkgdir/usr/sbin/mount.zfs"
 # the modules under /usr/lib (/lib is a link to it)
 if [ -d "$pkgdir/lib/modules" ]; then
     mkdir -p "$pkgdir/usr/lib"

@@ -21,7 +21,7 @@
 # (data files, inert).
 name = "bcachefs-tools"
 version = "1.39.7"
-release = 1
+release = 2
 summary = "Userspace tools for the bcachefs filesystem"
 license = "GPL-2.0-only"
 homepage = "https://bcachefs.org"
@@ -60,4 +60,11 @@ make -j$jobs PREFIX=/usr ROOT_SBINDIR=/usr/bin CARGO_BUILD_ARGS="--release --fro
 install = '''
 make PREFIX=/usr ROOT_SBINDIR=/usr/bin DESTDIR="$pkgdir" CARGO_BUILD_ARGS="--release --frozen --offline" install
 install -Dm644 COPYING "$pkgdir/usr/share/licenses/bcachefs-tools/COPYING"
+# mount(8) looks for its helpers only in /sbin (here /usr/sbin), /sbin/fs.d and /sbin/fs: in /usr/bin alone
+# `mount -t bcachefs` never ran them
+mkdir -p "$pkgdir/usr/sbin"
+for h in "$pkgdir"/usr/bin/mount.*; do
+    n=$(basename "$h")
+    ln -s ../bin/"$n" "$pkgdir/usr/sbin/$n"
+done
 '''

@@ -9,7 +9,7 @@
 # packages do, so /etc/fstab can mount remotes.
 name = "rclone"
 version = "1.76.0"
-release = 1
+release = 2
 summary = "Rsync for cloud storage"
 license = "MIT"
 homepage = "https://rclone.org"
@@ -36,6 +36,13 @@ install = '''
 install -Dm755 rclone "$pkgdir/usr/bin/rclone"
 ln -s rclone "$pkgdir/usr/bin/mount.rclone"
 ln -s rclone "$pkgdir/usr/bin/rclonefs"
+# mount(8) looks for its helpers only in /sbin (here /usr/sbin), /sbin/fs.d and /sbin/fs: in /usr/bin alone
+# `mount -t rclone` never ran them
+mkdir -p "$pkgdir/usr/sbin"
+for h in "$pkgdir"/usr/bin/mount.*; do
+    n=$(basename "$h")
+    ln -s ../bin/"$n" "$pkgdir/usr/sbin/$n"
+done
 install -Dm644 rclone.1 "$pkgdir/usr/share/man/man1/rclone.1"
 install -Dm644 gen/rclone.bash "$pkgdir/usr/share/bash-completion/completions/rclone"
 install -Dm644 gen/_rclone "$pkgdir/usr/share/zsh/site-functions/_rclone"
