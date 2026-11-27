@@ -2,15 +2,19 @@
 # /bin/sh on this system (static, so a damaged library never leaves the system without one).
 # r2: static libraries too (in dash-static), for fully static programs on musl.
 name = "dash"
-version = "0.5.12"
-release = 2
+# 0.5.13.6: the upstream server gave no HTTPS connection, so the tarball came over HTTP; its sha512 was the one in
+# Gentoo's app-shells/dash Manifest, fetched over HTTPS (2026-11-27).
+version = "0.5.13.6"
+release = 1
+# From Alpine (aports main/dash), a fix 0.5.13.6 does not have yet, added 2026-11-27: shell-Fix-unsigned-char-promotion-and-truncation.patch
+patches = ["shell-Fix-unsigned-char-promotion-and-truncation.patch"]
 summary = "POSIX shell (/bin/sh)"
 license = "BSD-3-Clause"
 homepage = "http://gondor.apana.org.au/~herbert/dash"
 options = ["static", "!check"]
 
 source = [
-    { url = "http://gondor.apana.org.au/~herbert/dash/files/dash-0.5.12.tar.gz", sha256 = "6a474ac46e8b0b32916c4c60df694c82058d3297d8b385b74508030ca4a8f28a" },
+    { url = "http://gondor.apana.org.au/~herbert/dash/files/dash-0.5.13.6.tar.gz", sha256 = "26aac476f476cef391c600cb064417d82a5465d8fc7c4fd56158c276e86538c1" },
 ]
 
 setup = '''
