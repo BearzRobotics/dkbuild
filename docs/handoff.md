@@ -143,6 +143,22 @@ sat for 10 to 25 minutes flushing to disk (2026-11-25): the test suite may be sl
   still happens, get the ISO's sha256, a photo or video, the graphics hardware, and whether the 2026-11-26 final ISO
   does it too.
 
+## 2026-11-27: security updates, first batch (48 recipes; none built)
+
+- Method: Alpine's secdb (secdb.alpinelinux.org/edge, main and community) matched by recipe name against our versions:
+  62 recipes with a fix in a newer version, 17 where Alpine patched our version. Leads, not proof; recipes Alpine names
+  otherwise or does not package are not covered.
+- Updated, in series where possible (gstreamer 1.28.9, samba 4.23.13, django 5.2.19, libpcap 1.10.7, mbedtls 3.6.8,
+  libssh 0.11.5, ruby 3.4.13, valkey 9.1.4; openjdk the `+2` releases, with `--with-version-build=2`; util-linux went
+  to 2.42.4, mostly to a version at or past Alpine's fix). Checked: sources fetched, patches apply, source edits still
+  match, license files present. **Not built**: configure and compile changes show only in the rebuild.
+- **Not confirmed fixed** (not named in the new release's own notes): mbedtls CVE-2026-50580, -90471; libssh
+  CVE-2026-59842, -59851; ruby CVE-2026-80212, -80213 (ruby-lang.org names the other four of Alpine's six as fixed
+  already in 3.4.12). For the rest, the new version is at or past the one Alpine says holds the fix.
+- **Left:** the 17 same-version patches (openssl, sudo, libssh2, avahi, qt6-qtwebengine, ...), and updates that change
+  series: ffmpeg 9, incus 7, mbedtls 4, pkgconf 3, giflib 6, gzip 1.15, patch 2.8, gpgme 2.3, libraw, libcdio,
+  libvpx 1.16, opencc, uriparser 1.0 and others in Alpine's list that this batch does not name.
+
 ## `wallet-engine`'s cached dependency list: nothing to do
 
 An earlier note asked for `cache/cargodeps/45d22ed4...da2.list` to be deleted by hand: it was uniffi-bindgen-cpp's
