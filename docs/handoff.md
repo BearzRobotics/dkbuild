@@ -239,6 +239,14 @@ they had one. Nothing here is built.
   of 77 recipes' kept patches for code newly present upstream found none; it misses a fix upstream wrote differently,
   as openblas's was. **For next time:** `patch --fuzz=0`, and read where a fuzzy one lands.
 
+## 2026-11-27: imagemagick 7.1.2.36 and libreoffice 26.8.3.1 (left to Claude's judgment; not built)
+
+- imagemagick: its patch applies strictly. libreoffice: bundled sources matched to download.lst (3 of 35 changed,
+  checksums verified), 6 patches strict. With these, 35 recipes of the patch round stay held (djvulibre, libpass and
+  the others listed above, less dash, imagemagick and libreoffice).
+- **Next in the agreed order:** the user builds the toolchain on DKRescue, a new base image from repo/ is tried, then
+  stage 2, then the full rebuild from an empty repository (back repo/ up first).
+
 ## `wallet-engine`'s cached dependency list: nothing to do
 
 An earlier note asked for `cache/cargodeps/45d22ed4...da2.list` to be deleted by hand: it was uniffi-bindgen-cpp's
