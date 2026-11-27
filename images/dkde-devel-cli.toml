@@ -65,7 +65,28 @@ packages = ["base", "openssh", "openssh-server", "curl", "linux", "live-initramf
 "modemmanager", "mpg123", "ndctl", "newt", "opencolorio", "openldap", "p11-kit", "pango", "pcsc-lite", "qt6-qtbase",
 "qt6-qtdeclarative", "rubberband", "samba", "sndio", "talloc-python", "tslib", "unbound", "v4l-utils", "wayland",
 # five the list above missed (2026-11-27): scanner drivers, libheif's dav1d plugin, the mobile broadband proxies, OpenAL's data
-"sane-backends", "libheif", "libmbim", "libqmi", "openal-soft"]
+"sane-backends", "libheif", "libmbim", "libqmi", "openal-soft",
+# FOR NOW (2026-11-27), for images of the packages built before that day: every other main package whose -libs
+# the image has. Remove with the lists above once an image of rebuilt packages works without them.
+"acl", "brotli", "bzip2", "c-ares", "cdparanoia", "chromaprint", "dav1d", "davs2", "efivar", "fftw", "flac",
+"flite", "fluidsynth", "fribidi", "giflib", "glslang", "gsm", "hunspell", "jbig2dec", "jbigkit", "kvazaar", "lame",
+"lcms2", "libaom", "libarchive", "libatasmart", "libavc1394", "libavif", "libbluray", "libbs2b", "libcap",
+"libcddb", "libcdio", "libcdio-paranoia", "libdatrie", "libdc1394", "libde265", "libdeflate", "libdisplay-info",
+"libei", "libevdev", "libexpat", "libfreeaptx", "libgcrypt", "libgd", "libidn2", "libiec61883", "libilbc",
+"libjpeg-turbo", "liblc3", "libndp", "libopenmpt", "libpcap", "libpng", "libpsl", "libraw1394", "librist",
+"libseccomp", "libsepol", "libsndfile", "libtasn1", "libtiff", "libtracefs", "libvmaf", "libvpx", "libxcvt",
+"libxml2", "llama-cpp", "lmdb", "lz4", "mbedtls", "mtdev", "net-snmp", "nettle", "nss", "numactl", "oapv",
+"ocl-icd", "openexr", "openjpeg", "openjph", "pcre2", "protobuf", "protobuf-c", "qpdf", "qrencode", "rabbitmq-c",
+"raptor", "rav1e", "roc-toolkit", "rtmpdump", "sbc", "sdl2-compat", "serd", "shaderc", "shine", "sord",
+"soundtouch", "speex", "spirv-llvm-translator", "spirv-tools", "sqlite", "srt", "svt-av1", "svt-jpeg-xs", "tdb",
+"twolame", "vamp-plugin-sdk", "vvenc", "x264", "x265", "xavs2", "xxhash", "zeromq", "zvbi",
+# (four the first image made with that list still lacked)
+"libimobiledevice", "libnfs", "libplist", "libusbmuxd",
+# the tree command, with its manual
+"tree", "tree-doc",
+# FOR NOW too: what clang, C++, static links and rustc need from those packages. The rebuilt base-devel brings
+# what is needed by itself, and there is no rust-libs after the rebuild (this line then fails the image).
+"llvm-libcxx-devel", "musl-static", "llvm-static", "rust-libs"]
 #exclude  = ["*-devel", "*-doc", "*-static"]
 # never installed, even as a dependency (apk stops with a conflict if something needs it)
 unwanted = ["dhcpcd"]

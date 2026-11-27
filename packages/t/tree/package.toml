@@ -1,0 +1,21 @@
+# Lists a directory's contents as an indented tree. Asked for by the user's uncle (2026-11-27).
+name = "tree"
+version = "2.3.2"
+release = 1
+summary = "List directory contents as a tree"
+license = "GPL-2.0-or-later"
+homepage = "https://oldmanprogrammer.net/source.php?dir=projects/tree"
+options = ["!check"]    # upstream ships no tests
+
+source = [
+    { url = "https://gitlab.com/OldManProgrammer/unix-tree/-/archive/2.3.2/unix-tree-2.3.2.tar.gz", sha256 = "513a53cbc42ca1f4ea06af2bab1f5283524a3848266b1d162416f8033afc4985" },
+]
+
+build = '''
+%make
+'''
+# The Makefile's DESTDIR is the directory the program goes into, and MANDIR the manual's: neither is a prefix.
+install = '''
+make DESTDIR="$pkgdir/usr/bin" MANDIR="$pkgdir/usr/share/man" install
+install -Dm644 LICENSE "$pkgdir/usr/share/licenses/tree/LICENSE"
+'''
