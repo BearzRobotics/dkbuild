@@ -7,8 +7,12 @@
 # Based on Chimera Linux cports (BSD-2-Clause): user/incus. Its gtar patch is
 # not used (GNU tar is `tar` here).
 name = "incus"
-version = "6.17.0"
-release = 3
+# 7.7.0 (from 6.17.0, 2026-11-27, for its security fixes: the 116 advisories on GitHub that day were all fixed by it).
+# A major release: it needs Linux 6.12, LXC 6.0, QEMU 8.2, nftables 1.0 and dnsmasq 2.90 (all met by this tree),
+# no longer ships lxd-to-incus, and a 6.x server's database is upgraded for good on first start (back it up first;
+# see upstream's release notes).
+version = "7.7.0"
+release = 1
 summary = "System container and virtual machine manager"
 license = "Apache-2.0"
 homepage = "https://linuxcontainers.org/incus"
@@ -19,7 +23,7 @@ rundeps = ["acl", "attr", "dnsmasq", "tar", "nftables", "lego", "qemu", "qemu-sy
 options = ["!check", "godeps"]
 
 source = [
-    { url = "https://github.com/lxc/incus/archive/v6.17.0.tar.gz", sha256 = "19bcceaab1fad128ae1b91de4f4a3526ec77097de4df0cff057832d6fccb2404" },
+    { url = "https://github.com/lxc/incus/archive/v7.7.0.tar.gz", sha256 = "ef78630d34096d00b225489374191aad577d0b370b202dce3e589d9ff5ed7251" },
 ]
 
 environment = '''
@@ -27,8 +31,13 @@ export CGO_ENABLED=1
 '''
 build = '''
 mkdir -p build
+# 7.x embeds translation catalogs (po/embed.go) that the tarball does not carry: made first, as upstream's
+# `make catalogs` does; without them the build stops on the empty go:embed pattern
+CGO_ENABLED=0 go run ./cmd/generate-catalogs po po/catalogs
 # the daemon and tools, against the system's SQLite and cowsql
 go build -trimpath -tags libsqlite3 -o build/ ./cmd/...
+# tools for developing Incus itself, not installed
+rm -f build/generate-*
 # the VM agent, static (it runs inside any guest): pure Go, as upstream's
 # Makefile builds it (CGO_ENABLED=0; a cgo -static-pie link fails: Go asks for
 # a non-PIE link)
