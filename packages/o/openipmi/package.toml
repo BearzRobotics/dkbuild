@@ -7,7 +7,7 @@
 # Python/Tk GUI (language modules, not libraries other packages link
 # against; they can be added on request).
 name = "openipmi"
-version = "2.0.37"
+version = "2.0.38"
 release = 1
 summary = "IPMI library and tools"
 license = "LGPL-2.1-or-later AND GPL-2.0-or-later AND BSD-3-Clause"
@@ -16,7 +16,7 @@ hostdeps = ["pkgconf", "make"]
 builddeps = ["net-snmp-devel", "openssl-devel", "glib-devel", "popt-devel", "ncurses-devel", "readline-devel", "linux-headers"]
 
 source = [
-    { url = "https://downloads.sourceforge.net/project/openipmi/OpenIPMI%202.0%20Library/OpenIPMI-2.0.37.tar.gz", sha256 = "c62d38f5da7df4299ac3a652508e959537752440181e34c76b2aecebd7f301b9" },
+    { url = "https://downloads.sourceforge.net/project/openipmi/OpenIPMI%202.0%20Library/OpenIPMI-2.0.38.tar.gz", sha256 = "614097444340519eeeacb1d5d052103b1e6dd353e1141d7da524e09068442f5a" },
 ]
 
 build = '''

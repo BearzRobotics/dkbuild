@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xbitmaps/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "xbitmaps"
-version = "1.1.3"
+version = "1.1.4"
 release = 1
 summary = "Common X11 bitmaps"
 license = "MIT"
@@ -9,7 +9,7 @@ homepage = "https://xorg.freedesktop.org"
 hostdeps = ["pkgconf"]
 
 source = [
-    { url = "https://www.x.org/releases/individual/data/xbitmaps-1.1.3.tar.gz", sha256 = "93b433b7ff223c4685fdba583b4bd30f2706be2413a670021084422d85b0269d" },
+    { url = "https://www.x.org/releases/individual/data/xbitmaps-1.1.4.tar.gz", sha256 = "518ffe82f5206091a3ed9bf3b8ebbc6b3a696e3d5a259e072af4d0760754b47a" },
 ]
 
 setup = '''

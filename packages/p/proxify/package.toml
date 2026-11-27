@@ -1,7 +1,7 @@
 # Swiss Army knife Proxy tool for HTTP/HTTPS traffic capture, manipulation, and replay... (BlackArch list, requested 2026-11-16; docs/requests.md). Written from the template of ffuf; not built yet when written (wip/queue): expect first-build fixes.
 # Go module, dependencies fetched on the host (godeps). Main package: cmd/proxify.
 name = "proxify"
-version = "0.0.16"
+version = "0.0.17"
 release = 1
 summary = "Swiss Army knife Proxy tool for HTTP/HTTPS traffic capture, manipulation, and replay..."
 license = "MIT"
@@ -10,7 +10,7 @@ hostdeps = ["go"]
 options = ["!check", "godeps"]
 
 source = [
-    { url = "https://github.com/projectdiscovery/proxify/archive/refs/tags/v0.0.16.tar.gz", sha256 = "a156d8094ac5a31bc92029c1a9e02300caa5e2f189dc13949410d792e9f4e63c" },
+    { url = "https://github.com/projectdiscovery/proxify/archive/refs/tags/v0.0.17.tar.gz", sha256 = "e0c5bc3c8b0666ccbfd34cadbab972ddfe3737f01f1bcde9fddb265c96262a76" },
 ]
 
 environment = '''

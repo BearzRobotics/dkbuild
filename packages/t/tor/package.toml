@@ -1,8 +1,8 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/user/tor/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "tor"
-version = "0.4.9.14"
-release = 2
+version = "0.4.9.17"
+release = 1
 summary = "Anonymizing overlay network"
 license = "BSD-3-Clause"
 homepage = "https://gitlab.com/torproject/tor"
@@ -15,7 +15,7 @@ checkdeps = ["bash"]
 rundeps = ["base-files", "shadow"]
 
 source = [
-    { url = "https://gitlab.com/torproject/tor/-/archive/tor-0.4.9.14/tor-tor-0.4.9.14.tar.gz", sha256 = "1eca189920bc14316e2f2c5e662916e4fc90eae898705d1374af870bde7d8d5d" },
+    { url = "https://gitlab.com/torproject/tor/-/archive/tor-0.4.9.17/tor-tor-0.4.9.17.tar.gz", sha256 = "542b1b7735729dfd0cb253d07faeb4317feb53676a87fc4963d1efb7a632d52f" },
 ]
 
 environment = '''

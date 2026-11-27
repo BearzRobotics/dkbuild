@@ -3,7 +3,7 @@
 # needed by: python-meson-python (it fixes extension modules' RPATH with it:
 # python-dbus, numpy).
 name = "patchelf"
-version = "0.19.1"
+version = "0.19.3"
 release = 1
 summary = "Utility to modify the dynamic linker and RPATH of ELF executables"
 license = "GPL-3.0-or-later"
@@ -12,7 +12,7 @@ hostdeps = ["automake"]
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/NixOS/patchelf/releases/download/0.19.1/patchelf-0.19.1.tar.bz2", sha256 = "2cce01de93653829f6ab68a20c2ec275e1c00a946110704a27e928d2e6e88716" },
+    { url = "https://github.com/NixOS/patchelf/releases/download/0.19.3/patchelf-0.19.3.tar.bz2", sha256 = "20dbe23e9dbc4ad769078a867ad002c04297a069ff93c95fb72242dd55d4dd6f" },
 ]
 
 setup = '''

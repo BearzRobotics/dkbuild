@@ -1,8 +1,8 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/wireshark/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "wireshark"
-version = "4.7.2"
-release = 3
+version = "4.7.4"
+release = 1
 summary = "Network protocol analyzer"
 license = "GPL-2.0-or-later"
 homepage = "https://www.wireshark.org"
@@ -14,7 +14,7 @@ checkdeps = ["python-pytest"]
 # groupadd and useradd (shadow) and the files they edit (base-files) must be there before pre-install runs
 rundeps = ["libcap", "base-files", "shadow"]
 source = [
-    { url = "https://www.wireshark.org/download/src/all-versions/wireshark-4.7.2.tar.xz", sha256 = "f94df4731d9fcb86240950fde44b3db52ffdd04e918b558e613891d0b578dadc" },
+    { url = "https://www.wireshark.org/download/src/all-versions/wireshark-4.7.4.tar.xz", sha256 = "f3a2f5bcca31dd2f8fe92444441402a6d27861b3a4023b68cb42c0563daaf186" },
 ]
 
 setup = '''

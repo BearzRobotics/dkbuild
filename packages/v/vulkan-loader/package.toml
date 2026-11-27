@@ -5,8 +5,8 @@
 # r2: rebuilt with libraries in /usr/lib (the %cmake macro set no libdir; they went to /usr/lib64).
 # 2026-11-11: Vulkan surfaces on X11 (XCB, Xlib) too.
 name = "vulkan-loader"
-version = "1.4.365"
-release = 3
+version = "1.4.369"
+release = 1
 summary = "Vulkan Installable Client Driver (ICD) loader"
 license = "Apache-2.0"
 homepage = "https://www.khronos.org/vulkan"
@@ -15,7 +15,7 @@ builddeps = ["libxkbcommon-devel", "vulkan-headers-devel", "wayland-devel", "lib
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/KhronosGroup/Vulkan-Loader/archive/v1.4.365.tar.gz", sha256 = "df0358f57c1936e4abd262a7327ba1f80ffb424dbbdcbcb01bb9288511f31eef" },
+    { url = "https://github.com/KhronosGroup/Vulkan-Loader/archive/v1.4.369.tar.gz", sha256 = "26e41e25d45005eb1b818b941b5877b5b41d05190dd18743948c954fdb47b280" },
 ]
 
 setup = '''

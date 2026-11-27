@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "mythes"
-version = "1.2.6"
+version = "1.2.7"
 release = 1
 summary = "Simple thesaurus that uses structured text data"
 license = "BSD-3-Clause"
@@ -12,7 +12,7 @@ hostdeps = ["pkgconf", "automake", "libtool"]
 builddeps = ["hunspell-devel"]
 
 source = [
-    { url = "https://github.com/hunspell/mythes/releases/download/v1.2.6/mythes-1.2.6.tar.xz", sha256 = "97bd2ba5738aebdba1bc31f30f1be42f1404386c94105ad5990d839a1311c8a5" },
+    { url = "https://github.com/hunspell/mythes/releases/download/v1.2.7/mythes-1.2.7.tar.xz", sha256 = "861af73ad57ee240647a79a64e31f214de6d63ea53e406d2d4c1f730706dd921" },
 ]
 
 setup = '''

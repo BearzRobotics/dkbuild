@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xwud/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "xwud"
-version = "1.0.7"
+version = "1.0.8"
 release = 1
 summary = "X image displayer"
 license = "MIT"
@@ -10,7 +10,7 @@ hostdeps = ["automake", "pkgconf", "xorg-util-macros"]
 builddeps = ["libx11-devel"]
 
 source = [
-    { url = "https://www.x.org/releases/individual/app/xwud-1.0.7.tar.xz", sha256 = "e55cbedab36d7a5f671abf8e594888afc48caa116d51d429ea53ea317ec0c61e" },
+    { url = "https://www.x.org/releases/individual/app/xwud-1.0.8.tar.xz", sha256 = "2e282648c34018fd870052b8d814ea4d35ad9fdb9bcfc8bdc5a06822c0f86e99" },
 ]
 
 setup = '''

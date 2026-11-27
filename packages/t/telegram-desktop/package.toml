@@ -25,7 +25,7 @@
 # deep recursion in worker threads overflows it. Alpine sets 1 MiB-ish
 # (1024768) for the same reason.
 name = "telegram-desktop"
-version = "7.4.4"
+version = "7.4.7"
 release = 1
 summary = "Telegram Desktop messaging app"
 license = "GPL-3.0-or-later WITH openvpn-openssl-exception"
@@ -37,7 +37,7 @@ rundeps = ["qt6-qtimageformats"]
 options = ["!check", "jobs:12"]
 
 source = [
-    { url = "https://github.com/telegramdesktop/tdesktop/releases/download/v7.4.4/tdesktop-7.4.4-full.tar.gz", sha256 = "b563b3a35a5589f70f317297aa8dc4f19da065c393c3ae663ae11841b5ab0891" },
+    { url = "https://github.com/telegramdesktop/tdesktop/releases/download/v7.4.7/tdesktop-7.4.7-full.tar.gz", sha256 = "b4dd1550e6ee2be4c0e42fa31371752aae9683c3248749cd5006b22e256aa7ea" },
 ]
 
 environment = '''

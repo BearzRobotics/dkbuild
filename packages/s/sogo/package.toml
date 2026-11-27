@@ -22,7 +22,7 @@
 # upstream's all-commented example; no site, no cron job, no database, no
 # credentials. Setup: /usr/share/doc/sogo/README.FenrirOS.
 name = "sogo"
-version = "5.12.13"
+version = "5.12.14"
 release = 1
 summary = "Groupware server: webmail, calendars, contacts, CalDAV/CardDAV, ActiveSync"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
@@ -33,7 +33,7 @@ rundeps = ["sope", "memcached", "ca-certificates"]
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/Alinto/sogo/archive/refs/tags/SOGo-5.12.13.tar.gz", sha256 = "0c6b4cf8992634ab14c9a7860c21189cf48db69cba3d82ee76a556a0b083708b" },
+    { url = "https://github.com/Alinto/sogo/archive/refs/tags/SOGo-5.12.14.tar.gz", sha256 = "4346ea4e9e688c0e0181d8976e590587af39ec392c794444eb5e155a4ae82b06" },
 ]
 
 environment = '''

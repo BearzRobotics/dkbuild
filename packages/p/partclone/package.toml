@@ -12,8 +12,8 @@
 # Source edits: none. The release tarball has no configure, so ./autogen runs
 # first (libtoolize, aclocal, automake, autoreconf).
 name = "partclone"
-version = "0.3.54"
-release = 3
+version = "0.3.55"
+release = 1
 summary = "File system aware disk partition cloning and restoring"
 license = "GPL-2.0-or-later"
 homepage = "https://partclone.org"
@@ -25,7 +25,7 @@ builddeps = ["e2fsprogs-devel", "userspace-rcu-devel", "nilfs-utils-devel", "ntf
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/Thomas-Tsai/partclone/archive/refs/tags/0.3.54.tar.gz", sha256 = "7a09a4676327ecea284df2cf1c6a1fa36b11308659d58e32fec9a723e18e52ab" },
+    { url = "https://github.com/Thomas-Tsai/partclone/archive/refs/tags/0.3.55.tar.gz", sha256 = "bbef594e5089c7a811da1a05f80fe0b6687c1f06d1f5a201c2fb9bdfd572f39c" },
 ]
 
 # new release: autogen stopped with "required file './config.rpath' not found" (gettext's autopoint step is not run by it): the file is copied from gettext.

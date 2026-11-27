@@ -8,8 +8,8 @@
 # r2 (2026-11-26): no usr/share/info/dir in -doc (it conflicted with other -doc packages).
 # r3 (2026-11-27): the merge of two changes that each made an r2: the audit's files/screen.conf fix and the -doc fix above.
 name = "screen"
-version = "5.0.2"
-release = 3
+version = "5.0.3"
+release = 1
 summary = "GNU screen"
 license = "GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/screen"
@@ -19,7 +19,7 @@ rundeps = ["linux-pam", "linux-pam-base"]
 options = ["!check"]
 
 source = [
-    { url = "https://ftp.gnu.org/gnu/screen/screen-5.0.2.tar.gz", sha256 = "ca9a2c7e240919bc7ac12124593ae4529bb4eb5f7349d8857829b7e3f0b3b332" },
+    { url = "https://ftp.gnu.org/gnu/screen/screen-5.0.3.tar.gz", sha256 = "941c98ffecdca4bff4bbd1cd6f08fbd18967353affc46521040a999dafbd39a2" },
 ]
 
 setup = '''

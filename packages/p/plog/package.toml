@@ -3,15 +3,15 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "plog"
-version = "1.1.10"
-release = 2
+version = "1.1.11"
+release = 1
 summary = "Portable, simple, and extensible C++ logging library"
 license = "MIT"
 homepage = "https://github.com/SergiusTheBest/plog"
 hostdeps = ["cmake", "ninja"]
 
 source = [
-    { url = "https://github.com/SergiusTheBest/plog/archive/refs/tags/1.1.10.tar.gz", sha256 = "55a090fc2b46ab44d0dde562a91fe5fc15445a3caedfaedda89fe3925da4705a" },
+    { url = "https://github.com/SergiusTheBest/plog/archive/refs/tags/1.1.11.tar.gz", sha256 = "d60b8b35f56c7c852b7f00f58cbe9c1c2e9e59566c5b200512d0cdbb6309a7c2" },
 ]
 
 setup = '''

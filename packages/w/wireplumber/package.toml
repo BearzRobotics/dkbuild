@@ -9,8 +9,8 @@
 # r5: hostdeps python-lxml: docs/meson.build (run for the GObject introspection data) stops with "python3 is missing modules: lxml"
 # when the build root has no lxml; it used to get one only by chance, through another package's dependencies.
 name = "wireplumber"
-version = "0.5.18"
-release = 6
+version = "0.5.19"
+release = 1
 summary = "Session and policy manager implementation for PipeWire"
 license = "MIT"
 homepage = "https://pipewire.pages.freedesktop.org/wireplumber"
@@ -20,7 +20,7 @@ checkdeps = ["pipewire", "dbus"]
 rundeps = ["pipewire"]
 
 source = [
-    { url = "https://gitlab.freedesktop.org/pipewire/wireplumber/-/archive/0.5.18/wireplumber-0.5.18.tar.gz", sha256 = "8c8a326a5b2a570681c1503c83f1fce0cc54ba862019815604b2bc92a7d483a1" },
+    { url = "https://gitlab.freedesktop.org/pipewire/wireplumber/-/archive/0.5.19/wireplumber-0.5.19.tar.gz", sha256 = "f9454eae3a5a6ca903c05ead2a7e47d7d3957fb0ffac3ebb11d92842603ae80f" },
 ]
 
 setup = '''

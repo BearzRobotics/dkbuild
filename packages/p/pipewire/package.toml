@@ -15,8 +15,8 @@
 # (r7, r8). r9: spatial audio (libmysofa), cameras (libcamera), network audio (ROC).
 # r10: PipeWire's libjack in /usr/lib (-Dlibjack-path, as Chimera), not /usr/lib/pipewire-0.3/jack: programs linked against JACK (ffmpeg, SDL 3, fluidsynth, mpg123) find it, and it provides so:libjack.so.0.
 name = "pipewire"
-version = "1.6.10"
-release = 11
+version = "1.6.12"
+release = 1
 summary = "Server and user space API to deal with multimedia pipelines"
 license = "MIT"
 homepage = "https://pipewire.org"
@@ -27,7 +27,7 @@ rundeps = ["dbus"]
 options = ["!check"]
 
 source = [
-    { url = "https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/1.6.10/pipewire-1.6.10.tar.gz", sha256 = "93b7c4f1e62fd9ec3a921846c6bfc64442872bb2366c2bbc3ea69a427b79a4f9" },
+    { url = "https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/1.6.12/pipewire-1.6.12.tar.gz", sha256 = "73dd5d5c7e67993d33de0930df5189bd5cb8883d8e3c81ab7866b1370f029eb3" },
 ]
 
 setup = '''

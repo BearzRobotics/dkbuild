@@ -3,8 +3,8 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "srt"
-version = "1.5.4"
-release = 2
+version = "1.5.7"
+release = 1
 summary = "Secure Reliable Transport library"
 license = "MPL-2.0"
 homepage = "https://www.srtalliance.org"
@@ -13,7 +13,7 @@ builddeps = ["gtest-devel", "linux-headers", "openssl-devel"]
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/Haivision/srt/archive/refs/tags/v1.5.4.tar.gz", sha256 = "d0a8b600fe1b4eaaf6277530e3cfc8f15b8ce4035f16af4a5eb5d4b123640cdd" },
+    { url = "https://github.com/Haivision/srt/archive/refs/tags/v1.5.7.tar.gz", sha256 = "017cd1e437ef2073a4dd10ddf7b55e86bc3d6ebac0393d13bd22f6a57055d32b" },
 ]
 
 setup = '''

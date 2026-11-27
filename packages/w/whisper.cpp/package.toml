@@ -24,8 +24,8 @@
 # point at /usr/lib/libggml.so and /usr/lib/cmake/ggml, which are not there) and the
 # cmake config packages are dropped for the same reason.
 name = "whisper.cpp"
-version = "1.9.5"
-release = 3
+version = "1.9.6"
+release = 1
 summary = "Whisper speech recognition in C/C++, with Vulkan and BLAS backends"
 license = "MIT"
 homepage = "https://github.com/ggml-org/whisper.cpp"
@@ -35,7 +35,7 @@ rundeps = ["vulkan-loader"]
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/ggml-org/whisper.cpp/archive/refs/tags/v1.9.5.tar.gz", sha256 = "ff1a9053feb509ff9d7729703355541ae9690073a6b1c40eb692c962e0dc1720" },
+    { url = "https://github.com/ggml-org/whisper.cpp/archive/refs/tags/v1.9.6.tar.gz", sha256 = "7ab15dc88022d2425ad94dcffd8abbf1b6d7018089b4e48d6b40780738e0b445" },
 ]
 
 # First the static build; its archives are kept, then the shared build.

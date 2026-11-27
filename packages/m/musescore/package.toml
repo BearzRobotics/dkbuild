@@ -1,7 +1,7 @@
 # MuseScore 4 (no auto-update, no crash reporter; its MS Basic soundfont is a
 # separate download it offers on first start).
 name = "musescore"
-version = "4.7.6"
+version = "4.7.7"
 release = 1
 summary = "Music notation editor"
 license = "GPL-3.0-only"
@@ -11,7 +11,7 @@ builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "
 options = ["!check", "jobs:12"]
 
 source = [
-    { url = "https://github.com/musescore/MuseScore/archive/refs/tags/v4.7.6.tar.gz", sha256 = "9fb06edd88adc27b69606252790dd574e9de8ae6c28d6a993bdb06d4115f7886" },
+    { url = "https://github.com/musescore/MuseScore/archive/refs/tags/v4.7.7.tar.gz", sha256 = "2c1e60cdc7fd0209a7a261a918f697ebf75d31fd5c7f161c44f728715847e9c0" },
 ]
 
 setup = '''

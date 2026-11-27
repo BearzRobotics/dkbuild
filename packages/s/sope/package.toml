@@ -17,7 +17,7 @@
 #   SAX drivers and products are bundles it loads at run time, linked against
 #   the shared SOPE libraries (a static copy would duplicate its classes).
 name = "sope"
-version = "5.12.13"
+version = "5.12.14"
 release = 1
 summary = "Objective-C application server framework (for SOGo)"
 license = "LGPL-2.0-or-later"
@@ -28,7 +28,7 @@ rundeps = ["ca-certificates"]
 options = ["!check"]
 
 source = [
-    { url = "https://github.com/Alinto/sope/archive/refs/tags/SOPE-5.12.13.tar.gz", sha256 = "76efdbc86d04842fad0fd447798f6b834703f0bc17e93d9900f8789536696969" },
+    { url = "https://github.com/Alinto/sope/archive/refs/tags/SOPE-5.12.14.tar.gz", sha256 = "b28b206c26eac72e02332e14e9e4237007a52ffc472a6c94102e2942ae5317d3" },
 ]
 
 environment = '''

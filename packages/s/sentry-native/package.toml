@@ -3,7 +3,7 @@
 # third-party tree of submodules the tarball lacks, and breakpad's is the same. libcurl is the
 # transport. Bridge only sends reports when a DSN is compiled in; the recipes leave it empty.
 name = "sentry-native"
-version = "0.17.6"
+version = "0.17.7"
 release = 1
 summary = "Sentry crash-reporting SDK for C and C++"
 license = "MIT"
@@ -13,7 +13,7 @@ hostdeps = ["cmake", "ninja", "pkgconf"]
 builddeps = ["curl-devel", "zlib-ng-compat-devel"]
 
 source = [
-    { url = "https://github.com/getsentry/sentry-native/archive/refs/tags/0.17.6.tar.gz", sha256 = "0c7a4d257453bd781ef88362ef786a07104bcdd99e3bb9bde6683fb98d0d2caa" },
+    { url = "https://github.com/getsentry/sentry-native/archive/refs/tags/0.17.7.tar.gz", sha256 = "226057ae3293b1b02ab3872c323324a056a98df0cee395680ee87344d0ee52c2" },
 ]
 
 setup = '''

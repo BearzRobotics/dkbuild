@@ -23,8 +23,8 @@
 # there; in release mode they are built by rustc alone, no crates); Chimera
 # builds YJIT the same way. The tree's ruby 3.4 recipe does not (yet).
 name = "ruby4.0"
-version = "4.0.9"
-release = 3
+version = "4.0.10"
+release = 1
 summary = "Ruby scripting language 4.0.x"
 license = "Ruby OR BSD-2-Clause"
 homepage = "https://www.ruby-lang.org/en"
@@ -34,7 +34,7 @@ builddeps = ["libedit-devel", "libffi-devel", "libyaml-devel", "openssl-devel", 
 options = ["!cross", "!check"]
 
 source = [
-    { url = "https://cache.ruby-lang.org/pub/ruby/4.0/ruby-4.0.9.tar.xz", sha256 = "a8057adb39f51ad6dc3106237504c93dd792bb515837b4fe7817ae21ed7e51f4" },
+    { url = "https://cache.ruby-lang.org/pub/ruby/4.0/ruby-4.0.10.tar.xz", sha256 = "1537f7a6003c436546ecab6b48b6e7725a9af2328f45a8af7f42f41c5df90ab8" },
 ]
 
 setup = '''

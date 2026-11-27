@@ -3,8 +3,8 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "p11-kit"
-version = "0.26.5"
-release = 3
+version = "0.26.6"
+release = 1
 summary = "Provides a way to load and enumerate PKCS#11 modules"
 license = "BSD-3-Clause"
 homepage = "https://github.com/p11-glue/p11-kit"
@@ -12,7 +12,7 @@ hostdeps = ["gettext", "libtasn1", "pkgconf", "libxslt", "docbook-xsl-nons", "do
 builddeps = ["libtasn1-devel", "libffi-devel"]
 
 source = [
-    { url = "https://github.com/p11-glue/p11-kit/releases/download/0.26.5/p11-kit-0.26.5.tar.xz", sha256 = "f2cc09111e44bf3fea58f023180b33acea90aa82d042d6fbb623fbc5ba033bb7" },
+    { url = "https://github.com/p11-glue/p11-kit/releases/download/0.26.6/p11-kit-0.26.6.tar.xz", sha256 = "5fda95dc89964af32dbd8e01b139c166717cf96c4fee3d601bcd60bdb23d23c6" },
 ]
 
 environment = '''

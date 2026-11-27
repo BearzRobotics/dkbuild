@@ -1,7 +1,7 @@
 # SuperTux: classic 2D jump'n'run sidescroller in the style of Super Mario
 # (GPL-3.0; art and levels under GPL/CC-BY-SA, included in the source tarball).
 name = "supertux"
-version = "0.7.0"
+version = "0.7.0.1"
 release = 1
 summary = "Classic 2D jump'n run sidescroller game"
 license = "GPL-3.0-or-later"
@@ -12,7 +12,7 @@ builddeps = ["boost-devel", "curl-devel", "fmt-devel", "freetype-devel", "glew-d
 options = ["!check"]  # the test target needs a display and the data directory
 
 source = [
-    { url = "https://github.com/SuperTux/supertux/releases/download/v0.7.0/SuperTux-v0.7.0-Source.tar.gz", sha256 = "32fc5b99b9994ed58e58341d6f21de925764b381256e108591136de53bc31da5" },
+    { url = "https://github.com/SuperTux/supertux/releases/download/v0.7.0.1/SuperTux-v0.7.0.1-Source.tar.gz", sha256 = "c3a3813bc57b8267960e4fcc33afe5f5cb468abe2a288fe58da4f288d0d7442c" },
 ]
 
 setup = '''

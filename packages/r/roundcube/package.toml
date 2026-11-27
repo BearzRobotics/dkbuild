@@ -17,7 +17,7 @@
 # Installed inert (docs/requests.md): no config.inc.php (so no des_key and no
 # database), no site, no cron job; the README says how to set it up.
 name = "roundcube"
-version = "1.7.6"
+version = "1.7.7"
 release = 1
 summary = "Browser-based IMAP webmail client"
 license = "GPL-3.0-or-later"
@@ -26,7 +26,7 @@ rundeps = ["php", "php-fpm", "nginx"]
 options = ["!check", "!strip"]
 
 source = [
-    { url = "https://github.com/roundcube/roundcubemail/releases/download/1.7.6/roundcubemail-1.7.6-complete.tar.gz", sha256 = "0168085bf0bfeeb5d4eca3b9730effbe610dbdb380a68567d292fec51f09db36" },
+    { url = "https://github.com/roundcube/roundcubemail/releases/download/1.7.7/roundcubemail-1.7.7-complete.tar.gz", sha256 = "cc9358a27cda7b3e62c4b6758897bc0f132fe58420d02b2e842be7e10a1dd3fb" },
 ]
 
 install = '''

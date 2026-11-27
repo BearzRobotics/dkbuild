@@ -2,7 +2,7 @@
 # Linux's testing/process-cpp (MIT-licensed APKBUILD and patches; the software's licence is LGPL-3.0-only).
 # Not built (queued, wip/queue): expect first-build fixes.
 name = "process-cpp"
-version = "3.1.0"
+version = "3.1.1"
 release = 1
 summary = "C++ process management library (Lomiri)"
 license = "LGPL-3.0-only"
@@ -13,7 +13,7 @@ builddeps = ["boost-devel", "cmake-extras", "properties-cpp-devel"]
 options = ["!check"]
 
 source = [
-    { url = "https://gitlab.com/ubports/core/lib-cpp/process-cpp/-/archive/3.1.0/process-cpp-3.1.0.tar.gz", sha256 = "fa16a5d299379b490822af5d0a34e24eef1c42eee86702ecadac27113b3602e9" },
+    { url = "https://gitlab.com/ubports/core/lib-cpp/process-cpp/-/archive/3.1.1/process-cpp-3.1.1.tar.gz", sha256 = "3981fdc0436b007173fc0348fcd3220ff42b5fec86f8967c926d1f85671aeddf" },
 ]
 
 setup = '''

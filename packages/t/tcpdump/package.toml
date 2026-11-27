@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "tcpdump"
-version = "4.99.6"
+version = "4.99.7"
 release = 1
 summary = "Command-line network traffic analysis tool"
 license = "BSD-3-Clause"
@@ -13,7 +13,7 @@ builddeps = ["libpcap-devel", "openssl-devel"]
 checkdeps = ["perl"]
 
 source = [
-    { url = "https://www.tcpdump.org/release/tcpdump-4.99.6.tar.gz", sha256 = "5839921a0f67d7d8fa3dacd9cd41e44c89ccb867e8a6db216d62628c7fd14b09" },
+    { url = "https://www.tcpdump.org/release/tcpdump-4.99.7.tar.gz", sha256 = "8be364e28d3b745ef1459b385cd2f4bc0e1ebad7a5d2ebdf70071d6c9b5b9a54" },
 ]
 
 setup = '''

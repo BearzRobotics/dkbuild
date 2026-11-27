@@ -3,8 +3,8 @@
 # The X.org bitmap core fonts (Chimera's fonts-xorg) are left out: modern
 # programs draw with fontconfig, and Xorg has its built-in fixed font.
 name = "xserver-xorg"
-version = "21.1.24"
-release = 2
+version = "21.1.26"
+release = 1
 summary = "X.org X server"
 license = "MIT AND BSD-3-Clause"
 homepage = "https://xorg.freedesktop.org"
@@ -16,7 +16,7 @@ rundeps = ["iceauth", "setxkbmap", "transset", "xbacklight", "xcmsdb", "xcursorg
 options = ["!check"]
 
 source = [
-    { url = "https://gitlab.freedesktop.org/xorg/xserver/-/archive/xorg-server-21.1.24/xserver-xorg-server-21.1.24.tar.gz", sha256 = "5051b8a339b9497cb573b57871fa7311a2d55c39c3d1cecd051804bbfe9c18e2" },
+    { url = "https://gitlab.freedesktop.org/xorg/xserver/-/archive/xorg-server-21.1.26/xserver-xorg-server-21.1.26.tar.gz", sha256 = "83f31046a1d8656dfcd2e95b92c3eed7ef42a50af7ab1512d0af27d94b8c4f99" },
 ]
 
 environment = '''

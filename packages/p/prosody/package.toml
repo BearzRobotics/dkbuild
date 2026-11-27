@@ -17,7 +17,7 @@
 # Installed inert: the dinit service is shipped, not enabled; no
 # /etc/prosody/prosody.cfg.lua, no hosts, no accounts. Setup: README.FenrirOS.
 name = "prosody"
-version = "13.0.7"
+version = "13.0.8"
 release = 1
 summary = "Lightweight XMPP (Jabber) server written in Lua"
 license = "MIT"
@@ -28,7 +28,7 @@ rundeps = ["lua", "lua5.4-socket", "lua5.4-expat", "lua5.4-filesystem", "lua5.4-
 options = ["!check"]
 
 source = [
-    { url = "https://prosody.im/downloads/source/prosody-13.0.7.tar.gz", sha256 = "f671df3c7535c7269afc89579ea26fc13d1006b40ef5df4ccb71a560197f151b" },
+    { url = "https://prosody.im/downloads/source/prosody-13.0.8.tar.gz", sha256 = "14d8da7369e38d0eef34915ff44099bb842eba4cc5b931cae782e02feb9c6226" },
 ]
 
 build = '''

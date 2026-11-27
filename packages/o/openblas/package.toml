@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "openblas"
-version = "0.3.30"
+version = "0.3.34"
 release = 1
 summary = "Optimized BLAS library"
 license = "BSD-3-Clause"
@@ -14,7 +14,7 @@ hostdeps = ["cmake", "ninja", "pkgconf"]
 builddeps = ["linux-headers"]
 
 source = [
-    { url = "https://github.com/OpenMathLib/OpenBLAS/releases/download/v0.3.30/OpenBLAS-0.3.30.tar.gz", sha256 = "27342cff518646afb4c2b976d809102e368957974c250a25ccc965e53063c95d" },
+    { url = "https://github.com/OpenMathLib/OpenBLAS/releases/download/v0.3.34/OpenBLAS-0.3.34.tar.gz", sha256 = "cd7e129868320cc2d033afa920e31202dfe0b8066a5b66661900ccc0f197dfed" },
 ]
 
 setup = '''

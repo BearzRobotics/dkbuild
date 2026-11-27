@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: /tmp/claude-1000/-stuff-git-dkbuild/d8b7a1e7-c48c-4fe9-b3a3-e71798cac65d/scratchpad/cports-full/main/xset/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "xset"
-version = "1.2.5"
+version = "1.2.6"
 release = 1
 summary = "X11 user preferences utility"
 license = "MIT"
@@ -11,7 +11,7 @@ builddeps = ["libxext-devel", "libxfontcache-devel", "libxmu-devel", "libxxf86mi
 options = ["!check"]
 
 source = [
-    { url = "https://www.x.org/releases/individual/app/xset-1.2.5.tar.gz", sha256 = "2068d1356d80c29ce283f0fff5895667b38f24ea95df363d3dde7b8c8a92fffe" },
+    { url = "https://www.x.org/releases/individual/app/xset-1.2.6.tar.gz", sha256 = "b63c6e3dc531b054284cc14b9cae57cfa1ac99804d7ae1f2fe2f48a1adf260cf" },
 ]
 
 setup = '''
