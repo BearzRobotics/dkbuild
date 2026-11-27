@@ -342,6 +342,10 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
                 \\cp /target/usr/lib/live/initrd.img "$t/boot/initrd.img"
                 \\# The installer's minimum disk size: what the root takes, unpacked.
                 \\du -sb /target | cut -f1 > "$t/live/rootfs.size"
+                \\# This ISO's own ID, on the disc and on every boot menu entry: the initramfs boots only the system
+                \\# image that came with its kernel, never another ISO's that happens to be on some drive.
+                \\buildid=$(cat /proc/sys/kernel/random/uuid)
+                \\echo "$buildid" > "$t/live/build.id"
                 \\mksquashfs /target "$t/live/rootfs.sfs" -comp zstd -noappend -quiet
                 \\# The image's own dklilo: its boot loader goes onto the disc. The build machine's is
                 \\# whatever its image was made with (DKRescue's 0.0.1 had no keyboard at a BIOS menu).
@@ -356,19 +360,25 @@ pub fn script(arena: Allocator, img: Image) Allocator.Error![]const u8 {
                 \\
                 \\image   = /boot/vmlinuz
                 \\    label  = {0s}
-                \\    append = "root=live:LABEL={1s} quiet"
+                \\    append = "root=live:LABEL={1s} quiet fenriros.build=@BUILDID@"
                 \\    initrd = /boot/initrd.img
                 \\
                 \\image   = /boot/vmlinuz
                 \\    label  = {0s}-safe
-                \\    append = "root=live:LABEL={1s} nomodeset"
+                \\    append = "root=live:LABEL={1s} nomodeset fenriros.build=@BUILDID@"
+                \\    initrd = /boot/initrd.img
+                \\
+                \\image   = /boot/vmlinuz
+                \\    label  = {0s}-toram
+                \\    append = "root=live:LABEL={1s} toram fenriros.build=@BUILDID@"
                 \\    initrd = /boot/initrd.img
                 \\
                 \\image   = /boot/vmlinuz
                 \\    label  = {0s}-serial
-                \\    append = "root=live:LABEL={1s} console=tty0 console=ttyS0,115200"
+                \\    append = "root=live:LABEL={1s} console=tty0 console=ttyS0,115200 fenriros.build=@BUILDID@"
                 \\    initrd = /boot/initrd.img
                 \\EOF
+                \\sed -i "s/@BUILDID@/$buildid/g" "$t/boot/dklilo.conf"
                 \\xorriso -as mkisofs -R -V {1s} -o /out/{0s}.iso \
                 \\    --grub2-mbr "$img/mbr.bin" \
                 \\    -b boot/dklilo/eltorito.bin -no-emul-boot -boot-load-size 4 -boot-info-table \
@@ -615,6 +625,13 @@ test "image files parse; bad outputs, excluded packages and odd names are refuse
     try std.testing.expect(std.mem.indexOf(u8, ls, "\n\"$dklilo\" mkiso-images ") != null);
     try std.testing.expect(std.mem.indexOf(u8, ls, "\n\"$dklilo\" isohybrid /out/base.iso\n") != null);
     try std.testing.expect(std.mem.indexOf(u8, ls, "\ndklilo ") == null);
+    // the optional entry that copies the system into RAM (live-initramfs' init reads `toram`); never the default
+    try std.testing.expect(std.mem.indexOf(u8, ls, "label  = base-toram\n    append = \"root=live:LABEL=BASE toram fenriros.build=@BUILDID@\"") != null);
+    try std.testing.expect(std.mem.indexOf(u8, ls, "default = base\n") != null);
+    // the disc and every menu entry carry the same new ID
+    try std.testing.expect(std.mem.indexOf(u8, ls, "\necho \"$buildid\" > \"$t/live/build.id\"\n") != null);
+    try std.testing.expectEqual(@as(usize, 4), std.mem.count(u8, ls, " fenriros.build=@BUILDID@\"\n"));
+    try std.testing.expect(std.mem.indexOf(u8, ls, "\nsed -i \"s/@BUILDID@/$buildid/g\" \"$t/boot/dklilo.conf\"\n") != null);
     try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\npackages = [\"a-devel\"]\nexclude = [\"*-devel\"]\noutput = [\"tar\"]\n", &diag));
     try std.testing.expectError(error.InvalidImage, parse(a, "name = \"x\"\npackages = [\"a;rm\"]\noutput = [\"tar\"]\n", &diag));
     const s = try script(a, img);

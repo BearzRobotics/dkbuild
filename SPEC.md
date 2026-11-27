@@ -1242,6 +1242,16 @@ failed run the old one stays and the log is `out/<name>-failed.log`:
 booted by dklilo, made with `xorriso`: the kernel and an initramfs in the
 ISO 9660 part, the root as a squashfs (`live/rootfs.sfs`, with `rootfs.size`
 for the installer) that the live init mounts under a RAM overlay. It needs
+The boot menu has four entries: the default, `-safe` (`nomodeset`), `-toram`
+(the system image is copied into RAM and the medium let go; with too little
+free memory, or a failed copy, it boots from the medium as usual) and
+`-serial`. It needs
+Each ISO gets a new random ID, in `live/build.id` and as `fenriros.build=` on
+every boot entry. The live init boots only a system image with that ID: from a
+disc with the label, or, if none has appeared after 15 seconds, from an `.iso`
+file of that label found on a partition (Ventoy and the like), which stays
+mounted read-only while the system runs from it. Partitions looked into and
+not used are let go again. An image of another build is never booted. It needs
 `live-initramfs` (the live init's initramfs) in `packages`, a kernel, and
 `dklilo` among what gets installed: the boot loader written to the disc is
 the **image's own** `/usr/sbin/dklilo`, never the build machine's;

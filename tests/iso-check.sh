@@ -80,6 +80,25 @@ case $kind in
     desktop) if [ $greeter = yes ]; then ok "the desktop image enables its graphical login"; else bad "the desktop image does not enable greetd"; fi ;;
 esac
 
+# its own ID, on the disc and on every menu entry, so that the initramfs cannot boot another ISO's system
+id=
+xorriso -osirrox on -indev "$iso" -extract /live/build.id "$W/build.id" >/dev/null 2>&1 && id=$(tr -d '\n' < "$W/build.id")
+entries=$(grep -c 'append = "root=live:' "$W/boot/dklilo.conf")
+if [ -n "$id" ] && [ "$(grep 'append = "root=live:' "$W/boot/dklilo.conf" | grep -c "fenriros\.build=${id}[ \"]")" = "$entries" ]; then
+    ok "the disc has a build ID, and all $entries boot entries ask for it"
+else bad "no build ID on the disc and its boot entries: another ISO's system on some drive could be booted instead"; fi
+# the live system's startup script is this tree's, and the menu offers to run from RAM
+if grep -Eq 'root=live:LABEL=[^ "]+ toram[ "]' "$W/boot/dklilo.conf"; then ok "the boot menu has the toram entry (run from RAM)"
+else bad "the boot menu has no toram entry"; fi
+if ! command -v zstd >/dev/null || ! command -v cpio >/dev/null; then
+    bad "needs zstd and cpio to look into the initramfs"
+else
+    mkdir -p "$W/initrd"
+    if zstd -dcq "$W/boot/initrd.img" 2>/dev/null | (cd "$W/initrd" && cpio -i --quiet --no-absolute-filenames init 2>/dev/null) &&
+        cmp -s packages/l/live-initramfs/files/init "$W/initrd/init"; then ok "the live startup script is the tree's"
+    else bad "the live startup script differs from the tree's (an older live-initramfs)"; fi
+fi
+
 # ---- 2. the kernel and its modules -------------------------------------------------------------------------------
 # the release string, where the x86 boot protocol says it is (offset 0x20e, relative to 0x200)
 off=$(od -An -tu2 -j526 -N2 "$W/boot/vmlinuz" | tr -d ' ')
@@ -187,6 +206,20 @@ case $kind in
         done
         if [ -z "$miss" ]; then ok "the compilers, the libraries static links need, tree and nologin are there"
         else bad "missing (present is not the same as working: compiling is not checked here):$miss"; fi
+        ;;
+esac
+
+# ---- 7b. installing a boot loader from the live system --------------------------------------------------------------
+# grub-install needs its modules for the target firmware (the 2026-11-24 images had none for x86_64 UEFI)
+case $kind in
+    cli | desktop)
+        miss=
+        for p in /usr/sbin/grub-install /usr/lib/grub/x86_64-efi/modinfo.sh /usr/lib/grub/x86_64-efi/normal.mod \
+            /usr/lib/grub/i386-pc/modinfo.sh /usr/lib/grub/i386-pc/normal.mod /usr/sbin/efibootmgr /usr/sbin/mkfs.fat; do
+            has "$p" || has "/usr/bin/${p##*/}" || miss="$miss $p"
+        done
+        if [ -z "$miss" ]; then ok "grub-install has its BIOS and x86_64 EFI modules, with efibootmgr and mkfs.fat"
+        else bad "missing for installing GRUB:$miss"; fi
         ;;
 esac
 

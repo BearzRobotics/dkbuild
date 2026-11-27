@@ -31,13 +31,29 @@ case " $(cat /proc/cmdline) " in
         ;;
 esac
 
-# The disc's volume label, from root=live:LABEL=... on the command line.
+# The disc's volume label, from root=live:LABEL=... on the command line, and the ID of the ISO this kernel and
+# initramfs came from (fenriros.build=..., which `dkbuild image` puts there and in the disc's live/build.id). Only a
+# system image that matches is booted: another one would not fit this kernel (its modules, above all).
 label=FENRIROS
+build=
 for arg in $(cat /proc/cmdline); do
     case $arg in
         root=live:LABEL=*) label=${arg#root=live:LABEL=} ;;
+        fenriros.build=*) build=${arg#fenriros.build=} ;;
     esac
 done
+
+# matches DIR: does the disc mounted at DIR hold the system image that goes with this kernel?
+matches() {
+    [ -f "$1/live/rootfs.sfs" ] || return 1
+    [ -z "$build" ] && return 0
+    [ "$(cat "$1/live/build.id" 2>/dev/null)" = "$build" ]
+}
+
+# The volume label inside an .iso file (ISO 9660: 32 bytes at 32768 + 40).
+iso_label() {
+    dd if="$1" bs=1 skip=32808 count=32 2>/dev/null | tr -d '\000' | sed 's/ *$//'
+}
 
 # Ventoy and similar tools leave the disc as a plain .iso file on a data
 # partition, so no volume carries the label. Look inside the partitions
@@ -45,6 +61,7 @@ done
 # the command line (dklilo's iso= entries pass it) is tried first. Only
 # exFAT, NTFS, FAT, UDF and ext are opened, read-only; ext without journal
 # replay, so a damaged disk is never touched.
+told=" "
 find_iso() {
     want=
     for arg in $(cat /proc/cmdline); do
@@ -64,14 +81,29 @@ find_iso() {
         esac
         host=/run/live/host/$name
         mkdir -p "$host"
-        mount -t "$fstype" -o "$fsopts" "/dev/$name" "$host" 2>/dev/null || continue
+        if ! err=$(mount -t "$fstype" -o "$fsopts" "/dev/$name" "$host" 2>&1); then
+            # said once per partition (the search runs every second): the ISO may well be on this one
+            case $told in
+                *" $name "*) ;;
+                *)
+                    echo "fenriros: cannot look into /dev/$name ($fstype): $err"
+                    echo "fenriros: $(dmesg | grep -i -e "$name" -e ntfs3 | tail -n 1)"
+                    told="$told$name "
+                    ;;
+            esac
+            continue
+        fi
         for f in ${want:+"$host$want"} "$host"/*.iso "$host"/*/*.iso; do
             [ -f "$f" ] || continue
+            # another label is another system (a file named on the command line is taken at its word)
+            [ "$f" = "$host$want" ] || [ "$(iso_label "$f")" = "$label" ] || continue
             mount -t iso9660 -o ro,loop "$f" /run/live/probe 2>/dev/null || continue
-            if [ -f /run/live/probe/live/rootfs.sfs ]; then
+            if matches /run/live/probe; then
                 umount /run/live/probe
                 dev=$f
                 mopts=ro,loop
+                # said out loud: this drive stays mounted, read-only, for as long as the system runs from it
+                echo "fenriros: booting from the file ${f#"$host"} on /dev/$name (that partition stays in use)"
                 return 0
             fi
             umount /run/live/probe
@@ -82,22 +114,79 @@ find_iso() {
 }
 
 # USB sticks and optical drives can take several seconds to appear.
-# findfs only reads each device's label; nothing is mounted or written.
+# findfs only reads each device's label; nothing is mounted or written. Only when no disc with the label has shown up
+# for a good while are partitions looked into (for an .iso file), each mounted read-only and let go again. An ISO
+# given by name (iso-scan/filename=) is not waited for that long.
+patience=15
+case " $(cat /proc/cmdline) " in *" iso-scan/filename="*) patience=3 ;; esac
 dev=
 mopts=ro
 tries=0
-while [ $tries -lt 30 ]; do
+while [ $tries -lt 45 ]; do
     dev=$(findfs "LABEL=$label" 2>/dev/null)
-    [ -n "$dev" ] && break
-    [ $tries -ge 3 ] && find_iso && break
+    if [ -n "$dev" ]; then
+        # the label is not enough: an older disc of the same name does not go with this kernel
+        mkdir -p /run/live/probe
+        if mount -t iso9660 -o ro "$dev" /run/live/probe 2>/dev/null; then
+            if matches /run/live/probe; then
+                umount /run/live/probe
+                break
+            fi
+            umount /run/live/probe
+        fi
+        dev=
+    fi
+    [ $tries -ge $patience ] && find_iso && break
     sleep 1
     tries=$((tries + 1))
 done
-[ -n "$dev" ] || fail "no volume labelled $label found"
+[ -n "$dev" ] || fail "no disc or .iso file labelled $label${build:+ with build ID $build} found"
 
 mkdir -p /run/live/medium /run/live/rootfs /run/live/rw
 mount -t iso9660 -o "$mopts" "$dev" /run/live/medium ||
     fail "cannot mount $dev"
+# toram on the command line (the boot menu's "-toram" entry): the system image is copied into RAM and the disc or
+# stick is let go, so it can be taken out once the system is up. It ends up at the same place, /run/live/medium, where
+# the installer looks for it. Whenever that cannot be done (too little free memory, a failed copy) the boot goes on
+# from the disc, and says so.
+to_ram() {
+    m=/run/live/medium
+    need=$(( ($(stat -c %s $m/live/rootfs.sfs) + 1023) / 1024 ))
+    free=$(sed -n 's/^MemAvailable: *\([0-9]*\) kB$/\1/p' /proc/meminfo)
+    # a GiB must be left for the system to run in, besides the copy
+    spare=1048576
+    if [ "${free:-0}" -lt $((need + spare)) ]; then
+        echo "fenriros: toram: not enough memory: the copy needs $((need / 1024)) MiB and 1024 MiB must stay free,"
+        echo "fenriros: toram: but only $((${free:-0} / 1024)) MiB are available. Booting from the disc instead."
+        return 1
+    fi
+    mkdir -p /run/live/ram
+    mount -t tmpfs -o mode=0755,size=$((need + 65536))k tmpfs /run/live/ram || return 1
+    echo "fenriros: toram: copying $((need / 1024)) MiB into RAM; from a USB stick or a disc this takes a while..."
+    mkdir -p /run/live/ram/live
+    # rootfs.size is for the installer, as is install/ (an answers file for a hands-off installation)
+    if cp $m/live/rootfs.sfs /run/live/ram/live/ &&
+        { [ ! -f $m/live/rootfs.size ] || cp $m/live/rootfs.size /run/live/ram/live/; } &&
+        { [ ! -d $m/install ] || cp -r $m/install /run/live/ram/; } &&
+        [ "$(stat -c %s /run/live/ram/live/rootfs.sfs)" = "$(stat -c %s $m/live/rootfs.sfs)" ]; then
+        :
+    else
+        echo "fenriros: toram: copying failed. Booting from the disc instead."
+        umount /run/live/ram
+        return 1
+    fi
+    umount $m || { umount /run/live/ram; return 1; }
+    mount -o move /run/live/ram $m || fail "toram: cannot move the copy into place"
+    # an .iso file on a partition (Ventoy and the like): that partition is let go too
+    for h in /run/live/host/*; do
+        if [ -d "$h" ]; then umount "$h" 2>/dev/null; fi
+    done
+    echo "fenriros: toram: done. The disc or stick can be removed once the system is up."
+}
+case " $(cat /proc/cmdline) " in
+    *" toram "*) to_ram ;;
+esac
+
 mount -t squashfs -o ro,loop /run/live/medium/live/rootfs.sfs /run/live/rootfs ||
     fail "cannot mount /live/rootfs.sfs"
 

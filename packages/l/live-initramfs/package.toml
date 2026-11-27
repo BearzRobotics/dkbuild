@@ -6,6 +6,9 @@
 # command line stops in a shell first. Runs on a static BusyBox; only the
 # kernel's built-in drivers are used (it carries no modules).
 # r2: no /run in the live fstab: the /run the initramfs moved into the root holds /run/live (the disc), and a second tmpfs would hide it.
+# r6 also: it boots only the system image that has its ISO's build ID. Before, a boot stick slower than 3 seconds made it
+# take the first .iso file on any drive that held a live system, whatever its label or age, and keep that drive mounted.
+# r6 also: `toram` on the command line copies the system into RAM and lets the disc go (the "-toram" boot menu entry).
 name = "live-initramfs"
 version = "1"
 release = 6
