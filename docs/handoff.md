@@ -1,4 +1,4 @@
-# Handoff (2026-11-26, the audit's bugs are fixed)
+# Handoff (2026-11-27, the audit's fixes and the other session's work are merged)
 
 Read this section first.
 
@@ -40,14 +40,18 @@ Behaviour that is new:
    decide on them. So far only the packages with setuid programs have them.
 3. After the release: a base image generated from our own repository, then stage 2 build roots (docs/roadmap.md).
 
-## The checkout on /stuff
+## The merge and the checkout on /stuff
 
-The other session's commits (grub, dklilo, dkinstaller, images, rebuild bumps, icu, firefox) up to 6d598830 are on
-`origin/new-build-machine`, replayed, so their hashes differ. When that session is finished, bring over any later
-commits before moving that checkout to origin's branch (`git pull --rebase` drops commits already applied; check
-`git log origin/new-build-machine..HEAD` first). One recipe alone can be taken without moving it:
+On 2026-11-27 all of the other session's commits (up to its 82c91d37: grub, dklilo, dkinstaller, the dkde-devel and
+dkde-devel-cli images, firefox 161, install triggers for the glib, mime and desktop caches) were replayed onto
+`new-build-machine`, and `/stuff/git/dkbuild` was moved to it. Its old state is the local branch
+`backup/before-audit-merge-2026-11-27`. v0.0.1 does not include this merge. `tests/run-all.sh` passed on the merged
+tree (one test skipped by design); `check` passed; `outdated` against the built records reports nothing.
 
-    git fetch origin && git checkout origin/new-build-machine -- packages/r/rpi-imager
+- screen is r3: both sides had made an r2, and the built one lacks the audit's `files/screen.conf` fix.
+- firefox is r2: the built r1 had `--disable-hardening`. It has not been built without it.
+- `out/dkde-devel*/*.iso` (2026-11-26 evening) were built before the merge. Claude did not boot them. GRUB's boot
+  test is in docs/packbug/grub.md.
 
 Before `wallet-engine` is built with the new code, delete its old dependency list once (below).
 
