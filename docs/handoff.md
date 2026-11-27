@@ -159,6 +159,18 @@ sat for 10 to 25 minutes flushing to disk (2026-11-25): the test suite may be sl
   series: ffmpeg 9, incus 7, mbedtls 4, pkgconf 3, giflib 6, gzip 1.15, patch 2.8, gpgme 2.3, libraw, libcdio,
   libvpx 1.16, opencc, uriparser 1.0 and others in Alpine's list that this batch does not name.
 
+## 2026-11-27: security updates, second batch: the "same version" cases (15 recipes; none built)
+
+- Security patches from Alpine added to openssl, libssh2, sudo, libsndfile, openjpeg, rapidjson, tinyxml, heimdal,
+  unzip (zip bomb parts 4-7 and its switch), and from its 3.23-stable branch to avahi, giflib and busybox; opusfile's
+  from the xiph commit Alpine uses. perl to 5.40.5, patch to 2.8.1. Each patch applies without fuzz after the
+  recipe's own, to the cached source; each recipe says where its patches came from. musl already had both fixes.
+- Heimdal's CVE-2018-16860 patch applied cleanly **onto a source that already had the fix** and was left out. After
+  adding a patch, look for its added code in the unpatched file: applying proves nothing by itself.
+- **Open:** avahi CVE-2025-68276, -68468, -68471, CVE-2026-24401, -34933 (not in 3.23's set); unzip CVE-2021-4217,
+  CVE-2022-0529, -0530 (Alpine's patches do not apply after ours), and its CVE-2015-7696, -7697 not looked at;
+  qt6-qtwebengine's list (not looked at); giflib's two fixed only in 6.x.
+
 ## `wallet-engine`'s cached dependency list: nothing to do
 
 An earlier note asked for `cache/cargodeps/45d22ed4...da2.list` to be deleted by hand: it was uniffi-bindgen-cpp's
