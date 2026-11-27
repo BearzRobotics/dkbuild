@@ -1,7 +1,9 @@
 # Check auxillary (non-root) filesystems.
 
 type = scripted
-command = /sbin/fsck -A -R -C -a
+# -A: the entries of /etc/fstab (those with a number in the last column), -R: not the root (rootfscheck did it),
+# -M: not what is already mounted, noopts=noauto: not what is not going to be mounted at boot
+command = /sbin/fsck -A -R -M -C -a -t noopts=noauto
 restart = false
 options: starts-on-console start-interruptible skippable unmask-intr
 

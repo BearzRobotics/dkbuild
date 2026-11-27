@@ -4,6 +4,9 @@ type = scripted
 command = /etc/dinit.d/filesystems.sh start
 restart = false
 logfile = /var/log/dinit-filesystems.log
+# dinit looks again for its control socket, /run/dinitctl, when a service with this option has started, and makes it
+# anew if it is gone: so it is back should anything in /etc/fstab have been mounted over /run
+options = starts-rwfs
 start-timeout = 1200   # 20 minutes
 
 depends-on: udevd

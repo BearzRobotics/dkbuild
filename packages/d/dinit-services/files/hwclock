@@ -1,7 +1,8 @@
 # Set system time from hardware clock
 
 type = scripted
-command = /sbin/hwclock --hctosys
+# hwclock --hctosys, and where that times out, again with --directisa
+command = /etc/dinit.d/hwclock.sh
 log-type = buffer
 
 # Optional, not necessary, and not recommended:
