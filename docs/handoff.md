@@ -53,51 +53,19 @@ tree (one test skipped by design); `check` passed; `outdated` against the built 
 - `out/dkde-devel*/*.iso` (2026-11-26 evening) were built before the merge. Claude did not boot them. GRUB's boot
   test is in docs/packbug/grub.md.
 
-Before `wallet-engine` is built with the new code, delete its old dependency list once (below).
+The fixes were made in a temporary clone on the home drive, deleted on 2026-11-27; work from `/stuff/git/dkbuild`.
+The build directories are links to /mnt/dkbuild again, but `tests/` writes its trees on /stuff, where sandboxes once
+sat for 10 to 25 minutes flushing to disk (2026-11-25): the test suite may be slow or seem stuck there. The suite had
+not been run from /stuff after the move when this was written.
 
-# Earlier: Handoff (2026-11-25, bug fixing: the build directories are local for now)
+## `wallet-engine`'s cached dependency list: nothing to do
 
-## Work is in ~/dkbuild-bugfix for now
+An earlier note asked for `cache/cargodeps/45d22ed4...da2.list` to be deleted by hand: it was uniffi-bindgen-cpp's
+list under the name wallet-engine uses (BC-06; the two share a source). On 2026-11-27 the file was already gone (when
+and why is not recorded). Only its `.config.toml` was left, which the next fetch overwrites: without the list,
+wallet-engine's dependencies are fetched afresh. Not tried.
 
-/stuff (a shingled desktop drive, btrfs) stalled while testing the fixes: sandboxes sat for 10 to 25 minutes flushing
-to it. **The bug fixes are made in a clone, `~/dkbuild-bugfix` (home NVMe), with its own real build directories**;
-there the tests take under a minute. `/stuff/git/dkbuild` is behind `origin/new-build-machine` until it is pulled (it
-holds an uncommitted copy of the first fix, now committed: `git checkout src/sandbox.zig && rm tests/isolation.sh`
-before pulling). The bug reports (`docs/bugs/`, ignored by git) are current in the clone only.
-
-## After the bug fixes: one thing to do by hand in the real cache
-
-`wallet-engine` and `uniffi-bindgen-cpp` share a source, and the cache's list for it is uniffi-bindgen-cpp's (BC-06,
-fixed: lists are now named by everything that decides them). wallet-engine keeps the plain name, so before it is
-built delete that list once (uniffi-bindgen-cpp then fetches or has already taken its own copy):
-
-    rm /mnt/dkbuild/cache/cargodeps/45d22ed481dc4fab07390abfa811c095c424e11c745e87b9d0d27b40efa17da2.list
-
-## Links removed while the bug fixes are made
-
-So that fixing and testing cannot touch the repository or the built packages, these six links were replaced by
-**real, local directories** on 2026-11-25. Nothing under /mnt/dkbuild was changed or removed.
-
-| In the source tree | Was a link to |
-|---|---|
-| `repo/x86_64` | `/mnt/dkbuild/repo/x86_64` |
-| `logs/x86_64` | `/mnt/dkbuild/logs/x86_64` |
-| `cache` | `/mnt/dkbuild/cache` |
-| `work` | `/mnt/dkbuild/work` |
-| `rootfs` | `/mnt/dkbuild/rootfs` |
-| `out` | `/mnt/dkbuild/out` |
-
-The local `rootfs/dkrescue` was unpacked from `./dkrescue.iso`; everything else started empty. **To put the links
-back** when the fixes are done (this deletes only the local, throwaway directories; check `ls -ld` shows real
-directories first, and never add a trailing slash to a name that is already a link):
-
-    for l in repo/x86_64 logs/x86_64 cache work rootfs out; do
-        [ -L "$l" ] || { chmod -R u+rwX "$l"; rm -rf -- "$l"; ln -s "/mnt/dkbuild/$l" "$l"; }
-    done
-
-## Handoff (2026-11-25, build tree on the new drive)
-
-Read this section first. The sections below it are older history.
+# Earlier: Handoff (2026-11-25, build tree on the new drive)
 
 ## Layout now
 
