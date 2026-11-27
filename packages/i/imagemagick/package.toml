@@ -3,8 +3,8 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "imagemagick"
-version = "7.1.2.28"
-release = 8
+version = "7.1.2.36"
+release = 1
 summary = "Create, edit, compose, or convert digital images"
 license = "ImageMagick"
 homepage = "https://www.imagemagick.org"
@@ -15,7 +15,7 @@ checkdeps = ["ghostscript"]
 options = ["!cross", "!check"]
 
 source = [
-    { url = "https://github.com/ImageMagick/ImageMagick/archive/7.1.2-28.tar.gz", sha256 = "b4a5ec023644fd345f1e22b1ab92af3fb6762dceb56de805dde53b0ce515c481" },
+    { url = "https://github.com/ImageMagick/ImageMagick/archive/7.1.2-36.tar.gz", sha256 = "5ba807e38a6bcb7c3c96a166485e270c5017aaa6b166f0440dc4b2badf6e6167" },
 ]
 
 setup = '''
