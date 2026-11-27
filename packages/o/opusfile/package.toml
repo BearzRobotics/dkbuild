@@ -2,7 +2,9 @@
 # needed by: sox_ng (reading .opus files).
 name = "opusfile"
 version = "0.12"
-release = 1
+release = 2
+# CVE-2022-47021.patch: xiph/opusfile commit 0a4cd796 (the one Alpine uses), added 2026-11-27
+patches = ["CVE-2022-47021.patch"]
 summary = "Library for opening, seeking and decoding .opus files"
 license = "BSD-3-Clause"
 homepage = "https://opus-codec.org"

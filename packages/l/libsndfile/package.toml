@@ -2,7 +2,9 @@
 # Reading and writing sampled audio files. needed by: sox_ng, twolame, libpulse.
 name = "libsndfile"
 version = "1.2.2"
-release = 2
+release = 3
+# Security patches from Alpine Linux (aports, master main/libsndfile), added 2026-11-27: CVE-2024-50612.patch
+patches = ["CVE-2024-50612.patch"]
 summary = "Library for reading and writing sampled audio files"
 license = "LGPL-2.1-or-later"
 homepage = "https://libsndfile.github.io/libsndfile"

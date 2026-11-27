@@ -4,8 +4,8 @@
 # r3: rebuilt so its libperl.so (no soname, in CORE/) counts as private.
 # r10: provides so:libperl.so for nginx's and postgresql's embedded perl.
 name = "perl"
-version = "5.40.1"
-release = 10
+version = "5.40.5"
+release = 1
 summary = "Practical Extraction and Report Language"
 license = "Artistic-1.0-Perl OR GPL-1.0-or-later"
 homepage = "https://www.perl.org"
@@ -15,7 +15,7 @@ options = ["bootstrap", "!check"]
 provides = ["so:libperl.so"]
 
 source = [
-    { url = "https://www.cpan.org/src/5.0/perl-5.40.1.tar.xz", sha256 = "dfa20c2eef2b4af133525610bbb65dd13777ecf998c9c5b1ccf0d308e732ee3f" },
+    { url = "https://www.cpan.org/src/5.0/perl-5.40.5.tar.xz", sha256 = "1fe6f825b487d26c35aa51a35f52fe494d4cfc77b8051f8b1ee3391bf0289bc6" },
 ]
 
 setup = '''

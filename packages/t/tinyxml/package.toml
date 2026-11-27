@@ -6,6 +6,8 @@
 name = "tinyxml"
 version = "2.6.2"
 release = 1
+# Security patches from Alpine Linux (aports, master community/tinyxml), added 2026-11-27: CVE-2021-42260.patch, CVE-2023-34194.patch
+patches = ["CVE-2021-42260.patch", "CVE-2023-34194.patch"]
 summary = "Small C++ XML parser (TinyXML 1)"
 license = "Zlib"
 homepage = "https://sourceforge.net/projects/tinyxml"

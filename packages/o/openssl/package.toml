@@ -9,7 +9,9 @@ name = "openssl"
 # do not move down by a plain `apk upgrade` (`apk upgrade --available`). Next: a 4.x long-term release (upstream plans
 # one each April of an odd year). upstream.toml keeps the update check on 3.5.
 version = "3.5.9"
-release = 1
+release = 2
+# Security patches from Alpine Linux (aports, master main/openssl), added 2026-11-27: CVE-2026-107496.patch, CVE-2026-88822.patch, CVE-2026-88823.patch, CVE-2026-95691.patch, CVE-2026-95692.patch
+patches = ["CVE-2026-107496.patch", "CVE-2026-88822.patch", "CVE-2026-88823.patch", "CVE-2026-95691.patch", "CVE-2026-95692.patch"]
 summary = "TLS and cryptography library"
 license = "Apache-2.0"
 homepage = "https://www.openssl.org"

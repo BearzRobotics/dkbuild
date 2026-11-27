@@ -8,7 +8,8 @@ release = 5
 summary = "Implementation of the Kerberos authentication protocol"
 license = "BSD-3-Clause"
 homepage = "https://heimdal.software"
-patches = ["001-nfs-des.patch", "002-openafs.patch", "003-installsh.patch", "004-link-gssapi.patch", "005-no-build-string.patch", "006-parallel-build.patch", "007-disable-iprop.patch", "008-disable-rpath.patch", "009-missing-headers.patch", "010-musl-warning.patch", "011-disable-zip-tests.patch", "012-disable-db-tests-sqlite.patch", "1085.patch", "upstream-001.patch", "upstream-002.patch", "upstream-003.patch", "upstream-004.patch", "upstream-005.patch", "upstream-006.patch", "upstream-007.patch"]
+# Security patches from Alpine Linux (aports, master main/heimdal), added 2026-11-27: CVE-2022-45142.patch
+patches = ["001-nfs-des.patch", "002-openafs.patch", "003-installsh.patch", "004-link-gssapi.patch", "005-no-build-string.patch", "006-parallel-build.patch", "007-disable-iprop.patch", "008-disable-rpath.patch", "009-missing-headers.patch", "010-musl-warning.patch", "011-disable-zip-tests.patch", "012-disable-db-tests-sqlite.patch", "1085.patch", "upstream-001.patch", "upstream-002.patch", "upstream-003.patch", "upstream-004.patch", "upstream-005.patch", "upstream-006.patch", "upstream-007.patch", "CVE-2022-45142.patch"]
 hostdeps = ["automake", "byacc", "e2fsprogs-devel", "flex", "gettext", "libtool", "mandoc", "perl", "perl-json", "pkgconf", "python", "texinfo"]
 builddeps = ["e2fsprogs-devel", "gettext-devel", "libcap-ng-devel", "libedit-devel", "ncurses-devel", "openldap-devel", "sqlite-devel"]
 

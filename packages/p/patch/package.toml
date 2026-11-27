@@ -2,15 +2,15 @@
 # Chimera's recipe was not used.
 # r2: static libraries too (in patch-static), for fully static programs on musl.
 name = "patch"
-version = "2.7.6"
-release = 2
+version = "2.8.1"
+release = 1
 summary = "Apply a diff to files"
 license = "GPL-3.0-or-later"
 homepage = "https://savannah.gnu.org/projects/patch"
 options = ["bootstrap", "!check"]
 
 source = [
-    { url = "https://ftp.gnu.org/gnu/patch/patch-2.7.6.tar.xz", sha256 = "ac610bda97abe0d9f6b7c963255a11dcb196c25e337c61f94e4778d632f1d8fd" },
+    { url = "https://ftp.gnu.org/gnu/patch/patch-2.8.1.tar.xz", sha256 = "3240c7959c5347c8ed347e3c4201c0337bf4240d5cf09d68889e58eeaba30e17" },
 ]
 
 setup = '''

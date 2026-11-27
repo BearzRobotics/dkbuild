@@ -4,11 +4,12 @@
 # r3: static libraries too (in libssh2-static), for fully static programs on musl.
 name = "libssh2"
 version = "1.11.1"
-release = 3
+release = 4
 summary = "Library implementing the SSH2 protocol"
 license = "BSD-3-Clause"
 homepage = "https://www.libssh2.org"
-patches = ["CVE-2026-7598.patch"]
+# Security patches from Alpine Linux (aports, master main/libssh2), added 2026-11-27: CVE-2025-15661.patch, libssh-unconst-backport.patch, CVE-2026-55199.patch, CVE-2026-55200.patch, CVE-2026-58050.patch, CVE-2026-58051.patch, CVE-2026-66032.patch, CVE-2026-66033.patch, CVE-2026-66034.patch, CVE-2026-66035.patch
+patches = ["CVE-2026-7598.patch", "CVE-2025-15661.patch", "libssh-unconst-backport.patch", "CVE-2026-55199.patch", "CVE-2026-55200.patch", "CVE-2026-58050.patch", "CVE-2026-58051.patch", "CVE-2026-66032.patch", "CVE-2026-66033.patch", "CVE-2026-66034.patch", "CVE-2026-66035.patch"]
 hostdeps = ["pkgconf"]
 builddeps = ["zlib-ng-compat-devel", "openssl-devel"]
 checkdeps = ["bash"]

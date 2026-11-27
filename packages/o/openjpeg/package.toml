@@ -2,7 +2,9 @@
 # JPEG 2000. needed by: leptonica (and later poppler, GIMP, FFmpeg).
 name = "openjpeg"
 version = "2.5.4"
-release = 1
+release = 2
+# Security patches from Alpine Linux (aports, master main/openjpeg), added 2026-11-27: CVE-2026-6192.patch, OSV-2025-219.patch
+patches = ["CVE-2026-6192.patch", "OSV-2025-219.patch"]
 summary = "JPEG 2000 codec library and tools"
 license = "BSD-2-Clause"
 homepage = "https://www.openjpeg.org"

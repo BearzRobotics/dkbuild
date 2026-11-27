@@ -2,11 +2,12 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "rapidjson"
 version = "1.1.0"
-release = 2
+release = 3
 summary = "JSON parser/generator for C++"
 license = "MIT"
 homepage = "https://rapidjson.org"
-patches = ["3b2441b87f99ab65f37b141a7b548ebadb607b96.patch", "862c39be371278a45a88d4d1d75164be57bb7e2d.patch", "char_traits-clang-19-errors.diff", "disable-bad-flags.patch", "no-vendor-gtest.patch"]
+# Security patches from Alpine Linux (aports, master community/rapidjson), added 2026-11-27: CVE-2024-38517.patch
+patches = ["3b2441b87f99ab65f37b141a7b548ebadb607b96.patch", "862c39be371278a45a88d4d1d75164be57bb7e2d.patch", "char_traits-clang-19-errors.diff", "disable-bad-flags.patch", "no-vendor-gtest.patch", "CVE-2024-38517.patch"]
 hostdeps = ["cmake", "ninja", "pkgconf"]
 builddeps = ["gtest-devel"]
 

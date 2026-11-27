@@ -5,7 +5,9 @@
 # tc is off: it does not build against current kernel headers.
 name = "busybox"
 version = "1.37.0"
-release = 4
+release = 5
+# Security patches from Alpine Linux (aports, 3.23-stable main/busybox), added 2026-11-27: 0001-netstat-sanitize-process-names.patch, 0001-tar-fix-16018-masking-of-potentially-malicious-tar-cpio-content.patch, 0001-tar-fix-TOCTOU-symlink-race-condition.patch, 0005-libbb-sockaddr2str-ensure-only-printable-characters-.patch, 0011-nslookup-sanitize-all-printed-strings-with-printable.patch, 0026-awk.c-fix-CVE-2023-42366-bug-15874.patch
+patches = ["0001-netstat-sanitize-process-names.patch", "0001-tar-fix-16018-masking-of-potentially-malicious-tar-cpio-content.patch", "0001-tar-fix-TOCTOU-symlink-race-condition.patch", "0005-libbb-sockaddr2str-ensure-only-printable-characters-.patch", "0011-nslookup-sanitize-all-printed-strings-with-printable.patch", "0026-awk.c-fix-CVE-2023-42366-bug-15874.patch"]
 summary = "Many common UNIX utilities in one small static executable"
 license = "GPL-2.0-only"
 homepage = "https://busybox.net"

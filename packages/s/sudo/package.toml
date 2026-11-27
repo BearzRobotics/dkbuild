@@ -5,7 +5,9 @@
 # r3: static libraries too (in sudo-static), for fully static programs on musl.
 name = "sudo"
 version = "1.9.17_p2"
-release = 4
+release = 5
+# Security patches from Alpine Linux (aports, master community/sudo), added 2026-11-27: CVE-2026-96512.patch
+patches = ["CVE-2026-96512.patch"]
 summary = "Run commands as another user"
 license = "ISC"
 homepage = "https://www.sudo.ws"
