@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/kmime/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "kmime"
-version = "6.31.0"
+version = "6.32.0"
 release = 1
 summary = "KDE library for mail messages"
 license = "LGPL-2.0-or-later"
@@ -10,7 +10,7 @@ hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf", "qt6-
 builddeps = ["kcodecs-devel", "ki18n-devel", "qt6-qtdeclarative-devel"]
 
 source = [
-    { url = "https://download.kde.org/stable/frameworks/6.31/kmime-6.31.0.tar.xz", sha256 = "859a5c233ef0a70af76fe678da3b1d519086de9cd410826342bdf2c02eadcf90" },
+    { url = "https://download.kde.org/stable/frameworks/6.32/kmime-6.32.0.tar.xz", sha256 = "390870842f4b6afeab01a0f76b63e22f0b97f788f8815d847a43d7a4f23e7941" },
 ]
 
 setup = '''

@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/kimageformats/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "kimageformats"
-version = "6.31.0"
+version = "6.32.0"
 release = 1
 summary = "Image format plugins for Qt6"
 license = "LGPL-2.1-or-later"
@@ -10,7 +10,7 @@ hostdeps = ["cmake", "extra-cmake-modules", "ninja", "pkgconf"]
 builddeps = ["karchive-devel", "libavif-devel", "libheif-devel", "libjxl-devel", "libraw-devel", "openexr-devel", "openjpeg-devel", "qt6-qtbase-devel"]
 
 source = [
-    { url = "https://download.kde.org/stable/frameworks/6.31/kimageformats-6.31.0.tar.xz", sha256 = "62a0a92b6b7e117256c0ad115f1c7cc8ef343bb3b80b721cc9240cfa76657c8c" },
+    { url = "https://download.kde.org/stable/frameworks/6.32/kimageformats-6.32.0.tar.xz", sha256 = "298069eab84d34b909fc271d818b0762c6c63cc8490f2d8b0fe48dc0d8804b5c" },
 ]
 
 setup = '''

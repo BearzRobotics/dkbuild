@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "extra-cmake-modules"
-version = "6.31.0"
+version = "6.32.0"
 release = 1
 summary = "Extra modules and scripts for CMake"
 license = "BSD-3-Clause"
@@ -12,7 +12,7 @@ hostdeps = ["cmake", "ninja"]
 checkdeps = ["qt6-qtdeclarative-devel", "qt6-qttools-devel"]
 
 source = [
-    { url = "https://download.kde.org/stable/frameworks/6.31/extra-cmake-modules-6.31.0.tar.xz", sha256 = "8f74af329e4c918358bfe54316f8cf4d530c28444595a3e2fb15075f72877f17" },
+    { url = "https://download.kde.org/stable/frameworks/6.32/extra-cmake-modules-6.32.0.tar.xz", sha256 = "305f4e2b82eb073be6ac3e50ace85578b3c0c409be262ccc51d445449e3d9312" },
 ]
 
 setup = '''

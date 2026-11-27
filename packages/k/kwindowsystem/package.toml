@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "kwindowsystem"
-version = "6.31.0"
+version = "6.32.0"
 release = 1
 summary = "KDE windowing system access"
 license = "MIT AND (LGPL-2.1-only OR LGPL-3.0-only)"
@@ -15,7 +15,7 @@ checkdeps = []
 rundeps = ["qqc2-desktop-style"]
 
 source = [
-    { url = "https://download.kde.org/stable/frameworks/6.31/kwindowsystem-6.31.0.tar.xz", sha256 = "9968f66ba750432480960e321dd7ec32e2ea19a1596496f39147797684842f57" },
+    { url = "https://download.kde.org/stable/frameworks/6.32/kwindowsystem-6.32.0.tar.xz", sha256 = "43a32eb940c740f5acc917ce24c4939ba08b9e08c26091dbb5577ad0ef74f3a0" },
 ]
 
 setup = '''

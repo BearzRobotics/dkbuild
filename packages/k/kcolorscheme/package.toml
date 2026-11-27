@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "kcolorscheme"
-version = "6.31.0"
+version = "6.32.0"
 release = 1
 summary = "KDE library to interact with KColorScheme"
 license = "LGPL-2.0-or-later"
@@ -13,7 +13,7 @@ builddeps = ["kconfig-devel", "kguiaddons-devel", "ki18n-devel", "qt6-qtbase-dev
 checkdeps = ["dbus"]
 
 source = [
-    { url = "https://download.kde.org/stable/frameworks/6.31/kcolorscheme-6.31.0.tar.xz", sha256 = "41a8b12a4d9f4fdada70e4853879a2f43a7bf43e870a18c6038eebd956a1f863" },
+    { url = "https://download.kde.org/stable/frameworks/6.32/kcolorscheme-6.32.0.tar.xz", sha256 = "235c73afa46669c41cbe2e3a14c5a6ae1f8ad8cbb386b3f65261f65449d2b915" },
 ]
 
 setup = '''

@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "kconfigwidgets"
-version = "6.31.0"
+version = "6.32.0"
 release = 1
 summary = "KDE Widgets for configuration dialogs"
 license = "LGPL-2.1-only AND LGPL-2.1-or-later"
@@ -13,7 +13,7 @@ builddeps = ["kcodecs-devel", "kcolorscheme-devel", "kconfig-devel", "kcoreaddon
 checkdeps = ["dbus"]
 
 source = [
-    { url = "https://download.kde.org/stable/frameworks/6.31/kconfigwidgets-6.31.0.tar.xz", sha256 = "a9aa37565702ac1353c36cf16cc968c8aa336d33bcab9d0ff5419dd0b1dc92df" },
+    { url = "https://download.kde.org/stable/frameworks/6.32/kconfigwidgets-6.32.0.tar.xz", sha256 = "9d7f60aec2c8153e944d0916852942abb7a28459146b1383f3c540e49dd3da8d" },
 ]
 
 setup = '''

@@ -1,8 +1,8 @@
 # Imported from Chimera Linux cports: main/syntax-highlighting/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "syntax-highlighting"
-version = "6.31.0"
-release = 3
+version = "6.32.0"
+release = 1
 summary = "KDE Syntax highlighting engine for structured text and code"
 license = "MIT"
 homepage = "https://community.kde.org/Frameworks"
@@ -10,7 +10,7 @@ hostdeps = ["cmake", "extra-cmake-modules", "ninja", "perl", "pkgconf"]
 builddeps = ["qt6-qtdeclarative-devel", "qt6-qttools-devel"]
 
 source = [
-    { url = "https://download.kde.org/stable/frameworks/6.31/syntax-highlighting-6.31.0.tar.xz", sha256 = "7c2a64d3fd42ae433e9737b9cf6733b9ad3cb0e212285fd6820157d86831316c" },
+    { url = "https://download.kde.org/stable/frameworks/6.32/syntax-highlighting-6.32.0.tar.xz", sha256 = "561d01001509299ad0578a02365e6bc714f2799724ac5980bc021c1ec2a44a67" },
 ]
 
 setup = '''

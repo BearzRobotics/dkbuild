@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/kpty/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "kpty"
-version = "6.31.0"
+version = "6.32.0"
 release = 1
 summary = "KDE Interface to pseudo terminal devices"
 license = "LGPL-2.1-or-later"
@@ -10,7 +10,7 @@ hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja"]
 builddeps = ["kcoreaddons-devel", "ki18n-devel", "qt6-qttools-devel"]
 
 source = [
-    { url = "https://download.kde.org/stable/frameworks/6.31/kpty-6.31.0.tar.xz", sha256 = "432b0a8fed2d355e19131e3f63c7856e5cb26fe4932ecb840be9465fa072bcea" },
+    { url = "https://download.kde.org/stable/frameworks/6.32/kpty-6.32.0.tar.xz", sha256 = "ed8a6feee493a1b98930fb78d40e09a5a7983ec2f29ced0afc83ffbdb54f6152" },
 ]
 
 setup = '''

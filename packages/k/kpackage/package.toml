@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "kpackage"
-version = "6.31.0"
+version = "6.32.0"
 release = 1
 summary = "KDE Installation and loading of additional content as packages"
 license = "LGPL-2.1-or-later"
@@ -12,7 +12,7 @@ hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja"]
 builddeps = ["karchive-devel", "kcoreaddons-devel", "kdoctools-devel", "ki18n-devel", "qt6-qttools-devel"]
 
 source = [
-    { url = "https://download.kde.org/stable/frameworks/6.31/kpackage-6.31.0.tar.xz", sha256 = "cdfdc95ccc31f753f30d62918c8098d8544b08c10b70835628839198671c13a3" },
+    { url = "https://download.kde.org/stable/frameworks/6.32/kpackage-6.32.0.tar.xz", sha256 = "f3959f4a5956a29ce9bd083410d7df63d4f93a1a4e451cb87c2ccf834995e3ca" },
 ]
 
 setup = '''

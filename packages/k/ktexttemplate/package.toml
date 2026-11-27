@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/ktexttemplate/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "ktexttemplate"
-version = "6.31.0"
+version = "6.32.0"
 release = 1
 summary = "KDE library for text templates"
 license = "LGPL-2.1-or-later"
@@ -10,7 +10,7 @@ hostdeps = ["cmake", "extra-cmake-modules", "ninja"]
 builddeps = ["qt6-qtdeclarative-devel", "qt6-qttools-devel"]
 
 source = [
-    { url = "https://download.kde.org/stable/frameworks/6.31/ktexttemplate-6.31.0.tar.xz", sha256 = "461c0d1672430f646d98d89ec226912f7ace031fda020a209b9ce270fd146c0c" },
+    { url = "https://download.kde.org/stable/frameworks/6.32/ktexttemplate-6.32.0.tar.xz", sha256 = "074a1616a41600b358e20c40cab16113906c2394600a4fdc62a22696cc3d4156" },
 ]
 
 setup = '''

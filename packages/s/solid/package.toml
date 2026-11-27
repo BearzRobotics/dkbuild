@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "solid"
-version = "6.31.0"
+version = "6.32.0"
 release = 1
 summary = "KDE Hardware integration and detection"
 license = "LGPL-2.1-only OR LGPL-3.0-only"
@@ -13,7 +13,7 @@ hostdeps = ["bison", "cmake", "extra-cmake-modules", "flex", "ninja"]
 builddeps = ["libimobiledevice-devel", "libplist-devel", "qt6-qtbase-devel", "qt6-qttools-devel", "eudev-devel", "util-linux-devel"]
 
 source = [
-    { url = "https://download.kde.org/stable/frameworks/6.31/solid-6.31.0.tar.xz", sha256 = "82950a3d19a8b3ccac11bbcc297e132b975921e25b386f462abe5727a78f1e35" },
+    { url = "https://download.kde.org/stable/frameworks/6.32/solid-6.32.0.tar.xz", sha256 = "9620a6065403c5097fce0518abb7d4f038f4f11327e7ce94094ae9561bce0008" },
 ]
 
 setup = '''

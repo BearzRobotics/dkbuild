@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/kdnssd/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "kdnssd"
-version = "6.31.0"
+version = "6.32.0"
 release = 1
 summary = "KDE zeroconf integration"
 license = "GPL-2.0-or-later"
@@ -10,7 +10,7 @@ hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja", "pkgconf"]
 builddeps = ["avahi-devel", "qt6-qtbase-devel", "qt6-qttools-devel"]
 
 source = [
-    { url = "https://download.kde.org/stable/frameworks/6.31/kdnssd-6.31.0.tar.xz", sha256 = "7b5884ef22522bc25f8158546956b75b72f46e1af7765fedf4fb816b9c34574d" },
+    { url = "https://download.kde.org/stable/frameworks/6.32/kdnssd-6.32.0.tar.xz", sha256 = "60f8de14e4a6026c5e843355a180dadd038d6efe41eb9c9a2444971915466b41" },
 ]
 
 setup = '''

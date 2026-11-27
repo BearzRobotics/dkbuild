@@ -3,8 +3,8 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "kio"
-version = "6.31.0"
-release = 2
+version = "6.32.0"
+release = 1
 summary = "KDE Network transparent access to files and data"
 license = "LGPL-2.1-only AND LGPL-2.1-or-later AND (LGPL-2.1-only OR LGPL-3.0-only)"
 homepage = "https://community.kde.org/Frameworks"
@@ -16,7 +16,7 @@ rundeps = ["kded"]
 options = ["!check"]
 
 source = [
-    { url = "https://download.kde.org/stable/frameworks/6.31/kio-6.31.0.tar.xz", sha256 = "cdc8e3787be1f4a5c8f8a45fabab5cf540ef6380c549c6fd984f15f093b5eac0" },
+    { url = "https://download.kde.org/stable/frameworks/6.32/kio-6.32.0.tar.xz", sha256 = "d16d302a3db7a140703082f0a9a7c7127a5bff795c497f2ae7f8cbb53b100b59" },
 ]
 
 # r2: moc_predefs.h could not be generated ("clang++: error: no such file or directory: ' --target=x86_64-fenriros-linux-musl'"): the build's CXX is

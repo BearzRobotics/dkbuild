@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/bluez-qt/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "bluez-qt"
-version = "6.31.0"
+version = "6.32.0"
 release = 1
 summary = "Qt wrapper for Bluez 5 D-Bus API"
 license = "LGPL-2.1-or-later"
@@ -12,7 +12,7 @@ checkdeps = ["dbus"]
 rundeps = ["bluez"]
 
 source = [
-    { url = "https://download.kde.org/stable/frameworks/6.31/bluez-qt-6.31.0.tar.xz", sha256 = "22b25448c6b5372ee4fba15bb938e698a599cec0d69816ceb0405451c879c827" },
+    { url = "https://download.kde.org/stable/frameworks/6.32/bluez-qt-6.32.0.tar.xz", sha256 = "53f9705366f1e142e921f3ec314d673d51341bd20d358c33ebe8fe4218d2cd6b" },
 ]
 
 setup = '''

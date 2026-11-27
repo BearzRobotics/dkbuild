@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "kirigami"
-version = "6.31.0"
+version = "6.32.0"
 release = 1
 summary = "KDE's QtQuick based UI component set"
 license = "LGPL-2.0-only"
@@ -12,7 +12,7 @@ hostdeps = ["cmake", "extra-cmake-modules", "ninja"]
 builddeps = ["qt6-qtbase-devel", "qt6-qtdeclarative-devel", "qt6-qtsvg-devel", "qt6-qttools-devel"]
 
 source = [
-    { url = "https://download.kde.org/stable/frameworks/6.31/kirigami-6.31.0.tar.xz", sha256 = "811a8a150e636216269c0346e62470997fa282113a39e32b2d332bd5969926f0" },
+    { url = "https://download.kde.org/stable/frameworks/6.32/kirigami-6.32.0.tar.xz", sha256 = "1cb13ef3ad1885726c383bcd1a35c494db3e9c2cf87b49398ea34d63129cf6d7" },
 ]
 
 setup = '''

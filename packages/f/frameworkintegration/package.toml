@@ -1,7 +1,7 @@
 # Imported from Chimera Linux cports: main/frameworkintegration/template.py
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "frameworkintegration"
-version = "6.31.0"
+version = "6.32.0"
 release = 1
 summary = "Integration of Qt application with KDE workspaces"
 license = "LGPL-2.1-or-later"
@@ -10,7 +10,7 @@ hostdeps = ["cmake", "extra-cmake-modules", "gettext", "ninja"]
 builddeps = ["kcolorscheme-devel", "kconfig-devel", "ki18n-devel", "kiconthemes-devel", "knewstuff-devel", "knotifications-devel", "kpackage-devel", "kwidgetsaddons-devel", "qt6-qtdeclarative-devel", "qt6-qttools-devel"]
 
 source = [
-    { url = "https://download.kde.org/stable/frameworks/6.31/frameworkintegration-6.31.0.tar.xz", sha256 = "b76c5fb0379c9c33641d2aebd6449dc3af6e727e9ce35bc469611b28e6f47ad1" },
+    { url = "https://download.kde.org/stable/frameworks/6.32/frameworkintegration-6.32.0.tar.xz", sha256 = "874e13434e808cb0b2081af0f993e09236d0c3e44a6ae37d4fe724ee7547a912" },
 ]
 
 setup = '''

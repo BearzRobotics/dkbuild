@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "kitemviews"
-version = "6.31.0"
+version = "6.32.0"
 release = 1
 summary = "KDE Widget addons for Qt Model/View"
 license = "GPL-2.0-only AND LGPL-2.1-only"
@@ -13,7 +13,7 @@ builddeps = ["qt6-qtbase-devel", "qt6-qttools-devel"]
 options = ["!cross"]
 
 source = [
-    { url = "https://download.kde.org/stable/frameworks/6.31/kitemviews-6.31.0.tar.xz", sha256 = "cf0d9bf175619ed76cda99a20b04d349082a7c0e4bd1b2ce1dcf2631131cabcd" },
+    { url = "https://download.kde.org/stable/frameworks/6.32/kitemviews-6.32.0.tar.xz", sha256 = "fcd869d9e7cea6e296ae0240a6fab07f31762afcc3f427381db703f9fddaef28" },
 ]
 
 setup = '''

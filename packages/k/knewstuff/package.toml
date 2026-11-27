@@ -3,7 +3,7 @@
 # DRAFT, made by `dkbuild import-cbuild`: review every "TODO(cbuild)" and the
 # dependency names (they are Chimera's) before building.
 name = "knewstuff"
-version = "6.31.0"
+version = "6.32.0"
 release = 1
 summary = "Framework for downloading/sharing additional app data"
 license = "LGPL-2.1-or-later"
@@ -13,7 +13,7 @@ builddeps = ["attica-devel", "karchive-devel", "kconfig-devel", "kcoreaddons-dev
 rundeps = ["kirigami"]
 
 source = [
-    { url = "https://download.kde.org/stable/frameworks/6.31/knewstuff-6.31.0.tar.xz", sha256 = "c944c39ea454b956d0a71e6fe3d790aea46bd38447ea231ca21f3167f8dc1252" },
+    { url = "https://download.kde.org/stable/frameworks/6.32/knewstuff-6.32.0.tar.xz", sha256 = "91ee15856bb831d1f4022fb45c8b29b15be6e9330bbc8447fadeee9d6f16ab27" },
 ]
 
 setup = '''
