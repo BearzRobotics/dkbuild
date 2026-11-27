@@ -29,13 +29,13 @@
 # Not done: Odin's tests; aarch64 (box3d's library path is amd64 only).
 name = "odin"
 version = "2026.11a"
-release = 1
+release = 2
 summary = "The Odin programming language"
 license = "BSD-3-Clause"
 homepage = "https://odin-lang.org"
 archs = ["x86_64"]
 hostdeps = ["llvm22", "llvm-clang", "llvm-lld", "llvm-libcxx-devel", "make"]
-builddeps = ["llvm22", "llvm-libcxx-devel", "llvm-libunwind-devel", "zlib-ng-compat-devel", "zlib-ng-compat-static",
+builddeps = ["llvm22", "llvm-libcxx-devel", "zlib-ng-compat-devel", "zlib-ng-compat-static",
              "zstd-devel", "zstd-static"]
 rundeps = ["llvm-clang", "llvm-lld"]
 options = ["!check", "!lto", "!strip"]

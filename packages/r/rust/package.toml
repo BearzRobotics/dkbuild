@@ -30,7 +30,7 @@ license = "MIT OR Apache-2.0"
 homepage = "https://www.rust-lang.org"
 hostdeps = ["python", "cmake", "pkgconf", "llvm", "llvm-clang", "llvm-lld", "curl-devel"]
 stage0deps = ["rust-bootstrap"]
-builddeps = ["llvm22", "llvm-libcxx-devel", "llvm-libunwind-devel", "zlib-ng-compat-devel", "zlib-ng-compat-static",
+builddeps = ["llvm22", "llvm-libcxx-devel", "zlib-ng-compat-devel", "zlib-ng-compat-static",
              "zstd-devel", "zstd-static", "openssl-devel", "curl-devel", "libssh2-devel"]
 rundeps = ["llvm-clang", "llvm-lld", "musl-devel", "llvm-libunwind"]
 # rust-libs, up to 1.99.1-r7, held only the link /usr/lib/librustc_driver-*.so, which is back in rust (SPEC 5.7);

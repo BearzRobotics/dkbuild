@@ -24,13 +24,13 @@
 # run time (rundeps).
 name = "ldc"
 version = "1.43.0"
-release = 1
+release = 2
 summary = "The LLVM-based D compiler"
 license = "BSD-3-Clause"
 homepage = "https://github.com/ldc-developers/ldc"
 archs = ["x86_64"]
-hostdeps = ["cmake", "ninja", "llvm22", "llvm-clang", "llvm-lld", "llvm-libcxx-devel", "llvm-libunwind-devel"]
-builddeps = ["llvm22", "llvm-libcxx-devel", "llvm-libunwind-devel", "zlib-ng-compat-devel", "zlib-ng-compat-static",
+hostdeps = ["cmake", "ninja", "llvm22", "llvm-clang", "llvm-lld", "llvm-libcxx-devel"]
+builddeps = ["llvm22", "llvm-libcxx-devel", "zlib-ng-compat-devel", "zlib-ng-compat-static",
              "zstd-devel", "zstd-static", "linux-headers"]
 stage0deps = ["ldc-bootstrap"]
 rundeps = ["llvm-clang", "llvm-lld", "curl-libs"]
