@@ -189,6 +189,24 @@ sat for 10 to 25 minutes flushing to disk (2026-11-25): the test suite may be sl
 - ffmpeg builds against samba (`--enable-libsmbclient`), not the other way round; samba went to 4.23.13 on this day,
   so the rebuild is the first test of that pair. The user: ffmpeg was a pain to get built with it.
 
+## 2026-11-27: security reports that pointed to other series: reviewed
+
+The user's rule: upgrade where the security problem is major; ffmpeg held. Severity from NVD, OSV and GitHub, where
+they had one. Nothing here is built.
+
+- **Upgraded:** gpgme 2.3.1 (CVE-2026-129975, high), libraw 0.22.3 (six high, crafted images; 0.21 ended before
+  them; its soname changes), libvpx 1.16.0 (CVE-2026-1861, high; soname changes; ffmpeg builds against it), gzip
+  1.15 (low, a plain release of the same program). (Earlier the same day: incus 7.7.0.)
+- **Not open after all:** ruby (80212/80213: 3.4.13 has resolv 0.7.2; the other four fixed in 3.4.12 already);
+  valkey CVE-2026-130822 (NVD: fixed in 9.1.4); libssh CVE-2026-59842, -59851 (GSSAPI key exchange, not in 0.11.5);
+  aerc CVE-2025-49466 (open.go takes path.Base of the name); python-jwt (ours is the `jwt` project, not PyJWT);
+  libcdio CVE-2024-36600 (reported for 2.2.0; 2.1.0 copies at most the allocated length: by reading the code);
+  ffmpeg's seven (above).
+- **Kept, still open:** pkgconf 2.4.3 (two medium); giflib 5.2.2 CVE-2026-23868 (medium), CVE-2024-45993 (medium,
+  the gif2rgb tool); uriparser 0.9.8 (two, low); opencc 1.1.9 (CVE-2025-15536, low, local).
+- **Unknown:** mbedtls CVE-2026-50580, -90471 (not in 3.6.8's notes, not in NVD). **Not looked at:**
+  qt6-qtwebengine.
+
 ## `wallet-engine`'s cached dependency list: nothing to do
 
 An earlier note asked for `cache/cargodeps/45d22ed4...da2.list` to be deleted by hand: it was uniffi-bindgen-cpp's
