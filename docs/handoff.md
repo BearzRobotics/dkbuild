@@ -128,6 +128,21 @@ sat for 10 to 25 minutes flushing to disk (2026-11-25): the test suite may be sl
   after the rebuild. **LLVM is not to be updated now** (nor flang, clang-tools-extra and the others that share its
   version). `dkbuild upstream --refresh` gave 1129 results (work/upstream/report.txt); no recipe updated yet.
 
+## 2026-11-27: the ISOs' boot loader was the build machine's; the uncle's flashing console
+
+- **dkbuild bug, fixed:** `dkbuild image` ran a bare `dklilo`, so every ISO's boot loader was written
+  by the DKRescue root's old one (0.0.1), whatever the image installed. At a BIOS menu its keyboard did nothing
+  (reproduced in QEMU; dklilo 418b6bf, in 0.0.5, says it never worked and that disk read errors looked like
+  success). It now runs the image's `/target/usr/sbin/dklilo` for `mkiso-images` and `isohybrid`. The UEFI
+  `IoError` above was seen with the old loader; not tried since (UEFI waits).
+- **New ISOs** (10:50, 10:52; replace all earlier ones): sha256 `f734547b...7c7f` desktop, `57441d9e...e921` cli.
+  Package checks passed; BIOS menu Down+Enter boots the `-safe` entry (nomodeset) on both; normal BIOS boots good.
+- **Open:** on the uncle's computer, with the previous CLI live ISO, the console flashes between blank and text, the
+  login prompt over and over, on other ttys too, and something "looks like" a greeter. Cause unknown; not seen in
+  QEMU. The CLI ISO's files enable no greetd and nothing there depends on it. To do: try the `-safe` entry; if it
+  still happens, get the ISO's sha256, a photo or video, the graphics hardware, and whether the 2026-11-26 final ISO
+  does it too.
+
 ## `wallet-engine`'s cached dependency list: nothing to do
 
 An earlier note asked for `cache/cargodeps/45d22ed4...da2.list` to be deleted by hand: it was uniffi-bindgen-cpp's

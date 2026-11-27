@@ -223,6 +223,21 @@ Details and per-package notes: `docs/requests.md` and `wip/`.
   stage 2 as above.
 - Optional per-target GCC cross suites and every LLVM backend stay as they are:
   AVR code is built without LTO.
+- **A system-setup tool of our own** (idea, 2026-11-27; only if it becomes important enough: not planned work).
+  Modeled on the ideas of Solus's usysconf (the Go version, github.com/getsolus/usysconf, keeps its rules in TOML;
+  only its READMEs, some folder listings and recent history were read), written for apk rather than ported.
+  - apk keeps deciding when to run it, through its triggers; the tool does the setup and can rerun it to repair a
+    system. It tracks no packages.
+  - Rules: small TOML files, which packages ship: the program to run, when it is needed, what must run first.
+  - Commands: `list`, `run <name>`, `run --all`, and a preview of what would run.
+  - Every task safe to run again. Failures logged by name, with a failing exit status and an easy retry.
+  - Works on another root (image builds), skipping what needs a running system, such as restarting a service.
+  - It may run as root: rules only from protected system folders; commands run without building shell strings.
+  - Zig, like the other tools.
+  - **First:** wait for a real need (setup scripts repeating the same work, or users needing an easy repair). List
+    what today's triggers and install scripts do (some work belongs only to install or removal and must not be
+    rerun as repair), test what apk can already rerun, and try a few existing triggers to see whether a separate
+    tool makes things simpler. After the uncle's boot problems and the world rebuild.
 - **Package deltas** (for discussion, not decided): a patch from the previous
   release of a package to the new one, to cut update downloads. The user knows
   it from the Solus project. Producing them is the easy half (a binary diff of
