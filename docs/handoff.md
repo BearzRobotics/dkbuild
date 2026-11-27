@@ -207,6 +207,23 @@ they had one. Nothing here is built.
 - **Unknown:** mbedtls CVE-2026-50580, -90471 (not in 3.6.8's notes, not in NVD). **Not looked at:**
   qt6-qtwebengine.
 
+## 2026-11-27: KDE release sets and patch releases (none built)
+
+- KDE: Frameworks 6.32.0 (73), Plasma 6.8.3 (58), Gear 26.08.3 (172). Patch releases: 236 recipes. `dkbuild upstream
+  --refresh` gave 1098 results first; LLVM and everything sharing its version left out.
+- Checked for each: sources and vendored dependencies fetched, patches apply, licence files (and those the recipe
+  installs), old version strings left behind, other sources, the recipe's `sed -i` edits still changing files, go.mod
+  and rust-version, one top-level folder in the tarball. A configure or build change shows only in the rebuild.
+- **Kept at the old version (37):**
+  - a patch no longer applies: grafana, hunspell, ibus, krita, libaec, libetonyek, libmodplug, libopenmpt,
+    libphonenumber, lomiri-trust-store, scdoc, tcl
+  - a source edit changed or was not checkable, or a bundled source did not move: ldacbt, libcurl-impersonate,
+    ollama, openshadinglanguage, orcaslicer, tesseract, uptime-kuma, zaproxy
+  - lock file in files/ to be re-made: libera-suite, rocketchat-electron, wasm-bindgen-cli0.2.120
+  - other: djvulibre, python-libpass
+  - the new source's address was not found or did not download: clojure, collabora-online, dash, dialog, exabgp,
+    fortune-mod, freebasic, imagemagick, libreoffice, libstatgrab, r-base, xorriso
+
 ## `wallet-engine`'s cached dependency list: nothing to do
 
 An earlier note asked for `cache/cargodeps/45d22ed4...da2.list` to be deleted by hand: it was uniffi-bindgen-cpp's
