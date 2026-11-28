@@ -4,7 +4,7 @@
 # r2: static libraries too (in file-static), for fully static programs on musl.
 name = "file"
 version = "5.48"
-release = 3
+release = 4
 summary = "File type identification utility"
 license = "BSD-2-Clause"
 homepage = "http://www.darwinsys.com/file"

@@ -6,7 +6,7 @@
 # r3: static libraries too (in e2fsprogs-static), for fully static programs on musl.
 name = "e2fsprogs"
 version = "1.47.4"
-release = 3
+release = 4
 summary = "Ext2/3/4 file system utilities"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://e2fsprogs.sourceforge.net"

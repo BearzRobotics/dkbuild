@@ -14,7 +14,7 @@
 # with lld (exported unversioned, as with GNU ld).
 name = "fuse2"
 version = "2.9.9"
-release = 1
+release = 2
 summary = "Filesystem in USErspace, FUSE 2 library (libfuse 2.9)"
 license = "LGPL-2.1-only AND GPL-2.0-only"
 homepage = "https://github.com/libfuse/libfuse"
