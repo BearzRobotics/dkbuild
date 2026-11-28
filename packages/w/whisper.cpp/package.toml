@@ -23,15 +23,19 @@
 # standard headers they forget, through CXXFLAGS. The upstream cmake/pkgconfig files are replaced (they would
 # point at /usr/lib/libggml.so and /usr/lib/cmake/ggml, which are not there) and the
 # cmake config packages are dropped for the same reason.
+# r2: provides its private ggml (SPEC.md 5.6): ffmpeg links /usr/lib/whisper.cpp/libggml.so.1 through the rpath in whisper.pc.
+# Until 1.9.6 llama-cpp-libs' own libggml.so.0 satisfied that dependency by chance; with .so.1 no package did, and the
+# images could not be made (2026-11-28).
 name = "whisper.cpp"
 version = "1.9.6"
-release = 1
+release = 2
 summary = "Whisper speech recognition in C/C++, with Vulkan and BLAS backends"
 license = "MIT"
 homepage = "https://github.com/ggml-org/whisper.cpp"
 hostdeps = ["cmake", "ninja", "pkgconf", "shaderc"]
 builddeps = ["vulkan-headers-devel", "vulkan-loader-devel", "openmp-devel", "openblas-devel"]
 rundeps = ["vulkan-loader"]
+provides = ["so:libggml.so.1", "so:libggml-base.so.1"]
 options = ["!check"]
 
 source = [
