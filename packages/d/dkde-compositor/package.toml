@@ -4,30 +4,36 @@
 # tarball's vendored dependencies (zig-pkg/, offline: --system). With it installed, labwc becomes optional: select it
 # with `compositor=dkde-compositor` in ~/.config/dkde/session.conf or DKDE_COMPOSITOR (the session entry
 # dkde-compositor.desktop is installed). Same source and version as dkde.
+# 0.3.6_pre20261127 (the user, 2026-11-27: "dkde is latest git ... it will include the tty switching"; 0.3.6 is not
+# released yet): commit 48f21b6, from GitHub's archive of it, which has no zig-pkg/ (option `zigdeps`).
+# Built from the tree's top build.zig (-Dapp=compositor). It now needs GLES2 and EGL (libglvnd-devel). Its session entry,
+# dkde-compositor.desktop, is gone: dkde's dkde.desktop starts it by default. Not built.
 name = "dkde-compositor"
-version = "0.3.5"
+version = "0.3.6_pre20261127"
 release = 1
 summary = "DKDE's Wayland compositor (experimental)"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dkde"
 archs = ["x86_64"]
 hostdeps = ["zig", "pkgconf", "wayland"]
-builddeps = ["wlroots0.20-devel", "wayland-devel", "wayland-protocols", "libxkbcommon-devel", "pixman-devel", "libinput-devel"]
+builddeps = ["wlroots0.20-devel", "wayland-devel", "wayland-protocols", "libxkbcommon-devel", "pixman-devel", "libinput-devel", "libglvnd-devel"]
 rundeps = ["dkde", "seatd"]
-options = ["!check"]
+options = ["zigdeps", "!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/dkde/releases/download/v0.3.5/dkde-v0.3.5.tar.gz", sha256 = "02451443cb3b7f6e2c579d08ac50d49819b72cae1f89a60691645c13723cd9e7" },
+    { url = "https://github.com/BearzRobotics/dkde/archive/48f21b64b5bd897240ec4f16500c19bd28d62759.tar.gz", sha256 = "22ddf6011d6cf510caf6a597049d8d270dee546e4318abd535ff066a84f3d875" },
 ]
 
-build = '''
-cd src/compositor
-zig build --release=safe --prefix /usr -Dcpu=$zig_cpu -Dwlroots=0.20 --system "$srcdir/zig-pkg" -j$jobs
-'''
 install = '''
-cd src/compositor
-DESTDIR=$pkgdir zig build --release=safe --prefix /usr -Dcpu=$zig_cpu -Dwlroots=0.20 --system "$srcdir/zig-pkg" -j$jobs install
-cd ../..
-install -Dm644 data/dkde-compositor.desktop "$pkgdir/usr/share/wayland-sessions/dkde-compositor.desktop"
+# uucode's generator runs through ../.. from inside zig-pkg/uucode-*, which
+# must not be a link into the package store (as in dkconsole): copied instead
+for p in zig-pkg/*; do
+    [ -L "$p" ] || continue
+    t=$(readlink -f "$p"); rm "$p"; cp -a "$t" "$p"
+done
+%zig_build -Dapp=compositor -Dwlroots=0.20
+# a one-part build also installs the shared settings files, which are the dkde package's
+rm "$pkgdir/usr/share/dkde/style.css" "$pkgdir/usr/share/dkde/dkde.toml"
+rmdir "$pkgdir/usr/share/dkde"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/dkde-compositor/LICENSE"
 '''

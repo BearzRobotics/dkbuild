@@ -2,8 +2,12 @@
 # a work area per monitor, title bars for windows that draw none, the same shortcuts and settings file as
 # dkde-compositor. A separate Zig package inside the dkde tarball (src/xwm), built against the tarball's vendored
 # dependencies (offline: --system). `dkde-session --x11` starts an X11 session with it (it needs an X server: Xorg or Xvfb).
+# 0.3.6_pre20261127 (the user, 2026-11-27: "dkde is latest git ... it will include the tty switching"; 0.3.6 is not
+# released yet): commit 48f21b6, from GitHub's archive of it, which has no zig-pkg/ (option `zigdeps`).
+# Built from the tree's top build.zig (-Dapp=wm), which also installs the X11 login entry, dkde-x11.desktop (before, no
+# package here installed it). The other recipes of dkde need the same commit. Not built.
 name = "dkde-wm"
-version = "0.3.5"
+version = "0.3.6_pre20261127"
 release = 1
 summary = "DKDE's X11 window manager (experimental)"
 license = "MIT"
@@ -12,19 +16,22 @@ archs = ["x86_64"]
 hostdeps = ["zig", "pkgconf"]
 builddeps = ["libxcb-devel", "libxkbcommon-devel", "pango-devel", "cairo-devel"]
 rundeps = ["dkde"]
-options = ["!check"]
+options = ["zigdeps", "!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/dkde/releases/download/v0.3.5/dkde-v0.3.5.tar.gz", sha256 = "02451443cb3b7f6e2c579d08ac50d49819b72cae1f89a60691645c13723cd9e7" },
+    { url = "https://github.com/BearzRobotics/dkde/archive/48f21b64b5bd897240ec4f16500c19bd28d62759.tar.gz", sha256 = "22ddf6011d6cf510caf6a597049d8d270dee546e4318abd535ff066a84f3d875" },
 ]
 
-build = '''
-cd src/xwm
-zig build --release=safe --prefix /usr -Dcpu=$zig_cpu --system "$srcdir/zig-pkg" -j$jobs
-'''
 install = '''
-cd src/xwm
-DESTDIR=$pkgdir zig build --release=safe --prefix /usr -Dcpu=$zig_cpu --system "$srcdir/zig-pkg" -j$jobs install
-cd ../..
+# uucode's generator runs through ../.. from inside zig-pkg/uucode-*, which
+# must not be a link into the package store (as in dkconsole): copied instead
+for p in zig-pkg/*; do
+    [ -L "$p" ] || continue
+    t=$(readlink -f "$p"); rm "$p"; cp -a "$t" "$p"
+done
+%zig_build -Dapp=wm
+# a one-part build also installs the shared settings files, which are the dkde package's
+rm "$pkgdir/usr/share/dkde/style.css" "$pkgdir/usr/share/dkde/dkde.toml"
+rmdir "$pkgdir/usr/share/dkde"
 install -Dm644 LICENSE "$pkgdir/usr/share/licenses/dkde-wm/LICENSE"
 '''
