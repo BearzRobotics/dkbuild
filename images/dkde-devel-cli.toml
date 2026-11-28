@@ -86,8 +86,8 @@ packages = ["base", "openssh", "openssh-server", "curl", "linux", "live-initramf
 # the tree command, with its manual
 "tree", "tree-doc",
 # FOR NOW too: what clang, C++, static links and rustc need from those packages. The rebuilt base-devel brings
-# what is needed by itself, and there is no rust-libs after the rebuild (this line then fails the image).
-"llvm-libcxx-devel", "musl-static", "llvm-static", "rust-libs"]
+# what is needed by itself.
+"llvm-libcxx-devel", "musl-static", "llvm-static"]
 #exclude  = ["*-devel", "*-doc", "*-static"]
 # never installed, even as a dependency (apk stops with a conflict if something needs it)
 unwanted = ["dhcpcd"]
