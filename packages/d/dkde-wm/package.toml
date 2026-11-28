@@ -2,12 +2,12 @@
 # a work area per monitor, title bars for windows that draw none, the same shortcuts and settings file as
 # dkde-compositor. A separate Zig package inside the dkde tarball (src/xwm), built against the tarball's vendored
 # dependencies (offline: --system). `dkde-session --x11` starts an X11 session with it (it needs an X server: Xorg or Xvfb).
-# 0.3.6_pre20261127 (the user, 2026-11-27: "dkde is latest git ... it will include the tty switching"; 0.3.6 is not
-# released yet): commit 48f21b6, from GitHub's archive of it, which has no zig-pkg/ (option `zigdeps`).
+# 0.3.6 (2026-11-27, the user gave the release): the release tarball, which has zig-pkg/. It replaces the pin to commit
+# 48f21b6 (0.3.6_pre20261127), made for console switching.
 # Built from the tree's top build.zig (-Dapp=wm), which also installs the X11 login entry, dkde-x11.desktop (before, no
-# package here installed it). The other recipes of dkde need the same commit. Not built.
+# package here installed it). The other recipes of dkde need the same version. Not built.
 name = "dkde-wm"
-version = "0.3.6_pre20261127"
+version = "0.3.6"
 release = 1
 summary = "DKDE's X11 window manager (experimental)"
 license = "MIT"
@@ -19,7 +19,7 @@ rundeps = ["dkde"]
 options = ["zigdeps", "!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/dkde/archive/48f21b64b5bd897240ec4f16500c19bd28d62759.tar.gz", sha256 = "22ddf6011d6cf510caf6a597049d8d270dee546e4318abd535ff066a84f3d875" },
+    { url = "https://github.com/BearzRobotics/dkde/releases/download/v0.3.6/dkde-v0.3.6.tar.gz", sha256 = "2f0e98e882c2f141f719cf25f4b3ede1f3a92f72287f225467df2c142e4aad2f" },
 ]
 
 install = '''

@@ -4,12 +4,12 @@
 # tarball's vendored dependencies (zig-pkg/, offline: --system). With it installed, labwc becomes optional: select it
 # with `compositor=dkde-compositor` in ~/.config/dkde/session.conf or DKDE_COMPOSITOR (the session entry
 # dkde-compositor.desktop is installed). Same source and version as dkde.
-# 0.3.6_pre20261127 (the user, 2026-11-27: "dkde is latest git ... it will include the tty switching"; 0.3.6 is not
-# released yet): commit 48f21b6, from GitHub's archive of it, which has no zig-pkg/ (option `zigdeps`).
+# 0.3.6 (2026-11-27, the user gave the release): the release tarball, which has zig-pkg/. It replaces the pin to commit
+# 48f21b6 (0.3.6_pre20261127), made for console switching.
 # Built from the tree's top build.zig (-Dapp=compositor). It now needs GLES2 and EGL (libglvnd-devel). Its session entry,
 # dkde-compositor.desktop, is gone: dkde's dkde.desktop starts it by default. Not built.
 name = "dkde-compositor"
-version = "0.3.6_pre20261127"
+version = "0.3.6"
 release = 1
 summary = "DKDE's Wayland compositor (experimental)"
 license = "MIT"
@@ -21,7 +21,7 @@ rundeps = ["dkde", "seatd"]
 options = ["zigdeps", "!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/dkde/archive/48f21b64b5bd897240ec4f16500c19bd28d62759.tar.gz", sha256 = "22ddf6011d6cf510caf6a597049d8d270dee546e4318abd535ff066a84f3d875" },
+    { url = "https://github.com/BearzRobotics/dkde/releases/download/v0.3.6/dkde-v0.3.6.tar.gz", sha256 = "2f0e98e882c2f141f719cf25f4b3ede1f3a92f72287f225467df2c142e4aad2f" },
 ]
 
 install = '''

@@ -7,9 +7,9 @@
 # packaging/build.sh also writes a greetd login screen and PAM files; this
 # system logs in on dkconsole and has no PAM, so those are not part of this package.
 #
-# 0.3.6_pre20261127 (the user, 2026-11-27: "dkde is latest git ... it will include the tty switching"; 0.3.6 is not
-# released yet): commit 48f21b6, from GitHub's archive of it, which has no zig-pkg/ (option `zigdeps`).
-# Upstream calls this a pre-release: dkde-compositor is now the default of the session and the login screen (labwc is
+# 0.3.6 (2026-11-27, the user gave the release): the release tarball, which has zig-pkg/. It replaces the pin to commit
+# 48f21b6 (0.3.6_pre20261127), made for console switching.
+# Upstream calls 0.3.6 a pre-release: dkde-compositor is now the default of the session and the login screen (labwc is
 # the backup), not tried by upstream on a real boot; if the login screen fails, in /etc/greetd/config.toml:
 # command = "env DKDE_GREETER_COMPOSITOR=labwc dkde-greeter-session". A plain `zig build` now builds the compositor and
 # window manager too: left out here (their own recipes). Not packaged: dkde-xcomp, the X11 compositing manager
@@ -29,7 +29,7 @@
 # NOT BUILT YET: needs gtk4, gtk4-layer-shell, wayland, cairo, pango, glib and the
 # Zig dependency fetch to have been run (`dkbuild fetch dkde`).
 name = "dkde"
-version = "0.3.6_pre20261127"
+version = "0.3.6"
 release = 1
 summary = "A Wayland desktop shell in Zig on GTK4 and labwc"
 license = "MIT"
@@ -45,7 +45,7 @@ rundeps = ["labwc", "seatd", "dbus", "polkit", "gvfs", "gnome-online-accounts", 
 options = ["zigdeps", "!check"]
 
 source = [
-    { url = "https://github.com/BearzRobotics/dkde/archive/48f21b64b5bd897240ec4f16500c19bd28d62759.tar.gz", sha256 = "22ddf6011d6cf510caf6a597049d8d270dee546e4318abd535ff066a84f3d875" },
+    { url = "https://github.com/BearzRobotics/dkde/releases/download/v0.3.6/dkde-v0.3.6.tar.gz", sha256 = "2f0e98e882c2f141f719cf25f4b3ede1f3a92f72287f225467df2c142e4aad2f" },
 ]
 
 install = '''
