@@ -8,12 +8,11 @@
 # that need the upstream test images (not in the tarball).
 name = "quirc"
 version = "1.2"
-release = 4
+release = 5
 summary = "QR code decoder library"
-# r3 (2026-11-20): provides so:libquirc.so. The library has no soname, so a program linked against it records the file name
-# libquirc.so (ffmpeg-libs r15 does) and the scanner only offers so:libquirc.so.1.2; without this ffmpeg-libs cannot be installed
-# (found when the dkde-devel image failed: "so:libquirc.so (no such package)"). Declared here, as perl does for libperl.so, so ffmpeg is not rebuilt.
-provides = ["so:libquirc.so"]
+# r5 (2026-11-28): linked with a soname, libquirc.so.1. r3 and r4 instead declared provides so:libquirc.so on the main
+# package, which does not hold that file (it is quirc-devel's link): images installed ffmpeg-libs without it, and
+# ffmpeg could not start. ffmpeg has to be rebuilt after this.
 license = "ISC"
 homepage = "https://github.com/dlbeer/quirc"
 hostdeps = ["pkgconf"]
@@ -29,14 +28,14 @@ source = [
 # the shell ("EOF in backquote substitution"). The library and quirc-scanner do not
 # use SDL (the SDL demos are not built), so the variables are emptied on the command line.
 build = '''
-make libquirc.a libquirc.so quirc-scanner CFLAGS="$CFLAGS -fPIC" SDL_CFLAGS= SDL_LIBS= OPENCV_CFLAGS=
+make libquirc.a libquirc.so quirc-scanner CFLAGS="$CFLAGS -fPIC" SDL_CFLAGS= SDL_LIBS= OPENCV_CFLAGS= LDFLAGS="$LDFLAGS -Wl,-soname,libquirc.so.1"
 '''
 install = '''
 install -Dm644 lib/quirc.h "$pkgdir/usr/include/quirc.h"
 install -Dm644 libquirc.a "$pkgdir/usr/lib/libquirc.a"
 install -Dm755 libquirc.so.1.2 "$pkgdir/usr/lib/libquirc.so.1.2"
-# The Makefile installs only libquirc.so.1.2; the library has no soname set
-# (it is linked without -Wl,-soname), so both links are created here.
+# The Makefile installs only libquirc.so.1.2, so the soname link and the
+# development link are created here.
 ln -s libquirc.so.1.2 "$pkgdir/usr/lib/libquirc.so.1"
 ln -s libquirc.so.1.2 "$pkgdir/usr/lib/libquirc.so"
 install -Dm755 quirc-scanner "$pkgdir/usr/bin/quirc-scanner"

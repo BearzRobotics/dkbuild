@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "gdb"
 version = "17.2"
-release = 2
+release = 3
 summary = "GNU debugger"
 license = "GPL-3.0-or-later"
 homepage = "https://www.gnu.org/software/gdb"

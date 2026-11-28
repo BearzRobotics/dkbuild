@@ -22,7 +22,7 @@
 # r5: rewritten (the import lost the waf configure), split client/libs/python.
 name = "samba"
 version = "4.23.13"
-release = 1
+release = 2
 summary = "SMB/CIFS file, print, and login server for Unix"
 license = "GPL-3.0-or-later"
 homepage = "https://www.samba.org"

@@ -5,10 +5,12 @@
 #     patches; libelf.a kept. Only libelf was built before.
 # r4: debuginfod, the client library (elfutils-debuginfod-libs) and the server
 #   (elfutils-debuginfod), as Chimera splits them.
+# r6: libdebuginfod-<version>.so, the real library, went to elfutils-libs (a *.so pattern takes only links) and its
+#   libdebuginfod.so.1 link to elfutils-debuginfod-libs: gdb installed without the link and could not start (2026-11-28).
 # r2: static libraries too (in elfutils-static), for fully static programs on musl.
 name = "elfutils"
 version = "0.193"
-release = 5
+release = 6
 summary = "Utilities and libraries to handle ELF files and DWARF data"
 license = "GPL-3.0-or-later AND (GPL-2.0-or-later OR LGPL-3.0-or-later)"
 homepage = "https://sourceware.org/elfutils"
@@ -55,4 +57,4 @@ paths   = ["/usr/bin/debuginfod*", "/usr/share/man/man1/debuginfod*", "/usr/shar
 # the client library that debuggers and tools use to fetch debug info
 [subpackages.debuginfod-libs]
 summary = "debuginfod client library"
-paths   = ["/etc/profile.d", "/usr/lib/libdebuginfod.so.*", "/usr/lib/libdebuginfod-*.so"]
+paths   = ["/etc/profile.d", "/usr/lib/libdebuginfod.so.*", "/usr/lib/libdebuginfod-*"]
