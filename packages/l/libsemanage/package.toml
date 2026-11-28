@@ -3,7 +3,7 @@
 # Not built (queued, wip/queue): expect first-build fixes.
 name = "libsemanage"
 version = "3.11"
-release = 1
+release = 2
 summary = "SELinux policy management library (libsemanage)"
 license = "LGPL-2.0-or-later"
 homepage = "https://github.com/SELinuxProject/selinux"

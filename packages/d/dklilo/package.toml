@@ -4,7 +4,7 @@
 # 0.0.5 (2026-11-26): new upstream release.
 name = "dklilo"
 version = "0.0.5"
-release = 1
+release = 2
 summary = "A modern LILO: BIOS and UEFI boot loader that reads filesystems itself"
 license = "MIT"
 homepage = "https://github.com/BearzRobotics/dklilo"

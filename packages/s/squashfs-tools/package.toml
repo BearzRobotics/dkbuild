@@ -1,7 +1,7 @@
 # Follows the DKRescue post's build of squashfs-tools 4.7.5.
 name = "squashfs-tools"
 version = "4.7.5"
-release = 1
+release = 2
 summary = "Squashfs filesystem tools"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/plougher/squashfs-tools"

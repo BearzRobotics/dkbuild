@@ -3,7 +3,7 @@
 # Not built (queued, wip/queue): expect first-build fixes.
 name = "audit"
 version = "4.2.1"
-release = 1
+release = 2
 summary = "Linux Audit userspace: libaudit, auditd, auditctl, ausearch (needed by the SELinux tools)"
 license = "LGPL-2.1-or-later"
 homepage = "https://github.com/linux-audit/audit-userspace"
