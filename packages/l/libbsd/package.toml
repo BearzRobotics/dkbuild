@@ -5,7 +5,7 @@
 # tests need); its gsed wrapper is not needed, FenrirOS's sed is GNU sed.
 name = "libbsd"
 version = "0.12.2"
-release = 1
+release = 2
 summary = "Commonly used BSD functions not implemented by all libcs"
 license = "BSD-3-Clause"
 homepage = "https://libbsd.freedesktop.org"

@@ -8,7 +8,7 @@
 # needed by: ffmpeg (libsvtjpegxs).
 name = "svt-jpeg-xs"
 version = "0.10.0"
-release = 2
+release = 3
 summary = "SVT JPEG XS encoder and decoder"
 license = "BSD-2-Clause-Patent"
 homepage = "https://github.com/OpenVisualCloud/SVT-JPEG-XS"

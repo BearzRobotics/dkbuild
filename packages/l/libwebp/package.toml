@@ -4,7 +4,7 @@
 # r2: rebuilt with libraries in /usr/lib (the %cmake macro set no libdir; they went to /usr/lib64).
 name = "libwebp"
 version = "1.6.0"
-release = 3
+release = 4
 summary = "WebP image format library"
 license = "BSD-3-Clause"
 homepage = "https://chromium.googlesource.com/webm/libwebp"

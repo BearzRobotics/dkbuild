@@ -6,7 +6,7 @@
 # r4 (2026-11-26): no usr/share/info/dir in -doc (it conflicted with other -doc packages).
 name = "parted"
 version = "3.8"
-release = 4
+release = 5
 summary = "GNU parted"
 license = "GPL-3.0-or-later"
 homepage = "http://www.gnu.org/software/parted"

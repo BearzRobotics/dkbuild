@@ -4,7 +4,7 @@
 # r2: static libraries too (in libxfixes-static), for fully static programs on musl.
 name = "libxfixes"
 version = "6.0.2"
-release = 2
+release = 3
 summary = "Xfixes library and extension of X RandR"
 license = "MIT"
 homepage = "https://xorg.freedesktop.org"

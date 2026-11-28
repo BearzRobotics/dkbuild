@@ -8,7 +8,7 @@
 # needed by: ffmpeg (libxavs2).
 name = "xavs2"
 version = "1.4"
-release = 3
+release = 4
 summary = "AVS2 video encoder"
 license = "GPL-2.0-or-later"
 homepage = "https://github.com/pkuvcl/xavs2"

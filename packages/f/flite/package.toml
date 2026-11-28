@@ -10,7 +10,7 @@
 # no pkg-config file (FFmpeg's configure links -lflite_* directly).
 name = "flite"
 version = "2.2"
-release = 1
+release = 2
 summary = "Small fast speech synthesis engine"
 license = "BSD-3-Clause"
 homepage = "http://www.festvox.org/flite"

@@ -5,7 +5,7 @@
 # Not enabled by itself: nothing but a dependent service starts it.
 name = "wpa-supplicant"
 version = "2.12"
-release = 3
+release = 4
 summary = "WPA/WPA2/IEEE 802.1X Supplicant"
 license = "BSD-3-Clause"
 homepage = "http://w1.fi/wpa_supplicant"

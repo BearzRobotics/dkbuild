@@ -5,7 +5,7 @@
 # r3: static libraries too (in libusb-static), for fully static programs on musl.
 name = "libusb"
 version = "1.0.30"
-release = 3
+release = 4
 summary = "Library for userspace USB device access"
 license = "LGPL-2.1-or-later"
 homepage = "https://libusb.info"

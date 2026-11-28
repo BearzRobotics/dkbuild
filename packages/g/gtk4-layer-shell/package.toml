@@ -6,7 +6,7 @@
 # r4: static libraries too (in gtk4-layer-shell-static), for fully static programs on musl.
 name = "gtk4-layer-shell"
 version = "1.3.0"
-release = 5
+release = 6
 summary = "Library to create panels and other desktop components for Wayland"
 license = "MIT"
 homepage = "https://github.com/wmww/gtk4-layer-shell"

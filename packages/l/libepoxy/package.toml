@@ -7,7 +7,7 @@
 # 2026-11-11: X11 and GLX too (GTK's X11 backends use GLX).
 name = "libepoxy"
 version = "1.5.10"
-release = 6
+release = 7
 summary = "Library for handling OpenGL function pointers"
 license = "MIT"
 homepage = "https://github.com/anholt/libepoxy"

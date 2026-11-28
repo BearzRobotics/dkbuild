@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "libxkbfile"
 version = "1.2.0"
-release = 1
+release = 2
 summary = "Xkbfile library from X.org"
 license = "MIT"
 homepage = "https://xorg.freedesktop.org"

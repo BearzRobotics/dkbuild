@@ -2,7 +2,7 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "iptables"
 version = "1.8.13"
-release = 2
+release = 3
 summary = "Linux packet filtering system"
 license = "GPL-2.0-only"
 homepage = "https://www.netfilter.org/projects/iptables"

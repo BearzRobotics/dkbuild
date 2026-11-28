@@ -6,7 +6,7 @@
 # the .gir files), with the options its dependencies now allow.
 name = "gdk-pixbuf"
 version = "2.44.8"
-release = 4
+release = 5
 summary = "Image loading library for GTK"
 license = "LGPL-2.1-or-later"
 homepage = "https://wiki.gnome.org/Projects/GdkPixbuf"

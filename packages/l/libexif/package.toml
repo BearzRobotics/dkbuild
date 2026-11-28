@@ -2,7 +2,7 @@
 # EXIF data in JPEG files. needed by: libcupsfilters (image orientation when printing photos).
 name = "libexif"
 version = "0.6.26"
-release = 1
+release = 2
 summary = "Library to parse EXIF data"
 license = "LGPL-2.1-or-later"
 homepage = "https://libexif.github.io"

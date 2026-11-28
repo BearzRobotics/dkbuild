@@ -4,7 +4,7 @@
 # r2: static libraries too (in libdisplay-info-static), for fully static programs on musl.
 name = "libdisplay-info"
 version = "0.3.0"
-release = 2
+release = 3
 summary = "EDID and DisplayID library"
 license = "MIT"
 homepage = "https://gitlab.freedesktop.org/emersion/libdisplay-info"

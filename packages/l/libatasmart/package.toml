@@ -2,7 +2,7 @@
 # needed by: udisks, libblockdev.
 name = "libatasmart"
 version = "0.19"
-release = 2
+release = 3
 summary = "ATA S.M.A.R.T. reading and parsing library"
 license = "LGPL-2.1-or-later"
 homepage = "https://0pointer.de/blog/projects/being-smart.html"

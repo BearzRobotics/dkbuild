@@ -1,7 +1,7 @@
 # C++/Python bindings. needed by: python-pikepdf.
 name = "python-nanobind"
 version = "3.1.0"
-release = 2
+release = 3
 summary = "nanobind for Python"
 license = "MIT"
 homepage = "https://pypi.org/project/nanobind"

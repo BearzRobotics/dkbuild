@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "fftw"
 version = "3.3.10"
-release = 1
+release = 2
 summary = "Library for computing the discrete Fourier transform"
 license = "GPL-2.0-or-later"
 homepage = "http://www.fftw.org"

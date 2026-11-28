@@ -8,7 +8,7 @@
 # getpeereid and reallocarray, which musl does not have.
 name = "sndio"
 version = "1.11.0"
-release = 2
+release = 3
 summary = "Small audio and MIDI framework from OpenBSD"
 license = "ISC"
 homepage = "https://sndio.org"

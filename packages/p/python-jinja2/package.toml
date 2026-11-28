@@ -3,7 +3,7 @@
 # backend); markupsafe, its one dependency, is the image's until it is a recipe.
 name = "python-jinja2"
 version = "3.1.6"
-release = 1
+release = 2
 summary = "Template engine for Python"
 license = "BSD-3-Clause"
 homepage = "https://palletsprojects.com/p/jinja"

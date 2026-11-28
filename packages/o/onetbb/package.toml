@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "onetbb"
 version = "2023.0.0"
-release = 1
+release = 2
 summary = "OneAPI Threading Building Blocks"
 license = "GPL-2.0-only"
 homepage = "https://oneapi-src.github.io/oneTBB"

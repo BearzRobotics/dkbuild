@@ -2,7 +2,7 @@
 # needed by: leptonica, openjpeg (and most image programs).
 name = "libtiff"
 version = "4.7.2"
-release = 1
+release = 2
 summary = "Library and tools for reading and writing TIFF files"
 license = "libtiff"
 homepage = "https://libtiff.gitlab.io/libtiff"

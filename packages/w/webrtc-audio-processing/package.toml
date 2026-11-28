@@ -5,7 +5,7 @@
 # Based on Chimera Linux cports (BSD-2-Clause): main/webrtc-audio-processing.
 name = "webrtc-audio-processing"
 version = "2.1"
-release = 2
+release = 3
 summary = "WebRTC audio processing: echo cancellation, noise suppression, gain control"
 license = "BSD-3-Clause"
 homepage = "https://freedesktop.org/software/pulseaudio/webrtc-audio-processing"

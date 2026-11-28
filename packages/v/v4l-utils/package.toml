@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "v4l-utils"
 version = "1.30.1"
-release = 1
+release = 2
 summary = "Userspace tools and libraries for V4L"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://linuxtv.org/wiki/index.php/V4l-utils"

@@ -2,7 +2,7 @@
 # needed by: opusfile, libsndfile, sox_ng.
 name = "opus"
 version = "1.6.1"
-release = 1
+release = 2
 summary = "Opus audio codec"
 license = "BSD-3-Clause"
 homepage = "https://opus-codec.org"

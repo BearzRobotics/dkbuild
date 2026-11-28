@@ -13,7 +13,7 @@
 #     crates meson's wraps would download are sources, copied to its packagecache.
 name = "mesa"
 version = "26.2.5"
-release = 7
+release = 8
 summary = "Mesa 3D Graphics Library"
 license = "MIT"
 homepage = "https://www.mesa3d.org"

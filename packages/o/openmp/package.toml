@@ -6,7 +6,7 @@
 # offloading (libomptarget).
 name = "openmp"
 version = "23.1.5"
-release = 1
+release = 2
 summary = "LLVM OpenMP runtime library"
 license = "Apache-2.0 WITH LLVM-exception"
 homepage = "https://openmp.llvm.org"

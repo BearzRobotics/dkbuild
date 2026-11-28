@@ -2,7 +2,7 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "libgusb"
 version = "0.4.9"
-release = 1
+release = 2
 summary = "GLib wrapper around libusb"
 license = "LGPL-2.1-or-later"
 homepage = "https://github.com/hughsie/libgusb"

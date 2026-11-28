@@ -4,7 +4,7 @@
 # r3: static libraries too (in tar-static), for fully static programs on musl.
 name = "tar"
 version = "1.35"
-release = 5
+release = 6
 summary = "GNU tape archiver"
 license = "GPL-3.0-or-later"
 homepage = "http://www.gnu.org/software/tar"

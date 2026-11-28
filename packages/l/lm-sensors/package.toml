@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "lm-sensors"
 version = "3.6.2"
-release = 1
+release = 2
 summary = "Sensor reading utilities"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://github.com/lm-sensors/lm-sensors"

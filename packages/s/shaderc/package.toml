@@ -4,7 +4,7 @@
 # glslang 16 installs its SPIRV headers under /usr/include/glslang.
 name = "shaderc"
 version = "2026.4"
-release = 1
+release = 2
 summary = "Collection of tools and libraries for shader compilation"
 license = "Apache-2.0"
 homepage = "https://github.com/google/shaderc"

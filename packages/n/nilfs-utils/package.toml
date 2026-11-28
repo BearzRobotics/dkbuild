@@ -4,7 +4,7 @@
 # usrmerge=sbin: programs go to /usr/sbin like the rest of the tree, not /sbin.
 name = "nilfs-utils"
 version = "2.3.1"
-release = 1
+release = 2
 summary = "NILFS2 filesystem utilities (mkfs, mount, cleanerd, lscp)"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://nilfs.sourceforge.io/"

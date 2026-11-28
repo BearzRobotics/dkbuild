@@ -2,7 +2,7 @@
 # needed by: udisks.
 name = "libblockdev"
 version = "3.4.0"
-release = 2
+release = 3
 summary = "Library for manipulating block devices"
 license = "LGPL-2.1-or-later"
 homepage = "https://github.com/storaged-project/libblockdev"

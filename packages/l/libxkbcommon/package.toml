@@ -7,7 +7,7 @@
 # r4: libxkbcommon-libs depends on xkeyboard-config: the library reads the keyboard layouts from xkeyboard-config's data; without it labwc found no keymap and crashed.
 name = "libxkbcommon"
 version = "1.13.2"
-release = 5
+release = 6
 summary = "Library to handle keyboard descriptions"
 license = "MIT"
 homepage = "https://xkbcommon.org"

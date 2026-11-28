@@ -5,7 +5,7 @@
 # r3: static libraries too (in wayland-protocols-static), for fully static programs on musl.
 name = "wayland-protocols"
 version = "1.49"
-release = 3
+release = 4
 summary = "Wayland compositor protocols"
 license = "MIT"
 homepage = "https://wayland.freedesktop.org"

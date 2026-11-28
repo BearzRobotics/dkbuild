@@ -14,7 +14,7 @@
 # needed by: ffmpeg (libdc1394).
 name = "libdc1394"
 version = "2.2.7"
-release = 3
+release = 4
 summary = "Library for controlling IIDC (DCAM) 1394 cameras"
 license = "LGPL-2.1-or-later"
 homepage = "https://damien.douxchamps.net/ieee1394/libdc1394"

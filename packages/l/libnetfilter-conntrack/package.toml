@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "libnetfilter-conntrack"
 version = "1.1.1"
-release = 2
+release = 3
 summary = "Library providing an API to the in-kernel connection tracking table"
 license = "GPL-2.0-only"
 homepage = "https://www.netfilter.org/projects/libnetfilter_conntrack"

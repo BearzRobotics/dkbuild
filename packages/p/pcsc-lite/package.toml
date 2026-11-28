@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "pcsc-lite"
 version = "2.3.3"
-release = 1
+release = 2
 summary = "Middleware to access PC/SC smart cards using SCard API"
 license = "BSD-3-Clause"
 homepage = "https://pcsclite.apdu.fr"

@@ -7,7 +7,7 @@
 # install. Without it GTK cannot tell what an SVG is, and Firefox 161 aborted on the desktop loading an SVG icon.
 name = "shared-mime-info"
 version = "2.4"
-release = 8
+release = 9
 # scripts/post-install and scripts/trigger (the trigger watches these directories)
 triggers = ["/usr/share/mime/packages"]
 summary = "Core database of common types"

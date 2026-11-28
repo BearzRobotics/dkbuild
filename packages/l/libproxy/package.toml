@@ -5,7 +5,7 @@
 # r2: rebuilt so libproxy-libs depends on libproxy for its private libpxbackend (as libpulse r2).
 name = "libproxy"
 version = "0.5.12"
-release = 2
+release = 3
 summary = "Automatic proxy configuration management library"
 license = "LGPL-2.1-or-later"
 homepage = "http://libproxy.github.io/libproxy"

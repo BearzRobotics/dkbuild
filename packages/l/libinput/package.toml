@@ -6,7 +6,7 @@
 # r4: with libwacom (drawing tablets: stylus buttons, pressure areas, left-handed mode).
 name = "libinput"
 version = "1.31.3"
-release = 4
+release = 5
 summary = "Input abstraction library for Wayland and X"
 license = "MIT"
 homepage = "https://www.freedesktop.org/wiki/Software/libinput"

@@ -2,7 +2,7 @@
 # needed by: libblockdev.
 name = "libbytesize"
 version = "2.12"
-release = 1
+release = 2
 summary = "Library for operations with sizes in bytes"
 license = "LGPL-2.1-or-later"
 homepage = "https://github.com/storaged-project/libbytesize"

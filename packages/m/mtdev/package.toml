@@ -4,7 +4,7 @@
 # r2: static libraries too (in mtdev-static), for fully static programs on musl.
 name = "mtdev"
 version = "1.1.7"
-release = 2
+release = 3
 summary = "Multitouch Protocol Translation Library"
 license = "MIT"
 homepage = "https://bitmath.org/code/mtdev"

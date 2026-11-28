@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "ladspa-sdk"
 version = "1.17"
-release = 3
+release = 4
 summary = "Linux Audio Developer's Simple Plugin API"
 license = "LGPL-2.1-or-later"
 homepage = "http://www.ladspa.org"

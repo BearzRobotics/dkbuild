@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "libqmi"
 version = "1.38.0"
-release = 3
+release = 4
 summary = "QMI modem protocol helper library"
 license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
 homepage = "https://www.freedesktop.org/wiki/Software/libqmi"

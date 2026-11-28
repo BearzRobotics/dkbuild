@@ -5,7 +5,7 @@
 # r2: static libraries too (in libei-static), for fully static programs on musl.
 name = "libei"
 version = "1.6.0"
-release = 3
+release = 4
 summary = "Emulated Input Library"
 license = "MIT"
 homepage = "https://gitlab.freedesktop.org/libinput/libei"

@@ -5,7 +5,7 @@
 # needed by: ffmpeg (libiec61883).
 name = "libiec61883"
 version = "1.2.0"
-release = 1
+release = 2
 summary = "IEC 61883 (FireWire audio/video) streaming library"
 license = "LGPL-2.1-or-later"
 homepage = "https://ieee1394.docs.kernel.org"

@@ -4,7 +4,7 @@
 # r2: static libraries too (in alsa-lib-static), for fully static programs on musl.
 name = "alsa-lib"
 version = "1.2.16.1"
-release = 2
+release = 3
 summary = "Advanced Linux Sound Architecture library"
 license = "LGPL-2.1-or-later"
 homepage = "https://www.alsa-project.org"

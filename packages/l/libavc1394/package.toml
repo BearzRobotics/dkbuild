@@ -5,7 +5,7 @@
 # not know this system's musl triple; regenerating takes the current ones.
 name = "libavc1394"
 version = "0.5.4"
-release = 2
+release = 3
 summary = "AV/C and ROM libraries for IEEE 1394 (FireWire) devices"
 license = "LGPL-2.1-or-later"
 homepage = "https://sourceforge.net/projects/libavc1394"

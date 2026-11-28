@@ -4,7 +4,7 @@
 # r2: static libraries too (in lcms2-static), for fully static programs on musl.
 name = "lcms2"
 version = "2.19.1"
-release = 3
+release = 4
 summary = "Small-footprint color management engine"
 license = "MIT"
 homepage = "https://littlecms.com"

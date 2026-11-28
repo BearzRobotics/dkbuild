@@ -2,7 +2,7 @@
 # needed by: libsndfile, sox_ng.
 name = "flac"
 version = "1.5.0"
-release = 1
+release = 2
 summary = "Free Lossless Audio Codec"
 license = "BSD-3-Clause AND GPL-2.0-or-later"
 homepage = "https://xiph.org/flac"

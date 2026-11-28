@@ -2,7 +2,7 @@
 # cports is BSD-2-Clause, Copyright (c) Chimera Linux contributors.
 name = "xkill"
 version = "1.0.7"
-release = 1
+release = 2
 summary = "Kill an X client by its X resource"
 license = "MIT"
 homepage = "https://xorg.freedesktop.org"

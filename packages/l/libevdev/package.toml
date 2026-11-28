@@ -4,7 +4,7 @@
 # r2: static libraries too (in libevdev-static), for fully static programs on musl.
 name = "libevdev"
 version = "1.13.7"
-release = 2
+release = 3
 summary = "Wrapper library for evdev devices"
 license = "MIT"
 homepage = "https://www.freedesktop.org/wiki/Software/libevdev"

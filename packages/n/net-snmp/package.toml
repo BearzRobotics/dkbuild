@@ -4,7 +4,7 @@
 # No Perl modules or embedded Perl: nothing here uses them.
 name = "net-snmp"
 version = "5.9.5.2"
-release = 1
+release = 2
 summary = "Simple Network Management Protocol tools"
 license = "BSD-3-Clause AND MIT"
 homepage = "http://www.net-snmp.org"

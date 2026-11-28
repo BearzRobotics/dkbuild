@@ -6,7 +6,7 @@
 # 2026-11-11: xkbcomp at build time, as Chimera.
 name = "xkeyboard-config"
 version = "2.44"
-release = 4
+release = 5
 summary = "X Keyboard Configuration Database"
 license = "MIT"
 homepage = "https://www.freedesktop.org/wiki/Software/XKeyboardConfig"

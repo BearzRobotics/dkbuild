@@ -4,7 +4,7 @@
 # dependency names (they are Chimera's) before building.
 name = "libgd"
 version = "2.3.3_git20230727"
-release = 1
+release = 2
 summary = "Graphics library for the dynamic creation of images"
 license = "custom:libgd"
 homepage = "https://libgd.github.io"

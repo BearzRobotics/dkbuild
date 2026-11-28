@@ -2,7 +2,7 @@
 # needed by: gvfs (mounting drives in dkde's file manager).
 name = "udisks"
 version = "2.11.2"
-release = 1
+release = 2
 summary = "Daemon, tools and libraries for disk manipulation"
 license = "GPL-2.0-or-later"
 homepage = "https://www.freedesktop.org/wiki/Software/udisks"

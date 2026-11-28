@@ -15,7 +15,7 @@
 # deterministic, so the output is the same on every build.
 name = "libcamera"
 version = "0.7.2"
-release = 9
+release = 10
 summary = "Open source camera stack and framework"
 license = "LGPL-2.1-or-later AND GPL-2.0-or-later"
 homepage = "https://libcamera.org"

@@ -2,7 +2,7 @@
 # JBIG2 decoder. needed by: ghostscript.
 name = "jbig2dec"
 version = "0.20"
-release = 1
+release = 2
 summary = "JBIG2 decoder library"
 license = "AGPL-3.0-or-later"
 homepage = "https://www.jbig2dec.com"
